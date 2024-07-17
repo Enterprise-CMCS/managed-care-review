@@ -12,7 +12,7 @@ import type {
     HealthPlanFormDataType,
     UnlockedHealthPlanFormDataType,
     StateCodeType,
-} from '../../../app-web/src/common-code/healthPlanFormDataType'
+} from '../common-code/healthPlanFormDataType'
 import type {
     CreateQuestionInput,
     InsertQuestionResponseArgs,
@@ -33,7 +33,7 @@ import { NewPostgresStore } from '../postgres'
 import { configureResolvers } from '../resolvers'
 import { latestFormData } from './healthPlanPackageHelpers'
 import { sharedTestPrismaClient } from './storeHelpers'
-import { domainToBase64 } from '../../../app-web/src/common-code/proto/healthPlanFormDataProto'
+import { domainToBase64 } from '../common-code/proto/healthPlanFormDataProto'
 import type { EmailParameterStore } from '../parameterStore'
 import { newLocalEmailParameterStore } from '../parameterStore'
 import { testLDService } from './launchDarklyHelpers'

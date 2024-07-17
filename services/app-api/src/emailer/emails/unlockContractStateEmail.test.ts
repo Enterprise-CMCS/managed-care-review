@@ -4,7 +4,7 @@ import {
     mockContractRev,
 } from '../../testHelpers/emailerHelpers'
 import { unlockContractStateEmail } from './index'
-import { packageName } from '../../../../app-web/src/common-code/healthPlanFormDataType'
+import { packageName } from '../../common-code/healthPlanFormDataType'
 
 const unlockData = {
     updatedBy: 'josh@example.com',

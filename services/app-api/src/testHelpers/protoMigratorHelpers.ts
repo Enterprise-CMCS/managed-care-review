@@ -1,7 +1,7 @@
 import type { HealthPlanRevisionTable } from '@prisma/client'
-import { unlockedWithALittleBitOfEverything } from 'app-web/src/common-code/healthPlanFormDataMocks'
-import { toProtoBuffer } from 'app-web/src/common-code/proto/healthPlanFormDataProto'
-import type { SubmissionDocument } from 'app-web/src/common-code/healthPlanFormDataType'
+import { unlockedWithALittleBitOfEverything } from '../common-code/healthPlanFormDataMocks'
+import { toProtoBuffer } from '../common-code/proto/healthPlanFormDataProto'
+import type { SubmissionDocument } from '../common-code/healthPlanFormDataType'
 import { v4 as uuidv4 } from 'uuid'
 
 export function createMockRevision(id = 'mockId'): HealthPlanRevisionTable {

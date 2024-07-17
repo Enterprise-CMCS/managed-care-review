@@ -1,12 +1,8 @@
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
-import {
-    must,
-    mockInsertContractArgs,
-    getStateRecord,
-} from '../../testHelpers'
+import { must, mockInsertContractArgs, getStateRecord } from '../../testHelpers'
 import { insertDraftContract } from './insertContract'
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'
-import type { StateCodeType } from '../../../../app-web/src/common-code/healthPlanFormDataType'
+import type { StateCodeType } from '../../common-code/healthPlanFormDataType'
 
 describe('insertContract', () => {
     afterEach(() => {

@@ -27,7 +27,7 @@ import { latestFormData } from './healthPlanPackageHelpers'
 import type {
     HealthPlanFormDataType,
     StateCodeType,
-} from 'app-web/src/common-code/healthPlanFormDataType'
+} from '../common-code/healthPlanFormDataType'
 import { addNewRateToTestContract } from './gqlRateHelpers'
 import UPDATE_CONTRACT_DRAFT_REVISION from 'app-graphql/src/mutations/updateContractDraftRevision.graphql'
 import type { ContractFormDataType } from '../domain-models'

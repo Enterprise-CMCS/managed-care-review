@@ -3,7 +3,7 @@ import {
     isEqualData,
     convertHealthPlanPackageRatesToDomain,
 } from './resolverHelpers'
-import type { UnlockedHealthPlanFormDataType } from '../../../../../app-web/src/common-code/healthPlanFormDataType'
+import type { UnlockedHealthPlanFormDataType } from '../../../common-code/healthPlanFormDataType'
 import { must } from '../../../testHelpers'
 import type { RateFormDataType } from '../../../domain-models'
 
