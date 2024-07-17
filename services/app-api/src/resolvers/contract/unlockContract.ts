@@ -88,8 +88,11 @@ export function unlockContractResolver(
                 },
             })
         }
-        if (unlockContractResult.status === 'SUBMITTED') {
-            const errMessage = `Programming Error: Got SUBMITTED from an unlocked contract.`
+        if (
+            unlockContractResult.status != 'UNLOCKED' &&
+            unlockContractResult.status != 'DRAFT'
+        ) {
+            const errMessage = `Programming Error: Got incorrect status from an unlocked contract.`
             logError('unlockContract', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new GraphQLError(errMessage, {

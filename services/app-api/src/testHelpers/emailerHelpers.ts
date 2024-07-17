@@ -4,7 +4,7 @@ import type {
     LockedHealthPlanFormDataType,
     ProgramArgType,
     UnlockedHealthPlanFormDataType,
-} from '../../../app-web/src/common-code/healthPlanFormDataType'
+} from '../common-code/healthPlanFormDataType'
 import type { ContractRevisionWithRatesType, Question } from '../domain-models'
 import { SESServiceException } from '@aws-sdk/client-ses'
 import { testSendSESEmail } from './awsSESHelpers'
@@ -70,7 +70,7 @@ const sendTestEmails = async (emailData: EmailData): Promise<void | Error> => {
 
 function testEmailer(customConfig?: EmailConfiguration): Emailer {
     const config = customConfig || testEmailConfig()
-    return emailer(config, vi.fn(sendTestEmails))
+    return emailer(config, jest.fn(sendTestEmails))
 }
 
 type State = {

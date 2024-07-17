@@ -260,6 +260,8 @@ async function unlockContractInTransaction(
     const unlockedContract: UnlockedContractType = {
         ...contract,
         draftRevision: contract.draftRevision,
+        draftRates: contract.draftRates ?? [],
+        status: 'UNLOCKED',
     }
     return unlockedContract
 }

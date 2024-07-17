@@ -1,5 +1,5 @@
 import { packageStatus, packageSubmittedAt } from '../../domain-models'
-import { protoToBase64 } from '../../../../app-web/src/common-code/proto/healthPlanFormDataProto'
+import { protoToBase64 } from '../../common-code/proto/healthPlanFormDataProto'
 import statePrograms from '../../../../app-web/src/common-code/data/statePrograms.json'
 import type { Resolvers } from '../../gen/gqlServer'
 import type { Store } from '../../postgres'

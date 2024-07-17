@@ -1,6 +1,6 @@
 import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
-import type { UnlockedHealthPlanFormDataType } from '../../../../app-web/src/common-code/healthPlanFormDataType'
-import { toDomain } from '../../../../app-web/src/common-code/proto/healthPlanFormDataProto'
+import type { UnlockedHealthPlanFormDataType } from '../../common-code/healthPlanFormDataType'
+import { toDomain } from '../../common-code/proto/healthPlanFormDataProto'
 import type { UpdateInfoType, ContractType } from '../../domain-models'
 import {
     isCMSUser,

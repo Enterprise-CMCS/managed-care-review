@@ -7,4 +7,9 @@ const statusSchema = z.union([
     z.literal('RESUBMITTED'),
 ])
 
-export { statusSchema }
+const unlockedContractStatusSchema = z.union([
+    z.literal('DRAFT'),
+    z.literal('UNLOCKED'),
+])
+
+export { statusSchema, unlockedContractStatusSchema }

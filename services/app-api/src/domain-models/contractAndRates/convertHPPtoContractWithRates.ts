@@ -1,7 +1,7 @@
 import type {
     RateInfoType,
     UnlockedHealthPlanFormDataType,
-} from 'app-web/src/common-code/healthPlanFormDataType'
+} from '../../common-code/healthPlanFormDataType'
 import type {
     ContractFormData,
     RateFormData,
