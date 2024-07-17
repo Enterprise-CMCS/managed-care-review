@@ -9,6 +9,7 @@
         "test": "jest --watch",
         "test:once": "jest --runInBand --ci",
         "test:coverage": "yarn test --coverage --watchAll=false",
+        "test:coverage-ci": "yarn test --ci --coverage --watchAll=false",
         "lint": "tsc --noEmit && eslint . --max-warnings=0",
         "clean": "rm -rf node_modules && yarn cache clean",
         "generate": "yarn prisma generate",
