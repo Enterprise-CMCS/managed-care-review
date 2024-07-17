@@ -243,6 +243,7 @@ async function unlockContractInTransaction(
         ...contract,
         draftRevision: contract.draftRevision,
         draftRates: contract.draftRates,
+        status: 'UNLOCKED',
     }
     return unlockedContract
 }
