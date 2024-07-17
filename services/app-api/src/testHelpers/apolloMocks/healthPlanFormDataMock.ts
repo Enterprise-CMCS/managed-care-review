@@ -11,7 +11,7 @@ import {
     unlockedWithALittleBitOfEverything,
 } from '../../common-code/healthPlanFormDataMocks'
 
-import type {
+import {
     HealthPlanFormDataType,
     LockedHealthPlanFormDataType,
     SubmissionDocument,
@@ -21,7 +21,7 @@ import {
     domainToBase64,
     protoToBase64,
 } from '../../common-code/proto/healthPlanFormDataProto'
-import { HealthPlanPackage, UpdateInformation } from '../../gen/gqlClient'
+import { HealthPlanPackage, UpdateInformation} from '../../gen/gqlClient'
 import { mockMNState } from './stateMock'
 
 function mockDraft(
@@ -143,7 +143,7 @@ function mockContractAndRatesDraft(
             {
                 s3URL: 's3://bucketname/key/contract',
                 sha256: 'fakesha',
-                name: 'contract',
+                name: 'contract'
             },
         ],
         contractDateStart: new Date(),
