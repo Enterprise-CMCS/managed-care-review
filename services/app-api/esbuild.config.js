@@ -59,12 +59,12 @@ module.exports = () => {
                     build.onStart(async () => {
                         try {
                             await fse.ensureDir(
-                                '.esbuild/.build/etaTemplates/'
+                                '.esbuild/.build/src/handlers/etaTemplates/'
                             );
 
                             await fse.copy(
                                 './src/emailer/etaTemplates',
-                                '.esbuild/.build/etaTemplates/',
+                                '.esbuild/.build/src/handlers/etaTemplates/',
                                 { overwrite: true }
                             );
                             console.log('Eta templates copied successfully');
