@@ -88,7 +88,10 @@ export function unlockContractResolver(
                 },
             })
         }
-        if (unlockContractResult.status != 'UNLOCKED') {
+        if (
+            unlockContractResult.status != 'UNLOCKED' &&
+            unlockContractResult.status != 'DRAFT'
+        ) {
             const errMessage = `Programming Error: Got incorrect from an unlocked contract.`
             logError('unlockContract', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)

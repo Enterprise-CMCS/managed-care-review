@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { contractRevisionWithRatesSchema } from './revisionTypes'
-import { statusSchema } from './statusType'
+import { statusSchema, unlockedContractStatusSchema } from './statusType'
 import { pruneDuplicateEmails } from '../../emailer/formatters'
 import { rateSchema } from './rateTypes'
 import { contractPackageSubmissionSchema } from './packageSubmissions'
@@ -26,7 +26,7 @@ const contractSchema = z.object({
 })
 
 const unlockedContractSchema = contractSchema.extend({
-    status: z.literal('UNLOCKED'),
+    status: unlockedContractStatusSchema,
     // Since this is a contract in UNLOCKED status, there will be a draftRevision and draftRates
     draftRevision: contractRevisionWithRatesSchema,
     draftRates: z.array(rateSchema),

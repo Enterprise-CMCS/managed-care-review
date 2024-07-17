@@ -12,7 +12,7 @@ import { findRateWithHistory } from './findRateWithHistory'
 import { must, mockInsertContractArgs } from '../../testHelpers'
 import { mockInsertRateArgs } from '../../testHelpers/rateDataMocks'
 import { findContractWithHistory } from './findContractWithHistory'
-import type { UnlockedContractType } from '../../domain-models/contractAndRates/contractTypes'
+import type { DraftContractType } from '../../domain-models/contractAndRates/contractTypes'
 import { updateDraftContractRates } from './updateDraftContractRates'
 
 describe('findRate', () => {
@@ -210,7 +210,7 @@ describe('findRate', () => {
                 unlockedByUserID: cmsUser.id,
                 unlockReason: 'unlock for 1.1',
             })
-        ) as UnlockedContractType
+        ) as DraftContractType
         must(
             await updateDraftContractWithRates(client, {
                 contractID: unlockedContract1.id,

@@ -811,6 +811,7 @@ enum HealthPlanPackageStatus {
 
 enum UnlockedStatus {
     UNLOCKED
+    DRAFT
 }
 
 """
