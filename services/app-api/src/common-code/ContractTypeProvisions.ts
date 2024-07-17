@@ -3,15 +3,15 @@ import {
     ModifiedProvisionsBaseContractRecord,
     ModifiedProvisionsCHIPRecord,
 } from '../constants/modifiedProvisions'
-import { Contract } from '../gen/gqlClient'
+import type { Contract } from '../gen/gqlServer'
 import {
-    CHIPProvisionType,
-    MedicaidBaseProvisionType,
-    MedicaidAmendmentProvisionType,
+    type CHIPProvisionType,
+    type MedicaidBaseProvisionType,
+    type MedicaidAmendmentProvisionType,
     provisionCHIPKeys,
     modifiedProvisionMedicaidBaseKeys,
     modifiedProvisionMedicaidAmendmentKeys,
-    GeneralizedProvisionType,
+    type GeneralizedProvisionType,
     isCHIPProvision,
     isMedicaidAmendmentProvision,
     isMedicaidBaseProvision,
@@ -25,10 +25,10 @@ import {
 import { getLastContractSubmission } from '../gqlHelpers/contractsAndRates'
 
 /*
-    Each provision key represents a Yes/No question asked on Contract Details. 
+    Each provision key represents a Yes/No question asked on Contract Details.
     This is a set of helper functions that each take in a submission and return provisions related data.
 
-    There are currently three distrinct variants of the provisions: 
+    There are currently three distrinct variants of the provisions:
     1. For CHIP amendment
     2. For non CHIP base contract
     3. For non CHIP contract amendment
@@ -77,43 +77,59 @@ const generateProvisionLabel = (
     }
 }
 
-/* 
+/*
     Returns two lists of provisions keys sorted by whether they are set true/false
-    This function also quietly discard keys from the submission's own provisions list that are not valid for the current variant. 
+    This function also quietly discard keys from the submission's own provisions list that are not valid for the current variant.
     That functionality needed for unlocked contracts which can be edited in a non-linear fashion)
 */
 const sortModifiedProvisions = (
     contract: Contract
 ): [GeneralizedProvisionType[], GeneralizedProvisionType[]] => {
-    const contractFormData = contract.draftRevision?.formData || getLastContractSubmission(contract)?.contractRevision.formData
+    const contractFormData =
+        contract.draftRevision?.formData ||
+        getLastContractSubmission(contract)?.contractRevision.formData
     const initialProvisions = {
         inLieuServicesAndSettings: contractFormData?.inLieuServicesAndSettings,
         modifiedBenefitsProvided: contractFormData?.modifiedBenefitsProvided,
         modifiedGeoAreaServed: contractFormData?.modifiedGeoAreaServed,
-        modifiedMedicaidBeneficiaries: contractFormData?.modifiedMedicaidBeneficiaries,
-        modifiedRiskSharingStrategy: contractFormData?.modifiedRiskSharingStrategy,
-        modifiedIncentiveArrangements: contractFormData?.modifiedIncentiveArrangements,
+        modifiedMedicaidBeneficiaries:
+            contractFormData?.modifiedMedicaidBeneficiaries,
+        modifiedRiskSharingStrategy:
+            contractFormData?.modifiedRiskSharingStrategy,
+        modifiedIncentiveArrangements:
+            contractFormData?.modifiedIncentiveArrangements,
         modifiedWitholdAgreements: contractFormData?.modifiedWitholdAgreements,
-        modifiedStateDirectedPayments: contractFormData?.modifiedStateDirectedPayments,
-        modifiedPassThroughPayments: contractFormData?.modifiedPassThroughPayments,
-        modifiedPaymentsForMentalDiseaseInstitutions: contractFormData?.modifiedPaymentsForMentalDiseaseInstitutions,
-        modifiedMedicalLossRatioStandards: contractFormData?.modifiedMedicalLossRatioStandards,
-        modifiedOtherFinancialPaymentIncentive: contractFormData?.modifiedOtherFinancialPaymentIncentive,
+        modifiedStateDirectedPayments:
+            contractFormData?.modifiedStateDirectedPayments,
+        modifiedPassThroughPayments:
+            contractFormData?.modifiedPassThroughPayments,
+        modifiedPaymentsForMentalDiseaseInstitutions:
+            contractFormData?.modifiedPaymentsForMentalDiseaseInstitutions,
+        modifiedMedicalLossRatioStandards:
+            contractFormData?.modifiedMedicalLossRatioStandards,
+        modifiedOtherFinancialPaymentIncentive:
+            contractFormData?.modifiedOtherFinancialPaymentIncentive,
         modifiedEnrollmentProcess: contractFormData?.modifiedEnrollmentProcess,
-        modifiedGrevienceAndAppeal: contractFormData?.modifiedGrevienceAndAppeal,
-        modifiedNetworkAdequacyStandards: contractFormData?.modifiedNetworkAdequacyStandards,
+        modifiedGrevienceAndAppeal:
+            contractFormData?.modifiedGrevienceAndAppeal,
+        modifiedNetworkAdequacyStandards:
+            contractFormData?.modifiedNetworkAdequacyStandards,
         modifiedLengthOfContract: contractFormData?.modifiedLengthOfContract,
-        modifiedNonRiskPaymentArrangements: contractFormData?.modifiedNonRiskPaymentArrangements,
-        statutoryRegulatoryAttestation: contractFormData?.statutoryRegulatoryAttestation,
-        statutoryRegulatoryAttestationDescription: contractFormData?.statutoryRegulatoryAttestationDescription
+        modifiedNonRiskPaymentArrangements:
+            contractFormData?.modifiedNonRiskPaymentArrangements,
+        statutoryRegulatoryAttestation:
+            contractFormData?.statutoryRegulatoryAttestation,
+        statutoryRegulatoryAttestationDescription:
+            contractFormData?.statutoryRegulatoryAttestationDescription,
     }
-    const hasInitialProvisions = Object.values(initialProvisions).some((val) => val !== undefined)
+    const hasInitialProvisions = Object.values(initialProvisions).some(
+        (val) => val !== undefined
+    )
     const modifiedProvisions: GeneralizedProvisionType[] = []
     const unmodifiedProvisions: GeneralizedProvisionType[] = []
 
     if (hasInitialProvisions && isContractWithProvisions(contract)) {
-        const applicableProvisions =
-            generateApplicableProvisionsList(contract)
+        const applicableProvisions = generateApplicableProvisionsList(contract)
 
         for (const provisionKey of applicableProvisions) {
             const value = initialProvisions[provisionKey]
@@ -130,7 +146,7 @@ const sortModifiedProvisions = (
 
 /*
     Returns boolean for whether a submission variant is missing required provisions
-    This is used to determine if we display the missing data warning on review and submit  
+    This is used to determine if we display the missing data warning on review and submit
 */
 const isMissingProvisions = (contract: Contract): boolean => {
     const requiredProvisions = generateApplicableProvisionsList(contract)

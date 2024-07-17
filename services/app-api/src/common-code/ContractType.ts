@@ -1,4 +1,4 @@
-import type { Contract, ContractRevision } from '../gen/gqlClient'
+import type { Contract, ContractRevision } from '../gen/gqlServer'
 import { getLastContractSubmission } from '../gqlHelpers/contractsAndRates'
 
 const getContractRev = (contract: Contract): ContractRevision | undefined => {
