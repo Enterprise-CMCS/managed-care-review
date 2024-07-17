@@ -5,7 +5,7 @@ import { once } from '../deps.js'
 async function compileGraphQLTypesWatch(runner: LabeledProcessRunner) {
     await runner.runCommandAndOutput('gql deps', ['yarn', 'install'], '')
 
-    runner.runCommandAndOutput(
+    return await runner.runCommandAndOutput(
         'gqlgen',
         ['npx', 'lerna', 'run', 'gqlgen:watch'],
         ''

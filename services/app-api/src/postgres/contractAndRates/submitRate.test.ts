@@ -9,8 +9,8 @@ import {
 import { submitContract } from './submitContract'
 import { insertDraftContract } from './insertContract'
 import { unlockRate } from './unlockRate'
-import { convertContractToDraftRateRevisions } from '../../domain-models/contractAndRates/convertContractWithRatesToHPP'
 import { updateDraftContractRates } from './updateDraftContractRates'
+import { convertContractToDraftRateRevisions } from '../../domain-models/contractAndRates/convertContractWithRatesToHPP'
 
 describe('submitRate', () => {
     it('submits rate independent of contract status', async () => {
