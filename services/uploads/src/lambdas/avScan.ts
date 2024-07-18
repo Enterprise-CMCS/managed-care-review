@@ -101,4 +101,4 @@ async function avScan(event: S3Event, _context: Context) {
     return 'FILE SCANNED'
 }
 
-export { avScan }
+module.exports = { avScan }

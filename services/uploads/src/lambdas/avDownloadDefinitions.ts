@@ -77,4 +77,4 @@ async function avDownloadDefinitions(_event: S3Event, _context: Context) {
     return 'FILE SCANNED'
 }
 
-export { avDownloadDefinitions }
+module.exports = { avDownloadDefinitions }

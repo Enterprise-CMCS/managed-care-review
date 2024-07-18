@@ -45,4 +45,4 @@ async function avAuditUploads(_event: unknown, _context: Context) {
     return 'FILES SCANNED'
 }
 
-export { avAuditUploads }
+module.exports = { avAuditUploads }
