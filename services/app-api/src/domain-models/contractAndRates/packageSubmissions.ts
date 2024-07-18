@@ -42,9 +42,20 @@ const ratePackageSubmissionSchema = z.object({
 
 type RatePackageSubmissionType = z.infer<typeof ratePackageSubmissionSchema>
 
+const ratePackageSubmissionWithCauseSchema = ratePackageSubmissionSchema.extend(
+    {
+        cause: packgeSubmissionCause,
+    }
+)
+
+type RatePackageSubmissionWithCauseType = z.infer<
+    typeof ratePackageSubmissionWithCauseSchema
+>
+
 export {
     contractPackageSubmissionSchema,
     contractPackageSubmissionWithCauseSchema,
+    ratePackageSubmissionWithCauseSchema,
     ratePackageSubmissionSchema,
 }
 
@@ -52,4 +63,5 @@ export type {
     ContractPackageSubmissionType,
     ContractPackageSubmissionWithCauseType,
     RatePackageSubmissionType,
+    RatePackageSubmissionWithCauseType,
 }

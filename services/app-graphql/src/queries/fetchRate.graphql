@@ -132,7 +132,7 @@ fragment rateRevisionFragmentForFetchRate on RateRevision {
     }
 }
 
-fragment rateFields on Rate {
+fragment rateFieldsForFetchRate on Rate {
     id
     createdAt
     updatedAt
@@ -152,12 +152,35 @@ fragment rateFields on Rate {
     status
     parentContractID
     initiallySubmittedAt
+
+    packageSubmissions {
+        ...packageSubmissionsFragmentForFetchRate
+    }
+}
+
+fragment packageSubmissionsFragmentForFetchRate on RatePackageSubmission {
+    cause
+    submitInfo {
+        ...updateInformationFields
+    }
+
+    submittedRevisions {
+        ...submittableRevisionsFieldsForFetchRate
+    }
+
+    rateRevision {
+        ...rateRevisionFragmentForFetchRate
+    }
+
+    contractRevisions {
+        ...contractRevisionFragmentForFetchRate
+    }
 }
 
 query fetchRate($input: FetchRateInput!) {
     fetchRate(input: $input) {
         rate {
-            ...rateFields
+            ...rateFieldsForFetchRate
 
             draftRevision {
                 ...rateRevisionFragmentForFetchRate
@@ -168,4 +191,102 @@ query fetchRate($input: FetchRateInput!) {
             }
         }
     }
+}
+
+fragment contractFormDataFragmentForFetchRate on ContractFormData {
+    programIDs
+
+    populationCovered
+    submissionType
+
+    riskBasedContract
+    submissionDescription
+
+    stateContacts {
+        name
+        titleRole
+        email
+    }
+
+    supportingDocuments {
+        name
+        s3URL
+        sha256
+        dateAdded
+        downloadURL
+    }
+
+    contractType
+    contractExecutionStatus
+    contractDocuments {
+        name
+        s3URL
+        sha256
+        dateAdded
+        downloadURL
+    }
+
+    contractDateStart
+    contractDateEnd
+    managedCareEntities
+    federalAuthorities
+    inLieuServicesAndSettings
+    modifiedBenefitsProvided
+    modifiedGeoAreaServed
+    modifiedMedicaidBeneficiaries
+    modifiedRiskSharingStrategy
+    modifiedIncentiveArrangements
+    modifiedWitholdAgreements
+    modifiedStateDirectedPayments
+    modifiedPassThroughPayments
+    modifiedPaymentsForMentalDiseaseInstitutions
+    modifiedMedicaidBeneficiaries
+    modifiedMedicalLossRatioStandards
+    modifiedOtherFinancialPaymentIncentive
+    modifiedEnrollmentProcess
+    modifiedGrevienceAndAppeal
+    modifiedNetworkAdequacyStandards
+    modifiedLengthOfContract
+    modifiedNonRiskPaymentArrangements
+    statutoryRegulatoryAttestation
+    statutoryRegulatoryAttestationDescription
+}
+
+fragment contractRevisionFragmentForFetchRate on ContractRevision {
+    id
+    createdAt
+    updatedAt
+    contractName
+
+    submitInfo {
+        updatedAt
+        updatedBy
+        updatedReason
+    }
+
+    unlockInfo {
+        updatedAt
+        updatedBy
+        updatedReason
+    }
+
+    formData {
+        ...contractFormDataFragmentForFetchRate
+    }
+}
+
+fragment submittableRevisionsFieldsForFetchRate on SubmittableRevision {
+    ... on ContractRevision {
+        ...contractRevisionFragmentForFetchRate
+    }
+    ... on RateRevision {
+        ...rateRevisionFragmentForFetchRate
+    }
+}
+
+
+fragment updateInformationFields on UpdateInformation {
+    updatedAt
+    updatedBy
+    updatedReason
 }

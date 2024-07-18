@@ -17,16 +17,18 @@ import type {
     UpdateDraftContractRatesInput,
     Rate,
 } from '../gen/gqlServer'
-import type { RateType } from '../domain-models'
 import type { ApolloServer } from 'apollo-server-lambda'
-import type { RateFormEditableType } from '../domain-models/contractAndRates'
+import type {
+    RateFormEditableType,
+    RateType,
+} from '../domain-models/contractAndRates'
 import { createAndSubmitTestContractWithRate } from './gqlContractHelpers'
 import { clearDocMetadata } from './documentHelpers'
 
 const fetchTestRateById = async (
     server: ApolloServer,
     rateID: string
-): Promise<RateType> => {
+): Promise<Rate> => {
     const input = { rateID }
     const result = await server.executeOperation({
         query: FETCH_RATE,
@@ -64,7 +66,7 @@ const submitTestRate = async (
     server: ApolloServer,
     rateID: string,
     submittedReason: string
-): Promise<RateType> => {
+): Promise<Rate> => {
     const updateResult = await server.executeOperation({
         query: SUBMIT_RATE,
         variables: {

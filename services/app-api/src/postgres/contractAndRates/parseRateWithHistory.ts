@@ -333,7 +333,7 @@ function rateWithoutDraftContractsToDomainModel(
         stateNumber: rate.stateNumber,
         draftRevision,
         revisions: revisions.reverse(),
-        packageSubmissions,
+        packageSubmissions: packageSubmissions.reverse(),
     }
 }
 
