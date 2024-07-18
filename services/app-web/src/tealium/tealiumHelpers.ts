@@ -44,16 +44,15 @@ const getTealiumPageName = ({
     switch (route) {
         case 'ROOT':
             if (!user) {
-                return formatPageName({ title: 'Landing' })
-            } else if (user.__typename === 'CMSUser') {
-                return formatPageName({ heading, title: 'CMS Dashboard' })
+                return formatPageName({ title: 'Home' })
             } else if (user.__typename === 'StateUser') {
                 return formatPageName({
                     heading,
                     title: 'State dashboard',
                 })
+            } else {
+                return formatPageName({ heading, title: 'CMS Dashboard' })
             }
-            return formatPageName({ heading, title: PageTitlesRecord[route] })
         case 'DASHBOARD_SUBMISSIONS' || 'DASHBOARD_RATES':
             if (user && user.__typename === 'CMSUser') {
                 return formatPageName({ title: 'CMS Dashboard' })
