@@ -10,7 +10,7 @@ import type {
     ContractRevision,
     Rate,
     RateRevision,
-} from '../gen/gqlClient'
+} from '../gen/gqlServer'
 import type { ActuaryContact } from '../common-code/healthPlanFormDataType'
 import { ActuaryFirmsRecord } from '../constants'
 
