@@ -377,23 +377,27 @@ export function submitHealthPlanPackageResolver(
             }
 
             for (const draftRate of contractWithHistory.draftRates) {
-                if (draftRate.parentContractID !== contractWithHistory.id) {
-                    // this is a linked rate, unlink it
-                    rateUpdates.rateUpdates.unlink.push({
-                        rateID: draftRate.id,
-                    })
-                } else if (draftRate.revisions.length === 0) {
+                if (draftRate.revisions.length === 0) {
+                    if (draftRate.parentContractID !== contractWithHistory.id) {
+                        console.error(
+                            'This never submitted rate is not parented to this contract',
+                            contractWithHistory.id,
+                            draftRate.id
+                        )
+                        throw new Error(
+                            'This never submitted rate is not parented to this contract'
+                        )
+                    }
+
                     // this is a child draft rate, delete it
                     rateUpdates.rateUpdates.delete.push({
                         rateID: draftRate.id,
                     })
                 } else {
-                    // this is a previously submitted child-rate. I'm not sure what to do with it
-                    console.warn(
-                        'Attempting to remove a previously submitted child rate in submit',
-                        contractWithHistory.id
-                    )
-                    throw new Error('no nonono bad child rate submit')
+                    // this is a linked rate, unlink it
+                    rateUpdates.rateUpdates.unlink.push({
+                        rateID: draftRate.id,
+                    })
                 }
             }
             const rateResult = await store.updateDraftContractRates(rateUpdates)
