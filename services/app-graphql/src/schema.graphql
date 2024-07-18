@@ -1475,7 +1475,7 @@ type Rate {
     packageSubmissions are a list of all the submissions of this rate and any contracts it
     was associated with.
     """
-    packageSubmissions: [RatePackageSubmission!]!
+    packageSubmissions: [RatePackageSubmission!]
 }
 
 """
