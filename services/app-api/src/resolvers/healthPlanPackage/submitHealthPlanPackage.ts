@@ -38,14 +38,13 @@ import type {
     LDService,
 } from '../../launchDarkly/launchDarkly'
 import {
+    convertContractToDraftRateRevisions,
     convertContractWithRatesToFormData,
     convertContractWithRatesToUnlockedHPP,
 } from '../../domain-models/contractAndRates/convertContractWithRatesToHPP'
 import type { Span } from '@opentelemetry/api'
-import type {
-    PackageStatusType,
-    RateFormEditableType,
-} from '../../domain-models/contractAndRates'
+import type { PackageStatusType } from '../../domain-models/contractAndRates'
+import type { UpdateDraftContractRatesArgsType } from '../../postgres/contractAndRates/updateDraftContractRates'
 
 export const SubmissionErrorCodes = ['INCOMPLETE', 'INVALID'] as const
 type SubmissionErrorCode = (typeof SubmissionErrorCodes)[number] // iterable union type
@@ -302,6 +301,7 @@ export function submitHealthPlanPackageResolver(
         // reassign variable set up before rates feature flag
         const conversionResult = convertContractWithRatesToFormData(
             contractWithHistory.draftRevision,
+            convertContractToDraftRateRevisions(contractWithHistory),
             contractWithHistory.id,
             contractWithHistory.stateCode,
             contractWithHistory.stateNumber
@@ -357,12 +357,57 @@ export function submitHealthPlanPackageResolver(
             })
         }
 
-        // Since submit can change the form data, we have to save it again.
-        // if the rates were removed, we remove them.
-        let removeRateInfos: RateFormEditableType[] | undefined = undefined
-        if (maybeLocked.rateInfos.length === 0) {
-            // undefined means ignore rates in updaterDraftContractWithRates, empty array means empty them.
-            removeRateInfos = []
+        // If this contract is being submitted as CONTRACT_ONLY but still has associations with rates
+        // we need to prune those rates at submission time to make the submission clean
+        if (
+            contractWithHistory.draftRevision.formData.submissionType ===
+                'CONTRACT_ONLY' &&
+            contractWithHistory.draftRates &&
+            contractWithHistory.draftRates.length > 0
+        ) {
+            const rateUpdates: UpdateDraftContractRatesArgsType = {
+                contractID: contractWithHistory.id,
+                rateUpdates: {
+                    create: [],
+                    update: [],
+                    link: [],
+                    unlink: [],
+                    delete: [],
+                },
+            }
+
+            for (const draftRate of contractWithHistory.draftRates) {
+                if (draftRate.revisions.length === 0) {
+                    if (draftRate.parentContractID !== contractWithHistory.id) {
+                        console.error(
+                            'This never submitted rate is not parented to this contract',
+                            contractWithHistory.id,
+                            draftRate.id
+                        )
+                        throw new Error(
+                            'This never submitted rate is not parented to this contract'
+                        )
+                    }
+
+                    // this is a child draft rate, delete it
+                    rateUpdates.rateUpdates.delete.push({
+                        rateID: draftRate.id,
+                    })
+                } else {
+                    // this is a linked rate, unlink it
+                    rateUpdates.rateUpdates.unlink.push({
+                        rateID: draftRate.id,
+                    })
+                }
+            }
+            const rateResult = await store.updateDraftContractRates(rateUpdates)
+            if (rateResult instanceof Error) {
+                const errMessage =
+                    'Error while attempting to clean up rates from a now CONTRACT_ONLY submission'
+                logError('submitHealthPlanPackage', errMessage)
+                setErrorAttributesOnActiveSpan(errMessage, span)
+                throw new Error(errMessage)
+            }
         }
 
         const updateResult = await store.updateDraftContractWithRates({
@@ -389,7 +434,6 @@ export function submitHealthPlanPackageResolver(
                     }
                 }),
             },
-            rateFormDatas: removeRateInfos,
         })
         if (updateResult instanceof Error) {
             const errMessage = `Failed to update submitted contract info with ID: ${contractRevisionID}; ${updateResult.message}`

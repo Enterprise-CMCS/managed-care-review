@@ -27,6 +27,7 @@ generates:
         UnlockedContract: ../domain-models#UnlockedContractType as UnlockedContractDomainType
         ContractRevision: ../domain-models#ContractRevisionType
         ContractPackageSubmission: ../domain-models#ContractPackageSubmissionWithCauseType
+        RatePackageSubmission: ../domain-models#RatePackageSubmissionWithCauseType
   ../app-web/src/gen/gqlClient.tsx:
     documents:
       - src/queries/*.graphql

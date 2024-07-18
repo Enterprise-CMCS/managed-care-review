@@ -5,13 +5,15 @@ import { submitContract } from './submitContract'
 import { submitRate } from './submitRate'
 import { insertDraftContract } from './insertContract'
 import { unlockContract } from './unlockContract'
-import { updateDraftContractWithRates } from './updateDraftContractWithRates'
+import { updateDraftContractFormData } from './updateDraftContractWithRates'
 import { insertDraftRate } from './insertRate'
 import { updateDraftRate } from './updateDraftRate'
 import { unlockRate } from './unlockRate'
 import { findRateWithHistory } from './findRateWithHistory'
 import { must, mockInsertContractArgs } from '../../testHelpers'
 import { mockInsertRateArgs } from '../../testHelpers/rateDataMocks'
+import { convertContractToDraftRateRevisions } from '../../domain-models/contractAndRates/convertContractWithRatesToHPP'
+import { updateDraftContractRates } from './updateDraftContractRates'
 
 // TODO: Enable these tests again after reimplementing rate change history that was in contractWithHistoryToDomainModel
 // eslint-disable-next-line jest/no-disabled-tests
@@ -227,7 +229,7 @@ describe.skip('findContractWithHistory with full contract and rate history', () 
             })
         )
         must(
-            await updateDraftContractWithRates(client, {
+            await updateDraftContractFormData(client, {
                 contractID: contractA.id,
                 formData: {
                     submissionType: 'CONTRACT_AND_RATES',
@@ -237,15 +239,41 @@ describe.skip('findContractWithHistory with full contract and rate history', () 
                     populationCovered: 'MEDICAID',
                     riskBasedContract: false,
                 },
-                rateFormDatas: unlockedContractA.draftRevision?.rateRevisions
-                    .filter(
-                        (rateRevision) =>
-                            rateRevision.formData.rateID !== rate1.id &&
-                            rateRevision.formData.rateID !== rate2.id
-                    )
-                    .map((rate) => rate.formData),
             })
         )
+
+        const remainingRateRevisions = convertContractToDraftRateRevisions(
+            unlockedContractA
+        ).filter(
+            (rateRevision) =>
+                rateRevision.formData.rateID !== rate1.id &&
+                rateRevision.formData.rateID !== rate2.id
+        )
+
+        must(
+            await updateDraftContractRates(client, {
+                contractID: contractA.id,
+                rateUpdates: {
+                    create: [],
+                    update: remainingRateRevisions.map((r, idx) => ({
+                        rateID: r.rateID,
+                        formData: r.formData,
+                        ratePosition: idx + 1,
+                    })),
+                    link: [],
+                    unlink: [
+                        {
+                            rateID: rate1.id,
+                        },
+                        {
+                            rateID: rate2.id,
+                        },
+                    ],
+                    delete: [],
+                },
+            })
+        )
+
         must(
             await submitContract(client, {
                 contractID: contractA.id,
@@ -536,7 +564,7 @@ describe.skip('findContractWithHistory with full contract and rate history', () 
         )
         // Remove rate 1 and rate 2 from contract
         must(
-            await updateDraftContractWithRates(client, {
+            await updateDraftContractFormData(client, {
                 contractID: contractA.id,
                 formData: {
                     submissionType: 'CONTRACT_AND_RATES',
@@ -546,13 +574,38 @@ describe.skip('findContractWithHistory with full contract and rate history', () 
                     populationCovered: 'MEDICAID',
                     riskBasedContract: false,
                 },
-                rateFormDatas: unlockedContractA.draftRevision?.rateRevisions
-                    .filter(
-                        (rateRevision) =>
-                            rateRevision.formData.rateID !== rate1.id &&
-                            rateRevision.formData.rateID !== rate2.id
-                    )
-                    .map((rate) => rate.formData),
+            })
+        )
+
+        const remainingRateRevisions = convertContractToDraftRateRevisions(
+            unlockedContractA
+        ).filter(
+            (rateRevision) =>
+                rateRevision.formData.rateID !== rate1.id &&
+                rateRevision.formData.rateID !== rate2.id
+        )
+
+        must(
+            await updateDraftContractRates(client, {
+                contractID: contractA.id,
+                rateUpdates: {
+                    create: [],
+                    update: remainingRateRevisions.map((r, idx) => ({
+                        rateID: r.rateID,
+                        formData: r.formData,
+                        ratePosition: idx + 1,
+                    })),
+                    link: [],
+                    unlink: [
+                        {
+                            rateID: rate1.id,
+                        },
+                        {
+                            rateID: rate2.id,
+                        },
+                    ],
+                    delete: [],
+                },
             })
         )
 
@@ -668,7 +721,7 @@ describe.skip('findContractWithHistory with full contract and rate history', () 
             await insertDraftContract(client, draftContractData)
         )
         const updatedDraftContractWithRates = must(
-            await updateDraftContractWithRates(client, {
+            await updateDraftContractFormData(client, {
                 contractID: contractA.id,
                 formData: {
                     submissionType: 'CONTRACT_AND_RATES',
@@ -678,7 +731,36 @@ describe.skip('findContractWithHistory with full contract and rate history', () 
                     populationCovered: 'MEDICAID',
                     riskBasedContract: false,
                 },
-                rateFormDatas: [rate1, rate2],
+            })
+        )
+
+        must(
+            await updateDraftContractRates(client, {
+                contractID: contractA.id,
+                rateUpdates: {
+                    create: [
+                        {
+                            formData: rate1,
+                            ratePosition: 1,
+                        },
+                        {
+                            formData: rate2,
+                            ratePosition: 2,
+                        },
+                    ],
+                    update: [],
+                    link: [],
+                    unlink: [],
+                    delete: [],
+                },
+            })
+        )
+
+        must(
+            await submitContract(client, {
+                contractID: contractA.id,
+                submittedByUserID: stateUser.id,
+                submittedReason: 'Submitting A.2',
             })
         )
 
@@ -687,15 +769,19 @@ describe.skip('findContractWithHistory with full contract and rate history', () 
                 'Unexpected error: draftRevision does not exist in contract'
             )
         }
+        if (!updatedDraftContractWithRates.draftRates) {
+            throw new Error('Unexpected error: revisions missing draftRates')
+        }
 
         const draftRateRevisionData1 =
-            updatedDraftContractWithRates.draftRevision.rateRevisions[0]
-                .formData
+            updatedDraftContractWithRates.draftRates[0].draftRevision?.formData
         const draftRateRevisionData2 =
-            updatedDraftContractWithRates.draftRevision.rateRevisions[1]
-                .formData
+            updatedDraftContractWithRates.draftRates[1].draftRevision?.formData
 
-        if (!draftRateRevisionData1.rateID || !draftRateRevisionData2.rateID) {
+        if (
+            !draftRateRevisionData1?.rateID ||
+            !draftRateRevisionData2?.rateID
+        ) {
             throw new Error('Unexpected error: rate revision is missing rateID')
         }
 
@@ -740,9 +826,10 @@ describe.skip('findContractWithHistory with full contract and rate history', () 
         )
         expect(draftPreRateUnlock.draftRevision).toBeDefined()
         expect(
-            draftPreRateUnlock.draftRevision?.rateRevisions.map(
-                (rr) => rr.formData.rateCertificationName
-            )
+            draftPreRateUnlock.draftRates &&
+                draftPreRateUnlock.draftRates.map(
+                    (rr) => rr?.draftRevision?.formData.rateCertificationName
+                )
         ).toEqual(['onepoint0', 'twopoint0'])
 
         // unlock and submit second rate rev
@@ -767,7 +854,7 @@ describe.skip('findContractWithHistory with full contract and rate history', () 
         )
         expect(draftPreRateSubmit.draftRevision).toBeDefined()
         expect(
-            draftPreRateSubmit.draftRevision?.rateRevisions.map(
+            convertContractToDraftRateRevisions(draftPreRateSubmit).map(
                 (rr) => rr.formData.rateCertificationName
             )
         ).toEqual(['onepoint0', 'twopointone'])
@@ -787,7 +874,7 @@ describe.skip('findContractWithHistory with full contract and rate history', () 
         )
         expect(draftPostRateSubmit.draftRevision).toBeDefined()
         expect(
-            draftPostRateSubmit.draftRevision?.rateRevisions.map(
+            convertContractToDraftRateRevisions(draftPostRateSubmit).map(
                 (rr) => rr.formData.rateCertificationName
             )
         ).toEqual(['onepoint0', 'twopointone'])
@@ -876,16 +963,23 @@ describe('findContractWithHistory with only contract history', () => {
         )
 
         const updatedContract = must(
-            await updateDraftContractWithRates(client, {
+            await updateDraftContractRates(client, {
                 contractID: draftContract.id,
-                formData: {},
-                rateFormDatas: [
-                    mockInsertRateArgs({
-                        id: uuidv4(),
-                        rateType: 'NEW',
-                        rateCertificationName: 'First rate',
-                    }),
-                ],
+                rateUpdates: {
+                    create: [
+                        {
+                            formData: mockInsertRateArgs({
+                                rateType: 'NEW',
+                                rateCertificationName: 'First rate',
+                            }),
+                            ratePosition: 1,
+                        },
+                    ],
+                    update: [],
+                    link: [],
+                    unlink: [],
+                    delete: [],
+                },
             })
         )
 
@@ -896,7 +990,8 @@ describe('findContractWithHistory with only contract history', () => {
         }
 
         const contractID = updatedContract.id
-        const rateID = updatedContract.draftRevision.rateRevisions[0].rateID
+        const rateID =
+            convertContractToDraftRateRevisions(updatedContract)[0].rateID
 
         // Submit contract
         must(
@@ -1042,25 +1137,40 @@ describe('findContractWithHistory with only contract history', () => {
         }
 
         const updatedContractWithRates = must(
-            await updateDraftContractWithRates(client, {
+            await updateDraftContractRates(client, {
                 contractID: draftContract.id,
-                formData: {},
-                rateFormDatas: [
-                    // Make sure existing rate is still included. If not it will be removed from the contract
-                    unlockedContract.draftRevision.rateRevisions[0].formData,
-                    mockInsertRateArgs({
-                        id: uuidv4(),
-                        rateType: 'NEW',
-                        rateCertificationName: 'Second rate',
-                    }),
-                ],
+                rateUpdates: {
+                    create: [
+                        {
+                            formData: mockInsertRateArgs({
+                                rateType: 'NEW',
+                                rateCertificationName: 'Second rate',
+                            }),
+                            ratePosition: 2,
+                        },
+                    ],
+                    update: [
+                        {
+                            rateID: convertContractToDraftRateRevisions(
+                                unlockedContract
+                            )[0].rateID,
+                            formData:
+                                convertContractToDraftRateRevisions(
+                                    unlockedContract
+                                )[0].formData,
+                            ratePosition: 1,
+                        },
+                    ],
+                    link: [],
+                    unlink: [],
+                    delete: [],
+                },
             })
         )
 
-        const secondRate =
-            updatedContractWithRates.draftRevision?.rateRevisions.find(
-                (rr) => rr.formData.rateCertificationName === 'Second rate'
-            )
+        const secondRate = convertContractToDraftRateRevisions(
+            updatedContractWithRates
+        ).find((rr) => rr.formData.rateCertificationName === 'Second rate')
 
         if (!secondRate) {
             throw new Error('Unexpected Error: No rate found in contract')

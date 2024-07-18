@@ -1,7 +1,7 @@
 import type { PrismaTransactionType } from '../prismaTypes'
 import type { RateType } from '../../domain-models/contractAndRates'
 import { parseRateWithHistory } from './parseRateWithHistory'
-import { includeFullRate } from './prismaSubmittedRateHelpers'
+import { includeFullRate } from './prismaFullContractRateHelpers'
 
 type RateOrErrorType = {
     rateID: string

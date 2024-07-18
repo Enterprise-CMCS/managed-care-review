@@ -42,15 +42,6 @@ async function unlockRateInDB(
                 },
             },
             contractsWithSharedRateRevision: true,
-
-            contractRevisions: {
-                where: {
-                    validUntil: null,
-                },
-                include: {
-                    contractRevision: true,
-                },
-            },
             relatedSubmissions: {
                 orderBy: {
                     updatedAt: 'desc',
@@ -86,13 +77,6 @@ async function unlockRateInDB(
             'Programming Error: cannot unlock a already unlocked rate'
         )
     }
-
-    // old way to find connected contracts
-    //TODO: with linked rates on, find them via package submission
-    const previouslySubmittedContractIDs = currentRev.contractRevisions.map(
-        (c) => c.contractRevision.contractID
-    )
-
     const prevContractsWithSharedRateRevisionIDs =
         currentRev.contractsWithSharedRateRevision.map(
             (contract) => contract.id
@@ -108,12 +92,6 @@ async function unlockRateInDB(
             unlockInfo: {
                 connect: { id: unlockInfoID },
             },
-            draftContracts: {
-                connect: previouslySubmittedContractIDs.map((cID) => ({
-                    id: cID,
-                })),
-            },
-
             rateType: currentRev.rateType,
             rateCapitationType: currentRev.rateCapitationType,
             rateDateStart: currentRev.rateDateStart,
@@ -169,13 +147,6 @@ async function unlockRateInDB(
                         id: contractID,
                     })
                 ),
-            },
-        },
-        include: {
-            contractRevisions: {
-                include: {
-                    contractRevision: true,
-                },
             },
         },
     })

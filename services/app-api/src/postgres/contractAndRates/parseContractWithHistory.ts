@@ -2,13 +2,15 @@ import type {
     ContractType,
     ContractRevisionWithRatesType,
     ContractRevisionType,
-    RateType,
     RateRevisionType,
 } from '../../domain-models/contractAndRates'
 import { contractSchema } from '../../domain-models/contractAndRates'
+import type { ContractWithoutDraftRatesType } from '../../domain-models/contractAndRates/baseContractRateTypes'
 import type { ContractPackageSubmissionType } from '../../domain-models/contractAndRates/packageSubmissions'
-import { rateWithHistoryToDomainModel } from './parseRateWithHistory'
-import { draftContractRevToDomainModel } from './prismaDraftContractHelpers'
+import {
+    DRAFT_PARENT_PLACEHOLDER,
+    rateWithoutDraftContractsToDomainModel,
+} from './parseRateWithHistory'
 import type {
     RateRevisionTableWithFormData,
     ContractRevisionTableWithFormData,
@@ -28,7 +30,8 @@ import {
     ratesRevisionsToDomainModel,
     getContractRateStatus,
 } from './prismaSharedContractRateHelpers'
-import type { ContractTableFullPayload } from './prismaSubmittedContractHelpers'
+import type { ContractTableWithoutDraftRates } from './prismaSubmittedContractHelpers'
+import type { ContractTableFullPayload } from './prismaFullContractRateHelpers'
 
 // This function might be generally useful later on. It takes an array of objects
 // that can be errors and either returns the first error, or returns the list but with
@@ -133,22 +136,22 @@ function contractRevisionsToDomainModels(
     return contractRevisions.map((crev) => contractRevisionToDomainModel(crev))
 }
 
-// contractWithHistoryToDomainModel constructs a history for this particular contract including changes to all of its
-// revisions and all related rate revisions, including added and removed rates
-function contractWithHistoryToDomainModel(
-    contract: ContractTableFullPayload
-): ContractType | Error {
+// contractWithHistoryToDomainModelWithoutRates constructs a history for this particular contract including changes to all of its
+// revisions and all related rate revisions, including added and removed rates, but eliding any draft rates to break the recursion chain.
+function contractWithHistoryToDomainModelWithoutRates(
+    contract: ContractTableWithoutDraftRates
+): ContractWithoutDraftRatesType | Error {
     // We iterate through each contract revision in order, adding it as a revision in the history
     // then iterate through each of its rates, constructing a history of any rates that changed
     // between contract revision updates
     const allRevisionSets: ContractRevisionSet[] = []
     const contractRevisions = contract.revisions
-    let draftRevision: ContractRevisionWithRatesType | Error | undefined =
-        undefined
-    let draftRates: RateType[] | undefined = undefined
+
+    let draftRevision: ContractRevisionType | Error | undefined = undefined
 
     for (const [contractRevIndex, contractRev] of contractRevisions.entries()) {
-        // We set the draft revision aside, all ordered revisions are submitted
+        // If we have a draft revision
+        // We set the draft revision aside, format it properly
         if (!contractRev.submitInfo) {
             if (draftRevision) {
                 return new Error(
@@ -157,44 +160,15 @@ function contractWithHistoryToDomainModel(
                 )
             }
 
-            draftRevision = draftContractRevToDomainModel(contractRev)
-
-            if (draftRevision instanceof Error) {
-                return new Error(
-                    `error converting draft contract revision with id ${contractRev.id} to domain model: ${draftRevision}`
-                )
-            }
-
-            // if we have a draft revision, we should set draftRates
-            const draftRatesOrErrors = contract.draftRates.map((dr) =>
-                rateWithHistoryToDomainModel(dr.rate)
-            )
-
-            const draftRatesOrError = arrayOrFirstError(draftRatesOrErrors)
-            if (draftRatesOrError instanceof Error) {
-                return draftRatesOrError
-            }
-
-            draftRates = draftRatesOrError
-
-            if (draftRates.length === 0) {
-                console.info(
-                    'Checking for old style draft rates, this code should go when migrated to new draft-rates table.'
-                )
-                // This code works for pre-migrated stuff.
-                const draftPrismaRates = contractRev.draftRates
-                draftRates = draftPrismaRates.map((r) => {
-                    return {
-                        id: r.id,
-                        createdAt: r.createdAt,
-                        updatedAt: r.updatedAt,
-                        status: getContractRateStatus(r.revisions),
-                        stateCode: r.stateCode,
-                        parentContractID: contractRev.contractID, // all pre-migrated rates are parented to their only contract.
-                        stateNumber: r.stateNumber,
-                        revisions: [],
-                    }
-                })
+            draftRevision = {
+                id: contractRev.id,
+                contract: contractRev.contract,
+                createdAt: contractRev.createdAt,
+                updatedAt: contractRev.updatedAt,
+                unlockInfo: convertUpdateInfoToDomainModel(
+                    contractRev.unlockInfo
+                ),
+                formData: contractFormDataToDomainModel(contractRev),
             }
 
             // skip the rest of the processing
@@ -280,7 +254,8 @@ function contractWithHistoryToDomainModel(
             contractRevisions[contractRevIndex + 1]
 
         // Reverse rateRevisions so it is in DESC order.
-        const rateRevisions = contractRev.rateRevisions.reverse()
+        const rateRevisions =
+            contractRev.relatedSubmisions[0].submissionPackages
 
         for (const rateRev of rateRevisions) {
             if (!rateRev.rateRevision.submitInfo) {
@@ -305,11 +280,7 @@ function contractWithHistoryToDomainModel(
             // - Submitted before the next contract rev unlock date
             // - Not already in the initial entry. We are looping through this in desc order, so the first rate rev is the latest.
             // - Not removed from the contract
-            if (
-                isRateSubmittedDateValid &&
-                !isRateIncluded &&
-                !rateRev.isRemoval
-            ) {
+            if (isRateSubmittedDateValid && !isRateIncluded) {
                 // unshift rate revision into entries to asc order
                 initialEntry.rateRevisions.unshift(rateRev.rateRevision)
             }
@@ -359,10 +330,6 @@ function contractWithHistoryToDomainModel(
             const rateRevisions =
                 unsortedRatesRevisionsToDomainModel(relatedRateRevisions)
 
-            if (rateRevisions instanceof Error) {
-                return rateRevisions
-            }
-
             packageSubmissions.push({
                 submitInfo: {
                     updatedAt: submission.updatedAt,
@@ -404,9 +371,52 @@ function contractWithHistoryToDomainModel(
         stateCode: contract.stateCode,
         stateNumber: contract.stateNumber,
         draftRevision,
-        draftRates,
         revisions: revisions.reverse(),
         packageSubmissions: packageSubmissions.reverse(),
+    }
+}
+
+// contractWithHistoryToDomainModel constructs a history for this particular contract including changes to all of its
+// revisions and all related rate revisions, including added and removed rates
+function contractWithHistoryToDomainModel(
+    contract: ContractTableFullPayload
+): ContractType | Error {
+    const contractWithoutRates =
+        contractWithHistoryToDomainModelWithoutRates(contract)
+    if (contractWithoutRates instanceof Error) {
+        return contractWithoutRates
+    }
+
+    if (
+        contractWithoutRates.status === 'SUBMITTED' ||
+        contractWithoutRates.status === 'RESUBMITTED'
+    ) {
+        return contractWithoutRates
+    }
+
+    // since we have a draft revision, we should also hold onto any set draftRates for later
+    const draftRatesOrErrors = contract.draftRates.map((dr) =>
+        rateWithoutDraftContractsToDomainModel(dr.rate)
+    )
+
+    const draftRatesOrError = arrayOrFirstError(draftRatesOrErrors)
+    if (draftRatesOrError instanceof Error) {
+        return draftRatesOrError
+    }
+
+    // FIX PARENT ID IF NEEDED
+    // This is fragile code. Because of the asymmetry required to break the
+    // draftRate/draftContract type-loop, we don't have the data required to
+    // set parent id for a draft when parsing it. We fix it here.
+    for (const draftRate of draftRatesOrError) {
+        if (draftRate.parentContractID === DRAFT_PARENT_PLACEHOLDER) {
+            draftRate.parentContractID = contractWithoutRates.id
+        }
+    }
+
+    return {
+        ...contractWithoutRates,
+        draftRates: draftRatesOrError,
     }
 }
 
@@ -414,4 +424,7 @@ export {
     parseContractWithHistory,
     contractRevisionToDomainModel,
     contractRevisionsToDomainModels,
+    contractWithHistoryToDomainModel,
+    contractWithHistoryToDomainModelWithoutRates,
+    arrayOrFirstError,
 }
