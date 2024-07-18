@@ -22,7 +22,7 @@ const contractWithoutDraftRatesSchema = z.object({
     stateCode: z.string(),
     mccrsID: z.string().optional(),
     stateNumber: z.number().min(1),
-    // If this contract is in a DRAFT or UNLOCKED status, there will be a draftRevision and draftRates
+    // If this contract is in a DRAFT or UNLOCKED status, there will be a draftRevision
     draftRevision: contractRevisionSchema.optional(),
 
     // All revisions are submitted and in reverse chronological order
