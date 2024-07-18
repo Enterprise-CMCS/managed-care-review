@@ -11,7 +11,7 @@ const useTealium = (): {
         tealiumData: Omit<TealiumButtonEventObject, 'event_name'>,
     ) => void,
     logInternalLinkEvent: (
-        tealiumData: Omit<TealiumInternalLinkEventObject, 'event_name'>,
+        tealiumData: TealiumInternalLinkEventObject,
     ) => void
 } => {
     const context = React.useContext(TealiumContext)
@@ -36,16 +36,16 @@ const useTealium = (): {
     }
 
     const logInternalLinkEvent = (
-        tealiumData: Omit<TealiumInternalLinkEventObject, 'event_name'>
+        tealiumData: TealiumInternalLinkEventObject
     ) => {
         const linkData: TealiumInternalLinkEventObject = {
             ...tealiumData,
-            event_name: 'internal_link_clicked',
+            event_name: tealiumData.event_name ?? 'internal_link_clicked',
         }
         logUserEvent(linkData, pathname, loggedInUser, heading)
     }
 
-    return { logButtonEvent, logInternalLinkEvent }
+return { logButtonEvent, logInternalLinkEvent}
 }
 
 export { useTealium }

@@ -17,7 +17,7 @@ interface S3BulkDownloadRequest {
     zipFileName: string
 }
 
-export const main: APIGatewayProxyHandler = async (event) => {
+const main: APIGatewayProxyHandler = async (event) => {
     const authProvider =
         event.requestContext.identity.cognitoAuthenticationProvider
     if (authProvider == undefined) {
@@ -257,3 +257,5 @@ function parseContentDisposition(cd: string): string {
     console.info('original name: ' + filename)
     return filename
 }
+
+module.exports = { main }

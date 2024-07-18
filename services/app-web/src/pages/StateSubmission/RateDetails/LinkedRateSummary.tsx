@@ -1,7 +1,6 @@
 import { formatCalendarDate } from '../../../common-code/dateHelpers'
 import {
     DataDetail,
-    DataDetailMissingField,
     DoubleColumnGrid,
     SectionCard,
     UploadedDocumentsTable,
@@ -45,14 +44,12 @@ export const LinkedRateSummary = ({
                         id="ratingPeriod"
                         label="Rating period"
                         children={
-                            rateForm.rateDateStart && rateForm.rateDateEnd ? (
+                            rateForm.rateDateStart && rateForm.rateDateEnd && (
                                 `${formatCalendarDate(
                                     rateForm?.rateDateStart
                                 )} to ${formatCalendarDate(
                                     rateForm?.rateDateEnd
                                 )}`
-                            ) : (
-                                <DataDetailMissingField />
                             )
                         }
                     />

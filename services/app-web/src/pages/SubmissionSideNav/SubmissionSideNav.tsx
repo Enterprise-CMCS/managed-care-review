@@ -171,6 +171,7 @@ export const SubmissionSideNav = () => {
                                     pathname:
                                         RoutesRecord.DASHBOARD_SUBMISSIONS,
                                 }}
+                                event_name="back_button"
                             >
                                 <Icon.ArrowBack />
                                 {loggedInUser?.__typename === 'StateUser' ? (
@@ -195,6 +196,7 @@ export const SubmissionSideNav = () => {
                                             ? STATE_SUBMISSION_FORM_ROUTES
                                             : 'SUBMISSIONS_SUMMARY'
                                     )}
+                                    event_name="navigation_clicked"
                                 >
                                     {isStateUser &&
                                     submissionStatus === 'UNLOCKED'
@@ -206,6 +208,7 @@ export const SubmissionSideNav = () => {
                                     className={isSelectedLink(
                                         'SUBMISSIONS_QUESTIONS_AND_ANSWERS'
                                     )}
+                                    event_name="navigation_clicked"
                                 >
                                     Q&A
                                 </NavLinkWithLogging>,

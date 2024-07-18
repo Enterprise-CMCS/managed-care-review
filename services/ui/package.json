@@ -9,7 +9,7 @@
     "license": "CC0-1.0",
     "dependencies": {},
     "devDependencies": {
-        "serverless": "^3.26.0",
+        "serverless": "^3.39.0",
         "serverless-s3-bucket-helper": "CMSgov/serverless-s3-bucket-helper",
         "serverless-stack-termination-protection": "^2.0.2"
     }

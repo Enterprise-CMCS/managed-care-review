@@ -13,7 +13,7 @@ import { extractText } from './tealiamLoggingHelpers'
 type TealiumDataType = Omit<
     TealiumInternalLinkEventObject,
     'event_name' | 'link_url' | 'text'
->
+> & { event_name?: TealiumInternalLinkEventObject['event_name'] }
 
 type LinkWithLoggingType = TealiumDataType & DefaultLinkProps
 const LinkWithLogging = (props: LinkWithLoggingType) => {
@@ -34,6 +34,7 @@ const LinkWithLogging = (props: LinkWithLoggingType) => {
                     link_url: href,
                     parent_component_type,
                     parent_component_heading,
+                    event_name: props.event_name ?? 'internal_link_clicked',
                 })
                 if (onClick) {
                     onClick(e)
@@ -72,6 +73,7 @@ const NavLinkWithLogging = (props: NavLinkWithLoggingType) => {
                     link_url,
                     parent_component_type,
                     parent_component_heading,
+                    event_name: props.event_name ?? 'internal_link_clicked',
                 })
             }}
             {...rest}
@@ -106,6 +108,7 @@ const ReactRouterLinkWithLogging = (props: ReactRouterLinkWithLoggingType) => {
                     link_url,
                     parent_component_type,
                     parent_component_heading,
+                    event_name: props.event_name ?? 'internal_link_clicked',
                 })
             }}
             {...rest}

@@ -1,4 +1,4 @@
-import { S3ClientT } from '../s3'
+import type { S3ClientT } from '../s3'
 import { parseKey } from '../common-code/s3URLEncoding'
 
 export const testS3Client: () => S3ClientT = () => {
