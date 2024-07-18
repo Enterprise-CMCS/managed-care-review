@@ -2,9 +2,9 @@
     "extends": "../../tsconfig.json",
     "compilerOptions": {
         "module": "ESNext",
-        "target": "es2021",
+        "lib": ["ES2021", "DOM"],
+        "target": "ES2021",
         "moduleResolution": "node",
-        "lib": ["es2021", "DOM"],
         "baseUrl": "/",
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,

@@ -25,7 +25,7 @@ const jwtLib = newJWTLib({
     expirationDurationS: 90 * 24 * 60 * 60, // 90 days
 })
 
-export const main: APIGatewayTokenAuthorizerHandler = async (
+const main: APIGatewayTokenAuthorizerHandler = async (
     event
 ): Promise<APIGatewayAuthorizerResult> => {
     const authToken = event.authorizationToken.replace('Bearer ', '')
@@ -79,3 +79,5 @@ const generatePolicy = function (
 
     return response
 }
+
+module.exports = { main }

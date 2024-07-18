@@ -5,7 +5,7 @@ import { getDBClusterID, getPostgresURL } from './configuration'
 import { initTracer, recordException } from '../../../uploads/src/lib/otel'
 import { migrate, newDBMigrator } from '../dataMigrations/dataMigrator'
 
-export const main: Handler = async (): Promise<APIGatewayProxyResultV2> => {
+const main: Handler = async (): Promise<APIGatewayProxyResultV2> => {
     // setup otel tracing
     const otelCollectorURL = process.env.API_APP_OTEL_COLLECTOR_URL
     if (!otelCollectorURL || otelCollectorURL === '') {
@@ -159,3 +159,5 @@ function fmtMigrateError(error: string): APIGatewayProxyResultV2 {
         },
     }
 }
+
+module.exports = { main }
