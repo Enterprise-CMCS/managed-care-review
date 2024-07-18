@@ -3,14 +3,13 @@ service: uploads
 frameworkVersion: '^3.19.0'
 
 plugins:
+  - serverless-esbuild
   - serverless-offline-ssm
   - serverless-plugin-scripts
   - serverless-s3-local
   - serverless-offline
   - serverless-stack-termination-protection
-  - serverless-idempotency-helper
   - serverless-iam-helper
-  - serverless-webpack
 
 # The `provider` block defines where your service will be deployed
 provider:
@@ -53,11 +52,8 @@ custom:
   region: ${aws:region}
   reactAppOtelCollectorUrl: ${env:VITE_APP_OTEL_COLLECTOR_URL, ssm:/configuration/react_app_otel_collector_url}
   authorizedKeys: ${file(../postgres/scripts/authorized_keys)}
-  webpack:
-    webpackConfig: webpack.config.js
+  esbuild:
     packager: yarn
-    packagerOptions:
-      lockFile: ../../yarn.lock
   vpcId: ${ssm:/configuration/${sls:stage}/vpc/id, ssm:/configuration/default/vpc/id}
   sgId: ${ssm:/configuration/${sls:stage}/vpc/sg/id, ssm:/configuration/default/vpc/sg/id}
   privateSubnets:
