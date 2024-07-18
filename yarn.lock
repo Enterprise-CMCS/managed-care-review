@@ -23125,11 +23125,6 @@ serverless-offline@^13.3.2:
     velocityjs "^2.0.6"
     ws "^8.16.0"
 
-serverless-plugin-scripts@^1.0.2:
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/serverless-plugin-scripts/-/serverless-plugin-scripts-1.0.2.tgz#21808c3cfd0a1a84e48c0660b0f6f370b5665486"
-  integrity sha512-+OL9fFz5r6BXNHfpu9MDLehS/haC0fy/T3V5uJsTfLAnNsn+PzM6BmvefUfWG372hBT7piTbywB1Vl1+4LmI5Q==
-
 serverless-s3-bucket-helper@CMSgov/serverless-s3-bucket-helper:
   version "1.0.0"
   resolved "https://codeload.github.com/CMSgov/serverless-s3-bucket-helper/tar.gz/3e519d15676de237ec8ede3ff9ae26abf3f3ef0a"
