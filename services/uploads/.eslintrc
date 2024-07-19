@@ -15,12 +15,7 @@
     "env": {
         "jest/globals": true,
     },
-    "ignorePatterns": [
-        "gen/*",
-        "webpack.config.js",
-        "jest.config.ts",
-        "esbuild.config.js",
-    ],
+    "ignorePatterns": ["gen/*", "jest.config.ts", "esbuild.config.js"],
     "rules": {
         "prefer-promise-reject-errors": "error",
         "no-throw-literal": "error",
