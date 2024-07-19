@@ -17,9 +17,10 @@ const useTealium = (): {
     const context = React.useContext(TealiumContext)
 
     if (context === undefined) {
-        const error = new Error('useTealium can only be used within an Tealium Provider')
-        recordJSException(error)
-        throw error
+        return {
+            logButtonEvent: () => {console.warn('cannot logButtonEven - Tealium Provider not loaded')},
+            logInternalLinkEvent:  () => {console.warn('cannot logLinkEvent- Tealium Provider not loaded')}
+        }
     }
 
     const { pathname, loggedInUser, heading, logUserEvent } = context
