@@ -323,7 +323,7 @@ export const RateDetailsSummarySection = ({
                                 >
                                     {rateFormData.rateCertificationName}
                                 </h3>
-                                {isAdminUser && (
+                                {(isAdminUser && !isLinkedRate) && (
                                     <LinkWithLogging
                                         href={`/submissions/${contract.id}/replace_rate`}
                                         className={'usa-button usa-button--outline'}

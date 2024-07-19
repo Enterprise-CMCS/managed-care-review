@@ -18,6 +18,9 @@ import { Rate } from '../../../gen/gqlClient'
 import { testS3Client } from '../../../testHelpers/s3Helpers'
 import { ActuaryCommunicationRecord } from '../../../constants'
 import * as usePreviousSubmission from '../../../hooks/usePreviousSubmission'
+import {
+    RateRevisionWithIsLinked,
+} from '../../../gqlHelpers/contractsAndRates'
 
 describe('RateDetailsSummarySection', () => {
     const draftContract = mockContractPackageDraft()
@@ -306,6 +309,35 @@ describe('RateDetailsSummarySection', () => {
         expect(screen.getByRole('link', {
             name: 'Replace rate',
         })).toBeInTheDocument()
+    })
+
+    it('does not render replace rate button for linked rates', async () => {
+        const contract = mockContractWithLinkedRateSubmitted()
+        const rateRevs:RateRevisionWithIsLinked[] = contract.packageSubmissions[0].rateRevisions.map((rev)=>{
+            const newRev:RateRevisionWithIsLinked = {
+                ...rev,
+                isLinked: true
+            }
+            return newRev
+        })
+        const statePrograms = mockMNState().programs
+        await waitFor(() => {
+            renderWithProviders(
+                <RateDetailsSummarySection
+                    contract={contract}
+                    rateRevs={rateRevs}
+                    editNavigateTo="rate-details"
+                    submissionName="MN-MSHO-0003"
+                    statePrograms={statePrograms}
+                />,
+                {
+                    apolloProvider: apolloProviderAdminUser,
+                }
+            )
+        })
+        expect(screen.queryByRole('link', {
+            name: 'Replace rate',
+        })).not.toBeInTheDocument()
     })
 
     it('does not render replace rate button for state or cms users', async () => {
