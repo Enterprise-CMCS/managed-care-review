@@ -103,7 +103,7 @@ layers:
 
 functions:
   avScan:
-    handler: src/lambdas/index.avScan
+    handler: src/lambdas/avScan.main
     name: ${self:service}-${sls:stage}-avScan
     timeout: 300 # 300 seconds = 5 minutes. Average scan is 25 seconds.
     memorySize: 4096
@@ -122,25 +122,8 @@ functions:
       OPENTELEMETRY_COLLECTOR_CONFIG_FILE: /var/task/collector.yml
       VITE_APP_OTEL_COLLECTOR_URL: ${self:custom.reactAppOtelCollectorUrl}
 
-  avDownloadDefinitions:
-    handler: src/lambdas/index.avDownloadDefinitions
-    events:
-      - schedule: cron(0 */6 * * ? *)
-    timeout: 300 # 300 seconds = 5 minutes
-    memorySize: 1024
-    layers:
-      - !Ref ClamAvLambdaLayer
-      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-18-1:3
-    environment:
-      stage: ${sls:stage}
-      CLAMAV_BUCKET_NAME: !Ref ClamDefsBucket
-      PATH_TO_AV_DEFINITIONS: 'lambda/s3-antivirus/av-definitions'
-      AWS_LAMBDA_EXEC_WRAPPER: /opt/otel-handler
-      OPENTELEMETRY_COLLECTOR_CONFIG_FILE: /var/task/collector.yml
-      VITE_APP_OTEL_COLLECTOR_URL: ${self:custom.reactAppOtelCollectorUrl}
-
   avAuditUploads:
-    handler: src/lambdas/index.avAuditUploads
+    handler: src/lambdas/avAuditUploads.main
     timeout: 300 # 300 seconds = 5 minutes. Average scan is 25 seconds.
     maximumRetryAttempts: 0
     layers:
@@ -157,7 +140,7 @@ functions:
       VITE_APP_OTEL_COLLECTOR_URL: ${self:custom.reactAppOtelCollectorUrl}
 
   avAuditFiles:
-    handler: src/lambdas/index.avAuditFiles
+    handler: src/lambdas/avAuditFiles.main
     name: ${self:service}-${sls:stage}-avAuditFiles
     timeout: 300 # 300 seconds = 5 minutes. Average scan is 25 seconds.
     memorySize: 2048
@@ -181,7 +164,6 @@ resources:
       - !Equals ['${sls:stage}', 'main']
       - !Equals ['${sls:stage}', 'val']
       - !Equals ['${sls:stage}', 'prod']
-      - !Equals ['${sls:stage}', 'mtfixavdns']
 
   Resources:
     DocumentUploadsBucket:

@@ -9,7 +9,7 @@ import {
     recordHistogram,
 } from '../lib/otel'
 
-async function avScan(event: S3Event, _context: Context) {
+async function main(event: S3Event, _context: Context) {
     console.info('-----Start Antivirus Lambda function-----')
 
     // Check on the values for our required config
@@ -101,4 +101,4 @@ async function avScan(event: S3Event, _context: Context) {
     return 'FILE SCANNED'
 }
 
-module.exports = { avScan }
+module.exports = { main }
