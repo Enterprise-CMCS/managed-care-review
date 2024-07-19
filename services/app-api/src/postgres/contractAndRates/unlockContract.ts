@@ -61,15 +61,6 @@ async function unlockContractInTransaction(
                     },
                 },
             },
-
-            rateRevisions: {
-                where: {
-                    validUntil: null,
-                },
-                include: {
-                    rateRevision: true,
-                },
-            },
         },
     })
     if (!currentRev) {
@@ -152,11 +143,6 @@ async function unlockContractInTransaction(
             unlockInfo: {
                 connect: { id: unlockInfo.id },
             },
-            draftRates: {
-                connect: relatedRateIDs.map((cID) => ({
-                    id: cID,
-                })),
-            },
 
             populationCovered: currentRev.populationCovered,
             programIDs: currentRev.programIDs,
@@ -224,13 +210,6 @@ async function unlockContractInTransaction(
                 })),
             },
         },
-        include: {
-            rateRevisions: {
-                include: {
-                    rateRevision: true,
-                },
-            },
-        },
     })
 
     // connect draftRates
@@ -257,10 +236,13 @@ async function unlockContractInTransaction(
     if (!contract.draftRevision) {
         return new Error('Unlocked Contract is missing draft revision')
     }
+    if (!contract.draftRates) {
+        return new Error('Unlocked Contract is missing draft rates')
+    }
     const unlockedContract: UnlockedContractType = {
         ...contract,
         draftRevision: contract.draftRevision,
-        draftRates: contract.draftRates ?? [],
+        draftRates: contract.draftRates,
         status: 'UNLOCKED',
     }
     return unlockedContract
@@ -286,6 +268,7 @@ async function unlockContract(
             if (result instanceof Error) {
                 throw result
             }
+
             return result
         })
     } catch (err) {

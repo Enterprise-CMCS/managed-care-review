@@ -28,7 +28,7 @@ async function updateDraftRate(
     client: PrismaTransactionType,
     args: UpdateRateArgsType
 ): Promise<RateType | NotFoundError | Error> {
-    const { rateID, formData, contractIDs } = args
+    const { rateID, formData } = args
 
     try {
         // Given all the Rates associated with this draft, find the most recent submitted to update.
@@ -53,11 +53,6 @@ async function updateDraftRate(
             },
             data: {
                 ...prismaUpdateRateFormDataFromDomain(formData),
-                draftContracts: {
-                    set: contractIDs.map((rID) => ({
-                        id: rID,
-                    })),
-                },
             },
         })
         return findRateWithHistory(client, rateID)

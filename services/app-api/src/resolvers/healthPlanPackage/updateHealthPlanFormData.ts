@@ -193,7 +193,6 @@ export function updateHealthPlanFormDataResolver(
                     }
                 ),
             },
-            rateFormDatas: undefined, // don't ever pass rates here, rate will be updated with new API only.
         })
 
         if (updateResult instanceof Error) {

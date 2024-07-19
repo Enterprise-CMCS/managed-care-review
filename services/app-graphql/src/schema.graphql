@@ -1470,6 +1470,12 @@ type Rate {
     for the rate and contains the full data from when the rate cert was submitted
     """
     revisions: [RateRevision!]!
+
+    """
+    packageSubmissions are a list of all the submissions of this rate and any contracts it
+    was associated with.
+    """
+    packageSubmissions: [RatePackageSubmission!]
 }
 
 """
@@ -1524,6 +1530,23 @@ type ContractPackageSubmission {
     contractRevision: ContractRevision!
     "rateRevisions are the linked rate revisions current at the time of this package submission"
     rateRevisions: [RateRevision!]!
+}
+
+"""
+RatePackageSubmission is a snapshot of a contract and all its related rates in time
+a RatePackageSubmission can be created by the user submitting a contract or a related rate
+"""
+type RatePackageSubmission {
+    "cause is a hint as to why this submission was created"
+    cause: SubmissionReason!
+    "submitInfo provides the submission reason/date/by for this package submission"
+    submitInfo: UpdateInformation!
+    "submittedRevisions is a list of contract and/or rate revisions that were submitted to create this package submission"
+    submittedRevisions: [SubmittableRevision!]!
+    "rateRevision are the linked rate revisions current at the time of this package submission"
+    rateRevision: RateRevision!
+    "contractRevision is the contract revision current at the time of this package submission"
+    contractRevisions: [ContractRevision!]!
 }
 
 """

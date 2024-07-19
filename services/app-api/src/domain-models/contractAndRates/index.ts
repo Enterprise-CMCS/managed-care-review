@@ -1,4 +1,4 @@
-export { rateSchema, draftRateSchema } from './rateTypes'
+export { rateSchema } from './rateTypes'
 
 export {
     contractSchema,
@@ -47,6 +47,8 @@ export type {
 export type {
     ContractPackageSubmissionType,
     ContractPackageSubmissionWithCauseType,
+    RatePackageSubmissionType,
+    RatePackageSubmissionWithCauseType,
 } from './packageSubmissions'
 
 export { validateContractDraftRevisionInput } from './dataValidatorHelpers'

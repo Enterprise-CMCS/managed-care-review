@@ -12,16 +12,29 @@ import {
     toDomain,
     toProtoBuffer,
 } from '../../common-code/proto/healthPlanFormDataProto'
-import type { ContractRevisionWithRatesType } from './revisionTypes'
 import { parsePartialHPFD } from '../../common-code/proto/healthPlanFormDataProto/toDomain'
 import type { PartialHealthPlanFormData } from '../../common-code/proto/healthPlanFormDataProto/toDomain'
+import type { ContractRevisionType, RateRevisionType } from './revisionTypes'
+
+function convertContractToDraftRateRevisions(contract: ContractType) {
+    const rateRevisions: RateRevisionType[] = []
+    contract.draftRates?.forEach((rate) => {
+        if (rate.draftRevision) {
+            rateRevisions.push(rate.draftRevision)
+        } else if (rate.revisions.length > 0) {
+            rateRevisions.push(rate.revisions[0])
+        }
+    })
+    return rateRevisions
+}
 
 function convertContractWithRatesToUnlockedHPP(
     contract: ContractType
 ): HealthPlanPackageType | Error {
     // Since drafts come in separate on the Contract type, we push it onto the revisions before converting below
     if (contract.draftRevision) {
-        contract.revisions.unshift(contract.draftRevision)
+        const rateRevisions = convertContractToDraftRateRevisions(contract)
+        contract.revisions.unshift({ ...contract.draftRevision, rateRevisions })
     }
 
     const healthPlanRevisions = convertContractWithRatesRevtoHPPRev(contract)
@@ -45,6 +58,7 @@ function convertContractWithRatesRevtoHPPRev(
     for (const contractRev of contract.revisions) {
         const unlockedHealthPlanFormData = convertContractWithRatesToFormData(
             contractRev,
+            contractRev.rateRevisions,
             contract.id,
             contract.stateCode,
             contract.stateNumber
@@ -82,59 +96,58 @@ function convertContractWithRatesRevtoHPPRev(
 }
 
 function convertContractWithRatesToFormData(
-    contractRev: ContractRevisionWithRatesType,
+    contractRev: ContractRevisionType,
+    rateRevisions: RateRevisionType[],
     contractID: string,
     stateCode: string,
     stateNumber: number
 ): HealthPlanFormDataType | Error {
-    const rateInfos: RateInfoType[] = contractRev.rateRevisions.map(
-        (rateRev) => {
-            const {
-                rateType,
-                rateCapitationType,
-                rateCertificationName,
-                rateDateCertified,
-                rateDateEnd,
-                rateDateStart,
-                rateDocuments = [],
-                supportingDocuments = [],
-                rateProgramIDs,
-                packagesWithSharedRateCerts,
-                certifyingActuaryContacts = [],
-                addtlActuaryContacts = [],
-                amendmentEffectiveDateEnd,
-                amendmentEffectiveDateStart,
-                actuaryCommunicationPreference,
-            } = rateRev.formData
+    const rateInfos: RateInfoType[] = rateRevisions.map((rateRev) => {
+        const {
+            rateType,
+            rateCapitationType,
+            rateCertificationName,
+            rateDateCertified,
+            rateDateEnd,
+            rateDateStart,
+            rateDocuments = [],
+            supportingDocuments = [],
+            rateProgramIDs,
+            packagesWithSharedRateCerts,
+            certifyingActuaryContacts = [],
+            addtlActuaryContacts = [],
+            amendmentEffectiveDateEnd,
+            amendmentEffectiveDateStart,
+            actuaryCommunicationPreference,
+        } = rateRev.formData
 
-            const rateAmendmentInfo = (amendmentEffectiveDateStart ||
-                amendmentEffectiveDateEnd) && {
-                effectiveDateStart: amendmentEffectiveDateStart,
-                effectiveDateEnd: amendmentEffectiveDateEnd,
-            }
-            return {
-                id: rateRev.formData.rateID, // the rateInfo id needs to be the top level rate id
-                rateType,
-                rateCapitationType,
-                rateDocuments: rateDocuments.map((doc) => ({
-                    ...doc,
-                })) as SubmissionDocument[],
-                supportingDocuments: supportingDocuments.map((doc) => ({
-                    ...doc,
-                })) as SubmissionDocument[],
-                rateAmendmentInfo: rateAmendmentInfo,
-                rateDateStart,
-                rateDateEnd,
-                rateDateCertified,
-                rateProgramIDs,
-                rateCertificationName,
-                actuaryContacts: certifyingActuaryContacts ?? [],
-                addtlActuaryContacts: addtlActuaryContacts ?? [],
-                actuaryCommunicationPreference,
-                packagesWithSharedRateCerts,
-            }
+        const rateAmendmentInfo = (amendmentEffectiveDateStart ||
+            amendmentEffectiveDateEnd) && {
+            effectiveDateStart: amendmentEffectiveDateStart,
+            effectiveDateEnd: amendmentEffectiveDateEnd,
         }
-    )
+        return {
+            id: rateRev.formData.rateID, // the rateInfo id needs to be the top level rate id
+            rateType,
+            rateCapitationType,
+            rateDocuments: rateDocuments.map((doc) => ({
+                ...doc,
+            })) as SubmissionDocument[],
+            supportingDocuments: supportingDocuments.map((doc) => ({
+                ...doc,
+            })) as SubmissionDocument[],
+            rateAmendmentInfo: rateAmendmentInfo,
+            rateDateStart,
+            rateDateEnd,
+            rateDateCertified,
+            rateProgramIDs,
+            rateCertificationName,
+            actuaryContacts: certifyingActuaryContacts ?? [],
+            addtlActuaryContacts: addtlActuaryContacts ?? [],
+            actuaryCommunicationPreference,
+            packagesWithSharedRateCerts,
+        }
+    })
 
     // since this data is coming out from the DB without validation, we start by making a draft.
     const healthPlanFormData: PartialHealthPlanFormData = {
@@ -233,4 +246,5 @@ export {
     convertContractWithRatesRevtoHPPRev,
     convertContractWithRatesToUnlockedHPP,
     convertContractWithRatesToFormData,
+    convertContractToDraftRateRevisions,
 }

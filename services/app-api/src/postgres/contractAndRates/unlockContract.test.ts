@@ -5,7 +5,7 @@ import { unlockContract } from './unlockContract'
 import { insertDraftRate } from './insertRate'
 import { unlockRate } from './unlockRate'
 import { submitRate } from './submitRate'
-import { updateDraftContractWithRates } from './updateDraftContractWithRates'
+import { updateDraftContractFormData } from './updateDraftContractWithRates'
 import { updateDraftRate } from './updateDraftRate'
 import { submitContract } from './submitContract'
 import { findContractWithHistory } from './findContractWithHistory'
@@ -199,7 +199,7 @@ describe('unlockContract', () => {
 
         // Connect draft contract to submitted rate
         must(
-            await updateDraftContractWithRates(client, {
+            await updateDraftContractFormData(client, {
                 contractID: contract.id,
                 formData: {
                     submissionType: 'CONTRACT_AND_RATES',
@@ -209,7 +209,24 @@ describe('unlockContract', () => {
                     populationCovered: 'MEDICAID',
                     riskBasedContract: false,
                 },
-                rateFormDatas: [submittedRate.revisions[0].formData],
+            })
+        )
+
+        must(
+            await updateDraftContractRates(client, {
+                contractID: contract.id,
+                rateUpdates: {
+                    create: [],
+                    update: [],
+                    link: [
+                        {
+                            rateID: submittedRate.id,
+                            ratePosition: 1,
+                        },
+                    ],
+                    unlink: [],
+                    delete: [],
+                },
             })
         )
 

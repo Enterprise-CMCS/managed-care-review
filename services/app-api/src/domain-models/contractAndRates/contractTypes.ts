@@ -1,35 +1,24 @@
 import { z } from 'zod'
-import { contractRevisionWithRatesSchema } from './revisionTypes'
-import { statusSchema, unlockedContractStatusSchema } from './statusType'
+import {
+    contractRevisionSchema,
+    contractRevisionWithRatesSchema,
+} from './revisionTypes'
+import { unlockedContractStatusSchema } from './statusType'
 import { pruneDuplicateEmails } from '../../emailer/formatters'
-import { rateSchema } from './rateTypes'
-import { contractPackageSubmissionSchema } from './packageSubmissions'
+import {
+    contractWithoutDraftRatesSchema,
+    rateWithoutDraftContractsSchema,
+} from './baseContractRateTypes'
 
-// Contract represents the contract specific information in a submission package
-// All that data is contained in revisions, each revision represents the data in a single submission
-// submissions are kept intact here across time
-const contractSchema = z.object({
-    id: z.string().uuid(),
-    createdAt: z.date(),
-    updatedAt: z.date(),
-    status: statusSchema,
-    stateCode: z.string(),
-    mccrsID: z.string().optional(),
-    stateNumber: z.number().min(1),
-    // If this contract is in a DRAFT or UNLOCKED status, there will be a draftRevision and draftRates
-    draftRevision: contractRevisionWithRatesSchema.optional(),
-    draftRates: z.array(rateSchema).optional(),
-    // All revisions are submitted and in reverse chronological order
-    revisions: z.array(contractRevisionWithRatesSchema),
-
-    packageSubmissions: z.array(contractPackageSubmissionSchema),
+const contractSchema = contractWithoutDraftRatesSchema.extend({
+    draftRates: z.array(rateWithoutDraftContractsSchema).optional(),
 })
 
 const unlockedContractSchema = contractSchema.extend({
     status: unlockedContractStatusSchema,
     // Since this is a contract in UNLOCKED status, there will be a draftRevision and draftRates
-    draftRevision: contractRevisionWithRatesSchema,
-    draftRates: z.array(rateSchema),
+    draftRevision: contractRevisionSchema,
+    draftRates: z.array(rateWithoutDraftContractsSchema),
 })
 
 const draftContractSchema = contractSchema.extend({

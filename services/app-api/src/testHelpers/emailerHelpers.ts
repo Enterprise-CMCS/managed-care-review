@@ -10,7 +10,6 @@ import { SESServiceException } from '@aws-sdk/client-ses'
 import { testSendSESEmail } from './awsSESHelpers'
 import { testCMSUser, testStateUser } from './userHelpers'
 import { v4 as uuidv4 } from 'uuid'
-import { vi } from 'vitest'
 
 const testEmailConfig = (): EmailConfiguration => ({
     stage: 'LOCAL',

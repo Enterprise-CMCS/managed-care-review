@@ -4,7 +4,7 @@ import type {
     ContractFormDataType,
 } from '../../domain-models/contractAndRates'
 import { parseContractWithHistory } from './parseContractWithHistory'
-import { includeFullContract } from './prismaSubmittedContractHelpers'
+import { includeFullContract } from './prismaFullContractRateHelpers'
 
 type InsertContractArgsType = Partial<ContractFormDataType> & {
     // Certain fields are required on insert contract only

@@ -10,6 +10,7 @@ import type {
 } from '../../domain-models/contractAndRates'
 import { findStatePrograms } from '../state'
 import { packageName } from '../../common-code/healthPlanFormDataType'
+import { logError } from '../../logger'
 
 const subincludeUpdateInfo = {
     updatedBy: true,
@@ -130,7 +131,7 @@ type RateRevisionTableWithFormData = Prisma.RateRevisionTableGetPayload<{
 function rateFormDataToDomainModel(
     rateRevision: RateRevisionTableWithFormData,
     previousRevision?: RateRevisionTableWithFormData
-): RateFormDataType | Error {
+): RateFormDataType {
     const packagesWithSharedRateCerts = []
     let statePrograms: ProgramType[] | Error | undefined = undefined
 
@@ -142,9 +143,11 @@ function rateFormDataToDomainModel(
         }
 
         if (statePrograms instanceof Error) {
-            return new Error(
+            logError(
+                'prismaSharedContractRateHelpers',
                 `Cannot find ${contract.stateCode} programs for packagesWithSharedRateCerts with rate revision ${rateRevision.rateID} and contract ${contract.id}`
             )
+            statePrograms = []
         }
 
         packagesWithSharedRateCerts.push({
@@ -202,12 +205,8 @@ function rateFormDataToDomainModel(
 
 function rateRevisionToDomainModel(
     revision: RateRevisionTableWithFormData
-): RateRevisionType | Error {
+): RateRevisionType {
     const formData = rateFormDataToDomainModel(revision)
-
-    if (formData instanceof Error) {
-        return formData
-    }
 
     return {
         id: revision.id,
@@ -298,15 +297,11 @@ function ratesRevisionsToDomainModel(
 
 function unsortedRatesRevisionsToDomainModel(
     rateRevisions: RateRevisionTableWithFormData[]
-): RateRevisionType[] | Error {
+): RateRevisionType[] {
     const domainRevisions: RateRevisionType[] = []
 
     for (const revision of rateRevisions) {
         const domainRevision = rateRevisionToDomainModel(revision)
-
-        if (domainRevision instanceof Error) {
-            return domainRevision
-        }
 
         domainRevisions.push(domainRevision)
     }

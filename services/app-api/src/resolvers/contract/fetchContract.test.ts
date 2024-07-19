@@ -5,10 +5,10 @@ import {
 } from '../../testHelpers/gqlHelpers'
 
 import FETCH_CONTRACT from '../../../../app-graphql/src/queries/fetchContract.graphql'
-import type { RateType } from '../../domain-models'
 import { testCMSUser, testStateUser } from '../../testHelpers/userHelpers'
 import {
     createAndUpdateTestContractWithoutRates,
+    createAndUpdateTestContractWithRate,
     fetchTestContract,
     submitTestContract,
 } from '../../testHelpers/gqlContractHelpers'
@@ -23,24 +23,14 @@ describe('fetchContract', () => {
             s3Client: mockS3,
         })
 
-        const stateSubmission =
-            await createAndUpdateTestHealthPlanPackage(stateServer)
+        const contract = await createAndUpdateTestContractWithRate(stateServer)
 
-        const fetchDraftContractResult = await stateServer.executeOperation({
-            query: FETCH_CONTRACT,
-            variables: {
-                input: {
-                    contractID: stateSubmission.id,
-                },
-            },
-        })
-
-        expect(fetchDraftContractResult.errors).toBeUndefined()
-
-        const draftRate = fetchDraftContractResult.data?.fetchContract.contract
-            .draftRates as RateType[]
-
-        //check that we have a rate that is returned and is in DRAFT
+        const fetchedContract = await fetchTestContract(
+            stateServer,
+            contract.id
+        )
+        const draftRate = fetchedContract.draftRates ?? []
+        //check that we have some rate data returned and the rate has correct
         expect(draftRate).toHaveLength(1)
         expect(draftRate[0].status).toBe('DRAFT')
         expect(draftRate[0].stateCode).toBe('FL')
@@ -48,6 +38,9 @@ describe('fetchContract', () => {
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             draftRate[0].draftRevision?.formData.rateDocuments![0].downloadURL
         ).toBeDefined()
+
+        // confirm that contractID on draft rate is correct, this is now overwritten in parseContract and needs to be checked
+        expect(draftRate[0].parentContractID).toBe(fetchedContract.id)
     })
 
     it('gets the right contract name', async () => {

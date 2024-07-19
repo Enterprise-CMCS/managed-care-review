@@ -1,4 +1,4 @@
-import { requireBinary } from '../deps.js'
+import { once, requireBinary } from '../deps.js'
 import LabeledProcessRunner from '../runner.js'
 
 // run the proto compiler with --watch
@@ -15,12 +15,14 @@ export async function compileProtoWatch(runner: LabeledProcessRunner) {
 
     await runner.runCommandAndOutput('proto deps', ['yarn', 'install'], '')
 
-    runner.runCommandAndOutput(
+    return await runner.runCommandAndOutput(
         'protogen',
         ['npx', 'lerna', 'run', 'generate:watch', '--scope=app-proto'],
         ''
     )
 }
+
+export const compileProtoWatchOnce = once(compileProtoWatch)
 
 export async function compileProto(runner: LabeledProcessRunner) {
     await runner.runCommandAndOutput(

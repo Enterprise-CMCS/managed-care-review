@@ -1,4 +1,5 @@
 import { testLDService } from '../../testHelpers/launchDarklyHelpers'
+import { v4 as uuidv4 } from 'uuid'
 import {
     constructTestPostgresServer,
     createAndUpdateTestHealthPlanPackage,
@@ -21,6 +22,7 @@ import {
     createSubmitAndUnlockTestRate,
     fetchTestRateById,
     formatRateDataForSending,
+    unlockTestRate,
 } from '../../testHelpers/gqlRateHelpers'
 import {
     createAndUpdateTestContractWithoutRates,
@@ -28,6 +30,8 @@ import {
     submitTestContract,
 } from '../../testHelpers/gqlContractHelpers'
 import { testS3Client } from '../../../../app-web/src/testHelpers/s3Helpers'
+import { submitRate } from '../../postgres/contractAndRates'
+import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 
 describe('submitRate', () => {
     const ldService = testLDService({
@@ -496,6 +500,100 @@ describe('submitRate', () => {
         expect(result.errors).toBeDefined()
         expect(result.errors?.[0].extensions?.message).toBe(
             `Not authorized to edit and submit a rate independently, the feature is disabled`
+        )
+    })
+
+    it('is a rate that returns packageSubmissions', async () => {
+        const client = await sharedTestPrismaClient()
+
+        const stateUser = await client.user.create({
+            data: {
+                id: uuidv4(),
+                givenName: 'Aang',
+                familyName: 'Avatar',
+                email: 'aang@example.com',
+                role: 'STATE_USER',
+                stateCode: 'NM',
+            },
+        })
+
+        const stateServer = await constructTestPostgresServer({
+            s3Client: mockS3,
+        })
+
+        const cmsServer = await constructTestPostgresServer({
+            s3Client: mockS3,
+            context: {
+                user: testCMSUser(),
+            },
+        })
+
+        // 1. Submit A0 with Rate1 and Rate2
+        const draftA0 =
+            await createAndUpdateTestContractWithoutRates(stateServer)
+        const AID = draftA0.id
+        const draftA010 = await addNewRateToTestContract(stateServer, draftA0)
+
+        await addNewRateToTestContract(stateServer, draftA010)
+
+        const contractA0 = await submitTestContract(stateServer, AID)
+        const subA0 = contractA0.packageSubmissions[0]
+        const rate10 = subA0.rateRevisions[0]
+        const OneID = rate10.rateID
+
+        // 2. Submit B0 with Rate1 and Rate3
+        const draftB0 =
+            await createAndUpdateTestContractWithoutRates(stateServer)
+        const draftB010 = await addLinkedRateToTestContract(
+            stateServer,
+            draftB0,
+            OneID
+        )
+        await addNewRateToTestContract(stateServer, draftB010)
+
+        const contractB0 = await submitTestContract(stateServer, draftB0.id)
+        const subB0 = contractB0.packageSubmissions[0]
+
+        expect(subB0.rateRevisions[0].rateID).toBe(OneID)
+
+        await unlockTestRate(cmsServer, OneID, 'unlock rate')
+
+        await updateTestRate(OneID, {
+            rateCertificationName: 'after update',
+        })
+
+        const res = await submitRate(client, {
+            rateID: OneID,
+            submittedByUserID: stateUser.id,
+            submittedReason: 'final submit',
+        })
+        if (res instanceof Error) {
+            throw res
+        }
+
+        const fetchedRate = await fetchTestRateById(stateServer, OneID)
+
+        // console.log('FETCEDRAT', JSON.stringify(fetchedRate, null, 2))
+
+        const subs = fetchedRate.packageSubmissions
+        expect(subs).toHaveLength(3)
+
+        expect(subs[0].submitInfo.updatedReason).toBe('final submit')
+        expect(subs[0].cause).toBe('RATE_SUBMISSION')
+        expect(subs[0].submittedRevisions.map((r) => r.id)).toContain(
+            subs[0].rateRevision.id
+        )
+
+        expect(subs[1].submitInfo.updatedReason).toBe('Initial submission')
+        expect(subs[1].cause).toBe('RATE_LINK')
+        expect(subs[1].submittedRevisions.map((r) => r.id)).not.toContain(
+            subs[1].rateRevision.id
+        )
+
+        expect(subs[2].submitInfo.updatedReason).toBe('Initial submission')
+        expect(subs[2].cause).toBe('RATE_SUBMISSION')
+        expect(subs[2].submittedRevisions.map((r) => r.id)).toContain(
+            subs[2].rateRevision.id
         )
     })
 })
