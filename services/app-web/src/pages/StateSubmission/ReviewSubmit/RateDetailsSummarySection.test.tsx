@@ -5,6 +5,7 @@ import {
     mockMNState,
     fetchCurrentUserMock,
     mockValidCMSUser,
+    mockValidAdminUser,
     mockContractPackageSubmittedWithRevisions,
     mockValidStateUser,
     mockContractPackageUnlocked,
@@ -152,6 +153,14 @@ describe('RateDetailsSummarySection', () => {
             }),
         ],
     }
+    const apolloProviderAdminUser = {
+        mocks: [
+            fetchCurrentUserMock({
+                statusCode: 200,
+                user: mockValidAdminUser(),
+            }),
+        ],
+    }
 
     afterEach(() => {
         vi.clearAllMocks()
@@ -275,6 +284,67 @@ describe('RateDetailsSummarySection', () => {
         const rateName =
             'MCR-MN-0005-SNBC-RATE-20221013-20221013-CERTIFICATION-20221013'
         expect(screen.getByText(rateName)).toBeInTheDocument()
+    })
+
+    it('renders replace rate button for admin users', async () => {
+        const contract = mockContractPackageSubmitted()
+
+        const statePrograms = mockMNState().programs
+        await waitFor(() => {
+            renderWithProviders(
+                <RateDetailsSummarySection
+                    contract={contract}
+                    editNavigateTo="rate-details"
+                    submissionName="MN-MSHO-0003"
+                    statePrograms={statePrograms}
+                />,
+                {
+                    apolloProvider: apolloProviderAdminUser,
+                }
+            )
+        })
+        expect(screen.getByRole('link', {
+            name: 'Replace rate',
+        })).toBeInTheDocument()
+    })
+
+    it('does not render replace rate button for state or cms users', async () => {
+        const contract = mockContractPackageSubmitted()
+
+        const statePrograms = mockMNState().programs
+        await waitFor(() => {
+            renderWithProviders(
+                <RateDetailsSummarySection
+                    contract={contract}
+                    editNavigateTo="rate-details"
+                    submissionName="MN-MSHO-0003"
+                    statePrograms={statePrograms}
+                />,
+                {
+                    apolloProvider: apolloProviderCMSUser,
+                }
+            )
+        })
+        expect(screen.queryByRole('link', {
+            name: 'Replace rate',
+        })).not.toBeInTheDocument()
+
+        await waitFor(() => {
+            renderWithProviders(
+                <RateDetailsSummarySection
+                    contract={contract}
+                    editNavigateTo="rate-details"
+                    submissionName="MN-MSHO-0003"
+                    statePrograms={statePrograms}
+                />,
+                {
+                    apolloProvider: apolloProviderStateUser,
+                }
+            )
+        })
+        expect(screen.queryByRole('link', {
+            name: 'Replace rate',
+        })).not.toBeInTheDocument()
     })
 
     it('can render correct rate name for AMENDMENT rate submission', () => {

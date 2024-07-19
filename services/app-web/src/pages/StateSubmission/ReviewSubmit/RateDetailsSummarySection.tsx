@@ -37,6 +37,8 @@ import {
 import { useAuth } from '../../../contexts/AuthContext'
 import { ActuaryCommunicationRecord } from '../../../constants'
 import { useParams } from 'react-router-dom'
+import { LinkWithLogging } from '../../../components/TealiumLogging/Link'
+import classnames from 'classnames'
 
 export type RateDetailsSummarySectionProps = {
     contract: Contract
@@ -92,6 +94,7 @@ export const RateDetailsSummarySection = ({
     const isSubmitted =
         contract.status === 'SUBMITTED' || contract.status === 'RESUBMITTED'
     const isCMSUser = loggedInUser?.role === 'CMS_USER'
+    const isAdminUser = loggedInUser?.role === 'ADMIN_USER'
     const isSubmittedOrCMSUser = isSubmitted || isCMSUser
     const isEditing = !isSubmittedOrCMSUser && editNavigateTo !== undefined
     const isPreviousSubmission = usePreviousSubmission()
@@ -266,6 +269,13 @@ export const RateDetailsSummarySection = ({
         isSubmittedOrCMSUser,
         isPreviousSubmission,
     ])
+
+    const classes = classnames(
+        {
+            [styles.replaceRateWrapper]: isAdminUser,
+        },
+    )
+
     return (
         <SectionCard id="rateDetails" className={styles.summarySection}>
             <SectionHeader
@@ -306,12 +316,23 @@ export const RateDetailsSummarySection = ({
                               id={`rate-details-${rate.id}`}
                               key={rate.id}
                           >
-                              <h3
-                                  aria-label={`Rate ID: ${rateFormData.rateCertificationName}`}
-                                  className={styles.rateName}
-                              >
-                                  {rateFormData.rateCertificationName}
-                              </h3>
+                            <div className={classes}>
+                                <h3
+                                    aria-label={`Rate ID: ${rateFormData.rateCertificationName}`}
+                                    className={styles.rateName}
+                                >
+                                    {rateFormData.rateCertificationName}
+                                </h3>
+                                {isAdminUser && (
+                                    <LinkWithLogging
+                                        href={`/submissions/${contract.id}/replace_rate`}
+                                        className={'usa-button usa-button--outline'}
+                                        variant="unstyled"
+                                    >
+                                        Replace rate
+                                    </LinkWithLogging>
+                                )}
+                            </div>
                               <dl>
                                   <DoubleColumnGrid>
                                       {showLegacyRatePrograms ? (
