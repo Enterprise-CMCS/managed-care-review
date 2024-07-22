@@ -8,10 +8,9 @@ import { submitContractAndOrRates } from './submitContractAndOrRates'
 
 async function submitContractInsideTransaction(
     tx: PrismaTransactionType,
-    contractID: string,
-    submittedByUserID: string,
-    submittedReason: string
+    args: SubmitContractArgsType
 ): Promise<ContractType | Error> {
+    const { contractID, submittedByUserID, submittedReason } = args
     // New C+R code pre-submit
     const currentContract = await findContractWithHistory(tx, contractID)
     if (currentContract instanceof Error) {
@@ -115,6 +114,6 @@ async function submitContract(
     }
 }
 
-export { submitContract }
+export { submitContract, submitContractInsideTransaction }
 
 export type { SubmitContractArgsType }

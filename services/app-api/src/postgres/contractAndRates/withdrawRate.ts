@@ -8,7 +8,9 @@ type WithdrawDateArgsType = {
     withdrawReason: string
 }
 
-async function withdrawRate(
+// This function was originally built for use within replaceRateOnContract, which is a limited admin-only use case
+// would likely need to be more robust  for use on demand
+async function withdrawRateInsideTransaction(
     tx: PrismaTransactionType,
     args: WithdrawDateArgsType
 ): Promise<RateType | Error> {
@@ -59,5 +61,5 @@ async function withdrawRate(
     }
 }
 
-export { withdrawRate }
+export { withdrawRateInsideTransaction }
 export type { WithdrawDateArgsType }

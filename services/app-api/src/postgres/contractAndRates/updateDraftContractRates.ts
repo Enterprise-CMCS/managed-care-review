@@ -38,7 +38,7 @@ interface UpdateDraftContractRatesArgsType {
     rateUpdates: UpdatedRatesType
 }
 
-async function updateDraftContractRatesInTransaction(
+async function updateDraftContractRatesInsideTransaction(
     tx: PrismaTransactionType,
     args: UpdateDraftContractRatesArgsType
 ): Promise<ContractType | Error> {
@@ -222,7 +222,10 @@ async function updateDraftContractRates(
 ): Promise<ContractType | Error> {
     try {
         return await client.$transaction(async (tx) => {
-            const result = await updateDraftContractRatesInTransaction(tx, args)
+            const result = await updateDraftContractRatesInsideTransaction(
+                tx,
+                args
+            )
 
             return result
         })
@@ -234,4 +237,4 @@ async function updateDraftContractRates(
 
 export type { UpdateDraftContractRatesArgsType }
 
-export { updateDraftContractRates, updateDraftContractRatesInTransaction }
+export { updateDraftContractRates, updateDraftContractRatesInsideTransaction }
