@@ -337,7 +337,7 @@ async function initializeGQLHandler(): Promise<Handler> {
 
     // Wait for initialization. On initialization failure default to offlineLDService and close ldClient.
     try {
-        await ldClient.waitForInitialization()
+        await ldClient.waitForInitialization({ timeout: 10 })
         launchDarkly = ldService(ldClient)
     } catch (err) {
         console.error(

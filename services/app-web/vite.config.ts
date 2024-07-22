@@ -10,6 +10,7 @@ import path from 'path'
 
 export default defineConfig(() => ({
     base: '/',
+    sourcemap: true,
     plugins: [
         react(),
         svgr({
@@ -28,6 +29,43 @@ export default defineConfig(() => ({
         open: true,
         port: 3000,
         host: '127.0.0.1',
+        cors: {
+            origin: '*',
+            preflightContinue: true,
+            methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+        },
+        proxy: {
+            '/ld-clientsdk': {
+                target: 'https://clientsdk.launchdarkly.us',
+                changeOrigin: true,
+                rewrite: (path) => path.replace(/^\/ld-clientsdk/, ''),
+                configure: (proxy, _options) => {
+                    proxy.on('proxyReq', (proxyReq, req, res) => {
+                        proxyReq.setHeader('Origin', 'http://localhost:3000')
+                    })
+                },
+            },
+            '/ld-clientstream': {
+                target: 'https://clientstream.launchdarkly.us',
+                changeOrigin: true,
+                rewrite: (path) => path.replace(/^\/ld-clientstream/, ''),
+                configure: (proxy, _options) => {
+                    proxy.on('proxyReq', (proxyReq, req, res) => {
+                        proxyReq.setHeader('Origin', 'http://localhost:3000')
+                    })
+                },
+            },
+            '/ld-events': {
+                target: 'https://events.launchdarkly.us',
+                changeOrigin: true,
+                rewrite: (path) => path.replace(/^\/ld-events/, ''),
+                configure: (proxy, _options) => {
+                    proxy.on('proxyReq', (proxyReq, req, res) => {
+                        proxyReq.setHeader('Origin', 'http://localhost:3000')
+                    })
+                },
+            },
+        },
     },
     define: {
         global: 'globalThis',
@@ -49,9 +87,11 @@ export default defineConfig(() => ({
     css: {
         preprocessorOptions: {
             scss: {
-                includePaths: [path.resolve(__dirname, '../../node_modules/uswds/dist')]
-            }
-        }
+                includePaths: [
+                    path.resolve(__dirname, '../../node_modules/uswds/dist'),
+                ],
+            },
+        },
     },
     test: {
         environment: 'jsdom',
