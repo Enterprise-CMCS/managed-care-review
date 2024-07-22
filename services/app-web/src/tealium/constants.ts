@@ -27,6 +27,7 @@ const TEALIUM_CONTENT_TYPE_BY_ROUTE: Record<RouteT | 'UNKNOWN_ROUTE', string> = 
     API_ACCESS: 'dev',
     SETTINGS: 'table',
     RATES_SUMMARY: 'summary',
+    REPLACE_RATE: 'form',
     RATE_EDIT: 'form',
     SUBMISSIONS: 'form',
     SUBMISSIONS_NEW: 'form',
