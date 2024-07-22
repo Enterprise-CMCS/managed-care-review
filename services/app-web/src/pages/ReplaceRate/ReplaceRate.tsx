@@ -16,8 +16,8 @@ export const ReplaceRate = (): React.ReactElement => {
     const { updateHeading } = usePage()
     const navigate = useNavigate()
     const [rateName, setRateName] = useState<string | undefined>(undefined)
-    const { rateId } = useParams()
-    if (!rateId) {
+    const { rateID } = useParams()
+    if (!rateID) {
         throw new Error(
             'PROGRAMMING ERROR: id param not set in state submission form.'
         )
@@ -30,7 +30,7 @@ export const ReplaceRate = (): React.ReactElement => {
     const { data, loading, error } = useFetchRateQuery({
         variables: {
             input: {
-                rateID: rateId,
+                rateID,
             },
         },
     })
@@ -57,9 +57,9 @@ export const ReplaceRate = (): React.ReactElement => {
         }
     }
 
-     // Redirecting non admin users to rate page
-     if (loggedInUser?.role != 'ADMIN_USER' ) {
-        navigate(`/rates/${rateId}`)
+    // Redirecting non admin users to rate page
+    if (loggedInUser?.role != 'ADMIN_USER') {
+        navigate(`/rates/${rateID}`)
     }
 
     if (

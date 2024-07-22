@@ -52,7 +52,7 @@ const RoutesRecord: Record<RouteT, string> = {
     SETTINGS: '/settings',
     RATES_SUMMARY: '/rates/:id',
     RATE_EDIT: '/rates/:id/edit',
-    REPLACE_RATE: '/submissions/:id/replace-rate/:rateId',
+    REPLACE_RATE: '/submissions/:id/replace-rate/:rateID',
     SUBMISSIONS: '/submissions',
     SUBMISSIONS_NEW: '/submissions/new',
     SUBMISSIONS_EDIT_TOP_LEVEL: '/submissions/:id/edit/*',
