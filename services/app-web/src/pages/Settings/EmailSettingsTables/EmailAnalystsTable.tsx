@@ -47,7 +47,7 @@ const EmailAnalystsTable = ({
     )
 
     const reactTable = useReactTable({
-        data: analysts.sort((a, b) =>
+        data: Array.from(analysts).sort((a, b) =>
             a['stateCode'] > b['stateCode'] ? -1 : 1
         ),
         filterFns: {

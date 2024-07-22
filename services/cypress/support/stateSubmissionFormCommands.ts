@@ -103,7 +103,7 @@ Cypress.Commands.add('fillOutBaseContractDetails', () => {
     cy.findByText('No, the contract does not fully comply with all applicable requirements').click()
 
     cy.findByRole('textbox', {name: 'Provide a brief description of any contractual or operational non-compliance, including regulatory citations and expected timeframe for remediation'})
-        .type('Non compliance explanation')
+        .type('Non compliance explanation - base contract')
 
     cy.findByText('Fully executed').click()
     cy.findAllByLabelText('Start date', {timeout: 2000})
@@ -116,8 +116,8 @@ Cypress.Commands.add('fillOutBaseContractDetails', () => {
         .findByTestId('date-picker-external-input')
         .type('03/31/2025')
         .blur()
-    cy.findByLabelText('Managed Care Organization (MCO)').safeClick()
-    cy.findByLabelText('1932(a) State Plan Authority').safeClick()
+    cy.findByLabelText('Managed Care Organization (MCO)').check({force: true})
+    cy.findByLabelText('1932(a) State Plan Authority').check({force: true})
     cy.findByTestId('file-input-input').attachFile(
         'documents/trussel-guide.pdf'
     )
@@ -183,7 +183,7 @@ Cypress.Commands.add('fillOutAmendmentToBaseContractDetails', () => {
     // Contract 438 attestation question
     cy.findByText('No, the contract does not fully comply with all applicable requirements').click()
     cy.findByRole('textbox', {name: 'Provide a brief description of any contractual or operational non-compliance, including regulatory citations and expected timeframe for remediation'})
-        .type('Non compliance explanation')
+        .type('Non compliance explanation - amendment')
 
     cy.findByText('Unexecuted by some or all parties').click()
 
@@ -196,8 +196,8 @@ Cypress.Commands.add('fillOutAmendmentToBaseContractDetails', () => {
         .findByTestId('date-picker-external-input')
         .type('03/31/2025')
         .blur()
-    cy.findByLabelText('Managed Care Organization (MCO)').safeClick()
-    cy.findByLabelText('1932(a) State Plan Authority').safeClick()
+    cy.findByLabelText('Managed Care Organization (MCO)').check({force: true})
+    cy.findByLabelText('1932(a) State Plan Authority').check({force: true})
 
     // fill out the yes/nos
     cy.findByText('In Lieu-of Services and Settings (ILOSs) in accordance with 42 CFR § 438.3(e)(2)')
