@@ -270,11 +270,9 @@ export const RateDetailsSummarySection = ({
         isPreviousSubmission,
     ])
 
-    const classes = classnames(
-        {
-            [styles.replaceRateWrapper]: isAdminUser,
-        },
-    )
+    const replaceRateClass = classnames({
+        [styles.replaceRateWrapper]: isAdminUser,
+    })
 
     return (
         <SectionCard id="rateDetails" className={styles.summarySection}>
@@ -306,7 +304,8 @@ export const RateDetailsSummarySection = ({
                           hasDeprecatedRatePrograms &&
                           hasNoRatePrograms &&
                           (isSubmittedOrCMSUser || isLinkedRate)
-                      const showReplaceRateBtn = isAdminUser && !isPreviousSubmission && !isLinkedRate
+                      const showReplaceRateBtn =
+                          isAdminUser && !isPreviousSubmission && !isLinkedRate
                       if (!rateFormData) {
                           return <GenericErrorPage />
                       }
@@ -316,23 +315,25 @@ export const RateDetailsSummarySection = ({
                               id={`rate-details-${rateRev.id}`}
                               key={rateRev.id}
                           >
-                            <div className={classes}>
-                                <h3
-                                    aria-label={`Rate ID: ${rateFormData.rateCertificationName}`}
-                                    className={styles.rateName}
-                                >
-                                    {rateFormData.rateCertificationName}
-                                </h3>
-                                {showReplaceRateBtn && (
-                                    <LinkWithLogging
-                                        href={`/submissions/${contract.id}/replace-rate/${rateRev.rateID}`}
-                                        className={'usa-button usa-button--outline'}
-                                        variant="unstyled"
-                                    >
-                                        Replace rate
-                                    </LinkWithLogging>
-                                )}
-                            </div>
+                              <div className={replaceRateClass}>
+                                  <h3
+                                      aria-label={`Rate ID: ${rateFormData.rateCertificationName}`}
+                                      className={styles.rateName}
+                                  >
+                                      {rateFormData.rateCertificationName}
+                                  </h3>
+                                  {showReplaceRateBtn && (
+                                      <LinkWithLogging
+                                          href={`/submissions/${contract.id}/replace-rate/${rateRev.rateID}`}
+                                          className={
+                                              'usa-button usa-button--outline'
+                                          }
+                                          variant="unstyled"
+                                      >
+                                          Replace rate
+                                      </LinkWithLogging>
+                                  )}
+                              </div>
                               <dl>
                                   <DoubleColumnGrid>
                                       {showLegacyRatePrograms ? (
@@ -366,11 +367,13 @@ export const RateDetailsSummarySection = ({
                                           id="rateType"
                                           label="Rate certification type"
                                           explainMissingData={
-                                            isLinkedRate
-                                                ? false
-                                                : explainMissingData
-                                        }
-                                          children={rateCertificationType(rateRev)}
+                                              isLinkedRate
+                                                  ? false
+                                                  : explainMissingData
+                                          }
+                                          children={rateCertificationType(
+                                              rateRev
+                                          )}
                                       />
                                       <DataDetail
                                           id="ratingPeriod"
@@ -381,10 +384,10 @@ export const RateDetailsSummarySection = ({
                                                   : 'Rating period'
                                           }
                                           explainMissingData={
-                                            isLinkedRate
-                                                ? false
-                                                : explainMissingData
-                                        }
+                                              isLinkedRate
+                                                  ? false
+                                                  : explainMissingData
+                                          }
                                           children={formatDatePeriod(
                                               rateFormData.rateDateStart,
                                               rateFormData.rateDateEnd
@@ -398,10 +401,10 @@ export const RateDetailsSummarySection = ({
                                                   : 'Date certified'
                                           }
                                           explainMissingData={
-                                            isLinkedRate
-                                                ? false
-                                                : explainMissingData
-                                        }
+                                              isLinkedRate
+                                                  ? false
+                                                  : explainMissingData
+                                          }
                                           children={formatCalendarDate(
                                               rateFormData.rateDateCertified
                                           )}
@@ -411,10 +414,10 @@ export const RateDetailsSummarySection = ({
                                               id="effectiveRatingPeriod"
                                               label="Rate amendment effective dates"
                                               explainMissingData={
-                                                isLinkedRate
-                                                    ? false
-                                                    : explainMissingData
-                                            }
+                                                  isLinkedRate
+                                                      ? false
+                                                      : explainMissingData
+                                              }
                                               children={formatDatePeriod(
                                                   rateFormData.amendmentEffectiveDateStart,
                                                   rateFormData.amendmentEffectiveDateEnd
@@ -425,20 +428,20 @@ export const RateDetailsSummarySection = ({
                                           id="rateCapitationType"
                                           label="Does the actuary certify capitation rates specific to each rate cell or a rate range?"
                                           explainMissingData={
-                                            isLinkedRate
-                                                ? false
-                                                : explainMissingData
-                                        }
+                                              isLinkedRate
+                                                  ? false
+                                                  : explainMissingData
+                                          }
                                           children={rateCapitationType(rateRev)}
                                       />
                                       <DataDetail
                                           id="certifyingActuary"
                                           label="Certifying actuary"
                                           explainMissingData={
-                                            isLinkedRate
-                                                ? false
-                                                : explainMissingData
-                                        }
+                                              isLinkedRate
+                                                  ? false
+                                                  : explainMissingData
+                                          }
                                           children={
                                               validateActuary(
                                                   rateFormData
@@ -460,9 +463,9 @@ export const RateDetailsSummarySection = ({
                                                   id={`addtlCertifyingActuary-${addtlContactIndex}`}
                                                   label="Certifying actuary"
                                                   explainMissingData={
-                                                    isLinkedRate
-                                                        ? false
-                                                        : explainMissingData
+                                                      isLinkedRate
+                                                          ? false
+                                                          : explainMissingData
                                                   }
                                                   children={
                                                       validateActuary(
@@ -487,9 +490,9 @@ export const RateDetailsSummarySection = ({
                                               ]
                                           }
                                           explainMissingData={
-                                            isLinkedRate
-                                                ? false
-                                                : explainMissingData
+                                              isLinkedRate
+                                                  ? false
+                                                  : explainMissingData
                                           }
                                       />
                                   </DoubleColumnGrid>

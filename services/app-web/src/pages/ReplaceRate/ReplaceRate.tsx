@@ -7,7 +7,6 @@ import { useFetchRateQuery } from '../../gen/gqlClient'
 import styles from '../SubmissionSummary/SubmissionSummary.module.scss'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import { useAuth } from '../../contexts/AuthContext'
-import { ErrorForbiddenPage } from '../Errors/ErrorForbiddenPage'
 import { Error404 } from '../Errors/Error404Page'
 
 export const ReplaceRate = (): React.ReactElement => {
@@ -18,9 +17,7 @@ export const ReplaceRate = (): React.ReactElement => {
     const [rateName, setRateName] = useState<string | undefined>(undefined)
     const { rateID } = useParams()
     if (!rateID) {
-        throw new Error(
-            'PROGRAMMING ERROR: id param not set in state submission form.'
-        )
+        throw new Error('PROGRAMMING ERROR: rateID param not set')
     }
 
     useEffect(() => {
@@ -45,12 +42,7 @@ export const ReplaceRate = (): React.ReactElement => {
             </GridContainer>
         )
     } else if (error || !rate || !currentRateRev?.formData) {
-        //error handling for a state user that tries to access rates for a different state
-        if (error?.graphQLErrors[0]?.extensions?.code === 'FORBIDDEN') {
-            return (
-                <ErrorForbiddenPage errorMsg={error.graphQLErrors[0].message} />
-            )
-        } else if (error?.graphQLErrors[0]?.extensions?.code === 'NOT_FOUND') {
+        if (error?.graphQLErrors[0]?.extensions?.code === 'NOT_FOUND') {
             return <Error404 />
         } else {
             return <GenericErrorPage />
