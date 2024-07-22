@@ -325,7 +325,7 @@ describe('RateDetailsSummarySection', () => {
             renderWithProviders(
                 <RateDetailsSummarySection
                     contract={contract}
-                    rateRevs={rateRevs}
+                    rateRevisons={rateRevs}
                     editNavigateTo="rate-details"
                     submissionName="MN-MSHO-0003"
                     statePrograms={statePrograms}

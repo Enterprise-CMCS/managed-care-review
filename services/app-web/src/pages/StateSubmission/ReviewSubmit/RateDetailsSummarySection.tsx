@@ -43,7 +43,7 @@ import classnames from 'classnames'
 export type RateDetailsSummarySectionProps = {
     contract: Contract
     contractRev?: ContractRevision
-    rateRevs?: RateRevisionWithIsLinked[]
+    rateRevisons?: RateRevisionWithIsLinked[]
     editNavigateTo?: string
     isCMSUser?: boolean
     submissionName: string
@@ -82,7 +82,7 @@ export function renderDownloadButton(
 
 export const RateDetailsSummarySection = ({
     contract,
-    rateRevs,
+    rateRevisons,
     editNavigateTo,
     submissionName,
     statePrograms,
@@ -100,8 +100,8 @@ export const RateDetailsSummarySection = ({
     const isPreviousSubmission = usePreviousSubmission()
     const isInitialSubmission = contract.packageSubmissions.length === 1
 
-    const rates = rateRevs
-        ? rateRevs
+    const rateRevs = rateRevisons
+        ? rateRevisons
         : getVisibleLatestRateRevisions(contract, isEditing)
 
     // Calculate last submitted data for document upload tables
@@ -286,15 +286,14 @@ export const RateDetailsSummarySection = ({
                     !isPreviousSubmission &&
                     renderDownloadButton(zippedFilesURL)}
             </SectionHeader>
-            {rates && rates.length > 0
-                ? rates.map((rate) => {
-                      const rateFormData = getRateFormData(rate)
+            {rateRevs && rateRevs.length > 0
+                ? rateRevs.map((rateRev) => {
+                      const rateFormData = getRateFormData(rateRev)
                       const hasDeprecatedRatePrograms =
                           rateFormData.deprecatedRateProgramIDs.length > 0
                       const hasNoRatePrograms =
                           rateFormData.rateProgramIDs.length === 0
-                      const isLinkedRate = rate.isLinked
-
+                      const isLinkedRate = rateRev.isLinked
                       /*
                     Rate programs switched in summer 2024. We still show deprecated program field values when
                     - there's no new field values present and CMS user is viewing
@@ -307,14 +306,15 @@ export const RateDetailsSummarySection = ({
                           hasDeprecatedRatePrograms &&
                           hasNoRatePrograms &&
                           (isSubmittedOrCMSUser || isLinkedRate)
+                      const showReplaceRateBtn = isAdminUser && !isPreviousSubmission && !isLinkedRate
                       if (!rateFormData) {
                           return <GenericErrorPage />
                       }
 
                       return (
                           <SectionCard
-                              id={`rate-details-${rate.id}`}
-                              key={rate.id}
+                              id={`rate-details-${rateRev.id}`}
+                              key={rateRev.id}
                           >
                             <div className={classes}>
                                 <h3
@@ -323,9 +323,9 @@ export const RateDetailsSummarySection = ({
                                 >
                                     {rateFormData.rateCertificationName}
                                 </h3>
-                                {(isAdminUser && !isLinkedRate) && (
+                                {showReplaceRateBtn && (
                                     <LinkWithLogging
-                                        href={`/submissions/${contract.id}/replace_rate`}
+                                        href={`/submissions/${contract.id}/replace-rate/${rateRev.rateID}`}
                                         className={'usa-button usa-button--outline'}
                                         variant="unstyled"
                                     >
@@ -343,7 +343,7 @@ export const RateDetailsSummarySection = ({
                                                   false // this is a deprecated field, we never need to explain if its missing
                                               }
                                               children={ratePrograms(
-                                                  rate,
+                                                  rateRev,
                                                   true
                                               )}
                                           />
@@ -357,7 +357,7 @@ export const RateDetailsSummarySection = ({
                                                       : explainMissingData
                                               }
                                               children={ratePrograms(
-                                                  rate,
+                                                  rateRev,
                                                   false
                                               )}
                                           />
@@ -370,7 +370,7 @@ export const RateDetailsSummarySection = ({
                                                 ? false
                                                 : explainMissingData
                                         }
-                                          children={rateCertificationType(rate)}
+                                          children={rateCertificationType(rateRev)}
                                       />
                                       <DataDetail
                                           id="ratingPeriod"
@@ -429,7 +429,7 @@ export const RateDetailsSummarySection = ({
                                                 ? false
                                                 : explainMissingData
                                         }
-                                          children={rateCapitationType(rate)}
+                                          children={rateCapitationType(rateRev)}
                                       />
                                       <DataDetail
                                           id="certifyingActuary"
