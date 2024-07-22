@@ -351,7 +351,7 @@ Cypress.Commands.add('fillOutNewRateCertification', () => {
             cy.findAllByLabelText('Name').eq(0).click().type('Actuary Contact Person')
             cy.findAllByLabelText('Title/Role').eq(0).type('Actuary Contact Title')
             cy.findAllByLabelText('Email').eq(0).type('actuarycontact@example.com')
-            cy.findAllByLabelText('Mercer').eq(0).safeClick()
+            cy.findAllByLabelText('Mercer').eq(0).check({force: true})
 
             //Actuary communication preference
             cy.findByRole('radiogroup', {
@@ -432,7 +432,7 @@ Cypress.Commands.add('fillOutAmendmentToPriorRateCertification', (id = 0) => {
     cy.findAllByLabelText('Name').eq(0).click().clear().type('Actuary Contact Person')
     cy.findAllByLabelText('Title/Role').eq(0).clear().type('Actuary Contact Title')
     cy.findAllByLabelText('Email').eq(0).clear().type('actuarycontact@example.com')
-    cy.findAllByLabelText('Mercer').eq(0).safeClick()
+    cy.findAllByLabelText('Mercer').eq(0).check({force: true})
 
     //Actuary communication preference
     cy.findByRole('radiogroup', {
@@ -478,7 +478,7 @@ Cypress.Commands.add('fillOutAdditionalActuaryContact', () => {
     cy.findByTestId('addtlActuaryContacts.email').clear().type('actuarycontact@example.com')
 
     // Actuarial firm
-    cy.findByTestId('addtlActuaryContacts.mercer').safeClick()
+    cy.findByTestId('addtlActuaryContacts.mercer').check({force: true})
 
     cy.findAllByTestId('errorMessage').should('have.length', 0)
 })
