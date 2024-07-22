@@ -151,7 +151,7 @@ if (ldClientId === undefined) {
     const LDProvider = await asyncWithLDProvider({
         clientSideID: ldClientId,
         options: {
-            bootstrap: 'localStorage' as const,
+            bootstrap: 'localStorage',
             baseUrl:
                 authMode === 'LOCAL'
                     ? '/ld-clientsdk'
