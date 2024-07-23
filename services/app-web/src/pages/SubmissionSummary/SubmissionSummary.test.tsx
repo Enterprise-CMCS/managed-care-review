@@ -16,7 +16,7 @@ import { SubmissionSideNav } from '../SubmissionSideNav'
 import { testS3Client } from '../../testHelpers/s3Helpers'
 import { mockContractPackageUnlocked } from '../../testHelpers/apolloMocks/contractPackageDataMock'
 import { ReviewSubmit } from '../StateSubmission/ReviewSubmit'
-import { Location } from 'react-router-dom'
+import { generatePath, Location } from 'react-router-dom'
 
 describe('SubmissionSummary', () => {
     it('renders without errors', async () => {
@@ -397,7 +397,9 @@ describe('SubmissionSummary', () => {
         )
         await waitFor(() => {
             expect(testLocation.pathname).toBe(
-                '/submissions/test-abc-123/edit/review-and-submit'
+                generatePath(RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT, {
+                    id: 'test-abc-123',
+                })
             )
         })
     })
