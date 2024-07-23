@@ -21837,9 +21837,9 @@ pure-rand@^6.0.0:
   integrity sha512-6Yg0ekpKICSjPswYOuC5sku/TSWaRYlA0qsXqJgM/d/4pLPHPuTxK7Nbf7jFKzAeedUhR8C7K9Uv63FBsSo8xQ==
 
 purify-ts@^2.0.1:
-  version "2.0.3"
-  resolved "https://registry.yarnpkg.com/purify-ts/-/purify-ts-2.0.3.tgz#c359fa9a956ad18e8334802e26af1b46c603b90f"
-  integrity sha512-RiPOlX4L+eggnbEdwGV34t7iRSPK5d37nKPZXSu8G5mTUhxbEjPpThRFuEV4GL/T6zEJQ+ZeiuNoBk61VJvszg==
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/purify-ts/-/purify-ts-2.1.0.tgz#e51cd94aa29edc7e09e914b15b3367c490b3df40"
+  integrity sha512-+KNUHV9FxB9BbjadFdvxa+LNJIaqZmSF7CQH5Rv6+f0rBzsxm9FEqrvkALQbWYJobAja2ZCbBDUY7O4fH2znMA==
   dependencies:
     "@types/json-schema" "7.0.15"
 
