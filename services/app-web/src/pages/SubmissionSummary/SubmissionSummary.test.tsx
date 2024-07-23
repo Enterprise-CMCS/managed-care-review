@@ -11,7 +11,7 @@ import {
     mockContractPackageSubmitted,
 } from '../../testHelpers/apolloMocks'
 import { renderWithProviders } from '../../testHelpers/jestHelpers'
-import { SubmissionSummary } from './V2/SubmissionSummaryV2'
+import { SubmissionSummary } from './SubmissionSummary'
 import { SubmissionSideNav } from '../SubmissionSideNav'
 import { testS3Client } from '../../testHelpers/s3Helpers'
 import { mockContractPackageUnlocked } from '../../testHelpers/apolloMocks/contractPackageDataMock'
@@ -353,54 +353,6 @@ describe('SubmissionSummary', () => {
             expect(
                 screen.queryByText('Add MC-CRS record number')
             ).not.toBeInTheDocument()
-        })
-    })
-
-    it('renders submission unlocked banner for State user', async () => {
-        renderWithProviders(
-            <Routes>
-                <Route element={<SubmissionSideNav />}>
-                    <Route
-                        path={RoutesRecord.SUBMISSIONS_SUMMARY}
-                        element={<SubmissionSummary />}
-                    />
-                </Route>
-            </Routes>,
-            {
-                apolloProvider: {
-                    mocks: [
-                        fetchCurrentUserMock({
-                            user: mockValidUser(),
-                            statusCode: 200,
-                        }),
-                        fetchStateHealthPlanPackageWithQuestionsMockSuccess({
-                            id: 'test-abc-123',
-                        }),
-                        fetchContractMockSuccess({
-                            contract: mockContractPackageUnlocked(),
-                        }),
-                    ],
-                },
-                routerProvider: {
-                    route: '/submissions/test-abc-123',
-                },
-                featureFlags: {},
-            }
-        )
-        await waitFor(() => {
-            expect(screen.getByTestId('unlockedBanner')).toBeInTheDocument()
-            expect(screen.getByTestId('unlockedBanner')).toHaveClass(
-                'usa-alert--info'
-            )
-            expect(screen.getByTestId('unlockedBanner')).toHaveTextContent(
-                /on: (0?[1-9]|[12][0-9]|3[01])\/[0-9]+\/[0-9]+\s[0-9]+:[0-9]+[a-zA-Z]+ ET/i
-            )
-            expect(screen.getByTestId('unlockedBanner')).toHaveTextContent(
-                'by: cms@example.com'
-            )
-            expect(screen.getByTestId('unlockedBanner')).toHaveTextContent(
-                'Reason for unlock: unlocked for a test'
-            )
         })
     })
 
