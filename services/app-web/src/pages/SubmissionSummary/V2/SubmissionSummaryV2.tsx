@@ -35,6 +35,7 @@ import { featureFlags } from '../../../common-code/featureFlags'
 import { RoutesRecord } from '../../../constants'
 import { useRouteParams } from '../../../hooks'
 import { getVisibleLatestContractFormData } from '../../../gqlHelpers/contractsAndRates'
+import { generatePath, Navigate } from 'react-router-dom'
 
 function UnlockModalButton({
     disabled,
@@ -63,7 +64,6 @@ export const SubmissionSummary = (): React.ReactElement => {
     const modalRef = useRef<ModalRef>(null)
     const [documentError, setDocumentError] = useState(false)
     const { loggedInUser } = useAuth()
-
     const { id } = useRouteParams()
 
     const ldClient = useLDClient()
@@ -71,6 +71,10 @@ export const SubmissionSummary = (): React.ReactElement => {
         featureFlags.CMS_QUESTIONS.flag,
         featureFlags.CMS_QUESTIONS.defaultValue
     )
+
+    const isCMSUser = loggedInUser?.role === 'CMS_USER'
+    const isStateUser = loggedInUser?.role === 'STATE_USER'
+    const isHelpDeskUser = loggedInUser?.role === 'HELPDESK_USER'
 
     // API requests
     const {
@@ -101,11 +105,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                 <Loading />
             </GridContainer>
         )
-    } else if (
-        fetchContractError ||
-        !contract ||
-        contract.packageSubmissions.length === 0
-    ) {
+    } else if (fetchContractError) {
         //error handling for a state user that tries to access rates for a different state
         if (
             fetchContractError?.graphQLErrors[0]?.extensions?.code ===
@@ -124,18 +124,42 @@ export const SubmissionSummary = (): React.ReactElement => {
         } else {
             return <GenericErrorPage />
         }
+    } else if (!contract) {
+        return <GenericErrorPage />
     }
-    const isCMSUser = loggedInUser?.role === 'CMS_USER'
-    const isStateUser = loggedInUser?.role === 'STATE_USER'
-    const isHelpDeskUser = loggedInUser?.role === 'HELPDESK_USER'
+
     const submissionStatus = contract.status
+    const isSubmitted =
+        submissionStatus === 'SUBMITTED' || submissionStatus === 'RESUBMITTED'
     const statePrograms = contract.state.programs
+
+    if (!isSubmitted && isStateUser) {
+        if (submissionStatus === 'DRAFT') {
+            return (
+                <Navigate
+                    to={generatePath(RoutesRecord.SUBMISSIONS_TYPE, { id })}
+                />
+            )
+        } else {
+            return (
+                <Navigate
+                    to={generatePath(RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT, {
+                        id,
+                    })}
+                />
+            )
+        }
+    }
 
     const contractFormData = getVisibleLatestContractFormData(
         contract,
         isStateUser
     )
-    if (!contractFormData || !contract || !statePrograms) {
+    if (
+        !contractFormData ||
+        !statePrograms ||
+        contract.packageSubmissions.length === 0
+    ) {
         console.error(
             'missing fundamental contract data inside submission summary'
         )
@@ -161,8 +185,6 @@ export const SubmissionSummary = (): React.ReactElement => {
     const editOrAddMCCRSID = contract.mccrsID
         ? 'Edit MC-CRS number'
         : 'Add MC-CRS record number'
-    const isSubmitted =
-        contract.status === 'SUBMITTED' || contract.status === 'RESUBMITTED'
     const explainMissingData = (isHelpDeskUser || isStateUser) && !isSubmitted
 
     return (
