@@ -15,6 +15,8 @@ import { SubmissionSummary } from './SubmissionSummary'
 import { SubmissionSideNav } from '../SubmissionSideNav'
 import { testS3Client } from '../../testHelpers/s3Helpers'
 import { mockContractPackageUnlocked } from '../../testHelpers/apolloMocks/contractPackageDataMock'
+import { ReviewSubmit } from '../StateSubmission/ReviewSubmit'
+import { Location } from 'react-router-dom'
 
 describe('SubmissionSummary', () => {
     it('renders without errors', async () => {
@@ -353,6 +355,50 @@ describe('SubmissionSummary', () => {
             expect(
                 screen.queryByText('Add MC-CRS record number')
             ).not.toBeInTheDocument()
+        })
+    })
+
+    it('redirects to review and submit page for State user', async () => {
+        let testLocation: Location
+        renderWithProviders(
+            <Routes>
+                <Route element={<SubmissionSideNav />}>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                        element={<SubmissionSummary />}
+                    />
+                </Route>
+                <Route
+                    path={RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT}
+                    element={<ReviewSubmit />}
+                />
+            </Routes>,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockValidUser(),
+                            statusCode: 200,
+                        }),
+                        fetchStateHealthPlanPackageWithQuestionsMockSuccess({
+                            id: 'test-abc-123',
+                        }),
+                        fetchContractMockSuccess({
+                            contract: mockContractPackageUnlocked(),
+                        }),
+                    ],
+                },
+                routerProvider: {
+                    route: '/submissions/test-abc-123',
+                },
+                featureFlags: {},
+                location: (location) => (testLocation = location),
+            }
+        )
+        await waitFor(() => {
+            expect(testLocation.pathname).toBe(
+                '/submissions/test-abc-123/edit/review-and-submit'
+            )
         })
     })
 
