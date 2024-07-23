@@ -1,6 +1,12 @@
 import React from 'react'
 
-import { Routes, Route } from 'react-router-dom'
+import {
+    Routes,
+    Route,
+    useOutletContext,
+    Navigate,
+    generatePath,
+} from 'react-router-dom'
 
 import { Error404 } from '../Errors/Error404Page'
 
@@ -20,9 +26,22 @@ import { UnlockedHealthPlanFormDataType } from '../../common-code/healthPlanForm
 import { ContractFormData } from '../../gen/gqlClient'
 import { RateDetails } from './RateDetails'
 import styles from './StateSubmissionForm.module.scss'
+import { SideNavOutletContextType } from '../SubmissionSideNav/SubmissionSideNav'
 
 // Can move this AppRoutes on future pass - leaving it here now to make diff clear
 export const StateSubmissionForm = (): React.ReactElement => {
+    const { pkg } = useOutletContext<SideNavOutletContextType>()
+
+    if (pkg.status === 'RESUBMITTED' || pkg.status === 'SUBMITTED') {
+        return (
+            <Navigate
+                to={generatePath(RoutesRecord.SUBMISSIONS_SUMMARY, {
+                    id: pkg.id,
+                })}
+            />
+        )
+    }
+
     return (
         <div
             data-testid="state-submission-form-page"
