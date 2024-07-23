@@ -7,9 +7,9 @@
         "precommit": "lint-staged",
         "start": "vite",
         "build": "tsc --noEmit && vite build",
-        "clean": "rm -rf node_modules && yarn cache clean",
+        "clean": "rm -rf node_modules && pnpm store prune",
         "format": "prettier --write src/**/*.ts{,x}",
-        "lint": "tsc --noEmit && eslint src/ --max-warnings=0 && yarn lint:style",
+        "lint": "tsc --noEmit && eslint src/ --max-warnings=0 && pnpm lint:style",
         "lint:style": "npx stylelint '**/*.scss'",
         "test": "TZ=UTC vitest",
         "test:coverage": "TZ=UTC vitest --coverage",
@@ -25,7 +25,7 @@
             "prettier --write"
         ],
         "**/*.scss": [
-            "yarn lint:style",
+            "pnpm lint:style",
             "prettier --write"
         ]
     },
@@ -149,7 +149,7 @@
         "@types/react-test-renderer": "^18.0.0",
         "@types/url-parse": "^1.4.3",
         "@types/uuid": "^9.0.0",
-        "@typescript-eslint/eslint-plugin": "^5.6.0",
+        "@typescript-eslint/eslint-plugin": "^6.21.0",
         "@typescript-eslint/parser": "^6.5.0",
         "@vitest/coverage-v8": "^1.6.0",
         "@vitest/ui": "^1.6.0",
@@ -178,7 +178,6 @@
         "vite-plugin-graphql-loader": "^3.0.1",
         "vite-plugin-node-polyfills": "^0.22.0",
         "vite-plugin-svgr": "^4.2.0",
-        "vitest": "^1.6.0",
-        "yarn": "^1.22.19"
+        "vitest": "^1.6.0"
     }
 }

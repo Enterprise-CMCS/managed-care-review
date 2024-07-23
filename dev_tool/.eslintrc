@@ -47,5 +47,6 @@
             }
         ]
     },
-    "overrides": []
+    "overrides": [],
+    "ignorePatterns": ["**/esbuild.config.js"],
 }

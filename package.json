@@ -5,29 +5,23 @@
     "description": "",
     "main": "index.js",
     "private": true,
-    "workspaces": {
-        "packages": [
-            "services/*",
-            "dev_tool",
-            "scripts"
-        ]
-    },
     "directories": {
         "test": "services/cypress"
     },
     "scripts": {
+        "preinstall": "npx only-allow pnpm",
         "clean": "npx lerna clean",
-        "format": "yarn prettier --write",
+        "format": "pnpm run prettier --write",
         "prettier": "prettier --ignore-path .gitignore \"**/*.+(ts|tsx|json)\"",
         "test:coverage": "npx lerna run test:coverage --scope=app-web --scope=app-api --scope=cypress",
         "pretest:coverage": "rm -rf .nyc_output",
-        "posttest:coverage": "yarn run report:combined",
+        "posttest:coverage": "pnpm run report:combined",
         "mkdir:reports": "mkdir -p reports",
-        "precopy:reports": "yarn run mkdir:reports",
+        "precopy:reports": "pnpm run mkdir:reports",
         "copy:reports": "cp ./coverage-cypress/coverage-final.json ./reports/from-cypress.json && cp ./services/app-web/coverage/coverage-final.json ./reports/from-jest.json && cp ./services/app-api/coverage/coverage-final.json ./reports/from-api.json",
-        "precombine:reports": "yarn run copy:reports && mkdir -p .nyc_output",
+        "precombine:reports": "pnpm run copy:reports && mkdir -p .nyc_output",
         "combine:reports": "npx nyc merge reports && mv coverage.json .nyc_output/out.json",
-        "prereport:combined": "yarn run combine:reports",
+        "prereport:combined": "pnpm run combine:reports",
         "report:combined": "mkdir -p coverage-all && npx nyc report --reporter lcov --reporter text --reporter json-summary --report-dir coverage-all"
     },
     "repository": {

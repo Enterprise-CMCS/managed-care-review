@@ -8,7 +8,7 @@
     "license": "CC0-1.0",
     "scripts": {
         "clean": "lerna clean",
-        "format": "yarn prettier --write",
+        "format": "pnpm prettier --write",
         "prettier": "prettier --ignore-path .gitignore \"**/*.+(ts|tsx|json)\"",
         "cypress:open": "../../node_modules/.bin/cypress open --env AUTH_MODE=LOCAL",
         "test:coverage": "rm -rf ../../.nyc_output && ../../node_modules/.bin/cypress run --env AUTH_MODE=LOCAL --headless --browser chrome"

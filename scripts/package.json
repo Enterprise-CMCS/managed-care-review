@@ -7,7 +7,7 @@
     "private": true,
     "scripts": {
         "precommit": "lint-staged",
-        "clean": "rm -rf node_modules && yarn cache clean",
+        "clean": "rm -rf node_modules && pnpm store prune",
         "lint": "tsc --noEmit && eslint",
         "build": "tsc",
         "build:ci-scripts": "tsc"

@@ -22,37 +22,37 @@ Familiarizing yourself with these dependencies will help you navigate the codeba
 
 In the project directory, you can run:
 
-### `yarn clean`
+### `pnpm clean`
 
-Clear yarn cache and reinstall.
+Clear pnpm cache and reinstall.
 
-### `yarn start`
+### `pnpm start`
 
 Runs the app in the development mode.\
 Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 
-### `yarn test`
+### `pnpm test`
 
 Launches the test runner in the interactive watch mode.\
 See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
 
-### `yarn test: once`
+### `pnpm test: once`
 
 Launches the test runner and runs through once,running all tests serially in the current process. Used in CI.
 
-### `yarn test:update`
+### `pnpm test:update`
 
 Override failing snapshot tests and update existing snapshot tests with new markup. Use sparingly - may be a valid failure.
 
-### `yarn test:coverage`
+### `pnpm test:coverage`
 
 Generate code coverage.
 
-### `yarn test:clear`
+### `pnpm test:clear`
 
 Clears jest cache, this can resolve false negatives in unit tests.
 
-## `yarn storybook`
+## `pnpm storybook`
 
 Run storybook.
 Open [http://localhost:6000](http://localhost:6000) to view in the browser.
@@ -69,8 +69,8 @@ Open [http://localhost:6000](http://localhost:6000) to view in the browser.
 
 ### SCSS files
 
-- Use modular styles. This means creating`<component>.module.scss` or `<component>.module.css` files in your component folders.
-- Read [how to styles](/docs/technical-design/howto-style-css-scss.md) documentation.
+-   Use modular styles. This means creating`<component>.module.scss` or `<component>.module.css` files in your component folders.
+-   Read [how to styles](/docs/technical-design/howto-style-css-scss.md) documentation.
 
 ### `/gen`
 

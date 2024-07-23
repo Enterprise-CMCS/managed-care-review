@@ -15,7 +15,7 @@ Managed Care Review is an application that accepts Managed Care contract and rat
 
 -   [ ] Node.js
 -   [ ] Serverless - Get help installing it here: [Serverless Getting Started page](https://www.serverless.com/framework/docs/providers/aws/guide/installation/). Learn more about serverless from the [Serverless Stack tutorial](https://serverless-stack.com/).
--   [ ] Yarn - In order to install dependencies, you need to [install yarn](https://classic.yarnpkg.com/en/docs/install/).
+-   [ ] Yarn - In order to install dependencies, you need to [install pnpm](https://pnpm.io/installation).
 -   [ ] AWS Account - You'll need an AWS account with appropriate IAM permissions (admin recommended) to deploy this app in Amazon.
 -   [ ] NVM - If you are on a Mac using nvm, you should be able to install all the dependencies as [described below](#installing-node-and-dependencies).
 -   [ ] envrc - Used to set environment variables locally
@@ -31,8 +31,8 @@ To get the tools needed for local development, you can run:
 
 ```bash
 brew tap yoheimuta/protolint
-brew install yarn lerna direnv shellcheck protolint detect-secrets
-yarn husky install
+brew install pnpm lerna direnv shellcheck protolint detect-secrets
+pnpm husky install
 ```
 
 We use [direnv](https://direnv.net/) to automatically set required environment variables when you enter this directory or its children. This will be used when running the application locally, or when using tools like the `aws` or `serverless` CLIs locally.
@@ -83,8 +83,8 @@ which node    # should return something like /Users/YOURUSER/.nvm/versions/node/
 nvm install
 nvm use
 
-# install yarn for dependency manage
-brew install yarn
+# install pnpm for dependency manage
+Please see: https://pnpm.io/installation
 
 # run the app and storybook
 ./dev local

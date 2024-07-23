@@ -1,5 +1,5 @@
 import { spawnSync } from 'child_process'
-import request from 'request'
+import axios from 'axios'
 
 // once lets you wrap a function so that if you call the wrapper multiple times the
 // wrapped function is only called once. This gives the ability to define a function as being
@@ -24,14 +24,9 @@ export function requireBinary(checkCmd: string[], helpText: string) {
 }
 
 export function checkURLIsUp(url: string): Promise<boolean> {
-    return new Promise<boolean>((resolve) => {
-        request(url, {}, (err) => {
-            if (err) {
-                resolve(false)
-            }
-            resolve(true)
-        })
-    })
+    return axios.get(url, { timeout: 5000 })  // Add a timeout to prevent long waits
+        .then(() => true)
+        .catch(() => false)
 }
 
 export async function checkDockerInstalledAndRunning() {

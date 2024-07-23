@@ -576,6 +576,9 @@ describe('submitRate', () => {
         // console.log('FETCEDRAT', JSON.stringify(fetchedRate, null, 2))
 
         const subs = fetchedRate.packageSubmissions
+        if (!subs) {
+            throw new Error('subs is null or undefined')
+        }
         expect(subs).toHaveLength(3)
 
         expect(subs[0].submitInfo.updatedReason).toBe('final submit')
