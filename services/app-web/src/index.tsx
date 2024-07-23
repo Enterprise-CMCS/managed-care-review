@@ -60,7 +60,7 @@ Amplify.configure({
     },
 })
 
-const authMode = import.meta.env.VITE_APP_AUTH_MODE
+const authMode: string = import.meta.env.VITE_APP_AUTH_MODE
 assertIsAuthMode(authMode)
 const cache = new InMemoryCache({
     typePolicies: {
@@ -152,9 +152,18 @@ if (ldClientId === undefined) {
         clientSideID: ldClientId,
         options: {
             bootstrap: 'localStorage',
-            baseUrl: 'https://clientsdk.launchdarkly.us',
-            streamUrl: 'https://clientstream.launchdarkly.us',
-            eventsUrl: 'https://events.launchdarkly.us',
+            baseUrl:
+                authMode === 'LOCAL'
+                    ? '/ld-clientsdk'
+                    : 'https://clientsdk.launchdarkly.us',
+            streamUrl:
+                authMode === 'LOCAL'
+                    ? '/ld-clientstream'
+                    : 'https://clientstream.launchdarkly.us',
+            eventsUrl:
+                authMode === 'LOCAL'
+                    ? '/ld-events'
+                    : 'https://events.launchdarkly.us',
         },
     })
 
