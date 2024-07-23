@@ -169,6 +169,7 @@
         "react-test-renderer": "^18.2.0",
         "serverless": "^3.39.0",
         "serverless-cf-invalidate-proxy": "^1.0.1",
+        "serverless-plugin-scripts": "^1.0.2",
         "serverless-s3-sync": "^3.0.0",
         "serverless-stack-termination-protection": "^2.0.2",
         "stylelint": "^16.1.0",
@@ -178,7 +179,6 @@
         "vite-plugin-node-polyfills": "^0.22.0",
         "vite-plugin-svgr": "^4.2.0",
         "vitest": "^1.6.0",
-        "webpack": "^5.72.0",
         "yarn": "^1.22.19"
     }
 }

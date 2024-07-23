@@ -3,7 +3,7 @@ import { NewS3UploadsClient } from '../deps/s3'
 import { NewLambdaInfectedFilesLister } from './avAuditFiles'
 import { auditBucket } from '../lib/auditUploads'
 
-async function avAuditUploads(_event: unknown, _context: Context) {
+async function main(_event: unknown, _context: Context) {
     console.info('-----Start Audit Uploads function-----')
 
     // Check on the values for our required config
@@ -45,4 +45,4 @@ async function avAuditUploads(_event: unknown, _context: Context) {
     return 'FILES SCANNED'
 }
 
-export { avAuditUploads }
+module.exports = { main }

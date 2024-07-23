@@ -26,7 +26,9 @@ type listInfectedFilesFn = (
 // NewLambdaInfectedFilesLister returns an async function that will invoke a lambda
 // to scan a set of files for viruses. This is meant to be used in an AWS environment and
 // is called by the avAuditUploads lambda when running there.
-function NewLambdaInfectedFilesLister(lambdaName: string): listInfectedFilesFn {
+export function NewLambdaInfectedFilesLister(
+    lambdaName: string
+): listInfectedFilesFn {
     return async (input: ScanFilesInput): Promise<ScanFilesOutput | Error> => {
         const lambdaClient = new LambdaClient({})
 
@@ -74,7 +76,7 @@ function NewLambdaInfectedFilesLister(lambdaName: string): listInfectedFilesFn {
 // NewLocalInfectedFilesLister runs scanFiles locally in the same format as we call
 // the lambda with. This is meant to be used locally in tests, side stepping the need for
 // invoking an actual lambda to do the same work.
-function NewLocalInfectedFilesLister(
+export function NewLocalInfectedFilesLister(
     s3Client: S3UploadsClient,
     clamAV: ClamAV
 ): listInfectedFilesFn {
@@ -104,7 +106,7 @@ function NewLocalInfectedFilesLister(
 /*
  * avAuditFiles is a lambda that returns a list of all the given files in S3 that fail antivirus scanning
  */
-async function avAuditFiles(
+async function main(
     event: ScanFilesInput,
     _context: Context
 ): Promise<ScanFilesOutput> {
@@ -153,11 +155,4 @@ async function avAuditFiles(
     }
 }
 
-export {
-    avAuditFiles,
-    ScanFilesInput,
-    ScanFilesOutput,
-    listInfectedFilesFn,
-    NewLocalInfectedFilesLister,
-    NewLambdaInfectedFilesLister,
-}
+module.exports = { main }
