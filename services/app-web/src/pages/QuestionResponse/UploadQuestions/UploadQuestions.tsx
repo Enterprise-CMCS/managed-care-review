@@ -27,13 +27,14 @@ import { usePage } from '../../../contexts/PageContext'
 import { Breadcrumbs } from '../../../components/Breadcrumbs/Breadcrumbs'
 import { createQuestionWrapper } from '../../../gqlHelpers/mutationWrappersForUserFriendlyErrors'
 import { RoutesRecord } from '../../../constants'
+import { GenericErrorPage } from '../../Errors/GenericErrorPage'
 
 export const UploadQuestions = () => {
     // router context
     // eslint-disable-next-line @typescript-eslint/no-use-before-define
     const { division, id } = useParams<{ division: string; id: string }>()
     const navigate = useNavigate()
-    const { packageName } = useOutletContext<SideNavOutletContextType>()
+    const { packageName, pkg } = useOutletContext<SideNavOutletContextType>()
 
     // api
     const [createQuestion, { loading: apiLoading, error: apiError }] =
@@ -45,6 +46,10 @@ export const UploadQuestions = () => {
     useEffect(() => {
         updateHeading({ customHeading: `${packageName} Add questions` })
     }, [packageName, updateHeading])
+
+    if (pkg.status === 'DRAFT') {
+        return <GenericErrorPage />
+    }
 
     // component specific support
     const { handleDeleteFile, handleUploadFile, handleScanFile } = useS3()
