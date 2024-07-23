@@ -6,35 +6,32 @@ import {
     ModalToggleButton,
 } from '@trussworks/react-uswds'
 import React, { useEffect, useRef, useState } from 'react'
-import { useAuth } from '../../../contexts/AuthContext'
-import { ContractDetailsSummarySection } from '../../StateSubmission/ReviewSubmit/ContractDetailsSummarySection'
-import { ContactsSummarySection } from '../../StateSubmission/ReviewSubmit/ContactsSummarySection'
-import { RateDetailsSummarySection } from '../../StateSubmission/ReviewSubmit/RateDetailsSummarySection'
-import { SubmissionTypeSummarySection } from '../../StateSubmission/ReviewSubmit/SubmissionTypeSummarySection'
+import { useAuth } from '../../contexts/AuthContext'
+import { ContractDetailsSummarySection } from '../StateSubmission/ReviewSubmit/ContractDetailsSummarySection'
+import { ContactsSummarySection } from '../StateSubmission/ReviewSubmit/ContactsSummarySection'
+import { RateDetailsSummarySection } from '../StateSubmission/ReviewSubmit/RateDetailsSummarySection'
+import { SubmissionTypeSummarySection } from '../StateSubmission/ReviewSubmit/SubmissionTypeSummarySection'
 import {
     SubmissionUnlockedBanner,
     SubmissionUpdatedBanner,
     DocumentWarningBanner,
     NavLinkWithLogging,
     LinkWithLogging,
-} from '../../../components'
-import { Loading } from '../../../components'
-import { usePage } from '../../../contexts/PageContext'
-import {
-    useFetchContractQuery,
-    UpdateInformation,
-} from '../../../gen/gqlClient'
-import { ErrorForbiddenPage } from '../../Errors/ErrorForbiddenPage'
-import { Error404 } from '../../Errors/Error404Page'
-import { GenericErrorPage } from '../../Errors/GenericErrorPage'
-import styles from '../SubmissionSummary.module.scss'
-import { ChangeHistory } from '../../../components/ChangeHistory'
-import { UnlockSubmitModal } from '../../../components/Modal'
+} from '../../components'
+import { Loading } from '../../components'
+import { usePage } from '../../contexts/PageContext'
+import { useFetchContractQuery, UpdateInformation } from '../../gen/gqlClient'
+import { ErrorForbiddenPage } from '../Errors/ErrorForbiddenPage'
+import { Error404 } from '../Errors/Error404Page'
+import { GenericErrorPage } from '../Errors/GenericErrorPage'
+import styles from './SubmissionSummary.module.scss'
+import { ChangeHistory } from '../../components/ChangeHistory'
+import { UnlockSubmitModal } from '../../components/Modal'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
-import { featureFlags } from '../../../common-code/featureFlags'
-import { RoutesRecord } from '../../../constants'
-import { useRouteParams } from '../../../hooks'
-import { getVisibleLatestContractFormData } from '../../../gqlHelpers/contractsAndRates'
+import { featureFlags } from '../../common-code/featureFlags'
+import { RoutesRecord } from '../../constants'
+import { useRouteParams } from '../../hooks'
+import { getVisibleLatestContractFormData } from '../../gqlHelpers/contractsAndRates'
 import { generatePath, Navigate } from 'react-router-dom'
 
 function UnlockModalButton({
