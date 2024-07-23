@@ -28,6 +28,7 @@ import { SideNavOutletContextType } from '../../SubmissionSideNav/SubmissionSide
 import { Breadcrumbs } from '../../../components/Breadcrumbs/Breadcrumbs'
 import { createResponseWrapper } from '../../../gqlHelpers/mutationWrappersForUserFriendlyErrors'
 import { RoutesRecord } from '../../../constants'
+import { GenericErrorPage } from '../../Errors/GenericErrorPage'
 
 export const UploadResponse = () => {
     // router context
@@ -46,10 +47,14 @@ export const UploadResponse = () => {
     // page level state
     const [shouldValidate, setShouldValidate] = React.useState(false)
     const { updateHeading } = usePage()
-    const { packageName } = useOutletContext<SideNavOutletContextType>()
+    const { packageName, pkg } = useOutletContext<SideNavOutletContextType>()
     useEffect(() => {
         updateHeading({ customHeading: packageName })
     }, [packageName, updateHeading])
+
+    if (pkg.status === 'DRAFT') {
+        return <GenericErrorPage />
+    }
 
     // component specific support
     const { handleDeleteFile, handleUploadFile, handleScanFile } = useS3()
