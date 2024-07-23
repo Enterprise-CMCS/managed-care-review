@@ -43,7 +43,7 @@ import classnames from 'classnames'
 export type RateDetailsSummarySectionProps = {
     contract: Contract
     contractRev?: ContractRevision
-    rateRevisons?: RateRevisionWithIsLinked[]
+    rateRevisions?: RateRevisionWithIsLinked[]
     editNavigateTo?: string
     isCMSUser?: boolean
     submissionName: string
@@ -82,7 +82,7 @@ export function renderDownloadButton(
 
 export const RateDetailsSummarySection = ({
     contract,
-    rateRevisons,
+    rateRevisions,
     editNavigateTo,
     submissionName,
     statePrograms,
@@ -100,8 +100,8 @@ export const RateDetailsSummarySection = ({
     const isPreviousSubmission = usePreviousSubmission()
     const isInitialSubmission = contract.packageSubmissions.length === 1
 
-    const rateRevs = rateRevisons
-        ? rateRevisons
+    const rateRevs = rateRevisions
+        ? rateRevisions
         : getVisibleLatestRateRevisions(contract, isEditing)
 
     // Calculate last submitted data for document upload tables

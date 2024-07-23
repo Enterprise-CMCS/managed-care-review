@@ -1,19 +1,18 @@
 import { GridContainer } from '@trussworks/react-uswds'
 import React, { useEffect, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
-import { Loading } from '../../components'
+import { useParams } from 'react-router-dom'
 import { usePage } from '../../contexts/PageContext'
 import { useFetchRateQuery } from '../../gen/gqlClient'
 import styles from '../SubmissionSummary/SubmissionSummary.module.scss'
-import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import { useAuth } from '../../contexts/AuthContext'
-import { Error404 } from '../Errors/Error404Page'
+import {
+    ErrorOrLoadingPage,
+} from '../../pages/StateSubmission/ErrorOrLoadingPage'
 
 export const ReplaceRate = (): React.ReactElement => {
     // Page level state
     const { loggedInUser } = useAuth()
     const { updateHeading } = usePage()
-    const navigate = useNavigate()
     const [rateName, setRateName] = useState<string | undefined>(undefined)
     const { rateID } = useParams()
     if (!rateID) {
@@ -36,24 +35,17 @@ export const ReplaceRate = (): React.ReactElement => {
     const currentRateRev = rate?.revisions[0]
 
     if (loading) {
-        return (
-            <GridContainer>
-                <Loading />
-            </GridContainer>
-        )
+        return <ErrorOrLoadingPage state="LOADING" />
     } else if (error || !rate || !currentRateRev?.formData) {
         if (error?.graphQLErrors[0]?.extensions?.code === 'NOT_FOUND') {
-            return <Error404 />
+            return <ErrorOrLoadingPage state="NOT_FOUND" />
+        } else if (loggedInUser?.role != 'ADMIN_USER') {
+            return <ErrorOrLoadingPage state="FORBIDDEN" />
         } else {
-            return <GenericErrorPage />
+            return <ErrorOrLoadingPage state="GENERIC_ERROR" />
         }
     }
-
-    // Redirecting non admin users to rate page
-    if (loggedInUser?.role != 'ADMIN_USER') {
-        navigate(`/rates/${rateID}`)
-    }
-
+    
     if (
         rateName !== currentRateRev.formData.rateCertificationName &&
         currentRateRev.formData.rateCertificationName

@@ -255,6 +255,12 @@ fragment packageSubmissionsFragmentForFetch on ContractPackageSubmission {
     }
     rateRevisions {
         ...rateRevisionFragmentForFetchContract
+        rate {
+            ...rateFields
+            revisions {
+                ...rateRevisionFragmentForFetchContract
+            }
+        }
     }
 }
 
