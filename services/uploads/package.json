@@ -39,7 +39,7 @@
         "serverless-offline": "^13.3.2",
         "serverless-offline-ssm": "^6.2.0",
         "serverless-s3-bucket-helper": "CMSgov/serverless-s3-bucket-helper",
-        "serverless-s3-local": "^0.7.1",
+        "serverless-s3-local": "^0.8.4",
         "serverless-stack-termination-protection": "^2.0.2",
         "ts-jest": "^29.1.1",
         "ts-loader": "^9.2.8"
