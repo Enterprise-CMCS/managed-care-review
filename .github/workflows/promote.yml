@@ -74,7 +74,7 @@ jobs:
           DATABASE_URL: postgresql://postgres:shhhsecret@localhost:5432/postgres?schema=public&connection_limit=5 #pragma: allowlist secret
           NODE_OPTIONS: --max_old_space_size=6000
         working-directory: services/app-api
-        run: yarn test:coverage
+        run: pnpm test:coverage
 
       - name: Web Unit Tests
         env:
@@ -83,7 +83,7 @@ jobs:
           DATABASE_URL: postgresql://postgres:shhhsecret@localhost:5432/postgres?schema=public&connection_limit=5 #pragma: allowlist secret
           NODE_OPTIONS: --max_old_space_size=6000
         working-directory: services/app-web
-        run: yarn test:coverage
+        run: pnpm test:coverage
 
       - name: publish code coverage
         uses: paambaati/codeclimate-action@v8.0.0
@@ -111,16 +111,16 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version-file: '.nvmrc'
-          cache: 'yarn'
+          cache: 'pnpm'
 
-      - name: Get yarn cache directory path
+      - name: Get pnpm cache directory path
         shell: bash
-        id: yarn-cache-dir-path
-        run: echo "::set-output name=dir::$(yarn cache dir)"
+        id: pnpm-cache-dir-path
+        run: echo "::set-output name=dir::$(pnpm cache dir)"
 
       - name: Install packages
         working-directory: services/app-api
-        run: PRISMA_CLI_BINARY_TARGETS=rhel-openssl-3.0.x yarn install --prefer-offline --frozen-lockfile --cache-folder ${{ steps.yarn-cache-dir-path.outputs.dir }}
+        run: PRISMA_CLI_BINARY_TARGETS=rhel-openssl-3.0.x pnpm install --prefer-offline --frozen-lockfile --cache-folder ${{ steps.pnpm-cache-dir-path.outputs.dir }}
 
       - name: Generate protos
         run: npx lerna run generate --scope=app-proto
@@ -128,7 +128,7 @@ jobs:
       # Generate Prisma Client and binary that can run in a lambda environment
       - name: Prepare prisma client
         working-directory: services/app-api
-        run: PRISMA_CLI_BINARY_TARGETS=rhel-openssl-3.0.x yarn prisma generate
+        run: PRISMA_CLI_BINARY_TARGETS=rhel-openssl-3.0.x pnpm prisma generate
 
       - name: Prepare "@prisma/client" lambda layer
         working-directory: services/app-api
@@ -154,7 +154,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version-file: '.nvmrc'
-          cache: yarn
+          cache: pnpm
 
       - name: Prepare ClamAV layer
         working-directory: services/uploads/src/avLayer

@@ -4,22 +4,35 @@ description: 'Runs common tasks for setting up the build environment in GHA'
 runs:
   using: 'composite'
   steps:
-    - name: Get yarn cache directory path
-      shell: bash
-      id: yarn-cache-dir-path
-      run: echo "::set-output name=dir::$(yarn cache dir)"
-
     - uses: actions/setup-node@v4
       with:
         node-version-file: '.nvmrc'
-        cache: 'yarn'
 
-    - name: Install yarn package
+    - uses: pnpm/action-setup@v4
+      name: Install pnpm
+      with:
+        version: 9
+        run_install: false
+
+    - name: Get pnpm store directory
       shell: bash
-      id: yarn-install
-      run: yarn install --prefer-offline --frozen-lockfile --cache-folder ${{ steps.yarn-cache-dir-path.outputs.dir }}
+      id: pnpm-cache
+      run: |
+        echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
 
-    - name: set path
+    - uses: actions/cache@v3
+      name: Setup pnpm cache
+      with:
+        path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+        key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+        restore-keys: |
+          ${{ runner.os }}-pnpm-store-
+
+    - name: Install dependencies
+      shell: bash
+      run: pnpm install --frozen-lockfile
+
+    - name: Set PATH for project binaries
       shell: bash
       run: |
-        echo "PATH=$(pwd)/node_modules/.bin/:$PATH" >> $GITHUB_ENV
+        echo "$(pwd)/node_modules/.bin" >> $GITHUB_PATH
