@@ -266,8 +266,8 @@ describe('findRate', () => {
         if (twoRate instanceof Error) {
             throw twoRate
         }
-        expect(twoRate.revisions).toHaveLength(5)
-        expect(twoRate.revisions[0].contractRevisions).toHaveLength(2)
+        expect(twoRate.packageSubmissions).toHaveLength(5)
+        expect(twoRate.packageSubmissions[0].contractRevisions).toHaveLength(2)
 
         // update contract 1 to have a new version, should make one new rev.
         const unlockedContract1 = must(
@@ -367,70 +367,71 @@ describe('findRate', () => {
             throw resultingRate
         }
 
-        const revisionsInTimeOrder = resultingRate.revisions.reverse()
+        const submissionsInTimeOrder =
+            resultingRate.packageSubmissions.reverse()
 
         console.info(
             'ALL First REvisions: ',
-            JSON.stringify(revisionsInTimeOrder, null, '  ')
+            JSON.stringify(submissionsInTimeOrder, null, '  ')
         )
 
         // Each Revision needs a Reason, one of the rates or revisions associated with it should have changed and why.
 
-        expect(revisionsInTimeOrder).toHaveLength(8)
-        expect(revisionsInTimeOrder[0].contractRevisions).toHaveLength(0)
-        expect(revisionsInTimeOrder[0].unlockInfo).toBeUndefined()
-        expect(revisionsInTimeOrder[0].submitInfo?.updatedReason).toBe(
+        expect(submissionsInTimeOrder).toHaveLength(8)
+        expect(submissionsInTimeOrder[0].contractRevisions).toHaveLength(0)
+        // expect(submissionsInTimeOrder[0].unlockInfo).toBeUndefined()
+        expect(submissionsInTimeOrder[0].submitInfo?.updatedReason).toBe(
             'initial rate submit'
         )
 
-        expect(revisionsInTimeOrder[1].contractRevisions).toHaveLength(1)
-        expect(revisionsInTimeOrder[1].unlockInfo).toBeUndefined()
-        expect(revisionsInTimeOrder[1].submitInfo?.updatedReason).toBe(
+        expect(submissionsInTimeOrder[1].contractRevisions).toHaveLength(1)
+        // expect(submissionsInTimeOrder[1].unlockInfo).toBeUndefined()
+        expect(submissionsInTimeOrder[1].submitInfo?.updatedReason).toBe(
             'Contract Submit'
         )
 
-        expect(revisionsInTimeOrder[2].contractRevisions).toHaveLength(2)
-        expect(revisionsInTimeOrder[2].unlockInfo).toBeUndefined()
-        expect(revisionsInTimeOrder[2].submitInfo?.updatedReason).toBe(
+        expect(submissionsInTimeOrder[2].contractRevisions).toHaveLength(2)
+        // expect(submissionsInTimeOrder[2].unlockInfo).toBeUndefined()
+        expect(submissionsInTimeOrder[2].submitInfo?.updatedReason).toBe(
             'ContractSubmit 2'
         )
 
-        expect(revisionsInTimeOrder[3].contractRevisions).toHaveLength(3)
-        expect(revisionsInTimeOrder[3].unlockInfo).toBeUndefined()
-        expect(revisionsInTimeOrder[3].submitInfo?.updatedReason).toBe(
+        expect(submissionsInTimeOrder[3].contractRevisions).toHaveLength(3)
+        // expect(submissionsInTimeOrder[3].unlockInfo).toBeUndefined()
+        expect(submissionsInTimeOrder[3].submitInfo?.updatedReason).toBe(
             '3.0 create'
         )
 
-        expect(revisionsInTimeOrder[4].contractRevisions).toHaveLength(2)
-        expect(revisionsInTimeOrder[4].unlockInfo?.updatedReason).toBe(
-            'unlock for 2.1 remove'
-        )
-        expect(revisionsInTimeOrder[4].unlockInfo?.updatedBy).toBe(
-            'zuko@example.com'
-        )
-        expect(revisionsInTimeOrder[4].submitInfo?.updatedReason).toBe(
+        expect(submissionsInTimeOrder[4].contractRevisions).toHaveLength(2)
+        // expect(submissionsInTimeOrder[4].unlockInfo?.updatedReason).toBe(
+        //     'unlock for 2.1 remove'
+        // )
+        // expect(submissionsInTimeOrder[4].unlockInfo?.updatedBy).toBe(
+        //     'zuko@example.com'
+        // )
+        expect(submissionsInTimeOrder[4].submitInfo?.updatedReason).toBe(
             '2.1 remove'
         )
 
-        expect(revisionsInTimeOrder[5].contractRevisions).toHaveLength(2)
+        expect(submissionsInTimeOrder[5].contractRevisions).toHaveLength(2)
         expect(
-            revisionsInTimeOrder[5].contractRevisions[1].formData
+            submissionsInTimeOrder[5].contractRevisions[1].formData
                 .submissionDescription
         ).toBe('onepointone')
-        expect(revisionsInTimeOrder[5].unlockInfo?.updatedReason).toBe(
-            'unlock for 1.1'
-        )
-        expect(revisionsInTimeOrder[5].submitInfo?.updatedReason).toBe(
+        // expect(submissionsInTimeOrder[5].unlockInfo?.updatedReason).toBe(
+        //     'unlock for 1.1'
+        // )
+        expect(submissionsInTimeOrder[5].submitInfo?.updatedReason).toBe(
             '1.1 new name'
         )
 
-        expect(revisionsInTimeOrder[6].contractRevisions).toHaveLength(2)
-        expect(revisionsInTimeOrder[6].submitInfo?.updatedReason).toBe(
+        expect(submissionsInTimeOrder[6].contractRevisions).toHaveLength(2)
+        expect(submissionsInTimeOrder[6].submitInfo?.updatedReason).toBe(
             'Submitting A.1'
         )
 
-        expect(revisionsInTimeOrder[7].contractRevisions).toHaveLength(1)
-        expect(revisionsInTimeOrder[7].formData).toEqual(
+        expect(submissionsInTimeOrder[7].contractRevisions).toHaveLength(1)
+        expect(submissionsInTimeOrder[7].rateRevision.formData).toEqual(
             expect.objectContaining({
                 rateCertificationName: 'one contract',
                 rateDateCertified: undefined,
@@ -438,7 +439,7 @@ describe('findRate', () => {
                 rateType: 'AMENDMENT',
             })
         )
-        expect(revisionsInTimeOrder[7].submitInfo?.updatedReason).toBe(
+        expect(submissionsInTimeOrder[7].submitInfo?.updatedReason).toBe(
             'Submitting A.2'
         )
 

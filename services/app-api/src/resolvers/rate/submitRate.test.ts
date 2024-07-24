@@ -312,13 +312,13 @@ describe('submitRate', () => {
         // 4. make sure both rates return contract C in their list of revisions
         const rateOne = await fetchTestRateById(stateServer, OneID)
 
-        expect(rateOne.revisions).toHaveLength(1)
-        expect(rateOne.revisions[0].contractRevisions).toHaveLength(2)
+        expect(rateOne.packageSubmissions).toHaveLength(1)
+        expect(rateOne.packageSubmissions[0].contractRevisions).toHaveLength(2)
 
         const rateTwo = await fetchTestRateById(stateServer, TwoID)
 
-        expect(rateTwo.revisions).toHaveLength(1)
-        expect(rateTwo.revisions[0].contractRevisions).toHaveLength(2)
+        expect(rateTwo.packageSubmissions).toHaveLength(1)
+        expect(rateTwo.packageSubmissions[0].contractRevisions).toHaveLength(2)
 
         // 5. unlock and resubmit A
         await unlockTestHealthPlanPackage(
@@ -329,8 +329,10 @@ describe('submitRate', () => {
 
         const unlockedRateOne = await fetchTestRateById(stateServer, OneID)
 
-        expect(unlockedRateOne.revisions).toHaveLength(1)
-        expect(unlockedRateOne.revisions[0].contractRevisions).toHaveLength(2)
+        expect(unlockedRateOne.packageSubmissions).toHaveLength(1)
+        expect(
+            unlockedRateOne.packageSubmissions[0].contractRevisions
+        ).toHaveLength(2)
 
         await submitTestContract(
             stateServer,
@@ -341,17 +343,17 @@ describe('submitRate', () => {
         // everything should have the latest
         const resubmittedRateOne = await fetchTestRateById(stateServer, OneID)
 
-        expect(resubmittedRateOne.revisions).toHaveLength(2)
-        expect(resubmittedRateOne.revisions[0].contractRevisions).toHaveLength(
-            2
-        )
+        expect(resubmittedRateOne.packageSubmissions).toHaveLength(2)
+        expect(
+            resubmittedRateOne.packageSubmissions[0].contractRevisions
+        ).toHaveLength(2)
 
         const postResubmitRateTwo = await fetchTestRateById(stateServer, TwoID)
 
-        expect(postResubmitRateTwo.revisions).toHaveLength(1)
-        expect(postResubmitRateTwo.revisions[0].contractRevisions).toHaveLength(
-            2
-        )
+        expect(postResubmitRateTwo.packageSubmissions).toHaveLength(1)
+        expect(
+            postResubmitRateTwo.packageSubmissions[0].contractRevisions
+        ).toHaveLength(2)
 
         const postSubmitC = await fetchTestContract(stateServer, contractC0.id)
 
