@@ -28,8 +28,9 @@ describe('withdrawAndReplaceRedundantRate', () => {
 
         // we are going to replace a rate on contract 1
         // first identify rate that is going to be withdrawn and rate that will be replacement
-        const toWithdrawRate = contract1.packageSubmissions[0].rateRevisions[0]
-        if (!toWithdrawRate) {
+        const withdrawnRateID =
+            contract1.packageSubmissions[0].rateRevisions[0].rateID
+        if (!withdrawnRateID) {
             throw Error('Not getting expected data for contract with rates')
         }
 
@@ -44,7 +45,7 @@ describe('withdrawAndReplaceRedundantRate', () => {
             contractID: contract1.id,
             replaceReason,
             replacementRateID: replacementRate.id,
-            withdrawnRateID: toWithdrawRate.id,
+            withdrawnRateID,
         })
 
         const refetchContract1 = await fetchTestContract(
@@ -73,7 +74,7 @@ describe('withdrawAndReplaceRedundantRate', () => {
         // Check that rate data is correct for latest submission
         expect(
             refetchContract1.packageSubmissions[0].rateRevisions[0].rateID
-        ).not.toBe(toWithdrawRate.id)
+        ).not.toBe(withdrawnRateID)
         expect(
             refetchContract1.packageSubmissions[0].rateRevisions[0].rateID
         ).toBe(replacementRate.id)

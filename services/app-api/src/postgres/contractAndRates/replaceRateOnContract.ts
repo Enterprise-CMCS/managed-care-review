@@ -64,9 +64,22 @@ async function replaceRateOnContractInsideTransaction(
 
     // prepare to update contract
     const previousRates = unlockResult.draftRates
-    const withdrawnRatePosition = previousRates
+
+    const withdrawnRateIndex = previousRates
         .map((rate) => rate.id)
         .indexOf(withdrawnRateID)
+
+    if (withdrawnRateIndex === -1) {
+        return new Error(
+            'UserInputError: withdrawnRateID does not map to a current rate on this contract'
+        )
+    }
+
+    if (previousRates[withdrawnRateIndex].parentContractID !== contractID) {
+        return new Error(
+            'UserInputError: withdrawnRateID points to an already linked rate. Only child rates can be withdrawn.'
+        )
+    }
     const updateRates: UpdateDraftContractRatesArgsType['rateUpdates']['update'] =
         []
     const linkRates: UpdateDraftContractRatesArgsType['rateUpdates']['link'] =
@@ -80,7 +93,7 @@ async function replaceRateOnContractInsideTransaction(
         if (rate.parentContractID !== contractID) {
             linkRates.push({
                 rateID: rate.id,
-                ratePosition: idx,
+                ratePosition: idx + 1,
             })
         } else {
             // keep any existing child rates
@@ -88,14 +101,14 @@ async function replaceRateOnContractInsideTransaction(
                 rateID: rate.id,
                 formData:
                     rate.packageSubmissions[0].contractRevisions[0].formData,
-                ratePosition: idx,
+                ratePosition: idx + 1,
             })
         }
     })
     // add in replacement rate with the ratePosition of the withdrawn rate
     linkRates.push({
         rateID: replacementRateID,
-        ratePosition: withdrawnRatePosition,
+        ratePosition: withdrawnRateIndex + 1,
     })
 
     // arrange data for update draft contract rates
@@ -120,6 +133,7 @@ async function replaceRateOnContractInsideTransaction(
             ],
         },
     }
+
     const updateResult = await updateDraftContractRatesInsideTransaction(
         tx,
         updateContractRatesArgs
