@@ -18,9 +18,10 @@ export type {
     TealiumViewDataObject,
     TealiumEvent,
     TealiumButtonEventObject,
-    TealiumInternalLinkEventObject,
+    TealiumLinkEventObject,
     TealiumEventObjectTypes,
     TealiumClientType,
     TealiumEnv,
-    ButtonEventStyle
+    ButtonEventStyle,
+    TealiumDropdownSelectionEventObject
 } from './tealium'

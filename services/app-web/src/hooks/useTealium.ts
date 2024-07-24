@@ -1,9 +1,9 @@
 import React from 'react'
 import type {
     TealiumButtonEventObject,
-    TealiumInternalLinkEventObject,
+    TealiumLinkEventObject,
+    TealiumDropdownSelectionEventObject
 } from '../tealium'
-import { recordJSException } from '../otelHelpers'
 import { TealiumContext } from '../contexts/TealiumContext';
 
 const useTealium = (): {
@@ -11,16 +11,21 @@ const useTealium = (): {
         tealiumData: Omit<TealiumButtonEventObject, 'event_name'>,
     ) => void,
     logInternalLinkEvent: (
-        tealiumData: TealiumInternalLinkEventObject,
+        tealiumData: TealiumLinkEventObject,
+    ) => void,
+    logDropdownSelectionEvent: (
+        tealiumData: Omit<TealiumDropdownSelectionEventObject, 'event_name'>
     ) => void
 } => {
     const context = React.useContext(TealiumContext)
 
     if (context === undefined) {
+        const warnNoTealium = () => console.warn('cannot log tealium event - Tealium Provider not loaded');
         return {
-            logButtonEvent: () => {console.warn('cannot logButtonEven - Tealium Provider not loaded')},
-            logInternalLinkEvent:  () => {console.warn('cannot logLinkEvent- Tealium Provider not loaded')}
-        }
+            logButtonEvent: warnNoTealium,
+            logInternalLinkEvent: warnNoTealium,
+            logDropdownSelectionEvent: warnNoTealium
+        };
     }
 
     const { pathname, loggedInUser, heading, logUserEvent } = context
@@ -37,16 +42,26 @@ const useTealium = (): {
     }
 
     const logInternalLinkEvent = (
-        tealiumData: TealiumInternalLinkEventObject
+        tealiumData: TealiumLinkEventObject
     ) => {
-        const linkData: TealiumInternalLinkEventObject = {
+        const linkData: TealiumLinkEventObject = {
             ...tealiumData,
             event_name: tealiumData.event_name ?? 'internal_link_clicked',
         }
         logUserEvent(linkData, pathname, loggedInUser, heading)
     }
 
-return { logButtonEvent, logInternalLinkEvent}
+    const logDropdownSelectionEvent = (
+        tealiumData: Omit<TealiumDropdownSelectionEventObject, 'event_name'>
+    ) => {
+        const linkData: TealiumDropdownSelectionEventObject = {
+            ...tealiumData,
+            event_name: 'dropdown_selection',
+        }
+        logUserEvent(linkData, pathname, loggedInUser, heading)
+    }
+
+    return { logButtonEvent, logInternalLinkEvent, logDropdownSelectionEvent }
 }
 
 export { useTealium }

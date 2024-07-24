@@ -10,6 +10,25 @@ import {recordJSException} from '../otelHelpers';
 import { TEALIUM_CONTENT_TYPE_BY_ROUTE, TEALIUM_SUBSECTION_BY_ROUTE } from './constants';
 
 // TYPES
+
+type TealiumEvent =
+    | 'search'
+    | 'submission_view'
+    | 'user_login'
+    | 'user_logout'
+    | 'save_draft'
+    | 'button_engagement'
+    | 'internal_link_clicked'
+    | 'navigation_clicked'
+    | 'external_link_clicked'
+    | 'back_button'
+    | 'dropdown_selection'
+
+type TealiumEnv =
+    | 'prod'
+    | 'qa'
+    | 'dev'
+
 type TealiumDataObject = {
     content_language: string
     content_type: string
@@ -59,15 +78,22 @@ type TealiumButtonEventObject = {
     event_extension?: string
 } & Partial<TealiumDataObject>
 
+type TealiumDropdownSelectionEventObject = {
+    event_name: 'dropdown_selection'
+    heading?: string
+    text: string
+    link_type?: string
+} & Partial<TealiumDataObject>
+
 // Used for internal links and navigation links
-type TealiumInternalLinkEventObject = {
+type TealiumLinkEventObject = {
     event_name: 'internal_link_clicked' | "navigation_clicked" | "back_button"
     text: string
     link_url: string
     //link_type: string //currently not sending
     parent_component_heading?: string
     parent_component_type?: LinkEventParentComponentType | string
-}
+} & Partial<TealiumDataObject>
 
 type LinkEventParentComponentType =
     | 'card'
@@ -85,24 +111,8 @@ type TealiumViewDataObject = TealiumDataObject // event default to page_view in 
 
 type TealiumEventObjectTypes =
     | TealiumButtonEventObject
-    | TealiumInternalLinkEventObject
-
-type TealiumEvent =
-    | 'search'
-    | 'submission_view'
-    | 'user_login'
-    | 'user_logout'
-    | 'save_draft'
-    | 'button_engagement'
-    | 'internal_link_clicked'
-    | "navigation_clicked"
-    | "external_link_clicked"
-    | "back_button"
-
-type TealiumEnv =
-    | 'prod'
-    | 'qa'
-    | 'dev'
+    | TealiumLinkEventObject
+    | TealiumDropdownSelectionEventObject
 
 type TealiumClientType = {
     initializeTealium: () => void
@@ -177,7 +187,7 @@ const tealiumClient = (tealiumEnv: Omit<TealiumEnv, 'dev'>): TealiumClientType =
                 page_name: `${heading}: ${PageTitlesRecord[currentRoute]}`,
                 page_path: pathname,
                 site_domain: 'cms.gov',
-                site_environment: `${process.env.REACT_APP_STAGE_NAME}`,
+                site_environment: `${tealiumEnv}`,
                 site_section: `${currentRoute}`,
                 logged_in: `${Boolean(loggedInUser) ?? false}`,
                 userId: loggedInUser?.email,
@@ -204,7 +214,7 @@ const tealiumClient = (tealiumEnv: Omit<TealiumEnv, 'dev'>): TealiumClientType =
                 page_name: tealiumPageName,
                 page_path: pathname,
                 site_domain: 'cms.gov',
-                site_environment: `${process.env.REACT_APP_STAGE_NAME}`,
+                site_environment: `${tealiumEnv}`,
                 site_section: `${TEALIUM_SUBSECTION_BY_ROUTE[currentRoute]}`,
                 logged_in: `${Boolean(loggedInUser) ?? false}`,
             }
@@ -243,7 +253,7 @@ const devTealiumClient = (): TealiumClientType => {
                 page_name: `${heading}: ${PageTitlesRecord[currentRoute]}`,
                 page_path: pathname,
                 site_domain: 'cms.gov',
-                site_environment: `${process.env.REACT_APP_STAGE_NAME}`,
+                site_environment: 'dev',
                 site_section: `${currentRoute}`,
                 logged_in: `${Boolean(loggedInUser) ?? false}`,
                 userId: loggedInUser?.email,
@@ -271,7 +281,7 @@ const devTealiumClient = (): TealiumClientType => {
                 page_name: tealiumPageName,
                 page_path: pathname,
                 site_domain: 'cms.gov',
-                site_environment: `${process.env.REACT_APP_STAGE_NAME}`,
+                site_environment: 'dev',
                 site_section: `${TEALIUM_SUBSECTION_BY_ROUTE[currentRoute]}`,
                 logged_in: `${Boolean(loggedInUser) ?? false}`,
             }
@@ -288,9 +298,10 @@ export type {
     TealiumViewDataObject,
     TealiumEvent,
     TealiumButtonEventObject,
-    TealiumInternalLinkEventObject,
+    TealiumLinkEventObject,
     TealiumEventObjectTypes,
     TealiumClientType,
     TealiumEnv,
-    ButtonEventStyle
+    ButtonEventStyle,
+    TealiumDropdownSelectionEventObject
 }
