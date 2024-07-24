@@ -59,8 +59,8 @@ function getVisibleLatestRateRevisions(contract: Contract, isEditing: boolean): 
         return lastContractSubmission.rateRevisions.map ( (rrev) => {
             return {
             ...rrev,
-            isLinked:  rrev.rate? rrev.rate?.parentContractID !== contract.id : false
-            // TODO: need more clarity about when the revision has the rate attached or not and make sure test mock data matches this. for now just assume not linked if that rate data is not coming down
+            // LinkedRates are determined by comparing the rates parentContractID to the contract.id
+            isLinked:  rrev.rate ? rrev.rate.parentContractID !== contract.id : false
         }})
     }
 }

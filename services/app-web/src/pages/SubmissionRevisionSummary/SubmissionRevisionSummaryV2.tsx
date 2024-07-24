@@ -145,7 +145,7 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
                         contractRev={revision}
                         submissionName={name}
                         statePrograms={statePrograms}
-                        rateRevs={rateRevisions}
+                        rateRevisions={rateRevisions}
                     />
                 )}
                 <ContactsSummarySection
