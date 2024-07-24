@@ -18,6 +18,7 @@ import {
 import { QATable, QuestionData, Division } from './QATable/QATable'
 import { CmsUser, QuestionEdge, StateUser } from '../../gen/gqlClient'
 import { useStringConstants } from '../../hooks/useStringConstants'
+import { GenericErrorPage } from '../Errors/GenericErrorPage'
 
 type divisionQuestionDataType = {
     division: Division
@@ -79,6 +80,10 @@ export const QuestionResponse = () => {
                 <Loading />
             </GridContainer>
         )
+    }
+
+    if (pkg.status === 'DRAFT') {
+        return <GenericErrorPage />
     }
 
     const isCMSUser = user?.role === 'CMS_USER'

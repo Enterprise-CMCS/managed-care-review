@@ -11,10 +11,12 @@ import {
     mockContractPackageSubmitted,
 } from '../../testHelpers/apolloMocks'
 import { renderWithProviders } from '../../testHelpers/jestHelpers'
-import { SubmissionSummary } from './V2/SubmissionSummaryV2'
+import { SubmissionSummary } from './SubmissionSummary'
 import { SubmissionSideNav } from '../SubmissionSideNav'
 import { testS3Client } from '../../testHelpers/s3Helpers'
 import { mockContractPackageUnlocked } from '../../testHelpers/apolloMocks/contractPackageDataMock'
+import { ReviewSubmit } from '../StateSubmission/ReviewSubmit'
+import { generatePath, Location } from 'react-router-dom'
 
 describe('SubmissionSummary', () => {
     it('renders without errors', async () => {
@@ -356,7 +358,8 @@ describe('SubmissionSummary', () => {
         })
     })
 
-    it('renders submission unlocked banner for State user', async () => {
+    it('redirects to review and submit page for State user', async () => {
+        let testLocation: Location
         renderWithProviders(
             <Routes>
                 <Route element={<SubmissionSideNav />}>
@@ -365,6 +368,10 @@ describe('SubmissionSummary', () => {
                         element={<SubmissionSummary />}
                     />
                 </Route>
+                <Route
+                    path={RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT}
+                    element={<ReviewSubmit />}
+                />
             </Routes>,
             {
                 apolloProvider: {
@@ -385,21 +392,14 @@ describe('SubmissionSummary', () => {
                     route: '/submissions/test-abc-123',
                 },
                 featureFlags: {},
+                location: (location) => (testLocation = location),
             }
         )
         await waitFor(() => {
-            expect(screen.getByTestId('unlockedBanner')).toBeInTheDocument()
-            expect(screen.getByTestId('unlockedBanner')).toHaveClass(
-                'usa-alert--info'
-            )
-            expect(screen.getByTestId('unlockedBanner')).toHaveTextContent(
-                /on: (0?[1-9]|[12][0-9]|3[01])\/[0-9]+\/[0-9]+\s[0-9]+:[0-9]+[a-zA-Z]+ ET/i
-            )
-            expect(screen.getByTestId('unlockedBanner')).toHaveTextContent(
-                'by: cms@example.com'
-            )
-            expect(screen.getByTestId('unlockedBanner')).toHaveTextContent(
-                'Reason for unlock: unlocked for a test'
+            expect(testLocation.pathname).toBe(
+                generatePath(RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT, {
+                    id: 'test-abc-123',
+                })
             )
         })
     })

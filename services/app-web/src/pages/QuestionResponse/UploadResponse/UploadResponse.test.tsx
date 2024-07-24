@@ -14,6 +14,7 @@ import { RoutesRecord } from '../../../constants/routes'
 import { ACCEPTED_SUBMISSION_FILE_TYPES } from '../../../components/FileUpload'
 import {
     fetchCurrentUserMock,
+    mockDraftHealthPlanPackage,
     mockValidUser,
 } from '../../../testHelpers/apolloMocks'
 import {
@@ -334,5 +335,46 @@ describe('UploadResponse', () => {
         expect(
             screen.getByText("We're having trouble loading this page.")
         ).toBeDefined()
+    })
+    describe('errors', () => {
+        it('shows generic error if submission is a draft', async () => {
+            const mockSubmission = mockDraftHealthPlanPackage()
+            renderWithProviders(
+                <Routes>
+                    <Route element={<SubmissionSideNav />}>
+                        <Route
+                            path={RoutesRecord.SUBMISSIONS_UPLOAD_RESPONSE}
+                            element={<UploadResponse />}
+                        />
+                    </Route>
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                user: mockValidUser(),
+                                statusCode: 200,
+                            }),
+                            fetchStateHealthPlanPackageWithQuestionsMockSuccess(
+                                {
+                                    id: '15',
+                                    stateSubmission: mockSubmission,
+                                }
+                            ),
+                        ],
+                    },
+                    routerProvider: {
+                        route: `/submissions/15/question-and-answers/${division}/${questionID}/upload-response`,
+                    },
+                    featureFlags: {
+                        'cms-questions': true,
+                    },
+                }
+            )
+
+            await waitFor(() => {
+                expect(screen.getByText('System error')).toBeInTheDocument()
+            })
+        })
     })
 })

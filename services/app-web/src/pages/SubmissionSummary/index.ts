@@ -1,2 +1,2 @@
-export { SubmissionSummary } from './V2/SubmissionSummaryV2'
+export { SubmissionSummary } from './SubmissionSummary'
 export { RateSummary } from '../RateSummary'
