@@ -2,6 +2,8 @@ import FETCH_CONTRACT from '../../../app-graphql/src/queries/fetchContract.graph
 import SUBMIT_CONTRACT from '../../../app-graphql/src/mutations/submitContract.graphql'
 import UNLOCK_CONTRACT from '../../../app-graphql/src/mutations/unlockContract.graphql'
 import UPDATE_DRAFT_CONTRACT_RATES from '../../../app-graphql/src/mutations/updateDraftContractRates.graphql'
+import WITHDRAW_REPLACE_RATE from '../../../app-graphql/src/mutations/withdrawAndReplaceRedundantRate.graphql'
+
 import { findStatePrograms } from '../postgres'
 import type { InsertContractArgsType } from '../postgres/contractAndRates/insertContract'
 
@@ -164,6 +166,42 @@ async function fetchTestContract(
 
     if (!result.data) {
         throw new Error('fetchTestContract returned nothing')
+    }
+
+    return result.data.fetchContract.contract
+}
+
+async function updateTestContractToReplaceRate(
+    server: ApolloServer,
+    args: {
+        contractID: string
+        withdrawnRateID: string
+        replacementRateID: string
+        replaceReason: string
+    }
+): Promise<Contract> {
+    const { contractID, withdrawnRateID, replacementRateID, replaceReason } =
+        args
+    const result = await server.executeOperation({
+        query: WITHDRAW_REPLACE_RATE,
+        variables: {
+            input: {
+                contractID,
+                withdrawnRateID,
+                replacementRateID,
+                replaceReason,
+            },
+        },
+    })
+
+    if (result.errors) {
+        throw new Error(
+            `updateContractToReplaceRate mutation failed with errors ${result.errors}`
+        )
+    }
+
+    if (!result.data) {
+        throw new Error('updateContractToReplaceRate returned nothing')
     }
 
     return result.data.fetchContract.contract
@@ -419,4 +457,5 @@ export {
     clearRatesOnDraftContract,
     updateTestContractDraftRevision,
     createTestContract,
+    updateTestContractToReplaceRate,
 }

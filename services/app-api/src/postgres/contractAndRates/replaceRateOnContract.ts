@@ -17,11 +17,10 @@ import {
     type SubmitContractArgsType,
     submitContractInsideTransaction,
 } from './submitContract'
+import { type PrismaTransactionType } from '../prismaTypes'
 
 /**
  * replaceRateOnContract
- * @param client
- * @param args
  * @returns contract with updated rates
  *
  * unlock, edit, and resubmit contract to unlink a withdrawn rate and use replacement rate instead
@@ -33,8 +32,130 @@ type ReplaceRateOnContractArgsType = {
     contractID: string
     withdrawnRateID: string
     replacementRateID: string
-    updateByUserID: string
-    updateReason: string
+    replacedByUserID: string
+    replaceReason: string
+}
+
+async function replaceRateOnContractInsideTransaction(
+    tx: PrismaTransactionType,
+    args: ReplaceRateOnContractArgsType
+): Promise<ContractType | Error> {
+    const {
+        contractID,
+        replacedByUserID,
+        replaceReason,
+        withdrawnRateID,
+        replacementRateID,
+    } = args
+
+    // unlock contract and rates
+    const unlockContractArgs: UnlockContractArgsType = {
+        contractID,
+        unlockedByUserID: replacedByUserID,
+        unlockReason: replaceReason,
+    }
+    const unlockResult = await unlockContractInsideTransaction(
+        tx,
+        unlockContractArgs
+    )
+    if (unlockResult instanceof Error) {
+        return unlockResult
+    }
+
+    // prepare to update contract
+    const previousRates = unlockResult.draftRates
+    const withdrawnRatePosition = previousRates
+        .map((rate) => rate.id)
+        .indexOf(withdrawnRateID)
+    const updateRates: UpdateDraftContractRatesArgsType['rateUpdates']['update'] =
+        []
+    const linkRates: UpdateDraftContractRatesArgsType['rateUpdates']['link'] =
+        []
+
+    previousRates.forEach((rate, idx) => {
+        if (rate.id === withdrawnRateID) {
+            return // we already know this is swapped, we will swap in replacement later, skip for now
+        }
+        // keep any existing linked rates besides replacement or withddrawn rate
+        if (rate.parentContractID !== contractID) {
+            linkRates.push({
+                rateID: rate.id,
+                ratePosition: idx,
+            })
+        } else {
+            // keep any existing child rates
+            updateRates.push({
+                rateID: rate.id,
+                formData:
+                    rate.packageSubmissions[0].contractRevisions[0].formData,
+                ratePosition: idx,
+            })
+        }
+    })
+    // add in replacement rate with the ratePosition of the withdrawn rate
+    linkRates.push({
+        rateID: replacementRateID,
+        ratePosition: withdrawnRatePosition,
+    })
+
+    // arrange data for update draft contract rates
+    const updateContractRatesArgs: UpdateDraftContractRatesArgsType = {
+        contractID,
+        rateUpdates: {
+            create: [],
+            update: [
+                //  keep any already added child rates
+                ...updateRates,
+            ],
+            delete: [],
+            unlink: [
+                // unlink the withdrawn child rate
+                {
+                    rateID: withdrawnRateID,
+                },
+            ],
+            link: [
+                // link replacement rate and keep any other already added linked rates
+                ...linkRates.sort((a, b) => a.ratePosition - b.ratePosition),
+            ],
+        },
+    }
+    const updateResult = await updateDraftContractRatesInsideTransaction(
+        tx,
+        updateContractRatesArgs
+    )
+    if (updateResult instanceof Error) {
+        return updateResult
+    }
+
+    // resubmit contract
+    const resubmitContractArgs: SubmitContractArgsType = {
+        contractID,
+        submittedByUserID: replacedByUserID,
+        submittedReason: replaceReason,
+    }
+    const resubmitResult = await submitContractInsideTransaction(
+        tx,
+        resubmitContractArgs
+    )
+    if (resubmitResult instanceof Error) {
+        return resubmitResult
+    }
+
+    // finalize withdraw rate on the child rate we just removed from the contract
+    const withdrawRateArgs: WithdrawDateArgsType = {
+        rateID: withdrawnRateID,
+        withdrawnByUserID: replacedByUserID,
+        withdrawReason: replaceReason,
+    }
+    const withdrawResult = await withdrawRateInsideTransaction(
+        tx,
+        withdrawRateArgs
+    )
+    if (withdrawResult instanceof Error) {
+        return withdrawResult
+    }
+    return updateResult
 }
 
 async function replaceRateOnContract(
@@ -43,95 +164,32 @@ async function replaceRateOnContract(
 ): Promise<ContractType | NotFoundError | Error> {
     const {
         contractID,
-        updateByUserID,
-        updateReason,
+        replacedByUserID,
+        replaceReason,
         withdrawnRateID,
         replacementRateID,
     } = args
 
     try {
         return await client.$transaction(async (tx) => {
-            // unlock contract and rates
-            const unlockContractArgs: UnlockContractArgsType = {
+            const result = replaceRateOnContractInsideTransaction(tx, {
                 contractID,
-                unlockedByUserID: updateByUserID,
-                unlockReason: updateReason,
+                replacedByUserID,
+                replaceReason,
+                withdrawnRateID,
+                replacementRateID,
+            })
+            if (result instanceof Error) {
+                // if we get an error here, we need to throw it to kill the transaction.
+                // then we catch it and return it as normal.
+                throw result
             }
-            const unlockResult = await unlockContractInsideTransaction(
-                tx,
-                unlockContractArgs
-            )
-            if (unlockResult instanceof Error) {
-                throw unlockResult
-            }
-
-            // update contract - unlink withdrawn child rate and use replacement instead
-            const previousRates = unlockResult.draftRates
-            const withdrawnRatePosition = previousRates
-                .map((rate) => rate.id)
-                .indexOf(withdrawnRateID)
-            const updateContractRatesArgs: UpdateDraftContractRatesArgsType = {
-                contractID,
-                rateUpdates: {
-                    create: [],
-                    update: [],
-                    delete: [],
-                    unlink: [
-                        {
-                            rateID: withdrawnRateID,
-                        },
-                    ],
-                    link: [
-                        {
-                            rateID: replacementRateID,
-                            ratePosition: withdrawnRatePosition, // put the linked rate in the same place the withdrawn rate was
-                        },
-                    ],
-                },
-            }
-            const updateResult =
-                await updateDraftContractRatesInsideTransaction(
-                    tx,
-                    updateContractRatesArgs
-                )
-            if (updateResult instanceof Error) {
-                throw updateResult
-            }
-
-            // resubmit contract
-            const resubmitContractArgs: SubmitContractArgsType = {
-                contractID,
-                submittedByUserID: updateByUserID,
-                submittedReason: updateReason,
-            }
-            const resubmitResult = await submitContractInsideTransaction(
-                tx,
-                resubmitContractArgs
-            )
-            if (resubmitResult instanceof Error) {
-                throw resubmitResult
-            }
-
-            // finalize withdraw rate on the child rate we just removed from the contract
-            const withdrawRateArgs: WithdrawDateArgsType = {
-                rateID: withdrawnRateID,
-                withdrawnByUserID: updateByUserID,
-                withdrawReason: updateReason,
-            }
-            const withdrawResult = await withdrawRateInsideTransaction(
-                tx,
-                withdrawRateArgs
-            )
-            if (withdrawResult instanceof Error) {
-                throw withdrawResult
-            }
-            return updateResult
+            return result
         })
     } catch (err) {
-        console.error('UNLOCK PRISMA CONTRACT ERR', err)
+        console.error('Prisma Error: ', err)
         return err
     }
 }
-
 export { replaceRateOnContract }
 export type { ReplaceRateOnContractArgsType }

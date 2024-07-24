@@ -440,11 +440,33 @@ type Mutation {
             - Postgres returns error when attempting to update a package
             - Attempt to find state programs from json file returns an error
         - EMAIL_ERROR
+
             - Sending state or CMS email failed.
     """
     submitContract(
         input: SubmitContractInput!
     ): SubmitContractPayload!
+
+ """
+    withdrawAndReplaceRedundantRate is an Admin only action to address bookkeeping errors with rate
+
+    Prior to the release of linked rates, states would submit contracts with the same rate
+    resulting in duplicate rates in the dashboard that were otherwise identical.
+    This API addresses the problem by replacing thr duplicate redundant rates with a linked rate.
+
+    Errors:
+    - ForbiddenError:
+        - A non Admin user called this
+    - INTERNAL_SERVER_ERROR
+        - DB_ERROR
+            - A contract or rate cannot be found by id
+            - A invalid update reason was submitted
+            - The contract or target rates are unlocked. This API only works on submitted resources.
+            - The withdrawnRate points to a linked rate. Only child rates can be withdrawn
+    """
+    withdrawAndReplaceRedundantRate(
+        input: withdrawAndReplaceRedundantRateInput!
+    ): withdrawAndReplaceRedundantRatePayload
 }
 
 input CreateHealthPlanPackageInput {
@@ -704,6 +726,17 @@ type UpdateContractPayload {
 type CreateAPIKeyPayload {
     key: String!
     expiresAt: DateTime!
+}
+
+input withdrawAndReplaceRedundantRateInput {
+    contractID: String!
+    replaceReason: String!
+    withdrawnRateID: String!
+    replacementRateID: String!
+}
+
+type withdrawAndReplaceRedundantRatePayload {
+      contract: Contract!
 }
 
 "Date is a CalendarDate representing a day without time information"

@@ -95,12 +95,11 @@ async function submitContract(
 
     try {
         return await client.$transaction(async (tx) => {
-            const result = submitContractInsideTransaction(
-                tx,
+            const result = submitContractInsideTransaction(tx, {
                 contractID,
                 submittedByUserID,
-                submittedReason
-            )
+                submittedReason,
+            })
             if (result instanceof Error) {
                 // if we get an error here, we need to throw it to kill the transaction.
                 // then we catch it and return it as normal.
