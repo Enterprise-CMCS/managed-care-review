@@ -18,6 +18,11 @@ runs:
       shell: bash
       run: pnpm config set git-prefer-https true
 
+    # We need this override until pnpm fixes this as we use CMSGov repos:
+    # https://github.com/pnpm/pnpm/issues/3948
+    - name: Configure git
+      run: git config --global url."https://github.com/".insteadOf "git@github.com:"
+
     - name: Get pnpm store directory
       shell: bash
       id: pnpm-cache
