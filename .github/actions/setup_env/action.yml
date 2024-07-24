@@ -14,6 +14,10 @@ runs:
         version: 9
         run_install: false
 
+    - name: Configure pnpm to use HTTPS
+      shell: bash
+      run: pnpm config set git-prefer-https true
+
     - name: Get pnpm store directory
       shell: bash
       id: pnpm-cache
@@ -30,7 +34,7 @@ runs:
 
     - name: Install dependencies
       shell: bash
-      run: pnpm install --frozen-lockfile
+      run: pnpm install --frozen-lockfile --verbose
 
     - name: Set PATH for project binaries
       shell: bash
