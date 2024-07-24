@@ -7,7 +7,6 @@ import {
     getFilteredRowModel,
     getSortedRowModel,
     getFacetedMinMaxValues,
-    RowData,
     useReactTable,
     getFacetedUniqueValues,
     Column,
@@ -39,16 +38,6 @@ import { FilterDateRangeRef } from '../../../components/FilterAccordion/FilterDa
 import { Loading, NavLinkWithLogging } from '../../../components'
 
 type RatingPeriodFilterType = [string, string] | []
-
-declare module '@tanstack/table-core' {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    interface ColumnMeta<TData extends RowData, TValue> {
-        dataTestID: string
-    }
-    interface FilterFns {
-        dateRangeFilter: FilterFn<unknown>
-    }
-}
 
 export type RateInDashboardType = {
     id: string
