@@ -21,6 +21,7 @@ runs:
     # We need this override until pnpm fixes this as we use CMSGov repos:
     # https://github.com/pnpm/pnpm/issues/3948
     - name: Configure git
+      shell: bash
       run: git config --global url."https://github.com/".insteadOf "git@github.com:"
 
     - name: Get pnpm store directory
