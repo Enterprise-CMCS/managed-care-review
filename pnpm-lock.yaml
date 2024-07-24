@@ -826,9 +826,15 @@ importers:
 
   services/uploads:
     dependencies:
+      '@aws-sdk/client-lambda':
+        specifier: ^3.529.1
+        version: 3.609.0
       '@aws-sdk/client-s3':
         specifier: ^3.529.1
         version: 3.609.0
+      '@aws-sdk/util-utf8-node':
+        specifier: ^3.259.0
+        version: 3.259.0
       '@opentelemetry/api':
         specifier: ^1.6.0
         version: 1.7.0
@@ -1475,6 +1481,10 @@ packages:
     resolution: {integrity: sha512-fObm+P6mjWYzxoFY4y2STHBmSdgKbIAXez0xope563mox62I8I4hhVPUCaDVydXvDpJv8tbedJMk0meJl22+xA==}
     engines: {node: '>= 12.0.0'}
 
+  '@aws-sdk/is-array-buffer@3.201.0':
+    resolution: {integrity: sha512-UPez5qLh3dNgt0DYnPD/q0mVJY84rA17QE26hVNOW3fAji8W2wrwrxdacWOxyXvlxWsVRcKmr+lay1MDqpAMfg==}
+    engines: {node: '>=14.0.0'}
+
   '@aws-sdk/is-array-buffer@3.6.1':
     resolution: {integrity: sha512-qm2iDJmCrxlQE2dsFG+TujPe7jw4DF+4RTrsFMhk/e3lOl3MAzQ6Fc2kXtgeUcVrZVFTL8fQvXE1ByYyI6WbCw==}
     engines: {node: '>= 10.0.0'}
@@ -1776,6 +1786,10 @@ packages:
     resolution: {integrity: sha512-be2GCk2lsLWg/2V5Y+S4/9pOMXhOQo4DR4dIqBdR2R+jrMMHN9Xsr5QrkT6chcqLaJ/SBlwiAEEi3StMRmCOXA==}
     engines: {node: '>= 12.0.0'}
 
+  '@aws-sdk/util-buffer-from@3.208.0':
+    resolution: {integrity: sha512-7L0XUixNEFcLUGPeBF35enCvB9Xl+K6SQsmbrPk1P3mlV9mguWSDQqbOBwY1Ir0OVbD6H/ZOQU7hI/9RtRI0Zw==}
+    engines: {node: '>=14.0.0'}
+
   '@aws-sdk/util-buffer-from@3.6.1':
     resolution: {integrity: sha512-OGUh2B5NY4h7iRabqeZ+EgsrzE1LUmNFzMyhoZv0tO4NExyfQjxIYXLQQvydeOq9DJUbCw+yrRZrj8vXNDQG+g==}
     engines: {node: '>= 10.0.0'}
@@ -1867,6 +1881,10 @@ packages:
   '@aws-sdk/util-utf8-node@3.186.0':
     resolution: {integrity: sha512-7qlE0dOVdjuRbZTb7HFywnHHCrsN7AeQiTnsWT63mjXGDbPeUWQQw3TrdI20um3cxZXnKoeudGq8K6zbXyQ4iA==}
     engines: {node: '>= 12.0.0'}
+
+  '@aws-sdk/util-utf8-node@3.259.0':
+    resolution: {integrity: sha512-2sbGdmrkODKeJb6kbEOKpX8cYtS9IO16XRAtINcN7sInWfspAITDofrabf0i0tFQF0hsJtbC5dyJRn87w0gYIQ==}
+    engines: {node: '>=14.0.0'}
 
   '@aws-sdk/util-utf8-node@3.6.1':
     resolution: {integrity: sha512-4s0vYfMUn74XLn13rUUhNsmuPMh0j1d4rF58wXtjlVUU78THxonnN8mbCLC48fI3fKDHTmDDkeEqy7+IWP9VyA==}
@@ -16318,6 +16336,10 @@ snapshots:
     dependencies:
       tslib: 2.6.3
 
+  '@aws-sdk/is-array-buffer@3.201.0':
+    dependencies:
+      tslib: 2.6.3
+
   '@aws-sdk/is-array-buffer@3.6.1':
     dependencies:
       tslib: 1.14.1
@@ -16801,6 +16823,11 @@ snapshots:
       '@aws-sdk/is-array-buffer': 3.186.0
       tslib: 2.6.3
 
+  '@aws-sdk/util-buffer-from@3.208.0':
+    dependencies:
+      '@aws-sdk/is-array-buffer': 3.201.0
+      tslib: 2.6.3
+
   '@aws-sdk/util-buffer-from@3.6.1':
     dependencies:
       '@aws-sdk/is-array-buffer': 3.6.1
@@ -16917,6 +16944,11 @@ snapshots:
   '@aws-sdk/util-utf8-node@3.186.0':
     dependencies:
       '@aws-sdk/util-buffer-from': 3.186.0
+      tslib: 2.6.3
+
+  '@aws-sdk/util-utf8-node@3.259.0':
+    dependencies:
+      '@aws-sdk/util-buffer-from': 3.208.0
       tslib: 2.6.3
 
   '@aws-sdk/util-utf8-node@3.6.1':
