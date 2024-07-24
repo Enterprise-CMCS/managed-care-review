@@ -219,19 +219,8 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version-file: '.nvmrc'
-          cache: pnpm
-
-      - name: Get pnpm cache directory path
-        shell: bash
-        id: pnpm-cache-dir-path
-        run: echo "dir=$(pnpm cache dir)" >> "$GITHUB_OUTPUT"
-
-      - name: Install packages
-        working-directory: services/app-api
-        run: PRISMA_CLI_BINARY_TARGETS=rhel-openssl-3.0.x pnpm install --prefer-offline --frozen-lockfile --cache-folder ${{ steps.pnpm-cache-dir-path.outputs.dir }}
+      - name: Setup env
+        uses: ./.github/actions/setup_env
 
       - name: Generate protos
         run: npx lerna run generate && npx lerna run build --scope=app-proto

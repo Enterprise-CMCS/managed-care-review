@@ -40,7 +40,7 @@ runs:
 
     - name: Install dependencies
       shell: bash
-      run: pnpm install --frozen-lockfile --verbose
+      run: PRISMA_CLI_BINARY_TARGETS=rhel-openssl-3.0.x pnpm install --frozen-lockfile
 
     - name: Set PATH for project binaries
       shell: bash
