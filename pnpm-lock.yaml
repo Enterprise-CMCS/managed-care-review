@@ -310,7 +310,7 @@ importers:
         specifier: ^1.52.1
         version: 1.52.1(esbuild@0.20.2)
       serverless-iam-helper:
-        specifier: CMSgov/serverless-iam-helper
+        specifier: https://github.com/CMSgov/serverless-iam-helper.git
         version: git+https://git@github.com:CMSgov/serverless-iam-helper.git#ffcca526d127cf0e791f0d931d442f4131953483(serverless@3.39.0(encoding@0.1.13))
       serverless-offline:
         specifier: ^13.3.2
@@ -319,7 +319,7 @@ importers:
         specifier: ^6.2.0
         version: 6.2.0
       serverless-s3-bucket-helper:
-        specifier: CMSgov/serverless-s3-bucket-helper
+        specifier: https://github.com/CMSgov/serverless-s3-bucket-helper
         version: git+https://git@github.com:CMSgov/serverless-s3-bucket-helper.git#3e519d15676de237ec8ede3ff9ae26abf3f3ef0a(serverless@3.39.0(encoding@0.1.13))
       serverless-stack-termination-protection:
         specifier: ^2.0.2
@@ -742,10 +742,10 @@ importers:
         specifier: ^3.39.0
         version: 3.39.0(encoding@0.1.13)
       serverless-iam-helper:
-        specifier: CMSgov/serverless-iam-helper
+        specifier: https://github.com/CMSgov/serverless-iam-helper.git
         version: git+https://git@github.com:CMSgov/serverless-iam-helper.git#ffcca526d127cf0e791f0d931d442f4131953483(serverless@3.39.0(encoding@0.1.13))
       serverless-s3-bucket-helper:
-        specifier: CMSgov/serverless-s3-bucket-helper
+        specifier: https://github.com/CMSgov/serverless-s3-bucket-helper
         version: git+https://git@github.com:CMSgov/serverless-s3-bucket-helper.git#3e519d15676de237ec8ede3ff9ae26abf3f3ef0a(serverless@3.39.0(encoding@0.1.13))
       serverless-stack-termination-protection:
         specifier: ^2.0.2
@@ -764,10 +764,10 @@ importers:
         specifier: ^3.39.0
         version: 3.39.0(encoding@0.1.13)
       serverless-iam-helper:
-        specifier: CMSgov/serverless-iam-helper
+        specifier: https://github.com/CMSgov/serverless-iam-helper.git
         version: git+https://git@github.com:CMSgov/serverless-iam-helper.git#ffcca526d127cf0e791f0d931d442f4131953483(serverless@3.39.0(encoding@0.1.13))
       serverless-s3-bucket-helper:
-        specifier: CMSgov/serverless-s3-bucket-helper
+        specifier: https://github.com/CMSgov/serverless-s3-bucket-helper
         version: git+https://git@github.com:CMSgov/serverless-s3-bucket-helper.git#3e519d15676de237ec8ede3ff9ae26abf3f3ef0a(serverless@3.39.0(encoding@0.1.13))
       serverless-scriptable-plugin:
         specifier: ^1.3.1
@@ -779,7 +779,7 @@ importers:
   services/storybook:
     devDependencies:
       serverless-s3-bucket-helper:
-        specifier: CMSgov/serverless-s3-bucket-helper
+        specifier: https://github.com/CMSgov/serverless-s3-bucket-helper
         version: git+https://git@github.com:CMSgov/serverless-s3-bucket-helper.git#3e519d15676de237ec8ede3ff9ae26abf3f3ef0a(serverless@3.39.0(encoding@0.1.13))
       serverless-stack-termination-protection:
         specifier: ^2.0.2
@@ -791,7 +791,7 @@ importers:
         specifier: ^3.39.0
         version: 3.39.0(encoding@0.1.13)
       serverless-s3-bucket-helper:
-        specifier: CMSgov/serverless-s3-bucket-helper
+        specifier: https://github.com/CMSgov/serverless-s3-bucket-helper
         version: git+https://git@github.com:CMSgov/serverless-s3-bucket-helper.git#3e519d15676de237ec8ede3ff9ae26abf3f3ef0a(serverless@3.39.0(encoding@0.1.13))
       serverless-stack-termination-protection:
         specifier: ^2.0.2
@@ -803,10 +803,10 @@ importers:
         specifier: ^3.1.0
         version: 3.2.5
       serverless-iam-helper:
-        specifier: CMSgov/serverless-iam-helper
+        specifier: https://github.com/CMSgov/serverless-iam-helper.git
         version: git+https://git@github.com:CMSgov/serverless-iam-helper.git#ffcca526d127cf0e791f0d931d442f4131953483(serverless@3.39.0(encoding@0.1.13))
       serverless-s3-bucket-helper:
-        specifier: CMSgov/serverless-s3-bucket-helper
+        specifier: https://github.com/CMSgov/serverless-s3-bucket-helper
         version: git+https://git@github.com:CMSgov/serverless-s3-bucket-helper.git#3e519d15676de237ec8ede3ff9ae26abf3f3ef0a(serverless@3.39.0(encoding@0.1.13))
       serverless-stack-termination-protection:
         specifier: ^2.0.2
@@ -855,7 +855,7 @@ importers:
         specifier: ^1.52.1
         version: 1.52.1(esbuild@0.20.2)
       serverless-iam-helper:
-        specifier: CMSgov/serverless-iam-helper
+        specifier: https://github.com/CMSgov/serverless-iam-helper.git
         version: git+https://git@github.com:CMSgov/serverless-iam-helper.git#ffcca526d127cf0e791f0d931d442f4131953483(serverless@3.39.0(encoding@0.1.13))
       serverless-offline:
         specifier: ^13.3.2
@@ -864,7 +864,7 @@ importers:
         specifier: ^6.2.0
         version: 6.2.0
       serverless-s3-bucket-helper:
-        specifier: CMSgov/serverless-s3-bucket-helper
+        specifier: https://github.com/CMSgov/serverless-s3-bucket-helper
         version: git+https://git@github.com:CMSgov/serverless-s3-bucket-helper.git#3e519d15676de237ec8ede3ff9ae26abf3f3ef0a(serverless@3.39.0(encoding@0.1.13))
       serverless-s3-local:
         specifier: ^0.8.4
