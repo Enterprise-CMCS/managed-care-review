@@ -1609,6 +1609,7 @@ type Contract {
     submission is in the first position in the array.
     """
     packageSubmissions: [ContractPackageSubmission!]!
+    questions: IndexQuestionsPayload
 }
 
 """
