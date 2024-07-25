@@ -1,27 +1,33 @@
 import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
 import { testS3Client } from 'app-web/src/testHelpers/s3Helpers'
-
-import { testAdminUser } from '../../testHelpers/userHelpers'
+import WITHDRAW_REPLACE_RATE from 'app-graphql/src/mutations/withdrawAndReplaceRedundantRate.graphql'
+import { testAdminUser, testCMSUser } from '../../testHelpers/userHelpers'
 import {
     createAndSubmitTestContractWithRate,
     fetchTestContract,
+    unlockTestContract,
     updateTestContractToReplaceRate,
 } from '../../testHelpers/gqlContractHelpers'
 import { type ApolloServer } from 'apollo-server-lambda'
 import { fetchTestRateById } from '../../testHelpers'
 import { type ContractRevision } from '../../gen/gqlServer'
+import { type HealthPlanFormDataType } from '../../common-code/healthPlanFormDataType'
 
 // Setup function for testing withdraw and replace rate
 // returns a the target contractID and ids for the child rate to be withdrawn and the replacement
 const setupWithdrawRateTestData = async (
-    stateServer: ApolloServer
+    stateServer: ApolloServer,
+    contractOverrides?: Partial<HealthPlanFormDataType>
 ): Promise<{
     contractID: string
     replacementRateID: string
     withdrawnRateID: string
 }> => {
     // submit two contracts with rates
-    const contract1 = await createAndSubmitTestContractWithRate(stateServer)
+    const contract1 = await createAndSubmitTestContractWithRate(
+        stateServer,
+        contractOverrides
+    )
     const contract2 = await createAndSubmitTestContractWithRate(stateServer)
 
     // contract 1 is the target contract, prepare to withdraw and replace rate
@@ -45,6 +51,7 @@ const setupWithdrawRateTestData = async (
 describe('withdrawAndReplaceRedundantRate', () => {
     const mockS3 = testS3Client()
     const adminUser = testAdminUser()
+    const cmsUser = testCMSUser()
 
     it('results in the expected contract package changes - unlinks withdrawn rate, links replacement rate', async () => {
         const stateServer = await constructTestPostgresServer({
@@ -138,14 +145,92 @@ describe('withdrawAndReplaceRedundantRate', () => {
         // TODO add assertion checking the review status
     })
 
-    it.todo(
-        'does not change or re-validate contract data, just replace rate as is'
-    )
-    // old form data
-    // double check submit contract logic
-    // make sure submit can't fail with old style rate programs - make sure its still there - its not getting stripped away
-    it.todo('returns forbidden error for non-admin users')
-    it.todo(
-        'returns error if the contract or individual rates are not currently submitted'
-    )
+    it('returns forbidden error for non-admin users', async () => {
+        const stateServer = await constructTestPostgresServer({
+            s3Client: mockS3,
+        })
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: cmsUser,
+            },
+            s3Client: mockS3,
+        })
+
+        const { contractID, replacementRateID, withdrawnRateID } =
+            await setupWithdrawRateTestData(stateServer)
+
+        const replaceReason = 'Admin has to do it!'
+        const cmsResult = await cmsServer.executeOperation({
+            query: WITHDRAW_REPLACE_RATE,
+            variables: {
+                input: {
+                    contractID,
+                    withdrawnRateID,
+                    replacementRateID,
+                    replaceReason,
+                },
+            },
+        })
+
+        const stateResult = await stateServer.executeOperation({
+            query: WITHDRAW_REPLACE_RATE,
+            variables: {
+                input: {
+                    contractID,
+                    withdrawnRateID,
+                    replacementRateID,
+                    replaceReason,
+                },
+            },
+        })
+
+        expect(cmsResult.errors).toBeDefined()
+        expect(stateResult.errors).toBeDefined()
+    })
+
+    it('returns error if the contract or individual rates are not currently submitted', async () => {
+        const stateServer = await constructTestPostgresServer({
+            s3Client: mockS3,
+        })
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: cmsUser,
+            },
+            s3Client: mockS3,
+        })
+        const adminServer = await constructTestPostgresServer({
+            context: {
+                user: adminUser,
+            },
+            s3Client: mockS3,
+        })
+
+        const contract1 = await createAndSubmitTestContractWithRate(stateServer)
+        const contract1ThatIsUnlocked = await unlockTestContract(
+            cmsServer,
+            contract1.id,
+            'Unlock reason'
+        )
+        const contractWithReplacementRate =
+            await createAndSubmitTestContractWithRate(stateServer)
+
+        const replaceReason = 'Admin has to do it!'
+        const adminResult = await adminServer.executeOperation({
+            query: WITHDRAW_REPLACE_RATE,
+            variables: {
+                input: {
+                    contractID: contract1ThatIsUnlocked.id,
+                    withdrawnRateID:
+                        contract1ThatIsUnlocked.packageSubmissions[0]
+                            .rateRevisions[0].rateID,
+                    replacementRateID:
+                        contractWithReplacementRate.packageSubmissions[0]
+                            .rateRevisions[0].rateID,
+                    replaceReason,
+                },
+            },
+        })
+
+        expect(adminResult.errors).toBeDefined()
+    })
 })

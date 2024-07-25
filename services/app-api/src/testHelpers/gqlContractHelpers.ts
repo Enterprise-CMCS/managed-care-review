@@ -141,9 +141,13 @@ async function createSubmitAndUnlockTestContract(
 }
 
 async function createAndSubmitTestContractWithRate(
-    server: ApolloServer
+    server: ApolloServer,
+    contractOverrides?: Partial<HealthPlanFormDataType>
 ): Promise<Contract> {
-    const draft = await createAndUpdateTestContractWithRate(server)
+    const draft = await createAndUpdateTestContractWithRate(
+        server,
+        contractOverrides
+    )
 
     return await submitTestContract(server, draft.id)
 }
@@ -270,9 +274,14 @@ const createTestContract = async (
 }
 
 async function createAndUpdateTestContractWithRate(
-    server: ApolloServer
+    server: ApolloServer,
+    contractOverrides?: Partial<HealthPlanFormDataType>
 ): Promise<Contract> {
-    const draft = await createAndUpdateTestContractWithoutRates(server)
+    const draft = await createAndUpdateTestContractWithoutRates(
+        server,
+        'FL',
+        contractOverrides
+    )
     return await addNewRateToTestContract(server, draft)
 }
 
