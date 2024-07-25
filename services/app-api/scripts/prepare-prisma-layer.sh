@@ -23,7 +23,7 @@ function preparePrismaLayer() {
     PRISMA_CLI_BINARY_TARGETS=rhel-openssl-3.0.x pnpm exec prisma generate
 
     echo "Prepare Prisma Client Migration lambda layer"
-    #rsync -av node_modules/@prisma/ lambda-layers-prisma-client-migration/nodejs/node_modules/@prisma
+    rsync -av node_modules/@prisma/ lambda-layers-prisma-client-migration/nodejs/node_modules/@prisma
     rsync -av node_modules/prisma/ lambda-layers-prisma-client-migration/nodejs/node_modules/prisma
     rsync -av ./../../node_modules/.pnpm/@prisma+client@5.17.0_prisma@5.17.0/node_modules/.prisma/ lambda-layers-prisma-client-migration/nodejs/node_modules/.prisma 
     rsync -av ./../../node_modules/.pnpm/node_modules/@prisma/ lambda-layers-prisma-client-migration/nodejs/node_modules/@prisma
@@ -34,7 +34,7 @@ function preparePrismaLayer() {
 
     echo "Prepare Prisma Client Engine lambda layer"
     rsync -av ./../../node_modules/.pnpm/node_modules/@prisma/ lambda-layers-prisma-client-migration/nodejs/node_modules/@prisma
-    #rsync -av node_modules/@prisma/client/ lambda-layers-prisma-client-engine/nodejs/node_modules/@prisma/client
+    rsync -av node_modules/@prisma/client/ lambda-layers-prisma-client-engine/nodejs/node_modules/@prisma/client
     rsync -av node_modules/prisma/ lambda-layers-prisma-client-engine/nodejs/node_modules/prisma
     rsync -av ./../../node_modules/.pnpm/@prisma+client@5.17.0_prisma@5.17.0/node_modules/.prisma/ lambda-layers-prisma-client-engine/nodejs/node_modules/.prisma 
     #rsync -av ./../../node_modules/.pnpm/node_modules/@prisma/engines/dist/ lambda-layers-prisma-client-migration/nodejs/node_modules/@prisma/engines/dist
