@@ -88,6 +88,19 @@
     margin: 0;
 }
 
+.replaceRateWrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid custom.$mcr-gray-lighter;
+    margin-bottom: 1rem;
+    padding-bottom: 17px;
+
+    h3 {
+        max-width: 70%;
+    }
+}
+
 .certifyingActuaryDetail {
     margin-bottom: uswds.units(4);
 

@@ -14,6 +14,7 @@ import { RoutesRecord } from '../../../constants/routes'
 import { ACCEPTED_SUBMISSION_FILE_TYPES } from '../../../components/FileUpload'
 import {
     fetchCurrentUserMock,
+    mockDraftHealthPlanPackage,
     mockValidCMSUser,
 } from '../../../testHelpers/apolloMocks'
 import {
@@ -420,5 +421,46 @@ describe('UploadQuestions', () => {
         expect(
             screen.getByText("We're having trouble loading this page.")
         ).toBeDefined()
+    })
+    describe('errors', () => {
+        it('shows generic error if submission is a draft', async () => {
+            const mockSubmission = mockDraftHealthPlanPackage()
+            renderWithProviders(
+                <Routes>
+                    <Route element={<SubmissionSideNav />}>
+                        <Route
+                            path={RoutesRecord.SUBMISSIONS_UPLOAD_QUESTION}
+                            element={<UploadQuestions />}
+                        />
+                    </Route>
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                user: mockValidCMSUser(),
+                                statusCode: 200,
+                            }),
+                            fetchStateHealthPlanPackageWithQuestionsMockSuccess(
+                                {
+                                    id: '15',
+                                    stateSubmission: mockSubmission,
+                                }
+                            ),
+                        ],
+                    },
+                    routerProvider: {
+                        route: `/submissions/15/question-and-answers/dmco/upload-questions`,
+                    },
+                    featureFlags: {
+                        'cms-questions': true,
+                    },
+                }
+            )
+
+            await waitFor(() => {
+                expect(screen.getByText('System error')).toBeInTheDocument()
+            })
+        })
     })
 })

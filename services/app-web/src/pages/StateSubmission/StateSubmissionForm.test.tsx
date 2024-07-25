@@ -1,11 +1,12 @@
 import { screen, waitFor } from '@testing-library/react'
-import { Route, Routes } from 'react-router-dom'
+import { generatePath, Location, Route, Routes } from 'react-router-dom'
 import userEvent from '@testing-library/user-event'
 import { SubmissionDocument } from '../../common-code/healthPlanFormDataType'
 import { RoutesRecord } from '../../constants/routes'
 import { fetchCurrentUserMock } from '../../testHelpers/apolloMocks/userGQLMock'
 import {
     mockDraftHealthPlanPackage,
+    mockSubmittedHealthPlanPackage,
     mockUnlockedHealthPlanPackage,
     mockUnlockedHealthPlanPackageWithDocuments,
 } from '../../testHelpers/apolloMocks/healthPlanFormDataMock'
@@ -27,16 +28,24 @@ import {
 } from '../../common-code/proto/healthPlanFormDataProto'
 import { testS3Client } from '../../testHelpers/s3Helpers'
 import { getYesNoFieldValue } from '../../testHelpers/fieldHelpers'
+import { SubmissionSideNav } from '../SubmissionSideNav'
+import { fetchStateHealthPlanPackageWithQuestionsMockSuccess } from '../../testHelpers/apolloMocks'
 
 describe('StateSubmissionForm', () => {
+    afterEach(() => {
+        vi.clearAllMocks()
+    })
     describe('loads draft submission', () => {
+        const mockSubmission = mockDraftHealthPlanPackage()
         it('loads step indicator', async () => {
             renderWithProviders(
                 <Routes>
-                    <Route
-                        path={RoutesRecord.SUBMISSIONS_EDIT_TOP_LEVEL}
-                        element={<StateSubmissionForm />}
-                    />
+                    <Route element={<SubmissionSideNav />}>
+                        <Route
+                            path={RoutesRecord.SUBMISSIONS_EDIT_TOP_LEVEL}
+                            element={<StateSubmissionForm />}
+                        />
+                    </Route>
                 </Routes>,
                 {
                     apolloProvider: {
@@ -45,6 +54,12 @@ describe('StateSubmissionForm', () => {
                             fetchHealthPlanPackageMockSuccess({
                                 id: '15',
                             }),
+                            fetchStateHealthPlanPackageWithQuestionsMockSuccess(
+                                {
+                                    id: '15',
+                                    stateSubmission: mockSubmission,
+                                }
+                            ),
                         ],
                     },
                     routerProvider: {
@@ -53,9 +68,46 @@ describe('StateSubmissionForm', () => {
                 }
             )
 
-            const stepIndicator = await screen.findByTestId('step-indicator')
+            await waitFor(() => {
+                const stepIndicator = screen.getByTestId('step-indicator')
+                expect(stepIndicator).toHaveClass('usa-step-indicator')
+            })
+        })
 
-            expect(stepIndicator).toHaveClass('usa-step-indicator')
+        it('redirects user to submission summary page when status is submitted', async () => {
+            const mockSubmission = mockSubmittedHealthPlanPackage()
+            let testLocation: Location
+            renderWithProviders(
+                <Routes>
+                    <Route element={<SubmissionSideNav />}>
+                        <Route
+                            path={RoutesRecord.SUBMISSIONS_EDIT_TOP_LEVEL}
+                            element={<StateSubmissionForm />}
+                        />
+                    </Route>
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchStateHealthPlanPackageWithQuestionsMockSuccess(
+                                {
+                                    stateSubmission: mockSubmission,
+                                    id: '15',
+                                }
+                            ),
+                        ],
+                    },
+                    routerProvider: { route: '/submissions/15/edit/type' },
+                    location: (location) => (testLocation = location),
+                }
+            )
+
+            await waitFor(() => {
+                expect(testLocation.pathname).toBe(
+                    generatePath(RoutesRecord.SUBMISSIONS_SUMMARY, { id: '15' })
+                )
+            })
         })
 
         it('loads submission type fields for /submissions/edit/type', async () => {
@@ -66,10 +118,12 @@ describe('StateSubmissionForm', () => {
             })
             renderWithProviders(
                 <Routes>
-                    <Route
-                        path={RoutesRecord.SUBMISSIONS_EDIT_TOP_LEVEL}
-                        element={<StateSubmissionForm />}
-                    />
+                    <Route element={<SubmissionSideNav />}>
+                        <Route
+                            path={RoutesRecord.SUBMISSIONS_EDIT_TOP_LEVEL}
+                            element={<StateSubmissionForm />}
+                        />
+                    </Route>
                 </Routes>,
                 {
                     apolloProvider: {
@@ -79,6 +133,12 @@ describe('StateSubmissionForm', () => {
                                 id: '15',
                                 submission: mockSubmission,
                             }),
+                            fetchStateHealthPlanPackageWithQuestionsMockSuccess(
+                                {
+                                    stateSubmission: mockSubmission,
+                                    id: '15',
+                                }
+                            ),
                         ],
                     },
                     routerProvider: { route: '/submissions/15/edit/type' },
@@ -129,10 +189,12 @@ describe('StateSubmissionForm', () => {
 
             renderWithProviders(
                 <Routes>
-                    <Route
-                        path={RoutesRecord.SUBMISSIONS_EDIT_TOP_LEVEL}
-                        element={<StateSubmissionForm />}
-                    />
+                    <Route element={<SubmissionSideNav />}>
+                        <Route
+                            path={RoutesRecord.SUBMISSIONS_EDIT_TOP_LEVEL}
+                            element={<StateSubmissionForm />}
+                        />
+                    </Route>
                 </Routes>,
                 {
                     apolloProvider: {
@@ -142,6 +204,12 @@ describe('StateSubmissionForm', () => {
                                 id: '12',
                                 submission: mockAmendment,
                             }),
+                            fetchStateHealthPlanPackageWithQuestionsMockSuccess(
+                                {
+                                    stateSubmission: mockAmendment,
+                                    id: '12',
+                                }
+                            ),
                         ],
                     },
                     routerProvider: {
@@ -165,12 +233,15 @@ describe('StateSubmissionForm', () => {
         })
 
         it('loads documents fields for /submissions/:id/edit/documents', async () => {
+            const mockSubmission = mockDraftHealthPlanPackage()
             renderWithProviders(
                 <Routes>
-                    <Route
-                        path={RoutesRecord.SUBMISSIONS_EDIT_TOP_LEVEL}
-                        element={<StateSubmissionForm />}
-                    />
+                    <Route element={<SubmissionSideNav />}>
+                        <Route
+                            path={RoutesRecord.SUBMISSIONS_EDIT_TOP_LEVEL}
+                            element={<StateSubmissionForm />}
+                        />
+                    </Route>
                 </Routes>,
                 {
                     apolloProvider: {
@@ -179,6 +250,12 @@ describe('StateSubmissionForm', () => {
                             fetchHealthPlanPackageMockSuccess({
                                 id: '12',
                             }),
+                            fetchStateHealthPlanPackageWithQuestionsMockSuccess(
+                                {
+                                    id: '12',
+                                    stateSubmission: mockSubmission,
+                                }
+                            ),
                         ],
                     },
                     routerProvider: {
@@ -198,12 +275,15 @@ describe('StateSubmissionForm', () => {
 
     describe('loads unlocked submission', () => {
         it('displays unlock banner with correct data for an unlocked submission', async () => {
+            const mockSubmission = mockUnlockedHealthPlanPackage()
             renderWithProviders(
                 <Routes>
-                    <Route
-                        path={RoutesRecord.SUBMISSIONS_EDIT_TOP_LEVEL}
-                        element={<StateSubmissionForm />}
-                    />
+                    <Route element={<SubmissionSideNav />}>
+                        <Route
+                            path={RoutesRecord.SUBMISSIONS_EDIT_TOP_LEVEL}
+                            element={<StateSubmissionForm />}
+                        />
+                    </Route>
                 </Routes>,
                 {
                     apolloProvider: {
@@ -211,8 +291,14 @@ describe('StateSubmissionForm', () => {
                             fetchCurrentUserMock({ statusCode: 200 }),
                             fetchHealthPlanPackageMockSuccess({
                                 id: '15',
-                                submission: mockUnlockedHealthPlanPackage(),
+                                submission: mockSubmission,
                             }),
+                            fetchStateHealthPlanPackageWithQuestionsMockSuccess(
+                                {
+                                    id: '15',
+                                    stateSubmission: mockSubmission,
+                                }
+                            ),
                         ],
                     },
                     routerProvider: {
@@ -254,10 +340,12 @@ describe('StateSubmissionForm', () => {
 
             renderWithProviders(
                 <Routes>
-                    <Route
-                        path={RoutesRecord.SUBMISSIONS_EDIT_TOP_LEVEL}
-                        element={<StateSubmissionForm />}
-                    />
+                    <Route element={<SubmissionSideNav />}>
+                        <Route
+                            path={RoutesRecord.SUBMISSIONS_EDIT_TOP_LEVEL}
+                            element={<StateSubmissionForm />}
+                        />
+                    </Route>
                 </Routes>,
                 {
                     apolloProvider: {
@@ -275,6 +363,12 @@ describe('StateSubmissionForm', () => {
                             fetchHealthPlanPackageMockSuccess({
                                 id: '15',
                             }),
+                            fetchStateHealthPlanPackageWithQuestionsMockSuccess(
+                                {
+                                    id: '15',
+                                    stateSubmission: mockSubmission,
+                                }
+                            ),
                         ],
                     },
                     routerProvider: { route: '/submissions/15/edit/type' },
@@ -322,10 +416,12 @@ describe('StateSubmissionForm', () => {
 
             renderWithProviders(
                 <Routes>
-                    <Route
-                        path={RoutesRecord.SUBMISSIONS_EDIT_TOP_LEVEL}
-                        element={<StateSubmissionForm />}
-                    />
+                    <Route element={<SubmissionSideNav />}>
+                        <Route
+                            path={RoutesRecord.SUBMISSIONS_EDIT_TOP_LEVEL}
+                            element={<StateSubmissionForm />}
+                        />
+                    </Route>
                 </Routes>,
                 {
                     apolloProvider: {
@@ -343,6 +439,12 @@ describe('StateSubmissionForm', () => {
                             fetchHealthPlanPackageMockSuccess({
                                 id: '15',
                             }),
+                            fetchStateHealthPlanPackageWithQuestionsMockSuccess(
+                                {
+                                    id: '15',
+                                    stateSubmission: mockSubmission,
+                                }
+                            ),
                         ],
                     },
                     routerProvider: { route: '/submissions/15/edit/type' },
@@ -368,18 +470,27 @@ describe('StateSubmissionForm', () => {
 
     describe('errors', () => {
         it('shows a generic error fetching submission fails at submission type', async () => {
+            const mockSubmission = mockDraftHealthPlanPackage()
             renderWithProviders(
                 <Routes>
-                    <Route
-                        path={RoutesRecord.SUBMISSIONS_EDIT_TOP_LEVEL}
-                        element={<StateSubmissionForm />}
-                    />
+                    <Route element={<SubmissionSideNav />}>
+                        <Route
+                            path={RoutesRecord.SUBMISSIONS_EDIT_TOP_LEVEL}
+                            element={<StateSubmissionForm />}
+                        />
+                    </Route>
                 </Routes>,
                 {
                     apolloProvider: {
                         mocks: [
                             fetchCurrentUserMock({ statusCode: 200 }),
                             fetchHealthPlanPackageMockAuthFailure(),
+                            fetchStateHealthPlanPackageWithQuestionsMockSuccess(
+                                {
+                                    id: '15',
+                                    stateSubmission: mockSubmission,
+                                }
+                            ),
                         ],
                     },
                     routerProvider: { route: '/submissions/15/edit/type' },
@@ -391,18 +502,27 @@ describe('StateSubmissionForm', () => {
         })
 
         it('shows a generic error fetching submission fails at contract details', async () => {
+            const mockSubmission = mockDraftHealthPlanPackage()
             renderWithProviders(
                 <Routes>
-                    <Route
-                        path={RoutesRecord.SUBMISSIONS_EDIT_TOP_LEVEL}
-                        element={<StateSubmissionForm />}
-                    />
+                    <Route element={<SubmissionSideNav />}>
+                        <Route
+                            path={RoutesRecord.SUBMISSIONS_EDIT_TOP_LEVEL}
+                            element={<StateSubmissionForm />}
+                        />
+                    </Route>
                 </Routes>,
                 {
                     apolloProvider: {
                         mocks: [
                             fetchCurrentUserMock({ statusCode: 200 }),
                             fetchHealthPlanPackageMockNetworkFailure(),
+                            fetchStateHealthPlanPackageWithQuestionsMockSuccess(
+                                {
+                                    id: '15',
+                                    stateSubmission: mockSubmission,
+                                }
+                            ),
                         ],
                     },
                     routerProvider: {
@@ -416,18 +536,27 @@ describe('StateSubmissionForm', () => {
         })
 
         it('shows a generic error fetching submission fails at documents', async () => {
+            const mockSubmission = mockDraftHealthPlanPackage()
             renderWithProviders(
                 <Routes>
-                    <Route
-                        path={RoutesRecord.SUBMISSIONS_EDIT_TOP_LEVEL}
-                        element={<StateSubmissionForm />}
-                    />
+                    <Route element={<SubmissionSideNav />}>
+                        <Route
+                            path={RoutesRecord.SUBMISSIONS_EDIT_TOP_LEVEL}
+                            element={<StateSubmissionForm />}
+                        />
+                    </Route>
                 </Routes>,
                 {
                     apolloProvider: {
                         mocks: [
                             fetchCurrentUserMock({ statusCode: 200 }),
                             fetchHealthPlanPackageMockAuthFailure(),
+                            fetchStateHealthPlanPackageWithQuestionsMockSuccess(
+                                {
+                                    id: '15',
+                                    stateSubmission: mockSubmission,
+                                }
+                            ),
                         ],
                     },
                     routerProvider: { route: '/submissions/15/edit/documents' },
@@ -446,10 +575,12 @@ describe('StateSubmissionForm', () => {
 
             renderWithProviders(
                 <Routes>
-                    <Route
-                        path={RoutesRecord.SUBMISSIONS_EDIT_TOP_LEVEL}
-                        element={<StateSubmissionForm />}
-                    />
+                    <Route element={<SubmissionSideNav />}>
+                        <Route
+                            path={RoutesRecord.SUBMISSIONS_EDIT_TOP_LEVEL}
+                            element={<StateSubmissionForm />}
+                        />
+                    </Route>
                 </Routes>,
                 {
                     apolloProvider: {
@@ -460,6 +591,12 @@ describe('StateSubmissionForm', () => {
                                 id: '15',
                             }),
                             updateHealthPlanFormDataMockAuthFailure(),
+                            fetchStateHealthPlanPackageWithQuestionsMockSuccess(
+                                {
+                                    id: '15',
+                                    stateSubmission: mockSubmission,
+                                }
+                            ),
                         ],
                     },
                     routerProvider: { route: '/submissions/15/edit/type' },
@@ -488,12 +625,15 @@ describe('StateSubmissionForm', () => {
         })
 
         it('shows a generic 404 page when package is not found', async () => {
+            const mockSubmission = mockDraftHealthPlanPackage()
             renderWithProviders(
                 <Routes>
-                    <Route
-                        path={RoutesRecord.SUBMISSIONS_EDIT_TOP_LEVEL}
-                        element={<StateSubmissionForm />}
-                    />
+                    <Route element={<SubmissionSideNav />}>
+                        <Route
+                            path={RoutesRecord.SUBMISSIONS_EDIT_TOP_LEVEL}
+                            element={<StateSubmissionForm />}
+                        />
+                    </Route>
                 </Routes>,
                 {
                     apolloProvider: {
@@ -502,6 +642,12 @@ describe('StateSubmissionForm', () => {
                             fetchHealthPlanPackageMockNotFound({
                                 id: '404',
                             }),
+                            fetchStateHealthPlanPackageWithQuestionsMockSuccess(
+                                {
+                                    id: '404',
+                                    stateSubmission: mockSubmission,
+                                }
+                            ),
                         ],
                     },
                     routerProvider: { route: '/submissions/404/edit/type' },
@@ -525,10 +671,12 @@ describe('StateSubmissionForm', () => {
             const submission = mockUnlockedHealthPlanPackageWithDocuments()
             renderWithProviders(
                 <Routes>
-                    <Route
-                        path={RoutesRecord.SUBMISSIONS_EDIT_TOP_LEVEL}
-                        element={<StateSubmissionForm />}
-                    />
+                    <Route element={<SubmissionSideNav />}>
+                        <Route
+                            path={RoutesRecord.SUBMISSIONS_EDIT_TOP_LEVEL}
+                            element={<StateSubmissionForm />}
+                        />
+                    </Route>
                 </Routes>,
                 {
                     apolloProvider: {
@@ -538,6 +686,12 @@ describe('StateSubmissionForm', () => {
                                 id: '15',
                                 submission,
                             }),
+                            fetchStateHealthPlanPackageWithQuestionsMockSuccess(
+                                {
+                                    id: '15',
+                                    stateSubmission: submission,
+                                }
+                            ),
                         ],
                     },
                     routerProvider: { route: '/submissions/15/edit/documents' },

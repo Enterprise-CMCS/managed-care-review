@@ -11,6 +11,7 @@ import {
     fetchStateHealthPlanPackageWithQuestionsMockSuccess,
     mockQuestionsPayload,
     mockValidUser,
+    mockDraftHealthPlanPackage,
 } from '../../testHelpers/apolloMocks'
 import { IndexQuestionsPayload } from '../../gen/gqlClient'
 
@@ -463,6 +464,52 @@ describe('QuestionResponse', () => {
             expect(
                 screen.queryByRole('link', { name: /Add questions/ })
             ).not.toBeInTheDocument()
+        })
+    })
+    describe('errors', () => {
+        it('shows generic error if submission is a draft', async () => {
+            const mockSubmission = mockDraftHealthPlanPackage()
+            renderWithProviders(
+                <Routes>
+                    <Route element={<SubmissionSideNav />}>
+                        <Route
+                            path={
+                                RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS
+                            }
+                            element={<QuestionResponse />}
+                        />
+                    </Route>
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                user: mockValidCMSUser({
+                                    divisionAssignment: 'OACT',
+                                }),
+                                statusCode: 200,
+                            }),
+                            fetchStateHealthPlanPackageWithQuestionsMockSuccess(
+                                {
+                                    id: '15',
+                                    stateSubmission: mockSubmission,
+                                    questions: mockQuestionsPayload('15'),
+                                }
+                            ),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/15/question-and-answers',
+                    },
+                    featureFlags: {
+                        'cms-questions': true,
+                    },
+                }
+            )
+
+            await waitFor(() => {
+                expect(screen.getByText('System error')).toBeInTheDocument()
+            })
         })
     })
 })

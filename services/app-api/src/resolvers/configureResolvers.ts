@@ -158,7 +158,7 @@ export function configureResolvers(
         CMSUser: cmsUserResolver,
         HealthPlanPackage: healthPlanPackageResolver(store),
         Rate: rateResolver,
-        RateRevision: rateRevisionResolver,
+        RateRevision: rateRevisionResolver(store),
         Contract: contractResolver(),
         UnlockedContract: unlockedContractResolver(),
         ContractRevision: contractRevisionResolver(store),
