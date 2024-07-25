@@ -38,7 +38,14 @@ type Query {
     CMSUsers can find all the packages that do not have the DRAFT status
     """
     indexHealthPlanPackages: IndexHealthPlanPackagesPayload!
+    
+    """
+    indexContracts returns all of the contracts the current user can see.
 
+    StateUsers can find all the contracts for their state
+    CMSUsers can find all the contracts that do not have the DRAFT status
+    """
+    indexContracts: IndexContractsPayload!
     """
     indexUsers returns all of the Users in the system.
 
@@ -518,10 +525,20 @@ type HealthPlanPackageEdge {
     node: HealthPlanPackage!
 }
 
+type ContractEdge {
+    node: Contract!
+}
+
 type IndexHealthPlanPackagesPayload {
     totalCount: Int
     edges: [HealthPlanPackageEdge!]!
 }
+
+type IndexContractsPayload {
+    totalCount: Int
+    edges: [ContractEdge!]!
+}
+
 
 input IndexQuestionsInput {
     "The ID of the package for which to fetch associated questions"

@@ -1,0 +1,283 @@
+query indexContracts {
+    indexContracts {
+        totalCount
+        edges {
+            node {
+                ...contractFieldsFetchContract
+
+                draftRevision {
+                    ...contractRevisionFragmentForIndex
+                }
+
+                draftRates {
+                    ...rateFields
+
+                    draftRevision {
+                        ...rateRevisionFragmentForIndexContract
+                    }
+
+                    revisions {
+                        ...rateRevisionFragmentForIndexContract
+                    }
+                }
+
+                packageSubmissions {
+                    ...packageSubmissionsFragmentForIndex
+                }
+            }
+        }
+    }
+}
+
+fragment contractFieldsFetchContract on Contract {
+    id
+    status
+    createdAt
+    updatedAt
+    initiallySubmittedAt
+    stateCode
+    mccrsID
+    state {
+        code
+        name
+        programs {
+            id
+            name
+            fullName
+            isRateProgram
+        }
+    }
+
+    stateNumber
+}
+
+fragment rateFields on Rate {
+    id
+    createdAt
+    updatedAt
+    stateCode
+    stateNumber
+    parentContractID
+    state {
+        code
+        name
+        programs {
+            id
+            name
+            fullName
+            isRateProgram
+        }
+    }
+    status
+    parentContractID
+    initiallySubmittedAt
+}
+
+fragment rateRevisionFragmentForIndexContract on RateRevision {
+    id
+    rateID
+    createdAt
+    updatedAt
+    unlockInfo {
+        updatedAt
+        updatedBy
+        updatedReason
+    }
+    submitInfo {
+        updatedAt
+        updatedBy
+        updatedReason
+    }
+    formData {
+        rateType
+        rateCapitationType
+        rateDocuments {
+            name
+            s3URL
+            sha256
+            dateAdded
+            downloadURL
+        }
+        supportingDocuments {
+            name
+            s3URL
+            sha256
+            dateAdded
+            downloadURL
+        }
+        rateDateStart
+        rateDateEnd
+        rateDateCertified
+        amendmentEffectiveDateStart
+        amendmentEffectiveDateEnd
+        rateProgramIDs
+        deprecatedRateProgramIDs
+        rateCertificationName
+        certifyingActuaryContacts {
+            id
+            name
+            titleRole
+            email
+            actuarialFirm
+            actuarialFirmOther
+        }
+        addtlActuaryContacts {
+            id
+            name
+            titleRole
+            email
+            actuarialFirm
+            actuarialFirmOther
+        }
+        actuaryCommunicationPreference
+        packagesWithSharedRateCerts {
+            packageName
+            packageId
+            packageStatus
+        }
+    }
+    contractRevisions {
+        id
+        contract {
+            id
+            stateCode
+            stateNumber
+        }
+        createdAt
+        updatedAt
+        submitInfo {
+            updatedAt
+            updatedBy
+            updatedReason
+        }
+        unlockInfo {
+            updatedAt
+            updatedBy
+            updatedReason
+        }
+        formData {
+            ...contractFormDataFragmentForIndex
+        }
+    }
+}
+
+fragment contractFormDataFragmentForIndex on ContractFormData {
+    programIDs
+
+    populationCovered
+    submissionType
+
+    riskBasedContract
+    submissionDescription
+
+    stateContacts {
+        name
+        titleRole
+        email
+    }
+
+    supportingDocuments {
+        name
+        s3URL
+        sha256
+        dateAdded
+        downloadURL
+    }
+
+    contractType
+    contractExecutionStatus
+    contractDocuments {
+        name
+        s3URL
+        sha256
+        dateAdded
+        downloadURL
+    }
+
+    contractDateStart
+    contractDateEnd
+    managedCareEntities
+    federalAuthorities
+    inLieuServicesAndSettings
+    modifiedBenefitsProvided
+    modifiedGeoAreaServed
+    modifiedMedicaidBeneficiaries
+    modifiedRiskSharingStrategy
+    modifiedIncentiveArrangements
+    modifiedWitholdAgreements
+    modifiedStateDirectedPayments
+    modifiedPassThroughPayments
+    modifiedPaymentsForMentalDiseaseInstitutions
+    modifiedMedicaidBeneficiaries
+    modifiedMedicalLossRatioStandards
+    modifiedOtherFinancialPaymentIncentive
+    modifiedEnrollmentProcess
+    modifiedGrevienceAndAppeal
+    modifiedNetworkAdequacyStandards
+    modifiedLengthOfContract
+    modifiedNonRiskPaymentArrangements
+    statutoryRegulatoryAttestation
+    statutoryRegulatoryAttestationDescription
+}
+
+fragment contractRevisionFragmentForIndex on ContractRevision {
+    id
+    createdAt
+    updatedAt
+    contractName
+
+    submitInfo {
+        updatedAt
+        updatedBy
+        updatedReason
+    }
+
+    unlockInfo {
+        updatedAt
+        updatedBy
+        updatedReason
+    }
+
+    formData {
+        ...contractFormDataFragmentForIndex
+    }
+}
+
+fragment packageSubmissionsFragmentForIndex on ContractPackageSubmission {
+    cause
+    submitInfo {
+        ...updateInformationFields
+    }
+
+    submittedRevisions {
+        ...submittableRevisionsFieldsForIndex
+    }
+
+    contractRevision {
+        ...contractRevisionFragmentForIndex
+    }
+    rateRevisions {
+        ...rateRevisionFragmentForIndexContract
+        rate {
+            ...rateFields
+            revisions {
+                ...rateRevisionFragmentForIndexContract
+            }
+        }
+    }
+}
+
+fragment submittableRevisionsFieldsForIndex on SubmittableRevision {
+    ... on ContractRevision {
+        ...contractRevisionFragmentForIndex
+    }
+    ... on RateRevision {
+        ...rateRevisionFragmentForIndexContract
+    }
+}
+
+fragment updateInformationFields on UpdateInformation {
+    updatedAt
+    updatedBy
+    updatedReason
+}
