@@ -230,7 +230,6 @@ describe('withdrawAndReplaceRedundantRate', () => {
                 },
             },
         })
-
         expect(adminResult.errors).toBeDefined()
     })
 })
