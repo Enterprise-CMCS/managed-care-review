@@ -1,15 +1,11 @@
 import '@tanstack/react-table'
 
-declare module '@tanstack/table-core' {
+declare module '@tanstack/react-table' {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     interface ColumnMeta<TData extends RowData, TValue> {
         dataTestID: string
     }
     interface FilterFns {
         dateRangeFilter: FilterFn<unknown>
     }
-
-    type FilterFnOption<TData extends RowData> =
-        | keyof FilterFns
-        | FilterFn<TData>
-        | 'dateRangeFilter' // Add this line
 }
