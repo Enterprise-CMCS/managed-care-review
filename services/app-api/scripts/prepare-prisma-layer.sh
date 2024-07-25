@@ -31,6 +31,7 @@ function preparePrismaLayer() {
     cp ./../../node_modules/.pnpm/node_modules/@prisma/engines/package.json lambda-layers-prisma-client-migration/nodejs/node_modules/@prisma/engines/package.json
     rsync -av ./../../node_modules/.pnpm/node_modules/@prisma/engines/dist/ lambda-layers-prisma-client-migration/nodejs/node_modules/@prisma/engines/dist
     rsync -av ./../../node_modules/.pnpm/node_modules/@prisma/debug/ lambda-layers-prisma-client-migration/nodejs/node_modules/@prisma/debug
+    rsync -av ./../../node_modules/.pnpm/node_modules/@prisma/engines-version/ lambda-layers-prisma-client-migration/nodejs/node_modules/@prisma/engines-version
     rsync -av ./../../node_modules/.pnpm/node_modules/@prisma/fetch-engine/ lambda-layers-prisma-client-migration/nodejs/node_modules/@prisma/fetch-engine
     rsync -av ./../../node_modules/.pnpm/node_modules/@prisma/get-platform/ lambda-layers-prisma-client-migration/nodejs/node_modules/@prisma/get-platform
 
@@ -40,6 +41,7 @@ function preparePrismaLayer() {
     rsync -av ./../../node_modules/.pnpm/@prisma+client@5.17.0_prisma@5.17.0/node_modules/.prisma/ lambda-layers-prisma-client-engine/nodejs/node_modules/.prisma 
     rsync -av ./../../node_modules/.pnpm/node_modules/@prisma/engines/dist/ lambda-layers-prisma-client-migration/nodejs/node_modules/@prisma/engines/dist
     rsync -av ./../../node_modules/.pnpm/node_modules/@prisma/debug/ lambda-layers-prisma-client-migration/nodejs/node_modules/@prisma/debug
+    rsync -av ./../../node_modules/.pnpm/node_modules/@prisma/engines-version/ lambda-layers-prisma-client-migration/nodejs/node_modules/@prisma/engines-version
     rsync -av ./../../node_modules/.pnpm/node_modules/@prisma/fetch-engine/ lambda-layers-prisma-client-migration/nodejs/node_modules/@prisma/fetch-engine
     rsync -av ./../../node_modules/.pnpm/node_modules/@prisma/get-platform/ lambda-layers-prisma-client-migration/nodejs/node_modules/@prisma/get-platform
 
