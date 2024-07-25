@@ -23,6 +23,8 @@ type TealiumEvent =
     | 'external_link_clicked'
     | 'back_button'
     | 'dropdown_selection'
+    | 'filters_applied'
+    | 'filter_removed'
 
 type TealiumEnv =
     | 'prod'
@@ -103,6 +105,26 @@ type LinkEventParentComponentType =
     | 'app page'
     | 'top navigation'
 
+type TealiumFilterAppliedType = {
+    event_name: 'filters_applied'
+    search_result_count: string
+    link_type?: 'link_other'
+    results_count_after_filtering: string
+    results_count_prior_to_filtering: string
+    filter_categories_used: string
+}
+
+type TealiumFilterRemovedType = {
+    event_name: 'filter_removed'
+    search_result_count: string
+    link_type?: 'link_other'
+    filter_categories_used: string
+}
+
+type TealiumFilterEventObject = (
+    TealiumFilterAppliedType | TealiumFilterRemovedType
+) & Partial<TealiumDataObject>
+
 type TealiumLinkDataObject = {
     tealium_event: TealiumEvent // event is required for user tracking links
 } & Partial<TealiumDataObject>
@@ -113,6 +135,7 @@ type TealiumEventObjectTypes =
     | TealiumButtonEventObject
     | TealiumLinkEventObject
     | TealiumDropdownSelectionEventObject
+    | TealiumFilterEventObject
 
 type TealiumClientType = {
     initializeTealium: () => void
@@ -303,5 +326,6 @@ export type {
     TealiumClientType,
     TealiumEnv,
     ButtonEventStyle,
-    TealiumDropdownSelectionEventObject
+    TealiumDropdownSelectionEventObject,
+    TealiumFilterEventObject
 }

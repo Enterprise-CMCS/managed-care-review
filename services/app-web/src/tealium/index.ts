@@ -23,5 +23,6 @@ export type {
     TealiumClientType,
     TealiumEnv,
     ButtonEventStyle,
-    TealiumDropdownSelectionEventObject
+    TealiumDropdownSelectionEventObject,
+    TealiumFilterEventObject
 } from './tealium'

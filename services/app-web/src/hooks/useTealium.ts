@@ -2,7 +2,8 @@ import React from 'react'
 import type {
     TealiumButtonEventObject,
     TealiumLinkEventObject,
-    TealiumDropdownSelectionEventObject
+    TealiumDropdownSelectionEventObject,
+    TealiumFilterEventObject
 } from '../tealium'
 import { TealiumContext } from '../contexts/TealiumContext';
 
@@ -16,6 +17,9 @@ const useTealium = (): {
     logDropdownSelectionEvent: (
         tealiumData: Omit<TealiumDropdownSelectionEventObject, 'event_name'>
     ) => void
+    logFilterEvent: (
+        tealiumData: TealiumFilterEventObject
+    ) => void
 } => {
     const context = React.useContext(TealiumContext)
 
@@ -24,7 +28,8 @@ const useTealium = (): {
         return {
             logButtonEvent: warnNoTealium,
             logInternalLinkEvent: warnNoTealium,
-            logDropdownSelectionEvent: warnNoTealium
+            logDropdownSelectionEvent: warnNoTealium,
+            logFilterEvent: warnNoTealium
         };
     }
 
@@ -61,7 +66,11 @@ const useTealium = (): {
         logUserEvent(linkData, pathname, loggedInUser, heading)
     }
 
-    return { logButtonEvent, logInternalLinkEvent, logDropdownSelectionEvent }
+    const logFilterEvent = (
+        tealiumData: TealiumFilterEventObject
+    ) => logUserEvent(tealiumData, pathname, loggedInUser, heading)
+
+    return { logButtonEvent, logInternalLinkEvent, logDropdownSelectionEvent, logFilterEvent }
 }
 
 export { useTealium }
