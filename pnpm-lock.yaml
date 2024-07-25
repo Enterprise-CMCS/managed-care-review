@@ -814,6 +814,9 @@ importers:
       prettier:
         specifier: ^3.1.0
         version: 3.2.5
+      serverless:
+        specifier: ^3.39.0
+        version: 3.39.0(encoding@0.1.13)
       serverless-iam-helper:
         specifier: https://github.com/CMSgov/serverless-iam-helper
         version: git+https://git@github.com:CMSgov/serverless-iam-helper.git#ffcca526d127cf0e791f0d931d442f4131953483(serverless@3.39.0(encoding@0.1.13))

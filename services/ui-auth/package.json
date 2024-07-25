@@ -9,6 +9,7 @@
     "license": "CC0-1.0",
     "devDependencies": {
         "prettier": "^3.1.0",
+        "serverless": "^3.39.0",
         "serverless-iam-helper": "https://github.com/CMSgov/serverless-iam-helper",
         "serverless-stack-termination-protection": "^2.0.2",
         "serverless-s3-bucket-helper": "https://github.com/CMSgov/serverless-s3-bucket-helper"
