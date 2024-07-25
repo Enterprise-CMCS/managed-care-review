@@ -19,6 +19,7 @@ import {
 } from '../StateSubmission/RateDetails'
 import { useS3 } from '../../contexts/S3Context'
 import { useFormikContext } from 'formik'
+import { useTealium } from '../../hooks'
 
 export interface LinkRateOptionType {
     readonly value: string
@@ -36,12 +37,14 @@ export type LinkRateSelectPropType = {
     name: string
     initialValue: string | undefined
     autofill: (rateForm: FormikRateForm) => void // used for multi-rates, when called will FieldArray replace the existing form fields with new data
+    label?: string
 }
 
 export const LinkRateSelect = ({
     name,
     initialValue,
     autofill,
+    label,
     ...selectProps
 }: LinkRateSelectPropType & Props<LinkRateOptionType, false>) => {
     const { values }: { values: RateDetailFormConfig } = useFormikContext()
@@ -50,6 +53,7 @@ export const LinkRateSelect = ({
     const { loggedInUser } = useAuth()
     const user = loggedInUser as StateUser
     const statePrograms = user.state.programs
+    const { logDropdownSelectionEvent } = useTealium()
 
     const rates = data?.indexRates.edges.map((e) => e.node) || []
 
@@ -121,6 +125,10 @@ export const LinkRateSelect = ({
             // put already selected fields back in place
             linkedRateForm.ratePreviouslySubmitted = 'YES'
 
+            logDropdownSelectionEvent({
+                text: newValue.label,
+                heading: label,
+            })
             autofill(linkedRateForm)
         } else if (action === 'clear') {
             const emptyRateForm = convertGQLRateToRateForm(getKey)
@@ -128,6 +136,10 @@ export const LinkRateSelect = ({
             // put already selected fields back in place
             emptyRateForm.ratePreviouslySubmitted = 'YES'
 
+            logDropdownSelectionEvent({
+                text: 'clear',
+                heading: label,
+            })
             autofill(emptyRateForm)
         }
     }

@@ -24,6 +24,7 @@ import { wrapApolloResult } from '../../../gqlHelpers/apolloQueryWrapper'
 import { handleApolloError } from '../../../gqlHelpers/apolloErrors'
 import { updateCMSUser } from '../../../gqlHelpers/updateCMSUser'
 import { ApolloError } from '@apollo/client'
+import { useTealium } from '../../../hooks'
 
 declare module '@tanstack/table-core' {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -50,6 +51,7 @@ function DivisionSelect({
     setDivision: SetDivisionCallbackType
 }): React.ReactElement {
     const [updateErrored, setUpdateErrored] = useState<boolean>(false)
+    const { logDropdownSelectionEvent } = useTealium()
 
     async function handleChange(
         selectedOption: OnChangeValue<DivisionSelectOptions, false>,
@@ -60,6 +62,10 @@ function DivisionSelect({
             if (err) {
                 setUpdateErrored(true)
             } else {
+                logDropdownSelectionEvent({
+                    text: selectedOption.value,
+                    heading: 'Division',
+                })
                 setUpdateErrored(false)
             }
         }
@@ -217,7 +223,6 @@ export const CMSUsersTable = (): React.ReactElement => {
                 }
                 return res
             }
-
             return undefined
         },
         [updateCmsUserMutation]

@@ -240,6 +240,7 @@ export const SingleRateFormFields = ({
                     inputId={`${fieldNamePrefix}.rateProgramIDs`}
                     programIDs={rateForm.rateProgramIDs}
                     aria-label={'programs (required)'}
+                    label="What rates are included in this certification?"
                 />
             </FormGroup>
 
