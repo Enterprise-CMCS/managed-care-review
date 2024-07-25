@@ -6,7 +6,7 @@ function preparePrismaLayer() {
     rm -rf lambda-layers-prisma-client-engine
 
     echo "Creating migration layer ..."
-    mkdir -p lambda-layers-prisma-client-migration/nodejs/node_modules/.prisma
+    #mkdir -p lambda-layers-prisma-client-migration/nodejs/node_modules/.prisma
     mkdir -p lambda-layers-prisma-client-migration/nodejs/node_modules/@prisma/engines
     mkdir -p lambda-layers-prisma-client-migration/nodejs/node_modules/prisma
     mkdir -p lambda-layers-prisma-client-migration/nodejs/prisma
@@ -14,28 +14,28 @@ function preparePrismaLayer() {
     mkdir -p lambda-layers-prisma-client-migration/nodejs/gen
 
     echo "Creating engine layer ..."
-    mkdir -p lambda-layers-prisma-client-engine/nodejs/node_modules/.prisma
+    #mkdir -p lambda-layers-prisma-client-engine/nodejs/node_modules/.prisma
     mkdir -p lambda-layers-prisma-client-engine/nodejs/node_modules/@prisma/engines
     mkdir -p lambda-layers-prisma-client-engine/nodejs/node_modules/prisma
     mkdir -p lambda-layers-prisma-client-engine/nodejs/prisma
 
     echo "Generate RHEL client..."
-    PRISMA_CLI_BINARY_TARGETS=rhel-openssl-3.0.x pnpm prisma generate
+    PRISMA_CLI_BINARY_TARGETS=rhel-openssl-3.0.x pnpm exec prisma generate
 
     echo "Prepare Prisma Client Migration lambda layer"
     rsync -av node_modules/@prisma/client/ lambda-layers-prisma-client-migration/nodejs/node_modules/@prisma/client
     rsync -av node_modules/prisma/ lambda-layers-prisma-client-migration/nodejs/node_modules/prisma
-    rsync -av node_modules/.prisma/ lambda-layers-prisma-client-migration/nodejs/node_modules/.prisma
-    cp node_modules/@prisma/engines/migration-engine-rhel-openssl-3.0.x lambda-layers-prisma-client-migration/nodejs/node_modules/@prisma/engines/
-    cp node_modules/@prisma/engines/libquery_engine-rhel-openssl-3.0.x.so.node lambda-layers-prisma-client-migration/nodejs/node_modules/@prisma/engines/
-    cp node_modules/@prisma/engines/package.json lambda-layers-prisma-client-migration/nodejs/node_modules/@prisma/engines/package.json
-    rsync -av node_modules/@prisma/engines/dist/ lambda-layers-prisma-client-migration/nodejs/node_modules/@prisma/engines/dist
+    rsync -av ./../../node_modules/.pnpm/@prisma+client@5.17.0_prisma@5.17.0/node_modules/.prisma/ lambda-layers-prisma-client-migration/nodejs/node_modules/.prisma 
+    cp ./../../node_modules/.pnpm/node_modules/@prisma/engines/libquery_engine-rhel-openssl-3.0.x.so.node lambda-layers-prisma-client-migration/nodejs/node_modules/@prisma/engines/
+    cp ./../../node_modules/.pnpm/node_modules/@prisma/engines/schema-engine-rhel-openssl-3.0.x lambda-layers-prisma-client-migration/nodejs/node_modules/@prisma/engines/
+    cp ./../../node_modules/.pnpm/node_modules/@prisma/engines/package.json lambda-layers-prisma-client-migration/nodejs/node_modules/@prisma/engines/package.json
+    rsync -av ./../../node_modules/.pnpm/node_modules/@prisma/engines/dist/ lambda-layers-prisma-client-migration/nodejs/node_modules/@prisma/engines/dist
 
     echo "Prepare Prisma Client Engine lambda layer"
     rsync -av node_modules/@prisma/client/ lambda-layers-prisma-client-engine/nodejs/node_modules/@prisma/client
     rsync -av node_modules/prisma/ lambda-layers-prisma-client-engine/nodejs/node_modules/prisma
-    rsync -av node_modules/.prisma/ lambda-layers-prisma-client-engine/nodejs/node_modules/.prisma
-    rsync -av node_modules/@prisma/engines/dist/ lambda-layers-prisma-client-engine/nodejs/node_modules/@prisma/engines/dist
+    rsync -av ./../../node_modules/.pnpm/@prisma+client@5.17.0_prisma@5.17.0/node_modules/.prisma/ lambda-layers-prisma-client-engine/nodejs/node_modules/.prisma 
+    rsync -av ./../../node_modules/.pnpm/node_modules/@prisma/engines/dist/ lambda-layers-prisma-client-migration/nodejs/node_modules/@prisma/engines/dist
 
     echo "Copy schema migration files to layer..."
     rsync -av prisma/ lambda-layers-prisma-client-migration/nodejs/prisma
@@ -53,7 +53,7 @@ function preparePrismaLayer() {
     rm -rf lambda-layers-prisma-client-engine/nodejs/node_modules/@prisma/cli
 
     echo "Remove non-RHEL bins to save space ..."
-    rm -rf lambda-layers-prisma-client-migration/nodejs/node_modules/.prisma/client/libquery_engine-debian-openssl-1.1.x.so.node
+    rm -rf lambda-layers-prisma-client-migration/nodejs/node_modules/.prisma/dd[d[client/libquery_engine-debian-openssl-1.1.x.so.node
     rm -rf lambda-layers-prisma-client-migration/nodejs/node_modules/.prisma/client/libquery_engine-debian-openssl-3.0.x.so.node
     rm -rf lambda-layers-prisma-client-migration/nodejs/node_modules/prisma/engines
     rm -rf lambda-layers-prisma-client-migration/nodejs/node_modules/prisma/libquery_engine-debian-openssl-1.1.x.so.node
