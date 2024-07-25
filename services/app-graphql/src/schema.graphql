@@ -1496,7 +1496,10 @@ type Rate {
     stateNumber: Int!
     "parentContractID is the ID of the contract that initially submitted this rate"
     parentContractID: ID!
-    "The currently modifiable revision if the rate is DRAFT or UNLOCKED"
+    "withdrawInfo is the who/when/why for this rate being withdrawn. Rates actively in use in the system will not have a withdrawInfo"
+    withdrawInfo: UpdateInformation
+
+    "The currently modifiable revision of the rate. Only present when rate has a status of DRAFT or UNLOCKED"
     draftRevision: RateRevision
     """
     Array of revisions for this rate. Each revision represents a single submission

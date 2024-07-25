@@ -152,7 +152,11 @@ fragment rateFieldsForFetchRate on Rate {
     status
     parentContractID
     initiallySubmittedAt
-
+    withdrawInfo {
+        updatedAt
+        updatedBy
+        updatedReason
+    }
     packageSubmissions {
         ...packageSubmissionsFragmentForFetchRate
     }

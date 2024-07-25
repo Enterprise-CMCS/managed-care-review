@@ -24,7 +24,7 @@ async function withdrawRateInsideTransaction(
             },
         })
 
-        if (rate.withdrawInfoID !== undefined) {
+        if (rate.withdrawInfoID !== null) {
             const err = `PRISMA ERROR: Cannot withdraw rate more than once. See rate id: ${rateID}`
             return new Error(err)
         }

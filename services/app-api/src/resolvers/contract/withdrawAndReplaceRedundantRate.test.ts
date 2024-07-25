@@ -7,7 +7,41 @@ import {
     fetchTestContract,
     updateTestContractToReplaceRate,
 } from '../../testHelpers/gqlContractHelpers'
+import { type ApolloServer } from 'apollo-server-lambda'
+import { fetchTestRateById } from '../../testHelpers'
+import { type ContractRevision } from '../../gen/gqlServer'
 
+// Setup function for testing withdraw and replace rate
+// returns a the target contractID and ids for the child rate to be withdrawn and the replacement
+const setupWithdrawRateTestData = async (
+    stateServer: ApolloServer
+): Promise<{
+    contractID: string
+    replacementRateID: string
+    withdrawnRateID: string
+}> => {
+    // submit two contracts with rates
+    const contract1 = await createAndSubmitTestContractWithRate(stateServer)
+    const contract2 = await createAndSubmitTestContractWithRate(stateServer)
+
+    // contract 1 is the target contract, prepare to withdraw and replace rate
+    const withdrawnRateID =
+        contract1.packageSubmissions[0].rateRevisions[0].rateID
+    if (!withdrawnRateID) {
+        throw Error('Not getting expected data for contract with rates')
+    }
+
+    const replacementRateID =
+        contract2.packageSubmissions[0].rateRevisions[0].rateID
+    if (!replacementRateID) {
+        throw Error('Not getting expected data for contract with rates')
+    }
+    return {
+        contractID: contract1.id,
+        replacementRateID,
+        withdrawnRateID,
+    }
+}
 describe('withdrawAndReplaceRedundantRate', () => {
     const mockS3 = testS3Client()
     const adminUser = testAdminUser()
@@ -16,44 +50,31 @@ describe('withdrawAndReplaceRedundantRate', () => {
         const stateServer = await constructTestPostgresServer({
             s3Client: mockS3,
         })
-        const cmsServer = await constructTestPostgresServer({
+        const adminServer = await constructTestPostgresServer({
             context: {
                 user: adminUser,
             },
             s3Client: mockS3,
         })
-        // submit two contracts with rates
-        const contract1 = await createAndSubmitTestContractWithRate(stateServer)
-        const contract2 = await createAndSubmitTestContractWithRate(stateServer)
 
-        // we are going to replace a rate on contract 1
-        // first identify rate that is going to be withdrawn and rate that will be replacement
-        const withdrawnRateID =
-            contract1.packageSubmissions[0].rateRevisions[0].rateID
-        if (!withdrawnRateID) {
-            throw Error('Not getting expected data for contract with rates')
-        }
-
-        const replacementRate = contract2.packageSubmissions[0].rateRevisions[0]
-        if (!replacementRate) {
-            throw Error('Not getting expected data for ontract with rates')
-        }
+        const { contractID, replacementRateID, withdrawnRateID } =
+            await setupWithdrawRateTestData(stateServer)
 
         // replace rate on contract 1 with linked rate from contract 2
         const replaceReason = 'Admin has to clean things up'
-        await updateTestContractToReplaceRate(cmsServer, {
-            contractID: contract1.id,
+        await updateTestContractToReplaceRate(adminServer, {
+            contractID: contractID,
             replaceReason,
-            replacementRateID: replacementRate.id,
+            replacementRateID: replacementRateID,
             withdrawnRateID,
         })
 
         const refetchContract1 = await fetchTestContract(
-            cmsServer,
-            contract1.id
+            adminServer,
+            contractID
         )
 
-        // Check unlock and resubmit logs are correct
+        // Check unlock and resubmit logs are correct on both target contract and the latest packageSubmission
         expect(refetchContract1.packageSubmissions).toHaveLength(2)
         expect(refetchContract1.status).toBe('RESUBMITTED')
         expect(
@@ -61,7 +82,7 @@ describe('withdrawAndReplaceRedundantRate', () => {
         ).toBe(replaceReason)
         expect(
             refetchContract1.packageSubmissions[0].submitInfo.updatedBy
-        ).toBe(adminUser.id)
+        ).toBe(adminUser.email)
         expect(
             refetchContract1.packageSubmissions[0].contractRevision.unlockInfo
                 ?.updatedReason
@@ -69,7 +90,7 @@ describe('withdrawAndReplaceRedundantRate', () => {
         expect(
             refetchContract1.packageSubmissions[0].contractRevision.unlockInfo
                 ?.updatedBy
-        ).toBe(adminUser.id)
+        ).toBe(adminUser.email)
 
         // Check that rate data is correct for latest submission
         expect(
@@ -77,11 +98,49 @@ describe('withdrawAndReplaceRedundantRate', () => {
         ).not.toBe(withdrawnRateID)
         expect(
             refetchContract1.packageSubmissions[0].rateRevisions[0].rateID
-        ).toBe(replacementRate.id)
+        ).toBe(replacementRateID)
     })
 
-    it.todo('withdraws rate and adjusts review status')
-    it.todo('does not re-validate contract data to replace rate')
+    it('withdraws rate, logs correct withdrawInfo', async () => {
+        const stateServer = await constructTestPostgresServer({
+            s3Client: mockS3,
+        })
+        const adminServer = await constructTestPostgresServer({
+            context: {
+                user: adminUser,
+            },
+            s3Client: mockS3,
+        })
+
+        const { contractID, replacementRateID, withdrawnRateID } =
+            await setupWithdrawRateTestData(stateServer)
+
+        const replaceReason = 'Admin has to replace a redundant rate'
+        await updateTestContractToReplaceRate(adminServer, {
+            contractID: contractID,
+            replaceReason,
+            replacementRateID: replacementRateID,
+            withdrawnRateID,
+        })
+
+        const withdrawnRate = await fetchTestRateById(
+            adminServer,
+            withdrawnRateID
+        )
+
+        expect(withdrawnRate.withdrawInfo).toBeTruthy()
+        expect(withdrawnRate.withdrawInfo?.updatedReason).toBe(replaceReason)
+        const relatedContracts: ContractRevision[] =
+            withdrawnRate.packageSubmissions
+                ? withdrawnRate.packageSubmissions[0].contractRevisions
+                : []
+        expect(relatedContracts).toHaveLength(0) // withdrawn rate should be detached entirely from contracts
+        // TODO add assertion checking the review status
+    })
+
+    it.todo(
+        'does not change or re-validate contract data, just replace rate as is'
+    )
     // old form data
     // double check submit contract logic
     // make sure submit can't fail with old style rate programs - make sure its still there - its not getting stripped away

@@ -204,7 +204,7 @@ async function updateTestContractToReplaceRate(
         throw new Error('updateContractToReplaceRate returned nothing')
     }
 
-    return result.data.fetchContract.contract
+    return result.data.withdrawAndReplaceRedundantRate.contract
 }
 
 // USING PRISMA DIRECTLY BELOW ---  we have no createContract resolver yet, but we have integration tests needing the workflows
