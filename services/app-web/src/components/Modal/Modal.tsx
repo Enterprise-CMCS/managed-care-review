@@ -73,6 +73,9 @@ export const Modal = ({
             id={id}
             ref={modalRef}
             className={`${styles.modal} ${className}`}
+            placeholder={null}
+            onPointerEnterCapture={null}
+            onPointerLeaveCapture={null}
         >
             {modalHeading && (
                 <ModalHeading id={`${id}-heading`}>{modalHeading}</ModalHeading>
