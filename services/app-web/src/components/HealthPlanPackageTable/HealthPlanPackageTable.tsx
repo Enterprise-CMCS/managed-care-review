@@ -43,18 +43,6 @@ declare module '@tanstack/table-core' {
     }
 }
 
-export type RateInDashboardType = {
-    id: string
-    name: string
-    submittedAt?: string
-    updatedAt: Date
-    status: HealthPlanPackageStatus
-    programs: Program[]
-    rateType?: string
-    ratePeriodStart: Date
-    ratePeriodEnd: Date
-    stateName?: string
-}
 export type PackageInDashboardType = {
     id: string
     name: string
