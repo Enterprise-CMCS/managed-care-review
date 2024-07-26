@@ -307,11 +307,12 @@ describe('SingleRateSummarySection', () => {
                     featureFlags: { 'rate-edit-unlock': true },
                 }
             )
-            expect(
-                await screen.findByRole('button', {
-                    name: 'Unlock rate',
-                })
-            ).toBeInTheDocument()
+
+            await screen.findByRole('button', {
+                name: 'Unlock rate',
+            })
+
+            expect(screen.getByText('Unlock rate')).toBeDefined()
         })
 
         it('renders unlock button that redirects to contract submission page when linked rates on but standalone rate edit and unlock is still disabled', async () => {
