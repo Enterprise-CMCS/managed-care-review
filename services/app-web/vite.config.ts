@@ -81,14 +81,14 @@ export default defineConfig(() => ({
     },
     resolve: {
         alias: {
-            '~uswds': path.resolve(__dirname, '../../node_modules/uswds'),
+            '~uswds': path.resolve(__dirname, './node_modules/uswds'),
         },
     },
     css: {
         preprocessorOptions: {
             scss: {
                 includePaths: [
-                    path.resolve(__dirname, '../../node_modules/uswds/dist'),
+                    path.resolve(__dirname, './node_modules/uswds/dist'),
                 ],
             },
         },
