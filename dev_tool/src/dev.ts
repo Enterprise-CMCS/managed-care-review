@@ -26,7 +26,7 @@ import {
     runWebTestsWatch,
 } from './test/index.js'
 
-// Run clean commands from every single lerna package. 
+// Run clean commands from every single lerna package.
 async function runAllClean() {
     const runner = new LabeledProcessRunner()
     await runner.runCommandAndOutput(
@@ -36,7 +36,7 @@ async function runAllClean() {
     )
 }
 
-// Run lint commands from every single lerna package. 
+// Run lint commands from every single lerna package.
 async function runAllLint() {
     const runner = new LabeledProcessRunner()
     await runner.runCommandAndOutput(
