@@ -25,6 +25,8 @@ type TealiumEvent =
     | 'dropdown_selection'
     | 'filters_applied'
     | 'filter_removed'
+    | 'inline_error'
+    | 'alert_impression'
 
 type TealiumEnv =
     | 'prod'
@@ -121,6 +123,25 @@ type TealiumFilterRemovedType = {
     filter_categories_used: string
 }
 
+type TealiumInlineErrorObject = {
+    event_name: 'inline_error'
+    error_type: 'validation' | 'system'
+    error_message: string
+    error_code?: string
+    form_field_label: string
+    link_type?: 'link_other'
+}
+
+type TealiumAlertImpressionObject = {
+    event_name: 'alert_impression'
+    error_type: 'validation' | 'system'
+    error_message: string
+    error_code?: string
+    heading: string
+    type: 'alert' | 'warn' | 'error'
+    extension?: string
+}
+
 type TealiumFilterEventObject = (
     TealiumFilterAppliedType | TealiumFilterRemovedType
 ) & Partial<TealiumDataObject>
@@ -136,6 +157,8 @@ type TealiumEventObjectTypes =
     | TealiumLinkEventObject
     | TealiumDropdownSelectionEventObject
     | TealiumFilterEventObject
+    | TealiumInlineErrorObject
+    | TealiumAlertImpressionObject
 
 type TealiumClientType = {
     initializeTealium: () => void
@@ -327,5 +350,7 @@ export type {
     TealiumEnv,
     ButtonEventStyle,
     TealiumDropdownSelectionEventObject,
-    TealiumFilterEventObject
+    TealiumFilterEventObject,
+    TealiumInlineErrorObject,
+    TealiumAlertImpressionObject
 }

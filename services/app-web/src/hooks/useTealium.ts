@@ -6,6 +6,10 @@ import type {
     TealiumFilterEventObject
 } from '../tealium'
 import { TealiumContext } from '../contexts/TealiumContext';
+import {TealiumAlertImpressionObject, TealiumInlineErrorObject} from '../tealium/tealium';
+import {getRouteName} from '../routeHelpers';
+
+type AlertImpressionFnArgType = Omit<TealiumAlertImpressionObject, 'event_name' | 'heading'> & { heading?: string }
 
 const useTealium = (): {
     logButtonEvent: (
@@ -20,6 +24,12 @@ const useTealium = (): {
     logFilterEvent: (
         tealiumData: TealiumFilterEventObject
     ) => void
+    logInlineErrorEvent: (
+        tealiumData: Omit<TealiumInlineErrorObject, 'event_name'>
+    ) => void
+    logAlertImpressionEvent: (
+        tealiumData: AlertImpressionFnArgType
+    ) => void
 } => {
     const context = React.useContext(TealiumContext)
 
@@ -29,7 +39,9 @@ const useTealium = (): {
             logButtonEvent: warnNoTealium,
             logInternalLinkEvent: warnNoTealium,
             logDropdownSelectionEvent: warnNoTealium,
-            logFilterEvent: warnNoTealium
+            logFilterEvent: warnNoTealium,
+            logInlineErrorEvent: warnNoTealium,
+            logAlertImpressionEvent: warnNoTealium
         };
     }
 
@@ -70,7 +82,37 @@ const useTealium = (): {
         tealiumData: TealiumFilterEventObject
     ) => logUserEvent(tealiumData, pathname, loggedInUser, heading)
 
-    return { logButtonEvent, logInternalLinkEvent, logDropdownSelectionEvent, logFilterEvent }
+    const logInlineErrorEvent = (
+        tealiumData: Omit<TealiumInlineErrorObject, 'event_name'>
+    ) => {
+        const linkData: TealiumInlineErrorObject = {
+            ...tealiumData,
+            event_name: 'inline_error',
+        }
+        logUserEvent(linkData, pathname, loggedInUser, heading)
+    }
+
+    const logAlertImpressionEvent = (
+        tealiumData: AlertImpressionFnArgType
+    ) => {
+        const linkData: TealiumAlertImpressionObject = {
+            ...tealiumData,
+            // Alerts usually are placed at top of pages. The way the app works, the form would be closely tied to the
+            // pathname, so we can default to using that for the heading.
+            heading: tealiumData.heading || getRouteName(pathname),
+            event_name: 'alert_impression',
+        }
+        logUserEvent(linkData, pathname, loggedInUser, heading)
+    }
+
+    return {
+        logButtonEvent,
+        logInternalLinkEvent,
+        logDropdownSelectionEvent,
+        logFilterEvent,
+        logInlineErrorEvent,
+        logAlertImpressionEvent
+    }
 }
 
 export { useTealium }
