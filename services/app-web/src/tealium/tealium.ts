@@ -10,7 +10,6 @@ import {recordJSException} from '../otelHelpers';
 import { TEALIUM_CONTENT_TYPE_BY_ROUTE, TEALIUM_SUBSECTION_BY_ROUTE } from './constants';
 
 // TYPES
-
 type TealiumEvent =
     | 'search'
     | 'submission_view'
@@ -32,20 +31,6 @@ type TealiumEnv =
     | 'prod'
     | 'qa'
     | 'dev'
-
-type TealiumDataObject = {
-    content_language: string
-    content_type: string
-    page_name: string
-    page_path: string
-    site_domain: 'cms.gov'
-    site_environment: string
-    site_section: string
-    logged_in: 'true' | 'false'
-    userId?: string // custom attribute
-    packageId?: string // custom attribute
-    tealium_event?: TealiumEvent // this is required by tealium, TBD what allowed values aer here, usually this is supposed to be configured first .
-}
 
 type ButtonEventStyle =
     | 'default'
@@ -70,6 +55,28 @@ type ButtonEventParentComponentType =
     | 'page body'
     | 'constant header'
 
+type LinkEventParentComponentType =
+    | 'card'
+    | 'modal'
+    | 'help drawer'
+    | 'resource-tray'
+    | 'app page'
+    | 'top navigation'
+
+type TealiumDataObject = {
+    content_language: string
+    content_type: string
+    page_name: string
+    page_path: string
+    site_domain: 'cms.gov'
+    site_environment: string
+    site_section: string
+    logged_in: 'true' | 'false'
+    userId?: string // custom attribute
+    packageId?: string // custom attribute
+    tealium_event?: TealiumEvent // this is required by tealium, TBD what allowed values aer here, usually this is supposed to be configured first .
+}
+
 type TealiumButtonEventObject = {
     event_name: 'button_engagement',
     text: string
@@ -80,14 +87,14 @@ type TealiumButtonEventObject = {
     parent_component_type?: ButtonEventParentComponentType | string
     link_url?: string
     event_extension?: string
-} & Partial<TealiumDataObject>
+}
 
 type TealiumDropdownSelectionEventObject = {
     event_name: 'dropdown_selection'
     heading?: string
     text: string
     link_type?: string
-} & Partial<TealiumDataObject>
+}
 
 // Used for internal links and navigation links
 type TealiumLinkEventObject = {
@@ -97,15 +104,7 @@ type TealiumLinkEventObject = {
     //link_type: string //currently not sending
     parent_component_heading?: string
     parent_component_type?: LinkEventParentComponentType | string
-} & Partial<TealiumDataObject>
-
-type LinkEventParentComponentType =
-    | 'card'
-    | 'modal'
-    | 'help drawer'
-    | 'resource-tray'
-    | 'app page'
-    | 'top navigation'
+}
 
 type TealiumFilterAppliedType = {
     event_name: 'filters_applied'
@@ -144,7 +143,7 @@ type TealiumAlertImpressionObject = {
 
 type TealiumFilterEventObject = (
     TealiumFilterAppliedType | TealiumFilterRemovedType
-) & Partial<TealiumDataObject>
+)
 
 type TealiumLinkDataObject = {
     tealium_event: TealiumEvent // event is required for user tracking links
@@ -152,13 +151,14 @@ type TealiumLinkDataObject = {
 
 type TealiumViewDataObject = TealiumDataObject // event default to page_view in useTealium hook
 
-type TealiumEventObjectTypes =
+type TealiumEventObjectTypes = (
     | TealiumButtonEventObject
     | TealiumLinkEventObject
     | TealiumDropdownSelectionEventObject
     | TealiumFilterEventObject
     | TealiumInlineErrorObject
     | TealiumAlertImpressionObject
+    ) & Partial<TealiumDataObject>
 
 type TealiumClientType = {
     initializeTealium: () => void

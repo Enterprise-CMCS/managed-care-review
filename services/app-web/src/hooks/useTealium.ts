@@ -3,10 +3,11 @@ import type {
     TealiumButtonEventObject,
     TealiumLinkEventObject,
     TealiumDropdownSelectionEventObject,
-    TealiumFilterEventObject
+    TealiumFilterEventObject,
+    TealiumAlertImpressionObject,
+    TealiumInlineErrorObject
 } from '../tealium'
 import { TealiumContext } from '../contexts/TealiumContext';
-import {TealiumAlertImpressionObject, TealiumInlineErrorObject} from '../tealium/tealium';
 import {getRouteName} from '../routeHelpers';
 
 type AlertImpressionFnArgType = Omit<TealiumAlertImpressionObject, 'event_name' | 'heading'> & { heading?: string }
