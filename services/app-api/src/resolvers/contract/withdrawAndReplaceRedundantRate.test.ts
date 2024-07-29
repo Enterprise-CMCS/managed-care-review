@@ -4,14 +4,20 @@ import WITHDRAW_REPLACE_RATE from 'app-graphql/src/mutations/withdrawAndReplaceR
 import { testAdminUser, testCMSUser } from '../../testHelpers/userHelpers'
 import {
     createAndSubmitTestContractWithRate,
+    createAndUpdateTestContractWithRate,
     fetchTestContract,
+    linkRateToDraftContract,
+    submitTestContract,
     unlockTestContract,
     updateTestContractToReplaceRate,
 } from '../../testHelpers/gqlContractHelpers'
 import { type ApolloServer } from 'apollo-server-lambda'
-import { fetchTestRateById } from '../../testHelpers'
+import { fetchTestRateById, must } from '../../testHelpers'
 import { type ContractRevision } from '../../gen/gqlServer'
 import { type HealthPlanFormDataType } from '../../common-code/healthPlanFormDataType'
+import { withdrawRateInsideTransaction } from '../../postgres/contractAndRates'
+import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
+import { WithdrawDateArgsType } from '../../postgres/contractAndRates/withdrawRate'
 
 // Setup function for testing withdraw and replace rate
 // returns a the target contractID and ids for the child rate to be withdrawn and the replacement
@@ -231,5 +237,96 @@ describe('withdrawAndReplaceRedundantRate', () => {
             },
         })
         expect(adminResult.errors).toBeDefined()
+    })
+
+    it('returns error if called on already withdrawn rate', async () => {
+        // Set up function to withdraw arte using prisma level function - we don't have standalone resolver for this
+        const withdrawRateOnDemand = async(args: WithdrawDateArgsType) => {
+            const {rateID, withdrawnByUserID, withdrawReason} = args
+            const client = await sharedTestPrismaClient()
+
+            return must(
+            await withdrawRateInsideTransaction(client, {
+                rateID,
+                withdrawnByUserID,
+                withdrawReason
+            })
+
+    )}
+
+        const stateServer = await constructTestPostgresServer({
+            s3Client: mockS3,
+        })
+        const adminServer = await constructTestPostgresServer({
+            context: {
+                user: adminUser,
+            },
+            s3Client: mockS3,
+        })
+
+        const originalContract = await createAndSubmitTestContractWithRate(stateServer)
+        const contractWithReplacementRate = await createAndSubmitTestContractWithRate(stateServer)
+        const rateRevOnOriginalContract = originalContract.packageSubmissions[0].rateRevisions[0]
+
+        // manually withdraw the rate early
+        await withdrawRateOnDemand( {rateID: rateRevOnOriginalContract.rateID,
+        withdrawnByUserID: adminUser.id,
+        withdrawReason: 'Withdraw this rate early for sake of the test'})
+
+        const replaceReason = 'Try to withdraw already withdrawn rate'
+        const withdrawRateResult = await adminServer.executeOperation({
+            query: WITHDRAW_REPLACE_RATE,
+            variables: {
+                input: {
+                    contractID: originalContract.id,
+                    withdrawnRateID:
+                        rateRevOnOriginalContract.rateID,
+                    replacementRateID:
+                        contractWithReplacementRate.packageSubmissions[0]
+                            .rateRevisions[0].rateID,
+                    replaceReason,
+                },
+            },
+        })
+        expect(withdrawRateResult.errors).toBeDefined()
+    })
+
+    it('returns error if called on linked rate', async () => {
+        const stateServer = await constructTestPostgresServer({
+            s3Client: mockS3,
+        })
+        const adminServer = await constructTestPostgresServer({
+            context: {
+                user: adminUser,
+            },
+            s3Client: mockS3,
+        })
+
+        const firstContractRateRevision = (await createAndSubmitTestContractWithRate(stateServer)).packageSubmissions[0].rateRevisions[0]
+
+        // submit a contract with linked rate
+        const secondContractWithLinkedRate = await createAndUpdateTestContractWithRate(stateServer)
+        await linkRateToDraftContract(stateServer,secondContractWithLinkedRate.id, firstContractRateRevision.rateID)
+        await submitTestContract(stateServer,secondContractWithLinkedRate.id, 'submit contract with a linked rate')
+
+        const thirdContractWithReplacementRate = await createAndSubmitTestContractWithRate(stateServer)
+
+
+        const replaceReason = 'Try to withdraw a linked rate'
+        const withdrawRateResult = await adminServer.executeOperation({
+            query: WITHDRAW_REPLACE_RATE,
+            variables: {
+                input: {
+                    contractID: secondContractWithLinkedRate.id,
+                    withdrawnRateID:
+                    firstContractRateRevision.rateID,
+                    replacementRateID:
+                    thirdContractWithReplacementRate.packageSubmissions[0]
+                            .rateRevisions[0].rateID,
+                    replaceReason,
+                },
+            },
+        })
+        expect(withdrawRateResult.errors).toBeDefined()
     })
 })
