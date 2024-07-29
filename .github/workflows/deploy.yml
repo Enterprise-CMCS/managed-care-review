@@ -475,8 +475,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup env
-        uses: ./.github/actions/setup_env
+      - uses: pnpm/action-setup@v4
+        name: Install pnpm
+        with:
+          version: 9
+          run_install: false
 
       - uses: actions/download-artifact@v4
         with:
