@@ -22,7 +22,7 @@ export const ErrorAlertFailedRequest = ({
     useEffect(() => {
         logAlertImpressionEvent({
             error_type: 'system',
-            error_message: message || "We're having trouble loading this page.",
+            error_message: message ?? "We're having trouble loading this page.",
             type: 'error',
             extension: 'react-uswds',
         })

@@ -91,7 +91,7 @@ export const ActuaryContactFields = ({
                 {showFieldErrors(
                     getIn(errors, `${fieldNamePrefix}.actuarialFirm`)
                 ) && (
-                    <PoliteErrorMessage>
+                    <PoliteErrorMessage formFieldLabel="Actuarial firm">
                         {getIn(errors, `${fieldNamePrefix}.actuarialFirm`)}
                     </PoliteErrorMessage>
                 )}
@@ -167,7 +167,7 @@ export const ActuaryContactFields = ({
                         >
                             Other actuarial firm
                         </label>
-                        <PoliteErrorMessage>
+                        <PoliteErrorMessage formFieldLabel="Other actuarial firm">
                             {showFieldErrors(
                                 getIn(
                                     errors,

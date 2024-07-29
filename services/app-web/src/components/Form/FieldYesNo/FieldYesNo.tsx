@@ -61,7 +61,11 @@ export const FieldYesNo = ({
                     {isRequired ? 'Required' : 'Optional'}
                 </span>
             )}
-            {showError && <PoliteErrorMessage>{meta.error}</PoliteErrorMessage>}
+            {showError && (
+                <PoliteErrorMessage formFieldLabel={label}>
+                    {meta.error}
+                </PoliteErrorMessage>
+            )}
             {hint && (
                 <div
                     role="note"
@@ -109,6 +113,6 @@ export const yesNoFormValueAsBoolean = (
     return maybeString === 'YES'
         ? true
         : maybeString === 'NO'
-        ? false
-        : undefined
+          ? false
+          : undefined
 }

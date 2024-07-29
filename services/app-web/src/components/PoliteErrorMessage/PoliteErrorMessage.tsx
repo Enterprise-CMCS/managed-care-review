@@ -1,10 +1,13 @@
-import React, { forwardRef } from 'react'
+import React, { forwardRef, useEffect } from 'react'
 import classnames from 'classnames'
+import { useTealium } from '../../hooks'
+import { extractText } from '../TealiumLogging/tealiamLoggingHelpers'
 
 type PoliteErrorMessageProps = {
     children: React.ReactNode
     id?: string
     className?: string
+    formFieldLabel: string
 } & JSX.IntrinsicElements['span']
 
 export type PoliteErrorMessageRef = React.Ref<HTMLSpanElement> | null
@@ -13,12 +16,28 @@ export type PoliteErrorMessageRef = React.Ref<HTMLSpanElement> | null
 // If no children exist, render nothing
 export const PoliteErrorMessage = forwardRef(
     (
-        { children, className, id, ...remainingProps }: PoliteErrorMessageProps,
+        {
+            formFieldLabel,
+            children,
+            className,
+            id,
+            ...remainingProps
+        }: PoliteErrorMessageProps,
         ref: PoliteErrorMessageRef
     ): React.ReactElement | null => {
         if (!children) return null
+        const { logInlineErrorEvent } = useTealium()
 
         const classes = classnames('usa-error-message', className)
+
+        // Only log this event once.
+        useEffect(() => {
+            logInlineErrorEvent({
+                error_type: 'validation',
+                error_message: extractText(children),
+                form_field_label: formFieldLabel,
+            })
+        }, [])
 
         return (
             <span

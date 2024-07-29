@@ -331,7 +331,7 @@ export const SubmissionType = ({
                                             {showFieldErrors(
                                                 errors.populationCovered
                                             ) && (
-                                                <PoliteErrorMessage>
+                                                <PoliteErrorMessage formFieldLabel="Which populations does this contract action cover?">
                                                     {errors.populationCovered}
                                                 </PoliteErrorMessage>
                                             )}
@@ -405,7 +405,7 @@ export const SubmissionType = ({
                                             Required
                                         </span>
                                         {showFieldErrors(errors.programIDs) && (
-                                            <PoliteErrorMessage>
+                                            <PoliteErrorMessage formFieldLabel="Programs this contract action covers">
                                                 {errors.programIDs}
                                             </PoliteErrorMessage>
                                         )}
@@ -440,7 +440,7 @@ export const SubmissionType = ({
                                             {showFieldErrors(
                                                 errors.submissionType
                                             ) && (
-                                                <PoliteErrorMessage>
+                                                <PoliteErrorMessage formFieldLabel="Choose a submission type">
                                                     {errors.submissionType}
                                                 </PoliteErrorMessage>
                                             )}
@@ -504,7 +504,7 @@ export const SubmissionType = ({
                                             {showFieldErrors(
                                                 errors.contractType
                                             ) && (
-                                                <PoliteErrorMessage>
+                                                <PoliteErrorMessage formFieldLabel="Contract action type">
                                                     {errors.contractType}
                                                 </PoliteErrorMessage>
                                             )}

@@ -55,7 +55,7 @@ export const LinkYourRates = ({
                 }
             >
                 <span className={styles.requiredOptionalText}>Required</span>
-                <PoliteErrorMessage>
+                <PoliteErrorMessage formFieldLabel="Was this rate certification included with another submission?">
                     {showFieldErrors('ratePreviouslySubmitted')}
                 </PoliteErrorMessage>
                 <FieldRadio
@@ -94,7 +94,7 @@ export const LinkYourRates = ({
                     <span className={styles.requiredOptionalText}>
                         Required
                     </span>
-                    <PoliteErrorMessage>
+                    <PoliteErrorMessage formFieldLabel="Which rate certification was it?">
                         {showFieldErrors('linkRateSelect')}
                     </PoliteErrorMessage>
                     <LinkRateSelect

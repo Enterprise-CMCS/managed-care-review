@@ -105,12 +105,14 @@ const RateDatesErrorMessage = ({
     startDateError,
     endDateError,
     shouldValidate,
+    formFieldLabel,
 }: {
     shouldValidate: boolean
     startDate?: string
     endDate?: string
     startDateError?: string // yup validation message
     endDateError?: string // yup validation message
+    formFieldLabel: string
 }): React.ReactElement => {
     const hasError = shouldValidate && (startDateError || endDateError)
 
@@ -122,7 +124,11 @@ const RateDatesErrorMessage = ({
             : startDateError ?? endDateError
         : null
 
-    return <PoliteErrorMessage>{validationErrorMessage}</PoliteErrorMessage>
+    return (
+        <PoliteErrorMessage formFieldLabel={formFieldLabel}>
+            {validationErrorMessage}
+        </PoliteErrorMessage>
+    )
 }
 
 export const SingleRateCert = ({
@@ -289,7 +295,7 @@ export const SingleRateCert = ({
                     <span className={styles.requiredOptionalText}>
                         Required
                     </span>
-                    <PoliteErrorMessage>
+                    <PoliteErrorMessage formFieldLabel="Programs this rate certification covers">
                         {showFieldErrors('rateProgramIDs')}
                     </PoliteErrorMessage>
                     <ProgramSelect
@@ -311,7 +317,7 @@ export const SingleRateCert = ({
                         <span className={styles.requiredOptionalText}>
                             Required
                         </span>
-                        <PoliteErrorMessage>
+                        <PoliteErrorMessage formFieldLabel="Rate certification type">
                             {showFieldErrors('rateType')}
                         </PoliteErrorMessage>
 
@@ -370,7 +376,7 @@ export const SingleRateCert = ({
                         role="radiogroup"
                         aria-required
                     >
-                        <PoliteErrorMessage>
+                        <PoliteErrorMessage formFieldLabel="Does the actuary certify capitation rates specific to each rate cell or a rate range?">
                             {showFieldErrors('rateCapitationType')}
                         </PoliteErrorMessage>
                         <FieldRadio
@@ -417,6 +423,11 @@ export const SingleRateCert = ({
                                         'rateDateEnd'
                                     )}
                                     shouldValidate={shouldValidate}
+                                    formFieldLabel={
+                                        isRateTypeAmendment(rateInfo)
+                                            ? 'Rating period of original rate certification'
+                                            : 'Rating period'
+                                    }
                                 />
 
                                 <DateRangePicker
@@ -484,6 +495,7 @@ export const SingleRateCert = ({
                                                 'effectiveDateEnd'
                                             )}
                                             shouldValidate={shouldValidate}
+                                            formFieldLabel="Effective dates of rate amendment"
                                         />
 
                                         <DateRangePicker
@@ -545,7 +557,13 @@ export const SingleRateCert = ({
                             >
                                 mm/dd/yyyy
                             </div>
-                            <PoliteErrorMessage>
+                            <PoliteErrorMessage
+                                formFieldLabel={
+                                    isRateTypeAmendment(rateInfo)
+                                        ? 'Date certified for rate amendment'
+                                        : 'Date certified'
+                                }
+                            >
                                 {showFieldErrors('rateDateCertified')}
                             </PoliteErrorMessage>
 
@@ -654,7 +672,7 @@ export const SingleRateCert = ({
                             certifying actuaries and additional actuary
                             contacts)
                         </span>
-                        <PoliteErrorMessage>
+                        <PoliteErrorMessage formFieldLabel="Actuaries' communication preference">
                             {showFieldErrors(
                                 'actuaryCommunicationPreference'
                             ) &&

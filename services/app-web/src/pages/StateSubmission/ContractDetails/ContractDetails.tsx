@@ -103,11 +103,13 @@ function formattedDateMinusOneDay(initialValue: string): string {
 const ContractDatesErrorMessage = ({
     values,
     validationErrorMessage,
+    formFieldLabel,
 }: {
     values: ContractDetailsFormValues
     validationErrorMessage: string
+    formFieldLabel: string
 }): React.ReactElement => (
-    <PoliteErrorMessage>
+    <PoliteErrorMessage formFieldLabel={formFieldLabel}>
         {isDateRangeEmpty(values.contractDateStart, values.contractDateEnd)
             ? 'You must provide a start and an end date'
             : validationErrorMessage}
@@ -691,7 +693,11 @@ export const ContractDetails = ({
                                                 {showFieldErrors(
                                                     errors.statutoryRegulatoryAttestation
                                                 ) && (
-                                                    <PoliteErrorMessage>
+                                                    <PoliteErrorMessage
+                                                        formFieldLabel={
+                                                            StatutoryRegulatoryAttestationQuestion
+                                                        }
+                                                    >
                                                         {
                                                             errors.statutoryRegulatoryAttestation
                                                         }
@@ -778,7 +784,7 @@ export const ContractDetails = ({
                                             {showFieldErrors(
                                                 errors.contractExecutionStatus
                                             ) && (
-                                                <PoliteErrorMessage>
+                                                <PoliteErrorMessage formFieldLabel="Contract status">
                                                     {
                                                         errors.contractExecutionStatus
                                                     }
@@ -839,6 +845,13 @@ export const ContractDetails = ({
                                                                 errors.contractDateStart ||
                                                                 errors.contractDateEnd ||
                                                                 'Invalid date'
+                                                            }
+                                                            formFieldLabel={
+                                                                isContractAmendment(
+                                                                    draftSubmission
+                                                                )
+                                                                    ? 'Amendment effective dates'
+                                                                    : 'Contract effective dates'
                                                             }
                                                         />
                                                     )}
@@ -937,7 +950,7 @@ export const ContractDetails = ({
                                                     {showFieldErrors(
                                                         errors.managedCareEntities
                                                     ) && (
-                                                        <PoliteErrorMessage>
+                                                        <PoliteErrorMessage formFieldLabel="Managed Care entities">
                                                             {
                                                                 errors.managedCareEntities
                                                             }
@@ -1012,7 +1025,7 @@ export const ContractDetails = ({
                                                     {showFieldErrors(
                                                         errors.federalAuthorities
                                                     ) && (
-                                                        <PoliteErrorMessage>
+                                                        <PoliteErrorMessage formFieldLabel="Active federal operating authority">
                                                             {
                                                                 errors.federalAuthorities
                                                             }
