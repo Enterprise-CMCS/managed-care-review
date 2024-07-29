@@ -43,6 +43,7 @@
         "serverless-s3-bucket-helper": "https://github.com/CMSgov/serverless-s3-bucket-helper",
         "serverless-s3-local": "^0.8.4",
         "serverless-stack-termination-protection": "^2.0.2",
+        "lint-staged": "^15.2.7",
         "ts-jest": "^29.1.1",
         "ts-loader": "^9.2.8"
     }

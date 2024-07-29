@@ -475,6 +475,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Setup env
+        uses: ./.github/actions/setup_env
+
       - uses: actions/download-artifact@v4
         with:
           name: app-web-gen
@@ -569,6 +572,9 @@ jobs:
       fail-fast: false
     steps:
       - uses: actions/checkout@v4
+
+      - name: Setup env
+        uses: ./.github/actions/setup_env
 
       - name: Collate test coverage reports
         run: |
