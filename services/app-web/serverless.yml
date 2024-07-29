@@ -87,4 +87,4 @@ custom:
 
 
         pnpm build
-        pnpm build-storybook
+        pnpm storybook:build
