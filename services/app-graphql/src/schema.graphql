@@ -100,6 +100,7 @@ type Query {
     - NotFoundError: contract for contractID not found in database
     """
     fetchContract(input: FetchContractInput!): FetchContractPayload!
+    fetchContractWithQuestions(input: FetchContractWithQuestionsInput!): FetchContractWithQuestionsPayload!
 }
 
 type Mutation {
@@ -1688,7 +1689,18 @@ type FetchContractPayload {
     contract: Contract!
 }
 
+type FetchContractWithQuestionsPayload {
+    """
+    A rate that include contract and rate revisions
+    """
+    contract: Contract!
+}
+
 input FetchContractInput {
+    contractID: ID!
+}
+
+input FetchContractWithQuestionsInput {
     contractID: ID!
 }
 

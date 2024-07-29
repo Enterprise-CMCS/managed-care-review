@@ -43,6 +43,7 @@ import { contractResolver } from './contract/contractResolver'
 import { unlockedContractResolver } from './contract/unlockedContractResolver'
 import { contractRevisionResolver } from './contract/contractRevisionResolver'
 import { fetchContractResolver } from './contract/fetchContract'
+import { fetchContractWithQuestionsResolver } from './contract/fetchContractWithQuestions'
 import { submitContract } from './contract/submitContract'
 import { rateRevisionResolver } from './rate/rateRevisionResolver'
 import type { S3ClientT } from '../s3'
@@ -76,6 +77,7 @@ export function configureResolvers(
             indexRates: indexRatesResolver(store),
             fetchRate: fetchRateResolver(store),
             fetchContract: fetchContractResolver(store),
+            fetchContractWithQuestions: fetchContractWithQuestionsResolver(store),
         },
         Mutation: {
             createHealthPlanPackage: createHealthPlanPackageResolver(store),
