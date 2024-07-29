@@ -290,7 +290,6 @@ export const AppRoutes = ({
         checkIfSessionsIsAboutToExpire,
     } = useAuth()
     const { pathname } = useLocation()
-    const navigate = useNavigate()
     const ldClient = useLDClient()
     const [redirectPath, setRedirectPath] = useLocalStorage(
         'LOGIN_REDIRECT',
@@ -351,7 +350,7 @@ export const AppRoutes = ({
                         window.location.href = idmRedirectURL()
                     } else {
                         console.info('redirecting to /auth')
-                        navigate('/auth')
+                        window.location.href = '/auth'
                     }
                 } catch (err) {
                     recordJSException(
@@ -363,14 +362,13 @@ export const AppRoutes = ({
         } else {
             if (typeof redirectPath === 'string') {
                 console.info('Retrieved For Redirect: ', redirectPath)
-                navigate(redirectPath)
+                 window.location.href = redirectPath
                 setRedirectPath(null)
             }
         }
     }, [
         initialPath,
         loggedInUser,
-        navigate,
         authMode,
         redirectPath,
         setRedirectPath,
