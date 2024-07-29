@@ -162,6 +162,7 @@ async function replaceRateOnContractInsideTransaction(
         withdrawnByUserID: replacedByUserID,
         withdrawReason: replaceReason,
     }
+
     const withdrawResult = await withdrawRateInsideTransaction(
         tx,
         withdrawRateArgs
@@ -169,6 +170,8 @@ async function replaceRateOnContractInsideTransaction(
     if (withdrawResult instanceof Error) {
         return withdrawResult
     }
+
+    // return updateResult because we want to return updated contract - withdrawResult is the updated standalone rate
     return updateResult
 }
 
