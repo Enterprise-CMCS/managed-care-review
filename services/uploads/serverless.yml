@@ -432,6 +432,7 @@ resources:
             # Write to the clamd.conf
             echo "TCPSocket 3310" >> /etc/clamav/clamd.conf
             echo "TCPAddr 0.0.0.0" >> /etc/clamav/clamd.conf 
+            sed -i 's/^StreamMaxLength .*/StreamMaxLength 50M/' /etc/clamav/clamd.conf
 
             # Create a systemd service override to delay the start
             cat <<EOF > /etc/systemd/system/clamav-daemon.service.d/override.conf

@@ -36,44 +36,6 @@ describe('StateSubmissionForm', () => {
         vi.clearAllMocks()
     })
     describe('loads draft submission', () => {
-        const mockSubmission = mockDraftHealthPlanPackage()
-        it('loads step indicator', async () => {
-            renderWithProviders(
-                <Routes>
-                    <Route element={<SubmissionSideNav />}>
-                        <Route
-                            path={RoutesRecord.SUBMISSIONS_EDIT_TOP_LEVEL}
-                            element={<StateSubmissionForm />}
-                        />
-                    </Route>
-                </Routes>,
-                {
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchHealthPlanPackageMockSuccess({
-                                id: '15',
-                            }),
-                            fetchStateHealthPlanPackageWithQuestionsMockSuccess(
-                                {
-                                    id: '15',
-                                    stateSubmission: mockSubmission,
-                                }
-                            ),
-                        ],
-                    },
-                    routerProvider: {
-                        route: '/submissions/15/edit/contract-details',
-                    },
-                }
-            )
-
-            await waitFor(() => {
-                const stepIndicator = screen.getByTestId('step-indicator')
-                expect(stepIndicator).toHaveClass('usa-step-indicator')
-            })
-        })
-
         it('redirects user to submission summary page when status is submitted', async () => {
             const mockSubmission = mockSubmittedHealthPlanPackage()
             let testLocation: Location

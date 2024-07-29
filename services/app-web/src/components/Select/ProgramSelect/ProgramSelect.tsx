@@ -1,13 +1,19 @@
 import React from 'react'
 import styles from '../Select.module.scss'
-import Select, { AriaOnFocus, Props } from 'react-select'
+import Select, {
+    ActionMeta,
+    AriaOnFocus,
+    OnChangeValue,
+    Props,
+} from 'react-select'
 import { useField } from 'formik'
-import { useStatePrograms } from '../../../hooks'
+import { useStatePrograms, useTealium } from '../../../hooks'
 
 export type ProgramSelectPropType = {
     name: string
     programIDs: string[]
     contractProgramsOnly?: boolean
+    label?: string
 }
 
 export interface ProgramOptionType {
@@ -21,13 +27,14 @@ export interface ProgramOptionType {
  * This component renders the react-select combobox
  *
  * It relies on the Formik useField hook to work, so it must ALWAYS be rendered
- * inside of a Formik form context.
+ * inside a Formik form context.
  */
 
 export const ProgramSelect = ({
     name,
     programIDs,
     contractProgramsOnly,
+    label,
     ...selectProps
 }: ProgramSelectPropType & Props<ProgramOptionType, true>) => {
     const [_field, _meta, helpers] = useField({ name })
@@ -40,6 +47,8 @@ export const ProgramSelect = ({
         return { value: program.id, label: program.name }
     })
 
+    const { logDropdownSelectionEvent } = useTealium()
+
     const onFocus: AriaOnFocus<ProgramOptionType> = ({
         focused,
         isDisabled,
@@ -47,6 +56,34 @@ export const ProgramSelect = ({
         return `You are currently focused on option ${focused.label}${
             isDisabled ? ', disabled' : ''
         }`
+    }
+
+    const handleOnChangeWithLogging = async (
+        newValue: OnChangeValue<ProgramOptionType, true>,
+        actionMeta: ActionMeta<ProgramOptionType>
+    ) => {
+        const action = actionMeta.action
+        // This is done because we are handling the values outside react-select onChange function
+        if (action === 'select-option' && actionMeta.option?.value) {
+            logDropdownSelectionEvent({
+                text: actionMeta.option.value,
+                heading: label,
+            })
+        } else if (action === 'remove-value') {
+            logDropdownSelectionEvent({
+                text: `${action}: ${actionMeta.removedValue?.value}`,
+                heading: label,
+            })
+        } else if (action) {
+            logDropdownSelectionEvent({
+                text: action,
+                heading: label,
+            })
+        }
+
+        await helpers.setValue(
+            newValue.map((item: { value: string }) => item.value)
+        )
     }
 
     return (
@@ -73,11 +110,7 @@ export const ProgramSelect = ({
             ariaLiveMessages={{
                 onFocus,
             }}
-            onChange={(selectedOptions) =>
-                helpers.setValue(
-                    selectedOptions.map((item: { value: string }) => item.value)
-                )
-            }
+            onChange={handleOnChangeWithLogging}
             {...selectProps}
         />
     )

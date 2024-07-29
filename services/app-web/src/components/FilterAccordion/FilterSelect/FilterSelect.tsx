@@ -6,7 +6,10 @@ import Select, {
     components,
     MenuListProps,
     MultiValue,
+    ActionMeta,
+    OnChangeValue,
 } from 'react-select'
+import { useTealium } from '../../../hooks'
 
 export type FilterSelectPropType = {
     name: string
@@ -28,8 +31,10 @@ export const FilterSelect = ({
     filterOptions,
     label,
     toggleClearFilter,
+    onChange,
     ...selectProps
 }: FilterSelectPropType & Props<FilterOptionType, true>) => {
+    const { logDropdownSelectionEvent } = useTealium()
     const onFocus: AriaOnFocus<FilterOptionType> = ({
         focused,
         isDisabled,
@@ -37,6 +42,33 @@ export const FilterSelect = ({
         return `You are currently focused on option ${focused.label}${
             isDisabled ? ', disabled' : ''
         }`
+    }
+
+    const handleOnChangeWithLogging = (
+        newValue: OnChangeValue<FilterOptionType, true>,
+        actionMeta: ActionMeta<FilterOptionType>
+    ) => {
+        if (onChange) {
+            const action = actionMeta.action
+            // This is done because we are handling the values outside react-select onChange function
+            if (action === 'select-option' && actionMeta.option?.value) {
+                logDropdownSelectionEvent({
+                    text: actionMeta.option.value,
+                    heading: label,
+                })
+            } else if (action === 'remove-value') {
+                logDropdownSelectionEvent({
+                    text: `${action}: ${actionMeta.removedValue?.value}`,
+                    heading: label,
+                })
+            } else if (action) {
+                logDropdownSelectionEvent({
+                    text: action,
+                    heading: label,
+                })
+            }
+            onChange(newValue, actionMeta)
+        }
     }
 
     //This component just wraps the menu list inside a div, so we can set a data-testid and run jest tests.
@@ -69,6 +101,7 @@ export const FilterSelect = ({
                     onFocus,
                 }}
                 components={{ MenuList }}
+                onChange={handleOnChangeWithLogging}
                 {...selectProps}
             />
         </div>
