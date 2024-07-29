@@ -1,8 +1,12 @@
-import { ForbiddenError } from 'apollo-server-lambda'
+import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
 import { isAdminUser } from '../../domain-models'
 import type { MutationResolvers } from '../../gen/gqlServer'
 import { logError, logSuccess } from '../../logger'
-import type { Store } from '../../postgres'
+import {
+    NotFoundError,
+    UserInputPostgresError,
+    type Store,
+} from '../../postgres'
 
 import {
     setErrorAttributesOnActiveSpan,
@@ -62,8 +66,30 @@ export function withdrawAndReplaceRedundantRateResolver(
                 replaceReason,
                 replacedByUserID: user.id,
             })
+
+        if (
+            withdrawAndReplaceRedundantRateResult instanceof
+            UserInputPostgresError
+        ) {
+            throw new UserInputError(
+                withdrawAndReplaceRedundantRateResult.message
+            )
+        }
+
+        if (withdrawAndReplaceRedundantRateResult instanceof NotFoundError) {
+            throw new GraphQLError(
+                withdrawAndReplaceRedundantRateResult.message,
+                {
+                    extensions: {
+                        code: 'NOT_FOUND',
+                        cause: 'DB_ERROR',
+                    },
+                }
+            )
+        }
+
         if (withdrawAndReplaceRedundantRateResult instanceof Error) {
-            const errMessage = `Failed to unlock contract revision with ID: ${contractID}; ${withdrawAndReplaceRedundantRateResult.message}`
+            const errMessage = `Failed to replace rate on contract ID: ${contractID}; ${withdrawAndReplaceRedundantRateResult.message}`
             logError('withdrawAndReplaceRedundantRate', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new GraphQLError(errMessage, {

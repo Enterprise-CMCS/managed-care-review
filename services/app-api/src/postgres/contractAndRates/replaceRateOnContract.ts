@@ -3,7 +3,7 @@ import {
     type UpdateDraftContractRatesArgsType,
     updateDraftContractRatesInsideTransaction,
 } from './updateDraftContractRates'
-import { type NotFoundError } from '../postgresErrors'
+import { UserInputPostgresError, type NotFoundError } from '../postgresErrors'
 import {
     type UnlockContractArgsType,
     unlockContractInsideTransaction,
@@ -70,14 +70,14 @@ async function replaceRateOnContractInsideTransaction(
         .indexOf(withdrawnRateID)
 
     if (withdrawnRateIndex === -1) {
-        return new Error(
-            'UserInputError: withdrawnRateID does not map to a current rate on this contract'
+        return new UserInputPostgresError(
+            `withdrawnRateID ${withdrawnRateID} does not map to a current rate on this contract`
         )
     }
 
     if (previousRates[withdrawnRateIndex].parentContractID !== contractID) {
-        return new Error(
-            'UserInputError: withdrawnRateID points to an already linked rate. Only child rates can be withdrawn.'
+        return new UserInputPostgresError(
+            `withdrawnRateID ${withdrawnRateID} points to an already linked rate. Only child rates can be withdrawn.`
         )
     }
     const updateRates: UpdateDraftContractRatesArgsType['rateUpdates']['update'] =

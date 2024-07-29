@@ -1,6 +1,7 @@
 import { findRateWithHistory } from './findRateWithHistory'
 import type { RateType } from '../../domain-models/contractAndRates'
 import type { PrismaTransactionType } from '../prismaTypes'
+import { NotFoundError } from '../postgresErrors'
 
 type WithdrawDateArgsType = {
     rateID: string
@@ -18,12 +19,16 @@ async function withdrawRateInsideTransaction(
 
     try {
         // check rate is not already withdrawn
-        const rate = await tx.rateTable.findUniqueOrThrow({
+        const rate = await tx.rateTable.findUnique({
             where: {
                 id: rateID,
             },
         })
 
+        if (rate === null) {
+            const err = `PRISMA ERROR: Cannot find rate with id: ${rateID}`
+            return new NotFoundError(err)
+        }
         if (rate.withdrawInfoID !== null) {
             const err = `PRISMA ERROR: Cannot withdraw rate more than once. See rate id: ${rateID}`
             return new Error(err)
@@ -51,7 +56,7 @@ async function withdrawRateInsideTransaction(
         })
 
         if (updatedRate instanceof Error) {
-            throw updatedRate
+            return updatedRate
         }
 
         return findRateWithHistory(tx, rateID)
