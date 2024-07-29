@@ -99,9 +99,13 @@
     h3 {
         max-width: 70%;
     }
+
+    a {
+        margin-right: 0;
+    }
 }
 
-.certifyingActuaryDetail { 
+.certifyingActuaryDetail {
     margin-bottom: uswds.units(4);
 
     @include uswds.at-media(tablet) {

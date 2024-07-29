@@ -103,6 +103,7 @@ export const LinkYourRates = ({
                         name={`${fieldNamePrefix}.linkRateSelect`}
                         initialValue={getIn(values, `${fieldNamePrefix}.id`)}
                         autofill={autofill}
+                        label="Which rate certification was it?"
                     />
                 </>
             )}

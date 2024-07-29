@@ -74,6 +74,12 @@ describe('FileItemList component', () => {
             logInternalLinkEvent: () => {
                 return
             },
+            logDropdownSelectionEvent: () => {
+                return
+            },
+            logFilterEvent: () => {
+                return
+            },
         }))
     })
     afterEach(() => vi.clearAllMocks())

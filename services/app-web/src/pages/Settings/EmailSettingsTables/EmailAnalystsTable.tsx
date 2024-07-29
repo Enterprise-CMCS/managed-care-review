@@ -1,5 +1,6 @@
 import {
     Column,
+    ColumnFiltersState,
     createColumnHelper,
     getCoreRowModel,
     getFacetedUniqueValues,
@@ -7,8 +8,7 @@ import {
     getSortedRowModel,
     useReactTable,
 } from '@tanstack/react-table'
-import { StateAnalystsConfiguration } from '../../../gen/gqlClient'
-import { useMemo, useRef } from 'react'
+import React, { useMemo, useRef, useState } from 'react'
 import {
     FilterSelect,
     FilterSelectedOptionsType,
@@ -19,15 +19,31 @@ import { Table } from '@trussworks/react-uswds'
 
 import styles from '../Settings.module.scss'
 import { pluralize } from '../../../common-code/formatters'
+import { useTealium } from '../../../hooks'
+import useDeepCompareEffect from 'use-deep-compare-effect'
 
-const columnHelper = createColumnHelper<StateAnalystsConfiguration>()
+type StateAnalystsInDashboardType = {
+    emails: string[]
+    stateCode: string
+}
+
+const columnHelper = createColumnHelper<StateAnalystsInDashboardType>()
 
 const EmailAnalystsTable = ({
     analysts,
 }: {
-    analysts: StateAnalystsConfiguration[]
+    analysts: StateAnalystsInDashboardType[]
 }) => {
     const lastClickedElement = useRef<string | null>(null)
+    const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+    const [prevFilters, setPrevFilters] = useState<{
+        filters: ColumnFiltersState
+        results?: string
+    }>({
+        filters: columnFilters,
+    })
+    const { logFilterEvent } = useTealium()
+
     const tableColumns = useMemo(
         () => [
             columnHelper.accessor('stateCode', {
@@ -38,7 +54,7 @@ const EmailAnalystsTable = ({
             }),
             columnHelper.accessor('emails', {
                 id: 'emails',
-                header: 'Emails',
+                header: 'Inbox',
                 cell: (info) => <span>{info.getValue()}</span>,
                 filterFn: `arrIncludesSome`,
             }),
@@ -47,7 +63,7 @@ const EmailAnalystsTable = ({
     )
 
     const reactTable = useReactTable({
-        data: Array.from(analysts).sort((a, b) =>
+        data: analysts.sort((a, b) =>
             a['stateCode'] > b['stateCode'] ? -1 : 1
         ),
         filterFns: {
@@ -55,6 +71,10 @@ const EmailAnalystsTable = ({
         },
         getCoreRowModel: getCoreRowModel(),
         columns: tableColumns,
+        state: {
+            columnFilters,
+        },
+        onColumnFiltersChange: setColumnFilters,
         getFacetedUniqueValues: getFacetedUniqueValues(),
         getFilteredRowModel: getFilteredRowModel(),
         getSortedRowModel: getSortedRowModel(),
@@ -64,16 +84,16 @@ const EmailAnalystsTable = ({
 
     const stateColumn = reactTable.getColumn(
         'stateCode'
-    ) as Column<StateAnalystsConfiguration>
+    ) as Column<StateAnalystsInDashboardType>
     const emailsColumn = reactTable.getColumn(
         'emails'
-    ) as Column<StateAnalystsConfiguration>
+    ) as Column<StateAnalystsInDashboardType>
     const rowCount = `Displaying ${filteredRows.length} of ${analysts.length} ${pluralize(
         'state',
         filteredRows.length
     )}`
     const updateFilters = (
-        column: Column<StateAnalystsConfiguration>,
+        column: Column<StateAnalystsInDashboardType>,
         selectedOptions: FilterSelectedOptionsType,
         filterName: string
     ) => {
@@ -82,6 +102,42 @@ const EmailAnalystsTable = ({
             selectedOptions.map((selection) => selection.value)
         )
     }
+
+    // Handles logging when filters change.
+    useDeepCompareEffect(() => {
+        const filterCategories = columnFilters.map((f) => f.id).join(',')
+        const prevFilterCategories = prevFilters.filters
+            .map((f) => f.id)
+            .join(',')
+        // Any changes in results or filters
+        if (
+            filterCategories !== prevFilterCategories ||
+            prevFilters.results === undefined
+        ) {
+            // if current filters is one and previous is more than 1, then it was cleared
+            if (columnFilters.length === 0 && prevFilterCategories.length > 0) {
+                logFilterEvent({
+                    event_name: 'filter_removed',
+                    search_result_count: rowCount,
+                    filter_categories_used: filterCategories,
+                })
+                // If there are filters, then we applied new filters
+            } else if (columnFilters.length > 0) {
+                logFilterEvent({
+                    event_name: 'filters_applied',
+                    search_result_count: rowCount,
+                    results_count_after_filtering: rowCount,
+                    results_count_prior_to_filtering:
+                        prevFilters.results ?? 'No prior count, filter on load',
+                    filter_categories_used: filterCategories,
+                })
+            }
+            setPrevFilters({
+                filters: columnFilters,
+                results: rowCount,
+            })
+        }
+    }, [rowCount, columnFilters, setPrevFilters, prevFilters])
 
     return (
         <>
@@ -150,4 +206,4 @@ const EmailAnalystsTable = ({
         </>
     )
 }
-export { EmailAnalystsTable }
+export { EmailAnalystsTable, type StateAnalystsInDashboardType }

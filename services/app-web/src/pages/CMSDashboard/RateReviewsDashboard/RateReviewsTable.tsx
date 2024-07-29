@@ -37,6 +37,8 @@ import { pluralize } from '../../../common-code/formatters'
 import { DoubleColumnGrid } from '../../../components'
 import { FilterDateRangeRef } from '../../../components/FilterAccordion/FilterDateRange/FilterDateRange'
 import { Loading, NavLinkWithLogging } from '../../../components'
+import { useTealium } from '../../../hooks'
+import useDeepCompareEffect from 'use-deep-compare-effect'
 
 type RatingPeriodFilterType = [string, string] | []
 
@@ -200,6 +202,13 @@ export const RateReviewsTable = ({
     const [defaultColumnFilters, setDefaultColumnState] = useState<
         ColumnFiltersState | undefined
     >(undefined)
+    const [prevFilters, setPrevFilters] = useState<{
+        filters: ColumnFiltersState
+        results?: string
+    }>({
+        filters: columnFilters,
+    })
+    const { logFilterEvent } = useTealium()
 
     const tableConfig: TableVariantConfig = {
         tableName: 'Rate Reviews',
@@ -463,6 +472,41 @@ export const RateReviewsTable = ({
             setDefaultColumnState(defaultFiltersFromUrl.data)
         }
     }, [defaultFiltersFromUrl, defaultColumnFilters])
+
+    useDeepCompareEffect(() => {
+        const filterCategories = columnFilters.map((f) => f.id).join(',')
+        const prevFilterCategories = prevFilters.filters
+            .map((f) => f.id)
+            .join(',')
+        // Any changes in results or filters
+        if (
+            filterCategories !== prevFilterCategories ||
+            prevFilters.results === undefined
+        ) {
+            // if current filters is one and previous is more than 1, then it was cleared
+            if (columnFilters.length === 0 && prevFilterCategories.length > 0) {
+                logFilterEvent({
+                    event_name: 'filter_removed',
+                    search_result_count: submissionCount,
+                    filter_categories_used: filterCategories,
+                })
+                // If there are filters, then we applied new filters
+            } else if (columnFilters.length > 0) {
+                logFilterEvent({
+                    event_name: 'filters_applied',
+                    search_result_count: submissionCount,
+                    results_count_after_filtering: submissionCount,
+                    results_count_prior_to_filtering:
+                        prevFilters.results ?? 'No prior count, filter on load',
+                    filter_categories_used: filterCategories,
+                })
+            }
+            setPrevFilters({
+                filters: columnFilters,
+                results: submissionCount,
+            })
+        }
+    }, [submissionCount, columnFilters, setPrevFilters, prevFilters])
 
     if (defaultColumnFilters === undefined) {
         return <Loading />
