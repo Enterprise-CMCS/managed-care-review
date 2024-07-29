@@ -1,6 +1,8 @@
 import styles from '../Banner.module.scss'
 import { Alert } from '@trussworks/react-uswds'
-import React from 'react'
+import React, { useEffect } from 'react'
+import { useTealium } from '../../../hooks'
+import { extractText } from '../../TealiumLogging/tealiamLoggingHelpers'
 
 export type AccountWarningBannerProps = {
     header: string
@@ -11,6 +13,17 @@ const UserAccountWarningBanner = ({
     header,
     message,
 }: AccountWarningBannerProps) => {
+    const { logAlertImpressionEvent } = useTealium()
+
+    // We only want to log this impression once
+    useEffect(() => {
+        logAlertImpressionEvent({
+            error_type: 'system',
+            error_message: extractText(message),
+            type: 'warn',
+            extension: 'react-uswds',
+        })
+    }, [])
     return (
         <div className={styles.bannerBodyText}>
             <Alert type="warning" headingLevel="h4" heading={header}>

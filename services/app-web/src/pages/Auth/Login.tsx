@@ -1,16 +1,10 @@
 import React, { useState } from 'react'
-import {
-    Alert,
-    Form,
-    FormGroup,
-    Label,
-    TextInput,
-} from '@trussworks/react-uswds'
+import { Form, FormGroup, Label, TextInput } from '@trussworks/react-uswds'
 import { useNavigate } from 'react-router-dom'
 
 import { signIn } from '../Auth/cognitoAuth'
 import { useAuth } from '../../contexts/AuthContext'
-import { ButtonWithLogging } from '../../components'
+import { ButtonWithLogging, ErrorAlert } from '../../components'
 
 type Props = {
     defaultEmail?: string
@@ -74,11 +68,7 @@ export function Login({ defaultEmail }: Props): React.ReactElement {
 
     return (
         <Form onSubmit={handleSubmit} name="Login" aria-label="Login Form">
-            {showFormAlert && (
-                <Alert headingLevel="h4" type="error">
-                    Something went wrong
-                </Alert>
-            )}
+            {showFormAlert && <ErrorAlert>Something went wrong</ErrorAlert>}
             <FormGroup>
                 <Label htmlFor="loginEmail">Email</Label>
                 <TextInput
