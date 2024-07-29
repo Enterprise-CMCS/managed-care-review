@@ -744,6 +744,9 @@ importers:
       c8:
         specifier: ^10.1.2
         version: 10.1.2
+      cypress:
+        specifier: ^13.0.0
+        version: 13.13.1
       husky:
         specifier: ^9.0.11
         version: 9.0.11
