@@ -4,10 +4,6 @@ description: 'Runs common tasks for setting up the build environment in GHA'
 runs:
   using: 'composite'
   steps:
-    - uses: actions/setup-node@v4
-      with:
-        node-version-file: '.nvmrc'
-
     - uses: pnpm/action-setup@v4
       name: Install pnpm
       with:
@@ -37,6 +33,11 @@ runs:
         key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
         restore-keys: |
           ${{ runner.os }}-pnpm-store-
+
+    - uses: actions/setup-node@v4
+      with:
+        node-version-file: '.nvmrc'
+        cache: 'pnpm'
 
     - name: Install dependencies
       shell: bash
