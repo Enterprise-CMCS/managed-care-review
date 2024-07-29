@@ -171,8 +171,7 @@ async function replaceRateOnContractInsideTransaction(
         return withdrawResult
     }
 
-    // return updateResult because we want to return updated contract - withdrawResult is the updated standalone rate
-    return updateResult
+    return resubmitResult
 }
 
 async function replaceRateOnContract(
