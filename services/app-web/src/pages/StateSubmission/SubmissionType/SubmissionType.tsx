@@ -415,6 +415,7 @@ export const SubmissionType = ({
                                             programIDs={values.programIDs}
                                             contractProgramsOnly
                                             aria-label="Programs this contract action covers (required)"
+                                            label="Programs this contract action covers"
                                         />
                                     </FormGroup>
                                     <FormGroup

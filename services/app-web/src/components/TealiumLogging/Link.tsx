@@ -6,14 +6,14 @@ import {
     CustomLinkProps,
     DefaultLinkProps,
 } from '@trussworks/react-uswds/lib/components/Link/Link'
-import type { TealiumInternalLinkEventObject } from '../../tealium'
+import type { TealiumLinkEventObject } from '../../tealium'
 import { useTealium } from '../../hooks'
 import { extractText } from './tealiamLoggingHelpers'
 
 type TealiumDataType = Omit<
-    TealiumInternalLinkEventObject,
+    TealiumLinkEventObject,
     'event_name' | 'link_url' | 'text'
-> & { event_name?: TealiumInternalLinkEventObject['event_name'] }
+> & { event_name?: TealiumLinkEventObject['event_name'] }
 
 type LinkWithLoggingType = TealiumDataType & DefaultLinkProps
 const LinkWithLogging = (props: LinkWithLoggingType) => {

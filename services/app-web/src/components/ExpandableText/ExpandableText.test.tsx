@@ -36,6 +36,12 @@ describe('ExpandableText', () => {
             logInternalLinkEvent: () => {
                 return
             },
+            logDropdownSelectionEvent: () => {
+                return
+            },
+            logFilterEvent: () => {
+                return
+            },
         }))
     })
 

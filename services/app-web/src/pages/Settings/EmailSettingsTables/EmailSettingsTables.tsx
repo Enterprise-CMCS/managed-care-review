@@ -7,7 +7,10 @@ import {
 } from '../../../gen/gqlClient'
 import { SettingsErrorAlert } from '../SettingsErrorAlert'
 import styles from '../Settings.module.scss'
-import { EmailAnalystsTable } from './EmailAnalystsTable'
+import {
+    EmailAnalystsTable,
+    type StateAnalystsInDashboardType,
+} from './EmailAnalystsTable'
 
 const formatEmails = (arr?: string[]) => (arr ? arr.join(',') : 'NOT DEFINED')
 
@@ -18,9 +21,14 @@ const EmailSettingsTable = ({
 }): React.ReactElement => {
     const { loading, data, error } = useFetchEmailSettingsQuery()
     const config = data?.fetchEmailSettings.config
-    const analysts = data?.fetchEmailSettings.stateAnalysts
+    const analysts: StateAnalystsInDashboardType[] = data?.fetchEmailSettings
+        .stateAnalysts
+        ? data.fetchEmailSettings.stateAnalysts.map((sa) => ({
+              emails: sa.emails,
+              stateCode: sa.stateCode,
+          }))
+        : []
     if (error) return <SettingsErrorAlert error={error} />
-
     return (
         <div className={styles.table}>
             {loading && <Loading />}
@@ -40,7 +48,6 @@ const EmailSettingsTable = ({
 }
 
 const EmailGeneralTable = ({ config }: { config: EmailConfiguration }) => {
-    console.info('ALL CONFIG', JSON.stringify(config))
     return (
         <>
             <h2>Automated emails</h2>
