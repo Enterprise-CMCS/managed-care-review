@@ -23,10 +23,14 @@ export function requireBinary(checkCmd: string[], helpText: string) {
     }
 }
 
-export function checkURLIsUp(url: string): Promise<boolean> {
-    return axios.get(url, { timeout: 5000 })  // Add a timeout to prevent long waits
-        .then(() => true)
-        .catch(() => false)
+export async function checkURLIsUp(url: string): Promise<boolean> {
+    try {
+        await axios.post(url, {})
+        return true
+    } catch (error) {
+        console.error('URL not up', error)
+        return false
+    }
 }
 
 export async function checkDockerInstalledAndRunning() {
