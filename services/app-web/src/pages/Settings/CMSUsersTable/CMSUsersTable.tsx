@@ -144,6 +144,9 @@ function CMSUserTableWithData({
                     )
                 },
                 header: () => 'Division',
+                meta: {
+                    dataTestID: 'division-assignment',
+                },
             }),
         ]
     }, [setDivision])
