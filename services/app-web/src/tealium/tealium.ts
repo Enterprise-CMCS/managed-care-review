@@ -26,6 +26,9 @@ type TealiumEvent =
     | 'filter_removed'
     | 'inline_error'
     | 'alert_impression'
+    | 'radio_button_list_selected'
+    | 'checkbox_selected'
+    | 'checkbox_unselected'
 
 type TealiumEnv =
     | 'prod'
@@ -141,6 +144,27 @@ type TealiumAlertImpressionObject = {
     extension?: string
 }
 
+type TealiumRadioButtonEventObject = {
+    event_name: 'radio_button_list_selected'
+    radio_button_title: string
+    list_position: number
+    list_options: number
+    link_type?: 'link_other'
+    parent_component_heading?: string
+    parent_component_type?: string
+    field_type: 'optional' | 'required'
+    form_fill_status: boolean
+}
+
+type TealiumCheckboxEventObject = {
+    event_name: 'checkbox_selected' | 'checkbox_unselected'
+    text: string
+    heading: string
+    parent_component_heading?: string
+    parent_component_type?: string
+    field_type: 'optional' | 'required'
+}
+
 type TealiumFilterEventObject = (
     TealiumFilterAppliedType | TealiumFilterRemovedType
 )
@@ -158,6 +182,8 @@ type TealiumEventObjectTypes = (
     | TealiumFilterEventObject
     | TealiumInlineErrorObject
     | TealiumAlertImpressionObject
+    | TealiumCheckboxEventObject
+    | TealiumRadioButtonEventObject
     ) & Partial<TealiumDataObject>
 
 type TealiumClientType = {
@@ -352,5 +378,7 @@ export type {
     TealiumDropdownSelectionEventObject,
     TealiumFilterEventObject,
     TealiumInlineErrorObject,
-    TealiumAlertImpressionObject
+    TealiumAlertImpressionObject,
+    TealiumRadioButtonEventObject,
+    TealiumCheckboxEventObject
 }

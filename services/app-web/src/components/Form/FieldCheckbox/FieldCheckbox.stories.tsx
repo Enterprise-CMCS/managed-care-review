@@ -22,4 +22,6 @@ Default.args = {
     name: 'managedCareEntity',
     id: 'mco',
     label: 'Managed Care Organization (MCO)',
+    heading: 'Managed Care entities',
+    parent_component_heading: 'Contract Details Form',
 }

@@ -277,12 +277,20 @@ export const SingleRateFormFields = ({
                         name={`${fieldNamePrefix}.rateType`}
                         label="New rate certification"
                         value={'NEW'}
+                        list_position={1}
+                        list_options={2}
+                        parent_component_heading="Rate certification type"
+                        radio_button_title="New rate certification"
                     />
                     <FieldRadio
                         id={`amendmentRate-${index}`}
                         name={`${fieldNamePrefix}.rateType`}
                         label="Amendment to prior rate certification"
                         value={'AMENDMENT'}
+                        list_position={2}
+                        list_options={2}
+                        parent_component_heading="Rate certification type"
+                        radio_button_title="Amendment to prior rate certification"
                     />
                 </Fieldset>
             </FormGroup>
@@ -325,12 +333,20 @@ export const SingleRateFormFields = ({
                         name={`${fieldNamePrefix}.rateCapitationType`}
                         label="Certification of capitation rates specific to each rate cell"
                         value={'RATE_CELL'}
+                        list_position={1}
+                        list_options={2}
+                        parent_component_heading="Does the actuary certify capitation rates specific to each rate cell or a rate range?"
+                        radio_button_title="Certification of capitation rates specific to each rate cell"
                     />
                     <FieldRadio
                         id={`rateRange-${index}`}
                         name={`${fieldNamePrefix}.rateCapitationType`}
                         label="Certification of rate ranges of capitation rates per rate cell"
                         value={'RATE_RANGE'}
+                        list_position={2}
+                        list_options={2}
+                        parent_component_heading="Does the actuary certify capitation rates specific to each rate cell or a rate range?"
+                        radio_button_title="Certification of rate ranges of capitation rates per rate cell"
                     />
                 </Fieldset>
             </FormGroup>
@@ -607,6 +623,10 @@ export const SingleRateFormFields = ({
                         label={`OACT can communicate directly with the state's actuaries but should copy the state on all written communication and all appointments for verbal discussions.`}
                         value={'OACT_TO_ACTUARY'}
                         aria-required
+                        list_position={1}
+                        list_options={2}
+                        parent_component_heading="Actuaries' communication preference"
+                        radio_button_title="OACT can communicate directly with the state's actuaries but should copy the state on all written communication and all appointments for verbal discussions."
                     />
                     <FieldRadio
                         id={`${fieldNamePrefix}.actuaryCommunicationPreference.OACTtoState`}
@@ -614,6 +634,10 @@ export const SingleRateFormFields = ({
                         label={`OACT can communicate directly with the state, and the state will relay all written communication to their actuaries and set up time for any potential verbal discussions.`}
                         value={'OACT_TO_STATE'}
                         aria-required
+                        list_position={2}
+                        list_options={2}
+                        parent_component_heading="Actuaries' communication preference"
+                        radio_button_title="OACT can communicate directly with the state, and the state will relay all written communication to their actuaries and set up time for any potential verbal discussions."
                     />
                 </Fieldset>
             </FormGroup>

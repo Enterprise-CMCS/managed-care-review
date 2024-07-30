@@ -711,6 +711,14 @@ export const ContractDetails = ({
                                                     id="statutoryRegulatoryAttestationYes"
                                                     value={'YES'}
                                                     aria-required
+                                                    list_position={1}
+                                                    list_options={2}
+                                                    parent_component_heading={
+                                                        StatutoryRegulatoryAttestationQuestion
+                                                    }
+                                                    radio_button_title={
+                                                        StatutoryRegulatoryAttestation.YES
+                                                    }
                                                 />
                                                 <FieldRadio
                                                     name="statutoryRegulatoryAttestation"
@@ -720,6 +728,14 @@ export const ContractDetails = ({
                                                     id="statutoryRegulatoryAttestationNo"
                                                     value={'NO'}
                                                     aria-required
+                                                    list_position={2}
+                                                    list_options={2}
+                                                    parent_component_heading={
+                                                        StatutoryRegulatoryAttestationQuestion
+                                                    }
+                                                    radio_button_title={
+                                                        StatutoryRegulatoryAttestation.NO
+                                                    }
                                                 />
                                             </Fieldset>
                                         </FormGroup>
@@ -796,6 +812,10 @@ export const ContractDetails = ({
                                                 label="Fully executed"
                                                 aria-required
                                                 value={'EXECUTED'}
+                                                list_position={1}
+                                                list_options={2}
+                                                parent_component_heading="Contract status"
+                                                radio_button_title="Fully executed"
                                             />
                                             <FieldRadio
                                                 id="unexecutedContract"
@@ -803,6 +823,10 @@ export const ContractDetails = ({
                                                 label="Unexecuted by some or all parties"
                                                 aria-required
                                                 value={'UNEXECUTED'}
+                                                list_position={2}
+                                                list_options={2}
+                                                parent_component_heading="Contract status"
+                                                radio_button_title="Unexecuted by some or all parties"
                                             />
                                         </Fieldset>
                                     </FormGroup>
@@ -963,6 +987,8 @@ export const ContractDetails = ({
                                                             ManagedCareEntityRecord.MCO
                                                         }
                                                         value="MCO"
+                                                        heading="Managed Care entities"
+                                                        parent_component_heading="Contract Details Form"
                                                     />
                                                     <FieldCheckbox
                                                         id="prepaidInpatientHealthPlan"
@@ -971,6 +997,8 @@ export const ContractDetails = ({
                                                             ManagedCareEntityRecord.PIHP
                                                         }
                                                         value="PIHP"
+                                                        heading="Managed Care entities"
+                                                        parent_component_heading="Contract Details Form"
                                                     />
                                                     <FieldCheckbox
                                                         id="prepaidAmbulatoryHealthPlans"
@@ -979,6 +1007,8 @@ export const ContractDetails = ({
                                                             ManagedCareEntityRecord.PAHP
                                                         }
                                                         value="PAHP"
+                                                        heading="Managed Care entities"
+                                                        parent_component_heading="Contract Details Form"
                                                     />
                                                     <FieldCheckbox
                                                         id="primaryCareCaseManagementEntity"
@@ -987,6 +1017,8 @@ export const ContractDetails = ({
                                                             ManagedCareEntityRecord.PCCM
                                                         }
                                                         value="PCCM"
+                                                        heading="Managed Care entities"
+                                                        parent_component_heading="Contract Details Form"
                                                     />
                                                 </Fieldset>
                                             </FormGroup>
@@ -1045,6 +1077,8 @@ export const ContractDetails = ({
                                                                 value={
                                                                     federalAuthority
                                                                 }
+                                                                heading="Managed Care entities"
+                                                                parent_component_heading="Contract Details Form"
                                                             />
                                                         )
                                                     )}

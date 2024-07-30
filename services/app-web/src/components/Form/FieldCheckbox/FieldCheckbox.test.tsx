@@ -28,6 +28,8 @@ describe('FieldCheckbox component', () => {
                 name="managedCareEntity"
                 id="mco"
                 label="Managed Care Organization (MCO)"
+                heading="Managed Care entities"
+                parent_component_heading="Contract Details Form"
             />
         )
         expect(
@@ -48,6 +50,8 @@ describe('FieldCheckbox component', () => {
                 id="mco"
                 aria-required
                 label="Managed Care Organization (MCO)"
+                heading="Managed Care entities"
+                parent_component_heading="Contract Details Form"
             />
         )
         expect(
@@ -66,6 +70,8 @@ describe('FieldCheckbox component', () => {
                     id="foobar"
                     aria-required
                     label="Foobar"
+                    heading="Managed Care entities"
+                    parent_component_heading="Contract Details Form"
                 />
                 <FieldCheckbox
                     name="managedCareEntity"
@@ -73,6 +79,8 @@ describe('FieldCheckbox component', () => {
                     aria-required
                     label="Managed Care Organization (MCO)"
                     checked
+                    heading="Managed Care entities"
+                    parent_component_heading="Contract Details Form"
                 />
             </fieldset>
         )

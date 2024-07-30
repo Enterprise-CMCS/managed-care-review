@@ -33,5 +33,11 @@ export const mockUseTealiumHookFunctions = (): UseTealiumHookType => ({
     },
     logInlineErrorEvent: () => {
         return
+    },
+    logCheckboxEvent: () => {
+        return
+    },
+    logRadioButtonEvent: () => {
+        return
     }
 })

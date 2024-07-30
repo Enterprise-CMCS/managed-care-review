@@ -102,6 +102,10 @@ export const ActuaryContactFields = ({
                     value={'MERCER'}
                     aria-required
                     data-testid={`${testIdPrefix}.mercer`}
+                    list_position={1}
+                    list_options={7}
+                    parent_component_heading="Actuarial firm"
+                    radio_button_title="Mercer"
                 />
                 <FieldRadio
                     id={`${fieldNamePrefix}-milliman`}
@@ -110,6 +114,10 @@ export const ActuaryContactFields = ({
                     value={'MILLIMAN'}
                     aria-required
                     data-testid={`${testIdPrefix}.milliman`}
+                    list_position={2}
+                    list_options={7}
+                    parent_component_heading="Actuarial firm"
+                    radio_button_title="Milliman"
                 />
                 <FieldRadio
                     id={`${fieldNamePrefix}-optumas`}
@@ -118,6 +126,10 @@ export const ActuaryContactFields = ({
                     value={'OPTUMAS'}
                     aria-required
                     data-testid={`${testIdPrefix}.optumas`}
+                    list_position={3}
+                    list_options={7}
+                    parent_component_heading="Actuarial firm"
+                    radio_button_title="Optumas"
                 />
                 <FieldRadio
                     id={`${fieldNamePrefix}-guidehouse`}
@@ -126,6 +138,10 @@ export const ActuaryContactFields = ({
                     value={'GUIDEHOUSE'}
                     aria-required
                     data-testid={`${testIdPrefix}.guidehouse`}
+                    list_position={4}
+                    list_options={7}
+                    parent_component_heading="Actuarial firm"
+                    radio_button_title="Guidehouse"
                 />
                 <FieldRadio
                     id={`${fieldNamePrefix}-deloitte`}
@@ -134,6 +150,10 @@ export const ActuaryContactFields = ({
                     value={'DELOITTE'}
                     aria-required
                     data-testid={`${testIdPrefix}.deloitte`}
+                    list_position={5}
+                    list_options={7}
+                    parent_component_heading="Actuarial firm"
+                    radio_button_title="Deloitte"
                 />
                 <FieldRadio
                     id={`${fieldNamePrefix}-stateInHouse`}
@@ -142,6 +162,10 @@ export const ActuaryContactFields = ({
                     value={'STATE_IN_HOUSE'}
                     aria-required
                     data-testid={`${testIdPrefix}.stateInHouse`}
+                    list_position={6}
+                    list_options={7}
+                    parent_component_heading="Actuarial firm"
+                    radio_button_title="State in-house"
                 />
                 <FieldRadio
                     id={`${fieldNamePrefix}-other`}
@@ -150,6 +174,10 @@ export const ActuaryContactFields = ({
                     value={'OTHER'}
                     aria-required
                     data-testid={`${testIdPrefix}.other`}
+                    list_position={7}
+                    list_options={7}
+                    parent_component_heading="Actuarial firm"
+                    radio_button_title="Other"
                 />
 
                 {getIn(values, `${fieldNamePrefix}.actuarialFirm`) ===
