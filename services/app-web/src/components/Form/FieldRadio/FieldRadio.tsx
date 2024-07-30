@@ -51,7 +51,7 @@ export const FieldRadio = ({
             radio_button_title,
             list_options,
             list_position,
-            field_type: inputProps['aria-required'] ? 'required' : 'optional',
+            field_type: isRequired ? 'required' : 'optional',
             //  TODO: form_fill_status: Unsure about the requirement of this field. Selecting the radio answers the question, so wouldn't this be always TRUE?
             form_fill_status: true,
         })
