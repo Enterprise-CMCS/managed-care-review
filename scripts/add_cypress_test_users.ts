@@ -62,6 +62,7 @@ function IDMRole(role: UserRole): string {
 async function createUser({
     userPoolID,
     name,
+    familyName,
     email,
     role,
     password,
@@ -73,6 +74,7 @@ async function createUser({
     role: UserRole
     password: string
     state?: string
+    familyName?: string
 }) {
     const cognitoClient = new CognitoIdentityProviderClient({
         apiVersion: '2016-04-19',
@@ -91,7 +93,7 @@ async function createUser({
             },
             {
                 Name: 'family_name',
-                Value: 'TestLastName',
+                Value: familyName ?? 'TestLastName',
             },
             {
                 Name: 'email',
@@ -175,36 +177,42 @@ async function main() {
     const testUsers = [
         {
             name: 'Aang',
+            familyName: 'Avatar',
             email: 'aang@example.com',
             role: 'STATE_USER' as const,
             state: 'MN',
         },
         {
             name: 'Toph',
+            familyName: 'Beifong',
             email: 'toph@example.com',
             role: 'STATE_USER' as const,
             state: 'VA',
         },
         {
             name: 'Toph',
+            familyName: 'Beifong',
             email: 'toph2@example.com',
             role: 'STATE_USER' as const,
             state: 'FL',
         },
         {
             name: 'Zuko',
+            familyName: 'Hotman',
             email: 'zuko@example.com',
             role: 'CMS_USER' as const,
             state: undefined,
         },
         {
             name: 'Roku',
+            familyName: 'Hotman',
             email: 'roku@example.com',
             role: 'CMS_USER' as const,
             state: undefined,
         },
         {
             name: 'Izumi',
+            familyName: 'Hotman',
             email: 'izumi@example.com',
             role: 'CMS_USER' as const,
             state: undefined,
@@ -218,17 +226,20 @@ async function main() {
         {
             name: 'Iroh',
             email: 'iroh@example.com',
+            familyName: 'Uncle',
             role: 'ADMIN_USER' as const,
             state: undefined,
         },
         {
             name: 'Appa',
+            familyName: 'Sky Bison',
             email: 'appa@example.com',
             role: 'HELPDESK_USER' as const,
             state: undefined,
         },
         {
             name: 'Shi Tong',
+            familyName: 'Wan',
             email: 'shi-tong@example.com',
             role: 'BUSINESSOWNER_USER' as const,
             state: undefined,
@@ -241,6 +252,7 @@ async function main() {
             await createUser({
                 userPoolID,
                 name: user.name,
+                familyName: user.familyName,
                 email: user.email,
                 role: user.role,
                 password: testUserPassword,
