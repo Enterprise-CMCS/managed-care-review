@@ -12,9 +12,16 @@ export function fetchContractWithQuestionsResolver(
     store: Store
 ): QueryResolvers['fetchContractWithQuestions'] {
     return async (_parent, { input }, context) => {
+        console.error(
+            '=================================== HI ======================'
+        )
         const { user, ctx, tracer } = context
         // add a span to OTEL
-        const span = tracer?.startSpan('fetchContractWithQuestionsResolver', {}, ctx)
+        const span = tracer?.startSpan(
+            'fetchContractWithQuestionsResolver',
+            {},
+            ctx
+        )
         setResolverDetailsOnActiveSpan('fetchContractWithQuestions', user, span)
 
         const contractWithHistory = await store.findContractWithHistory(
@@ -42,7 +49,9 @@ export function fetchContractWithQuestionsResolver(
             })
         }
 
-        const questionsForContract = await store.findAllQuestionsByContract(input.contractID)
+        const questionsForContract = await store.findAllQuestionsByContract(
+            input.contractID
+        )
         if (questionsForContract instanceof Error) {
             const errMessage = `Issue finding contract message: ${questionsForContract.message}`
             setErrorAttributesOnActiveSpan(errMessage, span)
@@ -63,44 +72,50 @@ export function fetchContractWithQuestionsResolver(
                 },
             })
         }
-
-        const dmcoQuestions = questionsForContract.filter((question) => question.division === 'DMCO')
-        .map((question) => {
-            return {
-                node: {
-                    ...question
+        console.info(
+            '============== QUESTIONS FOR CONTRACT ===========',
+            questionsForContract
+        )
+        const dmcoQuestions = questionsForContract
+            .filter((question) => question.division === 'DMCO')
+            .map((question) => {
+                return {
+                    node: {
+                        ...question,
+                    },
                 }
-            }
-        })
-        const dmcpQuestions = questionsForContract.filter((question) => question.division === 'DMCP')
-        .map((question) => {
-            return {
-                node: {
-                    ...question
+            })
+        const dmcpQuestions = questionsForContract
+            .filter((question) => question.division === 'DMCP')
+            .map((question) => {
+                return {
+                    node: {
+                        ...question,
+                    },
                 }
-            }
-        })
-        const oactQuestions = questionsForContract.filter((question) => question.division === 'OACT')
-        .map((question) => {
-            return {
-                node: {
-                    ...question
+            })
+        const oactQuestions = questionsForContract
+            .filter((question) => question.division === 'OACT')
+            .map((question) => {
+                return {
+                    node: {
+                        ...question,
+                    },
                 }
-            }
-        })
+            })
 
         const questionPayload: QuestionIndexType = {
             DMCOQuestions: {
                 totalCount: dmcoQuestions.length,
-                edges: dmcoQuestions
+                edges: dmcoQuestions,
             },
             DMCPQuestions: {
                 totalCount: dmcpQuestions.length,
-                edges: dmcpQuestions
+                edges: dmcpQuestions,
             },
             OACTQuestions: {
                 totalCount: oactQuestions.length,
-                edges: oactQuestions
+                edges: oactQuestions,
             },
         }
         // A state user cannot access contracts that don't belong to their state
@@ -119,9 +134,11 @@ export function fetchContractWithQuestionsResolver(
         }
 
         setSuccessAttributesOnActiveSpan(span)
-        return { contract: {
-            ...contractWithHistory,
-            questions: questionPayload
-        } }
+        return {
+            contract: {
+                ...contractWithHistory,
+                questions: questionPayload,
+            },
+        }
     }
 }

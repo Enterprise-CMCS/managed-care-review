@@ -16,7 +16,9 @@ export function fetchContractResolver(
         // add a span to OTEL
         const span = tracer?.startSpan('fetchContractResolver', {}, ctx)
         setResolverDetailsOnActiveSpan('fetchContract', user, span)
-
+        console.info(
+            '==================== HI fetchContract ====================='
+        )
         const contractWithHistory = await store.findContractWithHistory(
             input.contractID
         )
