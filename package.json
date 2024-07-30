@@ -10,7 +10,7 @@
     },
     "scripts": {
         "preinstall": "npx only-allow pnpm",
-        "clean": "npx lerna clean",
+        "clean": "rm -rf node_modules && pnpm store prune",
         "format": "pnpm run prettier --write",
         "prettier": "prettier --ignore-path .gitignore \"**/*.+(ts|tsx|json)\"",
         "test:coverage": "npx lerna run test:coverage --scope=app-web --scope=app-api --scope=cypress",
