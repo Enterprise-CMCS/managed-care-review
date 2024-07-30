@@ -6,11 +6,9 @@ import {
     getCoreRowModel,
     getFilteredRowModel,
     getSortedRowModel,
-    RowData,
     useReactTable,
     getFacetedUniqueValues,
     Column,
-    FilterFn,
 } from '@tanstack/react-table'
 import { useAtom } from 'jotai/react'
 import { atomWithHash } from 'jotai-location'
@@ -33,14 +31,17 @@ import { NavLinkWithLogging } from '../TealiumLogging/Link'
 import { useTealium } from '../../hooks'
 import useDeepCompareEffect from 'use-deep-compare-effect'
 
-declare module '@tanstack/table-core' {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    interface ColumnMeta<TData extends RowData, TValue> {
-        dataTestID: string
-    }
-    interface FilterFns {
-        dateRangeFilter: FilterFn<unknown>
-    }
+export type RateInDashboardType = {
+    id: string
+    name: string
+    submittedAt?: string
+    updatedAt: Date
+    status: HealthPlanPackageStatus
+    programs: Program[]
+    rateType?: string
+    ratePeriodStart: Date
+    ratePeriodEnd: Date
+    stateName?: string
 }
 
 export type PackageInDashboardType = {

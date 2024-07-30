@@ -18,9 +18,7 @@ import { Rate } from '../../../gen/gqlClient'
 import { testS3Client } from '../../../testHelpers/s3Helpers'
 import { ActuaryCommunicationRecord } from '../../../constants'
 import * as usePreviousSubmission from '../../../hooks/usePreviousSubmission'
-import {
-    RateRevisionWithIsLinked,
-} from '../../../gqlHelpers/contractsAndRates'
+import { RateRevisionWithIsLinked } from '../../../gqlHelpers/contractsAndRates'
 
 describe('RateDetailsSummarySection', () => {
     const draftContract = mockContractPackageDraft()
@@ -306,20 +304,23 @@ describe('RateDetailsSummarySection', () => {
                 }
             )
         })
-        expect(screen.getByRole('link', {
-            name: 'Replace rate',
-        })).toBeInTheDocument()
+        expect(
+            screen.getByRole('link', {
+                name: 'Replace rate',
+            })
+        ).toBeInTheDocument()
     })
 
     it('does not render replace rate button for linked rates', async () => {
         const contract = mockContractWithLinkedRateSubmitted()
-        const rateRevs:RateRevisionWithIsLinked[] = contract.packageSubmissions[0].rateRevisions.map((rev)=>{
-            const newRev:RateRevisionWithIsLinked = {
-                ...rev,
-                isLinked: true
-            }
-            return newRev
-        })
+        const rateRevs: RateRevisionWithIsLinked[] =
+            contract.packageSubmissions[0].rateRevisions.map((rev) => {
+                const newRev: RateRevisionWithIsLinked = {
+                    ...rev,
+                    isLinked: true,
+                }
+                return newRev
+            })
         const statePrograms = mockMNState().programs
         await waitFor(() => {
             renderWithProviders(
@@ -335,9 +336,11 @@ describe('RateDetailsSummarySection', () => {
                 }
             )
         })
-        expect(screen.queryByRole('link', {
-            name: 'Replace rate',
-        })).not.toBeInTheDocument()
+        expect(
+            screen.queryByRole('link', {
+                name: 'Replace rate',
+            })
+        ).not.toBeInTheDocument()
     })
 
     it('does not render replace rate button for state or cms users', async () => {
@@ -357,9 +360,11 @@ describe('RateDetailsSummarySection', () => {
                 }
             )
         })
-        expect(screen.queryByRole('link', {
-            name: 'Replace rate',
-        })).not.toBeInTheDocument()
+        expect(
+            screen.queryByRole('link', {
+                name: 'Replace rate',
+            })
+        ).not.toBeInTheDocument()
 
         await waitFor(() => {
             renderWithProviders(
@@ -374,9 +379,11 @@ describe('RateDetailsSummarySection', () => {
                 }
             )
         })
-        expect(screen.queryByRole('link', {
-            name: 'Replace rate',
-        })).not.toBeInTheDocument()
+        expect(
+            screen.queryByRole('link', {
+                name: 'Replace rate',
+            })
+        ).not.toBeInTheDocument()
     })
 
     it('can render correct rate name for AMENDMENT rate submission', () => {
@@ -516,11 +523,15 @@ describe('RateDetailsSummarySection', () => {
         contract.draftRates![0].revisions[0].formData.rateDateEnd = null
         contract.draftRates![0].revisions[0].formData.rateDateCertified = null
         contract.draftRates![0].revisions[0].formData.rateCapitationType = null
-        contract.draftRates![0].revisions[0].formData.amendmentEffectiveDateEnd = null
-        contract.draftRates![0].revisions[0].formData.amendmentEffectiveDateStart = null
+        contract.draftRates![0].revisions[0].formData.amendmentEffectiveDateEnd =
+            null
+        contract.draftRates![0].revisions[0].formData.amendmentEffectiveDateStart =
+            null
         contract.draftRates![0].revisions[0].formData.rateCapitationType = null
-        contract.draftRates![0].revisions[0].formData.certifyingActuaryContacts = []
-        contract.draftRates![0].revisions[0].formData.actuaryCommunicationPreference = null
+        contract.draftRates![0].revisions[0].formData.certifyingActuaryContacts =
+            []
+        contract.draftRates![0].revisions[0].formData.actuaryCommunicationPreference =
+            null
 
         await waitFor(() => {
             renderWithProviders(

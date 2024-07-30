@@ -2,10 +2,8 @@ import { Table } from '@trussworks/react-uswds'
 import React, { useCallback, useMemo, useState } from 'react'
 import {
     createColumnHelper,
-    FilterFn,
     flexRender,
     getCoreRowModel,
-    RowData,
     useReactTable,
 } from '@tanstack/react-table'
 import Select, { OnChangeValue } from 'react-select'
@@ -25,16 +23,6 @@ import { handleApolloError } from '../../../gqlHelpers/apolloErrors'
 import { updateCMSUser } from '../../../gqlHelpers/updateCMSUser'
 import { ApolloError } from '@apollo/client'
 import { useTealium } from '../../../hooks'
-
-declare module '@tanstack/table-core' {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    interface ColumnMeta<TData extends RowData, TValue> {
-        dataTestID: string
-    }
-    interface FilterFns {
-        dateRangeFilter: FilterFn<unknown>
-    }
-}
 
 type DivisionSelectOptions = {
     label: string

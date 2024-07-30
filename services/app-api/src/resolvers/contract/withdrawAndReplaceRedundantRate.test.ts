@@ -1,5 +1,5 @@
 import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
-import { testS3Client } from 'app-web/src/testHelpers/s3Helpers'
+import { testS3Client } from '../../../../app-web/src/testHelpers/s3Helpers'
 import WITHDRAW_REPLACE_RATE from 'app-graphql/src/mutations/withdrawAndReplaceRedundantRate.graphql'
 import { testAdminUser, testCMSUser } from '../../testHelpers/userHelpers'
 import {
@@ -17,7 +17,7 @@ import { type ContractRevision } from '../../gen/gqlServer'
 import { type HealthPlanFormDataType } from '../../common-code/healthPlanFormDataType'
 import { withdrawRateInsideTransaction } from '../../postgres/contractAndRates'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
-import { WithdrawDateArgsType } from '../../postgres/contractAndRates/withdrawRate'
+import type { WithdrawDateArgsType } from '../../postgres/contractAndRates/withdrawRate'
 
 // Setup function for testing withdraw and replace rate
 // returns a the target contractID and ids for the child rate to be withdrawn and the replacement
@@ -241,18 +241,18 @@ describe('withdrawAndReplaceRedundantRate', () => {
 
     it('returns error if called on already withdrawn rate', async () => {
         // Set up function to withdraw arte using prisma level function - we don't have standalone resolver for this
-        const withdrawRateOnDemand = async(args: WithdrawDateArgsType) => {
-            const {rateID, withdrawnByUserID, withdrawReason} = args
+        const withdrawRateOnDemand = async (args: WithdrawDateArgsType) => {
+            const { rateID, withdrawnByUserID, withdrawReason } = args
             const client = await sharedTestPrismaClient()
 
             return must(
-            await withdrawRateInsideTransaction(client, {
-                rateID,
-                withdrawnByUserID,
-                withdrawReason
-            })
-
-    )}
+                await withdrawRateInsideTransaction(client, {
+                    rateID,
+                    withdrawnByUserID,
+                    withdrawReason,
+                })
+            )
+        }
 
         const stateServer = await constructTestPostgresServer({
             s3Client: mockS3,
@@ -264,14 +264,19 @@ describe('withdrawAndReplaceRedundantRate', () => {
             s3Client: mockS3,
         })
 
-        const originalContract = await createAndSubmitTestContractWithRate(stateServer)
-        const contractWithReplacementRate = await createAndSubmitTestContractWithRate(stateServer)
-        const rateRevOnOriginalContract = originalContract.packageSubmissions[0].rateRevisions[0]
+        const originalContract =
+            await createAndSubmitTestContractWithRate(stateServer)
+        const contractWithReplacementRate =
+            await createAndSubmitTestContractWithRate(stateServer)
+        const rateRevOnOriginalContract =
+            originalContract.packageSubmissions[0].rateRevisions[0]
 
         // manually withdraw the rate early
-        await withdrawRateOnDemand( {rateID: rateRevOnOriginalContract.rateID,
-        withdrawnByUserID: adminUser.id,
-        withdrawReason: 'Withdraw this rate early for sake of the test'})
+        await withdrawRateOnDemand({
+            rateID: rateRevOnOriginalContract.rateID,
+            withdrawnByUserID: adminUser.id,
+            withdrawReason: 'Withdraw this rate early for sake of the test',
+        })
 
         const replaceReason = 'Try to withdraw already withdrawn rate'
         const withdrawRateResult = await adminServer.executeOperation({
@@ -279,8 +284,7 @@ describe('withdrawAndReplaceRedundantRate', () => {
             variables: {
                 input: {
                     contractID: originalContract.id,
-                    withdrawnRateID:
-                        rateRevOnOriginalContract.rateID,
+                    withdrawnRateID: rateRevOnOriginalContract.rateID,
                     replacementRateID:
                         contractWithReplacementRate.packageSubmissions[0]
                             .rateRevisions[0].rateID,
@@ -302,15 +306,26 @@ describe('withdrawAndReplaceRedundantRate', () => {
             s3Client: mockS3,
         })
 
-        const firstContractRateRevision = (await createAndSubmitTestContractWithRate(stateServer)).packageSubmissions[0].rateRevisions[0]
+        const firstContractRateRevision = (
+            await createAndSubmitTestContractWithRate(stateServer)
+        ).packageSubmissions[0].rateRevisions[0]
 
         // submit a contract with linked rate
-        const secondContractWithLinkedRate = await createAndUpdateTestContractWithRate(stateServer)
-        await linkRateToDraftContract(stateServer,secondContractWithLinkedRate.id, firstContractRateRevision.rateID)
-        await submitTestContract(stateServer,secondContractWithLinkedRate.id, 'submit contract with a linked rate')
+        const secondContractWithLinkedRate =
+            await createAndUpdateTestContractWithRate(stateServer)
+        await linkRateToDraftContract(
+            stateServer,
+            secondContractWithLinkedRate.id,
+            firstContractRateRevision.rateID
+        )
+        await submitTestContract(
+            stateServer,
+            secondContractWithLinkedRate.id,
+            'submit contract with a linked rate'
+        )
 
-        const thirdContractWithReplacementRate = await createAndSubmitTestContractWithRate(stateServer)
-
+        const thirdContractWithReplacementRate =
+            await createAndSubmitTestContractWithRate(stateServer)
 
         const replaceReason = 'Try to withdraw a linked rate'
         const withdrawRateResult = await adminServer.executeOperation({
@@ -318,10 +333,9 @@ describe('withdrawAndReplaceRedundantRate', () => {
             variables: {
                 input: {
                     contractID: secondContractWithLinkedRate.id,
-                    withdrawnRateID:
-                    firstContractRateRevision.rateID,
+                    withdrawnRateID: firstContractRateRevision.rateID,
                     replacementRateID:
-                    thirdContractWithReplacementRate.packageSubmissions[0]
+                        thirdContractWithReplacementRate.packageSubmissions[0]
                             .rateRevisions[0].rateID,
                     replaceReason,
                 },

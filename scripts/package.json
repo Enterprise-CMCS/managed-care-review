@@ -7,7 +7,7 @@
     "private": true,
     "scripts": {
         "precommit": "lint-staged",
-        "clean": "rm -rf node_modules && yarn cache clean",
+        "clean": "rm -rf node_modules && pnpm store prune",
         "lint": "tsc --noEmit && eslint",
         "build": "tsc",
         "build:ci-scripts": "tsc"
@@ -21,12 +21,14 @@
         "@aws-sdk/client-cloudformation": "^3.529.1",
         "@aws-sdk/client-cognito-identity-provider": "^3.529.1",
         "@aws-sdk/client-s3": "^3.529.1",
+        "@types/uuid": "^9.0.0",
         "octokit": "^3.1.2"
     },
     "devDependencies": {
         "@actions/core": "^1.6.0",
         "@octokit/action": "^5.0.2",
         "csv-parser": "^3.0.0",
+        "lint-staged": "^15.2.7",
         "typescript": "^4.5.4",
         "uuid": "^9.0.0"
     }

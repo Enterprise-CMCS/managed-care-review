@@ -18,7 +18,7 @@ export async function runAPITestsWatch(jestArgs: string[]) {
     // because we are inheriting stdio for this process,
     // we need to not run spawnSync or else all the output
     // for the graphql compiler & db will be swallowed.
-    const proc = spawn('yarn', ['test'].concat(jestArgs), {
+    const proc = spawn('pnpm', ['test'].concat(jestArgs), {
         cwd: 'services/app-api',
         stdio: 'inherit',
     })
@@ -45,7 +45,7 @@ export async function runAPITests(
 
     return await runner.runCommandAndOutput(
         'api - unit',
-        ['yarn', 'test:coverage'],
+        ['pnpm', 'test:coverage'],
         'services/app-api'
     )
 }

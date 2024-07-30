@@ -8,7 +8,7 @@
     "license": "CC0-1.0",
     "scripts": {
         "clean": "lerna clean",
-        "format": "yarn prettier --write",
+        "format": "pnpm prettier --write",
         "prettier": "prettier --ignore-path .gitignore \"**/*.+(ts|tsx|json)\"",
         "cypress:open": "../../node_modules/.bin/cypress open --env AUTH_MODE=LOCAL",
         "test:coverage": "rm -rf ../../.nyc_output && ../../node_modules/.bin/cypress run --env AUTH_MODE=LOCAL --headless --browser chrome"
@@ -40,7 +40,11 @@
         ]
     },
     "devDependencies": {
+        "@cypress-audit/pa11y": "^1.3.0",
+        "@cypress/code-coverage": "^3.10.0",
+        "@testing-library/cypress": "^10.0.1",
         "c8": "^10.1.2",
+        "cypress": "^13.0.0",
         "husky": "^9.0.11",
         "lint-staged": "^15.2.2",
         "prettier": "^3.1.0"

@@ -107,7 +107,7 @@ jobs:
           VITE_APP_AUTH_MODE: AWS_COGNITO
           DATABASE_URL: postgresql://postgres:shhhsecret@localhost:5432/postgres?schema=public&connection_limit=5 #pragma: allowlist secret
         working-directory: services/app-web
-        run: yarn test:coverage
+        run: pnpm test:coverage
 
       - name: upload app web gen directory
         uses: actions/upload-artifact@v4
@@ -194,7 +194,7 @@ jobs:
           VITE_APP_AUTH_MODE: AWS_COGNITO
           DATABASE_URL: postgresql://postgres:shhhsecret@localhost:5432/postgres?schema=public&connection_limit=5 #pragma: allowlist secret
         working-directory: services/app-api
-        run: yarn test:coverage-ci
+        run: pnpm test:coverage-ci
 
       - name: upload api test coverage
         uses: actions/upload-artifact@v4
@@ -219,19 +219,8 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version-file: '.nvmrc'
-          cache: yarn
-
-      - name: Get yarn cache directory path
-        shell: bash
-        id: yarn-cache-dir-path
-        run: echo "dir=$(yarn cache dir)" >> "$GITHUB_OUTPUT"
-
-      - name: Install packages
-        working-directory: services/app-api
-        run: PRISMA_CLI_BINARY_TARGETS=rhel-openssl-3.0.x yarn install --prefer-offline --frozen-lockfile --cache-folder ${{ steps.yarn-cache-dir-path.outputs.dir }}
+      - name: Setup env
+        uses: ./.github/actions/setup_env
 
       - name: Generate protos
         run: npx lerna run generate && npx lerna run build --scope=app-proto
@@ -241,7 +230,7 @@ jobs:
         working-directory: services/app-api
         env:
           PRISMA_CLI_BINARY_TARGETS: rhel-openssl-3.0.x
-        run: yarn prisma generate
+        run: pnpm prisma generate
 
       - name: Prepare "@prisma/client" lambda layer
         working-directory: services/app-api
@@ -267,7 +256,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version-file: '.nvmrc'
-          cache: yarn
 
       - name: Prepare ClamAV layer
         working-directory: services/uploads/src/avLayer
@@ -358,7 +346,7 @@ jobs:
           TEST_USERS_PASS: ${{ secrets.TEST_USERS_PASS }}
         run: |
           cd scripts
-          yarn tsc
+          pnpm tsc
           node ./add_cypress_test_users.js $STAGE_NAME $TEST_USERS_PASS
 
       - name: Run migrate to turn on Aurora
@@ -487,6 +475,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Setup env
+        uses: ./.github/actions/setup_env
+
       - uses: actions/download-artifact@v4
         with:
           name: app-web-gen
@@ -581,6 +572,9 @@ jobs:
       fail-fast: false
     steps:
       - uses: actions/checkout@v4
+
+      - name: Setup env
+        uses: ./.github/actions/setup_env
 
       - name: Collate test coverage reports
         run: |

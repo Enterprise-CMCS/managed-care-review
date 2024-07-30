@@ -3,7 +3,7 @@ import { once } from '../deps.js'
 
 // run the graphql compiler with --watch
 async function compileGraphQLTypesWatch(runner: LabeledProcessRunner) {
-    await runner.runCommandAndOutput('gql deps', ['yarn', 'install'], '')
+    await runner.runCommandAndOutput('gql deps', ['pnpm', 'install'], '')
 
     return await runner.runCommandAndOutput(
         'gqlgen',
@@ -17,7 +17,7 @@ export const compileGraphQLTypesWatchOnce = once(compileGraphQLTypesWatch)
 async function compileGraphQLTypes(runner: LabeledProcessRunner) {
     await runner.runCommandAndOutput(
         'gql deps',
-        ['yarn', 'install', '--prefer-offline'],
+        ['pnpm', 'install', '--prefer--offline'],
         ''
     )
 

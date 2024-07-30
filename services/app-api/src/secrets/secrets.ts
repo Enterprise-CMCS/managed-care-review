@@ -1,8 +1,8 @@
 import {
-    SecretsManagerClient,
     GetSecretValueCommand,
+    SecretsManagerClient,
 } from '@aws-sdk/client-secrets-manager'
-import type { GetSecretValueResponse } from 'aws-sdk/clients/secretsmanager'
+import type { GetSecretValueResponse } from '@aws-sdk/client-secrets-manager'
 
 interface APISecrets {
     pgConnectionURL: string
@@ -43,9 +43,8 @@ async function getSecretValue(
     })
 
     const command = new GetSecretValueCommand(params)
-    const secretResponse: GetSecretValueResponse = await secretsManager.send(
-        command
-    )
+    const secretResponse: GetSecretValueResponse =
+        await secretsManager.send(command)
 
     // parse the secrets. we store as a string.
     const secret = JSON.parse(secretResponse.SecretString ?? '') as Secret

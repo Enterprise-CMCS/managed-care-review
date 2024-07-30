@@ -7,7 +7,7 @@ import { compileGraphQLTypesWatchOnce } from './graphql.js'
 import { compileProtoWatchOnce } from './proto.js'
 
 async function installWebDeps(runner: LabeledProcessRunner) {
-    return runner.runCommandAndOutput('web deps', ['yarn', 'install'], '')
+    return runner.runCommandAndOutput('web deps', ['pnpm', 'install'], '')
 }
 
 export const installWebDepsOnce = once(installWebDeps)
