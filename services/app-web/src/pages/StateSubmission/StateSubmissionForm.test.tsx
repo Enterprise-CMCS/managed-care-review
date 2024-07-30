@@ -51,15 +51,16 @@ describe('StateSubmissionForm', () => {
                     apolloProvider: {
                         mocks: [
                             fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchHealthPlanPackageMockSuccess({
-                                id: '15',
-                            }),
                             fetchStateHealthPlanPackageWithQuestionsMockSuccess(
                                 {
                                     id: '15',
                                     stateSubmission: mockSubmission,
                                 }
                             ),
+                            fetchHealthPlanPackageMockSuccess({
+                                id: '15',
+                                submission: mockSubmission,
+                            }),
                         ],
                     },
                     routerProvider: {
