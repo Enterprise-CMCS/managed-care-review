@@ -305,6 +305,8 @@ describe('unlockPackageCMSEmail', () => {
         )
     })
     test('to addresses list includes DMCP and OACT emails for contract and rate package', async () => {
+        // set riskedBasedContract to true so that OACT is emailed
+        sub.riskBasedContract = true
         const template = await unlockPackageCMSEmail(
             sub,
             unlockData,
@@ -395,6 +397,8 @@ describe('unlockPackageCMSEmail', () => {
         })
     })
     test('includes correct toAddresses in contract and rate submission unlock', async () => {
+        // set riskedBasedContract to true so that OACT is emailed
+        sub.riskBasedContract = true
         const template = await unlockPackageCMSEmail(
             sub,
             unlockData,

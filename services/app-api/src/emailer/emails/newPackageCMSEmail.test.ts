@@ -41,6 +41,7 @@ test('to addresses list includes review team email addresses', async () => {
 
 test('to addresses list includes OACT and DMCP group emails for contract and rate package', async () => {
     const sub = mockContractAndRatesFormData()
+    sub.riskBasedContract = true
     const statePrograms = mockMNState().programs
     const template = await newPackageCMSEmail(
         sub,
@@ -699,6 +700,7 @@ test('includes state specific analyst on contract only submission', async () => 
 
 test('includes state specific analyst on contract and rate submission', async () => {
     const sub = mockContractAndRatesFormData()
+    sub.riskBasedContract = true
     const testStateAnalystEmails = testStateAnalystsEmails
     const statePrograms = mockMNState().programs
     const template = await newPackageCMSEmail(
@@ -750,8 +752,10 @@ test('does not include state specific analyst on contract and rate submission', 
     })
 })
 
-test('includes oactEmails on contract and rate submission', async () => {
+test('includes oactEmails on contract and rate submission for a risked based contract', async () => {
     const sub = mockContractAndRatesFormData()
+    // ensure oact will be notified
+    sub.riskBasedContract = true
     const statePrograms = mockMNState().programs
     const template = await newPackageCMSEmail(
         sub,

@@ -304,6 +304,7 @@ describe('with rates', () => {
         )
     })
     test('to addresses list includes DMCP and OACT group emails for contract and rate package', async () => {
+        submission.riskBasedContract = true
         const template = await resubmitPackageCMSEmail(
             submission,
             resubmitData,

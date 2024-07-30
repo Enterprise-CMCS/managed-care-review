@@ -767,7 +767,6 @@ describe(`Tests unlockHealthPlanPackage`, () => {
         const cmsEmails = [
             ...config.devReviewTeamEmails,
             ...stateAnalystsEmails,
-            ...config.oactEmails,
         ]
 
         // email subject line is correct for CMS email
