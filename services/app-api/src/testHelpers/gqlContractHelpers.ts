@@ -2,6 +2,8 @@ import FETCH_CONTRACT from '../../../app-graphql/src/queries/fetchContract.graph
 import SUBMIT_CONTRACT from '../../../app-graphql/src/mutations/submitContract.graphql'
 import UNLOCK_CONTRACT from '../../../app-graphql/src/mutations/unlockContract.graphql'
 import UPDATE_DRAFT_CONTRACT_RATES from '../../../app-graphql/src/mutations/updateDraftContractRates.graphql'
+import WITHDRAW_REPLACE_RATE from '../../../app-graphql/src/mutations/withdrawAndReplaceRedundantRate.graphql'
+
 import { findStatePrograms } from '../postgres'
 import type { InsertContractArgsType } from '../postgres/contractAndRates/insertContract'
 
@@ -139,9 +141,13 @@ async function createSubmitAndUnlockTestContract(
 }
 
 async function createAndSubmitTestContractWithRate(
-    server: ApolloServer
+    server: ApolloServer,
+    contractOverrides?: Partial<HealthPlanFormDataType>
 ): Promise<Contract> {
-    const draft = await createAndUpdateTestContractWithRate(server)
+    const draft = await createAndUpdateTestContractWithRate(
+        server,
+        contractOverrides
+    )
 
     return await submitTestContract(server, draft.id)
 }
@@ -167,6 +173,42 @@ async function fetchTestContract(
     }
 
     return result.data.fetchContract.contract
+}
+
+async function updateTestContractToReplaceRate(
+    server: ApolloServer,
+    args: {
+        contractID: string
+        withdrawnRateID: string
+        replacementRateID: string
+        replaceReason: string
+    }
+): Promise<Contract> {
+    const { contractID, withdrawnRateID, replacementRateID, replaceReason } =
+        args
+    const result = await server.executeOperation({
+        query: WITHDRAW_REPLACE_RATE,
+        variables: {
+            input: {
+                contractID,
+                withdrawnRateID,
+                replacementRateID,
+                replaceReason,
+            },
+        },
+    })
+
+    if (result.errors) {
+        throw new Error(
+            `updateContractToReplaceRate mutation failed with errors ${result.errors}`
+        )
+    }
+
+    if (!result.data) {
+        throw new Error('updateContractToReplaceRate returned nothing')
+    }
+
+    return result.data.withdrawAndReplaceRedundantRate.contract
 }
 
 // USING PRISMA DIRECTLY BELOW ---  we have no createContract resolver yet, but we have integration tests needing the workflows
@@ -232,9 +274,14 @@ const createTestContract = async (
 }
 
 async function createAndUpdateTestContractWithRate(
-    server: ApolloServer
+    server: ApolloServer,
+    contractOverrides?: Partial<HealthPlanFormDataType>
 ): Promise<Contract> {
-    const draft = await createAndUpdateTestContractWithoutRates(server)
+    const draft = await createAndUpdateTestContractWithoutRates(
+        server,
+        'FL',
+        contractOverrides
+    )
     return await addNewRateToTestContract(server, draft)
 }
 
@@ -419,4 +466,5 @@ export {
     clearRatesOnDraftContract,
     updateTestContractDraftRevision,
     createTestContract,
+    updateTestContractToReplaceRate,
 }
