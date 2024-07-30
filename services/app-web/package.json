@@ -7,7 +7,6 @@
         "precommit": "lint-staged",
         "start": "vite",
         "build": "tsc --noEmit && vite build",
-        "clean": "rm -rf node_modules && pnpm store prune",
         "format": "npx prettier --write src/**/*.ts{,x}",
         "lint": "tsc --noEmit && eslint src/ --max-warnings=0 && pnpm lint:style",
         "lint:style": "npx stylelint '**/*.scss'",

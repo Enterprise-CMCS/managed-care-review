@@ -7,7 +7,6 @@
     "author": "",
     "license": "CC0-1.0",
     "scripts": {
-        "clean": "lerna clean",
         "format": "pnpm prettier --write",
         "prettier": "prettier --ignore-path .gitignore \"**/*.+(ts|tsx|json)\"",
         "cypress:open": "../../node_modules/.bin/cypress open --env AUTH_MODE=LOCAL",
