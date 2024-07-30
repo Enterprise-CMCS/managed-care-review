@@ -12,7 +12,7 @@ import {getRouteName} from '../routeHelpers';
 
 type AlertImpressionFnArgType = Omit<TealiumAlertImpressionObject, 'event_name' | 'heading'> & { heading?: string }
 
-const useTealium = (): {
+type UseTealiumHookType = {
     logButtonEvent: (
         tealiumData: Omit<TealiumButtonEventObject, 'event_name'>,
     ) => void,
@@ -31,7 +31,9 @@ const useTealium = (): {
     logAlertImpressionEvent: (
         tealiumData: AlertImpressionFnArgType
     ) => void
-} => {
+}
+
+const useTealium = (): UseTealiumHookType => {
     const context = React.useContext(TealiumContext)
 
     if (context === undefined) {
@@ -116,4 +118,4 @@ const useTealium = (): {
     }
 }
 
-export { useTealium }
+export { useTealium, type UseTealiumHookType }

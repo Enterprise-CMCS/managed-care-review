@@ -3,6 +3,7 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { ExpandableText } from './ExpandableText'
 import * as tealium from '../../hooks/useTealium'
+import { mockUseTealiumHookFunctions } from '../../testHelpers/tealiumHelpers'
 
 describe('ExpandableText', () => {
     type NodeWidth = Pick<
@@ -29,20 +30,7 @@ describe('ExpandableText', () => {
     const spyOnUseTealium = vi.spyOn(tealium, 'useTealium')
 
     beforeEach(() => {
-        spyOnUseTealium.mockImplementation(() => ({
-            logButtonEvent: () => {
-                return
-            },
-            logInternalLinkEvent: () => {
-                return
-            },
-            logDropdownSelectionEvent: () => {
-                return
-            },
-            logFilterEvent: () => {
-                return
-            },
-        }))
+        spyOnUseTealium.mockImplementation(() => mockUseTealiumHookFunctions())
     })
 
     afterEach(() => {
