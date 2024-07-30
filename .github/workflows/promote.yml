@@ -140,10 +140,8 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version-file: '.nvmrc'
-          cache: pnpm
+      - name: Setup env
+        uses: ./.github/actions/setup_env
 
       - name: Prepare ClamAV layer
         working-directory: services/uploads/src/avLayer

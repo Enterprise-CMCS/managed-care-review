@@ -15,7 +15,7 @@ Managed Care Review is an application that accepts Managed Care contract and rat
 
 -   [ ] Node.js
 -   [ ] Serverless - Get help installing it here: [Serverless Getting Started page](https://www.serverless.com/framework/docs/providers/aws/guide/installation/). Learn more about serverless from the [Serverless Stack tutorial](https://serverless-stack.com/).
--   [ ] Yarn - In order to install dependencies, you need to [install pnpm](https://pnpm.io/installation).
+-   [ ] pnpm - In order to install dependencies, you need to [install pnpm](https://pnpm.io/installation).
 -   [ ] AWS Account - You'll need an AWS account with appropriate IAM permissions (admin recommended) to deploy this app in Amazon.
 -   [ ] NVM - If you are on a Mac using nvm, you should be able to install all the dependencies as [described below](#installing-node-and-dependencies).
 -   [ ] envrc - Used to set environment variables locally
@@ -109,7 +109,7 @@ When run locally (with LOCAL_LOGIN=true), auth bypasses Cognito and uses [`serve
 Run whole app locally
 
 -   `./dev local` to run the entire app and storybook
--   Available flags:  `--web`, `--api`, `--s3`, '--postgres' for running services individually
+-   Available flags: `--web`, `--api`, `--s3`, '--postgres' for running services individually
 -   (you can also exclude services by using the yargs 'no' standard: `./dev local --no-webk`)
 
 Run individual services locally
