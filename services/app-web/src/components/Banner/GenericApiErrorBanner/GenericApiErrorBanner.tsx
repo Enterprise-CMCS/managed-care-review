@@ -1,9 +1,10 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import styles from '../Banner.module.scss'
 import { Alert } from '@trussworks/react-uswds'
 import { ERROR_MESSAGES } from '../../../constants/errors'
 import { useStringConstants } from '../../../hooks/useStringConstants'
 import { LinkWithLogging } from '../../TealiumLogging/Link'
+import { useTealium } from '../../../hooks'
 
 export type GenericApiErrorProps = {
     heading?: string
@@ -17,7 +18,19 @@ export const GenericApiErrorBanner = ({
     suggestion,
 }: GenericApiErrorProps): React.ReactElement => {
     const stringConstants = useStringConstants()
+    const { logAlertImpressionEvent } = useTealium()
     const MAIL_TO_SUPPORT = stringConstants.MAIL_TO_SUPPORT
+
+    useEffect(() => {
+        logAlertImpressionEvent({
+            error_type: 'system',
+            error_message:
+                'Please refresh your browser and if you continue to experience an error let us know.',
+            type: 'error',
+            extension: 'react-uswds',
+        })
+    }, [])
+
     return (
         <Alert
             role="alert"

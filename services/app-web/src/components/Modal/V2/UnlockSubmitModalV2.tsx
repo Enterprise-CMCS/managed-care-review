@@ -320,7 +320,12 @@ export const UnlockSubmitModal = ({
                         error={Boolean(formik.errors.unlockSubmitModalInput)}
                     >
                         {formik.errors.unlockSubmitModalInput && (
-                            <PoliteErrorMessage role="alert">
+                            <PoliteErrorMessage
+                                formFieldLabel={
+                                    modalValues.modalHeading ?? modalType
+                                }
+                                role="alert"
+                            >
                                 {formik.errors.unlockSubmitModalInput}
                             </PoliteErrorMessage>
                         )}

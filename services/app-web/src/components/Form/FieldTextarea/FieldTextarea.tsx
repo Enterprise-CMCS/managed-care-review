@@ -55,7 +55,11 @@ export const FieldTextarea = ({
             <span className={styles.requiredOptionalText}>
                 {isRequired ? 'Required' : 'Optional'}
             </span>
-            {showError && <PoliteErrorMessage>{meta.error}</PoliteErrorMessage>}
+            {showError && (
+                <PoliteErrorMessage formFieldLabel={label}>
+                    {meta.error}
+                </PoliteErrorMessage>
+            )}
             {hint && (
                 <div
                     role="note"

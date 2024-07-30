@@ -1,4 +1,5 @@
 import { TealiumClientType } from '../tealium';
+import {UseTealiumHookType} from '../hooks/useTealium';
 
 export const tealiumTestClient = (): TealiumClientType => {
     return {
@@ -13,3 +14,30 @@ export const tealiumTestClient = (): TealiumClientType => {
         },
     }
 }
+
+export const mockUseTealiumHookFunctions = (): UseTealiumHookType => ({
+    logButtonEvent: () => {
+        return
+    },
+    logInternalLinkEvent: () => {
+        return
+    },
+    logDropdownSelectionEvent: () => {
+        return
+    },
+    logFilterEvent: () => {
+        return
+    },
+    logAlertImpressionEvent: () => {
+        return
+    },
+    logInlineErrorEvent: () => {
+        return
+    },
+    logCheckboxEvent: () => {
+        return
+    },
+    logRadioButtonEvent: () => {
+        return
+    }
+})

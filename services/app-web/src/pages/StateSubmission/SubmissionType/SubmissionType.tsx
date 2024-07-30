@@ -331,7 +331,7 @@ export const SubmissionType = ({
                                             {showFieldErrors(
                                                 errors.populationCovered
                                             ) && (
-                                                <PoliteErrorMessage>
+                                                <PoliteErrorMessage formFieldLabel="Which populations does this contract action cover?">
                                                     {errors.populationCovered}
                                                 </PoliteErrorMessage>
                                             )}
@@ -351,6 +351,15 @@ export const SubmissionType = ({
                                                         setFieldValue
                                                     )
                                                 }
+                                                aria-required
+                                                list_position={1}
+                                                list_options={3}
+                                                parent_component_heading="Which populations does this contract action cover?"
+                                                radio_button_title={
+                                                    PopulationCoveredRecord[
+                                                        'MEDICAID'
+                                                    ]
+                                                }
                                             />
                                             <FieldRadio
                                                 id="medicaid-and-chip"
@@ -368,6 +377,14 @@ export const SubmissionType = ({
                                                         setFieldValue
                                                     )
                                                 }
+                                                list_position={2}
+                                                list_options={3}
+                                                parent_component_heading="Which populations does this contract action cover?"
+                                                radio_button_title={
+                                                    PopulationCoveredRecord[
+                                                        'MEDICAID_AND_CHIP'
+                                                    ]
+                                                }
                                             />
                                             <FieldRadio
                                                 id="chip"
@@ -384,6 +401,14 @@ export const SubmissionType = ({
                                                         values,
                                                         setFieldValue
                                                     )
+                                                }
+                                                list_position={3}
+                                                list_options={3}
+                                                parent_component_heading="Which populations does this contract action cover?"
+                                                radio_button_title={
+                                                    PopulationCoveredRecord[
+                                                        'CHIP'
+                                                    ]
                                                 }
                                             />
                                         </Fieldset>
@@ -405,7 +430,7 @@ export const SubmissionType = ({
                                             Required
                                         </span>
                                         {showFieldErrors(errors.programIDs) && (
-                                            <PoliteErrorMessage>
+                                            <PoliteErrorMessage formFieldLabel="Programs this contract action covers">
                                                 {errors.programIDs}
                                             </PoliteErrorMessage>
                                         )}
@@ -440,7 +465,7 @@ export const SubmissionType = ({
                                             {showFieldErrors(
                                                 errors.submissionType
                                             ) && (
-                                                <PoliteErrorMessage>
+                                                <PoliteErrorMessage formFieldLabel="Choose a submission type">
                                                     {errors.submissionType}
                                                 </PoliteErrorMessage>
                                             )}
@@ -453,6 +478,14 @@ export const SubmissionType = ({
                                                     ]
                                                 }
                                                 value={'CONTRACT_ONLY'}
+                                                list_position={1}
+                                                list_options={2}
+                                                parent_component_heading="Programs this contract action covers"
+                                                radio_button_title={
+                                                    SubmissionTypeRecord[
+                                                        'CONTRACT_ONLY'
+                                                    ]
+                                                }
                                             />
                                             <FieldRadio
                                                 id="contractRate"
@@ -466,6 +499,14 @@ export const SubmissionType = ({
                                                 disabled={
                                                     values.populationCovered ===
                                                     'CHIP'
+                                                }
+                                                list_position={2}
+                                                list_options={2}
+                                                parent_component_heading="Programs this contract action covers"
+                                                radio_button_title={
+                                                    SubmissionTypeRecord[
+                                                        'CONTRACT_AND_RATES'
+                                                    ]
                                                 }
                                             />
                                             {values.populationCovered ===
@@ -504,7 +545,7 @@ export const SubmissionType = ({
                                             {showFieldErrors(
                                                 errors.contractType
                                             ) && (
-                                                <PoliteErrorMessage>
+                                                <PoliteErrorMessage formFieldLabel="Contract action type">
                                                     {errors.contractType}
                                                 </PoliteErrorMessage>
                                             )}
@@ -514,6 +555,10 @@ export const SubmissionType = ({
                                                 label="Base contract"
                                                 aria-required
                                                 value={'BASE'}
+                                                list_position={1}
+                                                list_options={2}
+                                                parent_component_heading="Contract action type"
+                                                radio_button_title="Base contract"
                                             />
                                             <FieldRadio
                                                 id="amendmentContract"
@@ -521,6 +566,10 @@ export const SubmissionType = ({
                                                 label="Amendment to base contract"
                                                 aria-required
                                                 value={'AMENDMENT'}
+                                                list_position={2}
+                                                list_options={2}
+                                                parent_component_heading="Contract action type"
+                                                radio_button_title="Amendment to base contract"
                                             />
                                         </Fieldset>
                                     </FormGroup>

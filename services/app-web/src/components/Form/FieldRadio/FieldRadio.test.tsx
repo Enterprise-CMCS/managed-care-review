@@ -28,6 +28,10 @@ describe('FieldRadio component', () => {
                 name="submissionType"
                 id="contractOnly"
                 label="Executed contract action only"
+                list_position={1}
+                list_options={2}
+                radio_button_title="Executed contract action only"
+                parent_component_heading="Contract Execution Status"
             />
         )
         expect(
@@ -48,6 +52,10 @@ describe('FieldRadio component', () => {
                 id="contractOnly"
                 aria-required
                 label="Executed contract action only"
+                list_position={1}
+                list_options={2}
+                radio_button_title="Executed contract action only"
+                parent_component_heading="Contract Execution Status"
             />
         )
         expect(
@@ -66,6 +74,10 @@ describe('FieldRadio component', () => {
                     id="contractOnly"
                     aria-required
                     label="Executed contract action only"
+                    list_position={1}
+                    list_options={2}
+                    radio_button_title="Executed contract action only"
+                    parent_component_heading="Contract Execution Status"
                 />
                 <FieldRadio
                     name="submissionType"
@@ -73,6 +85,10 @@ describe('FieldRadio component', () => {
                     aria-required
                     label="Contract and rates"
                     checked
+                    list_position={1}
+                    list_options={2}
+                    radio_button_title="Executed contract action only"
+                    parent_component_heading="Contract Execution Status"
                 />
             </fieldset>
         )
