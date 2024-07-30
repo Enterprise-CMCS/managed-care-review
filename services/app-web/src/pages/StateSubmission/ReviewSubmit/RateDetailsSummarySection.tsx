@@ -272,7 +272,8 @@ export const RateDetailsSummarySection = ({
 
     const replaceRateClass = (isLinkedRate: boolean) =>
         classnames({
-            [styles.replaceRateWrapper]: isAdminUser && !isLinkedRate,
+            [styles.replaceRateWrapper]:
+                isAdminUser && !isLinkedRate && !isPreviousSubmission,
         })
 
     return (
