@@ -22,6 +22,8 @@ describe('FieldCheckbox component', () => {
         vi.clearAllMocks()
     })
 
+    const formHeading = 'Contract Details Form'
+
     it('renders without errors', () => {
         render(
             <FieldCheckbox
@@ -29,7 +31,7 @@ describe('FieldCheckbox component', () => {
                 id="mco"
                 label="Managed Care Organization (MCO)"
                 heading="Managed Care entities"
-                parent_component_heading="Contract Details Form"
+                parent_component_heading={formHeading}
             />
         )
         expect(
@@ -51,7 +53,7 @@ describe('FieldCheckbox component', () => {
                 aria-required
                 label="Managed Care Organization (MCO)"
                 heading="Managed Care entities"
-                parent_component_heading="Contract Details Form"
+                parent_component_heading={formHeading}
             />
         )
         expect(
@@ -71,7 +73,7 @@ describe('FieldCheckbox component', () => {
                     aria-required
                     label="Foobar"
                     heading="Managed Care entities"
-                    parent_component_heading="Contract Details Form"
+                    parent_component_heading={formHeading}
                 />
                 <FieldCheckbox
                     name="managedCareEntity"
@@ -80,7 +82,7 @@ describe('FieldCheckbox component', () => {
                     label="Managed Care Organization (MCO)"
                     checked
                     heading="Managed Care entities"
-                    parent_component_heading="Contract Details Form"
+                    parent_component_heading={formHeading}
                 />
             </fieldset>
         )

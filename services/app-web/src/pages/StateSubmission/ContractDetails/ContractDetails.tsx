@@ -510,6 +510,9 @@ export const ContractDetails = ({
             setSubmitting(false)
         }
     }
+
+    const formHeading = 'Contract Details Form'
+
     return (
         <>
             <div>
@@ -555,7 +558,7 @@ export const ContractDetails = ({
                             <UswdsForm
                                 className={styles.formContainer}
                                 id="ContractDetailsForm"
-                                aria-label="Contract Details Form"
+                                aria-label={formHeading}
                                 aria-describedby="form-guidance"
                                 onSubmit={(e) => {
                                     setShouldValidate(true)
@@ -988,7 +991,9 @@ export const ContractDetails = ({
                                                         }
                                                         value="MCO"
                                                         heading="Managed Care entities"
-                                                        parent_component_heading="Contract Details Form"
+                                                        parent_component_heading={
+                                                            formHeading
+                                                        }
                                                     />
                                                     <FieldCheckbox
                                                         id="prepaidInpatientHealthPlan"
@@ -998,7 +1003,9 @@ export const ContractDetails = ({
                                                         }
                                                         value="PIHP"
                                                         heading="Managed Care entities"
-                                                        parent_component_heading="Contract Details Form"
+                                                        parent_component_heading={
+                                                            formHeading
+                                                        }
                                                     />
                                                     <FieldCheckbox
                                                         id="prepaidAmbulatoryHealthPlans"
@@ -1008,7 +1015,9 @@ export const ContractDetails = ({
                                                         }
                                                         value="PAHP"
                                                         heading="Managed Care entities"
-                                                        parent_component_heading="Contract Details Form"
+                                                        parent_component_heading={
+                                                            formHeading
+                                                        }
                                                     />
                                                     <FieldCheckbox
                                                         id="primaryCareCaseManagementEntity"
@@ -1018,7 +1027,9 @@ export const ContractDetails = ({
                                                         }
                                                         value="PCCM"
                                                         heading="Managed Care entities"
-                                                        parent_component_heading="Contract Details Form"
+                                                        parent_component_heading={
+                                                            formHeading
+                                                        }
                                                     />
                                                 </Fieldset>
                                             </FormGroup>
@@ -1078,7 +1089,9 @@ export const ContractDetails = ({
                                                                     federalAuthority
                                                                 }
                                                                 heading="Managed Care entities"
-                                                                parent_component_heading="Contract Details Form"
+                                                                parent_component_heading={
+                                                                    formHeading
+                                                                }
                                                             />
                                                         )
                                                     )}
