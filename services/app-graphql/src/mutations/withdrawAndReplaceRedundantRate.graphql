@@ -1,4 +1,76 @@
-fragment rateRevisionFragmentForFetchRate on RateRevision {
+mutation withdrawAndReplaceRedundantRate($input: withdrawAndReplaceRedundantRateInput!) {
+    withdrawAndReplaceRedundantRate(input: $input) {
+        contract {
+            ...contractFieldsForReplaceRate
+
+            draftRevision {
+                ...contractRevisionFragmentForReplaceRate
+            }
+
+            draftRates {
+                ...rateFields
+
+                draftRevision {
+                    ...rateRevisionFragmentForReplaceRate
+                }
+
+                revisions {
+                    ...rateRevisionFragmentForReplaceRate
+                }
+            }
+
+            packageSubmissions {
+                ...packageSubmissionsFragmentForReplaceRate
+            }
+        }
+}
+}
+
+fragment contractFieldsForReplaceRate on Contract {
+    id
+    status
+    createdAt
+    updatedAt
+    initiallySubmittedAt
+    stateCode
+    mccrsID
+    state {
+        code
+        name
+        programs {
+            id
+            name
+            fullName
+            isRateProgram
+        }
+    }
+
+    stateNumber
+}
+
+fragment rateFields on Rate {
+    id
+    createdAt
+    updatedAt
+    stateCode
+    stateNumber
+    parentContractID
+    state {
+        code
+        name
+        programs {
+            id
+            name
+            fullName
+            isRateProgram
+        }
+    }
+    status
+    parentContractID
+    initiallySubmittedAt
+}
+
+fragment rateRevisionFragmentForReplaceRate on RateRevision {
     id
     rateID
     createdAt
@@ -81,123 +153,12 @@ fragment rateRevisionFragmentForFetchRate on RateRevision {
             updatedReason
         }
         formData {
-            programIDs
-            populationCovered
-            submissionType
-            riskBasedContract
-            submissionDescription
-            stateContacts {
-                name,
-                titleRole
-                email
-            }
-            supportingDocuments {
-                name
-                s3URL
-                sha256
-                dateAdded
-                downloadURL
-            }
-            contractType
-            contractExecutionStatus
-            contractDocuments {
-                name
-                s3URL
-                sha256
-                dateAdded
-                downloadURL
-            }
-            contractDateStart
-            contractDateEnd
-            managedCareEntities
-            federalAuthorities
-            inLieuServicesAndSettings
-            modifiedBenefitsProvided
-            modifiedGeoAreaServed
-            modifiedMedicaidBeneficiaries
-            modifiedRiskSharingStrategy
-            modifiedIncentiveArrangements
-            modifiedWitholdAgreements
-            modifiedStateDirectedPayments
-            modifiedPassThroughPayments
-            modifiedPaymentsForMentalDiseaseInstitutions
-            modifiedMedicalLossRatioStandards
-            modifiedOtherFinancialPaymentIncentive
-            modifiedEnrollmentProcess
-            modifiedGrevienceAndAppeal
-            modifiedNetworkAdequacyStandards
-            modifiedLengthOfContract
-            modifiedNonRiskPaymentArrangements
+            ...contractFormDataFragmentForReplaceRate
         }
     }
 }
 
-fragment rateFieldsForFetchRate on Rate {
-    id
-    createdAt
-    updatedAt
-    stateCode
-    stateNumber
-    parentContractID
-    state {
-        code
-        name
-        programs {
-            id
-            name
-            fullName
-            isRateProgram
-        }
-    }
-    status
-    parentContractID
-    initiallySubmittedAt
-    withdrawInfo {
-        updatedAt
-        updatedBy
-        updatedReason
-    }
-    packageSubmissions {
-        ...packageSubmissionsFragmentForFetchRate
-    }
-}
-
-fragment packageSubmissionsFragmentForFetchRate on RatePackageSubmission {
-    cause
-    submitInfo {
-        ...updateInformationFields
-    }
-
-    submittedRevisions {
-        ...submittableRevisionsFieldsForFetchRate
-    }
-
-    rateRevision {
-        ...rateRevisionFragmentForFetchRate
-    }
-
-    contractRevisions {
-        ...contractRevisionFragmentForFetchRate
-    }
-}
-
-query fetchRate($input: FetchRateInput!) {
-    fetchRate(input: $input) {
-        rate {
-            ...rateFieldsForFetchRate
-
-            draftRevision {
-                ...rateRevisionFragmentForFetchRate
-            }
-
-            revisions {
-                ...rateRevisionFragmentForFetchRate
-            }
-        }
-    }
-}
-
-fragment contractFormDataFragmentForFetchRate on ContractFormData {
+fragment contractFormDataFragmentForReplaceRate on ContractFormData {
     programIDs
 
     populationCovered
@@ -256,7 +217,7 @@ fragment contractFormDataFragmentForFetchRate on ContractFormData {
     statutoryRegulatoryAttestationDescription
 }
 
-fragment contractRevisionFragmentForFetchRate on ContractRevision {
+fragment contractRevisionFragmentForReplaceRate on ContractRevision {
     id
     createdAt
     updatedAt
@@ -275,19 +236,36 @@ fragment contractRevisionFragmentForFetchRate on ContractRevision {
     }
 
     formData {
-        ...contractFormDataFragmentForFetchRate
+        ...contractFormDataFragmentForReplaceRate
     }
 }
 
-fragment submittableRevisionsFieldsForFetchRate on SubmittableRevision {
+fragment packageSubmissionsFragmentForReplaceRate on ContractPackageSubmission {
+    cause
+    submitInfo {
+        ...updateInformationFields
+    }
+
+    submittedRevisions {
+        ...submittableRevisionsFieldsForReplaceRate
+    }
+
+    contractRevision {
+        ...contractRevisionFragmentForReplaceRate
+    }
+    rateRevisions {
+        ...rateRevisionFragmentForReplaceRate
+    }
+}
+
+fragment submittableRevisionsFieldsForReplaceRate on SubmittableRevision {
     ... on ContractRevision {
-        ...contractRevisionFragmentForFetchRate
+        ...contractRevisionFragmentForReplaceRate
     }
     ... on RateRevision {
-        ...rateRevisionFragmentForFetchRate
+        ...rateRevisionFragmentForReplaceRate
     }
 }
-
 
 fragment updateInformationFields on UpdateInformation {
     updatedAt

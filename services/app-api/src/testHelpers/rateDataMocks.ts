@@ -15,6 +15,8 @@ const defaultRateData = () => ({
     updatedAt: new Date(),
     stateCode: 'MN',
     stateNumber: 111,
+    withdrawInfo: null,
+    withdrawInfoID: null,
 })
 
 const mockInsertRateArgs = (
@@ -35,6 +37,8 @@ const mockDraftRate = (
     stateCode: 'MN',
     stateNumber: 111,
     draftContracts: [],
+    withdrawInfoID: null,
+    withdrawInfo: null,
     revisions: rate?.revisions ?? [
         mockRateRevision(
             rate,

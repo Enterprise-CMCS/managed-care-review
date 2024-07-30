@@ -7,4 +7,14 @@ class NotFoundError extends Error {
     }
 }
 
-export { NotFoundError }
+// UserInputPostgresError is an Error subclass that indicates that the user passed in invalid arguements
+// maps to UserInputError in apollo server
+class UserInputPostgresError extends Error {
+    constructor(message: string) {
+        super(message)
+
+        Object.setPrototypeOf(this, NotFoundError.prototype)
+    }
+}
+
+export { NotFoundError, UserInputPostgresError }

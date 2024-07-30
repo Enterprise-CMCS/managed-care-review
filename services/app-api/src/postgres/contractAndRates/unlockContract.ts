@@ -5,7 +5,7 @@ import { NotFoundError } from '../postgresErrors'
 import { unlockRateInDB } from './unlockRate'
 import type { PrismaTransactionType } from '../prismaTypes'
 
-async function unlockContractInTransaction(
+async function unlockContractInsideTransaction(
     tx: PrismaTransactionType,
     args: UnlockContractArgsType
 ): Promise<UnlockedContractType | Error> {
@@ -264,7 +264,7 @@ async function unlockContract(
 ): Promise<UnlockedContractType | NotFoundError | Error> {
     try {
         return await client.$transaction(async (tx) => {
-            const result = await unlockContractInTransaction(tx, args)
+            const result = await unlockContractInsideTransaction(tx, args)
             if (result instanceof Error) {
                 throw result
             }
@@ -277,5 +277,5 @@ async function unlockContract(
     }
 }
 
-export { unlockContract }
+export { unlockContract, unlockContractInsideTransaction }
 export type { UnlockContractArgsType }

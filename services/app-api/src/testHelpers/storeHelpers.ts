@@ -118,6 +118,9 @@ function mockStoreThatErrors(): Store {
         unlockRate: async (_ID) => {
             return genericError
         },
+        replaceRateOnContract: async (_ID) => {
+            return genericError
+        },
     }
 }
 
