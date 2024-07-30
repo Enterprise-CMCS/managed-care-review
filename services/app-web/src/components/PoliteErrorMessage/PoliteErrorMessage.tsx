@@ -30,7 +30,6 @@ export const PoliteErrorMessage = forwardRef(
 
         const classes = classnames('usa-error-message', className)
 
-        // Only log this event once.
         useEffect(() => {
             logInlineErrorEvent({
                 error_type: 'validation',

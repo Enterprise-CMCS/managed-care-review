@@ -29,7 +29,6 @@ export const ErrorAlert = ({
     const defaultMessage =
         "We're having trouble loading this page. Please refresh your browser and if you continue to experience an error,"
 
-    // We only want to log this impression once
     useEffect(() => {
         const logErrorMessage = `${message ? extractText(message) : defaultMessage} email ${MAIL_TO_SUPPORT}`
         logAlertImpressionEvent({

@@ -9,7 +9,6 @@ export const UploadErrorAlert = ({
 }): JSX.Element => {
     const { logAlertImpressionEvent } = useTealium()
 
-    // We only want to log this impression once
     useEffect(() => {
         logAlertImpressionEvent({
             error_type: 'system',

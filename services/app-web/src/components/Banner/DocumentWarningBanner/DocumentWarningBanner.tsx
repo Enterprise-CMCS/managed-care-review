@@ -10,7 +10,6 @@ export const DocumentWarningBanner = ({
     const stringConstants = useStringConstants()
     const { logAlertImpressionEvent } = useTealium()
 
-    // We only want to log this impression once
     useEffect(() => {
         logAlertImpressionEvent({
             error_type: 'system',

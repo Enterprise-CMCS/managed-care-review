@@ -15,7 +15,6 @@ const UserAccountWarningBanner = ({
 }: AccountWarningBannerProps) => {
     const { logAlertImpressionEvent } = useTealium()
 
-    // We only want to log this impression once
     useEffect(() => {
         logAlertImpressionEvent({
             error_type: 'system',

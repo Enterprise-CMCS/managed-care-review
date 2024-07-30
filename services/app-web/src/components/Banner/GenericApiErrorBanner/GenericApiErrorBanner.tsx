@@ -21,7 +21,6 @@ export const GenericApiErrorBanner = ({
     const { logAlertImpressionEvent } = useTealium()
     const MAIL_TO_SUPPORT = stringConstants.MAIL_TO_SUPPORT
 
-    // We only want to log this impression once
     useEffect(() => {
         logAlertImpressionEvent({
             error_type: 'system',
