@@ -31,7 +31,7 @@ async function runAllClean() {
     const runner = new LabeledProcessRunner()
     await runner.runCommandAndOutput(
         'clean',
-        ['npx', 'lerna', 'run', 'clean'],
+        ['pnpm', 'clean'],
         ''
     )
 }
