@@ -59,7 +59,7 @@
         "graphql": "^16.8.1",
         "graphql-scalars": "^1.11.1",
         "jsonwebtoken": "^9.0.2",
-        "neverthrow": "^6.0.0",
+        "neverthrow": "^7.0.0",
         "path-to-regexp": "^6.2.1",
         "prisma": "^5.17.0",
         "protobufjs": "^7.3.0",

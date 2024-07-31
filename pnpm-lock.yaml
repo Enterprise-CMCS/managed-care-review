@@ -225,8 +225,8 @@ importers:
         specifier: ^9.0.2
         version: 9.0.2
       neverthrow:
-        specifier: ^6.0.0
-        version: 6.2.1
+        specifier: ^7.0.0
+        version: 7.0.0
       path-to-regexp:
         specifier: ^6.2.1
         version: 6.2.2
@@ -10990,8 +10990,9 @@ packages:
     resolution: {integrity: sha512-dBpDMdxv9Irdq66304OLfEmQ9tbNRFnFTuZiLo+bD+r332bBmMJ8GBLXklIXXgxd3+v9+KUnZaUR5PJMa75Gsg==}
     engines: {node: '>= 0.4.0'}
 
-  neverthrow@6.2.1:
-    resolution: {integrity: sha512-amlnNvPXmiUOmNsDfUngNWPdZYOmCUGExQy/kuPCmLbhrXVXIYhY4bnE4D3dWl7OMhSEr9NndUrl4aKGFhFIQg==}
+  neverthrow@7.0.0:
+    resolution: {integrity: sha512-GDDz+SQGGZWIGYk3cL2Jf+RX7QYRJOsQltrbpBiSQiNVN4QJi3/YJhaZY4pRlDou+W3YSHk8DYBKMt4CDPBglg==}
+    engines: {node: '>=18'}
 
   next-tick@1.1.0:
     resolution: {integrity: sha512-CXdUiJembsNjuToQvxayPZF9Vqht7hewsvy2sOWafLvi2awflj9mOC6bHIg50orX8IJvWKY9wYQ/zB2kogPslQ==}
@@ -29433,7 +29434,7 @@ snapshots:
 
   netmask@2.0.2: {}
 
-  neverthrow@6.2.1: {}
+  neverthrow@7.0.0: {}
 
   next-tick@1.1.0: {}
 
