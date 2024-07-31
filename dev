@@ -22,9 +22,9 @@ if ! diff .nvmrc <(node -v) > /dev/null ; then
 	exit 1
 fi
 
-# check yarn exists
-if ! which yarn > /dev/null ; then
-	echo "yarn not found on the system. On macOS, you can install it with 'brew install yarn'"
+# check pnpm exists
+if ! which pnpm > /dev/null ; then
+	echo "pnpm not found on the system. Please see: https://pnpm.io/installation"
 	exit 1
 fi
 
@@ -37,14 +37,14 @@ fi
 # check serverless is installed globally.
 if ! which serverless > /dev/null ; then
 	echo "installing serverless globally"
-	yarn global add serverless
+	pnpm global add serverless
 fi
 
-# have to ensure that yarn install is up to date.
-# we use .yarn_install as a marker for the last time `yarn install` was run. Rerun the command when yarn.lock is updated
-if [ "yarn.lock" -nt ".yarn_install" ]; then
-	yarn install
-	touch .yarn_install
+# have to ensure that pnpm install is up to date.
+# we use .pnpm_install as a marker for the last time `pnpm install` was run. Rerun the command when pnpm-lock.yaml is updated
+if [ "pnpm-lock.yaml" -nt ".pnpm_install" ]; then
+	pnpm install
+	touch .pnpm_install
 fi
 
 # build and run dev.ts

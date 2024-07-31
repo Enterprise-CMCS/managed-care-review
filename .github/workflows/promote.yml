@@ -74,7 +74,7 @@ jobs:
           DATABASE_URL: postgresql://postgres:shhhsecret@localhost:5432/postgres?schema=public&connection_limit=5 #pragma: allowlist secret
           NODE_OPTIONS: --max_old_space_size=6000
         working-directory: services/app-api
-        run: yarn test:coverage
+        run: pnpm test:coverage
 
       - name: Web Unit Tests
         env:
@@ -83,7 +83,7 @@ jobs:
           DATABASE_URL: postgresql://postgres:shhhsecret@localhost:5432/postgres?schema=public&connection_limit=5 #pragma: allowlist secret
           NODE_OPTIONS: --max_old_space_size=6000
         working-directory: services/app-web
-        run: yarn test:coverage
+        run: pnpm test:coverage
 
       - name: publish code coverage
         uses: paambaati/codeclimate-action@v8.0.0
@@ -108,19 +108,8 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version-file: '.nvmrc'
-          cache: 'yarn'
-
-      - name: Get yarn cache directory path
-        shell: bash
-        id: yarn-cache-dir-path
-        run: echo "::set-output name=dir::$(yarn cache dir)"
-
-      - name: Install packages
-        working-directory: services/app-api
-        run: PRISMA_CLI_BINARY_TARGETS=rhel-openssl-3.0.x yarn install --prefer-offline --frozen-lockfile --cache-folder ${{ steps.yarn-cache-dir-path.outputs.dir }}
+      - name: Setup env
+        uses: ./.github/actions/setup_env
 
       - name: Generate protos
         run: npx lerna run generate --scope=app-proto
@@ -128,7 +117,7 @@ jobs:
       # Generate Prisma Client and binary that can run in a lambda environment
       - name: Prepare prisma client
         working-directory: services/app-api
-        run: PRISMA_CLI_BINARY_TARGETS=rhel-openssl-3.0.x yarn prisma generate
+        run: PRISMA_CLI_BINARY_TARGETS=rhel-openssl-3.0.x pnpm prisma generate
 
       - name: Prepare "@prisma/client" lambda layer
         working-directory: services/app-api
@@ -151,10 +140,8 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version-file: '.nvmrc'
-          cache: yarn
+      - name: Setup env
+        uses: ./.github/actions/setup_env
 
       - name: Prepare ClamAV layer
         working-directory: services/uploads/src/avLayer
@@ -251,18 +238,12 @@ jobs:
     needs: [promote-app-prod]
     runs-on: ubuntu-20.04
     container:
-      image: cypress/browsers:node16.17.0-chrome106
+      image: cypress/browsers:node-20.14.0-chrome-126.0.6478.114-1-ff-127.0.1-edge-126.0.2592.61-1
       options: --user 1001
     strategy:
       fail-fast: false
-
     steps:
       - uses: actions/checkout@v4
-
-      - name: check ip
-        id: check-ip
-        shell: bash
-        run: curl ifconfig.me/ip
 
       - name: Generate unique ID for Cypress
         id: uuid

@@ -391,7 +391,9 @@ export const FileUpload = ({
                 {isRequired ? 'Required' : 'Optional'}
             </span>
 
-            <PoliteErrorMessage id={`${id}-error`}>{error}</PoliteErrorMessage>
+            <PoliteErrorMessage id={`${id}-error`} formFieldLabel={label}>
+                {error}
+            </PoliteErrorMessage>
             {hint && (
                 <span
                     id={`${id}-hint`}

@@ -15,7 +15,7 @@
     "env": {
         "jest/globals": true,
     },
-    "ignorePatterns": ["gen/*", "esbuild.config.js"],
+    "ignorePatterns": ["gen/*", "**/esbuild.config.js"],
     "rules": {
         "array-callback-return": "error",
         "prefer-promise-reject-errors": "error",

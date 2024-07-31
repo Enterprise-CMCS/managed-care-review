@@ -8,7 +8,7 @@ const {
 
 module.exports = () => {
     return {
-        packager: 'yarn',
+        packager: 'pnpm',
         bundle: true,
         exclude: ['prisma', '@prisma/client'],
         plugins: [
@@ -61,7 +61,13 @@ module.exports = () => {
                             await fse.ensureDir(
                                 '.esbuild/.build/src/handlers/etaTemplates/'
                             );
+                        } catch (err) {
+                            console.error('Error making directory: ', err);
+                        }
+                    });
 
+                    build.onEnd(async () => {
+                        try {
                             await fse.copy(
                                 './src/emailer/etaTemplates',
                                 '.esbuild/.build/src/handlers/etaTemplates/',

@@ -270,9 +270,11 @@ export const RateDetailsSummarySection = ({
         isPreviousSubmission,
     ])
 
-    const replaceRateClass = classnames({
-        [styles.replaceRateWrapper]: isAdminUser,
-    })
+    const replaceRateClass = (isLinkedRate: boolean) =>
+        classnames({
+            [styles.replaceRateWrapper]:
+                isAdminUser && !isLinkedRate && !isPreviousSubmission,
+        })
 
     return (
         <SectionCard id="rateDetails" className={styles.summarySection}>
@@ -315,7 +317,7 @@ export const RateDetailsSummarySection = ({
                               id={`rate-details-${rateRev.id}`}
                               key={rateRev.id}
                           >
-                              <div className={replaceRateClass}>
+                              <div className={replaceRateClass(isLinkedRate)}>
                                   <h3
                                       aria-label={`Rate ID: ${rateFormData.rateCertificationName}`}
                                       className={styles.rateName}

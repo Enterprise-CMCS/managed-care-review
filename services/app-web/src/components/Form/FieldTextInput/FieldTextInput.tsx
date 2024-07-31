@@ -63,7 +63,9 @@ export const FieldTextInput = ({
                 {label}
             </Label>
             {showError && meta.error && (
-                <PoliteErrorMessage>{meta.error}</PoliteErrorMessage>
+                <PoliteErrorMessage formFieldLabel={label}>
+                    {meta.error}
+                </PoliteErrorMessage>
             )}
             {hint && (
                 <div

@@ -4,8 +4,8 @@
     "version": "1.0.0",
     "description": "app-proto Typescript definitions and helpers",
     "scripts": {
-        "generate": "yarn proto:compile && yarn proto:ts && yarn proto:generate-cjs && yarn proto:copy-api && yarn proto:copy-web && yarn proto:copy-cypress",
-        "generate:watch": "find src | entr yarn generate",
+        "generate": "pnpm proto:compile && pnpm proto:ts && pnpm proto:generate-cjs && pnpm proto:copy-api && pnpm proto:copy-web && pnpm proto:copy-cypress",
+        "generate:watch": "find src | entr pnpm generate",
         "proto:compile": "rm -rf gen && mkdir gen && pbjs -t static-module -w es6 -o ./gen/healthPlanFormDataProto.js src/health_plan_form_data.proto",
         "proto:generate-cjs": "pbjs -t static-module -w commonjs -o ./gen/healthPlanFormDataProto.cjs src/health_plan_form_data.proto",
         "proto:ts": "pbts -o ./gen/healthPlanFormDataProto.d.ts ./gen/healthPlanFormDataProto.js",
@@ -27,7 +27,7 @@
         "uuid": "^9.0.0"
     },
     "devDependencies": {
-        "lint-staged": "^15.2.2",
+        "lint-staged": "^15.2.7",
         "protobufjs-cli": "^1.1.2"
     }
 }

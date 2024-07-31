@@ -6,11 +6,9 @@ import {
     getCoreRowModel,
     getFilteredRowModel,
     getSortedRowModel,
-    RowData,
     useReactTable,
     getFacetedUniqueValues,
     Column,
-    FilterFn,
 } from '@tanstack/react-table'
 import { useAtom } from 'jotai/react'
 import { atomWithHash } from 'jotai-location'
@@ -30,16 +28,8 @@ import { InfoTag, TagProps } from '../InfoTag/InfoTag'
 import { pluralize } from '../../common-code/formatters'
 import { DoubleColumnGrid } from '../DoubleColumnGrid'
 import { NavLinkWithLogging } from '../TealiumLogging/Link'
-
-declare module '@tanstack/table-core' {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    interface ColumnMeta<TData extends RowData, TValue> {
-        dataTestID: string
-    }
-    interface FilterFns {
-        dateRangeFilter: FilterFn<unknown>
-    }
-}
+import { useTealium } from '../../hooks'
+import useDeepCompareEffect from 'use-deep-compare-effect'
 
 export type RateInDashboardType = {
     id: string
@@ -53,6 +43,7 @@ export type RateInDashboardType = {
     ratePeriodEnd: Date
     stateName?: string
 }
+
 export type PackageInDashboardType = {
     id: string
     name: string
@@ -190,6 +181,13 @@ export const HealthPlanPackageTable = ({
     }
     const lastClickedElement = useRef<string | null>(null)
     const [columnFilters, setColumnFilters] = useAtom(columnHash)
+    const [prevFilters, setPrevFilters] = useState<{
+        filters: ColumnFiltersState
+        results?: string
+    }>({
+        filters: columnFilters,
+    })
+    const { logFilterEvent } = useTealium()
 
     /* we store the last clicked element in a ref so that when the url is updated and the page rerenders
         we can focus that element.  this useEffect (with no dependency array) will run once on each render.
@@ -408,6 +406,42 @@ export const HealthPlanPackageTable = ({
         showFilters,
         tableConfig.tableName,
     ])
+
+    // Handles logging when filters change.
+    useDeepCompareEffect(() => {
+        const filterCategories = columnFilters.map((f) => f.id).join(',')
+        const prevFilterCategories = prevFilters.filters
+            .map((f) => f.id)
+            .join(',')
+        // Any changes in results or filters
+        if (
+            filterCategories !== prevFilterCategories ||
+            prevFilters.results === undefined
+        ) {
+            // if current filters is one and previous is more than 1, then it was cleared
+            if (columnFilters.length === 0 && prevFilterCategories.length > 0) {
+                logFilterEvent({
+                    event_name: 'filter_removed',
+                    search_result_count: submissionCount,
+                    filter_categories_used: filterCategories,
+                })
+                // If there are filters, then we applied new filters
+            } else if (columnFilters.length > 0) {
+                logFilterEvent({
+                    event_name: 'filters_applied',
+                    search_result_count: submissionCount,
+                    results_count_after_filtering: submissionCount,
+                    results_count_prior_to_filtering:
+                        prevFilters.results ?? 'No prior count, filter on load',
+                    filter_categories_used: filterCategories,
+                })
+            }
+            setPrevFilters({
+                filters: columnFilters,
+                results: submissionCount,
+            })
+        }
+    }, [submissionCount, columnFilters, setPrevFilters, prevFilters])
 
     return (
         <>

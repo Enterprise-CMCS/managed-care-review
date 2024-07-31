@@ -9,7 +9,7 @@ export function rateRevisionResolver(store: Store): Resolvers['RateRevision'] {
         contractRevisions(parent) {
             return parent.contractRevisions || []
         },
-        rate: async (parent, _args, context) =>  {
+        rate: async (parent, _args, context) => {
             const { ctx, tracer } = context
             const span = tracer?.startSpan(
                 'healthPlanPackageResolver.questions',
@@ -30,6 +30,6 @@ export function rateRevisionResolver(store: Store): Resolvers['RateRevision'] {
                 })
             }
             return rate
-        }
+        },
     }
 }

@@ -5,9 +5,9 @@ import { installPrismaDeps } from './postgres.js'
 import { compileProtoWatchOnce } from './proto.js'
 
 export async function installAPIDeps(runner: LabeledProcessRunner) {
-    await runner.runCommandAndOutput('api deps', ['yarn', 'install'], '')
+    await runner.runCommandAndOutput('api deps', ['pnpm', 'install'], '')
 
-    // prisma requires that prisma generate is run after any yarn install
+    // prisma requires that prisma generate is run after any pnpm install
     return installPrismaDeps(runner)
 }
 

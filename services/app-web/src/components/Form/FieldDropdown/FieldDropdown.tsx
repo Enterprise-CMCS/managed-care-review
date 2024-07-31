@@ -46,10 +46,16 @@ export const FieldDropdown = ({
                 {label}
             </Label>
             {showError && meta.error && (
-                <PoliteErrorMessage>{meta.error}</PoliteErrorMessage>
+                <PoliteErrorMessage formFieldLabel={label}>
+                    {meta.error}
+                </PoliteErrorMessage>
             )}
             {hint && (
-                <div role="note" aria-labelledby={id} className="usa-hint margin-top-1">
+                <div
+                    role="note"
+                    aria-labelledby={id}
+                    className="usa-hint margin-top-1"
+                >
                     {hint}
                 </div>
             )}

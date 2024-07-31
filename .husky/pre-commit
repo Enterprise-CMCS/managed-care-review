@@ -11,8 +11,8 @@ for req in "${requirements[@]}"; do
     fi
 done
 
-# detect secrets in commit
-git diff --staged --name-only -z | xargs -0 detect-secrets-hook
+# Detect secrets in commit, excluding pnpm-lock.yaml
+git diff --staged --name-only -z | grep -zv 'pnpm-lock.yaml' | xargs -0 detect-secrets-hook
 
-# Run "precommit" in all yarn repos
+# Run "precommit" in all pnpm workspaces 
 npx lint-staged --allow-empty

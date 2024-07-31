@@ -6,9 +6,13 @@ export type { RateOrErrorArrayType } from './findAllRatesWithHistoryBySubmitInfo
 export type { UpdateMCCRSIDFormArgsType } from './updateMCCRSID'
 export type { SubmitContractArgsType } from './submitContract'
 export type { SubmitRateArgsType } from './submitRate'
+export type { ReplaceRateOnContractArgsType } from './replaceRateOnContract'
 export { submitContract } from './submitContract'
 export { submitRate } from './submitRate'
-export { unlockContract } from './unlockContract'
+export {
+    unlockContract,
+    unlockContractInsideTransaction,
+} from './unlockContract'
 export { insertDraftContract } from './insertContract'
 export { findContractWithHistory } from './findContractWithHistory'
 export { updateDraftContractFormData as updateDraftContractWithRates } from './updateDraftContractWithRates'
@@ -16,4 +20,6 @@ export { updateMCCRSID } from './updateMCCRSID'
 export { findAllContractsWithHistoryByState } from './findAllContractsWithHistoryByState'
 export { findAllContractsWithHistoryBySubmitInfo } from './findAllContractsWithHistoryBySubmitInfo'
 export { findAllRatesWithHistoryBySubmitInfo } from './findAllRatesWithHistoryBySubmitInfo'
+export { replaceRateOnContract } from './replaceRateOnContract'
+export { withdrawRateInsideTransaction } from './withdrawRate'
 export { updateDraftContract } from './updateDraftContract'

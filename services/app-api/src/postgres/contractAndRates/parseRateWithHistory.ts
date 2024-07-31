@@ -321,6 +321,7 @@ function rateWithoutDraftContractsToDomainModel(
         status: getContractRateStatus(rateRevisions),
         stateCode: rate.stateCode,
         parentContractID: parentContractID,
+        withdrawInfo: convertUpdateInfoToDomainModel(rate.withdrawInfo),
         stateNumber: rate.stateNumber,
         draftRevision,
         revisions: revisions.reverse(),

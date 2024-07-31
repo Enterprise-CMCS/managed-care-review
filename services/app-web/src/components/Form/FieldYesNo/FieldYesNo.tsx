@@ -61,7 +61,11 @@ export const FieldYesNo = ({
                     {isRequired ? 'Required' : 'Optional'}
                 </span>
             )}
-            {showError && <PoliteErrorMessage>{meta.error}</PoliteErrorMessage>}
+            {showError && (
+                <PoliteErrorMessage formFieldLabel={label}>
+                    {meta.error}
+                </PoliteErrorMessage>
+            )}
             {hint && (
                 <div
                     role="note"
@@ -78,6 +82,10 @@ export const FieldYesNo = ({
                     label="Yes"
                     aria-required={isRequired}
                     value="YES"
+                    list_position={1}
+                    list_options={2}
+                    radio_button_title="Yes"
+                    parent_component_heading={label}
                 />
                 <FieldRadio
                     id={id + 'No'}
@@ -86,6 +94,10 @@ export const FieldYesNo = ({
                     label="No"
                     aria-required={isRequired}
                     value="NO"
+                    list_position={2}
+                    list_options={2}
+                    radio_button_title="Yes"
+                    parent_component_heading={label}
                 />
             </span>
         </Fieldset>
@@ -109,6 +121,6 @@ export const yesNoFormValueAsBoolean = (
     return maybeString === 'YES'
         ? true
         : maybeString === 'NO'
-        ? false
-        : undefined
+          ? false
+          : undefined
 }

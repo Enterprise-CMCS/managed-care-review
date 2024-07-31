@@ -1,9 +1,11 @@
 import classnames from 'classnames'
-import React from 'react'
+import React, { useEffect } from 'react'
 import styles from './ErrorAlert.module.scss'
 import { Alert } from '@trussworks/react-uswds'
 import { useStringConstants } from '../../hooks/useStringConstants'
 import { LinkWithLogging } from '../TealiumLogging/Link'
+import { useTealium } from '../../hooks'
+import { extractText } from '../TealiumLogging/tealiamLoggingHelpers'
 
 export type ErrorAlertProps = {
     message?: React.ReactNode
@@ -20,9 +22,23 @@ export const ErrorAlert = ({
     ...divProps
 }: ErrorAlertProps): React.ReactElement => {
     const stringConstants = useStringConstants()
+    const { logAlertImpressionEvent } = useTealium()
     const MAIL_TO_SUPPORT = stringConstants.MAIL_TO_SUPPORT
     const classes = classnames(styles.messageBodyText, className)
     const showLink = appendLetUsKnow || !message // our default message includes the link
+    const defaultMessage =
+        "We're having trouble loading this page. Please refresh your browser and if you continue to experience an error,"
+
+    useEffect(() => {
+        const logErrorMessage = `${message ? extractText(message) : defaultMessage} email ${MAIL_TO_SUPPORT}`
+        logAlertImpressionEvent({
+            error_type: 'system',
+            error_message: logErrorMessage,
+            type: 'error',
+            extension: 'react-uswds',
+        })
+    }, [])
+
     return (
         <Alert
             role="alert"
@@ -33,10 +49,7 @@ export const ErrorAlert = ({
             className={classes}
             {...divProps}
         >
-            <span>
-                {message ||
-                    "We're having trouble loading this page. Please refresh your browser and if you continue to experience an error,"}
-            </span>
+            <span>{message || defaultMessage}</span>
 
             {showLink && (
                 <span>

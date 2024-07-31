@@ -589,7 +589,7 @@ describe('submitRate', () => {
 
         const subs = fetchedRate.packageSubmissions
         if (!subs) {
-            throw new Error('no subs')
+            throw new Error('packageSubmissions are expected but missing')
         }
         expect(subs).toHaveLength(3)
 

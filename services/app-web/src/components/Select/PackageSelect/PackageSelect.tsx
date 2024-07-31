@@ -23,7 +23,7 @@ export type PackageOptionType = {
  * This component renders the react-select combobox
  *
  * It relies on the Formik useField hook to work, so it must ALWAYS be rendered
- * inside of a Formik form context.
+ * inside a Formik form context.
  */
 
 export const PackageSelect = ({

@@ -18,9 +18,15 @@ export type {
     TealiumViewDataObject,
     TealiumEvent,
     TealiumButtonEventObject,
-    TealiumInternalLinkEventObject,
+    TealiumLinkEventObject,
     TealiumEventObjectTypes,
     TealiumClientType,
     TealiumEnv,
-    ButtonEventStyle
+    ButtonEventStyle,
+    TealiumDropdownSelectionEventObject,
+    TealiumFilterEventObject,
+    TealiumAlertImpressionObject,
+    TealiumInlineErrorObject,
+    TealiumRadioButtonEventObject,
+    TealiumCheckboxEventObject
 } from './tealium'

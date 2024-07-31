@@ -57,7 +57,7 @@ To add a new user event type:
 ```typescript
 type TealiumEventObjectTypes =
 | TealiumButtonEventObject
-| TealiumInternalLinkEventObject
+| TealiumLinkEventObject
 | SomeNewTealiumEventObjext
 ```
 - Now `logUserEvent` is ready to take that even in as the `linkData` argument.
