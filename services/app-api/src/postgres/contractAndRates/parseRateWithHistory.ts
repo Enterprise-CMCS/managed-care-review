@@ -1,5 +1,4 @@
 import type {
-    RateRevisionWithContractsType,
     RateType,
     RateRevisionType,
 } from '../../domain-models/contractAndRates'
@@ -10,7 +9,6 @@ import type {
 } from '../../domain-models/contractAndRates/packageSubmissions'
 import type { RateWithoutDraftContractsType } from '../../domain-models/contractAndRates/baseContractRateTypes'
 import {
-    contractRevisionsToDomainModels,
     arrayOrFirstError,
     contractWithHistoryToDomainModelWithoutRates,
     contractRevisionToDomainModel,
@@ -60,8 +58,8 @@ interface RateRevisionSet {
 
 function rateSetsToDomainModel(
     entries: RateRevisionSet[]
-): RateRevisionWithContractsType[] | Error {
-    const revisions: RateRevisionWithContractsType[] = []
+): RateRevisionType[] | Error {
+    const revisions: RateRevisionType[] = []
 
     for (const entry of entries) {
         const domainRateRevision = rateRevisionToDomainModel(entry.rateRev)
@@ -72,13 +70,6 @@ function rateSetsToDomainModel(
 
         revisions.push({
             ...domainRateRevision,
-            contractRevisions: contractRevisionsToDomainModels(
-                entry.contractRevs
-            ),
-
-            // override this contractRevisions's update infos with the one that caused this revision to be created.
-            submitInfo: convertUpdateInfoToDomainModel(entry.submitInfo),
-            unlockInfo: convertUpdateInfoToDomainModel(entry.unlockInfo),
         })
     }
 

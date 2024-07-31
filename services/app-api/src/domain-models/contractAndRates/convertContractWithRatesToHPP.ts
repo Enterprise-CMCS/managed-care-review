@@ -31,12 +31,6 @@ function convertContractToDraftRateRevisions(contract: ContractType) {
 function convertContractWithRatesToUnlockedHPP(
     contract: ContractType
 ): HealthPlanPackageType | Error {
-    // Since drafts come in separate on the Contract type, we push it onto the revisions before converting below
-    if (contract.draftRevision) {
-        const rateRevisions = convertContractToDraftRateRevisions(contract)
-        contract.revisions.unshift({ ...contract.draftRevision, rateRevisions })
-    }
-
     const healthPlanRevisions = convertContractWithRatesRevtoHPPRev(contract)
 
     if (healthPlanRevisions instanceof Error) {
@@ -55,10 +49,51 @@ function convertContractWithRatesRevtoHPPRev(
     contract: ContractType
 ): HealthPlanRevisionType[] | Error {
     let healthPlanRevisions: HealthPlanRevisionType[] | Error = []
-    for (const contractRev of contract.revisions) {
+
+    if (contract.draftRevision && contract.draftRates) {
+        const contractRev = contract.draftRevision
+        const rateRevisions = convertContractToDraftRateRevisions(contract)
+
         const unlockedHealthPlanFormData = convertContractWithRatesToFormData(
             contractRev,
-            contractRev.rateRevisions,
+            rateRevisions,
+            contract.id,
+            contract.stateCode,
+            contract.stateNumber
+        )
+
+        if (unlockedHealthPlanFormData instanceof Error) {
+            return unlockedHealthPlanFormData
+        }
+
+        const formDataProto = toProtoBuffer(unlockedHealthPlanFormData)
+
+        const healthPlanRevision: HealthPlanRevisionType = {
+            id: contractRev.id,
+            unlockInfo: contractRev.unlockInfo,
+            submitInfo: contractRev.submitInfo,
+            createdAt: contractRev.createdAt,
+            formDataProto,
+        }
+
+        healthPlanRevisions.push(healthPlanRevision)
+    }
+
+    // Convert a list of package submissions into a list of pkg revisions
+    let lastSeenContractRevID: string | undefined = undefined
+    for (const submission of contract.packageSubmissions) {
+        const contractRev = submission.contractRevision
+        if (contractRev.id === lastSeenContractRevID) {
+            continue
+        }
+
+        // otherwise, this is a new contract rev so we add a new rev to the history.
+        // this is lossy, our HPP revs don't map 1:1 to package submissions. Temporary.
+        lastSeenContractRevID = contractRev.id
+
+        const unlockedHealthPlanFormData = convertContractWithRatesToFormData(
+            contractRev,
+            submission.rateRevisions,
             contract.id,
             contract.stateCode,
             contract.stateNumber

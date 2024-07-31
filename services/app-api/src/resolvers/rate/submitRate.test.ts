@@ -293,7 +293,7 @@ describe('submitRate', () => {
         const subB0 = contractB0.packageSubmissions[0]
         const rate30 = subB0.rateRevisions[0]
         const TwoID = rate30.rateID
-        console.info('THREEID', TwoID)
+        console.info('TWOID', TwoID)
 
         expect(subB0.rateRevisions[0].rateID).toBe(TwoID)
 
@@ -312,13 +312,23 @@ describe('submitRate', () => {
         // 4. make sure both rates return contract C in their list of revisions
         const rateOne = await fetchTestRateById(stateServer, OneID)
 
-        expect(rateOne.packageSubmissions).toHaveLength(1)
-        expect(rateOne.packageSubmissions[0].contractRevisions).toHaveLength(2)
+        expect(rateOne.packageSubmissions).toHaveLength(2)
+        expect(rateOne.packageSubmissions?.[0].contractRevisions).toHaveLength(
+            2
+        )
+        expect(rateOne.packageSubmissions?.[1].contractRevisions).toHaveLength(
+            1
+        )
 
         const rateTwo = await fetchTestRateById(stateServer, TwoID)
 
-        expect(rateTwo.packageSubmissions).toHaveLength(1)
-        expect(rateTwo.packageSubmissions[0].contractRevisions).toHaveLength(2)
+        expect(rateTwo.packageSubmissions).toHaveLength(2)
+        expect(rateTwo.packageSubmissions?.[0].contractRevisions).toHaveLength(
+            2
+        )
+        expect(rateTwo.packageSubmissions?.[1].contractRevisions).toHaveLength(
+            1
+        )
 
         // 5. unlock and resubmit A
         await unlockTestHealthPlanPackage(
@@ -329,10 +339,13 @@ describe('submitRate', () => {
 
         const unlockedRateOne = await fetchTestRateById(stateServer, OneID)
 
-        expect(unlockedRateOne.packageSubmissions).toHaveLength(1)
+        expect(unlockedRateOne.packageSubmissions).toHaveLength(2)
         expect(
-            unlockedRateOne.packageSubmissions[0].contractRevisions
+            unlockedRateOne.packageSubmissions?.[0].contractRevisions
         ).toHaveLength(2)
+        expect(
+            unlockedRateOne.packageSubmissions?.[1].contractRevisions
+        ).toHaveLength(1)
 
         await submitTestContract(
             stateServer,
@@ -343,16 +356,16 @@ describe('submitRate', () => {
         // everything should have the latest
         const resubmittedRateOne = await fetchTestRateById(stateServer, OneID)
 
-        expect(resubmittedRateOne.packageSubmissions).toHaveLength(2)
+        expect(resubmittedRateOne.packageSubmissions).toHaveLength(3)
         expect(
-            resubmittedRateOne.packageSubmissions[0].contractRevisions
+            resubmittedRateOne.packageSubmissions?.[0].contractRevisions
         ).toHaveLength(2)
 
         const postResubmitRateTwo = await fetchTestRateById(stateServer, TwoID)
 
-        expect(postResubmitRateTwo.packageSubmissions).toHaveLength(1)
+        expect(postResubmitRateTwo.packageSubmissions).toHaveLength(2)
         expect(
-            postResubmitRateTwo.packageSubmissions[0].contractRevisions
+            postResubmitRateTwo.packageSubmissions?.[0].contractRevisions
         ).toHaveLength(2)
 
         const postSubmitC = await fetchTestContract(stateServer, contractC0.id)
@@ -555,7 +568,6 @@ describe('submitRate', () => {
 
         const contractB0 = await submitTestContract(stateServer, draftB0.id)
         const subB0 = contractB0.packageSubmissions[0]
-
         expect(subB0.rateRevisions[0].rateID).toBe(OneID)
 
         await unlockTestRate(cmsServer, OneID, 'unlock rate')
@@ -575,9 +587,10 @@ describe('submitRate', () => {
 
         const fetchedRate = await fetchTestRateById(stateServer, OneID)
 
-        // console.log('FETCEDRAT', JSON.stringify(fetchedRate, null, 2))
-
         const subs = fetchedRate.packageSubmissions
+        if (!subs) {
+            throw new Error('no subs')
+        }
         expect(subs).toHaveLength(3)
 
         expect(subs[0].submitInfo.updatedReason).toBe('final submit')

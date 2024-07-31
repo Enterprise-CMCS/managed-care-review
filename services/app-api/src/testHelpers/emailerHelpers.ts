@@ -5,7 +5,15 @@ import type {
     ProgramArgType,
     UnlockedHealthPlanFormDataType,
 } from '../common-code/healthPlanFormDataType'
-import type { ContractRevisionWithRatesType, Question } from '../domain-models'
+import type {
+    ContractRevisionType,
+    Question,
+    RatePackageSubmissionType,
+    RateRevisionType,
+    RateType,
+    UnlockedContractType,
+    UpdateInfoType,
+} from '../domain-models'
 import { SESServiceException } from '@aws-sdk/client-ses'
 import { testSendSESEmail } from './awsSESHelpers'
 import { testCMSUser, testStateUser } from './userHelpers'
@@ -131,9 +139,10 @@ export function mockMSState(): State {
         code: 'MS',
     }
 }
+
 const mockContractRev = (
-    submissionPartial?: Partial<ContractRevisionWithRatesType>
-): ContractRevisionWithRatesType => {
+    submissionPartial?: Partial<ContractRevisionType>
+): ContractRevisionType => {
     return {
         createdAt: new Date('01/01/2021'),
         updatedAt: new Date('02/01/2021'),
@@ -198,56 +207,121 @@ const mockContractRev = (
             statutoryRegulatoryAttestation: undefined,
             statutoryRegulatoryAttestationDescription: undefined,
         },
-        rateRevisions: [
-            {
-                id: '12345',
-                rateID: '6789',
-                submitInfo: undefined,
-                unlockInfo: undefined,
-                createdAt: new Date(11 / 27 / 2023),
-                updatedAt: new Date(11 / 27 / 2023),
-                formData: {
-                    id: 'test-id-1234',
-                    rateID: 'test-id-1234',
-                    rateType: 'NEW',
-                    rateCapitationType: 'RATE_CELL',
-                    rateDocuments: [
-                        {
-                            s3URL: 's3://bucketname/key/test1',
-                            name: 'foo',
-                            sha256: 'fakesha',
-                            dateAdded: new Date(11 / 27 / 2023),
-                        },
-                    ],
-                    supportingDocuments: [],
-                    rateDateStart: new Date('01/01/2024'),
-                    rateDateEnd: new Date('01/01/2025'),
-                    rateDateCertified: new Date('01/01/2024'),
-                    amendmentEffectiveDateStart: new Date('01/01/2024'),
-                    amendmentEffectiveDateEnd: new Date('01/01/2025'),
-                    rateProgramIDs: ['3fd36500-bf2c-47bc-80e8-e7aa417184c5'],
-                    rateCertificationName: 'Rate Cert Name',
-                    certifyingActuaryContacts: [
-                        {
-                            actuarialFirm: 'DELOITTE',
-                            name: 'Actuary Contact 1',
-                            titleRole: 'Test Actuary Contact 1',
-                            email: 'actuarycontact1@example.com',
-                        },
-                    ],
-                    addtlActuaryContacts: [],
-                    actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
-                    packagesWithSharedRateCerts: [
-                        {
-                            packageName: 'pkgName',
-                            packageId: '12345',
-                            packageStatus: 'SUBMITTED',
-                        },
-                    ],
-                },
-            },
-        ],
         ...submissionPartial,
+    }
+}
+
+const mockRateRevision = (
+    rateRevPartial?: Partial<RateRevisionType>
+): RateRevisionType => {
+    return {
+        id: '12345',
+        rateID: '6789',
+        submitInfo: undefined,
+        unlockInfo: undefined,
+        createdAt: new Date(11 / 27 / 2023),
+        updatedAt: new Date(11 / 27 / 2023),
+        formData: {
+            id: 'test-id-1234',
+            rateID: 'test-id-1234',
+            rateType: 'NEW',
+            rateCapitationType: 'RATE_CELL',
+            rateDocuments: [
+                {
+                    s3URL: 's3://bucketname/key/test1',
+                    name: 'foo',
+                    sha256: 'fakesha',
+                    dateAdded: new Date(11 / 27 / 2023),
+                },
+            ],
+            supportingDocuments: [],
+            rateDateStart: new Date('01/01/2024'),
+            rateDateEnd: new Date('01/01/2025'),
+            rateDateCertified: new Date('01/01/2024'),
+            amendmentEffectiveDateStart: new Date('01/01/2024'),
+            amendmentEffectiveDateEnd: new Date('01/01/2025'),
+            rateProgramIDs: ['3fd36500-bf2c-47bc-80e8-e7aa417184c5'],
+            rateCertificationName: 'Rate Cert Name',
+            certifyingActuaryContacts: [
+                {
+                    actuarialFirm: 'DELOITTE',
+                    name: 'Actuary Contact 1',
+                    titleRole: 'Test Actuary Contact 1',
+                    email: 'actuarycontact1@example.com',
+                },
+            ],
+            addtlActuaryContacts: [],
+            actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+            packagesWithSharedRateCerts: [
+                {
+                    packageName: 'pkgName',
+                    packageId: '12345',
+                    packageStatus: 'SUBMITTED',
+                },
+            ],
+        },
+        ...rateRevPartial,
+    }
+}
+
+const mockRate = (ratePartial?: Partial<RateType>): RateType => {
+    const submitInfo: UpdateInfoType = {
+        updatedAt: new Date('02/01/2021'),
+        updatedBy: 'someone@example.com',
+        updatedReason: 'Initial submission',
+    }
+    const rateRev = mockRateRevision({
+        submitInfo,
+    })
+    const contractRev = mockContractRev({
+        id: 'test-contract-234',
+        submitInfo,
+    })
+    const rateSubmission: RatePackageSubmissionType = {
+        submitInfo,
+        submittedRevisions: [rateRev, contractRev],
+        rateRevision: rateRev,
+        contractRevisions: [contractRev],
+    }
+
+    return {
+        id: 'test-rate-234',
+        createdAt: new Date('01/01/2021'),
+        updatedAt: new Date('02/01/2021'),
+        status: 'SUBMITTED',
+        stateCode: 'MN',
+        stateNumber: 2,
+        parentContractID: 'test-contract-234',
+
+        revisions: [rateRev],
+        packageSubmissions: [rateSubmission],
+
+        ...ratePartial,
+    }
+}
+
+const mockUnlockedContract = (
+    contractPartial?: Partial<UnlockedContractType>,
+    rateParitals?: Partial<RateType>[]
+): UnlockedContractType => {
+    const draftRates = rateParitals
+        ? rateParitals.map((r) => mockRate(r))
+        : [mockRate()]
+
+    return {
+        id: 'test-contract-123',
+        createdAt: new Date('01/01/2021'),
+        updatedAt: new Date('02/01/2021'),
+        status: 'UNLOCKED',
+        stateCode: 'MN',
+        stateNumber: 4,
+
+        draftRevision: mockContractRev(),
+        draftRates,
+
+        revisions: [],
+        packageSubmissions: [],
+        ...contractPartial,
     }
 }
 
@@ -664,6 +738,7 @@ export {
     mockContractOnlyFormData,
     mockContractRev,
     mockContractAndRatesFormData,
+    mockUnlockedContract,
     mockUnlockedContractAndRatesFormData,
     mockUnlockedContractOnlyFormData,
     testEmailer,

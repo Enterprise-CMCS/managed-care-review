@@ -5,7 +5,7 @@ import {
 } from '../../testHelpers/emailerHelpers'
 import type {
     CMSUserType,
-    ContractRevisionWithRatesType,
+    ContractRevisionType,
     StateType,
 } from '../../domain-models'
 import type { ContractFormDataType, Question } from '../../domain-models'
@@ -122,7 +122,7 @@ test('to addresses list includes submitter emails', async () => {
 })
 
 test('to addresses list includes all state contacts on submission', async () => {
-    const sub: ContractRevisionWithRatesType = {
+    const sub: ContractRevisionType = {
         ...mockContractRev({ formData }),
     }
     const defaultStatePrograms = mockMNState().programs
@@ -164,7 +164,7 @@ test('to addresses list does not include duplicate state receiver emails on subm
         ],
     }
 
-    const sub: ContractRevisionWithRatesType = mockContractRev({
+    const sub: ContractRevisionType = mockContractRev({
         formData: formDataWithDuplicateStateContacts,
     })
     const defaultStatePrograms = mockMNState().programs

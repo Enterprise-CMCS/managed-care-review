@@ -1,6 +1,5 @@
 import type {
     ContractType,
-    ContractRevisionWithRatesType,
     ContractRevisionType,
     RateRevisionType,
 } from '../../domain-models/contractAndRates'
@@ -27,7 +26,6 @@ import {
 import {
     contractFormDataToDomainModel,
     convertUpdateInfoToDomainModel,
-    ratesRevisionsToDomainModel,
     getContractRateStatus,
 } from './prismaSharedContractRateHelpers'
 import type { ContractTableWithoutDraftRates } from './prismaSubmittedContractHelpers'
@@ -91,24 +89,12 @@ interface ContractRevisionSet {
 
 function contractSetsToDomainModel(
     revisions: ContractRevisionSet[]
-): ContractRevisionWithRatesType[] | Error {
+): ContractRevisionType[] | Error {
     const contractRevisions = []
 
     for (const revision of revisions) {
-        const rateRevisions = ratesRevisionsToDomainModel(
-            revision.rateRevisions
-        )
-
-        if (rateRevisions instanceof Error) {
-            return rateRevisions
-        }
-
         contractRevisions.push({
             ...contractRevisionToDomainModel(revision.contractRev),
-            rateRevisions,
-            // override this contractRevisions's update infos with the one that caused this revision to be created.
-            submitInfo: convertUpdateInfoToDomainModel(revision.submitInfo),
-            unlockInfo: convertUpdateInfoToDomainModel(revision.unlockInfo),
         })
     }
 

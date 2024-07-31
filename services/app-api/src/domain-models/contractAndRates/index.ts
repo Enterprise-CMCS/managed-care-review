@@ -10,8 +10,8 @@ export {
 export { contractFormDataSchema, rateFormDataSchema } from './formDataTypes'
 
 export {
-    rateRevisionWithContractsSchema,
-    contractRevisionWithRatesSchema,
+    // rateRevisionWithContractsSchema,
+    // contractRevisionWithRatesSchema,
     contractRevisionSchema,
     rateRevisionSchema,
 } from './revisionTypes'
@@ -40,8 +40,8 @@ export type {
 export type {
     ContractRevisionType,
     RateRevisionType,
-    RateRevisionWithContractsType,
-    ContractRevisionWithRatesType,
+    // RateRevisionWithContractsType,
+    // ContractRevisionWithRatesType,
 } from './revisionTypes'
 
 export type {

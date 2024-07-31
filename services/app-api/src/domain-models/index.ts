@@ -37,11 +37,9 @@ export {
 export type {
     ContractType,
     ContractRevisionType,
-    ContractRevisionWithRatesType,
     ContractFormDataType,
     RateType,
     RateRevisionType,
-    RateRevisionWithContractsType,
     RateFormDataType,
     PackageStatusType,
     ContractPackageSubmissionType,

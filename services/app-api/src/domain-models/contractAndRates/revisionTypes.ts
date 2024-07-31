@@ -26,26 +26,26 @@ const rateRevisionSchema = z.object({
     formData: rateFormDataSchema,
 })
 
-const rateRevisionWithContractsSchema = rateRevisionSchema.extend({
-    contractRevisions: z.array(contractRevisionSchema),
-})
+// const rateRevisionWithContractsSchema = rateRevisionSchema.extend({
+//     contractRevisions: z.array(contractRevisionSchema),
+// })
 
-const contractRevisionWithRatesSchema = contractRevisionSchema.extend({
-    rateRevisions: z.array(rateRevisionSchema),
-})
+// const contractRevisionWithRatesSchema = contractRevisionSchema.extend({
+//     rateRevisions: z.array(rateRevisionSchema),
+// })
 
 type ContractRevisionType = z.infer<typeof contractRevisionSchema>
 type RateRevisionType = z.infer<typeof rateRevisionSchema>
-type RateRevisionWithContractsType = z.infer<
-    typeof rateRevisionWithContractsSchema
->
-type ContractRevisionWithRatesType = z.infer<
-    typeof contractRevisionWithRatesSchema
->
+// type RateRevisionWithContractsType = z.infer<
+//     typeof rateRevisionWithContractsSchema
+// >
+// type ContractRevisionWithRatesType = z.infer<
+//     typeof contractRevisionWithRatesSchema
+// >
 
 export {
-    rateRevisionWithContractsSchema,
-    contractRevisionWithRatesSchema,
+    // rateRevisionWithContractsSchema,
+    // contractRevisionWithRatesSchema,
     contractRevisionSchema,
     rateRevisionSchema,
 }
@@ -53,6 +53,6 @@ export {
 export type {
     ContractRevisionType,
     RateRevisionType,
-    RateRevisionWithContractsType,
-    ContractRevisionWithRatesType,
+    // RateRevisionWithContractsType,
+    // ContractRevisionWithRatesType,
 }
