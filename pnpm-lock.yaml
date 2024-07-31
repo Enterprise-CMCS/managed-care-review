@@ -24394,7 +24394,7 @@ snapshots:
       p-map: 4.0.0
       promise-inflight: 1.0.1
       ssri: 10.0.4
-      tar: 6.1.15
+      tar: 6.2.1
       unique-filename: 3.0.0
     transitivePeerDependencies:
       - bluebird
