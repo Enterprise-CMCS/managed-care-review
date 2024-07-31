@@ -68,6 +68,7 @@ test('to addresses list only includes state analyst when a DMCO user submits a q
 
 test('to addresses list includes state analyst and OACT group emails when an OACT user submits a question', async () => {
     const sub = mockContractRev()
+    sub.formData.riskBasedContract = true
     const defaultStatePrograms = mockMNState().programs
     const oactUser: CMSUserType = {
         ...cmsUser,

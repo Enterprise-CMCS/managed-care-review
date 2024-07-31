@@ -36,7 +36,7 @@ export const sendQuestionResponseCMSEmail = async (
     let receiverEmails = [...stateAnalystsEmails, ...config.devReviewTeamEmails]
     if (division === 'DMCP') {
         receiverEmails.push(...config.dmcpReviewEmails)
-    } else if (division === 'OACT') {
+    } else if (division === 'OACT' && contractRev.formData.riskBasedContract) {
         receiverEmails.push(...config.oactEmails)
     }
     receiverEmails = pruneDuplicateEmails(receiverEmails)
