@@ -41,7 +41,7 @@ export async function runBrowserTestsAgainstAWS(
     if (stageName === '') {
         console.info(
             'Error: you do not appear to be on a git branch so we cannot auto-detect what stage to attach to.\n',
-            'Either checkout the deployed branch or specify --stage explicitly.'
+            'Either checkout the deployed branch or specify --stage-name explicitly.'
         )
         process.exit(1)
     }
