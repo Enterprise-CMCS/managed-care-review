@@ -31,7 +31,7 @@ runs:
       with:
         path: |
           ${{ steps.pnpm-cache.outputs.STORE_PATH }}
-          /github/home/.cache/Cypress
+          ~/.cache/Cypress
         key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
         restore-keys: |
           ${{ runner.os }}-pnpm-store-
