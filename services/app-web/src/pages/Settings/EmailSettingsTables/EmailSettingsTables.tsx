@@ -91,7 +91,7 @@ const EmailGeneralTable = ({ config }: { config: EmailConfiguration }) => {
                         <td>OACT division emails</td>
                         <td>
                             Contract and rate submissions; excluding CHIP
-                            programs and PR state
+                            programs, PR state and non risked based contraction
                         </td>
                     </tr>
                     <tr>
