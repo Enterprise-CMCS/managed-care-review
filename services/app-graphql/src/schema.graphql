@@ -38,7 +38,14 @@ type Query {
     CMSUsers can find all the packages that do not have the DRAFT status
     """
     indexHealthPlanPackages: IndexHealthPlanPackagesPayload!
+    
+    """
+    indexContracts returns all of the contracts the current user can see.
 
+    StateUsers can find all the contracts for their state
+    CMSUsers can find all the contracts that do not have the DRAFT status
+    """
+    indexContracts: IndexContractsPayload!
     """
     indexUsers returns all of the Users in the system.
 
@@ -93,6 +100,17 @@ type Query {
     - NotFoundError: contract for contractID not found in database
     """
     fetchContract(input: FetchContractInput!): FetchContractPayload!
+    """
+    fetchContractWithQuestions returns a single contract, linked to revisions and related rates and questionsList
+    given a contractID
+
+    It can be called by CMS or State users
+
+    Errors:
+    - ForbiddenError: A State user requests a contract that belongs to another state
+    - NotFoundError: contract for contractID not found in database
+    """
+    fetchContractWithQuestions(input: FetchContractWithQuestionsInput!): FetchContractWithQuestionsPayload!
 }
 
 type Mutation {
@@ -540,10 +558,20 @@ type HealthPlanPackageEdge {
     node: HealthPlanPackage!
 }
 
+type ContractEdge {
+    node: Contract!
+}
+
 type IndexHealthPlanPackagesPayload {
     totalCount: Int
     edges: [HealthPlanPackageEdge!]!
 }
+
+type IndexContractsPayload {
+    totalCount: Int
+    edges: [ContractEdge!]!
+}
+
 
 input IndexQuestionsInput {
     "The ID of the package for which to fetch associated questions"
@@ -1628,6 +1656,7 @@ type Contract {
     submission is in the first position in the array.
     """
     packageSubmissions: [ContractPackageSubmission!]!
+    questions: IndexQuestionsPayload
 }
 
 """
@@ -1706,7 +1735,18 @@ type FetchContractPayload {
     contract: Contract!
 }
 
+type FetchContractWithQuestionsPayload {
+    """
+    A rate that include contract and rate revisions
+    """
+    contract: Contract!
+}
+
 input FetchContractInput {
+    contractID: ID!
+}
+
+input FetchContractWithQuestionsInput {
     contractID: ID!
 }
 

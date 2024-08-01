@@ -10,6 +10,7 @@ import {
     rateRevisionWithContractsSchema,
 } from './revisionTypes'
 import { statusSchema } from './statusType'
+import { indexQuestionsPayload } from '../QuestionsType'
 import { updateInfoSchema } from './updateInfoType'
 
 // Contract represents the contract specific information in a submission package
@@ -30,6 +31,8 @@ const contractWithoutDraftRatesSchema = z.object({
     revisions: z.array(contractRevisionWithRatesSchema),
 
     packageSubmissions: z.array(contractPackageSubmissionSchema),
+
+    questions: indexQuestionsPayload.optional(),
 })
 
 type ContractWithoutDraftRatesType = z.infer<

@@ -33,6 +33,7 @@ import { rateResolver } from './rate/rateResolver'
 import { genericDocumentResolver } from './shared/genericDocumentResolver'
 import { fetchRateResolver } from './rate/fetchRate'
 import { updateContract } from './contract/updateContract'
+import { indexContractsResolver } from './contract/indexContracts'
 import { unlockContractResolver } from './contract/unlockContract'
 import { createAPIKeyResolver } from './APIKey'
 import { unlockRate } from './rate/unlockRate'
@@ -64,6 +65,7 @@ export function configureResolvers(
             fetchCurrentUser: fetchCurrentUserResolver(),
             fetchHealthPlanPackage: fetchHealthPlanPackageResolver(store),
             indexHealthPlanPackages: indexHealthPlanPackagesResolver(store),
+            indexContracts: indexContractsResolver(store),
             indexUsers: indexUsersResolver(store),
             indexQuestions: indexQuestionsResolver(store),
             fetchEmailSettings: fetchEmailSettingsResolver(
@@ -162,7 +164,7 @@ export function configureResolvers(
         HealthPlanPackage: healthPlanPackageResolver(store),
         Rate: rateResolver,
         RateRevision: rateRevisionResolver(store),
-        Contract: contractResolver(),
+        Contract: contractResolver(store),
         UnlockedContract: unlockedContractResolver(),
         ContractRevision: contractRevisionResolver(store),
         GenericDocument: genericDocumentResolver(s3Client),
