@@ -89,12 +89,6 @@ function contractRevisionToDomainModel(
     }
 }
 
-function contractRevisionsToDomainModels(
-    contractRevisions: ContractRevisionTableWithFormData[]
-): ContractRevisionType[] {
-    return contractRevisions.map((crev) => contractRevisionToDomainModel(crev))
-}
-
 // contractWithHistoryToDomainModelWithoutRates constructs a history for this particular contract including changes to all of its
 // revisions and all related rate revisions, including added and removed rates, but eliding any draft rates to break the recursion chain.
 function contractWithHistoryToDomainModelWithoutRates(
@@ -251,7 +245,6 @@ function contractWithHistoryToDomainModel(
 export {
     parseContractWithHistory,
     contractRevisionToDomainModel,
-    contractRevisionsToDomainModels,
     contractWithHistoryToDomainModel,
     contractWithHistoryToDomainModelWithoutRates,
     arrayOrFirstError,

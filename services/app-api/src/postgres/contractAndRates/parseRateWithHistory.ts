@@ -59,20 +59,6 @@ function rateRevisionToDomainModel(
     }
 }
 
-function rateRevisionsToDomainModels(
-    rateRevisions: RateRevisionTableWithFormData[]
-): RateRevisionType[] {
-    const domainRateRevisions: RateRevisionType[] = []
-
-    for (const rateRevision of rateRevisions) {
-        const domainRateRevision = rateRevisionToDomainModel(rateRevision)
-
-        domainRateRevisions.push(domainRateRevision)
-    }
-
-    return domainRateRevisions
-}
-
 const DRAFT_PARENT_PLACEHOLDER = 'DRAFT_PARENT_REPLACE_ME'
 
 // rateWithoutDraftContractsToDomainModel constructs a history for this particular contract including changes to all of its
@@ -286,7 +272,6 @@ function rateWithHistoryToDomainModel(
 export {
     parseRateWithHistory,
     rateRevisionToDomainModel,
-    rateRevisionsToDomainModels,
     rateWithHistoryToDomainModel,
     rateWithoutDraftContractsToDomainModel,
     DRAFT_PARENT_PLACEHOLDER,
