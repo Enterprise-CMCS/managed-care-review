@@ -10,19 +10,30 @@ import {recordJSException} from '../otelHelpers';
 import { TEALIUM_CONTENT_TYPE_BY_ROUTE, TEALIUM_SUBSECTION_BY_ROUTE } from './constants';
 
 // TYPES
-type TealiumDataObject = {
-    content_language: string
-    content_type: string
-    page_name: string
-    page_path: string
-    site_domain: 'cms.gov'
-    site_environment: string
-    site_section: string
-    logged_in: 'true' | 'false'
-    userId?: string // custom attribute
-    packageId?: string // custom attribute
-    tealium_event?: TealiumEvent // this is required by tealium, TBD what allowed values aer here, usually this is supposed to be configured first .
-}
+type TealiumEvent =
+    | 'search'
+    | 'submission_view'
+    | 'user_login'
+    | 'user_logout'
+    | 'save_draft'
+    | 'button_engagement'
+    | 'internal_link_clicked'
+    | 'navigation_clicked'
+    | 'external_link_clicked'
+    | 'back_button'
+    | 'dropdown_selection'
+    | 'filters_applied'
+    | 'filter_removed'
+    | 'inline_error'
+    | 'alert_impression'
+    | 'radio_button_list_selected'
+    | 'checkbox_selected'
+    | 'checkbox_unselected'
+
+type TealiumEnv =
+    | 'prod'
+    | 'qa'
+    | 'dev'
 
 type ButtonEventStyle =
     | 'default'
@@ -47,6 +58,28 @@ type ButtonEventParentComponentType =
     | 'page body'
     | 'constant header'
 
+type LinkEventParentComponentType =
+    | 'card'
+    | 'modal'
+    | 'help drawer'
+    | 'resource-tray'
+    | 'app page'
+    | 'top navigation'
+
+type TealiumDataObject = {
+    content_language: string
+    content_type: string
+    page_name: string
+    page_path: string
+    site_domain: 'cms.gov'
+    site_environment: string
+    site_section: string
+    logged_in: 'true' | 'false'
+    userId?: string // custom attribute
+    packageId?: string // custom attribute
+    tealium_event?: TealiumEvent // this is required by tealium, TBD what allowed values aer here, usually this is supposed to be configured first .
+}
+
 type TealiumButtonEventObject = {
     event_name: 'button_engagement',
     text: string
@@ -57,10 +90,17 @@ type TealiumButtonEventObject = {
     parent_component_type?: ButtonEventParentComponentType | string
     link_url?: string
     event_extension?: string
-} & Partial<TealiumDataObject>
+}
+
+type TealiumDropdownSelectionEventObject = {
+    event_name: 'dropdown_selection'
+    heading?: string
+    text: string
+    link_type?: string
+}
 
 // Used for internal links and navigation links
-type TealiumInternalLinkEventObject = {
+type TealiumLinkEventObject = {
     event_name: 'internal_link_clicked' | "navigation_clicked" | "back_button"
     text: string
     link_url: string
@@ -69,13 +109,65 @@ type TealiumInternalLinkEventObject = {
     parent_component_type?: LinkEventParentComponentType | string
 }
 
-type LinkEventParentComponentType =
-    | 'card'
-    | 'modal'
-    | 'help drawer'
-    | 'resource-tray'
-    | 'app page'
-    | 'top navigation'
+type TealiumFilterAppliedType = {
+    event_name: 'filters_applied'
+    search_result_count: string
+    link_type?: 'link_other'
+    results_count_after_filtering: string
+    results_count_prior_to_filtering: string
+    filter_categories_used: string
+}
+
+type TealiumFilterRemovedType = {
+    event_name: 'filter_removed'
+    search_result_count: string
+    link_type?: 'link_other'
+    filter_categories_used: string
+}
+
+type TealiumInlineErrorObject = {
+    event_name: 'inline_error'
+    error_type: 'validation' | 'system'
+    error_message: string
+    error_code?: string
+    form_field_label: string
+    link_type?: 'link_other'
+}
+
+type TealiumAlertImpressionObject = {
+    event_name: 'alert_impression'
+    error_type: 'validation' | 'system'
+    error_message: string
+    error_code?: string
+    heading: string
+    type: 'alert' | 'warn' | 'error'
+    extension?: string
+}
+
+type TealiumRadioButtonEventObject = {
+    event_name: 'radio_button_list_selected'
+    radio_button_title: string
+    list_position: number
+    list_options: number
+    link_type?: 'link_other'
+    parent_component_heading?: string
+    parent_component_type?: string
+    field_type: 'optional' | 'required'
+    form_fill_status: boolean
+}
+
+type TealiumCheckboxEventObject = {
+    event_name: 'checkbox_selected' | 'checkbox_unselected'
+    text: string
+    heading: string
+    parent_component_heading?: string
+    parent_component_type?: string
+    field_type: 'optional' | 'required'
+}
+
+type TealiumFilterEventObject = (
+    TealiumFilterAppliedType | TealiumFilterRemovedType
+)
 
 type TealiumLinkDataObject = {
     tealium_event: TealiumEvent // event is required for user tracking links
@@ -83,26 +175,16 @@ type TealiumLinkDataObject = {
 
 type TealiumViewDataObject = TealiumDataObject // event default to page_view in useTealium hook
 
-type TealiumEventObjectTypes =
+type TealiumEventObjectTypes = (
     | TealiumButtonEventObject
-    | TealiumInternalLinkEventObject
-
-type TealiumEvent =
-    | 'search'
-    | 'submission_view'
-    | 'user_login'
-    | 'user_logout'
-    | 'save_draft'
-    | 'button_engagement'
-    | 'internal_link_clicked'
-    | "navigation_clicked"
-    | "external_link_clicked"
-    | "back_button"
-
-type TealiumEnv =
-    | 'prod'
-    | 'qa'
-    | 'dev'
+    | TealiumLinkEventObject
+    | TealiumDropdownSelectionEventObject
+    | TealiumFilterEventObject
+    | TealiumInlineErrorObject
+    | TealiumAlertImpressionObject
+    | TealiumCheckboxEventObject
+    | TealiumRadioButtonEventObject
+    ) & Partial<TealiumDataObject>
 
 type TealiumClientType = {
     initializeTealium: () => void
@@ -177,7 +259,7 @@ const tealiumClient = (tealiumEnv: Omit<TealiumEnv, 'dev'>): TealiumClientType =
                 page_name: `${heading}: ${PageTitlesRecord[currentRoute]}`,
                 page_path: pathname,
                 site_domain: 'cms.gov',
-                site_environment: `${process.env.REACT_APP_STAGE_NAME}`,
+                site_environment: `${tealiumEnv}`,
                 site_section: `${currentRoute}`,
                 logged_in: `${Boolean(loggedInUser) ?? false}`,
                 userId: loggedInUser?.email,
@@ -204,7 +286,7 @@ const tealiumClient = (tealiumEnv: Omit<TealiumEnv, 'dev'>): TealiumClientType =
                 page_name: tealiumPageName,
                 page_path: pathname,
                 site_domain: 'cms.gov',
-                site_environment: `${process.env.REACT_APP_STAGE_NAME}`,
+                site_environment: `${tealiumEnv}`,
                 site_section: `${TEALIUM_SUBSECTION_BY_ROUTE[currentRoute]}`,
                 logged_in: `${Boolean(loggedInUser) ?? false}`,
             }
@@ -243,7 +325,7 @@ const devTealiumClient = (): TealiumClientType => {
                 page_name: `${heading}: ${PageTitlesRecord[currentRoute]}`,
                 page_path: pathname,
                 site_domain: 'cms.gov',
-                site_environment: `${process.env.REACT_APP_STAGE_NAME}`,
+                site_environment: 'dev',
                 site_section: `${currentRoute}`,
                 logged_in: `${Boolean(loggedInUser) ?? false}`,
                 userId: loggedInUser?.email,
@@ -271,7 +353,7 @@ const devTealiumClient = (): TealiumClientType => {
                 page_name: tealiumPageName,
                 page_path: pathname,
                 site_domain: 'cms.gov',
-                site_environment: `${process.env.REACT_APP_STAGE_NAME}`,
+                site_environment: 'dev',
                 site_section: `${TEALIUM_SUBSECTION_BY_ROUTE[currentRoute]}`,
                 logged_in: `${Boolean(loggedInUser) ?? false}`,
             }
@@ -288,9 +370,15 @@ export type {
     TealiumViewDataObject,
     TealiumEvent,
     TealiumButtonEventObject,
-    TealiumInternalLinkEventObject,
+    TealiumLinkEventObject,
     TealiumEventObjectTypes,
     TealiumClientType,
     TealiumEnv,
-    ButtonEventStyle
+    ButtonEventStyle,
+    TealiumDropdownSelectionEventObject,
+    TealiumFilterEventObject,
+    TealiumInlineErrorObject,
+    TealiumAlertImpressionObject,
+    TealiumRadioButtonEventObject,
+    TealiumCheckboxEventObject
 }

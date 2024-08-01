@@ -1,4 +1,4 @@
-import type { FeatureFlagSettings } from 'app-web/src/common-code/featureFlags'
+import type { FeatureFlagSettings } from '../../common-code/featureFlags'
 import type { ContractDraftRevisionFormDataInput } from '../../gen/gqlServer'
 import { contractFormDataSchema, preprocessNulls } from './formDataTypes'
 import {

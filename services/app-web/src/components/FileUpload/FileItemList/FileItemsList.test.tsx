@@ -6,6 +6,7 @@ import { FileItemT } from '../FileProcessor/FileProcessor'
 import { FileItemsList } from './FileItemsList'
 import { TEST_PDF_FILE } from '../../../testHelpers'
 import * as tealium from '../../../hooks/useTealium'
+import { mockUseTealiumHookFunctions } from '../../../testHelpers/tealiumHelpers'
 
 describe('FileItemList component', () => {
     const pending: FileItemT = {
@@ -67,15 +68,9 @@ describe('FileItemList component', () => {
     const spyOnUseTealium = vi.spyOn(tealium, 'useTealium')
 
     beforeEach(() => {
-        spyOnUseTealium.mockImplementation(() => ({
-            logButtonEvent: () => {
-                return
-            },
-            logInternalLinkEvent: () => {
-                return
-            },
-        }))
+        spyOnUseTealium.mockImplementation(() => mockUseTealiumHookFunctions())
     })
+
     afterEach(() => vi.clearAllMocks())
 
     it('renders a list without errors', () => {

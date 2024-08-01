@@ -77,7 +77,7 @@ custom:
     prod: 1
   scriptable:
     hooks:
-      before:package:createDeploymentArtifacts: yarn build
+      before:package:createDeploymentArtifacts: pnpm build
       before:deploy:finalize: node scripts/uploadScripts.js ${self:custom.stage}
 
 package:

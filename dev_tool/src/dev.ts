@@ -26,17 +26,17 @@ import {
     runWebTestsWatch,
 } from './test/index.js'
 
-// Run clean commands from every single lerna package. For a list, run yarn lerna list from the root.
+// Run clean commands from every single lerna package.
 async function runAllClean() {
     const runner = new LabeledProcessRunner()
     await runner.runCommandAndOutput(
         'clean',
-        ['npx', 'lerna', 'run', 'clean'],
+        ['pnpm', 'clean'],
         ''
     )
 }
 
-// Run lint commands from every single lerna package. For a list, run yarn lerna list from the root.
+// Run lint commands from every single lerna package.
 async function runAllLint() {
     const runner = new LabeledProcessRunner()
     await runner.runCommandAndOutput(
@@ -47,9 +47,9 @@ async function runAllLint() {
 }
 
 // Rebuild- this is for use after .dev clean
-// Runs yarn install, tsc, generate compiled types
+// Runs pnpm install, tsc, generate compiled types
 async function runAllBuild(runner: LabeledProcessRunner) {
-    await runner.runCommandAndOutput('yarn install', ['npx', 'yarn'], '')
+    await runner.runCommandAndOutput('pnpm install', ['npx', 'pnpm'], '')
     await runAllGenerate()
     await runner.runCommandAndOutput(
         'build',

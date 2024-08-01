@@ -11,6 +11,8 @@ import {
 } from './revisionTypes'
 import { statusSchema } from './statusType'
 import { indexQuestionsPayload } from '../QuestionsType'
+import { updateInfoSchema } from './updateInfoType'
+
 // Contract represents the contract specific information in a submission package
 // All that data is contained in revisions, each revision represents the data in a single submission
 // submissions are kept intact here across time
@@ -45,6 +47,7 @@ const rateWithoutDraftContractsSchema = z.object({
     stateCode: z.string(),
     parentContractID: z.string().uuid(),
     stateNumber: z.number().min(1),
+    withdrawInfo: updateInfoSchema.optional(),
     // If this rate is in a DRAFT or UNLOCKED status, there will be a draftRevision
     draftRevision: rateRevisionSchema.optional(),
     // draftContracts: rateDraftContracts,

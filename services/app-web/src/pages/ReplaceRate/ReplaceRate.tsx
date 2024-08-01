@@ -5,9 +5,7 @@ import { usePage } from '../../contexts/PageContext'
 import { useFetchRateQuery } from '../../gen/gqlClient'
 import styles from '../SubmissionSummary/SubmissionSummary.module.scss'
 import { useAuth } from '../../contexts/AuthContext'
-import {
-    ErrorOrLoadingPage,
-} from '../../pages/StateSubmission/ErrorOrLoadingPage'
+import { ErrorOrLoadingPage } from '../../pages/StateSubmission/ErrorOrLoadingPage'
 
 export const ReplaceRate = (): React.ReactElement => {
     // Page level state
@@ -45,7 +43,7 @@ export const ReplaceRate = (): React.ReactElement => {
             return <ErrorOrLoadingPage state="GENERIC_ERROR" />
         }
     }
-    
+
     if (
         rateName !== currentRateRev.formData.rateCertificationName &&
         currentRateRev.formData.rateCertificationName

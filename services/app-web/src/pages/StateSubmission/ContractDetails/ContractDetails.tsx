@@ -103,11 +103,13 @@ function formattedDateMinusOneDay(initialValue: string): string {
 const ContractDatesErrorMessage = ({
     values,
     validationErrorMessage,
+    formFieldLabel,
 }: {
     values: ContractDetailsFormValues
     validationErrorMessage: string
+    formFieldLabel: string
 }): React.ReactElement => (
-    <PoliteErrorMessage>
+    <PoliteErrorMessage formFieldLabel={formFieldLabel}>
         {isDateRangeEmpty(values.contractDateStart, values.contractDateEnd)
             ? 'You must provide a start and an end date'
             : validationErrorMessage}
@@ -508,6 +510,9 @@ export const ContractDetails = ({
             setSubmitting(false)
         }
     }
+
+    const formHeading = 'Contract Details Form'
+
     return (
         <>
             <div>
@@ -553,7 +558,7 @@ export const ContractDetails = ({
                             <UswdsForm
                                 className={styles.formContainer}
                                 id="ContractDetailsForm"
-                                aria-label="Contract Details Form"
+                                aria-label={formHeading}
                                 aria-describedby="form-guidance"
                                 onSubmit={(e) => {
                                     setShouldValidate(true)
@@ -691,7 +696,11 @@ export const ContractDetails = ({
                                                 {showFieldErrors(
                                                     errors.statutoryRegulatoryAttestation
                                                 ) && (
-                                                    <PoliteErrorMessage>
+                                                    <PoliteErrorMessage
+                                                        formFieldLabel={
+                                                            StatutoryRegulatoryAttestationQuestion
+                                                        }
+                                                    >
                                                         {
                                                             errors.statutoryRegulatoryAttestation
                                                         }
@@ -705,6 +714,14 @@ export const ContractDetails = ({
                                                     id="statutoryRegulatoryAttestationYes"
                                                     value={'YES'}
                                                     aria-required
+                                                    list_position={1}
+                                                    list_options={2}
+                                                    parent_component_heading={
+                                                        StatutoryRegulatoryAttestationQuestion
+                                                    }
+                                                    radio_button_title={
+                                                        StatutoryRegulatoryAttestation.YES
+                                                    }
                                                 />
                                                 <FieldRadio
                                                     name="statutoryRegulatoryAttestation"
@@ -714,6 +731,14 @@ export const ContractDetails = ({
                                                     id="statutoryRegulatoryAttestationNo"
                                                     value={'NO'}
                                                     aria-required
+                                                    list_position={2}
+                                                    list_options={2}
+                                                    parent_component_heading={
+                                                        StatutoryRegulatoryAttestationQuestion
+                                                    }
+                                                    radio_button_title={
+                                                        StatutoryRegulatoryAttestation.NO
+                                                    }
                                                 />
                                             </Fieldset>
                                         </FormGroup>
@@ -778,7 +803,7 @@ export const ContractDetails = ({
                                             {showFieldErrors(
                                                 errors.contractExecutionStatus
                                             ) && (
-                                                <PoliteErrorMessage>
+                                                <PoliteErrorMessage formFieldLabel="Contract status">
                                                     {
                                                         errors.contractExecutionStatus
                                                     }
@@ -790,6 +815,10 @@ export const ContractDetails = ({
                                                 label="Fully executed"
                                                 aria-required
                                                 value={'EXECUTED'}
+                                                list_position={1}
+                                                list_options={2}
+                                                parent_component_heading="Contract status"
+                                                radio_button_title="Fully executed"
                                             />
                                             <FieldRadio
                                                 id="unexecutedContract"
@@ -797,6 +826,10 @@ export const ContractDetails = ({
                                                 label="Unexecuted by some or all parties"
                                                 aria-required
                                                 value={'UNEXECUTED'}
+                                                list_position={2}
+                                                list_options={2}
+                                                parent_component_heading="Contract status"
+                                                radio_button_title="Unexecuted by some or all parties"
                                             />
                                         </Fieldset>
                                     </FormGroup>
@@ -839,6 +872,13 @@ export const ContractDetails = ({
                                                                 errors.contractDateStart ||
                                                                 errors.contractDateEnd ||
                                                                 'Invalid date'
+                                                            }
+                                                            formFieldLabel={
+                                                                isContractAmendment(
+                                                                    draftSubmission
+                                                                )
+                                                                    ? 'Amendment effective dates'
+                                                                    : 'Contract effective dates'
                                                             }
                                                         />
                                                     )}
@@ -937,7 +977,7 @@ export const ContractDetails = ({
                                                     {showFieldErrors(
                                                         errors.managedCareEntities
                                                     ) && (
-                                                        <PoliteErrorMessage>
+                                                        <PoliteErrorMessage formFieldLabel="Managed Care entities">
                                                             {
                                                                 errors.managedCareEntities
                                                             }
@@ -950,6 +990,10 @@ export const ContractDetails = ({
                                                             ManagedCareEntityRecord.MCO
                                                         }
                                                         value="MCO"
+                                                        heading="Managed Care entities"
+                                                        parent_component_heading={
+                                                            formHeading
+                                                        }
                                                     />
                                                     <FieldCheckbox
                                                         id="prepaidInpatientHealthPlan"
@@ -958,6 +1002,10 @@ export const ContractDetails = ({
                                                             ManagedCareEntityRecord.PIHP
                                                         }
                                                         value="PIHP"
+                                                        heading="Managed Care entities"
+                                                        parent_component_heading={
+                                                            formHeading
+                                                        }
                                                     />
                                                     <FieldCheckbox
                                                         id="prepaidAmbulatoryHealthPlans"
@@ -966,6 +1014,10 @@ export const ContractDetails = ({
                                                             ManagedCareEntityRecord.PAHP
                                                         }
                                                         value="PAHP"
+                                                        heading="Managed Care entities"
+                                                        parent_component_heading={
+                                                            formHeading
+                                                        }
                                                     />
                                                     <FieldCheckbox
                                                         id="primaryCareCaseManagementEntity"
@@ -974,6 +1026,10 @@ export const ContractDetails = ({
                                                             ManagedCareEntityRecord.PCCM
                                                         }
                                                         value="PCCM"
+                                                        heading="Managed Care entities"
+                                                        parent_component_heading={
+                                                            formHeading
+                                                        }
                                                     />
                                                 </Fieldset>
                                             </FormGroup>
@@ -1012,7 +1068,7 @@ export const ContractDetails = ({
                                                     {showFieldErrors(
                                                         errors.federalAuthorities
                                                     ) && (
-                                                        <PoliteErrorMessage>
+                                                        <PoliteErrorMessage formFieldLabel="Active federal operating authority">
                                                             {
                                                                 errors.federalAuthorities
                                                             }
@@ -1031,6 +1087,10 @@ export const ContractDetails = ({
                                                                 }
                                                                 value={
                                                                     federalAuthority
+                                                                }
+                                                                heading="Managed Care entities"
+                                                                parent_component_heading={
+                                                                    formHeading
                                                                 }
                                                             />
                                                         )

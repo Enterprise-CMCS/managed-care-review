@@ -7,7 +7,7 @@ import {
 } from '../../testHelpers/gqlHelpers'
 import type { RateEdge, Rate } from '../../gen/gqlServer'
 import { testCMSUser, testStateUser } from '../../testHelpers/userHelpers'
-import { formatGQLDate } from 'app-web/src/common-code/dateHelpers'
+import { formatGQLDate } from '../../common-code/dateHelpers'
 import {
     submitTestRate,
     unlockTestRate,

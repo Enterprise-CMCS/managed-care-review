@@ -729,8 +729,10 @@ describe(`Tests unlockHealthPlanPackage`, () => {
         const stateServer = await constructTestPostgresServer()
 
         // First, create a new submitted submission
-        const stateSubmission =
-            await createAndSubmitTestHealthPlanPackage(stateServer)
+        const stateSubmission = await createAndSubmitTestHealthPlanPackage(
+            stateServer,
+            { riskBasedContract: true }
+        )
 
         const cmsServer = await constructTestPostgresServer({
             context: {

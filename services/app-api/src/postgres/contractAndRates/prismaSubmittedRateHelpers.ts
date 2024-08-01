@@ -2,6 +2,7 @@ import type { Prisma } from '@prisma/client'
 import {
     includeContractFormData,
     includeRateFormData,
+    includeUpdateInfo,
 } from './prismaSharedContractRateHelpers'
 
 const includeLatestSubmittedRateRev = {
@@ -18,13 +19,13 @@ const includeLatestSubmittedRateRev = {
 
 // includeRateWithoutDraftContracts is the prisma includes block for a complete Rate
 const includeRateWithoutDraftContracts = {
+    withdrawInfo: includeUpdateInfo,
     revisions: {
         orderBy: {
             createdAt: 'asc',
         },
         include: {
             ...includeRateFormData,
-
             submitInfo: {
                 include: {
                     updatedBy: true,

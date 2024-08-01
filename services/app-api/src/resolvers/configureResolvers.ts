@@ -48,6 +48,7 @@ import { rateRevisionResolver } from './rate/rateRevisionResolver'
 import type { S3ClientT } from '../s3'
 import { createContract } from './contract/createContract'
 import { updateContractDraftRevision } from './contract/updateContractDraftRevision'
+import { withdrawAndReplaceRedundantRateResolver } from './contract/withdrawAndReplaceRedundantRate'
 
 export function configureResolvers(
     store: Store,
@@ -114,6 +115,8 @@ export function configureResolvers(
                 launchDarkly
             ),
             updateDraftContractRates: updateDraftContractRates(store),
+            withdrawAndReplaceRedundantRate:
+                withdrawAndReplaceRedundantRateResolver(store),
             updateCMSUser: updateCMSUserResolver(store),
             createQuestion: createQuestionResolver(
                 store,

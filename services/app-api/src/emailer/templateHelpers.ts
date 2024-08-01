@@ -156,8 +156,11 @@ const generateCMSReviewerEmailsForContract = (
             ...config.devReviewTeamEmails,
             ...stateAnalystsEmails,
             ...dmcpSubmissionEmails,
-            ...oactEmails,
         ]
+
+        if (contractFormData.riskBasedContract) {
+            reviewers = [...reviewers, ...oactEmails]
+        }
     }
 
     //Remove OACT and DMCP emails from CHIP or State of PR submissions
@@ -210,8 +213,10 @@ const generateCMSReviewerEmails = (
             ...config.devReviewTeamEmails,
             ...stateAnalystsEmails,
             ...dmcpSubmissionEmails,
-            ...oactEmails,
         ]
+        if (pkg.riskBasedContract) {
+            reviewers = [...reviewers, ...oactEmails]
+        }
     }
 
     //Remove OACT and DMCP emails from CHIP or State of PR submissions

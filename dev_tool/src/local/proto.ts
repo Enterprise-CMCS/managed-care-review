@@ -13,7 +13,7 @@ export async function compileProtoWatch(runner: LabeledProcessRunner) {
         '`protolint` is used on pre-commit to check your .proto files. Please refer to the README for installation instructions.'
     )
 
-    await runner.runCommandAndOutput('proto deps', ['yarn', 'install'], '')
+    await runner.runCommandAndOutput('proto deps', ['pnpm', 'install'], '')
 
     return await runner.runCommandAndOutput(
         'protogen',
@@ -27,7 +27,7 @@ export const compileProtoWatchOnce = once(compileProtoWatch)
 export async function compileProto(runner: LabeledProcessRunner) {
     await runner.runCommandAndOutput(
         'proto deps',
-        ['yarn', 'install', '--prefer-offline'],
+        ['pnpm', 'install', '--prefer-offline'],
         ''
     )
 

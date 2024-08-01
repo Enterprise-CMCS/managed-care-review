@@ -55,7 +55,7 @@ export const LinkYourRates = ({
                 }
             >
                 <span className={styles.requiredOptionalText}>Required</span>
-                <PoliteErrorMessage>
+                <PoliteErrorMessage formFieldLabel="Was this rate certification included with another submission?">
                     {showFieldErrors('ratePreviouslySubmitted')}
                 </PoliteErrorMessage>
                 <FieldRadio
@@ -70,6 +70,10 @@ export const LinkYourRates = ({
                         autofill(emptyRateForm)
                     }}
                     aria-required
+                    list_position={1}
+                    list_options={2}
+                    radio_button_title="No, this rate certification was not included with any other submissions"
+                    parent_component_heading="Was this rate certification included with another submission?"
                 />
                 <FieldRadio
                     id={`ratePreviouslySubmittedYes.${index}.ratePreviouslySubmittedYes`}
@@ -83,6 +87,10 @@ export const LinkYourRates = ({
                         autofill(emptyRateForm)
                     }}
                     aria-required
+                    list_position={2}
+                    list_options={2}
+                    radio_button_title="Yes, this rate certification is part of another submission"
+                    parent_component_heading="Was this rate certification included with another submission?"
                 />
             </Fieldset>
             {getIn(values, `${fieldNamePrefix}.ratePreviouslySubmitted`) ===
@@ -94,7 +102,7 @@ export const LinkYourRates = ({
                     <span className={styles.requiredOptionalText}>
                         Required
                     </span>
-                    <PoliteErrorMessage>
+                    <PoliteErrorMessage formFieldLabel="Which rate certification was it?">
                         {showFieldErrors('linkRateSelect')}
                     </PoliteErrorMessage>
                     <LinkRateSelect
@@ -103,6 +111,7 @@ export const LinkYourRates = ({
                         name={`${fieldNamePrefix}.linkRateSelect`}
                         initialValue={getIn(values, `${fieldNamePrefix}.id`)}
                         autofill={autofill}
+                        label="Which rate certification was it?"
                     />
                 </>
             )}

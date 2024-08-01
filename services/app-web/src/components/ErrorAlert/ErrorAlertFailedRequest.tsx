@@ -1,8 +1,9 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import styles from './ErrorAlert.module.scss'
 import { Alert } from '@trussworks/react-uswds'
 import { useStringConstants } from '../../hooks/useStringConstants'
 import { LinkWithLogging } from '../TealiumLogging/Link'
+import { useTealium } from '../../hooks'
 
 export type ErrorAlertFailedRequestProps = {
     message?: string
@@ -10,15 +11,27 @@ export type ErrorAlertFailedRequestProps = {
 }
 // TODO: Refactor to use Error Alert and switchover components using GenericApiErrorBanner to use this
 export const ErrorAlertFailedRequest = ({
+    heading,
     message,
 }: ErrorAlertFailedRequestProps): React.ReactElement => {
     const stringConstants = useStringConstants()
+    const { logAlertImpressionEvent } = useTealium()
     const MAIL_TO_SUPPORT = stringConstants.MAIL_TO_SUPPORT
+
+    useEffect(() => {
+        logAlertImpressionEvent({
+            error_type: 'system',
+            error_message: message ?? "We're having trouble loading this page.",
+            type: 'error',
+            extension: 'react-uswds',
+        })
+    }, [])
+
     return (
         <Alert
             role="alert"
             type="error"
-            heading="System error"
+            heading={heading || 'System error'}
             headingLevel="h4"
             validation
             data-testid="error-alert"

@@ -1,6 +1,6 @@
 # Cypress
 
-This service deploys our Cypress app for e2e testing locally and CI. An important note is that the actual Cypress package is installed in the root `node_modules` this was the only way we could get Cypress commands to work in CI. The reason is still unknown, but we suspect it because some Cypress commands need a yarn.lock in the same directory where the package is installed and in our monorepo we only have a yarn.lock at the root directory.
+This service deploys our Cypress app for e2e testing locally and CI. An important note is that the actual Cypress package is installed in the root `node_modules` this was the only way we could get Cypress commands to work in CI.
 
 ### Deploying locally
 
@@ -16,6 +16,7 @@ This service deploys our Cypress app for e2e testing locally and CI. An importan
 CI deployment is congifured in `.github/workflows/deploy.yml`.
 
 -   The `cypress` job is where cypress is configured and ran in CI. Here some notable steps in this job
+
     -   Because we cannot run the generate commands in order to get the `gen` folder and files we instead download it. These `gen` folders where uploaded from the earlier `web-unit-tests` job.
 
         ```yaml
@@ -232,6 +233,7 @@ We can use the `apiCreateAndSubmitContractOnlySubmission` cypress command as an 
             )
             ```
 5. To make our callback function that does all the API requests we start by creating a function accepts `apollClient` as an argument with the type `ApolloClient<NormalizedCacheObject>`. In this function we can now make requests using the apollo client and our `gql` mutations and queries from `gen/gqlClient.ts`
+
     ```ts
     const createAndSubmitPackage = async (
         apolloClient: ApolloClient<NormalizedCacheObject>
@@ -281,6 +283,7 @@ We can use the `apiCreateAndSubmitContractOnlySubmission` cypress command as an 
         return submission.data.submitHealthPlanPackage.pkg
     }
     ```
+
 6. Now we can place this function as the `callback` parameter of `apolloClientWrapper` in our command, and now it is ready to be used in tests.
     ```ts
     Cypress.Commands.add(

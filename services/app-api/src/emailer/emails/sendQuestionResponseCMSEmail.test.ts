@@ -20,6 +20,7 @@ const dmcpUser = testCMSUser({
     divisionAssignment: 'DMCP',
 })
 const contractRev = mockContractRev()
+contractRev.formData.riskBasedContract = true
 const defaultMNStatePrograms = mockMNState().programs
 const questions = [
     mockQuestionAndResponses({

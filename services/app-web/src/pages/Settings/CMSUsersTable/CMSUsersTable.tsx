@@ -2,10 +2,8 @@ import { Table } from '@trussworks/react-uswds'
 import React, { useCallback, useMemo, useState } from 'react'
 import {
     createColumnHelper,
-    FilterFn,
     flexRender,
     getCoreRowModel,
-    RowData,
     useReactTable,
 } from '@tanstack/react-table'
 import Select, { OnChangeValue } from 'react-select'
@@ -24,16 +22,7 @@ import { wrapApolloResult } from '../../../gqlHelpers/apolloQueryWrapper'
 import { handleApolloError } from '../../../gqlHelpers/apolloErrors'
 import { updateCMSUser } from '../../../gqlHelpers/updateCMSUser'
 import { ApolloError } from '@apollo/client'
-
-declare module '@tanstack/table-core' {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    interface ColumnMeta<TData extends RowData, TValue> {
-        dataTestID: string
-    }
-    interface FilterFns {
-        dateRangeFilter: FilterFn<unknown>
-    }
-}
+import { useTealium } from '../../../hooks'
 
 type DivisionSelectOptions = {
     label: string
@@ -50,6 +39,7 @@ function DivisionSelect({
     setDivision: SetDivisionCallbackType
 }): React.ReactElement {
     const [updateErrored, setUpdateErrored] = useState<boolean>(false)
+    const { logDropdownSelectionEvent } = useTealium()
 
     async function handleChange(
         selectedOption: OnChangeValue<DivisionSelectOptions, false>,
@@ -60,6 +50,10 @@ function DivisionSelect({
             if (err) {
                 setUpdateErrored(true)
             } else {
+                logDropdownSelectionEvent({
+                    text: selectedOption.value,
+                    heading: 'Division',
+                })
                 setUpdateErrored(false)
             }
         }
@@ -217,7 +211,6 @@ export const CMSUsersTable = (): React.ReactElement => {
                 }
                 return res
             }
-
             return undefined
         },
         [updateCmsUserMutation]

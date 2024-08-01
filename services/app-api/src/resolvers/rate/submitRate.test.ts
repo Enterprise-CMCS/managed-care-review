@@ -573,8 +573,6 @@ describe('submitRate', () => {
 
         const fetchedRate = await fetchTestRateById(stateServer, OneID)
 
-        // console.log('FETCEDRAT', JSON.stringify(fetchedRate, null, 2))
-
         const subs = fetchedRate.packageSubmissions
         if (!subs)
             throw new Error('packageSubmissions are expected but missing')

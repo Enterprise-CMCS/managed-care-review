@@ -20,7 +20,7 @@ export async function runWebTestsWatch(jestArgs: string[]) {
     // because we are inheriting stdio for this process,
     // we need to not run spawnSync or else all the output
     // for the graphql compiler will be swallowed.
-    const proc = spawn('yarn', ['test'].concat(jestArgs), {
+    const proc = spawn('pnpm', ['test'].concat(jestArgs), {
         cwd: 'services/app-web',
         stdio: 'inherit',
     })
@@ -39,7 +39,7 @@ export async function runWebTests(
 
     return await runner.runCommandAndOutput(
         'web - unit',
-        ['yarn', 'test:coverage'],
+        ['pnpm', 'test:coverage'],
         'services/app-web'
     )
 }

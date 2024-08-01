@@ -4,22 +4,49 @@ description: 'Runs common tasks for setting up the build environment in GHA'
 runs:
   using: 'composite'
   steps:
-    - name: Get yarn cache directory path
+    - uses: pnpm/action-setup@v4
+      name: Install pnpm
+      with:
+        version: 9
+        run_install: false
+
+    - name: Configure pnpm to use HTTPS
       shell: bash
-      id: yarn-cache-dir-path
-      run: echo "::set-output name=dir::$(yarn cache dir)"
+      run: pnpm config set git-prefer-https true
+
+    # We need this override until pnpm fixes this as we use CMSGov repos:
+    # https://github.com/pnpm/pnpm/issues/3948
+    - name: Configure git
+      shell: bash
+      run: git config --global url."https://github.com/".insteadOf "git@github.com:"
+
+    - name: Get pnpm store directory
+      shell: bash
+      id: pnpm-cache
+      run: |
+        echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+    - uses: actions/cache@v4
+      name: Setup pnpm cache
+      with:
+        path: |
+          ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          /root/.cache/Cypress
+          /github/home/.cache/Cypress
+        key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+        restore-keys: |
+          ${{ runner.os }}-pnpm-store-
 
     - uses: actions/setup-node@v4
       with:
         node-version-file: '.nvmrc'
-        cache: 'yarn'
+        cache: 'pnpm'
 
-    - name: Install yarn package
+    - name: Install dependencies
       shell: bash
-      id: yarn-install
-      run: yarn install --prefer-offline --frozen-lockfile --cache-folder ${{ steps.yarn-cache-dir-path.outputs.dir }}
+      run: PRISMA_CLI_BINARY_TARGETS=rhel-openssl-3.0.x pnpm install --frozen-lockfile
 
-    - name: set path
+    - name: Set PATH for project binaries
       shell: bash
       run: |
-        echo "PATH=$(pwd)/node_modules/.bin/:$PATH" >> $GITHUB_ENV
+        echo "$(pwd)/node_modules/.bin" >> $GITHUB_PATH

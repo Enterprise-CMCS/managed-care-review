@@ -267,7 +267,9 @@ export const FilterDateRange = forwardRef(
                         </Label>
                     )}
                     {showStartDateError && (
-                        <PoliteErrorMessage>
+                        <PoliteErrorMessage
+                            formFieldLabel={`${legend} - ${startDateLabel}`}
+                        >
                             You must enter a valid date
                         </PoliteErrorMessage>
                     )}
@@ -303,7 +305,9 @@ export const FilterDateRange = forwardRef(
                         </Label>
                     )}
                     {showEndDateError && (
-                        <PoliteErrorMessage>
+                        <PoliteErrorMessage
+                            formFieldLabel={`${legend} - ${endDateLabel}`}
+                        >
                             You must enter a valid date
                         </PoliteErrorMessage>
                     )}

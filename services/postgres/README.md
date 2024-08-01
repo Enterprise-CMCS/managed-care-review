@@ -67,7 +67,7 @@ Once you have the credentials from Secrets Manager (see above), you can set the 
 
 `export DATABASE_URL=postgresql://username:pass@hostname:3306/dbname` #pragma: allowlist secret
 
-A recent copy of our code base will need to be checked out onto the jumpbox to run `prisma` commands. Just `git clone` this repository to the jumpbox and `yarn install` things in order to get the appropriate `prisma` commands.
+A recent copy of our code base will need to be checked out onto the jumpbox to run `prisma` commands. Just `git clone` this repository to the jumpbox and `pnpm install` things in order to get the appropriate `prisma` commands.
 
 You can now use `npx prisma diff` and the other [prisma tools](https://www.prisma.io/docs/guides/migrate/production-troubleshooting) to fix up the failed migration.
 

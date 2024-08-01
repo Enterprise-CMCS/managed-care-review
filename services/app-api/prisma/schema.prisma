@@ -47,7 +47,7 @@ model ContractTable {
 
   draftRates DraftRateJoinTable[]
 
-  revisions          ContractRevisionTable[]
+  revisions ContractRevisionTable[]
 
   sharedRateRevisions RateRevisionTable[] @relation(name: "SharedRateRevisions")
 }
@@ -61,10 +61,12 @@ model RateTable {
   state       State  @relation(fields: [stateCode], references: [stateCode])
   stateNumber Int
 
+  withdrawInfoID String?
+  withdrawInfo   UpdateInfoTable? @relation("withdrawRateInfo", fields: [withdrawInfoID], references: [id])
+
   draftContracts DraftRateJoinTable[]
 
-  revisions              RateRevisionTable[]
-
+  revisions RateRevisionTable[]
 }
 
 // DraftRateJoinTable links a draft contract to a set of rates, draft or submitted.
@@ -130,9 +132,9 @@ model ContractRevisionTable {
 }
 
 model RateRevisionTable {
-  id                String                                  @id @default(uuid())
-  rateID            String
-  rate              RateTable                               @relation(fields: [rateID], references: [id])
+  id     String    @id @default(uuid())
+  rateID String
+  rate   RateTable @relation(fields: [rateID], references: [id])
 
   createdAt    DateTime         @default(now())
   updatedAt    DateTime         @default(now()) @updatedAt
@@ -162,7 +164,6 @@ model RateRevisionTable {
   contractsWithSharedRateRevision ContractTable[]          @relation(name: "SharedRateRevisions")
 }
 
-
 model UpdateInfoTable {
   id            String   @id @default(uuid())
   updatedAt     DateTime
@@ -177,6 +178,7 @@ model UpdateInfoTable {
   // These relations are inverse 1:1 relations that are not really used.
   unlockedContracts  ContractRevisionTable[]      @relation("unlockContractInfo")
   unlockedRates      RateRevisionTable[]          @relation("unlockRateInfo")
+  withdrawnRates     RateTable[]                  @relation("withdrawRateInfo")
   submissionPackages SubmissionPackageJoinTable[] @relation("submission")
 
   // these get ALL related contracts + revisions for given update.

@@ -1,0 +1,4 @@
+packages:
+  - "services/**"
+  - "dev_tool"
+  - "scripts"
