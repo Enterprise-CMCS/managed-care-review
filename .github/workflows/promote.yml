@@ -271,7 +271,6 @@ jobs:
         id: cypress
         uses: cypress-io/github-action@v6
         with:
-          install: false
           config: baseUrl=https://mc-review.onemac.cms.gov
           spec: services/cypress/integration/promoteWorkflow/promote.spec.ts
           record: true
