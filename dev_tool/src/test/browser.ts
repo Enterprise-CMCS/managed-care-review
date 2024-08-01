@@ -2,6 +2,23 @@ import { spawnSync } from 'child_process'
 import LabeledProcessRunner from '../runner.js'
 import { checkDockerInstalledAndRunning, checkURLIsUp } from '../deps.js'
 import * as path from 'path'
+import { checkStageAccess, getWebAuthVars } from '../serverless.js'
+import { commandMustSucceedSync } from '../localProcess.js'
+
+// By default, we transform the current branch name into a valid stage name
+export function stageNameFromBranch(): string {
+    const branchName = commandMustSucceedSync('git', [
+        'branch',
+        '--show-current',
+    ])
+
+    const transformedName = commandMustSucceedSync(
+        'scripts/stage_name_for_branch.sh',
+        [branchName]
+    )
+
+    return transformedName
+}
 
 export async function runBrowserTests(cypressArgs: string[]) {
     let args = ['open']
@@ -28,6 +45,112 @@ async function buildCypressDockerImage(runner: LabeledProcessRunner) {
         ['docker', 'build', '-t', 'gha-cypress:latest', '.'],
         'containers/gha-cypress'
     )
+}
+
+export async function runBrowserTestsAgainstAWS(
+    stageNameOpt: string | undefined
+) {
+    const stageName = stageNameOpt ?? stageNameFromBranch()
+
+    if (stageName === '') {
+        console.info(
+            'Error: you do not appear to be on a git branch so we cannot auto-detect what stage to attach to.\n',
+            'Either checkout the deployed branch or specify --stage explicitly.'
+        )
+        process.exit(1)
+    }
+
+    console.info('Attempting to access stage:', stageName)
+    // Test to see if we can read info from serverless. This is likely to trip folks up who haven't
+    // configured their AWS keys correctly or if they have an invalid stage name.
+
+    const serverlessConnection = checkStageAccess(stageName)
+
+    switch (serverlessConnection) {
+        case 'AWS_TOKEN_ERROR': {
+            console.info(
+                'Error: Invalid token attempting to read AWS Cloudformation\n',
+                'Likely, you do not have aws configured right. You will need AWS tokens from cloudwatch configured\n',
+                'See the AWS Token section of the README for more details.\n\n'
+            )
+            process.exit(1)
+        }
+        // don't need a break because we exit
+        // eslint-disable-next-line no-fallthrough
+        case 'STAGE_ERROR': {
+            console.info(
+                `Error: stack with id ${stageName} does not exist or is not done deploying\n`,
+                "If you didn't set one explicitly, maybe you haven't pushed this branch yet to deploy a review app?"
+            )
+            process.exit(1)
+        }
+        // don't need a break because we exit
+        // eslint-disable-next-line no-fallthrough
+        case 'UNKNOWN_ERROR': {
+            console.info(
+                'Unexpected Error attempting to read AWS Cloudformation.'
+            )
+            process.exit(2)
+        }
+    }
+
+    // Now, we've confirmed we are configured to pull data out of serverless x cloudformation
+    console.info('Access confirmed. Fetching config vars')
+    const { region, idPool, userPool, userPoolClient, userPoolDomain } =
+        getWebAuthVars(stageName)
+
+    const apiBase = commandMustSucceedSync(
+        './output.sh',
+        ['infra-api', 'ApiGatewayRestApiUrl', stageName],
+        {
+            cwd: './services',
+        }
+    )
+
+    const appUrl = commandMustSucceedSync(
+        './output.sh',
+        ['ui', 'CloudFrontEndpointUrl', stageName],
+        {
+            cwd: './services',
+        }
+    )
+
+    const s3Region = commandMustSucceedSync(
+        './output.sh',
+        ['uploads', 'Region', stageName],
+        {
+            cwd: './services',
+        }
+    )
+
+    const apiAuthMode = commandMustSucceedSync(
+        './output.sh',
+        ['app-api', 'ApiAuthMode', stageName],
+        {
+            cwd: './services',
+        }
+    )
+
+    console.info('Fetching config vars succeeded. Setting environment vars')
+
+    // set them
+    process.env.PORT = '5432' // run hybrid on a different port
+    process.env.VITE_APP_AUTH_MODE = apiAuthMode // override local_login in .env
+    process.env.VITE_APP_API_URL = apiBase
+    process.env.VITE_APP_COGNITO_REGION = region
+    process.env.VITE_APP_COGNITO_ID_POOL_ID = idPool
+    process.env.VITE_APP_COGNITO_USER_POOL_ID = userPool
+    process.env.VITE_APP_COGNITO_USER_POOL_CLIENT_ID = userPoolClient
+    process.env.VITE_APP_COGNITO_USER_POOL_CLIENT_DOMAIN = userPoolDomain
+    process.env.VITE_APP_S3_REGION = s3Region
+
+    //run Cypress with configuring baseUrl to appUrl
+    const args = ['cypress'].concat(['open', '--config', `baseUrl=${appUrl}`])
+    console.info(`Starting cypress: npx ${args.join(' ')}`)
+    spawnSync('npx', args, {
+        cwd: 'services/cypress',
+        stdio: 'inherit',
+    })
 }
 
 export async function runBrowserTestsInDocker(cypressArgs: string[]) {
