@@ -576,6 +576,8 @@ describe('submitRate', () => {
         // console.log('FETCEDRAT', JSON.stringify(fetchedRate, null, 2))
 
         const subs = fetchedRate.packageSubmissions
+        if (!subs)
+            throw new Error('packageSubmissions are expected but missing')
         expect(subs).toHaveLength(3)
 
         expect(subs[0].submitInfo.updatedReason).toBe('final submit')

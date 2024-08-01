@@ -17,7 +17,7 @@ import {
     testStateUser,
 } from '../../testHelpers/userHelpers'
 
-describe('fetchContractWithQuestions', () => {
+describe('contractResolver', () => {
     const dmcoCMSUser = testCMSUser({
         divisionAssignment: 'DMCO',
     })
@@ -132,8 +132,7 @@ describe('fetchContractWithQuestions', () => {
         expect(fetchContractResult.errors).toBeUndefined()
 
         const questions =
-            fetchContractResult.data?.fetchContractWithQuestions.contract
-                .questions
+            fetchContractResult.data?.fetchContract.contract.questions
         expect(questions).toEqual(
             expect.objectContaining({
                 DMCOQuestions: expect.objectContaining({

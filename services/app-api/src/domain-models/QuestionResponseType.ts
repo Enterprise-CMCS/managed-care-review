@@ -1,26 +1,39 @@
-import type { StateUserType } from './UserType'
+import { z } from 'zod'
+import { stateUserType } from './UserType'
 
-type QuestionResponseDocument = {
-    name: string
-    s3URL: string
-    downloadURL?: string
-}
+const questionResponseDocument = z.object({
+    name: z.string(),
+    s3URL: z.string(),
+    downloadURL: z.string().optional(),
+})
 
-type QuestionResponseType = {
-    id: string
-    questionID: string
-    createdAt: Date
-    addedBy: StateUserType
-    documents: QuestionResponseDocument[]
-}
+const questionResponseType = z.object({
+    id: z.string().uuid(),
+    questionID: z.string().uuid(),
+    createdAt: z.date(),
+    addedBy: stateUserType,
+    documents: z.array(questionResponseDocument),
+})
 
-type InsertQuestionResponseArgs = {
-    questionID: string
-    documents: QuestionResponseDocument[]
-}
+const insertQuestionResponseArgs = z.object({
+    questionID: z.string().uuid(),
+    documents: z.array(questionResponseDocument),
+})
+
+type QuestionResponseDocument = z.infer<typeof questionResponseDocument>
+
+type QuestionResponseType = z.infer<typeof questionResponseType>
+
+type InsertQuestionResponseArgs = z.infer<typeof insertQuestionResponseArgs>
 
 export type {
     InsertQuestionResponseArgs,
     QuestionResponseType,
     QuestionResponseDocument,
+}
+
+export {
+    insertQuestionResponseArgs,
+    questionResponseType,
+    questionResponseDocument,
 }

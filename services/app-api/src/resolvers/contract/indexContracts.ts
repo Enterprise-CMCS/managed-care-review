@@ -49,7 +49,7 @@ const parseContracts = (
     return parsedContracts
 }
 
-const validateAndReturnContracts = (results: ContractType[], span?: Span) => {
+const formatContracts = (results: ContractType[]) => {
     const contracts: ContractType[] = results
 
     const edges = contracts.map((contract) => {
@@ -60,8 +60,6 @@ const validateAndReturnContracts = (results: ContractType[], span?: Span) => {
         }
     })
 
-    logSuccess('indexContracts')
-    setSuccessAttributesOnActiveSpan(span)
     return { totalCount: edges.length, edges }
 }
 
@@ -98,9 +96,10 @@ export function indexContractsResolver(
                     },
                 })
             }
-
+            logSuccess('indexContracts')
+            setSuccessAttributesOnActiveSpan(span)
             const parsedContracts = parseContracts(contractsWithHistory, span)
-            return validateAndReturnContracts(parsedContracts, span)
+            return formatContracts(parsedContracts)
         } else if (
             isCMSUser(user) ||
             isAdminUser(user) ||
@@ -131,10 +130,11 @@ export function indexContractsResolver(
                     },
                 })
             }
-
+            logSuccess('indexContracts')
+            setSuccessAttributesOnActiveSpan(span)
             const parsedContracts = parseContracts(contractsWithHistory, span)
 
-            return validateAndReturnContracts(parsedContracts, span)
+            return formatContracts(parsedContracts)
         } else {
             const errMsg = 'user not authorized to fetch state data'
             logError('indexContracts', errMsg)

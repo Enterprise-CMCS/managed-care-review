@@ -1,5 +1,5 @@
-query fetchContractWithQuestions($input: FetchContractWithQuestionsInput!) {
-    fetchContractWithQuestions(input: $input) {
+query fetchContractWithQuestions($input: FetchContractInput!) {
+    fetchContract(input: $input) {
         contract {
             ...contractFieldsFetchContract
 
