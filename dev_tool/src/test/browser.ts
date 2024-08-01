@@ -4,21 +4,7 @@ import { checkDockerInstalledAndRunning, checkURLIsUp } from '../deps.js'
 import * as path from 'path'
 import { checkStageAccess, getWebAuthVars } from '../serverless.js'
 import { commandMustSucceedSync } from '../localProcess.js'
-
-// By default, we transform the current branch name into a valid stage name
-export function stageNameFromBranch(): string {
-    const branchName = commandMustSucceedSync('git', [
-        'branch',
-        '--show-current',
-    ])
-
-    const transformedName = commandMustSucceedSync(
-        'scripts/stage_name_for_branch.sh',
-        [branchName]
-    )
-
-    return transformedName
-}
+import { stageNameFromBranch } from '../local/web.js'
 
 export async function runBrowserTests(cypressArgs: string[]) {
     let args = ['open']
