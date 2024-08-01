@@ -448,16 +448,19 @@ async function main() {
                                     type: 'boolean',
                                     describe:
                                         'run cypress in a linux docker container that better matches the environment cypress is run in in CI. N.B. requires running app-web with --for-docker in order to work. Ignores APPLICATION_ENDPOINT in favor of docker networking.',
+                                    conflicts: ['in-review-app', 'stage-name'],
                                 })
                                 .option('in-review-app', {
                                     type: 'boolean',
                                     describe:
                                         'run cypress locally against a deployed review app. add --stageName to specify the review app branch to run against. Default stage name uses current branch.',
+                                    conflicts: 'in-docker',
                                 })
                                 .option('stage-name', {
                                     type: 'string',
                                     describe:
                                         'specify the review app branch to run against.',
+                                    conflicts: 'in-docker',
                                 })
                                 .example([
                                     [
