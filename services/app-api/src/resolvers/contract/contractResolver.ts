@@ -11,7 +11,6 @@ import {
     setErrorAttributesOnActiveSpan,
     setResolverDetailsOnActiveSpan,
 } from '../attributeHelper'
-import { isStateUser } from '../../domain-models'
 import type { IndexQuestionsPayload } from '../../domain-models/QuestionsType'
 
 export function contractResolver(store: Store): Resolvers['Contract'] {
@@ -188,21 +187,6 @@ export function contractResolver(store: Store): Resolvers['Contract'] {
                     edges: oactQuestions,
                 },
             }
-            // A state user cannot access contracts that don't belong to their state
-            if (isStateUser(user)) {
-                if (parent.stateCode !== user.stateCode) {
-                    const errMessage = `User from state ${user.stateCode} not allowed to access contract from ${parent.stateCode}`
-                    setErrorAttributesOnActiveSpan(errMessage, span)
-
-                    throw new GraphQLError(errMessage, {
-                        extensions: {
-                            code: 'FORBIDDEN',
-                            cause: 'INVALID_STATE_REQUESTER',
-                        },
-                    })
-                }
-            }
-
             return questionPayload
         },
     }
