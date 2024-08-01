@@ -8,8 +8,10 @@ import type {
 } from '../../../app-web/src/common-code/healthPlanFormDataType'
 import type { EmailConfiguration, StateAnalystsEmails } from '.'
 import type {
-    ContractRevisionWithRatesType,
+    ContractRevisionType,
     ProgramType,
+    RateRevisionType,
+    UnlockedContractType,
 } from '../domain-models'
 import { logError } from '../logger'
 import { pruneDuplicateEmails } from './formatters'
@@ -80,7 +82,8 @@ const handleAsCHIPSubmission = (
 }
 
 const handleAsCHIPSubmissionForContract = (
-    contractRev: ContractRevisionWithRatesType
+    contractRev: ContractRevisionType,
+    rateRevs: RateRevisionType[]
 ): boolean => {
     const contractFormData = contractRev.formData
     //  This const is deprecated. No longer in use once we added population covered question, code remains only for backwards compatibility for existing Mississippi submissions.
@@ -94,7 +97,7 @@ const handleAsCHIPSubmissionForContract = (
         !contractFormData.populationCovered &&
         contractRev.contract.stateCode === 'MS'
     ) {
-        const programIDs = findAllContractProgramIds(contractRev)
+        const programIDs = findAllContractProgramIds(contractRev, rateRevs)
         return programIDs.some(
             (id: string) => LEGACY_CHIP_PROGRAMS_UUID.MS === id
         )
@@ -125,11 +128,12 @@ const filterChipAndPRSubmissionReviewers = (
     
     Return should be wrapped in pruneDuplicate to ensure even if config is added twice, we get unique list of reviewers
 */
-const generateCMSReviewerEmailsForContract = (
+const generateCMSReviewerEmailsForUnlockedContract = (
     config: EmailConfiguration,
-    contractRev: ContractRevisionWithRatesType,
+    contract: UnlockedContractType,
     stateAnalystsEmails: StateAnalystsEmails
 ): string[] | Error => {
+    const contractRev = contract.draftRevision
     const contractFormData = contractRev.formData
     if (
         contractFormData.submissionType !== 'CONTRACT_AND_RATES' &&
@@ -160,9 +164,12 @@ const generateCMSReviewerEmailsForContract = (
         ]
     }
 
+    const rateRevs = contract.draftRates.map(
+        (rate) => rate.draftRevision || rate.packageSubmissions[0].rateRevision
+    )
     //Remove OACT and DMCP emails from CHIP or State of PR submissions
     if (
-        handleAsCHIPSubmissionForContract(contractRev) ||
+        handleAsCHIPSubmissionForContract(contractRev, rateRevs) ||
         contractRev.contract.stateCode === 'PR'
     ) {
         reviewers = filterChipAndPRSubmissionReviewers(reviewers, config)
@@ -242,15 +249,16 @@ const findAllPackageProgramIds = (
 
 //Finds all contract program and rate program ids in a contract and combines them into one array removing duplicates.
 const findAllContractProgramIds = (
-    contractRev: ContractRevisionWithRatesType
+    contractRev: ContractRevisionType,
+    rateRevs: RateRevisionType[]
 ): string[] => {
     const contractFormData = contractRev.formData
     const programs = [...contractFormData.programIDs]
     if (
         contractFormData.submissionType === 'CONTRACT_AND_RATES' &&
-        !!contractRev.rateRevisions?.length
+        !!rateRevs?.length
     ) {
-        const ratePrograms = contractRev.rateRevisions?.flatMap(
+        const ratePrograms = rateRevs?.flatMap(
             (rateInfo) => rateInfo.formData.rateProgramIDs
         )
         if (ratePrograms?.length) {
@@ -281,7 +289,7 @@ const findPackagePrograms = (
 
 //Find state programs from contract with rates
 const findContractPrograms = (
-    contractRev: ContractRevisionWithRatesType,
+    contractRev: ContractRevisionType,
     statePrograms: ProgramType[]
 ): ProgramType[] | Error => {
     const programIDs = contractRev.formData.programIDs
@@ -347,7 +355,7 @@ export {
     handleAsCHIPSubmission,
     handleAsCHIPSubmissionForContract,
     generateCMSReviewerEmails,
-    generateCMSReviewerEmailsForContract,
+    generateCMSReviewerEmailsForUnlockedContract,
     renderTemplate,
     SubmissionTypeRecord,
     findAllPackageProgramIds,

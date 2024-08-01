@@ -10,10 +10,10 @@ import {
     getQuestionRound,
 } from '../templateHelpers'
 import { submissionQuestionResponseURL } from '../generateURLs'
-import type { ContractRevisionWithRatesType } from '../../domain-models/contractAndRates'
+import type { ContractRevisionType } from '../../domain-models/contractAndRates'
 
 export const sendQuestionCMSEmail = async (
-    contractRev: ContractRevisionWithRatesType,
+    contractRev: ContractRevisionType,
     stateAnalystsEmails: StateAnalystsEmails,
     config: EmailConfiguration,
     statePrograms: ProgramType[],

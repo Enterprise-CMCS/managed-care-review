@@ -3,10 +3,7 @@ import {
     contractWithoutDraftRatesSchema,
     rateWithoutDraftContractsSchema,
 } from './baseContractRateTypes'
-import {
-    rateRevisionWithContractsSchema,
-    rateRevisionSchema,
-} from './revisionTypes'
+import { rateRevisionSchema } from './revisionTypes'
 
 const rateSchema = rateWithoutDraftContractsSchema.extend({
     draftContracts: z.array(contractWithoutDraftRatesSchema).optional(),
@@ -14,6 +11,6 @@ const rateSchema = rateWithoutDraftContractsSchema.extend({
 
 type RateType = z.infer<typeof rateSchema>
 
-export { rateRevisionSchema, rateRevisionWithContractsSchema, rateSchema }
+export { rateRevisionSchema, rateSchema }
 
 export type { RateType }

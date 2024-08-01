@@ -239,10 +239,10 @@ describe('unlockContract', () => {
             })
         )
         // Latest revision is the last index
-        const latestContractRev = submittedContract.revisions[0]
+        const latestSubmission = submittedContract.packageSubmissions[0]
 
         // Expect rate to be connected to submitted contract
-        expect(latestContractRev.rateRevisions[0].id).toEqual(
+        expect(latestSubmission.rateRevisions[0].id).toEqual(
             submittedRate.revisions[0].id
         )
 
@@ -274,10 +274,11 @@ describe('unlockContract', () => {
             await findContractWithHistory(client, contract.id)
         )
         // Latest revision is the last index
-        const latestResubmittedRev = submittedContract2.revisions[0]
+        const latestResubmittedPackage =
+            submittedContract2.packageSubmissions[0]
 
         // Expect latest contract revision to now be connected to latest rate revision
-        expect(latestResubmittedRev.rateRevisions[0].id).toEqual(
+        expect(latestResubmittedPackage.rateRevisions[0].id).toEqual(
             resubmittedRate.revisions[0].id
         )
     })

@@ -1,8 +1,5 @@
 import { z } from 'zod'
-import {
-    contractRevisionSchema,
-    contractRevisionWithRatesSchema,
-} from './revisionTypes'
+import { contractRevisionSchema } from './revisionTypes'
 import { unlockedContractStatusSchema } from './statusType'
 import { pruneDuplicateEmails } from '../../emailer/formatters'
 import {
@@ -23,8 +20,8 @@ const unlockedContractSchema = contractSchema.extend({
 
 const draftContractSchema = contractSchema.extend({
     status: z.literal('DRAFT'),
-    draftRevision: contractRevisionWithRatesSchema,
-    revisions: z.array(contractRevisionWithRatesSchema).min(1),
+    draftRevision: contractRevisionSchema,
+    revisions: z.array(contractRevisionSchema).min(1),
 })
 
 type ContractType = z.infer<typeof contractSchema>
@@ -43,7 +40,6 @@ function contractSubmitters(contract: ContractType): string[] {
 }
 
 export {
-    contractRevisionWithRatesSchema,
     unlockedContractSchema,
     draftContractSchema,
     contractSchema,

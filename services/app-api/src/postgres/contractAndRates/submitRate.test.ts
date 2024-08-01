@@ -90,7 +90,7 @@ describe('submitRate', () => {
 
         // expect updated and submitted rate revision to be on submitted contract revision
         expect(
-            submittedContract.revisions[0].rateRevisions[0].formData
+            submittedContract.packageSubmissions[0].rateRevisions[0].formData
         ).toEqual(
             expect.objectContaining({
                 rateCertificationName: 'rate revision 1.0',

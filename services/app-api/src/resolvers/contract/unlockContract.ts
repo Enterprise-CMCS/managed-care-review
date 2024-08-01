@@ -139,10 +139,9 @@ export function unlockContractResolver(
             updatedReason: unlockedReason,
         }
 
-        const contractRev = unlockContractResult.revisions[0]
         const unlockContractCMSEmailResult =
             await emailer.sendUnlockContractCMSEmail(
-                contractRev,
+                unlockContractResult,
                 updateInfo,
                 stateAnalystsEmails,
                 statePrograms
@@ -150,7 +149,7 @@ export function unlockContractResolver(
 
         const unlockContractStateEmailResult =
             await emailer.sendUnlockContractStateEmail(
-                contractRev,
+                unlockContractResult,
                 updateInfo,
                 statePrograms,
                 submitterEmails
