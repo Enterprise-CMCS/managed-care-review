@@ -304,9 +304,10 @@ describe('with rates', () => {
         )
     })
     test('to addresses list includes DMCP and OACT group emails for contract and rate package', async () => {
-        submission.riskBasedContract = true
+        const sub = submission
+        sub.riskBasedContract = true
         const template = await resubmitPackageCMSEmail(
-            submission,
+            sub,
             resubmitData,
             testEmailConfig(),
             testStateAnalystEmails,
@@ -343,6 +344,32 @@ describe('with rates', () => {
         })
     })
 
+    it('does not include oactEmails for non risked based contract', async () => {
+        const sub = submission
+        sub.riskBasedContract = false
+        const template = await resubmitPackageCMSEmail(
+            submission,
+            resubmitData,
+            testEmailConfig(),
+            testStateAnalystEmails,
+            defaultStatePrograms
+        )
+
+        if (template instanceof Error) {
+            console.error(template)
+            return
+        }
+
+        const ratesReviewerEmails = [...testEmailConfig().oactEmails]
+        ratesReviewerEmails.forEach((emailAddress) => {
+            expect(template).toEqual(
+                expect.objectContaining({
+                    toAddresses: expect.not.arrayContaining([emailAddress]),
+                })
+            )
+        })
+    })
+
     test('to addresses list does not include help addresses', async () => {
         const template = await resubmitPackageCMSEmail(
             submission,
@@ -374,8 +401,10 @@ describe('with rates', () => {
     })
 
     it('includes state specific analysts emails on contract and rate resubmission email', async () => {
+        const sub = submission
+        sub.riskBasedContract = true
         const template = await resubmitPackageCMSEmail(
-            submission,
+            sub,
             resubmitData,
             testEmailConfig(),
             testStateAnalystEmails,

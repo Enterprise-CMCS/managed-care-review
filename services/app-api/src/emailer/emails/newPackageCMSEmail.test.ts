@@ -805,6 +805,31 @@ test('does not include oactEmails on contract only submission', async () => {
     })
 })
 
+test('does not include oactEmails on non risked based contract', async () => {
+    const sub = mockContractAndRatesFormData()
+    sub.riskBasedContract = false
+    const statePrograms = mockMNState().programs
+    const template = await newPackageCMSEmail(
+        sub,
+        testEmailConfig(),
+        [],
+        statePrograms
+    )
+
+    if (template instanceof Error) {
+        throw template
+    }
+
+    const ratesReviewerEmails = [...testEmailConfig().oactEmails]
+    ratesReviewerEmails.forEach((emailAddress) => {
+        expect(template).toEqual(
+            expect.objectContaining({
+                toAddresses: expect.not.arrayContaining([emailAddress]),
+            })
+        )
+    })
+})
+
 test('CHIP contract only submission does include state specific analysts emails', async () => {
     const sub = mockContractOnlyFormData({
         stateCode: 'MS',
