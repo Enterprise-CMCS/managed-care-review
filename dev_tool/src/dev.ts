@@ -454,13 +454,11 @@ async function main() {
                                     type: 'boolean',
                                     describe:
                                         'run cypress locally against a deployed review app. add --stageName to specify the review app branch to run against. Default stage name uses current branch.',
-                                    conflicts: 'in-docker',
                                 })
                                 .option('stage-name', {
                                     type: 'string',
                                     describe:
                                         'specify the review app branch to run against.',
-                                    conflicts: 'in-docker',
                                 })
                                 .example([
                                     [
