@@ -1,7 +1,7 @@
-import { FormGroup, GridContainer, Label } from '@trussworks/react-uswds'
+import { ButtonGroup, FormGroup, GridContainer, Label } from '@trussworks/react-uswds'
 import * as Yup from 'yup'
 import React, { useEffect, } from 'react'
-import { useParams } from 'react-router-dom'
+import { Navigate, useParams } from 'react-router-dom'
 import { usePage } from '../../contexts/PageContext'
 import { useFetchContractQuery, useWithdrawAndReplaceRedundantRateMutation } from '../../gen/gqlClient'
 import styles from './ReplaceRate.module.scss'
@@ -12,19 +12,20 @@ import {
     Form as UswdsForm,
 } from '@trussworks/react-uswds'
 import { Formik, FormikErrors, getIn } from 'formik'
-import { DataDetail, FieldTextarea, PoliteErrorMessage } from '../../components'
+import { ActionButton, DataDetail, FieldTextarea, GenericApiErrorBanner, PoliteErrorMessage } from '../../components'
 import { LinkRateSelect } from '../LinkYourRates/LinkRateSelect'
+import { PageActionsContainer } from '../StateSubmission/PageActions'
 
 export interface ReplaceRateFormValues {
-    replacementRateID: string | undefined
-   replaceReason: string | undefined
+    replacementRateID: string
+   replaceReason: string
 }
 type FormError =
     FormikErrors<ReplaceRateFormValues>[keyof FormikErrors<ReplaceRateFormValues>]
 
 export const ReplaceRate = (): React.ReactElement => {
     // Page level state
-    const [shouldValidate, setShouldValidate] = React.useState(false)
+    const [shouldValidate] = React.useState(false)
     const { loggedInUser } = useAuth()
     const { updateHeading } = usePage()
     const { id, rateID} = useParams()
@@ -71,19 +72,19 @@ export const ReplaceRate = (): React.ReactElement => {
 
     // Form setup
     const formInitialValues: ReplaceRateFormValues = {
-        replacementRateID: undefined,
+        replacementRateID:'',
         replaceReason: 'Admin has decided to replace this rate'
 
     }
     const showFieldErrors = (error?: FormError) =>
         shouldValidate && Boolean(error)
 
-    const onSubmit = async ({replacementRateID, replaceReason } : {replacementRateID: string, replaceReason: string}) => {
+    const onSubmit = async (values : ReplaceRateFormValues) => {
        try {
          await replaceRate({ variables: {
                 input: {
-                replacementRateID,
-                replaceReason,
+                replacementRateID: values.replacementRateID,
+                replaceReason: values.replaceReason,
                 withdrawnRateID: rateID,
                 contractID: id,
             }
@@ -100,9 +101,9 @@ export const ReplaceRate = (): React.ReactElement => {
     return (
         <div className={styles.background}>
             <GridContainer
-                data-testid="rate-summary"
                 className={styles.gridContainer}
             >
+                  {replaceError && <GenericApiErrorBanner />}
                 <h2>Replace a rate review</h2>
                 <DataDetail
                  id="withdrawnRate"
@@ -112,12 +113,12 @@ export const ReplaceRate = (): React.ReactElement => {
                 </DataDetail>
                 <Formik
                     initialValues={formInitialValues}
-                    onSubmit={onSubmit}
+                    onSubmit={(values) => onSubmit(values)}
                     validationSchema={() =>
                         Yup.object().shape({
-                            replaceReason: Yup.string().required(),
+                            replaceReason: Yup.string(),
 
-                            replacementRateID: Yup.string().required(),
+                            replacementRateID: Yup.string(),
                         })
                         }
                 >
@@ -125,17 +126,15 @@ export const ReplaceRate = (): React.ReactElement => {
                         values,
                         errors,
                         handleSubmit,
-                        setSubmitting,
-                        isSubmitting,
-                        setFieldValue,
                     }) => (
-
                             <UswdsForm
                                 className={styles.formContainer}
                                 id="ReplaceRateForm"
                                 aria-label={'Withdraw and replace rate on contract'}
                                 aria-describedby="form-guidance"
-                                onSubmit={() => onSubmit}
+                                onSubmit={(e) => {
+                                    handleSubmit(e)
+                                }}
                             >
                                 <fieldset className="usa-fieldset">
                                     <legend className="srOnly">
@@ -188,6 +187,32 @@ export const ReplaceRate = (): React.ReactElement => {
                                     </FormGroup>
 
                                 </fieldset>
+                        <PageActionsContainer>
+                    <ButtonGroup type="default">
+                        <ActionButton
+                            type="button"
+                            variant="outline"
+                            data-testid="page-actions-left-secondary"
+                            parent_component_type="page body"
+                            link_url={`/submissions/${id}`}
+                        >
+                            Cancel
+                        </ActionButton>
+
+                        <ActionButton
+                            type="submit"
+                            variant="default"
+                            data-testid="page-actions-right-primary"
+                            parent_component_type="page body"
+                            link_url={`/submissions/${id}`}
+                            disabled={replaceError !== undefined}
+                            animationTimeout={1000}
+                            loading={replaceLoading}
+                        >
+                           Replace rate
+                        </ActionButton>
+                    </ButtonGroup>
+                </PageActionsContainer>
                                 </UswdsForm>
                                 )}
                          </Formik>
