@@ -28,12 +28,6 @@ if ! which pnpm > /dev/null ; then
 	exit 1
 fi
 
-# check lerna exists
-if ! which lerna > /dev/null ; then
-	echo "lerna not found on the system. On macOS, you can install it with 'brew install lerna'"
-	exit 1
-fi
-
 # check serverless is installed globally.
 if ! which serverless > /dev/null ; then
 	echo "installing serverless globally"

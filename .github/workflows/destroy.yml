@@ -26,8 +26,7 @@ jobs:
 
       - name: build scripts
         shell: bash
-        run: |
-          npx lerna run build:ci-scripts
+        run: pnpm -r build:ci-scripts
 
       - name: lock this branch to prevent concurrent destroys
         run: ./.github/github-lock.sh

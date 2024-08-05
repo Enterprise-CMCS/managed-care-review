@@ -51,7 +51,7 @@ jobs:
           changed-services: ${{ inputs.changed_services }}
 
       - name: Generate Code
-        run: npx lerna run generate
+        run: pnpm -r generage
 
       - name: deploy app-web
         id: deploy-app-web
@@ -81,7 +81,7 @@ jobs:
           changed-services: ${{ inputs.changed_services }}
 
       - name: Generate Code
-        run: npx lerna run generate
+        run: pnpm -r generate
 
       - name: upload app web gen directory
         uses: actions/upload-artifact@v4
