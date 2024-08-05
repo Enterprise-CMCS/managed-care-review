@@ -51,7 +51,7 @@ jobs:
           changed-services: ${{ inputs.changed_services }}
 
       - name: Generate Code
-        run: pnpm -r generage
+        run: pnpm -r generate
 
       - name: deploy app-web
         id: deploy-app-web
