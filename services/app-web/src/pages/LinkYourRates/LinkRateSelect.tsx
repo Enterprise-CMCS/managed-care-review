@@ -7,18 +7,15 @@ import Select, {
     SingleValue,
     createFilter,
 } from 'react-select'
-import styles from '../../components/Select/RateSelect/RateSelect.module.scss'
-import { StateUser, useIndexRatesQuery } from '../../gen/gqlClient'
-import { useAuth } from '../../contexts/AuthContext'
+import styles from '../../components/Select/Select.module.scss'
+import { useIndexRatesQuery } from '../../gen/gqlClient'
 import { programNames } from '../../common-code/healthPlanFormDataType'
 import { formatCalendarDate } from '../../common-code/dateHelpers'
 import {
     FormikRateForm,
-    RateDetailFormConfig,
     convertGQLRateToRateForm,
 } from '../StateSubmission/RateDetails'
 import { useS3 } from '../../contexts/S3Context'
-import { useFormikContext } from 'formik'
 import { useTealium } from '../../hooks'
 
 export interface LinkRateOptionType {
@@ -36,7 +33,8 @@ export interface LinkRateOptionType {
 export type LinkRateSelectPropType = {
     name: string
     initialValue: string | undefined
-    autofill: (rateForm: FormikRateForm) => void // used for multi-rates, when called will FieldArray replace the existing form fields with new data
+    alreadySelected?: string[], // used for multi-rate, array of rate IDs helps ensure we can't select rates already selected elsewhere on page
+    autofill?: (rateForm: FormikRateForm) => void // used for multi-rates, when called will FieldArray replace the existing form fields with new data
     label?: string
 }
 
@@ -44,15 +42,12 @@ export const LinkRateSelect = ({
     name,
     initialValue,
     autofill,
+    alreadySelected,
     label,
     ...selectProps
 }: LinkRateSelectPropType & Props<LinkRateOptionType, false>) => {
-    const { values }: { values: RateDetailFormConfig } = useFormikContext()
     const { data, loading, error } = useIndexRatesQuery()
     const { getKey } = useS3()
-    const { loggedInUser } = useAuth()
-    const user = loggedInUser as StateUser
-    const statePrograms = user.state.programs
     const { logDropdownSelectionEvent } = useTealium()
 
     const rates = data?.indexRates.edges.map((e) => e.node) || []
@@ -75,7 +70,7 @@ export const LinkRateSelect = ({
                 revision.formData.rateCertificationName ??
                 'Unknown rate certification',
             rateProgramIDs: programNames(
-                statePrograms,
+                rate.state.programs,
                 revision.formData.rateProgramIDs
             ).join(', '),
             rateDateStart: formatCalendarDate(revision.formData.rateDateStart),
@@ -129,7 +124,7 @@ export const LinkRateSelect = ({
                 text: newValue.label,
                 heading: label,
             })
-            autofill(linkedRateForm)
+            if(autofill) autofill(linkedRateForm)
         } else if (action === 'clear') {
             const emptyRateForm = convertGQLRateToRateForm(getKey)
 
@@ -140,7 +135,7 @@ export const LinkRateSelect = ({
                 text: 'clear',
                 heading: label,
             })
-            autofill(emptyRateForm)
+            if(autofill)  autofill(emptyRateForm)
         }
     }
 
@@ -166,9 +161,6 @@ export const LinkRateSelect = ({
         return <div>{data.rateCertificationName}</div>
     }
 
-    //We track rates that have already been selected to remove them from the dropdown
-    const selectedRates = values.rateForms.map((rate) => rate.id && rate.id)
-
     return (
         <Select
             value={defaultValue}
@@ -176,9 +168,11 @@ export const LinkRateSelect = ({
             options={
                 error || loading
                     ? undefined
-                    : rateNames.filter(
-                          (rate) => !selectedRates.includes(rate.value)
+                    : alreadySelected?
+                    rateNames.filter(
+                          (rate) =>  alreadySelected.includes(rate.value)
                       )
+                    : rateNames
             }
             formatOptionLabel={formatOptionLabel}
             isSearchable

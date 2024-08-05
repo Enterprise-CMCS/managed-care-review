@@ -1,0 +1,46 @@
+@use '../../styles/custom.scss' as custom;
+@use '../../styles/uswdsImports.scss' as uswds;
+
+.background{
+    width: 100%;
+    display: flex;
+    align-items: center;
+}
+.gridContainer{
+    @include custom.default-page-container;
+    max-width: custom.$mcr-container-standard-width-fixed;
+    flex-direction: column;
+    margin: 2rem;
+    padding: 1rem;
+}
+
+.formContainer {
+    max-width: custom.$mcr-container-standard-width-fixed;
+    > [class^='usa-fieldset'] {
+        padding: uswds.units(4);
+        margin-bottom: uswds.units(2);
+        margin-top: uswds.units(2);
+        background: custom.$mcr-foundation-white;
+        border: 1px solid custom.$mcr-gray-lighter;
+        @include uswds.u-radius('md');
+    }
+
+    h2 {
+        margin-top: 0;
+    }
+
+    > div[class^='usa-form-group']:not(:first-of-type) {
+        margin-top: 2.5rem;
+    }
+
+    &[class^='usa-form'] {
+        min-width: 100%;
+        max-width: 100%;
+
+        @include uswds.at-media(tablet) {
+            min-width: 40rem;
+            max-width: 20rem;
+            margin: 0 auto;
+        }
+    }
+}
