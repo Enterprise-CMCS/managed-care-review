@@ -1,54 +1,54 @@
 import { GridContainer } from '@trussworks/react-uswds'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, } from 'react'
 import { useParams } from 'react-router-dom'
 import { usePage } from '../../contexts/PageContext'
-import { useFetchRateQuery } from '../../gen/gqlClient'
+import { useFetchContractQuery } from '../../gen/gqlClient'
 import styles from '../SubmissionSummary/SubmissionSummary.module.scss'
+import { ErrorOrLoadingPage, handleAndReturnErrorState } from '../../pages/StateSubmission/ErrorOrLoadingPage'
 import { useAuth } from '../../contexts/AuthContext'
-import { ErrorOrLoadingPage } from '../../pages/StateSubmission/ErrorOrLoadingPage'
 
 export const ReplaceRate = (): React.ReactElement => {
     // Page level state
     const { loggedInUser } = useAuth()
     const { updateHeading } = usePage()
-    const [rateName, setRateName] = useState<string | undefined>(undefined)
-    const { rateID } = useParams()
-    if (!rateID) {
-        throw new Error('PROGRAMMING ERROR: rateID param not set')
+    const { id, rateID} = useParams()
+    if (!id) {
+        throw new Error('PROGRAMMING ERROR: id param not set')
+    }
+    if (loggedInUser?.role != 'ADMIN_USER') {
+        return <ErrorOrLoadingPage state="FORBIDDEN" />
     }
 
-    useEffect(() => {
-        updateHeading({ customHeading: rateName })
-    }, [rateName, updateHeading])
-
-    const { data, loading, error } = useFetchRateQuery({
+    // API handling
+    const {  data: initialData, loading: initialRequestLoading, error: initialRequestError } = useFetchContractQuery({
         variables: {
             input: {
-                rateID,
+                contractID: id ?? 'unknown contract',
             },
         },
     })
 
-    const rate = data?.fetchRate.rate
-    const currentRateRev = rate?.revisions[0]
+    // const [replaceRate, {data: replaceData, loading: replaceLoading, error: replaceError}] = useWithdrawAndReplaceRedundantRateMutation(
 
-    if (loading) {
+    const contract =  initialData?.fetchContract.contract
+    const contractName = contract?.packageSubmissions[0].contractRevision.contractName
+    const withdrawnRateRevisionName =  contract?.packageSubmissions[0].rateRevisions.find( rateRev => rateRev.rateID == rateID)?.formData.rateCertificationName
+
+    useEffect(() => {
+        updateHeading({ customHeading: contractName })
+    }, [contractName, updateHeading])
+
+
+    if (initialRequestLoading) {
         return <ErrorOrLoadingPage state="LOADING" />
-    } else if (error || !rate || !currentRateRev?.formData) {
-        if (error?.graphQLErrors[0]?.extensions?.code === 'NOT_FOUND') {
-            return <ErrorOrLoadingPage state="NOT_FOUND" />
-        } else if (loggedInUser?.role != 'ADMIN_USER') {
-            return <ErrorOrLoadingPage state="FORBIDDEN" />
-        } else {
-            return <ErrorOrLoadingPage state="GENERIC_ERROR" />
-        }
     }
 
-    if (
-        rateName !== currentRateRev.formData.rateCertificationName &&
-        currentRateRev.formData.rateCertificationName
-    ) {
-        setRateName(currentRateRev.formData.rateCertificationName)
+    if (initialRequestError) {
+        return (
+            <ErrorOrLoadingPage
+                state={handleAndReturnErrorState(initialRequestError)}
+            />
+        )
     }
 
     return (
@@ -57,7 +57,7 @@ export const ReplaceRate = (): React.ReactElement => {
                 data-testid="rate-summary"
                 className={styles.container}
             >
-                <h2>{rateName}</h2>
+                <h2>{withdrawnRateRevisionName}</h2>
             </GridContainer>
         </div>
     )
