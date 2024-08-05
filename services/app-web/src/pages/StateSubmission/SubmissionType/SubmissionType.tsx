@@ -5,7 +5,7 @@ import {
     Label,
 } from '@trussworks/react-uswds'
 import { Formik, FormikErrors, FormikHelpers } from 'formik'
-import React, { useEffect } from 'react'
+import React, { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import {
     DynamicStepIndicator,
@@ -26,7 +26,10 @@ import {
 } from '../../../common-code/healthPlanFormDataType'
 import {
     SubmissionType as SubmissionTypeT,
-    CreateHealthPlanPackageInput,
+    CreateContractInput,
+    useFetchContractQuery,
+    useCreateContractMutation,
+    useUpdateContractMutation,
 } from '../../../gen/gqlClient'
 import { PageActions } from '../PageActions'
 import styles from '../StateSubmissionForm.module.scss'
@@ -42,12 +45,12 @@ import {
 import { SubmissionTypeFormSchema } from './SubmissionTypeSchema'
 import { RoutesRecord, STATE_SUBMISSION_FORM_ROUTES } from '../../../constants'
 import { FormContainer } from '../FormContainer'
-import { useHealthPlanPackageForm } from '../../../hooks/useHealthPlanPackageForm'
 import { useCurrentRoute } from '../../../hooks'
 import { ErrorOrLoadingPage } from '../ErrorOrLoadingPage'
 import { useAuth } from '../../../contexts/AuthContext'
 import { useRouteParams } from '../../../hooks/useRouteParams'
 import { PageBannerAlerts } from '../PageBannerAlerts'
+import { useErrorSummary } from '../../../hooks/useErrorSummary'
 
 export interface SubmissionTypeFormValues {
     populationCovered?: PopulationCoveredType
@@ -65,50 +68,54 @@ export const SubmissionType = ({
 }: HealthPlanFormPageProps): React.ReactElement => {
     const { loggedInUser } = useAuth()
     const { currentRoute } = useCurrentRoute()
-    const [showFormAlert, setShowFormAlert] = React.useState(false)
-    const [shouldValidate, setShouldValidate] = React.useState(showValidations)
-    const errorSummaryHeadingRef = React.useRef<HTMLHeadingElement>(null)
-    const [focusErrorSummaryHeading, setFocusErrorSummaryHeading] =
-        React.useState(false)
+    const [showFormAlert, setShowFormAlert] = useState(false)
+    const [shouldValidate, setShouldValidate] = useState(showValidations)
+    const [showAPIErrorBanner, setShowAPIErrorBanner] = useState<
+        boolean | string>(false) // string is a custom error message, defaults to generic message when true
+
+    const { setFocusErrorSummaryHeading, errorSummaryHeadingRef } =
+        useErrorSummary()
     const navigate = useNavigate()
     const location = useLocation()
     const isNewSubmission = location.pathname === '/submissions/new'
-
+    const [draftSubmission] = useCreateContractMutation()
+    const [updateContract] = useUpdateContractMutation()
     const { id } = useRouteParams()
-
-    const {
-        draftSubmission,
-        updateDraft,
-        createDraft,
-        interimState,
-        showPageErrorMessage,
-        unlockInfo,
-    } = useHealthPlanPackageForm(id)
-
-    useEffect(() => {
-        // Focus the error summary heading only if we are displaying
-        // validation errors and the heading element exists
-        if (focusErrorSummaryHeading && errorSummaryHeadingRef.current) {
-            errorSummaryHeadingRef.current.focus()
-        }
-        setFocusErrorSummaryHeading(false)
-    }, [focusErrorSummaryHeading])
+    let contract
+    let contractDraftRevision
+    if (id) {
+        const {
+            data: fetchContractData,
+            loading: fetchContractLoading,
+            error: fetchContractError,
+        } = useFetchContractQuery({
+            variables: {
+                input: {
+                    contractID: id ?? 'unknown-contract',
+                },
+            },
+        })
+    
+        // Set up data for form. Either based on contract API (for multi rate) or rates API (for edit and submit of standalone rate)
+        contract = fetchContractData?.fetchContract.contract
+        contractDraftRevision = contract?.draftRevision
+        if (fetchContractLoading || fetchContractError)
+        return <ErrorOrLoadingPage state={fetchContractLoading ? 'LOADING' : 'GENERIC_ERROR'} />
+    }
 
     const showFieldErrors = (error?: FormError) =>
         shouldValidate && Boolean(error)
 
     const submissionTypeInitialValues: SubmissionTypeFormValues = {
-        populationCovered: draftSubmission?.populationCovered,
-        programIDs: draftSubmission?.programIDs ?? [],
+        populationCovered: contractDraftRevision?.formData.populationCovered === null ? undefined : contractDraftRevision?.formData.populationCovered,
+        programIDs: contractDraftRevision?.formData.programIDs ?? [],
         riskBasedContract:
-            booleanAsYesNoFormValue(draftSubmission?.riskBasedContract) ?? '',
-        submissionDescription: draftSubmission?.submissionDescription ?? '',
-        submissionType: draftSubmission?.submissionType ?? '',
-        contractType: draftSubmission?.contractType ?? '',
+            booleanAsYesNoFormValue(contractDraftRevision?.formData.riskBasedContract === null ? undefined : contractDraftRevision?.formData.riskBasedContract) ?? '',
+        submissionDescription: contractDraftRevision?.formData.submissionDescription ?? '',
+        submissionType: contractDraftRevision?.formData.submissionType ?? '',
+        contractType: contractDraftRevision?.formData.contractType ?? '',
     }
 
-    if (interimState)
-        return <ErrorOrLoadingPage state={interimState || 'GENERIC_ERROR'} />
     const handleFormSubmit = async (
         values: SubmissionTypeFormValues,
         formikHelpers: Pick<
@@ -117,6 +124,30 @@ export const SubmissionType = ({
         >,
         redirectPath?: string
     ) => {
+        const input: CreateContractInput = {
+            populationCovered: values.populationCovered!,
+            programIDs: values.programIDs,
+            submissionType: values.submissionType as SubmissionTypeT,
+            riskBasedContract: yesNoFormValueAsBoolean(
+                values.riskBasedContract
+            ),
+            submissionDescription: values.submissionDescription,
+            contractType: values.contractType as ContractType,
+        }
+        const something = await draftSubmission({
+            variables: {
+                input,
+            },
+        })
+        const draftContract = something.data?.createContract.contract
+
+        if (!draftContract) {
+            return
+        }
+        if (draftContract instanceof Error) {
+            console.error('draft contract encountered an error')
+            return
+        }
         if (isNewSubmission) {
             try {
                 if (!values.populationCovered) {
@@ -151,34 +182,12 @@ export const SubmissionType = ({
                     return
                 }
 
-                const input: CreateHealthPlanPackageInput = {
-                    populationCovered: values.populationCovered,
-                    programIDs: values.programIDs,
-                    submissionType: values.submissionType,
-                    riskBasedContract: yesNoFormValueAsBoolean(
-                        values.riskBasedContract
-                    ),
-                    submissionDescription: values.submissionDescription,
-                    contractType: values.contractType,
-                }
-                if (!createDraft) {
-                    console.info(
-                        'PROGRAMMING ERROR, SubmissionType for does have props needed to update a draft.'
-                    )
-                    return
-                }
-
-                const draftSubmission = await createDraft(input)
-
-                if (draftSubmission instanceof Error) {
-                    console.error('ah')
-                    return
-                }
                 navigate(
-                    `/submissions/${draftSubmission.id}/edit/contract-details`
+                    `/submissions/${draftContract.id}/edit/contract-details`
                 )
             } catch (serverError) {
-                setShowFormAlert(true)
+                // setShowFormAlert(true)
+                setShowAPIErrorBanner(true)
                 formikHelpers.setSubmitting(false) // unblock submit button to allow resubmit
                 console.info(
                     'Log: creating new submission failed with server error',
@@ -186,33 +195,30 @@ export const SubmissionType = ({
                 )
             }
         } else {
-            if (draftSubmission === undefined || !updateDraft) {
-                console.info(draftSubmission, updateDraft)
-                console.info(
-                    'ERROR, SubmissionType for does not have props needed to update a draft.'
-                )
-                return
-            }
-
             // set new values
-            draftSubmission.populationCovered = values.populationCovered
-            draftSubmission.programIDs = values.programIDs
-            draftSubmission.submissionType =
+            draftContract.draftRevision!.formData.populationCovered = values.populationCovered
+            draftContract.draftRevision!.formData.programIDs = values.programIDs
+            draftContract.draftRevision!.formData.submissionType =
                 values.submissionType as SubmissionTypeT
-            draftSubmission.riskBasedContract = yesNoFormValueAsBoolean(
+            draftContract.draftRevision!.formData.riskBasedContract = yesNoFormValueAsBoolean(
                 values.riskBasedContract
             )
-            draftSubmission.submissionDescription = values.submissionDescription
-            draftSubmission.contractType = values.contractType as ContractType
+            draftContract.draftRevision!.formData.submissionDescription = values.submissionDescription
+            draftContract.draftRevision!.formData.contractType = values.contractType as ContractType
 
             try {
-                const updatedDraft = await updateDraft(draftSubmission)
+                const updatedDraft = await updateContract({
+                    variables: {
+                        input: draftContract
+                    }
+                })
                 if (updatedDraft instanceof Error) {
                     formikHelpers.setSubmitting(false)
                 } else {
                     navigate(redirectPath || `../contract-details`)
                 }
             } catch (serverError) {
+                // setShowAPIErrorBanner(true)
                 formikHelpers.setSubmitting(false) // unblock submit button to allow resubmit
             }
         }
@@ -257,16 +263,16 @@ export const SubmissionType = ({
             <div>
                 <DynamicStepIndicator
                     formPages={
-                        draftSubmission
-                            ? activeFormPages(draftSubmission)
+                        contractDraftRevision
+                            ? activeFormPages(contractDraftRevision.formData)
                             : STATE_SUBMISSION_FORM_ROUTES
                     }
                     currentFormPage={currentRoute}
                 />
                 <PageBannerAlerts
                     loggedInUser={loggedInUser}
-                    unlockedInfo={unlockInfo}
-                    showPageErrorMessage={showPageErrorMessage ?? false}
+                    unlockedInfo={contractDraftRevision?.unlockInfo}
+                    showPageErrorMessage={showAPIErrorBanner}
                 />
             </div>
             <FormContainer id="SubmissionType">
@@ -658,7 +664,7 @@ export const SubmissionType = ({
                         </>
                     )}
                 </Formik>
-            </FormContainer>
-        </>
+            </FormContainer> 
+        </> 
     )
 }
