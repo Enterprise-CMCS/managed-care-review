@@ -9,9 +9,9 @@ const repo = 'managed-care-review'
 
 async function main() {
     // get our service names from lerna
-    const listOfServices = getAllServicesFromLerna()
+    const listOfServices = getAllServicesFromPnpm()
     if (listOfServices instanceof Error) {
-        console.error('Failed to get service list from Lerna', listOfServices)
+        console.error('Failed to get service list from pnpm', listOfServices)
         throw listOfServices
     }
 
@@ -62,14 +62,14 @@ async function main() {
         return
     }
 
-    // have lerna tell us which services have changed in code since the
+    // have pnpm tell us which services have changed in code since the
     // last completed workflow run
-    const lernaChangedServices = getChangedServicesSinceSha(
+    const pnpmChangedServices = getChangedServicesSinceShaV2(
         lastCompletedRun.head_sha
     )
 
-    // if lerna can't find the sha, run everything
-    if (lernaChangedServices instanceof Error) {
+    // if pnpm can't find the sha, run everything
+    if (pnpmChangedServices instanceof Error) {
         core.setOutput('changed-services', deployAllServices)
         return
     }
@@ -82,11 +82,11 @@ async function main() {
     const ghaJobsToRun = listOfServices.filter((x) => !jobsToSkip.includes(x))
 
     // concat our two arrays of what to change together into one deduped set
-    const jobsToRun = [...new Set([...ghaJobsToRun, ...lernaChangedServices])]
+    const jobsToRun = [...new Set([...ghaJobsToRun, ...pnpmChangedServices])]
 
     console.info('All services: ' + listOfServices)
     console.info('Jobs we can skip from GHA: ' + jobsToSkip)
-    console.info('Changed services from lerna: ' + lernaChangedServices)
+    console.info('Changed services from lerna: ' + pnpmChangedServices)
     console.info('Jobs to rerun: ' + jobsToRun)
 
     core.setOutput('changed-services', jobsToRun)
@@ -133,6 +133,23 @@ interface LernaListItem {
     location: string
 }
 
+// a list of all of our deployable service names from pnpm
+function getAllServicesFromPnpm(): string[] | Error {
+    const { stdout, stderr, error, status } = spawnSync('pnpm', [
+        'ls',
+        '-r',
+        '--json',
+    ])
+
+    if (error || status !== 0) {
+        console.error('Error: ', error, stderr?.toString())
+        return new Error('Failed to list all services from pnpm')
+    }
+    const pnpmList = JSON.parse(stdout.toString())
+
+    return pnpmList.map((i: { name: string }) => i.name)
+}
+
 // a list of all of our deployable service names from lerna
 function getAllServicesFromLerna(): string[] | Error {
     const { stdout, stderr, error, status } = spawnSync('lerna', [
@@ -148,6 +165,35 @@ function getAllServicesFromLerna(): string[] | Error {
     const lernaList: LernaListItem[] = JSON.parse(stdout.toString())
 
     return lernaList.map((i) => i.name)
+}
+
+function getChangedServicesSinceShaV2(sha: string): string[] | Error {
+    const {
+        stdout: gitStdout,
+        stderr: gitStderr,
+        error: gitError,
+        status: gitStatus,
+    } = spawnSync('git', ['diff', '--name-only', sha])
+
+    if (gitError || gitStatus !== 0) {
+        console.error(gitError, gitStderr?.toString())
+        return new Error('Failed to get changed files from git')
+    }
+
+    const changedFiles = gitStdout.toString().split('\n').filter(Boolean)
+
+    const allServices = getAllServicesFromPnpm()
+    if (allServices instanceof Error) {
+        return allServices
+    }
+
+    // Filter packages that have changed files
+    const changedPackages = allServices.filter((name) => {
+        const servicePath = `services/${name}/` // Adjust this if your package structure is different
+        return changedFiles.some((file) => file.startsWith(servicePath))
+    })
+
+    return changedPackages
 }
 
 // uses lerna to find services that have changed since the passed sha
