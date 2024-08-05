@@ -64,7 +64,7 @@ async function main() {
 
     // have pnpm tell us which services have changed in code since the
     // last completed workflow run
-    const pnpmChangedServices = getChangedServicesSinceShaV2(
+    const pnpmChangedServices = getChangedServicesSinceSha(
         lastCompletedRun.head_sha
     )
 
@@ -126,13 +126,6 @@ async function getJobsToSkip(
     return jobsToSkip
 }
 
-interface LernaListItem {
-    name: string
-    version: string
-    private: boolean
-    location: string
-}
-
 // a list of all of our deployable service names from pnpm
 function getAllServicesFromPnpm(): string[] | Error {
     const { stdout, stderr, error, status } = spawnSync('pnpm', [
@@ -150,24 +143,7 @@ function getAllServicesFromPnpm(): string[] | Error {
     return pnpmList.map((i: { name: string }) => i.name)
 }
 
-// a list of all of our deployable service names from lerna
-function getAllServicesFromLerna(): string[] | Error {
-    const { stdout, stderr, error, status } = spawnSync('lerna', [
-        'ls',
-        '-a',
-        '--json',
-    ])
-
-    if (error || status !== 0) {
-        console.error('Error: ', error, stderr.toString())
-        return new Error('Failed to list all services from Lerna')
-    }
-    const lernaList: LernaListItem[] = JSON.parse(stdout.toString())
-
-    return lernaList.map((i) => i.name)
-}
-
-function getChangedServicesSinceShaV2(sha: string): string[] | Error {
+function getChangedServicesSinceSha(sha: string): string[] | Error {
     const {
         stdout: gitStdout,
         stderr: gitStderr,
@@ -194,26 +170,6 @@ function getChangedServicesSinceShaV2(sha: string): string[] | Error {
     })
 
     return changedPackages
-}
-
-// uses lerna to find services that have changed since the passed sha
-function getChangedServicesSinceSha(sha: string): string[] | Error {
-    const { stdout, stderr, error, status } = spawnSync('lerna', [
-        'ls',
-        '--since',
-        sha,
-        '-all',
-        '--json',
-    ])
-
-    if (error || status !== 0) {
-        console.error(error, stderr.toString())
-        return new Error('Failed to find changes since recent SHA in Lerna')
-    }
-
-    const lernaList: LernaListItem[] = JSON.parse(stdout.toString())
-
-    return lernaList.map((i) => i.name)
 }
 
 async function getLatestCommitSHA(): Promise<string> {
