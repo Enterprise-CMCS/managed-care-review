@@ -41,8 +41,7 @@ jobs:
 
       - name: build scripts
         shell: bash
-        run: |
-          npx lerna run build:ci-scripts
+        run: pnpm -r build:ci-scripts
 
       - name: Set the correct stage name for the bootstrapped OIDC role based on the environment
         id: set-oidc-stage-name

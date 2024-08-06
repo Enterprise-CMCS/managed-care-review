@@ -26,45 +26,27 @@ import {
     runWebTestsWatch,
 } from './test/index.js'
 
-// Run clean commands from every single lerna package.
 async function runAllClean() {
     const runner = new LabeledProcessRunner()
-    await runner.runCommandAndOutput(
-        'clean',
-        ['pnpm', 'clean'],
-        ''
-    )
+    await runner.runCommandAndOutput('clean', ['pnpm', 'clean'], '')
 }
 
-// Run lint commands from every single lerna package.
 async function runAllLint() {
     const runner = new LabeledProcessRunner()
-    await runner.runCommandAndOutput(
-        'lint',
-        ['npx', 'lerna', 'run', 'lint'],
-        ''
-    )
+    await runner.runCommandAndOutput('lint', ['pnpm', '-r', 'lint'], '')
 }
 
 // Rebuild- this is for use after .dev clean
 // Runs pnpm install, tsc, generate compiled types
 async function runAllBuild(runner: LabeledProcessRunner) {
-    await runner.runCommandAndOutput('pnpm install', ['npx', 'pnpm'], '')
+    await runner.runCommandAndOutput('pnpm install', ['pnpm', 'install'], '')
     await runAllGenerate()
-    await runner.runCommandAndOutput(
-        'build',
-        ['npx', 'lerna', 'run', 'build'],
-        ''
-    )
+    await runner.runCommandAndOutput('build', ['pnpm', 'build'], '')
 }
 
 async function runAllFormat() {
     const runner = new LabeledProcessRunner()
-    await runner.runCommandAndOutput(
-        'format',
-        ['npx', 'lerna', 'run', 'prettier'],
-        ''
-    )
+    await runner.runCommandAndOutput('format', ['pnpm', 'prettier'], '')
 }
 
 // create generated types for graphql, proto, prisma

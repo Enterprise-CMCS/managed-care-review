@@ -5,9 +5,5 @@ export async function runS3Locally(runner: LabeledProcessRunner) {
     await runner.runCommandAndOutput('s3 pnpm', ['pnpm', 'install'], '')
 
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    runner.runCommandAndOutput(
-        's3',
-        ['npx', 'lerna', 'run', 'start', '--scope=uploads'],
-        ''
-    )
+    runner.runCommandAndOutput('s3', ['pnpm', 'start'], 'services/uploads')
 }

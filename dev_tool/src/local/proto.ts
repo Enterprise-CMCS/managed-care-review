@@ -17,8 +17,8 @@ export async function compileProtoWatch(runner: LabeledProcessRunner) {
 
     return await runner.runCommandAndOutput(
         'protogen',
-        ['npx', 'lerna', 'run', 'generate:watch', '--scope=app-proto'],
-        ''
+        ['pnpm', 'generate:watch'],
+        'services/app-proto'
     )
 }
 
@@ -33,7 +33,7 @@ export async function compileProto(runner: LabeledProcessRunner) {
 
     return runner.runCommandAndOutput(
         'protogen',
-        ['npx', 'lerna', 'run', 'generate', '--scope=app-proto'],
-        ''
+        ['pnpm', 'generate'],
+        'services/app-proto'
     )
 }

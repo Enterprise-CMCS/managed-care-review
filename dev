@@ -28,18 +28,11 @@ if ! which pnpm > /dev/null ; then
 	exit 1
 fi
 
-# check lerna exists
-if ! which lerna > /dev/null ; then
-	echo "lerna not found on the system. On macOS, you can install it with 'brew install lerna'"
-	exit 1
-fi
-
 # check serverless is installed globally.
 if ! which serverless > /dev/null ; then
 	echo "installing serverless globally"
 	pnpm global add serverless
 fi
-
 # have to ensure that pnpm install is up to date.
 # we use .pnpm_install as a marker for the last time `pnpm install` was run. Rerun the command when pnpm-lock.yaml is updated
 if [ "pnpm-lock.yaml" -nt ".pnpm_install" ]; then
@@ -49,4 +42,5 @@ fi
 
 # build and run dev.ts
 # tsc is configured to build what we expect in tsconfig.json
-npx lerna run build --scope=dev_tool && node ./dev_tool/build/dev.js "$@"
+pnpm run -r build:dev 
+node ./dev_tool/build/dev.js "$@"
