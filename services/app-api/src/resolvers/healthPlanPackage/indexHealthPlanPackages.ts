@@ -3,11 +3,9 @@ import { ForbiddenError } from 'apollo-server-lambda'
 import type { HealthPlanPackageType } from '../../domain-models'
 import {
     isStateUser,
-    isCMSUser,
-    isAdminUser,
-    isBusinessOwnerUser,
+    hasAdminPermissions,
+    hasCMSPermissions,
 } from '../../domain-models'
-import { isHelpdeskUser } from '../../domain-models/user'
 import type { QueryResolvers } from '../../gen/gqlServer'
 import { logError, logSuccess } from '../../logger'
 import type { Store } from '../../postgres'
@@ -76,12 +74,7 @@ export function indexHealthPlanPackagesResolver(
             const results = validateContractsAndConvert(contractsWithHistory)
 
             return validateAndReturnHealthPlanPackages(results, span)
-        } else if (
-            isCMSUser(user) ||
-            isAdminUser(user) ||
-            isHelpdeskUser(user) ||
-            isBusinessOwnerUser(user)
-        ) {
+        } else if (hasCMSPermissions(user) || hasAdminPermissions(user)) {
             const contractsWithHistory =
                 await store.findAllContractsWithHistoryBySubmitInfo()
 
