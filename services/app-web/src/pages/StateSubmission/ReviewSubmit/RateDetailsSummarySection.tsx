@@ -39,6 +39,7 @@ import { ActuaryCommunicationRecord } from '../../../constants'
 import { useParams } from 'react-router-dom'
 import { LinkWithLogging } from '../../../components/TealiumLogging/Link'
 import classnames from 'classnames'
+import { hasCMSUserPermissions } from '../../../gqlHelpers'
 
 export type RateDetailsSummarySectionProps = {
     contract: Contract
@@ -93,7 +94,7 @@ export const RateDetailsSummarySection = ({
     const { revisionVersion } = useParams()
     const isSubmitted =
         contract.status === 'SUBMITTED' || contract.status === 'RESUBMITTED'
-    const isCMSUser = loggedInUser?.role === 'CMS_USER'
+    const isCMSUser = hasCMSUserPermissions(loggedInUser)
     const isAdminUser = loggedInUser?.role === 'ADMIN_USER'
     const isSubmittedOrCMSUser = isSubmitted || isCMSUser
     const isEditing = !isSubmittedOrCMSUser && editNavigateTo !== undefined

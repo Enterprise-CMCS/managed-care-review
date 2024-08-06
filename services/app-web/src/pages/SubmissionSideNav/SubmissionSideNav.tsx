@@ -110,19 +110,12 @@ export const SubmissionSideNav = () => {
         pkg.initiallySubmittedAt !== null &&
         QUESTION_RESPONSE_SHOW_SIDEBAR_ROUTES.includes(routeName)
 
-    const isCMSUser = loggedInUser?.role === 'CMS_USER'
     const isStateUser = loggedInUser?.role === 'STATE_USER'
-    const isAdminUser = loggedInUser?.role === 'ADMIN_USER'
-    const isHelpdeskUser = loggedInUser?.role === 'HELPDESK_USER'
-    const isBusinessOwnerUser = loggedInUser?.role === 'BUSINESSOWNER_USER'
     const isFormPage =
         (submissionStatus === 'UNLOCKED' || submissionStatus === 'DRAFT') &&
         isStateUser
-    // CMS Users can't see DRAFT, it's an error
-    if (
-        submissionStatus === 'DRAFT' &&
-        (isCMSUser || isAdminUser || isHelpdeskUser || isBusinessOwnerUser)
-    ) {
+    // Only State users can see a draft submission
+    if (submissionStatus === 'DRAFT' && !isStateUser) {
         return <GenericErrorPage />
     }
 
