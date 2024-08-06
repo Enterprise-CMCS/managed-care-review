@@ -85,6 +85,7 @@ const STATE_ROLE_ATTRIBUTE = 'macmcrrs-state-user'
 const ADMIN_ROLE_ATTRIBUTE = 'macmcrrs-approver'
 const HELPDESK_ROLE_ATTRIBUTE = 'macmcrrs-helpdesk'
 const BUSINESSOWNER_ROLE_ATTRIBUTE = 'macmcrrs-bo'
+const CMS_APPROVER_ROLE_ATTRIBUTE = 'macmcrrs-cms-approver'
 
 export function userTypeFromAttributes(
     id: string,
@@ -138,6 +139,20 @@ export function userTypeFromAttributes(
         return ok({
             id,
             role: 'CMS_USER',
+            email: attributes.email,
+            givenName: attributes.given_name,
+            familyName: attributes.family_name,
+            stateAssignments: [],
+            divisionAssignment: isValidCmsDivison(attributes.division)
+                ? attributes.division
+                : undefined,
+        })
+    }
+
+    if (roles.includes(CMS_APPROVER_ROLE_ATTRIBUTE)) {
+        return ok({
+            id,
+            role: 'CMS_APPROVER_USER',
             email: attributes.email,
             givenName: attributes.given_name,
             familyName: attributes.family_name,

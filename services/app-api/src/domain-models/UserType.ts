@@ -8,6 +8,7 @@ type UserType =
     | AdminUserType
     | HelpdeskUserType
     | BusinessOwnerUserType
+    | CMSApproverUserType
 
 const stateUserType = z.object({
     id: z.string().uuid(),
@@ -21,6 +22,16 @@ const stateUserType = z.object({
 const cmsUserType = z.object({
     id: z.string().uuid(),
     role: z.literal('CMS_USER'),
+    email: z.string(),
+    givenName: z.string(),
+    familyName: z.string(),
+    stateAssignments: z.array(stateType),
+    divisionAssignment: divisionType.optional(),
+})
+
+const cmsApproverUserType = z.object({
+    id: z.string().uuid(),
+    role: z.literal('CMS_APPROVER_USER'),
     email: z.string(),
     givenName: z.string(),
     familyName: z.string(),
@@ -52,6 +63,15 @@ const businessOwnerUserType = z.object({
     familyName: z.string(),
 })
 
+const userRoles = z.union([
+    stateUserType.shape.role,
+    cmsUserType.shape.role,
+    adminUserType.shape.role,
+    helpdeskUserType.shape.role,
+    businessOwnerUserType.shape.role,
+    cmsApproverUserType.shape.role,
+])
+
 type StateUserType = z.infer<typeof stateUserType>
 
 type AdminUserType = z.infer<typeof adminUserType>
@@ -62,13 +82,22 @@ type BusinessOwnerUserType = z.infer<typeof businessOwnerUserType>
 
 type CMSUserType = z.infer<typeof cmsUserType>
 
+type CMSApproverUserType = z.infer<typeof cmsApproverUserType>
+
+type CMSUsersUnionType = CMSUserType | CMSApproverUserType
+
+type UserRoles = z.infer<typeof userRoles>
+
 export type {
     CMSUserType,
     StateUserType,
     AdminUserType,
     HelpdeskUserType,
     BusinessOwnerUserType,
+    CMSApproverUserType,
     UserType,
+    UserRoles,
+    CMSUsersUnionType,
 }
 
-export { cmsUserType, stateUserType }
+export { cmsUserType, stateUserType, userRoles }

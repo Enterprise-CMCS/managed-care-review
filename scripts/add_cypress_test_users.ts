@@ -39,7 +39,7 @@ async function getUserPoolID(stageName: string): Promise<string> {
     return userPoolID
 }
 
-type UserRole = 'CMS_USER' | 'STATE_USER' | 'UNKNOWN_USER' | 'ADMIN_USER' | 'HELPDESK_USER' | 'BUSINESSOWNER_USER'
+type UserRole = 'CMS_USER' | 'STATE_USER' | 'UNKNOWN_USER' | 'ADMIN_USER' | 'HELPDESK_USER' | 'BUSINESSOWNER_USER' | 'CMS_APPROVER_USER'
 
 // these are the exact roles as they are set by IDM
 function IDMRole(role: UserRole): string {
@@ -54,6 +54,8 @@ function IDMRole(role: UserRole): string {
             return 'macmcrrs-helpdesk'
         case 'BUSINESSOWNER_USER':
             return 'macmcrrs-bo'
+        case 'CMS_APPROVER_USER':
+            return 'macmcrrs-cms-approver'
         case 'UNKNOWN_USER':
             return 'foo-bar-user'
     }
@@ -242,6 +244,12 @@ async function main() {
             familyName: 'Wan',
             email: 'shi-tong@example.com',
             role: 'BUSINESSOWNER_USER' as const,
+            state: undefined,
+        },
+        {
+            name: 'Azula',
+            email: 'azula@example.com',
+            role: 'CMS_APPROVER_USER' as const,
             state: undefined,
         }
     ]
