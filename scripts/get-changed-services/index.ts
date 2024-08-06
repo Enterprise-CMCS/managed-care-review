@@ -8,7 +8,7 @@ const owner = 'Enterprise-CMCS'
 const repo = 'managed-care-review'
 
 async function main() {
-    // get our service names from lerna
+    // get our service names from pnpm
     const listOfServices = getAllServicesFromPnpm()
     if (listOfServices instanceof Error) {
         console.error('Failed to get service list from pnpm', listOfServices)
@@ -86,7 +86,7 @@ async function main() {
 
     console.info('All services: ' + listOfServices)
     console.info('Jobs we can skip from GHA: ' + jobsToSkip)
-    console.info('Changed services from lerna: ' + pnpmChangedServices)
+    console.info('Changed services from pnpm: ' + pnpmChangedServices)
     console.info('Jobs to rerun: ' + jobsToRun)
 
     core.setOutput('changed-services', jobsToRun)
