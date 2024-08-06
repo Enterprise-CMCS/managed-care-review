@@ -33,7 +33,7 @@ async function runAllClean() {
 
 async function runAllLint() {
     const runner = new LabeledProcessRunner()
-    await runner.runCommandAndOutput('lint', ['pnpm', 'lint'], '')
+    await runner.runCommandAndOutput('lint', ['pnpm', '-r', 'lint'], '')
 }
 
 // Rebuild- this is for use after .dev clean
