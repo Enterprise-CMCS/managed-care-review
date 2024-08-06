@@ -3,7 +3,6 @@ import type { StateCodeType } from '../../../app-web/src/common-code/healthPlanF
 import type {
     ProgramType,
     UserType,
-    CMSUserType,
     StateUserType,
     Question,
     CreateQuestionInput,
@@ -12,6 +11,7 @@ import type {
     RateType,
     ContractType,
     UnlockedContractType,
+    CMSUsersUnionType,
 } from '../domain-models'
 import { findPrograms, findStatePrograms } from '../postgres'
 import type { InsertUserArgsType } from './user'
@@ -85,11 +85,11 @@ type Store = {
         idOfUserPerformingUpdate: string,
         divisionAssignment?: Division,
         description?: string | null
-    ) => Promise<CMSUserType | Error>
+    ) => Promise<CMSUsersUnionType | Error>
 
     insertQuestion: (
         questionInput: CreateQuestionInput,
-        user: CMSUserType
+        user: CMSUsersUnionType
     ) => Promise<Question | Error>
 
     findAllQuestionsByContract: (pkgID: string) => Promise<Question[] | Error>

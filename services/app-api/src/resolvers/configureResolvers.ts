@@ -23,6 +23,7 @@ import {
     stateUserResolver,
     cmsUserResolver,
     indexUsersResolver,
+    cmsApproverUserResolver,
 } from './user'
 import type { EmailParameterStore } from '../parameterStore'
 import type { LDService } from '../launchDarkly/launchDarkly'
@@ -139,6 +140,8 @@ export function configureResolvers(
                     return 'StateUser'
                 } else if (obj.role === 'CMS_USER') {
                     return 'CMSUser'
+                } else if (obj.role === 'CMS_APPROVER_USER') {
+                    return 'CMSApproverUser'
                 } else if (obj.role === 'ADMIN_USER') {
                     return 'AdminUser'
                 } else if (obj.role === 'HELPDESK_USER') {
@@ -147,6 +150,15 @@ export function configureResolvers(
                     return 'BusinessOwnerUser'
                 } else {
                     return 'StateUser'
+                }
+            },
+        },
+        CMSUsersUnion: {
+            __resolveType(obj) {
+                if (obj.role === 'CMS_USER') {
+                    return 'CMSUser'
+                } else {
+                    return 'CMSApproverUser'
                 }
             },
         },
@@ -161,6 +173,7 @@ export function configureResolvers(
         },
         StateUser: stateUserResolver,
         CMSUser: cmsUserResolver,
+        CMSApproverUser: cmsApproverUserResolver,
         HealthPlanPackage: healthPlanPackageResolver(store),
         Rate: rateResolver,
         RateRevision: rateRevisionResolver(store),

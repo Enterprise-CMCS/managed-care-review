@@ -1,7 +1,7 @@
 import type { StateCodeType } from '../../common-code/healthPlanFormDataType'
 import type { Division, PrismaClient } from '@prisma/client'
 import { AuditAction } from '@prisma/client'
-import type { CMSUserType } from '../../domain-models'
+import type { CMSUsersUnionType } from '../../domain-models'
 import { domainUserFromPrismaUser } from './prismaDomainUser'
 import { NotFoundError } from '../postgresErrors'
 
@@ -12,7 +12,7 @@ export async function updateCmsUserProperties(
     idOfUserPerformingUpdate: string,
     divisionAssignment?: Division,
     description?: string | null
-): Promise<CMSUserType | Error> {
+): Promise<CMSUsersUnionType | Error> {
     try {
         const statesWithCode = stateCodes.map((s) => {
             return { stateCode: s }
@@ -31,7 +31,9 @@ export async function updateCmsUserProperties(
             userBeforeUpdate = await client.user.findFirst({
                 where: {
                     id: userID,
-                    role: 'CMS_USER',
+                    role: {
+                        in: ['CMS_USER', 'CMS_APPROVER_USER'],
+                    },
                 },
                 include: {
                     stateAssignments: true,
@@ -94,7 +96,10 @@ export async function updateCmsUserProperties(
             return domainUser
         }
 
-        if (domainUser.role !== 'CMS_USER') {
+        if (
+            domainUser.role !== 'CMS_USER' &&
+            domainUser.role !== 'CMS_APPROVER_USER'
+        ) {
             return new Error(
                 'UNEXPECTED EXCEPTION: should have gotten a CMS user back'
             )
