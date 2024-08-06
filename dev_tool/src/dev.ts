@@ -29,11 +29,7 @@ import {
 // Run clean commands from every single lerna package.
 async function runAllClean() {
     const runner = new LabeledProcessRunner()
-    await runner.runCommandAndOutput(
-        'clean',
-        ['pnpm', 'clean'],
-        ''
-    )
+    await runner.runCommandAndOutput('clean', ['pnpm', 'clean'], '')
 }
 
 // Run lint commands from every single lerna package.
@@ -146,7 +142,7 @@ async function runOnlineTests() {
 }
 
 function runPrisma(args: string[]) {
-    const proc = spawn('prisma', args, {
+    const proc = spawn('npx', ['prisma'].concat(args), {
         cwd: 'services/app-api',
         stdio: 'inherit',
     })
