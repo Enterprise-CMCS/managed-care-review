@@ -248,6 +248,7 @@ async function main() {
         },
         {
             name: 'Azula',
+            familyName: 'Hotman',
             email: 'azula@example.com',
             role: 'CMS_APPROVER_USER' as const,
             state: undefined,
