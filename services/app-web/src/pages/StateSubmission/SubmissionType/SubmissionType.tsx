@@ -70,7 +70,8 @@ export const SubmissionType = ({
     const { currentRoute } = useCurrentRoute()
     const [shouldValidate, setShouldValidate] = useState(showValidations)
     const [showAPIErrorBanner, setShowAPIErrorBanner] = useState<
-        boolean | string>(false) // string is a custom error message, defaults to generic message when true
+        boolean | string
+    >(false) // string is a custom error message, defaults to generic message when true
 
     const { setFocusErrorSummaryHeading, errorSummaryHeadingRef } =
         useErrorSummary()
@@ -94,23 +95,35 @@ export const SubmissionType = ({
                 },
             },
         })
-    
+
         // Set up data for form. Either based on contract API (for multi rate) or rates API (for edit and submit of standalone rate)
         contract = fetchContractData?.fetchContract.contract
         contractDraftRevision = contract?.draftRevision
         if (fetchContractLoading || fetchContractError)
-        return <ErrorOrLoadingPage state={fetchContractLoading ? 'LOADING' : 'GENERIC_ERROR'} />
+            return (
+                <ErrorOrLoadingPage
+                    state={fetchContractLoading ? 'LOADING' : 'GENERIC_ERROR'}
+                />
+            )
     }
 
     const showFieldErrors = (error?: FormError) =>
         shouldValidate && Boolean(error)
 
     const submissionTypeInitialValues: SubmissionTypeFormValues = {
-        populationCovered: contractDraftRevision?.formData.populationCovered === null ? undefined : contractDraftRevision?.formData.populationCovered,
+        populationCovered:
+            contractDraftRevision?.formData.populationCovered === null
+                ? undefined
+                : contractDraftRevision?.formData.populationCovered,
         programIDs: contractDraftRevision?.formData.programIDs ?? [],
         riskBasedContract:
-            booleanAsYesNoFormValue(contractDraftRevision?.formData.riskBasedContract === null ? undefined : contractDraftRevision?.formData.riskBasedContract) ?? '',
-        submissionDescription: contractDraftRevision?.formData.submissionDescription ?? '',
+            booleanAsYesNoFormValue(
+                contractDraftRevision?.formData.riskBasedContract === null
+                    ? undefined
+                    : contractDraftRevision?.formData.riskBasedContract
+            ) ?? '',
+        submissionDescription:
+            contractDraftRevision?.formData.submissionDescription ?? '',
         submissionType: contractDraftRevision?.formData.submissionType ?? '',
         contractType: contractDraftRevision?.formData.contractType ?? '',
     }
@@ -133,12 +146,12 @@ export const SubmissionType = ({
             submissionDescription: values.submissionDescription,
             contractType: values.contractType as ContractType,
         }
-        const {data: createContractData,
-        errors: createContractErrors} = await draftSubmission({
-            variables: {
-                input,
-            },
-        })
+        const { data: createContractData, errors: createContractErrors } =
+            await draftSubmission({
+                variables: {
+                    input,
+                },
+            })
         if (!createContractData) {
             setShowAPIErrorBanner(true)
             return
@@ -203,22 +216,30 @@ export const SubmissionType = ({
                 )
             }
         } else {
+            if (!draftContract.draftRevision) {
+                console.info(
+                    'Expected draft revision on contract to be present'
+                )
+                return
+            }
             // set new values
-            draftContract.draftRevision!.formData.populationCovered = values.populationCovered
-            draftContract.draftRevision!.formData.programIDs = values.programIDs
-            draftContract.draftRevision!.formData.submissionType =
+            draftContract.draftRevision.formData.populationCovered =
+                values.populationCovered
+            draftContract.draftRevision.formData.programIDs = values.programIDs
+            draftContract.draftRevision.formData.submissionType =
                 values.submissionType as SubmissionTypeT
-            draftContract.draftRevision!.formData.riskBasedContract = yesNoFormValueAsBoolean(
-                values.riskBasedContract
-            )
-            draftContract.draftRevision!.formData.submissionDescription = values.submissionDescription
-            draftContract.draftRevision!.formData.contractType = values.contractType as ContractType
+            draftContract.draftRevision.formData.riskBasedContract =
+                yesNoFormValueAsBoolean(values.riskBasedContract)
+            draftContract.draftRevision.formData.submissionDescription =
+                values.submissionDescription
+            draftContract.draftRevision.formData.contractType =
+                values.contractType as ContractType
 
             try {
                 const updatedDraft = await updateContract({
                     variables: {
-                        input: draftContract
-                    }
+                        input: draftContract,
+                    },
                 })
                 if (updatedDraft instanceof Error) {
                     formikHelpers.setSubmitting(false)
@@ -313,7 +334,9 @@ export const SubmissionType = ({
                                     <legend className="srOnly">
                                         Submission type
                                     </legend>
-                                    {showAPIErrorBanner && <GenericApiErrorBanner />}
+                                    {showAPIErrorBanner && (
+                                        <GenericApiErrorBanner />
+                                    )}
 
                                     {shouldValidate && (
                                         <ErrorSummary
@@ -672,7 +695,7 @@ export const SubmissionType = ({
                         </>
                     )}
                 </Formik>
-            </FormContainer> 
-        </> 
+            </FormContainer>
+        </>
     )
 }
