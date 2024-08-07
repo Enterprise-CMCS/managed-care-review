@@ -36,6 +36,24 @@ async function buildCypressDockerImage(runner: LabeledProcessRunner) {
 export async function runBrowserTestsAgainstAWS(
     stageNameOpt: string | undefined
 ) {
+    if (!process.env.TEST_USERS_PASS) {
+        console.info(
+            `ERROR: Could not find TEST_USERS_PASS environment variable.\nDid you set your env vars locally? Hint: try running 'direnv allow'.\n`
+        )
+        process.exit(1)
+    }
+
+    if (
+        !process.env.AWS_ACCESS_KEY_ID ||
+        !process.env.AWS_SECRET_ACCESS_KEY ||
+        !process.env.AWS_SESSION_TOKEN
+    ) {
+        console.info(
+            `ERROR: Could not find AWS credentials in environment variables.\nDid you set your env vars locally? Hint: try running 'direnv allow'.\n`
+        )
+        process.exit(1)
+    }
+
     const stageName = stageNameOpt ?? stageNameFromBranch()
 
     if (stageName === '') {
