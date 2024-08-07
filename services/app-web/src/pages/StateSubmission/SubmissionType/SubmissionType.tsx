@@ -68,7 +68,6 @@ export const SubmissionType = ({
 }: HealthPlanFormPageProps): React.ReactElement => {
     const { loggedInUser } = useAuth()
     const { currentRoute } = useCurrentRoute()
-    const [showFormAlert, setShowFormAlert] = useState(false)
     const [shouldValidate, setShouldValidate] = useState(showValidations)
     const [showAPIErrorBanner, setShowAPIErrorBanner] = useState<
         boolean | string>(false) // string is a custom error message, defaults to generic message when true
@@ -186,7 +185,6 @@ export const SubmissionType = ({
                     `/submissions/${draftContract.id}/edit/contract-details`
                 )
             } catch (serverError) {
-                // setShowFormAlert(true)
                 setShowAPIErrorBanner(true)
                 formikHelpers.setSubmitting(false) // unblock submit button to allow resubmit
                 console.info(
@@ -218,7 +216,7 @@ export const SubmissionType = ({
                     navigate(redirectPath || `../contract-details`)
                 }
             } catch (serverError) {
-                // setShowAPIErrorBanner(true)
+                setShowAPIErrorBanner(true)
                 formikHelpers.setSubmitting(false) // unblock submit button to allow resubmit
             }
         }
@@ -305,7 +303,7 @@ export const SubmissionType = ({
                                     <legend className="srOnly">
                                         Submission type
                                     </legend>
-                                    {showFormAlert && <GenericApiErrorBanner />}
+                                    {showAPIErrorBanner && <GenericApiErrorBanner />}
 
                                     {shouldValidate && (
                                         <ErrorSummary

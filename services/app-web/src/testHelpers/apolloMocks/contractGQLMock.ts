@@ -3,6 +3,8 @@ import {
     Contract,
     FetchContractDocument,
     UpdateDraftContractRatesDocument,
+    UpdateContractDocument,
+    UpdateContractMutation,
     UpdateDraftContractRatesMutation,
     SubmitContractMutation,
     SubmitContractDocument,
@@ -33,6 +35,43 @@ const fetchContractMockSuccess = ({
                     },
                 },
             },
+        },
+    }
+}
+
+const fetchContractMockFail = ({
+    id,
+    error,
+}: {
+    id: string
+    error?: {
+        code: GraphQLErrorCodeTypes
+        cause: GraphQLErrorCauseTypes
+    }
+}): MockedResponse<FetchContractQuery | ApolloError> => {
+    const graphQLError = new GraphQLError(
+        error
+            ? GRAPHQL_ERROR_CAUSE_MESSAGES[error.cause]
+            : 'Error attempting to submit.',
+        {
+            extensions: {
+                code: error?.code,
+                cause: error?.cause,
+            },
+        }
+    )
+
+    return {
+        request: {
+            query: FetchContractDocument,
+            variables: { input: { contractID: id } },
+        },
+        error: new ApolloError({
+            graphQLErrors: [graphQLError],
+        }),
+        result: {
+            data: null,
+            errors: [graphQLError],
         },
     }
 }
@@ -93,6 +132,78 @@ const updateDraftContractRatesMockSuccess = ({
     }
 }
 
+const updateDraftContractRatesMockFail = ({
+    contract,
+    error
+}: {
+    contract?: Partial<Contract>
+    error?: {
+        code: GraphQLErrorCodeTypes
+        cause: GraphQLErrorCauseTypes
+    }
+}): MockedResponse<UpdateContractMutation | ApolloError> => {
+    const contractData = mockContractPackageDraft(contract)
+    const contractInput = {
+        contractID: contractData.id,
+        lastSeenUpdatedAt: contractData.draftRevision?.updatedAt,
+        updatedRates: [
+            {
+                formData: {
+                rateType: undefined,
+                rateCapitationType: undefined,
+                rateDocuments: [],
+                supportingDocuments: [],
+                rateDateStart: undefined,
+                rateDateEnd: undefined,
+                rateDateCertified: undefined,
+                amendmentEffectiveDateStart: undefined,
+                amendmentEffectiveDateEnd: undefined,
+                rateProgramIDs: [],
+                deprecatedRateProgramIDs: [],
+                certifyingActuaryContacts: [
+                    {
+                        name: "",
+                        titleRole: "",
+                        email: "",
+                        actuarialFirm: undefined,
+                        actuarialFirmOther: ""
+                    }
+                ],
+                addtlActuaryContacts: [],
+                actuaryCommunicationPreference: undefined,
+            },
+            rateID: undefined,
+            type: "CREATE"
+        }]
+    }
+
+    const graphQLError = new GraphQLError(
+        error
+            ? GRAPHQL_ERROR_CAUSE_MESSAGES[error.cause]
+            : 'Error attempting to update',
+        {
+            extensions: {
+                code: error?.code,
+                cause: error?.cause,
+            },
+        }
+    )
+
+    return {
+        request: {
+            query: UpdateContractDocument,
+            variables: { input: contractInput },
+        },
+        error: new ApolloError({
+            graphQLErrors: [graphQLError],
+        }),
+        result: {
+            data: null,
+            errors: [graphQLError],
+        },
+    }
+}
+
 const submitContractMockSuccess = ({
     id,
     submittedReason,
@@ -146,4 +257,4 @@ const submitContractMockError = ({
         },
     }
 }
-export { fetchContractMockSuccess, updateDraftContractRatesMockSuccess, submitContractMockSuccess, submitContractMockError }
+export { fetchContractMockSuccess, fetchContractMockFail, updateDraftContractRatesMockSuccess, updateDraftContractRatesMockFail, submitContractMockSuccess, submitContractMockError }
