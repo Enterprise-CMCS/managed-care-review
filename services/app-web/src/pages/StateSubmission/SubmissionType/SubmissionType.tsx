@@ -133,18 +133,28 @@ export const SubmissionType = ({
             submissionDescription: values.submissionDescription,
             contractType: values.contractType as ContractType,
         }
-        const something = await draftSubmission({
+        const {data: createContractData,
+        errors: createContractErrors} = await draftSubmission({
             variables: {
                 input,
             },
         })
-        const draftContract = something.data?.createContract.contract
+        if (!createContractData) {
+            setShowAPIErrorBanner(true)
+            return
+        }
+        if (createContractErrors instanceof Error) {
+            setShowAPIErrorBanner(true)
+            return
+        }
+        const draftContract = createContractData.createContract.contract
 
         if (!draftContract) {
+            setShowAPIErrorBanner(true)
             return
         }
         if (draftContract instanceof Error) {
-            console.error('draft contract encountered an error')
+            setShowAPIErrorBanner(true)
             return
         }
         if (isNewSubmission) {

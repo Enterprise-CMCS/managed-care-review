@@ -8,6 +8,8 @@ import {
     UpdateDraftContractRatesMutation,
     SubmitContractMutation,
     SubmitContractDocument,
+    CreateContractMutation,
+    CreateContractDocument
 } from '../../gen/gqlClient'
 import { MockedResponse } from '@apollo/client/testing'
 import { mockContractPackageDraft, mockContractPackageSubmittedWithRevisions } from './contractPackageDataMock'
@@ -72,6 +74,65 @@ const fetchContractMockFail = ({
         result: {
             data: null,
             errors: [graphQLError],
+        },
+    }
+}
+
+const createContractMockFail = ({
+    error,
+}: {
+    error?: {
+        code: GraphQLErrorCodeTypes
+        cause: GraphQLErrorCauseTypes
+    }
+}): MockedResponse<CreateContractMutation | ApolloError> => {
+    const graphQLError = new GraphQLError(
+        error
+            ? GRAPHQL_ERROR_CAUSE_MESSAGES[error.cause]
+            : 'Error attempting to submit.',
+        {
+            extensions: {
+                code: error?.code,
+                cause: error?.cause,
+            },
+        }
+    )
+
+    return {
+        request: {
+            query: CreateContractDocument,
+            variables: { input: { contractID: '123' } },
+        },
+        error: new ApolloError({
+            graphQLErrors: [graphQLError],
+        }),
+        result: {
+            data: null,
+            errors: [graphQLError],
+        },
+    }
+}
+
+const createContractMockSuccess = ({
+    contract,
+}: {
+    contract?: Partial<Contract>
+}): MockedResponse<CreateContractMutation> => {
+    const contractData = mockContractPackageDraft(contract)
+
+    return {
+        request: {
+            query: FetchContractDocument,
+            variables: { input: { contractID: contractData.id } },
+        },
+        result: {
+            data: {
+                createContract: {
+                    contract: {
+                        ...contractData,
+                    },
+                },
+            },
         },
     }
 }
@@ -257,4 +318,4 @@ const submitContractMockError = ({
         },
     }
 }
-export { fetchContractMockSuccess, fetchContractMockFail, updateDraftContractRatesMockSuccess, updateDraftContractRatesMockFail, submitContractMockSuccess, submitContractMockError }
+export { fetchContractMockSuccess, fetchContractMockFail, updateDraftContractRatesMockSuccess, updateDraftContractRatesMockFail, submitContractMockSuccess, submitContractMockError, createContractMockFail, createContractMockSuccess }
