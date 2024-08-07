@@ -202,10 +202,16 @@ describe('Auth', () => {
             ).toBeInTheDocument()
 
             expect(
+                screen.getByRole('img', {
+                    name: /Azula/i,
+                })
+            ).toBeInTheDocument()
+
+            expect(
                 screen.getAllByRole('button', {
                     name: /Login/i,
                 })
-            ).toHaveLength(8)
+            ).toHaveLength(9)
         })
 
         it('when login is successful, redirect to dashboard', async () => {

@@ -306,21 +306,41 @@ fragment questionEdgeFragment on QuestionEdge {
         contractID
         createdAt
         addedBy {
-            id
-            role
-            email
-            givenName
-            familyName
-            divisionAssignment
-            stateAssignments {
-                code
-                name
-                programs {
-                    id
+            ... on CMSUser {
+                id
+                email
+                role
+                familyName
+                givenName
+                stateAssignments {
+                    code
                     name
-                    fullName
-                    isRateProgram
+                    programs {
+                        id
+                        name
+                        fullName
+                        isRateProgram
+                    }
                 }
+                divisionAssignment
+            }
+            ... on CMSApproverUser {
+                id
+                email
+                role
+                familyName
+                givenName
+                stateAssignments {
+                    code
+                    name
+                    programs {
+                        id
+                        name
+                        fullName
+                        isRateProgram
+                    }
+                }
+                divisionAssignment
             }
         }
         division

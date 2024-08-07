@@ -7,7 +7,7 @@ import {
 } from '../attributeHelper'
 import {
     hasAdminPermissions,
-    isCMSUser,
+    hasCMSPermissions,
     isStateUser,
 } from '../../domain-models/user'
 import { NotFoundError } from '../../postgres'
@@ -51,7 +51,7 @@ export function indexRatesResolver(store: Store): QueryResolvers['indexRates'] {
         setResolverDetailsOnActiveSpan('indexRates', user, span)
 
         const adminPermissions = hasAdminPermissions(user)
-        const cmsUser = isCMSUser(user)
+        const cmsUser = hasCMSPermissions(user)
         const stateUser = isStateUser(user)
 
         if (adminPermissions || cmsUser || stateUser) {

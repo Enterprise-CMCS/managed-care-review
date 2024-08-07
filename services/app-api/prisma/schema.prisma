@@ -386,6 +386,7 @@ enum Role {
   ADMIN_USER
   HELPDESK_USER
   BUSINESSOWNER_USER
+  CMS_APPROVER_USER
 }
 
 enum AuditAction {

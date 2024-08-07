@@ -33,6 +33,7 @@ import { RoutesRecord } from '../../constants'
 import { useRouteParams } from '../../hooks'
 import { getVisibleLatestContractFormData } from '../../gqlHelpers/contractsAndRates'
 import { generatePath, Navigate } from 'react-router-dom'
+import { hasCMSUserPermissions } from '../../gqlHelpers'
 
 function UnlockModalButton({
     disabled,
@@ -69,7 +70,7 @@ export const SubmissionSummary = (): React.ReactElement => {
         featureFlags.CMS_QUESTIONS.defaultValue
     )
 
-    const isCMSUser = loggedInUser?.role === 'CMS_USER'
+    const hasCMSPermissions = hasCMSUserPermissions(loggedInUser)
     const isStateUser = loggedInUser?.role === 'STATE_USER'
     const isHelpDeskUser = loggedInUser?.role === 'HELPDESK_USER'
 
@@ -192,11 +193,7 @@ export const SubmissionSummary = (): React.ReactElement => {
             >
                 {submissionStatus === 'UNLOCKED' && updateInfo && (
                     <SubmissionUnlockedBanner
-                        userType={
-                            loggedInUser?.role === 'CMS_USER'
-                                ? 'CMS_USER'
-                                : 'STATE_USER'
-                        }
+                        userType={hasCMSPermissions ? 'CMS_USER' : 'STATE_USER'}
                         unlockedBy={updateInfo.updatedBy}
                         unlockedOn={updateInfo.updatedAt}
                         reason={updateInfo.updatedReason}
@@ -236,7 +233,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                 {
                     <SubmissionTypeSummarySection
                         subHeaderComponent={
-                            isCMSUser ? (
+                            hasCMSPermissions ? (
                                 <div className={styles.subHeader}>
                                     {contract.mccrsID && (
                                         <span className={styles.mccrsID}>
@@ -266,7 +263,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                         contract={contract}
                         submissionName={name}
                         headerChildComponent={
-                            isCMSUser ? (
+                            hasCMSPermissions ? (
                                 <UnlockModalButton
                                     modalRef={modalRef}
                                     disabled={['DRAFT', 'UNLOCKED'].includes(
@@ -285,7 +282,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                 {
                     <ContractDetailsSummarySection
                         contract={contract}
-                        isCMSUser={isCMSUser}
+                        isCMSUser={hasCMSPermissions}
                         isStateUser={isStateUser}
                         submissionName={name}
                         onDocumentError={handleDocumentDownloadError}
@@ -297,7 +294,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                     <RateDetailsSummarySection
                         contract={contract}
                         submissionName={name}
-                        isCMSUser={isCMSUser}
+                        isCMSUser={hasCMSPermissions}
                         statePrograms={statePrograms}
                         onDocumentError={handleDocumentDownloadError}
                         explainMissingData={explainMissingData}

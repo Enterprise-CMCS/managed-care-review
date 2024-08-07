@@ -39,7 +39,9 @@ export {
     mockValidUser,
     mockValidAdminUser,
     indexUsersQueryMock,
-    mockValidHelpDeskUser
+    mockValidHelpDeskUser,
+    mockValidCMSApproverUser,
+    iterableCmsUsersMockData
 } from './userGQLMock'
 
 export {

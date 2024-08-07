@@ -128,7 +128,7 @@ async function runOnlineTests() {
 }
 
 function runPrisma(args: string[]) {
-    const proc = spawn('prisma', args, {
+    const proc = spawn('npx', ['prisma'].concat(args), {
         cwd: 'services/app-api',
         stdio: 'inherit',
     })

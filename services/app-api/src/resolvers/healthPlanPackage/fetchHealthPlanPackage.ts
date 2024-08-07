@@ -1,13 +1,11 @@
 import { ForbiddenError } from 'apollo-server-lambda'
 import {
-    isCMSUser,
     isStateUser,
-    isAdminUser,
     packageStatus,
     convertContractWithRatesToUnlockedHPP,
-    isBusinessOwnerUser,
+    hasAdminPermissions,
+    hasCMSPermissions,
 } from '../../domain-models'
-import { isHelpdeskUser } from '../../domain-models/user'
 import type { QueryResolvers, State } from '../../gen/gqlServer'
 import { logError, logSuccess } from '../../logger'
 import type { Store } from '../../postgres'
@@ -86,12 +84,7 @@ export function fetchHealthPlanPackageResolver(
                     'user not authorized to fetch data from a different state'
                 )
             }
-        } else if (
-            isCMSUser(user) ||
-            isAdminUser(user) ||
-            isHelpdeskUser(user) ||
-            isBusinessOwnerUser(user)
-        ) {
+        } else if (hasCMSPermissions(user) || hasAdminPermissions(user)) {
             if (packageStatus(pkg) === 'DRAFT') {
                 logError(
                     'fetchHealthPlanPackage',
