@@ -30,6 +30,8 @@ import {
     useFetchContractQuery,
     useCreateContractMutation,
     useUpdateContractMutation,
+    useUpdateDraftContractRatesMutation,
+    ContractRevision
 } from '../../../gen/gqlClient'
 import { PageActions } from '../PageActions'
 import styles from '../StateSubmissionForm.module.scss'
@@ -79,10 +81,9 @@ export const SubmissionType = ({
     const location = useLocation()
     const isNewSubmission = location.pathname === '/submissions/new'
     const [draftSubmission] = useCreateContractMutation()
-    const [updateContract] = useUpdateContractMutation()
+    const [updateContract] = useUpdateDraftContractRatesMutation()
     const { id } = useRouteParams()
     let contract
-    let contractDraftRevision
     if (id) {
         const {
             data: fetchContractData,
@@ -98,7 +99,10 @@ export const SubmissionType = ({
 
         // Set up data for form. Either based on contract API (for multi rate) or rates API (for edit and submit of standalone rate)
         contract = fetchContractData?.fetchContract.contract
-        contractDraftRevision = contract?.draftRevision
+        if (!contract) {
+            return <></>
+        }
+        const contractDraftRevision = contract.draftRevision
         if (fetchContractLoading || fetchContractError)
             return (
                 <ErrorOrLoadingPage
@@ -136,42 +140,43 @@ export const SubmissionType = ({
         >,
         redirectPath?: string
     ) => {
-        const input: CreateContractInput = {
-            populationCovered: values.populationCovered!,
-            programIDs: values.programIDs,
-            submissionType: values.submissionType as SubmissionTypeT,
-            riskBasedContract: yesNoFormValueAsBoolean(
-                values.riskBasedContract
-            ),
-            submissionDescription: values.submissionDescription,
-            contractType: values.contractType as ContractType,
-        }
-        const { data: createContractData, errors: createContractErrors } =
-            await draftSubmission({
-                variables: {
-                    input,
-                },
-            })
-        if (!createContractData) {
-            setShowAPIErrorBanner(true)
-            return
-        }
-        if (createContractErrors instanceof Error) {
-            setShowAPIErrorBanner(true)
-            return
-        }
-        const draftContract = createContractData.createContract.contract
-
-        if (!draftContract) {
-            setShowAPIErrorBanner(true)
-            return
-        }
-        if (draftContract instanceof Error) {
-            setShowAPIErrorBanner(true)
-            return
-        }
         if (isNewSubmission) {
             try {
+
+                const input: CreateContractInput = {
+                    populationCovered: values.populationCovered!,
+                    programIDs: values.programIDs,
+                    submissionType: values.submissionType as SubmissionTypeT,
+                    riskBasedContract: yesNoFormValueAsBoolean(
+                        values.riskBasedContract
+                    ),
+                    submissionDescription: values.submissionDescription,
+                    contractType: values.contractType as ContractType,
+                }
+                const { data: createContractData, errors: createContractErrors } =
+                    await draftSubmission({
+                        variables: {
+                            input,
+                        },
+                    })
+                if (!createContractData) {
+                    setShowAPIErrorBanner(true)
+                    return
+                }
+                if (createContractErrors instanceof Error) {
+                    setShowAPIErrorBanner(true)
+                    return
+                }
+                const draftContract = createContractData.createContract.contract
+        
+                if (!draftContract) {
+                    setShowAPIErrorBanner(true)
+                    return
+                }
+                if (draftContract instanceof Error) {
+                    setShowAPIErrorBanner(true)
+                    return
+                }
                 if (!values.populationCovered) {
                     console.info(
                         'unexpected error, attempting to submit without population covered',
@@ -216,7 +221,7 @@ export const SubmissionType = ({
                 )
             }
         } else {
-            if (!draftContract.draftRevision) {
+            if (!contractDraftRevision) {
                 console.info(
                     'Expected draft revision on contract to be present'
                 )
@@ -236,12 +241,17 @@ export const SubmissionType = ({
                 values.contractType as ContractType
 
             try {
-                const updatedDraft = await updateContract({
+                const {errors: updateContractErrors} = await updateContract({
                     variables: {
-                        input: draftContract,
+                        input: {
+                            // ...draftContract,
+                            contractID: draftContract.id,
+                            lastSeenUpdatedAt: draftContract.updatedAt,
+                            updatedRates: []
+                        },
                     },
                 })
-                if (updatedDraft instanceof Error) {
+                if (updateContractErrors) {
                     formikHelpers.setSubmitting(false)
                 } else {
                     navigate(redirectPath || `../contract-details`)
