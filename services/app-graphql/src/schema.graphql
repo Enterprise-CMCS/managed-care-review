@@ -797,7 +797,7 @@ type CMSUser {
     divisionAssignment: Division
 }
 
-"CMSUser is a user that works for CMS, approving CMS approver request and able to do everything a CMSUser can do"
+"CMSApproverUser is a user that works for CMS, approving CMS approver request and able to do everything a CMSUser can do"
 type CMSApproverUser {
     id: ID!
     "will always be 'CMS_APPROVER_USER'"
