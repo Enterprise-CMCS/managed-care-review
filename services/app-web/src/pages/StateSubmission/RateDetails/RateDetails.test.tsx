@@ -530,6 +530,7 @@ describe('RateDetails', () => {
                             fetchCurrentUserMock({ statusCode: 200 }),
                             fetchContractMockSuccess({
                                 contract: {
+                                    ...mockContractPackageDraft,
                                     id: 'test-abc-123',
                                 },
                             }),
