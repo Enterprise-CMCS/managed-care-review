@@ -47,6 +47,47 @@ describe('RateSummary', () => {
                 ).toBeInTheDocument()
             })
 
+            it('displays withdrawn banner on a withdrawn rate', async () => {
+                renderWithProviders(wrapInRoutes(<RateSummary />), {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                user: mockUser(),
+                                statusCode: 200,
+                            }),
+                            fetchRateMockSuccess({
+                                id: '1337',
+                                withdrawInfo: {
+                                    updatedAt: new Date('2024-01-01'),
+                                    updatedBy: 'admin@example.com',
+                                    updatedReason: 'This rate was withdrawn',
+                                },
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/rates/1337',
+                    },
+                    featureFlags: { 'rate-edit-unlock': true },
+                })
+
+                await waitFor(() => {
+                    expect(
+                        screen.queryByTestId('rate-summary')
+                    ).toBeInTheDocument()
+                })
+
+                expect(
+                    await screen.findByText(
+                        'Rates this rate certification covers'
+                    )
+                ).toBeInTheDocument()
+
+                expect(
+                    screen.getByTestId('rateWithdrawnBanner')
+                ).toBeInTheDocument()
+            })
+
             it('renders document download warning banner when download fails', async () => {
                 const error = vi
                     .spyOn(console, 'error')
@@ -146,6 +187,43 @@ describe('RateSummary', () => {
 
             expect(
                 await screen.findByText('Rates this rate certification covers')
+            ).toBeInTheDocument()
+        })
+
+        it('displays withdrawn banner on a withdrawn rate', async () => {
+            renderWithProviders(wrapInRoutes(<RateSummary />), {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockValidStateUser(),
+                            statusCode: 200,
+                        }),
+                        fetchRateMockSuccess({
+                            id: '1337',
+                            withdrawInfo: {
+                                updatedAt: new Date('2024-01-01'),
+                                updatedBy: 'admin@example.com',
+                                updatedReason: 'This rate was withdrawn',
+                            },
+                        }),
+                    ],
+                },
+                routerProvider: {
+                    route: '/rates/1337',
+                },
+                featureFlags: { 'rate-edit-unlock': true },
+            })
+
+            await waitFor(() => {
+                expect(screen.queryByTestId('rate-summary')).toBeInTheDocument()
+            })
+
+            expect(
+                await screen.findByText('Rates this rate certification covers')
+            ).toBeInTheDocument()
+
+            expect(
+                screen.getByTestId('rateWithdrawnBanner')
             ).toBeInTheDocument()
         })
 
