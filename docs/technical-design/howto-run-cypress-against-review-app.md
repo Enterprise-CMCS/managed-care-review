@@ -14,10 +14,10 @@ A couple of environment variables you will need to manually add to your `envrc.l
        ```
   - Cypress users password
     - You will have to add `TEST_USERS_PASS` environment variable into your `envrc.local`. This is the single password used for all test users in the review app.
-    - You can retrieve the password from GitHub secrets.
+    - You can retrieve the password from 1password for `Review App State User` or `Review App CMS User` both passwords are the same..
     <br><br>example:
         ```text
-        export TEST_USERS_PASS=getMeFromGitHubSecrets
+        export TEST_USERS_PASS=getMeFrom1password
        ```
 
   - Run `direnv allow` in the project root to update environments variables.
