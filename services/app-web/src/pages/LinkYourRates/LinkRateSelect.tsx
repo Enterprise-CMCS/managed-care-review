@@ -59,12 +59,12 @@ export const LinkRateSelect = ({
 
     const rates = data?.indexRates.edges.map((e) => e.node) || []
 
-    // Sort rates by latest submission in desc order
+    // Sort rates by latest submission in desc order and remove withdrawn
     rates.sort(
         (a, b) =>
             new Date(b.revisions[0].submitInfo?.updatedAt).getTime() -
             new Date(a.revisions[0].submitInfo?.updatedAt).getTime()
-    )
+    ).filter( (rate)=> rate.withdrawInfo === undefined)
 
     const rateNames: LinkRateOptionType[] = rates.map((rate) => {
         const revision = rate.revisions[0]
