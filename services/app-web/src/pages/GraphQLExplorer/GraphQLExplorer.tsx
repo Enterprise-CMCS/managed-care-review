@@ -6,6 +6,7 @@ import { FetchCurrentUserDocument } from '../../gen/gqlClient'
 import { fakeAmplifyFetch } from '../../api'
 
 import schema from '../../gen/schema.graphql'
+import { print } from 'graphql'
 
 export const GraphQLExplorer = () => {
     const stageName = import.meta.env.VITE_APP_STAGE_NAME
@@ -36,7 +37,7 @@ export const GraphQLExplorer = () => {
             <ApolloExplorer
                 className={styles.explorer}
                 endpointUrl={'/graphql'}
-                schema={schema}
+                schema={print(schema)}
                 initialState={{
                     displayOptions: {
                         docsPanelState: 'open',
