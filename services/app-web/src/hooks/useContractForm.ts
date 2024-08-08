@@ -9,6 +9,7 @@ import {
     useCreateContractMutation,
     useUpdateContractMutation,
     useUpdateDraftContractRatesMutation,
+    useUpdateContractDraftRevisionMutation,
     ContractRevision,
     UpdateInformation,
     UnlockedContract,
@@ -25,7 +26,7 @@ import type { InterimState } from '../pages/StateSubmission/ErrorOrLoadingPage'
 
 
 type  UseContractForm = {
-    draftSubmission?: ContractRevision
+    draftSubmission?: Contract
     unlockInfo?: UpdateInformation
     showPageErrorMessage: string | boolean
     previousDocuments?: string[]
@@ -38,7 +39,7 @@ type  UseContractForm = {
     submissionName?: string
 }
 
-const useContractForm = (contractID: string): UseContractForm => {
+const useContractForm = (contractID?: string): UseContractForm => {
     // Set up defaults for the return value for hook
     let interimState: UseContractForm['interimState'] = undefined // enum to determine what Interim UI should override form page
     let previousDocuments: UseContractForm['previousDocuments'] = [] // used for document upload tables
@@ -59,11 +60,14 @@ const useContractForm = (contractID: string): UseContractForm => {
         data: fetchResultData,
         error: fetchResultError,
         loading: fetchResultLoading
-     } = useFetchContractQuery({variables: {
-        input: {
-            contractID: contractID
-        }
-    }})
+     } = useFetchContractQuery({
+        variables: {
+            input: {
+                contractID: contractID ?? 'new-draft'
+            }
+        },
+        skip: !contractID
+    })
     const [createFormData] = useCreateContractMutation()
 
     const createDraft: UseContractForm['createDraft']  = async (
@@ -107,7 +111,7 @@ const useContractForm = (contractID: string): UseContractForm => {
             return new Error(serverError)
         }
     }
-    const [updateFormData] = useUpdateDraftContractRatesMutation()
+    const [updateFormData] = useUpdateContractDraftRevisionMutation()
 
     const updateDraft: UseContractForm['updateDraft']  = async (
         input: Contract
@@ -118,14 +122,14 @@ const useContractForm = (contractID: string): UseContractForm => {
             const updateResult = await updateFormData({
                 variables: {
                     input: {
-                        contractID: contract!.id,
-                        lastSeenUpdatedAt: '',
-                        updatedRates: []
+                        contractID: contractID ?? 'new-draft',
+                        lastSeenUpdatedAt: contract?.updatedAt,
+                        formData: contract!.draftRevision!.formData
                     },
                 },
             })
             const updatedSubmission =
-                updateResult?.data?.updateDraftContractRates.contract
+                updateResult?.data?.updateContractDraftRevision.contract
 
             if (!updatedSubmission) {
                 setShowPageErrorMessage(true)
@@ -135,7 +139,6 @@ const useContractForm = (contractID: string): UseContractForm => {
                 )
                 return new Error('Failed to update form data')
             }
-
             return updatedSubmission
         } catch (serverError) {
             setShowPageErrorMessage(true)
@@ -199,7 +202,7 @@ const useContractForm = (contractID: string): UseContractForm => {
     }
 
     // set up data to return
-    draftSubmission = contract.draftRevision!
+    draftSubmission = contract
     unlockInfo =  latestRevision!.unlockInfo ?? undefined // An unlocked revision is defined by having unlockInfo on it, pull it out here if it exists
     // documentDateLookupTable = documentDates
     return {draftSubmission, unlockInfo, previousDocuments, documentDateLookupTable,  updateDraft, createDraft, interimState, showPageErrorMessage, submissionName }

@@ -53,6 +53,7 @@ import { useAuth } from '../../../contexts/AuthContext'
 import { useRouteParams } from '../../../hooks/useRouteParams'
 import { PageBannerAlerts } from '../PageBannerAlerts'
 import { useErrorSummary } from '../../../hooks/useErrorSummary'
+import { useContractForm } from '../../../hooks/useContractForm'
 
 export interface SubmissionTypeFormValues {
     populationCovered?: PopulationCoveredType
@@ -80,56 +81,40 @@ export const SubmissionType = ({
     const navigate = useNavigate()
     const location = useLocation()
     const isNewSubmission = location.pathname === '/submissions/new'
-    const [draftSubmission] = useCreateContractMutation()
     const [updateContract] = useUpdateDraftContractRatesMutation()
     const { id } = useRouteParams()
-    let contract
-    if (id) {
-        const {
-            data: fetchContractData,
-            loading: fetchContractLoading,
-            error: fetchContractError,
-        } = useFetchContractQuery({
-            variables: {
-                input: {
-                    contractID: id ?? 'unknown-contract',
-                },
-            },
-        })
-
-        // Set up data for form. Either based on contract API (for multi rate) or rates API (for edit and submit of standalone rate)
-        contract = fetchContractData?.fetchContract.contract
-        if (!contract) {
-            return <></>
-        }
-        const contractDraftRevision = contract.draftRevision
-        if (fetchContractLoading || fetchContractError)
-            return (
-                <ErrorOrLoadingPage
-                    state={fetchContractLoading ? 'LOADING' : 'GENERIC_ERROR'}
-                />
-            )
-    }
+    const {
+        draftSubmission,
+        updateDraft,
+        createDraft,
+        interimState,
+        showPageErrorMessage,
+        unlockInfo,
+    } = useContractForm(id)
+    
+    // <ErrorOrLoadingPage
+    //     state={fetchContractLoading ? 'LOADING' : 'GENERIC_ERROR'}
+    // />
 
     const showFieldErrors = (error?: FormError) =>
         shouldValidate && Boolean(error)
 
     const submissionTypeInitialValues: SubmissionTypeFormValues = {
         populationCovered:
-            contractDraftRevision?.formData.populationCovered === null
+            draftSubmission?.draftRevision?.formData.populationCovered === null
                 ? undefined
-                : contractDraftRevision?.formData.populationCovered,
-        programIDs: contractDraftRevision?.formData.programIDs ?? [],
+                : draftSubmission?.draftRevision?.formData.populationCovered,
+        programIDs: draftSubmission?.draftRevision?.formData.programIDs ?? [],
         riskBasedContract:
             booleanAsYesNoFormValue(
-                contractDraftRevision?.formData.riskBasedContract === null
+                draftSubmission?.draftRevision?.formData.riskBasedContract === null
                     ? undefined
-                    : contractDraftRevision?.formData.riskBasedContract
+                    : draftSubmission?.draftRevision?.formData.riskBasedContract
             ) ?? '',
         submissionDescription:
-            contractDraftRevision?.formData.submissionDescription ?? '',
-        submissionType: contractDraftRevision?.formData.submissionType ?? '',
-        contractType: contractDraftRevision?.formData.contractType ?? '',
+            draftSubmission?.draftRevision?.formData.submissionDescription ?? '',
+        submissionType: draftSubmission?.draftRevision?.formData.submissionType ?? '',
+        contractType: draftSubmission?.draftRevision?.formData.contractType ?? '',
     }
 
     const handleFormSubmit = async (
@@ -221,7 +206,7 @@ export const SubmissionType = ({
                 )
             }
         } else {
-            if (!contractDraftRevision) {
+            if (!draftSubmission) {
                 console.info(
                     'Expected draft revision on contract to be present'
                 )
@@ -302,15 +287,15 @@ export const SubmissionType = ({
             <div>
                 <DynamicStepIndicator
                     formPages={
-                        contractDraftRevision
-                            ? activeFormPages(contractDraftRevision.formData)
+                        draftSubmission
+                            ? activeFormPages(draftSubmission.formData)
                             : STATE_SUBMISSION_FORM_ROUTES
                     }
                     currentFormPage={currentRoute}
                 />
                 <PageBannerAlerts
                     loggedInUser={loggedInUser}
-                    unlockedInfo={contractDraftRevision?.unlockInfo}
+                    unlockedInfo={draftSubmission?.unlockInfo}
                     showPageErrorMessage={showAPIErrorBanner}
                 />
             </div>
