@@ -27,8 +27,7 @@ export const RateWithdrawnBanner = ({
         >
             <div className={styles.bannerBodyText}>
                 <p className="usa-alert__text">
-                    <b>Withdrawn by:&nbsp;</b>
-                    Administrator
+                    <b>Withdrawn by:&nbsp;</b>Administrator
                 </p>
                 <p className="usa-alert__text">
                     <b>Withdrawn on:&nbsp;</b>

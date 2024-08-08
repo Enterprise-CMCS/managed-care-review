@@ -10,6 +10,7 @@ import { RateSummary } from './RateSummary'
 import { RoutesRecord } from '../../constants'
 import { Route, Routes } from 'react-router-dom'
 import { RateEdit } from '../RateEdit/RateEdit'
+import { dayjs } from '../../common-code/dateHelpers'
 
 // Wrap test component in some top level routes to allow getParams to be tested
 const wrapInRoutes = (children: React.ReactNode) => {
@@ -60,7 +61,8 @@ describe('RateSummary', () => {
                                 withdrawInfo: {
                                     updatedAt: new Date('2024-01-01'),
                                     updatedBy: 'admin@example.com',
-                                    updatedReason: 'This rate was withdrawn',
+                                    updatedReason:
+                                        'Admin as withdrawn this rate.',
                                 },
                             }),
                         ],
@@ -83,8 +85,20 @@ describe('RateSummary', () => {
                     )
                 ).toBeInTheDocument()
 
+                expect(screen.getByRole('alert')).toHaveClass('usa-alert--info')
                 expect(
                     screen.getByTestId('rateWithdrawnBanner')
+                ).toHaveTextContent(/Withdrawn by: Administrator/)
+                expect(
+                    screen.getByText(
+                        `${dayjs
+                            .utc(new Date('2024-01-01'))
+                            .tz('America/New_York')
+                            .format('MM/DD/YY h:mma')} ET`
+                    )
+                ).toBeInTheDocument()
+                expect(
+                    screen.getByText('Admin as withdrawn this rate.')
                 ).toBeInTheDocument()
             })
 
@@ -203,7 +217,7 @@ describe('RateSummary', () => {
                             withdrawInfo: {
                                 updatedAt: new Date('2024-01-01'),
                                 updatedBy: 'admin@example.com',
-                                updatedReason: 'This rate was withdrawn',
+                                updatedReason: 'Admin as withdrawn this rate.',
                             },
                         }),
                     ],
@@ -222,8 +236,20 @@ describe('RateSummary', () => {
                 await screen.findByText('Rates this rate certification covers')
             ).toBeInTheDocument()
 
+            expect(screen.getByRole('alert')).toHaveClass('usa-alert--info')
+            expect(screen.getByTestId('rateWithdrawnBanner')).toHaveTextContent(
+                /Withdrawn by: Administrator/
+            )
             expect(
-                screen.getByTestId('rateWithdrawnBanner')
+                screen.getByText(
+                    `${dayjs
+                        .utc(new Date('2024-01-01'))
+                        .tz('America/New_York')
+                        .format('MM/DD/YY h:mma')} ET`
+                )
+            ).toBeInTheDocument()
+            expect(
+                screen.getByText('Admin as withdrawn this rate.')
             ).toBeInTheDocument()
         })
 
