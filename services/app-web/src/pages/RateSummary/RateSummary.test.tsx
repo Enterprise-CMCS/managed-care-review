@@ -10,6 +10,7 @@ import { RateSummary } from './RateSummary'
 import { RoutesRecord } from '../../constants'
 import { Route, Routes } from 'react-router-dom'
 import { RateEdit } from '../RateEdit/RateEdit'
+import { dayjs } from '../../common-code/dateHelpers'
 
 // Wrap test component in some top level routes to allow getParams to be tested
 const wrapInRoutes = (children: React.ReactNode) => {
@@ -44,6 +45,60 @@ describe('RateSummary', () => {
                     await screen.findByText(
                         'Rates this rate certification covers'
                     )
+                ).toBeInTheDocument()
+            })
+
+            it('displays withdrawn banner on a withdrawn rate', async () => {
+                renderWithProviders(wrapInRoutes(<RateSummary />), {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                user: mockUser(),
+                                statusCode: 200,
+                            }),
+                            fetchRateMockSuccess({
+                                id: '1337',
+                                withdrawInfo: {
+                                    updatedAt: new Date('2024-01-01'),
+                                    updatedBy: 'admin@example.com',
+                                    updatedReason:
+                                        'Admin as withdrawn this rate.',
+                                },
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/rates/1337',
+                    },
+                    featureFlags: { 'rate-edit-unlock': true },
+                })
+
+                await waitFor(() => {
+                    expect(
+                        screen.queryByTestId('rate-summary')
+                    ).toBeInTheDocument()
+                })
+
+                expect(
+                    await screen.findByText(
+                        'Rates this rate certification covers'
+                    )
+                ).toBeInTheDocument()
+
+                expect(screen.getByRole('alert')).toHaveClass('usa-alert--info')
+                expect(
+                    screen.getByTestId('rateWithdrawnBanner')
+                ).toHaveTextContent(/Withdrawn by: Administrator/)
+                expect(
+                    screen.getByText(
+                        `${dayjs
+                            .utc(new Date('2024-01-01'))
+                            .tz('America/New_York')
+                            .format('MM/DD/YY h:mma')} ET`
+                    )
+                ).toBeInTheDocument()
+                expect(
+                    screen.getByText('Admin as withdrawn this rate.')
                 ).toBeInTheDocument()
             })
 
@@ -146,6 +201,55 @@ describe('RateSummary', () => {
 
             expect(
                 await screen.findByText('Rates this rate certification covers')
+            ).toBeInTheDocument()
+        })
+
+        it('displays withdrawn banner on a withdrawn rate', async () => {
+            renderWithProviders(wrapInRoutes(<RateSummary />), {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockValidStateUser(),
+                            statusCode: 200,
+                        }),
+                        fetchRateMockSuccess({
+                            id: '1337',
+                            withdrawInfo: {
+                                updatedAt: new Date('2024-01-01'),
+                                updatedBy: 'admin@example.com',
+                                updatedReason: 'Admin as withdrawn this rate.',
+                            },
+                        }),
+                    ],
+                },
+                routerProvider: {
+                    route: '/rates/1337',
+                },
+                featureFlags: { 'rate-edit-unlock': true },
+            })
+
+            await waitFor(() => {
+                expect(screen.queryByTestId('rate-summary')).toBeInTheDocument()
+            })
+
+            expect(
+                await screen.findByText('Rates this rate certification covers')
+            ).toBeInTheDocument()
+
+            expect(screen.getByRole('alert')).toHaveClass('usa-alert--info')
+            expect(screen.getByTestId('rateWithdrawnBanner')).toHaveTextContent(
+                /Withdrawn by: Administrator/
+            )
+            expect(
+                screen.getByText(
+                    `${dayjs
+                        .utc(new Date('2024-01-01'))
+                        .tz('America/New_York')
+                        .format('MM/DD/YY h:mma')} ET`
+                )
+            ).toBeInTheDocument()
+            expect(
+                screen.getByText('Admin as withdrawn this rate.')
             ).toBeInTheDocument()
         })
 
