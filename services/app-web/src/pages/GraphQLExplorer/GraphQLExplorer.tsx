@@ -4,9 +4,9 @@ import { useAuth } from '../../contexts/AuthContext'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import { FetchCurrentUserDocument } from '../../gen/gqlClient'
 import { fakeAmplifyFetch } from '../../api'
+import { print } from 'graphql'
 
 import schema from '../../gen/schema.graphql'
-import { print } from 'graphql'
 
 export const GraphQLExplorer = () => {
     const stageName = import.meta.env.VITE_APP_STAGE_NAME
