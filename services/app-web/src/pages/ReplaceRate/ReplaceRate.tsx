@@ -1,7 +1,7 @@
 import { ButtonGroup, FormGroup, GridContainer, Label } from '@trussworks/react-uswds'
 import * as Yup from 'yup'
 import React, { useEffect, } from 'react'
-import { Navigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { usePage } from '../../contexts/PageContext'
 import { useFetchContractQuery, useWithdrawAndReplaceRedundantRateMutation } from '../../gen/gqlClient'
 import styles from './ReplaceRate.module.scss'
@@ -11,7 +11,7 @@ import { recordJSExceptionWithContext } from '../../otelHelpers'
 import {
     Form as UswdsForm,
 } from '@trussworks/react-uswds'
-import { Formik, FormikErrors, getIn } from 'formik'
+import { Formik, FormikErrors } from 'formik'
 import { ActionButton, DataDetail, FieldTextarea, GenericApiErrorBanner, PoliteErrorMessage } from '../../components'
 import { LinkRateSelect } from '../LinkYourRates/LinkRateSelect'
 import { PageActionsContainer } from '../StateSubmission/PageActions'
@@ -27,6 +27,7 @@ export const ReplaceRate = (): React.ReactElement => {
     // Page level state
     const [shouldValidate] = React.useState(false)
     const { loggedInUser } = useAuth()
+    const navigate = useNavigate()
     const { updateHeading } = usePage()
     const { id, rateID} = useParams()
     if (!id ||!rateID) {
@@ -45,7 +46,7 @@ export const ReplaceRate = (): React.ReactElement => {
         },
     })
 
-    const [replaceRate, {data: replaceData, loading: replaceLoading, error: replaceError}] = useWithdrawAndReplaceRedundantRateMutation()
+    const [replaceRate, {loading: replaceLoading, error: replaceError}] = useWithdrawAndReplaceRedundantRateMutation()
 
     const contract =  initialData?.fetchContract.contract
     const contractName = contract?.packageSubmissions[0].contractRevision.contractName
@@ -90,6 +91,9 @@ export const ReplaceRate = (): React.ReactElement => {
             }
          }
          })
+         navigate(
+            `/submissions/${id}`
+        )
     } catch (err) {
         recordJSExceptionWithContext(
             err,
@@ -104,27 +108,19 @@ export const ReplaceRate = (): React.ReactElement => {
                 className={styles.gridContainer}
             >
                   {replaceError && <GenericApiErrorBanner />}
-                <h2>Replace a rate review</h2>
-                <DataDetail
-                 id="withdrawnRate"
-                 label="Current rate"
-                 >
-                {withdrawnRateRevisionName}
-                </DataDetail>
-                <Formik
+                  <Formik
                     initialValues={formInitialValues}
                     onSubmit={(values) => onSubmit(values)}
                     validationSchema={() =>
                         Yup.object().shape({
                             replaceReason: Yup.string(),
-
                             replacementRateID: Yup.string(),
                         })
                         }
                 >
                     {({
-                        values,
                         errors,
+                        values,
                         handleSubmit,
                     }) => (
                             <UswdsForm
@@ -133,9 +129,17 @@ export const ReplaceRate = (): React.ReactElement => {
                                 aria-label={'Withdraw and replace rate on contract'}
                                 aria-describedby="form-guidance"
                                 onSubmit={(e) => {
-                                    handleSubmit(e)
-                                }}
+
+                                    return handleSubmit(e)}}
                             >
+                <h2>Replace a rate review</h2>
+                <DataDetail
+                 id="withdrawnRate"
+                 label="Current rate"
+                 >
+                {withdrawnRateRevisionName}
+                </DataDetail>
+
                                 <fieldset className="usa-fieldset">
                                     <legend className="srOnly">
                                         Withdraw and replace rate on contract
@@ -161,7 +165,7 @@ export const ReplaceRate = (): React.ReactElement => {
                                         }
                                     />
                                     <FormGroup>
-                                    <Label htmlFor={`replacementRateID`}>
+                                    <Label htmlFor={'replacementRateID'}>
                                     Select a replacement rate
                                     </Label>
                                     <span className={styles.requiredOptionalText}>
@@ -178,10 +182,11 @@ export const ReplaceRate = (): React.ReactElement => {
                                    Selecting a rate below will withdraw the current rate from review.
                                 </div>
                                     <LinkRateSelect
-                                        inputId={`replacementRateID`}
-                                        name={`replacementRateID`}
-                                        initialValue={getIn(values, `replacementRateID`)}
+                                        inputId="replacementRateID"
+                                        name="replacementRateID"
+                                        initialValue={values.replacementRateID}
                                         label="Which rate certification was it?"
+                                        alreadySelected={[rateID]}
                                     />
 
                                     </FormGroup>
@@ -205,7 +210,6 @@ export const ReplaceRate = (): React.ReactElement => {
                             data-testid="page-actions-right-primary"
                             parent_component_type="page body"
                             link_url={`/submissions/${id}`}
-                            disabled={replaceError !== undefined}
                             animationTimeout={1000}
                             loading={replaceLoading}
                         >
