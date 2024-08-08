@@ -337,6 +337,7 @@ describe('SubmissionSummary', () => {
                         }),
                         fetchContractMockSuccess({
                             contract: {
+                                ...mockContractPackageSubmitted(),
                                 id: 'test-abc-123',
                             },
                         }),
@@ -560,6 +561,7 @@ describe('SubmissionSummary', () => {
                         }),
                         fetchContractMockSuccess({
                             contract: {
+                                ...mockContractPackageSubmitted(),
                                 id: 'test-abc-123',
                             },
                         }),
@@ -599,6 +601,7 @@ describe('SubmissionSummary', () => {
                         }),
                         fetchContractMockSuccess({
                             contract: {
+                                ...mockContractPackageSubmitted(),
                                 id: 'test-abc-123',
                             },
                         }),

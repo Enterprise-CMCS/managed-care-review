@@ -1,5 +1,5 @@
 import React, { Fragment, useEffect, useState } from 'react'
-import { useNavigate, useLocation, Navigate } from 'react-router'
+import { useLocation, Navigate } from 'react-router'
 import { Route, Routes } from 'react-router-dom'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { extendSession, idmRedirectURL } from '../../pages/Auth/cognitoAuth'
