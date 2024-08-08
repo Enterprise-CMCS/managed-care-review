@@ -33,10 +33,6 @@ export const ReplaceRate = (): React.ReactElement => {
     if (!id ||!rateID) {
         throw new Error('PROGRAMMING ERROR: proper url params not set')
     }
-    if (loggedInUser?.role != 'ADMIN_USER') {
-        return <ErrorOrLoadingPage state="FORBIDDEN" />
-    }
-
     // API handling
     const {  data: initialData, loading: initialRequestLoading, error: initialRequestError } = useFetchContractQuery({
         variables: {
@@ -45,24 +41,25 @@ export const ReplaceRate = (): React.ReactElement => {
             },
         },
     })
-
     const [replaceRate, {loading: replaceLoading, error: replaceError}] = useWithdrawAndReplaceRedundantRateMutation()
 
     const contract =  initialData?.fetchContract.contract
-    const contractName = contract?.packageSubmissions[0].contractRevision.contractName
-    const withdrawnRateRevisionName =  contract?.packageSubmissions[0].rateRevisions.find( rateRev => rateRev.rateID == rateID)?.formData.rateCertificationName
+    const contractName = contract?.packageSubmissions[0]?.contractRevision.contractName
+    const withdrawnRateRevisionName =  contract?.packageSubmissions[0]?.rateRevisions.find( rateRev => rateRev.rateID == rateID)?.formData.rateCertificationName
 
     useEffect(() => {
         updateHeading({ customHeading: contractName })
     }, [contractName, updateHeading])
 
+
+    if (loggedInUser?.role != 'ADMIN_USER') {
+        return <ErrorOrLoadingPage state="FORBIDDEN" />
+    }
+
     if (initialRequestLoading) {
         return <ErrorOrLoadingPage state="LOADING" />
     }
-    if(!withdrawnRateRevisionName){
-        recordJSExceptionWithContext(`rate ID: ${rateID} not found on contract`, 'ReplaceRate.withdrawnRateRevisionName')
-        return <ErrorOrLoadingPage state='NOT_FOUND'/>
-    }
+
     if (initialRequestError) {
         return (
             <ErrorOrLoadingPage
@@ -71,6 +68,10 @@ export const ReplaceRate = (): React.ReactElement => {
         )
     }
 
+    if(!withdrawnRateRevisionName){
+        recordJSExceptionWithContext(`rate ID: ${rateID} not found on contract ${id}`, 'ReplaceRate.withdrawnRateRevisionName')
+        return <ErrorOrLoadingPage state='NOT_FOUND'/>
+    }
     // Form setup
     const formInitialValues: ReplaceRateFormValues = {
         replacementRateID:'',
@@ -200,6 +201,7 @@ export const ReplaceRate = (): React.ReactElement => {
                             data-testid="page-actions-left-secondary"
                             parent_component_type="page body"
                             link_url={`/submissions/${id}`}
+                            onClick={()=> navigate(`/submissions/${id}`)}
                         >
                             Cancel
                         </ActionButton>

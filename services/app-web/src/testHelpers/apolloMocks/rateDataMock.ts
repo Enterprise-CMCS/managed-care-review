@@ -3,11 +3,10 @@ import {
     RateRevision,
     RelatedContractRevisions,
 } from '../../gen/gqlClient'
+import { s3DlUrl } from './documentDataMock'
 import { mockMNState } from './stateMock'
 import { v4 as uuidv4 } from 'uuid'
 
-const s3DlUrl =
-    'https://fake-bucket.s3.amazonaws.com/file.pdf?AWSAccessKeyId=AKIAIOSFODNN7EXAMPLE&Expires=1719564800&Signature=abc123def456ghijk' //pragma: allowlist secret
 
 const contractRevisionOnRateDataMock = (
     data?: Partial<RelatedContractRevisions>
@@ -52,6 +51,7 @@ const contractRevisionOnRateDataMock = (
                 __typename: 'GenericDocument',
                 name: 'contract-document.pdf',
                 s3URL: 's3://bucketname/key/contract-document',
+                downloadURL: s3DlUrl,
                 sha256: 'fakeSha',
                 dateAdded: new Date(),
             },
