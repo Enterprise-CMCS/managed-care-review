@@ -8,7 +8,7 @@ import Select, {
     createFilter,
 } from 'react-select'
 import styles from '../../components/Select/Select.module.scss'
-import { IndexRatesInput, useIndexRatesQuery } from '../../gen/gqlClient'
+import { useIndexRatesQuery } from '../../gen/gqlClient'
 import { programNames } from '../../common-code/healthPlanFormDataType'
 import { formatCalendarDate } from '../../common-code/dateHelpers'
 import {
