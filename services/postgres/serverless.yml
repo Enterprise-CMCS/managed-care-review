@@ -160,34 +160,6 @@ resources:
       Properties:
         BucketName: !Sub ${self:service}-${sls:stage}-postgres-infra-scripts
         AccessControl: Private
-        PublicAccessBlockConfiguration:
-          BlockPublicAcls: true
-          BlockPublicPolicy: true
-          IgnorePublicAcls: true
-          RestrictPublicBuckets: true
-        BucketEncryption:
-          ServerSideEncryptionConfiguration:
-            - ServerSideEncryptionByDefault:
-                SSEAlgorithm: AES256
-
-    PostgresVMScriptsBucketPolicy:
-      Type: AWS::S3::BucketPolicy
-      Condition: IsDevValProd
-      Properties:
-        Bucket: !Ref PostgresVMScriptsBucket
-        PolicyDocument:
-          Version: '2012-10-17'
-          Statement:
-            - Sid: ForceSSLOnlyAccess
-              Effect: Deny
-              Principal: '*'
-              Action: 's3:*'
-              Resource:
-                - !Sub arn:aws:s3:::${self:service}-${sls:stage}-postgres-infra-scripts
-                - !Sub arn:aws:s3:::${self:service}-${sls:stage}-postgres-infra-scripts/*
-              Condition:
-                Bool:
-                  aws:SecureTransport: false
 
     PostgresVM:
       Type: 'AWS::EC2::Instance'
