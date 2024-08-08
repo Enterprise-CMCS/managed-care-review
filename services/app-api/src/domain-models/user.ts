@@ -5,6 +5,8 @@ import type {
     AdminUserType,
     HelpdeskUserType,
     BusinessOwnerUserType,
+    CMSApproverUserType,
+    UserRoles,
 } from './UserType'
 import type { User as PrismaUser } from '@prisma/client'
 
@@ -64,13 +66,35 @@ function toDomainUser(user: PrismaUser): UserType {
                 divisionAssignment: user.divisionAssignment,
                 stateAssignments: [],
             } as CMSUserType
+        case 'CMS_APPROVER_USER':
+            return {
+                id: user.id,
+                role: 'CMS_APPROVER_USER',
+                email: user.email,
+                givenName: user.givenName,
+                familyName: user.familyName,
+                divisionAssignment: user.divisionAssignment,
+                stateAssignments: [],
+            } as CMSApproverUserType
         case 'STATE_USER':
             return user as StateUserType
     }
 }
 
-function hasAdminPermissions(user: UserType): boolean {
-    const authorizedAdmins = [
+// Users with CMS reviewer and approver permissions
+function hasCMSPermissions(
+    user: UserType
+): user is CMSUserType | CMSApproverUserType {
+    const authorizedCMSUsers: UserRoles[] = ['CMS_USER', 'CMS_APPROVER_USER']
+
+    return authorizedCMSUsers.includes(user.role)
+}
+
+// Users with admin permissions
+function hasAdminPermissions(
+    user: UserType
+): user is AdminUserType | HelpdeskUserType | BusinessOwnerUserType {
+    const authorizedAdmins: UserRoles[] = [
         'ADMIN_USER',
         'HELPDESK_USER',
         'BUSINESSOWNER_USER',
@@ -88,4 +112,5 @@ export {
     isHelpdeskUser,
     isBusinessOwnerUser,
     hasAdminPermissions,
+    hasCMSPermissions,
 }

@@ -72,7 +72,10 @@ export const QATable = ({
         if (user.id === addedBy.id) {
             return 'You'
         }
-        if (addedBy.__typename === 'CMSUser') {
+        if (
+            addedBy.__typename === 'CMSUser' ||
+            addedBy.__typename === 'CMSApproverUser'
+        ) {
             return `${addedBy.givenName} (CMS)`
         }
         if (addedBy.__typename === 'StateUser') {

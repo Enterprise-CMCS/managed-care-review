@@ -12,12 +12,22 @@ import {
     AdminUser,
     HelpdeskUser,
     BusinessOwnerUser,
+    CmsApproverUser,
 } from '../../../gen/gqlClient'
+import {
+    hasAdminUserPermissions,
+    hasCMSUserPermissions,
+} from '../../../gqlHelpers'
 
 const CMSUserRow = ({
     heading,
 }: {
-    user: CmsUser | AdminUser | HelpdeskUser | BusinessOwnerUser
+    user:
+        | CmsUser
+        | AdminUser
+        | HelpdeskUser
+        | BusinessOwnerUser
+        | CmsApproverUser
     heading?: string | React.ReactElement
 }) => {
     return (
@@ -120,10 +130,8 @@ export const PageHeadingRow = ({
     }
 
     if (
-        loggedInUser.__typename === 'CMSUser' ||
-        loggedInUser.__typename === 'AdminUser' ||
-        loggedInUser.__typename === 'HelpdeskUser' ||
-        loggedInUser.__typename === 'BusinessOwnerUser'
+        hasCMSUserPermissions(loggedInUser) ||
+        hasAdminUserPermissions(loggedInUser)
     ) {
         return <CMSUserRow user={loggedInUser} heading={heading} />
     } else if (loggedInUser.__typename === 'StateUser') {

@@ -14,6 +14,7 @@ import { packageName } from '../../common-code/healthPlanFormDataType'
 import { assertAnError, assertAnErrorCode } from '../../testHelpers'
 import {
     createDBUsersWithFullData,
+    testCMSApproverUser,
     testCMSUser,
 } from '../../testHelpers/userHelpers'
 import { base64ToDomain } from '../../common-code/proto/healthPlanFormDataProto'
@@ -238,6 +239,41 @@ describe('createQuestion', () => {
     })
     it('returns error when CMS user division is unassigned', async () => {
         const cmsUserWithNoDivision = testCMSUser({
+            divisionAssignment: undefined,
+        })
+        await createDBUsersWithFullData([cmsUserWithNoDivision])
+        const stateServer = await constructTestPostgresServer()
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: cmsUserWithNoDivision,
+            },
+        })
+
+        await createAndSubmitTestHealthPlanPackage(stateServer)
+
+        const createdQuestion = await cmsServer.executeOperation({
+            query: CREATE_QUESTION,
+            variables: {
+                input: {
+                    contractID: 'invalid-pkg-id',
+                    documents: [
+                        {
+                            name: 'Test Question',
+                            s3URL: 's3://bucketname/key/test1',
+                        },
+                    ],
+                },
+            },
+        })
+
+        expect(createdQuestion.errors).toBeDefined()
+        expect(assertAnErrorCode(createdQuestion)).toBe('FORBIDDEN')
+        expect(assertAnError(createdQuestion).message).toBe(
+            `users without an assigned division are not authorized to create a question`
+        )
+    })
+    it('returns error when CMS approver user division is unassigned', async () => {
+        const cmsUserWithNoDivision = testCMSApproverUser({
             divisionAssignment: undefined,
         })
         await createDBUsersWithFullData([cmsUserWithNoDivision])

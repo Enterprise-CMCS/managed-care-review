@@ -12,6 +12,7 @@ import { DataDetailMissingField } from '../../DataDetail/DataDetailMissingField'
 import { GenericDocument } from '../../../gen/gqlClient'
 import { DocumentDateLookupTableType } from '../../../documentHelpers/makeDocumentDateLookupTable'
 import { LinkWithLogging, NavLinkWithLogging } from '../../TealiumLogging'
+import { hasCMSUserPermissions } from '../../../gqlHelpers'
 
 // This is used to convert from deprecated FE domain types from protos to GQL GenericDocuments by added in a dateAdded
 export const convertFromSubmissionDocumentsToGenericDocuments = (
@@ -55,7 +56,7 @@ export const UploadedDocumentsTable = ({
     }))
     const { loggedInUser } = useAuth()
     const isStateUser = loggedInUser?.__typename === 'StateUser'
-    const isCMSUser = loggedInUser?.__typename === 'CMSUser'
+    const isCMSUser = hasCMSUserPermissions(loggedInUser)
     const { getDocumentsWithS3KeyAndUrl } = useDocument()
     const [refreshedDocs, setRefreshedDocs] =
         useState<DocumentWithS3Data[]>(initialDocState)

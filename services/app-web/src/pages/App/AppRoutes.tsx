@@ -362,17 +362,11 @@ export const AppRoutes = ({
         } else {
             if (typeof redirectPath === 'string') {
                 console.info('Retrieved For Redirect: ', redirectPath)
-                 window.location.href = redirectPath
+                window.location.href = redirectPath
                 setRedirectPath(null)
             }
         }
-    }, [
-        initialPath,
-        loggedInUser,
-        authMode,
-        redirectPath,
-        setRedirectPath,
-    ])
+    }, [initialPath, loggedInUser, authMode, redirectPath, setRedirectPath])
 
     /*
         Side effects that happen on page change

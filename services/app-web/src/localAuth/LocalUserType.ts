@@ -7,6 +7,7 @@ type LocalUserType =
     | LocalAdminUserType
     | LocalHelpdeskUserType
     | LocalBusinessOwnerUserType
+    | LocalCMSApproverType
 
 type LocalStateUserType = {
     id: string
@@ -51,6 +52,16 @@ type LocalBusinessOwnerUserType = {
     familyName: string
 }
 
+type LocalCMSApproverType = {
+    id: string
+    role: 'CMS_APPROVER_USER'
+    email: string
+    givenName: string
+    familyName: string
+    stateAssignments: StateType[]
+    divisionAssignment?: Division
+}
+
 function isLocalUser(user: unknown): user is LocalUserType {
     if (user && typeof user === 'object') {
         if ('role' in user) {
@@ -61,7 +72,8 @@ function isLocalUser(user: unknown): user is LocalUserType {
                     roleUser.role === 'CMS_USER' ||
                     roleUser.role === 'ADMIN_USER' ||
                     roleUser.role === 'HELPDESK_USER' ||
-                    roleUser.role === 'BUSINESSOWNER_USER'
+                    roleUser.role === 'BUSINESSOWNER_USER' ||
+                    roleUser.role === 'CMS_APPROVER_USER'
                 ) {
                     return true
                 }

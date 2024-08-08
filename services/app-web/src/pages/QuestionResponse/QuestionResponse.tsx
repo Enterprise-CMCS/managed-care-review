@@ -19,6 +19,7 @@ import { QATable, QuestionData, Division } from './QATable/QATable'
 import { CmsUser, QuestionEdge, StateUser } from '../../gen/gqlClient'
 import { useStringConstants } from '../../hooks/useStringConstants'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
+import { hasCMSUserPermissions } from '../../gqlHelpers'
 
 type divisionQuestionDataType = {
     division: Division
@@ -86,9 +87,9 @@ export const QuestionResponse = () => {
         return <GenericErrorPage />
     }
 
-    const isCMSUser = user?.role === 'CMS_USER'
+    const hasCMSPermissions = hasCMSUserPermissions(user)
 
-    if (isCMSUser) {
+    if (hasCMSPermissions) {
         division = getUserDivision(user as CmsUser)
     }
 
@@ -129,7 +130,7 @@ export const QuestionResponse = () => {
     return (
         <div className={styles.background}>
             <GridContainer className={styles.container}>
-                {isCMSUser && !division && (
+                {hasCMSPermissions && !division && (
                     <UserAccountWarningBanner
                         header={'Missing division'}
                         message={
@@ -154,7 +155,7 @@ export const QuestionResponse = () => {
                 )}
                 <section>
                     <SectionHeader header="Contract questions" hideBorder>
-                        {isCMSUser && division && (
+                        {hasCMSPermissions && division && (
                             <NavLinkWithLogging
                                 className="usa-button"
                                 variant="unstyled"

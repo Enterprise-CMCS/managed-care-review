@@ -2,6 +2,7 @@ import type { InsertUserArgsType } from '../postgres'
 import { NewPostgresStore } from '../postgres'
 import type {
     AdminUserType,
+    CMSApproverUserType,
     CMSUserType,
     StateUserType,
     UserType,
@@ -15,6 +16,19 @@ const testCMSUser = (userData?: Partial<CMSUserType>): CMSUserType => ({
     email: 'zuko@example.com',
     familyName: 'Zuko',
     givenName: 'Prince',
+    divisionAssignment: 'DMCO' as const,
+    stateAssignments: [],
+    ...userData,
+})
+
+const testCMSApproverUser = (
+    userData?: Partial<CMSApproverUserType>
+): CMSApproverUserType => ({
+    id: uuidv4(),
+    role: 'CMS_APPROVER_USER',
+    email: 'azula@example.com',
+    familyName: 'Azula',
+    givenName: 'Princess',
     divisionAssignment: 'DMCO' as const,
     stateAssignments: [],
     ...userData,
@@ -65,4 +79,25 @@ const createDBUsersWithFullData = async (
     return result
 }
 
-export { testAdminUser, testStateUser, testCMSUser, createDBUsersWithFullData }
+const iterableCmsUsersMockData: {
+    userRole: 'CMS_USER' | 'CMS_APPROVER_USER'
+    mockUser: <T>(userData?: Partial<T>) => CMSUserType | CMSApproverUserType
+}[] = [
+    {
+        userRole: 'CMS_USER',
+        mockUser: testCMSUser,
+    },
+    {
+        userRole: 'CMS_APPROVER_USER',
+        mockUser: testCMSApproverUser,
+    },
+]
+
+export {
+    testAdminUser,
+    testStateUser,
+    testCMSUser,
+    createDBUsersWithFullData,
+    iterableCmsUsersMockData,
+    testCMSApproverUser,
+}

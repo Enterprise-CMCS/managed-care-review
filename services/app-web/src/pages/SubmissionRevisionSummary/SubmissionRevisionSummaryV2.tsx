@@ -16,6 +16,7 @@ import {
     handleAndReturnErrorState,
 } from '../StateSubmission/ErrorOrLoadingPage'
 import { Error404 } from '../Errors/Error404Page'
+import { hasCMSUserPermissions } from '../../gqlHelpers'
 
 export const SubmissionRevisionSummary = (): React.ReactElement => {
     // Page level state
@@ -29,7 +30,7 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
     const { loggedInUser } = useAuth()
 
     const isStateUser = loggedInUser?.role === 'STATE_USER'
-    const isCMSUser = loggedInUser?.role === 'CMS_USER'
+    const hasCMSPermissions = hasCMSUserPermissions(loggedInUser)
 
     const {
         data: fetchContractData,
@@ -134,7 +135,7 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
                 <ContractDetailsSummarySection
                     contract={contract}
                     submissionName={name}
-                    isCMSUser={isCMSUser}
+                    isCMSUser={hasCMSPermissions}
                     isStateUser={isStateUser}
                     contractRev={revision}
                 />
