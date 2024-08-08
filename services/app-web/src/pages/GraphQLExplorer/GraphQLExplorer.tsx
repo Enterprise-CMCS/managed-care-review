@@ -4,6 +4,7 @@ import { useAuth } from '../../contexts/AuthContext'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import { FetchCurrentUserDocument } from '../../gen/gqlClient'
 import { fakeAmplifyFetch } from '../../api'
+import { print } from 'graphql'
 
 import schema from '../../gen/schema.graphql'
 
@@ -36,7 +37,7 @@ export const GraphQLExplorer = () => {
             <ApolloExplorer
                 className={styles.explorer}
                 endpointUrl={'/graphql'}
-                schema={schema}
+                schema={print(schema)}
                 initialState={{
                     displayOptions: {
                         docsPanelState: 'open',
