@@ -8,6 +8,7 @@ import {
 } from '../../../testHelpers/apolloMocks'
 import { indexRatesMockSuccess } from '../../../testHelpers/apolloMocks'
 import { screen, waitFor } from '@testing-library/react'
+import { Rate } from '../../../gen/gqlClient'
 
 describe('RateReviewsDashboard', () => {
     describe.each(iterableCmsUsersMockData)(
