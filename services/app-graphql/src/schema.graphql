@@ -38,7 +38,7 @@ type Query {
     CMSUsers can find all the packages that do not have the DRAFT status
     """
     indexHealthPlanPackages: IndexHealthPlanPackagesPayload!
-    
+
     """
     indexContracts returns all of the contracts the current user can see.
 
@@ -76,7 +76,7 @@ type Query {
     - ForbiddenError: User must be a CMS or Admin type user
     - NotFoundError: No rates with at least one submitted revision were found
     """
-    indexRates: IndexRatesPayload!
+    indexRates(input: IndexRatesInput): IndexRatesPayload!
     """
     fetchRate returns a rate with its revisions, including contract revisions
     for a given rate's ID
@@ -1706,6 +1706,10 @@ type UnlockedContract {
 
 type RateEdge {
     node: Rate!
+}
+
+input IndexRatesInput {
+    stateCode: String
 }
 
 type IndexRatesPayload {

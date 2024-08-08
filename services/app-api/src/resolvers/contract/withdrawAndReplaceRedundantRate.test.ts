@@ -73,6 +73,19 @@ describe('withdrawAndReplaceRedundantRate', () => {
         const { contractID, replacementRateID, withdrawnRateID } =
             await setupWithdrawRateTestData(stateServer)
 
+        const confirmTestContract = await fetchTestContract(
+                adminServer,
+                contractID
+            )
+
+        // Confirm shape of data before withdraw is as expected
+        expect(confirmTestContract.packageSubmissions).toHaveLength(1)
+        expect(confirmTestContract.status).toBe('SUBMITTED')
+        expect(
+            confirmTestContract.packageSubmissions[0].rateRevisions).toHaveLength(1)
+
+
+
         // replace rate on contract 1 with linked rate from contract 2
         const replaceReason = 'Admin has to clean things up'
         await updateTestContractToReplaceRate(adminServer, {
@@ -86,6 +99,7 @@ describe('withdrawAndReplaceRedundantRate', () => {
             adminServer,
             contractID
         )
+
 
         // Check unlock and resubmit logs are correct on both target contract and the latest packageSubmission
         expect(refetchContract1.packageSubmissions).toHaveLength(2)
@@ -112,7 +126,12 @@ describe('withdrawAndReplaceRedundantRate', () => {
         expect(
             refetchContract1.packageSubmissions[0].rateRevisions[0].rateID
         ).toBe(replacementRateID)
+        // check that only one rate is attached to latest submission
+        expect(
+            refetchContract1.packageSubmissions[0].rateRevisions).toHaveLength(1)
+
     })
+
 
     it('withdraws rate, logs correct withdrawInfo', async () => {
         const stateServer = await constructTestPostgresServer({
