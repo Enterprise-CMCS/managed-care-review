@@ -34,9 +34,9 @@ export interface LinkRateOptionType {
 export type LinkRateSelectPropType = {
     name: string
     initialValue: string | undefined
-    alreadySelected?: string[], // used for multi-rate, array of rate IDs helps ensure we can't select rates already selected elsewhere on page
+    alreadySelected?: string[] // used for multi-rate, array of rate IDs helps ensure we can't select rates already selected elsewhere on page
     autofill?: (rateForm: FormikRateForm) => void // used for multi-rates, when called will FieldArray replace the existing form fields with new data
-    label?: string,
+    label?: string
     stateCode?: string //used to limit rates by state
 }
 
@@ -51,20 +51,22 @@ export const LinkRateSelect = ({
 }: LinkRateSelectPropType & Props<LinkRateOptionType, false>) => {
     // const input:IndexRatesInput | undefined  ={stateCode}
     // TODO figure out why this isn't working -  useIndexRatesQuery({variables: { input }})
-    const { data, loading, error } =  useIndexRatesQuery()
+    const { data, loading, error } = useIndexRatesQuery()
 
     const { getKey } = useS3()
     const { logDropdownSelectionEvent } = useTealium()
-    const [ _field, _meta, helpers] = useField({ name }) // useField only relevant for non-autofill implementations
+    const [_field, _meta, helpers] = useField({ name }) // useField only relevant for non-autofill implementations
 
     const rates = data?.indexRates.edges.map((e) => e.node) || []
 
     // Sort rates by latest submission in desc order and remove withdrawn
-    rates.sort(
-        (a, b) =>
-            new Date(b.revisions[0].submitInfo?.updatedAt).getTime() -
-            new Date(a.revisions[0].submitInfo?.updatedAt).getTime()
-    ).filter( (rate)=> rate.withdrawInfo === undefined)
+    rates
+        .sort(
+            (a, b) =>
+                new Date(b.revisions[0].submitInfo?.updatedAt).getTime() -
+                new Date(a.revisions[0].submitInfo?.updatedAt).getTime()
+        )
+        .filter((rate) => rate.withdrawInfo === undefined)
 
     const rateNames: LinkRateOptionType[] = rates.map((rate) => {
         const revision = rate.revisions[0]
@@ -123,9 +125,11 @@ export const LinkRateSelect = ({
                 heading: label,
             })
 
-            if(autofill) {
+            if (autofill) {
                 const linkedRateID = newValue.value
-                const linkedRate = rates.find((rate) => rate.id === linkedRateID)
+                const linkedRate = rates.find(
+                    (rate) => rate.id === linkedRateID
+                )
                 const linkedRateForm: FormikRateForm = convertGQLRateToRateForm(
                     getKey,
                     linkedRate
@@ -136,20 +140,23 @@ export const LinkRateSelect = ({
                 autofill(linkedRateForm)
             } else {
                 // this path is used for replace/withdraw redundant rates
-                // we are not autofilling form data, we are just returning the IDs of the rate selectred
-                await helpers.setValue(
-                    newValue.value)
+                // we are not autofilling form data, we are just returning the IDs of the rate selected
+                await helpers.setValue(newValue.value)
             }
         } else if (action === 'clear') {
             logDropdownSelectionEvent({
                 text: 'clear',
                 heading: label,
             })
-            if(autofill){
+            if (autofill) {
                 const emptyRateForm = convertGQLRateToRateForm(getKey)
                 // put already selected fields back in place
                 emptyRateForm.ratePreviouslySubmitted = 'YES'
                 autofill(emptyRateForm)
+            } else {
+                // this path is used for replace/withdraw redundant rates
+                // we are not autofilling form data, we are just returning the IDs of the rate selected
+                await helpers.setValue('')
             }
         }
     }
@@ -183,11 +190,11 @@ export const LinkRateSelect = ({
             options={
                 error || loading
                     ? undefined
-                    : alreadySelected?
-                    rateNames.filter(
-                          (rate) =>  !alreadySelected.includes(rate.value)
-                      )
-                    : rateNames
+                    : alreadySelected
+                      ? rateNames.filter(
+                            (rate) => !alreadySelected.includes(rate.value)
+                        )
+                      : rateNames
             }
             formatOptionLabel={formatOptionLabel}
             isSearchable
