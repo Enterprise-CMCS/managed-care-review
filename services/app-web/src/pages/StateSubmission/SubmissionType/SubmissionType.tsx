@@ -112,7 +112,7 @@ export const SubmissionType = ({
         submissionType: draftSubmission?.draftRevision?.formData.submissionType ?? '',
         contractType: draftSubmission?.draftRevision?.formData.contractType ?? '',
     }
-    
+
     if (interimState)
         return <ErrorOrLoadingPage state={interimState || 'GENERIC_ERROR'} />
 

@@ -103,7 +103,7 @@ export const ProgramSelect = ({
     return (
         <Select
             defaultValue={programValue}
-            value={programValue}
+            value={contractProgramsOnly ? programValue : undefined}
             className={styles.multiSelect}
             classNamePrefix="select"
             id={`${name}-programSelect`}
