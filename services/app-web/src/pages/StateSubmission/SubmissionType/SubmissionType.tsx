@@ -281,8 +281,8 @@ export const SubmissionType = ({
                 />
                 <PageBannerAlerts
                     loggedInUser={loggedInUser}
-                    unlockedInfo={draftSubmission?.draftRevision!.unlockInfo}
-                    showPageErrorMessage={showAPIErrorBanner}
+                    unlockedInfo={unlockInfo}
+                    showPageErrorMessage={showPageErrorMessage ?? false}
                 />
             </div>
             <FormContainer id="SubmissionType">
