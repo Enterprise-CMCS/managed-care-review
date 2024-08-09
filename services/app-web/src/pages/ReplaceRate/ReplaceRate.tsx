@@ -165,17 +165,18 @@ export const ReplaceRate = (): React.ReactElement => {
                                 return handleSubmit(e)
                             }}
                         >
-                            <h2>Replace a rate review</h2>
-                            <DataDetail id="withdrawnRate" label="Current rate">
-                                {withdrawnRateRevisionName}
-                            </DataDetail>
-
                             {shouldValidate && (
                                 <ErrorSummary
                                     errors={generateErrorSummaryErrors(errors)}
                                     headingRef={errorSummaryHeadingRef}
                                 />
                             )}
+
+                            <h2>Replace a rate review</h2>
+
+                            <DataDetail id="withdrawnRate" label="Current rate">
+                                {withdrawnRateRevisionName}
+                            </DataDetail>
 
                             <fieldset className="usa-fieldset">
                                 <legend className="srOnly">
