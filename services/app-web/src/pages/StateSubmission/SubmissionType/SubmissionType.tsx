@@ -37,7 +37,6 @@ import { PageActions } from '../PageActions'
 import styles from '../StateSubmissionForm.module.scss'
 import { GenericApiErrorBanner, ProgramSelect } from '../../../components'
 import {
-    type HealthPlanFormPageProps,
     activeFormPages,
 } from '../StateSubmissionForm'
 import {
@@ -66,9 +65,14 @@ export interface SubmissionTypeFormValues {
 
 type FormError =
     FormikErrors<SubmissionTypeFormValues>[keyof FormikErrors<SubmissionTypeFormValues>]
-export const SubmissionType = ({
+
+    type SubmissionTypePageProps = {
+        showValidations?: boolean
+    }
+
+    export const SubmissionType = ({
     showValidations = false,
-}: HealthPlanFormPageProps): React.ReactElement => {
+}: SubmissionTypePageProps): React.ReactElement => {
     const { loggedInUser } = useAuth()
     const { currentRoute } = useCurrentRoute()
     const [shouldValidate, setShouldValidate] = useState(showValidations)
@@ -299,8 +303,8 @@ export const SubmissionType = ({
                         isSubmitting,
                         setSubmitting,
                         setFieldValue,
-                    }) => {
-                        return (<>
+                    }) => (
+                        <>
                             <UswdsForm
                                 className={styles.formContainer}
                                 id="SubmissionTypeForm"
@@ -458,6 +462,7 @@ export const SubmissionType = ({
                                             inputId="programIDs"
                                             programIDs={values.programIDs}
                                             contractProgramsOnly
+                                            initializeValues
                                             aria-label="Programs this contract action covers (required)"
                                             label="Programs this contract action covers"
                                         />
@@ -674,9 +679,8 @@ export const SubmissionType = ({
                                     continueOnClickUrl="/edit/contract-details"
                                 />
                             </UswdsForm>
-                        </>)
-                        }
-}
+                        </>
+                    )}
                 </Formik>
             </FormContainer>
         </>
