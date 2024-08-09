@@ -81,9 +81,9 @@ export const SubmissionType = ({
     const navigate = useNavigate()
     const location = useLocation()
     const isNewSubmission = location.pathname === '/submissions/new'
-    const [updateContract] = useUpdateDraftContractRatesMutation()
     const { id } = useRouteParams()
-    const {
+
+    let {
         draftSubmission,
         updateDraft,
         createDraft,
@@ -91,15 +91,11 @@ export const SubmissionType = ({
         showPageErrorMessage,
         unlockInfo,
     } = useContractForm(id)
-    
-    // <ErrorOrLoadingPage
-    //     state={fetchContractLoading ? 'LOADING' : 'GENERIC_ERROR'}
-    // />
 
     const showFieldErrors = (error?: FormError) =>
         shouldValidate && Boolean(error)
 
-    const submissionTypeInitialValues: SubmissionTypeFormValues = {
+        const submissionTypeInitialValues: SubmissionTypeFormValues = {
         populationCovered:
             draftSubmission?.draftRevision?.formData.populationCovered === null
                 ? undefined
@@ -116,6 +112,9 @@ export const SubmissionType = ({
         submissionType: draftSubmission?.draftRevision?.formData.submissionType ?? '',
         contractType: draftSubmission?.draftRevision?.formData.contractType ?? '',
     }
+    
+    if (interimState)
+        return <ErrorOrLoadingPage state={interimState || 'GENERIC_ERROR'} />
 
     const handleFormSubmit = async (
         values: SubmissionTypeFormValues,
@@ -127,41 +126,6 @@ export const SubmissionType = ({
     ) => {
         if (isNewSubmission) {
             try {
-
-                const input: CreateContractInput = {
-                    populationCovered: values.populationCovered!,
-                    programIDs: values.programIDs,
-                    submissionType: values.submissionType as SubmissionTypeT,
-                    riskBasedContract: yesNoFormValueAsBoolean(
-                        values.riskBasedContract
-                    ),
-                    submissionDescription: values.submissionDescription,
-                    contractType: values.contractType as ContractType,
-                }
-                const { data: createContractData, errors: createContractErrors } =
-                    await draftSubmission({
-                        variables: {
-                            input,
-                        },
-                    })
-                if (!createContractData) {
-                    setShowAPIErrorBanner(true)
-                    return
-                }
-                if (createContractErrors instanceof Error) {
-                    setShowAPIErrorBanner(true)
-                    return
-                }
-                const draftContract = createContractData.createContract.contract
-        
-                if (!draftContract) {
-                    setShowAPIErrorBanner(true)
-                    return
-                }
-                if (draftContract instanceof Error) {
-                    setShowAPIErrorBanner(true)
-                    return
-                }
                 if (!values.populationCovered) {
                     console.info(
                         'unexpected error, attempting to submit without population covered',
@@ -194,8 +158,32 @@ export const SubmissionType = ({
                     return
                 }
 
+                const input: CreateContractInput = {
+                    populationCovered: values.populationCovered!,
+                    programIDs: values.programIDs,
+                    submissionType: values.submissionType as SubmissionTypeT,
+                    riskBasedContract: yesNoFormValueAsBoolean(
+                        values.riskBasedContract
+                    ),
+                    submissionDescription: values.submissionDescription,
+                    contractType: values.contractType as ContractType,
+                }
+
+                if (!createDraft) {
+                    console.info(
+                        'PROGRAMMING ERROR, SubmissionType for does have props needed to update a draft.'
+                    )
+                    return
+                }
+
+                const draftSubmission = await createDraft(input)
+
+                if (draftSubmission instanceof Error) {
+                    console.error('ah')
+                    return
+                }
                 navigate(
-                    `/submissions/${draftContract.id}/edit/contract-details`
+                    `/submissions/${draftSubmission.id}/edit/contract-details`
                 )
             } catch (serverError) {
                 setShowAPIErrorBanner(true)
@@ -206,37 +194,35 @@ export const SubmissionType = ({
                 )
             }
         } else {
-            if (!draftSubmission) {
+            if (draftSubmission === undefined || !updateDraft || !draftSubmission.draftRevision) {
+                console.info(draftSubmission, updateDraft)
                 console.info(
-                    'Expected draft revision on contract to be present'
+                    'ERROR, SubmissionType for does not have props needed to update a draft.'
                 )
                 return
             }
             // set new values
-            draftContract.draftRevision.formData.populationCovered =
-                values.populationCovered
-            draftContract.draftRevision.formData.programIDs = values.programIDs
-            draftContract.draftRevision.formData.submissionType =
-                values.submissionType as SubmissionTypeT
-            draftContract.draftRevision.formData.riskBasedContract =
-                yesNoFormValueAsBoolean(values.riskBasedContract)
-            draftContract.draftRevision.formData.submissionDescription =
-                values.submissionDescription
-            draftContract.draftRevision.formData.contractType =
-                values.contractType as ContractType
-
+            draftSubmission = {
+                ...draftSubmission,
+                draftRevision: {
+                    ...draftSubmission.draftRevision,
+                    formData: {
+                        ...draftSubmission.draftRevision.formData,
+                        contractType: values.contractType as ContractType,
+                        submissionDescription: values.submissionDescription,
+                        riskBasedContract: yesNoFormValueAsBoolean(
+                            values.riskBasedContract
+                        ),
+                        populationCovered: values.populationCovered,
+                        submissionType: values.submissionType as SubmissionTypeT,
+                        programIDs: values.programIDs
+                    }
+                }
+            }
+            
             try {
-                const {errors: updateContractErrors} = await updateContract({
-                    variables: {
-                        input: {
-                            // ...draftContract,
-                            contractID: draftContract.id,
-                            lastSeenUpdatedAt: draftContract.updatedAt,
-                            updatedRates: []
-                        },
-                    },
-                })
-                if (updateContractErrors) {
+                const updatedDraft = await updateDraft(draftSubmission)
+                if (updatedDraft instanceof Error) {
                     formikHelpers.setSubmitting(false)
                 } else {
                     navigate(redirectPath || `../contract-details`)
@@ -288,14 +274,14 @@ export const SubmissionType = ({
                 <DynamicStepIndicator
                     formPages={
                         draftSubmission
-                            ? activeFormPages(draftSubmission.formData)
+                            ? activeFormPages(draftSubmission?.draftRevision!.formData)
                             : STATE_SUBMISSION_FORM_ROUTES
                     }
                     currentFormPage={currentRoute}
                 />
                 <PageBannerAlerts
                     loggedInUser={loggedInUser}
-                    unlockedInfo={draftSubmission?.unlockInfo}
+                    unlockedInfo={draftSubmission?.draftRevision!.unlockInfo}
                     showPageErrorMessage={showAPIErrorBanner}
                 />
             </div>
@@ -304,6 +290,7 @@ export const SubmissionType = ({
                     initialValues={submissionTypeInitialValues}
                     onSubmit={handleFormSubmit}
                     validationSchema={SubmissionTypeFormSchema()}
+                    enableReinitialize
                 >
                     {({
                         values,
@@ -312,8 +299,8 @@ export const SubmissionType = ({
                         isSubmitting,
                         setSubmitting,
                         setFieldValue,
-                    }) => (
-                        <>
+                    }) => {
+                        return (<>
                             <UswdsForm
                                 className={styles.formContainer}
                                 id="SubmissionTypeForm"
@@ -687,8 +674,9 @@ export const SubmissionType = ({
                                     continueOnClickUrl="/edit/contract-details"
                                 />
                             </UswdsForm>
-                        </>
-                    )}
+                        </>)
+                        }
+}
                 </Formik>
             </FormContainer>
         </>

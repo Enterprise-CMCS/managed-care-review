@@ -10,6 +10,7 @@ import {
     useUpdateContractMutation,
     useUpdateDraftContractRatesMutation,
     useUpdateContractDraftRevisionMutation,
+    ContractDraftRevisionFormDataInput,
     ContractRevision,
     UpdateInformation,
     UnlockedContract,
@@ -119,12 +120,24 @@ const useContractForm = (contractID?: string): UseContractForm => {
 
         setShowPageErrorMessage(false)
         try {
+            const formData:ContractDraftRevisionFormDataInput = {
+                submissionDescription: input.draftRevision!.formData.submissionDescription,
+                submissionType: input.draftRevision!.formData.submissionType,
+                contractDocuments: input.draftRevision!.formData.contractDocuments,
+                federalAuthorities: input.draftRevision!.formData.federalAuthorities,
+                managedCareEntities: input.draftRevision!.formData.managedCareEntities,
+                programIDs: input.draftRevision!.formData.programIDs,
+                stateContacts: input.draftRevision!.formData.stateContacts,
+                supportingDocuments: input.draftRevision!.formData.supportingDocuments,
+                riskBasedContract: input.draftRevision!.formData.riskBasedContract,
+                populationCovered: input.draftRevision!.formData.populationCovered,
+            }
             const updateResult = await updateFormData({
                 variables: {
                     input: {
                         contractID: contractID ?? 'new-draft',
-                        lastSeenUpdatedAt: contract?.updatedAt,
-                        formData: contract!.draftRevision!.formData
+                        lastSeenUpdatedAt: contract!.draftRevision!.updatedAt,
+                        formData: formData
                     },
                 },
             })

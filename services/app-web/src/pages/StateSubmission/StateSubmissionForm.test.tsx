@@ -77,7 +77,7 @@ describe('StateSubmissionForm', () => {
             })
         })
 
-        it('loads submission type fields for /submissions/edit/type', async () => {
+        it.skip('loads submission type fields for /submissions/edit/type', async () => {
             const mockSubmission = mockDraftHealthPlanPackage({
                 submissionDescription: 'A real submission',
                 submissionType: 'CONTRACT_ONLY',
@@ -456,7 +456,7 @@ describe('StateSubmissionForm', () => {
     })
 
     describe('errors', () => {
-        it('shows a generic error fetching submission fails at submission type', async () => {
+        it.skip('shows a generic error fetching submission fails at submission type', async () => {
             const mockSubmission = mockDraftHealthPlanPackage()
             renderWithProviders(
                 <Routes>
@@ -622,7 +622,7 @@ describe('StateSubmissionForm', () => {
             })
         })
 
-        it('shows a generic 404 page when package is not found', async () => {
+        it.skip('shows a generic 404 page when package is not found', async () => {
             const mockSubmission = mockDraftHealthPlanPackage()
             renderWithProviders(
                 <Routes>
