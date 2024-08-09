@@ -138,7 +138,12 @@ export const ReplaceRate = (): React.ReactElement => {
     ): ErrorSummaryProps['errors'] => {
         const errorObject: ErrorSummaryProps['errors'] = {}
         Object.entries(errors).forEach(([field, value]) => {
-            errorObject[field] = value
+            // select dropdown component error messages needs a # proceeding the key name because this is the only way to be able to link to react-select based components. See comments in ErrorSummaryMessage component.
+            if (field === 'replacementRateID') {
+                errorObject[`#${field}`] = value
+            } else {
+                errorObject[field] = value
+            }
         })
 
         return errorObject
