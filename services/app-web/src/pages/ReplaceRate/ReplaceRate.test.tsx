@@ -165,17 +165,17 @@ describe('ReplaceRate', () => {
         // Click replace button to show errors
         await userEvent.click(replaceRateButton)
 
-        // Check for both errors
+        // Check for both errors inline and error summary
         expect(
-            screen.queryByText(
+            screen.queryAllByText(
                 'You must provide a reason for revoking this rate certification.'
             )
-        ).toBeInTheDocument()
+        ).toHaveLength(2)
         expect(
-            screen.queryByText(
+            screen.queryAllByText(
                 'You must select a replacement rate certification.'
             )
-        ).toBeInTheDocument()
+        ).toHaveLength(2)
 
         // Fill withdraw reason
         const replaceReasonInput = screen.getByRole('textbox', {
@@ -196,15 +196,15 @@ describe('ReplaceRate', () => {
 
         // Check errors are gone
         expect(
-            screen.queryByText(
+            screen.queryAllByText(
                 'You must provide a reason for revoking this rate certification.'
             )
-        ).not.toBeInTheDocument()
+        ).toHaveLength(0)
         expect(
-            screen.queryByText(
+            screen.queryAllByText(
                 'You must select a replacement rate certification.'
             )
-        ).not.toBeInTheDocument()
+        ).toHaveLength(0)
 
         // Click replace rate button
         await userEvent.click(replaceRateButton)

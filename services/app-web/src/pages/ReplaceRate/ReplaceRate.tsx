@@ -30,6 +30,11 @@ import {
 import { LinkRateSelect } from '../LinkYourRates/LinkRateSelect'
 import { PageActionsContainer } from '../StateSubmission/PageActions'
 import { ReplaceRateSchema } from './ReplaceRateSchema'
+import { useErrorSummary } from '../../hooks/useErrorSummary'
+import {
+    ErrorSummaryProps,
+    ErrorSummary,
+} from '../../components/Form/ErrorSummary/ErrorSummary'
 
 export interface ReplaceRateFormValues {
     replacementRateID: string
@@ -45,6 +50,9 @@ export const ReplaceRate = (): React.ReactElement => {
     const { loggedInUser } = useAuth()
     const navigate = useNavigate()
     const { updateHeading } = usePage()
+    const { setFocusErrorSummaryHeading, errorSummaryHeadingRef } =
+        useErrorSummary()
+
     const { id, rateID } = useParams()
     if (!id || !rateID) {
         throw new Error('PROGRAMMING ERROR: proper url params not set')
@@ -125,6 +133,17 @@ export const ReplaceRate = (): React.ReactElement => {
         }
     }
 
+    const generateErrorSummaryErrors = (
+        errors: FormikErrors<ReplaceRateFormValues>
+    ): ErrorSummaryProps['errors'] => {
+        const errorObject: ErrorSummaryProps['errors'] = {}
+        Object.entries(errors).forEach(([field, value]) => {
+            errorObject[field] = value
+        })
+
+        return errorObject
+    }
+
     return (
         <div className={styles.background}>
             <GridContainer className={styles.gridContainer}>
@@ -142,6 +161,7 @@ export const ReplaceRate = (): React.ReactElement => {
                             aria-describedby="form-guidance"
                             onSubmit={(e) => {
                                 setShouldValidate(true)
+                                setFocusErrorSummaryHeading(true)
                                 return handleSubmit(e)
                             }}
                         >
@@ -149,6 +169,13 @@ export const ReplaceRate = (): React.ReactElement => {
                             <DataDetail id="withdrawnRate" label="Current rate">
                                 {withdrawnRateRevisionName}
                             </DataDetail>
+
+                            {shouldValidate && (
+                                <ErrorSummary
+                                    errors={generateErrorSummaryErrors(errors)}
+                                    headingRef={errorSummaryHeadingRef}
+                                />
+                            )}
 
                             <fieldset className="usa-fieldset">
                                 <legend className="srOnly">
