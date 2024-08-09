@@ -189,6 +189,13 @@ export const ReplaceRate = (): React.ReactElement => {
                                     >
                                         Required
                                     </span>
+                                    {showFieldErrors(
+                                        errors.replacementRateID
+                                    ) && (
+                                        <PoliteErrorMessage formFieldLabel="Select a replacement rate">
+                                            {errors.replacementRateID}
+                                        </PoliteErrorMessage>
+                                    )}
                                     <div
                                         role="note"
                                         aria-labelledby={id}
@@ -197,13 +204,6 @@ export const ReplaceRate = (): React.ReactElement => {
                                         Selecting a rate below will withdraw the
                                         current rate from review.
                                     </div>
-                                    {showFieldErrors(
-                                        errors.replacementRateID
-                                    ) && (
-                                        <PoliteErrorMessage formFieldLabel="Select a replacement rate">
-                                            {errors.replacementRateID}
-                                        </PoliteErrorMessage>
-                                    )}
                                     <LinkRateSelect
                                         inputId="replacementRateID"
                                         name="replacementRateID"
