@@ -77,5 +77,5 @@ export {
     mockEmptyDraftContractAndRate
 } from './contractPackageDataMock'
 export { rateDataMock } from './rateDataMock'
-export { fetchContractMockSuccess, updateDraftContractRatesMockSuccess } from './contractGQLMock'
+export { fetchContractMockSuccess, fetchContractMockFail, updateDraftContractRatesMockSuccess, updateDraftContractRatesMockFail, createContractMockFail, createContractMockSuccess } from './contractGQLMock'
 export { indexRatesMockSuccess, indexRatesMockFailure } from './rateGQLMocks'
