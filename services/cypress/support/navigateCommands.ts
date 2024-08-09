@@ -24,13 +24,13 @@ Cypress.Commands.add(
 
         if (buttonKey === 'SAVE_DRAFT') {
             if(waitForLoad) {
-                cy.wait('@updateContractDraftRevisionMutation', { timeout: 50_000})
+                cy.wait('@updateHealthPlanFormDataMutation', { timeout: 50_000})
              }
             cy.findByTestId('state-dashboard-page').should('exist')
             cy.findByRole('heading',{name:'Submissions'}).should('exist')
         } else if (buttonKey === 'CONTINUE_FROM_START_NEW') {
             if (waitForLoad) {
-                cy.wait('@createContractMutation', { timeout: 50_000 })
+                cy.wait('@createHealthPlanPackageMutation', { timeout: 50_000 })
                 cy.wait('@fetchHealthPlanPackageWithQuestionsQuery')
             }
             cy.findByTestId('state-submission-form-page').should('exist')
