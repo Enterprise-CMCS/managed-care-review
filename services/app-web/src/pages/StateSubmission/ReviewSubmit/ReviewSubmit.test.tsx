@@ -8,7 +8,7 @@ import {
 } from '../../../testHelpers/apolloMocks'
 import { Route, Routes } from 'react-router-dom'
 import { RoutesRecord } from '../../../constants'
-import { mockContractPackageUnlocked } from '../../../testHelpers/apolloMocks/contractPackageDataMock'
+import { mockContractPackageDraft, mockContractPackageUnlocked } from '../../../testHelpers/apolloMocks/contractPackageDataMock'
 
 describe('ReviewSubmit', () => {
     it('renders without errors', async () => {
@@ -60,6 +60,7 @@ describe('ReviewSubmit', () => {
                         fetchCurrentUserMock({ statusCode: 200 }),
                         fetchContractMockSuccess({
                             contract: {
+                                ...mockContractPackageDraft(),
                                 id: 'test-abc-123',
                             },
                         }),
@@ -100,6 +101,7 @@ describe('ReviewSubmit', () => {
                         fetchCurrentUserMock({ statusCode: 200 }),
                         fetchContractMockSuccess({
                             contract: {
+                                ...mockContractPackageDraft(),
                                 id: 'test-abc-123',
                             },
                         }),
@@ -133,7 +135,7 @@ describe('ReviewSubmit', () => {
                     mocks: [
                         fetchCurrentUserMock({ statusCode: 200 }),
                         fetchContractMockSuccess({
-                            contract: { id: 'test-abc-123' },
+                            contract: {  ...mockContractPackageDraft(),id: 'test-abc-123' },
                         }),
                     ],
                 },
@@ -217,7 +219,7 @@ describe('ReviewSubmit', () => {
                     mocks: [
                         fetchCurrentUserMock({ statusCode: 200 }),
                         fetchContractMockSuccess({
-                            contract: { id: 'test-abc-123' },
+                            contract: {  ...mockContractPackageDraft(), id: 'test-abc-123' },
                         }),
                     ],
                 },

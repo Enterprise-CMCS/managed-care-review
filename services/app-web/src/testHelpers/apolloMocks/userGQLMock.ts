@@ -62,9 +62,9 @@ function mockValidAdminUser(userData?: Partial<AdminUser>): AdminUser {
         __typename: 'AdminUser' as const,
         id: 'bar-id',
         role: 'ADMIN_USER',
-        givenName: 'bob',
+        givenName: 'bobadmin',
         familyName: 'ddmas',
-        email: 'bob@dmas.mn.gov',
+        email: 'bobadmin@dmas.mn.gov',
         ...userData,
     }
 }

@@ -45,7 +45,7 @@ const validateAndReturnRates = (
 }
 
 export function indexRatesResolver(store: Store): QueryResolvers['indexRates'] {
-    return async (_parent, _args, context) => {
+    return async (_parent, { input }, context) => {
         const { user, ctx, tracer } = context
         const span = tracer?.startSpan('indexRates', {}, ctx)
         setResolverDetailsOnActiveSpan('indexRates', user, span)
@@ -61,6 +61,11 @@ export function indexRatesResolver(store: Store): QueryResolvers['indexRates'] {
                     await store.findAllRatesWithHistoryBySubmitInfo(
                         user.stateCode
                     )
+            } else if (input && input.stateCode) {
+                ratesWithHistory =
+                await store.findAllRatesWithHistoryBySubmitInfo(
+                    input.stateCode
+                )
             } else {
                 ratesWithHistory =
                     await store.findAllRatesWithHistoryBySubmitInfo()

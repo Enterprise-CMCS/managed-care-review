@@ -89,7 +89,7 @@ export function withdrawAndReplaceRedundantRateResolver(
         }
 
         if (withdrawAndReplaceRedundantRateResult instanceof Error) {
-            const errMessage = `Failed to replace rate on contract ID: ${contractID}; ${withdrawAndReplaceRedundantRateResult.message}`
+            const errMessage = `Failed to withdraw rate ID:${withdrawnRateID} and replace with rate ID:${replacementRateID} on contract ID: ${contractID}; ${withdrawAndReplaceRedundantRateResult.message}`
             logError('withdrawAndReplaceRedundantRate', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new GraphQLError(errMessage, {

@@ -12,6 +12,8 @@ export {
     mockUnlockedHealthPlanPackage,
 } from './healthPlanFormDataMock'
 
+export {s3DlUrl} from './documentDataMock';
+
 export {
     fetchHealthPlanPackageMockSuccess,
     fetchHealthPlanPackageMockNotFound,

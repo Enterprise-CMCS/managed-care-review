@@ -8,6 +8,7 @@ import { getIn, useFormikContext } from 'formik'
 import { LinkRateSelect } from './LinkRateSelect'
 import {
     FormikRateForm,
+    RateDetailFormConfig,
     convertGQLRateToRateForm,
 } from '../StateSubmission/RateDetails'
 import { useS3 } from '../../contexts/S3Context'
@@ -25,7 +26,7 @@ export const LinkYourRates = ({
     autofill,
     shouldValidate,
 }: LinkYourRatesProps): React.ReactElement | null => {
-    const { values, errors } = useFormikContext()
+    const { values, errors } = useFormikContext<RateDetailFormConfig>()
     const { getKey } = useS3()
 
     const showFieldErrors = (
@@ -37,6 +38,12 @@ export const LinkYourRates = ({
         if (!shouldValidate) return undefined
         return getIn(errors, `${fieldNamePrefix}.${fieldName}`)
     }
+
+     //We track rates that have already been selected to remove them from the dropdown
+     const selectedRatesByID = values.rateForms.reduce((arr: string[] = [], rate ) => {
+        if (rate?.id) arr.push(rate.id)
+        return arr
+     },[])
 
     return (
         <FormGroup
@@ -112,6 +119,7 @@ export const LinkYourRates = ({
                         initialValue={getIn(values, `${fieldNamePrefix}.id`)}
                         autofill={autofill}
                         label="Which rate certification was it?"
+                        alreadySelected={selectedRatesByID}
                     />
                 </>
             )}
