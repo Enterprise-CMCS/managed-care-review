@@ -13,9 +13,7 @@ import { RateTypeRecord } from '../../../constants/healthPlanPackages'
 const RateReviewsDashboard = (): React.ReactElement => {
     const { loggedInUser } = useAuth()
     const isAdminUser = loggedInUser?.role === 'ADMIN_USER'
-    const { data, loading, error } = useIndexRatesQuery({
-        fetchPolicy: 'network-only',
-    })
+    const { data, loading, error } = useIndexRatesQuery({variables: {input: {stateCode : undefined}}})
 
     const reviewRows: RateInDashboardType[] = []
     data?.indexRates.edges

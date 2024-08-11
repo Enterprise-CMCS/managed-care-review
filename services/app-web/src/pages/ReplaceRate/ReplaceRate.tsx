@@ -13,7 +13,7 @@ import {
 } from '@trussworks/react-uswds'
 import { Formik, FormikErrors } from 'formik'
 import { ActionButton, DataDetail, FieldTextarea, GenericApiErrorBanner, PoliteErrorMessage } from '../../components'
-import { LinkRateSelect } from '../LinkYourRates/LinkRateSelect'
+import { LinkRateSelect } from '../LinkYourRates/LinkRateSelect/LinkRateSelect'
 import { PageActionsContainer } from '../StateSubmission/PageActions'
 
 export interface ReplaceRateFormValues {

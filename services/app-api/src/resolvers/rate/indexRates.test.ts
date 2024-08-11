@@ -23,6 +23,8 @@ import {
     createAndUpdateTestContractWithRate,
 } from '../../testHelpers/gqlContractHelpers'
 import { testS3Client } from '../../../../app-web/src/testHelpers/s3Helpers'
+import statePrograms from '../../../../app-web/src/common-code/data/statePrograms.json'
+import { UserType } from '../../domain-models'
 
 describe('indexRates', () => {
     describe.each(iterableCmsUsersMockData)(
@@ -131,10 +133,17 @@ describe('indexRates', () => {
                     ldService,
                     s3Client: mockS3,
                 })
+                const stateServer = await constructTestPostgresServer({
+                    context: {
+                        user: testStateUser(),
+                    },
+                    ldService,
+                    s3Client: mockS3,
+                })
 
                 // create and submit new contracts
-                const contract1 = await createAndSubmitTestContract()
-                const contract2 = await createAndSubmitTestContract()
+                const contract1 = await createAndSubmitTestContract( stateServer)
+                const contract2 = await createAndSubmitTestContract( stateServer)
 
                 // index rates
                 const result = await cmsServer.executeOperation({
@@ -314,6 +323,86 @@ describe('indexRates', () => {
                 expect(newlyAdded.revisions[0].formData.rateDateEnd).toBe(
                     '2025-01-01'
                 )
+            })
+
+            it.only('returns rates from specific state when stateCode passed in', async () => {
+                const stateServerFL = await constructTestPostgresServer({
+                    context: {
+                        user: {...testStateUser(), stateCode: 'FL'},
+                    },
+                    ldService,
+                    s3Client: mockS3,
+                })
+                const stateServerVA = await constructTestPostgresServer({
+                    context: {
+                        user: {...testStateUser(), stateCode: 'VA'}
+                    },
+                    ldService,
+                    s3Client: mockS3,
+                })
+
+
+                const cmsServer = await constructTestPostgresServer({
+                    context: {
+                        user: mockUser(),
+                    },
+                    ldService,
+                    s3Client: mockS3,
+                })
+                const flPrograms=  statePrograms.states.filter( (program) => program.code === 'FL')[0].programs
+                const vaPrograms=  statePrograms.states.filter( (program) => program.code === 'VA')[0].programs
+                const contract1 =
+                    await createAndSubmitTestContractWithRate(stateServerFL, {stateCode: 'FL', programIDs: [flPrograms[0].id]})
+                const contract2 =
+                    await createAndSubmitTestContractWithRate(stateServerVA, {stateCode: 'VA', programIDs: [vaPrograms[0].id]})
+
+
+                const flRateID =
+                    contract1.packageSubmissions[0].rateRevisions[0].rateID
+                const vaRateID =
+                    contract2.packageSubmissions[0].rateRevisions[0].rateID
+
+                // fetch rates only with  stateCode FL
+
+                const result = await cmsServer.executeOperation({
+                    query: INDEX_RATES,
+                    variables: {input: {stateCode: 'FL'}}
+                })
+                expect(result.errors).toBeUndefined()
+                const rates: Rate[] = result.data?.indexRates.edges.map(
+                    (edge: RateEdge) => edge.node
+                )
+
+                const flRate = rates.find((test: Rate) => {
+                    return test.id === flRateID
+                })
+                const vaRate = rates.find((test: Rate) => {
+                    return test.id == vaRateID
+                })
+
+                expect(flRate).toBeTruthy()
+                expect(vaRate).toBeFalsy()
+
+                // fetch all rates
+
+                const resultAllStates = await cmsServer.executeOperation({
+                    query: INDEX_RATES,
+                })
+                expect(resultAllStates.errors).toBeUndefined()
+                const ratesAllStates: Rate[] = result.data?.indexRates.edges.map(
+                    (edge: RateEdge) => edge.node
+                )
+
+                const flRateQueryingAllStates = ratesAllStates.find((test: Rate) => {
+                    return test.id === flRateID
+                })
+                const vaRateQueryingAllStates = ratesAllStates.find((test: Rate) => {
+                    return test.id == vaRateID
+                })
+
+                expect(flRateQueryingAllStates).toBeTruthy()
+                expect(vaRateQueryingAllStates).toBeTruthy()
+
             })
 
             it('synthesizes the right statuses as a rate is submitted/unlocked/etc', async () => {

@@ -7,16 +7,16 @@ import Select, {
     SingleValue,
     createFilter,
 } from 'react-select'
-import styles from '../../components/Select/Select.module.scss'
-import { useIndexRatesQuery } from '../../gen/gqlClient'
-import { programNames } from '../../common-code/healthPlanFormDataType'
-import { formatCalendarDate } from '../../common-code/dateHelpers'
+import styles from '../../../components/Select/Select.module.scss'
+import { IndexRatesInput, useIndexRatesQuery } from '../../../gen/gqlClient'
+import { programNames, StateCodeType } from '../../../common-code/healthPlanFormDataType'
+import { formatCalendarDate } from '../../../common-code/dateHelpers'
 import {
     FormikRateForm,
     convertGQLRateToRateForm,
-} from '../StateSubmission/RateDetails'
-import { useS3 } from '../../contexts/S3Context'
-import { useTealium } from '../../hooks'
+} from '../../StateSubmission/RateDetails'
+import { useS3 } from '../../../contexts/S3Context'
+import { useTealium } from '../../../hooks'
 import { useField } from 'formik'
 
 export interface LinkRateOptionType {
@@ -37,7 +37,7 @@ export type LinkRateSelectPropType = {
     alreadySelected?: string[], // used for multi-rate, array of rate IDs helps ensure we can't select rates already selected elsewhere on page
     autofill?: (rateForm: FormikRateForm) => void // used for multi-rates, when called will FieldArray replace the existing form fields with new data
     label?: string,
-    stateCode?: string //used to limit rates by state
+    stateCode?: StateCodeType//used to limit rates by state
 }
 
 export const LinkRateSelect = ({
@@ -49,9 +49,8 @@ export const LinkRateSelect = ({
     stateCode,
     ...selectProps
 }: LinkRateSelectPropType & Props<LinkRateOptionType, false>) => {
-    // const input:IndexRatesInput | undefined  ={stateCode}
-    // TODO figure out why this isn't working -  useIndexRatesQuery({variables: { input }})
-    const { data, loading, error } =  useIndexRatesQuery()
+    const input: IndexRatesInput  = {stateCode}
+    const { data, loading, error } =  useIndexRatesQuery({variables: { input }})
 
     const { getKey } = useS3()
     const { logDropdownSelectionEvent } = useTealium()

@@ -1,5 +1,5 @@
-query indexRates {
-    indexRates {
+query indexRates($input: IndexRatesInput) {
+    indexRates(input: $input) {
         totalCount
         edges {
             node {
