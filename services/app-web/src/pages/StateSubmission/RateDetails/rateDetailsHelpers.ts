@@ -8,8 +8,10 @@ import {
 } from '../../../formHelpers/formatters'
 import {
     ActuaryContact,
+    HealthPlanPackageStatus,
     Rate,
     RateFormData, RateFormDataInput,
+    RateRevision,
     UpdateContractRateInput,
 } from '../../../gen/gqlClient'
 import { S3ClientT } from '../../../s3'
@@ -79,6 +81,70 @@ const isRatePartiallyFilled = (rate: RateFormData): boolean => {
         rate.actuaryCommunicationPreference)
 }
 
+type RateRevisionWithoutContracts = Omit<RateRevision, "contractRevisions">
+
+// This is a narrower type than just using Rate that allows for the fact that we are calling indexRates without including contractRevisions
+interface RateWithoutContractData {
+    parentContractID: string
+    draftRevision?: RateRevisionWithoutContracts | null,
+    revisions: RateRevisionWithoutContracts[],
+    id: string,
+    initiallySubmittedAt?: Date,
+    status: HealthPlanPackageStatus,
+}
+
+// Convert from GQL Rate to FormikRateForm object used in the form
+// if rate is not passed in, return an empty RateForm // we need to pass in the  s3 handler because 3 urls generated client-side
+// useLatestSubmission means to pull the latest submitted info rather than the draft info
+const convertIndexRatesGQLRateToRateForm = (getKey: S3ClientT['getKey'], rate?: RateWithoutContractData, parentContractID?: string): FormikRateForm => {
+    const handleAsLinkedRate = rate && rate.parentContractID !== parentContractID // TODO: Make this a more sophisticated check for child-rates
+    const rateRev = handleAsLinkedRate ? rate?.revisions[0] : rate?.draftRevision
+    const rateForm = rateRev?.formData
+
+    // isFilledIn is used for determining if the rateForm should be saved in the case of the yes/no question for was
+    // this rate included in another submission fillable Fields includes only fields that aren't auto populated on
+    // initial yes/no selection, like id and rateName
+    const isFilledIn = rateForm && isRatePartiallyFilled(rateForm)
+
+    return {
+        id: rate?.id,
+        status: rate?.status,
+        rateCertificationName: rateForm?.rateCertificationName ?? undefined,
+        rateType: rateForm?.rateType ?? undefined,
+        rateCapitationType: rateForm?.rateCapitationType ?? undefined,
+        rateDateStart: formatForForm(rateForm?.rateDateStart),
+        rateDateEnd: formatForForm(rateForm?.rateDateEnd),
+        rateDateCertified: formatForForm(rateForm?.rateDateCertified),
+        effectiveDateStart: formatForForm(
+            rateForm?.amendmentEffectiveDateStart
+        ),
+        effectiveDateEnd: formatForForm(rateForm?.amendmentEffectiveDateEnd),
+        rateProgramIDs: rateForm?.rateProgramIDs ?? [],
+        rateDocuments: formatDocumentsForForm({
+            documents: rateForm?.rateDocuments,
+            getKey: getKey,
+        }),
+        supportingDocuments: formatDocumentsForForm({
+            documents: rateForm?.supportingDocuments,
+            getKey: getKey,
+        }),
+        actuaryContacts: formatActuaryContactsForForm(
+            rateForm?.certifyingActuaryContacts
+        ),
+        addtlActuaryContacts: formatAddtlActuaryContactsForForm(
+            rateForm?.addtlActuaryContacts
+        ),
+        actuaryCommunicationPreference:
+            rateForm?.actuaryCommunicationPreference ?? undefined,
+        packagesWithSharedRateCerts:
+            rateForm?.packagesWithSharedRateCerts ?? [],
+        ratePreviouslySubmitted: handleAsLinkedRate? 'YES' : isFilledIn ? 'NO' : undefined,
+        initiallySubmittedAt: rate?.initiallySubmittedAt,
+        linkRateSelect: handleAsLinkedRate && rate?.id ? 'true' : undefined
+    }
+}
+
+
 // Convert from GQL Rate to FormikRateForm object used in the form
 // if rate is not passed in, return an empty RateForm // we need to pass in the  s3 handler because 3 urls generated client-side
 // useLatestSubmission means to pull the latest submitted info rather than the draft info
@@ -132,6 +198,7 @@ const convertGQLRateToRateForm = (getKey: S3ClientT['getKey'], rate?: Rate, pare
 
 export {
     convertGQLRateToRateForm,
+    convertIndexRatesGQLRateToRateForm,
     convertRateFormToGQLRateFormData,
     generateUpdatedRates,
     isRatePartiallyFilled

@@ -15,7 +15,6 @@ import {
     submitTestRate,
     unlockTestRate,
     updateTestRate,
-    createAndSubmitTestContract,
 } from '../../testHelpers'
 import {
     createAndSubmitTestContractWithRate,
@@ -121,55 +120,6 @@ describe('indexRates', () => {
                     })
 
                 expect(testRates).toHaveLength(0)
-            })
-
-            it('does not add rates when contracts without rates are submitted', async () => {
-                const cmsUser = mockUser()
-                const cmsServer = await constructTestPostgresServer({
-                    context: {
-                        user: cmsUser,
-                    },
-                    ldService,
-                    s3Client: mockS3,
-                })
-                const stateServer = await constructTestPostgresServer({
-                    context: {
-                        user: testStateUser(),
-                    },
-                    ldService,
-                    s3Client: mockS3,
-                })
-
-                // create and submit new contracts
-                const contract1 = await createAndSubmitTestContract( stateServer)
-                const contract2 = await createAndSubmitTestContract( stateServer)
-
-                // index rates
-                const result = await cmsServer.executeOperation({
-                    query: INDEX_RATES,
-                })
-
-                expect(result.errors).toBeUndefined()
-
-                const rates = result.data?.indexRates.edges
-
-                // Go through all of these rates and confirm that none of them are associated with either of these two new contracts
-                for (const rateEdge of rates) {
-                    const rateRevs = rateEdge.node.revisions
-                    for (const rrev of rateRevs) {
-                        const contractRevs = rrev.contractRevisions
-                        for (const contractRev of contractRevs) {
-                            if (
-                                contractRev.contract.id === contract1.id ||
-                                contractRev.contractID === contract2.id
-                            ) {
-                                throw new Error(
-                                    'contract without rates made rates'
-                                )
-                            }
-                        }
-                    }
-                }
             })
 
             it('returns a rate with history with correct data in each revision', async () => {
@@ -327,19 +277,18 @@ describe('indexRates', () => {
             it('returns rates from specific state when stateCode passed in', async () => {
                 const stateServerFL = await constructTestPostgresServer({
                     context: {
-                        user: {...testStateUser(), stateCode: 'FL'},
+                        user: { ...testStateUser(), stateCode: 'FL' },
                     },
                     ldService,
                     s3Client: mockS3,
                 })
                 const stateServerVA = await constructTestPostgresServer({
                     context: {
-                        user: {...testStateUser(), stateCode: 'VA'}
+                        user: { ...testStateUser(), stateCode: 'VA' },
                     },
                     ldService,
                     s3Client: mockS3,
                 })
-
 
                 const cmsServer = await constructTestPostgresServer({
                     context: {
@@ -348,12 +297,20 @@ describe('indexRates', () => {
                     ldService,
                     s3Client: mockS3,
                 })
-                const flPrograms=  statePrograms.states.filter( (program) => program.code === 'FL')[0].programs
-                const vaPrograms=  statePrograms.states.filter( (program) => program.code === 'VA')[0].programs
-                const contract1 =
-                    await createAndSubmitTestContractWithRate(stateServerFL, {stateCode: 'FL', programIDs: [flPrograms[0].id]})
-                const contract2 =
-                    await createAndSubmitTestContractWithRate(stateServerVA, {stateCode: 'VA', programIDs: [vaPrograms[0].id]})
+                const flPrograms = statePrograms.states.filter(
+                    (program) => program.code === 'FL'
+                )[0].programs
+                const vaPrograms = statePrograms.states.filter(
+                    (program) => program.code === 'VA'
+                )[0].programs
+                const contract1 = await createAndSubmitTestContractWithRate(
+                    stateServerFL,
+                    { stateCode: 'FL', programIDs: [flPrograms[0].id] }
+                )
+                const contract2 = await createAndSubmitTestContractWithRate(
+                    stateServerVA,
+                    { stateCode: 'VA', programIDs: [vaPrograms[0].id] }
+                )
 
                 const flRateID =
                     contract1.packageSubmissions[0].rateRevisions[0].rateID
@@ -364,7 +321,7 @@ describe('indexRates', () => {
 
                 const result = await cmsServer.executeOperation({
                     query: INDEX_RATES,
-                    variables: {input: {stateCode: 'FL'}}
+                    variables: { input: { stateCode: 'FL' } },
                 })
                 expect(result.errors).toBeUndefined()
                 const rates: Rate[] = result.data?.indexRates.edges.map(
@@ -387,20 +344,24 @@ describe('indexRates', () => {
                     query: INDEX_RATES,
                 })
                 expect(resultAllStates.errors).toBeUndefined()
-                const ratesAllStates: Rate[] = resultAllStates.data?.indexRates.edges.map(
-                    (edge: RateEdge) => edge.node
-                )
+                const ratesAllStates: Rate[] =
+                    resultAllStates.data?.indexRates.edges.map(
+                        (edge: RateEdge) => edge.node
+                    )
 
-                const flRateQueryingAllStates = ratesAllStates.find((test: Rate) => {
-                    return test.id === flRateID
-                })
-                const vaRateQueryingAllStates = ratesAllStates.find((test: Rate) => {
-                    return test.id == vaRateID
-                })
+                const flRateQueryingAllStates = ratesAllStates.find(
+                    (test: Rate) => {
+                        return test.id === flRateID
+                    }
+                )
+                const vaRateQueryingAllStates = ratesAllStates.find(
+                    (test: Rate) => {
+                        return test.id == vaRateID
+                    }
+                )
 
                 expect(flRateQueryingAllStates).toBeTruthy()
                 expect(vaRateQueryingAllStates).toBeTruthy()
-
             })
 
             it('synthesizes the right statuses as a rate is submitted/unlocked/etc', async () => {

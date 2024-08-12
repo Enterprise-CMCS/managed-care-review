@@ -1,4 +1,3 @@
-import React from 'react'
 import Select, {
     ActionMeta,
     AriaOnFocus,
@@ -9,7 +8,7 @@ import Select, {
 } from 'react-select'
 import styles from '../../../components/Select/Select.module.scss'
 import { IndexRatesInput, useIndexRatesQuery } from '../../../gen/gqlClient'
-import { programNames, StateCodeType } from '../../../common-code/healthPlanFormDataType'
+import { programNames } from '../../../common-code/healthPlanFormDataType'
 import { formatCalendarDate } from '../../../common-code/dateHelpers'
 import {
     FormikRateForm,
@@ -18,6 +17,7 @@ import {
 import { useS3 } from '../../../contexts/S3Context'
 import { useTealium } from '../../../hooks'
 import { useField } from 'formik'
+import { convertIndexRatesGQLRateToRateForm } from '../../StateSubmission/RateDetails/rateDetailsHelpers'
 
 export interface LinkRateOptionType {
     readonly value: string
@@ -49,8 +49,10 @@ export const LinkRateSelect = ({
     stateCode,
     ...selectProps
 }: LinkRateSelectPropType & Props<LinkRateOptionType, false>) => {
-    const input: IndexRatesInput  = {stateCode}
-    const { data, loading, error } =  useIndexRatesQuery({variables: { input }})
+    const input: IndexRatesInput = { stateCode }
+    const { data, loading, error } = useIndexRatesQuery({
+        variables: { input },
+    })
     const { getKey } = useS3()
     const { logDropdownSelectionEvent } = useTealium()
     const [_field, _meta, helpers] = useField({ name }) // useField only relevant for non-autofill implementations
@@ -128,10 +130,8 @@ export const LinkRateSelect = ({
                 const linkedRate = rates.find(
                     (rate) => rate.id === linkedRateID
                 )
-                const linkedRateForm: FormikRateForm = convertGQLRateToRateForm(
-                    getKey,
-                    linkedRate
-                )
+                const linkedRateForm: FormikRateForm =
+                    convertIndexRatesGQLRateToRateForm(getKey, linkedRate)
                 // put already selected fields back in place
                 linkedRateForm.ratePreviouslySubmitted = 'YES'
 
