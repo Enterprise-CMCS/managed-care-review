@@ -24,7 +24,6 @@ import {
 } from '../../testHelpers/gqlContractHelpers'
 import { testS3Client } from '../../../../app-web/src/testHelpers/s3Helpers'
 import statePrograms from '../../../../app-web/src/common-code/data/statePrograms.json'
-import { UserType } from '../../domain-models'
 
 describe('indexRates', () => {
     describe.each(iterableCmsUsersMockData)(
@@ -324,8 +323,8 @@ describe('indexRates', () => {
                     '2025-01-01'
                 )
             })
-
-            it.only('returns rates from specific state when stateCode passed in', async () => {
+            // TODO why isn't this test passing?
+            it('returns rates from specific state when stateCode passed in', async () => {
                 const stateServerFL = await constructTestPostgresServer({
                     context: {
                         user: {...testStateUser(), stateCode: 'FL'},
@@ -356,12 +355,11 @@ describe('indexRates', () => {
                 const contract2 =
                     await createAndSubmitTestContractWithRate(stateServerVA, {stateCode: 'VA', programIDs: [vaPrograms[0].id]})
 
-
                 const flRateID =
                     contract1.packageSubmissions[0].rateRevisions[0].rateID
                 const vaRateID =
                     contract2.packageSubmissions[0].rateRevisions[0].rateID
-
+                console.log('IDexists', vaRateID)
                 // fetch rates only with  stateCode FL
 
                 const result = await cmsServer.executeOperation({

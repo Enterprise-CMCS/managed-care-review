@@ -5,7 +5,6 @@ import UPDATE_DRAFT_CONTRACT_RATES from '../../../app-graphql/src/mutations/upda
 import WITHDRAW_REPLACE_RATE from '../../../app-graphql/src/mutations/withdrawAndReplaceRedundantRate.graphql'
 
 import { findStatePrograms } from '../postgres'
-import type { InsertContractArgsType } from '../postgres/contractAndRates/insertContract'
 
 import { must } from './assertionHelpers'
 import {
@@ -13,9 +12,6 @@ import {
     defaultFloridaProgram,
     updateTestHealthPlanFormData,
 } from './gqlHelpers'
-import { mockInsertContractArgs, mockContractData } from './contractDataMocks'
-import { sharedTestPrismaClient } from './storeHelpers'
-import { insertDraftContract } from '../postgres/contractAndRates/insertContract'
 
 import { type ContractType } from '../domain-models'
 import type { ApolloServer } from 'apollo-server-lambda'
@@ -38,34 +34,16 @@ import CREATE_CONTRACT from 'app-graphql/src/mutations/createContract.graphql'
 import { mockGqlContractDraftRevisionFormDataInput } from './gqlContractInputMocks'
 
 const createAndSubmitTestContract = async (
-    contractData?: InsertContractArgsType
-): Promise<ContractType> => {
-    const contract = await createTestContractWithDB(contractData)
-    return await must(submitTestContractWithDB(contract))
-}
-
-const submitTestContractWithDB = async (
-    contractData?: Partial<InsertContractArgsType>
-): Promise<ContractType> => {
-    const prismaClient = await sharedTestPrismaClient()
-    const defaultContractData = { ...mockContractData() }
-    const initialData = {
-        ...defaultContractData,
-        ...contractData, // override with any new fields passed in
-    }
-    const programs = initialData.stateCode
-        ? [must(findStatePrograms(initialData.stateCode))[0]]
-        : [defaultFloridaProgram()]
-
-    const programIDs = programs.map((program) => program.id)
-
-    const draftContractData = mockInsertContractArgs({
-        ...initialData,
-        programIDs: programIDs,
-        stateCode: 'FL',
-    })
-
-    return must(await insertDraftContract(prismaClient, draftContractData))
+    server: ApolloServer,
+    stateCode?: StateCodeType,
+    formData?: Partial<ContractFormDataType>
+): Promise<Contract> => {
+    const contract = await createAndUpdateTestContractWithoutRates(
+        server,
+        stateCode,
+        formData
+    )
+    return await must(submitTestContract(server, contract.id, 'Time to submit!'))
 }
 
 async function submitTestContract(
@@ -148,7 +126,6 @@ async function createAndSubmitTestContractWithRate(
         server,
         contractOverrides
     )
-
     return await submitTestContract(server, draft.id)
 }
 
@@ -210,32 +187,6 @@ async function updateTestContractToReplaceRate(
 
     return result.data.withdrawAndReplaceRedundantRate.contract
 }
-
-// USING PRISMA DIRECTLY BELOW ---  we have no createContract resolver yet, but we have integration tests needing the workflows
-const createTestContractWithDB = async (
-    contractData?: Partial<InsertContractArgsType>
-): Promise<ContractType> => {
-    const prismaClient = await sharedTestPrismaClient()
-    const defaultContractData = { ...mockContractData() }
-    const initialData = {
-        ...defaultContractData,
-        ...contractData, // override with any new fields passed in
-    }
-    const programs = initialData.stateCode
-        ? [must(findStatePrograms(initialData.stateCode))[0]]
-        : [defaultFloridaProgram()]
-
-    const programIDs = programs.map((program) => program.id)
-
-    const draftContractData = mockInsertContractArgs({
-        ...initialData,
-        programIDs: programIDs,
-        stateCode: 'FL',
-    })
-
-    return must(await insertDraftContract(prismaClient, draftContractData))
-}
-
 const createTestContract = async (
     server: ApolloServer,
     stateCode?: StateCodeType,
@@ -279,9 +230,10 @@ async function createAndUpdateTestContractWithRate(
 ): Promise<Contract> {
     const draft = await createAndUpdateTestContractWithoutRates(
         server,
-        'FL',
+        contractOverrides?.stateCode as StateCodeType ?? 'FL',
         contractOverrides
     )
+
     return await addNewRateToTestContract(server, draft)
 }
 
@@ -452,7 +404,6 @@ const updateTestContractDraftRevision = async (
 }
 
 export {
-    createTestContractWithDB,
     submitTestContract,
     unlockTestContract,
     createAndSubmitTestContract,

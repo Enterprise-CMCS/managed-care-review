@@ -8,8 +8,7 @@ export { must } from './assertionHelpers'
 
 export {
     mockInsertContractArgs,
-    mockContractRevision,
-    mockContractData,
+    mockContractRevision
 } from './contractDataMocks'
 
 export {
@@ -32,7 +31,6 @@ export {
 } from './gqlRateHelpers'
 
 export {
-    createTestContractWithDB,
     createAndSubmitTestContract,
     fetchTestContract,
     updateTestContractDraftRevision,

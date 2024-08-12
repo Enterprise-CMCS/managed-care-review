@@ -39,33 +39,6 @@ const mockInsertContractArgs = ({
     }
 }
 
-const mockContractData = (
-    contract?: Partial<ContractTableFullPayload>
-): ContractTableFullPayload => {
-    const contractData = {
-        id: uuidv4(),
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        mccrsID: null,
-        stateCode: 'MN',
-        stateNumber: 111,
-        draftRates: [],
-        revisions: [],
-        ...contract,
-    }
-
-    Object.assign(contractData, {
-        revisions: contract?.revisions ?? [
-            mockContractRevision({
-                ...contractData,
-                ...contract,
-            }) as ContractRevisionTableWithRates,
-        ],
-    })
-
-    return contractData
-}
-
 const mockContractRevision = (
     contract?: Partial<ContractTableFullPayload>,
     revision?: Partial<ContractRevisionTableWithRates>,
@@ -172,4 +145,4 @@ const mockContractRevision = (
     }
 }
 
-export { mockInsertContractArgs, mockContractRevision, mockContractData }
+export { mockInsertContractArgs, mockContractRevision}
