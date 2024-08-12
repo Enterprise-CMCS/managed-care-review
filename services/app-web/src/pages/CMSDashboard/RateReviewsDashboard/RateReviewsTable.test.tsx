@@ -63,7 +63,7 @@ describe('RateReviewsTable', () => {
 
     describe.each(iterableCmsUsersMockData)(
         '$userRole RateReviewsTable tests',
-        ({ userRole, mockUser }) => {
+        ({ mockUser }) => {
             it('renders rates table correctly', async () => {
                 renderWithProviders(
                     <RateReviewsTable
