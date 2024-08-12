@@ -323,7 +323,7 @@ describe('indexRates', () => {
                     '2025-01-01'
                 )
             })
-            // TODO why isn't this test passing?
+
             it('returns rates from specific state when stateCode passed in', async () => {
                 const stateServerFL = await constructTestPostgresServer({
                     context: {
@@ -359,7 +359,7 @@ describe('indexRates', () => {
                     contract1.packageSubmissions[0].rateRevisions[0].rateID
                 const vaRateID =
                     contract2.packageSubmissions[0].rateRevisions[0].rateID
-                console.log('IDexists', vaRateID)
+
                 // fetch rates only with  stateCode FL
 
                 const result = await cmsServer.executeOperation({
@@ -387,7 +387,7 @@ describe('indexRates', () => {
                     query: INDEX_RATES,
                 })
                 expect(resultAllStates.errors).toBeUndefined()
-                const ratesAllStates: Rate[] = result.data?.indexRates.edges.map(
+                const ratesAllStates: Rate[] = resultAllStates.data?.indexRates.edges.map(
                     (edge: RateEdge) => edge.node
                 )
 

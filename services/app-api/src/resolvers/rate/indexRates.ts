@@ -62,7 +62,6 @@ export function indexRatesResolver(store: Store): QueryResolvers['indexRates'] {
                        { stateCode: user.stateCode}
                     )
             } else if (input && input.stateCode) {
-                // TODO why is stateCode not getting passed in
                 ratesWithHistory = await store.findAllRatesWithHistoryBySubmitInfo(
                     {stateCode: input.stateCode}
                 )

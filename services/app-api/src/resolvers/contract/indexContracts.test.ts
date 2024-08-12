@@ -23,7 +23,7 @@ describe(`indexContracts`, () => {
     describe('isStateUser', () => {
         const cmsUser = testCMSUser()
         const mockS3 = testS3Client()
-        it.only('returns a list of contracts that includes newly created entries', async () => {
+        it('returns a list of contracts that includes newly created entries', async () => {
             const stateServer = await constructTestPostgresServer({
                 s3Client: mockS3,
             })
@@ -37,19 +37,17 @@ describe(`indexContracts`, () => {
             const submittedFormData =
                 submittedContract.packageSubmissions[0].contractRevision
                     .formData
-
-            console.log('HELLO', submittedContract)
             // then see if we can get that same contract back from the index
             const result = await stateServer.executeOperation({
                 query: INDEX_CONTRACTS,
             })
 
             expect(result.errors).toBeUndefined()
-            console.log('HELLO', result)
+
             const submissionsIndex = result.data?.indexContracts
 
             expect(submissionsIndex.totalCount).toBeGreaterThan(1)
-            console.log('here1')
+
             // Since we don't wipe the DB between tests,filter out extraneous contracts and grab new contracts by ID to confirm they are returned
             const theseSubmissions: Contract[] = submissionsIndex.edges
                 .map((edge: ContractEdge) => edge.node)
@@ -58,7 +56,6 @@ describe(`indexContracts`, () => {
                 )
             // specific contracts by id exist
             expect(theseSubmissions).toHaveLength(2)
-                console.log('here2', 2)
             // confirm some contract data is correct too, first in list will be draft, second is the submitted
             expect(theseSubmissions[0].initiallySubmittedAt).toBeNull()
             expect(theseSubmissions[0].status).toBe('DRAFT')
@@ -68,7 +65,6 @@ describe(`indexContracts`, () => {
             ).toBe(draftFormData?.submissionDescription)
             expect(theseSubmissions[1].initiallySubmittedAt).toBe(todaysDate())
             expect(theseSubmissions[1].status).toBe('SUBMITTED')
-            console.log('here3', 3)
             expect(
                 theseSubmissions[1].packageSubmissions[0].contractRevision
                     .formData.submissionDescription
