@@ -37,7 +37,7 @@ export type LinkRateSelectPropType = {
     alreadySelected?: string[], // used for multi-rate, array of rate IDs helps ensure we can't select rates already selected elsewhere on page
     autofill?: (rateForm: FormikRateForm) => void // used for multi-rates, when called will FieldArray replace the existing form fields with new data
     label?: string,
-    stateCode?: StateCodeType//used to limit rates by state
+    stateCode?: string //used to limit rates by state
 }
 
 export const LinkRateSelect = ({
