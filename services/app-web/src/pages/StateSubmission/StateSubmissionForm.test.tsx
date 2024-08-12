@@ -14,11 +14,10 @@ import {
     fetchContractMockSuccess,
     fetchContractMockFail,
     mockContractPackageDraft,
-    updateDraftContractRatesMockFail
+    updateContractDraftRevisionMockFail,
 } from '../../testHelpers/apolloMocks'
 import {
     fetchHealthPlanPackageMockSuccess,
-    fetchHealthPlanPackageMockNotFound,
     fetchHealthPlanPackageMockNetworkFailure,
     fetchHealthPlanPackageMockAuthFailure,
     updateHealthPlanFormDataMockSuccess,
@@ -85,6 +84,9 @@ describe('StateSubmissionForm', () => {
             })
             const mockDraftContract = mockContractPackageDraft()
             mockDraftContract.draftRevision!.formData.submissionType = 'CONTRACT_ONLY'
+            mockDraftContract.draftRevision!.formData.submissionDescription = 'A real submission'
+            mockDraftContract.draftRevision!.formData.programIDs = ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce']
+            
             renderWithProviders(
                 <Routes>
                     <Route element={<SubmissionSideNav />}>
@@ -110,7 +112,7 @@ describe('StateSubmissionForm', () => {
                             ),
                             fetchContractMockSuccess({
                                 contract: {
-                                    ...mockContractPackageDraft(mockDraftContract),
+                                    ...mockDraftContract,
                                     id: '15',
                                 },
                             }),
@@ -471,7 +473,7 @@ describe('StateSubmissionForm', () => {
                     apolloProvider: {
                         mocks: [
                             fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchHealthPlanPackageMockAuthFailure(),
+                            // fetchHealthPlanPackageMockAuthFailure(),
                             fetchStateHealthPlanPackageWithQuestionsMockSuccess(
                                 {
                                     id: '15',
@@ -557,7 +559,7 @@ describe('StateSubmissionForm', () => {
             expect(loading).toBeInTheDocument()
         })
 
-        it.skip('shows a generic error when updating submission fails', async () => {
+        it('shows a generic error when updating submission fails', async () => {
             const mockSubmission = mockDraftHealthPlanPackage({
                 submissionDescription:
                     'A real submission but updated something',
@@ -594,7 +596,7 @@ describe('StateSubmissionForm', () => {
                             fetchContractMockSuccess({
                                 contract: mockContract,
                             }),
-                            updateDraftContractRatesMockFail({contract: mockContract})
+                            updateContractDraftRevisionMockFail({contract: mockContract})
                         ],
                     },
                     routerProvider: { route: '/submissions/15/edit/type' },
@@ -622,8 +624,7 @@ describe('StateSubmissionForm', () => {
             })
         })
 
-        it.skip('shows a generic 404 page when package is not found', async () => {
-            const mockSubmission = mockDraftHealthPlanPackage()
+        it('shows a generic 404 page when package is not found', async () => {
             renderWithProviders(
                 <Routes>
                     <Route element={<SubmissionSideNav />}>
@@ -637,15 +638,7 @@ describe('StateSubmissionForm', () => {
                     apolloProvider: {
                         mocks: [
                             fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchHealthPlanPackageMockNotFound({
-                                id: '404',
-                            }),
-                            fetchStateHealthPlanPackageWithQuestionsMockSuccess(
-                                {
-                                    id: '404',
-                                    stateSubmission: mockSubmission,
-                                }
-                            ),
+                            fetchContractMockSuccess({}),
                             fetchContractMockFail({
                                 id: '404',
                             }),

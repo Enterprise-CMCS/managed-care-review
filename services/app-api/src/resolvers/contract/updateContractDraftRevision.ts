@@ -72,7 +72,6 @@ export function updateContractDraftRevision(
         ) {
             const errMessage = `Contract is not in editable state. Contract: ${contractID} Status: ${contractWithHistory.status}`
             logError('updateContractDraftRevision', errMessage)
-            console.error(errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new UserInputError(errMessage, {
                 argumentName: 'contractID',
@@ -87,8 +86,6 @@ export function updateContractDraftRevision(
             const errMessage = `Concurrent update error: The data you are trying to modify has changed since you last retrieved it. Please refresh the page to continue.`
             logError('updateContractDraftRevision', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
-            console.error(errMessage)
-
             throw new UserInputError(errMessage)
         }
 
@@ -104,8 +101,6 @@ export function updateContractDraftRevision(
             const errMessage = parsedFormData.message
             logError('updateContractDraftRevision', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
-            console.error(errMessage)
-
             throw new UserInputError(errMessage)
         }
 
@@ -121,8 +116,6 @@ export function updateContractDraftRevision(
             const errMessage = `Error updating form data: ${contractID}:: ${updateResult.message}`
             logError('updateContractDraftRevision', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
-            console.error(errMessage)
-
             throw new GraphQLError(errMessage, {
                 extensions: {
                     code: 'INTERNAL_SERVER_ERROR',

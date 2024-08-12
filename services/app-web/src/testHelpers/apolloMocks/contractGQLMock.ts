@@ -3,8 +3,8 @@ import {
     Contract,
     FetchContractDocument,
     UpdateDraftContractRatesDocument,
-    UpdateContractDocument,
-    UpdateContractMutation,
+    UpdateContractDraftRevisionMutation,
+    UpdateContractDraftRevisionDocument,
     UpdateDraftContractRatesMutation,
     SubmitContractMutation,
     SubmitContractDocument,
@@ -193,7 +193,34 @@ const updateDraftContractRatesMockSuccess = ({
     }
 }
 
-const updateDraftContractRatesMockFail = ({
+const updateContractDraftRevisionMockSuccess = ({
+    contract,
+}: {
+    contract?: Partial<Contract>
+}): MockedResponse<UpdateContractDraftRevisionMutation> => {
+    const contractData = mockContractPackageDraft(contract)
+    const contractInput = {
+        contractID: contractData.id,
+        lastSeenUpdatedAt: contractData.draftRevision?.updatedAt,
+        formData: contractData.draftRevision?.formData
+    }
+    return {
+        request: {
+            query: UpdateDraftContractRatesDocument,
+            variables: { input: contractInput },
+        },
+        result: {
+            data: {
+                updateContractDraftRevision: {
+                    contract: {
+                        ...contractData,
+                    },
+                },
+            },
+        },
+    }
+}
+const updateContractDraftRevisionMockFail = ({
     contract,
     error
 }: {
@@ -202,40 +229,12 @@ const updateDraftContractRatesMockFail = ({
         code: GraphQLErrorCodeTypes
         cause: GraphQLErrorCauseTypes
     }
-}): MockedResponse<UpdateContractMutation | ApolloError> => {
+}): MockedResponse<UpdateContractDraftRevisionMutation | ApolloError> => {
     const contractData = mockContractPackageDraft(contract)
     const contractInput = {
         contractID: contractData.id,
         lastSeenUpdatedAt: contractData.draftRevision?.updatedAt,
-        updatedRates: [
-            {
-                formData: {
-                rateType: undefined,
-                rateCapitationType: undefined,
-                rateDocuments: [],
-                supportingDocuments: [],
-                rateDateStart: undefined,
-                rateDateEnd: undefined,
-                rateDateCertified: undefined,
-                amendmentEffectiveDateStart: undefined,
-                amendmentEffectiveDateEnd: undefined,
-                rateProgramIDs: [],
-                deprecatedRateProgramIDs: [],
-                certifyingActuaryContacts: [
-                    {
-                        name: "",
-                        titleRole: "",
-                        email: "",
-                        actuarialFirm: undefined,
-                        actuarialFirmOther: ""
-                    }
-                ],
-                addtlActuaryContacts: [],
-                actuaryCommunicationPreference: undefined,
-            },
-            rateID: undefined,
-            type: "CREATE"
-        }]
+        formData: contractData.draftRevision?.formData
     }
 
     const graphQLError = new GraphQLError(
@@ -252,7 +251,7 @@ const updateDraftContractRatesMockFail = ({
 
     return {
         request: {
-            query: UpdateContractDocument,
+            query: UpdateContractDraftRevisionDocument,
             variables: { input: contractInput },
         },
         error: new ApolloError({
@@ -318,4 +317,4 @@ const submitContractMockError = ({
         },
     }
 }
-export { fetchContractMockSuccess, fetchContractMockFail, updateDraftContractRatesMockSuccess, updateDraftContractRatesMockFail, submitContractMockSuccess, submitContractMockError, createContractMockFail, createContractMockSuccess }
+export { fetchContractMockSuccess, fetchContractMockFail, updateDraftContractRatesMockSuccess, updateContractDraftRevisionMockFail, updateContractDraftRevisionMockSuccess, submitContractMockSuccess, submitContractMockError, createContractMockFail, createContractMockSuccess }
