@@ -138,7 +138,7 @@ describe('ReplaceRate', () => {
                         statusCode: 200,
                     }),
                     fetchContractMockSuccess({ contract }),
-                    indexRatesMockSuccess(replacementRates),
+                    indexRatesMockSuccess(contract.stateCode, replacementRates),
                     withdrawAndReplaceRedundantRateMock({
                         contract,
                         input: {
