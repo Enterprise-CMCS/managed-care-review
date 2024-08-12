@@ -51,6 +51,7 @@ import type {
     RateOrErrorArrayType,
     UpdateMCCRSIDFormArgsType,
     ReplaceRateOnContractArgsType,
+    FindAllRatesWithHistoryBySubmitType,
 } from './contractAndRates'
 import type { UnlockContractArgsType } from './contractAndRates/unlockContract'
 import { unlockRate } from './contractAndRates/unlockRate'
@@ -132,7 +133,7 @@ type Store = {
         ContractOrErrorArrayType | Error
     >
     findAllRatesWithHistoryBySubmitInfo: (
-        stateCode?: string
+        args?: FindAllRatesWithHistoryBySubmitType
     ) => Promise<RateOrErrorArrayType | Error>
 
     replaceRateOnContract: (
@@ -198,8 +199,8 @@ function NewPostgresStore(client: PrismaClient): Store {
             findAllContractsWithHistoryByState(client, args),
         findAllContractsWithHistoryBySubmitInfo: () =>
             findAllContractsWithHistoryBySubmitInfo(client),
-        findAllRatesWithHistoryBySubmitInfo: () =>
-            findAllRatesWithHistoryBySubmitInfo(client),
+        findAllRatesWithHistoryBySubmitInfo: (args) =>
+            findAllRatesWithHistoryBySubmitInfo(client, args),
         replaceRateOnContract: (args) => replaceRateOnContract(client, args),
         submitContract: (args) => submitContract(client, args),
         submitRate: (args) => submitRate(client, args),
