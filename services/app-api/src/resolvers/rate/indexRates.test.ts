@@ -15,7 +15,6 @@ import {
     submitTestRate,
     unlockTestRate,
     updateTestRate,
-    createAndSubmitTestContract,
 } from '../../testHelpers'
 import {
     createAndSubmitTestContractWithRate,
@@ -120,48 +119,6 @@ describe('indexRates', () => {
                     })
 
                 expect(testRates).toHaveLength(0)
-            })
-
-            it('does not add rates when contracts without rates are submitted', async () => {
-                const cmsUser = mockUser()
-                const cmsServer = await constructTestPostgresServer({
-                    context: {
-                        user: cmsUser,
-                    },
-                    ldService,
-                    s3Client: mockS3,
-                })
-
-                // create and submit new contracts
-                const contract1 = await createAndSubmitTestContract()
-                const contract2 = await createAndSubmitTestContract()
-
-                // index rates
-                const result = await cmsServer.executeOperation({
-                    query: INDEX_RATES,
-                })
-
-                expect(result.errors).toBeUndefined()
-
-                const rates = result.data?.indexRates.edges
-
-                // Go through all of these rates and confirm that none of them are associated with either of these two new contracts
-                for (const rateEdge of rates) {
-                    const rateRevs = rateEdge.node.revisions
-                    for (const rrev of rateRevs) {
-                        const contractRevs = rrev.contractRevisions
-                        for (const contractRev of contractRevs) {
-                            if (
-                                contractRev.contract.id === contract1.id ||
-                                contractRev.contractID === contract2.id
-                            ) {
-                                throw new Error(
-                                    'contract without rates made rates'
-                                )
-                            }
-                        }
-                    }
-                }
             })
 
             it('returns a rate with history with correct data in each revision', async () => {

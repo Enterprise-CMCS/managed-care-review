@@ -16,11 +16,7 @@ import { useAtom } from 'jotai/react'
 import { atom } from 'jotai'
 import { atomWithHash } from 'jotai-location'
 import { loadable } from 'jotai/vanilla/utils'
-import {
-    HealthPlanPackageStatus,
-    Program,
-    RelatedContractRevisions,
-} from '../../../gen/gqlClient'
+import { HealthPlanPackageStatus, Program } from '../../../gen/gqlClient'
 import styles from '../../../components/HealthPlanPackageTable/HealthPlanPackageTable.module.scss'
 import { Table, Tag } from '@trussworks/react-uswds'
 import dayjs from 'dayjs'
@@ -53,7 +49,6 @@ export type RateInDashboardType = {
     rateDateStart: Date
     rateDateEnd: Date
     stateName: string
-    contractRevisions: RelatedContractRevisions[]
 }
 
 export type RateTableProps = {
