@@ -362,8 +362,7 @@ describe('RateDetails', () => {
                     apolloProvider: {
                         mocks: [
                             fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchContractMockSuccess(
-                                {
+                            fetchContractMockSuccess({
                                 contract: {
                                     ...mockContractPackageDraft(),
                                     id: 'test-abc-123',

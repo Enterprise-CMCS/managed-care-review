@@ -79,3 +79,5 @@ export {
 export { rateDataMock } from './rateDataMock'
 export { fetchContractMockSuccess, updateDraftContractRatesMockSuccess } from './contractGQLMock'
 export { indexRatesMockSuccess, indexRatesMockFailure } from './rateGQLMocks'
+
+export { withdrawAndReplaceRedundantRateMock } from './replaceRateGQLMocks'
