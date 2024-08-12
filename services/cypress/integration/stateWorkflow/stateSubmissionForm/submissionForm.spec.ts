@@ -44,7 +44,7 @@ describe('state user in state submission form', () => {
             )
 
             // Change to contract and rates and contract amendment
-            cy.findByText('Contract action and rate certification').click()
+            cy.findByLabelText('Contract action and rate certification').check({force: true})
             cy.findByLabelText('Contract action and rate certification').should(
                 'be.checked'
             )
@@ -55,7 +55,7 @@ describe('state user in state submission form', () => {
             )
 
             // Save as draft
-            cy.deprecatedNavigateV1Form('SAVE_DRAFT')
+            cy.navigateContractRatesForm('SAVE_DRAFT')
             cy.findByRole('heading', { level: 1, name: /Submissions dashboard/ })
 
             // Link to type page and continue forward
@@ -64,7 +64,7 @@ describe('state user in state submission form', () => {
             )
             cy.findByTestId('step-indicator').findAllByRole('listitem').should('have.length', 6)
             cy.findByText('Rate details').should('exist')
-            cy.deprecatedNavigateV1Form('CONTINUE')
+            cy.navigateContractRatesForm('CONTINUE')
 
             // CHECK CONTRACT DETAILS PAGE NAVIGATION
             cy.findByRole('heading', { level: 2, name: /Contract details/ })
@@ -72,12 +72,12 @@ describe('state user in state submission form', () => {
             // Navigate back to previous page
             cy.deprecatedNavigateV1Form('BACK')
             cy.findByRole('heading', { level: 2, name: /Submission type/ })
-            cy.deprecatedNavigateV1Form('CONTINUE')
+            cy.navigateContractRatesForm('CONTINUE')
 
             // Change to contract amendment, save as draft
             cy.findByRole('heading', { level: 2, name: /Contract details/ })
             cy.fillOutAmendmentToBaseContractDetails()
-            cy.deprecatedNavigateV1Form('SAVE_DRAFT')
+            cy.navigateContractRatesForm('SAVE_DRAFT')
             cy.findByRole('heading', { level: 1, name: /Submissions dashboard/ })
 
             // Link to contract details page and continue

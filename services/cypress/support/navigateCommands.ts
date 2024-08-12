@@ -58,8 +58,8 @@ Cypress.Commands.add(
 
         if (buttonKey === 'SAVE_DRAFT') {
             if(waitForLoad) {
-                cy.wait('@updateDraftContractRatesMutation', { timeout: 50_000})
-             }
+                cy.wait('@updateContractDraftRevisionMutation', { timeout: 50_000})
+            }
             cy.findByTestId('state-dashboard-page').should('exist')
             cy.findByRole('heading',{name:'Submissions'}).should('exist')
         } else if (buttonKey === 'CONTINUE_FROM_START_NEW') {
@@ -71,7 +71,7 @@ Cypress.Commands.add(
         } else if (buttonKey === 'CONTINUE') {
             if (waitForLoad) {
                 cy.findAllByTestId('errorMessage').should('have.length', 0)
-                cy.wait('@updateDraftContractRatesMutation', { timeout: 50_000})
+                cy.wait('@updateContractDraftRevisionMutation', { timeout: 50_000})
             }
             cy.findByTestId('state-submission-form-page').should('exist')
         } else {
