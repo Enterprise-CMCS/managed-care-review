@@ -1,4 +1,3 @@
-import React from 'react'
 import Select, {
     ActionMeta,
     AriaOnFocus,
@@ -18,6 +17,7 @@ import {
 import { useS3 } from '../../contexts/S3Context'
 import { useTealium } from '../../hooks'
 import { useField } from 'formik'
+import { convertIndexRatesGQLRateToRateForm } from '../StateSubmission/RateDetails/rateDetailsHelpers'
 
 export interface LinkRateOptionType {
     readonly value: string
@@ -130,10 +130,8 @@ export const LinkRateSelect = ({
                 const linkedRate = rates.find(
                     (rate) => rate.id === linkedRateID
                 )
-                const linkedRateForm: FormikRateForm = convertGQLRateToRateForm(
-                    getKey,
-                    linkedRate
-                )
+                const linkedRateForm: FormikRateForm =
+                    convertIndexRatesGQLRateToRateForm(getKey, linkedRate)
                 // put already selected fields back in place
                 linkedRateForm.ratePreviouslySubmitted = 'YES'
 

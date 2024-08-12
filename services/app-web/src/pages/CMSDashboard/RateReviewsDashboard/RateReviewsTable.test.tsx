@@ -32,7 +32,6 @@ describe('RateReviewsTable', () => {
             updatedAt: new Date('2023-10-16'),
             rateType: 'NEW',
             stateName: 'Minnesota',
-            contractRevisions: [],
         },
         {
             id: 'rate-2-id',
@@ -46,7 +45,6 @@ describe('RateReviewsTable', () => {
             updatedAt: new Date('2023-11-18'),
             rateType: 'AMENDMENT',
             stateName: 'Ohio',
-            contractRevisions: [],
         },
         {
             id: 'rate-3-id',
@@ -60,13 +58,12 @@ describe('RateReviewsTable', () => {
             updatedAt: new Date('2023-12-01'),
             rateType: 'NEW',
             stateName: 'Florida',
-            contractRevisions: [],
         },
     ]
 
     describe.each(iterableCmsUsersMockData)(
         '$userRole RateReviewsTable tests',
-        ({ userRole, mockUser }) => {
+        ({ mockUser }) => {
             it('renders rates table correctly', async () => {
                 renderWithProviders(
                     <RateReviewsTable

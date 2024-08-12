@@ -100,7 +100,6 @@ const RateReviewsDashboard = (): React.ReactElement => {
                     ? RateTypeRecord[displayRateFormData.rateType]
                     : missingField,
                 stateName: rate.state.name,
-                contractRevisions: currentRevision.contractRevisions,
             })
         })
 
