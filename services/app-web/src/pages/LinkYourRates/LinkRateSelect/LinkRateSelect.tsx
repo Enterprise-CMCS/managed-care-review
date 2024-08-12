@@ -51,7 +51,6 @@ export const LinkRateSelect = ({
 }: LinkRateSelectPropType & Props<LinkRateOptionType, false>) => {
     const input: IndexRatesInput  = {stateCode}
     const { data, loading, error } =  useIndexRatesQuery({variables: { input }})
-
     const { getKey } = useS3()
     const { logDropdownSelectionEvent } = useTealium()
     const [ _field, _meta, helpers] = useField({ name }) // useField only relevant for non-autofill implementations

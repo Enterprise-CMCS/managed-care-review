@@ -12,7 +12,6 @@ import {
     fetchContractMockSuccess,
     updateDraftContractRatesMockSuccess,
     mockContractWithLinkedRateDraft,
-    mockContractAndRatesDraft,
     mockContractPackageDraft,
 } from '../../../testHelpers/apolloMocks'
 import { Route, Routes, Location } from 'react-router-dom'
@@ -857,6 +856,7 @@ describe('RateDetails', () => {
                                     }),
                                 },
                             }),
+                            indexRatesMockSuccess()
                         ],
                     },
                     routerProvider: {

@@ -70,6 +70,7 @@ const indexRatesMockSuccess = (
     return {
         request: {
             query: IndexRatesDocument,
+            variables: {input:{stateCode: undefined}}
         },
         result: {
             data: {
