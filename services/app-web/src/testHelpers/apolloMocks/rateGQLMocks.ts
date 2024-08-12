@@ -55,11 +55,6 @@ const fetchDraftRateMockSuccess = (
     }
 }
 
-type IndexRatesMockInputType = {
-    stateCode?: string,
-    rates?: Rate[]
-}
-
 const indexRatesMockSuccess = (
     stateCode?: string,
     rates?: Rate[]
@@ -79,7 +74,7 @@ const indexRatesMockSuccess = (
             query: IndexRatesDocument,
             variables: {
                 input:{
-                    stateCode: stateCode ?? "MN"
+                    stateCode: stateCode
                 }
             }
         },

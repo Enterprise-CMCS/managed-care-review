@@ -67,7 +67,7 @@ describe('ReplaceRate', () => {
                         statusCode: 200,
                     }),
                     fetchContractMockSuccess({ contract }),
-                    indexRatesMockSuccess(),
+                    indexRatesMockSuccess('MN'),
                 ],
             },
             routerProvider: {
@@ -106,7 +106,7 @@ describe('ReplaceRate', () => {
                         statusCode: 200,
                     }),
                     fetchContractMockSuccess({ contract }),
-                    indexRatesMockSuccess(),
+                    indexRatesMockSuccess('MN'),
                 ],
             },
             routerProvider: {
