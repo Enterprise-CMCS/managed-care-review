@@ -12,7 +12,6 @@ import {
     fetchContractMockSuccess,
     updateDraftContractRatesMockSuccess,
     mockContractWithLinkedRateDraft,
-    mockContractAndRatesDraft,
     mockContractPackageDraft,
 } from '../../../testHelpers/apolloMocks'
 import { Route, Routes, Location } from 'react-router-dom'
@@ -363,8 +362,7 @@ describe('RateDetails', () => {
                     apolloProvider: {
                         mocks: [
                             fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchContractMockSuccess(
-                                {
+                            fetchContractMockSuccess({
                                 contract: {
                                     ...mockContractPackageDraft(),
                                     id: 'test-abc-123',

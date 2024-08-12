@@ -18,7 +18,7 @@ const fetchContractMockSuccess = ({
 }: {
     contract?: Contract
 }): MockedResponse<FetchContractQuery> => {
-    const contractData = contract? contract : mockContractPackageDraft()
+    const contractData = contract ? contract : mockContractPackageDraft()
 
     return {
         request: {
