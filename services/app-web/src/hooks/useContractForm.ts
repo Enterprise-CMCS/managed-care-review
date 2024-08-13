@@ -117,7 +117,7 @@ const useContractForm = (contractID?: string): UseContractForm => {
                 supportingDocuments: input.draftRevision!.formData.supportingDocuments,
                 riskBasedContract: input.draftRevision!.formData.riskBasedContract,
                 populationCovered: input.draftRevision!.formData.populationCovered,
-            }
+            } 
             const updateResult = await updateFormData({
                 variables: {
                     input: {
