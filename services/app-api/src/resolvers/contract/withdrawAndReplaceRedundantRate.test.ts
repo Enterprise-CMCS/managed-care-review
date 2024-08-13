@@ -74,17 +74,16 @@ describe('withdrawAndReplaceRedundantRate', () => {
             await setupWithdrawRateTestData(stateServer)
 
         const confirmTestContract = await fetchTestContract(
-                adminServer,
-                contractID
-            )
+            adminServer,
+            contractID
+        )
 
         // Confirm shape of data before withdraw is as expected
         expect(confirmTestContract.packageSubmissions).toHaveLength(1)
         expect(confirmTestContract.status).toBe('SUBMITTED')
         expect(
-            confirmTestContract.packageSubmissions[0].rateRevisions).toHaveLength(1)
-
-
+            confirmTestContract.packageSubmissions[0].rateRevisions
+        ).toHaveLength(1)
 
         // replace rate on contract 1 with linked rate from contract 2
         const replaceReason = 'Admin has to clean things up'
@@ -99,7 +98,6 @@ describe('withdrawAndReplaceRedundantRate', () => {
             adminServer,
             contractID
         )
-
 
         // Check unlock and resubmit logs are correct on both target contract and the latest packageSubmission
         expect(refetchContract1.packageSubmissions).toHaveLength(2)
@@ -128,10 +126,9 @@ describe('withdrawAndReplaceRedundantRate', () => {
         ).toBe(replacementRateID)
         // check that only one rate is attached to latest submission
         expect(
-            refetchContract1.packageSubmissions[0].rateRevisions).toHaveLength(1)
-
+            refetchContract1.packageSubmissions[0].rateRevisions
+        ).toHaveLength(1)
     })
-
 
     it('withdraws rate, logs correct withdrawInfo', async () => {
         const stateServer = await constructTestPostgresServer({
@@ -352,6 +349,56 @@ describe('withdrawAndReplaceRedundantRate', () => {
             variables: {
                 input: {
                     contractID: secondContractWithLinkedRate.id,
+                    withdrawnRateID: firstContractRateRevision.rateID,
+                    replacementRateID:
+                        thirdContractWithReplacementRate.packageSubmissions[0]
+                            .rateRevisions[0].rateID,
+                    replaceReason,
+                },
+            },
+        })
+        expect(withdrawRateResult.errors).toBeDefined()
+    })
+
+    it('returns error if called on child rate that was linked to another submission', async () => {
+        const stateServer = await constructTestPostgresServer({
+            s3Client: mockS3,
+        })
+        const adminServer = await constructTestPostgresServer({
+            context: {
+                user: adminUser,
+            },
+            s3Client: mockS3,
+        })
+
+        const firstContractRateRevision = (
+            await createAndSubmitTestContractWithRate(stateServer)
+        ).packageSubmissions[0].rateRevisions[0]
+
+        // submit a contract with linked rate
+        const secondContractWithLinkedRate =
+            await createAndUpdateTestContractWithRate(stateServer)
+        await linkRateToDraftContract(
+            stateServer,
+            secondContractWithLinkedRate.id,
+            firstContractRateRevision.rateID
+        )
+        await submitTestContract(
+            stateServer,
+            secondContractWithLinkedRate.id,
+            'submit contract with a linked rate'
+        )
+
+        const thirdContractWithReplacementRate =
+            await createAndSubmitTestContractWithRate(stateServer)
+
+        const replaceReason =
+            'Try to withdraw a child rate linked to another submission'
+        const withdrawRateResult = await adminServer.executeOperation({
+            query: WITHDRAW_REPLACE_RATE,
+            variables: {
+                input: {
+                    contractID: firstContractRateRevision.id,
                     withdrawnRateID: firstContractRateRevision.rateID,
                     replacementRateID:
                         thirdContractWithReplacementRate.packageSubmissions[0]
