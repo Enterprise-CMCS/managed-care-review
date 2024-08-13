@@ -7,7 +7,11 @@ import {
     useUpdateContractDraftRevisionMutation,
     ContractDraftRevisionFormDataInput,
     UpdateInformation,
-    Contract
+    Contract,
+    GenericDocument,
+    GenericDocumentInput,
+    StateContact,
+    StateContactInput
 } from '../gen/gqlClient'
 import { recordJSException } from '../otelHelpers'
 import { handleApolloError } from '../gqlHelpers/apolloErrors'
@@ -26,6 +30,27 @@ type  UseContractForm = {
     createDraft: (input: CreateContractInput) => Promise<Contract | Error>
     interimState?:  InterimState
     submissionName?: string
+}
+
+const documentsInput = (documents: GenericDocument[]): GenericDocumentInput[] => {
+    return documents.map((doc) => {
+        return {
+            downloadURL: doc.downloadURL,
+            dateAdded: doc.dateAdded,
+            name: doc.name,
+            s3URL: doc.s3URL,
+            sha256: doc.sha256
+        }
+    })
+}
+const stateContactsInput = (contacts: StateContact[]): StateContactInput[] => {
+    return contacts.map((contact) => {
+        return {
+            email: contact.email,
+            name: contact.name,
+            titleRole: contact.titleRole,
+        }
+    })
 }
 
 const useContractForm = (contractID?: string): UseContractForm => {
@@ -104,17 +129,18 @@ const useContractForm = (contractID?: string): UseContractForm => {
     ): Promise<Contract | Error> => {
 
         setShowPageErrorMessage(false)
+        
         try {
             const formData:ContractDraftRevisionFormDataInput = {
                 submissionDescription: input.draftRevision!.formData.submissionDescription,
                 submissionType: input.draftRevision!.formData.submissionType,
                 contractType: input.draftRevision!.formData.contractType,
-                contractDocuments: input.draftRevision!.formData.contractDocuments,
+                contractDocuments: documentsInput(input.draftRevision!.formData.contractDocuments),
                 federalAuthorities: input.draftRevision!.formData.federalAuthorities,
                 managedCareEntities: input.draftRevision!.formData.managedCareEntities,
                 programIDs: input.draftRevision!.formData.programIDs,
-                stateContacts: input.draftRevision!.formData.stateContacts,
-                supportingDocuments: input.draftRevision!.formData.supportingDocuments,
+                stateContacts: stateContactsInput(input.draftRevision!.formData.stateContacts),
+                supportingDocuments: documentsInput(input.draftRevision!.formData.supportingDocuments),
                 riskBasedContract: input.draftRevision!.formData.riskBasedContract,
                 populationCovered: input.draftRevision!.formData.populationCovered,
             } 
