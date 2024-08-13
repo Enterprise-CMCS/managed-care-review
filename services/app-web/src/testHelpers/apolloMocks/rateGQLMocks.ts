@@ -61,8 +61,8 @@ const indexRatesMockSuccess = (
 ): MockedResponse<IndexRatesQuery> => {
     const mockRates = rates ?? [
         { ...rateDataMock(), id: 'test-id-123', stateNumber: 3 },
-        { ...rateDataMock(), id: 'test-id-123', stateNumber: 2 },
-        { ...rateDataMock(), id: 'test-id-124', stateNumber: 1 },
+        { ...rateDataMock(), id: 'test-id-124', stateNumber: 2 },
+        { ...rateDataMock(), id: 'test-id-125', stateNumber: 1 },
     ]
     const ratesEdge = mockRates.map((rate) => {
         return {
