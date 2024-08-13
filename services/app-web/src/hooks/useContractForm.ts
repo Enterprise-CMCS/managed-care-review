@@ -108,6 +108,7 @@ const useContractForm = (contractID?: string): UseContractForm => {
             const formData:ContractDraftRevisionFormDataInput = {
                 submissionDescription: input.draftRevision!.formData.submissionDescription,
                 submissionType: input.draftRevision!.formData.submissionType,
+                contractType: input.draftRevision!.formData.contractType,
                 contractDocuments: input.draftRevision!.formData.contractDocuments,
                 federalAuthorities: input.draftRevision!.formData.federalAuthorities,
                 managedCareEntities: input.draftRevision!.formData.managedCareEntities,

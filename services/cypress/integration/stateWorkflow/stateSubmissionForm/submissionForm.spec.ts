@@ -77,7 +77,7 @@ describe('state user in state submission form', () => {
             // Change to contract amendment, save as draft
             cy.findByRole('heading', { level: 2, name: /Contract details/ })
             cy.fillOutAmendmentToBaseContractDetails()
-            cy.navigateContractRatesForm('SAVE_DRAFT')
+            cy.deprecatedNavigateV1Form('SAVE_DRAFT')
             cy.findByRole('heading', { level: 1, name: /Submissions dashboard/ })
 
             // Link to contract details page and continue
