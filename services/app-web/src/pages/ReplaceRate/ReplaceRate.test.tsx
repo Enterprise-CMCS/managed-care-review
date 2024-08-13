@@ -214,4 +214,45 @@ describe('ReplaceRate', () => {
             expect(testLocation.pathname).toBe(`/submissions/${contract.id}`)
         })
     })
+
+    it('does not render rates that are child or linked to contract as a replacement rate', async () => {
+        const contract = mockContractPackageSubmitted()
+        const templateRate = contract.packageSubmissions[0].rateRevisions[0]
+        // Include all rates in indexRateMockSuccess
+        contract.packageSubmissions[0].rateRevisions = [
+            { ...templateRate, rateID: 'test-id-123' },
+            { ...templateRate, rateID: 'test-id-124' },
+            { ...templateRate, rateID: 'test-id-125' },
+        ]
+
+        await waitFor(() => {
+            renderWithProviders(wrapInRoutes(<ReplaceRate />), {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockValidAdminUser(),
+                            statusCode: 200,
+                        }),
+
+                        fetchContractMockSuccess({ contract }),
+                        indexRatesMockSuccess('MN'),
+                    ],
+                },
+                routerProvider: {
+                    route: `/submissions/${contract.id}/replace-rate/${contract.packageSubmissions[0].rateRevisions[0].rateID}`,
+                },
+            })
+        })
+
+        const comboBox = screen.getByRole('combobox')
+        expect(comboBox).toBeInTheDocument()
+
+        await userEvent.click(comboBox)
+
+        await waitFor(() => {
+            expect(
+                screen.getByText('No rate certifications found')
+            ).toBeInTheDocument()
+        })
+    })
 })

@@ -20,7 +20,13 @@ import { useAuth } from '../../contexts/AuthContext'
 import { recordJSExceptionWithContext } from '../../otelHelpers'
 import { Form as UswdsForm } from '@trussworks/react-uswds'
 import { Formik, FormikErrors } from 'formik'
-import { ActionButton, DataDetail, FieldTextarea, GenericApiErrorBanner, PoliteErrorMessage } from '../../components'
+import {
+    ActionButton,
+    DataDetail,
+    FieldTextarea,
+    GenericApiErrorBanner,
+    PoliteErrorMessage,
+} from '../../components'
 import { LinkRateSelect } from '../LinkYourRates/LinkRateSelect/LinkRateSelect'
 import { PageActionsContainer } from '../StateSubmission/PageActions'
 import { ReplaceRateSchema } from './ReplaceRateSchema'
@@ -73,6 +79,11 @@ export const ReplaceRate = (): React.ReactElement => {
         contract?.packageSubmissions[0]?.rateRevisions.find(
             (rateRev) => rateRev.rateID == rateID
         )?.formData.rateCertificationName
+
+    // Exclude all rates that are already attached to this contract, both linked and child rates of a multi-rate submission
+    const excludeRates = contract?.packageSubmissions[0].rateRevisions.map(
+        (rr) => rr.rateID
+    )
 
     useEffect(() => {
         updateHeading({ customHeading: contractName })
@@ -236,7 +247,7 @@ export const ReplaceRate = (): React.ReactElement => {
                                         name="replacementRateID"
                                         initialValue={values.replacementRateID}
                                         label="Which rate certification was it?"
-                                        alreadySelected={[rateID]}
+                                        alreadySelected={excludeRates}
                                         stateCode={contract.stateCode}
                                     />
                                 </FormGroup>
