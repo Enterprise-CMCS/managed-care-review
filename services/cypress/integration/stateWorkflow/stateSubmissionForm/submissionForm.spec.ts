@@ -49,7 +49,7 @@ describe('state user in state submission form', () => {
                 'be.checked'
             )
 
-            cy.findByText('Amendment to base contract').click()
+            cy.findByLabelText('Amendment to base contract').check({force: true})
             cy.findByRole('textbox', { name: 'Submission description' }).clear().type(
                 'description of contract only submission with amendment'
             )
