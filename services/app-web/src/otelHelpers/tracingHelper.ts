@@ -1,9 +1,14 @@
-import opentelemetry, { Span } from '@opentelemetry/api'
-
-const serviceNameOTEL = 'app-web-' + process.env.VITE_APP_STAGE_NAME
+import { ApolloError } from '@apollo/client'
+import opentelemetry, {
+    trace,
+    Span,
+    SpanKind,
+    SpanStatusCode,
+    Attributes,
+} from '@opentelemetry/api'
 
 function getTracer() {
-    return opentelemetry.trace.getTracer(serviceNameOTEL)
+    return trace.getTracer('app-web-' + process.env.VITE_APP_STAGE_NAME)
 }
 
 // Add a span to existing trace or if none, start and end and new span
@@ -39,12 +44,77 @@ async function recordSpan(
     return
 }
 
-function recordJSException(error: string | Error): void {
+function isApolloError(error: unknown): error is ApolloError {
+    return (
+        error instanceof Error &&
+        'graphQLErrors' in error &&
+        'networkError' in error &&
+        'message' in error
+    )
+}
+
+function isErrorWithStatus(
+    error: unknown
+): error is Error & { status: number } {
+    return (
+        error instanceof Error &&
+        'status' in error &&
+        typeof error.status === 'number'
+    )
+}
+
+function recordJSException(
+    error: unknown,
+    additionalAttributes: Attributes = {}
+): void {
     const tracer = getTracer()
-    const span = tracer.startSpan('JSException')
-    span.recordException(error)
-    console.error(error)
-    span.end()
+    const span = tracer.startSpan('JSException', { kind: SpanKind.INTERNAL })
+
+    try {
+        const errorObject =
+            error instanceof Error ? error : new Error(String(error))
+
+        // Basic error attributes
+        const attributes: Attributes = {
+            'error.type': errorObject.name,
+            'error.message': errorObject.message,
+            'error.stack': errorObject.stack || '',
+            ...additionalAttributes,
+        }
+
+        if (isErrorWithStatus(errorObject)) {
+            attributes['error.http.status_code'] = errorObject.status.toString()
+        }
+
+        if (isApolloError(errorObject)) {
+            if (errorObject.networkError) {
+                attributes['error.apollo.hasNetworkError'] = 'true'
+                if (
+                    'status' in errorObject.networkError &&
+                    typeof errorObject.networkError.status === 'number'
+                ) {
+                    attributes['error.http.status_code'] =
+                        errorObject.networkError.status.toString()
+                }
+            }
+
+            if (errorObject.graphQLErrors.length > 0) {
+                attributes['error.apollo.hasGraphQLErrors'] = 'true'
+                attributes['error.apollo.graphQLErrorCount'] =
+                    errorObject.graphQLErrors.length.toString()
+            }
+        }
+
+        span.setAttributes(attributes)
+        span.recordException(errorObject)
+        span.setStatus({ code: SpanStatusCode.ERROR })
+
+        console.error('Recorded JS Exception:', errorObject, attributes)
+    } catch (recordingError) {
+        console.error('Error while recording exception:', recordingError)
+    } finally {
+        span.end()
+    }
 }
 
 export function recordJSExceptionWithContext(

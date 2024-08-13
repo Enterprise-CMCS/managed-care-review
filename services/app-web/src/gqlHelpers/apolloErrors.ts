@@ -17,31 +17,27 @@ const handleNetworkError = (
             // Log nothing, this is an expected 403 for a logged out user trying to load a page where we query auth
             return
         } else if (serverError.statusCode === 403 && isAuthenticated) {
-            // Something has caused the user to lose their session entirely outside the scope of MC-Review.
-            // Log this so we have a record of it, but not entirely unexpected if user is opening application in multiple tabs and only logging out of one of them.
-            recordJSException(
-                `[User auth error]: Code: ${serverError.statusCode} Message: ${serverError.message} ${serverError.stack}`
-            )
+            recordJSException(serverError, {
+                'error.context': 'UserAuthError',
+                'user.isAuthenticated': String(isAuthenticated),
+            })
         } else {
-            // Server could be down. Log this.
-            recordJSException(
-                `[Server error]: Code: ${serverError.statusCode} Message: ${serverError.message} ${serverError.stack}`
-            )
+            recordJSException(serverError, {
+                'error.context': 'ServerError',
+                'user.isAuthenticated': String(isAuthenticated),
+            })
         }
     } else {
-        // Unknown general network issue
-        recordJSException(
-            `[Network issue]: ${networkError?.message} ${networkError?.stack}`
-        )
+        recordJSException(networkError, {
+            'error.context': 'NetworkIssue',
+            'user.isAuthenticated': String(isAuthenticated),
+        })
     }
 }
 
 const handleGQLErrors = (graphQLErrors: GraphQLErrors) => {
-    graphQLErrors.forEach(({ message, locations, path }) => {
-        recordJSException(
-            // Graphql errors mean something is wrong inside our api, maybe bad request or errors we return from api for known edge cases
-            `[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`
-        )
+    graphQLErrors.forEach((error) => {
+        recordJSException(error, { 'error.context': 'GraphQLError' })
     })
 }
 
