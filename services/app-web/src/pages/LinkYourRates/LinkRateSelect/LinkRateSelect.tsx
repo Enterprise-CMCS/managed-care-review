@@ -109,8 +109,7 @@ export const LinkRateSelect = ({
         }
         if (error) {
             return 'Could not load rate certifications. Please refresh your browser.'
-        }
-        if (!data) {
+        } else {
             return 'No rate certifications found'
         }
     }
