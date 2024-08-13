@@ -41,7 +41,6 @@ describe('RateDetailsSummarySection', () => {
                     rateID: '5678',
                     createdAt: new Date('01/01/2021'),
                     updatedAt: new Date('01/01/2021'),
-                    contractRevisions: [],
                     formData: {
                         rateType: 'NEW',
                         rateCapitationType: 'RATE_CELL',
@@ -99,7 +98,6 @@ describe('RateDetailsSummarySection', () => {
                     rateID: '5678',
                     createdAt: new Date('01/01/2021'),
                     updatedAt: new Date('01/01/2021'),
-                    contractRevisions: [],
                     formData: {
                         rateType: 'AMENDMENT',
                         rateCapitationType: 'RATE_CELL',

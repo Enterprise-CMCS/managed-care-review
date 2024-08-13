@@ -10,6 +10,10 @@ import { RateSummary } from './RateSummary'
 import { RoutesRecord } from '../../constants'
 import { Route, Routes } from 'react-router-dom'
 import { RateEdit } from '../RateEdit/RateEdit'
+import {
+    rateUnlockedWithHistoryMock,
+    rateWithHistoryMock,
+} from '../../testHelpers/apolloMocks/rateDataMock'
 
 // Wrap test component in some top level routes to allow getParams to be tested
 const wrapInRoutes = (children: React.ReactNode) => {
@@ -30,11 +34,11 @@ describe('RateSummary', () => {
                             user: mockValidCMSUser(),
                             statusCode: 200,
                         }),
-                        fetchRateMockSuccess({ id: '7a' }),
+                        fetchRateMockSuccess(rateUnlockedWithHistoryMock()),
                     ],
                 },
                 routerProvider: {
-                    route: '/rates/7a',
+                    route: '/rates/r-01',
                 },
             })
 
@@ -62,11 +66,11 @@ describe('RateSummary', () => {
                             user: mockValidCMSUser(),
                             statusCode: 200,
                         }),
-                        fetchRateMockSuccess({ id: '7a' }),
+                        fetchRateMockSuccess(rateUnlockedWithHistoryMock()),
                     ],
                 },
                 routerProvider: {
-                    route: '/rates/7a',
+                    route: '/rates/r-01',
                 },
                 s3Provider,
             })
@@ -117,11 +121,11 @@ describe('RateSummary', () => {
                             user: mockValidStateUser(),
                             statusCode: 200,
                         }),
-                        fetchRateMockSuccess({ id: '1337' }),
+                        fetchRateMockSuccess(rateWithHistoryMock()),
                     ],
                 },
                 routerProvider: {
-                    route: '/rates/1337',
+                    route: '/rates/r-01',
                 },
                 featureFlags: { 'rate-edit-unlock': true },
             })

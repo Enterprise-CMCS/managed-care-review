@@ -10,6 +10,7 @@ function mockContractRevision(name?: string, partial?: Partial<ContractRevision>
         createdAt: new Date('01/01/2024'),
         updatedAt: new Date('12/31/2024'),
         id: `123${name}`,
+        contractID: `contract-123-${name}`,
         submitInfo: {
             updatedAt: new Date(`2024-02-17T03:2${name}:00`),
             updatedBy: 'example@state.com',
@@ -94,7 +95,6 @@ function mockRateRevision(name?: string, partial?: Partial<RateRevision>): RateR
             updatedBy: 'example@state.com',
             updatedReason: 'contract unlock'
         },
-        contractRevisions: [],
         formData: {
             __typename: 'RateFormData',
             rateType: 'AMENDMENT',
@@ -196,7 +196,6 @@ function mockContractPackageDraft(
                 draftRevision: {
                     id: '123',
                     rateID: '456',
-                    contractRevisions: [],
                     createdAt: new Date(),
                     updatedAt: new Date(),
                     formData: {
@@ -348,7 +347,6 @@ function mockContractWithLinkedRateDraft(
                 draftRevision: {
                     id: '123',
                     rateID: 'rate-123',
-                    contractRevisions: [],
                     createdAt: new Date(),
                     updatedAt: new Date(),
                     submitInfo: {
@@ -403,7 +401,6 @@ function mockContractWithLinkedRateDraft(
                 revisions: [{
                     id: '456',
                     rateID: 'rate-123',
-                    contractRevisions: [],
                     createdAt: new Date(),
                     updatedAt: new Date(),
                     submitInfo: undefined,
@@ -548,7 +545,6 @@ function mockContractWithLinkedRateSubmitted(
             {
                         id: '123',
                         rateID: 'rate-123',
-                        contractRevisions: [],
                         createdAt: new Date('12/18/2023'),
                         updatedAt: new Date('12/18/2023'),
                         formData: {
@@ -692,7 +688,6 @@ function mockContractPackageSubmitted(
                     rateID: '123',
                     createdAt: new Date('01/01/2023'),
                     updatedAt: new Date('01/01/2023'),
-                    contractRevisions: [],
                     formData: {
                         rateType: 'AMENDMENT',
                         rateCapitationType: 'RATE_CELL',
@@ -1247,6 +1242,7 @@ function mockContractPackageUnlocked(
                 updatedReason: 'unlocked for a test',
             },
             id: '123',
+            contractID: 'test-abc-123',
             createdAt: new Date(),
             updatedAt: new Date(),
             contractName: 'MCR-MN-0005-SNBC',
@@ -1314,7 +1310,6 @@ function mockContractPackageUnlocked(
                 draftRevision: {
                     id: '123',
                     rateID: '456',
-                    contractRevisions: [],
                     createdAt: new Date(),
                     updatedAt: new Date(),
                     unlockInfo: {
@@ -1387,6 +1382,7 @@ function mockContractPackageUnlocked(
                         updatedReason: 'unlocked for a test'
                     },
                     id: '123',
+                    contractID: 'test-abc-123',
                     formData: {
                         programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
                         populationCovered: 'MEDICAID',
@@ -1500,7 +1496,6 @@ function mockContractPackageUnlocked(
                         updatedBy: 'example@state.com',
                         updatedReason: 'initial submission'
                     },
-                    contractRevisions: [],
                     formData: {
                         rateType: 'AMENDMENT',
                         rateCapitationType: 'RATE_CELL',
@@ -1698,7 +1693,6 @@ const mockEmptyDraftContractAndRate = (): Contract => mockContractPackageDraft(
                 draftRevision: {
                     id: '123',
                     rateID: '456',
-                    contractRevisions: [],
                     createdAt: new Date(),
                     updatedAt: new Date(),
                     formData: {
@@ -1763,6 +1757,7 @@ const mockEmptyDraftContractAndRate = (): Contract => mockContractPackageDraft(
 )
 
 export {
+    mockContractRevision,
     mockContractPackageDraft,
     mockContractPackageSubmitted,
     mockContractWithLinkedRateSubmitted,
