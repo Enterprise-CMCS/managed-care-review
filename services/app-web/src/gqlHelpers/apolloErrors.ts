@@ -1,6 +1,7 @@
 import { ServerError } from '@apollo/client'
 import { ApolloError, GraphQLErrors, NetworkError } from '@apollo/client/errors'
 import { recordJSException } from '../otelHelpers'
+import { getLoggedInUser } from '../localAuth'
 
 /*
 Adds OTEL logging for graphql api errors
@@ -35,15 +36,24 @@ const handleNetworkError = (
     }
 }
 
-const handleGQLErrors = (graphQLErrors: GraphQLErrors) => {
+const handleGQLErrors = async (graphQLErrors: GraphQLErrors) => {
+    const currentUser = await getLoggedInUser()
+
     graphQLErrors.forEach((error) => {
-        recordJSException(error, { 'error.context': 'GraphQLError' })
+        recordJSException(error, {
+            'user.id': currentUser?.id,
+            'user.email': currentUser?.email,
+            'error.context': 'GraphQLError',
+        })
     })
 }
 
-const handleApolloError = (error: ApolloError, isAuthenticated: boolean) => {
+const handleApolloError = async (
+    error: ApolloError,
+    isAuthenticated: boolean
+) => {
     const { graphQLErrors, networkError } = error
-    if (graphQLErrors) handleGQLErrors(graphQLErrors)
+    if (graphQLErrors) await handleGQLErrors(graphQLErrors)
     if (networkError) handleNetworkError(networkError, isAuthenticated)
 }
 
