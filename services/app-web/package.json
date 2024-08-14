@@ -102,7 +102,7 @@
         "babel-plugin-istanbul": "^6.1.1",
         "dayjs": "^1.10.5",
         "formik": "^2.2.9",
-        "graphql": "^16.8.1",
+        "graphql": "^16.9.0",
         "jotai": "^2.2.1",
         "jotai-location": "^0.5.1",
         "jsdom": "^24.1.1",
