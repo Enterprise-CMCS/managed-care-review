@@ -88,7 +88,6 @@ type FormError =
         createDraft,
         interimState,
         showPageErrorMessage,
-        unlockInfo,
     } = useContractForm(id)
 
     const showFieldErrors = (error?: FormError) =>
@@ -282,7 +281,7 @@ type FormError =
                 />
                 <PageBannerAlerts
                     loggedInUser={loggedInUser}
-                    unlockedInfo={unlockInfo}
+                    unlockedInfo={draftSubmission?.draftRevision!.unlockInfo}
                     showPageErrorMessage={showPageErrorMessage ?? false}
                 />
             </div>

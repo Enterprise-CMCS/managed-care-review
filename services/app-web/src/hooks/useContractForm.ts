@@ -6,7 +6,6 @@ import {
     useCreateContractMutation,
     useUpdateContractDraftRevisionMutation,
     ContractDraftRevisionFormDataInput,
-    UpdateInformation,
     Contract,
     GenericDocument,
     GenericDocumentInput,
@@ -21,7 +20,6 @@ import type { InterimState } from '../pages/StateSubmission/ErrorOrLoadingPage'
 
 type  UseContractForm = {
     draftSubmission?: Contract
-    unlockInfo?: UpdateInformation
     showPageErrorMessage: string | boolean
     previousDocuments?: string[]
     updateDraft: (
@@ -29,7 +27,6 @@ type  UseContractForm = {
     ) => Promise<Contract | Error>
     createDraft: (input: CreateContractInput) => Promise<Contract | Error>
     interimState?:  InterimState
-    submissionName?: string
 }
 
 const documentsInput = (documents: GenericDocument[]): GenericDocumentInput[] => {
@@ -58,7 +55,6 @@ const useContractForm = (contractID?: string): UseContractForm => {
     let interimState: UseContractForm['interimState'] = undefined // enum to determine what Interim UI should override form page
     let previousDocuments: UseContractForm['previousDocuments'] = [] // used for document upload tables
     let draftSubmission: UseContractForm['draftSubmission'] = undefined // form data from current package revision, used to load form
-    let unlockInfo: UseContractForm['unlockInfo'] = undefined
     const [showPageErrorMessage, setShowPageErrorMessage] = useState<boolean | string>(false) // string is a custom error message, defaults to generic of true
     const { updateHeading } = usePage()
     const [pkgNameForHeading, setPkgNameForHeading] = useState<string | undefined>(undefined)
@@ -85,10 +81,7 @@ const useContractForm = (contractID?: string): UseContractForm => {
         input: CreateContractInput
     ): Promise<Contract | Error> => {
         setShowPageErrorMessage(false)
-        const {populationCovered,programIDs,riskBasedContract, submissionType, submissionDescription, contractType} = input
-        if(populationCovered === undefined || contractType === undefined) {
-            return new Error('wrong')
-        }
+        const { populationCovered, programIDs, riskBasedContract, submissionType, submissionDescription, contractType } = input
         try {
             const createResult = await createFormData({
                 variables: {
@@ -201,8 +194,6 @@ const useContractForm = (contractID?: string): UseContractForm => {
 
     }
 
-    // pull out the latest revision
-    const latestRevision = contract.draftRevision
     
     const submissionName = contract.draftRevision?.contractName
     if (pkgNameForHeading !== submissionName) {
@@ -211,8 +202,7 @@ const useContractForm = (contractID?: string): UseContractForm => {
 
     // set up data to return
     draftSubmission = contract
-    unlockInfo =  latestRevision!.unlockInfo ?? undefined // An unlocked revision is defined by having unlockInfo on it, pull it out here if it exists
-    return {draftSubmission, unlockInfo, previousDocuments,  updateDraft, createDraft, interimState, showPageErrorMessage, submissionName }
+    return {draftSubmission, previousDocuments,  updateDraft, createDraft, interimState, showPageErrorMessage }
 }
 
 export {useContractForm}
