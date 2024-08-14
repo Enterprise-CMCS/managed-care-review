@@ -9,7 +9,7 @@ describe('state user in state submission form', () => {
         cy.logInAsStateUser()
 
         // Start a base contract only submissions
-        cy.startNewContractOnlySubmissionWithBaseContract()
+        cy.startNewContractOnlySubmissionWithBaseContractV2()
 
         // Save submission URL
         cy.location().then((fullUrl) => {
@@ -50,6 +50,8 @@ describe('state user in state submission form', () => {
             )
 
             cy.findByLabelText('Amendment to base contract').check({force: true})
+            cy.findByLabelText('Amendment to base contract').should('be.checked')
+            cy.get('label[for="riskBasedContractNo"]').click()
             cy.findByRole('textbox', { name: 'Submission description' }).clear().type(
                 'description of contract only submission with amendment'
             )

@@ -10,6 +10,18 @@ Cypress.Commands.add('startNewContractOnlySubmissionWithBaseContract', () => {
     cy.findByRole('heading', { level: 2, name: /Contract details/ })
 })
 
+Cypress.Commands.add('startNewContractOnlySubmissionWithBaseContractV2', () => {
+    // Must be on '/submissions/new'
+    cy.findByTestId('state-dashboard-page').should('exist')
+    cy.findByRole('link', { name: 'Start new submission' }).click()
+    cy.findByRole('heading', { level: 1, name: /New submission/ })
+
+    cy.fillOutContractActionOnlyWithBaseContract()
+
+    cy.navigateContractRatesForm('CONTINUE')
+    cy.findByRole('heading', { level: 2, name: /Contract details/ })
+})
+
 Cypress.Commands.add('startNewContractOnlySubmissionWithAmendment', () => {
     // Must be on '/submissions/new'
     cy.findByTestId('state-dashboard-page').should('exist')

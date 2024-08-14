@@ -52,6 +52,7 @@ declare global {
             // state submission form commands
             waitForDocumentsToLoad(): void
             startNewContractOnlySubmissionWithBaseContract(): void
+            startNewContractOnlySubmissionWithBaseContractV2(): void
             startNewContractOnlySubmissionWithAmendment(): void
             startNewContractAndRatesSubmission(): void
             fillOutContractActionOnlyWithBaseContract(): void
