@@ -181,7 +181,6 @@
         "serverless-stack-termination-protection": "^2.0.2",
         "stylelint": "^16.1.0",
         "stylelint-config-recommended-scss": "^14.0.0",
-        "vite-plugin-commonjs": "^0.10.1",
         "vite-plugin-graphql-loader": "^3.0.1",
         "vite-plugin-node-polyfills": "^0.22.0",
         "vite-plugin-svgr": "^4.2.0",
