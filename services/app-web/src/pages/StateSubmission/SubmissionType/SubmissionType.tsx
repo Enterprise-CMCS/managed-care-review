@@ -111,8 +111,10 @@ type FormError =
         contractType: draftSubmission?.draftRevision?.formData.contractType ?? '',
     }
 
-    if (interimState || !draftSubmission) {
-        return <ErrorOrLoadingPage state={interimState || 'GENERIC_ERROR'} />
+    if (interimState || (!draftSubmission && !isNewSubmission)) {
+        return <ErrorOrLoadingPage state={'LOADING'} />
+    } else if (showPageErrorMessage) {
+        return <ErrorOrLoadingPage state={'GENERIC_ERROR'} />
     }
 
     const handleFormSubmit = async (

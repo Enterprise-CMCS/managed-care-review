@@ -182,15 +182,15 @@ const useContractForm = (contractID?: string): UseContractForm => {
             handleApolloError(err, true)
             if (err.graphQLErrors[0]?.extensions?.code === 'NOT_FOUND') {
                     interimState = 'NOT_FOUND'
-                    return {interimState,createDraft, updateDraft,  showPageErrorMessage }
+                    return {interimState, createDraft, updateDraft,  showPageErrorMessage }
             }
         }
         if (err.name !== 'SKIPPED') {
             recordJSException(err)
             interimState = 'GENERIC_ERROR'// api failure or protobuf decode failure
-            return { interimState,  createDraft, updateDraft,  showPageErrorMessage}
+            return { interimState, createDraft, updateDraft,  showPageErrorMessage}
         }
-        return {interimState: undefined, createDraft, updateDraft,  showPageErrorMessage}
+        return {interimState, createDraft, updateDraft,  showPageErrorMessage}
 
     }
 
