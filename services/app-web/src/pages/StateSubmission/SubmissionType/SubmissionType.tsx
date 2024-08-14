@@ -94,7 +94,7 @@ type FormError =
     const showFieldErrors = (error?: FormError) =>
         shouldValidate && Boolean(error)
 
-        const submissionTypeInitialValues: SubmissionTypeFormValues = {
+    const submissionTypeInitialValues: SubmissionTypeFormValues = {
         populationCovered:
             draftSubmission?.draftRevision?.formData.populationCovered === null
                 ? undefined
@@ -112,15 +112,13 @@ type FormError =
         contractType: draftSubmission?.draftRevision?.formData.contractType ?? '',
     }
 
-    if (interimState)
+    if (interimState || !draftSubmission) {
         return <ErrorOrLoadingPage state={interimState || 'GENERIC_ERROR'} />
+    }
 
     const handleFormSubmit = async (
         values: SubmissionTypeFormValues,
-        formikHelpers: Pick<
-            FormikHelpers<SubmissionTypeFormValues>,
-            'setSubmitting'
-        >,
+        setSubmitting: (isSubmitting: boolean) => void, // formik setSubmitting
         redirectPath?: string
     ) => {
         if (isNewSubmission) {
@@ -186,13 +184,13 @@ type FormError =
                 )
             } catch (serverError) {
                 setShowAPIErrorBanner(true)
-                formikHelpers.setSubmitting(false) // unblock submit button to allow resubmit
+                setSubmitting(false) // unblock submit button to allow resubmit
                 console.info(
                     'Log: creating new submission failed with server error',
                     serverError
                 )
             } finally {
-                formikHelpers.setSubmitting(false)
+                setSubmitting(false)
             }
         } else {
             if (draftSubmission === undefined || !updateDraft || !draftSubmission.draftRevision) {
@@ -224,15 +222,15 @@ type FormError =
             try {
                 const updatedDraft = await updateDraft(draftSubmission)
                 if (updatedDraft instanceof Error) {
-                    formikHelpers.setSubmitting(false)
+                    setSubmitting(false)
                 } else {
                     navigate(redirectPath || `../contract-details`)
                 }
             }  catch (serverError) {
                 setShowAPIErrorBanner(true)
-                formikHelpers.setSubmitting(false) // unblock submit button to allow resubmit
+                setSubmitting(false) // unblock submit button to allow resubmit
             } finally {
-                formikHelpers.setSubmitting(false)
+                setSubmitting(false)
             }
         }
     }
@@ -291,9 +289,10 @@ type FormError =
             <FormContainer id="SubmissionType">
                 <Formik
                     initialValues={submissionTypeInitialValues}
-                    onSubmit={handleFormSubmit}
+                    onSubmit={(values, { setSubmitting }) => {
+                        return handleFormSubmit(values, setSubmitting)
+                    }}
                     validationSchema={SubmissionTypeFormSchema()}
-                    enableReinitialize
                 >
                     {({
                         values,
@@ -302,7 +301,8 @@ type FormError =
                         isSubmitting,
                         setSubmitting,
                         setFieldValue,
-                    }) => (
+                    }) => {
+                        return (
                         <>
                             <UswdsForm
                                 className={styles.formContainer}
@@ -461,7 +461,6 @@ type FormError =
                                             inputId="programIDs"
                                             programIDs={values.programIDs}
                                             contractProgramsOnly
-                                            initializeValues
                                             aria-label="Programs this contract action covers (required)"
                                             label="Programs this contract action covers"
                                         />
@@ -475,6 +474,7 @@ type FormError =
                                             className={styles.radioGroup}
                                             role="radiogroup"
                                             aria-required
+                                            defaultValue={values.submissionType}
                                             legend="Choose a submission type"
                                             id="submissionType"
                                         >
@@ -664,7 +664,7 @@ type FormError =
                                     saveAsDraftOnClick={async () => {
                                         await handleFormSubmit(
                                             values,
-                                            { setSubmitting },
+                                            setSubmitting,
                                             RoutesRecord.DASHBOARD_SUBMISSIONS
                                         )
                                     }}
@@ -679,7 +679,7 @@ type FormError =
                                 />
                             </UswdsForm>
                         </>
-                    )}
+                    )}}
                 </Formik>
             </FormContainer>
         </>

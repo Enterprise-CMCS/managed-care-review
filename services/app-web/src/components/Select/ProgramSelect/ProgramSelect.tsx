@@ -14,7 +14,6 @@ export type ProgramSelectPropType = {
     programIDs: string[]
     contractProgramsOnly?: boolean
     label?: string
-    initializeValues?: boolean
 }
 
 export interface ProgramOptionType {
@@ -36,7 +35,6 @@ export const ProgramSelect = ({
     programIDs,
     contractProgramsOnly,
     label,
-    initializeValues,
     ...selectProps
 }: ProgramSelectPropType & Props<ProgramOptionType, true>) => {
     const [_field, _meta, helpers] = useField({ name })
@@ -105,7 +103,6 @@ export const ProgramSelect = ({
     return (
         <Select
             defaultValue={programValue}
-            value={initializeValues ? programValue : undefined}
             className={styles.multiSelect}
             classNamePrefix="select"
             id={`${name}-programSelect`}
