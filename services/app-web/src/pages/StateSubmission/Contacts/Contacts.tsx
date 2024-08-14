@@ -29,7 +29,7 @@ import {
     DynamicStepIndicator,
     SectionCard,
 } from '../../../components'
-import { FormContainer } from '../FormContainer'
+import { FormContainer } from '../../../components/FormContainer/FormContainer'
 import {
     useCurrentRoute,
     useHealthPlanPackageForm,

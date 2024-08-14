@@ -1,7 +1,6 @@
 import {
     ButtonGroup,
     FormGroup,
-    GridContainer,
     Label,
 } from '@trussworks/react-uswds'
 import React, { useEffect } from 'react'
@@ -35,6 +34,8 @@ import {
     ErrorSummaryProps,
     ErrorSummary,
 } from '../../components/Form/ErrorSummary/ErrorSummary'
+import { FormContainer } from '../../components/FormContainer/FormContainer'
+import { LinkedRateSummary } from '../StateSubmission/RateDetails/LinkedRateSummary'
 
 export interface ReplaceRateFormValues {
     replacementRateID: string
@@ -155,8 +156,7 @@ export const ReplaceRate = (): React.ReactElement => {
     }
 
     return (
-        <div className={styles.background}>
-            <GridContainer className={styles.gridContainer}>
+        <FormContainer id="ReplaceRate">
                 {replaceError && <GenericApiErrorBanner />}
                 <Formik
                     initialValues={formInitialValues}
@@ -164,6 +164,7 @@ export const ReplaceRate = (): React.ReactElement => {
                     validationSchema={ReplaceRateSchema}
                 >
                     {({ errors, values, handleSubmit }) => (
+                        <>
                         <UswdsForm
                             className={styles.formContainer}
                             id="ReplaceRateForm"
@@ -188,7 +189,7 @@ export const ReplaceRate = (): React.ReactElement => {
                                 {withdrawnRateRevisionName}
                             </DataDetail>
 
-                            <fieldset className="usa-fieldset">
+                            <fieldset>
                                 <legend className="srOnly">
                                     Withdraw and replace rate on contract
                                 </legend>
@@ -252,7 +253,8 @@ export const ReplaceRate = (): React.ReactElement => {
                                     />
                                 </FormGroup>
                             </fieldset>
-                            <PageActionsContainer>
+                        </UswdsForm>
+                        <PageActionsContainer>
                                 <ButtonGroup type="default">
                                     <ActionButton
                                         type="button"
@@ -280,11 +282,10 @@ export const ReplaceRate = (): React.ReactElement => {
                                     </ActionButton>
                                 </ButtonGroup>
                             </PageActionsContainer>
-                        </UswdsForm>
+                            </>
                     )}
                 </Formik>
-            </GridContainer>
-        </div>
+         </FormContainer>
     )
 }
 

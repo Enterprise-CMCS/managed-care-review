@@ -4,7 +4,7 @@ import { DynamicStepIndicator } from '../../../components/DynamicStepIndicator'
 import { STATE_SUBMISSION_FORM_ROUTES } from '../../../constants/routes'
 import stylesForm from '../StateSubmissionForm.module.scss'
 import stylesSideNav from '../../SubmissionSideNav/SubmissionSideNav.module.scss'
-import { FormContainer } from '../FormContainer'
+import { FormContainer } from '../../../components/FormContainer/FormContainer'
 import { SubmissionType } from '../SubmissionType/SubmissionType'
 import { GridContainer } from '@trussworks/react-uswds'
 

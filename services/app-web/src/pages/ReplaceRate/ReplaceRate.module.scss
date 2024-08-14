@@ -1,32 +1,12 @@
 @use '../../styles/custom.scss' as custom;
 @use '../../styles/uswdsImports.scss' as uswds;
 
-.background{
-        width: 100%;
-        flex: 1 0 auto;
-        display: flex;
-        flex-direction: column;
-        background-color: none;
-        align-items: center
-}
-.gridContainer{
-    @include custom.default-page-container;
-    max-width: custom.$mcr-container-standard-width-fixed;
-    flex-direction: column;
-    margin: 2rem;
-    padding: 1rem;
-}
 
 .formContainer {
+    margin: 2rem;
+    background: custom.$mcr-foundation-white;
     max-width: custom.$mcr-container-standard-width-fixed;
-    > [class^='usa-fieldset'] {
-        padding: uswds.units(4);
-        margin-bottom: uswds.units(2);
-        margin-top: uswds.units(2);
-        background: custom.$mcr-foundation-white;
-        border: 1px solid custom.$mcr-gray-lighter;
-        @include uswds.u-radius('md');
-    }
+    padding: 2rem;
 
     h2 {
         margin-top: 0;
@@ -34,6 +14,11 @@
 
     > div[class^='usa-form-group']:not(:first-of-type) {
         margin-top: 2.5rem;
+    }
+    >fieldset{
+        border: 0;
+        margin: 0;
+        padding: 0;
     }
 
     &[class^='usa-form'] {
@@ -43,7 +28,6 @@
         @include uswds.at-media(tablet) {
             min-width: 40rem;
             max-width: 20rem;
-            margin: 0 auto;
         }
     }
 }

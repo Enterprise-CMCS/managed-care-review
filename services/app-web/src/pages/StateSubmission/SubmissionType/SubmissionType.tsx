@@ -41,7 +41,7 @@ import {
 } from '../../../components/Form/FieldYesNo/FieldYesNo'
 import { SubmissionTypeFormSchema } from './SubmissionTypeSchema'
 import { RoutesRecord, STATE_SUBMISSION_FORM_ROUTES } from '../../../constants'
-import { FormContainer } from '../FormContainer'
+import { FormContainer } from '../../../components/FormContainer/FormContainer'
 import { useHealthPlanPackageForm } from '../../../hooks/useHealthPlanPackageForm'
 import { useCurrentRoute } from '../../../hooks'
 import { ErrorOrLoadingPage } from '../ErrorOrLoadingPage'

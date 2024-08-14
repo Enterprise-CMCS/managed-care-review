@@ -1,5 +1,5 @@
 import { GridContainer } from '@trussworks/react-uswds'
-import styles from './StateSubmissionForm.module.scss'
+import styles from './FormContainer.module.scss'
 
 type FormContainerProps = {
     id: string

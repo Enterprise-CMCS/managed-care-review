@@ -75,7 +75,7 @@ import {
     StatutoryRegulatoryAttestationDescription,
     StatutoryRegulatoryAttestationQuestion,
 } from '../../../constants/statutoryRegulatoryAttestation'
-import { FormContainer } from '../FormContainer'
+import { FormContainer } from '../../../components/FormContainer/FormContainer'
 import {
     useCurrentRoute,
     useHealthPlanPackageForm,
