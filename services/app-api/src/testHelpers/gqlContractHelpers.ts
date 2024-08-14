@@ -43,7 +43,9 @@ const createAndSubmitTestContract = async (
         stateCode,
         formData
     )
-    return await must(submitTestContract(server, contract.id, 'Time to submit!'))
+    return await must(
+        submitTestContract(server, contract.id, 'Time to submit!')
+    )
 }
 
 async function submitTestContract(
@@ -230,7 +232,7 @@ async function createAndUpdateTestContractWithRate(
 ): Promise<Contract> {
     const draft = await createAndUpdateTestContractWithoutRates(
         server,
-        contractOverrides?.stateCode as StateCodeType ?? 'FL',
+        (contractOverrides?.stateCode as StateCodeType) ?? 'FL',
         contractOverrides
     )
 

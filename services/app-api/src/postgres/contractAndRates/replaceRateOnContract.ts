@@ -99,8 +99,7 @@ async function replaceRateOnContractInsideTransaction(
             // keep any existing child rates and resubmit them unchanged
             updateRates.push({
                 rateID: rate.id,
-                formData:
-                    rate.packageSubmissions[0].rateRevision.formData,
+                formData: rate.packageSubmissions[0].rateRevision.formData,
                 ratePosition: idx + 1,
             })
         }

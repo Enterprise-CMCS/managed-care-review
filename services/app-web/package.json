@@ -124,7 +124,7 @@
         "uswds": "^2.13.1",
         "uuid": "^9.0.0",
         "vite": "^5.2.11",
-        "vite-tsconfig-paths": "^4.3.2",
+        "vite-tsconfig-paths": "^5.0.1",
         "web-vitals": "^3.0.1",
         "yup": "^0.32.9",
         "zod": "^3.10.1"
@@ -181,7 +181,6 @@
         "serverless-stack-termination-protection": "^2.0.2",
         "stylelint": "^16.1.0",
         "stylelint-config-recommended-scss": "^14.0.0",
-        "vite-plugin-commonjs": "^0.10.1",
         "vite-plugin-graphql-loader": "^3.0.1",
         "vite-plugin-node-polyfills": "^0.22.0",
         "vite-plugin-svgr": "^4.2.0",
