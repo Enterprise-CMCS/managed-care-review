@@ -168,9 +168,6 @@ const useContractForm = (contractID?: string): UseContractForm => {
     }
 
     const contract = fetchResultData?.fetchContract.contract
-    if (!contract) {
-        return {interimState, createDraft, updateDraft, showPageErrorMessage }
-    }
     if (fetchResultLoading) {
         interimState = 'LOADING'
         return {interimState, createDraft, updateDraft, showPageErrorMessage }
@@ -194,7 +191,9 @@ const useContractForm = (contractID?: string): UseContractForm => {
 
     }
 
-    
+    if (!contract) {
+        return {interimState, createDraft, updateDraft, showPageErrorMessage }
+    }
     const submissionName = contract.draftRevision?.contractName
     if (pkgNameForHeading !== submissionName) {
         setPkgNameForHeading(submissionName)

@@ -18,7 +18,6 @@ describe('SubmissionType', () => {
                     fetchCurrentUserMock({ statusCode: 200 }),
                 ],
             },
-            routerProvider: { route: '/submissions/new' },
         })
 
         const requiredLabels = await screen.findAllByText('Required')
@@ -27,7 +26,7 @@ describe('SubmissionType', () => {
         expect(optionalLabels).toHaveLength(0)
     })
 
-    it.skip('displays submission type form when expected', async () => {
+    it('displays submission type form when expected', async () => {
         renderWithProviders(<SubmissionType />, {
             apolloProvider: {
                 mocks: [
@@ -40,7 +39,6 @@ describe('SubmissionType', () => {
                     }),
                 ],
             },
-            routerProvider: { route: '/submissions/15/edit/type' },
         })
 
         expect(
@@ -68,9 +66,7 @@ describe('SubmissionType', () => {
             apolloProvider: {
                 mocks: [fetchCurrentUserMock({ statusCode: 200 })],
             },
-            routerProvider: {
-                route: '/submissions/new',
-            },
+            routerProvider: { route: '/submissions/new' },
         })
 
         expect(
@@ -99,7 +95,6 @@ describe('SubmissionType', () => {
             apolloProvider: {
                 mocks: [fetchCurrentUserMock({ statusCode: 200 })],
             },
-            routerProvider: { route: '/submissions/new' },
         })
 
         expect(
@@ -122,7 +117,6 @@ describe('SubmissionType', () => {
             apolloProvider: {
                 mocks: [fetchCurrentUserMock({ statusCode: 200 })],
             },
-            routerProvider: { route: '/submissions/new' },
         })
 
         expect(
@@ -156,7 +150,6 @@ describe('SubmissionType', () => {
             apolloProvider: {
                 mocks: [fetchCurrentUserMock({ statusCode: 200 })],
             },
-            routerProvider: { route: '/submissions/new' },
         })
 
         expect(
@@ -209,7 +202,6 @@ describe('SubmissionType', () => {
             apolloProvider: {
                 mocks: [fetchCurrentUserMock({ statusCode: 200 })],
             },
-            routerProvider: { route: '/submissions/new' },
         })
 
         expect(
@@ -265,7 +257,6 @@ describe('SubmissionType', () => {
             apolloProvider: {
                 mocks: [fetchCurrentUserMock({ statusCode: 200 })],
             },
-            routerProvider: { route: '/submissions/new' },
         })
 
         expect(
@@ -304,7 +295,6 @@ describe('SubmissionType', () => {
             apolloProvider: {
                 mocks: [fetchCurrentUserMock({ statusCode: 200 })],
             },
-            routerProvider: { route: '/submissions/new' },
         })
 
         // Expect population coverage question and radios
@@ -336,7 +326,6 @@ describe('SubmissionType', () => {
             apolloProvider: {
                 mocks: [fetchCurrentUserMock({ statusCode: 200 })],
             },
-            routerProvider: { route: '/submissions/new' },
         })
 
         expect(
@@ -386,7 +375,6 @@ describe('SubmissionType', () => {
                     }),
                 ],
             },
-            routerProvider: { route: '/submissions/new' },
         })
         const combobox = await screen.findByRole('combobox')
 
@@ -410,7 +398,6 @@ describe('SubmissionType', () => {
             apolloProvider: {
                 mocks: [fetchCurrentUserMock({ statusCode: 200 })],
             },
-            routerProvider: { route: '/submissions/new' },
         })
 
         expect(
@@ -428,7 +415,6 @@ describe('SubmissionType', () => {
             apolloProvider: {
                 mocks: [fetchCurrentUserMock({ statusCode: 200 })],
             },
-            routerProvider: { route: '/submissions/new' },
         })
 
         expect(
@@ -446,7 +432,6 @@ describe('SubmissionType', () => {
             apolloProvider: {
                 mocks: [fetchCurrentUserMock({ statusCode: 200 })],
             },
-            routerProvider: { route: '/submissions/new' },
         })
 
         // setup
@@ -480,7 +465,6 @@ describe('SubmissionType', () => {
             apolloProvider: {
                 mocks: [fetchCurrentUserMock({ statusCode: 200 })],
             },
-            routerProvider: { route: '/submissions/new' },
         })
         expect(
             screen.getByRole('textbox', {
@@ -495,7 +479,6 @@ describe('SubmissionType', () => {
                 apolloProvider: {
                     mocks: [fetchCurrentUserMock({ statusCode: 200 })],
                 },
-                routerProvider: { route: '/submissions/new' },
             })
 
             expect(screen.getByRole('textbox')).not.toHaveClass(
@@ -519,7 +502,6 @@ describe('SubmissionType', () => {
                     apolloProvider: {
                         mocks: [fetchCurrentUserMock({ statusCode: 200 })],
                     },
-                    routerProvider: { route: '/submissions/new' },
                 }
             )
             const textarea = screen.getByRole('textbox', {
@@ -548,7 +530,6 @@ describe('SubmissionType', () => {
                     apolloProvider: {
                         mocks: [fetchCurrentUserMock({ statusCode: 200 })],
                     },
-                    routerProvider: { route: '/submissions/new' },
                 }
             )
             const textarea = screen.getByRole('textbox', {
@@ -579,7 +560,6 @@ describe('SubmissionType', () => {
                 apolloProvider: {
                     mocks: [fetchCurrentUserMock({ statusCode: 200 })],
                 },
-                routerProvider: { route: '/submissions/new' },
             })
             const textarea = screen.getByRole('textbox', {
                 name: 'Submission description',
@@ -603,7 +583,6 @@ describe('SubmissionType', () => {
                 apolloProvider: {
                     mocks: [fetchCurrentUserMock({ statusCode: 200 })],
                 },
-                routerProvider: { route: '/submissions/new' },
             })
 
             await userEvent.click(
