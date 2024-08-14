@@ -14,7 +14,7 @@ const RateReviewsDashboard = (): React.ReactElement => {
     const { loggedInUser } = useAuth()
     const isAdminUser = loggedInUser?.role === 'ADMIN_USER'
     const { data, loading, error } = useIndexRatesQuery({
-        fetchPolicy: 'network-only',
+        variables: { input: { stateCode: undefined } },
     })
 
     const reviewRows: RateInDashboardType[] = []

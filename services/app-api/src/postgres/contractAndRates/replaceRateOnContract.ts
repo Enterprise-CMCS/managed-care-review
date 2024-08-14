@@ -89,18 +89,18 @@ async function replaceRateOnContractInsideTransaction(
         if (rate.id === withdrawnRateID) {
             return // we already know this is swapped, we will swap in replacement later, skip for now
         }
-        // keep any existing linked rates besides replacement or withddrawn rate
+        // keep any existing linked rates besides replacement or withdrawn rate
         if (rate.parentContractID !== contractID) {
             linkRates.push({
                 rateID: rate.id,
                 ratePosition: idx + 1,
             })
         } else {
-            // keep any existing child rates
+            // keep any existing child rates and resubmit them unchanged
             updateRates.push({
                 rateID: rate.id,
                 formData:
-                    rate.packageSubmissions[0].contractRevisions[0].formData,
+                    rate.packageSubmissions[0].rateRevision.formData,
                 ratePosition: idx + 1,
             })
         }

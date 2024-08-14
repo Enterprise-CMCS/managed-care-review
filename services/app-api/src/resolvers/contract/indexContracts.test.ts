@@ -37,7 +37,6 @@ describe(`indexContracts`, () => {
             const submittedFormData =
                 submittedContract.packageSubmissions[0].contractRevision
                     .formData
-
             // then see if we can get that same contract back from the index
             const result = await stateServer.executeOperation({
                 query: INDEX_CONTRACTS,
@@ -57,7 +56,6 @@ describe(`indexContracts`, () => {
                 )
             // specific contracts by id exist
             expect(theseSubmissions).toHaveLength(2)
-
             // confirm some contract data is correct too, first in list will be draft, second is the submitted
             expect(theseSubmissions[0].initiallySubmittedAt).toBeNull()
             expect(theseSubmissions[0].status).toBe('DRAFT')

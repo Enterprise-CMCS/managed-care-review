@@ -5,7 +5,7 @@ import { Fieldset, FormGroup, Label } from '@trussworks/react-uswds'
 import styles from '../StateSubmission/StateSubmissionForm.module.scss'
 import { FieldRadio, PoliteErrorMessage } from '../../components'
 import { getIn, useFormikContext } from 'formik'
-import { LinkRateSelect } from './LinkRateSelect'
+import { LinkRateSelect } from './LinkRateSelect/LinkRateSelect'
 import {
     FormikRateForm,
     RateDetailFormConfig,

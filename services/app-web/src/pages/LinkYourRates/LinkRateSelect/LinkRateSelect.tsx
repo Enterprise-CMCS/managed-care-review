@@ -6,18 +6,18 @@ import Select, {
     SingleValue,
     createFilter,
 } from 'react-select'
-import styles from '../../components/Select/Select.module.scss'
-import { useIndexRatesQuery } from '../../gen/gqlClient'
-import { programNames } from '../../common-code/healthPlanFormDataType'
-import { formatCalendarDate } from '../../common-code/dateHelpers'
+import styles from '../../../components/Select/Select.module.scss'
+import { IndexRatesInput, useIndexRatesQuery } from '../../../gen/gqlClient'
+import { programNames } from '../../../common-code/healthPlanFormDataType'
+import { formatCalendarDate } from '../../../common-code/dateHelpers'
 import {
     FormikRateForm,
     convertGQLRateToRateForm,
-} from '../StateSubmission/RateDetails'
-import { useS3 } from '../../contexts/S3Context'
-import { useTealium } from '../../hooks'
+} from '../../StateSubmission/RateDetails'
+import { useS3 } from '../../../contexts/S3Context'
+import { useTealium } from '../../../hooks'
 import { useField } from 'formik'
-import { convertIndexRatesGQLRateToRateForm } from '../StateSubmission/RateDetails/rateDetailsHelpers'
+import { convertIndexRatesGQLRateToRateForm } from '../../StateSubmission/RateDetails/rateDetailsHelpers'
 
 export interface LinkRateOptionType {
     readonly value: string
@@ -49,10 +49,10 @@ export const LinkRateSelect = ({
     stateCode,
     ...selectProps
 }: LinkRateSelectPropType & Props<LinkRateOptionType, false>) => {
-    // const input:IndexRatesInput | undefined  ={stateCode}
-    // TODO figure out why this isn't working -  useIndexRatesQuery({variables: { input }})
-    const { data, loading, error } = useIndexRatesQuery()
-
+    const input: IndexRatesInput = { stateCode }
+    const { data, loading, error } = useIndexRatesQuery({
+        variables: { input },
+    })
     const { getKey } = useS3()
     const { logDropdownSelectionEvent } = useTealium()
     const [_field, _meta, helpers] = useField({ name }) // useField only relevant for non-autofill implementations
@@ -109,8 +109,7 @@ export const LinkRateSelect = ({
         }
         if (error) {
             return 'Could not load rate certifications. Please refresh your browser.'
-        }
-        if (!data) {
+        } else {
             return 'No rate certifications found'
         }
     }

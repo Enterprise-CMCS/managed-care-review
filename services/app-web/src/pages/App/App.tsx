@@ -36,10 +36,10 @@ function App({
     const environmentName = import.meta.env.VITE_APP_STAGE_NAME || ''
     const isHigherEnv = ['prod', 'val', 'main'].includes(environmentName)
     const nrSnippet = generateNRScriptContent({
-        accountID: getEnv('REACT_APP_NR_ACCOUNT_ID'),
-        trustKey: getEnv('REACT_APP_NR_TRUST_KEY'),
-        applicationID: getEnv('REACT_APP_NR_AGENT_ID'),
-        licenseKey: getEnv('REACT_APP_NR_LICENSE_KEY'),
+        accountID: getEnv('VITE_APP_NR_ACCOUNT_ID'),
+        trustKey: getEnv('VITE_APP_NR_TRUST_KEY'),
+        applicationID: getEnv('VITE_APP_NR_AGENT_ID'),
+        licenseKey: getEnv('VITE_APP_NR_LICENSE_KEY'),
     })
     useScript({
         inlineScriptAsString: nrSnippet,

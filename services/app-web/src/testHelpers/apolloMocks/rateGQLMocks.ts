@@ -56,13 +56,15 @@ const fetchDraftRateMockSuccess = (
 }
 
 const indexRatesMockSuccess = (
-    rates: Rate[] = [
-        { ...rateDataMock(), id: 'test-id-123', stateNumber: 3 },
-        { ...rateDataMock(), id: 'test-id-123', stateNumber: 2 },
-        { ...rateDataMock(), id: 'test-id-124', stateNumber: 1 },
-    ]
+    stateCode?: string,
+    rates?: Rate[]
 ): MockedResponse<IndexRatesQuery> => {
-    const ratesEdge = rates.map((rate) => {
+    const mockRates = rates ?? [
+        { ...rateDataMock(), id: 'test-id-123', stateNumber: 3 },
+        { ...rateDataMock(), id: 'test-id-124', stateNumber: 2 },
+        { ...rateDataMock(), id: 'test-id-125', stateNumber: 1 },
+    ]
+    const ratesEdge = mockRates.map((rate) => {
         return {
             node: rate,
         }
@@ -70,6 +72,11 @@ const indexRatesMockSuccess = (
     return {
         request: {
             query: IndexRatesDocument,
+            variables: {
+                input:{
+                    stateCode: stateCode
+                }
+            }
         },
         result: {
             data: {

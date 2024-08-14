@@ -186,7 +186,7 @@ describe('findAllRatesWithHistoryBySubmittedInfo', () => {
 
         // call the find by submit info function
         const rates = must(
-            await findAllRatesWithHistoryBySubmitInfo(client, 'MN')
+            await findAllRatesWithHistoryBySubmitInfo(client, {stateCode: 'MN'})
         )
 
         // expect our MN rate to not be in the results

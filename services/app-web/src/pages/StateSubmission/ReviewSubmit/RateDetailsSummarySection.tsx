@@ -295,20 +295,27 @@ export const RateDetailsSummarySection = ({
                       const hasNoRatePrograms =
                           rateFormData.rateProgramIDs.length === 0
                       const isLinkedRate = rateRev.isLinked
-                      /*
+                      // Is this rate linked to by another contract
+                      const isLinkedTo = rateRev.contractRevisions.length > 1
+
+                      /**
                     Rate programs switched in summer 2024. We still show deprecated program field values when
                     - there's no new field values present and CMS user is viewing
                     - theres no new field values present and contract is locked and state user viewing
                     - theres no new field values present and the contract unlocked and the rate being displayed as a linked rate
 
                     otherwise use new fields values going forward
-                    */
+                    **/
+
                       const showLegacyRatePrograms =
                           hasDeprecatedRatePrograms &&
                           hasNoRatePrograms &&
                           (isSubmittedOrCMSUser || isLinkedRate)
                       const showReplaceRateBtn =
-                          isAdminUser && !isPreviousSubmission && !isLinkedRate
+                          isAdminUser &&
+                          !isPreviousSubmission &&
+                          !isLinkedRate &&
+                          !isLinkedTo
                       if (!rateFormData) {
                           return <GenericErrorPage />
                       }

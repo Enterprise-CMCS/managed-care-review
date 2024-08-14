@@ -289,7 +289,6 @@ describe('RateDetailsSummarySection', () => {
 
     it('renders replace rate button for admin users', async () => {
         const contract = mockContractPackageSubmitted()
-
         const statePrograms = mockMNState().programs
         await waitFor(() => {
             renderWithProviders(
@@ -318,6 +317,51 @@ describe('RateDetailsSummarySection', () => {
                 const newRev: RateRevisionWithIsLinked = {
                     ...rev,
                     isLinked: true,
+                }
+                return newRev
+            })
+        const statePrograms = mockMNState().programs
+        await waitFor(() => {
+            renderWithProviders(
+                <RateDetailsSummarySection
+                    contract={contract}
+                    rateRevisions={rateRevs}
+                    editNavigateTo="rate-details"
+                    submissionName="MN-MSHO-0003"
+                    statePrograms={statePrograms}
+                />,
+                {
+                    apolloProvider: apolloProviderAdminUser,
+                }
+            )
+        })
+        expect(
+            screen.queryByRole('link', {
+                name: 'Replace rate',
+            })
+        ).not.toBeInTheDocument()
+    })
+
+    it('does not render replace rate button for rates linked to another contract', async () => {
+        const contract = mockContractWithLinkedRateSubmitted()
+        const contractB = mockContractPackageSubmittedWithRevisions()
+        const rateRevs: RateRevisionWithIsLinked[] =
+            contract.packageSubmissions[0].rateRevisions.map((rev) => {
+                const newRev: RateRevisionWithIsLinked = {
+                    ...rev,
+                    contractRevisions: [
+                        ...rev.contractRevisions,
+                        // Add a second contract revision to simulate this rate linked to another contract
+                        {
+                            ...contractB.packageSubmissions[0].contractRevision,
+                            __typename: 'RelatedContractRevisions',
+                            contract: {
+                                ...contractB,
+                                __typename: 'ContractOnRevisionType',
+                            },
+                        },
+                    ],
+                    isLinked: false,
                 }
                 return newRev
             })
