@@ -58,14 +58,14 @@ export function indexRatesResolver(store: Store): QueryResolvers['indexRates'] {
             let ratesWithHistory
             if (stateUser) {
                 ratesWithHistory =
-                    await store.findAllRatesWithHistoryBySubmitInfo(
-                        user.stateCode
-                    )
+                    await store.findAllRatesWithHistoryBySubmitInfo({
+                        stateCode: user.stateCode,
+                    })
             } else if (input && input.stateCode) {
                 ratesWithHistory =
-                await store.findAllRatesWithHistoryBySubmitInfo(
-                    input.stateCode
-                )
+                    await store.findAllRatesWithHistoryBySubmitInfo({
+                        stateCode: input.stateCode,
+                    })
             } else {
                 ratesWithHistory =
                     await store.findAllRatesWithHistoryBySubmitInfo()

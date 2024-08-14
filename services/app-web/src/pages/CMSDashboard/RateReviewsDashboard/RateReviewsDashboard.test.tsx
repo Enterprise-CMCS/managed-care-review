@@ -73,7 +73,7 @@ describe('RateReviewsDashboard', () => {
                                 statusCode: 200,
                                 user: mockUser(),
                             }),
-                            indexRatesMockSuccess(rates),
+                            indexRatesMockSuccess(undefined, rates),
                         ],
                     },
                 })

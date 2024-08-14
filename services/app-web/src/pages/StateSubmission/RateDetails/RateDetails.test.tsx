@@ -855,6 +855,7 @@ describe('RateDetails', () => {
                                     }),
                                 },
                             }),
+                            indexRatesMockSuccess(),
                         ],
                     },
                     routerProvider: {
@@ -976,7 +977,7 @@ describe('RateDetails', () => {
                 {
                     apolloProvider: {
                         mocks: [
-                            indexRatesMockSuccess(rates),
+                            indexRatesMockSuccess(undefined, rates),
                             fetchCurrentUserMock({ statusCode: 200 }),
                             fetchContractMockSuccess({
                                 contract: mockContractWithLinkedRateDraft(),

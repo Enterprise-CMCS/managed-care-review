@@ -5,7 +5,7 @@ import { Fieldset, FormGroup, Label } from '@trussworks/react-uswds'
 import styles from '../StateSubmission/StateSubmissionForm.module.scss'
 import { FieldRadio, PoliteErrorMessage } from '../../components'
 import { getIn, useFormikContext } from 'formik'
-import { LinkRateSelect } from './LinkRateSelect'
+import { LinkRateSelect } from './LinkRateSelect/LinkRateSelect'
 import {
     FormikRateForm,
     RateDetailFormConfig,
@@ -39,11 +39,14 @@ export const LinkYourRates = ({
         return getIn(errors, `${fieldNamePrefix}.${fieldName}`)
     }
 
-     //We track rates that have already been selected to remove them from the dropdown
-     const selectedRatesByID = values.rateForms.reduce((arr: string[] = [], rate ) => {
-        if (rate?.id) arr.push(rate.id)
-        return arr
-     },[])
+    //We track rates that have already been selected to remove them from the dropdown
+    const selectedRatesByID = values.rateForms.reduce(
+        (arr: string[] = [], rate) => {
+            if (rate?.id) arr.push(rate.id)
+            return arr
+        },
+        []
+    )
 
     return (
         <FormGroup

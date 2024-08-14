@@ -23,3 +23,4 @@ export { findAllRatesWithHistoryBySubmitInfo } from './findAllRatesWithHistoryBy
 export { replaceRateOnContract } from './replaceRateOnContract'
 export { withdrawRateInsideTransaction } from './withdrawRate'
 export { updateDraftContract } from './updateDraftContract'
+export type { FindAllRatesWithHistoryBySubmitType } from './findAllRatesWithHistoryBySubmitInfo'
