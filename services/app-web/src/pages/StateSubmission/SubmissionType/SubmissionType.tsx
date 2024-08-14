@@ -31,9 +31,7 @@ import {
 import { PageActions } from '../PageActions'
 import styles from '../StateSubmissionForm.module.scss'
 import { GenericApiErrorBanner, ProgramSelect } from '../../../components'
-import {
-    activeFormPages,
-} from '../StateSubmissionForm'
+import { activeFormPages } from '../StateSubmissionForm'
 import {
     booleanAsYesNoFormValue,
     yesNoFormValueAsBoolean,
@@ -61,11 +59,11 @@ export interface SubmissionTypeFormValues {
 type FormError =
     FormikErrors<SubmissionTypeFormValues>[keyof FormikErrors<SubmissionTypeFormValues>]
 
-    type SubmissionTypePageProps = {
-        showValidations?: boolean
-    }
+type SubmissionTypePageProps = {
+    showValidations?: boolean
+}
 
-    export const SubmissionType = ({
+export const SubmissionType = ({
     showValidations = false,
 }: SubmissionTypePageProps): React.ReactElement => {
     const { loggedInUser } = useAuth()
@@ -82,7 +80,7 @@ type FormError =
     const isNewSubmission = location.pathname === '/submissions/new'
     const { id } = useRouteParams()
 
-    let {
+    const {
         draftSubmission,
         updateDraft,
         createDraft,
@@ -101,14 +99,18 @@ type FormError =
         programIDs: draftSubmission?.draftRevision?.formData.programIDs ?? [],
         riskBasedContract:
             booleanAsYesNoFormValue(
-                draftSubmission?.draftRevision?.formData.riskBasedContract === null
+                draftSubmission?.draftRevision?.formData.riskBasedContract ===
+                    null
                     ? undefined
                     : draftSubmission?.draftRevision?.formData.riskBasedContract
             ) ?? '',
         submissionDescription:
-            draftSubmission?.draftRevision?.formData.submissionDescription ?? '',
-        submissionType: draftSubmission?.draftRevision?.formData.submissionType ?? '',
-        contractType: draftSubmission?.draftRevision?.formData.contractType ?? '',
+            draftSubmission?.draftRevision?.formData.submissionDescription ??
+            '',
+        submissionType:
+            draftSubmission?.draftRevision?.formData.submissionType ?? '',
+        contractType:
+            draftSubmission?.draftRevision?.formData.contractType ?? '',
     }
 
     if (interimState) {
@@ -192,7 +194,11 @@ type FormError =
                 setSubmitting(false)
             }
         } else {
-            if (draftSubmission === undefined || !updateDraft || !draftSubmission.draftRevision) {
+            if (
+                draftSubmission === undefined ||
+                !updateDraft ||
+                !draftSubmission.draftRevision
+            ) {
                 console.info(draftSubmission, updateDraft)
                 console.info(
                     'ERROR, SubmissionType for does not have props needed to update a draft.'
@@ -200,7 +206,7 @@ type FormError =
                 return
             }
             // set new values
-            draftSubmission = {
+            const updatedSubmission = {
                 ...draftSubmission,
                 draftRevision: {
                     ...draftSubmission.draftRevision,
@@ -212,20 +218,21 @@ type FormError =
                             values.riskBasedContract
                         ),
                         populationCovered: values.populationCovered,
-                        submissionType: values.submissionType as SubmissionTypeT,
-                        programIDs: values.programIDs
-                    }
-                }
+                        submissionType:
+                            values.submissionType as SubmissionTypeT,
+                        programIDs: values.programIDs,
+                    },
+                },
             }
-            
+
             try {
-                const updatedDraft = await updateDraft(draftSubmission)
+                const updatedDraft = await updateDraft(updatedSubmission)
                 if (updatedDraft instanceof Error) {
                     setSubmitting(false)
                 } else {
                     navigate(redirectPath || `../contract-details`)
                 }
-            }  catch (serverError) {
+            } catch (serverError) {
                 setShowAPIErrorBanner(true)
                 setSubmitting(false) // unblock submit button to allow resubmit
             } finally {
@@ -274,7 +281,9 @@ type FormError =
                 <DynamicStepIndicator
                     formPages={
                         draftSubmission
-                            ? activeFormPages(draftSubmission?.draftRevision!.formData)
+                            ? activeFormPages(
+                                  draftSubmission?.draftRevision!.formData
+                              )
                             : STATE_SUBMISSION_FORM_ROUTES
                     }
                     currentFormPage={currentRoute}
@@ -302,261 +311,152 @@ type FormError =
                         setFieldValue,
                     }) => {
                         return (
-                        <>
-                            <UswdsForm
-                                className={styles.formContainer}
-                                id="SubmissionTypeForm"
-                                aria-label={
-                                    isNewSubmission
-                                        ? 'New Submission Form'
-                                        : 'Submission Type Form'
-                                }
-                                aria-describedby="form-guidance"
-                                onSubmit={handleSubmit}
-                            >
-                                <fieldset className="usa-fieldset">
-                                    <legend className="srOnly">
-                                        Submission type
-                                    </legend>
-                                    {showAPIErrorBanner && (
-                                        <GenericApiErrorBanner />
-                                    )}
-
-                                    {shouldValidate && (
-                                        <ErrorSummary
-                                            errors={generateErrorSummaryErrors(
-                                                errors
-                                            )}
-                                            headingRef={errorSummaryHeadingRef}
-                                        />
-                                    )}
-                                    <FormGroup
-                                        error={showFieldErrors(
-                                            errors.populationCovered
+                            <>
+                                <UswdsForm
+                                    className={styles.formContainer}
+                                    id="SubmissionTypeForm"
+                                    aria-label={
+                                        isNewSubmission
+                                            ? 'New Submission Form'
+                                            : 'Submission Type Form'
+                                    }
+                                    aria-describedby="form-guidance"
+                                    onSubmit={handleSubmit}
+                                >
+                                    <fieldset className="usa-fieldset">
+                                        <legend className="srOnly">
+                                            Submission type
+                                        </legend>
+                                        {showAPIErrorBanner && (
+                                            <GenericApiErrorBanner />
                                         )}
-                                        className="margin-top-0"
-                                    >
-                                        <Fieldset
-                                            className={styles.radioGroup}
-                                            role="radiogroup"
-                                            aria-required
-                                            legend="Which populations does this contract action cover?"
-                                        >
-                                            <span
-                                                className={
-                                                    styles.requiredOptionalText
+
+                                        {shouldValidate && (
+                                            <ErrorSummary
+                                                errors={generateErrorSummaryErrors(
+                                                    errors
+                                                )}
+                                                headingRef={
+                                                    errorSummaryHeadingRef
                                                 }
-                                            >
-                                                Required
-                                            </span>
-                                            {showFieldErrors(
+                                            />
+                                        )}
+                                        <FormGroup
+                                            error={showFieldErrors(
                                                 errors.populationCovered
-                                            ) && (
-                                                <PoliteErrorMessage formFieldLabel="Which populations does this contract action cover?">
-                                                    {errors.populationCovered}
-                                                </PoliteErrorMessage>
                                             )}
-                                            <FieldRadio
-                                                id="medicaid"
-                                                name="populationCovered"
-                                                label={
-                                                    PopulationCoveredRecord[
-                                                        'MEDICAID'
-                                                    ]
-                                                }
-                                                value={'MEDICAID'}
-                                                onClick={() =>
-                                                    handlePopulationCoveredClick(
-                                                        'MEDICAID',
-                                                        values,
-                                                        setFieldValue
-                                                    )
-                                                }
+                                            className="margin-top-0"
+                                        >
+                                            <Fieldset
+                                                className={styles.radioGroup}
+                                                role="radiogroup"
                                                 aria-required
-                                                list_position={1}
-                                                list_options={3}
-                                                parent_component_heading="Which populations does this contract action cover?"
-                                                radio_button_title={
-                                                    PopulationCoveredRecord[
-                                                        'MEDICAID'
-                                                    ]
-                                                }
-                                            />
-                                            <FieldRadio
-                                                id="medicaid-and-chip"
-                                                name="populationCovered"
-                                                label={
-                                                    PopulationCoveredRecord[
-                                                        'MEDICAID_AND_CHIP'
-                                                    ]
-                                                }
-                                                value={'MEDICAID_AND_CHIP'}
-                                                onClick={() =>
-                                                    handlePopulationCoveredClick(
-                                                        'MEDICAID_AND_CHIP',
-                                                        values,
-                                                        setFieldValue
-                                                    )
-                                                }
-                                                list_position={2}
-                                                list_options={3}
-                                                parent_component_heading="Which populations does this contract action cover?"
-                                                radio_button_title={
-                                                    PopulationCoveredRecord[
-                                                        'MEDICAID_AND_CHIP'
-                                                    ]
-                                                }
-                                            />
-                                            <FieldRadio
-                                                id="chip"
-                                                name="populationCovered"
-                                                label={
-                                                    PopulationCoveredRecord[
-                                                        'CHIP'
-                                                    ]
-                                                }
-                                                value={'CHIP'}
-                                                onClick={() =>
-                                                    handlePopulationCoveredClick(
-                                                        'CHIP',
-                                                        values,
-                                                        setFieldValue
-                                                    )
-                                                }
-                                                list_position={3}
-                                                list_options={3}
-                                                parent_component_heading="Which populations does this contract action cover?"
-                                                radio_button_title={
-                                                    PopulationCoveredRecord[
-                                                        'CHIP'
-                                                    ]
-                                                }
-                                            />
-                                        </Fieldset>
-                                    </FormGroup>
-
-                                    <FormGroup
-                                        error={showFieldErrors(
-                                            errors.programIDs
-                                        )}
-                                    >
-                                        <Label htmlFor="programIDs">
-                                            Programs this contract action covers
-                                        </Label>
-                                        <span
-                                            className={
-                                                styles.requiredOptionalText
-                                            }
-                                        >
-                                            Required
-                                        </span>
-                                        {showFieldErrors(errors.programIDs) && (
-                                            <PoliteErrorMessage formFieldLabel="Programs this contract action covers">
-                                                {errors.programIDs}
-                                            </PoliteErrorMessage>
-                                        )}
-                                        <ProgramSelect
-                                            name="programIDs"
-                                            inputId="programIDs"
-                                            programIDs={values.programIDs}
-                                            contractProgramsOnly
-                                            aria-label="Programs this contract action covers (required)"
-                                            label="Programs this contract action covers"
-                                        />
-                                    </FormGroup>
-                                    <FormGroup
-                                        error={showFieldErrors(
-                                            errors.submissionType
-                                        )}
-                                    >
-                                        <Fieldset
-                                            className={styles.radioGroup}
-                                            role="radiogroup"
-                                            aria-required
-                                            defaultValue={values.submissionType}
-                                            legend="Choose a submission type"
-                                            id="submissionType"
-                                        >
-                                            <span
-                                                className={
-                                                    styles.requiredOptionalText
-                                                }
+                                                legend="Which populations does this contract action cover?"
                                             >
-                                                Required
-                                            </span>
-                                            {showFieldErrors(
-                                                errors.submissionType
-                                            ) && (
-                                                <PoliteErrorMessage formFieldLabel="Choose a submission type">
-                                                    {errors.submissionType}
-                                                </PoliteErrorMessage>
-                                            )}
-                                            <FieldRadio
-                                                id="contractOnly"
-                                                name="submissionType"
-                                                label={
-                                                    SubmissionTypeRecord[
-                                                        'CONTRACT_ONLY'
-                                                    ]
-                                                }
-                                                value={'CONTRACT_ONLY'}
-                                                list_position={1}
-                                                list_options={2}
-                                                parent_component_heading="Programs this contract action covers"
-                                                radio_button_title={
-                                                    SubmissionTypeRecord[
-                                                        'CONTRACT_ONLY'
-                                                    ]
-                                                }
-                                            />
-                                            <FieldRadio
-                                                id="contractRate"
-                                                name="submissionType"
-                                                label={
-                                                    SubmissionTypeRecord[
-                                                        'CONTRACT_AND_RATES'
-                                                    ]
-                                                }
-                                                value={'CONTRACT_AND_RATES'}
-                                                disabled={
-                                                    values.populationCovered ===
-                                                    'CHIP'
-                                                }
-                                                list_position={2}
-                                                list_options={2}
-                                                parent_component_heading="Programs this contract action covers"
-                                                radio_button_title={
-                                                    SubmissionTypeRecord[
-                                                        'CONTRACT_AND_RATES'
-                                                    ]
-                                                }
-                                            />
-                                            {values.populationCovered ===
-                                                'CHIP' && (
-                                                <div
-                                                    role="note"
-                                                    aria-labelledby="submissionType"
-                                                    className="usa-hint padding-top-2"
+                                                <span
+                                                    className={
+                                                        styles.requiredOptionalText
+                                                    }
                                                 >
-                                                    States are not required to
-                                                    submit rates with CHIP-only
-                                                    contracts.
-                                                </div>
+                                                    Required
+                                                </span>
+                                                {showFieldErrors(
+                                                    errors.populationCovered
+                                                ) && (
+                                                    <PoliteErrorMessage formFieldLabel="Which populations does this contract action cover?">
+                                                        {
+                                                            errors.populationCovered
+                                                        }
+                                                    </PoliteErrorMessage>
+                                                )}
+                                                <FieldRadio
+                                                    id="medicaid"
+                                                    name="populationCovered"
+                                                    label={
+                                                        PopulationCoveredRecord[
+                                                            'MEDICAID'
+                                                        ]
+                                                    }
+                                                    value={'MEDICAID'}
+                                                    onClick={() =>
+                                                        handlePopulationCoveredClick(
+                                                            'MEDICAID',
+                                                            values,
+                                                            setFieldValue
+                                                        )
+                                                    }
+                                                    aria-required
+                                                    list_position={1}
+                                                    list_options={3}
+                                                    parent_component_heading="Which populations does this contract action cover?"
+                                                    radio_button_title={
+                                                        PopulationCoveredRecord[
+                                                            'MEDICAID'
+                                                        ]
+                                                    }
+                                                />
+                                                <FieldRadio
+                                                    id="medicaid-and-chip"
+                                                    name="populationCovered"
+                                                    label={
+                                                        PopulationCoveredRecord[
+                                                            'MEDICAID_AND_CHIP'
+                                                        ]
+                                                    }
+                                                    value={'MEDICAID_AND_CHIP'}
+                                                    onClick={() =>
+                                                        handlePopulationCoveredClick(
+                                                            'MEDICAID_AND_CHIP',
+                                                            values,
+                                                            setFieldValue
+                                                        )
+                                                    }
+                                                    list_position={2}
+                                                    list_options={3}
+                                                    parent_component_heading="Which populations does this contract action cover?"
+                                                    radio_button_title={
+                                                        PopulationCoveredRecord[
+                                                            'MEDICAID_AND_CHIP'
+                                                        ]
+                                                    }
+                                                />
+                                                <FieldRadio
+                                                    id="chip"
+                                                    name="populationCovered"
+                                                    label={
+                                                        PopulationCoveredRecord[
+                                                            'CHIP'
+                                                        ]
+                                                    }
+                                                    value={'CHIP'}
+                                                    onClick={() =>
+                                                        handlePopulationCoveredClick(
+                                                            'CHIP',
+                                                            values,
+                                                            setFieldValue
+                                                        )
+                                                    }
+                                                    list_position={3}
+                                                    list_options={3}
+                                                    parent_component_heading="Which populations does this contract action cover?"
+                                                    radio_button_title={
+                                                        PopulationCoveredRecord[
+                                                            'CHIP'
+                                                        ]
+                                                    }
+                                                />
+                                            </Fieldset>
+                                        </FormGroup>
+
+                                        <FormGroup
+                                            error={showFieldErrors(
+                                                errors.programIDs
                                             )}
-                                        </Fieldset>
-                                    </FormGroup>
-                                    <FormGroup
-                                        error={showFieldErrors(
-                                            errors.contractType
-                                        )}
-                                    >
-                                        <Fieldset
-                                            role="radiogroup"
-                                            aria-required
-                                            className={styles.radioGroup}
-                                            legend="Contract action type"
-                                            id="contractType"
                                         >
+                                            <Label htmlFor="programIDs">
+                                                Programs this contract action
+                                                covers
+                                            </Label>
                                             <span
                                                 className={
                                                     styles.requiredOptionalText
@@ -565,120 +465,242 @@ type FormError =
                                                 Required
                                             </span>
                                             {showFieldErrors(
-                                                errors.contractType
+                                                errors.programIDs
                                             ) && (
-                                                <PoliteErrorMessage formFieldLabel="Contract action type">
-                                                    {errors.contractType}
+                                                <PoliteErrorMessage formFieldLabel="Programs this contract action covers">
+                                                    {errors.programIDs}
                                                 </PoliteErrorMessage>
                                             )}
-                                            <FieldRadio
-                                                id="baseContract"
-                                                name="contractType"
-                                                label="Base contract"
-                                                aria-required
-                                                value={'BASE'}
-                                                list_position={1}
-                                                list_options={2}
-                                                parent_component_heading="Contract action type"
-                                                radio_button_title="Base contract"
+                                            <ProgramSelect
+                                                name="programIDs"
+                                                inputId="programIDs"
+                                                programIDs={values.programIDs}
+                                                contractProgramsOnly
+                                                aria-label="Programs this contract action covers (required)"
+                                                label="Programs this contract action covers"
                                             />
-                                            <FieldRadio
-                                                id="amendmentContract"
-                                                name="contractType"
-                                                label="Amendment to base contract"
+                                        </FormGroup>
+                                        <FormGroup
+                                            error={showFieldErrors(
+                                                errors.submissionType
+                                            )}
+                                        >
+                                            <Fieldset
+                                                className={styles.radioGroup}
+                                                role="radiogroup"
                                                 aria-required
-                                                value={'AMENDMENT'}
-                                                list_position={2}
-                                                list_options={2}
-                                                parent_component_heading="Contract action type"
-                                                radio_button_title="Amendment to base contract"
-                                            />
-                                        </Fieldset>
-                                    </FormGroup>
-                                    <FormGroup
-                                        error={showFieldErrors(
-                                            errors.riskBasedContract
-                                        )}
-                                    >
-                                        <FieldYesNo
-                                            id="riskBasedContract"
-                                            name="riskBasedContract"
-                                            label="Is this a risk-based contract?"
-                                            aria-required
-                                            hint="See 42 CFR § 438.2"
-                                            showError={showFieldErrors(
+                                                defaultValue={
+                                                    values.submissionType
+                                                }
+                                                legend="Choose a submission type"
+                                                id="submissionType"
+                                            >
+                                                <span
+                                                    className={
+                                                        styles.requiredOptionalText
+                                                    }
+                                                >
+                                                    Required
+                                                </span>
+                                                {showFieldErrors(
+                                                    errors.submissionType
+                                                ) && (
+                                                    <PoliteErrorMessage formFieldLabel="Choose a submission type">
+                                                        {errors.submissionType}
+                                                    </PoliteErrorMessage>
+                                                )}
+                                                <FieldRadio
+                                                    id="contractOnly"
+                                                    name="submissionType"
+                                                    label={
+                                                        SubmissionTypeRecord[
+                                                            'CONTRACT_ONLY'
+                                                        ]
+                                                    }
+                                                    value={'CONTRACT_ONLY'}
+                                                    list_position={1}
+                                                    list_options={2}
+                                                    parent_component_heading="Programs this contract action covers"
+                                                    radio_button_title={
+                                                        SubmissionTypeRecord[
+                                                            'CONTRACT_ONLY'
+                                                        ]
+                                                    }
+                                                />
+                                                <FieldRadio
+                                                    id="contractRate"
+                                                    name="submissionType"
+                                                    label={
+                                                        SubmissionTypeRecord[
+                                                            'CONTRACT_AND_RATES'
+                                                        ]
+                                                    }
+                                                    value={'CONTRACT_AND_RATES'}
+                                                    disabled={
+                                                        values.populationCovered ===
+                                                        'CHIP'
+                                                    }
+                                                    list_position={2}
+                                                    list_options={2}
+                                                    parent_component_heading="Programs this contract action covers"
+                                                    radio_button_title={
+                                                        SubmissionTypeRecord[
+                                                            'CONTRACT_AND_RATES'
+                                                        ]
+                                                    }
+                                                />
+                                                {values.populationCovered ===
+                                                    'CHIP' && (
+                                                    <div
+                                                        role="note"
+                                                        aria-labelledby="submissionType"
+                                                        className="usa-hint padding-top-2"
+                                                    >
+                                                        States are not required
+                                                        to submit rates with
+                                                        CHIP-only contracts.
+                                                    </div>
+                                                )}
+                                            </Fieldset>
+                                        </FormGroup>
+                                        <FormGroup
+                                            error={showFieldErrors(
+                                                errors.contractType
+                                            )}
+                                        >
+                                            <Fieldset
+                                                role="radiogroup"
+                                                aria-required
+                                                className={styles.radioGroup}
+                                                legend="Contract action type"
+                                                id="contractType"
+                                            >
+                                                <span
+                                                    className={
+                                                        styles.requiredOptionalText
+                                                    }
+                                                >
+                                                    Required
+                                                </span>
+                                                {showFieldErrors(
+                                                    errors.contractType
+                                                ) && (
+                                                    <PoliteErrorMessage formFieldLabel="Contract action type">
+                                                        {errors.contractType}
+                                                    </PoliteErrorMessage>
+                                                )}
+                                                <FieldRadio
+                                                    id="baseContract"
+                                                    name="contractType"
+                                                    label="Base contract"
+                                                    aria-required
+                                                    value={'BASE'}
+                                                    list_position={1}
+                                                    list_options={2}
+                                                    parent_component_heading="Contract action type"
+                                                    radio_button_title="Base contract"
+                                                />
+                                                <FieldRadio
+                                                    id="amendmentContract"
+                                                    name="contractType"
+                                                    label="Amendment to base contract"
+                                                    aria-required
+                                                    value={'AMENDMENT'}
+                                                    list_position={2}
+                                                    list_options={2}
+                                                    parent_component_heading="Contract action type"
+                                                    radio_button_title="Amendment to base contract"
+                                                />
+                                            </Fieldset>
+                                        </FormGroup>
+                                        <FormGroup
+                                            error={showFieldErrors(
                                                 errors.riskBasedContract
                                             )}
+                                        >
+                                            <FieldYesNo
+                                                id="riskBasedContract"
+                                                name="riskBasedContract"
+                                                label="Is this a risk-based contract?"
+                                                aria-required
+                                                hint="See 42 CFR § 438.2"
+                                                showError={showFieldErrors(
+                                                    errors.riskBasedContract
+                                                )}
+                                            />
+                                        </FormGroup>
+                                        <FieldTextarea
+                                            label="Submission description"
+                                            id="submissionDescription"
+                                            name="submissionDescription"
+                                            aria-required
+                                            aria-describedby="submissionDescriptionHelp"
+                                            showError={showFieldErrors(
+                                                errors.submissionDescription
+                                            )}
+                                            hint={
+                                                <>
+                                                    <p
+                                                        id="submissionDescriptionHelp"
+                                                        role="note"
+                                                    >
+                                                        Provide a 1-2 paragraph
+                                                        summary of your
+                                                        submission that
+                                                        highlights any important
+                                                        changes CMS reviewers
+                                                        will need to be aware of
+                                                    </p>
+                                                    <ReactRouterLinkWithLogging
+                                                        variant="external"
+                                                        to={{
+                                                            pathname: '/help',
+                                                            hash: '#submission-description',
+                                                        }}
+                                                        target="_blank"
+                                                    >
+                                                        View description
+                                                        examples
+                                                    </ReactRouterLinkWithLogging>
+                                                </>
+                                            }
                                         />
-                                    </FormGroup>
-                                    <FieldTextarea
-                                        label="Submission description"
-                                        id="submissionDescription"
-                                        name="submissionDescription"
-                                        aria-required
-                                        aria-describedby="submissionDescriptionHelp"
-                                        showError={showFieldErrors(
-                                            errors.submissionDescription
-                                        )}
-                                        hint={
-                                            <>
-                                                <p
-                                                    id="submissionDescriptionHelp"
-                                                    role="note"
-                                                >
-                                                    Provide a 1-2 paragraph
-                                                    summary of your submission
-                                                    that highlights any
-                                                    important changes CMS
-                                                    reviewers will need to be
-                                                    aware of
-                                                </p>
-                                                <ReactRouterLinkWithLogging
-                                                    variant="external"
-                                                    to={{
-                                                        pathname: '/help',
-                                                        hash: '#submission-description',
-                                                    }}
-                                                    target="_blank"
-                                                >
-                                                    View description examples
-                                                </ReactRouterLinkWithLogging>
-                                            </>
+                                    </fieldset>
+                                    <PageActions
+                                        pageVariant={
+                                            isNewSubmission
+                                                ? 'FIRST'
+                                                : 'EDIT_FIRST'
                                         }
+                                        backOnClick={() =>
+                                            navigate(
+                                                RoutesRecord.DASHBOARD_SUBMISSIONS
+                                            )
+                                        }
+                                        continueOnClick={() => {
+                                            setShouldValidate(true)
+                                            setFocusErrorSummaryHeading(true)
+                                        }}
+                                        saveAsDraftOnClick={async () => {
+                                            await handleFormSubmit(
+                                                values,
+                                                setSubmitting,
+                                                RoutesRecord.DASHBOARD_SUBMISSIONS
+                                            )
+                                        }}
+                                        actionInProgress={isSubmitting}
+                                        backOnClickUrl={
+                                            RoutesRecord.DASHBOARD_SUBMISSIONS
+                                        }
+                                        saveAsDraftOnClickUrl={
+                                            RoutesRecord.DASHBOARD_SUBMISSIONS
+                                        }
+                                        continueOnClickUrl="/edit/contract-details"
                                     />
-                                </fieldset>
-                                <PageActions
-                                    pageVariant={
-                                        isNewSubmission ? 'FIRST' : 'EDIT_FIRST'
-                                    }
-                                    backOnClick={() =>
-                                        navigate(
-                                            RoutesRecord.DASHBOARD_SUBMISSIONS
-                                        )
-                                    }
-                                    continueOnClick={() => {
-                                        setShouldValidate(true)
-                                        setFocusErrorSummaryHeading(true)
-                                    }}
-                                    saveAsDraftOnClick={async () => {
-                                        await handleFormSubmit(
-                                            values,
-                                            setSubmitting,
-                                            RoutesRecord.DASHBOARD_SUBMISSIONS
-                                        )
-                                    }}
-                                    actionInProgress={isSubmitting}
-                                    backOnClickUrl={
-                                        RoutesRecord.DASHBOARD_SUBMISSIONS
-                                    }
-                                    saveAsDraftOnClickUrl={
-                                        RoutesRecord.DASHBOARD_SUBMISSIONS
-                                    }
-                                    continueOnClickUrl="/edit/contract-details"
-                                />
-                            </UswdsForm>
-                        </>
-                    )}}
+                                </UswdsForm>
+                            </>
+                        )
+                    }}
                 </Formik>
             </FormContainer>
         </>

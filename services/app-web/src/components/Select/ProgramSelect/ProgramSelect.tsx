@@ -86,23 +86,21 @@ export const ProgramSelect = ({
         )
     }
 
-    const programValue = programIDs.map((programID) => {
-        const program = statePrograms.find((p) => p.id === programID)
-        if (!program) {
-            return {
-                value: programID,
-                label: 'Unknown Program',
-            }
-        }
-        return {
-            value: program.id,
-            label: program.name,
-        }
-    })
-
     return (
         <Select
-            defaultValue={programValue}
+            defaultValue={programIDs.map((programID) => {
+                const program = statePrograms.find((p) => p.id === programID)
+                if (!program) {
+                    return {
+                        value: programID,
+                        label: 'Unknown Program',
+                    }
+                }
+                return {
+                    value: program.id,
+                    label: program.name,
+                }
+            })}
             className={styles.multiSelect}
             classNamePrefix="select"
             id={`${name}-programSelect`}
