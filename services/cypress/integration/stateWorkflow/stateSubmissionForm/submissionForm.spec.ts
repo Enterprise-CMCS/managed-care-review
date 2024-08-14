@@ -57,7 +57,7 @@ describe('state user in state submission form', () => {
             )
 
             // Save as draft
-            cy.navigateContractRatesForm('SAVE_DRAFT')
+            cy.navigateContractForm('SAVE_DRAFT')
             cy.findByRole('heading', { level: 1, name: /Submissions dashboard/ })
 
             // Link to type page and continue forward
@@ -66,7 +66,7 @@ describe('state user in state submission form', () => {
             )
             cy.findByTestId('step-indicator').findAllByRole('listitem').should('have.length', 6)
             cy.findByText('Rate details').should('exist')
-            cy.navigateContractRatesForm('CONTINUE')
+            cy.navigateContractForm('CONTINUE')
 
             // CHECK CONTRACT DETAILS PAGE NAVIGATION
             cy.findByRole('heading', { level: 2, name: /Contract details/ })
@@ -74,7 +74,7 @@ describe('state user in state submission form', () => {
             // Navigate back to previous page
             cy.deprecatedNavigateV1Form('BACK')
             cy.findByRole('heading', { level: 2, name: /Submission type/ })
-            cy.navigateContractRatesForm('CONTINUE')
+            cy.navigateContractForm('CONTINUE')
 
             // Change to contract amendment, save as draft
             cy.findByRole('heading', { level: 2, name: /Contract details/ })

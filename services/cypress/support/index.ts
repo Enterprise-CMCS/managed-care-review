@@ -81,6 +81,10 @@ declare global {
                 buttonName: FormButtonKey,
                 waitForLoad?: boolean
             ): void
+            navigateContractForm(
+                buttonName: FormButtonKey,
+                waitForLoad?: boolean
+            ): void
             navigateFormByDirectLink(url: string, waitForLoad?: boolean): void
 
             // dashboard commands

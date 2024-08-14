@@ -18,7 +18,7 @@ Cypress.Commands.add('startNewContractOnlySubmissionWithBaseContractV2', () => {
 
     cy.fillOutContractActionOnlyWithBaseContract()
 
-    cy.navigateContractRatesForm('CONTINUE')
+    cy.navigateContractForm('CONTINUE')
     cy.findByRole('heading', { level: 2, name: /Contract details/ })
 })
 
