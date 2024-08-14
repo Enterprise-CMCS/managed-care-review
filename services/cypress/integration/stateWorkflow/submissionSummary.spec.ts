@@ -15,7 +15,7 @@ describe('State user can view submissions', () => {
         cy.startNewContractAndRatesSubmission()
 
         cy.fillOutBaseContractDetails()
-        cy.navigateContractRatesForm('CONTINUE')
+        cy.deprecatedNavigateV1Form('CONTINUE')
 
         cy.findByRole('heading', {
             level: 2,
