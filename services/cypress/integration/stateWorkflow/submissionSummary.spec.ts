@@ -9,7 +9,7 @@ describe('State user can view submissions', () => {
 
         // add a draft contract only submission
         cy.startNewContractOnlySubmissionWithBaseContract()
-        cy.navigateContractRatesForm('SAVE_DRAFT')
+        cy.deprecatedNavigateV1Form('SAVE_DRAFT')
 
         // add a submitted contract and rates submission
         cy.startNewContractAndRatesSubmission()
