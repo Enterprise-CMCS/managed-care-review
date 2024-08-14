@@ -27,11 +27,6 @@ import {
 import {
     SubmissionType as SubmissionTypeT,
     CreateContractInput,
-    useFetchContractQuery,
-    useCreateContractMutation,
-    useUpdateContractMutation,
-    useUpdateDraftContractRatesMutation,
-    ContractRevision
 } from '../../../gen/gqlClient'
 import { PageActions } from '../PageActions'
 import styles from '../StateSubmissionForm.module.scss'
@@ -196,6 +191,8 @@ type FormError =
                     'Log: creating new submission failed with server error',
                     serverError
                 )
+            } finally {
+                formikHelpers.setSubmitting(false)
             }
         } else {
             if (draftSubmission === undefined || !updateDraft || !draftSubmission.draftRevision) {
@@ -231,9 +228,11 @@ type FormError =
                 } else {
                     navigate(redirectPath || `../contract-details`)
                 }
-            } catch (serverError) {
+            }  catch (serverError) {
                 setShowAPIErrorBanner(true)
                 formikHelpers.setSubmitting(false) // unblock submit button to allow resubmit
+            } finally {
+                formikHelpers.setSubmitting(false)
             }
         }
     }
