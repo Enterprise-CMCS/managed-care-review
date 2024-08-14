@@ -67,7 +67,7 @@ describe('ContractDetails', () => {
         mocks: [fetchCurrentUserMock({ statusCode: 200 })],
     }
 
-    it.skip('displays correct form guidance', async () => {
+    it('displays correct form guidance', async () => {
         renderWithProviders(<ContractDetails />, {
             apolloProvider: defaultApolloProvider,
         })
@@ -76,7 +76,7 @@ describe('ContractDetails', () => {
             screen.queryByText(/All fields are required/)
         ).not.toBeInTheDocument()
         const requiredLabels = await screen.findAllByText('Required')
-        expect(requiredLabels).toHaveLength(6)
+        expect(requiredLabels).toHaveLength(8)
         const optionalLabels = screen.queryAllByText('Optional')
         expect(optionalLabels).toHaveLength(0)
     })
