@@ -174,7 +174,18 @@ export const FileUpload = ({
     const asyncS3Upload = (files: File[] | File) => {
         const upload = async (file: File) => {
             const sha = (await calculateSHA256(file)) || ''
-            uploadFile(file)
+
+            // Create a new File object with downcased extension
+            // This will catch things like .PDF or .DOCX
+            const fileNameParts = file.name.split('.')
+            const extension = fileNameParts.pop()
+            const newFileName =
+                fileNameParts.join('.') +
+                '.' +
+                (extension ? extension.toLowerCase() : '')
+            const newFile = new File([file], newFileName, { type: file.type })
+
+            uploadFile(newFile)
                 .then((data) => {
                     setFileItems((prevItems) => {
                         const newItems = [...prevItems]
