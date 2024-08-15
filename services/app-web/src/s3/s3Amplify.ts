@@ -39,7 +39,6 @@ function assertIsS3PutError(val: unknown): asserts val is s3PutError {
 
 // MAIN
 // TODO clarify what gets3URL versus getURL are doing
-
 function newAmplifyS3Client(bucketConfig: S3BucketConfigType): S3ClientT {
     return {
         uploadFile: async (
@@ -47,7 +46,7 @@ function newAmplifyS3Client(bucketConfig: S3BucketConfigType): S3ClientT {
             bucket: BucketShortName
         ): Promise<string | S3Error> => {
             const uuid = uuidv4()
-            const ext = file.name.split('.').pop()
+            const ext = file.name.split('.').pop()?.toLowerCase() || ''
             //encode file names and decoding done in bulk_downloads.ts
             const fileName = encodeURIComponent(file.name)
             try {
