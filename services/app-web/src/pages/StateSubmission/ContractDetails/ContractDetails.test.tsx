@@ -76,7 +76,7 @@ describe('ContractDetails', () => {
             screen.queryByText(/All fields are required/)
         ).not.toBeInTheDocument()
         const requiredLabels = await screen.findAllByText('Required')
-        expect(requiredLabels).toHaveLength(8)
+        expect(requiredLabels).toHaveLength(6)
         const optionalLabels = screen.queryAllByText('Optional')
         expect(optionalLabels).toHaveLength(0)
     })
