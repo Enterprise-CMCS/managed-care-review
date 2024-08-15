@@ -171,7 +171,7 @@
         "graphql.macro": "^1.4.2",
         "jest-launchdarkly-mock": "^2.1.0",
         "lint-staged": "^15.2.7",
-        "prettier": "^3.1.0",
+        "prettier": "^3.3.3",
         "react-select-event": "^5.5.0",
         "react-test-renderer": "^18.2.0",
         "serverless": "^3.39.0",
