@@ -1,4 +1,5 @@
 import type { IndexQuestionsPayload } from './QuestionsType'
+import type { UpdateInfoType } from './contractAndRates'
 
 type HealthPlanPackageStatusType =
     | 'DRAFT'
@@ -12,12 +13,6 @@ type HealthPlanPackageType = {
     mccrsID?: string
     revisions: HealthPlanRevisionType[]
     questions?: IndexQuestionsPayload
-}
-
-type UpdateInfoType = {
-    updatedAt: Date
-    updatedBy: string
-    updatedReason: string
 }
 
 type HealthPlanRevisionType = {
