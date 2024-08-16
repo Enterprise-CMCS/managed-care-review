@@ -2088,5 +2088,7 @@ export {
     mockContractFormData,
     mockContractPackageSubmittedWithRevisions,
     mockContractPackageWithDifferentProgramsInRevisions,
-    mockEmptyDraftContractAndRate
+    mockEmptyDraftContractAndRate,
+    mockContractRevision,
+    mockRateRevision
 }

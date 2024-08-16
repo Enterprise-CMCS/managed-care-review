@@ -6,6 +6,8 @@ import {
     mockContractPackageSubmitted,
     mockContractPackageSubmittedWithRevisions,
     mockContractPackageUnlocked,
+    mockContractRevision,
+    mockRateRevision,
     mockValidCMSUser,
     mockValidStateUser,
 } from '../../testHelpers/apolloMocks'
@@ -72,6 +74,81 @@ describe('Change History', () => {
                     .format('MM/DD/YY h:mma')} ET - Submission`,
             })
         ).toBeInTheDocument()
+        expect(
+            screen.getByText(
+                submittedContract.packageSubmissions[0].submitInfo.updatedReason
+            )
+        ).toBeInTheDocument()
+    })
+
+    it('has expected text in the accordion titles and content for ADMIN events', () => {
+        const submittedContract = mockContractPackageSubmittedWithRevisions({
+            packageSubmissions: [
+                {
+                    __typename: 'ContractPackageSubmission',
+                    cause: 'CONTRACT_SUBMISSION',
+                    submitInfo: {
+                        __typename: 'UpdateInformation',
+                        updatedAt: '2024-02-02T17:45:39.173Z',
+                        updatedBy: {
+                            email: 'admin@example.com',
+                            role: 'ADMIN_USER',
+                            givenName: 'Admin',
+                            familyName: 'Admin',
+                        },
+                        updatedReason: 'Admin submit',
+                    },
+                    submittedRevisions: [mockContractRevision('2')],
+                    contractRevision: mockContractRevision('2', {
+                        unlockInfo: {
+                            __typename: 'UpdateInformation',
+                            updatedAt: '2024-01-25T21:13:56.174Z',
+                            updatedBy: {
+                                email: 'admin@example.com',
+                                role: 'ADMIN_USER',
+                                givenName: 'Admin',
+                                familyName: 'Admin',
+                            },
+                            updatedReason: 'Admin unlock',
+                        },
+                    }),
+                    rateRevisions: [mockRateRevision('2')],
+                },
+                {
+                    __typename: 'ContractPackageSubmission',
+                    cause: 'CONTRACT_SUBMISSION',
+                    submitInfo: {
+                        __typename: 'UpdateInformation',
+                        updatedAt: '2024-01-01T11:14:39.173Z',
+                        updatedBy: {
+                            email: 'example@state.com',
+                            role: 'STATE_USER',
+                            givenName: 'John',
+                            familyName: 'Vila',
+                        },
+                        updatedReason: 'submit 1',
+                    },
+                    submittedRevisions: [mockContractRevision('1')],
+                    contractRevision: mockContractRevision('1'),
+                    rateRevisions: [mockRateRevision('1')],
+                },
+            ],
+        })
+
+        renderWithProviders(<ChangeHistory contract={submittedContract} />)
+        expect(
+            screen.getByRole('button', {
+                name: `${dayjs(
+                    submittedContract.packageSubmissions[0].submitInfo.updatedAt
+                )
+                    .tz('America/New_York')
+                    .format('MM/DD/YY h:mma')} ET - Submission`,
+            })
+        ).toBeInTheDocument()
+        // Should have 3 change history records
+        expect(screen.getAllByTestId('change-history-record')).toHaveLength(3)
+        // Two should be made by Administrator.
+        expect(screen.getAllByText('Administrator')).toHaveLength(2)
         expect(
             screen.getByText(
                 submittedContract.packageSubmissions[0].submitInfo.updatedReason
