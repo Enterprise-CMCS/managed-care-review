@@ -91,7 +91,7 @@
         "@opentelemetry/resources": "^1.18.1",
         "@opentelemetry/sdk-trace-web": "^1.18.1",
         "@opentelemetry/semantic-conventions": "^1.25.1",
-        "@tanstack/react-table": "^8.19.3",
+        "@tanstack/react-table": "^8.20.1",
         "@trussworks/react-uswds": "^4.0.0",
         "@types/path-browserify": "^1.0.0",
         "@vitejs/plugin-react": "^4.3.0",
@@ -129,9 +129,9 @@
         "zod": "^3.10.1"
     },
     "devDependencies": {
-        "@aws-sdk/client-amplify": "^3.630.0",
-        "@aws-sdk/client-s3": "^3.629.0",
-        "@aws-sdk/s3-request-presigner": "^3.629.0",
+        "@aws-sdk/client-amplify": "^3.632.0",
+        "@aws-sdk/client-s3": "^3.632.0",
+        "@aws-sdk/s3-request-presigner": "^3.632.0",
         "@chromatic-com/storybook": "^1",
         "@esbuild-plugins/node-globals-polyfill": "^0.2.3",
         "@peculiar/webcrypto": "^1.5.0",
