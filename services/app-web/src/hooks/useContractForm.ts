@@ -10,7 +10,9 @@ import {
     GenericDocument,
     GenericDocumentInput,
     StateContact,
-    StateContactInput
+    StateContactInput,
+    UnlockedContract,
+    UpdateContractDraftRevisionInput
 } from '../gen/gqlClient'
 import { recordJSException } from '../otelHelpers'
 import { handleApolloError } from '../gqlHelpers/apolloErrors'
@@ -23,8 +25,8 @@ type  UseContractForm = {
     showPageErrorMessage: string | boolean
     previousDocuments?: string[]
     updateDraft: (
-        input: Contract
-    ) => Promise<Contract | Error>
+        input: UpdateContractDraftRevisionInput
+    ) => Promise<Contract | UnlockedContract | Error>
     createDraft: (input: CreateContractInput) => Promise<Contract | Error>
     interimState?:  InterimState
 }
@@ -63,18 +65,6 @@ const useContractForm = (contractID?: string): UseContractForm => {
         updateHeading({ customHeading: pkgNameForHeading })
     }, [pkgNameForHeading, updateHeading])
 
-    const { 
-        data: fetchResultData,
-        error: fetchResultError,
-        loading: fetchResultLoading
-     } = useFetchContractQuery({
-        variables: {
-            input: {
-                contractID: contractID ?? 'new-draft'
-            }
-        },
-        skip: !contractID
-    })
     const [createFormData] = useCreateContractMutation()
 
     const createDraft: UseContractForm['createDraft']  = async (
@@ -118,37 +108,23 @@ const useContractForm = (contractID?: string): UseContractForm => {
     const [updateFormData] = useUpdateContractDraftRevisionMutation()
 
     const updateDraft: UseContractForm['updateDraft']  = async (
-        input: Contract
-    ): Promise<Contract | Error> => {
+        input: UpdateContractDraftRevisionInput
+    ): Promise<Contract | UnlockedContract | Error> => {
 
         setShowPageErrorMessage(false)
         
         try {
-            const formData:ContractDraftRevisionFormDataInput = {
-                submissionDescription: input.draftRevision!.formData.submissionDescription,
-                submissionType: input.draftRevision!.formData.submissionType,
-                contractType: input.draftRevision!.formData.contractType,
-                contractDocuments: documentsInput(input.draftRevision!.formData.contractDocuments),
-                federalAuthorities: input.draftRevision!.formData.federalAuthorities,
-                managedCareEntities: input.draftRevision!.formData.managedCareEntities,
-                programIDs: input.draftRevision!.formData.programIDs,
-                stateContacts: stateContactsInput(input.draftRevision!.formData.stateContacts),
-                supportingDocuments: documentsInput(input.draftRevision!.formData.supportingDocuments),
-                riskBasedContract: input.draftRevision!.formData.riskBasedContract,
-                populationCovered: input.draftRevision!.formData.populationCovered,
-            } 
             const updateResult = await updateFormData({
                 variables: {
                     input: {
                         contractID: contractID ?? 'new-draft',
                         lastSeenUpdatedAt: contract!.draftRevision!.updatedAt,
-                        formData: formData
+                        formData: input.formData
                     },
                 },
             })
             const updatedSubmission =
                 updateResult?.data?.updateContractDraftRevision.contract
-
             if (!updatedSubmission) {
                 setShowPageErrorMessage(true)
                 console.info('Failed to update form data', updateResult)
@@ -166,13 +142,23 @@ const useContractForm = (contractID?: string): UseContractForm => {
             return new Error(serverError)
         }
     }
-
+    const { 
+        data: fetchResultData,
+        error: fetchResultError,
+        loading: fetchResultLoading
+     } = useFetchContractQuery({
+        variables: {
+            input: {
+                contractID: contractID ?? 'new-draft'
+            }
+        },
+        skip: !contractID
+    })
     const contract = fetchResultData?.fetchContract.contract
     if (fetchResultLoading) {
         interimState = 'LOADING'
         return {interimState, createDraft, updateDraft, showPageErrorMessage }
     }
-
     if (fetchResultError) {
         const err = fetchResultError
         if (err instanceof ApolloError){
@@ -187,7 +173,8 @@ const useContractForm = (contractID?: string): UseContractForm => {
             interimState = 'GENERIC_ERROR'// api failure or protobuf decode failure
             return { interimState, createDraft, updateDraft,  showPageErrorMessage}
         }
-        return {interimState, createDraft, updateDraft,  showPageErrorMessage}
+        draftSubmission = contract
+        return {interimState, createDraft, updateDraft, draftSubmission, showPageErrorMessage}
 
     }
 
