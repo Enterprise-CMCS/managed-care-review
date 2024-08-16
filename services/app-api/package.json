@@ -92,7 +92,7 @@
         "serverless-associate-waf": "^1.2.1",
         "serverless-esbuild": "^1.52.1",
         "serverless-iam-helper": "https://github.com/CMSgov/serverless-iam-helper",
-        "serverless-offline": "^13.3.2",
+        "serverless-offline": "^14.0.0",
         "serverless-offline-ssm": "^6.2.0",
         "serverless-s3-bucket-helper": "https://github.com/CMSgov/serverless-s3-bucket-helper",
         "serverless-stack-termination-protection": "^2.0.2",
