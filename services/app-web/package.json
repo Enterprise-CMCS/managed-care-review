@@ -92,7 +92,7 @@
         "@opentelemetry/resources": "^1.18.1",
         "@opentelemetry/sdk-trace-web": "^1.18.1",
         "@opentelemetry/semantic-conventions": "^1.25.1",
-        "@tanstack/react-table": "^8.19.3",
+        "@tanstack/react-table": "^8.20.1",
         "@trussworks/react-uswds": "^4.0.0",
         "@types/path-browserify": "^1.0.0",
         "@vitejs/plugin-react": "^4.3.0",
