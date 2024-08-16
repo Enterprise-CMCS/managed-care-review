@@ -113,7 +113,7 @@ describe('unlockContract', () => {
             await updateDraftRate(client, {
                 rateID: rate.id,
                 formData: { rateCertificationName: 'Rate 2.0' },
-                contractIDs: [],
+                contractIDs: [contract.id, contract2.id],
             })
         )
 
@@ -136,7 +136,9 @@ describe('unlockContract', () => {
             draftContractRevTwo === undefined ||
             draftContractTwoDraftRates === undefined
         ) {
-            throw Error('Unexpect error: draft contract missing draft revision')
+            throw Error(
+                'Unexpected error: draft contract missing draft revision'
+            )
         }
 
         // Contract should now have the latest rate revision

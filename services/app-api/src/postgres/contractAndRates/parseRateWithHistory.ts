@@ -254,8 +254,7 @@ function rateWithHistoryToDomainModel(
     // set parent id for a draft when parsing it. We fix it here.
     if (rateWithoutContracts.parentContractID === DRAFT_PARENT_PLACEHOLDER) {
         if (draftContractsOrError.length !== 1) {
-            const msg =
-                'programming error: its an unsubmitted rate with not one draft contract'
+            const msg = `programming error: its an unsubmitted rate with ${draftContractsOrError.length} draft contracts`
             console.error(msg)
             return new Error(msg)
         }
