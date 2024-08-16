@@ -11,7 +11,12 @@ import {
 } from '../../common-code/healthPlanFormDataType'
 
 const resubmitData = {
-    updatedBy: 'bob@example.com',
+    updatedBy: {
+        email: 'bob@example.com',
+        role: 'STATE_USER' as const,
+        givenName: 'Bob',
+        familyName: 'Vila',
+    },
     updatedAt: new Date('02/01/2022'),
     updatedReason: 'Added rate certification.',
 }
