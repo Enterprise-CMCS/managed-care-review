@@ -3,14 +3,10 @@ fragment rateRevisionFragmentForUnlock on RateRevision {
     createdAt
     updatedAt
     unlockInfo {
-        updatedAt
-        updatedBy
-        updatedReason
+        ...updateInformationFields
     }
     submitInfo {
-        updatedAt
-        updatedBy
-        updatedReason
+        ...updateInformationFields
     }
     formData {
         rateType,
@@ -70,14 +66,10 @@ fragment rateRevisionFragmentForUnlock on RateRevision {
         createdAt
         updatedAt
         submitInfo {
-            updatedAt
-            updatedBy
-            updatedReason
+            ...updateInformationFields
         }
         unlockInfo {
-            updatedAt
-            updatedBy
-            updatedReason
+            ...updateInformationFields
         }
         formData {
             programIDs
@@ -161,4 +153,15 @@ mutation unlockRate($input: UnlockRateInput!) {
             }
         }
     }
+}
+
+fragment updateInformationFields on UpdateInformation {
+    updatedAt
+    updatedBy {
+        email
+        role
+        familyName
+        givenName
+    }
+    updatedReason
 }
