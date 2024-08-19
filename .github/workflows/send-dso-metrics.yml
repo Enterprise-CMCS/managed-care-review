@@ -20,10 +20,23 @@ jobs:
           scan-config: |
             events:  # a list of event specifications such as the following one
             - type: deploy 
+            environment: prod
             name: mc-review-promote
             team: mv-review
-            environment: prod
             owner: Enterprise-CMCS
             repo: managed-care-review
             workflowfilename: promote.yml
             branch: main
+
+            - type: test
+            environment: prod
+            name: mc-review-test
+            team: mc-review
+            owner: Enterprise-CMCS
+            repo: managed-care-review
+            workflowfilename: promote.yml
+            branch: main
+            start:
+              job: unit-tests
+            end:
+              job: unit-tests
