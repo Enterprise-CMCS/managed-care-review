@@ -114,8 +114,7 @@ export const ChangeHistory = ({
                     <div data-testid={`change-history-record`}>
                         <span className={styles.tag}>Submitted by:</span>
                         <span>
-                            {' '}
-                            {getUpdatedByDisplayName(r.updatedBy)}&nbsp;
+                            {` ${getUpdatedByDisplayName(r.updatedBy)} `}
                         </span>
                         <br />
                         {r.revisionVersion && hasSubsequentSubmissions && (
@@ -136,7 +135,7 @@ export const ChangeHistory = ({
                                     : 'Unlocked by: '}
                             </span>
                             <span>
-                                {getUpdatedByDisplayName(r.updatedBy)}&nbsp;
+                                {`${getUpdatedByDisplayName(r.updatedBy)} `}
                             </span>
                         </div>
                         <div>

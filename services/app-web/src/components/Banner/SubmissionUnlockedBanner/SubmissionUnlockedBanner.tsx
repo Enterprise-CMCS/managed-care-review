@@ -1,7 +1,7 @@
 import React from 'react'
 import styles from '../Banner.module.scss'
 import { Alert } from '@trussworks/react-uswds'
-import { dayjs } from '../../../common-code/dateHelpers'
+import { formatBannerDate } from '../../../common-code/dateHelpers'
 import { ExpandableText } from '../../ExpandableText'
 import { UpdateInformation, User } from '../../../gen/gqlClient'
 import { getUpdatedByDisplayName } from '../../../gqlHelpers/userHelpers'
@@ -11,11 +11,6 @@ export type UnlockedProps = {
     loggedInUser?: User
     unlockedInfo?: UpdateInformation | null
 }
-
-export const formatBannerDate = (date?: Date) =>
-    date
-        ? dayjs.utc(date).tz('America/New_York').format('MM/DD/YY h:mma')
-        : 'Not available'
 
 export const SubmissionUnlockedBanner = ({
     className,
