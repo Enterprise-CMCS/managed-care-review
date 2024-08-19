@@ -64,12 +64,6 @@ export const SubmissionSummary = (): React.ReactElement => {
     const { loggedInUser } = useAuth()
     const { id } = useRouteParams()
 
-    const ldClient = useLDClient()
-    const showQuestionResponse = ldClient?.variation(
-        featureFlags.CMS_QUESTIONS.flag,
-        featureFlags.CMS_QUESTIONS.defaultValue
-    )
-
     const hasCMSPermissions = hasCMSUserPermissions(loggedInUser)
     const isStateUser = loggedInUser?.role === 'STATE_USER'
     const isHelpDeskUser = loggedInUser?.role === 'HELPDESK_USER'
@@ -214,7 +208,6 @@ export const SubmissionSummary = (): React.ReactElement => {
                     <DocumentWarningBanner className={styles.banner} />
                 )}
 
-                {!showQuestionResponse && (
                     <NavLinkWithLogging
                         to={{
                             pathname: RoutesRecord.DASHBOARD_SUBMISSIONS,
@@ -228,7 +221,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                             <span>&nbsp;Back to dashboard</span>
                         )}
                     </NavLinkWithLogging>
-                )}
+
 
                 {
                     <SubmissionTypeSummarySection
