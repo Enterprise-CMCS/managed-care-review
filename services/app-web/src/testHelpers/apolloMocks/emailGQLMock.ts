@@ -30,9 +30,13 @@ export const fetchEmailSettings =
                         },
                         stateAnalysts: [
                             {
-                                emails: ['testMN@example.com'],
+                                emails: ['testMN@example.com', 'cmsApproverUser1@dmas.mn.gov'],
                                 stateCode: 'MN',
                             },
+                            {
+                                emails: ['cmsUser2@dmas.mn.gov', 'cmsApproverUser2@dmas.mn.gov'],
+                                stateCode: 'OH'
+                            }
                         ],
                     },
                 },
