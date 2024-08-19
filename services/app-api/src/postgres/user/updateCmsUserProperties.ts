@@ -8,15 +8,17 @@ import { NotFoundError } from '../postgresErrors'
 export async function updateCmsUserProperties(
     client: PrismaClient,
     userID: string,
-    stateCodes: StateCodeType[],
     idOfUserPerformingUpdate: string,
+    stateCodes?: StateCodeType[],
     divisionAssignment?: Division,
     description?: string | null
 ): Promise<CMSUsersUnionType | Error> {
     try {
-        const statesWithCode = stateCodes.map((s) => {
-            return { stateCode: s }
-        })
+        const statesWithCode = stateCodes
+            ? stateCodes.map((s) => {
+                  return { stateCode: s }
+              })
+            : undefined
 
         /* we currently update only one property at a time, so
             we can exclude state assignments if divisionAssignment is present */
@@ -55,9 +57,12 @@ export async function updateCmsUserProperties(
                     id: userID,
                 },
                 data: {
-                    stateAssignments: {
-                        set: statesWithCode,
-                    },
+                    // We don't allow no state assignments, if empty array is passed
+                    stateAssignments: statesWithCode
+                        ? {
+                              set: statesWithCode,
+                          }
+                        : undefined,
                     divisionAssignment,
                 },
                 include: {
