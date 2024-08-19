@@ -68,12 +68,10 @@ const UniversalRoutes = (
 const StateUserRoutes = ({
     authMode,
     setAlert,
-    showQuestionResponse,
     stageName,
 }: {
     authMode: AuthModeType
     setAlert?: React.Dispatch<React.ReactElement>
-    showQuestionResponse: boolean
     stageName?: string
 }): React.ReactElement => {
     // feature flag
@@ -82,6 +80,12 @@ const StateUserRoutes = ({
         featureFlags.RATE_EDIT_UNLOCK.flag,
         featureFlags.RATE_EDIT_UNLOCK.defaultValue
     )
+
+    const showQuestionResponse = ldClient?.variation(
+        featureFlags.CMS_QUESTIONS.flag,
+        featureFlags.CMS_QUESTIONS.defaultValue
+    )
+
     return (
         <AuthenticatedRouteWrapper setAlert={setAlert} authMode={authMode}>
             <Routes>
@@ -166,14 +170,19 @@ const StateUserRoutes = ({
 const CMSUserRoutes = ({
     authMode,
     setAlert,
-    showQuestionResponse,
     stageName,
 }: {
     authMode: AuthModeType
     setAlert?: React.Dispatch<React.ReactElement>
-    showQuestionResponse: boolean
     stageName?: string
 }): React.ReactElement => {
+    const ldClient = useLDClient()
+
+    const showQuestionResponse = ldClient?.variation(
+        featureFlags.CMS_QUESTIONS.flag,
+        featureFlags.CMS_QUESTIONS.defaultValue
+    )
+
     return (
         <AuthenticatedRouteWrapper authMode={authMode} setAlert={setAlert}>
             <Routes>
@@ -301,11 +310,6 @@ export const AppRoutes = ({
         featureFlags.SESSION_EXPIRING_MODAL.defaultValue
     )
 
-    const showQuestionResponse = ldClient?.variation(
-        featureFlags.CMS_QUESTIONS.flag,
-        featureFlags.CMS_QUESTIONS.defaultValue
-    )
-
     const route = getRouteName(pathname)
     const { updateHeading } = usePage()
     const [initialPath] = useState(pathname) // this gets written on mount, so we don't call the effect on every path change
@@ -389,7 +393,6 @@ export const AppRoutes = ({
             <StateUserRoutes
                 authMode={authMode}
                 setAlert={setAlert}
-                showQuestionResponse={showQuestionResponse}
                 stageName={stageName}
             />
         )
@@ -398,7 +401,6 @@ export const AppRoutes = ({
             <CMSUserRoutes
                 authMode={authMode}
                 setAlert={setAlert}
-                showQuestionResponse={showQuestionResponse}
                 stageName={stageName}
             />
         )
