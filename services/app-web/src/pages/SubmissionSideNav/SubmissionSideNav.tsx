@@ -24,8 +24,6 @@ import {
     HealthPlanFormDataType,
     packageName,
 } from '../../common-code/healthPlanFormDataType'
-import { useLDClient } from 'launchdarkly-react-client-sdk'
-import { featureFlags } from '../../common-code/featureFlags'
 import {
     DocumentDateLookupTableType,
     makeDocumentDateTable,

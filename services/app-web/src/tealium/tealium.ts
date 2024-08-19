@@ -268,7 +268,7 @@ const tealiumClient = (tealiumEnv: Omit<TealiumEnv, 'dev'>): TealiumClientType =
             }
             utag.link(tagData)
         },
-        logPageView: (
+        logPageView: async (
             pathname: string,
             loggedInUser?: User,
             heading?: string | React.ReactElement,
@@ -292,7 +292,7 @@ const tealiumClient = (tealiumEnv: Omit<TealiumEnv, 'dev'>): TealiumClientType =
             }
 
             if (!window.utag) {
-                new Promise((resolve) => setTimeout(resolve, 1000)).finally(() => {
+                await new Promise((resolve) => setTimeout(resolve, 1000)).finally(() => {
                     if (!window.utag) {
                         recordJSException('Analytics did not load in time')
                         return
@@ -300,7 +300,6 @@ const tealiumClient = (tealiumEnv: Omit<TealiumEnv, 'dev'>): TealiumClientType =
                         window.utag.view(tagData)
                     }
                 })
-                // Guardrail on subsequent page view  - protect against multiple calls when route seems similar
             } else {
                 window.utag.view(tagData)
             }

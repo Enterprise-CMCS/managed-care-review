@@ -97,7 +97,7 @@ function AuthProvider({
             )
             modalCountdownTimers.current = []
         }
-    }, [sessionIsExpiring]) // full dep array causes a loop, because we're resetting the dep in the useEffect
+    }, [sessionIsExpiring, logoutCountdownDuration]) // full dep array causes a loop, because we're resetting the dep in the useEffect
 
     const isAuthenticated = loggedInUser !== undefined
 
