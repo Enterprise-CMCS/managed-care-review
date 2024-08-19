@@ -24,6 +24,13 @@ const featureFlags = {
         flag: 'rate-edit-unlock',
         defaultValue: false,
     },
+    /**
+     * Allows CMS and Admin users to read and write state assignments
+     */
+    READ_WRITE_STATE_ASSIGNMENTS: {
+        flag: 'read-write-state-assignments',
+        defaultValue: false
+    },
     // PERMANENT FLAGS
 
     /**
