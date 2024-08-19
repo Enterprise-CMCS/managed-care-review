@@ -25,7 +25,7 @@ const cmsUserType = z.object({
     email: z.string(),
     givenName: z.string(),
     familyName: z.string(),
-    stateAssignments: z.array(stateType),
+    stateAssignments: z.array(stateType.omit({ users: true })),
     divisionAssignment: divisionType.optional(),
 })
 
@@ -35,7 +35,7 @@ const cmsApproverUserType = z.object({
     email: z.string(),
     givenName: z.string(),
     familyName: z.string(),
-    stateAssignments: z.array(stateType),
+    stateAssignments: z.array(stateType.omit({ users: true })),
     divisionAssignment: divisionType.optional(),
 })
 
@@ -100,4 +100,4 @@ export type {
     CMSUsersUnionType,
 }
 
-export { cmsUserType, stateUserType, userRoles }
+export { cmsUserType, stateUserType, userRoles, cmsApproverUserType }
