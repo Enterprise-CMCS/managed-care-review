@@ -1,4 +1,4 @@
-export { updateCMSUserResolver } from './updateCMSUser'
+export { updateDivisionAssignment } from './updateDivisionAssignment'
 export { fetchCurrentUserResolver } from './fetchCurrentUser'
 export {
     stateUserResolver,

@@ -13,6 +13,7 @@ import {
 } from './fetchHealthPlanPackageWrapper'
 import { useIndexQuestionsQueryWrapper } from './useIndexQuestionsQueryWrapper'
 import { hasCMSUserPermissions, hasAdminUserPermissions } from './userHelpers'
+import { updateDivisionAssignment } from './updateDivisionAssignment'
 
 const isGraphQLErrors = (input: unknown): input is GraphQLErrors => {
     if (Array.isArray(input)) {
@@ -33,5 +34,6 @@ export {
     useIndexQuestionsQueryWrapper,
     useFetchHealthPlanPackageWithQuestionsWrapper,
     hasCMSUserPermissions,
-    hasAdminUserPermissions
+    hasAdminUserPermissions,
+    updateDivisionAssignment
 }
