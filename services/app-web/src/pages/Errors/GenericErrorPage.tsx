@@ -7,7 +7,6 @@ import { GridContainer } from '@trussworks/react-uswds'
 
 export const GenericErrorPage = (): React.ReactElement => {
     const stringConstants = useStringConstants()
-    const MAIL_TO_SUPPORT = stringConstants.MAIL_TO_SUPPORT
     return (
         <section className={styles.errorsContainer}>
             <GridContainer>
@@ -19,7 +18,7 @@ export const GenericErrorPage = (): React.ReactElement => {
                         error,&nbsp;
                     </span>
                     <LinkWithLogging
-                        href={`mailto: ${MAIL_TO_SUPPORT}, mc-review-team@truss.works`}
+                        href={stringConstants.MAIL_TO_SUPPORT_HREF}
                         variant="unstyled"
                         target="_blank"
                         rel="noreferrer"

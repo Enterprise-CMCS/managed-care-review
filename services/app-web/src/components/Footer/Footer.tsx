@@ -14,7 +14,6 @@ import { LinkWithLogging } from '../TealiumLogging/Link'
  */
 export const Footer = (): React.ReactElement => {
     const stringConstants = useStringConstants()
-    const MAIL_TO_SUPPORT = stringConstants.MAIL_TO_SUPPORT
     const { currentRoute: route } = useCurrentRoute()
 
     return route !== 'GRAPHQL_EXPLORER' ? (
@@ -45,12 +44,12 @@ export const Footer = (): React.ReactElement => {
                         <span>
                             Email&nbsp;
                             <LinkWithLogging
-                                href={`mailto: ${MAIL_TO_SUPPORT}, mc-review-team@truss.works`}
+                                href={stringConstants. MAIL_TO_SUPPORT_HREF}
                                 variant="unstyled"
                                 target="_blank"
                                 rel="noreferrer"
                             >
-                                {MAIL_TO_SUPPORT}
+                                {stringConstants.MAIL_TO_SUPPORT}
                             </LinkWithLogging>
                             &nbsp;to get help or send feedback
                         </span>

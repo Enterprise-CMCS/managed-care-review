@@ -19,7 +19,6 @@ export const GenericApiErrorBanner = ({
 }: GenericApiErrorProps): React.ReactElement => {
     const stringConstants = useStringConstants()
     const { logAlertImpressionEvent } = useTealium()
-    const MAIL_TO_SUPPORT = stringConstants.MAIL_TO_SUPPORT
 
     useEffect(() => {
         logAlertImpressionEvent({
@@ -54,7 +53,7 @@ export const GenericApiErrorBanner = ({
                                 to experience an error,&nbsp;
                             </span>
                             <LinkWithLogging
-                                href={`mailto: ${MAIL_TO_SUPPORT}, mc-review-team@truss.works`}
+                                href={stringConstants.MAIL_TO_SUPPORT_HREF}
                                 variant="unstyled"
                                 target="_blank"
                                 rel="noreferrer"

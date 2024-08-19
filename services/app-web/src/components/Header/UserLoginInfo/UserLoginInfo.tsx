@@ -22,17 +22,16 @@ const LoggedInUserInfo = (
     logout: LogoutHandlerT
 ): React.ReactElement => {
     const stringConstants = useStringConstants()
-    const MAIL_TO_SUPPORT = stringConstants.MAIL_TO_SUPPORT
     return (
         <div className={styles.userInfo}>
             <span>Contact </span>
             <LinkWithLogging
-                href={`mailto: ${MAIL_TO_SUPPORT}, mc-review-team@truss.works`}
+                href={stringConstants.MAIL_TO_SUPPORT_HREF}
                 variant="unstyled"
                 target="_blank"
                 rel="noreferrer"
             >
-                {MAIL_TO_SUPPORT}
+                {stringConstants.MAIL_TO_SUPPORT}
             </LinkWithLogging>
             <span className={styles.divider}>|</span>
             <span>{user.email}</span>

@@ -16,7 +16,6 @@ export const ErrorAlertFailedRequest = ({
 }: ErrorAlertFailedRequestProps): React.ReactElement => {
     const stringConstants = useStringConstants()
     const { logAlertImpressionEvent } = useTealium()
-    const MAIL_TO_SUPPORT = stringConstants.MAIL_TO_SUPPORT
 
     useEffect(() => {
         logAlertImpressionEvent({
@@ -49,7 +48,7 @@ export const ErrorAlertFailedRequest = ({
                     </span>
                     <LinkWithLogging
                         variant="unstyled"
-                        href={MAIL_TO_SUPPORT}
+                        href={stringConstants.MAIL_TO_SUPPORT_HREF}
                         target="_blank"
                         rel="noreferrer"
                     >

@@ -23,14 +23,13 @@ export const ErrorAlert = ({
 }: ErrorAlertProps): React.ReactElement => {
     const stringConstants = useStringConstants()
     const { logAlertImpressionEvent } = useTealium()
-    const MAIL_TO_SUPPORT = stringConstants.MAIL_TO_SUPPORT
     const classes = classnames(styles.messageBodyText, className)
     const showLink = appendLetUsKnow || !message // our default message includes the link
     const defaultMessage =
         "We're having trouble loading this page. Please refresh your browser and if you continue to experience an error,"
 
     useEffect(() => {
-        const logErrorMessage = `${message ? extractText(message) : defaultMessage} email ${MAIL_TO_SUPPORT}`
+        const logErrorMessage = `${message ? extractText(message) : defaultMessage} email ${stringConstants.MAIL_TO_SUPPORT}`
         logAlertImpressionEvent({
             error_type: 'system',
             error_message: logErrorMessage,
@@ -56,12 +55,12 @@ export const ErrorAlert = ({
                     &nbsp;email{' '}
                     <LinkWithLogging
                         className={styles.nowrap}
-                        href={MAIL_TO_SUPPORT}
+                        href={stringConstants.MAIL_TO_SUPPORT_HREF}
                         variant="unstyled"
                         target="_blank"
                         rel="noreferrer"
                     >
-                        {MAIL_TO_SUPPORT}
+                        {stringConstants.MAIL_TO_SUPPORT}
                     </LinkWithLogging>
                 </span>
             )}

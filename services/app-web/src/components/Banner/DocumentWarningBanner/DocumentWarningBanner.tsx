@@ -20,7 +20,6 @@ export const DocumentWarningBanner = ({
         })
     }, [])
 
-    const MAIL_TO_SUPPORT = stringConstants.MAIL_TO_SUPPORT
     return (
         <Alert
             role="alert"
@@ -35,7 +34,7 @@ export const DocumentWarningBanner = ({
                 try again. If you still see this message,&nbsp;
             </span>
             <a
-                href={`mailto: ${MAIL_TO_SUPPORT}, mc-review-team@truss.works`}
+                href={stringConstants.MAIL_TO_SUPPORT_HREF}
                 className="usa-link"
                 target="_blank"
                 rel="noreferrer"

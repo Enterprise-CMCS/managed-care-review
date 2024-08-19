@@ -139,11 +139,11 @@ export const QuestionResponse = () => {
                                 ask questions about a submission. Contact{' '}
                                 <LinkWithLogging
                                     variant="unstyled"
-                                    href={`mailto:${MAIL_TO_SUPPORT}`}
+                                    href={stringConstants.MAIL_TO_SUPPORT_HREF}
                                     target="_blank"
                                     rel="noreferrer"
                                 >
-                                    {MAIL_TO_SUPPORT}
+                                    {stringConstants.MAIL_TO_SUPPORT}
                                 </LinkWithLogging>{' '}
                                 to add your division.
                             </span>
