@@ -164,9 +164,7 @@ export const ReplaceRate = (): React.ReactElement => {
                     validationSchema={ReplaceRateSchema}
                 >
                     {({ errors, values, handleSubmit }) => (
-                        <>
                         <UswdsForm
-                            className={styles.formContainer}
                             id="ReplaceRateForm"
                             aria-label={'Withdraw and replace rate on contract'}
                             aria-describedby="form-guidance"
@@ -182,7 +180,7 @@ export const ReplaceRate = (): React.ReactElement => {
                                     headingRef={errorSummaryHeadingRef}
                                 />
                             )}
-
+                            <div className={styles.formContainer}>
                             <h2>Replace a rate review</h2>
 
                             <DataDetail id="withdrawnRate" label="Current rate">
@@ -253,7 +251,8 @@ export const ReplaceRate = (): React.ReactElement => {
                                     />
                                 </FormGroup>
                             </fieldset>
-                        </UswdsForm>
+                            </div>
+
                         <PageActionsContainer>
                                 <ButtonGroup type="default">
                                     <ActionButton
@@ -282,8 +281,9 @@ export const ReplaceRate = (): React.ReactElement => {
                                     </ActionButton>
                                 </ButtonGroup>
                             </PageActionsContainer>
-                            </>
+                            </UswdsForm>
                     )}
+
                 </Formik>
          </FormContainer>
     )
