@@ -1,0 +1,43 @@
+mutation updateStateAssignments($input: UpdateStateAssignmentsInput!) {
+    updateStateAssignments(input: $input) {
+        user {
+            __typename
+            ... on CMSUser {
+                id
+                email
+                role
+                familyName
+                givenName
+                stateAssignments {
+                    code
+                    name
+                    programs {
+                        id
+                        name
+                        fullName
+                        isRateProgram
+                    }
+                }
+                divisionAssignment
+            }
+            ... on CMSApproverUser {
+                id
+                email
+                role
+                familyName
+                givenName
+                stateAssignments {
+                    code
+                    name
+                    programs {
+                        id
+                        name
+                        fullName
+                        isRateProgram
+                    }
+                }
+                divisionAssignment
+            }
+        }
+    }
+}

@@ -1,0 +1,60 @@
+query fetchMcReviewSettings {
+    fetchMcReviewSettings {
+        emailConfiguration {
+            stage
+            baseUrl
+            emailSource
+            devReviewTeamEmails
+            oactEmails
+            dmcpReviewEmails
+            dmcpSubmissionEmails
+            dmcoEmails
+            cmsReviewHelpEmailAddress
+            cmsRateHelpEmailAddress
+            helpDeskEmail
+        }
+        stateAssignments {
+            stateCode
+            name
+            users {
+                __typename
+                ... on CMSUser {
+                    id
+                    email
+                    role
+                    familyName
+                    givenName
+                    stateAssignments {
+                        code
+                        name
+                        programs {
+                            id
+                            name
+                            fullName
+                            isRateProgram
+                        }
+                    }
+                    divisionAssignment
+                }
+                ... on CMSApproverUser {
+                    id
+                    email
+                    role
+                    familyName
+                    givenName
+                    stateAssignments {
+                        code
+                        name
+                        programs {
+                            id
+                            name
+                            fullName
+                            isRateProgram
+                        }
+                    }
+                    divisionAssignment
+                }
+            }
+        }
+    }
+}

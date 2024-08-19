@@ -111,6 +111,16 @@ type Query {
     - NotFoundError: contract for contractID not found in database
     """
     fetchContractWithQuestions(input: FetchContractWithQuestionsInput!): FetchContractWithQuestionsPayload!
+
+    """
+    fetchMcReviewSettings returns settings for the MC review app
+
+    stateAssignments: List of all States in the system with their assigned CMS users.
+
+    Errors:
+    - ForbiddenError: A State user requests a contract that belongs to another state
+    """
+    fetchMcReviewSettings: FetchMcReviewSettingsPayload!
 }
 
 type Mutation {
@@ -330,7 +340,23 @@ type Mutation {
         - cmsUserID was not a CMSUser's ID
         - stateCodes included an invalid state code
     """
-    updateCMSUser(input: UpdateCMSUserInput!): UpdateCMSUserPayload!
+    updateDivisionAssignment(input: UpdateDivisionAssignmentInput!): UpdateCMSUserPayload!
+
+    """
+    updateStateAssignments updates CMSUser state assignments.
+
+    This can only be called by an AdminUser or a DMCO CMS user.
+    The cmsUserID must be a CMSUser's id, not a state user
+
+    Errors:
+    - ForbiddenError:
+    - A non AdminUser called this
+    - A non DMCO CMS user called this
+    - UserInputError
+    - cmsUserID was not a CMSUser's ID
+    - stateCodes included an invalid state code
+    """
+    updateStateAssignments(input: UpdateStateAssignmentsInput!): UpdateCMSUserPayload!
 
     """
     createQuestion creates a new Question for the given HealthPlanPackage
@@ -719,12 +745,16 @@ enum Division {
     OACT
 }
 
-input UpdateCMSUserInput {
+input UpdateDivisionAssignmentInput {
+    cmsUserID: ID!
+    "divisionAssignment is one of the CMS divisions to which a user is assigned: 'DMCO', 'DMCP', or 'OACT'"
+    divisionAssignment: Division
+}
+
+input UpdateStateAssignmentsInput {
     cmsUserID: ID!
     "stateAssignments is an array of stateCodes (e.g. ['CA', 'NM', 'TN'])"
     stateAssignments: [String!]
-    "divisionAssignment is one of the CMS divisions to which a user is assigned: 'DMCO', 'DMCP', or 'OACT'"
-    divisionAssignment: Division
 }
 
 type UpdateCMSUserPayload {
@@ -1780,6 +1810,27 @@ input UnlockRateInput {
     rateID: ID!
     "User given reason this rate was unlocked"
     unlockedReason: String!
+}
+
+type StateAssignmentUser {
+    id: ID!
+    "will be 'CMS_USER' or 'CMS_APPROVER_USER'"
+    role: String!
+    email: String!
+    givenName: String!
+    familyName: String!
+    divisionAssignment: Division
+}
+
+type StateAssignment {
+    stateCode: String!
+    name: String!
+    users: [CMSUsersUnion!]!
+}
+
+type FetchMcReviewSettingsPayload {
+    emailConfiguration: EmailConfiguration
+    stateAssignments: [StateAssignment!]!
 }
 
 input ContractDraftRevisionFormDataInput {
