@@ -169,11 +169,17 @@ const EmailAnalystsTable = ({
                     filterOptions={Array.from(
                         emailsColumn.getFacetedUniqueValues().keys()
                     )
+                        .filter((state) => Boolean(state.length)) // filters out all empty assignments as filter options
                         .sort()
                         .map((state) => ({
                             value: state,
                             label: state,
-                        }))}
+                        }))
+                        // Add just one empty assignment filter with label
+                        .concat({
+                            value: [],
+                            label: 'No assignments',
+                        })}
                     onChange={(selectedOptions) =>
                         updateFilters(emailsColumn, selectedOptions, 'emails')
                     }
@@ -196,7 +202,8 @@ const EmailAnalystsTable = ({
                             <tr key={row.id}>
                                 <td>{row.getValue('stateCode')}</td>
                                 <td>
-                                    {formatEmails(row.getValue('emails') || [])}
+                                    {row.getValue &&
+                                        formatEmails(row.getValue('emails'))}
                                 </td>
                             </tr>
                         )

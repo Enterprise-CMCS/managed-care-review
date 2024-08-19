@@ -8,7 +8,12 @@ import { CMSUsersTable } from './CMSUsersTable/CMSUsersTable'
 import { SettingsErrorAlert } from './SettingsErrorAlert'
 import { useLocation } from 'react-router-dom'
 import { recordJSException } from '../../otelHelpers'
-import { hasAdminUserPermissions } from '../../gqlHelpers'
+import {
+    hasAdminUserPermissions,
+    hasCMSUserPermissions,
+} from '../../gqlHelpers'
+import { useLDClient } from 'launchdarkly-react-client-sdk'
+import { featureFlags } from '../../common-code/featureFlags'
 
 export const TestMonitoring = (): null => {
     const location = useLocation()
@@ -26,8 +31,18 @@ export const TestMonitoring = (): null => {
 }
 export const Settings = (): React.ReactElement => {
     const { loginStatus, loggedInUser } = useAuth()
+    const ldClient = useLDClient()
+
+    const showReadWriteStateAssignments = ldClient?.variation(
+        featureFlags.READ_WRITE_STATE_ASSIGNMENTS.flag,
+        featureFlags.READ_WRITE_STATE_ASSIGNMENTS.defaultValue
+    )
+
     const isAuthenticated = loginStatus === 'LOGGED_IN'
-    const isAllowedToSeeSettings = hasAdminUserPermissions(loggedInUser)
+    const isAllowedToSeeSettings =
+        hasAdminUserPermissions(loggedInUser) ||
+        (hasCMSUserPermissions(loggedInUser) && showReadWriteStateAssignments)
+
     const loading = loginStatus === 'LOADING' || !loggedInUser
 
     return (

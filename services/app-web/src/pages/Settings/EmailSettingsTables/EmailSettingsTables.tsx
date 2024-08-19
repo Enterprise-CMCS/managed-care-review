@@ -3,7 +3,10 @@ import React from 'react'
 import { Loading } from '../../../components'
 import {
     EmailConfiguration,
+    StateAnalystsConfiguration,
+    StateAssignment,
     useFetchEmailSettingsQuery,
+    useFetchMcReviewSettingsQuery,
 } from '../../../gen/gqlClient'
 import { SettingsErrorAlert } from '../SettingsErrorAlert'
 import styles from '../Settings.module.scss'
@@ -11,36 +14,92 @@ import {
     EmailAnalystsTable,
     type StateAnalystsInDashboardType,
 } from './EmailAnalystsTable'
+import { useLDClient } from 'launchdarkly-react-client-sdk'
+import { featureFlags } from '../../../common-code/featureFlags'
 
 const formatEmails = (arr?: string[]) => (arr ? arr.join(',') : 'NOT DEFINED')
+
+const mapStateAnalystsFromParamStore = (
+    stateAnalysts?: StateAnalystsConfiguration[] | null
+): StateAnalystsInDashboardType[] => {
+    return stateAnalysts
+        ? stateAnalysts.map((sa) => ({
+              emails: sa.emails,
+              stateCode: sa.stateCode,
+          }))
+        : []
+}
+
+const mapStateAnalystFromDB = (
+    stateAssignments?: StateAssignment[] | null
+): StateAnalystsInDashboardType[] => {
+    return stateAssignments
+        ? stateAssignments.map((state) => ({
+              stateCode: state.stateCode,
+              emails: state.users.map((user) => user.email),
+          }))
+        : []
+}
 
 const EmailSettingsTable = ({
     type,
 }: {
     type: 'GENERAL' | 'ANALYSTS' | 'SUPPORT'
 }): React.ReactElement => {
-    const { loading, data, error } = useFetchEmailSettingsQuery()
-    const config = data?.fetchEmailSettings.config
-    const analysts: StateAnalystsInDashboardType[] = data?.fetchEmailSettings
-        .stateAnalysts
-        ? data.fetchEmailSettings.stateAnalysts.map((sa) => ({
-              emails: sa.emails,
-              stateCode: sa.stateCode,
-          }))
-        : []
-    if (error) return <SettingsErrorAlert error={error} />
+    const ldClient = useLDClient()
+
+    const readWriteStateAssignments = ldClient?.variation(
+        featureFlags.READ_WRITE_STATE_ASSIGNMENTS.flag,
+        featureFlags.READ_WRITE_STATE_ASSIGNMENTS.defaultValue
+    )
+
+    const {
+        loading: loadEmailSettings,
+        data,
+        error: emailSettingsError,
+    } = useFetchEmailSettingsQuery({
+        skip: readWriteStateAssignments,
+    })
+    const {
+        loading: loadingMcReviewSettings,
+        data: settingsData,
+        error: mcReviewError,
+    } = useFetchMcReviewSettingsQuery({
+        skip: !readWriteStateAssignments,
+    })
+
+    const isLoading = readWriteStateAssignments
+        ? loadingMcReviewSettings
+        : loadEmailSettings
+    const isError = readWriteStateAssignments
+        ? mcReviewError
+        : emailSettingsError
+
+    const config =
+        readWriteStateAssignments && settingsData
+            ? settingsData.fetchMcReviewSettings.emailConfiguration
+            : data?.fetchEmailSettings.config
+
+    const analysts: StateAnalystsInDashboardType[] = readWriteStateAssignments
+        ? mapStateAnalystFromDB(
+              settingsData?.fetchMcReviewSettings.stateAssignments
+          )
+        : mapStateAnalystsFromParamStore(data?.fetchEmailSettings.stateAnalysts)
+
+    if (isError) return <SettingsErrorAlert error={isError} />
+
     return (
         <div className={styles.table}>
-            {loading && <Loading />}
+            {isLoading && <Loading />}
 
-            {data && config && type === 'GENERAL' && (
+            {config && type === 'GENERAL' && (
                 <EmailGeneralTable config={config} />
             )}
 
-            {data && analysts && type === 'ANALYSTS' && (
+            {analysts && type === 'ANALYSTS' && (
                 <EmailAnalystsTable analysts={analysts} />
             )}
-            {data && config && type === 'SUPPORT' && (
+            {config && type === 'SUPPORT' && (
                 <EmailSupportTable config={config} />
             )}
         </div>
