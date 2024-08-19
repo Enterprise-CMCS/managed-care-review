@@ -29,7 +29,7 @@
     },
     "devDependencies": {
         "@types/ssh2": "^1.11.15",
-        "@types/yargs": "^17.0.32",
+        "@types/yargs": "^17.0.33",
         "@types/node": "^20.14.12",
         "lint-staged": "^15.2.7",
         "typescript": "^4.4.4"
