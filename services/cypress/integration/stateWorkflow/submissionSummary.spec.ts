@@ -9,13 +9,13 @@ describe('State user can view submissions', () => {
 
         // add a draft contract only submission
         cy.startNewContractOnlySubmissionWithBaseContract()
-        cy.deprecatedNavigateV1Form('SAVE_DRAFT')
+        cy.navigateContractForm('SAVE_DRAFT')
 
         // add a submitted contract and rates submission
         cy.startNewContractAndRatesSubmission()
 
         cy.fillOutBaseContractDetails()
-        cy.deprecatedNavigateV1Form('CONTINUE')
+        cy.navigateContractForm('CONTINUE')
 
         cy.findByRole('heading', {
             level: 2,
