@@ -5,6 +5,10 @@
     "description": "",
     "main": "index.js",
     "private": true,
+    "workspaces": [
+        "packages/*",
+        "services/*"
+    ],
     "directories": {
         "test": "services/cypress"
     },

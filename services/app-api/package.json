@@ -26,6 +26,7 @@
         ]
     },
     "dependencies": {
+        "@mc-review/common-code": "workspace:*",
         "@apollo/client": "3.8.8",
         "@apollo/gateway": "^2.2.2",
         "@aws-sdk/client-amplify": "^3.632.0",

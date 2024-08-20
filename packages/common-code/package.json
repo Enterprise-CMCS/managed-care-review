@@ -1,0 +1,12 @@
+{
+    "name": "@mc-review/common-code",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "build": "tsc --noEmit"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC"
+}

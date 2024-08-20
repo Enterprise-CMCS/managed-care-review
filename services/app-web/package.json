@@ -75,6 +75,7 @@
         ]
     },
     "dependencies": {
+        "@mc-review/common-code": "workspace:*",
         "@apollo/client": "3.8.8",
         "@apollo/explorer": "^3.0.0",
         "@cypress/code-coverage": "^3.10.0",
