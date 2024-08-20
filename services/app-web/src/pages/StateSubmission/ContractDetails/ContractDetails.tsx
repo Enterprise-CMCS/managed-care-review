@@ -490,12 +490,12 @@ export const ContractDetails = ({
                                     : `../rate-details`,
                         })
                     }}
-                    // validationSchema={() =>
-                    //     ContractDetailsFormSchema(
-                    //         draftSubmission,
-                    //         ldClient?.allFlags()
-                    //     )
-                    // }
+                    validationSchema={() =>
+                        ContractDetailsFormSchema(
+                            draftSubmission,
+                            ldClient?.allFlags()
+                        )
+                    }
                 >
                     {({
                         values,

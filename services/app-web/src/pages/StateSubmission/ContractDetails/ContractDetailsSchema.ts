@@ -12,17 +12,21 @@ import {
     isCHIPOnly,
     isContractAmendment,
     isContractWithProvisions,
-} from '../../../common-code/healthPlanFormDataType/healthPlanFormData'
+} from '../../../common-code/ContractType'
 import {
     isMedicaidAmendmentProvision,
     isMedicaidBaseProvision,
 } from '../../../common-code/healthPlanFormDataType/ModifiedProvisions'
 import { FeatureFlagSettings } from '../../../common-code/featureFlags'
+import { Contract } from '../../../gen/gqlClient'
+import {
+    validateFileItemsList,
+} from '../../../formHelpers/validators'
 
 Yup.addMethod(Yup.date, 'validateDateFormat', validateDateFormat)
 
 export const ContractDetailsFormSchema = (
-    draftSubmission: UnlockedHealthPlanFormDataType,
+    draftSubmission: Contract,
     activeFeatureFlags: FeatureFlagSettings = {}
 ) => {
     const yesNoError = (provision: GeneralizedProvisionType) => {
@@ -79,7 +83,8 @@ export const ContractDetailsFormSchema = (
             .validateDateFormat('YYYY-MM-DD', true)
             .typeError('The start date must be in MM/DD/YYYY format')
             .defined('You must enter a start date'),
-
+        contractDocuments: validateFileItemsList({ required: true }),
+        supportingDocuments: validateFileItemsList({ required: false }),
         contractDateEnd: Yup.date()
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore-next-line
