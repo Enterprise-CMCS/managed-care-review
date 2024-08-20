@@ -9,7 +9,7 @@ import {
 } from '@trussworks/react-uswds'
 import { v4 as uuidv4 } from 'uuid'
 import { generatePath, useNavigate } from 'react-router-dom'
-import { Formik, FormikErrors } from 'formik'
+import { Formik, FormikErrors, getIn } from 'formik'
 import styles from '../StateSubmissionForm.module.scss'
 
 import {
@@ -42,7 +42,7 @@ import {
     activeFormPages,
     type HealthPlanFormPageProps,
 } from '../StateSubmissionForm'
-import { formatYesNoForProto, formatDocumentsForGQL, formatFormDateForGQL } from '../../../formHelpers/formatters'
+import { formatYesNoForProto, formatDocumentsForGQL, formatDocumentsForForm, formatFormDateForGQL } from '../../../formHelpers/formatters'
 import { ACCEPTED_SUBMISSION_FILE_TYPES } from '../../../components/FileUpload'
 import {
     federalAuthorityKeysForCHIP,
@@ -86,7 +86,7 @@ import { ErrorOrLoadingPage } from '../ErrorOrLoadingPage'
 import { PageBannerAlerts } from '../PageBannerAlerts'
 import { useErrorSummary } from '../../../hooks/useErrorSummary'
 import { useContractForm } from '../../../hooks/useContractForm'
-import { UpdateContractDraftRevisionInput, ContractDraftRevisionFormDataInput } from '../../../gen/gqlClient'
+import { UpdateContractDraftRevisionInput, ContractDraftRevisionFormDataInput, ContractRevision } from '../../../gen/gqlClient'
 
 function formattedDatePlusOneDay(initialValue: string): string {
     const dayjsValue = dayjs(initialValue)
@@ -117,7 +117,10 @@ const ContractDatesErrorMessage = ({
             : validationErrorMessage}
     </PoliteErrorMessage>
 )
-export interface ContractDetailsFormValues {
+
+export type ContractDetailsFormValues = {
+    contractDocuments: FileItemT[]
+    supportingDocuments: FileItemT[]
     contractExecutionStatus: ContractExecutionStatus | undefined
     contractDateStart: string
     contractDateEnd: string
@@ -143,7 +146,7 @@ export interface ContractDetailsFormValues {
     statutoryRegulatoryAttestation: string | undefined
     statutoryRegulatoryAttestationDescription: string | undefined
 }
-type FormError =
+export type FormError =
     FormikErrors<ContractDetailsFormValues>[keyof FormikErrors<ContractDetailsFormValues>]
 
 export const ContractDetails = ({
@@ -154,6 +157,7 @@ export const ContractDetails = ({
     const ldClient = useLDClient()
     const { setFocusErrorSummaryHeading, errorSummaryHeadingRef } =
         useErrorSummary()
+    // const { errors } = useFormikContext<ContractDetailsFormValues>()
 
     // set up API handling and HPP data
     const { loggedInUser } = useAuth()
@@ -174,25 +178,6 @@ export const ContractDetails = ({
 
     // Contract documents state management
     const { getKey, handleDeleteFile, handleUploadFile, handleScanFile } = useS3()
-    const [fileItems, setFileItems] = useState<FileItemT[]>([]) // eventually this will include files from api
-    const hasValidFiles =
-        fileItems.length > 0 &&
-        fileItems.every((item) => item.status === 'UPLOAD_COMPLETE')
-    const hasLoadingFiles =
-        fileItems.some((item) => item.status === 'PENDING') ||
-        fileItems.some((item) => item.status === 'SCANNING')
-    const showFileUploadError = shouldValidate && !hasValidFiles
-    const documentsErrorMessage =
-        showFileUploadError && hasLoadingFiles
-            ? 'You must wait for all documents to finish uploading before continuing'
-            : showFileUploadError && fileItems.length === 0
-              ? ' You must upload at least one document'
-              : showFileUploadError && !hasValidFiles
-                ? ' You must remove all documents with error messages before continuing'
-                : undefined
-    const documentsErrorKey =
-        fileItems.length === 0 ? 'documents' : '#file-items-list'
-
     if (interimState || !draftSubmission)
         return <ErrorOrLoadingPage state={interimState || 'GENERIC_ERROR'} />
     
@@ -230,6 +215,14 @@ export const ContractDetails = ({
         : federalAuthorityKeys
 
     const contractDetailsInitialValues: ContractDetailsFormValues = {
+        contractDocuments: formatDocumentsForForm({
+            documents: draftSubmission?.draftRevision?.formData.contractDocuments,
+            getKey: getKey,
+        }),
+        supportingDocuments: formatDocumentsForForm({
+            documents: draftSubmission?.draftRevision?.formData.supportingDocuments,
+            getKey: getKey,
+        }),
         contractExecutionStatus:
             draftSubmission?.draftRevision?.formData.contractExecutionStatus ?? undefined,
         contractDateStart:
@@ -354,9 +347,13 @@ export const ContractDetails = ({
         statutoryRegulatoryAttestationDescription: draftSubmission?.draftRevision?.formData.statutoryRegulatoryAttestationDescription ?? '',
     }
 
-    const showFieldErrors = (error?: FormError) =>
-        shouldValidate && Boolean(error)
-
+    const showFieldErrors = (
+        fieldName: keyof ContractDetailsFormValues,
+        errors:any
+    ): string | undefined => {
+        if (!shouldValidate) return undefined
+        return getIn(errors, `${fieldName}`)
+    }
     const handleFormSubmit = async (
         values: ContractDetailsFormValues,
         setSubmitting: (isSubmitting: boolean) => void, // formik setSubmitting
@@ -365,51 +362,6 @@ export const ContractDetails = ({
             redirectPath: string
         }
     ) => {
-        // Currently documents validation happens (outside of the yup schema, which only handles the formik form data)
-        // if there are any errors present in the documents list and we are in a validation state (relevant for Save as Draft) force user to clear validations to continue
-        if (options.shouldValidateDocuments) {
-            if (!hasValidFiles) {
-                setShouldValidate(true)
-                setFocusErrorSummaryHeading(true)
-                setSubmitting(false)
-                return
-            }
-        }
-
-        const contractDocuments = fileItems.reduce(
-            (formDataDocuments, fileItem) => {
-                if (fileItem.status === 'UPLOAD_ERROR') {
-                    console.info(
-                        'Attempting to save files that failed upload, discarding invalid files'
-                    )
-                } else if (fileItem.status === 'SCANNING_ERROR') {
-                    console.info(
-                        'Attempting to save files that failed scanning, discarding invalid files'
-                    )
-                } else if (fileItem.status === 'DUPLICATE_NAME_ERROR') {
-                    console.info(
-                        'Attempting to save files that are duplicate names, discarding duplicate'
-                    )
-                } else if (!fileItem.s3URL) {
-                    console.info(
-                        'Attempting to save a seemingly valid file item is not yet uploaded to S3, this should not happen on form submit. Discarding file.'
-                    )
-                } else if (!fileItem.sha256) {
-                    console.info(
-                        'Attempting to save a seemingly valid file item with no sha. this should not happen on form submit. Discarding file.'
-                    )
-                } else {
-                    formDataDocuments.push({
-                        name: fileItem.name,
-                        s3URL: fileItem.s3URL,
-                        sha256: fileItem.sha256,
-                    })
-                }
-                return formDataDocuments
-            },
-            [] as SubmissionDocument[]
-        )
-
         let updatedDraftSubmissionFormData: ContractDraftRevisionFormDataInput = {
             contractExecutionStatus: values.contractExecutionStatus,
             contractDateStart: formatFormDateForGQL(
@@ -422,11 +374,11 @@ export const ContractDetails = ({
             populationCovered: draftSubmission.draftRevision?.formData.populationCovered,
             programIDs: draftSubmission.draftRevision?.formData.programIDs || [],
             stateContacts: draftSubmission.draftRevision?.formData.stateContacts || [],
-            supportingDocuments: draftSubmission.draftRevision?.formData.supportingDocuments || [],
+            contractDocuments: formatDocumentsForGQL(values.contractDocuments) || [],
+            supportingDocuments: formatDocumentsForGQL(values.supportingDocuments) || [],
             managedCareEntities: values.managedCareEntities,
             federalAuthorities: values.federalAuthorities,
             submissionType: draftSubmission.draftRevision?.formData.submissionType,
-            contractDocuments: contractDocuments,
             statutoryRegulatoryAttestation: formatYesNoForProto(
                 values.statutoryRegulatoryAttestation
             ),
@@ -570,7 +522,7 @@ export const ContractDetails = ({
                                         Contract Details
                                     </legend>
 
-                                    {shouldValidate && (
+                                    {/* {shouldValidate && (
                                         <ErrorSummary
                                             errors={
                                                 documentsErrorMessage
@@ -583,10 +535,10 @@ export const ContractDetails = ({
                                             }
                                             headingRef={errorSummaryHeadingRef}
                                         />
-                                    )}
+                                    )} */}
 
                                     <FormGroup
-                                        error={showFileUploadError}
+                                        error={Boolean(showFieldErrors('contractDocuments', errors))}
                                         className="margin-top-0"
                                     >
                                         <FileUpload
@@ -594,7 +546,7 @@ export const ContractDetails = ({
                                             name="documents"
                                             label="Upload contract"
                                             aria-required
-                                            error={documentsErrorMessage}
+                                            // error={errors.contractDocuments}
                                             hint={
                                                 <span
                                                     className={
@@ -646,7 +598,7 @@ export const ContractDetails = ({
                                             }
                                             onFileItemsUpdate={({ fileItems }) =>
                                                 setFieldValue(
-                                                    `documents`,
+                                                    `contractDocuments`,
                                                     fileItems
                                                 )
                                             }
@@ -654,9 +606,10 @@ export const ContractDetails = ({
                                     </FormGroup>
                                     {contract438Attestation && (
                                         <FormGroup
-                                            error={showFieldErrors(
-                                                errors.statutoryRegulatoryAttestation
-                                            )}
+                                            error={Boolean(showFieldErrors(
+                                                'statutoryRegulatoryAttestation',
+                                                errors
+                                            ))}
                                         >
                                             <Fieldset
                                                 role="radiogroup"
@@ -703,9 +656,10 @@ export const ContractDetails = ({
                                                         </Link>
                                                     </span>
                                                 </div>
-                                                {showFieldErrors(
-                                                    errors.statutoryRegulatoryAttestation
-                                                ) && (
+                                                {Boolean(showFieldErrors(
+                                                    'statutoryRegulatoryAttestation',
+                                                    errors
+                                                )) && (
                                                     <PoliteErrorMessage
                                                         formFieldLabel={
                                                             StatutoryRegulatoryAttestationQuestion
@@ -768,9 +722,10 @@ export const ContractDetails = ({
                                                     id="statutoryRegulatoryAttestationDescription"
                                                     name="statutoryRegulatoryAttestationDescription"
                                                     aria-required
-                                                    showError={showFieldErrors(
-                                                        errors.statutoryRegulatoryAttestationDescription
-                                                    )}
+                                                    showError={Boolean(showFieldErrors(
+                                                        'statutoryRegulatoryAttestationDescription',
+                                                        errors
+                                                    ))}
                                                     hint={
                                                         <ReactRouterLinkWithLogging
                                                             variant="external"
@@ -793,9 +748,10 @@ export const ContractDetails = ({
                                             </div>
                                         )}
                                     <FormGroup
-                                        error={showFieldErrors(
-                                            errors.contractExecutionStatus
-                                        )}
+                                        error={Boolean(showFieldErrors(
+                                            'contractExecutionStatus',
+                                            errors
+                                        ))}
                                     >
                                         <Fieldset
                                             role="radiogroup"
@@ -810,9 +766,10 @@ export const ContractDetails = ({
                                             >
                                                 Required
                                             </span>
-                                            {showFieldErrors(
-                                                errors.contractExecutionStatus
-                                            ) && (
+                                            {Boolean(showFieldErrors(
+                                                'contractExecutionStatus',
+                                                errors
+                                            )) && (
                                                 <PoliteErrorMessage formFieldLabel="Contract status">
                                                     {
                                                         errors.contractExecutionStatus
@@ -847,12 +804,14 @@ export const ContractDetails = ({
                                         <>
                                             <FormGroup
                                                 error={
-                                                    showFieldErrors(
-                                                        errors.contractDateStart
-                                                    ) ||
-                                                    showFieldErrors(
-                                                        errors.contractDateEnd
-                                                    )
+                                                    Boolean(showFieldErrors(
+                                                        'contractDateStart',
+                                                        errors
+                                                    )) ||
+                                                    Boolean(showFieldErrors(
+                                                        'contractDateEnd',
+                                                        errors
+                                                    ))
                                                 }
                                             >
                                                 <Fieldset
@@ -872,10 +831,10 @@ export const ContractDetails = ({
                                                     >
                                                         Required
                                                     </span>
-                                                    {showFieldErrors(
-                                                        errors.contractDateStart ||
-                                                            errors.contractDateEnd
-                                                    ) && (
+                                                    {Boolean(showFieldErrors(
+                                                        'contractDateStart', errors) ||
+                                                    Boolean(showFieldErrors('contractDateEnd', errors)
+                                                    )) && (
                                                         <ContractDatesErrorMessage
                                                             values={values}
                                                             validationErrorMessage={
@@ -954,9 +913,10 @@ export const ContractDetails = ({
                                                 </Fieldset>
                                             </FormGroup>
                                             <FormGroup
-                                                error={showFieldErrors(
-                                                    errors.managedCareEntities
-                                                )}
+                                                error={Boolean(showFieldErrors(
+                                                    'managedCareEntities',
+                                                    errors
+                                                ))}
                                             >
                                                 <Fieldset
                                                     aria-required
@@ -984,9 +944,10 @@ export const ContractDetails = ({
                                                             Check all that apply
                                                         </span>
                                                     </div>
-                                                    {showFieldErrors(
-                                                        errors.managedCareEntities
-                                                    ) && (
+                                                    {Boolean(showFieldErrors(
+                                                        'managedCareEntities',
+                                                        errors
+                                                    )) && (
                                                         <PoliteErrorMessage formFieldLabel="Managed Care entities">
                                                             {
                                                                 errors.managedCareEntities
@@ -1045,9 +1006,10 @@ export const ContractDetails = ({
                                             </FormGroup>
 
                                             <FormGroup
-                                                error={showFieldErrors(
-                                                    errors.federalAuthorities
-                                                )}
+                                                error={Boolean(showFieldErrors(
+                                                    'federalAuthorities',
+                                                    errors
+                                                ))}
                                             >
                                                 <Fieldset
                                                     aria-required
@@ -1075,9 +1037,10 @@ export const ContractDetails = ({
                                                             Check all that apply
                                                         </span>
                                                     </div>
-                                                    {showFieldErrors(
-                                                        errors.federalAuthorities
-                                                    ) && (
+                                                    {Boolean(showFieldErrors(
+                                                        'federalAuthorities',
+                                                        errors
+                                                    )) && (
                                                         <PoliteErrorMessage formFieldLabel="Active federal operating authority">
                                                             {
                                                                 errors.federalAuthorities
@@ -1146,11 +1109,10 @@ export const ContractDetails = ({
                                                                         draftSubmission,
                                                                         modifiedProvisionName
                                                                     )}
-                                                                    showError={showFieldErrors(
-                                                                        errors[
-                                                                            modifiedProvisionName
-                                                                        ]
-                                                                    )}
+                                                                    showError={Boolean(showFieldErrors(
+                                                                        modifiedProvisionName,
+                                                                        errors
+                                                                    ))}
                                                                     variant="SUBHEAD"
                                                                 />
                                                             )
@@ -1164,34 +1126,20 @@ export const ContractDetails = ({
 
                                 <PageActions
                                     saveAsDraftOnClick={async () => {
-                                        // do not need to trigger validations if file list is empty
-                                        if (fileItems.length === 0) {
-                                            await handleFormSubmit(
-                                                values,
-                                                setSubmitting,
-                                                {
-                                                    shouldValidateDocuments:
-                                                        false,
-                                                    redirectPath:
-                                                        RoutesRecord.DASHBOARD_SUBMISSIONS,
-                                                }
-                                            )
-                                        } else {
-                                            await handleFormSubmit(
-                                                values,
-                                                setSubmitting,
-                                                {
-                                                    shouldValidateDocuments:
-                                                        true,
-                                                    redirectPath:
-                                                        RoutesRecord.DASHBOARD_SUBMISSIONS,
-                                                }
-                                            )
-                                        }
+                                        await handleFormSubmit(
+                                            values,
+                                            setSubmitting,
+                                            {
+                                                shouldValidateDocuments:
+                                                    true,
+                                                redirectPath:
+                                                    RoutesRecord.DASHBOARD_SUBMISSIONS,
+                                            }
+                                        )
                                     }}
                                     backOnClick={async () => {
                                         // do not need to validate or resubmit if no documents are uploaded
-                                        if (fileItems.length === 0) {
+                                        if (false) {
                                             navigate('../type')
                                         } else {
                                             await handleFormSubmit(
@@ -1205,7 +1153,10 @@ export const ContractDetails = ({
                                             )
                                         }
                                     }}
-                                    disableContinue={showFileUploadError}
+                                    disableContinue={
+                                        shouldValidate &&
+                                        !!Object.keys(errors).length
+                                    }
                                     actionInProgress={isSubmitting}
                                     backOnClickUrl={generatePath(
                                         RoutesRecord.SUBMISSIONS_TYPE,

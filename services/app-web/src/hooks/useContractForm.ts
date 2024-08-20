@@ -35,19 +35,9 @@ const documentsInput = (documents: GenericDocument[]): GenericDocumentInput[] =>
     return documents.map((doc) => {
         return {
             downloadURL: doc.downloadURL,
-            dateAdded: doc.dateAdded,
             name: doc.name,
             s3URL: doc.s3URL,
             sha256: doc.sha256
-        }
-    })
-}
-const stateContactsInput = (contacts: StateContact[]): StateContactInput[] => {
-    return contacts.map((contact) => {
-        return {
-            email: contact.email,
-            name: contact.name,
-            titleRole: contact.titleRole,
         }
     })
 }
@@ -112,7 +102,9 @@ const useContractForm = (contractID?: string): UseContractForm => {
     ): Promise<Contract | UnlockedContract | Error> => {
 
         setShowPageErrorMessage(false)
-        
+        if (input.formData.contractDocuments && input.formData.contractDocuments.length > 0) {
+            input.formData.contractDocuments = documentsInput(input.formData.contractDocuments)
+        }
         try {
             const updateResult = await updateFormData({
                 variables: {
