@@ -327,8 +327,7 @@ type Mutation {
 
 
     """
-    updateCMSUser updates CMSUser fields that are allowed to be modified.
-    Presently, just the user's stateAssignments.
+    updateDivisionAssignment updates CMS user division assignment.
 
     This can only be called by an AdminUser.
     The cmsUserID must be a CMSUser's id, not a state user
