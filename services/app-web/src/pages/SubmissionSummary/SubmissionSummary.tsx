@@ -206,22 +206,6 @@ export const SubmissionSummary = (): React.ReactElement => {
                     <DocumentWarningBanner className={styles.banner} />
                 )}
 
-                    <NavLinkWithLogging
-                        to={{
-                            pathname: RoutesRecord.DASHBOARD_SUBMISSIONS,
-                        }}
-                        event_name="back_button"
-                    >
-                        <Icon.ArrowBack />
-                        {loggedInUser?.__typename === 'StateUser' ? (
-                            <span>&nbsp;Back to state dashboard</span>
-                        ) : (
-                            <span>&nbsp;Back to dashboard</span>
-                        )}
-                    </NavLinkWithLogging>
-
-
-                {
                     <SubmissionTypeSummarySection
                         subHeaderComponent={
                             hasCMSPermissions ? (
@@ -268,7 +252,6 @@ export const SubmissionSummary = (): React.ReactElement => {
                         isStateUser={isStateUser}
                         explainMissingData={explainMissingData}
                     />
-                }
 
                 {
                     <ContractDetailsSummarySection
