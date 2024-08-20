@@ -2,7 +2,7 @@ import {
     IndexUsersDocument,
     UserEdge,
     User,
-    UpdateCmsUserDocument,
+    UpdateDivisionAssignmentDocument,
     FetchCurrentUserDocument,
     UpdateDraftContractRatesDocument,
     UpdateDraftContractRatesInput,
@@ -169,7 +169,7 @@ const assignCmsDivision = async (
 
     // assign division mutation
     await apolloClient.mutate({
-        mutation: UpdateCmsUserDocument,
+        mutation: UpdateDivisionAssignmentDocument,
         variables: {
             input: {
                 cmsUserID: user.id,
