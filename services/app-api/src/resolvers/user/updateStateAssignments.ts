@@ -1,6 +1,5 @@
 import type { Store } from '../../postgres'
 import type { MutationResolvers } from '../../gen/gqlServer'
-import type { LDService } from '../../launchDarkly/launchDarkly'
 import {
     setErrorAttributesOnActiveSpan,
     setResolverDetailsOnActiveSpan,
@@ -29,8 +28,7 @@ const hasUpdatePermissions = (user: UserType): boolean => {
 }
 
 export function updateStateAssignments(
-    store: Store,
-    launchDarkly: LDService
+    store: Store
 ): MutationResolvers['updateStateAssignments'] {
     return async (_parent, { input }, context) => {
         const { user: currentUser, ctx, tracer } = context

@@ -122,7 +122,7 @@ export function configureResolvers(
             withdrawAndReplaceRedundantRate:
                 withdrawAndReplaceRedundantRateResolver(store),
             updateDivisionAssignment: updateDivisionAssignment(store),
-            updateStateAssignments: updateStateAssignments(store, launchDarkly),
+            updateStateAssignments: updateStateAssignments(store),
             createQuestion: createQuestionResolver(
                 store,
                 emailParameterStore,
