@@ -60,7 +60,12 @@ describe('RateSummary', () => {
                                 id: '1337',
                                 withdrawInfo: {
                                     updatedAt: new Date('2024-01-01'),
-                                    updatedBy: 'admin@example.com',
+                                    updatedBy: {
+                                        email: 'admin@example.com',
+                                        role: 'ADMIN_USER',
+                                        familyName: 'Hotman',
+                                        givenName: 'Iroh',
+                                    },
                                     updatedReason:
                                         'Admin as withdrawn this rate.',
                                 },
@@ -216,7 +221,12 @@ describe('RateSummary', () => {
                             id: '1337',
                             withdrawInfo: {
                                 updatedAt: new Date('2024-01-01'),
-                                updatedBy: 'admin@example.com',
+                                updatedBy: {
+                                    email: 'admin@example.com',
+                                    role: 'ADMIN_USER',
+                                    familyName: 'Hotman',
+                                    givenName: 'Iroh',
+                                },
                                 updatedReason: 'Admin as withdrawn this rate.',
                             },
                         }),

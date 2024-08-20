@@ -4,6 +4,7 @@ import {
     SubmissionUpdatedBanner,
     UpdatedProps,
 } from './SubmissionUpdatedBanner'
+import { mockValidStateUser } from '../../../testHelpers/apolloMocks'
 
 export default {
     title: 'Components/Banner/SubmissionUpdatedBanner',
@@ -16,16 +17,32 @@ const Template: StoryFn<UpdatedProps> = (args) => (
 
 export const SubmissionUpdatedBannerLongText = Template.bind({})
 SubmissionUpdatedBannerLongText.args = {
-    submittedBy: 'Loremipsum@email.com',
-    updatedOn: new Date(),
-    changesMade:
-        'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi ut justo non nisl congue efficitur. Praesent porta condimentum imperdiet. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi ut justo non nisl congue efficitur. Praesent porta condimentum imperdiet. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi ut justo non nisl congue efficitur. Praesent porta condimentum imperdiet. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi ut justo non nisl congue efficitur. Praesent porta condimentum imperdiet. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi ut justo non nisl congue efficitur. Praesent porta condimentum imperdiet.',
+    loggedInUser: mockValidStateUser(),
+    updateInfo: {
+        updatedAt: new Date(),
+        updatedReason:
+            'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi ut justo non nisl congue efficitur. Praesent porta condimentum imperdiet. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi ut justo non nisl congue efficitur. Praesent porta condimentum imperdiet. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi ut justo non nisl congue efficitur. Praesent porta condimentum imperdiet. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi ut justo non nisl congue efficitur. Praesent porta condimentum imperdiet. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi ut justo non nisl congue efficitur. Praesent porta condimentum imperdiet.',
+        updatedBy: {
+            email: 'Loremipsum@email.com',
+            role: 'STATE_USER',
+            givenName: 'Bob',
+            familyName: 'Vila',
+        },
+    },
 }
 
 export const SubmissionUpdatedBannerShortText = Template.bind({})
 SubmissionUpdatedBannerShortText.args = {
-    submittedBy: 'Loremipsum@email.com',
-    updatedOn: new Date(),
-    changesMade:
-        'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi ut justo non nisl congue efficitur.',
+    loggedInUser: mockValidStateUser(),
+    updateInfo: {
+        updatedAt: new Date(),
+        updatedReason:
+            'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi ut justo non nisl congue efficitur.',
+        updatedBy: {
+            email: 'Loremipsum@email.com',
+            role: 'STATE_USER',
+            givenName: 'Bob',
+            familyName: 'Vila',
+        },
+    },
 }

@@ -4,6 +4,7 @@ import {
     SubmissionUnlockedBanner,
     UnlockedProps,
 } from './SubmissionUnlockedBanner'
+import { mockValidStateUser } from '../../../testHelpers/apolloMocks'
 
 export default {
     title: 'Components/Banner/SubmissionUnlockedBanner',
@@ -16,16 +17,33 @@ const Template: StoryFn<UnlockedProps> = (args) => (
 
 export const SubmissionUnlockedBannerCMSUser = Template.bind({})
 SubmissionUnlockedBannerCMSUser.args = {
-    userType: 'CMS_USER',
-    unlockedBy: 'Loremipsum@email.com',
-    unlockedOn: new Date(),
-    reason: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi ut justo non nisl congue efficitur. Praesent porta condimentum imperdiet. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi ut justo non nisl congue efficitur. Praesent porta condimentum imperdiet. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi ut justo non nisl congue efficitur. Praesent porta condimentum imperdiet. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi ut justo non nisl congue efficitur. Praesent porta condimentum imperdiet. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi ut justo non nisl congue efficitur. Praesent porta condimentum imperdiet.',
+    loggedInUser: mockValidStateUser(),
+    unlockedInfo: {
+        updatedAt: new Date(),
+        updatedReason:
+            'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi ut justo non nisl congue efficitur. Praesent porta condimentum imperdiet. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi ut justo non nisl congue efficitur. Praesent porta condimentum imperdiet. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi ut justo non nisl congue efficitur. Praesent porta condimentum imperdiet. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi ut justo non nisl congue efficitur. Praesent porta condimentum imperdiet. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi ut justo non nisl congue efficitur. Praesent porta condimentum imperdiet.',
+        updatedBy: {
+            email: 'Loremipsum@email.com',
+            role: 'CMS_USER',
+            givenName: 'Bob',
+            familyName: 'Vila',
+        },
+    },
 }
 
 export const SubmissionUnlockedBannerStateUser = Template.bind({})
 SubmissionUnlockedBannerStateUser.args = {
-    userType: 'STATE_USER',
-    unlockedBy: 'Loremipsum@email.com',
-    unlockedOn: new Date(),
-    reason: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi ut justo non nisl congue efficitur. Praesent porta condimentum imperdiet. Curabitur.',
+    loggedInUser: mockValidStateUser(),
+    unlockedInfo: {
+        updatedAt: new Date(),
+        updatedReason:
+            'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi ut justo non nisl congue efficitur. Praesent porta condimentum imperdiet. Curabitur.',
+
+        updatedBy: {
+            email: 'Loremipsum@email.com',
+            role: 'CMS_USER',
+            givenName: 'Bob',
+            familyName: 'Vila',
+        },
+    },
 }

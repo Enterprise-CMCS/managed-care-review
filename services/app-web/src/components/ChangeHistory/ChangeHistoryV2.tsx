@@ -6,6 +6,7 @@ import type { AccordionItemProps } from '@trussworks/react-uswds/lib/components/
 import { UpdateInformation, Contract } from '../../gen/gqlClient'
 import styles from './ChangeHistory.module.scss'
 import { LinkWithLogging } from '../TealiumLogging/Link'
+import { getUpdatedByDisplayName } from '../../gqlHelpers/userHelpers'
 
 type ChangeHistoryProps = {
     contract: Contract
@@ -112,7 +113,9 @@ export const ChangeHistory = ({
                 content: isInitialSubmission ? (
                     <div data-testid={`change-history-record`}>
                         <span className={styles.tag}>Submitted by:</span>
-                        <span> {r.updatedBy}&nbsp;</span>
+                        <span>
+                            {` ${getUpdatedByDisplayName(r.updatedBy)} `}
+                        </span>
                         <br />
                         {r.revisionVersion && hasSubsequentSubmissions && (
                             <LinkWithLogging
@@ -131,7 +134,9 @@ export const ChangeHistory = ({
                                     ? 'Submitted by: '
                                     : 'Unlocked by: '}
                             </span>
-                            <span>{r.updatedBy}&nbsp;</span>
+                            <span>
+                                {`${getUpdatedByDisplayName(r.updatedBy)} `}
+                            </span>
                         </div>
                         <div>
                             <span className={styles.tag}>

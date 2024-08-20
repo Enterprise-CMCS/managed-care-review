@@ -76,14 +76,10 @@ fragment rateRevisionFragmentForCreateContract on RateRevision {
     createdAt
     updatedAt
     unlockInfo {
-        updatedAt
-        updatedBy
-        updatedReason
+        ...updateInformationFields
     }
     submitInfo {
-        updatedAt
-        updatedBy
-        updatedReason
+        ...updateInformationFields
     }
     formData {
         rateType
@@ -143,14 +139,10 @@ fragment rateRevisionFragmentForCreateContract on RateRevision {
         createdAt
         updatedAt
         submitInfo {
-            updatedAt
-            updatedBy
-            updatedReason
+            ...updateInformationFields
         }
         unlockInfo {
-            updatedAt
-            updatedBy
-            updatedReason
+            ...updateInformationFields
         }
         formData {
             ...contractFormDataFragmentForCreate
@@ -224,15 +216,11 @@ fragment contractRevisionFragmentForCreate on ContractRevision {
     contractName
 
     submitInfo {
-        updatedAt
-        updatedBy
-        updatedReason
+        ...updateInformationFields
     }
 
     unlockInfo {
-        updatedAt
-        updatedBy
-        updatedReason
+        ...updateInformationFields
     }
 
     formData {
@@ -269,6 +257,11 @@ fragment submittableRevisionsFieldsForCreate on SubmittableRevision {
 
 fragment updateInformationFields on UpdateInformation {
     updatedAt
-    updatedBy
+    updatedBy {
+        email
+        role
+        familyName
+        givenName
+    }
     updatedReason
 }

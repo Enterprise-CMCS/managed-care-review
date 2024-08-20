@@ -1,9 +1,10 @@
 import { z } from 'zod'
 import type { contractSchema } from './contractTypes'
+import { baseUserSchema } from '../UserType'
 
 const updateInfoSchema = z.object({
     updatedAt: z.date(),
-    updatedBy: z.string().email(),
+    updatedBy: baseUserSchema.omit({ id: true }),
     updatedReason: z.string(),
 })
 

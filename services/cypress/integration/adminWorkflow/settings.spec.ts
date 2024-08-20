@@ -13,7 +13,7 @@ describe('Admin user can view application level settings', () => {
         cy.findByRole('tab', {name: 'CMS users'}).click()
         cy.findByRole('table', {name: 'CMS Users'}).should('exist')
         cy.findByText('Zuko').should('exist')
-        cy.findByText('Hotman').should('exist')
+        cy.findAllByText('Hotman').should('have.length.at.least', 1)
         cy.assignDivisionToCMSUser({userEmail: 'zuko@example.com', division: 'DMCO'})
         cy.findByText('Zuko').should('exist').siblings().should('include.text', 'selected.DMCO') // not accesible but dropdowns are not good idea
         cy.assignDivisionToCMSUser({userEmail: 'zuko@example.com', division: 'DMCP'})
