@@ -482,8 +482,14 @@ function mockSubmittedHealthPlanPackage(
                     createdAt: new Date('2021-01-01'),
                     unlockInfo: null,
                     submitInfo: {
+                        __typename: 'UpdateInformation',
                         updatedAt: new Date('2021-01-02'),
-                        updatedBy: 'test@example.com',
+                        updatedBy: {
+                            email: 'test@example.com',
+                            role: 'STATE_USER',
+                            familyName: 'Airman',
+                            givenName: 'Aang'
+                        },
                         updatedReason: 'Initial submit',
                         ...submitInfo,
                     },
@@ -512,12 +518,22 @@ function mockSubmittedHealthPlanPackageWithRevisions(): HealthPlanPackage {
                     id: 'sd596de8-852d-4e42-ab0a-c9c9bf78c3c1',
                     unlockInfo: {
                         updatedAt: '2022-03-25T01:18:44.663Z',
-                        updatedBy: 'zuko@example.com',
+                        updatedBy: {
+                            email: 'zuko@example.com',
+                            role: 'CMS_USER',
+                            familyName: 'Hotman',
+                            givenName: 'Zuko'
+                        },
                         updatedReason: 'Latest unlock',
                     },
                     submitInfo: {
                         updatedAt: '2022-03-25T01:19:46.154Z',
-                        updatedBy: 'aang@example.com',
+                        updatedBy: {
+                            email: 'aang@example.com',
+                            role: 'STATE_USER',
+                            familyName: 'Airman',
+                            givenName: 'Aang'
+                        },
                         updatedReason: 'Should be latest resubmission',
                         __typename: 'UpdateInformation',
                     },
@@ -530,12 +546,22 @@ function mockSubmittedHealthPlanPackageWithRevisions(): HealthPlanPackage {
                     id: '26596de8-852d-4e42-bb0a-c9c9bf78c3de',
                     unlockInfo: {
                         updatedAt: '2022-03-24T01:18:44.663Z',
-                        updatedBy: 'zuko@example.com',
+                        updatedBy: {
+                            email: 'zuko@example.com',
+                            role: 'CMS_USER',
+                            familyName: 'Hotman',
+                            givenName: 'Zuko'
+                        },
                         updatedReason: 'testing stuff',
                     },
                     submitInfo: {
                         updatedAt: '2022-03-24T01:19:46.154Z',
-                        updatedBy: 'aang@example.com',
+                        updatedBy: {
+                            email: 'aang@example.com',
+                            role: 'STATE_USER',
+                            familyName: 'Airman',
+                            givenName: 'Aang'
+                        },
                         updatedReason: 'Placeholder resubmission reason',
                     },
                     createdAt: '2022-03-24T01:18:44.665Z',
@@ -548,7 +574,12 @@ function mockSubmittedHealthPlanPackageWithRevisions(): HealthPlanPackage {
                     unlockInfo: null,
                     submitInfo: {
                         updatedAt: '2022-03-23T02:08:52.259Z',
-                        updatedBy: 'aang@example.com',
+                        updatedBy: {
+                            email: 'aang@example.com',
+                            role: 'STATE_USER',
+                            familyName: 'Airman',
+                            givenName: 'Aang'
+                        },
                         updatedReason: 'Initial submission',
                     },
                     createdAt: '2022-03-23T02:08:14.241Z',
@@ -585,8 +616,14 @@ function mockUnlockedHealthPlanPackage(
                     id: 'revision3',
                     createdAt: new Date(),
                     unlockInfo: {
+                        __typename: 'UpdateInformation',
                         updatedAt: new Date(),
-                        updatedBy: 'bob@dmas.mn.gov',
+                        updatedBy: {
+                            email: 'bob@dmas.mn.gov',
+                            role: 'CMS_USER',
+                            familyName: 'Airman',
+                            givenName: 'Bob'
+                        },
                         updatedReason: 'Test unlock reason',
                         ...unlockInfo,
                     },
@@ -599,14 +636,26 @@ function mockUnlockedHealthPlanPackage(
                     id: 'revision2',
                     createdAt: new Date('2020-07-01'),
                     unlockInfo: {
+                        __typename: 'UpdateInformation',
                         updatedAt: new Date('2020-08-01'),
-                        updatedBy: 'bob@dmas.mn.gov',
+                        updatedBy: {
+                            email: 'bob@dmas.mn.gov',
+                            role: 'CMS_USER',
+                            familyName: 'Airman',
+                            givenName: 'Bob'
+                        },
                         updatedReason: 'Test unlock reason',
                         ...unlockInfo,
                     },
                     submitInfo: {
+                        __typename: 'UpdateInformation',
                         updatedAt: new Date('2020-07-15'),
-                        updatedBy: 'bob@dmas.mn.gov',
+                        updatedBy: {
+                            email: 'bob@dmas.mn.gov',
+                            role: 'STATE_USER',
+                            familyName: 'Airman',
+                            givenName: 'Bob'
+                        },
                         updatedReason: 'Second Submit',
                     },
                     formDataProto: b64Previous,
@@ -618,8 +667,14 @@ function mockUnlockedHealthPlanPackage(
                     createdAt: new Date('2020-01-01'),
                     unlockInfo: null,
                     submitInfo: {
+                        __typename: 'UpdateInformation',
                         updatedAt: new Date('2021-01-02'),
-                        updatedBy: 'test@example.com',
+                        updatedBy: {
+                            email: 'test@example.com',
+                            role: 'CMS_USER',
+                            familyName: 'Airman',
+                            givenName: 'Bob'
+                        },
                         updatedReason: 'Initial submit',
                     },
                     formDataProto: b64Previous,
@@ -648,7 +703,12 @@ function mockUnlockedHealthPlanPackageWithOldProtos(
                     createdAt: new Date('2020-09-01'),
                     unlockInfo: {
                         updatedAt: new Date('2020-09-02'),
-                        updatedBy: 'bob@dmas.mn.gov',
+                        updatedBy: {
+                            email: 'bob@dmas.mn.gov',
+                            role: 'CMS_USER',
+                            familyName: 'Airman',
+                            givenName: 'Bob'
+                        },
                         updatedReason: 'Test unlock reason',
                     },
                     submitInfo: null,
@@ -661,12 +721,22 @@ function mockUnlockedHealthPlanPackageWithOldProtos(
                     createdAt: new Date('2020-07-01'),
                     unlockInfo: {
                         updatedAt: new Date('2020-08-01'),
-                        updatedBy: 'bob@dmas.mn.gov',
+                        updatedBy: {
+                            email: 'bob@dmas.mn.gov',
+                            role: 'CMS_USER',
+                            familyName: 'Airman',
+                            givenName: 'Bob'
+                        },
                         updatedReason: 'Test unlock reason',
                     },
                     submitInfo: {
                         updatedAt: new Date('2020-07-15'),
-                        updatedBy: 'bob@dmas.mn.gov',
+                        updatedBy: {
+                            email: 'bob@dmas.mn.gov',
+                            role: 'STATE_USER',
+                            familyName: 'Airman',
+                            givenName: 'Bob'
+                        },
                         updatedReason: 'Second Submit',
                     },
                     formDataProto: b64,
@@ -679,7 +749,12 @@ function mockUnlockedHealthPlanPackageWithOldProtos(
                     unlockInfo: null,
                     submitInfo: {
                         updatedAt: new Date('2021-01-02'),
-                        updatedBy: 'test@example.com',
+                        updatedBy: {
+                            email: 'test@example.com',
+                            role: 'CMS_USER',
+                            familyName: 'Airman',
+                            givenName: 'Bob'
+                        },
                         updatedReason: 'Initial submit',
                     },
                     formDataProto: b64,

@@ -35,7 +35,12 @@ describe('HealthPlanPackage helpers', () => {
                             createdAt: new Date(),
                             submitInfo: {
                                 updatedAt: new Date(),
-                                updatedBy: 'test@example.com',
+                                updatedBy: {
+                                    email: 'test@example.com',
+                                    role: 'STATE_USER',
+                                    givenName: 'John',
+                                    familyName: 'Vila',
+                                },
                                 updatedReason: 'Initial submit',
                             },
                             formDataProto: Buffer.from([1, 2, 3]),
@@ -59,7 +64,12 @@ describe('HealthPlanPackage helpers', () => {
                             createdAt: new Date('2022-01-01'),
                             unlockInfo: {
                                 updatedAt: new Date(),
-                                updatedBy: 'test@example.com',
+                                updatedBy: {
+                                    email: 'test@example.com',
+                                    role: 'CMS_USER',
+                                    givenName: 'Bob',
+                                    familyName: 'Vila',
+                                },
                                 updatedReason:
                                     'This is the reason for unlocking',
                             },
@@ -79,7 +89,12 @@ describe('HealthPlanPackage helpers', () => {
                             createdAt: new Date(),
                             submitInfo: {
                                 updatedAt: new Date(),
-                                updatedBy: 'test@example.com',
+                                updatedBy: {
+                                    email: 'test@example.com',
+                                    role: 'STATE_USER',
+                                    givenName: 'John',
+                                    familyName: 'Vila',
+                                },
                                 updatedReason: 'Initial submit',
                             },
                             formDataProto: Buffer.from([1, 2, 3]),
@@ -89,13 +104,23 @@ describe('HealthPlanPackage helpers', () => {
                             createdAt: new Date('2022-01-01'),
                             unlockInfo: {
                                 updatedAt: new Date(),
-                                updatedBy: 'test@example.com',
+                                updatedBy: {
+                                    email: 'test@example.com',
+                                    role: 'CMS_USER',
+                                    givenName: 'Bob',
+                                    familyName: 'Vila',
+                                },
                                 updatedReason:
                                     'This is the reason for unlocking',
                             },
                             submitInfo: {
                                 updatedAt: new Date(),
-                                updatedBy: 'test@example.com',
+                                updatedBy: {
+                                    email: 'test@example.com',
+                                    role: 'STATE_USER',
+                                    givenName: 'John',
+                                    familyName: 'Vila',
+                                },
                                 updatedReason:
                                     'This is the reason for resubmitting',
                             },
@@ -165,7 +190,12 @@ describe('HealthPlanPackage helpers', () => {
                             createdAt: new Date(),
                             submitInfo: {
                                 updatedAt: new Date(2022, 1, 1),
-                                updatedBy: 'test@example.com',
+                                updatedBy: {
+                                    email: 'test@example.com',
+                                    role: 'STATE_USER',
+                                    givenName: 'John',
+                                    familyName: 'Vila',
+                                },
                                 updatedReason: 'Initial submit',
                             },
                             formDataProto: Buffer.from([1, 2, 3]),
@@ -189,7 +219,12 @@ describe('HealthPlanPackage helpers', () => {
                             createdAt: new Date('2022-01-01'),
                             submitInfo: {
                                 updatedAt: new Date(2022, 1, 1),
-                                updatedBy: 'test@example.com',
+                                updatedBy: {
+                                    email: 'test@example.com',
+                                    role: 'STATE_USER',
+                                    givenName: 'John',
+                                    familyName: 'Vila',
+                                },
                                 updatedReason: 'Initial submit',
                             },
                             formDataProto: Buffer.from([1, 2, 3]),
@@ -213,7 +248,12 @@ describe('HealthPlanPackage helpers', () => {
                             createdAt: new Date('2022-01-01'),
                             submitInfo: {
                                 updatedAt: new Date(2022, 2, 4),
-                                updatedBy: 'test@example.com',
+                                updatedBy: {
+                                    email: 'test@example.com',
+                                    role: 'STATE_USER',
+                                    givenName: 'John',
+                                    familyName: 'Vila',
+                                },
                                 updatedReason: 'Initial submit',
                             },
                             formDataProto: Buffer.from([1, 2, 3]),
@@ -245,7 +285,12 @@ describe('HealthPlanPackage helpers', () => {
                             createdAt: new Date(),
                             submitInfo: {
                                 updatedAt: new Date(),
-                                updatedBy: 'submitter1@example.com',
+                                updatedBy: {
+                                    email: 'submitter1@example.com',
+                                    role: 'STATE_USER',
+                                    givenName: 'John',
+                                    familyName: 'Vila',
+                                },
                                 updatedReason: 'Initial submit',
                             },
                             formDataProto: Buffer.from([1, 2, 3]),
@@ -255,13 +300,23 @@ describe('HealthPlanPackage helpers', () => {
                             createdAt: new Date('2022-01-01'),
                             unlockInfo: {
                                 updatedAt: new Date(),
-                                updatedBy: 'unlocker@example.com',
+                                updatedBy: {
+                                    email: 'test@example.com',
+                                    role: 'CMS_USER',
+                                    givenName: 'Bob',
+                                    familyName: 'Vila',
+                                },
                                 updatedReason:
                                     'This is the reason for unlocking',
                             },
                             submitInfo: {
                                 updatedAt: new Date(),
-                                updatedBy: 'submitter1@example.com',
+                                updatedBy: {
+                                    email: 'submitter1@example.com',
+                                    role: 'STATE_USER',
+                                    givenName: 'John',
+                                    familyName: 'Vila',
+                                },
                                 updatedReason:
                                     'This is the reason for resubmitting',
                             },
@@ -281,7 +336,12 @@ describe('HealthPlanPackage helpers', () => {
                             createdAt: new Date('2022-01-01'),
                             submitInfo: {
                                 updatedAt: new Date(),
-                                updatedBy: 'submitter1@example.com',
+                                updatedBy: {
+                                    email: 'submitter1@example.com',
+                                    role: 'STATE_USER',
+                                    givenName: 'John',
+                                    familyName: 'Vila',
+                                },
                                 updatedReason: 'Initial submit',
                             },
                             formDataProto: Buffer.from([1, 2, 3]),
@@ -291,13 +351,23 @@ describe('HealthPlanPackage helpers', () => {
                             createdAt: new Date('2022-01-01'),
                             unlockInfo: {
                                 updatedAt: new Date('2022-01-02'),
-                                updatedBy: 'unlocker@example.com',
+                                updatedBy: {
+                                    email: 'unlocker@example.com',
+                                    role: 'CMS_USER',
+                                    givenName: 'Bob',
+                                    familyName: 'Vila',
+                                },
                                 updatedReason:
                                     'This is the reason for unlocking',
                             },
                             submitInfo: {
                                 updatedAt: new Date('2022-01-03'),
-                                updatedBy: 'submitter2@example.com',
+                                updatedBy: {
+                                    email: 'submitter2@example.com',
+                                    role: 'STATE_USER',
+                                    givenName: 'John',
+                                    familyName: 'Vila',
+                                },
                                 updatedReason:
                                     'This is the reason for resubmitting',
                             },
@@ -308,13 +378,23 @@ describe('HealthPlanPackage helpers', () => {
                             createdAt: new Date('2022-01-01'),
                             unlockInfo: {
                                 updatedAt: new Date('2022-01-04'),
-                                updatedBy: 'unlocker@example.com',
+                                updatedBy: {
+                                    email: 'unlocker@example.com',
+                                    role: 'CMS_USER',
+                                    givenName: 'Bob',
+                                    familyName: 'Vila',
+                                },
                                 updatedReason:
                                     'This is the reason for unlocking',
                             },
                             submitInfo: {
                                 updatedAt: new Date('2022-01-05'),
-                                updatedBy: 'submitter3@example.com',
+                                updatedBy: {
+                                    email: 'submitter3@example.com',
+                                    role: 'STATE_USER',
+                                    givenName: 'John',
+                                    familyName: 'Vila',
+                                },
                                 updatedReason:
                                     'This is the reason for resubmitting',
                             },
@@ -325,13 +405,23 @@ describe('HealthPlanPackage helpers', () => {
                             createdAt: new Date('2022-01-01'),
                             unlockInfo: {
                                 updatedAt: new Date('2022-01-06'),
-                                updatedBy: 'unlocker@example.com',
+                                updatedBy: {
+                                    email: 'unlocker@example.com',
+                                    role: 'CMS_USER',
+                                    givenName: 'Bob',
+                                    familyName: 'Vila',
+                                },
                                 updatedReason:
                                     'This is the reason for unlocking',
                             },
                             submitInfo: {
                                 updatedAt: new Date('2022-01-07'),
-                                updatedBy: 'submitter1@example.com',
+                                updatedBy: {
+                                    email: 'submitter1@example.com',
+                                    role: 'STATE_USER',
+                                    givenName: 'John',
+                                    familyName: 'Vila',
+                                },
                                 updatedReason:
                                     'This is the reason for resubmitting',
                             },
@@ -342,7 +432,12 @@ describe('HealthPlanPackage helpers', () => {
                             createdAt: new Date('2022-01-01'),
                             unlockInfo: {
                                 updatedAt: new Date('2022-01-08'),
-                                updatedBy: 'unlocker@example.com',
+                                updatedBy: {
+                                    email: 'unlocker@example.com',
+                                    role: 'CMS_USER',
+                                    givenName: 'Bob',
+                                    familyName: 'Vila',
+                                },
                                 updatedReason:
                                     'This is the reason for unlocking',
                             },

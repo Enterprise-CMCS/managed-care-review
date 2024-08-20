@@ -953,6 +953,13 @@ type HealthPlanPackage {
     questions: IndexQuestionsPayload
 }
 
+type UpdatedBy {
+    role: String!
+    email: String!
+    givenName: String!
+    familyName: String!
+}
+
 """
 UpdateInformation is used for the unlockInfo and the submitInfo on HealthPlanRevision.
 It tracks who, when, and why the submission or unlock was performed.
@@ -961,7 +968,7 @@ type UpdateInformation {
     "the datetime when the update occured"
     updatedAt: DateTime!
     "the email of the user who performed the update"
-    updatedBy: String!
+    updatedBy: UpdatedBy!
     "the reason provided by the user when performing the update"
     updatedReason: String!
 }

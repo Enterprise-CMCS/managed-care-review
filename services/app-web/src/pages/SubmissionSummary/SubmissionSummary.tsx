@@ -193,20 +193,16 @@ export const SubmissionSummary = (): React.ReactElement => {
             >
                 {submissionStatus === 'UNLOCKED' && updateInfo && (
                     <SubmissionUnlockedBanner
-                        userType={hasCMSPermissions ? 'CMS_USER' : 'STATE_USER'}
-                        unlockedBy={updateInfo.updatedBy}
-                        unlockedOn={updateInfo.updatedAt}
-                        reason={updateInfo.updatedReason}
                         className={styles.banner}
+                        loggedInUser={loggedInUser}
+                        unlockedInfo={updateInfo}
                     />
                 )}
 
                 {submissionStatus === 'RESUBMITTED' && updateInfo && (
                     <SubmissionUpdatedBanner
-                        submittedBy={updateInfo.updatedBy}
-                        updatedOn={updateInfo.updatedAt}
-                        changesMade={updateInfo.updatedReason}
                         className={styles.banner}
+                        updateInfo={updateInfo}
                     />
                 )}
 

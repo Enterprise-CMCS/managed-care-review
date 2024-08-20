@@ -5,6 +5,7 @@ export type {
     UserType,
     CMSApproverUserType,
     CMSUsersUnionType,
+    BaseUserType,
     BusinessOwnerUserType,
     HelpdeskUserType,
 } from './UserType'

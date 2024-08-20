@@ -52,7 +52,7 @@ export const resubmitPackageCMSEmail = async (
 
     const data = {
         packageName: packageName,
-        resubmittedBy: updateInfo.updatedBy,
+        resubmittedBy: updateInfo.updatedBy.email,
         resubmittedOn: formatCalendarDate(updateInfo.updatedAt),
         resubmissionReason: updateInfo.updatedReason,
         shouldIncludeRates: pkg.submissionType === 'CONTRACT_AND_RATES',

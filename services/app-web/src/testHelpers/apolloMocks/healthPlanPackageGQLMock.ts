@@ -270,7 +270,12 @@ const mockSubmittedHealthPlanPackageWithRevision = ({
     })
     const currentSubmit = {
         updatedAt: '2022-03-28T17:56:32.952Z',
-        updatedBy: 'aang@example.com',
+        updatedBy: {
+            email: 'aang@example.com',
+            role: 'STATE_USER',
+            familyName: 'Airman',
+            givenName: 'Aang'
+        },
         updatedReason: 'Placeholder resubmission reason',
         ...currentSubmitInfo,
     }
@@ -282,7 +287,12 @@ const mockSubmittedHealthPlanPackageWithRevision = ({
 
     const previousSubmit = {
         updatedAt: '2022-03-25T21:14:43.057Z',
-        updatedBy: 'aang@example.com',
+        updatedBy: {
+            email: 'aang@example.com',
+            role: 'STATE_USER',
+            familyName: 'Airman',
+            givenName: 'Aang'
+        },
         updatedReason: 'Placeholder resubmission reason',
         ...previousSubmitInfo,
     }
@@ -294,7 +304,12 @@ const mockSubmittedHealthPlanPackageWithRevision = ({
 
     const initialSubmit = {
         updatedAt: '2022-03-25T21:13:20.419Z',
-        updatedBy: 'aang@example.com',
+        updatedBy: {
+            email: 'aang@example.com',
+            role: 'STATE_USER',
+            familyName: 'Airman',
+            givenName: 'Aang'
+        },
         updatedReason: 'Initial submission',
         ...initialSubmitInfo,
     }
@@ -318,7 +333,12 @@ const mockSubmittedHealthPlanPackageWithRevision = ({
                     unlockInfo: {
                         __typename: 'UpdateInformation',
                         updatedAt: '2022-03-28T17:54:39.173Z',
-                        updatedBy: 'zuko@example.com',
+                        updatedBy: {
+                            email: 'zuko@example.com',
+                            role: 'CMS_USER',
+                            familyName: 'Hotman',
+                            givenName: 'Zuko'
+                        },
                         updatedReason: 'prepare to add documents',
                     },
                     submitInfo: {
@@ -337,7 +357,12 @@ const mockSubmittedHealthPlanPackageWithRevision = ({
                     unlockInfo: {
                         __typename: 'UpdateInformation',
                         updatedAt: '2022-03-25T21:13:56.174Z',
-                        updatedBy: 'zuko@example.com',
+                        updatedBy: {
+                            email: 'zuko@example.com',
+                            role: 'CMS_USER',
+                            familyName: 'Hotman',
+                            givenName: 'Zuko'
+                        },
                         updatedReason: 'test',
                     },
                     submitInfo: {

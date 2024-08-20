@@ -12,7 +12,7 @@ import {
     useFetchHealthPlanPackageWithQuestionsWrapper,
 } from './fetchHealthPlanPackageWrapper'
 import { useIndexQuestionsQueryWrapper } from './useIndexQuestionsQueryWrapper'
-import { hasCMSUserPermissions, hasAdminUserPermissions } from './userHelpers'
+import { hasCMSUserPermissions, hasAdminUserPermissions, getUpdatedByDisplayName } from './userHelpers'
 import { updateDivisionAssignment } from './updateDivisionAssignment'
 
 const isGraphQLErrors = (input: unknown): input is GraphQLErrors => {
@@ -35,5 +35,6 @@ export {
     useFetchHealthPlanPackageWithQuestionsWrapper,
     hasCMSUserPermissions,
     hasAdminUserPermissions,
+    getUpdatedByDisplayName,
     updateDivisionAssignment
 }
