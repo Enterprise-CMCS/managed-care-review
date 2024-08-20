@@ -14,6 +14,12 @@ const stateType = z.object({
             email: z.string(),
             givenName: z.string(),
             familyName: z.string(),
+            stateAssignments: z.array(
+                z.object({
+                    stateCode: z.string(),
+                    name: z.string(),
+                })
+            ),
             divisionAssignment: divisionType.optional(),
         })
     ),
