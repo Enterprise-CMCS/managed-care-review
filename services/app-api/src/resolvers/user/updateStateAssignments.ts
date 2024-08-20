@@ -53,22 +53,11 @@ export function updateStateAssignments(
 
         const { cmsUserID, stateAssignments } = input
 
-        if (!stateAssignments || stateAssignments.length === 0) {
-            const msg = 'cannot update state assignments with no assignments'
-            logError('updateStateAssignments', msg)
-            setErrorAttributesOnActiveSpan(msg, span)
-            throw new UserInputError(msg, {
-                argumentName: 'stateAssignments',
-                argumentValues: stateAssignments,
-                cause: 'INVALID_STATE_CODES',
-            })
-        }
-
         const stateAssignmentCodes: StateCodeType[] = []
         const invalidCodes = []
         let invalidStateCodes
 
-        if (stateAssignments) {
+        if (stateAssignments && stateAssignments.length > 0) {
             for (const assignment of stateAssignments) {
                 if (isValidStateCode(assignment)) {
                     stateAssignmentCodes.push(assignment)
@@ -93,6 +82,15 @@ export function updateStateAssignments(
                     cause: 'INVALID_STATE_CODES',
                 })
             }
+        } else {
+            const msg = 'cannot update state assignments with no assignments'
+            logError('updateStateAssignments', msg)
+            setErrorAttributesOnActiveSpan(msg, span)
+            throw new UserInputError(msg, {
+                argumentName: 'stateAssignments',
+                argumentValues: stateAssignments,
+                cause: 'INVALID_STATE_CODES',
+            })
         }
 
         const result = await store.updateCmsUserProperties(
