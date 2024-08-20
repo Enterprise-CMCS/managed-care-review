@@ -55,7 +55,7 @@ function convertUpdateInfoToDomainModel(
 
     return {
         updatedAt: info.updatedAt,
-        updatedBy: info.updatedBy.email,
+        updatedBy: info.updatedBy,
         updatedReason: info.updatedReason,
     }
 }

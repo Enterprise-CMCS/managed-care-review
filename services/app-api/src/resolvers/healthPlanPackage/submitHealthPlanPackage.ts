@@ -209,7 +209,7 @@ export function submitHealthPlanPackageResolver(
         //Set updateInfo default to initial submission
         const updateInfo: UpdateInfoType = {
             updatedAt: new Date(),
-            updatedBy: context.user.email,
+            updatedBy: context.user,
             updatedReason: 'Initial submission',
         }
 
