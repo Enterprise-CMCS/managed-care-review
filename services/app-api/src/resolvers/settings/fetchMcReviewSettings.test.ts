@@ -178,7 +178,7 @@ describe('fetchMcReviewSettings', () => {
         // confirm that we get what we got
         expect(res.errors).toBeUndefined()
 
-        expect(res.data?.fetchMcReviewSettings.config).toBeDefined()
+        expect(res.data?.fetchMcReviewSettings.emailConfiguration).toBeDefined()
     })
 
     it('errors when called by state user', async () => {
