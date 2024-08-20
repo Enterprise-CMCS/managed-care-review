@@ -1,24 +1,30 @@
 @use '../../styles/custom.scss' as custom;
 @use '../../styles/uswdsImports.scss' as uswds;
 
-.formContainer {
-    border: 0;
-    margin-top: 2rem;
-    margin-bottom: 2rem;
-    background: custom.$mcr-foundation-white;
-    max-width: custom.$mcr-container-standard-width-fixed;
-    padding: 2rem;
+.replaceRatePage {
+    form {
+        max-width: custom.$mcr-container-standard-width-fixed;
+    }
+    .formContainer {
+        border: 0;
+        margin-top: 2rem;
+        margin-bottom: 2rem;
+        background: custom.$mcr-foundation-white;
+        padding: 2rem;
 
-    h2 {
-        margin-top: 0;
+        h2 {
+            margin-top: 0;
+        }
+
+        > div[class^='usa-form-group']:not(:first-of-type) {
+            margin-top: 2.5rem;
+        }
+        >fieldset{
+           border: 0;
+           margin: 0;
+           padding:0
+        }
     }
 
-    > div[class^='usa-form-group']:not(:first-of-type) {
-        margin-top: 2.5rem;
-    }
-    >fieldset{
-       border: 0;
-       margin: 0;
-       padding:0
-    }
 }
+

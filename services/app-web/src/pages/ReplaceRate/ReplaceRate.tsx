@@ -156,7 +156,7 @@ export const ReplaceRate = (): React.ReactElement => {
     }
 
     return (
-        <FormContainer id="ReplaceRate">
+        <FormContainer id="ReplaceRate" className={styles.replaceRatePage}>
                 {replaceError && <GenericApiErrorBanner />}
                 <Formik
                     initialValues={formInitialValues}
