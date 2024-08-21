@@ -5,10 +5,7 @@ import userEvent from '@testing-library/user-event'
 import {
     mockContractAndRatesDraft,
     fetchCurrentUserMock,
-    mockDraft,
     mockBaseContract,
-    fetchContractMockSuccess,
-    mockContractPackageDraft,
     mockContractPackageUnlockedWithUnlockedType
 } from '../../../testHelpers/apolloMocks'
 
@@ -634,7 +631,19 @@ describe('ContractDetails', () => {
             })
         })
 
-        it.skip('disabled with alert after first attempt to continue with zero files', async () => {
+        it('disabled with alert after first attempt to continue with zero files', async () => {
+            const draftContract = mockContractPackageUnlockedWithUnlockedType()
+            draftContract.draftRevision.formData.contractDocuments = []
+            vi.spyOn(
+                useContractForm,
+                'useContractForm'
+            ).mockReturnValue({
+                updateDraft: mockUpdateDraftFn,
+                createDraft: vi.fn(),
+                showPageErrorMessage: false,
+                draftSubmission: draftContract,
+            })
+
             renderWithProviders(<ContractDetails />, {
                 apolloProvider: defaultApolloProvider,
             })
@@ -655,7 +664,7 @@ describe('ContractDetails', () => {
             })
         })
 
-        it.skip('disabled with alert after first attempt to continue with invalid duplicate files', async () => {
+        it('disabled with alert after first attempt to continue with invalid duplicate files', async () => {
             renderWithProviders(<ContractDetails />, {
                 apolloProvider: defaultApolloProvider,
             })
@@ -683,7 +692,18 @@ describe('ContractDetails', () => {
             })
         })
 
-        it.skip('disabled with alert after first attempt to continue with invalid files', async () => {
+        it('disabled with alert after first attempt to continue with invalid files', async () => {
+            const draftContract = mockContractPackageUnlockedWithUnlockedType()
+            draftContract.draftRevision.formData.contractDocuments = []
+            vi.spyOn(
+                useContractForm,
+                'useContractForm'
+            ).mockReturnValue({
+                updateDraft: mockUpdateDraftFn,
+                createDraft: vi.fn(),
+                showPageErrorMessage: false,
+                draftSubmission: draftContract,
+            })
             renderWithProviders(<ContractDetails />, {
                 apolloProvider: defaultApolloProvider,
             })
@@ -709,7 +729,18 @@ describe('ContractDetails', () => {
 
             expect(continueButton).toHaveAttribute('aria-disabled', 'true')
         })
-        it.skip('disabled with alert when trying to continue while a file is still uploading', async () => {
+        it('disabled with alert when trying to continue while a file is still uploading', async () => {
+            const draftContract = mockContractPackageUnlockedWithUnlockedType()
+            draftContract.draftRevision.formData.contractDocuments = []
+            vi.spyOn(
+                useContractForm,
+                'useContractForm'
+            ).mockReturnValue({
+                updateDraft: mockUpdateDraftFn,
+                createDraft: vi.fn(),
+                showPageErrorMessage: false,
+                draftSubmission: draftContract,
+            })
             renderWithProviders(<ContractDetails />, {
                 apolloProvider: defaultApolloProvider,
             })
