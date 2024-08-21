@@ -6,8 +6,8 @@
     "main": "index.js",
     "private": true,
     "workspaces": [
-        "packages/*",
-        "services/*"
+        "packages/**",
+        "services/**"
     ],
     "directories": {
         "test": "services/cypress"
