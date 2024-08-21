@@ -25,7 +25,7 @@ jobs:
           stage-name: prod
 
       - name: Sync Security Hub and Jira
-        uses: Enterprise-CMCS/mac-fc-security-hub-visibility@v2.0.8
+        uses: Enterprise-CMCS/mac-fc-security-hub-visibility@v2.0.9
         with:
           jira-token: ${{ secrets.JIRA_TOKEN }}
           jira-username: ${{ secrets.JIRA_USERNAME }}
