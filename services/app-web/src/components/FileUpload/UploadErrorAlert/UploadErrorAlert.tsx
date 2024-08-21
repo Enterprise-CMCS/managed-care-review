@@ -18,7 +18,7 @@ export const UploadErrorAlert = ({
             type: 'error',
             extension: 'react-uswds',
         })
-    }, [])
+    }, [logAlertImpressionEvent, hasNoDocuments])
 
     return hasNoDocuments ? (
         <Alert

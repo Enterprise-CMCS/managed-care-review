@@ -51,6 +51,7 @@ const TealiumProvider = ({ client, children }: TealiumProviderProps) => {
     // This effect should only fire on initial app load
     useEffect(() => {
         initializeTealium()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     // This effect should only fire each time the url changes
