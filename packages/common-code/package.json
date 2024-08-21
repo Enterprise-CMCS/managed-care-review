@@ -6,7 +6,10 @@
     "scripts": {
         "build": "tsc --noEmit"
     },
-    "keywords": [],
-    "author": "",
-    "license": "ISC"
+    "dependencies": {
+        "url-parse": "^1.5.10"
+    },
+    "devDependencies": {
+        "@types/url-parse": "^1.4.3"
+    }
 }
