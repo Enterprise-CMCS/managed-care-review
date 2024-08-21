@@ -52,10 +52,6 @@ export const UploadResponse = () => {
         updateHeading({ customHeading: packageName })
     }, [packageName, updateHeading])
 
-    if (pkg.status === 'DRAFT') {
-        return <GenericErrorPage />
-    }
-
     // component specific support
     const { handleDeleteFile, handleUploadFile, handleScanFile } = useS3()
     const {
@@ -67,6 +63,10 @@ export const UploadResponse = () => {
     } = useFileUpload(shouldValidate)
     const { setFocusErrorSummaryHeading, errorSummaryHeadingRef } =
         useErrorSummary()
+        if (pkg.status === 'DRAFT') {
+            return <GenericErrorPage />
+        }
+
     const showFileUploadError = Boolean(shouldValidate && fileUploadError)
     const fileUploadErrorFocusKey = hasNoFiles
         ? 'response-upload'

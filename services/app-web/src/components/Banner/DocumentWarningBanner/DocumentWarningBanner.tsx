@@ -18,7 +18,7 @@ export const DocumentWarningBanner = ({
             type: 'warn',
             extension: 'react-uswds',
         })
-    }, [])
+    }, [logAlertImpressionEvent])
 
     const MAIL_TO_SUPPORT = stringConstants.MAIL_TO_SUPPORT
     return (

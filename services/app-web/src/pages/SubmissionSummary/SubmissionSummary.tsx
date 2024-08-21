@@ -27,8 +27,6 @@ import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import styles from './SubmissionSummary.module.scss'
 import { ChangeHistory } from '../../components/ChangeHistory'
 import { UnlockSubmitModal } from '../../components/Modal'
-import { useLDClient } from 'launchdarkly-react-client-sdk'
-import { featureFlags } from '../../common-code/featureFlags'
 import { RoutesRecord } from '../../constants'
 import { useRouteParams } from '../../hooks'
 import { getVisibleLatestContractFormData } from '../../gqlHelpers/contractsAndRates'
@@ -63,12 +61,6 @@ export const SubmissionSummary = (): React.ReactElement => {
     const [documentError, setDocumentError] = useState(false)
     const { loggedInUser } = useAuth()
     const { id } = useRouteParams()
-
-    const ldClient = useLDClient()
-    const showQuestionResponse = ldClient?.variation(
-        featureFlags.CMS_QUESTIONS.flag,
-        featureFlags.CMS_QUESTIONS.defaultValue
-    )
 
     const hasCMSPermissions = hasCMSUserPermissions(loggedInUser)
     const isStateUser = loggedInUser?.role === 'STATE_USER'
@@ -210,23 +202,6 @@ export const SubmissionSummary = (): React.ReactElement => {
                     <DocumentWarningBanner className={styles.banner} />
                 )}
 
-                {!showQuestionResponse && (
-                    <NavLinkWithLogging
-                        to={{
-                            pathname: RoutesRecord.DASHBOARD_SUBMISSIONS,
-                        }}
-                        event_name="back_button"
-                    >
-                        <Icon.ArrowBack />
-                        {loggedInUser?.__typename === 'StateUser' ? (
-                            <span>&nbsp;Back to state dashboard</span>
-                        ) : (
-                            <span>&nbsp;Back to dashboard</span>
-                        )}
-                    </NavLinkWithLogging>
-                )}
-
-                {
                     <SubmissionTypeSummarySection
                         subHeaderComponent={
                             hasCMSPermissions ? (
@@ -273,7 +248,6 @@ export const SubmissionSummary = (): React.ReactElement => {
                         isStateUser={isStateUser}
                         explainMissingData={explainMissingData}
                     />
-                }
 
                 {
                     <ContractDetailsSummarySection

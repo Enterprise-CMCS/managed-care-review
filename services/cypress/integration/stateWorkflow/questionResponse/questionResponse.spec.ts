@@ -6,10 +6,6 @@ describe('Q&A', () => {
     })
 
     it('can add questions and responses', () => {
-        cy.interceptFeatureFlags({
-            'cms-questions': true,
-        })
-
         // Assign Division to CMS user zuko
         cy.apiAssignDivisionToCMSUser(cmsUser(), 'DMCO').then(() => {
             // Create a new submission
