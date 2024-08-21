@@ -1,20 +1,19 @@
 import React from 'react'
 import styles from '../Banner.module.scss'
 import { Alert } from '@trussworks/react-uswds'
-import { dayjs } from '../../../common-code/dateHelpers'
 import { ExpandableText } from '../../ExpandableText'
+import { UpdateInformation, User } from '../../../gen/gqlClient'
+import { getUpdatedByDisplayName } from '../../../gqlHelpers/userHelpers'
+import { formatBannerDate } from '../../../common-code/dateHelpers'
 
 export type UpdatedProps = {
-    submittedBy: string
-    updatedOn: Date
-    changesMade: string
+    loggedInUser?: User
+    updateInfo?: UpdateInformation | null
 }
 
 export const SubmissionUpdatedBanner = ({
-    submittedBy,
-    updatedOn,
-    changesMade,
     className,
+    updateInfo,
 }: UpdatedProps & React.HTMLAttributes<HTMLDivElement>): React.ReactElement => {
     return (
         <Alert
@@ -29,20 +28,17 @@ export const SubmissionUpdatedBanner = ({
             <div className={styles.bannerBodyText}>
                 <p className="usa-alert__text">
                     <b>Submitted by:&nbsp;</b>
-                    {submittedBy}
+                    {getUpdatedByDisplayName(updateInfo?.updatedBy)}
                 </p>
                 <p className="usa-alert__text">
                     <b>Updated on:&nbsp;</b>
-                    {dayjs
-                        .utc(updatedOn)
-                        .tz('America/New_York')
-                        .format('MM/DD/YY h:mma')}
+                    {formatBannerDate(updateInfo?.updatedAt)}
                     &nbsp;ET
                 </p>
                 <ExpandableText>
                     <>
                         <b>Changes made:&nbsp;</b>
-                        {changesMade}
+                        {updateInfo?.updatedReason ?? 'Not available'}
                     </>
                 </ExpandableText>
             </div>

@@ -149,7 +149,8 @@ async function addNewRateToTestContract(
     const addedInput = addNewRateToRateInput(
         rateUpdateInput,
         // match up program ids between contract and rates to allow ability to test non florida submissions - otherwise rate programs will error for being in wrong state
-        {  rateProgramIDs: contract.draftRevision?.formData.programIDs,
+        {
+            rateProgramIDs: contract.draftRevision?.formData.programIDs,
             ...rateFormDataOverrides,
         }
     )

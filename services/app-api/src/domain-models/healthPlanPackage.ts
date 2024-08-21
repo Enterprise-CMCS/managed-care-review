@@ -56,7 +56,7 @@ function packageSubmitters(pkg: HealthPlanPackageType): string[] {
     pkg.revisions.forEach(
         (revision) =>
             revision.submitInfo?.updatedBy &&
-            submitters.push(revision.submitInfo?.updatedBy)
+            submitters.push(revision.submitInfo?.updatedBy.email)
     )
 
     return pruneDuplicateEmails(submitters)

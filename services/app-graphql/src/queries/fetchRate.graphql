@@ -4,14 +4,10 @@ fragment rateRevisionFragmentForFetchRate on RateRevision {
     createdAt
     updatedAt
     unlockInfo {
-        updatedAt
-        updatedBy
-        updatedReason
+        ...updateInformationFields
     }
     submitInfo {
-        updatedAt
-        updatedBy
-        updatedReason
+        ...updateInformationFields
     }
     formData {
         rateType
@@ -71,14 +67,10 @@ fragment rateRevisionFragmentForFetchRate on RateRevision {
         createdAt
         updatedAt
         submitInfo {
-            updatedAt
-            updatedBy
-            updatedReason
+            ...updateInformationFields
         }
         unlockInfo {
-            updatedAt
-            updatedBy
-            updatedReason
+            ...updateInformationFields
         }
         formData {
             programIDs
@@ -153,9 +145,7 @@ fragment rateFieldsForFetchRate on Rate {
     parentContractID
     initiallySubmittedAt
     withdrawInfo {
-        updatedAt
-        updatedBy
-        updatedReason
+        ...updateInformationFields
     }
     packageSubmissions {
         ...packageSubmissionsFragmentForFetchRate
@@ -263,15 +253,11 @@ fragment contractRevisionFragmentForFetchRate on ContractRevision {
     contractName
 
     submitInfo {
-        updatedAt
-        updatedBy
-        updatedReason
+        ...updateInformationFields
     }
 
     unlockInfo {
-        updatedAt
-        updatedBy
-        updatedReason
+        ...updateInformationFields
     }
 
     formData {
@@ -291,6 +277,11 @@ fragment submittableRevisionsFieldsForFetchRate on SubmittableRevision {
 
 fragment updateInformationFields on UpdateInformation {
     updatedAt
-    updatedBy
+    updatedBy {
+        email
+        role
+        familyName
+        givenName
+    }
     updatedReason
 }

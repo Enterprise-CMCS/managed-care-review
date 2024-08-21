@@ -8,7 +8,7 @@ export { must } from './assertionHelpers'
 
 export {
     mockInsertContractArgs,
-    mockContractRevision
+    mockContractRevision,
 } from './contractDataMocks'
 
 export {

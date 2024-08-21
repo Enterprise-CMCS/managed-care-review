@@ -23,14 +23,10 @@ query indexHealthPlanPackages {
                         id
                         createdAt
                         unlockInfo {
-                            updatedAt
-                            updatedBy
-                            updatedReason
+                            ...updateInformationFields
                         }
                         submitInfo {
-                            updatedAt
-                            updatedBy
-                            updatedReason
+                            ...updateInformationFields
                         }
                         formDataProto
                     }
@@ -38,4 +34,15 @@ query indexHealthPlanPackages {
             }
         }
     }
+}
+
+fragment updateInformationFields on UpdateInformation {
+    updatedAt
+    updatedBy {
+        email
+        role
+        familyName
+        givenName
+    }
+    updatedReason
 }

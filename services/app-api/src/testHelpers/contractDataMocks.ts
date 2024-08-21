@@ -145,4 +145,4 @@ const mockContractRevision = (
     }
 }
 
-export { mockInsertContractArgs, mockContractRevision}
+export { mockInsertContractArgs, mockContractRevision }

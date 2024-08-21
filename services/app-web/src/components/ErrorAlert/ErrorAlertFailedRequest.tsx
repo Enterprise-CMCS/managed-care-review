@@ -25,7 +25,7 @@ export const ErrorAlertFailedRequest = ({
             type: 'error',
             extension: 'react-uswds',
         })
-    }, [])
+    }, [logAlertImpressionEvent, message])
 
     return (
         <Alert

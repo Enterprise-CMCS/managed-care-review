@@ -36,7 +36,7 @@ function contractSubmitters(contract: ContractType): string[] {
     contract.revisions.forEach(
         (revision) =>
             revision.submitInfo?.updatedBy &&
-            submitters.push(revision.submitInfo?.updatedBy)
+            submitters.push(revision.submitInfo?.updatedBy.email)
     )
 
     return pruneDuplicateEmails(submitters)

@@ -20,9 +20,7 @@ query indexRates($input: IndexRatesInput) {
                 }
                 status
                 withdrawInfo {
-                    updatedAt
-                    updatedReason
-                    updatedBy
+                    ...updateInformationFields
                 }
                 initiallySubmittedAt
                 parentContractID
@@ -33,14 +31,10 @@ query indexRates($input: IndexRatesInput) {
                     createdAt
                     updatedAt
                     unlockInfo {
-                        updatedAt
-                        updatedBy
-                        updatedReason
+                        ...updateInformationFields
                     }
                     submitInfo {
-                        updatedAt
-                        updatedBy
-                        updatedReason
+                        ...updateInformationFields
                     }
                     formData {
                         rateType,
@@ -96,14 +90,10 @@ query indexRates($input: IndexRatesInput) {
                     createdAt
                     updatedAt
                     unlockInfo {
-                        updatedAt
-                        updatedBy
-                        updatedReason
+                        ...updateInformationFields
                     }
                     submitInfo {
-                        updatedAt
-                        updatedBy
-                        updatedReason
+                        ...updateInformationFields
                     }
                     formData {
                         rateType,
@@ -155,4 +145,15 @@ query indexRates($input: IndexRatesInput) {
             }
         }
     }
+}
+
+fragment updateInformationFields on UpdateInformation {
+    updatedAt
+    updatedBy {
+        email
+        role
+        familyName
+        givenName
+    }
+    updatedReason
 }

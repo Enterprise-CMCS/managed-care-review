@@ -50,7 +50,12 @@ describe('RateReviewsDashboard', () => {
                         stateNumber: 2,
                         withdrawInfo: {
                             updatedAt: new Date(),
-                            updatedBy: 'admin@example.com',
+                            updatedBy: {
+                                email: 'admin@example.com',
+                                role: 'ADMIN_USER',
+                                familyName: 'Hotman',
+                                givenName: 'Iroh',
+                            },
                             updatedReason: 'retreat!',
                         },
                     },
@@ -60,7 +65,12 @@ describe('RateReviewsDashboard', () => {
                         stateNumber: 2,
                         withdrawInfo: {
                             updatedAt: new Date(),
-                            updatedBy: 'admin@example.com',
+                            updatedBy: {
+                                email: 'admin@example.com',
+                                role: 'ADMIN_USER',
+                                familyName: 'Hotman',
+                                givenName: 'Iroh',
+                            },
                             updatedReason: 'retreat!',
                         },
                     },

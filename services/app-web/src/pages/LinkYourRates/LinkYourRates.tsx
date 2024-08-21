@@ -39,11 +39,14 @@ export const LinkYourRates = ({
         return getIn(errors, `${fieldNamePrefix}.${fieldName}`)
     }
 
-     //We track rates that have already been selected to remove them from the dropdown
-     const selectedRatesByID = values.rateForms.reduce((arr: string[] = [], rate ) => {
-        if (rate?.id) arr.push(rate.id)
-        return arr
-     },[])
+    //We track rates that have already been selected to remove them from the dropdown
+    const selectedRatesByID = values.rateForms.reduce(
+        (arr: string[] = [], rate) => {
+            if (rate?.id) arr.push(rate.id)
+            return arr
+        },
+        []
+    )
 
     return (
         <FormGroup

@@ -81,7 +81,7 @@ async function submitContractInsideTransaction(
 
 type SubmitContractArgsType = {
     contractID: string // revision ID
-    submittedByUserID: UpdateInfoType['updatedBy']
+    submittedByUserID: string
     submittedReason: UpdateInfoType['updatedReason']
 }
 // Update the given revision

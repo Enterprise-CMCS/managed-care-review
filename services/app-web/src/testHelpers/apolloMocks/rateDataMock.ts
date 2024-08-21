@@ -24,7 +24,12 @@ const contractRevisionOnRateDataMock = (
     submitInfo: {
         __typename: 'UpdateInformation',
         updatedAt: '2023-10-16T19:02:26.795Z',
-        updatedBy: 'aang@example.com',
+        updatedBy: {
+            email: 'aang@example.com',
+            role: 'STATE_USER',
+            familyName: 'Airman',
+            givenName: 'Aang'
+        },
         updatedReason: 'Initial submission',
     },
     unlockInfo: null,
@@ -90,7 +95,12 @@ const rateRevisionDataMock = (data?: Partial<RateRevision>): RateRevision => {
         submitInfo: {
             __typename: 'UpdateInformation',
             updatedAt: '2023-10-16T19:02:26.766Z',
-            updatedBy: 'aang@example.com',
+            updatedBy: {
+                email: 'aang@example.com',
+                role: 'STATE_USER',
+                familyName: 'Airman',
+                givenName: 'Aang'
+            },
             updatedReason: 'Initial submission',
         },
         formData: {
@@ -217,13 +227,23 @@ const rateDataMock = (
                 unlockInfo: {
                     __typename: 'UpdateInformation',
                     updatedAt: '2023-10-16T19:05:26.585Z',
-                    updatedBy: 'zuko@example.com',
+                    updatedBy: {
+                        email: 'zuko@example.com',
+                        role: 'CMS_USER',
+                        familyName: 'Hotman',
+                        givenName: 'Zuko'
+                    },
                     updatedReason: 'Unlock',
                 },
                 submitInfo: {
                     __typename: 'UpdateInformation',
                     updatedAt: '2023-10-16T19:06:20.581Z',
-                    updatedBy: 'aang@example.com',
+                    updatedBy: {
+                        email: 'aang@example.com',
+                        role: 'STATE_USER',
+                        familyName: 'Airman',
+                        givenName: 'Aang'
+                    },
                     updatedReason: 'Resubmit',
                 },
                 contractRevisions: [
@@ -231,13 +251,23 @@ const rateDataMock = (
                         submitInfo: {
                             __typename: 'UpdateInformation',
                             updatedAt: '2023-10-16T19:06:20.643Z',
-                            updatedBy: 'aang@example.com',
+                            updatedBy: {
+                                email: 'aang@example.com',
+                                role: 'STATE_USER',
+                                familyName: 'Airman',
+                                givenName: 'Aang'
+                            },
                             updatedReason: 'Resubmit',
                         },
                         unlockInfo: {
                             __typename: 'UpdateInformation',
                             updatedAt: '2023-10-16T19:05:26.660Z',
-                            updatedBy: 'zuko@example.com',
+                            updatedBy: {
+                                email: 'zuko@example.com',
+                                role: 'CMS_USER',
+                                familyName: 'Hotman',
+                                givenName: 'Zuko'
+                            },
                             updatedReason: 'Unlock',
                         },
                     }),

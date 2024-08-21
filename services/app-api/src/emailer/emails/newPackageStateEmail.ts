@@ -102,7 +102,6 @@ export const newPackageStateEmail = async (
         return {
             toAddresses: receiverEmails,
             sourceEmail: config.emailSource,
-            replyToAddresses: [config.helpDeskEmail],
             subject: `${
                 config.stage !== 'prod' ? `[${config.stage}] ` : ''
             }${packageName} was sent to CMS`,
