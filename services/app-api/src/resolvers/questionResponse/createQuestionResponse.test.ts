@@ -145,9 +145,10 @@ describe('createQuestionResponse', () => {
             emailer: mockEmailer,
         })
 
-        const submittedPkg =
-            await createAndSubmitTestHealthPlanPackage(stateServer)
-
+        const submittedPkg = await createAndSubmitTestHealthPlanPackage(
+            stateServer,
+            { riskBasedContract: true }
+        )
         const formData = latestFormData(submittedPkg)
 
         const createdQuestion = await createTestQuestion(cmsServer, formData.id)

@@ -192,9 +192,15 @@ function scanForInfectedFiles(
             pathToScan,
         ])
 
-        console.info('stderror', avResult.stderr && avResult.stderr.toString())
-        console.info('stdout', avResult.stdout && avResult.stdout.toString())
-        console.info('err', avResult.error)
+        if (avResult.stderr) {
+            console.info('stderror', avResult.stderr.toString())
+        }
+        if (avResult.stdout) {
+            console.info('stdout', avResult.stdout.toString())
+        }
+        if (avResult.error) {
+            console.error('error', avResult.error)
+        }
 
         // Exit status 1 means file is infected
         if (avResult.status === 1) {

@@ -22,6 +22,7 @@ import irohAvatar from '../assets/images/iroh.png'
 import rokuAvatar from '../assets/images/roku.png'
 import izumiAvatar from '../assets/images/izumi.jpg'
 import shiAvatar from '../assets/images/shi-tong.png'
+import azulaAvatar from '../assets/images/azula.png'
 
 import { useAuth } from '../contexts/AuthContext'
 import { LocalUserType } from './LocalUserType'
@@ -72,7 +73,7 @@ const localUsers: LocalUserType[] = [
         id: 'user4',
         email: 'iroh@example.com',
         givenName: 'Iroh',
-        familyName: 'Coldstart',
+        familyName: 'Uncle',
         role: 'ADMIN_USER',
     },
     {
@@ -89,6 +90,14 @@ const localUsers: LocalUserType[] = [
         familyName: 'Wan',
         role: 'BUSINESSOWNER_USER',
     },
+    {
+        id: 'user9',
+        email: 'azula@example.com',
+        givenName: 'Azula',
+        familyName: 'Hotman',
+        role: 'CMS_APPROVER_USER',
+        stateAssignments: [],
+    },
 ]
 
 const userAvatars: { [key: string]: string } = {
@@ -100,6 +109,7 @@ const userAvatars: { [key: string]: string } = {
     'izumi@example.com': izumiAvatar,
     'appa@example.com': appaAvatar,
     'shi-tong@example.com': shiAvatar,
+    'azula@example.com': azulaAvatar,
 }
 
 export function LocalLogin(): React.ReactElement {
@@ -131,16 +141,17 @@ export function LocalLogin(): React.ReactElement {
             )}
             <CardGroup>
                 {localUsers.map((user) => {
-                    const fromString =
-                        user.role === 'ADMIN_USER'
-                            ? 'CMS (Admin)'
-                            : user.role === 'BUSINESSOWNER_USER'
-                              ? 'CMS (Business Owner)'
-                              : user.role === 'HELPDESK_USER'
-                                ? 'CMS (Helpdesk)'
-                                : user.role === 'CMS_USER'
-                                  ? 'CMS'
-                                  : user.stateCode
+                    const fromString = {
+                        CMS_APPROVER_USER: 'CMS (Approver)',
+                        ADMIN_USER: 'CMS (Admin)',
+                        BUSINESSOWNER_USER: 'CMS (Business Owner)',
+                        HELPDESK_USER: 'CMS (Helpdesk)',
+                        CMS_USER: 'CMS',
+                        STATE_USER:
+                            user.role === 'STATE_USER'
+                                ? user.stateCode
+                                : 'Unknown',
+                    }
 
                     return (
                         <Card key={user.email} className={styles.userCard}>
@@ -156,7 +167,7 @@ export function LocalLogin(): React.ReactElement {
                                 </h2>
                             </CardHeader>
                             <CardBody>
-                                <p>From {fromString}</p>
+                                <p>From {fromString[user.role]}</p>
                             </CardBody>
                             <CardFooter>
                                 <ButtonWithLogging

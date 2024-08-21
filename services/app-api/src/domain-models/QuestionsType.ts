@@ -1,49 +1,59 @@
-import type { CMSUserType } from './UserType'
-import type { QuestionResponseType } from './QuestionResponseType'
-import type { DivisionType } from './DivisionType'
+import { z } from 'zod'
+import { cmsUserType } from './UserType'
+import { questionResponseType } from './QuestionResponseType'
+import { divisionType } from './DivisionType'
 
-type Document = {
-    name: string
-    s3URL: string
-    downloadURL?: string
-}
+const document = z.object({
+    name: z.string(),
+    s3URL: z.string(),
+    downloadURL: z.string().optional(),
+})
 
-type Question = {
-    id: string
-    contractID: string
-    createdAt: Date
-    addedBy: CMSUserType
-    documents: Document[]
-    division: DivisionType
-    responses: QuestionResponseType[]
-}
+const question = z.object({
+    id: z.string().uuid(),
+    contractID: z.string().uuid(),
+    createdAt: z.date(),
+    addedBy: cmsUserType,
+    division: divisionType, // DMCO, DMCP, OACT
+    documents: z.array(document),
+    responses: z.array(questionResponseType),
+})
 
-type QuestionList = {
-    totalCount: number
-    edges: QuestionEdge[]
-}
+const questionEdge = z.object({
+    node: question,
+})
 
-type QuestionEdge = {
-    node: Question
-}
+const questionList = z.object({
+    totalCount: z.number(),
+    edges: z.array(questionEdge),
+})
 
-type IndexQuestionsPayload = {
-    //"Questions for a given submission that were asked by DMCO within CMS"
-    DMCOQuestions: QuestionList
-    //"Questions for a given submission that were asked by DMCP within CMS"
-    DMCPQuestions: QuestionList
-    //"Questions for a given submission that were asked by OACT within CMS"
-    OACTQuestions: QuestionList
-}
+const indexQuestionsPayload = z.object({
+    DMCOQuestions: questionList,
+    DMCPQuestions: questionList,
+    OACTQuestions: questionList,
+})
 
-type CreateQuestionPayload = {
-    question: Question
-}
+const createQuestionPayload = z.object({
+    question: question,
+})
 
-type CreateQuestionInput = {
-    contractID: string
-    documents: Document[]
-}
+const createQuestionInput = z.object({
+    contractID: z.string().uuid(),
+    documents: z.array(document),
+})
+
+type CreateQuestionPayload = z.infer<typeof createQuestionPayload>
+
+type CreateQuestionInput = z.infer<typeof createQuestionInput>
+
+type IndexQuestionsPayload = z.infer<typeof indexQuestionsPayload>
+
+type Question = z.infer<typeof question>
+
+type QuestionList = z.infer<typeof questionList>
+
+type Document = z.infer<typeof document>
 
 export type {
     IndexQuestionsPayload,
@@ -52,4 +62,13 @@ export type {
     Question,
     Document,
     QuestionList,
+}
+
+export {
+    indexQuestionsPayload,
+    createQuestionInput,
+    createQuestionPayload,
+    question,
+    document,
+    questionList,
 }

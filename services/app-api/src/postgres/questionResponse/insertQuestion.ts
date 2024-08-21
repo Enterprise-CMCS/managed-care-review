@@ -1,9 +1,9 @@
 import type { PrismaClient } from '@prisma/client'
 import type {
-    CMSUserType,
     Question,
     CreateQuestionInput,
     DivisionType,
+    CMSUsersUnionType,
 } from '../../domain-models'
 import { v4 as uuidv4 } from 'uuid'
 import { questionPrismaToDomainType, questionInclude } from './questionHelpers'
@@ -11,7 +11,7 @@ import { questionPrismaToDomainType, questionInclude } from './questionHelpers'
 export async function insertQuestion(
     client: PrismaClient,
     questionInput: CreateQuestionInput,
-    user: CMSUserType
+    user: CMSUsersUnionType
 ): Promise<Question | Error> {
     const documents = questionInput.documents.map((document) => ({
         id: uuidv4(),

@@ -1,5 +1,5 @@
 import React, { Fragment, useEffect, useState } from 'react'
-import { useNavigate, useLocation, Navigate } from 'react-router'
+import { useLocation, Navigate } from 'react-router'
 import { Route, Routes } from 'react-router-dom'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { extendSession, idmRedirectURL } from '../../pages/Auth/cognitoAuth'
@@ -290,7 +290,6 @@ export const AppRoutes = ({
         checkIfSessionsIsAboutToExpire,
     } = useAuth()
     const { pathname } = useLocation()
-    const navigate = useNavigate()
     const ldClient = useLDClient()
     const [redirectPath, setRedirectPath] = useLocalStorage(
         'LOGIN_REDIRECT',
@@ -351,7 +350,7 @@ export const AppRoutes = ({
                         window.location.href = idmRedirectURL()
                     } else {
                         console.info('redirecting to /auth')
-                        navigate('/auth')
+                        window.location.href = '/auth'
                     }
                 } catch (err) {
                     recordJSException(
@@ -363,18 +362,11 @@ export const AppRoutes = ({
         } else {
             if (typeof redirectPath === 'string') {
                 console.info('Retrieved For Redirect: ', redirectPath)
-                navigate(redirectPath)
+                window.location.href = redirectPath
                 setRedirectPath(null)
             }
         }
-    }, [
-        initialPath,
-        loggedInUser,
-        navigate,
-        authMode,
-        redirectPath,
-        setRedirectPath,
-    ])
+    }, [initialPath, loggedInUser, authMode, redirectPath, setRedirectPath])
 
     /*
         Side effects that happen on page change

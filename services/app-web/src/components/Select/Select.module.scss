@@ -4,7 +4,7 @@
 
 // react-select draws the chips in two parts, so we round the outer and square in the inner corners
 .multiSelect {
-    z-index: 4;
+    z-index: 5;
     padding-top: 12px;
     [class*='select__multi-value'] {
         border-radius: 99rem 99rem 99rem 99rem;

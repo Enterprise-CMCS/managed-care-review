@@ -5,8 +5,15 @@ import type {
     ContractPackageSubmissionWithCauseType,
     RateRevisionType,
 } from '../../domain-models'
+import type { Store } from '../../postgres'
+import { NotFoundError } from '../../postgres'
+import {
+    setErrorAttributesOnActiveSpan,
+    setResolverDetailsOnActiveSpan,
+} from '../attributeHelper'
+import type { IndexQuestionsPayload } from '../../domain-models/QuestionsType'
 
-export function contractResolver(): Resolvers['Contract'] {
+export function contractResolver(store: Store): Resolvers['Contract'] {
     return {
         initiallySubmittedAt(parent) {
             if (parent.packageSubmissions.length > 0) {
@@ -98,6 +105,89 @@ export function contractResolver(): Resolvers['Contract'] {
             }
 
             return gqlSubs
+        },
+        questions: async (parent, _args, context) => {
+            const { user, ctx, tracer } = context
+            // add a span to OTEL
+            const span = tracer?.startSpan(
+                'fetchContractWithQuestionsResolver',
+                {},
+                ctx
+            )
+            setResolverDetailsOnActiveSpan(
+                'fetchContractWithQuestions',
+                user,
+                span
+            )
+
+            const questionsForContract = await store.findAllQuestionsByContract(
+                parent.id
+            )
+
+            if (questionsForContract instanceof Error) {
+                const errMessage = `Issue finding contract message: ${questionsForContract.message}`
+                setErrorAttributesOnActiveSpan(errMessage, span)
+
+                if (questionsForContract instanceof NotFoundError) {
+                    throw new GraphQLError(errMessage, {
+                        extensions: {
+                            code: 'NOT_FOUND',
+                            cause: 'DB_ERROR',
+                        },
+                    })
+                }
+
+                throw new GraphQLError(errMessage, {
+                    extensions: {
+                        code: 'INTERNAL_SERVER_ERROR',
+                        cause: 'DB_ERROR',
+                    },
+                })
+            }
+
+            const dmcoQuestions = questionsForContract
+                .filter((question) => question.division === 'DMCO')
+                .map((question) => {
+                    return {
+                        node: {
+                            ...question,
+                        },
+                    }
+                })
+            const dmcpQuestions = questionsForContract
+                .filter((question) => question.division === 'DMCP')
+                .map((question) => {
+                    return {
+                        node: {
+                            ...question,
+                        },
+                    }
+                })
+            const oactQuestions = questionsForContract
+                .filter((question) => question.division === 'OACT')
+                .map((question) => {
+                    return {
+                        node: {
+                            ...question,
+                        },
+                    }
+                })
+
+            const questionPayload: IndexQuestionsPayload = {
+                DMCOQuestions: {
+                    totalCount: dmcoQuestions.length,
+                    edges: dmcoQuestions,
+                },
+                DMCPQuestions: {
+                    totalCount: dmcpQuestions.length,
+                    edges: dmcpQuestions,
+                },
+                OACTQuestions: {
+                    totalCount: oactQuestions.length,
+                    edges: oactQuestions,
+                },
+            }
+            return questionPayload
         },
     }
 }

@@ -6,8 +6,8 @@ import { commandMustSucceedSync } from '../localProcess.js'
 export async function installPrismaDeps(runner: LabeledProcessRunner) {
     await runner.runCommandAndOutput(
         'api prisma',
-        ['npx', 'lerna', 'run', 'generate', '--scope=app-api'],
-        ''
+        ['pnpm', 'generate'],
+        'services/app-api'
     )
 }
 
@@ -69,7 +69,7 @@ export async function runPostgresLocally(runner: LabeledProcessRunner) {
     // does not db push schema changes into the database
     const migrateResponse = await runner.runCommandAndOutput(
         'prisma reset',
-        ['npx', 'lerna', 'run', 'prisma:reset'],
+        ['pnpm', '-r', 'prisma:reset'],
         ''
     )
 

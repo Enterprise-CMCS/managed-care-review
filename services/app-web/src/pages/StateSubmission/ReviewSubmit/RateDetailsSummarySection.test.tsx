@@ -19,6 +19,7 @@ import { testS3Client } from '../../../testHelpers/s3Helpers'
 import { ActuaryCommunicationRecord } from '../../../constants'
 import * as usePreviousSubmission from '../../../hooks/usePreviousSubmission'
 import { RateRevisionWithIsLinked } from '../../../gqlHelpers/contractsAndRates'
+import { submittedLinkedRatesScenarioMock } from '../../../testHelpers/apolloMocks/rateDataMock'
 
 describe('RateDetailsSummarySection', () => {
     const draftContract = mockContractPackageDraft()
@@ -287,7 +288,6 @@ describe('RateDetailsSummarySection', () => {
 
     it('renders replace rate button for admin users', async () => {
         const contract = mockContractPackageSubmitted()
-
         const statePrograms = mockMNState().programs
         await waitFor(() => {
             renderWithProviders(
@@ -324,6 +324,38 @@ describe('RateDetailsSummarySection', () => {
             renderWithProviders(
                 <RateDetailsSummarySection
                     contract={contract}
+                    rateRevisions={rateRevs}
+                    editNavigateTo="rate-details"
+                    submissionName="MN-MSHO-0003"
+                    statePrograms={statePrograms}
+                />,
+                {
+                    apolloProvider: apolloProviderAdminUser,
+                }
+            )
+        })
+        expect(
+            screen.queryByRole('link', {
+                name: 'Replace rate',
+            })
+        ).not.toBeInTheDocument()
+    })
+
+    it('does not render replace rate button for rates linked to another contract', async () => {
+        const { c1 } = submittedLinkedRatesScenarioMock()
+        const rateRevs: RateRevisionWithIsLinked[] =
+            c1.packageSubmissions[0].rateRevisions.map((rev) => {
+                const newRev: RateRevisionWithIsLinked = {
+                    ...rev,
+                    isLinked: true,
+                }
+                return newRev
+            })
+        const statePrograms = mockMNState().programs
+        await waitFor(() => {
+            renderWithProviders(
+                <RateDetailsSummarySection
+                    contract={c1}
                     rateRevisions={rateRevs}
                     editNavigateTo="rate-details"
                     submissionName="MN-MSHO-0003"

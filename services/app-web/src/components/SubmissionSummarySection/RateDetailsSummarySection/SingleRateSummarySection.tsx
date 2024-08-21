@@ -29,6 +29,7 @@ import { handleApolloErrorsAndAddUserFacingMessages } from '../../../gqlHelpers/
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '../../../common-code/featureFlags'
 import { NavLinkWithLogging } from '../../TealiumLogging'
+import { hasCMSUserPermissions } from '../../../gqlHelpers'
 
 const rateCapitationType = (formData: RateFormData) =>
     formData.rateCapitationType
@@ -102,9 +103,12 @@ export const SingleRateSummarySection = ({
     const navigate = useNavigate()
 
     const latestSubmission = rate.packageSubmissions?.[0]
-
     if (!latestSubmission) {
-        return null
+        // This is unusual and ugly, we try not to throw ever, but we can't early return here.
+        // of course if the array were required we would just silently throw if its empty
+        throw new Error(
+            'programming error: should not have a summarized rate without a submission'
+        )
     }
 
     const rateRevision = latestSubmission.rateRevision
@@ -117,11 +121,11 @@ export const SingleRateSummarySection = ({
         !isSubmitted &&
         (loggedInUser?.role === 'STATE_USER' ||
             loggedInUser?.role === 'HELPDESK_USER')
-    const isCMSUser = loggedInUser?.role === 'CMS_USER'
+    const isCMSUser = hasCMSUserPermissions(loggedInUser)
     const isSubmittedOrCMSUser =
         rate.status === 'SUBMITTED' ||
         rate.status === 'RESUBMITTED' ||
-        loggedInUser?.role === 'CMS_USER'
+        isCMSUser
 
     // feature flags
     const ldClient = useLDClient()

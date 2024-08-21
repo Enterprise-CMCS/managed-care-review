@@ -40,6 +40,22 @@ function domainUserFromPrismaUser(
                 stateAssignments: prismaUser.stateAssignments,
                 divisionAssignment: divisionAssignment,
             }
+        case 'CMS_APPROVER_USER':
+            if (!prismaUser.stateAssignments) {
+                return new Error(
+                    `CMSUser has no states array, probably a programming error; id: ${prismaUser.id}`
+                )
+            }
+
+            return {
+                id: prismaUser.id,
+                role: 'CMS_APPROVER_USER',
+                givenName: prismaUser.givenName,
+                familyName: prismaUser.familyName,
+                email: prismaUser.email,
+                stateAssignments: prismaUser.stateAssignments,
+                divisionAssignment: divisionAssignment,
+            }
         case 'ADMIN_USER':
             return {
                 id: prismaUser.id,

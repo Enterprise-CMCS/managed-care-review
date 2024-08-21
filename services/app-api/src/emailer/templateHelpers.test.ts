@@ -18,6 +18,8 @@ import type { EmailConfiguration, StateAnalystsEmails } from './emailer'
 import type { ProgramType } from '../domain-models'
 
 describe('generateCMSReviewerEmails', () => {
+    const sub = mockUnlockedContractAndRatesFormData()
+    sub.riskBasedContract = true
     const contractOnlyWithValidRateData: {
         submission: UnlockedHealthPlanFormDataType
         emailConfig: EmailConfiguration
@@ -37,7 +39,7 @@ describe('generateCMSReviewerEmails', () => {
             ],
         },
         {
-            submission: mockUnlockedContractAndRatesFormData(),
+            submission: sub,
             emailConfig: testEmailConfig(),
             stateAnalystsEmails: testStateAnalystsEmails,
             testDescription: 'contract and rates submission',

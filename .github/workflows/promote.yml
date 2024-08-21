@@ -52,10 +52,11 @@ jobs:
         uses: ./.github/actions/setup_env
 
       - name: Generate GraphQL
-        run: npx lerna run gqlgen
+        run: pnpm -r gqlgen
 
       - name: Generate Protos
-        run: npx lerna run generate
+        working-directory: services/app-proto
+        run: pnpm generate
 
       - name: Generate Prisma
         env:
@@ -64,7 +65,7 @@ jobs:
           DATABASE_URL: postgresql://postgres:shhhsecret@localhost:5432/postgres?schema=public&connection_limit=5 #pragma: allowlist secret
         working-directory: services/app-api
         run: |
-          npx lerna run generate --scope=app-api
+          pnpm generate
           npx prisma migrate reset --force
 
       - name: API Unit Tests
@@ -112,7 +113,8 @@ jobs:
         uses: ./.github/actions/setup_env
 
       - name: Generate protos
-        run: npx lerna run generate --scope=app-proto
+        working-directory: services/app-proto
+        run: pnpm generate
 
       # Generate Prisma Client and binary that can run in a lambda environment
       - name: Prepare prisma client
@@ -271,7 +273,6 @@ jobs:
         id: cypress
         uses: cypress-io/github-action@v6
         with:
-          install: false
           config: baseUrl=https://mc-review.onemac.cms.gov
           spec: services/cypress/integration/promoteWorkflow/promote.spec.ts
           record: true

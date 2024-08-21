@@ -1,0 +1,358 @@
+query fetchContractWithQuestions($input: FetchContractInput!) {
+    fetchContract(input: $input) {
+        contract {
+            ...contractFieldsFetchContract
+
+            draftRevision {
+                ...contractRevisionFragmentForFetch
+            }
+
+            draftRates {
+                ...rateFields
+
+                draftRevision {
+                    ...rateRevisionFragmentForFetchContract
+                }
+
+                revisions {
+                    ...rateRevisionFragmentForFetchContract
+                }
+            }
+
+            packageSubmissions {
+                ...packageSubmissionsFragmentForFetch
+            }
+
+            questions {
+                DMCOQuestions {
+                    edges {
+                        ...questionEdgeFragment
+                    }
+                    totalCount
+                }
+                DMCPQuestions {
+                    edges {
+                        ...questionEdgeFragment
+                    }
+                    totalCount
+                }
+                OACTQuestions {
+                    edges {
+                        ...questionEdgeFragment
+                    }
+                    totalCount
+                }
+            }
+        }
+    }
+}
+
+fragment contractFieldsFetchContract on Contract {
+    id
+    status
+    createdAt
+    updatedAt
+    initiallySubmittedAt
+    stateCode
+    mccrsID
+    state {
+        code
+        name
+        programs {
+            id
+            name
+            fullName
+            isRateProgram
+        }
+    }
+
+    stateNumber
+}
+
+fragment rateFields on Rate {
+    id
+    createdAt
+    updatedAt
+    stateCode
+    stateNumber
+    parentContractID
+    state {
+        code
+        name
+        programs {
+            id
+            name
+            fullName
+            isRateProgram
+        }
+    }
+    status
+    parentContractID
+    initiallySubmittedAt
+}
+
+fragment rateRevisionFragmentForFetchContract on RateRevision {
+    id
+    rateID
+    createdAt
+    updatedAt
+    unlockInfo {
+        updatedAt
+        updatedBy
+        updatedReason
+    }
+    submitInfo {
+        updatedAt
+        updatedBy
+        updatedReason
+    }
+    formData {
+        rateType
+        rateCapitationType
+        rateDocuments {
+            name
+            s3URL
+            sha256
+            dateAdded
+            downloadURL
+        }
+        supportingDocuments {
+            name
+            s3URL
+            sha256
+            dateAdded
+            downloadURL
+        }
+        rateDateStart
+        rateDateEnd
+        rateDateCertified
+        amendmentEffectiveDateStart
+        amendmentEffectiveDateEnd
+        rateProgramIDs
+        deprecatedRateProgramIDs
+        rateCertificationName
+        certifyingActuaryContacts {
+            id
+            name
+            titleRole
+            email
+            actuarialFirm
+            actuarialFirmOther
+        }
+        addtlActuaryContacts {
+            id
+            name
+            titleRole
+            email
+            actuarialFirm
+            actuarialFirmOther
+        }
+        actuaryCommunicationPreference
+        packagesWithSharedRateCerts {
+            packageName
+            packageId
+            packageStatus
+        }
+    }
+}
+
+fragment contractFormDataFragmentForFetch on ContractFormData {
+    programIDs
+
+    populationCovered
+    submissionType
+
+    riskBasedContract
+    submissionDescription
+
+    stateContacts {
+        name
+        titleRole
+        email
+    }
+
+    supportingDocuments {
+        name
+        s3URL
+        sha256
+        dateAdded
+        downloadURL
+    }
+
+    contractType
+    contractExecutionStatus
+    contractDocuments {
+        name
+        s3URL
+        sha256
+        dateAdded
+        downloadURL
+    }
+
+    contractDateStart
+    contractDateEnd
+    managedCareEntities
+    federalAuthorities
+    inLieuServicesAndSettings
+    modifiedBenefitsProvided
+    modifiedGeoAreaServed
+    modifiedMedicaidBeneficiaries
+    modifiedRiskSharingStrategy
+    modifiedIncentiveArrangements
+    modifiedWitholdAgreements
+    modifiedStateDirectedPayments
+    modifiedPassThroughPayments
+    modifiedPaymentsForMentalDiseaseInstitutions
+    modifiedMedicaidBeneficiaries
+    modifiedMedicalLossRatioStandards
+    modifiedOtherFinancialPaymentIncentive
+    modifiedEnrollmentProcess
+    modifiedGrevienceAndAppeal
+    modifiedNetworkAdequacyStandards
+    modifiedLengthOfContract
+    modifiedNonRiskPaymentArrangements
+    statutoryRegulatoryAttestation
+    statutoryRegulatoryAttestationDescription
+}
+
+fragment contractRevisionFragmentForFetch on ContractRevision {
+    id
+    createdAt
+    updatedAt
+    contractID
+    contractName
+
+    submitInfo {
+        updatedAt
+        updatedBy
+        updatedReason
+    }
+
+    unlockInfo {
+        updatedAt
+        updatedBy
+        updatedReason
+    }
+
+    formData {
+        ...contractFormDataFragmentForFetch
+    }
+}
+
+fragment packageSubmissionsFragmentForFetch on ContractPackageSubmission {
+    cause
+    submitInfo {
+        ...updateInformationFields
+    }
+
+    submittedRevisions {
+        ...submittableRevisionsFieldsForFetch
+    }
+
+    contractRevision {
+        ...contractRevisionFragmentForFetch
+    }
+    rateRevisions {
+        ...rateRevisionFragmentForFetchContract
+        rate {
+            ...rateFields
+            revisions {
+                ...rateRevisionFragmentForFetchContract
+            }
+        }
+    }
+}
+
+fragment submittableRevisionsFieldsForFetch on SubmittableRevision {
+    ... on ContractRevision {
+        ...contractRevisionFragmentForFetch
+    }
+    ... on RateRevision {
+        ...rateRevisionFragmentForFetchContract
+    }
+}
+
+fragment updateInformationFields on UpdateInformation {
+    updatedAt
+    updatedBy
+    updatedReason
+}
+
+fragment questionEdgeFragment on QuestionEdge {
+    node {
+        id
+        contractID
+        createdAt
+        addedBy {
+            ... on CMSUser {
+                id
+                email
+                role
+                familyName
+                givenName
+                stateAssignments {
+                    code
+                    name
+                    programs {
+                        id
+                        name
+                        fullName
+                        isRateProgram
+                    }
+                }
+                divisionAssignment
+            }
+            ... on CMSApproverUser {
+                id
+                email
+                role
+                familyName
+                givenName
+                stateAssignments {
+                    code
+                    name
+                    programs {
+                        id
+                        name
+                        fullName
+                        isRateProgram
+                    }
+                }
+                divisionAssignment
+            }
+        }
+        division
+        documents {
+            s3URL
+            name
+            downloadURL
+        }
+        responses {
+            id
+            questionID
+            createdAt
+            addedBy {
+                id
+                role
+                email
+                givenName
+                familyName
+                state {
+                    code
+                    name
+                    programs {
+                        id
+                        name
+                        fullName
+                        isRateProgram
+                    }
+                }
+            }
+            documents {
+                name
+                s3URL
+                downloadURL
+            }
+        }
+    }
+}

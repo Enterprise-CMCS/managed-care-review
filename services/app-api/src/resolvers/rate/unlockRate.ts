@@ -1,6 +1,5 @@
 import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
 import type { RateType } from '../../domain-models'
-import { isCMSUser } from '../../domain-models'
 import type { MutationResolvers } from '../../gen/gqlServer'
 import { logError, logSuccess } from '../../logger'
 import { NotFoundError } from '../../postgres'
@@ -11,6 +10,7 @@ import {
     setSuccessAttributesOnActiveSpan,
 } from '../attributeHelper'
 import { GraphQLError } from 'graphql'
+import { hasCMSPermissions } from '../../domain-models'
 
 export function unlockRate(store: Store): MutationResolvers['unlockRate'] {
     return async (_parent, { input }, context) => {
@@ -22,7 +22,7 @@ export function unlockRate(store: Store): MutationResolvers['unlockRate'] {
         span?.setAttribute('mcreview.rate_id', rateID)
 
         // This resolver is only callable by CMS users
-        if (!isCMSUser(user)) {
+        if (!hasCMSPermissions(user)) {
             logError('unlockRate', 'user not authorized to unlock rate')
             setErrorAttributesOnActiveSpan(
                 'user not authorized to unlock rate',

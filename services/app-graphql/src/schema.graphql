@@ -40,6 +40,13 @@ type Query {
     indexHealthPlanPackages: IndexHealthPlanPackagesPayload!
 
     """
+    indexContracts returns all of the contracts the current user can see.
+
+    StateUsers can find all the contracts for their state
+    CMSUsers can find all the contracts that do not have the DRAFT status
+    """
+    indexContracts: IndexContractsPayload!
+    """
     indexUsers returns all of the Users in the system.
 
     It can only be called by an AdminUser
@@ -69,7 +76,7 @@ type Query {
     - ForbiddenError: User must be a CMS or Admin type user
     - NotFoundError: No rates with at least one submitted revision were found
     """
-    indexRates: IndexRatesPayload!
+    indexRates(input: IndexRatesInput): IndexRatesPayload!
     """
     fetchRate returns a rate with its revisions, including contract revisions
     for a given rate's ID
@@ -93,6 +100,17 @@ type Query {
     - NotFoundError: contract for contractID not found in database
     """
     fetchContract(input: FetchContractInput!): FetchContractPayload!
+    """
+    fetchContractWithQuestions returns a single contract, linked to revisions and related rates and questionsList
+    given a contractID
+
+    It can be called by CMS or State users
+
+    Errors:
+    - ForbiddenError: A State user requests a contract that belongs to another state
+    - NotFoundError: contract for contractID not found in database
+    """
+    fetchContractWithQuestions(input: FetchContractWithQuestionsInput!): FetchContractWithQuestionsPayload!
 }
 
 type Mutation {
@@ -540,10 +558,20 @@ type HealthPlanPackageEdge {
     node: HealthPlanPackage!
 }
 
+type ContractEdge {
+    node: Contract!
+}
+
 type IndexHealthPlanPackagesPayload {
     totalCount: Int
     edges: [HealthPlanPackageEdge!]!
 }
+
+type IndexContractsPayload {
+    totalCount: Int
+    edges: [ContractEdge!]!
+}
+
 
 input IndexQuestionsInput {
     "The ID of the package for which to fetch associated questions"
@@ -700,7 +728,7 @@ input UpdateCMSUserInput {
 }
 
 type UpdateCMSUserPayload {
-    user: CMSUser!
+    user: CMSUsersUnion!
 }
 
 input UpdateContractDraftRevisionInput {
@@ -744,7 +772,7 @@ scalar Date
 "DateTime is a moment in time with date and time information"
 scalar DateTime
 
-union User = StateUser | CMSUser | AdminUser | HelpdeskUser | BusinessOwnerUser
+union User = StateUser | CMSUser | AdminUser | HelpdeskUser | BusinessOwnerUser | CMSApproverUser
 
 "StateUser is a user that works for a state, submitting packages to be reviewed by CMSUsers"
 type StateUser {
@@ -768,6 +796,20 @@ type CMSUser {
     stateAssignments: [State!]!
     divisionAssignment: Division
 }
+
+"CMSApproverUser is a user that works for CMS, approving CMS approver request and able to do everything a CMSUser can do"
+type CMSApproverUser {
+    id: ID!
+    "will always be 'CMS_APPROVER_USER'"
+    role: String!
+    email: String!
+    givenName: String!
+    familyName: String!
+    stateAssignments: [State!]!
+    divisionAssignment: Division
+}
+
+union CMSUsersUnion = CMSUser | CMSApproverUser
 
 "AdminUser is a user that works on the MC Review app itself"
 type AdminUser {
@@ -962,7 +1004,7 @@ type Question {
     id: ID!
     contractID: ID!
     createdAt: DateTime!
-    addedBy: CMSUser!
+    addedBy: CMSUsersUnion!
     documents: [Document!]!
     division: Division!
     #    noteText: String
@@ -1600,6 +1642,7 @@ type Contract {
     submission is in the first position in the array.
     """
     packageSubmissions: [ContractPackageSubmission!]!
+    questions: IndexQuestionsPayload
 }
 
 """
@@ -1651,6 +1694,10 @@ type RateEdge {
     node: Rate!
 }
 
+input IndexRatesInput {
+    stateCode: String
+}
+
 type IndexRatesPayload {
     "Total number of submitted rates returned on request"
     totalCount: Int
@@ -1678,7 +1725,18 @@ type FetchContractPayload {
     contract: Contract!
 }
 
+type FetchContractWithQuestionsPayload {
+    """
+    A rate that include contract and rate revisions
+    """
+    contract: Contract!
+}
+
 input FetchContractInput {
+    contractID: ID!
+}
+
+input FetchContractWithQuestionsInput {
     contractID: ID!
 }
 

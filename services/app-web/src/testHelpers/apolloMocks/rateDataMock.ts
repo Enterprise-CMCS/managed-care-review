@@ -7,13 +7,12 @@ import {
     RateRevision,
     UpdateInformation,
 } from '../../gen/gqlClient'
+import { s3DlUrl } from './documentDataMock'
 import { mockMNState } from './stateMock'
 import { v4 as uuidv4 } from 'uuid'
 import { updateInfoMock } from './updateInfoMocks'
 import { mockContractRevision } from './contractPackageDataMock'
 
-const s3DlUrl =
-    'https://fake-bucket.s3.amazonaws.com/file.pdf?AWSAccessKeyId=AKIAIOSFODNN7EXAMPLE&Expires=1719564800&Signature=abc123def456ghijk' //pragma: allowlist secret
 
 const rateRevisionDataMock = (data?: Partial<RateRevision>): RateRevision => {
     return {
@@ -163,7 +162,21 @@ const rateDataMock = (
     rate?: Partial<Rate>
 ): Rate => {
     const rateID = rate?.id ?? uuidv4()
-    return {
+
+    const { r1 } = submittedLinkedRatesScenarioMock()
+    const latestSub = r1.packageSubmissions?.[0]
+    if (!latestSub) {
+        throw new Error('Bad package submission')
+    }
+
+    const latestRev = latestSub.rateRevision
+    const modifiedRev: RateRevision = {
+        ...latestRev,
+        ...revision
+    }
+
+    const finalRate: Rate = {
+        ...r1,
         __typename: 'Rate',
         createdAt: '2023-10-16T19:01:21.389Z',
         updatedAt: '2023-10-16T19:01:21.389Z',
@@ -174,27 +187,14 @@ const rateDataMock = (
         initiallySubmittedAt: '2023-10-16',
         draftRevision: null,
         parentContractID: 'foo-bar',
-        ...rate,
         id: rateID,
-        revisions: [
-            rateRevisionDataMock({
-                unlockInfo: {
-                    __typename: 'UpdateInformation',
-                    updatedAt: '2023-10-16T19:05:26.585Z',
-                    updatedBy: 'zuko@example.com',
-                    updatedReason: 'Unlock',
-                },
-                submitInfo: {
-                    __typename: 'UpdateInformation',
-                    updatedAt: '2023-10-16T19:06:20.581Z',
-                    updatedBy: 'aang@example.com',
-                    updatedReason: 'Resubmit',
-                },
-                ...revision,
-            }),
-            rateRevisionDataMock(),
-        ],
+        ...rate,
     }
+
+    finalRate.revisions[0] = modifiedRev
+    latestSub.rateRevision = modifiedRev
+
+    return finalRate
 }
 
 // n. b. at time of this writing we don't return draftContracts on Rates yet, so this is simpler than the setup 
@@ -307,6 +307,7 @@ function submittedLinkedRatesScenarioMock(): {
         draftRevision: null,
         parentContractID: 'c-01',
         id: 'r-01',
+        withdrawInfo: null,
         revisions: [
             r1r2,
             r1r01,
@@ -332,4 +333,5 @@ export {
     draftRateDataMock,
     rateWithHistoryMock,
     rateUnlockedWithHistoryMock,
+    submittedLinkedRatesScenarioMock,
 }

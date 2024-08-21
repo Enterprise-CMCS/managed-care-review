@@ -5,7 +5,7 @@ import { dayjs } from '../../../common-code/dateHelpers'
 import { ExpandableText } from '../../ExpandableText'
 
 export type UnlockedProps = {
-    userType: 'STATE_USER' | 'CMS_USER'
+    userType: 'STATE_USER' | 'CMS_USER' | 'CMS_APPROVER_USER'
     unlockedBy: string
     unlockedOn: Date
     reason: string
@@ -22,7 +22,7 @@ export const SubmissionUnlockedBanner = ({
     return (
         <Alert
             role="alert"
-            type={userType === 'CMS_USER' ? 'warning' : 'info'}
+            type={userType === 'STATE_USER' ? 'info' : 'warning'}
             heading="Submission unlocked"
             headingLevel="h4"
             validation={true}

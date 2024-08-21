@@ -1,5 +1,6 @@
 import { mockMNState } from '../../common-code/healthPlanFormDataMocks/healthPlanFormData'
 import { Contract, ContractFormData, ContractRevision, RateRevision } from '../../gen/gqlClient'
+import { s3DlUrl } from './documentDataMock'
 
 
 function mockContractRevision(name?: string, partial?: Partial<ContractRevision>): ContractRevision {
@@ -29,13 +30,15 @@ function mockContractRevision(name?: string, partial?: Partial<ContractRevision>
                     s3URL: `s3://bucketname/key/contractsupporting${name}1`,
                     sha256: 'fakesha',
                     name: `contractSupporting${name}1`,
-                    dateAdded: new Date('01/15/2024')
+                    dateAdded: new Date('01/15/2024'),
+                    downloadURL: s3DlUrl,
                 },
                 {
                     s3URL: `s3://bucketname/key/contractsupporting${name}2`,
                     sha256: 'fakesha',
                     name: `contractSupporting${name}2`,
-                    dateAdded: new Date('01/13/2024')
+                    dateAdded: new Date('01/13/2024'),
+                    downloadURL: s3DlUrl,
                 },
             ],
             stateContacts: [],
@@ -46,7 +49,8 @@ function mockContractRevision(name?: string, partial?: Partial<ContractRevision>
                     s3URL: `s3://bucketname/key/contract${name}`,
                     sha256: 'fakesha',
                     name: `contract${name}`,
-                    dateAdded: new Date('2024-02-17')
+                    dateAdded: new Date('2024-02-17'),
+                    downloadURL: s3DlUrl,
                 },
             ],
             contractDateStart: new Date(),
@@ -176,13 +180,14 @@ function mockContractPackageDraft(
             submitInfo: undefined,
             unlockInfo: undefined,
             id: '123',
+            contractID: 'test-abc-123',
             createdAt: new Date('01/01/2023'),
             updatedAt: new Date('11/01/2023'),
             contractName: 'MCR-0005-alvhalfhdsalfee',
             formData: mockContractFormData(partial?.draftRevision?.formData)
         },
 
-        draftRates: [
+        draftRates: partial?.draftRates ??[
             {
                 id: '123',
                 createdAt: new Date(),
@@ -254,7 +259,6 @@ function mockContractPackageDraft(
                         packagesWithSharedRateCerts: [],
                     }
                 }
-
             },
         ],
         packageSubmissions: [],
@@ -280,6 +284,7 @@ function mockContractWithLinkedRateDraft(
             submitInfo: undefined,
             unlockInfo: undefined,
             id: '123',
+            contractID: 'test-abc-123',
             createdAt: new Date('01/01/2023'),
             updatedAt: new Date('11/01/2023'),
             contractName: 'MCR-0005-alvhalfhdsalfss',
@@ -479,6 +484,7 @@ function mockContractWithLinkedRateSubmitted(
                 createdAt: new Date('01/01/2024'),
                 updatedAt: new Date('12/31/2024'),
                 id: '123',
+                contractID: 'test-abc-123',
                 submitInfo: {
                     updatedAt: new Date(),
                     updatedBy: 'example@state.com',
@@ -543,51 +549,49 @@ function mockContractWithLinkedRateSubmitted(
             },
             rateRevisions: [
             {
-                        id: '123',
-                        rateID: 'rate-123',
-                        createdAt: new Date('12/18/2023'),
-                        updatedAt: new Date('12/18/2023'),
-                        formData: {
-                            rateType: 'AMENDMENT',
-                            rateCapitationType: 'RATE_CELL',
-                            rateDocuments: [
-                                {
-                                    s3URL: 's3://bucketname/key/rate',
-                                    sha256: 'fakesha',
-                                    name: 'rate',
-                                    dateAdded: new Date()
-                                },
-                            ],
-                            supportingDocuments: [],
-                            rateDateStart: new Date('2020-02-02'),
-                            rateDateEnd: new Date('2021-02-02'),
-                            rateDateCertified: new Date(),
-                            amendmentEffectiveDateStart: new Date(),
-                            amendmentEffectiveDateEnd: new Date(),
-                            rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
-                            deprecatedRateProgramIDs: [],
-                            certifyingActuaryContacts: [
-                                {
-                                    actuarialFirm: 'DELOITTE',
-                                    name: 'Actuary Contact 1',
-                                    titleRole: 'Test Actuary Contact 1',
-                                    email: 'actuarycontact1@test.com',
-                                },
-                            ],
-                            addtlActuaryContacts: [
-                                {
-                                    actuarialFirm: 'DELOITTE',
-                                    name: 'Actuary Contact 1',
-                                    titleRole: 'Test Actuary Contact 1',
-                                    email: 'additionalactuarycontact1@test.com',
-                                },
-                            ],
-                            actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
-                            packagesWithSharedRateCerts: [],
-                        }
-                    }
-
-
+                id: '123',
+                rateID: 'rate-123',
+                createdAt: new Date('12/18/2023'),
+                updatedAt: new Date('12/18/2023'),
+                formData: {
+                    rateType: 'AMENDMENT',
+                    rateCapitationType: 'RATE_CELL',
+                    rateDocuments: [
+                        {
+                            s3URL: 's3://bucketname/key/rate',
+                            sha256: 'fakesha',
+                            name: 'rate',
+                            dateAdded: new Date()
+                        },
+                    ],
+                    supportingDocuments: [],
+                    rateDateStart: new Date('2020-02-02'),
+                    rateDateEnd: new Date('2021-02-02'),
+                    rateDateCertified: new Date(),
+                    amendmentEffectiveDateStart: new Date(),
+                    amendmentEffectiveDateEnd: new Date(),
+                    rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
+                    deprecatedRateProgramIDs: [],
+                    certifyingActuaryContacts: [
+                        {
+                            actuarialFirm: 'DELOITTE',
+                            name: 'Actuary Contact 1',
+                            titleRole: 'Test Actuary Contact 1',
+                            email: 'actuarycontact1@test.com',
+                        },
+                    ],
+                    addtlActuaryContacts: [
+                        {
+                            actuarialFirm: 'DELOITTE',
+                            name: 'Actuary Contact 1',
+                            titleRole: 'Test Actuary Contact 1',
+                            email: 'additionalactuarycontact1@test.com',
+                        },
+                    ],
+                    actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+                    packagesWithSharedRateCerts: [],
+                }
+            }
             ],
         }],
         ...partial,
@@ -606,6 +610,7 @@ function mockContractPackageSubmitted(
         stateCode: 'MN',
         state: mockMNState(),
         stateNumber: 5,
+        mccrsID: undefined,
         packageSubmissions: [{
             cause: 'CONTRACT_SUBMISSION',
             __typename: 'ContractPackageSubmission',
@@ -620,6 +625,7 @@ function mockContractPackageSubmitted(
                 createdAt: new Date('01/01/2024'),
                 updatedAt:  '2024-12-18T16:54:39.173Z',
                 id: '123',
+                contractID: 'test-abc-123',
                 submitInfo: {
                     updatedAt: new Date(),
                     updatedBy: 'example@state.com',
@@ -637,13 +643,15 @@ function mockContractPackageSubmitted(
                             s3URL: 's3://bucketname/key/contractsupporting1',
                             sha256: 'fakesha',
                             name: 'contractSupporting1',
-                            dateAdded: new Date('01/15/2024')
+                            dateAdded: new Date('01/15/2024'),
+                            downloadURL: s3DlUrl
                         },
                         {
                             s3URL: 's3://bucketname/key/contractSupporting2',
                             sha256: 'fakesha',
                             name: 'contractSupporting2',
-                            dateAdded: new Date('01/13/2024')
+                            dateAdded: new Date('01/13/2024'),
+                            downloadURL: s3DlUrl
                         },
                     ],
                     stateContacts: [],
@@ -654,7 +662,8 @@ function mockContractPackageSubmitted(
                             s3URL: 's3://bucketname/key/contract',
                             sha256: 'fakesha',
                             name: 'contract',
-                            dateAdded: new Date('01/01/2024')
+                            dateAdded: new Date('01/01/2024'),
+                            downloadURL: s3DlUrl
                         },
                     ],
                     contractDateStart: new Date(),
@@ -689,6 +698,7 @@ function mockContractPackageSubmitted(
                     createdAt: new Date('01/01/2023'),
                     updatedAt: new Date('01/01/2023'),
                     formData: {
+                        rateCertificationName:'rate cert',
                         rateType: 'AMENDMENT',
                         rateCapitationType: 'RATE_CELL',
                         rateDocuments: [
@@ -696,7 +706,8 @@ function mockContractPackageSubmitted(
                                 s3URL: 's3://bucketname/key/rate',
                                 sha256: 'fakesha',
                                 name: 'rate',
-                                dateAdded: new Date('01/01/2023')
+                                dateAdded: new Date('01/01/2023'),
+                                downloadURL: s3DlUrl
                             },
                         ],
                         supportingDocuments: [
@@ -704,13 +715,15 @@ function mockContractPackageSubmitted(
                                 s3URL: 's3://bucketname/key/rateSupporting1',
                                 sha256: 'fakesha',
                                 name: 'rate supporting 1',
-                                dateAdded: new Date('01/15/2023')
+                                dateAdded: new Date('01/15/2023'),
+                                downloadURL: s3DlUrl
                             },
                             {
                                 s3URL: 's3://bucketname/key/rateSupporting1',
                                 sha256: 'fakesha',
                                 name: 'rate supporting 2',
-                                dateAdded: new Date('01/15/2023')
+                                dateAdded: new Date('01/15/2023'),
+                                downloadURL: s3DlUrl
                             },
                         ],
                         rateDateStart: new Date(),
@@ -901,6 +914,7 @@ function mockContractPackageWithDifferentProgramsInRevisions (): Contract {
                        "createdAt": "2024-05-07T19:49:36.173Z",
                        "updatedAt": "2024-05-08T17:42:52.696Z",
                        "contractName": "MCR-FL-0221-DENTAL",
+                       "contractID": "e670adsfdfadsfc",
                        "submitInfo": {
                            "updatedAt": "2024-05-08T17:42:52.696Z",
                            "updatedBy": "team@example.com",
@@ -984,6 +998,7 @@ function mockContractPackageWithDifferentProgramsInRevisions (): Contract {
                    "createdAt": "2024-05-07T19:49:36.173Z",
                    "updatedAt": "2024-05-08T17:42:52.696Z",
                    "contractName": "MCR-FL-0221-DENTAL",
+                   "contractID": "e670adsfdfadsfc",
                    "submitInfo": {
                        "updatedAt": "2024-05-08T17:42:52.696Z",
                        "updatedBy": "team@example.com",
@@ -1078,6 +1093,7 @@ function mockContractPackageWithDifferentProgramsInRevisions (): Contract {
                        "createdAt": "2024-05-07T19:44:53.732Z",
                        "updatedAt": "2024-05-07T19:46:19.377Z",
                        "contractName": "MCR-FL-0221-PCCME",
+                       "contractID": "e670adsfdfadsfc",
                        "submitInfo": {
                            "updatedAt": "2024-05-07T19:46:19.376Z",
                            "updatedBy": "team@example.com",
@@ -1148,6 +1164,7 @@ function mockContractPackageWithDifferentProgramsInRevisions (): Contract {
                    "createdAt": "2024-05-07T19:44:53.732Z",
                    "updatedAt": "2024-05-07T19:46:19.377Z",
                    "contractName": "MCR-FL-0221-PCCME",
+                   "contractID": "e670adsfdfadsfc",
                    "submitInfo": {
                        "updatedAt": "2024-05-07T19:46:19.376Z",
                        "updatedBy": "team@example.com",
@@ -1267,7 +1284,8 @@ function mockContractPackageUnlocked(
                         s3URL: 's3://bucketname/one-two/one-two.png',
                         sha256: 'fakesha',
                         name: 'one two',
-                        dateAdded: new Date('02/02/2023')
+                        dateAdded: new Date('02/02/2023'),
+                        downloadURL: s3DlUrl,
                     },
                 ],
                 contractDateStart: new Date('02/02/2023'),
@@ -1325,7 +1343,8 @@ function mockContractPackageUnlocked(
                                 s3URL: 's3://bucketname/key/rate',
                                 sha256: 'fakesha',
                                 name: 'rate',
-                                dateAdded: new Date('03/02/2023')
+                                dateAdded: new Date('03/02/2023'),
+                                downloadURL: s3DlUrl,
                             },
                         ],
                         supportingDocuments: [],
@@ -1398,7 +1417,8 @@ function mockContractPackageUnlocked(
                                 s3URL: 's3://bucketname/key/contract',
                                 sha256: 'fakesha',
                                 name: 'contract',
-                                dateAdded: new Date()
+                                dateAdded: new Date(),
+                                downloadURL: s3DlUrl,
                             },
                         ],
                         contractDateStart: new Date('01/01/2023'),
@@ -1442,6 +1462,7 @@ function mockContractPackageUnlocked(
                     updatedReason: 'unlocked'
                 },
                 id: '123',
+                contractID: 'test-abc-123',
                 formData: {
                     programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
                     populationCovered: 'MEDICAID',
@@ -1457,7 +1478,8 @@ function mockContractPackageUnlocked(
                             s3URL: 's3://bucketname/key/contract',
                             sha256: 'fakesha',
                             name: 'contract',
-                            dateAdded: new Date()
+                            dateAdded: new Date(),
+                            downloadURL: s3DlUrl,
                         },
                     ],
                     contractDateStart: new Date('01/01/2023'),
@@ -1489,6 +1511,7 @@ function mockContractPackageUnlocked(
                 {
                     id: '1234',
                     rateID: '456',
+                    rate: undefined,
                     createdAt: new Date('01/01/2023'),
                     updatedAt: new Date('01/01/2023'),
                     submitInfo: {
@@ -1504,7 +1527,8 @@ function mockContractPackageUnlocked(
                                 s3URL: 's3://bucketname/key/rate',
                                 sha256: 'fakesha',
                                 name: 'rate',
-                                dateAdded: new Date()
+                                dateAdded: new Date(),
+                                downloadURL: s3DlUrl,
                             },
                         ],
                         supportingDocuments: [],
@@ -1556,13 +1580,15 @@ function mockContractFormData( partial?: Partial<ContractFormData>): ContractFor
                 s3URL: 's3://bucketname/key/contractsupporting1',
                 sha256: 'fakesha',
                 name: 'contractSupporting1',
-                dateAdded: new Date('01/15/2024')
+                dateAdded: new Date('01/15/2024'),
+                downloadURL: s3DlUrl,
             },
             {
                 s3URL: 's3://bucketname/key/contractSupporting2',
                 sha256: 'fakesha',
                 name: 'contractSupporting2',
-                dateAdded: new Date('01/13/2024')
+                dateAdded: new Date('01/13/2024'),
+                downloadURL: s3DlUrl,
             },
         ],
         stateContacts: [
@@ -1579,7 +1605,8 @@ function mockContractFormData( partial?: Partial<ContractFormData>): ContractFor
                 s3URL: 's3://bucketname/one-two/one-two.png',
                 sha256: 'fakesha',
                 name: 'contract document',
-                dateAdded: new Date('01/01/2024')
+                dateAdded: new Date('01/01/2024'),
+                downloadURL: s3DlUrl,
             },
         ],
         contractDateStart: new Date('01/01/2023'),
@@ -1634,13 +1661,15 @@ const mockEmptyDraftContractAndRate = (): Contract => mockContractPackageDraft(
                         s3URL: 's3://bucketname/key/contractsupporting1',
                         sha256: 'fakesha',
                         name: 'contractSupporting1',
-                        dateAdded: new Date('01/15/2024')
+                        dateAdded: new Date('01/15/2024'),
+                        downloadURL: s3DlUrl,
                     },
                     {
                         s3URL: 's3://bucketname/key/contractSupporting2',
                         sha256: 'fakesha',
                         name: 'contractSupporting2',
-                        dateAdded: new Date('01/13/2024')
+                        dateAdded: new Date('01/13/2024'),
+                        downloadURL: s3DlUrl,
                     },
                 ],
                 stateContacts: [],
@@ -1651,7 +1680,8 @@ const mockEmptyDraftContractAndRate = (): Contract => mockContractPackageDraft(
                         s3URL: 's3://bucketname/one-two/one-two.png',
                         sha256: 'fakesha',
                         name: 'contract document',
-                        dateAdded: new Date('01/01/2024')
+                        dateAdded: new Date('01/01/2024'),
+                        downloadURL: s3DlUrl,
                     },
                 ],
                 contractDateStart:undefined,
@@ -1703,7 +1733,8 @@ const mockEmptyDraftContractAndRate = (): Contract => mockContractPackageDraft(
                                 s3URL: 's3://bucketname/key/rate',
                                 sha256: 'fakesha',
                                 name: 'rate certification',
-                                dateAdded: new Date('01/13/2024')
+                                dateAdded: new Date('01/13/2024'),
+                                downloadURL: s3DlUrl,
                             },
                         ],
                         supportingDocuments: [
@@ -1711,13 +1742,15 @@ const mockEmptyDraftContractAndRate = (): Contract => mockContractPackageDraft(
                                 s3URL: 's3://bucketname/key/ratesupporting1',
                                 sha256: 'fakesha',
                                 name: 'rateSupporting1',
-                                dateAdded: new Date('01/15/2024')
+                                dateAdded: new Date('01/15/2024'),
+                                downloadURL: s3DlUrl,
                             },
                             {
                                 s3URL: 's3://bucketname/key/rateSupporting2',
                                 sha256: 'fakesha',
                                 name: 'rateSupporting2',
-                                dateAdded: new Date('01/13/2024')
+                                dateAdded: new Date('01/13/2024'),
+                                downloadURL: s3DlUrl,
                             },
                         ],
                         rateDateStart: undefined,

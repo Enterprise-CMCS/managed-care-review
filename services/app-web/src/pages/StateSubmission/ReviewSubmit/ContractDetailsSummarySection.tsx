@@ -50,6 +50,7 @@ import {
     getPackageSubmissionAtIndex,
     getVisibleLatestContractFormData,
 } from '../../../gqlHelpers/contractsAndRates'
+import { hasCMSUserPermissions } from '../../../gqlHelpers'
 
 export type ContractDetailsSummarySectionProps = {
     contract: Contract
@@ -94,7 +95,7 @@ export const ContractDetailsSummarySection = ({
     const ldClient = useLDClient()
     const { loggedInUser } = useAuth()
     const { revisionVersion } = useParams()
-    const isCMSUser = loggedInUser?.role === 'CMS_USER'
+    const isCMSUser = hasCMSUserPermissions(loggedInUser)
     const isSubmittedOrCMSUser =
         contract.status === 'SUBMITTED' ||
         contract.status === 'RESUBMITTED' ||
@@ -183,7 +184,7 @@ export const ContractDetailsSummarySection = ({
     const lastSubmittedDate = isPreviousSubmission
         ? getPackageSubmissionAtIndex(contract, lastSubmittedIndex)?.submitInfo
               .updatedAt
-        : getLastContractSubmission(contract)?.submitInfo.updatedAt ?? null
+        : (getLastContractSubmission(contract)?.submitInfo.updatedAt ?? null)
     return (
         <SectionCard
             id="contractDetailsSection"

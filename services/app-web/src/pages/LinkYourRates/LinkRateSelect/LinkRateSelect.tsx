@@ -6,19 +6,18 @@ import Select, {
     SingleValue,
     createFilter,
 } from 'react-select'
-import styles from '../../components/Select/RateSelect/RateSelect.module.scss'
-import { StateUser, useIndexRatesQuery } from '../../gen/gqlClient'
-import { useAuth } from '../../contexts/AuthContext'
-import { programNames } from '../../common-code/healthPlanFormDataType'
-import { formatCalendarDate } from '../../common-code/dateHelpers'
+import styles from '../../../components/Select/Select.module.scss'
+import { IndexRatesInput, useIndexRatesQuery } from '../../../gen/gqlClient'
+import { programNames } from '../../../common-code/healthPlanFormDataType'
+import { formatCalendarDate } from '../../../common-code/dateHelpers'
 import {
     FormikRateForm,
-    RateDetailFormConfig,
     convertGQLRateToRateForm,
-} from '../StateSubmission/RateDetails'
-import { useS3 } from '../../contexts/S3Context'
-import { useFormikContext } from 'formik'
-import { useTealium } from '../../hooks'
+} from '../../StateSubmission/RateDetails'
+import { useS3 } from '../../../contexts/S3Context'
+import { useTealium } from '../../../hooks'
+import { useField } from 'formik'
+import { convertIndexRatesGQLRateToRateForm } from '../../StateSubmission/RateDetails/rateDetailsHelpers'
 
 export interface LinkRateOptionType {
     readonly value: string
@@ -35,33 +34,39 @@ export interface LinkRateOptionType {
 export type LinkRateSelectPropType = {
     name: string
     initialValue: string | undefined
-    autofill: (rateForm: FormikRateForm) => void // used for multi-rates, when called will FieldArray replace the existing form fields with new data
+    alreadySelected?: string[] // used for multi-rate, array of rate IDs helps ensure we can't select rates already selected elsewhere on page
+    autofill?: (rateForm: FormikRateForm) => void // used for multi-rates, when called will FieldArray replace the existing form fields with new data
     label?: string
+    stateCode?: string //used to limit rates by state
 }
 
 export const LinkRateSelect = ({
     name,
     initialValue,
     autofill,
+    alreadySelected,
     label,
+    stateCode,
     ...selectProps
 }: LinkRateSelectPropType & Props<LinkRateOptionType, false>) => {
-    const { values }: { values: RateDetailFormConfig } = useFormikContext()
-    const { data, loading, error } = useIndexRatesQuery()
+    const input: IndexRatesInput = { stateCode }
+    const { data, loading, error } = useIndexRatesQuery({
+        variables: { input },
+    })
     const { getKey } = useS3()
-    const { loggedInUser } = useAuth()
-    const user = loggedInUser as StateUser
-    const statePrograms = user.state.programs
     const { logDropdownSelectionEvent } = useTealium()
+    const [_field, _meta, helpers] = useField({ name }) // useField only relevant for non-autofill implementations
 
     const rates = data?.indexRates.edges.map((e) => e.node) || []
 
-    // Sort rates by latest submission in desc order
-    rates.sort(
-        (a, b) =>
-            new Date(b.revisions[0].submitInfo?.updatedAt).getTime() -
-            new Date(a.revisions[0].submitInfo?.updatedAt).getTime()
-    )
+    // Sort rates by latest submission in desc order and remove withdrawn
+    rates
+        .sort(
+            (a, b) =>
+                new Date(b.revisions[0].submitInfo?.updatedAt).getTime() -
+                new Date(a.revisions[0].submitInfo?.updatedAt).getTime()
+        )
+        .filter((rate) => rate.withdrawInfo === undefined)
 
     const rateNames: LinkRateOptionType[] = rates.map((rate) => {
         const revision = rate.revisions[0]
@@ -74,7 +79,7 @@ export const LinkRateSelect = ({
                 revision.formData.rateCertificationName ??
                 'Unknown rate certification',
             rateProgramIDs: programNames(
-                statePrograms,
+                rate.state.programs,
                 revision.formData.rateProgramIDs
             ).join(', '),
             rateDateStart: formatCalendarDate(revision.formData.rateDateStart),
@@ -104,42 +109,52 @@ export const LinkRateSelect = ({
         }
         if (error) {
             return 'Could not load rate certifications. Please refresh your browser.'
-        }
-        if (!data) {
+        } else {
             return 'No rate certifications found'
         }
     }
 
-    const onInputChange = (
+    const onInputChange = async (
         newValue: SingleValue<LinkRateOptionType>,
         { action }: ActionMeta<LinkRateOptionType>
     ) => {
         if (action === 'select-option' && newValue) {
-            const linkedRateID = newValue.value
-            const linkedRate = rates.find((rate) => rate.id === linkedRateID)
-            const linkedRateForm: FormikRateForm = convertGQLRateToRateForm(
-                getKey,
-                linkedRate
-            )
-            // put already selected fields back in place
-            linkedRateForm.ratePreviouslySubmitted = 'YES'
-
             logDropdownSelectionEvent({
                 text: newValue.label,
                 heading: label,
             })
-            autofill(linkedRateForm)
+
+            if (autofill) {
+                const linkedRateID = newValue.value
+                const linkedRate = rates.find(
+                    (rate) => rate.id === linkedRateID
+                )
+                const linkedRateForm: FormikRateForm =
+                    convertIndexRatesGQLRateToRateForm(getKey, linkedRate)
+                // put already selected fields back in place
+                linkedRateForm.ratePreviouslySubmitted = 'YES'
+
+                autofill(linkedRateForm)
+            } else {
+                // this path is used for replace/withdraw redundant rates
+                // we are not autofilling form data, we are just returning the IDs of the rate selected
+                await helpers.setValue(newValue.value)
+            }
         } else if (action === 'clear') {
-            const emptyRateForm = convertGQLRateToRateForm(getKey)
-
-            // put already selected fields back in place
-            emptyRateForm.ratePreviouslySubmitted = 'YES'
-
             logDropdownSelectionEvent({
                 text: 'clear',
                 heading: label,
             })
-            autofill(emptyRateForm)
+            if (autofill) {
+                const emptyRateForm = convertGQLRateToRateForm(getKey)
+                // put already selected fields back in place
+                emptyRateForm.ratePreviouslySubmitted = 'YES'
+                autofill(emptyRateForm)
+            } else {
+                // this path is used for replace/withdraw redundant rates
+                // we are not autofilling form data, we are just returning the IDs of the rate selected
+                await helpers.setValue('')
+            }
         }
     }
 
@@ -165,9 +180,6 @@ export const LinkRateSelect = ({
         return <div>{data.rateCertificationName}</div>
     }
 
-    //We track rates that have already been selected to remove them from the dropdown
-    const selectedRates = values.rateForms.map((rate) => rate.id && rate.id)
-
     return (
         <Select
             value={defaultValue}
@@ -175,9 +187,11 @@ export const LinkRateSelect = ({
             options={
                 error || loading
                     ? undefined
-                    : rateNames.filter(
-                          (rate) => !selectedRates.includes(rate.value)
-                      )
+                    : alreadySelected
+                      ? rateNames.filter(
+                            (rate) => !alreadySelected.includes(rate.value)
+                        )
+                      : rateNames
             }
             formatOptionLabel={formatOptionLabel}
             isSearchable

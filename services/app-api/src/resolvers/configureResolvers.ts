@@ -23,6 +23,7 @@ import {
     stateUserResolver,
     cmsUserResolver,
     indexUsersResolver,
+    cmsApproverUserResolver,
 } from './user'
 import type { EmailParameterStore } from '../parameterStore'
 import type { LDService } from '../launchDarkly/launchDarkly'
@@ -33,6 +34,7 @@ import { rateResolver } from './rate/rateResolver'
 import { genericDocumentResolver } from './shared/genericDocumentResolver'
 import { fetchRateResolver } from './rate/fetchRate'
 import { updateContract } from './contract/updateContract'
+import { indexContractsResolver } from './contract/indexContracts'
 import { unlockContractResolver } from './contract/unlockContract'
 import { createAPIKeyResolver } from './APIKey'
 import { unlockRate } from './rate/unlockRate'
@@ -64,6 +66,7 @@ export function configureResolvers(
             fetchCurrentUser: fetchCurrentUserResolver(),
             fetchHealthPlanPackage: fetchHealthPlanPackageResolver(store),
             indexHealthPlanPackages: indexHealthPlanPackagesResolver(store),
+            indexContracts: indexContractsResolver(store),
             indexUsers: indexUsersResolver(store),
             indexQuestions: indexQuestionsResolver(store),
             fetchEmailSettings: fetchEmailSettingsResolver(
@@ -137,6 +140,8 @@ export function configureResolvers(
                     return 'StateUser'
                 } else if (obj.role === 'CMS_USER') {
                     return 'CMSUser'
+                } else if (obj.role === 'CMS_APPROVER_USER') {
+                    return 'CMSApproverUser'
                 } else if (obj.role === 'ADMIN_USER') {
                     return 'AdminUser'
                 } else if (obj.role === 'HELPDESK_USER') {
@@ -145,6 +150,15 @@ export function configureResolvers(
                     return 'BusinessOwnerUser'
                 } else {
                     return 'StateUser'
+                }
+            },
+        },
+        CMSUsersUnion: {
+            __resolveType(obj) {
+                if (obj.role === 'CMS_USER') {
+                    return 'CMSUser'
+                } else {
+                    return 'CMSApproverUser'
                 }
             },
         },
@@ -159,10 +173,11 @@ export function configureResolvers(
         },
         StateUser: stateUserResolver,
         CMSUser: cmsUserResolver,
+        CMSApproverUser: cmsApproverUserResolver,
         HealthPlanPackage: healthPlanPackageResolver(store),
         Rate: rateResolver,
         RateRevision: rateRevisionResolver(store),
-        Contract: contractResolver(),
+        Contract: contractResolver(store),
         UnlockedContract: unlockedContractResolver(),
         ContractRevision: contractRevisionResolver(store),
         GenericDocument: genericDocumentResolver(s3Client),

@@ -16,7 +16,10 @@
         "@graphql-codegen/typescript": "^4.0.7",
         "@graphql-codegen/typescript-operations": "^4.2.1",
         "@graphql-codegen/typescript-react-apollo": "^4.3.0",
-        "@graphql-codegen/typescript-resolvers": "^4.1.0",
-        "graphql": "^16.8.1"
+        "@graphql-codegen/typescript-resolvers": "^4.2.1",
+        "graphql": "^16.9.0"
+    },
+    "dependencies": {
+        "@parcel/watcher": "^2.4.1"
     }
 }

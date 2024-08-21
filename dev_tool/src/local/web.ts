@@ -19,11 +19,7 @@ export async function runWebLocally(runner: LabeledProcessRunner) {
 
     await installWebDepsOnce(runner)
 
-    runner.runCommandAndOutput(
-        'web',
-        ['npx', 'lerna', 'run', 'start', '--scope=app-web'],
-        ''
-    )
+    runner.runCommandAndOutput('web', ['pnpm', 'start'], 'services/app-web')
 }
 
 // By default, we transform the current branch name into a valid stage name

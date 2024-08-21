@@ -1,5 +1,6 @@
-import type { StateType } from './StateType'
-import type { DivisionType } from './DivisionType'
+import { z } from 'zod'
+import { stateType } from './StateType'
+import { divisionType } from './DivisionType'
 
 type UserType =
     | StateUserType
@@ -7,49 +8,85 @@ type UserType =
     | AdminUserType
     | HelpdeskUserType
     | BusinessOwnerUserType
+    | CMSApproverUserType
 
-type StateUserType = {
-    id: string
-    role: 'STATE_USER'
-    email: string
-    stateCode: string
-    givenName: string
-    familyName: string
-}
+const stateUserType = z.object({
+    id: z.string().uuid(),
+    role: z.literal('STATE_USER'),
+    email: z.string(),
+    stateCode: z.string(),
+    givenName: z.string(),
+    familyName: z.string(),
+})
 
-type CMSUserType = {
-    id: string
-    role: 'CMS_USER'
-    email: string
-    givenName: string
-    familyName: string
-    stateAssignments: StateType[]
-    divisionAssignment?: DivisionType
-}
+const cmsUserType = z.object({
+    id: z.string().uuid(),
+    role: z.literal('CMS_USER'),
+    email: z.string(),
+    givenName: z.string(),
+    familyName: z.string(),
+    stateAssignments: z.array(stateType),
+    divisionAssignment: divisionType.optional(),
+})
 
-type AdminUserType = {
-    id: string
-    role: 'ADMIN_USER'
-    email: string
-    givenName: string
-    familyName: string
-}
+const cmsApproverUserType = z.object({
+    id: z.string().uuid(),
+    role: z.literal('CMS_APPROVER_USER'),
+    email: z.string(),
+    givenName: z.string(),
+    familyName: z.string(),
+    stateAssignments: z.array(stateType),
+    divisionAssignment: divisionType.optional(),
+})
 
-type HelpdeskUserType = {
-    id: string
-    role: 'HELPDESK_USER'
-    email: string
-    givenName: string
-    familyName: string
-}
+const adminUserType = z.object({
+    id: z.string().uuid(),
+    role: z.literal('ADMIN_USER'),
+    email: z.string(),
+    givenName: z.string(),
+    familyName: z.string(),
+})
 
-type BusinessOwnerUserType = {
-    id: string
-    role: 'BUSINESSOWNER_USER'
-    email: string
-    givenName: string
-    familyName: string
-}
+const helpdeskUserType = z.object({
+    id: z.string().uuid(),
+    role: z.literal('HELPDESK_USER'),
+    email: z.string(),
+    givenName: z.string(),
+    familyName: z.string(),
+})
+
+const businessOwnerUserType = z.object({
+    id: z.string().uuid(),
+    role: z.literal('BUSINESSOWNER_USER'),
+    email: z.string(),
+    givenName: z.string(),
+    familyName: z.string(),
+})
+
+const userRoles = z.union([
+    stateUserType.shape.role,
+    cmsUserType.shape.role,
+    adminUserType.shape.role,
+    helpdeskUserType.shape.role,
+    businessOwnerUserType.shape.role,
+    cmsApproverUserType.shape.role,
+])
+
+type StateUserType = z.infer<typeof stateUserType>
+
+type AdminUserType = z.infer<typeof adminUserType>
+
+type HelpdeskUserType = z.infer<typeof helpdeskUserType>
+
+type BusinessOwnerUserType = z.infer<typeof businessOwnerUserType>
+
+type CMSUserType = z.infer<typeof cmsUserType>
+
+type CMSApproverUserType = z.infer<typeof cmsApproverUserType>
+
+type CMSUsersUnionType = CMSUserType | CMSApproverUserType
+
+type UserRoles = z.infer<typeof userRoles>
 
 export type {
     CMSUserType,
@@ -57,5 +94,10 @@ export type {
     AdminUserType,
     HelpdeskUserType,
     BusinessOwnerUserType,
+    CMSApproverUserType,
     UserType,
+    UserRoles,
+    CMSUsersUnionType,
 }
+
+export { cmsUserType, stateUserType, userRoles }

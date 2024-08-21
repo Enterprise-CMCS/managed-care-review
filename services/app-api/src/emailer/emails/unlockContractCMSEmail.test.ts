@@ -311,7 +311,7 @@ describe('unlockPackageCMSEmail', () => {
     })
     test('to addresses list includes DMCP and OACT emails for contract and rate package', async () => {
         const sub = mockUnlockedContract()
-
+        sub.draftRevision.formData.riskBasedContract = true
         const template = await unlockContractCMSEmail(
             sub,
             unlockData,
@@ -407,7 +407,7 @@ describe('unlockPackageCMSEmail', () => {
     })
     test('includes correct toAddresses in contract and rate submission unlock', async () => {
         const sub = mockUnlockedContract()
-
+        sub.draftRevision.formData.riskBasedContract = true
         const template = await unlockContractCMSEmail(
             sub,
             unlockData,
@@ -486,6 +486,30 @@ describe('unlockPackageCMSEmail', () => {
             },
             []
         )
+
+        const template = await unlockContractCMSEmail(
+            sub,
+            unlockData,
+            testEmailConfig(),
+            [],
+            defaultStatePrograms
+        )
+
+        if (template instanceof Error) {
+            throw template
+        }
+
+        const ratesReviewerEmails = [...testEmailConfig().oactEmails]
+        ratesReviewerEmails.forEach((emailAddress) => {
+            expect(template).toEqual(
+                expect.objectContaining({
+                    toAddresses: expect.not.arrayContaining([emailAddress]),
+                })
+            )
+        })
+    })
+    test('does not include oactEmails on non risked based submission unlock', async () => {
+        const sub = mockUnlockedContract()
 
         const template = await unlockContractCMSEmail(
             sub,

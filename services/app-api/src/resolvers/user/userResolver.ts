@@ -1,5 +1,30 @@
 import type { Resolvers } from '../../gen/gqlServer'
 import statePrograms from '../../../../app-web/src/common-code/data/statePrograms.json'
+import type {
+    CMSUserType,
+    CMSApproverUserType,
+} from '../../domain-models/UserType'
+
+function getStateAssignments(user: CMSUserType | CMSApproverUserType) {
+    const userStates = user.stateAssignments
+    const statesWithPrograms = userStates.map((userState) => {
+        const state = statePrograms.states.find(
+            (st) => st.code === userState.stateCode
+        )
+
+        if (state === undefined) {
+            return {
+                name: 'This state is not part of the pilot',
+                code: userState.stateCode,
+                programs: [],
+            }
+        }
+
+        return state
+    })
+
+    return statesWithPrograms
+}
 
 export const stateUserResolver: Resolvers['StateUser'] = {
     state(parent) {
@@ -18,24 +43,9 @@ export const stateUserResolver: Resolvers['StateUser'] = {
 }
 
 export const cmsUserResolver: Resolvers['CMSUser'] = {
-    stateAssignments(parent) {
-        const userStates = parent.stateAssignments
-        const statesWithPrograms = userStates.map((userState) => {
-            const state = statePrograms.states.find(
-                (st) => st.code === userState.stateCode
-            )
+    stateAssignments: (parent) => getStateAssignments(parent),
+}
 
-            if (state === undefined) {
-                return {
-                    name: 'This state is not part of the pilot',
-                    code: userState.stateCode,
-                    programs: [],
-                }
-            }
-
-            return state
-        })
-
-        return statesWithPrograms
-    },
+export const cmsApproverUserResolver: Resolvers['CMSApproverUser'] = {
+    stateAssignments: (parent) => getStateAssignments(parent),
 }

@@ -18,6 +18,24 @@ query fetchCurrentUser {
             }
             divisionAssignment
         }
+        ... on CMSApproverUser {
+            id
+            email
+            role
+            familyName
+            givenName
+            stateAssignments {
+                code
+                name
+                programs {
+                    id
+                    name
+                    fullName
+                    isRateProgram
+                }
+            }
+            divisionAssignment
+        }
         ... on StateUser {
             id
             email

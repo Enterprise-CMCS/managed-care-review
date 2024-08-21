@@ -1,6 +1,6 @@
 import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
 import type { UpdateInfoType } from '../../domain-models'
-import { isCMSUser, contractSubmitters } from '../../domain-models'
+import { contractSubmitters, hasCMSPermissions } from '../../domain-models'
 import type { Emailer } from '../../emailer'
 import type { MutationResolvers } from '../../gen/gqlServer'
 import { logError, logSuccess } from '../../logger'
@@ -31,7 +31,7 @@ export function unlockContractResolver(
         span?.setAttribute('mcreview.package_id', contractID)
 
         // This resolver is only callable by CMS users
-        if (!isCMSUser(user)) {
+        if (!hasCMSPermissions(user)) {
             logError('unlockContract', 'user not authorized to unlock contract')
             setErrorAttributesOnActiveSpan(
                 'user not authorized to unlock contract',

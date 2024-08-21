@@ -4,6 +4,7 @@ import {
 } from '../../components'
 import { UpdateInformation, User } from '../../gen/gqlClient'
 import styles from './StateSubmissionForm.module.scss'
+import { hasCMSUserPermissions } from '../../gqlHelpers'
 
 const PageBannerAlerts = ({
     showPageErrorMessage,
@@ -26,7 +27,7 @@ const PageBannerAlerts = ({
             {unlockedInfo && (
                 <SubmissionUnlockedBanner
                     userType={
-                        loggedInUser?.role === 'CMS_USER'
+                        hasCMSUserPermissions(loggedInUser)
                             ? 'CMS_USER'
                             : 'STATE_USER'
                     }

@@ -1,5 +1,5 @@
-query indexRates {
-    indexRates {
+query indexRates($input: IndexRatesInput) {
+    indexRates(input: $input) {
         totalCount
         edges {
             node {
@@ -19,6 +19,11 @@ query indexRates {
                     }
                 }
                 status
+                withdrawInfo {
+                    updatedAt
+                    updatedReason
+                    updatedBy
+                }
                 initiallySubmittedAt
                 parentContractID
 

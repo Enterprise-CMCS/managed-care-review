@@ -12,6 +12,7 @@ import {
     fetchContractMockSuccess,
     updateDraftContractRatesMockSuccess,
     mockContractWithLinkedRateDraft,
+    mockContractPackageDraft,
 } from '../../../testHelpers/apolloMocks'
 import { Route, Routes, Location } from 'react-router-dom'
 import { RoutesRecord } from '../../../constants'
@@ -19,6 +20,7 @@ import userEvent from '@testing-library/user-event'
 import {
     rateDataMock,
     rateRevisionDataMock,
+    draftRateDataMock,
 } from '../../../testHelpers/apolloMocks/rateDataMock'
 import {
     fetchDraftRateMockSuccess,
@@ -363,6 +365,7 @@ describe('RateDetails', () => {
                             fetchCurrentUserMock({ statusCode: 200 }),
                             fetchContractMockSuccess({
                                 contract: {
+                                    ...mockContractPackageDraft(),
                                     id: 'test-abc-123',
                                 },
                             }),
@@ -526,6 +529,7 @@ describe('RateDetails', () => {
                             fetchCurrentUserMock({ statusCode: 200 }),
                             fetchContractMockSuccess({
                                 contract: {
+                                    ...mockContractPackageDraft(),
                                     id: 'test-abc-123',
                                 },
                             }),
@@ -806,6 +810,38 @@ describe('RateDetails', () => {
         })
 
         it('displays dropdown menu if yes is selected and dropdown is clicked', async () => {
+            const testContract = {
+                ...mockContractWithLinkedRateDraft({
+                    draftRates: [
+                        draftRateDataMock(
+                            { id: 'test-abc-124' },
+                            {
+                                formData: {
+                                    ...rateRevisionDataMock().formData,
+                                    rateDocuments: [
+                                        {
+                                            s3URL: 's3://bucketname/one-one/one-one.png',
+                                            name: 'one one',
+                                            sha256: 'fakeSha1',
+                                        },
+                                        {
+                                            s3URL: 's3://bucketname/one-two/one-two.png',
+                                            name: 'one two',
+                                            sha256: 'fakeSha2',
+                                        },
+                                        {
+                                            s3URL: 's3://bucketname/one-three/one-three.png',
+                                            name: 'one three',
+                                            sha256: 'fakeSha3',
+                                        },
+                                    ],
+                                },
+                            }
+                        ),
+                    ],
+                }),
+            }
+
             const { user } = renderWithProviders(
                 <Routes>
                     <Route
@@ -819,39 +855,9 @@ describe('RateDetails', () => {
                             indexRatesMockSuccess(),
                             fetchCurrentUserMock({ statusCode: 200 }),
                             fetchContractMockSuccess({
-                                contract: {
-                                    ...mockContractWithLinkedRateDraft({
-                                        draftRates: [
-                                            rateDataMock(
-                                                {
-                                                    formData: {
-                                                        ...rateRevisionDataMock()
-                                                            .formData,
-                                                        rateDocuments: [
-                                                            {
-                                                                s3URL: 's3://bucketname/one-one/one-one.png',
-                                                                name: 'one one',
-                                                                sha256: 'fakeSha1',
-                                                            },
-                                                            {
-                                                                s3URL: 's3://bucketname/one-two/one-two.png',
-                                                                name: 'one two',
-                                                                sha256: 'fakeSha2',
-                                                            },
-                                                            {
-                                                                s3URL: 's3://bucketname/one-three/one-three.png',
-                                                                name: 'one three',
-                                                                sha256: 'fakeSha3',
-                                                            },
-                                                        ],
-                                                    },
-                                                },
-                                                { id: 'test-abc-123' }
-                                            ),
-                                        ],
-                                    }),
-                                },
+                                contract: testContract,
                             }),
+                            indexRatesMockSuccess(),
                         ],
                     },
                     routerProvider: {
@@ -973,7 +979,7 @@ describe('RateDetails', () => {
                 {
                     apolloProvider: {
                         mocks: [
-                            indexRatesMockSuccess(rates),
+                            indexRatesMockSuccess(undefined, rates),
                             fetchCurrentUserMock({ statusCode: 200 }),
                             fetchContractMockSuccess({
                                 contract: mockContractWithLinkedRateDraft(),
@@ -1046,6 +1052,7 @@ describe('RateDetails', () => {
                             fetchDraftRateMockSuccess({ id: rateID }),
                             fetchContractMockSuccess({
                                 contract: {
+                                    ...mockContractPackageDraft(),
                                     id: 'test-abc-123',
                                 },
                             }),
@@ -1133,6 +1140,7 @@ describe('RateDetails', () => {
                             fetchDraftRateMockSuccess({ id: rateID }),
                             fetchContractMockSuccess({
                                 contract: {
+                                    ...mockContractPackageDraft(),
                                     id: 'test-abc-123',
                                 },
                             }),
@@ -1233,6 +1241,7 @@ describe('RateDetails', () => {
                             fetchCurrentUserMock({ statusCode: 200 }),
                             fetchContractMockSuccess({
                                 contract: {
+                                    ...mockContractPackageDraft(),
                                     id: contractID,
                                     draftRates: [], //clear out rates
                                 },
@@ -1297,6 +1306,7 @@ describe('RateDetails', () => {
                             fetchCurrentUserMock({ statusCode: 200 }),
                             fetchContractMockSuccess({
                                 contract: {
+                                    ...mockContractPackageDraft(),
                                     id: contractID,
                                     draftRates: [], //clear out rates
                                 },
@@ -1369,6 +1379,7 @@ describe('RateDetails', () => {
                             fetchCurrentUserMock({ statusCode: 200 }),
                             fetchContractMockSuccess({
                                 contract: {
+                                    ...mockContractPackageDraft(),
                                     id: contractID,
                                     draftRates: [], //clear out rates
                                 },
@@ -1443,6 +1454,7 @@ describe('RateDetails', () => {
                             fetchDraftRateMockSuccess({ id: rateID }),
                             fetchContractMockSuccess({
                                 contract: {
+                                    ...mockContractPackageDraft(),
                                     id: 'test-abc-123',
                                 },
                             }),

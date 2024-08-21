@@ -305,8 +305,11 @@ describe('unlockPackageCMSEmail', () => {
         )
     })
     test('to addresses list includes DMCP and OACT emails for contract and rate package', async () => {
+        const submission = sub
+        // set riskedBasedContract to true so that OACT is emailed
+        submission.riskBasedContract = true
         const template = await unlockPackageCMSEmail(
-            sub,
+            submission,
             unlockData,
             testEmailConfig(),
             testStateAnalystEmails,
@@ -341,6 +344,31 @@ describe('unlockPackageCMSEmail', () => {
                 })
             )
         })
+    })
+
+    test('do not send OACT emails for non risked based contract', async () => {
+        const submission = sub
+        // set riskedBasedContract to true so that OACT is emailed
+        submission.riskBasedContract = false
+        const template = await unlockPackageCMSEmail(
+            submission,
+            unlockData,
+            testEmailConfig(),
+            testStateAnalystEmails,
+            defaultStatePrograms
+        )
+
+        if (template instanceof Error) {
+            throw template
+        }
+
+        expect(template).toEqual(
+            expect.objectContaining({
+                toAddresses: expect.not.arrayContaining([
+                    testEmailConfig().oactEmails,
+                ]),
+            })
+        )
     })
 
     test('to addresses list does not include help addresses', async () => {
@@ -395,6 +423,8 @@ describe('unlockPackageCMSEmail', () => {
         })
     })
     test('includes correct toAddresses in contract and rate submission unlock', async () => {
+        // set riskedBasedContract to true so that OACT is emailed
+        sub.riskBasedContract = true
         const template = await unlockPackageCMSEmail(
             sub,
             unlockData,
