@@ -15,7 +15,7 @@ jobs:
         uses: Enterprise-CMCS/mac-fc-scan-github@v1.0.1
         with:
           aws-account-id: ${{ secrets.PROD_AWS_ACCOUNT_ID }}
-          oidc-role: arn:aws:iam::${{secrets.PROD_AWS_ACCOUNT_ID }}:role/delegatedadmin/developer/github-oidc-prod-ServiceRole
+          oidc-role: 'arn:aws:iam::${{ secrets.PROD_AWS_ACCOUNT_ID }}:role/delegatedadmin/developer/github-oidc-prod-ServiceRole'
           github-access-token: ${{ secrets.GITHUB_ACCESS_TOKEN }}
           scan-config: |
             events:  # a list of event specifications such as the following one
