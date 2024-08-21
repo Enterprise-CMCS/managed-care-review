@@ -8,6 +8,7 @@ import { GridContainer, Grid } from '@trussworks/react-uswds'
 import { useStringConstants } from '../../hooks/useStringConstants'
 import { useCurrentRoute } from '../../hooks/useCurrentRoute'
 import { LinkWithLogging } from '../TealiumLogging/Link'
+import { LetUsKnowLink } from '../ErrorAlert/LetUsKnowLink'
 
 /**
  * CMS Footer
@@ -43,14 +44,7 @@ export const Footer = (): React.ReactElement => {
                     <Grid row className="flex-justify flex-align-center">
                         <span>
                             Email&nbsp;
-                            <LinkWithLogging
-                                href={stringConstants. MAIL_TO_SUPPORT_HREF}
-                                variant="unstyled"
-                                target="_blank"
-                                rel="noreferrer"
-                            >
-                                {stringConstants.MAIL_TO_SUPPORT}
-                            </LinkWithLogging>
+                            <LetUsKnowLink alternateText={stringConstants.MAIL_TO_SUPPORT} />
                             &nbsp;to get help or send feedback
                         </span>
                         <span>7500 Security Boulevard Baltimore, MD 21244</span>

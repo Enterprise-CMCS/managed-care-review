@@ -6,6 +6,7 @@ import { useStringConstants } from '../../hooks/useStringConstants'
 import { LinkWithLogging } from '../TealiumLogging/Link'
 import { useTealium } from '../../hooks'
 import { extractText } from '../TealiumLogging/tealiamLoggingHelpers'
+import { LetUsKnowLink } from './LetUsKnowLink'
 
 export type ErrorAlertProps = {
     message?: React.ReactNode
@@ -27,16 +28,15 @@ export const ErrorAlert = ({
     const showLink = appendLetUsKnow || !message // our default message includes the link
     const defaultMessage =
         "We're having trouble loading this page. Please refresh your browser and if you continue to experience an error,"
-
+    const errorMessage = `${message ? extractText(message) : defaultMessage} email ${stringConstants.MAIL_TO_SUPPORT}`
     useEffect(() => {
-        const logErrorMessage = `${message ? extractText(message) : defaultMessage} email ${stringConstants.MAIL_TO_SUPPORT}`
         logAlertImpressionEvent({
             error_type: 'system',
-            error_message: logErrorMessage,
+            error_message: errorMessage,
             type: 'error',
             extension: 'react-uswds',
         })
-    }, [])
+    }, [errorMessage, logAlertImpressionEvent])
 
     return (
         <Alert
@@ -52,16 +52,9 @@ export const ErrorAlert = ({
 
             {showLink && (
                 <span>
-                    &nbsp;email{' '}
-                    <LinkWithLogging
-                        className={styles.nowrap}
-                        href={stringConstants.MAIL_TO_SUPPORT_HREF}
-                        variant="unstyled"
-                        target="_blank"
-                        rel="noreferrer"
-                    >
-                        {stringConstants.MAIL_TO_SUPPORT}
-                    </LinkWithLogging>
+                    &nbsp;email&nbsp;
+                    <LetUsKnowLink
+                        className={styles.nowrap}/>
                 </span>
             )}
         </Alert>

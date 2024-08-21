@@ -13,11 +13,64 @@ import {
     iterableCmsUsersMockData,
 } from '../../testHelpers/apolloMocks'
 import { IndexQuestionsPayload } from '../../gen/gqlClient'
+import { useStringConstants } from '../../hooks/useStringConstants'
 
 describe('QuestionResponse', () => {
     describe.each(iterableCmsUsersMockData)(
         '$userRole QuestionResponse tests',
         ({ userRole, mockUser }) => {
+            it('render error if CMS user does not have division set', () =>{
+                const stringConstants = useStringConstants()
+
+                renderWithProviders(
+                    <Routes>
+                        <Route element={<SubmissionSideNav />}>
+                            <Route
+                                path={
+                                    RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS
+                                }
+                                element={<QuestionResponse />}
+                            />
+                        </Route>
+                    </Routes>,
+                    {
+                        apolloProvider: {
+                            mocks: [
+                                fetchCurrentUserMock({
+                                    user: {...mockUser(),
+                                        divisionAssignment: undefined
+                                    },
+                                    statusCode: 200,
+                                }),
+                                fetchStateHealthPlanPackageWithQuestionsMockSuccess(
+                                    {
+                                        id: '15',
+                                        questions:  mockQuestionsPayload('15'),
+                                    }
+                                ),
+                            ],
+                        },
+                        routerProvider: {
+                            route: '/submissions/15/question-and-answers',
+                        },
+                        featureFlags: {
+                            'cms-questions': true,
+                        },
+                    }
+                )
+
+                expect(screen.getByRole('heading', {name: 'Missing division'})).toBeInTheDocument()
+                const feedbackLink = screen.getByRole('link', {
+                    name: `${stringConstants.MAIL_TO_SUPPORT}`,
+                })
+                expect(feedbackLink).toHaveAttribute(
+                    'href',
+                    stringConstants.MAIL_TO_SUPPORT_HREF
+                )
+
+
+
+        })
             it('renders expected questions correctly with rounds', async () => {
                 const mockQuestions = mockQuestionsPayload('15')
 

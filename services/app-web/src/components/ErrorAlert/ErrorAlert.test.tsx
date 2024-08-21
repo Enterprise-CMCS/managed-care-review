@@ -1,6 +1,7 @@
 import { screen } from '@testing-library/react'
 import { ErrorAlert } from './ErrorAlert'
 import { renderWithProviders } from '../../testHelpers'
+import { useStringConstants } from '../../hooks/useStringConstants'
 
 test('renders default content when no props present', () => {
     renderWithProviders(<ErrorAlert />)
@@ -40,4 +41,17 @@ test('renders with custom styles', async () => {
     )
     await expect(screen.getByText(testText)).toBeInTheDocument()
     expect(screen.queryByTestId('error-alert')).toHaveClass('test-class')
+})
+test('displays let us know link mailto link by default', () =>{
+    const stringConstants = useStringConstants()
+    renderWithProviders(
+        <ErrorAlert  />
+    )
+    const feedbackLink = screen.getByRole('link', {
+        name: `let us know`,
+    })
+    expect(feedbackLink).toHaveAttribute(
+        'href',
+        stringConstants.MAIL_TO_SUPPORT_HREF
+    )
 })

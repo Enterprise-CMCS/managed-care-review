@@ -1,9 +1,8 @@
 import React, { useEffect } from 'react'
 import styles from './ErrorAlert.module.scss'
 import { Alert } from '@trussworks/react-uswds'
-import { useStringConstants } from '../../hooks/useStringConstants'
-import { LinkWithLogging } from '../TealiumLogging/Link'
 import { useTealium } from '../../hooks'
+import { LetUsKnowLink } from './LetUsKnowLink'
 
 export type ErrorAlertFailedRequestProps = {
     message?: string
@@ -14,7 +13,6 @@ export const ErrorAlertFailedRequest = ({
     heading,
     message,
 }: ErrorAlertFailedRequestProps): React.ReactElement => {
-    const stringConstants = useStringConstants()
     const { logAlertImpressionEvent } = useTealium()
 
     useEffect(() => {
@@ -46,14 +44,7 @@ export const ErrorAlertFailedRequest = ({
                         Please refresh your browser and if you continue to
                         experience an error,&nbsp;
                     </span>
-                    <LinkWithLogging
-                        variant="unstyled"
-                        href={stringConstants.MAIL_TO_SUPPORT_HREF}
-                        target="_blank"
-                        rel="noreferrer"
-                    >
-                        let us know.
-                    </LinkWithLogging>
+                    <LetUsKnowLink />
                 </p>
             </div>
         </Alert>

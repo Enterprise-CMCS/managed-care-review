@@ -2,9 +2,8 @@ import React, { useEffect } from 'react'
 import styles from '../Banner.module.scss'
 import { Alert } from '@trussworks/react-uswds'
 import { ERROR_MESSAGES } from '../../../constants/errors'
-import { useStringConstants } from '../../../hooks/useStringConstants'
-import { LinkWithLogging } from '../../TealiumLogging/Link'
 import { useTealium } from '../../../hooks'
+import { LetUsKnowLink } from '../../ErrorAlert/LetUsKnowLink'
 
 export type GenericApiErrorProps = {
     heading?: string
@@ -17,7 +16,6 @@ export const GenericApiErrorBanner = ({
     message,
     suggestion,
 }: GenericApiErrorProps): React.ReactElement => {
-    const stringConstants = useStringConstants()
     const { logAlertImpressionEvent } = useTealium()
 
     useEffect(() => {
@@ -52,14 +50,7 @@ export const GenericApiErrorBanner = ({
                                 Please refresh your browser and if you continue
                                 to experience an error,&nbsp;
                             </span>
-                            <LinkWithLogging
-                                href={stringConstants.MAIL_TO_SUPPORT_HREF}
-                                variant="unstyled"
-                                target="_blank"
-                                rel="noreferrer"
-                            >
-                                let us know.
-                            </LinkWithLogging>
+                            <LetUsKnowLink/>
                         </>
                     )}
                 </p>
