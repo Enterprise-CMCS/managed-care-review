@@ -80,12 +80,6 @@ const StateUserRoutes = ({
         featureFlags.RATE_EDIT_UNLOCK.flag,
         featureFlags.RATE_EDIT_UNLOCK.defaultValue
     )
-
-    const showQuestionResponse = ldClient?.variation(
-        featureFlags.CMS_QUESTIONS.flag,
-        featureFlags.CMS_QUESTIONS.defaultValue
-    )
-
     return (
         <AuthenticatedRouteWrapper setAlert={setAlert} authMode={authMode}>
             <Routes>
@@ -127,9 +121,7 @@ const StateUserRoutes = ({
                 )}
                 <Route element={<SubmissionSideNav />}>
                     <Route
-                        path={
-                            RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS
-                        }
+                        path={RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS}
                         element={<QuestionResponse />}
                     />
                     <Route
@@ -173,13 +165,6 @@ const CMSUserRoutes = ({
     setAlert?: React.Dispatch<React.ReactElement>
     stageName?: string
 }): React.ReactElement => {
-    const ldClient = useLDClient()
-
-    const showQuestionResponse = ldClient?.variation(
-        featureFlags.CMS_QUESTIONS.flag,
-        featureFlags.CMS_QUESTIONS.defaultValue
-    )
-
     return (
         <AuthenticatedRouteWrapper authMode={authMode} setAlert={setAlert}>
             <Routes>
@@ -208,9 +193,7 @@ const CMSUserRoutes = ({
 
                 <Route element={<SubmissionSideNav />}>
                     <Route
-                        path={
-                            RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS
-                        }
+                        path={RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS}
                         element={<QuestionResponse />}
                     />
                     <Route
