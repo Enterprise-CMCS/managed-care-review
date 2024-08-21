@@ -4,10 +4,11 @@
     "description": "",
     "main": "index.js",
     "scripts": {
-        "build": "tsc --noEmit"
+        "build": "tsc"
     },
     "dependencies": {
-        "url-parse": "^1.5.10"
+        "url-parse": "^1.5.10",
+        "dayjs": "^1.10.5"
     },
     "devDependencies": {
         "@types/url-parse": "^1.4.3"

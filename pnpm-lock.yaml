@@ -66,6 +66,9 @@ importers:
 
   packages/common-code:
     dependencies:
+      dayjs:
+        specifier: ^1.10.5
+        version: 1.11.12
       url-parse:
         specifier: ^1.5.10
         version: 1.5.10
