@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React from 'react'
 import dayjs from 'dayjs'
 import {
     Form as UswdsForm,
@@ -42,7 +42,12 @@ import {
     activeFormPages,
     type HealthPlanFormPageProps,
 } from '../StateSubmissionForm'
-import { formatYesNoForProto, formatDocumentsForGQL, formatDocumentsForForm, formatFormDateForGQL } from '../../../formHelpers/formatters'
+import {
+    formatYesNoForProto,
+    formatDocumentsForGQL,
+    formatDocumentsForForm,
+    formatFormDateForGQL,
+} from '../../../formHelpers/formatters'
 import { ACCEPTED_SUBMISSION_FILE_TYPES } from '../../../components/FileUpload'
 import {
     federalAuthorityKeysForCHIP,
@@ -54,7 +59,6 @@ import {
 } from '../../../common-code/ContractTypeProvisions'
 import type {
     ManagedCareEntity,
-    SubmissionDocument,
     ContractExecutionStatus,
     FederalAuthority,
 } from '../../../common-code/healthPlanFormDataType'
@@ -77,16 +81,16 @@ import {
     StatutoryRegulatoryAttestationQuestion,
 } from '../../../constants/statutoryRegulatoryAttestation'
 import { FormContainer } from '../FormContainer'
-import {
-    useCurrentRoute,
-    useRouteParams,
-} from '../../../hooks'
+import { useCurrentRoute, useRouteParams } from '../../../hooks'
 import { useAuth } from '../../../contexts/AuthContext'
 import { ErrorOrLoadingPage } from '../ErrorOrLoadingPage'
 import { PageBannerAlerts } from '../PageBannerAlerts'
 import { useErrorSummary } from '../../../hooks/useErrorSummary'
 import { useContractForm } from '../../../hooks/useContractForm'
-import { UpdateContractDraftRevisionInput, ContractDraftRevisionFormDataInput, ContractRevision } from '../../../gen/gqlClient'
+import {
+    UpdateContractDraftRevisionInput,
+    ContractDraftRevisionFormDataInput,
+} from '../../../gen/gqlClient'
 
 function formattedDatePlusOneDay(initialValue: string): string {
     const dayjsValue = dayjs(initialValue)
@@ -157,7 +161,6 @@ export const ContractDetails = ({
     const ldClient = useLDClient()
     const { setFocusErrorSummaryHeading, errorSummaryHeadingRef } =
         useErrorSummary()
-    // const { errors } = useFormikContext<ContractDetailsFormValues>()
 
     // set up API handling and HPP data
     const { loggedInUser } = useAuth()
@@ -177,10 +180,11 @@ export const ContractDetails = ({
     )
 
     // Contract documents state management
-    const { getKey, handleDeleteFile, handleUploadFile, handleScanFile } = useS3()
+    const { getKey, handleDeleteFile, handleUploadFile, handleScanFile } =
+        useS3()
     if (interimState || !draftSubmission)
         return <ErrorOrLoadingPage state={interimState || 'GENERIC_ERROR'} />
-    
+
     const fileItemsFromDraftSubmission: FileItemT[] | undefined =
         draftSubmission &&
         draftSubmission.draftRevision.formData.contractDocuments.map((doc) => {
@@ -203,7 +207,7 @@ export const ContractDetails = ({
                 s3URL: doc.s3URL,
                 status: 'UPLOAD_COMPLETE',
                 sha256: doc.sha256,
-                dateAdded: doc.dateAdded
+                dateAdded: doc.dateAdded,
             }
         })
 
@@ -220,140 +224,223 @@ export const ContractDetails = ({
             getKey: getKey,
         }),
         supportingDocuments: formatDocumentsForForm({
-            documents: draftSubmission.draftRevision.formData.supportingDocuments,
+            documents:
+                draftSubmission.draftRevision.formData.supportingDocuments,
             getKey: getKey,
         }),
         contractExecutionStatus:
-            draftSubmission.draftRevision.formData.contractExecutionStatus ?? undefined,
+            draftSubmission.draftRevision.formData.contractExecutionStatus ??
+            undefined,
         contractDateStart:
             (draftSubmission &&
-                formatForForm(draftSubmission.draftRevision.formData.contractDateStart)) ??
+                formatForForm(
+                    draftSubmission.draftRevision.formData.contractDateStart
+                )) ??
             '',
         contractDateEnd:
             (draftSubmission &&
-                formatForForm(draftSubmission.draftRevision.formData.contractDateEnd)) ??
+                formatForForm(
+                    draftSubmission.draftRevision.formData.contractDateEnd
+                )) ??
             '',
         managedCareEntities:
-            (draftSubmission.draftRevision.formData.managedCareEntities as ManagedCareEntity[]) ?? [],
-        federalAuthorities: draftSubmission.draftRevision.formData.federalAuthorities ?? [],
-        inLieuServicesAndSettings: booleanAsYesNoFormValue(
-            draftSubmission.draftRevision.formData.inLieuServicesAndSettings ===
-                null
-                ? undefined
-                : draftSubmission.draftRevision.formData.inLieuServicesAndSettings
-        ) ?? '',
-        modifiedBenefitsProvided: booleanAsYesNoFormValue(
-            draftSubmission.draftRevision.formData.modifiedBenefitsProvided ===
-                null
-                ? undefined
-                : draftSubmission.draftRevision.formData.modifiedBenefitsProvided
-        ) ?? '',
-        modifiedGeoAreaServed: booleanAsYesNoFormValue(
-            draftSubmission.draftRevision.formData.modifiedGeoAreaServed ===
-                null
-                ? undefined
-                : draftSubmission.draftRevision.formData.modifiedGeoAreaServed
-        ) ?? '',
-        modifiedMedicaidBeneficiaries: booleanAsYesNoFormValue(
-            draftSubmission.draftRevision.formData.modifiedMedicaidBeneficiaries ===
-                null
-                ? undefined
-                : draftSubmission.draftRevision.formData.modifiedMedicaidBeneficiaries
-        ) ?? '',
-        modifiedRiskSharingStrategy: booleanAsYesNoFormValue(
-            draftSubmission.draftRevision.formData.modifiedRiskSharingStrategy ===
-                null
-                ? undefined
-                : draftSubmission.draftRevision.formData.modifiedRiskSharingStrategy
-        ) ?? '',
-        modifiedIncentiveArrangements: booleanAsYesNoFormValue(
-            draftSubmission.draftRevision.formData.modifiedIncentiveArrangements ===
-                null
-                ? undefined
-                : draftSubmission.draftRevision.formData.modifiedIncentiveArrangements
-        ) ?? '',
-        modifiedWitholdAgreements: booleanAsYesNoFormValue(
-            draftSubmission.draftRevision.formData.modifiedWitholdAgreements ===
-                null
-                ? undefined
-                : draftSubmission.draftRevision.formData.modifiedWitholdAgreements
-        ) ?? '',
-        modifiedStateDirectedPayments: booleanAsYesNoFormValue(
-            draftSubmission.draftRevision.formData.modifiedStateDirectedPayments ===
-                null
-                ? undefined
-                : draftSubmission.draftRevision.formData.modifiedStateDirectedPayments
-        ) ?? '',
-        modifiedPassThroughPayments: booleanAsYesNoFormValue(
-            draftSubmission.draftRevision.formData.modifiedPassThroughPayments ===
-                null
-                ? undefined
-                : draftSubmission.draftRevision.formData.modifiedPassThroughPayments
-        ) ?? '',
-        modifiedPaymentsForMentalDiseaseInstitutions: booleanAsYesNoFormValue(
-            draftSubmission.draftRevision.formData.modifiedPaymentsForMentalDiseaseInstitutions ===
-                null
-                ? undefined
-                : draftSubmission.draftRevision.formData.modifiedPaymentsForMentalDiseaseInstitutions
-        ) ?? '',
-        modifiedMedicalLossRatioStandards: booleanAsYesNoFormValue(
-            draftSubmission.draftRevision.formData.modifiedMedicalLossRatioStandards ===
-                null
-                ? undefined
-                : draftSubmission.draftRevision.formData.modifiedMedicalLossRatioStandards
-        ) ?? '',
-        modifiedOtherFinancialPaymentIncentive: booleanAsYesNoFormValue(
-            draftSubmission.draftRevision.formData.modifiedOtherFinancialPaymentIncentive ===
-                null
-                ? undefined
-                : draftSubmission.draftRevision.formData.modifiedOtherFinancialPaymentIncentive
-        ) ?? '',
-        modifiedEnrollmentProcess: booleanAsYesNoFormValue(
-            draftSubmission.draftRevision.formData.modifiedEnrollmentProcess ===
-                null
-                ? undefined
-                : draftSubmission.draftRevision.formData.modifiedEnrollmentProcess
-        ) ?? '',
-        modifiedGrevienceAndAppeal: booleanAsYesNoFormValue(
-            draftSubmission.draftRevision.formData.modifiedGrevienceAndAppeal ===
-                null
-                ? undefined
-                : draftSubmission.draftRevision.formData.modifiedGrevienceAndAppeal
-        ) ?? '',
-        modifiedNetworkAdequacyStandards: booleanAsYesNoFormValue(
-            draftSubmission.draftRevision.formData.modifiedNetworkAdequacyStandards ===
-                null
-                ? undefined
-                : draftSubmission.draftRevision.formData.modifiedNetworkAdequacyStandards
-        ) ?? '',
-        modifiedLengthOfContract: booleanAsYesNoFormValue(
-            draftSubmission.draftRevision.formData.modifiedLengthOfContract ===
-                null
-                ? undefined
-                : draftSubmission.draftRevision.formData.modifiedLengthOfContract
-        ) ?? '',
-        modifiedNonRiskPaymentArrangements: booleanAsYesNoFormValue(
-            draftSubmission.draftRevision.formData.modifiedNonRiskPaymentArrangements ===
-                null
-                ? undefined
-                : draftSubmission.draftRevision.formData.modifiedNonRiskPaymentArrangements
-        ) ?? '',
-        statutoryRegulatoryAttestation: booleanAsYesNoFormValue(
-            draftSubmission.draftRevision.formData.statutoryRegulatoryAttestation ===
-                null
-                ? undefined
-                : draftSubmission.draftRevision.formData.statutoryRegulatoryAttestation
-        ) ?? '',
-        statutoryRegulatoryAttestationDescription: draftSubmission.draftRevision.formData.statutoryRegulatoryAttestationDescription ?? '',
+            (draftSubmission.draftRevision.formData
+                .managedCareEntities as ManagedCareEntity[]) ?? [],
+        federalAuthorities:
+            draftSubmission.draftRevision.formData.federalAuthorities ?? [],
+        inLieuServicesAndSettings:
+            booleanAsYesNoFormValue(
+                draftSubmission.draftRevision.formData
+                    .inLieuServicesAndSettings === null
+                    ? undefined
+                    : draftSubmission.draftRevision.formData
+                          .inLieuServicesAndSettings
+            ) ?? '',
+        modifiedBenefitsProvided:
+            booleanAsYesNoFormValue(
+                draftSubmission.draftRevision.formData
+                    .modifiedBenefitsProvided === null
+                    ? undefined
+                    : draftSubmission.draftRevision.formData
+                          .modifiedBenefitsProvided
+            ) ?? '',
+        modifiedGeoAreaServed:
+            booleanAsYesNoFormValue(
+                draftSubmission.draftRevision.formData.modifiedGeoAreaServed ===
+                    null
+                    ? undefined
+                    : draftSubmission.draftRevision.formData
+                          .modifiedGeoAreaServed
+            ) ?? '',
+        modifiedMedicaidBeneficiaries:
+            booleanAsYesNoFormValue(
+                draftSubmission.draftRevision.formData
+                    .modifiedMedicaidBeneficiaries === null
+                    ? undefined
+                    : draftSubmission.draftRevision.formData
+                          .modifiedMedicaidBeneficiaries
+            ) ?? '',
+        modifiedRiskSharingStrategy:
+            booleanAsYesNoFormValue(
+                draftSubmission.draftRevision.formData
+                    .modifiedRiskSharingStrategy === null
+                    ? undefined
+                    : draftSubmission.draftRevision.formData
+                          .modifiedRiskSharingStrategy
+            ) ?? '',
+        modifiedIncentiveArrangements:
+            booleanAsYesNoFormValue(
+                draftSubmission.draftRevision.formData
+                    .modifiedIncentiveArrangements === null
+                    ? undefined
+                    : draftSubmission.draftRevision.formData
+                          .modifiedIncentiveArrangements
+            ) ?? '',
+        modifiedWitholdAgreements:
+            booleanAsYesNoFormValue(
+                draftSubmission.draftRevision.formData
+                    .modifiedWitholdAgreements === null
+                    ? undefined
+                    : draftSubmission.draftRevision.formData
+                          .modifiedWitholdAgreements
+            ) ?? '',
+        modifiedStateDirectedPayments:
+            booleanAsYesNoFormValue(
+                draftSubmission.draftRevision.formData
+                    .modifiedStateDirectedPayments === null
+                    ? undefined
+                    : draftSubmission.draftRevision.formData
+                          .modifiedStateDirectedPayments
+            ) ?? '',
+        modifiedPassThroughPayments:
+            booleanAsYesNoFormValue(
+                draftSubmission.draftRevision.formData
+                    .modifiedPassThroughPayments === null
+                    ? undefined
+                    : draftSubmission.draftRevision.formData
+                          .modifiedPassThroughPayments
+            ) ?? '',
+        modifiedPaymentsForMentalDiseaseInstitutions:
+            booleanAsYesNoFormValue(
+                draftSubmission.draftRevision.formData
+                    .modifiedPaymentsForMentalDiseaseInstitutions === null
+                    ? undefined
+                    : draftSubmission.draftRevision.formData
+                          .modifiedPaymentsForMentalDiseaseInstitutions
+            ) ?? '',
+        modifiedMedicalLossRatioStandards:
+            booleanAsYesNoFormValue(
+                draftSubmission.draftRevision.formData
+                    .modifiedMedicalLossRatioStandards === null
+                    ? undefined
+                    : draftSubmission.draftRevision.formData
+                          .modifiedMedicalLossRatioStandards
+            ) ?? '',
+        modifiedOtherFinancialPaymentIncentive:
+            booleanAsYesNoFormValue(
+                draftSubmission.draftRevision.formData
+                    .modifiedOtherFinancialPaymentIncentive === null
+                    ? undefined
+                    : draftSubmission.draftRevision.formData
+                          .modifiedOtherFinancialPaymentIncentive
+            ) ?? '',
+        modifiedEnrollmentProcess:
+            booleanAsYesNoFormValue(
+                draftSubmission.draftRevision.formData
+                    .modifiedEnrollmentProcess === null
+                    ? undefined
+                    : draftSubmission.draftRevision.formData
+                          .modifiedEnrollmentProcess
+            ) ?? '',
+        modifiedGrevienceAndAppeal:
+            booleanAsYesNoFormValue(
+                draftSubmission.draftRevision.formData
+                    .modifiedGrevienceAndAppeal === null
+                    ? undefined
+                    : draftSubmission.draftRevision.formData
+                          .modifiedGrevienceAndAppeal
+            ) ?? '',
+        modifiedNetworkAdequacyStandards:
+            booleanAsYesNoFormValue(
+                draftSubmission.draftRevision.formData
+                    .modifiedNetworkAdequacyStandards === null
+                    ? undefined
+                    : draftSubmission.draftRevision.formData
+                          .modifiedNetworkAdequacyStandards
+            ) ?? '',
+        modifiedLengthOfContract:
+            booleanAsYesNoFormValue(
+                draftSubmission.draftRevision.formData
+                    .modifiedLengthOfContract === null
+                    ? undefined
+                    : draftSubmission.draftRevision.formData
+                          .modifiedLengthOfContract
+            ) ?? '',
+        modifiedNonRiskPaymentArrangements:
+            booleanAsYesNoFormValue(
+                draftSubmission.draftRevision.formData
+                    .modifiedNonRiskPaymentArrangements === null
+                    ? undefined
+                    : draftSubmission.draftRevision.formData
+                          .modifiedNonRiskPaymentArrangements
+            ) ?? '',
+        statutoryRegulatoryAttestation:
+            booleanAsYesNoFormValue(
+                draftSubmission.draftRevision.formData
+                    .statutoryRegulatoryAttestation === null
+                    ? undefined
+                    : draftSubmission.draftRevision.formData
+                          .statutoryRegulatoryAttestation
+            ) ?? '',
+        statutoryRegulatoryAttestationDescription:
+            draftSubmission.draftRevision.formData
+                .statutoryRegulatoryAttestationDescription ?? '',
     }
 
     const showFieldErrors = (
         fieldName: keyof ContractDetailsFormValues,
-        errors:any
+        errors: FormikErrors<ContractDetailsFormValues>
     ): string | undefined => {
         if (!shouldValidate) return undefined
         return getIn(errors, `${fieldName}`)
     }
+
+    const genecontractErrorsummaryErrors = (
+        errors: FormikErrors<ContractDetailsFormValues>,
+        values: ContractDetailsFormValues
+    ) => {
+        const errorsObject: { [field: string]: string } = {}
+        Object.entries(errors).forEach(([field, value]) => {
+            if (typeof value === 'string') {
+                errorsObject[field] = value
+            }
+            if (Array.isArray(value) && Array.length > 0) {
+                Object.entries(value).forEach(
+                    ([arrItemField, arrItemValue]) => {
+                        if (typeof arrItemValue === 'string') {
+                            errorsObject[arrItemField] = arrItemValue
+                        }
+                    }
+                )
+            }
+        })
+        values.contractDocuments.forEach((item) => {
+            const key = 'contractDocuments'
+            if (item.status === 'DUPLICATE_NAME_ERROR') {
+                errorsObject[key] =
+                    'You must remove all documents with error messages before continuing'
+            } else if (item.status === 'SCANNING_ERROR') {
+                errorsObject[key] =
+                    'You must remove files that failed the security scan'
+            } else if (item.status === 'UPLOAD_ERROR') {
+                errorsObject[key] =
+                    'You must remove or retry files that failed to upload'
+            }
+        })
+        // return errors
+        return errorsObject
+    }
+
     const handleFormSubmit = async (
         values: ContractDetailsFormValues,
         setSubmitting: (isSubmitting: boolean) => void, // formik setSubmitting
@@ -362,30 +449,36 @@ export const ContractDetails = ({
             redirectPath: string
         }
     ) => {
-        let updatedDraftSubmissionFormData: ContractDraftRevisionFormDataInput = {
-            contractExecutionStatus: values.contractExecutionStatus,
-            contractDateStart: formatFormDateForGQL(
-                values.contractDateStart
-            ),
-            contractDateEnd: formatFormDateForGQL(
-                values.contractDateEnd
-            ),
-            riskBasedContract: draftSubmission.draftRevision.formData.riskBasedContract,
-            populationCovered: draftSubmission.draftRevision.formData.populationCovered,
-            programIDs: draftSubmission.draftRevision.formData.programIDs || [],
-            stateContacts: draftSubmission.draftRevision.formData.stateContacts || [],
-            contractDocuments: formatDocumentsForGQL(values.contractDocuments) || [],
-            supportingDocuments: formatDocumentsForGQL(values.supportingDocuments) || [],
-            managedCareEntities: values.managedCareEntities,
-            federalAuthorities: values.federalAuthorities,
-            submissionType: draftSubmission.draftRevision.formData.submissionType,
-            statutoryRegulatoryAttestation: formatYesNoForProto(
-                values.statutoryRegulatoryAttestation
-            ),
-            // If contract is in compliance, we set the description to undefined. This clears out previous non-compliance description
-            statutoryRegulatoryAttestationDescription: values.statutoryRegulatoryAttestationDescription
-        }
-        
+        const updatedDraftSubmissionFormData: ContractDraftRevisionFormDataInput =
+            {
+                contractExecutionStatus: values.contractExecutionStatus,
+                contractDateStart: formatFormDateForGQL(
+                    values.contractDateStart
+                ),
+                contractDateEnd: formatFormDateForGQL(values.contractDateEnd),
+                riskBasedContract:
+                    draftSubmission.draftRevision.formData.riskBasedContract,
+                populationCovered:
+                    draftSubmission.draftRevision.formData.populationCovered,
+                programIDs:
+                    draftSubmission.draftRevision.formData.programIDs || [],
+                stateContacts:
+                    draftSubmission.draftRevision.formData.stateContacts || [],
+                contractDocuments:
+                    formatDocumentsForGQL(values.contractDocuments) || [],
+                supportingDocuments:
+                    formatDocumentsForGQL(values.supportingDocuments) || [],
+                managedCareEntities: values.managedCareEntities,
+                federalAuthorities: values.federalAuthorities,
+                submissionType:
+                    draftSubmission.draftRevision.formData.submissionType,
+                statutoryRegulatoryAttestation: formatYesNoForProto(
+                    values.statutoryRegulatoryAttestation
+                ),
+                // If contract is in compliance, we set the description to undefined. This clears out previous non-compliance description
+                statutoryRegulatoryAttestationDescription:
+                    values.statutoryRegulatoryAttestationDescription,
+            }
 
         if (
             draftSubmission === undefined ||
@@ -399,48 +492,84 @@ export const ContractDetails = ({
             return
         }
         if (isContractWithProvisions(draftSubmission)) {
-            updatedDraftSubmissionFormData.inLieuServicesAndSettings = yesNoFormValueAsBoolean(values.inLieuServicesAndSettings)
-            updatedDraftSubmissionFormData.modifiedBenefitsProvided = yesNoFormValueAsBoolean(values.modifiedBenefitsProvided)
-            updatedDraftSubmissionFormData.modifiedGeoAreaServed = yesNoFormValueAsBoolean(values.modifiedGeoAreaServed)
-            updatedDraftSubmissionFormData.modifiedMedicaidBeneficiaries = yesNoFormValueAsBoolean(values.modifiedMedicaidBeneficiaries)
-            updatedDraftSubmissionFormData.modifiedRiskSharingStrategy = yesNoFormValueAsBoolean(values.modifiedRiskSharingStrategy)
-            updatedDraftSubmissionFormData.modifiedIncentiveArrangements = yesNoFormValueAsBoolean(values.modifiedIncentiveArrangements)
-            updatedDraftSubmissionFormData.modifiedWitholdAgreements = yesNoFormValueAsBoolean(values.modifiedWitholdAgreements)
-            updatedDraftSubmissionFormData.modifiedStateDirectedPayments = yesNoFormValueAsBoolean(values.modifiedStateDirectedPayments)
-            updatedDraftSubmissionFormData.modifiedPassThroughPayments = yesNoFormValueAsBoolean(values.modifiedPassThroughPayments)
-            updatedDraftSubmissionFormData.modifiedPaymentsForMentalDiseaseInstitutions = yesNoFormValueAsBoolean(values.modifiedPaymentsForMentalDiseaseInstitutions)
-            updatedDraftSubmissionFormData.modifiedMedicalLossRatioStandards = yesNoFormValueAsBoolean(values.modifiedMedicalLossRatioStandards)
-            updatedDraftSubmissionFormData.modifiedOtherFinancialPaymentIncentive = yesNoFormValueAsBoolean(values.modifiedOtherFinancialPaymentIncentive)
-            updatedDraftSubmissionFormData.modifiedEnrollmentProcess = yesNoFormValueAsBoolean(values.modifiedEnrollmentProcess)
-            updatedDraftSubmissionFormData.modifiedGrevienceAndAppeal = yesNoFormValueAsBoolean(values.modifiedGrevienceAndAppeal)
-            updatedDraftSubmissionFormData.modifiedNetworkAdequacyStandards = yesNoFormValueAsBoolean(values.modifiedNetworkAdequacyStandards)
-            updatedDraftSubmissionFormData.modifiedLengthOfContract = yesNoFormValueAsBoolean(values.modifiedLengthOfContract)
-            updatedDraftSubmissionFormData.modifiedNonRiskPaymentArrangements = yesNoFormValueAsBoolean(values.modifiedNonRiskPaymentArrangements)
+            updatedDraftSubmissionFormData.inLieuServicesAndSettings =
+                yesNoFormValueAsBoolean(values.inLieuServicesAndSettings)
+            updatedDraftSubmissionFormData.modifiedBenefitsProvided =
+                yesNoFormValueAsBoolean(values.modifiedBenefitsProvided)
+            updatedDraftSubmissionFormData.modifiedGeoAreaServed =
+                yesNoFormValueAsBoolean(values.modifiedGeoAreaServed)
+            updatedDraftSubmissionFormData.modifiedMedicaidBeneficiaries =
+                yesNoFormValueAsBoolean(values.modifiedMedicaidBeneficiaries)
+            updatedDraftSubmissionFormData.modifiedRiskSharingStrategy =
+                yesNoFormValueAsBoolean(values.modifiedRiskSharingStrategy)
+            updatedDraftSubmissionFormData.modifiedIncentiveArrangements =
+                yesNoFormValueAsBoolean(values.modifiedIncentiveArrangements)
+            updatedDraftSubmissionFormData.modifiedWitholdAgreements =
+                yesNoFormValueAsBoolean(values.modifiedWitholdAgreements)
+            updatedDraftSubmissionFormData.modifiedStateDirectedPayments =
+                yesNoFormValueAsBoolean(values.modifiedStateDirectedPayments)
+            updatedDraftSubmissionFormData.modifiedPassThroughPayments =
+                yesNoFormValueAsBoolean(values.modifiedPassThroughPayments)
+            updatedDraftSubmissionFormData.modifiedPaymentsForMentalDiseaseInstitutions =
+                yesNoFormValueAsBoolean(
+                    values.modifiedPaymentsForMentalDiseaseInstitutions
+                )
+            updatedDraftSubmissionFormData.modifiedMedicalLossRatioStandards =
+                yesNoFormValueAsBoolean(
+                    values.modifiedMedicalLossRatioStandards
+                )
+            updatedDraftSubmissionFormData.modifiedOtherFinancialPaymentIncentive =
+                yesNoFormValueAsBoolean(
+                    values.modifiedOtherFinancialPaymentIncentive
+                )
+            updatedDraftSubmissionFormData.modifiedEnrollmentProcess =
+                yesNoFormValueAsBoolean(values.modifiedEnrollmentProcess)
+            updatedDraftSubmissionFormData.modifiedGrevienceAndAppeal =
+                yesNoFormValueAsBoolean(values.modifiedGrevienceAndAppeal)
+            updatedDraftSubmissionFormData.modifiedNetworkAdequacyStandards =
+                yesNoFormValueAsBoolean(values.modifiedNetworkAdequacyStandards)
+            updatedDraftSubmissionFormData.modifiedLengthOfContract =
+                yesNoFormValueAsBoolean(values.modifiedLengthOfContract)
+            updatedDraftSubmissionFormData.modifiedNonRiskPaymentArrangements =
+                yesNoFormValueAsBoolean(
+                    values.modifiedNonRiskPaymentArrangements
+                )
         } else {
             updatedDraftSubmissionFormData.inLieuServicesAndSettings = undefined
             updatedDraftSubmissionFormData.modifiedBenefitsProvided = undefined
             updatedDraftSubmissionFormData.modifiedGeoAreaServed = undefined
-            updatedDraftSubmissionFormData.modifiedMedicaidBeneficiaries = undefined
-            updatedDraftSubmissionFormData.modifiedRiskSharingStrategy = undefined
-            updatedDraftSubmissionFormData.modifiedIncentiveArrangements = undefined
+            updatedDraftSubmissionFormData.modifiedMedicaidBeneficiaries =
+                undefined
+            updatedDraftSubmissionFormData.modifiedRiskSharingStrategy =
+                undefined
+            updatedDraftSubmissionFormData.modifiedIncentiveArrangements =
+                undefined
             updatedDraftSubmissionFormData.modifiedWitholdAgreements = undefined
-            updatedDraftSubmissionFormData.modifiedStateDirectedPayments = undefined
-            updatedDraftSubmissionFormData.modifiedPassThroughPayments = undefined
-            updatedDraftSubmissionFormData.modifiedPaymentsForMentalDiseaseInstitutions = undefined
-            updatedDraftSubmissionFormData.modifiedMedicalLossRatioStandards = undefined
-            updatedDraftSubmissionFormData.modifiedOtherFinancialPaymentIncentive = undefined
+            updatedDraftSubmissionFormData.modifiedStateDirectedPayments =
+                undefined
+            updatedDraftSubmissionFormData.modifiedPassThroughPayments =
+                undefined
+            updatedDraftSubmissionFormData.modifiedPaymentsForMentalDiseaseInstitutions =
+                undefined
+            updatedDraftSubmissionFormData.modifiedMedicalLossRatioStandards =
+                undefined
+            updatedDraftSubmissionFormData.modifiedOtherFinancialPaymentIncentive =
+                undefined
             updatedDraftSubmissionFormData.modifiedEnrollmentProcess = undefined
-            updatedDraftSubmissionFormData.modifiedGrevienceAndAppeal = undefined
-            updatedDraftSubmissionFormData.modifiedNetworkAdequacyStandards = undefined
+            updatedDraftSubmissionFormData.modifiedGrevienceAndAppeal =
+                undefined
+            updatedDraftSubmissionFormData.modifiedNetworkAdequacyStandards =
+                undefined
             updatedDraftSubmissionFormData.modifiedLengthOfContract = undefined
-            updatedDraftSubmissionFormData.modifiedNonRiskPaymentArrangements = undefined
+            updatedDraftSubmissionFormData.modifiedNonRiskPaymentArrangements =
+                undefined
         }
 
         try {
             const updatedContract: UpdateContractDraftRevisionInput = {
                 formData: updatedDraftSubmissionFormData,
                 contractID: draftSubmission.id,
-                lastSeenUpdatedAt: draftSubmission.draftRevision.updatedAt
+                lastSeenUpdatedAt: draftSubmission.draftRevision.updatedAt,
             }
 
             const updatedSubmission = await updateDraft(updatedContract)
@@ -484,8 +613,8 @@ export const ContractDetails = ({
                         return handleFormSubmit(values, setSubmitting, {
                             shouldValidateDocuments: true,
                             redirectPath:
-                                draftSubmission.draftRevision.formData.submissionType ===
-                                'CONTRACT_ONLY'
+                                draftSubmission.draftRevision.formData
+                                    .submissionType === 'CONTRACT_ONLY'
                                     ? `../contacts`
                                     : `../rate-details`,
                         })
@@ -522,23 +651,23 @@ export const ContractDetails = ({
                                         Contract Details
                                     </legend>
 
-                                    {/* {shouldValidate && (
+                                    {shouldValidate && (
                                         <ErrorSummary
-                                            errors={
-                                                documentsErrorMessage
-                                                    ? {
-                                                          [documentsErrorKey]:
-                                                              documentsErrorMessage,
-                                                          ...errors,
-                                                      }
-                                                    : errors
-                                            }
+                                            errors={genecontractErrorsummaryErrors(
+                                                errors,
+                                                values
+                                            )}
                                             headingRef={errorSummaryHeadingRef}
                                         />
-                                    )} */}
+                                    )}
 
                                     <FormGroup
-                                        error={Boolean(showFieldErrors('contractDocuments', errors))}
+                                        error={Boolean(
+                                            showFieldErrors(
+                                                'contractDocuments',
+                                                errors
+                                            )
+                                        )}
                                         className="margin-top-0"
                                     >
                                         <FileUpload
@@ -546,7 +675,10 @@ export const ContractDetails = ({
                                             name="documents"
                                             label="Upload contract"
                                             aria-required
-                                            // error={errors.contractDocuments}
+                                            error={showFieldErrors(
+                                                'contractDocuments',
+                                                errors
+                                            )}
                                             hint={
                                                 <span
                                                     className={
@@ -586,9 +718,17 @@ export const ContractDetails = ({
                                                 fileItemsFromDraftSubmission
                                             }
                                             uploadFile={(file) =>
-                                                handleUploadFile(file, 'HEALTH_PLAN_DOCS')
+                                                handleUploadFile(
+                                                    file,
+                                                    'HEALTH_PLAN_DOCS'
+                                                )
                                             }
-                                            scanFile={(key) => handleScanFile(key, 'HEALTH_PLAN_DOCS')}
+                                            scanFile={(key) =>
+                                                handleScanFile(
+                                                    key,
+                                                    'HEALTH_PLAN_DOCS'
+                                                )
+                                            }
                                             deleteFile={(key) =>
                                                 handleDeleteFile(
                                                     key,
@@ -596,7 +736,9 @@ export const ContractDetails = ({
                                                     previousDocuments
                                                 )
                                             }
-                                            onFileItemsUpdate={({ fileItems }) =>
+                                            onFileItemsUpdate={({
+                                                fileItems,
+                                            }) =>
                                                 setFieldValue(
                                                     `contractDocuments`,
                                                     fileItems
@@ -606,10 +748,12 @@ export const ContractDetails = ({
                                     </FormGroup>
                                     {contract438Attestation && (
                                         <FormGroup
-                                            error={Boolean(showFieldErrors(
-                                                'statutoryRegulatoryAttestation',
-                                                errors
-                                            ))}
+                                            error={Boolean(
+                                                showFieldErrors(
+                                                    'statutoryRegulatoryAttestation',
+                                                    errors
+                                                )
+                                            )}
                                         >
                                             <Fieldset
                                                 role="radiogroup"
@@ -656,10 +800,12 @@ export const ContractDetails = ({
                                                         </Link>
                                                     </span>
                                                 </div>
-                                                {Boolean(showFieldErrors(
-                                                    'statutoryRegulatoryAttestation',
-                                                    errors
-                                                )) && (
+                                                {Boolean(
+                                                    showFieldErrors(
+                                                        'statutoryRegulatoryAttestation',
+                                                        errors
+                                                    )
+                                                ) && (
                                                     <PoliteErrorMessage
                                                         formFieldLabel={
                                                             StatutoryRegulatoryAttestationQuestion
@@ -722,10 +868,12 @@ export const ContractDetails = ({
                                                     id="statutoryRegulatoryAttestationDescription"
                                                     name="statutoryRegulatoryAttestationDescription"
                                                     aria-required
-                                                    showError={Boolean(showFieldErrors(
-                                                        'statutoryRegulatoryAttestationDescription',
-                                                        errors
-                                                    ))}
+                                                    showError={Boolean(
+                                                        showFieldErrors(
+                                                            'statutoryRegulatoryAttestationDescription',
+                                                            errors
+                                                        )
+                                                    )}
                                                     hint={
                                                         <ReactRouterLinkWithLogging
                                                             variant="external"
@@ -748,10 +896,12 @@ export const ContractDetails = ({
                                             </div>
                                         )}
                                     <FormGroup
-                                        error={Boolean(showFieldErrors(
-                                            'contractExecutionStatus',
-                                            errors
-                                        ))}
+                                        error={Boolean(
+                                            showFieldErrors(
+                                                'contractExecutionStatus',
+                                                errors
+                                            )
+                                        )}
                                     >
                                         <Fieldset
                                             role="radiogroup"
@@ -766,10 +916,12 @@ export const ContractDetails = ({
                                             >
                                                 Required
                                             </span>
-                                            {Boolean(showFieldErrors(
-                                                'contractExecutionStatus',
-                                                errors
-                                            )) && (
+                                            {Boolean(
+                                                showFieldErrors(
+                                                    'contractExecutionStatus',
+                                                    errors
+                                                )
+                                            ) && (
                                                 <PoliteErrorMessage formFieldLabel="Contract status">
                                                     {
                                                         errors.contractExecutionStatus
@@ -804,14 +956,18 @@ export const ContractDetails = ({
                                         <>
                                             <FormGroup
                                                 error={
-                                                    Boolean(showFieldErrors(
-                                                        'contractDateStart',
-                                                        errors
-                                                    )) ||
-                                                    Boolean(showFieldErrors(
-                                                        'contractDateEnd',
-                                                        errors
-                                                    ))
+                                                    Boolean(
+                                                        showFieldErrors(
+                                                            'contractDateStart',
+                                                            errors
+                                                        )
+                                                    ) ||
+                                                    Boolean(
+                                                        showFieldErrors(
+                                                            'contractDateEnd',
+                                                            errors
+                                                        )
+                                                    )
                                                 }
                                             >
                                                 <Fieldset
@@ -831,10 +987,18 @@ export const ContractDetails = ({
                                                     >
                                                         Required
                                                     </span>
-                                                    {Boolean(showFieldErrors(
-                                                        'contractDateStart', errors) ||
-                                                    Boolean(showFieldErrors('contractDateEnd', errors)
-                                                    )) && (
+                                                    {Boolean(
+                                                        showFieldErrors(
+                                                            'contractDateStart',
+                                                            errors
+                                                        ) ||
+                                                            Boolean(
+                                                                showFieldErrors(
+                                                                    'contractDateEnd',
+                                                                    errors
+                                                                )
+                                                            )
+                                                    ) && (
                                                         <ContractDatesErrorMessage
                                                             values={values}
                                                             validationErrorMessage={
@@ -913,10 +1077,12 @@ export const ContractDetails = ({
                                                 </Fieldset>
                                             </FormGroup>
                                             <FormGroup
-                                                error={Boolean(showFieldErrors(
-                                                    'managedCareEntities',
-                                                    errors
-                                                ))}
+                                                error={Boolean(
+                                                    showFieldErrors(
+                                                        'managedCareEntities',
+                                                        errors
+                                                    )
+                                                )}
                                             >
                                                 <Fieldset
                                                     aria-required
@@ -944,10 +1110,12 @@ export const ContractDetails = ({
                                                             Check all that apply
                                                         </span>
                                                     </div>
-                                                    {Boolean(showFieldErrors(
-                                                        'managedCareEntities',
-                                                        errors
-                                                    )) && (
+                                                    {Boolean(
+                                                        showFieldErrors(
+                                                            'managedCareEntities',
+                                                            errors
+                                                        )
+                                                    ) && (
                                                         <PoliteErrorMessage formFieldLabel="Managed Care entities">
                                                             {
                                                                 errors.managedCareEntities
@@ -1006,10 +1174,12 @@ export const ContractDetails = ({
                                             </FormGroup>
 
                                             <FormGroup
-                                                error={Boolean(showFieldErrors(
-                                                    'federalAuthorities',
-                                                    errors
-                                                ))}
+                                                error={Boolean(
+                                                    showFieldErrors(
+                                                        'federalAuthorities',
+                                                        errors
+                                                    )
+                                                )}
                                             >
                                                 <Fieldset
                                                     aria-required
@@ -1037,10 +1207,12 @@ export const ContractDetails = ({
                                                             Check all that apply
                                                         </span>
                                                     </div>
-                                                    {Boolean(showFieldErrors(
-                                                        'federalAuthorities',
-                                                        errors
-                                                    )) && (
+                                                    {Boolean(
+                                                        showFieldErrors(
+                                                            'federalAuthorities',
+                                                            errors
+                                                        )
+                                                    ) && (
                                                         <PoliteErrorMessage formFieldLabel="Active federal operating authority">
                                                             {
                                                                 errors.federalAuthorities
@@ -1109,10 +1281,12 @@ export const ContractDetails = ({
                                                                         draftSubmission,
                                                                         modifiedProvisionName
                                                                     )}
-                                                                    showError={Boolean(showFieldErrors(
-                                                                        modifiedProvisionName,
-                                                                        errors
-                                                                    ))}
+                                                                    showError={Boolean(
+                                                                        showFieldErrors(
+                                                                            modifiedProvisionName,
+                                                                            errors
+                                                                        )
+                                                                    )}
                                                                     variant="SUBHEAD"
                                                                 />
                                                             )
@@ -1130,8 +1304,7 @@ export const ContractDetails = ({
                                             values,
                                             setSubmitting,
                                             {
-                                                shouldValidateDocuments:
-                                                    true,
+                                                shouldValidateDocuments: true,
                                                 redirectPath:
                                                     RoutesRecord.DASHBOARD_SUBMISSIONS,
                                             }
@@ -1139,7 +1312,10 @@ export const ContractDetails = ({
                                     }}
                                     backOnClick={async () => {
                                         // do not need to validate or resubmit if no documents are uploaded
-                                        if (false) {
+                                        if (
+                                            values.contractDocuments.length ===
+                                            0
+                                        ) {
                                             navigate('../type')
                                         } else {
                                             await handleFormSubmit(
@@ -1166,8 +1342,8 @@ export const ContractDetails = ({
                                         RoutesRecord.DASHBOARD_SUBMISSIONS
                                     }
                                     continueOnClickUrl={
-                                        draftSubmission.draftRevision.formData.submissionType ===
-                                        'CONTRACT_ONLY'
+                                        draftSubmission.draftRevision.formData
+                                            .submissionType === 'CONTRACT_ONLY'
                                             ? '/edit/contacts'
                                             : '/edit/rate-details'
                                     }
