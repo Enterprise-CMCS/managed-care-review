@@ -18,8 +18,8 @@
     flex: 1 0 auto;
 }
 // We have some established width limits how far page content should stretch laterally. Right now this is controlled by CSS width properties
-$mcr-container-standard-width-fixed: 50rem;
-$mcr-container-max-width-fixed: 75rem;
+$mcr-container-standard-width-fixed: 640px;
+$mcr-container-max-width-fixed: 1130px;
 
 // Default page width and styles in MC-Review
 @mixin default-page-container {
@@ -31,6 +31,7 @@ $mcr-container-max-width-fixed: 75rem;
 // Form pages have larger margin on either side
 @mixin form-page-container {
     @include container;
+    flex-direction: column;
     width: $mcr-container-standard-width-fixed;
 }
 

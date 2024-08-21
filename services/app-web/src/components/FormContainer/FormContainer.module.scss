@@ -2,7 +2,5 @@
 @use '../../styles/uswdsImports.scss' as uswds;
 
 .formPage {
-    flex: 1 0 auto;
-    display: flex;
-    flex-direction: column;
+    @include custom.form-page-container
 }
