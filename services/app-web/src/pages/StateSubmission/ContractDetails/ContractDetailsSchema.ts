@@ -18,7 +18,7 @@ import {
     isMedicaidBaseProvision,
 } from '../../../common-code/healthPlanFormDataType/ModifiedProvisions'
 import { FeatureFlagSettings } from '../../../common-code/featureFlags'
-import { Contract } from '../../../gen/gqlClient'
+import { Contract, UnlockedContract } from '../../../gen/gqlClient'
 import {
     validateFileItemsList,
 } from '../../../formHelpers/validators'
@@ -26,7 +26,7 @@ import {
 Yup.addMethod(Yup.date, 'validateDateFormat', validateDateFormat)
 
 export const ContractDetailsFormSchema = (
-    draftSubmission: Contract,
+    draftSubmission: UnlockedContract,
     activeFeatureFlags: FeatureFlagSettings = {}
 ) => {
     const yesNoError = (provision: GeneralizedProvisionType) => {

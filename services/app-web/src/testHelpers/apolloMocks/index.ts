@@ -70,7 +70,8 @@ export {
     mockContractWithLinkedRateSubmitted,
     mockContractPackageUnlocked,
     mockContractPackageSubmittedWithRevisions,
-    mockEmptyDraftContractAndRate
+    mockEmptyDraftContractAndRate,
+    mockContractPackageUnlockedWithUnlockedType
 } from './contractPackageDataMock'
 export { rateDataMock } from './rateDataMock'
 export { fetchContractMockSuccess, fetchContractMockFail, updateDraftContractRatesMockSuccess, updateContractDraftRevisionMockFail, updateContractDraftRevisionMockSuccess, createContractMockFail, createContractMockSuccess } from './contractGQLMock'

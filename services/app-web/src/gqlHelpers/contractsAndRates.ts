@@ -3,7 +3,7 @@ These helpers help you access nested data from the Contract and Rate Apollo Clie
 If the data doesn't exist, returns undefined reliably
 */
 
-import { Contract, ContractFormData, ContractPackageSubmission, ContractRevision, Rate, RateRevision } from "../gen/gqlClient"
+import { Contract, ContractFormData, ContractPackageSubmission, ContractRevision, Rate, RateRevision, UnlockedContract } from "../gen/gqlClient"
 import {ActuaryContact} from '../common-code/healthPlanFormDataType';
 import {ActuaryFirmsRecord} from '../constants';
 
@@ -13,7 +13,7 @@ type RateRevisionWithIsLinked = {
 
 // This function returns a revision with isLinked field as well manually calculated from parent rate
 // There are cases where we need the revision itself to be able to track its own linked status, decontextualized from the parent rate or parent contract
-function getVisibleLatestRateRevisions(contract: Contract, isEditing: boolean): RateRevisionWithIsLinked[] | undefined {
+function getVisibleLatestRateRevisions(contract: Contract | UnlockedContract, isEditing: boolean): RateRevisionWithIsLinked[] | undefined {
     if (isEditing) {
         if (!contract.draftRates) {
             console.error('Programming Error: on the rate details page with no draft rates')
@@ -67,7 +67,7 @@ function getVisibleLatestRateRevisions(contract: Contract, isEditing: boolean): 
 
 // returns draft form data for unlocked and draft, and last package submission data for submitted or resubmitted
 // only state users get to see draft data.
-const getVisibleLatestContractFormData = (contract: Contract | ContractRevision, isStateUser: boolean): ContractFormData | undefined =>{
+const getVisibleLatestContractFormData = (contract: Contract | UnlockedContract| ContractRevision, isStateUser: boolean): ContractFormData | undefined =>{
    if (contract.__typename === 'Contract') {
         if (isStateUser) {
             return contract.draftRevision?.formData ||
@@ -79,15 +79,15 @@ const getVisibleLatestContractFormData = (contract: Contract | ContractRevision,
    }
 }
 
-const getLastContractSubmission = (contract: Contract): ContractPackageSubmission | undefined => {
+const getLastContractSubmission = (contract: Contract | UnlockedContract): ContractPackageSubmission | undefined => {
     return (contract.packageSubmissions && contract.packageSubmissions[0]) ?? undefined
 }
 
-const getPackageSubmissionAtIndex = (contract: Contract, indx: number): ContractPackageSubmission | undefined => {
+const getPackageSubmissionAtIndex = (contract: Contract | UnlockedContract, indx: number): ContractPackageSubmission | undefined => {
     return (contract.packageSubmissions[indx]) ?? undefined
 }
 // revisionVersion is a integer used in the URLs for previous submission - numbering the submission in order from first submitted
-const getIndexFromRevisionVersion = (contract: Contract, revisionVersion: number) => contract.packageSubmissions.length - (Number(revisionVersion) - 1)
+const getIndexFromRevisionVersion = (contract: Contract | UnlockedContract, revisionVersion: number) => contract.packageSubmissions.length - (Number(revisionVersion) - 1)
 const getDraftRates = (contract: Contract): Rate[] | undefined => {
     return (contract.draftRates && contract.draftRates[0]) ? contract.draftRates : undefined
 }

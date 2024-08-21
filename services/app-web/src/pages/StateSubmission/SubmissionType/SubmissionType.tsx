@@ -201,8 +201,7 @@ export const SubmissionType = ({
         } else {
             if (
                 draftSubmission === undefined ||
-                !updateDraft ||
-                !draftSubmission.draftRevision
+                !updateDraft
             ) {
                 console.info(draftSubmission, updateDraft)
                 console.info(
@@ -212,9 +211,9 @@ export const SubmissionType = ({
             }
             // set new values
             let updatedDraftSubmissionFormData: ContractDraftRevisionFormDataInput = {
-                contractExecutionStatus: draftSubmission.draftRevision?.formData.contractExecutionStatus,
-                contractDateStart: draftSubmission.draftRevision?.formData.contractDateStart,
-                contractDateEnd: draftSubmission.draftRevision?.formData.contractDateEnd,
+                contractExecutionStatus: draftSubmission.draftRevision.formData.contractExecutionStatus,
+                contractDateStart: draftSubmission.draftRevision.formData.contractDateStart,
+                contractDateEnd: draftSubmission.draftRevision.formData.contractDateEnd,
                 contractType: values.contractType as ContractType,
                 submissionDescription: values.submissionDescription,
                 riskBasedContract: yesNoFormValueAsBoolean(
@@ -224,35 +223,35 @@ export const SubmissionType = ({
                 submissionType:
                     values.submissionType as SubmissionTypeT,
                 programIDs: values.programIDs,
-                stateContacts: draftSubmission.draftRevision?.formData.stateContacts || [],
-                supportingDocuments: draftSubmission.draftRevision?.formData.supportingDocuments || [],
-                managedCareEntities: draftSubmission.draftRevision?.formData.managedCareEntities,
-                federalAuthorities: draftSubmission.draftRevision?.formData.federalAuthorities,
-                contractDocuments: draftSubmission.draftRevision?.formData.contractDocuments,
+                stateContacts: draftSubmission.draftRevision.formData.stateContacts || [],
+                supportingDocuments: draftSubmission.draftRevision.formData.supportingDocuments || [],
+                managedCareEntities: draftSubmission.draftRevision.formData.managedCareEntities,
+                federalAuthorities: draftSubmission.draftRevision.formData.federalAuthorities,
+                contractDocuments: draftSubmission.draftRevision.formData.contractDocuments,
                 statutoryRegulatoryAttestation:
-                    draftSubmission.draftRevision?.formData.statutoryRegulatoryAttestation,
+                    draftSubmission.draftRevision.formData.statutoryRegulatoryAttestation,
                 // If contract is in compliance, we set the description to undefined. This clears out previous non-compliance description
-                statutoryRegulatoryAttestationDescription: draftSubmission.draftRevision?.formData.statutoryRegulatoryAttestationDescription
+                statutoryRegulatoryAttestationDescription: draftSubmission.draftRevision.formData.statutoryRegulatoryAttestationDescription
             }
 
             if (isContractWithProvisions(draftSubmission)) {
-                updatedDraftSubmissionFormData.inLieuServicesAndSettings = draftSubmission.draftRevision?.formData.inLieuServicesAndSettings
-                updatedDraftSubmissionFormData.modifiedBenefitsProvided = draftSubmission.draftRevision?.formData.modifiedBenefitsProvided
-                updatedDraftSubmissionFormData.modifiedGeoAreaServed = draftSubmission.draftRevision?.formData.modifiedGeoAreaServed
-                updatedDraftSubmissionFormData.modifiedMedicaidBeneficiaries = draftSubmission.draftRevision?.formData.modifiedMedicaidBeneficiaries
-                updatedDraftSubmissionFormData.modifiedRiskSharingStrategy = draftSubmission.draftRevision?.formData.modifiedRiskSharingStrategy
-                updatedDraftSubmissionFormData.modifiedIncentiveArrangements = draftSubmission.draftRevision?.formData.modifiedIncentiveArrangements
-                updatedDraftSubmissionFormData.modifiedWitholdAgreements = draftSubmission.draftRevision?.formData.modifiedWitholdAgreements
-                updatedDraftSubmissionFormData.modifiedStateDirectedPayments = draftSubmission.draftRevision?.formData.modifiedStateDirectedPayments
-                updatedDraftSubmissionFormData.modifiedPassThroughPayments = draftSubmission.draftRevision?.formData.modifiedPassThroughPayments
-                updatedDraftSubmissionFormData.modifiedPaymentsForMentalDiseaseInstitutions = draftSubmission.draftRevision?.formData.modifiedPaymentsForMentalDiseaseInstitutions
-                updatedDraftSubmissionFormData.modifiedMedicalLossRatioStandards = draftSubmission.draftRevision?.formData.modifiedMedicalLossRatioStandards
-                updatedDraftSubmissionFormData.modifiedOtherFinancialPaymentIncentive = draftSubmission.draftRevision?.formData.modifiedOtherFinancialPaymentIncentive
-                updatedDraftSubmissionFormData.modifiedEnrollmentProcess = draftSubmission.draftRevision?.formData.modifiedEnrollmentProcess
-                updatedDraftSubmissionFormData.modifiedGrevienceAndAppeal = draftSubmission.draftRevision?.formData.modifiedGrevienceAndAppeal
-                updatedDraftSubmissionFormData.modifiedNetworkAdequacyStandards = draftSubmission.draftRevision?.formData.modifiedNetworkAdequacyStandards
-                updatedDraftSubmissionFormData.modifiedLengthOfContract = draftSubmission.draftRevision?.formData.modifiedLengthOfContract
-                updatedDraftSubmissionFormData.modifiedNonRiskPaymentArrangements = draftSubmission.draftRevision?.formData.modifiedNonRiskPaymentArrangements
+                updatedDraftSubmissionFormData.inLieuServicesAndSettings = draftSubmission.draftRevision.formData.inLieuServicesAndSettings
+                updatedDraftSubmissionFormData.modifiedBenefitsProvided = draftSubmission.draftRevision.formData.modifiedBenefitsProvided
+                updatedDraftSubmissionFormData.modifiedGeoAreaServed = draftSubmission.draftRevision.formData.modifiedGeoAreaServed
+                updatedDraftSubmissionFormData.modifiedMedicaidBeneficiaries = draftSubmission.draftRevision.formData.modifiedMedicaidBeneficiaries
+                updatedDraftSubmissionFormData.modifiedRiskSharingStrategy = draftSubmission.draftRevision.formData.modifiedRiskSharingStrategy
+                updatedDraftSubmissionFormData.modifiedIncentiveArrangements = draftSubmission.draftRevision.formData.modifiedIncentiveArrangements
+                updatedDraftSubmissionFormData.modifiedWitholdAgreements = draftSubmission.draftRevision.formData.modifiedWitholdAgreements
+                updatedDraftSubmissionFormData.modifiedStateDirectedPayments = draftSubmission.draftRevision.formData.modifiedStateDirectedPayments
+                updatedDraftSubmissionFormData.modifiedPassThroughPayments = draftSubmission.draftRevision.formData.modifiedPassThroughPayments
+                updatedDraftSubmissionFormData.modifiedPaymentsForMentalDiseaseInstitutions = draftSubmission.draftRevision.formData.modifiedPaymentsForMentalDiseaseInstitutions
+                updatedDraftSubmissionFormData.modifiedMedicalLossRatioStandards = draftSubmission.draftRevision.formData.modifiedMedicalLossRatioStandards
+                updatedDraftSubmissionFormData.modifiedOtherFinancialPaymentIncentive = draftSubmission.draftRevision.formData.modifiedOtherFinancialPaymentIncentive
+                updatedDraftSubmissionFormData.modifiedEnrollmentProcess = draftSubmission.draftRevision.formData.modifiedEnrollmentProcess
+                updatedDraftSubmissionFormData.modifiedGrevienceAndAppeal = draftSubmission.draftRevision.formData.modifiedGrevienceAndAppeal
+                updatedDraftSubmissionFormData.modifiedNetworkAdequacyStandards = draftSubmission.draftRevision.formData.modifiedNetworkAdequacyStandards
+                updatedDraftSubmissionFormData.modifiedLengthOfContract = draftSubmission.draftRevision.formData.modifiedLengthOfContract
+                updatedDraftSubmissionFormData.modifiedNonRiskPaymentArrangements = draftSubmission.draftRevision.formData.modifiedNonRiskPaymentArrangements
             } else {
                 updatedDraftSubmissionFormData.inLieuServicesAndSettings = undefined
                 updatedDraftSubmissionFormData.modifiedBenefitsProvided = undefined
@@ -335,7 +334,7 @@ export const SubmissionType = ({
                     formPages={
                         draftSubmission
                             ? activeFormPages(
-                                  draftSubmission?.draftRevision!.formData
+                                  draftSubmission.draftRevision.formData
                               )
                             : STATE_SUBMISSION_FORM_ROUTES
                     }
@@ -343,7 +342,7 @@ export const SubmissionType = ({
                 />
                 <PageBannerAlerts
                     loggedInUser={loggedInUser}
-                    unlockedInfo={draftSubmission?.draftRevision!.unlockInfo}
+                    unlockedInfo={draftSubmission?.draftRevision.unlockInfo}
                     showPageErrorMessage={showPageErrorMessage ?? false}
                 />
             </div>

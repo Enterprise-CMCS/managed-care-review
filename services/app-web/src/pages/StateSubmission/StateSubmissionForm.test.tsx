@@ -139,31 +139,26 @@ describe('StateSubmissionForm', () => {
         })
 
         it('loads contract details fields for /submissions/:id/edit/contract-details with amendments', async () => {
-            const mockAmendment = mockDraftHealthPlanPackage({
-                contractType: 'AMENDMENT',
-                contractAmendmentInfo: {
-                    modifiedProvisions: {
-                        modifiedBenefitsProvided: true,
-                        modifiedGeoAreaServed: false,
-                        modifiedMedicaidBeneficiaries: false,
-                        modifiedRiskSharingStrategy: false,
-                        modifiedIncentiveArrangements: false,
-                        modifiedWitholdAgreements: false,
-                        modifiedStateDirectedPayments: true,
-                        modifiedPassThroughPayments: false,
-                        modifiedPaymentsForMentalDiseaseInstitutions: false,
-                        modifiedMedicalLossRatioStandards: false,
-                        modifiedOtherFinancialPaymentIncentive: false,
-                        modifiedEnrollmentProcess: false,
-                        modifiedGrevienceAndAppeal: false,
-                        modifiedNetworkAdequacyStandards: false,
-                        modifiedLengthOfContract: false,
-                        modifiedNonRiskPaymentArrangements: false,
-                        inLieuServicesAndSettings: false,
-                    },
-                },
-            })
-
+            const mockSubmission = mockDraftHealthPlanPackage()
+            const mockDraftContract = mockContractPackageDraft()
+            mockDraftContract.draftRevision!.formData.modifiedBenefitsProvided = true
+            mockDraftContract.draftRevision!.formData.modifiedGeoAreaServed = false
+            mockDraftContract.draftRevision!.formData.modifiedMedicaidBeneficiaries = false
+            mockDraftContract.draftRevision!.formData.modifiedRiskSharingStrategy = false
+            mockDraftContract.draftRevision!.formData.modifiedIncentiveArrangements = false
+            mockDraftContract.draftRevision!.formData.modifiedWitholdAgreements = false
+            mockDraftContract.draftRevision!.formData.modifiedStateDirectedPayments = true
+            mockDraftContract.draftRevision!.formData.modifiedPassThroughPayments = false
+            mockDraftContract.draftRevision!.formData.modifiedPaymentsForMentalDiseaseInstitutions = false
+            mockDraftContract.draftRevision!.formData.modifiedMedicalLossRatioStandards = false
+            mockDraftContract.draftRevision!.formData.modifiedOtherFinancialPaymentIncentive = false
+            mockDraftContract.draftRevision!.formData.modifiedEnrollmentProcess = false
+            mockDraftContract.draftRevision!.formData.modifiedGrevienceAndAppeal = false
+            mockDraftContract.draftRevision!.formData.modifiedNetworkAdequacyStandards = false
+            mockDraftContract.draftRevision!.formData.modifiedLengthOfContract = false
+            mockDraftContract.draftRevision!.formData.modifiedNonRiskPaymentArrangements = false
+            mockDraftContract.draftRevision!.formData.inLieuServicesAndSettings = false
+            
             renderWithProviders(
                 <Routes>
                     <Route element={<SubmissionSideNav />}>
@@ -178,15 +173,21 @@ describe('StateSubmissionForm', () => {
                         mocks: [
                             fetchCurrentUserMock({ statusCode: 200 }),
                             fetchHealthPlanPackageMockSuccess({
-                                id: '12',
-                                submission: mockAmendment,
+                                id: '15',
+                                submission: mockSubmission,
                             }),
                             fetchStateHealthPlanPackageWithQuestionsMockSuccess(
                                 {
-                                    stateSubmission: mockAmendment,
-                                    id: '12',
+                                    stateSubmission: mockSubmission,
+                                    id: '15',
                                 }
                             ),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    ...mockDraftContract,
+                                    id: '15',
+                                },
+                            }),
                         ],
                     },
                     routerProvider: {

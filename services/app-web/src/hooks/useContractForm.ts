@@ -7,12 +7,14 @@ import {
     useUpdateContractDraftRevisionMutation,
     ContractDraftRevisionFormDataInput,
     Contract,
+    Rate,
     GenericDocument,
     GenericDocumentInput,
     StateContact,
     StateContactInput,
     UnlockedContract,
-    UpdateContractDraftRevisionInput
+    UpdateContractDraftRevisionInput,
+    ContractPackageSubmission
 } from '../gen/gqlClient'
 import { recordJSException } from '../otelHelpers'
 import { handleApolloError } from '../gqlHelpers/apolloErrors'
@@ -21,7 +23,7 @@ import type { InterimState } from '../pages/StateSubmission/ErrorOrLoadingPage'
 
 
 type  UseContractForm = {
-    draftSubmission?: Contract
+    draftSubmission?: UnlockedContract
     showPageErrorMessage: string | boolean
     previousDocuments?: string[]
     updateDraft: (
@@ -165,12 +167,43 @@ const useContractForm = (contractID?: string): UseContractForm => {
             interimState = 'GENERIC_ERROR'// api failure or protobuf decode failure
             return { interimState, createDraft, updateDraft,  showPageErrorMessage}
         }
-        draftSubmission = contract
+
+        if (!contract || !contract.draftRevision || !contract.draftRevision.formData || contract?.status === 'RESUBMITTED' || contract?.status === 'SUBMITTED') {
+            interimState = 'GENERIC_ERROR'// api failure or protobuf decode failure
+            return { interimState, createDraft, updateDraft,  showPageErrorMessage}
+        }
+        const rates:Rate[] = []
+        const packageSubmissions:ContractPackageSubmission[] = []
+        const unlockedContract:UnlockedContract = {
+            ...contract,
+            id: contract!.id,
+            createdAt: contract.createdAt,
+            updatedAt: contract.updatedAt,
+            stateCode: contract.stateCode,
+            stateNumber: contract.stateNumber,
+            status: contract.status,
+            draftRevision: {
+                ...contract.draftRevision,
+                id: contract.id,
+                contractName: contract.draftRevision.contractName,
+                createdAt: contract.draftRevision.createdAt,
+                updatedAt: contract.draftRevision.updatedAt,
+                __typename: 'ContractRevision',
+                formData: {
+                    ...contract.draftRevision.formData,
+                    __typename: 'ContractFormData'
+                }
+            },
+            draftRates: contract.draftRates || rates,
+            packageSubmissions: contract.packageSubmissions || packageSubmissions,
+            __typename: 'UnlockedContract'
+        }
+        draftSubmission = unlockedContract
         return {interimState, createDraft, updateDraft, draftSubmission, showPageErrorMessage}
 
     }
 
-    if (!contract) {
+    if (!contract || !contract.draftRevision || !contract.draftRevision.formData || contract?.status === 'RESUBMITTED' || contract?.status === 'SUBMITTED') {
         return {interimState, createDraft, updateDraft, showPageErrorMessage }
     }
     const submissionName = contract.draftRevision?.contractName
@@ -178,8 +211,34 @@ const useContractForm = (contractID?: string): UseContractForm => {
         setPkgNameForHeading(submissionName)
     }
 
-    // set up data to return
-    draftSubmission = contract
+    const rates:Rate[] = []
+        const packageSubmissions:ContractPackageSubmission[] = []
+        const unlockedContract:UnlockedContract = {
+            ...contract,
+            id: contract!.id,
+            createdAt: contract.createdAt,
+            updatedAt: contract.updatedAt,
+            stateCode: contract.stateCode,
+            stateNumber: contract.stateNumber,
+            status: contract.status,
+            draftRevision: {
+                ...contract.draftRevision,
+                id: contract.id,
+                contractName: contract.draftRevision.contractName,
+                createdAt: contract.draftRevision.createdAt,
+                updatedAt: contract.draftRevision.updatedAt,
+                __typename: 'ContractRevision',
+                formData: {
+                    ...contract.draftRevision.formData,
+                    __typename: 'ContractFormData'
+                }
+            },
+            draftRates: contract.draftRates || rates,
+            packageSubmissions: contract.packageSubmissions || packageSubmissions,
+            __typename: 'UnlockedContract'
+        }
+        // set up data to return
+        draftSubmission = unlockedContract
     return {draftSubmission, previousDocuments,  updateDraft, createDraft, interimState, showPageErrorMessage }
 }
 

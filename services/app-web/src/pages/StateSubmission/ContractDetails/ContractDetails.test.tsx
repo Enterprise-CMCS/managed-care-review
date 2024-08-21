@@ -9,6 +9,7 @@ import {
     mockBaseContract,
     fetchContractMockSuccess,
     mockContractPackageDraft,
+    mockContractPackageUnlockedWithUnlockedType
 } from '../../../testHelpers/apolloMocks'
 
 import {
@@ -51,7 +52,7 @@ describe('ContractDetails', () => {
             updateDraft: mockUpdateDraftFn,
             createDraft: vi.fn(),
             showPageErrorMessage: false,
-            draftSubmission: mockContractPackageDraft(),
+            draftSubmission: mockContractPackageUnlockedWithUnlockedType(),
         })
         vi.spyOn(useRouteParams, 'useRouteParams').mockReturnValue({
             id: '123-abc',
@@ -155,7 +156,7 @@ describe('ContractDetails', () => {
 
     describe('Federal authorities', () => {
         it('displays correct form fields for federal authorities with medicaid contract', async () => {
-            const draftContract = mockContractPackageDraft()
+            const draftContract = mockContractPackageUnlockedWithUnlockedType()
             draftContract.draftRevision!.formData.populationCovered = 'MEDICAID'
             vi.spyOn(
                 useContractForm,
@@ -189,7 +190,7 @@ describe('ContractDetails', () => {
         })
 
         it('displays correct form fields for federal authorities with CHIP only contract', async () => {
-            const draftContract = mockContractPackageDraft()
+            const draftContract = mockContractPackageUnlockedWithUnlockedType()
             draftContract.draftRevision!.formData.populationCovered = 'CHIP'
             vi.spyOn(
                 useContractForm,
