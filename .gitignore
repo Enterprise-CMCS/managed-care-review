@@ -70,3 +70,5 @@ tests/cypress/fixtures/stores/featureFlagStore.json
 packages/gql-helpers/build
 packages/otel-helpers/build
 packages/common-code/build
+packages/constants/build
+packages/types/build

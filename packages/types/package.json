@@ -9,10 +9,13 @@
     },
     "dependencies": {
         "typescript": "^4.9.5",
-        "dayjs": "^1.10.5"
+        "@apollo/client": "3.8.8",
+        "dayjs": "^1.10.5",
+        "zod": "^3.11.6"
     },
     "devDependencies": {
         "@mc-review/constants": "workspace:*",
-        "@types/jest": "^29.5.6"
+        "@types/jest": "^29.5.6",
+        "@types/node": "^20.14.12"
     }
 }

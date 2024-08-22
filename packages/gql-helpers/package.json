@@ -9,7 +9,6 @@
     "dependencies": {
         "@apollo/client": "3.8.8",
         "@mc-review/otel-helpers": "workspace:*",
-        "@mc-review/common-code": "workspace:*",
         "@mc-review/constants": "workspace:*",
         "typescript": "4.9.5"
     }

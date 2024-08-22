@@ -1,7 +1,7 @@
 import {
     mockBaseContract,
     mockContractAndRatesDraft,
-} from '../../testHelpers/apolloMocks'
+} from '../testHelpers/healthPlanFormDataMock'
 import {
     GeneralizedModifiedProvisions,
     GeneralizedProvisionType,
@@ -26,7 +26,7 @@ describe('generateApplicableProvisionsList', () => {
 
     const submissionsAndSupportedProvisions: [
         UnlockedHealthPlanFormDataType,
-        GeneralizedProvisionType[]
+        GeneralizedProvisionType[],
     ][] = [
         [baseContractCHIP, []],
         [

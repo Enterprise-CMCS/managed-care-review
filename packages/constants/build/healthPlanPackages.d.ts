@@ -1,5 +1,5 @@
-import { SubmissionType, RateType, ContractType, FederalAuthority, ManagedCareEntity, ActuarialFirmType, ActuaryCommunicationType, ContractExecutionStatus, PopulationCoveredType } from '../common-code/healthPlanFormDataType';
-import { HealthPlanPackageStatus } from '../gen/gqlClient';
+import { SubmissionType, RateType, ContractType, FederalAuthority, ManagedCareEntity, ActuarialFirmType, ActuaryCommunicationType, ContractExecutionStatus, PopulationCoveredType } from '@mc-review/common-code';
+import { HealthPlanPackageStatus } from './gen/gqlClient';
 declare const SubmissionTypeRecord: Record<SubmissionType, string>;
 declare const PopulationCoveredRecord: Record<PopulationCoveredType, string>;
 declare const ContractTypeRecord: Record<ContractType, string>;

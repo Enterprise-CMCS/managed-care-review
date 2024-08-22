@@ -118,9 +118,6 @@ importers:
       '@apollo/client':
         specifier: 3.8.8
         version: 3.8.8(graphql-ws@5.14.3(graphql@16.9.0))(graphql@16.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(subscriptions-transport-ws@0.11.0(graphql@16.9.0))
-      '@mc-review/common-code':
-        specifier: workspace:*
-        version: link:../common-code
       '@mc-review/constants':
         specifier: workspace:*
         version: link:../constants
@@ -146,12 +143,18 @@ importers:
 
   packages/types:
     dependencies:
+      '@apollo/client':
+        specifier: 3.8.8
+        version: 3.8.8(graphql-ws@5.14.3(graphql@16.9.0))(graphql@16.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(subscriptions-transport-ws@0.11.0(graphql@16.9.0))
       dayjs:
         specifier: ^1.10.5
         version: 1.11.12
       typescript:
         specifier: ^4.9.5
         version: 4.9.5
+      zod:
+        specifier: ^3.11.6
+        version: 3.23.8
     devDependencies:
       '@mc-review/constants':
         specifier: workspace:*
@@ -159,6 +162,9 @@ importers:
       '@types/jest':
         specifier: ^29.5.6
         version: 29.5.12
+      '@types/node':
+        specifier: ^20.14.12
+        version: 20.16.1
 
   scripts:
     dependencies:

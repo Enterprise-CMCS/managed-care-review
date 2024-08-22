@@ -2,9 +2,9 @@ import {
     mockDraft,
     mockStateSubmission,
     mockContractAndRatesDraft,
-    mockMNState,
     mockStateSubmissionContractAmendment,
-} from '../../testHelpers/apolloMocks'
+} from '../testHelpers/healthPlanFormDataMock'
+import { mockMNState } from '../testHelpers/stateMock'
 import {
     generateRateName,
     HealthPlanFormDataType,
