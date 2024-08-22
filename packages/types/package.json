@@ -1,0 +1,18 @@
+{
+    "name": "@mc-review/types",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "build": "tsc",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "dependencies": {
+        "typescript": "^4.9.5",
+        "dayjs": "^1.10.5"
+    },
+    "devDependencies": {
+        "@mc-review/constants": "workspace:*",
+        "@types/jest": "^29.5.6"
+    }
+}

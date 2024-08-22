@@ -12,7 +12,7 @@ Right now when we use proto data directly after it is deserialized to typescript
   toLatestVersion is an quick example of this kind of data translation function - it makes a proto compatible change 
   and updates the data in a proto to  match the latest schema 
 */
-import { mcreviewproto } from '../../../gen/healthPlanFormDataProto'
+import { mcreviewproto } from '../../gen/healthPlanFormDataProto'
 
 const CURRENT_PROTO_VERSION = 4
 

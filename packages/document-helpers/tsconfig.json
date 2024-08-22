@@ -1,0 +1,21 @@
+{
+    "extends": "../../tsconfig.json",
+    "compilerOptions": {
+        "module": "ESNext",
+        "lib": ["ES2021", "DOM"],
+        "target": "ES2021",
+        "moduleResolution": "node",
+        "baseUrl": "/",
+        "declaration": true,
+        "experimentalDecorators": true,
+        "emitDecoratorMetadata": true,
+        "preserveConstEnums": true,
+        "sourceMap": true,
+        "skipLibCheck": true,
+        "esModuleInterop": true,
+        "resolveJsonModule": true,
+        "jsx": "react",
+        "outDir": "build"
+    },
+    "include": ["src"]
+}

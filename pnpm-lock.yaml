@@ -66,13 +66,31 @@ importers:
 
   packages/common-code:
     dependencies:
+      '@mc-review/constants':
+        specifier: workspace:*
+        version: link:../constants
+      '@mc-review/gql-helpers':
+        specifier: workspace:*
+        version: link:../gql-helpers
+      '@mc-review/types':
+        specifier: workspace:*
+        version: link:../types
       dayjs:
         specifier: ^1.10.5
         version: 1.11.12
       url-parse:
         specifier: ^1.5.10
         version: 1.5.10
+      zod:
+        specifier: ^3.10.1
+        version: 3.23.8
     devDependencies:
+      '@types/jest':
+        specifier: ^29.5.6
+        version: 29.5.12
+      '@types/node':
+        specifier: ^20.14.12
+        version: 20.16.1
       '@types/url-parse':
         specifier: ^1.4.3
         version: 1.4.11
@@ -86,6 +104,15 @@ importers:
         specifier: 4.9.5
         version: 4.9.5
 
+  packages/document-helpers:
+    dependencies:
+      '@mc-review/common-code':
+        specifier: workspace:*
+        version: link:../common-code
+      typescript:
+        specifier: ^4.9.5
+        version: 4.9.5
+
   packages/gql-helpers:
     dependencies:
       '@apollo/client':
@@ -94,6 +121,9 @@ importers:
       '@mc-review/common-code':
         specifier: workspace:*
         version: link:../common-code
+      '@mc-review/constants':
+        specifier: workspace:*
+        version: link:../constants
       '@mc-review/otel-helpers':
         specifier: workspace:*
         version: link:../otel-helpers
@@ -113,6 +143,22 @@ importers:
       typescript:
         specifier: 4.9.5
         version: 4.9.5
+
+  packages/types:
+    dependencies:
+      dayjs:
+        specifier: ^1.10.5
+        version: 1.11.12
+      typescript:
+        specifier: ^4.9.5
+        version: 4.9.5
+    devDependencies:
+      '@mc-review/constants':
+        specifier: workspace:*
+        version: link:../constants
+      '@types/jest':
+        specifier: ^29.5.6
+        version: 29.5.12
 
   scripts:
     dependencies:

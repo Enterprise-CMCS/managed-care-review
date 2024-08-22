@@ -1,4 +1,4 @@
-import { mcreviewproto, google } from '../../../gen/healthPlanFormDataProto'
+import { mcreviewproto, google } from '../../gen/healthPlanFormDataProto'
 import {
     UnlockedHealthPlanFormDataType,
     LockedHealthPlanFormDataType,
@@ -200,14 +200,15 @@ const toProtoBuffer = (
         rateInfos:
             domainData.rateInfos && domainData.rateInfos.length
                 ? domainData.rateInfos.map((rateInfo) => {
-
-                    /**
-                     * Not adding more to the proto schema, we will combine certifying actuaries with additional actuaries
-                     * in the same array, where certifying actuary is at index 0 and additional actuaries are from index
-                     * 1 and beyond.
-                     */
-                    const combinedActuaries =
-                        rateInfo?.actuaryContacts.concat(rateInfo?.addtlActuaryContacts ?? []) ?? []
+                      /**
+                       * Not adding more to the proto schema, we will combine certifying actuaries with additional actuaries
+                       * in the same array, where certifying actuary is at index 0 and additional actuaries are from index
+                       * 1 and beyond.
+                       */
+                      const combinedActuaries =
+                          rateInfo?.actuaryContacts.concat(
+                              rateInfo?.addtlActuaryContacts ?? []
+                          ) ?? []
 
                       return {
                           id: rateInfo.id,

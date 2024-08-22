@@ -10,7 +10,7 @@ import {
     GeneralizedModifiedProvisions,
 } from './ModifiedProvisions'
 import { generateApplicableProvisionsList } from '../healthPlanSubmissionHelpers/provisions'
-import { formatRateNameDate } from '../../common-code/dateHelpers'
+import dayjs from 'dayjs'
 import type { LockedHealthPlanFormDataType } from './LockedHealthPlanFormDataType'
 import type { HealthPlanFormDataType } from './HealthPlanFormDataType'
 import type { ProgramArgType } from '.'
@@ -96,32 +96,32 @@ const hasValidActuaries = (actuaries: ActuaryContact[]): boolean =>
 
 const hasValidRates = (sub: LockedHealthPlanFormDataType): boolean => {
     const validRates = sub.rateInfos.every((rateInfo) => {
-                  const validBaseRate =
-                      rateInfo.rateType !== undefined &&
-                      rateInfo.rateDateCertified !== undefined &&
-                      rateInfo.rateDateStart !== undefined &&
-                      rateInfo.rateDateEnd !== undefined &&
-                      rateInfo.rateProgramIDs !== undefined &&
-                      rateInfo.rateProgramIDs.length > 0 &&
-                      hasValidActuaries(rateInfo.actuaryContacts)
+        const validBaseRate =
+            rateInfo.rateType !== undefined &&
+            rateInfo.rateDateCertified !== undefined &&
+            rateInfo.rateDateStart !== undefined &&
+            rateInfo.rateDateEnd !== undefined &&
+            rateInfo.rateProgramIDs !== undefined &&
+            rateInfo.rateProgramIDs.length > 0 &&
+            hasValidActuaries(rateInfo.actuaryContacts)
 
-                  if (isRateAmendment(rateInfo)) {
-                      return (
-                          validBaseRate &&
-                          Boolean(
-                              rateInfo.rateAmendmentInfo &&
-                                  rateInfo.rateAmendmentInfo.effectiveDateEnd &&
-                                  rateInfo.rateAmendmentInfo.effectiveDateStart
-                          )
-                      )
-                  }
+        if (isRateAmendment(rateInfo)) {
+            return (
+                validBaseRate &&
+                Boolean(
+                    rateInfo.rateAmendmentInfo &&
+                        rateInfo.rateAmendmentInfo.effectiveDateEnd &&
+                        rateInfo.rateAmendmentInfo.effectiveDateStart
+                )
+            )
+        }
 
-                  return validBaseRate
-              })
+        return validBaseRate
+    })
 
     // Contract only - skip all validations for hasValidRates
     if (sub.submissionType === 'CONTRACT_ONLY') {
-       return true
+        return true
     } else {
         return validRates
     }
@@ -325,6 +325,12 @@ const removeInvalidProvisionsAndAuthorities = (
     return pkg
 }
 
+function formatRateNameDate(date: Date | undefined): string {
+    if (!date) {
+        return ''
+    }
+    return dayjs(date).tz('UTC').format('YYYYMMDD')
+}
 export {
     isContractWithProvisions,
     hasValidModifiedProvisions,

@@ -1,5 +1,5 @@
 import { ZodError } from 'zod'
-import { mcreviewproto } from '../../../gen/healthPlanFormDataProto'
+import { mcreviewproto } from '../../gen/healthPlanFormDataProto'
 import {
     basicLockedHealthPlanFormData,
     basicHealthPlanFormData,
