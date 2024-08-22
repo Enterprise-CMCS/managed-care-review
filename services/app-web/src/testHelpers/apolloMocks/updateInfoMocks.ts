@@ -6,8 +6,15 @@ function updateInfoMock(
 ): UpdateInformation {
     const upAt = updatedAt ? updatedAt.toISOString() : '2023-01-01T16:54:39.173Z'
     return {
+        __typename: 'UpdateInformation',
         updatedAt: upAt,
-        updatedBy: 'example@state.com',
+        updatedBy: {
+            __typename: 'UpdatedBy',
+            givenName: 'Aang',
+            familyName: 'Hotman',
+            role: 'STATE_USER',
+            email: 'example@state.com',
+        },
         updatedReason: updatedReason || 'initial submission'
     }
 }
