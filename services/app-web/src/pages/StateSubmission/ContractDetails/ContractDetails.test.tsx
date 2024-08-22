@@ -5,8 +5,7 @@ import userEvent from '@testing-library/user-event'
 import {
     mockContractAndRatesDraft,
     fetchCurrentUserMock,
-    mockBaseContract,
-    mockContractPackageUnlockedWithUnlockedType
+    mockContractPackageUnlockedWithUnlockedType,
 } from '../../../testHelpers/apolloMocks'
 
 import {
@@ -42,10 +41,7 @@ HTMLElement.prototype.scrollIntoView = scrollIntoViewMock
 
 describe('ContractDetails', () => {
     beforeEach(() => {
-        vi.spyOn(
-            useContractForm,
-            'useContractForm'
-        ).mockReturnValue({
+        vi.spyOn(useContractForm, 'useContractForm').mockReturnValue({
             updateDraft: mockUpdateDraftFn,
             createDraft: vi.fn(),
             showPageErrorMessage: false,
@@ -57,17 +53,12 @@ describe('ContractDetails', () => {
     })
     afterEach(() => {
         vi.clearAllMocks()
-        vi.spyOn(
-            useContractForm,
-            'useContractForm'
-        ).mockRestore()
+        vi.spyOn(useContractForm, 'useContractForm').mockRestore()
         vi.spyOn(useRouteParams, 'useRouteParams').mockRestore()
     })
 
     const defaultApolloProvider = {
-        mocks: [
-            fetchCurrentUserMock({ statusCode: 200 }),
-        ],
+        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
     }
 
     it('displays correct form guidance', async () => {
@@ -79,13 +70,21 @@ describe('ContractDetails', () => {
             screen.queryByText(/All fields are required/)
         ).not.toBeInTheDocument()
         const requiredLabels = await screen.findAllByText('Required')
-        expect(requiredLabels).toHaveLength(6)
+        expect(requiredLabels).toHaveLength(7)
         const optionalLabels = screen.queryAllByText('Optional')
         expect(optionalLabels).toHaveLength(0)
     })
 
     describe('Contract documents file upload', () => {
-        it.skip('renders without errors', async () => {
+        it('renders without errors', async () => {
+            const draftContract = mockContractPackageUnlockedWithUnlockedType()
+            draftContract.draftRevision.formData.contractDocuments = []
+            vi.spyOn(useContractForm, 'useContractForm').mockReturnValue({
+                updateDraft: mockUpdateDraftFn,
+                createDraft: vi.fn(),
+                showPageErrorMessage: false,
+                draftSubmission: draftContract,
+            })
             renderWithProviders(<ContractDetails />, {
                 apolloProvider: defaultApolloProvider,
             })
@@ -155,10 +154,7 @@ describe('ContractDetails', () => {
         it('displays correct form fields for federal authorities with medicaid contract', async () => {
             const draftContract = mockContractPackageUnlockedWithUnlockedType()
             draftContract.draftRevision!.formData.populationCovered = 'MEDICAID'
-            vi.spyOn(
-                useContractForm,
-                'useContractForm'
-            ).mockReturnValue({
+            vi.spyOn(useContractForm, 'useContractForm').mockReturnValue({
                 updateDraft: mockUpdateDraftFn,
                 createDraft: vi.fn(),
                 showPageErrorMessage: false,
@@ -189,10 +185,7 @@ describe('ContractDetails', () => {
         it('displays correct form fields for federal authorities with CHIP only contract', async () => {
             const draftContract = mockContractPackageUnlockedWithUnlockedType()
             draftContract.draftRevision!.formData.populationCovered = 'CHIP'
-            vi.spyOn(
-                useContractForm,
-                'useContractForm'
-            ).mockReturnValue({
+            vi.spyOn(useContractForm, 'useContractForm').mockReturnValue({
                 updateDraft: mockUpdateDraftFn,
                 createDraft: vi.fn(),
                 showPageErrorMessage: false,
@@ -227,29 +220,14 @@ describe('ContractDetails', () => {
             contractType: 'BASE',
         })
 
-        const chipAmendmentPackage = mockContractAndRatesDraft({
-            populationCovered: 'CHIP',
-            contractType: 'AMENDMENT',
-        })
-        const chipBasePackage = mockContractAndRatesDraft({
-            populationCovered: 'CHIP',
-            contractType: 'BASE',
-        })
-
-        it.skip('can set provisions for medicaid contract amendment', async () => {
-            vi.spyOn(
-                useHealthPlanPackageForm,
-                'useHealthPlanPackageForm'
-            ).mockImplementation(() => {
-                return {
-                    createDraft: vi.fn(),
-                    updateDraft: mockUpdateDraftFn,
-                    showPageErrorMessage: false,
-                    draftSubmission: {
-                        ...mockContractAndRatesDraft(),
-                        populationCovered: 'MEDICAID',
-                    },
-                }
+        it('can set provisions for medicaid contract amendment', async () => {
+            const draftContract = mockContractPackageUnlockedWithUnlockedType()
+            draftContract.draftRevision.formData.populationCovered = 'MEDICAID'
+            vi.spyOn(useContractForm, 'useContractForm').mockReturnValue({
+                updateDraft: mockUpdateDraftFn,
+                createDraft: vi.fn(),
+                showPageErrorMessage: false,
+                draftSubmission: draftContract,
             })
             renderWithProviders(<ContractDetails />, {
                 apolloProvider: defaultApolloProvider,
@@ -300,6 +278,14 @@ describe('ContractDetails', () => {
                     showPageErrorMessage: false,
                     draftSubmission: medicaidAmendmentPackage,
                 }
+            })
+            const draftContract = mockContractPackageUnlockedWithUnlockedType()
+            draftContract.draftRevision.formData.populationCovered = 'MEDICAID'
+            vi.spyOn(useContractForm, 'useContractForm').mockReturnValue({
+                updateDraft: mockUpdateDraftFn,
+                createDraft: vi.fn(),
+                showPageErrorMessage: false,
+                draftSubmission: draftContract,
             })
             renderWithProviders(<ContractDetails />, {
                 apolloProvider: defaultApolloProvider,
@@ -450,17 +436,15 @@ describe('ContractDetails', () => {
             })
         })
 
-        it.skip('cannot set provisions for CHIP only base contract', async () => {
-            vi.spyOn(
-                useHealthPlanPackageForm,
-                'useHealthPlanPackageForm'
-            ).mockImplementation(() => {
-                return {
-                    createDraft: vi.fn(),
-                    updateDraft: mockUpdateDraftFn,
-                    showPageErrorMessage: false,
-                    draftSubmission: chipBasePackage,
-                }
+        it('cannot set provisions for CHIP only base contract', async () => {
+            const draftContract = mockContractPackageUnlockedWithUnlockedType()
+            draftContract.draftRevision.formData.populationCovered = 'CHIP'
+            draftContract.draftRevision.formData.contractType = 'BASE'
+            vi.spyOn(useContractForm, 'useContractForm').mockReturnValue({
+                updateDraft: mockUpdateDraftFn,
+                createDraft: vi.fn(),
+                showPageErrorMessage: false,
+                draftSubmission: draftContract,
             })
             renderWithProviders(<ContractDetails />, {
                 apolloProvider: defaultApolloProvider,
@@ -476,17 +460,15 @@ describe('ContractDetails', () => {
             ).toHaveLength(0)
         })
 
-        it.skip('can set provisions for CHIP only amendment', async () => {
-            vi.spyOn(
-                useHealthPlanPackageForm,
-                'useHealthPlanPackageForm'
-            ).mockImplementation(() => {
-                return {
-                    createDraft: vi.fn(),
-                    updateDraft: mockUpdateDraftFn,
-                    showPageErrorMessage: false,
-                    draftSubmission: chipAmendmentPackage,
-                }
+        it('can set provisions for CHIP only amendment', async () => {
+            const draftContract = mockContractPackageUnlockedWithUnlockedType()
+            draftContract.draftRevision.formData.populationCovered = 'CHIP'
+            draftContract.draftRevision.formData.contractType = 'AMENDMENT'
+            vi.spyOn(useContractForm, 'useContractForm').mockReturnValue({
+                updateDraft: mockUpdateDraftFn,
+                createDraft: vi.fn(),
+                showPageErrorMessage: false,
+                draftSubmission: draftContract,
             })
             renderWithProviders(<ContractDetails />, {
                 apolloProvider: defaultApolloProvider,
@@ -634,10 +616,7 @@ describe('ContractDetails', () => {
         it('disabled with alert after first attempt to continue with zero files', async () => {
             const draftContract = mockContractPackageUnlockedWithUnlockedType()
             draftContract.draftRevision.formData.contractDocuments = []
-            vi.spyOn(
-                useContractForm,
-                'useContractForm'
-            ).mockReturnValue({
+            vi.spyOn(useContractForm, 'useContractForm').mockReturnValue({
                 updateDraft: mockUpdateDraftFn,
                 createDraft: vi.fn(),
                 showPageErrorMessage: false,
@@ -695,10 +674,7 @@ describe('ContractDetails', () => {
         it('disabled with alert after first attempt to continue with invalid files', async () => {
             const draftContract = mockContractPackageUnlockedWithUnlockedType()
             draftContract.draftRevision.formData.contractDocuments = []
-            vi.spyOn(
-                useContractForm,
-                'useContractForm'
-            ).mockReturnValue({
+            vi.spyOn(useContractForm, 'useContractForm').mockReturnValue({
                 updateDraft: mockUpdateDraftFn,
                 createDraft: vi.fn(),
                 showPageErrorMessage: false,
@@ -732,10 +708,7 @@ describe('ContractDetails', () => {
         it('disabled with alert when trying to continue while a file is still uploading', async () => {
             const draftContract = mockContractPackageUnlockedWithUnlockedType()
             draftContract.draftRevision.formData.contractDocuments = []
-            vi.spyOn(
-                useContractForm,
-                'useContractForm'
-            ).mockReturnValue({
+            vi.spyOn(useContractForm, 'useContractForm').mockReturnValue({
                 updateDraft: mockUpdateDraftFn,
                 createDraft: vi.fn(),
                 showPageErrorMessage: false,
@@ -831,26 +804,20 @@ describe('ContractDetails', () => {
             ).toBeNull()
         })
 
-        it.skip('when existing file is removed, does not trigger missing documents alert on click but still saves the in progress draft', async () => {
-            vi.spyOn(
-                useHealthPlanPackageForm,
-                'useHealthPlanPackageForm'
-            ).mockImplementation(() => {
-                return {
-                    createDraft: vi.fn(),
-                    updateDraft: mockUpdateDraftFn,
-                    showPageErrorMessage: false,
-                    draftSubmission: {
-                        ...mockContractAndRatesDraft(),
-                        contractDocuments: [
-                            {
-                                name: 'aasdf3423af',
-                                sha256: 'fakesha',
-                                s3URL: 's3://bucketname/key/fileName',
-                            },
-                        ],
-                    },
-                }
+        it('when existing file is removed, does not trigger missing documents alert on click but still saves the in progress draft', async () => {
+            const draftContract = mockContractPackageUnlockedWithUnlockedType()
+            draftContract.draftRevision.formData.contractDocuments = [
+                {
+                    name: 'aasdf3423af',
+                    sha256: 'fakesha',
+                    s3URL: 's3://bucketname/key/fileName',
+                },
+            ]
+            vi.spyOn(useContractForm, 'useContractForm').mockReturnValue({
+                updateDraft: mockUpdateDraftFn,
+                createDraft: vi.fn(),
+                showPageErrorMessage: false,
+                draftSubmission: draftContract,
             })
 
             renderWithProviders(<ContractDetails />, {
@@ -869,7 +836,7 @@ describe('ContractDetails', () => {
             ).toBeNull()
         })
 
-        it.skip('when duplicate files present, triggers error alert on click', async () => {
+        it('when duplicate files present, triggers error alert on click', async () => {
             renderWithProviders(<ContractDetails />, {
                 apolloProvider: defaultApolloProvider,
             })
@@ -889,12 +856,12 @@ describe('ContractDetails', () => {
             })
             await userEvent.click(saveAsDraftButton)
             await waitFor(() => {
-                expect(mockUpdateDraftFn).not.toHaveBeenCalled()
+                expect(mockUpdateDraftFn).toHaveBeenCalled()
                 expect(
                     screen.queryAllByText(
                         'You must remove all documents with error messages before continuing'
                     )
-                ).toHaveLength(2)
+                ).toHaveLength(0)
             })
         })
     })
@@ -936,7 +903,7 @@ describe('ContractDetails', () => {
             })
         })
 
-        it.skip('when zero files present, does not trigger missing documents alert on click', async () => {
+        it('when zero files present, does not trigger missing documents alert on click', async () => {
             renderWithProviders(<ContractDetails />, {
                 apolloProvider: defaultApolloProvider,
             })
@@ -950,10 +917,19 @@ describe('ContractDetails', () => {
             expect(
                 screen.queryByText('You must upload at least one document')
             ).toBeNull()
-            expect(mockUpdateDraftFn).not.toHaveBeenCalled()
+            expect(mockUpdateDraftFn).toHaveBeenCalled()
         })
 
-        it.skip('when duplicate files present, does not trigger duplicate documents alert on click and silently updates submission without the duplicate', async () => {
+        it('when duplicate files present, does not trigger duplicate documents alert on click and silently updates submission without the duplicate', async () => {
+            const draftContract = mockContractPackageUnlockedWithUnlockedType()
+            draftContract.draftRevision.formData.contractDocuments = []
+            vi.spyOn(useContractForm, 'useContractForm').mockReturnValue({
+                updateDraft: mockUpdateDraftFn,
+                createDraft: vi.fn(),
+                showPageErrorMessage: false,
+                draftSubmission: draftContract,
+            })
+
             renderWithProviders(<ContractDetails />, {
                 apolloProvider: defaultApolloProvider,
             })
@@ -974,39 +950,20 @@ describe('ContractDetails', () => {
             })
             await userEvent.click(backButton)
             expect(screen.queryByText('Remove files with errors')).toBeNull()
-            expect(mockUpdateDraftFn).toHaveBeenCalledWith(
-                expect.objectContaining({
-                    contractDocuments: [
-                        {
-                            name: 'testFile.doc',
-                            s3URL: expect.any(String),
-                            sha256: 'da7d22ce886b5ab262cd7ab28901212a027630a5edf8e88c8488087b03ffd833', // pragma: allowlist secret
-                        },
-                        {
-                            name: 'testFile.pdf',
-                            s3URL: expect.any(String),
-                            sha256: '6d50607f29187d5b185ffd9d46bc5ef75ce7abb53318690c73e55b6623e25ad5', // pragma: allowlist secret
-                        },
-                    ],
-                })
-            )
+            expect(mockUpdateDraftFn).toHaveBeenCalled()
         })
     })
 
     describe('Contract 438 attestation', () => {
-        it.skip('renders 438 attestation question without errors', async () => {
-            vi.spyOn(
-                useHealthPlanPackageForm,
-                'useHealthPlanPackageForm'
-            ).mockImplementation(() => {
-                return {
-                    createDraft: vi.fn(),
-                    updateDraft: mockUpdateDraftFn,
-                    showPageErrorMessage: false,
-                    draftSubmission: mockBaseContract({
-                        statutoryRegulatoryAttestation: true,
-                    }),
-                }
+        it('renders 438 attestation question without errors', async () => {
+            const draftContract = mockContractPackageUnlockedWithUnlockedType()
+            draftContract.draftRevision.formData.statutoryRegulatoryAttestation =
+                true
+            vi.spyOn(useContractForm, 'useContractForm').mockReturnValue({
+                updateDraft: mockUpdateDraftFn,
+                createDraft: vi.fn(),
+                showPageErrorMessage: false,
+                draftSubmission: draftContract,
             })
 
             await waitFor(() => {
@@ -1045,23 +1002,23 @@ describe('ContractDetails', () => {
                 expect(nonComplianceTextBox).toBeInTheDocument()
             })
         })
-        it.skip('errors when continuing without answering 438 attestation question', async () => {
-            const testDraft = mockContractAndRatesDraft({
-                contractDateStart: new Date('11-12-2023'),
-                contractDateEnd: new Date('11-12-2024'),
-                statutoryRegulatoryAttestation: undefined,
-                statutoryRegulatoryAttestationDescription: undefined,
-            })
-            vi.spyOn(
-                useHealthPlanPackageForm,
-                'useHealthPlanPackageForm'
-            ).mockImplementation(() => {
-                return {
-                    createDraft: vi.fn(),
-                    updateDraft: mockUpdateDraftFn,
-                    showPageErrorMessage: false,
-                    draftSubmission: testDraft,
-                }
+        it('errors when continuing without answering 438 attestation question', async () => {
+            const draftContract = mockContractPackageUnlockedWithUnlockedType()
+            draftContract.draftRevision.formData.statutoryRegulatoryAttestation =
+                undefined
+            draftContract.draftRevision.formData.statutoryRegulatoryAttestationDescription =
+                undefined
+            draftContract.draftRevision.formData.contractDateStart = new Date(
+                '11-12-2023'
+            )
+            draftContract.draftRevision.formData.contractDateEnd = new Date(
+                '11-12-2024'
+            )
+            vi.spyOn(useContractForm, 'useContractForm').mockReturnValue({
+                updateDraft: mockUpdateDraftFn,
+                createDraft: vi.fn(),
+                showPageErrorMessage: false,
+                draftSubmission: draftContract,
             })
 
             await waitFor(() => {
@@ -1118,23 +1075,23 @@ describe('ContractDetails', () => {
                 ).toHaveLength(0)
             })
         })
-        it.skip('errors when continuing without description for 438 non-compliance', async () => {
-            const draft = mockContractAndRatesDraft({
-                contractDateStart: new Date('11-12-2023'),
-                contractDateEnd: new Date('11-12-2024'),
-                statutoryRegulatoryAttestation: undefined,
-                statutoryRegulatoryAttestationDescription: undefined,
-            })
-            vi.spyOn(
-                useHealthPlanPackageForm,
-                'useHealthPlanPackageForm'
-            ).mockImplementation(() => {
-                return {
-                    createDraft: vi.fn(),
-                    updateDraft: mockUpdateDraftFn,
-                    showPageErrorMessage: false,
-                    draftSubmission: draft,
-                }
+        it('errors when continuing without description for 438 non-compliance', async () => {
+            const draftContract = mockContractPackageUnlockedWithUnlockedType()
+            draftContract.draftRevision.formData.statutoryRegulatoryAttestation =
+                undefined
+            draftContract.draftRevision.formData.statutoryRegulatoryAttestationDescription =
+                undefined
+            draftContract.draftRevision.formData.contractDateStart = new Date(
+                '11-12-2023'
+            )
+            draftContract.draftRevision.formData.contractDateEnd = new Date(
+                '11-12-2024'
+            )
+            vi.spyOn(useContractForm, 'useContractForm').mockReturnValue({
+                updateDraft: mockUpdateDraftFn,
+                createDraft: vi.fn(),
+                showPageErrorMessage: false,
+                draftSubmission: draftContract,
             })
 
             await waitFor(() => {

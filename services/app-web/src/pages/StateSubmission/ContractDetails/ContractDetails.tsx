@@ -445,7 +445,6 @@ export const ContractDetails = ({
         values: ContractDetailsFormValues,
         setSubmitting: (isSubmitting: boolean) => void, // formik setSubmitting
         options: {
-            shouldValidateDocuments: boolean
             redirectPath: string
         }
     ) => {
@@ -611,7 +610,6 @@ export const ContractDetails = ({
                     initialValues={contractDetailsInitialValues}
                     onSubmit={(values, { setSubmitting }) => {
                         return handleFormSubmit(values, setSubmitting, {
-                            shouldValidateDocuments: true,
                             redirectPath:
                                 draftSubmission.draftRevision.formData
                                     .submissionType === 'CONTRACT_ONLY'
@@ -1304,7 +1302,6 @@ export const ContractDetails = ({
                                             values,
                                             setSubmitting,
                                             {
-                                                shouldValidateDocuments: true,
                                                 redirectPath:
                                                     RoutesRecord.DASHBOARD_SUBMISSIONS,
                                             }
@@ -1322,8 +1319,6 @@ export const ContractDetails = ({
                                                 values,
                                                 setSubmitting,
                                                 {
-                                                    shouldValidateDocuments:
-                                                        false,
                                                     redirectPath: '../type',
                                                 }
                                             )
