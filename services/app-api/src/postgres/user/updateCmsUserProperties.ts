@@ -20,7 +20,7 @@ export async function updateCmsUserProperties(
               })
             : undefined
 
-        // We do not allow States to clear our their stateAssignments. undefined will skip update in the prisma code.
+        // We do not allow stateAssignments to be cleared out by passing an empty array. undefined will skip update in the prisma code.
         if (statesWithCode && statesWithCode.length === 0) {
             return new UserInputPostgresError(
                 'cannot update stateAssignments with empty assignment array.'

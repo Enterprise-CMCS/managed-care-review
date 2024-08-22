@@ -27,7 +27,6 @@ export function fetchMcReviewSettings(
             logError('fetchMcReviewSettings', msg)
             setErrorAttributesOnActiveSpan(msg, span)
             throw new ForbiddenError(msg, {
-                code: 'FORBIDDEN',
                 cause: 'NOT_AUTHORIZED',
             })
         }
