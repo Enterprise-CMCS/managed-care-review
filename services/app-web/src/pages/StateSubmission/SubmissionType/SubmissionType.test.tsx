@@ -2,7 +2,7 @@
 import userEvent from '@testing-library/user-event'
 import { screen, waitFor, within } from '@testing-library/react'
 import selectEvent from 'react-select-event'
-import { 
+import {
     fetchCurrentUserMock,
     fetchContractMockSuccess,
     mockContractPackageDraft,
@@ -14,9 +14,7 @@ describe('SubmissionType', () => {
     it('displays correct form guidance', async () => {
         renderWithProviders(<SubmissionType />, {
             apolloProvider: {
-                mocks: [
-                    fetchCurrentUserMock({ statusCode: 200 }),
-                ],
+                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
             },
         })
 
