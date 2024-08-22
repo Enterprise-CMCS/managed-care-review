@@ -1,60 +1,23 @@
-import React, { useEffect } from 'react'
-import styles from '../Banner.module.scss'
-import { Alert } from '@trussworks/react-uswds'
-import { ERROR_MESSAGES } from '../../../constants/errors'
-import { useTealium } from '../../../hooks'
-import { LetUsKnowLink } from '../../ErrorAlert/LetUsKnowLink'
+import React from 'react'
+import { ErrorAlertFailedRequest } from '../../ErrorAlert'
+import { RemediationType } from '../../ErrorAlert/ErrorRemediations'
 
 export type GenericApiErrorProps = {
     heading?: string
     message?: string
-    suggestion?: string
+    validationFail?: boolean
 }
 
 export const GenericApiErrorBanner = ({
     heading,
     message,
-    suggestion,
+    validationFail = false,
 }: GenericApiErrorProps): React.ReactElement => {
-    const { logAlertImpressionEvent } = useTealium()
-
-    useEffect(() => {
-        logAlertImpressionEvent({
-            error_type: 'system',
-            error_message:
-                'Please refresh your browser and if you continue to experience an error let us know.',
-            type: 'error',
-            extension: 'react-uswds',
-        })
-    }, [])
-
+    let remediation :RemediationType | undefined = undefined
+    if (validationFail){
+        remediation = 'VALIDATION_ERROR'
+    }
     return (
-        <Alert
-            role="alert"
-            type="error"
-            heading={heading || 'System error'}
-            headingLevel="h4"
-            validation
-            data-testid="error-alert"
-        >
-            <div className={styles.bannerBodyText}>
-                <p className="usa-alert__text">
-                    <b>{message || ERROR_MESSAGES.generic_error}</b>
-                </p>
-                <p className="usa-alert__text">
-                    {suggestion ? (
-                        <span>{suggestion} </span>
-                    ) : (
-                        <>
-                            <span>
-                                Please refresh your browser and if you continue
-                                to experience an error,&nbsp;
-                            </span>
-                            <LetUsKnowLink/>
-                        </>
-                    )}
-                </p>
-            </div>
-        </Alert>
+        <ErrorAlertFailedRequest heading={heading} message={message} remediation={remediation}/>
     )
 }

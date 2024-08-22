@@ -2,41 +2,46 @@ import classnames from 'classnames'
 import React, { useEffect } from 'react'
 import styles from './ErrorAlert.module.scss'
 import { Alert } from '@trussworks/react-uswds'
-import { useStringConstants } from '../../hooks/useStringConstants'
-import { LinkWithLogging } from '../TealiumLogging/Link'
 import { useTealium } from '../../hooks'
 import { extractText } from '../TealiumLogging/tealiamLoggingHelpers'
-import { LetUsKnowLink } from './LetUsKnowLink'
+import { ErrorRemediation, RemediationType } from './ErrorRemediations'
 
 export type ErrorAlertProps = {
-    message?: React.ReactNode
-    heading?: string
-    calltoAction?: React.ReactNode
-    appendLetUsKnow?: boolean
+    heading?: string // Has a default for generic error
+    message?: React.ReactNode // Has a default for generic error.
+    withEmphasis?: boolean
+    remediation?: RemediationType
 } & React.JSX.IntrinsicElements['div']
 
+/*
+    Error alert is main error display in the application.
+    It is used for variety of purposes including API error handling and displaying full page messages during maintainece.
+    A heading and a message is always displayed with fallbacks to a generic system error.
+
+    An optional remediation message may displayed in a second paragraph. Remediation includes specific instructions about what the user can do to
+    fix the errors, such as refreshing page or contacting support. A mailto link to contact the help desk is often included as well.
+*/
+
 export const ErrorAlert = ({
-    message,
-    heading,
-    appendLetUsKnow = false,
+    heading = 'System error',
+    message = "We're having trouble loading this page.",
+    remediation,
+    withEmphasis,
     className,
     ...divProps
 }: ErrorAlertProps): React.ReactElement => {
-    const stringConstants = useStringConstants()
     const { logAlertImpressionEvent } = useTealium()
     const classes = classnames(styles.messageBodyText, className)
-    const showLink = appendLetUsKnow || !message // our default message includes the link
-    const defaultMessage =
-        "We're having trouble loading this page. Please refresh your browser and if you continue to experience an error,"
-    const errorMessage = `${message ? extractText(message) : defaultMessage} email ${stringConstants.MAIL_TO_SUPPORT}`
+    const loggingErrorMessage = extractText(message)
+
     useEffect(() => {
         logAlertImpressionEvent({
             error_type: 'system',
-            error_message: errorMessage,
+            error_message: loggingErrorMessage,
             type: 'error',
             extension: 'react-uswds',
         })
-    }, [errorMessage, logAlertImpressionEvent])
+    }, [loggingErrorMessage, logAlertImpressionEvent])
 
     return (
         <Alert
@@ -45,18 +50,23 @@ export const ErrorAlert = ({
             heading={heading || 'System error'}
             headingLevel="h4"
             data-testid="error-alert"
+            validation
             className={classes}
             {...divProps}
         >
-            <span>{message || defaultMessage}</span>
 
-            {showLink && (
-                <span>
-                    &nbsp;email&nbsp;
-                    <LetUsKnowLink
-                        className={styles.nowrap}/>
-                </span>
-            )}
+        <div className={styles.messageBodyText}>
+                <p className="usa-alert__text">
+                    {withEmphasis? (<b>
+                        {message}
+                    </b>)
+                    :( <>{message}</>)
+                    }
+                </p>
+               {remediation && <p className="usa-alert__text">
+                    <ErrorRemediation type={remediation} />
+                </p>}
+            </div>
         </Alert>
     )
 }

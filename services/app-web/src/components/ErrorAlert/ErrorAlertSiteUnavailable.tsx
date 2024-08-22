@@ -6,8 +6,7 @@ export const ErrorAlertSiteUnavailable = (): React.ReactElement => (
         heading="Site unavailable"
         message="MC-Review is currently unavailable due to technical
                             issues. We are working to resolve these issues as
-                            quickly as possible. If you have questions or need
-                            immediate assistance with your submission, please"
-        appendLetUsKnow
+                            quickly as possible."
+        remediation='TECH_ISSUE'
     />
 )
