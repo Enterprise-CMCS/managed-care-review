@@ -6,26 +6,11 @@ import {
 } from '../attributeHelper'
 import { logError } from '../../logger'
 import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
-import type { CMSUserType, UserType } from '../../domain-models'
 import { hasAdminPermissions, hasCMSPermissions } from '../../domain-models'
 import type { StateCodeType } from '../../common-code/healthPlanFormDataType'
 import { isValidStateCode } from '../../common-code/healthPlanFormDataType'
 import { NotFoundError } from '../../postgres'
 import { GraphQLError } from 'graphql/index'
-
-// Only Admin users and DMCO CMS users can update state assignments
-const hasUpdatePermissions = (user: UserType): boolean => {
-    if (hasAdminPermissions(user)) {
-        return true
-    }
-
-    if (hasCMSPermissions(user)) {
-        const cmsUser = user as CMSUserType
-        return cmsUser.divisionAssignment === 'DMCO'
-    }
-
-    return false
-}
 
 export function updateStateAssignments(
     store: Store
@@ -39,12 +24,15 @@ export function updateStateAssignments(
             span
         )
 
-        if (!hasUpdatePermissions(currentUser)) {
+        // Only Admin and all CMS users can call this resolver
+        if (
+            !hasAdminPermissions(currentUser) &&
+            !hasCMSPermissions(currentUser)
+        ) {
             const msg = 'user not authorized to modify assignments'
             logError('updateStateAssignments', msg)
             setErrorAttributesOnActiveSpan(msg, span)
             throw new ForbiddenError(msg, {
-                code: 'FORBIDDEN',
                 cause: 'NOT_AUTHORIZED',
             })
         }
