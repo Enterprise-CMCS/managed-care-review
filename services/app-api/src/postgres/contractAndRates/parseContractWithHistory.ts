@@ -155,7 +155,7 @@ function contractWithHistoryToDomainModelWithoutRates(
             packageSubmissions.push({
                 submitInfo: {
                     updatedAt: submission.updatedAt,
-                    updatedBy: submission.updatedBy.email,
+                    updatedBy: submission.updatedBy,
                     updatedReason: submission.updatedReason,
                 },
                 submittedRevisions: submitedRevs,

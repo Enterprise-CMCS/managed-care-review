@@ -1,10 +1,10 @@
+import React from 'react'
 import {
     GenericApiErrorBanner,
     SubmissionUnlockedBanner,
 } from '../../components'
 import { UpdateInformation, User } from '../../gen/gqlClient'
 import styles from './StateSubmissionForm.module.scss'
-import { hasCMSUserPermissions } from '../../gqlHelpers'
 
 const PageBannerAlerts = ({
     showPageErrorMessage,
@@ -14,7 +14,7 @@ const PageBannerAlerts = ({
     showPageErrorMessage: string | boolean
     loggedInUser?: User
     unlockedInfo?: UpdateInformation | null
-}): JSX.Element => {
+}): React.ReactElement => {
     const message =
         typeof showPageErrorMessage !== 'boolean'
             ? showPageErrorMessage
@@ -26,15 +26,9 @@ const PageBannerAlerts = ({
             )}
             {unlockedInfo && (
                 <SubmissionUnlockedBanner
-                    userType={
-                        hasCMSUserPermissions(loggedInUser)
-                            ? 'CMS_USER'
-                            : 'STATE_USER'
-                    }
-                    unlockedBy={unlockedInfo?.updatedBy || 'Not available'}
-                    unlockedOn={unlockedInfo.updatedAt || 'Not available'}
-                    reason={unlockedInfo.updatedReason || 'Not available'}
                     className={styles.banner}
+                    loggedInUser={loggedInUser}
+                    unlockedInfo={unlockedInfo}
                 />
             )}
         </>

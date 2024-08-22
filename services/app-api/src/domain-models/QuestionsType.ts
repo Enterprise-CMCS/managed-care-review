@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { cmsUserType } from './UserType'
+import { cmsUserSchema } from './UserType'
 import { questionResponseType } from './QuestionResponseType'
 import { divisionType } from './DivisionType'
 
@@ -13,7 +13,7 @@ const question = z.object({
     id: z.string().uuid(),
     contractID: z.string().uuid(),
     createdAt: z.date(),
-    addedBy: cmsUserType,
+    addedBy: cmsUserSchema,
     division: divisionType, // DMCO, DMCP, OACT
     documents: z.array(document),
     responses: z.array(questionResponseType),

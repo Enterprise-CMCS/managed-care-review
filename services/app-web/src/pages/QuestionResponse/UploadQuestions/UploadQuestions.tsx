@@ -47,10 +47,6 @@ export const UploadQuestions = () => {
         updateHeading({ customHeading: `${packageName} Add questions` })
     }, [packageName, updateHeading])
 
-    if (pkg.status === 'DRAFT') {
-        return <GenericErrorPage />
-    }
-
     // component specific support
     const { handleDeleteFile, handleUploadFile, handleScanFile } = useS3()
     const {
@@ -62,6 +58,10 @@ export const UploadQuestions = () => {
     } = useFileUpload(shouldValidate)
     const { setFocusErrorSummaryHeading, errorSummaryHeadingRef } =
         useErrorSummary()
+
+    if (pkg.status === 'DRAFT') {
+        return <GenericErrorPage />
+    }
     const showFileUploadError = Boolean(shouldValidate && fileUploadError)
     const fileUploadErrorFocusKey = hasNoFiles
         ? 'questions-upload'

@@ -50,9 +50,6 @@ describe('QuestionResponse', () => {
                         routerProvider: {
                             route: '/submissions/15/question-and-answers',
                         },
-                        featureFlags: {
-                            'cms-questions': true,
-                        },
                     }
                 )
 
@@ -206,9 +203,6 @@ describe('QuestionResponse', () => {
                         routerProvider: {
                             route: '/submissions/15/question-and-answers',
                         },
-                        featureFlags: {
-                            'cms-questions': true,
-                        },
                     }
                 )
 
@@ -266,9 +260,6 @@ describe('QuestionResponse', () => {
                         },
                         routerProvider: {
                             route: '/submissions/15/question-and-answers',
-                        },
-                        featureFlags: {
-                            'cms-questions': true,
                         },
                     }
                 )
@@ -334,9 +325,6 @@ describe('QuestionResponse', () => {
                         routerProvider: {
                             route: '/submissions/15/question-and-answers',
                         },
-                        featureFlags: {
-                            'cms-questions': true,
-                        },
                     }
                 )
 
@@ -388,9 +376,6 @@ describe('QuestionResponse', () => {
                         routerProvider: {
                             route: '/submissions/15/question-and-answers?submit=question',
                         },
-                        featureFlags: {
-                            'cms-questions': true,
-                        },
                     }
                 )
 
@@ -428,9 +413,6 @@ describe('QuestionResponse', () => {
                         },
                         routerProvider: {
                             route: '/submissions/15/question-and-answers',
-                        },
-                        featureFlags: {
-                            'cms-questions': true,
                         },
                     }
                 )
@@ -478,9 +460,6 @@ describe('QuestionResponse', () => {
                             routerProvider: {
                                 route: '/submissions/15/question-and-answers',
                             },
-                            featureFlags: {
-                                'cms-questions': true,
-                            },
                         }
                     )
 
@@ -525,9 +504,6 @@ describe('QuestionResponse', () => {
                     routerProvider: {
                         route: '/submissions/15/question-and-answers?submit=response',
                     },
-                    featureFlags: {
-                        'cms-questions': true,
-                    },
                 }
             )
 
@@ -565,9 +541,6 @@ describe('QuestionResponse', () => {
                     },
                     routerProvider: {
                         route: '/submissions/15/question-and-answers',
-                    },
-                    featureFlags: {
-                        'cms-questions': true,
                     },
                 }
             )

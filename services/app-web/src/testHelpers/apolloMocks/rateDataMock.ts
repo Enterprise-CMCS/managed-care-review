@@ -24,7 +24,12 @@ const rateRevisionDataMock = (data?: Partial<RateRevision>): RateRevision => {
         submitInfo: {
             __typename: 'UpdateInformation',
             updatedAt: '2023-10-16T19:02:26.766Z',
-            updatedBy: 'aang@example.com',
+            updatedBy: {
+                email: 'aang@example.com',
+                role: 'STATE_USER',
+                familyName: 'Airman',
+                givenName: 'Aang'
+            },
             updatedReason: 'Initial submission',
         },
         formData: {

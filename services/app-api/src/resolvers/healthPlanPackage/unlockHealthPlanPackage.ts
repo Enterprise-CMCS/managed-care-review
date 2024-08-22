@@ -184,7 +184,7 @@ export function unlockHealthPlanPackageResolver(
 
         const updateInfo: UpdateInfoType = {
             updatedAt: new Date(), // technically this is not right but it's close enough while we are supporting two systems
-            updatedBy: context.user.email,
+            updatedBy: context.user,
             updatedReason: unlockedReason,
         }
 

@@ -7,7 +7,12 @@ import { unlockContractStateEmail } from './index'
 import { packageName } from '../../common-code/healthPlanFormDataType'
 
 const unlockData = {
-    updatedBy: 'josh@example.com',
+    updatedBy: {
+        email: 'josh@example.com',
+        role: 'CMS_USER' as const,
+        givenName: 'Josh',
+        familyName: 'Knope',
+    },
     updatedAt: new Date('02/01/2022'),
     updatedReason: 'Adding rate certification.',
 }

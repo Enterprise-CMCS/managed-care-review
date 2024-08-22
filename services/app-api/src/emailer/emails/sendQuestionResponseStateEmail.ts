@@ -78,7 +78,6 @@ export const sendQuestionResponseStateEmail = async (
         return {
             toAddresses: receiverEmails,
             sourceEmail: config.emailSource,
-            replyToAddresses: [config.helpDeskEmail],
             subject: `${
                 config.stage !== 'prod' ? `[${config.stage}] ` : ''
             }Response submitted to CMS for ${packageName}`,

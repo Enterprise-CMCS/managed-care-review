@@ -106,7 +106,7 @@ describe('withdrawAndReplaceRedundantRate', () => {
             refetchContract1.packageSubmissions[0].submitInfo.updatedReason
         ).toBe(replaceReason)
         expect(
-            refetchContract1.packageSubmissions[0].submitInfo.updatedBy
+            refetchContract1.packageSubmissions[0].submitInfo.updatedBy.email
         ).toBe(adminUser.email)
         expect(
             refetchContract1.packageSubmissions[0].contractRevision.unlockInfo
@@ -114,7 +114,7 @@ describe('withdrawAndReplaceRedundantRate', () => {
         ).toBe(replaceReason)
         expect(
             refetchContract1.packageSubmissions[0].contractRevision.unlockInfo
-                ?.updatedBy
+                ?.updatedBy.email
         ).toBe(adminUser.email)
 
         // Check that rate data is correct for latest submission

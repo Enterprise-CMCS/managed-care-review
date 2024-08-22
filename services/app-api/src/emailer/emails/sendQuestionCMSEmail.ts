@@ -75,7 +75,6 @@ export const sendQuestionCMSEmail = async (
         return {
             toAddresses: receiverEmails,
             sourceEmail: config.emailSource,
-            replyToAddresses: [config.helpDeskEmail],
             subject: `${
                 config.stage !== 'prod' ? `[${config.stage}] ` : ''
             }Questions sent for ${packageName}`,

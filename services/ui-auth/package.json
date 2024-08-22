@@ -11,6 +11,7 @@
         "prettier": "^3.3.3",
         "serverless": "^3.39.0",
         "serverless-iam-helper": "https://github.com/CMSgov/serverless-iam-helper",
+        "serverless-offline-ssm": "^6.2.0",
         "serverless-stack-termination-protection": "^2.0.2",
         "serverless-s3-bucket-helper": "https://github.com/CMSgov/serverless-s3-bucket-helper"
     }

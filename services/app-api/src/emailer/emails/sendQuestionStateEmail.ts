@@ -67,7 +67,6 @@ export const sendQuestionStateEmail = async (
         return {
             toAddresses: receiverEmails,
             sourceEmail: config.emailSource,
-            replyToAddresses: [config.helpDeskEmail],
             subject: `${
                 config.stage !== 'prod' ? `[${config.stage}] ` : ''
             }New questions about ${packageName}`,

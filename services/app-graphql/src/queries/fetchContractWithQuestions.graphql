@@ -97,14 +97,10 @@ fragment rateRevisionFragmentForFetchContract on RateRevision {
     createdAt
     updatedAt
     unlockInfo {
-        updatedAt
-        updatedBy
-        updatedReason
+        ...updateInformationFields
     }
     submitInfo {
-        updatedAt
-        updatedBy
-        updatedReason
+        ...updateInformationFields
     }
     formData {
         rateType
@@ -223,15 +219,11 @@ fragment contractRevisionFragmentForFetch on ContractRevision {
     contractName
 
     submitInfo {
-        updatedAt
-        updatedBy
-        updatedReason
+        ...updateInformationFields
     }
 
     unlockInfo {
-        updatedAt
-        updatedBy
-        updatedReason
+        ...updateInformationFields
     }
 
     formData {
@@ -274,7 +266,12 @@ fragment submittableRevisionsFieldsForFetch on SubmittableRevision {
 
 fragment updateInformationFields on UpdateInformation {
     updatedAt
-    updatedBy
+    updatedBy {
+        email
+        role
+        familyName
+        givenName
+    }
     updatedReason
 }
 

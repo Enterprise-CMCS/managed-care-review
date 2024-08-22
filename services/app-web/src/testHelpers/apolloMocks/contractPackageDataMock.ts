@@ -14,7 +14,12 @@ function mockContractRevision(name?: string, partial?: Partial<ContractRevision>
         contractID: `contract-123-${name}`,
         submitInfo: {
             updatedAt: new Date(`2024-02-17T03:2${name}:00`),
-            updatedBy: 'example@state.com',
+            updatedBy: {
+                email: 'example@state.com',
+                role: 'STATE_USER',
+                givenName: 'John',
+                familyName: 'Vila'
+            },
             updatedReason: 'contract submit'
         },
         unlockInfo: null,
@@ -91,12 +96,22 @@ function mockRateRevision(name?: string, partial?: Partial<RateRevision>): RateR
         updatedAt: new Date('01/01/2023'),
         submitInfo: {
             updatedAt: '2023-01-01T16:54:39.173Z',
-            updatedBy: 'example@state.com',
+            updatedBy: {
+                email: 'example@state.com',
+                role: 'STATE_USER',
+                givenName: 'John',
+                familyName: 'Vila'
+            },
             updatedReason: 'contract submit'
         },
         unlockInfo: {
             updatedAt: '2023-01-01T18:54:39.173Z',
-            updatedBy: 'example@state.com',
+            updatedBy: {
+                email: 'example@cms.com',
+                role: 'CMS_USER',
+                givenName: 'Bob',
+                familyName: 'Vila'
+            },
             updatedReason: 'contract unlock'
         },
         formData: {
@@ -356,12 +371,22 @@ function mockContractWithLinkedRateDraft(
                     updatedAt: new Date(),
                     submitInfo: {
                         updatedAt: new Date('12/18/2023'),
-                        updatedBy: 'example@state.com',
+                        updatedBy: {
+                            email: 'example@state.com',
+                            role: 'STATE_USER',
+                            givenName: 'John',
+                            familyName: 'Vila'
+                        },
                         updatedReason: 'contract submit'
                     },
                     unlockInfo: {
                         updatedAt: new Date('12/19/2023'),
-                        updatedBy: 'example@state.com',
+                        updatedBy: {
+                            email: 'example@cms.com',
+                            role: 'CMS_USER',
+                            givenName: 'Bob',
+                            familyName: 'Vila'
+                        },
                         updatedReason: 'rate unlock maybe'
                     },
                     formData: {
@@ -475,7 +500,12 @@ function mockContractWithLinkedRateSubmitted(
             __typename: 'ContractPackageSubmission',
             submitInfo: {
                 updatedAt: new Date('12/18/2023'),
-                updatedBy: 'example@state.com',
+                updatedBy: {
+                    email: 'example@state.com',
+                    role: 'STATE_USER',
+                    givenName: 'John',
+                    familyName: 'Vila'
+                },
                 updatedReason: 'contract submit'
             },
             submittedRevisions: [],
@@ -487,7 +517,12 @@ function mockContractWithLinkedRateSubmitted(
                 contractID: 'test-abc-123',
                 submitInfo: {
                     updatedAt: new Date(),
-                    updatedBy: 'example@state.com',
+                    updatedBy: {
+                        email: 'example@state.com',
+                        role: 'STATE_USER',
+                        givenName: 'John',
+                        familyName: 'Vila'
+                    },
                     updatedReason: 'contract submit'
                 },
                 unlockInfo: undefined,
@@ -616,7 +651,12 @@ function mockContractPackageSubmitted(
             __typename: 'ContractPackageSubmission',
             submitInfo: {
                 updatedAt: '2024-12-18T16:54:39.173Z',
-                updatedBy: 'example@state.com',
+                updatedBy: {
+                    email: 'example@state.com',
+                    role: 'STATE_USER',
+                    givenName: 'John',
+                    familyName: 'Vila'
+                },
                 updatedReason: 'contract submit'
             },
             submittedRevisions: [],
@@ -628,7 +668,12 @@ function mockContractPackageSubmitted(
                 contractID: 'test-abc-123',
                 submitInfo: {
                     updatedAt: new Date(),
-                    updatedBy: 'example@state.com',
+                    updatedBy: {
+                        email: 'example@state.com',
+                        role: 'STATE_USER',
+                        givenName: 'John',
+                        familyName: 'Vila'
+                    },
                     updatedReason: 'contract submit'
                 },
                 unlockInfo: undefined,
@@ -782,7 +827,12 @@ function mockContractPackageSubmittedWithRevisions(
                 submitInfo: {
                     __typename: 'UpdateInformation',
                     updatedAt: '2024-03-03T16:54:39.173Z',
-                    updatedBy: 'example@state.com',
+                    updatedBy: {
+                        email: 'example@state.com',
+                        role: 'STATE_USER',
+                        givenName: 'John',
+                        familyName: 'Vila'
+                    },
                     updatedReason: 'submit 3'
                 },
                 submittedRevisions: [
@@ -792,7 +842,12 @@ function mockContractPackageSubmittedWithRevisions(
                     unlockInfo: {
                     __typename: 'UpdateInformation',
                     updatedAt: '2024-03-01T17:54:39.173Z',
-                    updatedBy: 'zuko@example.com',
+                    updatedBy: {
+                        email: 'zuko@example.com',
+                        role: 'CMS_USER',
+                        givenName: 'Zuko',
+                        familyName: 'Hotman'
+                    },
                     updatedReason: 'prepare to add documents',
                 },}),
                 rateRevisions: [
@@ -805,7 +860,12 @@ function mockContractPackageSubmittedWithRevisions(
                 submitInfo: {
                     __typename: 'UpdateInformation',
                     updatedAt: '2024-02-02T17:45:39.173Z',
-                    updatedBy: 'example@state.com',
+                    updatedBy: {
+                        email: 'example@state.com',
+                        role: 'STATE_USER',
+                        givenName: 'John',
+                        familyName: 'Vila'
+                    },
                     updatedReason: 'submit 2'
                 },
                 submittedRevisions: [
@@ -815,7 +875,12 @@ function mockContractPackageSubmittedWithRevisions(
                     unlockInfo: {
                     __typename: 'UpdateInformation',
                     updatedAt: '2024-01-25T21:13:56.174Z',
-                    updatedBy: 'zuko@example.com',
+                    updatedBy: {
+                        email: 'zuko@example.com',
+                        role: 'CMS_USER',
+                        givenName: 'Zuko',
+                        familyName: 'Hotman'
+                    },
                     updatedReason: 'test',
                 },}),
                 rateRevisions: [
@@ -828,7 +893,12 @@ function mockContractPackageSubmittedWithRevisions(
                 submitInfo: {
                     __typename: 'UpdateInformation',
                     updatedAt: '2024-01-01T11:14:39.173Z',
-                    updatedBy: 'example@state.com',
+                    updatedBy: {
+                        email: 'example@state.com',
+                        role: 'STATE_USER',
+                        givenName: 'John',
+                        familyName: 'Vila'
+                    },
                     updatedReason: 'submit 1'
                 },
                 submittedRevisions: [
@@ -904,7 +974,12 @@ function mockContractPackageWithDifferentProgramsInRevisions (): Contract {
                "cause": "CONTRACT_SUBMISSION",
                "submitInfo": {
                    "updatedAt": "2024-05-08T17:42:52.696Z",
-                   "updatedBy": "mc-review-team@truss.works",
+                   "updatedBy": {
+                       "email": "mc-review-team@truss.works",
+                       "role": "STATE_USER",
+                       "givenName": "John",
+                       "familyName": "Vila"
+                   },
                    "updatedReason": "testing 4100",
                    "__typename": "UpdateInformation"
                },
@@ -917,13 +992,23 @@ function mockContractPackageWithDifferentProgramsInRevisions (): Contract {
                        "contractID": "e670adsfdfadsfc",
                        "submitInfo": {
                            "updatedAt": "2024-05-08T17:42:52.696Z",
-                           "updatedBy": "team@example.com",
+                           "updatedBy": {
+                               "email": "team@example.com",
+                               "role": "STATE_USER",
+                               "givenName": "John",
+                               "familyName": "Vila"
+                           },
                            "updatedReason": "testing 4100",
                            "__typename": "UpdateInformation"
                        },
                        "unlockInfo": {
                            "updatedAt": "2024-05-07T19:49:36.175Z",
-                           "updatedBy": "team@example.com",
+                           "updatedBy": {
+                               "email": "team@example.com",
+                               "role": 'CMS_USER',
+                               "givenName": 'Zuko',
+                               "familyName": 'Hotman'
+                           },
                            "updatedReason": "test",
                            "__typename": "UpdateInformation"
                        },
@@ -1001,13 +1086,23 @@ function mockContractPackageWithDifferentProgramsInRevisions (): Contract {
                    "contractID": "e670adsfdfadsfc",
                    "submitInfo": {
                        "updatedAt": "2024-05-08T17:42:52.696Z",
-                       "updatedBy": "team@example.com",
+                       "updatedBy": {
+                           "email": "team@example.com",
+                           "role": "STATE_USER",
+                           "givenName": "John",
+                           "familyName": "Vila"
+                       },
                        "updatedReason": "testing 4100",
                        "__typename": "UpdateInformation"
                    },
                    "unlockInfo": {
                        "updatedAt": "2024-05-07T19:49:36.175Z",
-                       "updatedBy": "team@example.com",
+                       "updatedBy": {
+                           "email": "team@example.com",
+                           "role": 'CMS_USER',
+                           "givenName": 'Zuko',
+                           "familyName": 'Hotman'
+                       },
                        "updatedReason": "test",
                        "__typename": "UpdateInformation"
                    },
@@ -1083,7 +1178,12 @@ function mockContractPackageWithDifferentProgramsInRevisions (): Contract {
                "cause": "CONTRACT_SUBMISSION",
                "submitInfo": {
                    "updatedAt": "2024-05-07T19:46:19.376Z",
-                   "updatedBy": "team@example.com",
+                   "updatedBy": {
+                       "email": "team@example.com",
+                       "role": "STATE_USER",
+                       "givenName": "John",
+                       "familyName": "Vila"
+                   },
                    "updatedReason": "Initial submission",
                    "__typename": "UpdateInformation"
                },
@@ -1096,7 +1196,12 @@ function mockContractPackageWithDifferentProgramsInRevisions (): Contract {
                        "contractID": "e670adsfdfadsfc",
                        "submitInfo": {
                            "updatedAt": "2024-05-07T19:46:19.376Z",
-                           "updatedBy": "team@example.com",
+                           "updatedBy": {
+                               "email": "team@example.com",
+                               "role": "STATE_USER",
+                               "givenName": "John",
+                               "familyName": "Vila"
+                           },
                            "updatedReason": "Initial submission",
                            "__typename": "UpdateInformation"
                        },
@@ -1167,7 +1272,12 @@ function mockContractPackageWithDifferentProgramsInRevisions (): Contract {
                    "contractID": "e670adsfdfadsfc",
                    "submitInfo": {
                        "updatedAt": "2024-05-07T19:46:19.376Z",
-                       "updatedBy": "team@example.com",
+                       "updatedBy": {
+                           "email": "team@example.com",
+                           "role": "STATE_USER",
+                           "givenName": "John",
+                           "familyName": "Vila"
+                       },
                        "updatedReason": "Initial submission",
                        "__typename": "UpdateInformation"
                    },
@@ -1255,7 +1365,12 @@ function mockContractPackageUnlocked(
             submitInfo: undefined,
             unlockInfo: {
                 updatedAt: '2023-01-01T16:54:39.173Z',
-                updatedBy: 'cms@example.com',
+                updatedBy: {
+                    email: 'cms@example.com',
+                    role: 'CMS_USER',
+                    givenName: 'Zuko',
+                    familyName: 'Hotman'
+                },
                 updatedReason: 'unlocked for a test',
             },
             id: '123',
@@ -1332,7 +1447,12 @@ function mockContractPackageUnlocked(
                     updatedAt: new Date(),
                     unlockInfo: {
                         updatedAt: new Date(),
-                        updatedBy: 'cms@example.com',
+                        updatedBy: {
+                            email: 'cms@example.com',
+                            role: 'CMS_USER',
+                            givenName: 'Zuko',
+                            familyName: 'Hotman'
+                        },
                         updatedReason: 'unlocked for a test',
                     },
                     formData: {
@@ -1382,7 +1502,12 @@ function mockContractPackageUnlocked(
             cause: 'CONTRACT_SUBMISSION',
             submitInfo: {
                 updatedAt:  '2023-01-01T16:54:39.173Z',
-                updatedBy: 'example@state.com',
+                updatedBy: {
+                    email: 'example@state.com',
+                    role: 'STATE_USER',
+                    givenName: 'John',
+                    familyName: 'Vila'
+                },
                 updatedReason: 'initial submission'
             },
             submittedRevisions: [
@@ -1392,12 +1517,22 @@ function mockContractPackageUnlocked(
                     updatedAt:  '2023-01-01T16:54:39.173Z',
                     submitInfo: {
                         updatedAt: '2023-01-01T16:54:39.173Z',
-                        updatedBy: 'example@state.com',
+                        updatedBy: {
+                            email: 'example@state.com',
+                            role: 'STATE_USER',
+                            givenName: 'John',
+                            familyName: 'Vila'
+                        },
                         updatedReason: 'initial submission'
                     },
                     unlockInfo: {
                         updatedAt: '2023-01-01T16:54:39.173Z',
-                        updatedBy: 'example@state.com',
+                        updatedBy: {
+                            email: 'example@cms.com',
+                            role: 'CMS_USER',
+                            givenName: 'Bob',
+                            familyName: 'Vila'
+                        },
                         updatedReason: 'unlocked for a test'
                     },
                     id: '123',
@@ -1453,12 +1588,22 @@ function mockContractPackageUnlocked(
                 updatedAt: '2024-01-01T18:54:39.173Z',
                 submitInfo: {
                     updatedAt: '2024-01-01T18:54:39.173Z',
-                    updatedBy: 'example@state.com',
+                    updatedBy: {
+                        email: 'example@state.com',
+                        role: 'STATE_USER',
+                        givenName: 'John',
+                        familyName: 'Vila'
+                    },
                     updatedReason: 'initial submission'
                 },
                 unlockInfo: {
                     updatedAt: '2024-02-01T16:54:39.173Z',
-                    updatedBy: 'example@state.com',
+                    updatedBy: {
+                        email: 'example@cms.com',
+                        role: 'CMS_USER',
+                        givenName: 'Bob',
+                        familyName: 'Vila'
+                    },
                     updatedReason: 'unlocked'
                 },
                 id: '123',
@@ -1516,7 +1661,12 @@ function mockContractPackageUnlocked(
                     updatedAt: new Date('01/01/2023'),
                     submitInfo: {
                         updatedAt: new Date('01/01/2024'),
-                        updatedBy: 'example@state.com',
+                        updatedBy: {
+                            email: 'example@state.com',
+                            role: 'STATE_USER',
+                            givenName: 'John',
+                            familyName: 'Vila'
+                        },
                         updatedReason: 'initial submission'
                     },
                     formData: {
@@ -1799,5 +1949,6 @@ export {
     mockContractFormData,
     mockContractPackageSubmittedWithRevisions,
     mockContractPackageWithDifferentProgramsInRevisions,
-    mockEmptyDraftContractAndRate
+    mockEmptyDraftContractAndRate,
+    mockRateRevision
 }

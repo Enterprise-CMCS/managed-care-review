@@ -68,12 +68,10 @@ const UniversalRoutes = (
 const StateUserRoutes = ({
     authMode,
     setAlert,
-    showQuestionResponse,
     stageName,
 }: {
     authMode: AuthModeType
     setAlert?: React.Dispatch<React.ReactElement>
-    showQuestionResponse: boolean
     stageName?: string
 }): React.ReactElement => {
     // feature flag
@@ -122,20 +120,15 @@ const StateUserRoutes = ({
                     </>
                 )}
                 <Route element={<SubmissionSideNav />}>
-                    {showQuestionResponse && (
-                        <>
-                            <Route
-                                path={
-                                    RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS
-                                }
-                                element={<QuestionResponse />}
-                            />
-                            <Route
-                                path={RoutesRecord.SUBMISSIONS_UPLOAD_RESPONSE}
-                                element={<UploadResponse />}
-                            />
-                        </>
-                    )}
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS}
+                        element={<QuestionResponse />}
+                    />
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_UPLOAD_RESPONSE}
+                        element={<UploadResponse />}
+                    />
+
                     <Route
                         path={RoutesRecord.SUBMISSIONS_SUMMARY}
                         element={<SubmissionSummary />}
@@ -166,12 +159,10 @@ const StateUserRoutes = ({
 const CMSUserRoutes = ({
     authMode,
     setAlert,
-    showQuestionResponse,
     stageName,
 }: {
     authMode: AuthModeType
     setAlert?: React.Dispatch<React.ReactElement>
-    showQuestionResponse: boolean
     stageName?: string
 }): React.ReactElement => {
     return (
@@ -201,20 +192,15 @@ const CMSUserRoutes = ({
                 </Route>
 
                 <Route element={<SubmissionSideNav />}>
-                    {showQuestionResponse && (
-                        <>
-                            <Route
-                                path={
-                                    RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS
-                                }
-                                element={<QuestionResponse />}
-                            />
-                            <Route
-                                path={RoutesRecord.SUBMISSIONS_UPLOAD_QUESTION}
-                                element={<UploadQuestions />}
-                            />
-                        </>
-                    )}
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS}
+                        element={<QuestionResponse />}
+                    />
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_UPLOAD_QUESTION}
+                        element={<UploadQuestions />}
+                    />
+
                     <Route
                         path={RoutesRecord.SUBMISSIONS_SUMMARY}
                         element={<SubmissionSummary />}
@@ -301,11 +287,6 @@ export const AppRoutes = ({
         featureFlags.SESSION_EXPIRING_MODAL.defaultValue
     )
 
-    const showQuestionResponse = ldClient?.variation(
-        featureFlags.CMS_QUESTIONS.flag,
-        featureFlags.CMS_QUESTIONS.defaultValue
-    )
-
     const route = getRouteName(pathname)
     const { updateHeading } = usePage()
     const [initialPath] = useState(pathname) // this gets written on mount, so we don't call the effect on every path change
@@ -389,7 +370,6 @@ export const AppRoutes = ({
             <StateUserRoutes
                 authMode={authMode}
                 setAlert={setAlert}
-                showQuestionResponse={showQuestionResponse}
                 stageName={stageName}
             />
         )
@@ -398,7 +378,6 @@ export const AppRoutes = ({
             <CMSUserRoutes
                 authMode={authMode}
                 setAlert={setAlert}
-                showQuestionResponse={showQuestionResponse}
                 stageName={stageName}
             />
         )

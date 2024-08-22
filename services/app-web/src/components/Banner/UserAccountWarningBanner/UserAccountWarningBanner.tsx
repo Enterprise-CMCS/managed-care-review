@@ -22,7 +22,7 @@ const UserAccountWarningBanner = ({
             type: 'warn',
             extension: 'react-uswds',
         })
-    }, [])
+    }, [logAlertImpressionEvent, message])
     return (
         <div className={styles.bannerBodyText}>
             <Alert type="warning" headingLevel="h4" heading={header}>

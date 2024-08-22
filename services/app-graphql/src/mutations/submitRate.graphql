@@ -23,14 +23,10 @@ mutation submitRate($input: SubmitRateInput!) {
                 createdAt
                 updatedAt
                 unlockInfo {
-                    updatedAt
-                    updatedBy
-                    updatedReason
+                    ...updateInformationFields
                 }
                 submitInfo {
-                    updatedAt
-                    updatedBy
-                    updatedReason
+                    ...updateInformationFields
                 }
                 formData {
                     rateType,
@@ -83,4 +79,15 @@ mutation submitRate($input: SubmitRateInput!) {
             }
         }
     }
+}
+
+fragment updateInformationFields on UpdateInformation {
+    updatedAt
+    updatedBy {
+        email
+        role
+        familyName
+        givenName
+    }
+    updatedReason
 }

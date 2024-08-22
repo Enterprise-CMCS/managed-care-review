@@ -90,7 +90,7 @@ describe(`Tests unlockHealthPlanPackage`, () => {
         ).toContain('Z')
 
         expect(unlockedSub.revisions[0].node.unlockInfo).toBeDefined()
-        expect(unlockedSub.revisions[0].node.unlockInfo?.updatedBy).toBe(
+        expect(unlockedSub.revisions[0].node.unlockInfo?.updatedBy.email).toBe(
             'zuko@example.com'
         )
         expect(unlockedSub.revisions[0].node.unlockInfo?.updatedReason).toBe(
@@ -135,7 +135,7 @@ describe(`Tests unlockHealthPlanPackage`, () => {
         // After unlock, we should get a draft submission back
         expect(unlockedSub.status).toBe('UNLOCKED')
         expect(unlockedSub.revisions[0].node.unlockInfo).toBeDefined()
-        expect(unlockedSub.revisions[0].node.unlockInfo?.updatedBy).toBe(
+        expect(unlockedSub.revisions[0].node.unlockInfo?.updatedBy.email).toBe(
             'zuko@example.com'
         )
         expect(unlockedSub.revisions[0].node.unlockInfo?.updatedReason).toBe(
@@ -207,7 +207,7 @@ describe(`Tests unlockHealthPlanPackage`, () => {
         // After unlock, we should get a draft submission back
         expect(unlockedSub.status).toBe('UNLOCKED')
         expect(unlockedSub.revisions[0].node.unlockInfo).toBeDefined()
-        expect(unlockedSub.revisions[0].node.unlockInfo?.updatedBy).toBe(
+        expect(unlockedSub.revisions[0].node.unlockInfo?.updatedBy.email).toBe(
             'zuko@example.com'
         )
         expect(unlockedSub.revisions[0].node.unlockInfo?.updatedReason).toBe(
@@ -515,7 +515,7 @@ describe(`Tests unlockHealthPlanPackage`, () => {
             'Very super duper good reason.'
         )
         expect(draft.status).toBe('UNLOCKED')
-        expect(draft.revisions[0].node.unlockInfo?.updatedBy).toBe(
+        expect(draft.revisions[0].node.unlockInfo?.updatedBy.email).toBe(
             'zuko@example.com'
         )
         expect(draft.revisions[0].node.unlockInfo?.updatedReason).toBe(

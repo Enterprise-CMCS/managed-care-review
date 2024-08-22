@@ -187,7 +187,7 @@ async function replaceRateOnContract(
 
     try {
         return await client.$transaction(async (tx) => {
-            const result = replaceRateOnContractInsideTransaction(tx, {
+            const result = await replaceRateOnContractInsideTransaction(tx, {
                 contractID,
                 replacedByUserID,
                 replaceReason,

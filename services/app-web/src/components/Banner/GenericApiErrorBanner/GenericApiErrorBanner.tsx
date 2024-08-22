@@ -29,7 +29,7 @@ export const GenericApiErrorBanner = ({
             type: 'error',
             extension: 'react-uswds',
         })
-    }, [])
+    }, [logAlertImpressionEvent])
 
     return (
         <Alert
