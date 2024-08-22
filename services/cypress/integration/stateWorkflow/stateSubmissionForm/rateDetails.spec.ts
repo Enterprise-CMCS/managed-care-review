@@ -41,7 +41,7 @@ describe('rate details', () => {
         cy.fillOutBaseContractDetails()
 
         //Continue to Rate details page
-        cy.deprecatedNavigateV1Form('CONTINUE')
+        cy.navigateContractForm('CONTINUE')
         cy.findByRole('heading', { level: 2, name: /Rate details/ })
 
         //Add two more rate certifications, total three
