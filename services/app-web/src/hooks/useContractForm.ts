@@ -5,13 +5,10 @@ import {
     useFetchContractQuery,
     useCreateContractMutation,
     useUpdateContractDraftRevisionMutation,
-    ContractDraftRevisionFormDataInput,
     Contract,
     Rate,
     GenericDocument,
     GenericDocumentInput,
-    StateContact,
-    StateContactInput,
     UnlockedContract,
     UpdateContractDraftRevisionInput,
     ContractPackageSubmission
@@ -28,7 +25,7 @@ type  UseContractForm = {
     previousDocuments?: string[]
     updateDraft: (
         input: UpdateContractDraftRevisionInput
-    ) => Promise<Contract | UnlockedContract | Error>
+    ) => Promise<Contract | Error>
     createDraft: (input: CreateContractInput) => Promise<Contract | Error>
     interimState?:  InterimState
 }
@@ -101,7 +98,7 @@ const useContractForm = (contractID?: string): UseContractForm => {
 
     const updateDraft: UseContractForm['updateDraft']  = async (
         input: UpdateContractDraftRevisionInput
-    ): Promise<Contract | UnlockedContract | Error> => {
+    ): Promise<Contract | Error> => {
 
         setShowPageErrorMessage(false)
         if (input.formData.contractDocuments && input.formData.contractDocuments.length > 0) {
@@ -242,5 +239,5 @@ const useContractForm = (contractID?: string): UseContractForm => {
     return {draftSubmission, previousDocuments,  updateDraft, createDraft, interimState, showPageErrorMessage }
 }
 
-export {useContractForm}
-export type {UseContractForm}
+export { useContractForm }
+export type { UseContractForm }

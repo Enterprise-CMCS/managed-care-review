@@ -16,9 +16,7 @@ import {
     PoliteErrorMessage,
     ReactRouterLinkWithLogging,
 } from '../../../components'
-import {
-    isContractWithProvisions,
-} from '../../../common-code/ContractType'
+import { isContractWithProvisions } from '../../../common-code/ContractType'
 import {
     PopulationCoveredRecord,
     SubmissionTypeRecord,
@@ -31,12 +29,15 @@ import {
     SubmissionType as SubmissionTypeT,
     CreateContractInput,
     ContractDraftRevisionFormDataInput,
-    UpdateContractDraftRevisionInput
+    UpdateContractDraftRevisionInput,
 } from '../../../gen/gqlClient'
 import { PageActions } from '../PageActions'
 import styles from '../StateSubmissionForm.module.scss'
 import { GenericApiErrorBanner, ProgramSelect } from '../../../components'
-import { activeFormPages } from '../StateSubmissionForm'
+import {
+    activeFormPages,
+    type ContractFormPageProps,
+} from '../StateSubmissionForm'
 import {
     booleanAsYesNoFormValue,
     yesNoFormValueAsBoolean,
@@ -64,13 +65,9 @@ export interface SubmissionTypeFormValues {
 type FormError =
     FormikErrors<SubmissionTypeFormValues>[keyof FormikErrors<SubmissionTypeFormValues>]
 
-type SubmissionTypePageProps = {
-    showValidations?: boolean
-}
-
 export const SubmissionType = ({
     showValidations = false,
-}: SubmissionTypePageProps): React.ReactElement => {
+}: ContractFormPageProps): React.ReactElement => {
     const { loggedInUser } = useAuth()
     const { currentRoute } = useCurrentRoute()
     const [shouldValidate, setShouldValidate] = useState(showValidations)
@@ -199,10 +196,7 @@ export const SubmissionType = ({
                 setSubmitting(false)
             }
         } else {
-            if (
-                draftSubmission === undefined ||
-                !updateDraft
-            ) {
+            if (draftSubmission === undefined || !updateDraft) {
                 console.info(draftSubmission, updateDraft)
                 console.info(
                     'ERROR, SubmissionType for does not have props needed to update a draft.'
@@ -210,73 +204,124 @@ export const SubmissionType = ({
                 return
             }
             // set new values
-            let updatedDraftSubmissionFormData: ContractDraftRevisionFormDataInput = {
-                contractExecutionStatus: draftSubmission.draftRevision.formData.contractExecutionStatus,
-                contractDateStart: draftSubmission.draftRevision.formData.contractDateStart,
-                contractDateEnd: draftSubmission.draftRevision.formData.contractDateEnd,
-                contractType: values.contractType as ContractType,
-                submissionDescription: values.submissionDescription,
-                riskBasedContract: yesNoFormValueAsBoolean(
-                    values.riskBasedContract
-                ),
-                populationCovered: values.populationCovered,
-                submissionType:
-                    values.submissionType as SubmissionTypeT,
-                programIDs: values.programIDs,
-                stateContacts: draftSubmission.draftRevision.formData.stateContacts || [],
-                supportingDocuments: draftSubmission.draftRevision.formData.supportingDocuments || [],
-                managedCareEntities: draftSubmission.draftRevision.formData.managedCareEntities,
-                federalAuthorities: draftSubmission.draftRevision.formData.federalAuthorities,
-                contractDocuments: draftSubmission.draftRevision.formData.contractDocuments,
-                statutoryRegulatoryAttestation:
-                    draftSubmission.draftRevision.formData.statutoryRegulatoryAttestation,
-                // If contract is in compliance, we set the description to undefined. This clears out previous non-compliance description
-                statutoryRegulatoryAttestationDescription: draftSubmission.draftRevision.formData.statutoryRegulatoryAttestationDescription
-            }
+            const updatedDraftSubmissionFormData: ContractDraftRevisionFormDataInput =
+                {
+                    contractExecutionStatus:
+                        draftSubmission.draftRevision.formData
+                            .contractExecutionStatus,
+                    contractDateStart:
+                        draftSubmission.draftRevision.formData
+                            .contractDateStart,
+                    contractDateEnd:
+                        draftSubmission.draftRevision.formData.contractDateEnd,
+                    contractType: values.contractType as ContractType,
+                    submissionDescription: values.submissionDescription,
+                    riskBasedContract: yesNoFormValueAsBoolean(
+                        values.riskBasedContract
+                    ),
+                    populationCovered: values.populationCovered,
+                    submissionType: values.submissionType as SubmissionTypeT,
+                    programIDs: values.programIDs,
+                    stateContacts:
+                        draftSubmission.draftRevision.formData.stateContacts ||
+                        [],
+                    supportingDocuments:
+                        draftSubmission.draftRevision.formData
+                            .supportingDocuments || [],
+                    managedCareEntities:
+                        draftSubmission.draftRevision.formData
+                            .managedCareEntities,
+                    federalAuthorities:
+                        draftSubmission.draftRevision.formData
+                            .federalAuthorities,
+                    contractDocuments:
+                        draftSubmission.draftRevision.formData
+                            .contractDocuments,
+                    statutoryRegulatoryAttestation:
+                        draftSubmission.draftRevision.formData
+                            .statutoryRegulatoryAttestation,
+                    // If contract is in compliance, we set the description to undefined. This clears out previous non-compliance description
+                    statutoryRegulatoryAttestationDescription:
+                        draftSubmission.draftRevision.formData
+                            .statutoryRegulatoryAttestationDescription,
+                }
 
             if (isContractWithProvisions(draftSubmission)) {
-                updatedDraftSubmissionFormData.inLieuServicesAndSettings = draftSubmission.draftRevision.formData.inLieuServicesAndSettings
-                updatedDraftSubmissionFormData.modifiedBenefitsProvided = draftSubmission.draftRevision.formData.modifiedBenefitsProvided
-                updatedDraftSubmissionFormData.modifiedGeoAreaServed = draftSubmission.draftRevision.formData.modifiedGeoAreaServed
-                updatedDraftSubmissionFormData.modifiedMedicaidBeneficiaries = draftSubmission.draftRevision.formData.modifiedMedicaidBeneficiaries
-                updatedDraftSubmissionFormData.modifiedRiskSharingStrategy = draftSubmission.draftRevision.formData.modifiedRiskSharingStrategy
-                updatedDraftSubmissionFormData.modifiedIncentiveArrangements = draftSubmission.draftRevision.formData.modifiedIncentiveArrangements
-                updatedDraftSubmissionFormData.modifiedWitholdAgreements = draftSubmission.draftRevision.formData.modifiedWitholdAgreements
-                updatedDraftSubmissionFormData.modifiedStateDirectedPayments = draftSubmission.draftRevision.formData.modifiedStateDirectedPayments
-                updatedDraftSubmissionFormData.modifiedPassThroughPayments = draftSubmission.draftRevision.formData.modifiedPassThroughPayments
-                updatedDraftSubmissionFormData.modifiedPaymentsForMentalDiseaseInstitutions = draftSubmission.draftRevision.formData.modifiedPaymentsForMentalDiseaseInstitutions
-                updatedDraftSubmissionFormData.modifiedMedicalLossRatioStandards = draftSubmission.draftRevision.formData.modifiedMedicalLossRatioStandards
-                updatedDraftSubmissionFormData.modifiedOtherFinancialPaymentIncentive = draftSubmission.draftRevision.formData.modifiedOtherFinancialPaymentIncentive
-                updatedDraftSubmissionFormData.modifiedEnrollmentProcess = draftSubmission.draftRevision.formData.modifiedEnrollmentProcess
-                updatedDraftSubmissionFormData.modifiedGrevienceAndAppeal = draftSubmission.draftRevision.formData.modifiedGrevienceAndAppeal
-                updatedDraftSubmissionFormData.modifiedNetworkAdequacyStandards = draftSubmission.draftRevision.formData.modifiedNetworkAdequacyStandards
-                updatedDraftSubmissionFormData.modifiedLengthOfContract = draftSubmission.draftRevision.formData.modifiedLengthOfContract
-                updatedDraftSubmissionFormData.modifiedNonRiskPaymentArrangements = draftSubmission.draftRevision.formData.modifiedNonRiskPaymentArrangements
+                updatedDraftSubmissionFormData.inLieuServicesAndSettings =
+                    draftSubmission.draftRevision.formData.inLieuServicesAndSettings
+                updatedDraftSubmissionFormData.modifiedBenefitsProvided =
+                    draftSubmission.draftRevision.formData.modifiedBenefitsProvided
+                updatedDraftSubmissionFormData.modifiedGeoAreaServed =
+                    draftSubmission.draftRevision.formData.modifiedGeoAreaServed
+                updatedDraftSubmissionFormData.modifiedMedicaidBeneficiaries =
+                    draftSubmission.draftRevision.formData.modifiedMedicaidBeneficiaries
+                updatedDraftSubmissionFormData.modifiedRiskSharingStrategy =
+                    draftSubmission.draftRevision.formData.modifiedRiskSharingStrategy
+                updatedDraftSubmissionFormData.modifiedIncentiveArrangements =
+                    draftSubmission.draftRevision.formData.modifiedIncentiveArrangements
+                updatedDraftSubmissionFormData.modifiedWitholdAgreements =
+                    draftSubmission.draftRevision.formData.modifiedWitholdAgreements
+                updatedDraftSubmissionFormData.modifiedStateDirectedPayments =
+                    draftSubmission.draftRevision.formData.modifiedStateDirectedPayments
+                updatedDraftSubmissionFormData.modifiedPassThroughPayments =
+                    draftSubmission.draftRevision.formData.modifiedPassThroughPayments
+                updatedDraftSubmissionFormData.modifiedPaymentsForMentalDiseaseInstitutions =
+                    draftSubmission.draftRevision.formData.modifiedPaymentsForMentalDiseaseInstitutions
+                updatedDraftSubmissionFormData.modifiedMedicalLossRatioStandards =
+                    draftSubmission.draftRevision.formData.modifiedMedicalLossRatioStandards
+                updatedDraftSubmissionFormData.modifiedOtherFinancialPaymentIncentive =
+                    draftSubmission.draftRevision.formData.modifiedOtherFinancialPaymentIncentive
+                updatedDraftSubmissionFormData.modifiedEnrollmentProcess =
+                    draftSubmission.draftRevision.formData.modifiedEnrollmentProcess
+                updatedDraftSubmissionFormData.modifiedGrevienceAndAppeal =
+                    draftSubmission.draftRevision.formData.modifiedGrevienceAndAppeal
+                updatedDraftSubmissionFormData.modifiedNetworkAdequacyStandards =
+                    draftSubmission.draftRevision.formData.modifiedNetworkAdequacyStandards
+                updatedDraftSubmissionFormData.modifiedLengthOfContract =
+                    draftSubmission.draftRevision.formData.modifiedLengthOfContract
+                updatedDraftSubmissionFormData.modifiedNonRiskPaymentArrangements =
+                    draftSubmission.draftRevision.formData.modifiedNonRiskPaymentArrangements
             } else {
-                updatedDraftSubmissionFormData.inLieuServicesAndSettings = undefined
-                updatedDraftSubmissionFormData.modifiedBenefitsProvided = undefined
+                updatedDraftSubmissionFormData.inLieuServicesAndSettings =
+                    undefined
+                updatedDraftSubmissionFormData.modifiedBenefitsProvided =
+                    undefined
                 updatedDraftSubmissionFormData.modifiedGeoAreaServed = undefined
-                updatedDraftSubmissionFormData.modifiedMedicaidBeneficiaries = undefined
-                updatedDraftSubmissionFormData.modifiedRiskSharingStrategy = undefined
-                updatedDraftSubmissionFormData.modifiedIncentiveArrangements = undefined
-                updatedDraftSubmissionFormData.modifiedWitholdAgreements = undefined
-                updatedDraftSubmissionFormData.modifiedStateDirectedPayments = undefined
-                updatedDraftSubmissionFormData.modifiedPassThroughPayments = undefined
-                updatedDraftSubmissionFormData.modifiedPaymentsForMentalDiseaseInstitutions = undefined
-                updatedDraftSubmissionFormData.modifiedMedicalLossRatioStandards = undefined
-                updatedDraftSubmissionFormData.modifiedOtherFinancialPaymentIncentive = undefined
-                updatedDraftSubmissionFormData.modifiedEnrollmentProcess = undefined
-                updatedDraftSubmissionFormData.modifiedGrevienceAndAppeal = undefined
-                updatedDraftSubmissionFormData.modifiedNetworkAdequacyStandards = undefined
-                updatedDraftSubmissionFormData.modifiedLengthOfContract = undefined
-                updatedDraftSubmissionFormData.modifiedNonRiskPaymentArrangements = undefined
+                updatedDraftSubmissionFormData.modifiedMedicaidBeneficiaries =
+                    undefined
+                updatedDraftSubmissionFormData.modifiedRiskSharingStrategy =
+                    undefined
+                updatedDraftSubmissionFormData.modifiedIncentiveArrangements =
+                    undefined
+                updatedDraftSubmissionFormData.modifiedWitholdAgreements =
+                    undefined
+                updatedDraftSubmissionFormData.modifiedStateDirectedPayments =
+                    undefined
+                updatedDraftSubmissionFormData.modifiedPassThroughPayments =
+                    undefined
+                updatedDraftSubmissionFormData.modifiedPaymentsForMentalDiseaseInstitutions =
+                    undefined
+                updatedDraftSubmissionFormData.modifiedMedicalLossRatioStandards =
+                    undefined
+                updatedDraftSubmissionFormData.modifiedOtherFinancialPaymentIncentive =
+                    undefined
+                updatedDraftSubmissionFormData.modifiedEnrollmentProcess =
+                    undefined
+                updatedDraftSubmissionFormData.modifiedGrevienceAndAppeal =
+                    undefined
+                updatedDraftSubmissionFormData.modifiedNetworkAdequacyStandards =
+                    undefined
+                updatedDraftSubmissionFormData.modifiedLengthOfContract =
+                    undefined
+                updatedDraftSubmissionFormData.modifiedNonRiskPaymentArrangements =
+                    undefined
             }
 
             try {
                 const updatedContractInput: UpdateContractDraftRevisionInput = {
                     formData: updatedDraftSubmissionFormData,
                     contractID: draftSubmission.id,
-                    lastSeenUpdatedAt: draftSubmission.draftRevision.updatedAt
+                    lastSeenUpdatedAt: draftSubmission.draftRevision.updatedAt,
                 }
                 const updatedDraft = await updateDraft(updatedContractInput)
                 if (updatedDraft instanceof Error) {

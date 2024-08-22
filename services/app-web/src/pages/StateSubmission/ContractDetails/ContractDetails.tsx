@@ -40,7 +40,7 @@ import {
 import { PageActions } from '../PageActions'
 import {
     activeFormPages,
-    type HealthPlanFormPageProps,
+    type ContractFormPageProps,
 } from '../StateSubmissionForm'
 import {
     formatYesNoForProto,
@@ -155,7 +155,7 @@ export type FormError =
 
 export const ContractDetails = ({
     showValidations = false,
-}: HealthPlanFormPageProps): React.ReactElement => {
+}: ContractFormPageProps): React.ReactElement => {
     const [shouldValidate, setShouldValidate] = React.useState(showValidations)
     const navigate = useNavigate()
     const ldClient = useLDClient()
@@ -197,7 +197,6 @@ export const ContractDetails = ({
                     s3URL: undefined,
                     status: 'UPLOAD_ERROR',
                     sha256: doc.sha256,
-                    dateAdded: doc.dateAdded,
                 }
             }
             return {
@@ -207,7 +206,6 @@ export const ContractDetails = ({
                 s3URL: doc.s3URL,
                 status: 'UPLOAD_COMPLETE',
                 sha256: doc.sha256,
-                dateAdded: doc.dateAdded,
             }
         })
 
