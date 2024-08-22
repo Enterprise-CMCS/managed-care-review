@@ -7,7 +7,7 @@ import {
 } from '../../testHelpers/userHelpers'
 import { v4 as uuidv4 } from 'uuid'
 import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
-import UPDATE_STATE_ASSIGNMENTS from '../../../../app-graphql/src/mutations/updateStateAssignments.graphql'
+import UPDATE_STATE_ASSIGNMENTS from '../../../../app-graphql/src/mutations/updateStateAssignment.graphql'
 import FETCH_MCREVIEW_SETTINGS from '../../../../app-graphql/src/queries/fetchMcReviewSettings.graphql'
 import { assertAnError, must } from '../../testHelpers'
 
@@ -53,13 +53,13 @@ describe('fetchMcReviewSettings', () => {
             },
         })
 
-        if (!assignedOhioCMSUserResult.data?.updateStateAssignments) {
+        if (!assignedOhioCMSUserResult.data?.updateStateAssignment) {
             throw new Error(
-                'Unexpected Error: updateStateAssignments resulted no data'
+                'Unexpected Error: updateStateAssignment resulted no data'
             )
         }
         const assignedOhioCMSUser =
-            assignedOhioCMSUserResult.data.updateStateAssignments.user
+            assignedOhioCMSUserResult.data.updateStateAssignment.user
 
         const assignedTexasCMSUserResult = await server.executeOperation({
             query: UPDATE_STATE_ASSIGNMENTS,
@@ -71,13 +71,13 @@ describe('fetchMcReviewSettings', () => {
             },
         })
 
-        if (!assignedTexasCMSUserResult.data?.updateStateAssignments) {
+        if (!assignedTexasCMSUserResult.data?.updateStateAssignment) {
             throw new Error(
-                'Unexpected Error: updateStateAssignments resulted no data'
+                'Unexpected Error: updateStateAssignment resulted no data'
             )
         }
         const assignedTexasCMSUser =
-            assignedTexasCMSUserResult.data.updateStateAssignments.user
+            assignedTexasCMSUserResult.data.updateStateAssignment.user
 
         const assignedFloridaCMSUserResult = await server.executeOperation({
             query: UPDATE_STATE_ASSIGNMENTS,
@@ -89,13 +89,13 @@ describe('fetchMcReviewSettings', () => {
             },
         })
 
-        if (!assignedFloridaCMSUserResult.data?.updateStateAssignments) {
+        if (!assignedFloridaCMSUserResult.data?.updateStateAssignment) {
             throw new Error(
-                'Unexpected Error: updateStateAssignments resulted no data'
+                'Unexpected Error: updateStateAssignment resulted no data'
             )
         }
         const assignedFloridaCMSUser =
-            assignedFloridaCMSUserResult.data.updateStateAssignments.user
+            assignedFloridaCMSUserResult.data.updateStateAssignment.user
 
         const mcReviewSettings = await server.executeOperation({
             query: FETCH_MCREVIEW_SETTINGS,

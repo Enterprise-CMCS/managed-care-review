@@ -17,18 +17,9 @@ export async function findAllSupportedStates(
             include: {
                 users: {
                     where: {
-                        OR: [
-                            {
-                                role: {
-                                    equals: 'CMS_USER',
-                                },
-                            },
-                            {
-                                role: {
-                                    equals: 'CMS_APPROVER_USER',
-                                },
-                            },
-                        ],
+                        role: {
+                            in: ['CMS_USER', 'CMS_APPROVER_USER'],
+                        },
                     },
                     include: {
                         stateAssignments: true,

@@ -12,14 +12,14 @@ import { isValidStateCode } from '../../common-code/healthPlanFormDataType'
 import { NotFoundError } from '../../postgres'
 import { GraphQLError } from 'graphql/index'
 
-export function updateStateAssignments(
+export function updateStateAssignment(
     store: Store
-): MutationResolvers['updateStateAssignments'] {
+): MutationResolvers['updateStateAssignment'] {
     return async (_parent, { input }, context) => {
         const { user: currentUser, ctx, tracer } = context
-        const span = tracer?.startSpan('updateStateAssignments', {}, ctx)
+        const span = tracer?.startSpan('updateStateAssignment', {}, ctx)
         setResolverDetailsOnActiveSpan(
-            'updateStateAssignments',
+            'updateStateAssignment',
             currentUser,
             span
         )
@@ -30,7 +30,7 @@ export function updateStateAssignments(
             !hasCMSPermissions(currentUser)
         ) {
             const msg = 'user not authorized to modify assignments'
-            logError('updateStateAssignments', msg)
+            logError('updateStateAssignment', msg)
             setErrorAttributesOnActiveSpan(msg, span)
             throw new ForbiddenError(msg, {
                 cause: 'NOT_AUTHORIZED',
@@ -60,7 +60,7 @@ export function updateStateAssignments(
 
                 const errMsg =
                     'cannot update state assignments with invalid assignments'
-                logError('updateStateAssignments', errMsg)
+                logError('updateStateAssignment', errMsg)
                 setErrorAttributesOnActiveSpan(errMsg, span)
                 throw new UserInputError(errMsg, {
                     argumentName: 'stateAssignments',
@@ -70,7 +70,7 @@ export function updateStateAssignments(
             }
         } else {
             const msg = 'cannot update state assignments with no assignments'
-            logError('updateStateAssignments', msg)
+            logError('updateStateAssignment', msg)
             setErrorAttributesOnActiveSpan(msg, span)
             throw new UserInputError(msg, {
                 argumentName: 'stateAssignments',
@@ -90,7 +90,7 @@ export function updateStateAssignments(
         if (result instanceof Error) {
             if (result instanceof NotFoundError) {
                 const errMsg = 'cmsUserID does not exist'
-                logError('updateStateAssignments', errMsg)
+                logError('updateStateAssignment', errMsg)
                 setErrorAttributesOnActiveSpan(errMsg, span)
                 throw new UserInputError(errMsg, {
                     argumentName: 'cmsUserID',
@@ -100,7 +100,7 @@ export function updateStateAssignments(
             }
 
             const errMsg = `Issue assigning states to user. Message: ${result.message}`
-            logError('updateStateAssignments', errMsg)
+            logError('updateStateAssignment', errMsg)
             setErrorAttributesOnActiveSpan(errMsg, span)
             throw new GraphQLError(errMsg, {
                 extensions: {
@@ -111,7 +111,7 @@ export function updateStateAssignments(
         }
         if (!result) {
             const errMsg = 'Failed to update user'
-            logError('updateStateAssignments', errMsg)
+            logError('updateStateAssignment', errMsg)
             setErrorAttributesOnActiveSpan(errMsg, span)
             throw new GraphQLError(errMsg, {
                 extensions: {

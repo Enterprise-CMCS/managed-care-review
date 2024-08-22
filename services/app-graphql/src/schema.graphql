@@ -342,7 +342,7 @@ type Mutation {
     updateDivisionAssignment(input: UpdateDivisionAssignmentInput!): UpdateCMSUserPayload!
 
     """
-    updateStateAssignments updates CMSUser state assignments.
+    updateStateAssignment updates CMSUser state assignments.
 
     This can only be called by an AdminUser or a DMCO CMS user.
     The cmsUserID must be a CMSUser's id, not a state user
@@ -355,7 +355,7 @@ type Mutation {
     - cmsUserID was not a CMSUser's ID
     - stateCodes included an invalid state code
     """
-    updateStateAssignments(input: UpdateStateAssignmentsInput!): UpdateCMSUserPayload!
+    updateStateAssignment(input: UpdateStateAssignmentInput!): UpdateCMSUserPayload!
 
     """
     createQuestion creates a new Question for the given HealthPlanPackage
@@ -750,7 +750,7 @@ input UpdateDivisionAssignmentInput {
     divisionAssignment: Division
 }
 
-input UpdateStateAssignmentsInput {
+input UpdateStateAssignmentInput {
     cmsUserID: ID!
     "stateAssignments is an array of stateCodes (e.g. ['CA', 'NM', 'TN'])"
     stateAssignments: [String!]

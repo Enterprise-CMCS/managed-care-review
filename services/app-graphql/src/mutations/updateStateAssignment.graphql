@@ -1,5 +1,5 @@
-mutation updateStateAssignments($input: UpdateStateAssignmentsInput!) {
-    updateStateAssignments(input: $input) {
+mutation updateStateAssignment($input: UpdateStateAssignmentInput!) {
+    updateStateAssignment(input: $input) {
         user {
             __typename
             ... on CMSUser {

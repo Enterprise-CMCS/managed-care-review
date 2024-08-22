@@ -10,7 +10,7 @@ import { v4 as uuidv4 } from 'uuid'
 import type { InsertUserArgsType } from '../../postgres'
 import { NewPostgresStore } from '../../postgres'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
-import UPDATE_STATE_ASSIGNMENTS from '../../../../app-graphql/src/mutations/updateStateAssignments.graphql'
+import UPDATE_STATE_ASSIGNMENTS from '../../../../app-graphql/src/mutations/updateStateAssignment.graphql'
 import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
 import type { State } from '../../gen/gqlServer'
 import {
@@ -130,7 +130,7 @@ describe.each(authorizedUserTests)(
                 throw new Error('no data')
             }
 
-            const user = updateRes.data.updateStateAssignments.user
+            const user = updateRes.data.updateStateAssignment.user
             expect(user.email).toBe(newUser.email)
             expect(user.stateAssignments).toHaveLength(1)
             expect(user.stateAssignments[0].code).toBe('CA')
@@ -154,7 +154,7 @@ describe.each(authorizedUserTests)(
                 throw new Error('no data')
             }
 
-            const user2 = updateRes2.data.updateStateAssignments.user
+            const user2 = updateRes2.data.updateStateAssignment.user
             expect(user2.email).toBe(newUser.email)
             expect(user2.stateAssignments).toHaveLength(2)
             expect(user2.stateAssignments.map((s: State) => s.code)).toEqual(
@@ -330,7 +330,7 @@ describe.each(authorizedUserTests)(
 )
 
 describe.each(unauthorizedUserTests)(
-    'updateStateAssignments as $userType tests',
+    'updateStateAssignment as $userType tests',
     ({ mockUser, userType }) => {
         it(`errors if called by a ${userType}`, async () => {
             const prismaClient = await sharedTestPrismaClient()
