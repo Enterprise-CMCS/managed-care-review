@@ -15,9 +15,7 @@ import { mockInsertRateArgs } from '../../testHelpers/rateDataMocks'
 import { convertContractToDraftRateRevisions } from '../../domain-models/contractAndRates/convertContractWithRatesToHPP'
 import { updateDraftContractRates } from './updateDraftContractRates'
 
-// TODO: Enable these tests again after reimplementing rate change history that was in contractWithHistoryToDomainModel
-// eslint-disable-next-line jest/no-disabled-tests
-describe.skip('findContractWithHistory with full contract and rate history', () => {
+describe('findContractWithHistory with full contract and rate history', () => {
     it('finds a stripped down contract with history', async () => {
         const client = await sharedTestPrismaClient()
 
@@ -49,13 +47,6 @@ describe.skip('findContractWithHistory with full contract and rate history', () 
         const contractA = must(
             await insertDraftContract(client, draftContractData)
         )
-        must(
-            await submitContract(client, {
-                contractID: contractA.id,
-                submittedByUserID: stateUser.id,
-                submittedReason: 'initial submit',
-            })
-        )
 
         // Add 3 rates 1, 2, 3 pointing to contract A
         const rate1 = must(
@@ -69,13 +60,6 @@ describe.skip('findContractWithHistory with full contract and rate history', () 
                 rateID: rate1.id,
                 formData: { rateCertificationName: 'someurle.en' },
                 contractIDs: [contractA.id],
-            })
-        )
-        must(
-            await submitRate(client, {
-                rateID: rate1.id,
-                submittedByUserID: stateUser.id,
-                submittedReason: 'Rate Submit',
             })
         )
 
@@ -92,13 +76,6 @@ describe.skip('findContractWithHistory with full contract and rate history', () 
                 contractIDs: [contractA.id],
             })
         )
-        must(
-            await submitRate(client, {
-                rateID: rate2.id,
-                submittedByUserID: stateUser.id,
-                submittedReason: 'RateSubmit 2',
-            })
-        )
 
         const rate3 = must(
             await insertDraftRate(client, contractA.id, {
@@ -113,11 +90,12 @@ describe.skip('findContractWithHistory with full contract and rate history', () 
                 contractIDs: [contractA.id],
             })
         )
+
         must(
-            await submitRate(client, {
-                rateID: rate3.id,
+            await submitContract(client, {
+                contractID: contractA.id,
                 submittedByUserID: stateUser.id,
-                submittedReason: '3.0 create',
+                submittedReason: 'initial submit',
             })
         )
 
@@ -128,7 +106,7 @@ describe.skip('findContractWithHistory with full contract and rate history', () 
         if (threeContract instanceof Error) {
             throw threeContract
         }
-        expect(threeContract.revisions).toHaveLength(4)
+        expect(threeContract.packageSubmissions).toHaveLength(1)
 
         // remove the connection from rate 2
         must(
@@ -160,7 +138,7 @@ describe.skip('findContractWithHistory with full contract and rate history', () 
         if (twoContract instanceof Error) {
             throw twoContract
         }
-        expect(twoContract.revisions).toHaveLength(5)
+        expect(twoContract.packageSubmissions).toHaveLength(2)
         expect(twoContract.packageSubmissions[0].rateRevisions).toHaveLength(2)
 
         // update rate 1 to have a new version, should make one new rev.
@@ -193,7 +171,7 @@ describe.skip('findContractWithHistory with full contract and rate history', () 
         if (backAgainContract instanceof Error) {
             throw backAgainContract
         }
-        expect(backAgainContract.revisions).toHaveLength(6)
+        expect(backAgainContract.packageSubmissions).toHaveLength(3)
 
         // Make a new Contract Revision, should show up as a single new rev with all the old info
         must(
@@ -218,7 +196,7 @@ describe.skip('findContractWithHistory with full contract and rate history', () 
         if (testingContract instanceof Error) {
             throw testingContract
         }
-        expect(testingContract.revisions).toHaveLength(7)
+        expect(testingContract.packageSubmissions).toHaveLength(4)
 
         // Make a new Contract Revision, changing the connections should show up as a single new rev.
         const unlockedContractA = must(
@@ -289,7 +267,7 @@ describe.skip('findContractWithHistory with full contract and rate history', () 
         if (testingContract instanceof Error) {
             throw testingContract
         }
-        expect(testingContract.revisions).toHaveLength(8)
+        expect(testingContract.packageSubmissions).toHaveLength(5)
 
         // Now, find that contract and assert the history is what we expected
         const resultingContract = must(
@@ -302,89 +280,77 @@ describe.skip('findContractWithHistory with full contract and rate history', () 
         const submissionsInTimeOrder =
             resultingContract.packageSubmissions.reverse()
 
-        console.info(
-            'ALL First REvisions: ',
-            JSON.stringify(submissionsInTimeOrder, null, '  ')
-        )
+        // console.info(
+        //     'ALL First REvisions: ',
+        //     JSON.stringify(submissionsInTimeOrder, null, '  ')
+        // )
 
-        // Each Revision needs a Reason, one of the contracts or revisions associated with it should have changed and why.
-
-        expect(submissionsInTimeOrder).toHaveLength(8)
-        expect(submissionsInTimeOrder[0].rateRevisions).toHaveLength(0)
-        // expect(submissionsInTimeOrder[0].unlockInfo).toBeUndefined()
+        // Each submission needs a Reason, one of the contracts or revisions associated with it should have changed and why.
+        expect(submissionsInTimeOrder).toHaveLength(5)
+        expect(
+            submissionsInTimeOrder[0].contractRevision.unlockInfo
+        ).toBeUndefined()
+        expect(submissionsInTimeOrder[0].rateRevisions).toHaveLength(3)
         expect(submissionsInTimeOrder[0].submitInfo?.updatedReason).toBe(
             'initial submit'
         )
 
-        expect(submissionsInTimeOrder[1].rateRevisions).toHaveLength(1)
-        // expect(submissionsInTimeOrder[1].unlockInfo).toBeUndefined()
+        expect(submissionsInTimeOrder[1].rateRevisions).toHaveLength(2)
+        expect(
+            submissionsInTimeOrder[1].contractRevision.unlockInfo
+        ).toBeUndefined()
+        expect(
+            submissionsInTimeOrder[1].submittedRevisions[0].unlockInfo
+                ?.updatedReason
+        ).toBe('unlock for 2.1 remove')
+        expect(
+            submissionsInTimeOrder[1].submittedRevisions[0].unlockInfo
+                ?.updatedBy.email
+        ).toBe('zuko@example.com')
         expect(submissionsInTimeOrder[1].submitInfo?.updatedReason).toBe(
-            'Rate Submit'
-        )
-
-        expect(submissionsInTimeOrder[2].rateRevisions).toHaveLength(2)
-        // expect(submissionsInTimeOrder[2].unlockInfo).toBeUndefined()
-        expect(submissionsInTimeOrder[2].submitInfo?.updatedReason).toBe(
-            'RateSubmit 2'
-        )
-
-        expect(submissionsInTimeOrder[3].rateRevisions).toHaveLength(3)
-        // expect(submissionsInTimeOrder[3].unlockInfo).toBeUndefined()
-        expect(submissionsInTimeOrder[3].submitInfo?.updatedReason).toBe(
-            '3.0 create'
-        )
-
-        expect(submissionsInTimeOrder[4].rateRevisions).toHaveLength(2)
-        // expect(submissionsInTimeOrder[4].unlockInfo?.updatedReason).toBe(
-        //     'unlock for 2.1 remove'
-        // )
-        // expect(submissionsInTimeOrder[4].unlockInfo?.updatedBy).toBe(
-        //     'zuko@example.com'
-        // )
-        expect(submissionsInTimeOrder[4].submitInfo?.updatedReason).toBe(
             '2.1 remove'
         )
 
-        expect(submissionsInTimeOrder[5].rateRevisions).toHaveLength(2)
+        expect(submissionsInTimeOrder[2].rateRevisions).toHaveLength(2)
         expect(
-            submissionsInTimeOrder[5].rateRevisions[1].formData
+            submissionsInTimeOrder[2].rateRevisions[0].formData
                 .rateCertificationName
         ).toBe('onepointone')
-        // expect(submissionsInTimeOrder[5].unlockInfo?.updatedReason).toBe(
-        //     'unlock for 1.1'
-        // )
-        expect(submissionsInTimeOrder[5].submitInfo?.updatedReason).toBe(
+        expect(
+            submissionsInTimeOrder[2].rateRevisions[0].unlockInfo?.updatedReason
+        ).toBe('unlock for 1.1')
+        expect(submissionsInTimeOrder[2].submitInfo?.updatedReason).toBe(
             '1.1 new name'
         )
 
-        expect(submissionsInTimeOrder[6].rateRevisions).toHaveLength(2)
-        expect(submissionsInTimeOrder[6].submitInfo?.updatedReason).toBe(
+        expect(submissionsInTimeOrder[3].rateRevisions).toHaveLength(2)
+        expect(submissionsInTimeOrder[3].submitInfo?.updatedReason).toBe(
             'Submitting A.1'
         )
 
-        expect(submissionsInTimeOrder[7].rateRevisions).toHaveLength(1)
-        expect(submissionsInTimeOrder[7].contractRevision.formData).toEqual(
+        expect(submissionsInTimeOrder[4].rateRevisions).toHaveLength(1)
+        expect(submissionsInTimeOrder[4].contractRevision.formData).toEqual(
             expect.objectContaining({
                 submissionType: 'CONTRACT_AND_RATES',
                 submissionDescription: 'a.2 body',
             })
         )
-        expect(submissionsInTimeOrder[7].submitInfo?.updatedReason).toBe(
+        expect(submissionsInTimeOrder[4].submitInfo?.updatedReason).toBe(
             'Submitting A.2'
         )
 
         // check for rate and see if it handles the removed bit right
-
         const rate1fetched = await findRateWithHistory(client, rate1.id)
         if (rate1fetched instanceof Error) {
             throw rate1fetched
         }
 
-        expect(rate1fetched.revisions).toHaveLength(4)
-        expect(rate1fetched.revisions[0].submitInfo?.updatedReason).toBe(
-            'Submitting A.2'
-        )
+        expect(rate1fetched.packageSubmissions).toHaveLength(4)
+        expect(
+            rate1fetched.packageSubmissions[0].submitInfo?.updatedReason
+        ).toBe('Submitting A.2')
     })
+
     it('finds a full contract', async () => {
         const client = await sharedTestPrismaClient()
 
@@ -416,13 +382,6 @@ describe.skip('findContractWithHistory with full contract and rate history', () 
         const contractA = must(
             await insertDraftContract(client, draftContractData)
         )
-        must(
-            await submitContract(client, {
-                contractID: contractA.id,
-                submittedByUserID: stateUser.id,
-                submittedReason: 'initial submit',
-            })
-        )
 
         // Add 3 rates 1, 2, 3 pointing to contract A
         const rate1 = must(
@@ -442,13 +401,6 @@ describe.skip('findContractWithHistory with full contract and rate history', () 
                 }
             )
         )
-        must(
-            await submitRate(client, {
-                rateID: rate1.id,
-                submittedByUserID: stateUser.id,
-                submittedReason: 'Rate Submit',
-            })
-        )
 
         const rate2 = must(
             await insertDraftRate(client, contractA.id, {
@@ -461,13 +413,6 @@ describe.skip('findContractWithHistory with full contract and rate history', () 
                 rateID: rate2.id,
                 formData: { rateCertificationName: 'twopointone' },
                 contractIDs: [contractA.id],
-            })
-        )
-        must(
-            await submitRate(client, {
-                rateID: rate2.id,
-                submittedByUserID: stateUser.id,
-                submittedReason: 'RateSubmit 2',
             })
         )
 
@@ -484,11 +429,12 @@ describe.skip('findContractWithHistory with full contract and rate history', () 
                 contractIDs: [contractA.id],
             })
         )
+
         must(
-            await submitRate(client, {
-                rateID: rate3.id,
+            await submitContract(client, {
+                contractID: contractA.id,
                 submittedByUserID: stateUser.id,
-                submittedReason: '3.0 create',
+                submittedReason: 'initial submit',
             })
         )
 
@@ -629,68 +575,55 @@ describe.skip('findContractWithHistory with full contract and rate history', () 
         const submissionsInTimeOrder =
             resultingContract.packageSubmissions.reverse()
 
-        console.info(
-            'ALL First REvisions: ',
-            JSON.stringify(submissionsInTimeOrder, null, '  ')
-        )
+        // console.info(
+        //     'ALL First REvisions: ',
+        //     JSON.stringify(submissionsInTimeOrder, null, '  ')
+        // )
 
         // Each Revision needs a Reason, one of the contracts or revisions associated with it should have changed and why.
-
-        expect(submissionsInTimeOrder).toHaveLength(8)
-        expect(submissionsInTimeOrder[0].rateRevisions).toHaveLength(0)
+        expect(submissionsInTimeOrder).toHaveLength(5)
+        expect(submissionsInTimeOrder[0].rateRevisions).toHaveLength(3)
         expect(submissionsInTimeOrder[0].submitInfo?.updatedReason).toBe(
             'initial submit'
         )
 
-        expect(submissionsInTimeOrder[1].rateRevisions).toHaveLength(1)
-        expect(submissionsInTimeOrder[1].submitInfo?.updatedReason).toBe(
-            'Rate Submit'
-        )
+        expect(submissionsInTimeOrder[1].rateRevisions).toHaveLength(2)
 
         expect(submissionsInTimeOrder[2].rateRevisions).toHaveLength(2)
-        expect(submissionsInTimeOrder[2].submitInfo?.updatedReason).toBe(
-            'RateSubmit 2'
-        )
-
-        expect(submissionsInTimeOrder[3].rateRevisions).toHaveLength(3)
-        expect(submissionsInTimeOrder[4].rateRevisions).toHaveLength(2)
-
-        expect(submissionsInTimeOrder[5].rateRevisions).toHaveLength(2)
         expect(
-            submissionsInTimeOrder[5].rateRevisions[1].formData
+            submissionsInTimeOrder[2].rateRevisions[0].formData
                 .rateCertificationName
         ).toBe('onepointone')
-        expect(submissionsInTimeOrder[5].submitInfo?.updatedReason).toBe(
+        expect(submissionsInTimeOrder[2].submitInfo?.updatedReason).toBe(
             '1.1 new name'
         )
 
-        expect(submissionsInTimeOrder[6].rateRevisions).toHaveLength(2)
-        expect(submissionsInTimeOrder[6].submitInfo?.updatedReason).toBe(
+        expect(submissionsInTimeOrder[3].rateRevisions).toHaveLength(2)
+        expect(submissionsInTimeOrder[3].submitInfo?.updatedReason).toBe(
             'Submitting A.1'
         )
 
-        expect(submissionsInTimeOrder[7].rateRevisions).toHaveLength(1)
-        expect(submissionsInTimeOrder[7].contractRevision.formData).toEqual(
+        expect(submissionsInTimeOrder[4].rateRevisions).toHaveLength(1)
+        expect(submissionsInTimeOrder[4].contractRevision.formData).toEqual(
             expect.objectContaining({
                 submissionType: 'CONTRACT_AND_RATES',
                 submissionDescription: 'a.2 body',
             })
         )
-        expect(submissionsInTimeOrder[7].submitInfo?.updatedReason).toBe(
+        expect(submissionsInTimeOrder[4].submitInfo?.updatedReason).toBe(
             'Submitting A.2'
         )
 
         // check for rate and see if it handles the removed bit right
-
         const rate1fetched = await findRateWithHistory(client, rate1.id)
         if (rate1fetched instanceof Error) {
             throw rate1fetched
         }
 
-        expect(rate1fetched.revisions).toHaveLength(4)
-        expect(rate1fetched.revisions[0].submitInfo?.updatedReason).toBe(
-            'Submitting A.2'
-        )
+        expect(rate1fetched.packageSubmissions).toHaveLength(4)
+        expect(
+            rate1fetched.packageSubmissions[0].submitInfo?.updatedReason
+        ).toBe('Submitting A.2')
     })
     it('handles drafts correctly', async () => {
         const client = await sharedTestPrismaClient()
@@ -727,6 +660,11 @@ describe.skip('findContractWithHistory with full contract and rate history', () 
             stateCode: 'MN',
             rateCertificationName: 'twopoint0',
         })
+        const rate3 = mockInsertRateArgs({
+            id: uuidv4(),
+            stateCode: 'MN',
+            rateCertificationName: 'threepoint0',
+        })
 
         // add a contract that has both of them.
         const draftContractData = mockInsertContractArgs({
@@ -735,7 +673,7 @@ describe.skip('findContractWithHistory with full contract and rate history', () 
         const contractA = must(
             await insertDraftContract(client, draftContractData)
         )
-        const updatedDraftContractWithRates = must(
+        must(
             await updateDraftContractFormData(client, {
                 contractID: contractA.id,
                 formData: {
@@ -749,7 +687,7 @@ describe.skip('findContractWithHistory with full contract and rate history', () 
             })
         )
 
-        must(
+        const updatedDraftContractAWithRates = must(
             await updateDraftContractRates(client, {
                 contractID: contractA.id,
                 rateUpdates: {
@@ -771,27 +709,19 @@ describe.skip('findContractWithHistory with full contract and rate history', () 
             })
         )
 
-        must(
-            await submitContract(client, {
-                contractID: contractA.id,
-                submittedByUserID: stateUser.id,
-                submittedReason: 'Submitting A.2',
-            })
-        )
-
-        if (!updatedDraftContractWithRates.draftRevision) {
+        if (!updatedDraftContractAWithRates.draftRevision) {
             throw new Error(
                 'Unexpected error: draftRevision does not exist in contract'
             )
         }
-        if (!updatedDraftContractWithRates.draftRates) {
+        if (!updatedDraftContractAWithRates.draftRates) {
             throw new Error('Unexpected error: revisions missing draftRates')
         }
 
         const draftRateRevisionData1 =
-            updatedDraftContractWithRates.draftRates[0].draftRevision?.formData
+            updatedDraftContractAWithRates.draftRates[0].draftRevision?.formData
         const draftRateRevisionData2 =
-            updatedDraftContractWithRates.draftRates[1].draftRevision?.formData
+            updatedDraftContractAWithRates.draftRates[1].draftRevision?.formData
 
         if (
             !draftRateRevisionData1?.rateID ||
@@ -799,23 +729,6 @@ describe.skip('findContractWithHistory with full contract and rate history', () 
         ) {
             throw new Error('Unexpected error: rate revision is missing rateID')
         }
-
-        // submit both rates
-        must(
-            await submitRate(client, {
-                rateID: draftRateRevisionData1.rateID,
-                submittedByUserID: stateUser.id,
-                submittedReason: 'Rate Submit',
-            })
-        )
-
-        const submittedRate2 = must(
-            await submitRate(client, {
-                rateID: draftRateRevisionData2.rateID,
-                submittedByUserID: stateUser.id,
-                submittedReason: 'Rate Submit 2',
-            })
-        )
 
         // submit contract
         must(
@@ -826,10 +739,52 @@ describe.skip('findContractWithHistory with full contract and rate history', () 
             })
         )
 
-        // Unlock contract A, but don't resubmit it yet.
+        const rate1ID = updatedDraftContractAWithRates.draftRates[0].id
+
+        // add a contract that has both of them.
+        const draftContractBData = mockInsertContractArgs({
+            submissionDescription: 'two contract',
+        })
+        const contractB = must(
+            await insertDraftContract(client, draftContractBData)
+        )
+
+        must(
+            await updateDraftContractRates(client, {
+                contractID: contractB.id,
+                rateUpdates: {
+                    create: [
+                        {
+                            formData: rate3,
+                            ratePosition: 1,
+                        },
+                    ],
+                    update: [],
+                    link: [
+                        {
+                            rateID: rate1ID,
+                            ratePosition: 2,
+                        },
+                    ],
+                    unlink: [],
+                    delete: [],
+                },
+            })
+        )
+
+        // submit contract
+        must(
+            await submitContract(client, {
+                contractID: contractB.id,
+                submittedByUserID: stateUser.id,
+                submittedReason: 'initial submit',
+            })
+        )
+
+        // Unlock contract B, but don't resubmit it yet.
         must(
             await unlockContract(client, {
-                contractID: contractA.id,
+                contractID: contractB.id,
                 unlockedByUserID: cmsUser.id,
                 unlockReason: 'unlock A Open',
             })
@@ -837,47 +792,54 @@ describe.skip('findContractWithHistory with full contract and rate history', () 
 
         // Draft should pull revision 2.0 out
         const draftPreRateUnlock = must(
-            await findContractWithHistory(client, contractA.id)
+            await findContractWithHistory(client, contractB.id)
         )
         expect(draftPreRateUnlock.draftRevision).toBeDefined()
         expect(
             draftPreRateUnlock.draftRates &&
                 draftPreRateUnlock.draftRates.map(
-                    (rr) => rr?.draftRevision?.formData.rateCertificationName
+                    (rr) =>
+                        rr?.draftRevision?.formData.rateCertificationName ||
+                        rr.packageSubmissions[0].rateRevision.formData
+                            .rateCertificationName
                 )
-        ).toEqual(['onepoint0', 'twopoint0'])
+        ).toEqual(['threepoint0', 'onepoint0'])
 
-        // unlock and submit second rate rev
+        // unlock and submit second rate one
         must(
             await unlockRate(client, {
-                rateID: submittedRate2.id,
+                rateID: rate1ID,
                 unlockedByUserID: cmsUser.id,
                 unlockReason: 'unlock for 2.1',
             })
         )
         must(
             await updateDraftRate(client, {
-                rateID: submittedRate2.id,
-                formData: { rateCertificationName: 'twopointone' },
-                contractIDs: [contractA.id],
+                rateID: rate1ID,
+                formData: { rateCertificationName: 'onepointone' },
+                contractIDs: [contractA.id, contractB.id],
             })
         )
 
         // Draft should now pull draft revision 2.1 out, even though its unsubmitted
         const draftPreRateSubmit = must(
-            await findContractWithHistory(client, contractA.id)
+            await findContractWithHistory(client, contractB.id)
         )
         expect(draftPreRateSubmit.draftRevision).toBeDefined()
         expect(
-            convertContractToDraftRateRevisions(draftPreRateSubmit).map(
-                (rr) => rr.formData.rateCertificationName
-            )
-        ).toEqual(['onepoint0', 'twopointone'])
+            draftPreRateSubmit.draftRates &&
+                draftPreRateSubmit.draftRates.map(
+                    (rr) =>
+                        rr?.draftRevision?.formData.rateCertificationName ||
+                        rr.packageSubmissions[0].rateRevision.formData
+                            .rateCertificationName
+                )
+        ).toEqual(['threepoint0', 'onepointone'])
 
         // Submit Rate 2.1
         must(
             await submitRate(client, {
-                rateID: submittedRate2.id,
+                rateID: rate1ID,
                 submittedByUserID: stateUser.id,
                 submittedReason: '2.1 update',
             })
@@ -885,42 +847,41 @@ describe.skip('findContractWithHistory with full contract and rate history', () 
 
         // raft should still pull revision 2.1 out
         const draftPostRateSubmit = must(
-            await findContractWithHistory(client, contractA.id)
+            await findContractWithHistory(client, contractB.id)
         )
         expect(draftPostRateSubmit.draftRevision).toBeDefined()
         expect(
-            convertContractToDraftRateRevisions(draftPostRateSubmit).map(
-                (rr) => rr.formData.rateCertificationName
-            )
-        ).toEqual(['onepoint0', 'twopointone'])
+            draftPreRateSubmit.draftRates &&
+                draftPreRateSubmit.draftRates.map(
+                    (rr) =>
+                        rr?.draftRevision?.formData.rateCertificationName ||
+                        rr.packageSubmissions[0].rateRevision.formData
+                            .rateCertificationName
+                )
+        ).toEqual(['threepoint0', 'onepointone'])
 
-        // submit contract A1, now, should show up as a single new rev and have the latest rates
+        // submit contract B1, now, should show up as a single new rev and have the latest rates
         must(
             await submitContract(client, {
-                contractID: contractA.id,
+                contractID: contractB.id,
                 submittedByUserID: stateUser.id,
                 submittedReason: 'third submit',
             })
         )
 
         // attempt a second submission, should result in an error.
-        const contractA_1_Error = await submitContract(client, {
-            contractID: contractA.id,
+        const contractB_1_Error = await submitContract(client, {
+            contractID: contractB.id,
             submittedByUserID: stateUser.id,
             submittedReason: 'third submit',
         })
-        if (!(contractA_1_Error instanceof Error)) {
+        if (!(contractB_1_Error instanceof Error)) {
             throw new Error('Should be impossible to submit twice in a row.')
         }
 
-        const res = must(await findContractWithHistory(client, contractA.id))
+        const res = must(await findContractWithHistory(client, contractB.id))
 
         const submissionsInTimeOrder = res.packageSubmissions.reverse()
-
-        console.info(
-            'ALL First REvisions: ',
-            JSON.stringify(submissionsInTimeOrder, null, '  ')
-        )
 
         expect(submissionsInTimeOrder).toHaveLength(3)
         expect(submissionsInTimeOrder[0].rateRevisions).toHaveLength(2)
@@ -944,14 +905,14 @@ describe.skip('findContractWithHistory with full contract and rate history', () 
                 (rr) => rr.formData.rateCertificationName
             )
         )
-        const expectedFormDatas = new Set(['onepoint0', 'twopointone'])
+        const expectedFormDatas = new Set(['threepoint0', 'onepointone'])
         expect(revisionFormDatas).toStrictEqual(expectedFormDatas)
     })
 })
 
 describe('findContractWithHistory with only contract history', () => {
     // eslint-disable-next-line jest/no-disabled-tests
-    it.skip('matches correct rate revisions to contract revision with independent rate unlocks and submits', async () => {
+    it('matches correct rate revisions to contract revision with independent rate unlocks and submits', async () => {
         const client = await sharedTestPrismaClient()
 
         const stateUser = await client.user.create({
@@ -1136,12 +1097,6 @@ describe('findContractWithHistory with only contract history', () => {
             'submit contract revision 1.0'
         )
 
-        // Expect latest contract revisions matching rate revision to be version 1.3
-        expect(
-            submittedContract.packageSubmissions[1].rateRevisions[0].submitInfo
-                ?.updatedReason
-        ).toBe('submit rate A revision 1.3')
-
         // Add a second rate to contract and submit
         const unlockedContract = must(
             await unlockContract(client, {
@@ -1260,16 +1215,9 @@ describe('findContractWithHistory with only contract history', () => {
         expect(submittedContract.revisions[1].submitInfo?.updatedReason).toBe(
             'submit contract revision 1.1'
         )
-        expect(
-            submittedContract.packageSubmissions[1].rateRevisions[0].submitInfo
-                ?.updatedReason
-        ).toBe('submit rate A revision 1.5')
+
         expect(submittedContract.revisions[2].submitInfo?.updatedReason).toBe(
             'submit contract revision 1.0'
         )
-        expect(
-            submittedContract.packageSubmissions[2].rateRevisions[0].submitInfo
-                ?.updatedReason
-        ).toBe('submit rate A revision 1.3')
     })
 })
