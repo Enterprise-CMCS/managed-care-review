@@ -15,6 +15,7 @@ import {
     fetchContractMockFail,
     mockContractPackageDraft,
     updateContractDraftRevisionMockFail,
+    mockContractPackageUnlockedWithUnlockedType,
 } from '../../testHelpers/apolloMocks'
 import {
     fetchHealthPlanPackageMockSuccess,
@@ -24,6 +25,7 @@ import {
 } from '../../testHelpers/apolloMocks/healthPlanPackageGQLMock'
 // some spies will not work with indexed exports, so I refactored to import them directly from their files
 import { renderWithProviders } from '../../testHelpers/jestHelpers'
+import * as useContractForm from '../../hooks/useContractForm'
 
 import { StateSubmissionForm } from './StateSubmissionForm'
 import {
@@ -34,10 +36,20 @@ import { testS3Client } from '../../testHelpers/s3Helpers'
 import { getYesNoFieldValue } from '../../testHelpers/fieldHelpers'
 import { SubmissionSideNav } from '../SubmissionSideNav'
 import { fetchStateHealthPlanPackageWithQuestionsMockSuccess } from '../../testHelpers/apolloMocks'
+const mockUpdateDraftFn = vi.fn()
 
 describe('StateSubmissionForm', () => {
+    beforeEach(() => {
+        vi.spyOn(useContractForm, 'useContractForm').mockReturnValue({
+            updateDraft: mockUpdateDraftFn,
+            createDraft: vi.fn(),
+            showPageErrorMessage: false,
+            draftSubmission: mockContractPackageUnlockedWithUnlockedType(),
+        })
+    })
     afterEach(() => {
         vi.clearAllMocks()
+        vi.spyOn(useContractForm, 'useContractForm').mockRestore()
     })
     describe('loads draft submission', () => {
         it('redirects user to submission summary page when status is submitted', async () => {
@@ -77,16 +89,27 @@ describe('StateSubmissionForm', () => {
         })
 
         it('loads submission type fields for /submissions/edit/type', async () => {
+            const mockDraft = mockContractPackageUnlockedWithUnlockedType()
+            mockDraft.draftRevision.formData.submissionDescription =
+                'A real submission'
+            mockDraft.draftRevision.formData.submissionType = 'CONTRACT_ONLY'
+            mockDraft.draftRevision.formData.submissionDescription =
+                'A real submission'
+            mockDraft.draftRevision.formData.programIDs = [
+                'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
+            ]
+            vi.spyOn(useContractForm, 'useContractForm').mockReturnValue({
+                updateDraft: mockUpdateDraftFn,
+                createDraft: vi.fn(),
+                showPageErrorMessage: false,
+                draftSubmission: mockDraft,
+            })
             const mockSubmission = mockDraftHealthPlanPackage({
                 submissionDescription: 'A real submission',
                 submissionType: 'CONTRACT_ONLY',
                 programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
             })
-            const mockDraftContract = mockContractPackageDraft()
-            mockDraftContract.draftRevision!.formData.submissionType = 'CONTRACT_ONLY'
-            mockDraftContract.draftRevision!.formData.submissionDescription = 'A real submission'
-            mockDraftContract.draftRevision!.formData.programIDs = ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce']
-            
+
             renderWithProviders(
                 <Routes>
                     <Route element={<SubmissionSideNav />}>
@@ -110,12 +133,6 @@ describe('StateSubmissionForm', () => {
                                     id: '15',
                                 }
                             ),
-                            fetchContractMockSuccess({
-                                contract: {
-                                    ...mockDraftContract,
-                                    id: '15',
-                                },
-                            }),
                         ],
                     },
                     routerProvider: { route: '/submissions/15/edit/type' },
@@ -135,78 +152,6 @@ describe('StateSubmissionForm', () => {
             // in react-select, only items that are selected have a "remove item" label
             await waitFor(() => {
                 expect(screen.getByLabelText('Remove SNBC')).toBeInTheDocument()
-            })
-        })
-
-        it('loads contract details fields for /submissions/:id/edit/contract-details with amendments', async () => {
-            const mockSubmission = mockDraftHealthPlanPackage()
-            const mockDraftContract = mockContractPackageDraft()
-            mockDraftContract.draftRevision!.formData.modifiedBenefitsProvided = true
-            mockDraftContract.draftRevision!.formData.modifiedGeoAreaServed = false
-            mockDraftContract.draftRevision!.formData.modifiedMedicaidBeneficiaries = false
-            mockDraftContract.draftRevision!.formData.modifiedRiskSharingStrategy = false
-            mockDraftContract.draftRevision!.formData.modifiedIncentiveArrangements = false
-            mockDraftContract.draftRevision!.formData.modifiedWitholdAgreements = false
-            mockDraftContract.draftRevision!.formData.modifiedStateDirectedPayments = true
-            mockDraftContract.draftRevision!.formData.modifiedPassThroughPayments = false
-            mockDraftContract.draftRevision!.formData.modifiedPaymentsForMentalDiseaseInstitutions = false
-            mockDraftContract.draftRevision!.formData.modifiedMedicalLossRatioStandards = false
-            mockDraftContract.draftRevision!.formData.modifiedOtherFinancialPaymentIncentive = false
-            mockDraftContract.draftRevision!.formData.modifiedEnrollmentProcess = false
-            mockDraftContract.draftRevision!.formData.modifiedGrevienceAndAppeal = false
-            mockDraftContract.draftRevision!.formData.modifiedNetworkAdequacyStandards = false
-            mockDraftContract.draftRevision!.formData.modifiedLengthOfContract = false
-            mockDraftContract.draftRevision!.formData.modifiedNonRiskPaymentArrangements = false
-            mockDraftContract.draftRevision!.formData.inLieuServicesAndSettings = false
-            
-            renderWithProviders(
-                <Routes>
-                    <Route element={<SubmissionSideNav />}>
-                        <Route
-                            path={RoutesRecord.SUBMISSIONS_EDIT_TOP_LEVEL}
-                            element={<StateSubmissionForm />}
-                        />
-                    </Route>
-                </Routes>,
-                {
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchHealthPlanPackageMockSuccess({
-                                id: '15',
-                                submission: mockSubmission,
-                            }),
-                            fetchStateHealthPlanPackageWithQuestionsMockSuccess(
-                                {
-                                    stateSubmission: mockSubmission,
-                                    id: '15',
-                                }
-                            ),
-                            fetchContractMockSuccess({
-                                contract: {
-                                    ...mockDraftContract,
-                                    id: '15',
-                                },
-                            }),
-                        ],
-                    },
-                    routerProvider: {
-                        route: '/submissions/12/edit/contract-details',
-                    },
-                }
-            )
-
-            await waitFor(() => {
-                expect(
-                    getYesNoFieldValue(
-                        'Benefits provided by the managed care plans'
-                    )
-                ).toBe(true)
-                expect(
-                    getYesNoFieldValue(
-                        'Geographic areas served by the managed care plans'
-                    )
-                ).toBe(false)
             })
         })
 
@@ -460,6 +405,13 @@ describe('StateSubmissionForm', () => {
 
     describe('errors', () => {
         it('shows a generic error fetching submission fails at submission type', async () => {
+            vi.spyOn(useContractForm, 'useContractForm').mockReturnValue({
+                updateDraft: mockUpdateDraftFn,
+                createDraft: vi.fn(),
+                showPageErrorMessage: true,
+                draftSubmission: undefined,
+            })
+
             const mockSubmission = mockDraftHealthPlanPackage()
             renderWithProviders(
                 <Routes>
@@ -495,6 +447,13 @@ describe('StateSubmissionForm', () => {
         })
 
         it('shows a generic error fetching submission fails at contract details', async () => {
+            vi.spyOn(useContractForm, 'useContractForm').mockReturnValue({
+                updateDraft: mockUpdateDraftFn,
+                createDraft: vi.fn(),
+                showPageErrorMessage: true,
+                draftSubmission: undefined,
+            })
+
             const mockSubmission = mockDraftHealthPlanPackage()
             renderWithProviders(
                 <Routes>
@@ -566,10 +525,12 @@ describe('StateSubmissionForm', () => {
                     'A real submission but updated something',
             })
 
-            const mockContract = {
-                ...mockContractPackageDraft(),
-                id: '15'
-            }
+            vi.spyOn(useContractForm, 'useContractForm').mockReturnValue({
+                updateDraft: mockUpdateDraftFn,
+                createDraft: vi.fn(),
+                showPageErrorMessage: true,
+                draftSubmission: undefined,
+            })
 
             renderWithProviders(
                 <Routes>
@@ -594,10 +555,9 @@ describe('StateSubmissionForm', () => {
                                     stateSubmission: mockSubmission,
                                 }
                             ),
-                            fetchContractMockSuccess({
-                                contract: mockContract,
+                            updateContractDraftRevisionMockFail({
+                                contract: { id: '15' },
                             }),
-                            updateContractDraftRevisionMockFail({contract: mockContract})
                         ],
                     },
                     routerProvider: { route: '/submissions/15/edit/type' },
@@ -618,7 +578,7 @@ describe('StateSubmissionForm', () => {
                 name: 'Continue',
             })
             expect(continueButton).toBeInTheDocument()
-            continueButton.click()
+            await continueButton.click()
 
             await waitFor(() => {
                 expect(screen.getByText('System error')).toBeInTheDocument()
@@ -715,6 +675,60 @@ describe('StateSubmissionForm', () => {
             // When deleting a file that exists in a previous revision, we should not see its key
             // in the deleteCallKeys array.
             expect(deleteCallKeys).toEqual(['three-one'])
+        })
+
+        it('loads contract details fields for /submissions/:id/edit/contract-details with amendments', async () => {
+            const mockSubmission = mockDraftHealthPlanPackage()
+
+            renderWithProviders(
+                <Routes>
+                    <Route element={<SubmissionSideNav />}>
+                        <Route
+                            path={RoutesRecord.SUBMISSIONS_EDIT_TOP_LEVEL}
+                            element={<StateSubmissionForm />}
+                        />
+                    </Route>
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchHealthPlanPackageMockSuccess({
+                                id: '12',
+                                submission: mockSubmission,
+                            }),
+                            fetchStateHealthPlanPackageWithQuestionsMockSuccess(
+                                {
+                                    stateSubmission: mockSubmission,
+                                    id: '12',
+                                }
+                            ),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    ...mockContractPackageDraft(),
+                                    id: '12',
+                                },
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/12/edit/contract-details',
+                    },
+                }
+            )
+
+            await waitFor(() => {
+                expect(
+                    getYesNoFieldValue(
+                        'Benefits provided by the managed care plans'
+                    )
+                ).toBe(true)
+                expect(
+                    getYesNoFieldValue(
+                        'Geographic areas served by the managed care plans'
+                    )
+                ).toBe(false)
+            })
         })
     })
 })
