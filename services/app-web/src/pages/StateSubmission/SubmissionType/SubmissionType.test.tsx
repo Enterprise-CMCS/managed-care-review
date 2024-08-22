@@ -31,7 +31,7 @@ describe('SubmissionType', () => {
                     fetchCurrentUserMock({ statusCode: 200 }),
                     fetchContractMockSuccess({
                         contract: {
-                            ...mockContractPackageDraft,
+                            ...mockContractPackageDraft(),
                             id: '15',
                         },
                     }),
