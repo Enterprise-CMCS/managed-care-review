@@ -8,7 +8,7 @@
     },
     "dependencies": {
         "@mc-review/constants": "workspace:*",
-        "@mc-review/types": "workspace:*",
+        "@mc-review/hpp": "workspace:*",
         "@mc-review/gql-helpers": "workspace:*",
         "url-parse": "^1.5.10",
         "dayjs": "^1.10.5",

@@ -72,9 +72,9 @@ importers:
       '@mc-review/gql-helpers':
         specifier: workspace:*
         version: link:../gql-helpers
-      '@mc-review/types':
+      '@mc-review/hpp':
         specifier: workspace:*
-        version: link:../types
+        version: link:../hpp
       dayjs:
         specifier: ^1.10.5
         version: 1.11.12
@@ -128,20 +128,7 @@ importers:
         specifier: 4.9.5
         version: 4.9.5
 
-  packages/otel-helpers:
-    dependencies:
-      '@opentelemetry/api':
-        specifier: ^1.6.0
-        version: 1.7.0
-    devDependencies:
-      '@types/node':
-        specifier: ^20.14.12
-        version: 20.16.1
-      typescript:
-        specifier: 4.9.5
-        version: 4.9.5
-
-  packages/types:
+  packages/hpp:
     dependencies:
       '@apollo/client':
         specifier: 3.8.8
@@ -165,6 +152,19 @@ importers:
       '@types/node':
         specifier: ^20.14.12
         version: 20.16.1
+
+  packages/otel-helpers:
+    dependencies:
+      '@opentelemetry/api':
+        specifier: ^1.6.0
+        version: 1.7.0
+    devDependencies:
+      '@types/node':
+        specifier: ^20.14.12
+        version: 20.16.1
+      typescript:
+        specifier: 4.9.5
+        version: 4.9.5
 
   scripts:
     dependencies:
@@ -13790,7 +13790,7 @@ snapshots:
     dependencies:
       '@aws-crypto/sha256-browser': 5.2.0
       '@aws-crypto/sha256-js': 5.2.0
-      '@aws-sdk/client-sso-oidc': 3.609.0(@aws-sdk/client-sts@3.609.0)
+      '@aws-sdk/client-sso-oidc': 3.609.0(@aws-sdk/client-sts@3.632.0)
       '@aws-sdk/client-sts': 3.609.0
       '@aws-sdk/core': 3.609.0
       '@aws-sdk/credential-provider-node': 3.609.0(@aws-sdk/client-sso-oidc@3.609.0(@aws-sdk/client-sts@3.609.0))(@aws-sdk/client-sts@3.632.0)
@@ -14103,7 +14103,7 @@ snapshots:
     dependencies:
       '@aws-crypto/sha256-browser': 5.2.0
       '@aws-crypto/sha256-js': 5.2.0
-      '@aws-sdk/client-sso-oidc': 3.609.0(@aws-sdk/client-sts@3.632.0)
+      '@aws-sdk/client-sso-oidc': 3.609.0(@aws-sdk/client-sts@3.609.0)
       '@aws-sdk/client-sts': 3.609.0
       '@aws-sdk/core': 3.609.0
       '@aws-sdk/credential-provider-node': 3.609.0(@aws-sdk/client-sso-oidc@3.609.0(@aws-sdk/client-sts@3.609.0))(@aws-sdk/client-sts@3.632.0)
