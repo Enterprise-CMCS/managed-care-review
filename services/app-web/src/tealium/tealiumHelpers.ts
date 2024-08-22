@@ -3,6 +3,7 @@ import {
 } from './tealium'
 import {PageTitlesRecord, RouteT, STATE_SUBMISSION_FORM_ROUTES, STATE_SUBMISSION_SUMMARY_ROUTES} from '../constants';
 import {User} from '../gen/gqlClient';
+import {hasCMSUserPermissions} from '../gqlHelpers';
 
 function getTealiumEnv(stage: string): TealiumEnv {
     switch (stage) {
@@ -54,7 +55,7 @@ const getTealiumPageName = ({
                 return formatPageName({ heading, title: 'CMS Dashboard' })
             }
         case 'DASHBOARD_SUBMISSIONS' || 'DASHBOARD_RATES':
-            if (user && user.__typename === 'CMSUser') {
+            if (user && hasCMSUserPermissions(user)) {
                 return formatPageName({ title: 'CMS Dashboard' })
             } else if (user && user.__typename === 'StateUser') {
                 return formatPageName({

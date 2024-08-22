@@ -3,11 +3,10 @@ import {
     RateRevision,
     RelatedContractRevisions,
 } from '../../gen/gqlClient'
+import { s3DlUrl } from './documentDataMock'
 import { mockMNState } from './stateMock'
 import { v4 as uuidv4 } from 'uuid'
 
-const s3DlUrl =
-    'https://fake-bucket.s3.amazonaws.com/file.pdf?AWSAccessKeyId=AKIAIOSFODNN7EXAMPLE&Expires=1719564800&Signature=abc123def456ghijk' //pragma: allowlist secret
 
 const contractRevisionOnRateDataMock = (
     data?: Partial<RelatedContractRevisions>
@@ -25,7 +24,12 @@ const contractRevisionOnRateDataMock = (
     submitInfo: {
         __typename: 'UpdateInformation',
         updatedAt: '2023-10-16T19:02:26.795Z',
-        updatedBy: 'aang@example.com',
+        updatedBy: {
+            email: 'aang@example.com',
+            role: 'STATE_USER',
+            familyName: 'Airman',
+            givenName: 'Aang'
+        },
         updatedReason: 'Initial submission',
     },
     unlockInfo: null,
@@ -52,6 +56,7 @@ const contractRevisionOnRateDataMock = (
                 __typename: 'GenericDocument',
                 name: 'contract-document.pdf',
                 s3URL: 's3://bucketname/key/contract-document',
+                downloadURL: s3DlUrl,
                 sha256: 'fakeSha',
                 dateAdded: new Date(),
             },
@@ -90,7 +95,12 @@ const rateRevisionDataMock = (data?: Partial<RateRevision>): RateRevision => {
         submitInfo: {
             __typename: 'UpdateInformation',
             updatedAt: '2023-10-16T19:02:26.766Z',
-            updatedBy: 'aang@example.com',
+            updatedBy: {
+                email: 'aang@example.com',
+                role: 'STATE_USER',
+                familyName: 'Airman',
+                givenName: 'Aang'
+            },
             updatedReason: 'Initial submission',
         },
         formData: {
@@ -217,13 +227,23 @@ const rateDataMock = (
                 unlockInfo: {
                     __typename: 'UpdateInformation',
                     updatedAt: '2023-10-16T19:05:26.585Z',
-                    updatedBy: 'zuko@example.com',
+                    updatedBy: {
+                        email: 'zuko@example.com',
+                        role: 'CMS_USER',
+                        familyName: 'Hotman',
+                        givenName: 'Zuko'
+                    },
                     updatedReason: 'Unlock',
                 },
                 submitInfo: {
                     __typename: 'UpdateInformation',
                     updatedAt: '2023-10-16T19:06:20.581Z',
-                    updatedBy: 'aang@example.com',
+                    updatedBy: {
+                        email: 'aang@example.com',
+                        role: 'STATE_USER',
+                        familyName: 'Airman',
+                        givenName: 'Aang'
+                    },
                     updatedReason: 'Resubmit',
                 },
                 contractRevisions: [
@@ -231,13 +251,23 @@ const rateDataMock = (
                         submitInfo: {
                             __typename: 'UpdateInformation',
                             updatedAt: '2023-10-16T19:06:20.643Z',
-                            updatedBy: 'aang@example.com',
+                            updatedBy: {
+                                email: 'aang@example.com',
+                                role: 'STATE_USER',
+                                familyName: 'Airman',
+                                givenName: 'Aang'
+                            },
                             updatedReason: 'Resubmit',
                         },
                         unlockInfo: {
                             __typename: 'UpdateInformation',
                             updatedAt: '2023-10-16T19:05:26.660Z',
-                            updatedBy: 'zuko@example.com',
+                            updatedBy: {
+                                email: 'zuko@example.com',
+                                role: 'CMS_USER',
+                                familyName: 'Hotman',
+                                givenName: 'Zuko'
+                            },
                             updatedReason: 'Unlock',
                         },
                     }),

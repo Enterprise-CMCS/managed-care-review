@@ -20,9 +20,9 @@ import { ApolloError } from '@apollo/client'
 const fetchContractMockSuccess = ({
     contract,
 }: {
-    contract?: Partial<Contract>
+    contract?: Contract
 }): MockedResponse<FetchContractQuery> => {
-    const contractData = mockContractPackageDraft(contract)
+    const contractData = contract ? contract : mockContractPackageDraft()
 
     return {
         request: {

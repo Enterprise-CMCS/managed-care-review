@@ -8,59 +8,71 @@ type UserType =
     | AdminUserType
     | HelpdeskUserType
     | BusinessOwnerUserType
+    | CMSApproverUserType
 
-const stateUserType = z.object({
+const userRolesSchema = z.enum([
+    'STATE_USER',
+    'CMS_USER',
+    'CMS_APPROVER_USER',
+    'ADMIN_USER',
+    'HELPDESK_USER',
+    'BUSINESSOWNER_USER',
+])
+
+const baseUserSchema = z.object({
     id: z.string().uuid(),
-    role: z.literal('STATE_USER'),
+    role: userRolesSchema,
     email: z.string(),
-    stateCode: z.string(),
     givenName: z.string(),
     familyName: z.string(),
 })
 
-const cmsUserType = z.object({
-    id: z.string().uuid(),
-    role: z.literal('CMS_USER'),
-    email: z.string(),
-    givenName: z.string(),
-    familyName: z.string(),
+const stateUserSchema = baseUserSchema.extend({
+    role: z.literal(userRolesSchema.enum.STATE_USER),
+    stateCode: z.string(),
+})
+
+const cmsUserSchema = baseUserSchema.extend({
+    role: z.literal(userRolesSchema.enum.CMS_USER),
     stateAssignments: z.array(stateType),
     divisionAssignment: divisionType.optional(),
 })
 
-const adminUserType = z.object({
-    id: z.string().uuid(),
-    role: z.literal('ADMIN_USER'),
-    email: z.string(),
-    givenName: z.string(),
-    familyName: z.string(),
+const cmsApproverUserSchema = baseUserSchema.extend({
+    role: z.literal(userRolesSchema.enum.CMS_APPROVER_USER),
+    stateAssignments: z.array(stateType),
+    divisionAssignment: divisionType.optional(),
 })
 
-const helpdeskUserType = z.object({
-    id: z.string().uuid(),
-    role: z.literal('HELPDESK_USER'),
-    email: z.string(),
-    givenName: z.string(),
-    familyName: z.string(),
+const adminUserSchema = baseUserSchema.extend({
+    role: z.literal(userRolesSchema.enum.ADMIN_USER),
 })
 
-const businessOwnerUserType = z.object({
-    id: z.string().uuid(),
-    role: z.literal('BUSINESSOWNER_USER'),
-    email: z.string(),
-    givenName: z.string(),
-    familyName: z.string(),
+const helpdeskUserSchema = baseUserSchema.extend({
+    role: z.literal(userRolesSchema.enum.HELPDESK_USER),
 })
 
-type StateUserType = z.infer<typeof stateUserType>
+const businessOwnerUserSchema = baseUserSchema.extend({
+    role: z.literal(userRolesSchema.enum.BUSINESSOWNER_USER),
+})
 
-type AdminUserType = z.infer<typeof adminUserType>
+type StateUserType = z.infer<typeof stateUserSchema>
 
-type HelpdeskUserType = z.infer<typeof helpdeskUserType>
+type AdminUserType = z.infer<typeof adminUserSchema>
 
-type BusinessOwnerUserType = z.infer<typeof businessOwnerUserType>
+type HelpdeskUserType = z.infer<typeof helpdeskUserSchema>
 
-type CMSUserType = z.infer<typeof cmsUserType>
+type BusinessOwnerUserType = z.infer<typeof businessOwnerUserSchema>
+
+type CMSUserType = z.infer<typeof cmsUserSchema>
+
+type CMSApproverUserType = z.infer<typeof cmsApproverUserSchema>
+
+type CMSUsersUnionType = CMSUserType | CMSApproverUserType
+
+type BaseUserType = z.infer<typeof baseUserSchema>
+
+type UserRoles = z.infer<typeof userRolesSchema>
 
 export type {
     CMSUserType,
@@ -68,7 +80,11 @@ export type {
     AdminUserType,
     HelpdeskUserType,
     BusinessOwnerUserType,
+    CMSApproverUserType,
     UserType,
+    UserRoles,
+    CMSUsersUnionType,
+    BaseUserType,
 }
 
-export { cmsUserType, stateUserType }
+export { cmsUserSchema, stateUserSchema, userRolesSchema, baseUserSchema }

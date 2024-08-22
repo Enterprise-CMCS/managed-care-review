@@ -3,9 +3,9 @@ import type { UnlockedHealthPlanFormDataType } from '../../common-code/healthPla
 import { toDomain } from '../../common-code/proto/healthPlanFormDataProto'
 import type { UpdateInfoType, ContractType } from '../../domain-models'
 import {
-    isCMSUser,
     convertContractWithRatesToUnlockedHPP,
     packageSubmitters,
+    hasCMSPermissions,
 } from '../../domain-models'
 import type { Emailer } from '../../emailer'
 import type { MutationResolvers } from '../../gen/gqlServer'
@@ -37,7 +37,7 @@ export function unlockHealthPlanPackageResolver(
         span?.setAttribute('mcreview.package_id', pkgID)
 
         // This resolver is only callable by CMS users
-        if (!isCMSUser(user)) {
+        if (!hasCMSPermissions(user)) {
             logError(
                 'unlockHealthPlanPackage',
                 'user not authorized to unlock package'
@@ -184,7 +184,7 @@ export function unlockHealthPlanPackageResolver(
 
         const updateInfo: UpdateInfoType = {
             updatedAt: new Date(), // technically this is not right but it's close enough while we are supporting two systems
-            updatedBy: context.user.email,
+            updatedBy: context.user,
             updatedReason: unlockedReason,
         }
 

@@ -12,6 +12,8 @@ export {
     mockUnlockedHealthPlanPackage,
 } from './healthPlanFormDataMock'
 
+export {s3DlUrl} from './documentDataMock';
+
 export {
     fetchHealthPlanPackageMockSuccess,
     fetchHealthPlanPackageMockNotFound,
@@ -39,7 +41,9 @@ export {
     mockValidUser,
     mockValidAdminUser,
     indexUsersQueryMock,
-    mockValidHelpDeskUser
+    mockValidHelpDeskUser,
+    mockValidCMSApproverUser,
+    iterableCmsUsersMockData
 } from './userGQLMock'
 
 export {
@@ -71,8 +75,12 @@ export {
     mockContractPackageUnlocked,
     mockContractPackageSubmittedWithRevisions,
     mockEmptyDraftContractAndRate,
-    mockContractPackageUnlockedWithUnlockedType
+    mockContractPackageUnlockedWithUnlockedType,
+    mockContractRevision,
+    mockRateRevision
 } from './contractPackageDataMock'
 export { rateDataMock } from './rateDataMock'
 export { fetchContractMockSuccess, fetchContractMockFail, updateDraftContractRatesMockSuccess, updateContractDraftRevisionMockFail, updateContractDraftRevisionMockSuccess, createContractMockFail, createContractMockSuccess } from './contractGQLMock'
 export { indexRatesMockSuccess, indexRatesMockFailure } from './rateGQLMocks'
+
+export { withdrawAndReplaceRedundantRateMock } from './replaceRateGQLMocks'

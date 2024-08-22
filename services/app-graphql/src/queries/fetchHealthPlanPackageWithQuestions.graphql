@@ -4,21 +4,41 @@ fragment questionEdgeFragment on QuestionEdge {
         contractID
         createdAt
         addedBy {
-            id
-            role
-            email
-            givenName
-            familyName
-            divisionAssignment
-            stateAssignments {
-                code
-                name
-                programs {
-                    id
+            ... on CMSUser {
+                id
+                email
+                role
+                familyName
+                givenName
+                stateAssignments {
+                    code
                     name
-                    fullName
-                    isRateProgram
+                    programs {
+                        id
+                        name
+                        fullName
+                        isRateProgram
+                    }
                 }
+                divisionAssignment
+            }
+            ... on CMSApproverUser {
+                id
+                email
+                role
+                familyName
+                givenName
+                stateAssignments {
+                    code
+                    name
+                    programs {
+                        id
+                        name
+                        fullName
+                        isRateProgram
+                    }
+                }
+                divisionAssignment
             }
         }
         division
@@ -79,14 +99,10 @@ query fetchHealthPlanPackageWithQuestions($input: FetchHealthPlanPackageInput!) 
                 node {
                     id
                     unlockInfo {
-                        updatedAt
-                        updatedBy
-                        updatedReason
+                        ...updateInformationFields
                     }
                     submitInfo {
-                        updatedAt
-                        updatedBy
-                        updatedReason
+                        ...updateInformationFields
                     }
                     createdAt
                     formDataProto
@@ -114,4 +130,15 @@ query fetchHealthPlanPackageWithQuestions($input: FetchHealthPlanPackageInput!) 
             }
         }
     }
+}
+
+fragment updateInformationFields on UpdateInformation {
+    updatedAt
+    updatedBy {
+        email
+        role
+        familyName
+        givenName
+    }
+    updatedReason
 }

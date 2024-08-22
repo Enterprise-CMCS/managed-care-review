@@ -1,5 +1,5 @@
-query indexRates {
-    indexRates {
+query indexRates($input: IndexRatesInput) {
+    indexRates(input: $input) {
         totalCount
         edges {
             node {
@@ -19,6 +19,9 @@ query indexRates {
                     }
                 }
                 status
+                withdrawInfo {
+                    ...updateInformationFields
+                }
                 initiallySubmittedAt
                 parentContractID
 
@@ -28,14 +31,10 @@ query indexRates {
                     createdAt
                     updatedAt
                     unlockInfo {
-                        updatedAt
-                        updatedBy
-                        updatedReason
+                        ...updateInformationFields
                     }
                     submitInfo {
-                        updatedAt
-                        updatedBy
-                        updatedReason
+                        ...updateInformationFields
                     }
                     formData {
                         rateType,
@@ -81,77 +80,6 @@ query indexRates {
                             packageName
                             packageId
                             packageStatus
-                        }
-                    }
-                                     contractRevisions {
-                        id
-                        contract {
-                            id
-                            stateCode
-                            stateNumber
-                        }
-                        createdAt
-                        updatedAt
-                        submitInfo {
-                            updatedAt
-                            updatedBy
-                            updatedReason
-                        }
-                        unlockInfo {
-                            updatedAt
-                            updatedBy
-                            updatedReason
-                        }
-                        formData {
-                            programIDs
-                            populationCovered
-                            submissionType
-                            riskBasedContract
-                            submissionDescription
-                            stateContacts {
-                                name,
-                                titleRole
-                                email
-                            }
-                            supportingDocuments {
-                                name
-                                s3URL
-                                sha256
-                                dateAdded
-                                downloadURL
-                            }
-                            contractType
-                            contractExecutionStatus
-                            contractDocuments {
-                                name
-                                s3URL
-                                sha256
-                                dateAdded
-                                downloadURL
-                            }
-                            contractDateStart
-                            contractDateEnd
-                            managedCareEntities
-                            federalAuthorities
-                            inLieuServicesAndSettings
-                            modifiedBenefitsProvided
-                            modifiedGeoAreaServed
-                            modifiedMedicaidBeneficiaries
-                            modifiedRiskSharingStrategy
-                            modifiedIncentiveArrangements
-                            modifiedWitholdAgreements
-                            modifiedStateDirectedPayments
-                            modifiedPassThroughPayments
-                            modifiedPaymentsForMentalDiseaseInstitutions
-                            modifiedMedicalLossRatioStandards
-                            modifiedOtherFinancialPaymentIncentive
-                            modifiedEnrollmentProcess
-                            modifiedGrevienceAndAppeal
-                            modifiedNetworkAdequacyStandards
-                            modifiedLengthOfContract
-                            modifiedNonRiskPaymentArrangements
-                            statutoryRegulatoryAttestation
-                            statutoryRegulatoryAttestationDescription
                         }
                     }
                 }
@@ -162,14 +90,10 @@ query indexRates {
                     createdAt
                     updatedAt
                     unlockInfo {
-                        updatedAt
-                        updatedBy
-                        updatedReason
+                        ...updateInformationFields
                     }
                     submitInfo {
-                        updatedAt
-                        updatedBy
-                        updatedReason
+                        ...updateInformationFields
                     }
                     formData {
                         rateType,
@@ -217,77 +141,19 @@ query indexRates {
                             packageStatus
                         }
                     }
-                    contractRevisions {
-                        id
-                        contract {
-                            id
-                            stateCode
-                            stateNumber
-                        }
-                        createdAt
-                        updatedAt
-                        submitInfo {
-                            updatedAt
-                            updatedBy
-                            updatedReason
-                        }
-                        unlockInfo {
-                            updatedAt
-                            updatedBy
-                            updatedReason
-                        }
-                        formData {
-                            programIDs
-                            populationCovered
-                            submissionType
-                            riskBasedContract
-                            submissionDescription
-                            stateContacts {
-                                name,
-                                titleRole
-                                email
-                            }
-                            supportingDocuments {
-                                name
-                                s3URL
-                                sha256
-                                dateAdded
-                                downloadURL
-                            }
-                            contractType
-                            contractExecutionStatus
-                            contractDocuments {
-                                name
-                                s3URL
-                                sha256
-                                dateAdded
-                                downloadURL
-                            }
-                            contractDateStart
-                            contractDateEnd
-                            managedCareEntities
-                            federalAuthorities
-                            inLieuServicesAndSettings
-                            modifiedBenefitsProvided
-                            modifiedGeoAreaServed
-                            modifiedMedicaidBeneficiaries
-                            modifiedRiskSharingStrategy
-                            modifiedIncentiveArrangements
-                            modifiedWitholdAgreements
-                            modifiedStateDirectedPayments
-                            modifiedPassThroughPayments
-                            modifiedPaymentsForMentalDiseaseInstitutions
-                            modifiedMedicalLossRatioStandards
-                            modifiedOtherFinancialPaymentIncentive
-                            modifiedEnrollmentProcess
-                            modifiedGrevienceAndAppeal
-                            modifiedNetworkAdequacyStandards
-                            modifiedLengthOfContract
-                            modifiedNonRiskPaymentArrangements
-                        }
-                    }
                 }
             }
         }
     }
+}
+
+fragment updateInformationFields on UpdateInformation {
+    updatedAt
+    updatedBy {
+        email
+        role
+        familyName
+        givenName
+    }
+    updatedReason
 }

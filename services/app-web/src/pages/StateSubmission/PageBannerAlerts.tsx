@@ -1,3 +1,4 @@
+import React from 'react'
 import {
     GenericApiErrorBanner,
     SubmissionUnlockedBanner,
@@ -13,7 +14,7 @@ const PageBannerAlerts = ({
     showPageErrorMessage: string | boolean
     loggedInUser?: User
     unlockedInfo?: UpdateInformation | null
-}): JSX.Element => {
+}): React.ReactElement => {
     const message =
         typeof showPageErrorMessage !== 'boolean'
             ? showPageErrorMessage
@@ -25,15 +26,9 @@ const PageBannerAlerts = ({
             )}
             {unlockedInfo && (
                 <SubmissionUnlockedBanner
-                    userType={
-                        loggedInUser?.role === 'CMS_USER'
-                            ? 'CMS_USER'
-                            : 'STATE_USER'
-                    }
-                    unlockedBy={unlockedInfo?.updatedBy || 'Not available'}
-                    unlockedOn={unlockedInfo.updatedAt || 'Not available'}
-                    reason={unlockedInfo.updatedReason || 'Not available'}
                     className={styles.banner}
+                    loggedInUser={loggedInUser}
+                    unlockedInfo={unlockedInfo}
                 />
             )}
         </>

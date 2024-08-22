@@ -8,7 +8,7 @@ import {
     IndexUsersDocument,
     IndexUsersQuery,
     StateUser,
-    HelpdeskUser
+    HelpdeskUser, CmsApproverUser
 } from '../../gen/gqlClient'
 
 import { mockMNState } from './stateMock'
@@ -43,14 +43,28 @@ function mockValidCMSUser(userData?: Partial<CmsUser>): CmsUser {
     }
 }
 
+function mockValidCMSApproverUser(userData?: Partial<CmsApproverUser>): CmsApproverUser {
+    return {
+        __typename: 'CMSApproverUser' as const,
+        id: 'bar-id',
+        role: 'CMS_APPROVER_USER',
+        givenName: 'bob',
+        familyName: 'ddmas',
+        email: 'bob@dmas.mn.gov',
+        divisionAssignment: 'DMCO',
+        stateAssignments: [],
+        ...userData,
+    }
+}
+
 function mockValidAdminUser(userData?: Partial<AdminUser>): AdminUser {
     return {
         __typename: 'AdminUser' as const,
         id: 'bar-id',
         role: 'ADMIN_USER',
-        givenName: 'bob',
+        givenName: 'bobadmin',
         familyName: 'ddmas',
-        email: 'bob@dmas.mn.gov',
+        email: 'bobadmin@dmas.mn.gov',
         ...userData,
     }
 }
@@ -134,6 +148,20 @@ const indexUsersQueryMock = (): MockedResponse<IndexUsersQuery> => {
     }
 }
 
+const iterableCmsUsersMockData: {
+    userRole: 'CMS_USER' | 'CMS_APPROVER_USER',
+    mockUser: <T>(userData?: Partial<T>) => CmsUser | CmsApproverUser
+}[] = [
+    {
+        userRole: 'CMS_USER',
+        mockUser: mockValidCMSUser
+    },
+    {
+        userRole: 'CMS_APPROVER_USER',
+        mockUser: mockValidCMSApproverUser
+    }
+]
+
 export {
     fetchCurrentUserMock,
     mockValidStateUser,
@@ -141,5 +169,7 @@ export {
     mockValidUser,
     mockValidAdminUser,
     indexUsersQueryMock,
-    mockValidHelpDeskUser
+    mockValidHelpDeskUser,
+    mockValidCMSApproverUser,
+    iterableCmsUsersMockData
 }

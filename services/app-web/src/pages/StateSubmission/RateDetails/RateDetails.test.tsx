@@ -12,6 +12,7 @@ import {
     fetchContractMockSuccess,
     updateDraftContractRatesMockSuccess,
     mockContractWithLinkedRateDraft,
+    mockContractPackageDraft,
 } from '../../../testHelpers/apolloMocks'
 import { Route, Routes, Location } from 'react-router-dom'
 import { RoutesRecord } from '../../../constants'
@@ -363,6 +364,7 @@ describe('RateDetails', () => {
                             fetchCurrentUserMock({ statusCode: 200 }),
                             fetchContractMockSuccess({
                                 contract: {
+                                    ...mockContractPackageDraft(),
                                     id: 'test-abc-123',
                                 },
                             }),
@@ -526,6 +528,7 @@ describe('RateDetails', () => {
                             fetchCurrentUserMock({ statusCode: 200 }),
                             fetchContractMockSuccess({
                                 contract: {
+                                    ...mockContractPackageDraft(),
                                     id: 'test-abc-123',
                                 },
                             }),
@@ -852,6 +855,7 @@ describe('RateDetails', () => {
                                     }),
                                 },
                             }),
+                            indexRatesMockSuccess(),
                         ],
                     },
                     routerProvider: {
@@ -911,7 +915,12 @@ describe('RateDetails', () => {
                             submitInfo: {
                                 __typename: 'UpdateInformation',
                                 updatedAt: new Date('2022-04-10'),
-                                updatedBy: 'aang@example.com',
+                                updatedBy: {
+                                    email: 'aang@example.com',
+                                    role: 'ADMIN_USER',
+                                    familyName: 'Hotman',
+                                    givenName: 'Iroh',
+                                },
                                 updatedReason: 'Resubmit',
                             },
                             formData: {
@@ -931,7 +940,12 @@ describe('RateDetails', () => {
                             submitInfo: {
                                 __typename: 'UpdateInformation',
                                 updatedAt: new Date('2024-04-10'),
-                                updatedBy: 'aang@example.com',
+                                updatedBy: {
+                                    email: 'aang@example.com',
+                                    role: 'STATE_USER',
+                                    familyName: 'Airman',
+                                    givenName: 'Aang',
+                                },
                                 updatedReason: 'Resubmit',
                             },
                             formData: {
@@ -951,7 +965,12 @@ describe('RateDetails', () => {
                             submitInfo: {
                                 __typename: 'UpdateInformation',
                                 updatedAt: new Date('2024-04-08'),
-                                updatedBy: 'aang@example.com',
+                                updatedBy: {
+                                    email: 'aang@example.com',
+                                    role: 'STATE_USER',
+                                    familyName: 'Airman',
+                                    givenName: 'Aang',
+                                },
                                 updatedReason: 'Resubmit',
                             },
                             formData: {
@@ -973,7 +992,7 @@ describe('RateDetails', () => {
                 {
                     apolloProvider: {
                         mocks: [
-                            indexRatesMockSuccess(rates),
+                            indexRatesMockSuccess(undefined, rates),
                             fetchCurrentUserMock({ statusCode: 200 }),
                             fetchContractMockSuccess({
                                 contract: mockContractWithLinkedRateDraft(),
@@ -1046,6 +1065,7 @@ describe('RateDetails', () => {
                             fetchDraftRateMockSuccess({ id: rateID }),
                             fetchContractMockSuccess({
                                 contract: {
+                                    ...mockContractPackageDraft(),
                                     id: 'test-abc-123',
                                 },
                             }),
@@ -1133,6 +1153,7 @@ describe('RateDetails', () => {
                             fetchDraftRateMockSuccess({ id: rateID }),
                             fetchContractMockSuccess({
                                 contract: {
+                                    ...mockContractPackageDraft(),
                                     id: 'test-abc-123',
                                 },
                             }),
@@ -1233,6 +1254,7 @@ describe('RateDetails', () => {
                             fetchCurrentUserMock({ statusCode: 200 }),
                             fetchContractMockSuccess({
                                 contract: {
+                                    ...mockContractPackageDraft(),
                                     id: contractID,
                                     draftRates: [], //clear out rates
                                 },
@@ -1297,6 +1319,7 @@ describe('RateDetails', () => {
                             fetchCurrentUserMock({ statusCode: 200 }),
                             fetchContractMockSuccess({
                                 contract: {
+                                    ...mockContractPackageDraft(),
                                     id: contractID,
                                     draftRates: [], //clear out rates
                                 },
@@ -1369,6 +1392,7 @@ describe('RateDetails', () => {
                             fetchCurrentUserMock({ statusCode: 200 }),
                             fetchContractMockSuccess({
                                 contract: {
+                                    ...mockContractPackageDraft(),
                                     id: contractID,
                                     draftRates: [], //clear out rates
                                 },
@@ -1443,6 +1467,7 @@ describe('RateDetails', () => {
                             fetchDraftRateMockSuccess({ id: rateID }),
                             fetchContractMockSuccess({
                                 contract: {
+                                    ...mockContractPackageDraft(),
                                     id: 'test-abc-123',
                                 },
                             }),

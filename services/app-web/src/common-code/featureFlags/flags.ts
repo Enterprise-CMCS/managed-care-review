@@ -6,13 +6,6 @@
  */
 
 const featureFlags = {
-    /**
-     * Enables state and CMS Q&A features
-     */
-    CMS_QUESTIONS: {
-        flag: 'cms-questions',
-        defaultValue: false,
-    },
     CONTRACT_438_ATTESTATION: {
         flag: '438-attestation',
         defaultValue: false,

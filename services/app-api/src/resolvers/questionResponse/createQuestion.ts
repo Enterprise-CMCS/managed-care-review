@@ -1,5 +1,5 @@
 import type { MutationResolvers } from '../../gen/gqlServer'
-import { isCMSUser, contractSubmitters } from '../../domain-models'
+import { contractSubmitters, hasCMSPermissions } from '../../domain-models'
 import { logError, logSuccess } from '../../logger'
 import {
     setErrorAttributesOnActiveSpan,
@@ -22,7 +22,7 @@ export function createQuestionResolver(
         const { user, ctx, tracer } = context
         const span = tracer?.startSpan('createQuestion', {}, ctx)
 
-        if (!isCMSUser(user)) {
+        if (!hasCMSPermissions(user)) {
             const msg = 'user not authorized to create a question'
             logError('createQuestion', msg)
             setErrorAttributesOnActiveSpan(msg, span)

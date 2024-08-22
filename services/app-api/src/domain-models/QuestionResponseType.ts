@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { stateUserType } from './UserType'
+import { stateUserSchema } from './UserType'
 
 const questionResponseDocument = z.object({
     name: z.string(),
@@ -11,7 +11,7 @@ const questionResponseType = z.object({
     id: z.string().uuid(),
     questionID: z.string().uuid(),
     createdAt: z.date(),
-    addedBy: stateUserType,
+    addedBy: stateUserSchema,
     documents: z.array(questionResponseDocument),
 })
 

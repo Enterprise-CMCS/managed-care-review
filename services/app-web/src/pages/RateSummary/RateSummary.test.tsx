@@ -3,13 +3,14 @@ import { renderWithProviders, testS3Client } from '../../testHelpers'
 import {
     fetchCurrentUserMock,
     fetchRateMockSuccess,
-    mockValidCMSUser,
+    iterableCmsUsersMockData,
     mockValidStateUser,
 } from '../../testHelpers/apolloMocks'
 import { RateSummary } from './RateSummary'
 import { RoutesRecord } from '../../constants'
 import { Route, Routes } from 'react-router-dom'
 import { RateEdit } from '../RateEdit/RateEdit'
+import { dayjs } from '../../common-code/dateHelpers'
 
 // Wrap test component in some top level routes to allow getParams to be tested
 const wrapInRoutes = (children: React.ReactNode) => {
@@ -21,92 +22,165 @@ const wrapInRoutes = (children: React.ReactNode) => {
 }
 
 describe('RateSummary', () => {
-    describe('Viewing RateSummary as a CMS user', () => {
-        it('renders without errors', async () => {
-            renderWithProviders(wrapInRoutes(<RateSummary />), {
-                apolloProvider: {
-                    mocks: [
-                        fetchCurrentUserMock({
-                            user: mockValidCMSUser(),
-                            statusCode: 200,
-                        }),
-                        fetchRateMockSuccess({ id: '7a' }),
-                    ],
-                },
-                routerProvider: {
-                    route: '/rates/7a',
-                },
+    describe.each(iterableCmsUsersMockData)(
+        'Viewing RateSummary as a $userRole',
+        ({ userRole, mockUser }) => {
+            it('renders without errors', async () => {
+                renderWithProviders(wrapInRoutes(<RateSummary />), {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                user: mockUser(),
+                                statusCode: 200,
+                            }),
+                            fetchRateMockSuccess({ id: '7a' }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/rates/7a',
+                    },
+                })
+
+                expect(
+                    await screen.findByText(
+                        'Rates this rate certification covers'
+                    )
+                ).toBeInTheDocument()
             })
 
-            expect(
-                await screen.findByText('Rates this rate certification covers')
-            ).toBeInTheDocument()
-        })
+            it('displays withdrawn banner on a withdrawn rate', async () => {
+                renderWithProviders(wrapInRoutes(<RateSummary />), {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                user: mockUser(),
+                                statusCode: 200,
+                            }),
+                            fetchRateMockSuccess({
+                                id: '1337',
+                                withdrawInfo: {
+                                    updatedAt: new Date('2024-01-01'),
+                                    updatedBy: {
+                                        email: 'admin@example.com',
+                                        role: 'ADMIN_USER',
+                                        familyName: 'Hotman',
+                                        givenName: 'Iroh',
+                                    },
+                                    updatedReason:
+                                        'Admin as withdrawn this rate.',
+                                },
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/rates/1337',
+                    },
+                    featureFlags: { 'rate-edit-unlock': true },
+                })
 
-        it('renders document download warning banner when download fails', async () => {
-            const error = vi.spyOn(console, 'error').mockImplementation(vi.fn())
+                await waitFor(() => {
+                    expect(
+                        screen.queryByTestId('rate-summary')
+                    ).toBeInTheDocument()
+                })
 
-            const s3Provider = {
-                ...testS3Client(),
-                getBulkDlURL: async (
-                    keys: string[],
-                    fileName: string
-                ): Promise<string | Error> => {
-                    return new Error('Error: getBulkDlURL encountered an error')
-                },
-            }
-            renderWithProviders(wrapInRoutes(<RateSummary />), {
-                apolloProvider: {
-                    mocks: [
-                        fetchCurrentUserMock({
-                            user: mockValidCMSUser(),
-                            statusCode: 200,
-                        }),
-                        fetchRateMockSuccess({ id: '7a' }),
-                    ],
-                },
-                routerProvider: {
-                    route: '/rates/7a',
-                },
-                s3Provider,
+                expect(
+                    await screen.findByText(
+                        'Rates this rate certification covers'
+                    )
+                ).toBeInTheDocument()
+
+                expect(screen.getByRole('alert')).toHaveClass('usa-alert--info')
+                expect(
+                    screen.getByTestId('rateWithdrawnBanner')
+                ).toHaveTextContent(/Withdrawn by: Administrator/)
+                expect(
+                    screen.getByText(
+                        `${dayjs
+                            .utc(new Date('2024-01-01'))
+                            .tz('America/New_York')
+                            .format('MM/DD/YY h:mma')} ET`
+                    )
+                ).toBeInTheDocument()
+                expect(
+                    screen.getByText('Admin as withdrawn this rate.')
+                ).toBeInTheDocument()
             })
 
-            await waitFor(() => {
-                expect(screen.getByTestId('warning-alert')).toBeInTheDocument()
-                expect(screen.getByTestId('warning-alert')).toHaveClass(
-                    'usa-alert--warning'
+            it('renders document download warning banner when download fails', async () => {
+                const error = vi
+                    .spyOn(console, 'error')
+                    .mockImplementation(vi.fn())
+
+                const s3Provider = {
+                    ...testS3Client(),
+                    getBulkDlURL: async (
+                        keys: string[],
+                        fileName: string
+                    ): Promise<string | Error> => {
+                        return new Error(
+                            'Error: getBulkDlURL encountered an error'
+                        )
+                    },
+                }
+                renderWithProviders(wrapInRoutes(<RateSummary />), {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                user: mockUser(),
+                                statusCode: 200,
+                            }),
+                            fetchRateMockSuccess({ id: '7a' }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/rates/7a',
+                    },
+                    s3Provider,
+                })
+
+                await waitFor(() => {
+                    expect(
+                        screen.getByTestId('warning-alert')
+                    ).toBeInTheDocument()
+                    expect(screen.getByTestId('warning-alert')).toHaveClass(
+                        'usa-alert--warning'
+                    )
+                    expect(
+                        screen.getByTestId('warning-alert')
+                    ).toHaveTextContent('Document download unavailable')
+                    expect(error).toHaveBeenCalled()
+                })
+            })
+
+            it('renders back to dashboard link for CMS users', async () => {
+                renderWithProviders(wrapInRoutes(<RateSummary />), {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                user: mockUser(),
+                                statusCode: 200,
+                            }),
+                            fetchRateMockSuccess({ id: '7a' }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/rates/7a',
+                    },
+                })
+
+                const backLink = await screen.findByRole('link', {
+                    name: /Back to dashboard/,
+                })
+                expect(backLink).toBeInTheDocument()
+
+                expect(backLink).toHaveAttribute(
+                    'href',
+                    '/dashboard/rate-reviews'
                 )
-                expect(screen.getByTestId('warning-alert')).toHaveTextContent(
-                    'Document download unavailable'
-                )
-                expect(error).toHaveBeenCalled()
             })
-        })
-
-        it('renders back to dashboard link for CMS users', async () => {
-            renderWithProviders(wrapInRoutes(<RateSummary />), {
-                apolloProvider: {
-                    mocks: [
-                        fetchCurrentUserMock({
-                            user: mockValidCMSUser(),
-                            statusCode: 200,
-                        }),
-                        fetchRateMockSuccess({ id: '7a' }),
-                    ],
-                },
-                routerProvider: {
-                    route: '/rates/7a',
-                },
-            })
-
-            const backLink = await screen.findByRole('link', {
-                name: /Back to dashboard/,
-            })
-            expect(backLink).toBeInTheDocument()
-
-            expect(backLink).toHaveAttribute('href', '/dashboard/rate-reviews')
-        })
-    })
+        }
+    )
 
     describe('Viewing RateSummary as a State user', () => {
         it('renders SingleRateSummarySection component without errors for locked rate', async () => {
@@ -132,6 +206,60 @@ describe('RateSummary', () => {
 
             expect(
                 await screen.findByText('Rates this rate certification covers')
+            ).toBeInTheDocument()
+        })
+
+        it('displays withdrawn banner on a withdrawn rate', async () => {
+            renderWithProviders(wrapInRoutes(<RateSummary />), {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockValidStateUser(),
+                            statusCode: 200,
+                        }),
+                        fetchRateMockSuccess({
+                            id: '1337',
+                            withdrawInfo: {
+                                updatedAt: new Date('2024-01-01'),
+                                updatedBy: {
+                                    email: 'admin@example.com',
+                                    role: 'ADMIN_USER',
+                                    familyName: 'Hotman',
+                                    givenName: 'Iroh',
+                                },
+                                updatedReason: 'Admin as withdrawn this rate.',
+                            },
+                        }),
+                    ],
+                },
+                routerProvider: {
+                    route: '/rates/1337',
+                },
+                featureFlags: { 'rate-edit-unlock': true },
+            })
+
+            await waitFor(() => {
+                expect(screen.queryByTestId('rate-summary')).toBeInTheDocument()
+            })
+
+            expect(
+                await screen.findByText('Rates this rate certification covers')
+            ).toBeInTheDocument()
+
+            expect(screen.getByRole('alert')).toHaveClass('usa-alert--info')
+            expect(screen.getByTestId('rateWithdrawnBanner')).toHaveTextContent(
+                /Withdrawn by: Administrator/
+            )
+            expect(
+                screen.getByText(
+                    `${dayjs
+                        .utc(new Date('2024-01-01'))
+                        .tz('America/New_York')
+                        .format('MM/DD/YY h:mma')} ET`
+                )
+            ).toBeInTheDocument()
+            expect(
+                screen.getByText('Admin as withdrawn this rate.')
             ).toBeInTheDocument()
         })
 

@@ -7,7 +7,7 @@ import {
 } from '../attributeHelper'
 import {
     hasAdminPermissions,
-    isCMSUser,
+    hasCMSPermissions,
     isStateUser,
 } from '../../domain-models/user'
 import { NotFoundError } from '../../postgres'
@@ -45,22 +45,27 @@ const validateAndReturnRates = (
 }
 
 export function indexRatesResolver(store: Store): QueryResolvers['indexRates'] {
-    return async (_parent, _args, context) => {
+    return async (_parent, { input }, context) => {
         const { user, ctx, tracer } = context
         const span = tracer?.startSpan('indexRates', {}, ctx)
         setResolverDetailsOnActiveSpan('indexRates', user, span)
 
         const adminPermissions = hasAdminPermissions(user)
-        const cmsUser = isCMSUser(user)
+        const cmsUser = hasCMSPermissions(user)
         const stateUser = isStateUser(user)
 
         if (adminPermissions || cmsUser || stateUser) {
             let ratesWithHistory
             if (stateUser) {
                 ratesWithHistory =
-                    await store.findAllRatesWithHistoryBySubmitInfo(
-                        user.stateCode
-                    )
+                    await store.findAllRatesWithHistoryBySubmitInfo({
+                        stateCode: user.stateCode,
+                    })
+            } else if (input && input.stateCode) {
+                ratesWithHistory =
+                    await store.findAllRatesWithHistoryBySubmitInfo({
+                        stateCode: input.stateCode,
+                    })
             } else {
                 ratesWithHistory =
                     await store.findAllRatesWithHistoryBySubmitInfo()

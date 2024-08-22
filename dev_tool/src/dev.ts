@@ -24,47 +24,30 @@ import {
     runBrowserTestsInDocker,
     runWebTests,
     runWebTestsWatch,
+    runBrowserTestsAgainstAWS,
 } from './test/index.js'
 
-// Run clean commands from every single lerna package.
 async function runAllClean() {
     const runner = new LabeledProcessRunner()
-    await runner.runCommandAndOutput(
-        'clean',
-        ['pnpm', 'clean'],
-        ''
-    )
+    await runner.runCommandAndOutput('clean', ['pnpm', 'clean'], '')
 }
 
-// Run lint commands from every single lerna package.
 async function runAllLint() {
     const runner = new LabeledProcessRunner()
-    await runner.runCommandAndOutput(
-        'lint',
-        ['npx', 'lerna', 'run', 'lint'],
-        ''
-    )
+    await runner.runCommandAndOutput('lint', ['pnpm', '-r', 'lint'], '')
 }
 
 // Rebuild- this is for use after .dev clean
 // Runs pnpm install, tsc, generate compiled types
 async function runAllBuild(runner: LabeledProcessRunner) {
-    await runner.runCommandAndOutput('pnpm install', ['npx', 'pnpm'], '')
+    await runner.runCommandAndOutput('pnpm install', ['pnpm', 'install'], '')
     await runAllGenerate()
-    await runner.runCommandAndOutput(
-        'build',
-        ['npx', 'lerna', 'run', 'build'],
-        ''
-    )
+    await runner.runCommandAndOutput('build', ['pnpm', 'build'], '')
 }
 
 async function runAllFormat() {
     const runner = new LabeledProcessRunner()
-    await runner.runCommandAndOutput(
-        'format',
-        ['npx', 'lerna', 'run', 'prettier'],
-        ''
-    )
+    await runner.runCommandAndOutput('format', ['pnpm', 'prettier'], '')
 }
 
 // create generated types for graphql, proto, prisma
@@ -146,7 +129,7 @@ async function runOnlineTests() {
 }
 
 function runPrisma(args: string[]) {
-    const proc = spawn('prisma', args, {
+    const proc = spawn('npx', ['prisma'].concat(args), {
         cwd: 'services/app-api',
         stdio: 'inherit',
     })
@@ -451,6 +434,17 @@ async function main() {
                                     type: 'boolean',
                                     describe:
                                         'run cypress in a linux docker container that better matches the environment cypress is run in in CI. N.B. requires running app-web with --for-docker in order to work. Ignores APPLICATION_ENDPOINT in favor of docker networking.',
+                                    conflicts: ['in-review-app', 'stage-name'],
+                                })
+                                .option('in-review-app', {
+                                    type: 'boolean',
+                                    describe:
+                                        'run cypress locally against a deployed review app. add --stageName to specify the review app branch to run against. Default stage name uses current branch.',
+                                })
+                                .option('stage-name', {
+                                    type: 'string',
+                                    describe:
+                                        'specify the review app branch to run against.',
                                 })
                                 .example([
                                     [
@@ -469,12 +463,20 @@ async function main() {
                                         '$0 test browser --in-docker -- run --spec services/cypress/integration/stateSubmission.spec.ts',
                                         'run the stateSubmission cypress tests once in a CI-like docker container',
                                     ],
+                                    [
+                                        '$0 test browser --in-review-app',
+                                        'opens Cypress configured to run tests against review app of the current branch.',
+                                    ],
+                                    [
+                                        '$0 test browser --in-review-app --stage-name other-deployed-branch',
+                                        'opens Cypress configured to run tests against review app of the specified branch',
+                                    ],
                                 ])
                         },
                         (args) => {
                             // all args that come after a `--` hang out in args._, along with the command name(s)
                             // they can be strings or numbers so we map them before passing them on
-                            const unparsedCypressArgs = args._.slice(2).map(
+                            const unparsedCypressArgs = args._.slice(3).map(
                                 (intOrString) => {
                                     return intOrString.toString()
                                 }
@@ -482,6 +484,8 @@ async function main() {
 
                             if (args['in-docker']) {
                                 runBrowserTestsInDocker(unparsedCypressArgs)
+                            } else if (args['in-review-app']) {
+                                runBrowserTestsAgainstAWS(args.stageName)
                             } else {
                                 runBrowserTests(unparsedCypressArgs)
                             }

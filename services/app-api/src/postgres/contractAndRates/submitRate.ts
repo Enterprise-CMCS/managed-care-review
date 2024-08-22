@@ -89,7 +89,7 @@ async function submitRateInsideTransaction(
 type SubmitRateArgsType = {
     rateID: string
     formData?: RateFormEditableType
-    submittedByUserID: UpdateInfoType['updatedBy']
+    submittedByUserID: string
     submittedReason: UpdateInfoType['updatedReason']
 }
 

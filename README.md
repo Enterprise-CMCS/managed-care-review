@@ -25,13 +25,13 @@ Managed Care Review is an application that accepts Managed Care contract and rat
 
 We use a collection of tools to manage this monorepo.
 
-We use [Lerna](https://github.com/lerna/lerna) to manage commands across the entire monorepo. This tool is good for managing multi-package repositories like ours, where there are several nested `package.json`, typescript, eslint, and prettier configs, potentially with their own rules. We also use [Husky](https://github.com/typicode/husky) to run and organize our pre-commit scripts - e.g. `husky` uses the command `lerna run precommit` to run the specific `precommit` script indicated in each `package.json`.
+For monorepo tooling we just rely on the workspace configuration of `pnpm`. If given the `-r` recursive flag, `pnpm` will run a `package.json` script that matches the name given to it in every service. For example, `pnpm -r generate` will run the `generate` command in every service that has a `generate` command specified in it's `package.json`. We also use [Husky](https://github.com/typicode/husky) to run and organize our pre-commit scripts - e.g. `husky` uses the command `pnpm precommit` to run the specific `precommit` script indicated in each `package.json`.
 
 To get the tools needed for local development, you can run:
 
 ```bash
 brew tap yoheimuta/protolint
-brew install pnpm lerna direnv shellcheck protolint detect-secrets
+brew install pnpm direnv shellcheck protolint detect-secrets
 pnpm husky install
 ```
 
@@ -92,7 +92,7 @@ Please see: https://pnpm.io/installation
 
 ## Local Dev
 
-Run all the services locally with the command `./dev local`. All of the commands inside of `./dev local` use [Lerna](#lerna-usage) to run the tasks.
+Run all the services locally with the command `./dev local`.
 
 See the above Requirements section if the command asks for any prerequisites you don't have installed.
 
@@ -141,14 +141,6 @@ Run web app locally, but configured to run against a deployed backend
 -   `./dev local web --hybrid`
 -   For local dev testing, you should push your local branch to deploy a review app and then `./dev local web --hybrid` will connect to that running review app by default.
 -   If you want to specify a different instance to run against, you can set the `--hybrid-stage` parameter. For more info about stages/accounts take a gander at the Deploy section below.
-
-### Lerna usage
-
-All of the tasks in `./dev` are for the most part just wrappers around [Lerna](https://github.com/lerna/lerna) commands. Lerna allows us to define scripts in each service's `package.json` file and will then run any script that matches that script's name across the monorepo. For example, if we run `lerna run build`, Lerna will look at every `package.json` in the monorepo for a task called `build` and then execute the script associated with that `build` command.
-
-If we want to run a task scoped to only one or two services, we could instead run something like `lerna run build --scope=app-api --scope=app-web` to only run the build scripts found in `app-api` and `app-web`.
-
-Any script that is added to a `package.json` scripts section can be invoked with `lerna run $scriptName`.
 
 **Style guide**: Any new script added to a `package.json` file should prefer the format of `task:subtask`. For example, `test`, `test:once`, and `test:coverage` rather than `test_once` and `test_coverage`.
 
@@ -294,7 +286,6 @@ Then verify things are working by running any serverless command , e.g. `cd serv
 
 The Serverless framework calls encapsulated units of lambdas + AWS infrastructure a "service", so we've inherited this terminology from that project. All of our services live under the `./services/` directory. If you need to add a new service to the project a few things need to happen:
 
--   `lerna create ${service-name}`. Follow Lerna's prompts and you'll end up with a directory under `./services/` with a generated `package.json` and `README.md` file.
 -   Add a `serverless.yml` file to the root directory of this new service. You can copy off of an existing config or run the `serverless` command in `./services/${service-name}` to use one of their starter templates.
 -   If this service is going to require js or ts code, you'll want to create a `src` directory as well as copy over the appropriate `tsconfig.json` and `.eslintrc` configs. Refer to one of the existing services to get an idea of how we are currently doing this.
 

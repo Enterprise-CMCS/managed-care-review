@@ -5,15 +5,29 @@ mutation createQuestionResponse($input: CreateQuestionResponseInput!) {
             contractID
             createdAt
             addedBy {
-                id
-                role
-                email
-                givenName
-                familyName
-                divisionAssignment
-                stateAssignments {
-                    code
-                    name
+                ... on CMSUser {
+                    id
+                    role
+                    email
+                    givenName
+                    familyName
+                    divisionAssignment
+                    stateAssignments {
+                        code
+                        name
+                    }
+                }
+                ... on CMSApproverUser {
+                    id
+                    role
+                    email
+                    givenName
+                    familyName
+                    divisionAssignment
+                    stateAssignments {
+                        code
+                        name
+                    }
                 }
             }
             division

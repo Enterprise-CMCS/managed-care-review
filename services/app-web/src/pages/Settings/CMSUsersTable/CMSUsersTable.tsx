@@ -132,6 +132,9 @@ function CMSUserTableWithData({
                     )
                 },
                 header: () => 'Division',
+                meta: {
+                    dataTestID: 'division-assignment',
+                },
             }),
         ]
     }, [setDivision])
@@ -231,7 +234,11 @@ export const CMSUsersTable = (): React.ReactElement => {
 
     // filter to just CMS users
     const cmsUsers = result.data.indexUsers.edges
-        .filter((edge) => edge.node.__typename === 'CMSUser')
+        .filter(
+            (edge) =>
+                edge.node.__typename === 'CMSUser' ||
+                edge.node.__typename === 'CMSApproverUser'
+        )
         .map((edge) => edge.node as CmsUser)
 
     return (

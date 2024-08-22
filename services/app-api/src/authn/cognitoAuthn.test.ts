@@ -84,6 +84,22 @@ describe('cognitoAuthn', () => {
                 },
                 {
                     attributes: {
+                        'custom:role': 'macmcrrs-cms-approver',
+                        given_name: 'Generic',
+                        family_name: 'Person',
+                        email: 'gp@example.com',
+                    },
+                    expectedResult: ok({
+                        id: testID,
+                        role: 'CMS_APPROVER_USER',
+                        email: 'gp@example.com',
+                        familyName: 'Person',
+                        givenName: 'Generic',
+                        stateAssignments: [],
+                    }),
+                },
+                {
+                    attributes: {
                         'custom:role': 'macmcrrs-approver',
                         given_name: 'Generic',
                         family_name: 'Person',

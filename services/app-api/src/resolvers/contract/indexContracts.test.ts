@@ -6,7 +6,11 @@ import {
 } from '../../testHelpers/gqlHelpers'
 import { todaysDate } from '../../testHelpers/dateHelpers'
 import type { Contract, ContractEdge } from '../../gen/gqlServer'
-import { testCMSUser, testStateUser } from '../../testHelpers/userHelpers'
+import {
+    iterableCmsUsersMockData,
+    testCMSUser,
+    testStateUser,
+} from '../../testHelpers/userHelpers'
 import {
     createAndSubmitTestContractWithRate,
     createAndUpdateTestContractWithoutRates,
@@ -16,8 +20,8 @@ import {
 import { testS3Client } from '../../../../app-web/src/testHelpers/s3Helpers'
 
 describe(`indexContracts`, () => {
-    const cmsUser = testCMSUser()
     describe('isStateUser', () => {
+        const cmsUser = testCMSUser()
         const mockS3 = testS3Client()
         it('returns a list of contracts that includes newly created entries', async () => {
             const stateServer = await constructTestPostgresServer({
@@ -33,7 +37,6 @@ describe(`indexContracts`, () => {
             const submittedFormData =
                 submittedContract.packageSubmissions[0].contractRevision
                     .formData
-
             // then see if we can get that same contract back from the index
             const result = await stateServer.executeOperation({
                 query: INDEX_CONTRACTS,
@@ -53,7 +56,6 @@ describe(`indexContracts`, () => {
                 )
             // specific contracts by id exist
             expect(theseSubmissions).toHaveLength(2)
-
             // confirm some contract data is correct too, first in list will be draft, second is the submitted
             expect(theseSubmissions[0].initiallySubmittedAt).toBeNull()
             expect(theseSubmissions[0].status).toBe('DRAFT')
@@ -209,158 +211,165 @@ describe(`indexContracts`, () => {
         })
     })
 
-    describe('isCMSUser', () => {
-        it('returns an empty list if only draft contracts exist', async () => {
-            const stateServer = await constructTestPostgresServer()
-            const cmsServer = await constructTestPostgresServer({
-                context: {
-                    user: cmsUser,
-                },
-            })
-            // First, create new contracts
-            const draft1 =
-                await createAndUpdateTestContractWithoutRates(stateServer)
-            const draft2 =
-                await createAndUpdateTestContractWithoutRates(stateServer)
+    describe.each(iterableCmsUsersMockData)(
+        '$userRole indexContracts tests',
+        ({ mockUser }) => {
+            it('returns an empty list if only draft contracts exist', async () => {
+                const stateServer = await constructTestPostgresServer()
+                const cmsServer = await constructTestPostgresServer({
+                    context: {
+                        user: mockUser(),
+                    },
+                })
+                // First, create new contracts
+                const draft1 =
+                    await createAndUpdateTestContractWithoutRates(stateServer)
+                const draft2 =
+                    await createAndUpdateTestContractWithoutRates(stateServer)
 
-            // index contracts api request
-            const result = await cmsServer.executeOperation({
-                query: INDEX_CONTRACTS,
-            })
-            const submissionsIndex = result.data?.indexContracts
+                // index contracts api request
+                const result = await cmsServer.executeOperation({
+                    query: INDEX_CONTRACTS,
+                })
+                const submissionsIndex = result.data?.indexContracts
 
-            // pull out test related contracts and order them
-            const testSubmissionIDs = [draft1.id, draft2.id]
-            const testContracts: Contract[] = submissionsIndex.edges
-                .map((edge: ContractEdge) => edge.node)
-                .filter((test: Contract) => testSubmissionIDs.includes(test.id))
+                // pull out test related contracts and order them
+                const testSubmissionIDs = [draft1.id, draft2.id]
+                const testContracts: Contract[] = submissionsIndex.edges
+                    .map((edge: ContractEdge) => edge.node)
+                    .filter((test: Contract) =>
+                        testSubmissionIDs.includes(test.id)
+                    )
 
-            expect(testContracts).toHaveLength(0)
-        })
-
-        it('synthesizes the right statuses as a contract is submitted/unlocked/etc', async () => {
-            const server = await constructTestPostgresServer()
-
-            const cmsServer = await constructTestPostgresServer({
-                context: {
-                    user: cmsUser,
-                },
+                expect(testContracts).toHaveLength(0)
             })
 
-            // First, create new contracts
-            const submittedContract =
-                await createAndSubmitTestContractWithRate(server)
-            const unlockedContract =
-                await createAndSubmitTestContractWithRate(server)
-            const relockedContract =
-                await createAndSubmitTestContractWithRate(server)
+            it('synthesizes the right statuses as a contract is submitted/unlocked/etc', async () => {
+                const server = await constructTestPostgresServer()
 
-            // unlock two
-            await unlockTestContract(
-                cmsServer,
-                unlockedContract.id,
-                'Test reason'
-            )
-            await unlockTestContract(
-                cmsServer,
-                relockedContract.id,
-                'Test reason'
-            )
+                const cmsServer = await constructTestPostgresServer({
+                    context: {
+                        user: mockUser(),
+                    },
+                })
 
-            // resubmit one
-            await submitTestContract(
-                server,
-                relockedContract.id,
-                'Test first resubmission'
-            )
+                // First, create new contracts
+                const submittedContract =
+                    await createAndSubmitTestContractWithRate(server)
+                const unlockedContract =
+                    await createAndSubmitTestContractWithRate(server)
+                const relockedContract =
+                    await createAndSubmitTestContractWithRate(server)
 
-            // index contracts api request
-            const result = await cmsServer.executeOperation({
-                query: INDEX_CONTRACTS,
-            })
-            const submissionsIndex = result.data?.indexContracts
-
-            // pull out test related contracts and order them
-            const testSubmissionIDs = [
-                submittedContract.id,
-                unlockedContract.id,
-                relockedContract.id,
-            ]
-            const testContracts: Contract[] = submissionsIndex.edges
-                .map((edge: ContractEdge) => edge.node)
-                .filter((test: Contract) => testSubmissionIDs.includes(test.id))
-
-            expect(testContracts).toHaveLength(3)
-
-            // organize test contracts in a predictable order via testContractsIds array
-            testContracts.sort((a, b) => {
-                if (
-                    testSubmissionIDs.indexOf(a.id) >
-                    testSubmissionIDs.indexOf(b.id)
-                ) {
-                    return 1
-                } else {
-                    return -1
-                }
-            })
-        })
-
-        it('return a list of submitted contracts from multiple states', async () => {
-            const stateServer = await constructTestPostgresServer()
-            const cmsServer = await constructTestPostgresServer({
-                context: {
-                    user: cmsUser,
-                },
-            })
-            const otherStateServer = await constructTestPostgresServer({
-                context: {
-                    user: testStateUser({
-                        stateCode: 'VA',
-                        email: 'aang@mn.gov',
-                    }),
-                },
-            })
-            // submit contracts from two different states
-            const defaultState1 =
-                await createAndSubmitTestContractWithRate(stateServer)
-            const defaultState2 =
-                await createAndSubmitTestContractWithRate(stateServer)
-
-            const draft = await createAndUpdateTestContractWithoutRates(
-                otherStateServer,
-                'VA' as const
-            )
-
-            const otherState1 = await submitTestContract(
-                otherStateServer,
-                draft.id
-            )
-
-            const result = await cmsServer.executeOperation({
-                query: INDEX_CONTRACTS,
-            })
-
-            expect(result.errors).toBeUndefined()
-
-            const allContracts: Contract[] =
-                result.data?.indexContracts.edges.map(
-                    (edge: ContractEdge) => edge.node
+                // unlock two
+                await unlockTestContract(
+                    cmsServer,
+                    unlockedContract.id,
+                    'Test reason'
+                )
+                await unlockTestContract(
+                    cmsServer,
+                    relockedContract.id,
+                    'Test reason'
                 )
 
-            // Pull out only the results relevant to the test by using id of recently created test contracts.
-            const defaultStateContracts: Contract[] = []
-            const otherStateContracts: Contract[] = []
-            allContracts.forEach((pkg) => {
-                if ([defaultState1.id, defaultState2.id].includes(pkg.id)) {
-                    defaultStateContracts.push(pkg)
-                } else if ([otherState1.id].includes(pkg.id)) {
-                    otherStateContracts.push(pkg)
-                }
-                return
+                // resubmit one
+                await submitTestContract(
+                    server,
+                    relockedContract.id,
+                    'Test first resubmission'
+                )
+
+                // index contracts api request
+                const result = await cmsServer.executeOperation({
+                    query: INDEX_CONTRACTS,
+                })
+                const submissionsIndex = result.data?.indexContracts
+
+                // pull out test related contracts and order them
+                const testSubmissionIDs = [
+                    submittedContract.id,
+                    unlockedContract.id,
+                    relockedContract.id,
+                ]
+                const testContracts: Contract[] = submissionsIndex.edges
+                    .map((edge: ContractEdge) => edge.node)
+                    .filter((test: Contract) =>
+                        testSubmissionIDs.includes(test.id)
+                    )
+
+                expect(testContracts).toHaveLength(3)
+
+                // organize test contracts in a predictable order via testContractsIds array
+                testContracts.sort((a, b) => {
+                    if (
+                        testSubmissionIDs.indexOf(a.id) >
+                        testSubmissionIDs.indexOf(b.id)
+                    ) {
+                        return 1
+                    } else {
+                        return -1
+                    }
+                })
             })
 
-            expect(defaultStateContracts).toHaveLength(2)
-            expect(otherStateContracts).toHaveLength(1)
-        })
-    })
+            it('return a list of submitted contracts from multiple states', async () => {
+                const stateServer = await constructTestPostgresServer()
+                const cmsServer = await constructTestPostgresServer({
+                    context: {
+                        user: mockUser(),
+                    },
+                })
+                const otherStateServer = await constructTestPostgresServer({
+                    context: {
+                        user: testStateUser({
+                            stateCode: 'VA',
+                            email: 'aang@mn.gov',
+                        }),
+                    },
+                })
+                // submit contracts from two different states
+                const defaultState1 =
+                    await createAndSubmitTestContractWithRate(stateServer)
+                const defaultState2 =
+                    await createAndSubmitTestContractWithRate(stateServer)
+
+                const draft = await createAndUpdateTestContractWithoutRates(
+                    otherStateServer,
+                    'VA' as const
+                )
+
+                const otherState1 = await submitTestContract(
+                    otherStateServer,
+                    draft.id
+                )
+
+                const result = await cmsServer.executeOperation({
+                    query: INDEX_CONTRACTS,
+                })
+
+                expect(result.errors).toBeUndefined()
+
+                const allContracts: Contract[] =
+                    result.data?.indexContracts.edges.map(
+                        (edge: ContractEdge) => edge.node
+                    )
+
+                // Pull out only the results relevant to the test by using id of recently created test contracts.
+                const defaultStateContracts: Contract[] = []
+                const otherStateContracts: Contract[] = []
+                allContracts.forEach((pkg) => {
+                    if ([defaultState1.id, defaultState2.id].includes(pkg.id)) {
+                        defaultStateContracts.push(pkg)
+                    } else if ([otherState1.id].includes(pkg.id)) {
+                        otherStateContracts.push(pkg)
+                    }
+                    return
+                })
+
+                expect(defaultStateContracts).toHaveLength(2)
+                expect(otherStateContracts).toHaveLength(1)
+            })
+        }
+    )
 })

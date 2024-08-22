@@ -21,18 +21,25 @@ query fetchHealthPlanPackage($input: FetchHealthPlanPackageInput!) {
                     id
                     createdAt
                     unlockInfo {
-                        updatedAt
-                        updatedBy
-                        updatedReason
+                        ...updateInformationFields
                     }
                     submitInfo {
-                        updatedAt
-                        updatedBy
-                        updatedReason
+                        ...updateInformationFields
                     }
                     formDataProto
                 }
             }
         }
     }
+}
+
+fragment updateInformationFields on UpdateInformation {
+    updatedAt
+    updatedBy {
+        email
+        role
+        familyName
+        givenName
+    }
+    updatedReason
 }

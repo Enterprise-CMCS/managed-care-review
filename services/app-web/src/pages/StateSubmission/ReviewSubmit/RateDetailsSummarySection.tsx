@@ -39,6 +39,7 @@ import { ActuaryCommunicationRecord } from '../../../constants'
 import { useParams } from 'react-router-dom'
 import { LinkWithLogging } from '../../../components/TealiumLogging/Link'
 import classnames from 'classnames'
+import { hasCMSUserPermissions } from '../../../gqlHelpers'
 
 export type RateDetailsSummarySectionProps = {
     contract: Contract
@@ -93,7 +94,7 @@ export const RateDetailsSummarySection = ({
     const { revisionVersion } = useParams()
     const isSubmitted =
         contract.status === 'SUBMITTED' || contract.status === 'RESUBMITTED'
-    const isCMSUser = loggedInUser?.role === 'CMS_USER'
+    const isCMSUser = hasCMSUserPermissions(loggedInUser)
     const isAdminUser = loggedInUser?.role === 'ADMIN_USER'
     const isSubmittedOrCMSUser = isSubmitted || isCMSUser
     const isEditing = !isSubmittedOrCMSUser && editNavigateTo !== undefined
@@ -112,7 +113,7 @@ export const RateDetailsSummarySection = ({
     const lastSubmittedDate = isPreviousSubmission
         ? getPackageSubmissionAtIndex(contract, lastSubmittedIndex)?.submitInfo
               .updatedAt
-        : getLastContractSubmission(contract)?.submitInfo.updatedAt ?? null
+        : (getLastContractSubmission(contract)?.submitInfo.updatedAt ?? null)
 
     const { getKey, getBulkDlURL } = useS3()
     const [zippedFilesURL, setZippedFilesURL] = useState<
@@ -294,20 +295,27 @@ export const RateDetailsSummarySection = ({
                       const hasNoRatePrograms =
                           rateFormData.rateProgramIDs.length === 0
                       const isLinkedRate = rateRev.isLinked
-                      /*
+                      // Is this rate linked to by another contract
+                      const isLinkedTo = rateRev.contractRevisions.length > 1
+
+                      /**
                     Rate programs switched in summer 2024. We still show deprecated program field values when
                     - there's no new field values present and CMS user is viewing
                     - theres no new field values present and contract is locked and state user viewing
                     - theres no new field values present and the contract unlocked and the rate being displayed as a linked rate
 
                     otherwise use new fields values going forward
-                    */
+                    **/
+
                       const showLegacyRatePrograms =
                           hasDeprecatedRatePrograms &&
                           hasNoRatePrograms &&
                           (isSubmittedOrCMSUser || isLinkedRate)
                       const showReplaceRateBtn =
-                          isAdminUser && !isPreviousSubmission && !isLinkedRate
+                          isAdminUser &&
+                          !isPreviousSubmission &&
+                          !isLinkedRate &&
+                          !isLinkedTo
                       if (!rateFormData) {
                           return <GenericErrorPage />
                       }

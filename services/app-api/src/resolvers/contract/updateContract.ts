@@ -1,7 +1,7 @@
 import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
 import {
-    isCMSUser,
     convertContractWithRatesToUnlockedHPP,
+    hasCMSPermissions,
 } from '../../domain-models'
 import type { MutationResolvers } from '../../gen/gqlServer'
 import { logError } from '../../logger'
@@ -22,7 +22,7 @@ export function updateContract(
         setResolverDetailsOnActiveSpan('updateContract', user, span)
 
         // This resolver is only callable by CMS users
-        if (!isCMSUser(user)) {
+        if (!hasCMSPermissions(user)) {
             logError('updateContract', 'user not authorized to update contract')
             setErrorAttributesOnActiveSpan(
                 'user not authorized to update contract',

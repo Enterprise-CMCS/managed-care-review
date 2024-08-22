@@ -30,6 +30,7 @@ import { handleApolloErrorsAndAddUserFacingMessages } from '../../../gqlHelpers/
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '../../../common-code/featureFlags'
 import { NavLinkWithLogging } from '../../TealiumLogging'
+import { hasCMSUserPermissions } from '../../../gqlHelpers'
 
 const rateCapitationType = (formData: RateFormData) =>
     formData.rateCapitationType
@@ -116,11 +117,11 @@ export const SingleRateSummarySection = ({
         !isSubmitted &&
         (loggedInUser?.role === 'STATE_USER' ||
             loggedInUser?.role === 'HELPDESK_USER')
-    const isCMSUser = loggedInUser?.role === 'CMS_USER'
+    const isCMSUser = hasCMSUserPermissions(loggedInUser)
     const isSubmittedOrCMSUser =
         rate.status === 'SUBMITTED' ||
         rate.status === 'RESUBMITTED' ||
-        loggedInUser?.role === 'CMS_USER'
+        isCMSUser
 
     // feature flags
     const ldClient = useLDClient()

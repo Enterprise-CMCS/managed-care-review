@@ -38,7 +38,7 @@ type Query {
     CMSUsers can find all the packages that do not have the DRAFT status
     """
     indexHealthPlanPackages: IndexHealthPlanPackagesPayload!
-    
+
     """
     indexContracts returns all of the contracts the current user can see.
 
@@ -76,7 +76,7 @@ type Query {
     - ForbiddenError: User must be a CMS or Admin type user
     - NotFoundError: No rates with at least one submitted revision were found
     """
-    indexRates: IndexRatesPayload!
+    indexRates(input: IndexRatesInput): IndexRatesPayload!
     """
     fetchRate returns a rate with its revisions, including contract revisions
     for a given rate's ID
@@ -728,7 +728,7 @@ input UpdateCMSUserInput {
 }
 
 type UpdateCMSUserPayload {
-    user: CMSUser!
+    user: CMSUsersUnion!
 }
 
 input UpdateContractDraftRevisionInput {
@@ -772,7 +772,7 @@ scalar Date
 "DateTime is a moment in time with date and time information"
 scalar DateTime
 
-union User = StateUser | CMSUser | AdminUser | HelpdeskUser | BusinessOwnerUser
+union User = StateUser | CMSUser | AdminUser | HelpdeskUser | BusinessOwnerUser | CMSApproverUser
 
 "StateUser is a user that works for a state, submitting packages to be reviewed by CMSUsers"
 type StateUser {
@@ -796,6 +796,20 @@ type CMSUser {
     stateAssignments: [State!]!
     divisionAssignment: Division
 }
+
+"CMSApproverUser is a user that works for CMS, approving CMS approver request and able to do everything a CMSUser can do"
+type CMSApproverUser {
+    id: ID!
+    "will always be 'CMS_APPROVER_USER'"
+    role: String!
+    email: String!
+    givenName: String!
+    familyName: String!
+    stateAssignments: [State!]!
+    divisionAssignment: Division
+}
+
+union CMSUsersUnion = CMSUser | CMSApproverUser
 
 "AdminUser is a user that works on the MC Review app itself"
 type AdminUser {
@@ -909,6 +923,13 @@ type HealthPlanPackage {
     questions: IndexQuestionsPayload
 }
 
+type UpdatedBy {
+    role: String!
+    email: String!
+    givenName: String!
+    familyName: String!
+}
+
 """
 UpdateInformation is used for the unlockInfo and the submitInfo on HealthPlanRevision.
 It tracks who, when, and why the submission or unlock was performed.
@@ -917,7 +938,7 @@ type UpdateInformation {
     "the datetime when the update occured"
     updatedAt: DateTime!
     "the email of the user who performed the update"
-    updatedBy: String!
+    updatedBy: UpdatedBy!
     "the reason provided by the user when performing the update"
     updatedReason: String!
 }
@@ -990,7 +1011,7 @@ type Question {
     id: ID!
     contractID: ID!
     createdAt: DateTime!
-    addedBy: CMSUser!
+    addedBy: CMSUsersUnion!
     documents: [Document!]!
     division: Division!
     #    noteText: String
@@ -1706,6 +1727,10 @@ type UnlockedContract {
 
 type RateEdge {
     node: Rate!
+}
+
+input IndexRatesInput {
+    stateCode: String
 }
 
 type IndexRatesPayload {

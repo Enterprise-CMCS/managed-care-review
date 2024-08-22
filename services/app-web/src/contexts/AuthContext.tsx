@@ -1,5 +1,4 @@
 import React, { MutableRefObject, useEffect, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import * as ld from 'launchdarkly-js-client-sdk'
 import { AuthModeType } from '../common-code/config'
@@ -62,7 +61,6 @@ function AuthProvider({
     const [loginStatus, setLoginStatus] =
         useState<LoginStatusType>('LOGGED_OUT')
     const ldClient = useLDClient()
-    const navigate = useNavigate()
 
     // session expiration modal
     const [sessionIsExpiring, setSessionIsExpiring] = useState<boolean>(false)
@@ -146,7 +144,7 @@ function AuthProvider({
                     `[User auth error]: Unable to authenticate user though user seems to be logged in. Message: ${error.message}`
                 )
                 // since we have an auth request error but a potentially logged in user, we log out fully from Auth context and redirect to dashboard for clearer user experience
-                navigate(`/?session-timeout=true`)
+                window.location.href = '/?session-timeout=true'
             }
         } else if (data?.fetchCurrentUser) {
             if (!isAuthenticated) {

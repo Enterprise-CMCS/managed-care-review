@@ -20,14 +20,10 @@ mutation createHealthPlanPackage($input: CreateHealthPlanPackageInput!) {
                 node {
                     id
                     unlockInfo {
-                        updatedAt
-                        updatedBy
-                        updatedReason
+                        ...updateInformationFields
                     }
                     submitInfo {
-                        updatedAt
-                        updatedBy
-                        updatedReason
+                        ...updateInformationFields
                     }
                     createdAt
                     formDataProto
@@ -35,4 +31,15 @@ mutation createHealthPlanPackage($input: CreateHealthPlanPackageInput!) {
             }
         }
     }
+}
+
+fragment updateInformationFields on UpdateInformation {
+    updatedAt
+    updatedBy {
+        email
+        role
+        familyName
+        givenName
+    }
+    updatedReason
 }

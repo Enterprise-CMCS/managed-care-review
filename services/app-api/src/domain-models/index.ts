@@ -3,6 +3,9 @@ export type {
     StateUserType,
     AdminUserType,
     UserType,
+    CMSApproverUserType,
+    CMSUsersUnionType,
+    BaseUserType,
 } from './UserType'
 export type { StateType } from './StateType'
 
@@ -19,6 +22,7 @@ export {
     isBusinessOwnerUser,
     isHelpdeskUser,
     hasAdminPermissions,
+    hasCMSPermissions,
 } from './user'
 
 export {

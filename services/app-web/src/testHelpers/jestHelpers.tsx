@@ -83,7 +83,6 @@ const renderWithProviders = (
         location = undefined,
         featureFlags = undefined,
     } = options || {}
-
     const { route } = routerProvider
     const s3Client: S3ClientT = s3Provider ?? testS3Client()
     const tealiumClient: TealiumClientType =

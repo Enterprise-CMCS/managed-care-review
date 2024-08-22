@@ -7,7 +7,7 @@ async function compileGraphQLTypesWatch(runner: LabeledProcessRunner) {
 
     return await runner.runCommandAndOutput(
         'gqlgen',
-        ['npx', 'lerna', 'run', 'gqlgen:watch'],
+        ['pnpm', '-r', 'gqlgen:watch'],
         ''
     )
 }
@@ -21,11 +21,7 @@ async function compileGraphQLTypes(runner: LabeledProcessRunner) {
         ''
     )
 
-    return runner.runCommandAndOutput(
-        'gqlgen',
-        ['npx', 'lerna', 'run', 'gqlgen'],
-        ''
-    )
+    return runner.runCommandAndOutput('gqlgen', ['pnpm', '-r', 'gqlgen'], '')
 }
 
 export const compileGraphQLTypesOnce = once(compileGraphQLTypes)

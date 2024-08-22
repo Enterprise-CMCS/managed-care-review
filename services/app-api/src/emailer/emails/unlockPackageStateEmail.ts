@@ -51,7 +51,7 @@ export const unlockPackageStateEmail = async (
 
     const data = {
         packageName,
-        unlockedBy: updateInfo.updatedBy,
+        unlockedBy: updateInfo.updatedBy.email,
         unlockedOn: formatCalendarDate(updateInfo.updatedAt),
         unlockedReason: updateInfo.updatedReason,
         shouldIncludeRates: formData.submissionType === 'CONTRACT_AND_RATES',
@@ -72,7 +72,6 @@ export const unlockPackageStateEmail = async (
     } else {
         return {
             toAddresses: receiverEmails,
-            replyToAddresses: [config.helpDeskEmail],
             sourceEmail: config.emailSource,
             subject: `${
                 isTestEnvironment ? `[${config.stage}] ` : ''

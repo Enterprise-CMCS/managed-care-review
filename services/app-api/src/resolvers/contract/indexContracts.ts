@@ -2,12 +2,10 @@ import type { Span } from '@opentelemetry/api'
 import { ForbiddenError } from 'apollo-server-lambda'
 import {
     isStateUser,
-    isCMSUser,
-    isAdminUser,
-    isBusinessOwnerUser,
+    hasAdminPermissions,
+    hasCMSPermissions,
 } from '../../domain-models'
 import type { ContractType } from '../../domain-models'
-import { isHelpdeskUser } from '../../domain-models/user'
 import type { QueryResolvers } from '../../gen/gqlServer'
 import { logError, logSuccess } from '../../logger'
 import type { Store } from '../../postgres'
@@ -100,12 +98,7 @@ export function indexContractsResolver(
             setSuccessAttributesOnActiveSpan(span)
             const parsedContracts = parseContracts(contractsWithHistory, span)
             return formatContracts(parsedContracts)
-        } else if (
-            isCMSUser(user) ||
-            isAdminUser(user) ||
-            isHelpdeskUser(user) ||
-            isBusinessOwnerUser(user)
-        ) {
+        } else if (hasAdminPermissions(user) || hasCMSPermissions(user)) {
             const contractsWithHistory =
                 await store.findAllContractsWithHistoryBySubmitInfo()
 

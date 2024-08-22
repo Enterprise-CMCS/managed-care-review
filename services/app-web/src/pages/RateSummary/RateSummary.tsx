@@ -11,6 +11,7 @@ import { SingleRateSummarySection } from '../../components/SubmissionSummarySect
 import { useAuth } from '../../contexts/AuthContext'
 import { ErrorForbiddenPage } from '../Errors/ErrorForbiddenPage'
 import { Error404 } from '../Errors/Error404Page'
+import { RateWithdrawnBanner } from '../../components/Banner'
 
 export const RateSummary = (): React.ReactElement => {
     // Page level state
@@ -39,6 +40,7 @@ export const RateSummary = (): React.ReactElement => {
 
     const rate = data?.fetchRate.rate
     const currentRateRev = rate?.revisions[0]
+    const withdrawInfo = rate?.withdrawInfo
 
     if (loading) {
         return (
@@ -81,6 +83,13 @@ export const RateSummary = (): React.ReactElement => {
                 data-testid="rate-summary"
                 className={styles.container}
             >
+                {withdrawInfo && (
+                    <RateWithdrawnBanner
+                        withdrawInfo={withdrawInfo}
+                        className={styles.banner}
+                    />
+                )}
+
                 <div>
                     <NavLinkWithLogging
                         //TODO: Will have to remove this conditional once the rate dashboard is made available to state users

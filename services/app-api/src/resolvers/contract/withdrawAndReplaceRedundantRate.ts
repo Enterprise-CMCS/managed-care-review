@@ -58,6 +58,40 @@ export function withdrawAndReplaceRedundantRateResolver(
             throw new ForbiddenError(message)
         }
 
+        const rateWithHistory = await store.findRateWithHistory(withdrawnRateID)
+
+        if (rateWithHistory instanceof Error) {
+            const errMessage = `Issue finding rate message: ${rateWithHistory.message}`
+            setErrorAttributesOnActiveSpan(errMessage, span)
+
+            if (rateWithHistory instanceof NotFoundError) {
+                throw new GraphQLError(errMessage, {
+                    extensions: {
+                        code: 'NOT_FOUND',
+                        cause: 'DB_ERROR',
+                    },
+                })
+            }
+
+            throw new GraphQLError(errMessage, {
+                extensions: {
+                    code: 'INTERNAL_SERVER_ERROR',
+                    cause: 'DB_ERROR',
+                },
+            })
+        }
+
+        const latestPackageSubmissions = rateWithHistory.packageSubmissions[0]
+
+        // Check if rate was linked to other submissions
+        if (latestPackageSubmissions.contractRevisions.length > 1) {
+            const errMessage = `The rate has been linked to another submission: ${withdrawnRateID}`
+            setErrorAttributesOnActiveSpan(errMessage, span)
+            throw new UserInputError(errMessage, {
+                argumentName: 'withdrawnRateID',
+            })
+        }
+
         const withdrawAndReplaceRedundantRateResult =
             await store.replaceRateOnContract({
                 contractID: contractID,
@@ -89,7 +123,7 @@ export function withdrawAndReplaceRedundantRateResolver(
         }
 
         if (withdrawAndReplaceRedundantRateResult instanceof Error) {
-            const errMessage = `Failed to replace rate on contract ID: ${contractID}; ${withdrawAndReplaceRedundantRateResult.message}`
+            const errMessage = `Failed to withdraw rate ID:${withdrawnRateID} and replace with rate ID:${replacementRateID} on contract ID: ${contractID}; ${withdrawAndReplaceRedundantRateResult.message}`
             logError('withdrawAndReplaceRedundantRate', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new GraphQLError(errMessage, {

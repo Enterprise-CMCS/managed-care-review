@@ -1,28 +1,27 @@
 import React from 'react'
 import styles from '../Banner.module.scss'
 import { Alert } from '@trussworks/react-uswds'
-import { dayjs } from '../../../common-code/dateHelpers'
+import { formatBannerDate } from '../../../common-code/dateHelpers'
 import { ExpandableText } from '../../ExpandableText'
+import { UpdateInformation, User } from '../../../gen/gqlClient'
+import { getUpdatedByDisplayName } from '../../../gqlHelpers/userHelpers'
+import { hasCMSUserPermissions } from '../../../gqlHelpers/userHelpers'
 
 export type UnlockedProps = {
-    userType: 'STATE_USER' | 'CMS_USER'
-    unlockedBy: string
-    unlockedOn: Date
-    reason: string
+    loggedInUser?: User
+    unlockedInfo?: UpdateInformation | null
 }
 
 export const SubmissionUnlockedBanner = ({
-    userType,
-    unlockedBy,
-    unlockedOn,
-    reason,
     className,
+    loggedInUser,
+    unlockedInfo,
 }: UnlockedProps &
     React.HTMLAttributes<HTMLDivElement>): React.ReactElement => {
     return (
         <Alert
             role="alert"
-            type={userType === 'CMS_USER' ? 'warning' : 'info'}
+            type={hasCMSUserPermissions(loggedInUser) ? 'warning' : 'info'}
             heading="Submission unlocked"
             headingLevel="h4"
             validation={true}
@@ -32,20 +31,17 @@ export const SubmissionUnlockedBanner = ({
             <div className={styles.bannerBodyText}>
                 <p className="usa-alert__text">
                     <b>Unlocked by:&nbsp;</b>
-                    {unlockedBy}
+                    {getUpdatedByDisplayName(unlockedInfo?.updatedBy)}
                 </p>
                 <p className="usa-alert__text">
                     <b>Unlocked on:&nbsp;</b>
-                    {dayjs
-                        .utc(unlockedOn)
-                        .tz('America/New_York')
-                        .format('MM/DD/YY h:mma')}
+                    {formatBannerDate(unlockedInfo?.updatedAt)}
                     &nbsp;ET
                 </p>
                 <ExpandableText>
                     <>
                         <b>Reason for unlock:&nbsp;</b>
-                        {reason}
+                        {unlockedInfo?.updatedReason ?? 'Not available'}
                     </>
                 </ExpandableText>
             </div>
