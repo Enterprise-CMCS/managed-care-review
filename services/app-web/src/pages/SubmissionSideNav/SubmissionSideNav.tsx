@@ -24,8 +24,6 @@ import {
     HealthPlanFormDataType,
     packageName,
 } from '../../common-code/healthPlanFormDataType'
-import { useLDClient } from 'launchdarkly-react-client-sdk'
-import { featureFlags } from '../../common-code/featureFlags'
 import {
     DocumentDateLookupTableType,
     makeDocumentDateTable,
@@ -49,14 +47,8 @@ export const SubmissionSideNav = () => {
     }
     const { loggedInUser } = useAuth()
     const { pathname } = useLocation()
-    const ldClient = useLDClient()
 
     const routeName = getRouteName(pathname)
-
-    const showQuestionResponse = ldClient?.variation(
-        featureFlags.CMS_QUESTIONS.flag,
-        featureFlags.CMS_QUESTIONS.defaultValue
-    )
 
     const isSelectedLink = (route: string | string[]): string => {
         //We pass an array of the form routes in order to display the sideNav on all of the pages
@@ -105,7 +97,6 @@ export const SubmissionSideNav = () => {
 
     //The sideNav should not be visible to a state user if the submission is a draft that has never been submitted
     const showSidebar =
-        showQuestionResponse &&
         submissionStatus !== 'DRAFT' &&
         pkg.initiallySubmittedAt !== null &&
         QUESTION_RESPONSE_SHOW_SIDEBAR_ROUTES.includes(routeName)

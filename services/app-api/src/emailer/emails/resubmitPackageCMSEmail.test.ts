@@ -15,7 +15,12 @@ import {
 
 describe('with rates', () => {
     const resubmitData = {
-        updatedBy: 'bob@example.com',
+        updatedBy: {
+            email: 'bob@example.com',
+            role: 'STATE_USER' as const,
+            givenName: 'John',
+            familyName: 'Vila',
+        },
         updatedAt: new Date('02/01/2022'),
         updatedReason: 'Added rate certification.',
     }
@@ -554,7 +559,12 @@ describe('with rates', () => {
 
 describe('contract only', () => {
     const resubmitData = {
-        updatedBy: 'bob@example.com',
+        updatedBy: {
+            email: 'bob@example.com',
+            role: 'STATE_USER' as const,
+            givenName: 'Bob',
+            familyName: 'Vila',
+        },
         updatedAt: new Date('02/01/2022'),
         updatedReason: 'Added more contract details.',
     }
@@ -721,7 +731,12 @@ describe('contract only', () => {
 
 test('renders overall email as expected', async () => {
     const resubmitData = {
-        updatedBy: 'bob@example.com',
+        updatedBy: {
+            email: 'bob@example.com',
+            role: 'STATE_USER' as const,
+            givenName: 'Bob',
+            familyName: 'Vila',
+        },
         updatedAt: new Date('02/01/2022'),
         updatedReason: 'Added more contract details.',
     }

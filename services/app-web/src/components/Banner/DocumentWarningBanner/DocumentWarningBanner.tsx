@@ -18,7 +18,7 @@ export const DocumentWarningBanner = ({
             type: 'warn',
             extension: 'react-uswds',
         })
-    }, [])
+    }, [logAlertImpressionEvent])
 
     return (
         <Alert

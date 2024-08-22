@@ -915,7 +915,12 @@ describe('RateDetails', () => {
                             submitInfo: {
                                 __typename: 'UpdateInformation',
                                 updatedAt: new Date('2022-04-10'),
-                                updatedBy: 'aang@example.com',
+                                updatedBy: {
+                                    email: 'aang@example.com',
+                                    role: 'ADMIN_USER',
+                                    familyName: 'Hotman',
+                                    givenName: 'Iroh',
+                                },
                                 updatedReason: 'Resubmit',
                             },
                             formData: {
@@ -935,7 +940,12 @@ describe('RateDetails', () => {
                             submitInfo: {
                                 __typename: 'UpdateInformation',
                                 updatedAt: new Date('2024-04-10'),
-                                updatedBy: 'aang@example.com',
+                                updatedBy: {
+                                    email: 'aang@example.com',
+                                    role: 'STATE_USER',
+                                    familyName: 'Airman',
+                                    givenName: 'Aang',
+                                },
                                 updatedReason: 'Resubmit',
                             },
                             formData: {
@@ -955,7 +965,12 @@ describe('RateDetails', () => {
                             submitInfo: {
                                 __typename: 'UpdateInformation',
                                 updatedAt: new Date('2024-04-08'),
-                                updatedBy: 'aang@example.com',
+                                updatedBy: {
+                                    email: 'aang@example.com',
+                                    role: 'STATE_USER',
+                                    familyName: 'Airman',
+                                    givenName: 'Aang',
+                                },
                                 updatedReason: 'Resubmit',
                             },
                             formData: {

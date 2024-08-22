@@ -49,7 +49,7 @@ export const resubmitPackageStateEmail = async (
 
     const data = {
         packageName,
-        resubmittedBy: updateInfo.updatedBy,
+        resubmittedBy: updateInfo.updatedBy.email,
         resubmittedOn: formatCalendarDate(updateInfo.updatedAt),
         resubmissionReason: updateInfo.updatedReason,
         shouldIncludeRates: isContractAndRates,
@@ -69,7 +69,6 @@ export const resubmitPackageStateEmail = async (
     } else {
         return {
             toAddresses: receiverEmails,
-            replyToAddresses: [config.helpDeskEmail],
             sourceEmail: config.emailSource,
             subject: `${
                 isTestEnvironment ? `[${config.stage}] ` : ''

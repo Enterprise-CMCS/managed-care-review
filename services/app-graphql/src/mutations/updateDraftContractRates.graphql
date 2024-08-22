@@ -18,9 +18,7 @@ mutation updateDraftContractRates($input: UpdateDraftContractRatesInput!) {
                 updatedAt
 
                 unlockInfo {
-                    updatedAt
-                    updatedBy
-                    updatedReason
+                    ...updateInformationFields
                 }
 
                 formData {
@@ -73,9 +71,7 @@ mutation updateDraftContractRates($input: UpdateDraftContractRatesInput!) {
                     createdAt
                     updatedAt
                     unlockInfo {
-                        updatedAt
-                        updatedBy
-                        updatedReason
+                        ...updateInformationFields
                     }
 
                     formData {
@@ -132,9 +128,7 @@ mutation updateDraftContractRates($input: UpdateDraftContractRatesInput!) {
                     createdAt
                     updatedAt
                     unlockInfo {
-                        updatedAt
-                        updatedBy
-                        updatedReason
+                        ...updateInformationFields
                     }
 
                     formData {
@@ -183,4 +177,15 @@ mutation updateDraftContractRates($input: UpdateDraftContractRatesInput!) {
         }
 
     }
+}
+
+fragment updateInformationFields on UpdateInformation {
+    updatedAt
+    updatedBy {
+        email
+        role
+        familyName
+        givenName
+    }
+    updatedReason
 }
