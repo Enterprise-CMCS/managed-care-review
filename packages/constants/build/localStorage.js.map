@@ -1,0 +1,1 @@
+{"version":3,"file":"localStorage.js","sourceRoot":"","sources":["../src/localStorage.ts"],"names":[],"mappings":"AAAA;;;GAGG;AAEH,MAAM,kBAAkB,GAAG,CAAC,gBAAgB,CAAU,CAAA;AAItD,MAAM,CAAC,MAAM,gBAAgB,GAAwC;IACjE;;OAEG;IACH,cAAc,EAAE,gBAAgB;CACnC,CAAA"}

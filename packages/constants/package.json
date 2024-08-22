@@ -1,14 +1,14 @@
 {
-    "name": "@mc-review/gql-helpers",
+    "name": "@mc-review/constants",
     "version": "1.0.0",
     "main": "build/index.js",
     "scripts": {
+        "build": "tsc",
         "test": "echo \"Error: no test specified\" && exit 1"
     },
+    "license": "ISC",
     "dependencies": {
         "@apollo/client": "3.8.8",
-        "@mc-review/otel-helpers": "workspace:*",
-        "@mc-review/common-code": "workspace:*",
         "typescript": "4.9.5"
     }
 }
