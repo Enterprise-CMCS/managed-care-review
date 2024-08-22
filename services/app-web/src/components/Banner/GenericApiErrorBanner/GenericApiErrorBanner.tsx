@@ -1,6 +1,6 @@
 import React from 'react'
 import { ErrorAlertFailedRequest } from '../../ErrorAlert'
-import { RemediationType } from '../../ErrorAlert/ErrorRemediations'
+import { ErrorAlertValidationError } from '../../ErrorAlert/ErrorAlertValidationError'
 
 export type GenericApiErrorProps = {
     heading?: string
@@ -13,11 +13,10 @@ export const GenericApiErrorBanner = ({
     message,
     validationFail = false,
 }: GenericApiErrorProps): React.ReactElement => {
-    let remediation :RemediationType | undefined = undefined
     if (validationFail){
-        remediation = 'VALIDATION_ERROR'
+        return <ErrorAlertValidationError heading={heading} message={message} />
     }
     return (
-        <ErrorAlertFailedRequest heading={heading} message={message} remediation={remediation}/>
+        <ErrorAlertFailedRequest heading={heading} message={message}/>
     )
 }

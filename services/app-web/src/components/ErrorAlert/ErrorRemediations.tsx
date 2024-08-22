@@ -1,5 +1,5 @@
 import React from "react";
-import { LetUsKnowLink } from "./LetUsKnowLink";
+import { ContactSupportLink } from "./ContactSupportLink";
 
 // These components are used to display remediation messages in ErrorAlert
 // This is the second paragraph (which is optional) in the alert content
@@ -10,31 +10,31 @@ const DefaultRemediation = (): React.ReactNode =>  (
 Please refresh your browser and if you continue to
 experience an error,&nbsp;
     </span>
-    <LetUsKnowLink />
+    <ContactSupportLink />.
 </>)
 
 const SignInRemediation = (): React.ReactNode =>  (
     <>
     <span>
-        There has been a problem signing in. Please try to sign in again and if you continue to experience an error,&nbsp;
+        Please try to sign in again and if you continue to experience an error,&nbsp;
         </span>
-        <LetUsKnowLink />
+        <ContactSupportLink />.
     </>)
 
 const TechnicalIssuesRemediation= (): React.ReactNode => (
     <>
     <span>
-    MC-Review is currently unavailable due to technical issues. We are working to resolve these issues as quickly as possible. If you have questions or need immediate assistance with your submission, please,&nbsp;
+    We are working to resolve these issues as quickly as possible. If you have questions or need immediate assistance with your submission, please,&nbsp;
         </span>
-        <LetUsKnowLink />
+        <ContactSupportLink />.
     </>)
 
 const ValidationRemediation= (): React.ReactNode => (
     <>
     <span>
-    Please provide the required information before submitting. If you continue to see this message, please,&nbsp;
+    Please provide the required information before submitting. If you continue to see this message,&nbsp;
         </span>
-        <LetUsKnowLink />
+        <ContactSupportLink />.
     </>)
 
 type RemediationType = 'DEFAULT' | 'TECH_ISSUE' | 'SIGNIN_ERROR' | 'VALIDATION_ERROR';

@@ -3,7 +3,7 @@ import styles from './Errors.module.scss'
 
 import { PageHeading } from '../../components'
 import { GridContainer } from '@trussworks/react-uswds'
-import { LetUsKnowLink } from '../../components/ErrorAlert/LetUsKnowLink'
+import { ContactSupportLink } from '../../components/ErrorAlert/ContactSupportLink'
 
 export const GenericErrorPage = (): React.ReactElement => {
     return (
@@ -16,7 +16,7 @@ export const GenericErrorPage = (): React.ReactElement => {
                         your browser and if you continue to experience an
                         error,&nbsp;
                     </span>
-                    <LetUsKnowLink/>
+                    <ContactSupportLink/>
                 </p>
             </GridContainer>
         </section>

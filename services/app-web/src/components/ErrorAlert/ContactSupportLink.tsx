@@ -2,17 +2,17 @@ import React from 'react'
 import { useStringConstants } from '../../hooks/useStringConstants'
 import { LinkWithLogging } from '../TealiumLogging/Link'
 
-type LetUsKnowLinkProps = {
+type ContactSupportLinkProps = {
     alternateText?: string
    className?: string
 }
 
-export const LetUsKnowLink = ({
+export const ContactSupportLink = ({
     alternateText,
     className
-}: LetUsKnowLinkProps): React.ReactElement => {
+}: ContactSupportLinkProps): React.ReactElement => {
     const stringConstants = useStringConstants()
-    const displayText = alternateText?? 'let us know'
+    const displayText = alternateText?? 'email the help desk'
     return (
         <LinkWithLogging
         className={className}

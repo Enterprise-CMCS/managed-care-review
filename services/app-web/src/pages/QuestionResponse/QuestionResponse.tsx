@@ -20,7 +20,7 @@ import { CmsUser, QuestionEdge, StateUser } from '../../gen/gqlClient'
 import { useStringConstants } from '../../hooks/useStringConstants'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import { hasCMSUserPermissions } from '../../gqlHelpers'
-import { LetUsKnowLink } from '../../components/ErrorAlert/LetUsKnowLink'
+import { ContactSupportLink } from '../../components/ErrorAlert/ContactSupportLink'
 
 type divisionQuestionDataType = {
     division: Division
@@ -137,8 +137,8 @@ export const QuestionResponse = () => {
                         message={
                             <span>
                                 You must be assigned to a division in order to
-                                ask questions about a submission. Contact&nbsp;
-                                <LetUsKnowLink alternateText={stringConstants.MAIL_TO_SUPPORT} />&nbsp;to add your division.
+                                ask questions about a submission. Please&nbsp;
+                                <ContactSupportLink />&nbsp;to add your division.
                             </span>
                         }
                     />

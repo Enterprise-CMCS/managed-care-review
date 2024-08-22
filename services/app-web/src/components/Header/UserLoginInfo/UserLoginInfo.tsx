@@ -12,7 +12,7 @@ import {
     LinkWithLogging,
     ButtonWithLogging,
 } from '../../../components'
-import { LetUsKnowLink } from '../../ErrorAlert/LetUsKnowLink'
+import { ContactSupportLink } from '../../ErrorAlert/ContactSupportLink'
 
 type LogoutHandlerT = (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>
@@ -26,7 +26,7 @@ const LoggedInUserInfo = (
     return (
         <div className={styles.userInfo}>
             <span>Contact </span>
-            <LetUsKnowLink alternateText={stringConstants.MAIL_TO_SUPPORT} />
+            <ContactSupportLink alternateText={stringConstants.MAIL_TO_SUPPORT} />
             <span className={styles.divider}>|</span>
             <span>{user.email}</span>
             <span className={styles.divider}>|</span>

@@ -3,7 +3,7 @@ import { Alert } from '@trussworks/react-uswds'
 
 import classnames from 'classnames'
 import { useTealium } from '../../../hooks'
-import { LetUsKnowLink } from '../../ErrorAlert/LetUsKnowLink'
+import { ContactSupportLink } from '../../ErrorAlert/ContactSupportLink'
 
 export const DocumentWarningBanner = ({
     className,
@@ -33,7 +33,7 @@ export const DocumentWarningBanner = ({
                 Some documents aren’t available right now. Refresh the page to
                 try again. If you still see this message,&nbsp;
             </span>
-            <LetUsKnowLink alternateText='email the help desk' />
+            <ContactSupportLink />
         </Alert>
     )
 }
