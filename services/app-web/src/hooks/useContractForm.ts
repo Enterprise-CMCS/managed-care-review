@@ -90,7 +90,6 @@ const useContractForm = (contractID?: string): UseContractForm => {
 
             if (!createdSubmission) {
                 setShowPageErrorMessage(true)
-                console.info('Failed to update form data', createResult)
                 recordJSException(
                     `StateSubmissionForm: Apollo error reported. Error message: Failed to create form data ${createResult}`
                 )
@@ -135,7 +134,6 @@ const useContractForm = (contractID?: string): UseContractForm => {
                 updateResult?.data?.updateContractDraftRevision.contract
             if (!updatedSubmission) {
                 setShowPageErrorMessage(true)
-                console.info('Failed to update form data', updateResult)
                 recordJSException(
                     `StateSubmissionForm: Apollo error reported. Error message: Failed to update form data ${updateResult}`
                 )
@@ -178,12 +176,12 @@ const useContractForm = (contractID?: string): UseContractForm => {
         }
         if (err.name !== 'SKIPPED') {
             recordJSException(err)
-            interimState = 'GENERIC_ERROR'// api failure or protobuf decode failure
+            interimState = 'GENERIC_ERROR'
             return { interimState, createDraft, updateDraft,  showPageErrorMessage}
         }
 
         if (!contract || !contract.draftRevision || !contract.draftRevision.formData || contract?.status === 'RESUBMITTED' || contract?.status === 'SUBMITTED') {
-            interimState = 'GENERIC_ERROR'// api failure or protobuf decode failure
+            interimState = 'GENERIC_ERROR'
             return { interimState, createDraft, updateDraft,  showPageErrorMessage}
         }
         const rates:Rate[] = []
