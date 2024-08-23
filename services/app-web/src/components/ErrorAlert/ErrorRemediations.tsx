@@ -4,7 +4,7 @@ import { ContactSupportLink } from "./ContactSupportLink";
 // These components are used to display remediation messages in ErrorAlert
 // This is the second paragraph (which is optional) in the alert content
 
-const DefaultRemediation = (): React.ReactNode =>  (
+const DefaultRemediation = (): React.ReactElement =>  (
 <>
 <span>
 Please refresh your browser and if you continue to
@@ -13,7 +13,7 @@ experience an error,&nbsp;
     <ContactSupportLink />.
 </>)
 
-const SignInRemediation = (): React.ReactNode =>  (
+const SignInRemediation = (): React.ReactElement =>  (
     <>
     <span>
         Please try to sign in again and if you continue to experience an error,&nbsp;
@@ -21,7 +21,7 @@ const SignInRemediation = (): React.ReactNode =>  (
         <ContactSupportLink />.
     </>)
 
-const TechnicalIssuesRemediation= (): React.ReactNode => (
+const TechnicalIssuesRemediation= (): React.ReactElement => (
     <>
     <span>
     We are working to resolve these issues as quickly as possible. If you have questions or need immediate assistance with your submission, please,&nbsp;
@@ -29,7 +29,7 @@ const TechnicalIssuesRemediation= (): React.ReactNode => (
         <ContactSupportLink />.
     </>)
 
-const ValidationRemediation= (): React.ReactNode => (
+const ValidationRemediation= (): React.ReactElement => (
     <>
     <span>
     Please provide the required information before submitting. If you continue to see this message,&nbsp;
@@ -39,7 +39,7 @@ const ValidationRemediation= (): React.ReactNode => (
 
 type RemediationType = 'DEFAULT' | 'TECH_ISSUE' | 'SIGNIN_ERROR' | 'VALIDATION_ERROR';
 
-const ErrorRemediation = ({type} : {type: RemediationType | undefined}): React.ReactNode | undefined => {
+const ErrorRemediation = ({type} : {type: RemediationType | undefined}): React.ReactElement | null => {
    switch(type){
     case 'DEFAULT':
         return <DefaultRemediation/>
@@ -50,7 +50,7 @@ const ErrorRemediation = ({type} : {type: RemediationType | undefined}): React.R
     case 'VALIDATION_ERROR':
         return <ValidationRemediation />
     default:
-        return undefined
+        return null
    }
 }
 
