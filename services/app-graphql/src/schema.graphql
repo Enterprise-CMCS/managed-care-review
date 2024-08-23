@@ -1831,7 +1831,7 @@ type StateAssignmentUser {
 type StateAssignment {
     stateCode: String!
     name: String!
-    users: [CMSUsersUnion!]!
+    assignedCMSUsers: [CMSUsersUnion!]!
 }
 
 type FetchMcReviewSettingsPayload {

@@ -36,7 +36,7 @@ const mapStateAnalystFromDB = (
     return stateAssignments
         ? stateAssignments.map((state) => ({
               stateCode: state.stateCode,
-              emails: state.users.map((user) => user.email),
+              emails: state.assignedCMSUsers.map((user) => user.email),
           }))
         : []
 }

@@ -33,7 +33,7 @@ export const fetchMcReviewSettingsMock = (): MockedResponse<FetchMcReviewSetting
                             __typename: 'StateAssignment' as const,
                             stateCode: 'MN' as const,
                             name: 'Minnesota',
-                            users: [
+                            assignedCMSUsers: [
                                 {
                                     __typename: 'CMSUser' as const,
                                     id: uuidv4(),
@@ -69,7 +69,7 @@ export const fetchMcReviewSettingsMock = (): MockedResponse<FetchMcReviewSetting
                             __typename: 'StateAssignment' as const,
                             stateCode: 'OH' as const,
                             name: 'Ohio',
-                            users: [
+                            assignedCMSUsers: [
                                 {
                                     __typename: 'CMSUser' as const,
                                     id: uuidv4(),

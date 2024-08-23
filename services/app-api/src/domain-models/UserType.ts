@@ -34,13 +34,13 @@ const stateUserSchema = baseUserSchema.extend({
 
 const cmsUserSchema = baseUserSchema.extend({
     role: z.literal(userRolesSchema.enum.CMS_USER),
-    stateAssignments: z.array(stateType.omit({ users: true })),
+    stateAssignments: z.array(stateType.omit({ assignedCMSUsers: true })),
     divisionAssignment: divisionType.optional(),
 })
 
 const cmsApproverUserSchema = baseUserSchema.extend({
     role: z.literal(userRolesSchema.enum.CMS_APPROVER_USER),
-    stateAssignments: z.array(stateType.omit({ users: true })),
+    stateAssignments: z.array(stateType.omit({ assignedCMSUsers: true })),
     divisionAssignment: divisionType.optional(),
 })
 

@@ -16,7 +16,7 @@ query fetchMcReviewSettings {
         stateAssignments {
             stateCode
             name
-            users {
+            assignedCMSUsers {
                 __typename
                 ... on CMSUser {
                     id

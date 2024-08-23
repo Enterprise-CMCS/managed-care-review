@@ -115,7 +115,7 @@ describe('fetchMcReviewSettings', () => {
                 expect.objectContaining({
                     stateCode: 'OH',
                     name: 'Ohio',
-                    users: expect.arrayContaining([
+                    assignedCMSUsers: expect.arrayContaining([
                         expect.objectContaining({
                             id: assignedOhioCMSUser.id,
                             role: assignedOhioCMSUser.role,
@@ -130,7 +130,7 @@ describe('fetchMcReviewSettings', () => {
                 expect.objectContaining({
                     stateCode: 'TX',
                     name: 'Texas',
-                    users: expect.arrayContaining([
+                    assignedCMSUsers: expect.arrayContaining([
                         expect.objectContaining({
                             id: assignedTexasCMSUser.id,
                             role: assignedTexasCMSUser.role,
@@ -145,7 +145,7 @@ describe('fetchMcReviewSettings', () => {
                 expect.objectContaining({
                     stateCode: 'FL',
                     name: 'Florida',
-                    users: expect.arrayContaining([
+                    assignedCMSUsers: expect.arrayContaining([
                         expect.objectContaining({
                             id: assignedFloridaCMSUser.id,
                             role: assignedFloridaCMSUser.role,

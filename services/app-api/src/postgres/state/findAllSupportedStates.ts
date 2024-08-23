@@ -15,7 +15,7 @@ export async function findAllSupportedStates(
                 stateCode: 'asc',
             },
             include: {
-                users: {
+                assignedCMSUsers: {
                     where: {
                         role: {
                             in: ['CMS_USER', 'CMS_APPROVER_USER'],
@@ -34,7 +34,7 @@ export async function findAllSupportedStates(
 
         return states.map((state) => ({
             ...state,
-            users: state.users.map(
+            assignedCMSUsers: state.assignedCMSUsers.map(
                 (user) =>
                     ({
                         id: user.id,

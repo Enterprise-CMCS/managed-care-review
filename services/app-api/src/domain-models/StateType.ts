@@ -4,7 +4,7 @@ import { divisionType } from './DivisionType'
 const stateType = z.object({
     stateCode: z.string(),
     name: z.string(),
-    users: z.array(
+    assignedCMSUsers: z.array(
         z.object({
             id: z.string().uuid(),
             role: z.union([
