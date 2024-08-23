@@ -16,10 +16,13 @@ export type ErrorAlertProps = {
 /*
     Error alert is main error display in the application.
     It is used for variety of purposes including API error handling and displaying full page messages during maintainece.
+
     A heading and a message is always displayed with fallbacks to a generic system error.
 
     An optional remediation message may displayed in a second paragraph. Remediation includes specific instructions about what the user can do to
-    fix the errors, such as refreshing page or contacting support. A mailto link to contact the help desk is often included as well.
+    fix the errors, such as refreshing page or contacting support. A mailto link to contact the help desk is often included in the remediation message as well.
+
+    If the alert is displayed withEmphasis, the message is defined into two paragraphs, the first paragraph is displayed bold.
 */
 
 export const ErrorAlert = ({
@@ -54,18 +57,22 @@ export const ErrorAlert = ({
             className={classes}
             {...divProps}
         >
-
-        <div className={styles.messageBodyText}>
-                <p className="usa-alert__text">
-                    {withEmphasis? (<b>
-                        {message}
-                    </b>)
-                    :( <>{message}</>)
-                    }
-                </p>
-               {remediation && <p className="usa-alert__text">
-                    <ErrorRemediation type={remediation} />
-                </p>}
+            <div className={styles.messageBodyText}>
+                {withEmphasis ? (
+                    <>
+                        <p className="usa-alert__text">
+                            <b>{message}</b>
+                        </p>
+                        <p className="usa-alert__text">
+                            <ErrorRemediation type={remediation} />
+                        </p>
+                    </>
+                ) : (
+                    <p className="usa-alert__text">
+                        {message}&nbsp;
+                        <ErrorRemediation type={remediation} />
+                    </p>
+                )}
             </div>
         </Alert>
     )

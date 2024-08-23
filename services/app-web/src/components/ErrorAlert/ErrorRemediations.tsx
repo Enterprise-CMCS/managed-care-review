@@ -39,7 +39,7 @@ const ValidationRemediation= (): React.ReactNode => (
 
 type RemediationType = 'DEFAULT' | 'TECH_ISSUE' | 'SIGNIN_ERROR' | 'VALIDATION_ERROR';
 
-const ErrorRemediation = ({type} : {type: RemediationType}): React.ReactNode | undefined => {
+const ErrorRemediation = ({type} : {type: RemediationType | undefined}): React.ReactNode | undefined => {
    switch(type){
     case 'DEFAULT':
         return <DefaultRemediation/>
@@ -50,7 +50,7 @@ const ErrorRemediation = ({type} : {type: RemediationType}): React.ReactNode | u
     case 'VALIDATION_ERROR':
         return <ValidationRemediation />
     default:
-        return <DefaultRemediation/>
+        return undefined
    }
 }
 

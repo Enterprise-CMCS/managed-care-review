@@ -32,6 +32,9 @@ test('renders custom message', async () => {
     expect(
         screen.queryByText("We're having trouble loading this page.")
     ).toBeNull()
+    expect(
+        screen.getByText(/Something else went wrong/)
+    ).not.toHaveStyle('font-weight: bold')
 })
 
 test('renders with custom styles', async () => {
@@ -53,4 +56,15 @@ test('displays email support link mailto link with default remediation', () =>{
         'href',
         stringConstants.MAIL_TO_SUPPORT_HREF
     )
+})
+
+test('displays message with bold text when withEmphasis is used', () =>{
+    renderWithProviders(
+        <ErrorAlert  remediation='DEFAULT' withEmphasis />)
+    expect(
+            screen.queryByText("We're having trouble loading this page.")
+        ).toHaveStyle('font-weight: bold')
+    expect(
+            screen.queryByText("email the help desk")
+        ).not.toHaveStyle('font-weight: bold')
 })
