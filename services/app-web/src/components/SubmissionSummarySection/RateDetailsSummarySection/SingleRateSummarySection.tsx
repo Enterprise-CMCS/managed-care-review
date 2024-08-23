@@ -5,10 +5,10 @@ import { DataDetail, DataDetailContactField } from '../../DataDetail'
 import { formatCalendarDate } from '../../../common-code/dateHelpers'
 import {
     ActuaryContact,
+    ContractRevision,
     Program,
     Rate,
     RateFormData,
-    RelatedContractRevisions,
     useUnlockRateMutation,
 } from '../../../gen/gqlClient'
 import { UploadedDocumentsTable } from '../UploadedDocumentsTable'
@@ -20,7 +20,6 @@ import useDeepCompareEffect from 'use-deep-compare-effect'
 import { recordJSException } from '../../../otelHelpers'
 import { Grid } from '@trussworks/react-uswds'
 import { useNavigate } from 'react-router-dom'
-import { packageName } from '../../../common-code/healthPlanFormDataType'
 import { UploadedDocumentsTableProps } from '../UploadedDocumentsTable/UploadedDocumentsTable'
 import { useAuth } from '../../../contexts/AuthContext'
 import { SectionCard } from '../../SectionCard'
@@ -74,22 +73,16 @@ const rateCertificationType = (formData: RateFormData) => {
 }
 
 const relatedSubmissions = (
-    contractRevisions: RelatedContractRevisions[],
-    statePrograms: Program[]
+    contractRevisions: ContractRevision[]
 ): React.ReactElement => {
     return (
         <ul className={styles.commaList}>
             {contractRevisions.map((contractRev) => (
-                <li key={contractRev.contract.id}>
+                <li key={contractRev.contractID}>
                     <NavLinkWithLogging
-                        to={`/submissions/${contractRev.contract.id}`}
+                        to={`/submissions/${contractRev.contractID}`}
                     >
-                        {packageName(
-                            contractRev.contract.stateCode,
-                            contractRev.contract.stateNumber,
-                            contractRev.formData.programIDs,
-                            statePrograms
-                        )}
+                        {contractRev.contractName}
                     </NavLinkWithLogging>
                 </li>
             ))}
@@ -108,9 +101,20 @@ export const SingleRateSummarySection = ({
 }): React.ReactElement | null => {
     const { loggedInUser } = useAuth()
     const navigate = useNavigate()
-    const rateRevision = rate.revisions[0]
-    const formData: RateFormData = rateRevision?.formData
-    const lastSubmittedDate = rate.revisions[0]?.submitInfo?.updatedAt ?? null
+
+    const latestSubmission = rate.packageSubmissions?.[0]
+    if (!latestSubmission) {
+        // This is unusual and ugly, we try not to throw ever, but we can't early return here.
+        // of course if the array were required we would just silently throw if its empty
+        throw new Error(
+            'programming error: should not have a summarized rate without a submission'
+        )
+    }
+
+    const rateRevision = latestSubmission.rateRevision
+    const formData: RateFormData = rateRevision.formData
+    const lastSubmittedDate = latestSubmission.submitInfo.updatedAt
+
     const isRateAmendment = formData.rateType === 'AMENDMENT'
     const isUnlocked = rate.status === 'UNLOCKED'
     const explainMissingData =
@@ -130,7 +134,7 @@ export const SingleRateSummarySection = ({
         featureFlags.RATE_EDIT_UNLOCK.defaultValue
     )
 
-    const linkedContracts = rateRevision?.contractRevisions
+    const linkedContracts = latestSubmission.contractRevisions
 
     // TODO BULK DOWNLOAD
     // needs to be wrap in a standalone hook
@@ -403,10 +407,7 @@ export const SingleRateSummarySection = ({
                         <DataDetail
                             id="submittedWithContract"
                             label="Contract actions"
-                            children={relatedSubmissions(
-                                linkedContracts,
-                                statePrograms
-                            )}
+                            children={relatedSubmissions(linkedContracts)}
                         />
                     </Grid>
                 </dl>

@@ -1467,34 +1467,6 @@ type UpdateDraftContractRatesPayload {
     contract: Contract!
 }
 
-type ContractOnRevisionType {
-    id: String!
-    "The two letter abbreviation for the state the contract covers"
-    stateCode: String!
-    """
-    Maps a MC-Review contract to the record number
-    used in the MC-CRS system
-    """
-    mccrsID: String
-    "Number of contracts a state has"
-    stateNumber: Int!
-}
-
-type RelatedContractRevisions {
-    id: String!
-    contract: ContractOnRevisionType!
-    """
-    Information about who, when, and why this revision was unlocked.
-    Will be blank on the initial revision.
-    """
-    submitInfo: UpdateInformation
-    "Information on who, when, and why this revision was submitted."
-    unlockInfo: UpdateInformation
-    createdAt: DateTime!
-    updatedAt: DateTime!
-    formData: ContractFormData!
-}
-
 """
 A rate revision represents a single submission
 for the rate and contains the full data from when the rate cert was submitted
@@ -1514,8 +1486,6 @@ type RateRevision {
     submitInfo: UpdateInformation
     "The rate related form data that was inputed by the state"
     formData: RateFormData!
-    "Contract revisions related to the rate"
-    contractRevisions: [RelatedContractRevisions!]!
 }
 
 """
@@ -1569,6 +1539,8 @@ it contains the unlock and submit info.
 """
 type ContractRevision {
     id: ID!
+    contractID: String!
+
     createdAt: DateTime!
     updatedAt: DateTime!
     "submitInfo is the who/when/why for this revision being submitted. An Unlocked revision has no submitInfo"

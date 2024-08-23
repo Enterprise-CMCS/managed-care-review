@@ -1,7 +1,7 @@
 import {
     testEmailConfig,
     mockMNState,
-    mockContractRev,
+    mockUnlockedContract,
 } from '../../testHelpers/emailerHelpers'
 import { unlockContractStateEmail } from './index'
 import { packageName } from '../../common-code/healthPlanFormDataType'
@@ -21,12 +21,12 @@ const defaultStatePrograms = mockMNState().programs
 const defaultSubmitters = ['test1@example.com', 'test2@example.com']
 
 test('subject line is correct and clearly states submission is unlocked', async () => {
-    const sub = mockContractRev()
+    const sub = mockUnlockedContract()
 
     const name = packageName(
-        sub.contract.stateCode,
-        sub.contract.stateNumber,
-        sub.formData.programIDs,
+        sub.stateCode,
+        sub.stateNumber,
+        sub.draftRevision.formData.programIDs,
         defaultStatePrograms
     )
     const template = await unlockContractStateEmail(
@@ -49,7 +49,7 @@ test('subject line is correct and clearly states submission is unlocked', async 
 })
 
 test('includes expected data summary for a contract and rates submission unlock State email', async () => {
-    const sub = mockContractRev()
+    const sub = mockUnlockedContract()
 
     const template = await unlockContractStateEmail(
         sub,
@@ -85,7 +85,8 @@ test('includes expected data summary for a contract and rates submission unlock 
     expect(template).toEqual(
         expect.objectContaining({
             bodyText: expect.stringContaining(
-                sub.rateRevisions[0].formData.rateCertificationName ?? ''
+                sub.draftRates?.[0].draftRevision?.formData
+                    .rateCertificationName ?? ''
             ),
         })
     )
@@ -99,9 +100,10 @@ test('includes expected data summary for a contract and rates submission unlock 
 })
 
 test('includes expected data summary for a multi-rate contract and rates submission unlock State email', async () => {
-    const sub = mockContractRev({
-        rateRevisions: [
-            {
+    const sub = mockUnlockedContract(undefined, [
+        {
+            id: 'rate-123',
+            draftRevision: {
                 id: '12345',
                 rateID: '6789',
                 submitInfo: undefined,
@@ -148,7 +150,10 @@ test('includes expected data summary for a multi-rate contract and rates submiss
                     ],
                 },
             },
-            {
+        },
+        {
+            id: 'rate-234',
+            draftRevision: {
                 id: '12345',
                 rateID: '6789',
                 submitInfo: undefined,
@@ -195,7 +200,10 @@ test('includes expected data summary for a multi-rate contract and rates submiss
                     ],
                 },
             },
-            {
+        },
+        {
+            id: 'rate-345',
+            draftRevision: {
                 id: '12345',
                 rateID: '6789',
                 submitInfo: undefined,
@@ -242,8 +250,8 @@ test('includes expected data summary for a multi-rate contract and rates submiss
                     ],
                 },
             },
-        ],
-    })
+        },
+    ])
     const template = await unlockContractStateEmail(
         sub,
         unlockData,
@@ -279,7 +287,8 @@ test('includes expected data summary for a multi-rate contract and rates submiss
     expect(template).toEqual(
         expect.objectContaining({
             bodyText: expect.stringContaining(
-                sub.rateRevisions[0].formData.rateCertificationName ?? ''
+                sub.draftRates?.[0].draftRevision?.formData
+                    .rateCertificationName ?? ''
             ),
         })
     )
@@ -287,7 +296,8 @@ test('includes expected data summary for a multi-rate contract and rates submiss
     expect(template).toEqual(
         expect.objectContaining({
             bodyText: expect.stringContaining(
-                sub.rateRevisions[1].formData.rateCertificationName ?? ''
+                sub.draftRates?.[1].draftRevision?.formData
+                    .rateCertificationName ?? ''
             ),
         })
     )
@@ -295,7 +305,8 @@ test('includes expected data summary for a multi-rate contract and rates submiss
     expect(template).toEqual(
         expect.objectContaining({
             bodyText: expect.stringContaining(
-                sub.rateRevisions[2].formData.rateCertificationName ?? ''
+                sub.draftRates?.[2].draftRevision?.formData
+                    .rateCertificationName ?? ''
             ),
         })
     )
@@ -309,7 +320,7 @@ test('includes expected data summary for a multi-rate contract and rates submiss
 })
 
 test('does includes the correct submission URL', async () => {
-    const sub = mockContractRev()
+    const sub = mockUnlockedContract()
     const template = await unlockContractStateEmail(
         sub,
         unlockData,
@@ -333,7 +344,7 @@ test('does includes the correct submission URL', async () => {
 })
 
 test('renders overall email as expected', async () => {
-    const sub = mockContractRev()
+    const sub = mockUnlockedContract()
     const template = await unlockContractStateEmail(
         sub,
         unlockData,

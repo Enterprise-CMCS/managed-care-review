@@ -6,16 +6,9 @@ import { GraphQLError } from 'graphql'
 
 export function rateRevisionResolver(store: Store): Resolvers['RateRevision'] {
     return {
-        contractRevisions(parent) {
-            return parent.contractRevisions || []
-        },
         rate: async (parent, _args, context) => {
             const { ctx, tracer } = context
-            const span = tracer?.startSpan(
-                'healthPlanPackageResolver.questions',
-                {},
-                ctx
-            )
+            const span = tracer?.startSpan('rateRevisionResolver.rate', {}, ctx)
 
             const rate = await store.findRateWithHistory(parent.rateID)
             if (rate instanceof Error) {

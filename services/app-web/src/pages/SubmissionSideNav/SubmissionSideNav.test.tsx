@@ -310,7 +310,6 @@ describe('SubmissionSideNav', () => {
                     routerProvider: {
                         route: '/submissions/15',
                     },
-
                 }
             )
 
@@ -353,7 +352,6 @@ describe('SubmissionSideNav', () => {
                     routerProvider: {
                         route: '/submissions/15',
                     },
-
                 }
             )
 
@@ -396,7 +394,6 @@ describe('SubmissionSideNav', () => {
                     routerProvider: {
                         route: '/submissions/15',
                     },
-
                 }
             )
 
@@ -431,7 +428,6 @@ describe('SubmissionSideNav', () => {
                         ],
                     },
                     routerProvider: { route: '/submissions/404' },
-
                 }
             )
 
@@ -470,7 +466,6 @@ describe('SubmissionSideNav', () => {
                     routerProvider: {
                         route: '/submissions/15/question-and-answers',
                     },
-
                 }
             )
 

@@ -11,6 +11,7 @@ import { RoutesRecord } from '../../constants'
 import { Route, Routes } from 'react-router-dom'
 import { RateEdit } from '../RateEdit/RateEdit'
 import { dayjs } from '../../common-code/dateHelpers'
+import { rateWithHistoryMock } from '../../testHelpers/apolloMocks/rateDataMock'
 
 // Wrap test component in some top level routes to allow getParams to be tested
 const wrapInRoutes = (children: React.ReactNode) => {
@@ -59,6 +60,7 @@ describe('RateSummary', () => {
                             fetchRateMockSuccess({
                                 id: '1337',
                                 withdrawInfo: {
+                                    __typename: 'UpdateInformation',
                                     updatedAt: new Date('2024-01-01'),
                                     updatedBy: {
                                         email: 'admin@example.com',
@@ -191,11 +193,11 @@ describe('RateSummary', () => {
                             user: mockValidStateUser(),
                             statusCode: 200,
                         }),
-                        fetchRateMockSuccess({ id: '1337' }),
+                        fetchRateMockSuccess(rateWithHistoryMock()),
                     ],
                 },
                 routerProvider: {
-                    route: '/rates/1337',
+                    route: '/rates/r-01',
                 },
                 featureFlags: { 'rate-edit-unlock': true },
             })
@@ -220,6 +222,7 @@ describe('RateSummary', () => {
                         fetchRateMockSuccess({
                             id: '1337',
                             withdrawInfo: {
+                                __typename: 'UpdateInformation',
                                 updatedAt: new Date('2024-01-01'),
                                 updatedBy: {
                                     email: 'admin@example.com',

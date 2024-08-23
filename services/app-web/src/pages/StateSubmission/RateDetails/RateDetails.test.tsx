@@ -20,6 +20,7 @@ import userEvent from '@testing-library/user-event'
 import {
     rateDataMock,
     rateRevisionDataMock,
+    draftRateDataMock,
 } from '../../../testHelpers/apolloMocks/rateDataMock'
 import {
     fetchDraftRateMockSuccess,
@@ -809,6 +810,38 @@ describe('RateDetails', () => {
         })
 
         it('displays dropdown menu if yes is selected and dropdown is clicked', async () => {
+            const testContract = {
+                ...mockContractWithLinkedRateDraft({
+                    draftRates: [
+                        draftRateDataMock(
+                            { id: 'test-abc-124' },
+                            {
+                                formData: {
+                                    ...rateRevisionDataMock().formData,
+                                    rateDocuments: [
+                                        {
+                                            s3URL: 's3://bucketname/one-one/one-one.png',
+                                            name: 'one one',
+                                            sha256: 'fakeSha1',
+                                        },
+                                        {
+                                            s3URL: 's3://bucketname/one-two/one-two.png',
+                                            name: 'one two',
+                                            sha256: 'fakeSha2',
+                                        },
+                                        {
+                                            s3URL: 's3://bucketname/one-three/one-three.png',
+                                            name: 'one three',
+                                            sha256: 'fakeSha3',
+                                        },
+                                    ],
+                                },
+                            }
+                        ),
+                    ],
+                }),
+            }
+
             const { user } = renderWithProviders(
                 <Routes>
                     <Route
@@ -822,38 +855,7 @@ describe('RateDetails', () => {
                             indexRatesMockSuccess(),
                             fetchCurrentUserMock({ statusCode: 200 }),
                             fetchContractMockSuccess({
-                                contract: {
-                                    ...mockContractWithLinkedRateDraft({
-                                        draftRates: [
-                                            rateDataMock(
-                                                {
-                                                    formData: {
-                                                        ...rateRevisionDataMock()
-                                                            .formData,
-                                                        rateDocuments: [
-                                                            {
-                                                                s3URL: 's3://bucketname/one-one/one-one.png',
-                                                                name: 'one one',
-                                                                sha256: 'fakeSha1',
-                                                            },
-                                                            {
-                                                                s3URL: 's3://bucketname/one-two/one-two.png',
-                                                                name: 'one two',
-                                                                sha256: 'fakeSha2',
-                                                            },
-                                                            {
-                                                                s3URL: 's3://bucketname/one-three/one-three.png',
-                                                                name: 'one three',
-                                                                sha256: 'fakeSha3',
-                                                            },
-                                                        ],
-                                                    },
-                                                },
-                                                { id: 'test-abc-123' }
-                                            ),
-                                        ],
-                                    }),
-                                },
+                                contract: testContract,
                             }),
                             indexRatesMockSuccess(),
                         ],

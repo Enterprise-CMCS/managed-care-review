@@ -28,7 +28,7 @@ export const ErrorAlert = ({
     const showLink = appendLetUsKnow || !message // our default message includes the link
     const defaultMessage =
         "We're having trouble loading this page. Please refresh your browser and if you continue to experience an error,"
-            const logErrorMessage = `${message ? extractText(message) : defaultMessage} email ${MAIL_TO_SUPPORT}`
+    const logErrorMessage = `${message ? extractText(message) : defaultMessage} email ${MAIL_TO_SUPPORT}`
 
     useEffect(() => {
         logAlertImpressionEvent({
@@ -37,7 +37,7 @@ export const ErrorAlert = ({
             type: 'error',
             extension: 'react-uswds',
         })
-    }, [logAlertImpressionEvent,logErrorMessage])
+    }, [logAlertImpressionEvent, logErrorMessage])
 
     return (
         <Alert

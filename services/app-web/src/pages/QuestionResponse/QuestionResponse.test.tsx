@@ -504,7 +504,6 @@ describe('QuestionResponse', () => {
                     routerProvider: {
                         route: '/submissions/15/question-and-answers?submit=response',
                     },
-
                 }
             )
 
@@ -543,7 +542,6 @@ describe('QuestionResponse', () => {
                     routerProvider: {
                         route: '/submissions/15/question-and-answers',
                     },
-
                 }
             )
 
