@@ -9,6 +9,8 @@ import {
     Rate,
     GenericDocument,
     GenericDocumentInput,
+    StateContactInput,
+    StateContact,
     UnlockedContract,
     UpdateContractDraftRevisionInput,
     ContractPackageSubmission
@@ -37,6 +39,16 @@ const documentsInput = (documents: GenericDocument[]): GenericDocumentInput[] =>
             name: doc.name,
             s3URL: doc.s3URL,
             sha256: doc.sha256
+        }
+    })
+}
+
+const stateContactsInput = (contacts: StateContact[]): StateContactInput[] => {
+    return contacts.map((contact) => {
+        return {
+            email: contact.email,
+            name: contact.name,
+            titleRole: contact.titleRole,
         }
     })
 }
@@ -103,7 +115,12 @@ const useContractForm = (contractID?: string): UseContractForm => {
         setShowPageErrorMessage(false)
         if (input.formData.contractDocuments && input.formData.contractDocuments.length > 0) {
             input.formData.contractDocuments = documentsInput(input.formData.contractDocuments)
+        } if (input.formData.supportingDocuments && input.formData.supportingDocuments.length > 0) {
+            input.formData.supportingDocuments = documentsInput(input.formData.supportingDocuments)
+        } if (input.formData.stateContacts && input.formData.stateContacts.length > 0) {
+            input.formData.stateContacts = stateContactsInput(input.formData.stateContacts)
         }
+
         try {
             const updateResult = await updateFormData({
                 variables: {

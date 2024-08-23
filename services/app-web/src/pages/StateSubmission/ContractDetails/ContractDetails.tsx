@@ -667,8 +667,8 @@ export const ContractDetails = ({
                                         className="margin-top-0"
                                     >
                                         <FileUpload
-                                            id="documents"
-                                            name="documents"
+                                            id="contractDocuments"
+                                            name="contractDocuments"
                                             label="Upload contract"
                                             aria-required
                                             error={showFieldErrors(
