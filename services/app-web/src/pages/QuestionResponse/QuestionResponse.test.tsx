@@ -19,9 +19,9 @@ describe('QuestionResponse', () => {
     describe.each(iterableCmsUsersMockData)(
         '$userRole QuestionResponse tests',
         ({ userRole, mockUser }) => {
-            it('render error if CMS user does not have division set', () =>{
+            it('render error if CMS user does not have division set', async () =>{
                 const stringConstants = useStringConstants()
-
+                const user = mockUser({divisionAssignment: undefined})
                 renderWithProviders(
                     <Routes>
                         <Route element={<SubmissionSideNav />}>
@@ -36,12 +36,7 @@ describe('QuestionResponse', () => {
                     {
                         apolloProvider: {
                             mocks: [
-                                fetchCurrentUserMock({
-                                    user: {...mockUser(),
-                                        divisionAssignment: undefined
-                                    },
-                                    statusCode: 200,
-                                }),
+                                fetchCurrentUserMock({ user, statusCode: 200}),
                                 fetchStateHealthPlanPackageWithQuestionsMockSuccess(
                                     {
                                         id: '15',
@@ -53,15 +48,12 @@ describe('QuestionResponse', () => {
                         routerProvider: {
                             route: '/submissions/15/question-and-answers',
                         },
-                        featureFlags: {
-                            'cms-questions': true,
-                        },
                     }
                 )
 
-                expect(screen.getByRole('heading', {name: 'Missing division'})).toBeInTheDocument()
+                expect(await screen.findByRole('heading', {name: 'Missing division'})).toBeInTheDocument()
                 const feedbackLink = screen.getByRole('link', {
-                    name: `${stringConstants.MAIL_TO_SUPPORT}`,
+                    name: `email the help desk`,
                 })
                 expect(feedbackLink).toHaveAttribute(
                     'href',

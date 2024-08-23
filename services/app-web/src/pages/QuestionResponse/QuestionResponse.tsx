@@ -60,8 +60,6 @@ const getDivisionOrder = (division?: Division): Division[] =>
     }) as Division[]
 
 export const QuestionResponse = () => {
-    const stringConstants = useStringConstants()
-    const MAIL_TO_SUPPORT = stringConstants.MAIL_TO_SUPPORT
     // router context
     const location = useLocation()
     const submitType = new URLSearchParams(location.search).get('submit')
@@ -107,7 +105,6 @@ export const QuestionResponse = () => {
                 ),
             })
     )
-
     const mapQASections = () =>
         questions.map((divisionQuestions) => (
             <section
@@ -127,7 +124,6 @@ export const QuestionResponse = () => {
                 ))}
             </section>
         ))
-
     return (
         <div className={styles.background}>
             <GridContainer className={styles.container}>

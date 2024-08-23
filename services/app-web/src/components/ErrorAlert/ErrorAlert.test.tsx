@@ -42,13 +42,12 @@ test('renders with custom styles', async () => {
     await expect(screen.getByText(testText)).toBeInTheDocument()
     expect(screen.queryByTestId('error-alert')).toHaveClass('test-class')
 })
-test('displays let us know link mailto link by default', () =>{
+test('displays email support link mailto link with default remediation', () =>{
     const stringConstants = useStringConstants()
     renderWithProviders(
-        <ErrorAlert  />
-    )
+        <ErrorAlert  remediation='DEFAULT' />)
     const feedbackLink = screen.getByRole('link', {
-        name: `let us know`,
+        name: `email the help desk`,
     })
     expect(feedbackLink).toHaveAttribute(
         'href',
