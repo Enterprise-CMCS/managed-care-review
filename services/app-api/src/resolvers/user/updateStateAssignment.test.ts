@@ -44,13 +44,6 @@ const authorizedUserTests = [
         userType: 'Helpdesk user',
         mockUser: testHelpdeskUser(),
     },
-]
-
-const unauthorizedUserTests = [
-    {
-        userType: 'State user',
-        mockUser: testStateUser(),
-    },
     {
         userType: 'OACT CMS user',
         mockUser: testCMSUser({
@@ -74,6 +67,13 @@ const unauthorizedUserTests = [
         mockUser: testCMSApproverUser({
             divisionAssignment: 'OACT',
         }),
+    },
+]
+
+const unauthorizedUserTests = [
+    {
+        userType: 'State user',
+        mockUser: testStateUser(),
     },
 ]
 
