@@ -3,20 +3,29 @@ import type { Division, PrismaClient } from '@prisma/client'
 import { AuditAction } from '@prisma/client'
 import type { CMSUsersUnionType } from '../../domain-models'
 import { domainUserFromPrismaUser } from './prismaDomainUser'
-import { NotFoundError } from '../postgresErrors'
+import { NotFoundError, UserInputPostgresError } from '../postgresErrors'
 
 export async function updateCmsUserProperties(
     client: PrismaClient,
     userID: string,
-    stateCodes: StateCodeType[],
     idOfUserPerformingUpdate: string,
+    stateCodes?: StateCodeType[],
     divisionAssignment?: Division,
     description?: string | null
 ): Promise<CMSUsersUnionType | Error> {
     try {
-        const statesWithCode = stateCodes.map((s) => {
-            return { stateCode: s }
-        })
+        const statesWithCode = stateCodes
+            ? stateCodes.map((s) => {
+                  return { stateCode: s }
+              })
+            : undefined
+
+        // We do not allow stateAssignments to be cleared out by passing an empty array. undefined will skip update in the prisma code.
+        if (statesWithCode && statesWithCode.length === 0) {
+            return new UserInputPostgresError(
+                'cannot update stateAssignments with empty assignment array.'
+            )
+        }
 
         /* we currently update only one property at a time, so
             we can exclude state assignments if divisionAssignment is present */
@@ -55,7 +64,8 @@ export async function updateCmsUserProperties(
                     id: userID,
                 },
                 data: {
-                    stateAssignments: {
+                    // We don't allow no state assignments, if empty array is passed
+                    stateAssignments: statesWithCode && {
                         set: statesWithCode,
                     },
                     divisionAssignment,

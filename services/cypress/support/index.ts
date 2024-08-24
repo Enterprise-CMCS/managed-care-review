@@ -28,8 +28,8 @@ import {
 import './apiCommands'
 import { Contract, HealthPlanPackage } from '../gen/gqlClient';
 import { CMSUserType, DivisionType } from '../utils/apollo-test-utils';
-import { StateUserType } from 'app-api/src/domain-models';
-import { UnlockedHealthPlanFormDataType } from 'app-web/src/common-code/healthPlanFormDataType'
+import { StateUserType } from '../../app-api/src/domain-models';
+import { UnlockedHealthPlanFormDataType } from '../../app-web/src/common-code/healthPlanFormDataType'
 
 type FormButtonKey =
     | 'CONTINUE_FROM_START_NEW'
