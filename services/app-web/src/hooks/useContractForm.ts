@@ -167,10 +167,13 @@ const useContractForm = (contractID?: string): UseContractForm => {
         return {interimState, createDraft, updateDraft, showPageErrorMessage }
     }
 
-    const contract = result?.data.fetchContract.contract
-
-    if (result.status === 'ERROR') {
-        const err = fetchResultError
+    const contract = result?.data?.fetchContract.contract
+    
+    // apolloQueryWrapper returns an error if query has been skipped
+    // because it's intended for query to be skipped when no contract id is passed
+    // do not trip skipped as an error
+    if (result.status === 'ERROR' && result.error.name !== 'SKIPPED') {
+        const err = result.error
         if (err instanceof ApolloError){
             handleApolloError(err, true)
             if (err.graphQLErrors[0]?.extensions?.code === 'NOT_FOUND') {
@@ -184,7 +187,8 @@ const useContractForm = (contractID?: string): UseContractForm => {
             return { interimState, createDraft, updateDraft,  showPageErrorMessage}
         }
 
-        if (!contract || !contract.draftRevision || !contract.draftRevision.formData || contract?.status === 'RESUBMITTED' || contract?.status === 'SUBMITTED') {
+        if (!contract || !contract.draftRevision || !contract.draftRevision.formData ||
+            contract?.status === 'RESUBMITTED' || contract?.status === 'SUBMITTED') {
             interimState = 'GENERIC_ERROR'
             return { interimState, createDraft, updateDraft,  showPageErrorMessage}
         }
