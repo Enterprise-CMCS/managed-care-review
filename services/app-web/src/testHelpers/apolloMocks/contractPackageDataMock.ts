@@ -1734,6 +1734,7 @@ function mockContractPackageUnlockedWithUnlockedType(
         mccrsID: '1234',
         draftRevision: {
             __typename: 'ContractRevision',
+            contractID: 'test-abc-123',
             submitInfo: undefined,
             unlockInfo: {
                 updatedAt: '2023-01-01T16:54:39.173Z',
@@ -1813,7 +1814,6 @@ function mockContractPackageUnlockedWithUnlockedType(
                 draftRevision: {
                     id: '123',
                     rateID: '456',
-                    contractRevisions: [],
                     createdAt: new Date(),
                     updatedAt: new Date(),
                     unlockInfo: {
@@ -1885,6 +1885,7 @@ function mockContractPackageUnlockedWithUnlockedType(
                     contractName: 'MCR-MN-0005-SNBC',
                     createdAt: new Date('01/01/2024'),
                     updatedAt:  '2023-01-01T16:54:39.173Z',
+                    contractID: 'test-abc-123',
                     submitInfo: {
                         updatedAt: '2023-01-01T16:54:39.173Z',
                         updatedBy: {
@@ -1951,6 +1952,7 @@ function mockContractPackageUnlockedWithUnlockedType(
                 }
             ],
             contractRevision: {
+                contractID: 'test-abc-123',
                 contractName: 'MCR-MN-0005-SNBC',
                 createdAt: new Date('01/01/2024'),
                 updatedAt: '2024-01-01T18:54:39.173Z',
@@ -2034,7 +2036,6 @@ function mockContractPackageUnlockedWithUnlockedType(
                         },
                         updatedReason: 'initial submission'
                     },
-                    contractRevisions: [],
                     formData: {
                         rateType: 'AMENDMENT',
                         rateCapitationType: 'RATE_CELL',

@@ -166,8 +166,6 @@ const useContractForm = (contractID?: string): UseContractForm => {
         interimState = 'LOADING'
         return {interimState, createDraft, updateDraft, showPageErrorMessage }
     }
-
-    const contract = result?.data?.fetchContract.contract
     
     // apolloQueryWrapper returns an error if query has been skipped
     // because it's intended for query to be skipped when no contract id is passed
@@ -186,42 +184,10 @@ const useContractForm = (contractID?: string): UseContractForm => {
             interimState = 'GENERIC_ERROR'
             return { interimState, createDraft, updateDraft,  showPageErrorMessage}
         }
-
-        if (!contract || !contract.draftRevision || !contract.draftRevision.formData ||
-            contract?.status === 'RESUBMITTED' || contract?.status === 'SUBMITTED') {
-            interimState = 'GENERIC_ERROR'
-            return { interimState, createDraft, updateDraft,  showPageErrorMessage}
-        }
-        const rates:Rate[] = []
-        const packageSubmissions:ContractPackageSubmission[] = []
-        const unlockedContract:UnlockedContract = {
-            ...contract,
-            id: contract!.id,
-            createdAt: contract.createdAt,
-            updatedAt: contract.updatedAt,
-            stateCode: contract.stateCode,
-            stateNumber: contract.stateNumber,
-            status: contract.status,
-            draftRevision: {
-                ...contract.draftRevision,
-                id: contract.id,
-                contractName: contract.draftRevision.contractName,
-                createdAt: contract.draftRevision.createdAt,
-                updatedAt: contract.draftRevision.updatedAt,
-                __typename: 'ContractRevision',
-                formData: {
-                    ...contract.draftRevision.formData,
-                    __typename: 'ContractFormData'
-                }
-            },
-            draftRates: contract.draftRates || rates,
-            packageSubmissions: contract.packageSubmissions || packageSubmissions,
-            __typename: 'UnlockedContract'
-        }
-        draftSubmission = unlockedContract
-        return {interimState, createDraft, updateDraft, draftSubmission, showPageErrorMessage}
-
+        
+        return {interimState, createDraft, updateDraft, showPageErrorMessage}
     }
+    const contract = result?.data?.fetchContract.contract
 
     if (!contract || !contract.draftRevision || !contract.draftRevision.formData || contract?.status === 'RESUBMITTED' || contract?.status === 'SUBMITTED') {
         return {interimState, createDraft, updateDraft, showPageErrorMessage }
