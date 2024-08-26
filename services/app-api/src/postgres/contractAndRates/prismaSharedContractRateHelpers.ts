@@ -129,8 +129,7 @@ type RateRevisionTableWithFormData = Prisma.RateRevisionTableGetPayload<{
 }>
 
 function rateFormDataToDomainModel(
-    rateRevision: RateRevisionTableWithFormData,
-    previousRevision?: RateRevisionTableWithFormData
+    rateRevision: RateRevisionTableWithFormData
 ): RateFormDataType {
     const packagesWithSharedRateCerts = []
     let statePrograms: ProgramType[] | Error | undefined = undefined
@@ -317,8 +316,7 @@ type ContractRevisionTableWithFormData =
     }>
 
 function contractFormDataToDomainModel(
-    contractRevision: ContractRevisionTableWithFormData,
-    previousRevision?: ContractRevisionTableWithFormData
+    contractRevision: ContractRevisionTableWithFormData
 ): ContractFormDataType {
     return {
         submissionType: contractRevision.submissionType,

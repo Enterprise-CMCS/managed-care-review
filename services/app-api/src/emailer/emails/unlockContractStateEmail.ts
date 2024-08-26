@@ -6,12 +6,15 @@ import {
     findContractPrograms,
 } from '../templateHelpers'
 import type { EmailData, EmailConfiguration } from '../'
-import type { ProgramType, UpdateInfoType } from '../../domain-models'
+import type {
+    ProgramType,
+    UnlockedContractType,
+    UpdateInfoType,
+} from '../../domain-models'
 import { reviewAndSubmitURL } from '../generateURLs'
 import { pruneDuplicateEmails } from '../formatters'
-import type { ContractRevisionWithRatesType } from '../../domain-models'
 export const unlockContractStateEmail = async (
-    contractRev: ContractRevisionWithRatesType,
+    contract: UnlockedContractType,
     updateInfo: UpdateInfoType,
     config: EmailConfiguration,
     statePrograms: ProgramType[],
@@ -19,6 +22,16 @@ export const unlockContractStateEmail = async (
 ): Promise<EmailData | Error> => {
     const isTestEnvironment = config.stage !== 'prod'
     const stateContactEmails: string[] = []
+
+    const contractRev = contract.draftRevision
+    const rateRevs = contract.draftRates.map((rate) => {
+        if (rate.draftRevision) {
+            return rate.draftRevision
+        } else {
+            return rate.packageSubmissions[0].rateRevision
+        }
+    })
+
     const contractFormData = contractRev.formData
     contractFormData.stateContacts.forEach((contact) => {
         if (contact.email) stateContactEmails.push(contact.email)
@@ -37,15 +50,15 @@ export const unlockContractStateEmail = async (
     }
 
     const packageName = generatePackageName(
-        contractRev.contract.stateCode,
-        contractRev.contract.stateNumber,
+        contract.stateCode,
+        contract.stateNumber,
         contractRev.formData.programIDs,
         packagePrograms
     )
 
     const isContractAndRates =
         contractFormData.submissionType === 'CONTRACT_AND_RATES' &&
-        Boolean(contractRev.rateRevisions.length)
+        Boolean(rateRevs.length)
 
     const contractURL = reviewAndSubmitURL(
         contractRev.contract.id,
@@ -61,7 +74,7 @@ export const unlockContractStateEmail = async (
             contractFormData.submissionType === 'CONTRACT_AND_RATES',
         rateInfos:
             isContractAndRates &&
-            contractRev.rateRevisions.map((rate) => ({
+            rateRevs.map((rate) => ({
                 rateName: rate.formData.rateCertificationName,
             })),
         submissionURL: contractURL,

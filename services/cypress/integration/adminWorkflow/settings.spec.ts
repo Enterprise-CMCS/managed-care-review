@@ -9,7 +9,7 @@ describe('Admin user can view application level settings', () => {
         cy.logInAsCMSUser()
         cy.logOut()
 
-        cy.logInAsAdminUser({initialURL: '/settings'})
+        cy.logInAsAdminUser({initialURL: '/mc-review-settings'})
         cy.findByRole('tab', {name: 'CMS users'}).click()
         cy.findByRole('table', {name: 'CMS Users'}).should('exist')
         cy.findByText('Zuko').should('exist')
@@ -24,7 +24,7 @@ describe('Admin user can view application level settings', () => {
     })
 
     it('and filter down state analysts by state code', () => {
-         cy.logInAsAdminUser({initialURL: '/settings'})
+         cy.logInAsAdminUser({initialURL: '/mc-review-settings'})
          cy.findByRole('tab', {name: 'State analysts'}).click()
           // Table data has both minnesota entries and florida entries
          cy.findByRole('table').should('exist').should('include.text', 'FL').should('include.text', 'MN')

@@ -56,7 +56,7 @@ Cypress.Commands.add('interceptGraphQL', () => {
         aliasMutation(req, 'createContract')
         aliasMutation(req, 'updateHealthPlanFormData')
         aliasMutation(req, 'submitHealthPlanPackage')
-        aliasMutation(req, 'updateCMSUser')
+        aliasMutation(req, 'updateDivisionAssignment')
         aliasMutation(req, 'createQuestion')
         aliasMutation(req, 'createQuestionResponse')
         aliasMutation(req, 'updateDraftContractRates')

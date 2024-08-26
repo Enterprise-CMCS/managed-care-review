@@ -63,9 +63,11 @@ describe('fetchContract', () => {
         expect(fetchDraftContractResult.errors).toBeUndefined()
 
         const draftContract =
-            fetchDraftContractResult.data?.fetchContract.contract.draftRevision
+            fetchDraftContractResult.data?.fetchContract.contract
+        const draftContractRev = draftContract.draftRevision
 
-        expect(draftContract.contractName).toMatch(/MCR-FL-\d{4}-NEMTMTM/)
+        expect(draftContractRev.contractName).toMatch(/MCR-FL-\d{4}-NEMTMTM/)
+        expect(draftContractRev.contractID).toBe(draftContract.id)
     })
 
     it('returns a stable initially submitted at', async () => {

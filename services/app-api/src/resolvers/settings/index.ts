@@ -1,0 +1,1 @@
+export { fetchMcReviewSettings } from './fetchMcReviewSettings'
