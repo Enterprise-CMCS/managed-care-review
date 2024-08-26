@@ -128,7 +128,7 @@ const useContractForm = (contractID?: string): UseContractForm => {
                 variables: {
                     input: {
                         contractID: contractID ?? 'new-draft',
-                        lastSeenUpdatedAt: contract!.draftRevision!.updatedAt,
+                        lastSeenUpdatedAt: input.lastSeenUpdatedAt,
                         formData: input.formData
                     },
                 },
@@ -187,17 +187,20 @@ const useContractForm = (contractID?: string): UseContractForm => {
         
         return {interimState, createDraft, updateDraft, showPageErrorMessage}
     }
-    const contract = result?.data?.fetchContract.contract
 
-    if (!contract || !contract.draftRevision || !contract.draftRevision.formData || contract?.status === 'RESUBMITTED' || contract?.status === 'SUBMITTED') {
-        return {interimState, createDraft, updateDraft, showPageErrorMessage }
-    }
-    const submissionName = contract.draftRevision?.contractName
-    if (pkgNameForHeading !== submissionName) {
-        setPkgNameForHeading(submissionName)
-    }
+    if (result.status === 'SUCCESS') {
+        const contract = result?.data?.fetchContract.contract
 
-    const rates:Rate[] = []
+        
+        if (!contract || !contract.draftRevision || !contract.draftRevision.formData || contract?.status === 'RESUBMITTED' || contract?.status === 'SUBMITTED') {
+            return {interimState, createDraft, updateDraft, showPageErrorMessage }
+        }
+        const submissionName = contract.draftRevision?.contractName
+        if (pkgNameForHeading !== submissionName) {
+            setPkgNameForHeading(submissionName)
+        }
+        
+        const rates:Rate[] = []
         const packageSubmissions:ContractPackageSubmission[] = []
         const unlockedContract:UnlockedContract = {
             ...contract,
@@ -225,7 +228,10 @@ const useContractForm = (contractID?: string): UseContractForm => {
         }
         // set up data to return
         draftSubmission = unlockedContract
+        return {draftSubmission, previousDocuments,  updateDraft, createDraft, interimState, showPageErrorMessage }
+    }
     return {draftSubmission, previousDocuments,  updateDraft, createDraft, interimState, showPageErrorMessage }
+
 }
 
 export { useContractForm }
