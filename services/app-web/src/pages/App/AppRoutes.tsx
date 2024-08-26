@@ -232,7 +232,10 @@ const CMSUserRoutes = ({
                         element={<GraphQLExplorer />}
                     />
                 )}
-                <Route path={RoutesRecord.SETTINGS} element={<Settings />} />
+                <Route
+                    path={RoutesRecord.MC_REVIEW_SETTINGS}
+                    element={<Settings />}
+                />
                 <Route path={RoutesRecord.API_ACCESS} element={<APIAccess />} />
                 {UniversalRoutes}
                 <Route path="*" element={<Error404 />} />
