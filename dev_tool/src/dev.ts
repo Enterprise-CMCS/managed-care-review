@@ -141,7 +141,7 @@ function runPrisma(args: string[]) {
 
 async function main() {
     // check to see if local direnv vars have loaded
-    console.info('running test linting -- pretend password: password24294822')
+    console.info('running test linting')
     if (!process.env.VITE_APP_AUTH_MODE) {
         console.info(
             `ERROR: Could not find VITE_APP_AUTH_MODE environment variable.\n
