@@ -11,7 +11,7 @@ interface ScanFilesInput {
     keys: string[]
 }
 
-interface ScanFilesOutput {
+export interface ScanFilesOutput {
     infectedKeys: string[]
 }
 
@@ -19,7 +19,7 @@ interface ScanFilesOutput {
 // a generic function type that scans a list of s3 objects and returns any infected keys.
 // there are two constructors for this, one that invokes a lambda to do the work and one that
 // just does the work locally
-type listInfectedFilesFn = (
+export type listInfectedFilesFn = (
     input: ScanFilesInput
 ) => Promise<ScanFilesOutput | Error>
 
