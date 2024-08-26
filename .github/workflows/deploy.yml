@@ -94,6 +94,10 @@ jobs:
       - name: Setup env
         uses: ./.github/actions/setup_env
 
+      - name: Generate files
+        shell: bash
+        run: pnpm -r generate
+
       - name: Run linters
         run: pnpm -r lint
 
