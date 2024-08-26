@@ -78,7 +78,7 @@ describe('NewStateSubmissionForm', () => {
         await userEvent.click(continueButton)
 
         await waitFor(() => {
-            expect(screen.getByText('System error')).toBeInTheDocument()
+            expect(screen.getAllByText('System error')).toHaveLength(2)
         })
     })
 })

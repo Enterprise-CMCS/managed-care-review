@@ -502,27 +502,18 @@ export const ContractDetails = ({
                 undefined
         }
 
-        try {
-            const updatedContract: UpdateContractDraftRevisionInput = {
-                formData: updatedDraftSubmissionFormData,
-                contractID: draftSubmission.id,
-                lastSeenUpdatedAt: draftSubmission.draftRevision.updatedAt,
-            }
+        const updatedContract: UpdateContractDraftRevisionInput = {
+            formData: updatedDraftSubmissionFormData,
+            contractID: draftSubmission.id,
+            lastSeenUpdatedAt: draftSubmission.draftRevision.updatedAt,
+        }
 
-            const updatedSubmission = await updateDraft(updatedContract)
-            if (updatedSubmission instanceof Error) {
-                setSubmitting(false)
-                console.info(
-                    'Error updating draft submission: ',
-                    updatedSubmission
-                )
-            } else if (updatedSubmission) {
-                navigate(options.redirectPath)
-            }
-        } catch (serverError) {
+        const updatedSubmission = await updateDraft(updatedContract)
+        if (updatedSubmission instanceof Error) {
             setSubmitting(false)
-        } finally {
-            setSubmitting(false)
+            console.info('Error updating draft submission: ', updatedSubmission)
+        } else if (updatedSubmission) {
+            navigate(options.redirectPath)
         }
     }
 

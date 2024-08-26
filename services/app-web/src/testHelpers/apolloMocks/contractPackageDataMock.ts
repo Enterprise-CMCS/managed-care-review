@@ -2315,6 +2315,5 @@ export {
     mockContractPackageWithDifferentProgramsInRevisions,
     mockEmptyDraftContractAndRate,
     mockContractPackageUnlockedWithUnlockedType,
-    mockContractRevision,
     mockRateRevision
 }
