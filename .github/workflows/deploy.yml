@@ -84,6 +84,18 @@ jobs:
           transient-environment: true
           description: stack ${{ steps.branch-name.outputs.stage-name-for-branch}}
           initial-status: in_progress
+  lint-repo:
+    name: lint
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Setup env
+        uses: ./.github/actions/setup_env
+
+      - name: Run linters
+        run: pnpm -r lint
 
   web-unit-tests:
     name: test - web unit tests
@@ -289,6 +301,7 @@ jobs:
         build-prisma-client-lambda-layer,
         web-unit-tests,
         api-unit-tests,
+        lint-repo,
         deploy-infra,
       ]
     if: |
