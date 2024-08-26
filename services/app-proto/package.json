@@ -28,6 +28,7 @@
     },
     "devDependencies": {
         "lint-staged": "^15.2.7",
-        "protobufjs-cli": "^1.1.2"
+        "protobufjs-cli": "^1.1.2",
+        "protolint": "^0.50.5"
     }
 }
