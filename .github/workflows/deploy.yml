@@ -85,7 +85,7 @@ jobs:
           description: stack ${{ steps.branch-name.outputs.stage-name-for-branch}}
           initial-status: in_progress
   lint-repo:
-    name: lint
+    name: lint - run linters
     runs-on: ubuntu-20.04
     steps:
       - name: Check out repository
