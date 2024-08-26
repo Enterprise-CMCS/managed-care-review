@@ -15,6 +15,10 @@ import {
     UpdateContractDraftRevisionInput,
     ContractPackageSubmission
 } from '../gen/gqlClient'
+import {
+    wrapApolloResult,
+    ApolloResultType,
+} from '../gqlHelpers/apolloQueryWrapper'
 import { recordJSException } from '../otelHelpers'
 import { handleApolloError } from '../gqlHelpers/apolloErrors'
 import { ApolloError } from '@apollo/client'
@@ -148,24 +152,25 @@ const useContractForm = (contractID?: string): UseContractForm => {
             return new Error(serverError)
         }
     }
-    const { 
-        data: fetchResultData,
-        error: fetchResultError,
-        loading: fetchResultLoading
-     } = useFetchContractQuery({
+    const results = wrapApolloResult(useFetchContractQuery({
         variables: {
             input: {
                 contractID: contractID ?? 'new-draft'
             }
         },
         skip: !contractID
-    })
-    const contract = fetchResultData?.fetchContract.contract
-    if (fetchResultLoading) {
+    }))
+
+    const result = results.result
+    
+    if (result.status === 'LOADING') {
         interimState = 'LOADING'
         return {interimState, createDraft, updateDraft, showPageErrorMessage }
     }
-    if (fetchResultError) {
+
+    const contract = result?.data.fetchContract.contract
+
+    if (result.status === 'ERROR') {
         const err = fetchResultError
         if (err instanceof ApolloError){
             handleApolloError(err, true)

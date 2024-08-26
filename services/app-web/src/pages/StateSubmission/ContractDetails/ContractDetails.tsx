@@ -248,147 +248,87 @@ export const ContractDetails = ({
             draftSubmission.draftRevision.formData.federalAuthorities ?? [],
         inLieuServicesAndSettings:
             booleanAsYesNoFormValue(
-                draftSubmission.draftRevision.formData
-                    .inLieuServicesAndSettings === null
-                    ? undefined
-                    : draftSubmission.draftRevision.formData
-                          .inLieuServicesAndSettings
+                draftSubmission.draftRevision.formData.inLieuServicesAndSettings
             ) ?? '',
         modifiedBenefitsProvided:
             booleanAsYesNoFormValue(
-                draftSubmission.draftRevision.formData
-                    .modifiedBenefitsProvided === null
-                    ? undefined
-                    : draftSubmission.draftRevision.formData
-                          .modifiedBenefitsProvided
+                draftSubmission.draftRevision.formData.modifiedBenefitsProvided
             ) ?? '',
         modifiedGeoAreaServed:
             booleanAsYesNoFormValue(
-                draftSubmission.draftRevision.formData.modifiedGeoAreaServed ===
-                    null
-                    ? undefined
-                    : draftSubmission.draftRevision.formData
-                          .modifiedGeoAreaServed
+                draftSubmission.draftRevision.formData.modifiedGeoAreaServed
             ) ?? '',
         modifiedMedicaidBeneficiaries:
             booleanAsYesNoFormValue(
                 draftSubmission.draftRevision.formData
-                    .modifiedMedicaidBeneficiaries === null
-                    ? undefined
-                    : draftSubmission.draftRevision.formData
-                          .modifiedMedicaidBeneficiaries
+                    .modifiedMedicaidBeneficiaries
             ) ?? '',
         modifiedRiskSharingStrategy:
             booleanAsYesNoFormValue(
                 draftSubmission.draftRevision.formData
-                    .modifiedRiskSharingStrategy === null
-                    ? undefined
-                    : draftSubmission.draftRevision.formData
-                          .modifiedRiskSharingStrategy
+                    .modifiedRiskSharingStrategy
             ) ?? '',
         modifiedIncentiveArrangements:
             booleanAsYesNoFormValue(
                 draftSubmission.draftRevision.formData
-                    .modifiedIncentiveArrangements === null
-                    ? undefined
-                    : draftSubmission.draftRevision.formData
-                          .modifiedIncentiveArrangements
+                    .modifiedIncentiveArrangements
             ) ?? '',
         modifiedWitholdAgreements:
             booleanAsYesNoFormValue(
-                draftSubmission.draftRevision.formData
-                    .modifiedWitholdAgreements === null
-                    ? undefined
-                    : draftSubmission.draftRevision.formData
-                          .modifiedWitholdAgreements
+                draftSubmission.draftRevision.formData.modifiedWitholdAgreements
             ) ?? '',
         modifiedStateDirectedPayments:
             booleanAsYesNoFormValue(
                 draftSubmission.draftRevision.formData
-                    .modifiedStateDirectedPayments === null
-                    ? undefined
-                    : draftSubmission.draftRevision.formData
-                          .modifiedStateDirectedPayments
+                    .modifiedStateDirectedPayments
             ) ?? '',
         modifiedPassThroughPayments:
             booleanAsYesNoFormValue(
                 draftSubmission.draftRevision.formData
-                    .modifiedPassThroughPayments === null
-                    ? undefined
-                    : draftSubmission.draftRevision.formData
-                          .modifiedPassThroughPayments
+                    .modifiedPassThroughPayments
             ) ?? '',
         modifiedPaymentsForMentalDiseaseInstitutions:
             booleanAsYesNoFormValue(
                 draftSubmission.draftRevision.formData
-                    .modifiedPaymentsForMentalDiseaseInstitutions === null
-                    ? undefined
-                    : draftSubmission.draftRevision.formData
-                          .modifiedPaymentsForMentalDiseaseInstitutions
+                    .modifiedPaymentsForMentalDiseaseInstitutions
             ) ?? '',
         modifiedMedicalLossRatioStandards:
             booleanAsYesNoFormValue(
                 draftSubmission.draftRevision.formData
-                    .modifiedMedicalLossRatioStandards === null
-                    ? undefined
-                    : draftSubmission.draftRevision.formData
-                          .modifiedMedicalLossRatioStandards
+                    .modifiedMedicalLossRatioStandards
             ) ?? '',
         modifiedOtherFinancialPaymentIncentive:
             booleanAsYesNoFormValue(
                 draftSubmission.draftRevision.formData
-                    .modifiedOtherFinancialPaymentIncentive === null
-                    ? undefined
-                    : draftSubmission.draftRevision.formData
-                          .modifiedOtherFinancialPaymentIncentive
+                    .modifiedOtherFinancialPaymentIncentive
             ) ?? '',
         modifiedEnrollmentProcess:
             booleanAsYesNoFormValue(
-                draftSubmission.draftRevision.formData
-                    .modifiedEnrollmentProcess === null
-                    ? undefined
-                    : draftSubmission.draftRevision.formData
-                          .modifiedEnrollmentProcess
+                draftSubmission.draftRevision.formData.modifiedEnrollmentProcess
             ) ?? '',
         modifiedGrevienceAndAppeal:
             booleanAsYesNoFormValue(
                 draftSubmission.draftRevision.formData
-                    .modifiedGrevienceAndAppeal === null
-                    ? undefined
-                    : draftSubmission.draftRevision.formData
-                          .modifiedGrevienceAndAppeal
+                    .modifiedGrevienceAndAppeal
             ) ?? '',
         modifiedNetworkAdequacyStandards:
             booleanAsYesNoFormValue(
                 draftSubmission.draftRevision.formData
-                    .modifiedNetworkAdequacyStandards === null
-                    ? undefined
-                    : draftSubmission.draftRevision.formData
-                          .modifiedNetworkAdequacyStandards
+                    .modifiedNetworkAdequacyStandards
             ) ?? '',
         modifiedLengthOfContract:
             booleanAsYesNoFormValue(
-                draftSubmission.draftRevision.formData
-                    .modifiedLengthOfContract === null
-                    ? undefined
-                    : draftSubmission.draftRevision.formData
-                          .modifiedLengthOfContract
+                draftSubmission.draftRevision.formData.modifiedLengthOfContract
             ) ?? '',
         modifiedNonRiskPaymentArrangements:
             booleanAsYesNoFormValue(
                 draftSubmission.draftRevision.formData
-                    .modifiedNonRiskPaymentArrangements === null
-                    ? undefined
-                    : draftSubmission.draftRevision.formData
-                          .modifiedNonRiskPaymentArrangements
+                    .modifiedNonRiskPaymentArrangements
             ) ?? '',
         statutoryRegulatoryAttestation:
             booleanAsYesNoFormValue(
                 draftSubmission.draftRevision.formData
-                    .statutoryRegulatoryAttestation === null
-                    ? undefined
-                    : draftSubmission.draftRevision.formData
-                          .statutoryRegulatoryAttestation
+                    .statutoryRegulatoryAttestation
             ) ?? '',
         statutoryRegulatoryAttestationDescription:
             draftSubmission.draftRevision.formData

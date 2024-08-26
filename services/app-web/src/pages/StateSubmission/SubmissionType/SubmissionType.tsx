@@ -101,10 +101,7 @@ export const SubmissionType = ({
         programIDs: draftSubmission?.draftRevision?.formData.programIDs ?? [],
         riskBasedContract:
             booleanAsYesNoFormValue(
-                draftSubmission?.draftRevision?.formData.riskBasedContract ===
-                    null
-                    ? undefined
-                    : draftSubmission?.draftRevision?.formData.riskBasedContract
+                draftSubmission?.draftRevision?.formData.riskBasedContract
             ) ?? '',
         submissionDescription:
             draftSubmission?.draftRevision?.formData.submissionDescription ??
@@ -125,76 +122,68 @@ export const SubmissionType = ({
         redirectPath?: string
     ) => {
         if (isNewSubmission) {
-            try {
-                if (!values.populationCovered) {
-                    console.info(
-                        'unexpected error, attempting to submit without population covered',
-                        values.submissionType
-                    )
-                    return
-                }
-                if (
-                    !(
-                        values.submissionType === 'CONTRACT_ONLY' ||
-                        values.submissionType === 'CONTRACT_AND_RATES'
-                    )
-                ) {
-                    console.info(
-                        'unexpected error, attempting to submit a submissionType of ',
-                        values.submissionType
-                    )
-                    return
-                }
-                if (
-                    !(
-                        values.contractType === 'BASE' ||
-                        values.contractType === 'AMENDMENT'
-                    )
-                ) {
-                    console.info(
-                        'unexpected error, attempting to submit a contractType of ',
-                        values.contractType
-                    )
-                    return
-                }
-
-                const input: CreateContractInput = {
-                    populationCovered: values.populationCovered!,
-                    programIDs: values.programIDs,
-                    submissionType: values.submissionType as SubmissionTypeT,
-                    riskBasedContract: yesNoFormValueAsBoolean(
-                        values.riskBasedContract
-                    ),
-                    submissionDescription: values.submissionDescription,
-                    contractType: values.contractType as ContractType,
-                }
-
-                if (!createDraft) {
-                    console.info(
-                        'PROGRAMMING ERROR, SubmissionType for does have props needed to update a draft.'
-                    )
-                    return
-                }
-
-                const draftSubmission = await createDraft(input)
-
-                if (draftSubmission instanceof Error) {
-                    console.error('ah')
-                    return
-                }
-                navigate(
-                    `/submissions/${draftSubmission.id}/edit/contract-details`
+            if (!values.populationCovered) {
+                console.info(
+                    'unexpected error, attempting to submit without population covered',
+                    values.submissionType
                 )
-            } catch (serverError) {
+                return
+            }
+            if (
+                !(
+                    values.submissionType === 'CONTRACT_ONLY' ||
+                    values.submissionType === 'CONTRACT_AND_RATES'
+                )
+            ) {
+                console.info(
+                    'unexpected error, attempting to submit a submissionType of ',
+                    values.submissionType
+                )
+                return
+            }
+            if (
+                !(
+                    values.contractType === 'BASE' ||
+                    values.contractType === 'AMENDMENT'
+                )
+            ) {
+                console.info(
+                    'unexpected error, attempting to submit a contractType of ',
+                    values.contractType
+                )
+                return
+            }
+
+            const input: CreateContractInput = {
+                populationCovered: values.populationCovered!,
+                programIDs: values.programIDs,
+                submissionType: values.submissionType as SubmissionTypeT,
+                riskBasedContract: yesNoFormValueAsBoolean(
+                    values.riskBasedContract
+                ),
+                submissionDescription: values.submissionDescription,
+                contractType: values.contractType as ContractType,
+            }
+
+            if (!createDraft) {
+                console.info(
+                    'PROGRAMMING ERROR, SubmissionType for does have props needed to update a draft.'
+                )
+                return
+            }
+
+            const draftSubmission = await createDraft(input)
+
+            if (draftSubmission instanceof Error) {
                 setShowAPIErrorBanner(true)
                 setSubmitting(false) // unblock submit button to allow resubmit
                 console.info(
                     'Log: creating new submission failed with server error',
-                    serverError
+                    draftSubmission
                 )
-            } finally {
-                setSubmitting(false)
+                return
             }
+            navigate(`/submissions/${draftSubmission.id}/edit/contract-details`)
         } else {
             if (draftSubmission === undefined || !updateDraft) {
                 console.info(draftSubmission, updateDraft)
@@ -317,23 +306,17 @@ export const SubmissionType = ({
                     undefined
             }
 
-            try {
-                const updatedContractInput: UpdateContractDraftRevisionInput = {
-                    formData: updatedDraftSubmissionFormData,
-                    contractID: draftSubmission.id,
-                    lastSeenUpdatedAt: draftSubmission.draftRevision.updatedAt,
-                }
-                const updatedDraft = await updateDraft(updatedContractInput)
-                if (updatedDraft instanceof Error) {
-                    setSubmitting(false)
-                } else {
-                    navigate(redirectPath || `../contract-details`)
-                }
-            } catch (serverError) {
-                setShowAPIErrorBanner(true)
-                setSubmitting(false) // unblock submit button to allow resubmit
-            } finally {
+            const updatedContractInput: UpdateContractDraftRevisionInput = {
+                formData: updatedDraftSubmissionFormData,
+                contractID: draftSubmission.id,
+                lastSeenUpdatedAt: draftSubmission.draftRevision.updatedAt,
+            }
+
+            const updatedDraft = await updateDraft(updatedContractInput)
+            if (updatedDraft instanceof Error) {
                 setSubmitting(false)
+            } else {
+                navigate(redirectPath || `../contract-details`)
             }
         }
     }
