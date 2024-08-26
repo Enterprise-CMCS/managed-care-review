@@ -17,7 +17,6 @@ import {
 } from '../gen/gqlClient'
 import {
     wrapApolloResult,
-    ApolloResultType,
 } from '../gqlHelpers/apolloQueryWrapper'
 import { recordJSException } from '../otelHelpers'
 import { handleApolloError } from '../gqlHelpers/apolloErrors'
@@ -162,7 +161,7 @@ const useContractForm = (contractID?: string): UseContractForm => {
     }))
 
     const result = results.result
-    
+
     if (result.status === 'LOADING') {
         interimState = 'LOADING'
         return {interimState, createDraft, updateDraft, showPageErrorMessage }
