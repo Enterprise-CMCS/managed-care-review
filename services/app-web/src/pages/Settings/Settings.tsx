@@ -56,7 +56,7 @@ export const Settings = (): React.ReactElement => {
                 />
             ) : (
                 <Grid>
-                    <h2>Settings</h2>
+                    <h2>MC Review Settings</h2>
                     <Tabs className={styles.tabs}>
                         <TabPanel id="cms-users" tabName="CMS users">
                             <CMSUsersTable />
