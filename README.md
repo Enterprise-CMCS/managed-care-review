@@ -23,8 +23,6 @@ Managed Care Review is an application that accepts Managed Care contract and rat
 
 ### Local Tooling
 
-test
-
 We use a collection of tools to manage this monorepo.
 
 For monorepo tooling we just rely on the workspace configuration of `pnpm`. If given the `-r` recursive flag, `pnpm` will run a `package.json` script that matches the name given to it in every service. For example, `pnpm -r generate` will run the `generate` command in every service that has a `generate` command specified in it's `package.json`. We also use [Husky](https://github.com/typicode/husky) to run and organize our pre-commit scripts - e.g. `husky` uses the command `pnpm precommit` to run the specific `precommit` script indicated in each `package.json`.
