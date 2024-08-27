@@ -18,7 +18,7 @@ import classNames from 'classnames'
 import { ErrorSummary } from '../../../components/Form'
 import { activeFormPages } from '../StateSubmissionForm'
 import { RoutesRecord } from '../../../constants'
-import { FormContainer } from '../FormContainer'
+import { FormContainer } from '../../../components/FormContainer/FormContainer'
 import { useAuth } from '../../../contexts/AuthContext'
 import {
     useCurrentRoute,

@@ -80,8 +80,11 @@ import {
     StatutoryRegulatoryAttestationDescription,
     StatutoryRegulatoryAttestationQuestion,
 } from '../../../constants/statutoryRegulatoryAttestation'
-import { FormContainer } from '../FormContainer'
-import { useCurrentRoute, useRouteParams } from '../../../hooks'
+import { FormContainer } from '../../../components/FormContainer/FormContainer'
+import {
+    useCurrentRoute,
+    useRouteParams,
+} from '../../../hooks'
 import { useAuth } from '../../../contexts/AuthContext'
 import { ErrorOrLoadingPage } from '../ErrorOrLoadingPage'
 import { PageBannerAlerts } from '../PageBannerAlerts'

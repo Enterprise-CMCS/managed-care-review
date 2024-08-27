@@ -1,7 +1,6 @@
 import {
     ButtonGroup,
     FormGroup,
-    GridContainer,
     Label,
 } from '@trussworks/react-uswds'
 import React, { useEffect } from 'react'
@@ -35,6 +34,8 @@ import {
     ErrorSummaryProps,
     ErrorSummary,
 } from '../../components/Form/ErrorSummary/ErrorSummary'
+import { FormContainer } from '../../components/FormContainer/FormContainer'
+import { LinkedRateSummary } from '../StateSubmission/RateDetails/LinkedRateSummary'
 
 export interface ReplaceRateFormValues {
     replacementRateID: string
@@ -155,8 +156,7 @@ export const ReplaceRate = (): React.ReactElement => {
     }
 
     return (
-        <div className={styles.background}>
-            <GridContainer className={styles.gridContainer}>
+        <FormContainer id="ReplaceRate" className={styles.replaceRatePage}>
                 {replaceError && <GenericApiErrorBanner />}
                 <Formik
                     initialValues={formInitialValues}
@@ -165,7 +165,6 @@ export const ReplaceRate = (): React.ReactElement => {
                 >
                     {({ errors, values, handleSubmit }) => (
                         <UswdsForm
-                            className={styles.formContainer}
                             id="ReplaceRateForm"
                             aria-label={'Withdraw and replace rate on contract'}
                             aria-describedby="form-guidance"
@@ -181,14 +180,14 @@ export const ReplaceRate = (): React.ReactElement => {
                                     headingRef={errorSummaryHeadingRef}
                                 />
                             )}
-
+                            <div className={styles.formInnerContainer}>
                             <h2>Replace a rate review</h2>
 
                             <DataDetail id="withdrawnRate" label="Current rate">
                                 {withdrawnRateRevisionName}
                             </DataDetail>
 
-                            <fieldset className="usa-fieldset">
+                            <fieldset>
                                 <legend className="srOnly">
                                     Withdraw and replace rate on contract
                                 </legend>
@@ -252,7 +251,9 @@ export const ReplaceRate = (): React.ReactElement => {
                                     />
                                 </FormGroup>
                             </fieldset>
-                            <PageActionsContainer>
+                            </div>
+
+                        <PageActionsContainer>
                                 <ButtonGroup type="default">
                                     <ActionButton
                                         type="button"
@@ -280,11 +281,11 @@ export const ReplaceRate = (): React.ReactElement => {
                                     </ActionButton>
                                 </ButtonGroup>
                             </PageActionsContainer>
-                        </UswdsForm>
+                            </UswdsForm>
                     )}
+
                 </Formik>
-            </GridContainer>
-        </div>
+         </FormContainer>
     )
 }
 
