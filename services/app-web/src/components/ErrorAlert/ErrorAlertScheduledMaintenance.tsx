@@ -5,5 +5,6 @@ export const ErrorAlertScheduledMaintenance = (): React.ReactElement => (
     <ErrorAlert
         heading="Site unavailable"
         message="MC-Review is temporarily unavailable due to scheduled maintenance. Please check back later."
+        remediation='TECH_ISSUE'
     />
 )

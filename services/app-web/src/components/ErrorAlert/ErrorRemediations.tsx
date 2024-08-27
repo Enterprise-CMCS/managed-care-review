@@ -24,7 +24,7 @@ const SignInRemediation = (): React.ReactElement =>  (
 const TechnicalIssuesRemediation= (): React.ReactElement => (
     <>
     <span>
-    We are working to resolve these issues as quickly as possible. If you have questions or need immediate assistance with your submission, please,&nbsp;
+   If you have questions or need immediate assistance with your submission, please,&nbsp;
         </span>
         <ContactSupportLink />.
     </>)
