@@ -73,6 +73,7 @@ export const resubmitPackageCMSEmail = async (
     } else {
         return {
             toAddresses: reviewerEmails,
+            replyToAddresses: [],
             sourceEmail: config.emailSource,
             subject: `${
                 isTestEnvironment ? `[${config.stage}] ` : ''

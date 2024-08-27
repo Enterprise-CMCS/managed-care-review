@@ -69,6 +69,7 @@ export const resubmitPackageStateEmail = async (
     } else {
         return {
             toAddresses: receiverEmails,
+            replyToAddresses: [],
             sourceEmail: config.emailSource,
             subject: `${
                 isTestEnvironment ? `[${config.stage}] ` : ''
