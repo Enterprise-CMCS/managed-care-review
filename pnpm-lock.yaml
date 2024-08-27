@@ -464,8 +464,8 @@ importers:
         specifier: ^7.3.0
         version: 7.3.2
       qs:
-        specifier: ^6.11.0
-        version: 6.12.2
+        specifier: ^6.13.0
+        version: 6.13.0
       react:
         specifier: ^18.2.0
         version: 18.3.1
@@ -10918,8 +10918,8 @@ packages:
     resolution: {integrity: sha512-MvjoMCJwEarSbUYk5O+nmoSzSutSsTwF85zcHPQ9OrlFoZOYIjaqBAJIqIXjptyD5vThxGq52Xu/MaJzRkIk4Q==}
     engines: {node: '>=0.6'}
 
-  qs@6.12.2:
-    resolution: {integrity: sha512-x+NLUpx9SYrcwXtX7ob1gnkSems4i/mGZX5SlYxwIau6RrUSODO89TR/XDGGpn5RPWSYIB+aSfuSlV5+CmbTBg==}
+  qs@6.13.0:
+    resolution: {integrity: sha512-+38qI9SOr8tfZ4QmJNplMUxqjbe7LKvvZgWdExBOmd+egZTtjLB67Gu0HRX3u/XOq7UU2Nx6nsjvS16Z9uwfpg==}
     engines: {node: '>=0.6'}
 
   qs@6.9.3:
@@ -17866,7 +17866,7 @@ snapshots:
   '@gitbeaker/requester-utils@35.8.1':
     dependencies:
       form-data: 4.0.0
-      qs: 6.12.2
+      qs: 6.13.0
       xcase: 2.0.1
 
   '@graphql-codegen/add@5.0.2(graphql@16.9.0)':
@@ -28277,7 +28277,7 @@ snapshots:
     dependencies:
       side-channel: 1.0.6
 
-  qs@6.12.2:
+  qs@6.13.0:
     dependencies:
       side-channel: 1.0.6
 
@@ -29685,7 +29685,7 @@ snapshots:
       formidable: 2.0.1
       methods: 1.1.2
       mime: 2.6.0
-      qs: 6.12.2
+      qs: 6.13.0
       readable-stream: 3.6.2
       semver: 7.6.3
     transitivePeerDependencies:
