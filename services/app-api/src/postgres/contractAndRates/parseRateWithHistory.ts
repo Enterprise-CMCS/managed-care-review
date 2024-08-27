@@ -1,5 +1,4 @@
 import type {
-    RateRevisionWithContractsType,
     RateType,
     RateRevisionType,
 } from '../../domain-models/contractAndRates'
@@ -10,16 +9,11 @@ import type {
 } from '../../domain-models/contractAndRates/packageSubmissions'
 import type { RateWithoutDraftContractsType } from '../../domain-models/contractAndRates/baseContractRateTypes'
 import {
-    contractRevisionsToDomainModels,
     arrayOrFirstError,
     contractWithHistoryToDomainModelWithoutRates,
     contractRevisionToDomainModel,
 } from './parseContractWithHistory'
-import type {
-    ContractRevisionTableWithFormData,
-    RateRevisionTableWithFormData,
-    UpdateInfoTableWithUpdater,
-} from './prismaSharedContractRateHelpers'
+import type { RateRevisionTableWithFormData } from './prismaSharedContractRateHelpers'
 import {
     convertUpdateInfoToDomainModel,
     getContractRateStatus,
@@ -49,49 +43,10 @@ function parseRateWithHistory(rate: RateTableFullPayload): RateType | Error {
     return parseRate.data
 }
 
-// RateRevisionSet is for the internal building of individual revisions
-// we convert them into RateRevisions to return them
-interface RateRevisionSet {
-    rateRev: RateRevisionTableWithFormData
-    submitInfo: UpdateInfoTableWithUpdater
-    unlockInfo: UpdateInfoTableWithUpdater | undefined
-    contractRevs: ContractRevisionTableWithFormData[]
-}
-
-function rateSetsToDomainModel(
-    entries: RateRevisionSet[]
-): RateRevisionWithContractsType[] | Error {
-    const revisions: RateRevisionWithContractsType[] = []
-
-    for (const entry of entries) {
-        const domainRateRevision = rateRevisionToDomainModel(entry.rateRev)
-
-        if (domainRateRevision instanceof Error) {
-            return domainRateRevision
-        }
-
-        revisions.push({
-            ...domainRateRevision,
-            contractRevisions: contractRevisionsToDomainModels(
-                entry.contractRevs
-            ),
-
-            // override this contractRevisions's update infos with the one that caused this revision to be created.
-            submitInfo: convertUpdateInfoToDomainModel(entry.submitInfo),
-            unlockInfo: convertUpdateInfoToDomainModel(entry.unlockInfo),
-        })
-    }
-
-    return revisions
-}
 function rateRevisionToDomainModel(
     revision: RateRevisionTableWithFormData
-): RateRevisionType | Error {
+): RateRevisionType {
     const formData = rateFormDataToDomainModel(revision)
-
-    if (formData instanceof Error) {
-        return formData
-    }
 
     return {
         id: revision.id,
@@ -104,24 +59,6 @@ function rateRevisionToDomainModel(
     }
 }
 
-function rateRevisionsToDomainModels(
-    rateRevisions: RateRevisionTableWithFormData[]
-): RateRevisionType[] | Error {
-    const domainRateRevisions: RateRevisionType[] = []
-
-    for (const rateRevision of rateRevisions) {
-        const domainRateRevision = rateRevisionToDomainModel(rateRevision)
-
-        if (domainRateRevision instanceof Error) {
-            return domainRateRevision
-        }
-
-        domainRateRevisions.push(domainRateRevision)
-    }
-
-    return domainRateRevisions
-}
-
 const DRAFT_PARENT_PLACEHOLDER = 'DRAFT_PARENT_REPLACE_ME'
 
 // rateWithoutDraftContractsToDomainModel constructs a history for this particular contract including changes to all of its
@@ -132,12 +69,11 @@ function rateWithoutDraftContractsToDomainModel(
     // so you get all the rate revisions. each one has a bunch of contracts
     // each set of contracts gets its own "revision" in the return list
     // further rateRevs naturally are their own "revision"
-
-    const allEntries: RateRevisionSet[] = []
     const rateRevisions = rate.revisions
 
-    let draftRevision: RateRevisionType | Error | undefined = undefined
-    for (const [, rateRev] of rateRevisions.entries()) {
+    let draftRevision: RateRevisionType | undefined = undefined
+    const submittedRevisions: RateRevisionType[] = []
+    for (const rateRev of rateRevisions) {
         // If we have a draft revision
         // We set the draft revision aside, format it properly
         if (!rateRev.submitInfo) {
@@ -148,68 +84,13 @@ function rateWithoutDraftContractsToDomainModel(
                 )
             }
 
-            draftRevision = {
-                id: rateRev.id,
-                rateID: rateRev.rateID,
-                // rate: rateRev.rate, // not symmetric - this exists on contract draft revision but not on rate
-                createdAt: rateRev.createdAt,
-                updatedAt: rateRev.updatedAt,
-                unlockInfo: convertUpdateInfoToDomainModel(rateRev.unlockInfo),
-                formData: rateFormDataToDomainModel(rateRev),
-            }
+            draftRevision = rateRevisionToDomainModel(rateRev)
 
             // skip the rest of the processing
             continue
         }
 
-        /**
-         * Below a temporary approach to finding the matching rate revision to the contract revision. The correct way
-         * for this is to build the actual contract and rate history. This will be done in the Rate Change History epic
-
-         * The approach to finding the **single** rate revision for the submitted contract revision is to find
-         * the latest contract revision submitted before the next rate revision unlock date. The latest contract revision
-         * and not the one submitted with the rate, because contracts can be unlocked and resubmitted independently of
-         * the rate.
-         *
-         * The idea is that once a rate is unlocked again, the new rate revision created is now the "active"
-         * revision with most up-to-date data and previous submitted rate revision is now historical and changes
-         * should not be reflected on it, including contract changes.
-         **/
-
-        // New Way: post-migration
-        if (rateRev.relatedSubmissions.length > 0) {
-            // we aren't returning individual submission packages, so we just want to make sure that
-            // each rate revision we return has the most up to date set of related contract submissions associated with it
-
-            const mostRecentSubmission =
-                rateRev.relatedSubmissions[
-                    rateRev.relatedSubmissions.length - 1
-                ]
-
-            const mostRecentPackageContracts =
-                mostRecentSubmission.submissionPackages.filter(
-                    (p) => p.rateRevision.rateID === rateRev.rateID
-                )
-
-            const mostRecentContractRevs = mostRecentPackageContracts.map(
-                (p) => p.contractRevision
-            )
-
-            allEntries.push({
-                rateRev,
-                submitInfo: rateRev.submitInfo,
-                unlockInfo: rateRev.unlockInfo || undefined,
-                contractRevs: mostRecentContractRevs,
-            })
-        }
-    }
-
-    const revisions = rateSetsToDomainModel(allEntries)
-
-    if (revisions instanceof Error) {
-        return new Error(
-            `error converting rate with id ${rate.id} to domain models: ${draftRevision}`
-        )
+        submittedRevisions.push(rateRevisionToDomainModel(rateRev))
     }
 
     // New C+R package history code
@@ -299,11 +180,12 @@ function rateWithoutDraftContractsToDomainModel(
         }
     }
 
+    // TODO: why are we handling this differently from how we're doing dates in parseContractWithHistory
     // handle legacy revisions dateAdded  on documents
     // get references to rate revision in submission order and
     // reset the document dateAdded dates accordingly.
     const firstSeenDate: { [sha: string]: Date } = {}
-    for (const rateRev of revisions) {
+    for (const rateRev of submittedRevisions) {
         const sinceDate = rateRev.submitInfo?.updatedAt || rateRev.updatedAt
         if (rateRev.formData.rateDocuments) {
             for (const doc of rateRev.formData.rateDocuments) {
@@ -333,7 +215,7 @@ function rateWithoutDraftContractsToDomainModel(
         withdrawInfo: convertUpdateInfoToDomainModel(rate.withdrawInfo),
         stateNumber: rate.stateNumber,
         draftRevision,
-        revisions: revisions.reverse(),
+        revisions: submittedRevisions.reverse(),
         packageSubmissions: packageSubmissions.reverse(),
     }
 }
@@ -372,8 +254,7 @@ function rateWithHistoryToDomainModel(
     // set parent id for a draft when parsing it. We fix it here.
     if (rateWithoutContracts.parentContractID === DRAFT_PARENT_PLACEHOLDER) {
         if (draftContractsOrError.length !== 1) {
-            const msg =
-                'programming error: its an unsubmitted rate with not one draft contract'
+            const msg = `programming error: its an unsubmitted rate with ${draftContractsOrError.length} draft contracts`
             console.error(msg)
             return new Error(msg)
         }
@@ -390,7 +271,6 @@ function rateWithHistoryToDomainModel(
 export {
     parseRateWithHistory,
     rateRevisionToDomainModel,
-    rateRevisionsToDomainModels,
     rateWithHistoryToDomainModel,
     rateWithoutDraftContractsToDomainModel,
     DRAFT_PARENT_PLACEHOLDER,

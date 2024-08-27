@@ -41,7 +41,7 @@ describe('updateDraftRate', () => {
             await updateDraftRate(client, {
                 rateID: rate.id,
                 formData: draftRateForm2,
-                contractIDs: [],
+                contractIDs: [contract.id],
             })
         )
 
@@ -119,7 +119,7 @@ describe('updateDraftRate', () => {
             await updateDraftRate(client, {
                 rateID: rate.id,
                 formData: draftRateForm1,
-                contractIDs: [],
+                contractIDs: [contract.id],
             })
         )
 
@@ -130,7 +130,7 @@ describe('updateDraftRate', () => {
             await updateDraftRate(client, {
                 rateID: rate.id,
                 formData: draftRateForm2,
-                contractIDs: [],
+                contractIDs: [contract.id],
             })
         )
 
@@ -149,7 +149,7 @@ describe('updateDraftRate', () => {
             await updateDraftRate(client, {
                 rateID: rate.id,
                 formData: draftRateForm3,
-                contractIDs: [],
+                contractIDs: [contract.id],
             })
         )
         expect(draft3.draftRevision?.formData.rateCertificationName).toBe(
@@ -232,7 +232,7 @@ describe('updateDraftRate', () => {
             await updateDraftRate(client, {
                 rateID: rate.id,
                 formData: draftRateForm1,
-                contractIDs: [],
+                contractIDs: [contract.id],
             })
         )
 
@@ -247,7 +247,7 @@ describe('updateDraftRate', () => {
             await updateDraftRate(client, {
                 rateID: rate.id,
                 formData: draftRateForm2,
-                contractIDs: [],
+                contractIDs: [contract.id],
             })
         )
 
@@ -265,7 +265,7 @@ describe('updateDraftRate', () => {
             await updateDraftRate(client, {
                 rateID: rate.id,
                 formData: draftRateForm3,
-                contractIDs: [],
+                contractIDs: [contract.id],
             })
         )
         expect(draft3.draftRevision?.formData.rateCertificationName).toBe(

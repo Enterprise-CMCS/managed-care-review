@@ -3,12 +3,7 @@ import {
     contractPackageSubmissionSchema,
     ratePackageSubmissionSchema,
 } from './packageSubmissions'
-import {
-    contractRevisionSchema,
-    contractRevisionWithRatesSchema,
-    rateRevisionSchema,
-    rateRevisionWithContractsSchema,
-} from './revisionTypes'
+import { contractRevisionSchema, rateRevisionSchema } from './revisionTypes'
 import { statusSchema } from './statusType'
 import { indexQuestionsPayload } from '../QuestionsType'
 import { updateInfoSchema } from './updateInfoType'
@@ -28,7 +23,7 @@ const contractWithoutDraftRatesSchema = z.object({
     draftRevision: contractRevisionSchema.optional(),
 
     // All revisions are submitted and in reverse chronological order
-    revisions: z.array(contractRevisionWithRatesSchema),
+    revisions: z.array(contractRevisionSchema),
 
     packageSubmissions: z.array(contractPackageSubmissionSchema),
 
@@ -50,9 +45,8 @@ const rateWithoutDraftContractsSchema = z.object({
     withdrawInfo: updateInfoSchema.optional(),
     // If this rate is in a DRAFT or UNLOCKED status, there will be a draftRevision
     draftRevision: rateRevisionSchema.optional(),
-    // draftContracts: rateDraftContracts,
     // All revisions are submitted and in reverse chronological order
-    revisions: z.array(rateRevisionWithContractsSchema),
+    revisions: z.array(rateRevisionSchema),
 
     packageSubmissions: z.array(ratePackageSubmissionSchema),
 })

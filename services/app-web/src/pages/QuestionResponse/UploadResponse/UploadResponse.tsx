@@ -63,9 +63,9 @@ export const UploadResponse = () => {
     } = useFileUpload(shouldValidate)
     const { setFocusErrorSummaryHeading, errorSummaryHeadingRef } =
         useErrorSummary()
-        if (pkg.status === 'DRAFT') {
-            return <GenericErrorPage />
-        }
+    if (pkg.status === 'DRAFT') {
+        return <GenericErrorPage />
+    }
 
     const showFileUploadError = Boolean(shouldValidate && fileUploadError)
     const fileUploadErrorFocusKey = hasNoFiles

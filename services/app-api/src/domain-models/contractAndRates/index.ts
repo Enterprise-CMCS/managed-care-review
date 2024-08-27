@@ -9,12 +9,7 @@ export {
 
 export { contractFormDataSchema, rateFormDataSchema } from './formDataTypes'
 
-export {
-    rateRevisionWithContractsSchema,
-    contractRevisionWithRatesSchema,
-    contractRevisionSchema,
-    rateRevisionSchema,
-} from './revisionTypes'
+export { contractRevisionSchema, rateRevisionSchema } from './revisionTypes'
 
 export { statusSchema } from './statusType'
 
@@ -37,12 +32,7 @@ export type {
     ContractFormEditableType,
 } from './formDataTypes'
 
-export type {
-    ContractRevisionType,
-    RateRevisionType,
-    RateRevisionWithContractsType,
-    ContractRevisionWithRatesType,
-} from './revisionTypes'
+export type { ContractRevisionType, RateRevisionType } from './revisionTypes'
 
 export type {
     ContractPackageSubmissionType,

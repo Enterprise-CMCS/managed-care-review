@@ -121,9 +121,7 @@ const StateUserRoutes = ({
                 )}
                 <Route element={<SubmissionSideNav />}>
                     <Route
-                        path={
-                            RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS
-                        }
+                        path={RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS}
                         element={<QuestionResponse />}
                     />
                     <Route
@@ -195,9 +193,7 @@ const CMSUserRoutes = ({
 
                 <Route element={<SubmissionSideNav />}>
                     <Route
-                        path={
-                            RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS
-                        }
+                        path={RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS}
                         element={<QuestionResponse />}
                     />
                     <Route
@@ -236,7 +232,10 @@ const CMSUserRoutes = ({
                         element={<GraphQLExplorer />}
                     />
                 )}
-                <Route path={RoutesRecord.SETTINGS} element={<Settings />} />
+                <Route
+                    path={RoutesRecord.MC_REVIEW_SETTINGS}
+                    element={<Settings />}
+                />
                 <Route path={RoutesRecord.API_ACCESS} element={<APIAccess />} />
                 {UniversalRoutes}
                 <Route path="*" element={<Error404 />} />

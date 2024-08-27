@@ -8,7 +8,7 @@ import {
     IndexUsersDocument,
     IndexUsersQuery,
     StateUser,
-    HelpdeskUser, CmsApproverUser
+    HelpdeskUser, CmsApproverUser, BusinessOwnerUser
 } from '../../gen/gqlClient'
 
 import { mockMNState } from './stateMock'
@@ -76,6 +76,18 @@ function mockValidHelpDeskUser(userData?: Partial<HelpdeskUser>): HelpdeskUser {
         email: 'bob@dmas.mn.gov',
         ...userData,
     }, userData)
+}
+
+function mockValidBusinessOwnerUser(userData?: Partial<HelpdeskUser>): HelpdeskUser {
+    return {
+        __typename: 'HelpdeskUser' as const,
+        id: 'bar-id',
+        role: 'BUSINESSOWNER_USER',
+        givenName: 'bob',
+        familyName: 'ddmas',
+        email: 'bob@dmas.mn.gov',
+        ...userData,
+    }
 }
 
 type fetchCurrentUserMockProps = {
@@ -159,6 +171,24 @@ const iterableCmsUsersMockData: {
     }
 ]
 
+const iterableAdminUsersMockData: {
+    userRole: 'HELPDESK_USER' | 'BUSINESSOWNER_USER' | 'ADMIN_USER'
+    mockUser: <T>(userData?: Partial<T>) => AdminUser | BusinessOwnerUser | HelpdeskUser
+}[] = [
+    {
+        userRole: 'ADMIN_USER',
+        mockUser: mockValidAdminUser,
+    },
+    {
+        userRole: 'BUSINESSOWNER_USER',
+        mockUser: mockValidBusinessOwnerUser,
+    },
+    {
+        userRole: 'HELPDESK_USER',
+        mockUser: mockValidHelpDeskUser
+    }
+]
+
 export {
     fetchCurrentUserMock,
     mockValidStateUser,
@@ -168,5 +198,7 @@ export {
     indexUsersQueryMock,
     mockValidHelpDeskUser,
     mockValidCMSApproverUser,
-    iterableCmsUsersMockData
+    iterableCmsUsersMockData,
+    mockValidBusinessOwnerUser,
+    iterableAdminUsersMockData
 }

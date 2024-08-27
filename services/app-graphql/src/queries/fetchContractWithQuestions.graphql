@@ -150,25 +150,6 @@ fragment rateRevisionFragmentForFetchContract on RateRevision {
             packageStatus
         }
     }
-    contractRevisions {
-        id
-        contract {
-            id
-            stateCode
-            stateNumber
-        }
-        createdAt
-        updatedAt
-        submitInfo {
-            ...updateInformationFields
-        }
-        unlockInfo {
-            ...updateInformationFields
-        }
-        formData {
-            ...contractFormDataFragmentForFetch
-        }
-    }
 }
 
 fragment contractFormDataFragmentForFetch on ContractFormData {
@@ -234,6 +215,7 @@ fragment contractRevisionFragmentForFetch on ContractRevision {
     id
     createdAt
     updatedAt
+    contractID
     contractName
 
     submitInfo {

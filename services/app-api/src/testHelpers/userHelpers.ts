@@ -6,6 +6,8 @@ import type {
     CMSUserType,
     StateUserType,
     UserType,
+    BusinessOwnerUserType,
+    HelpdeskUserType,
 } from '../domain-models'
 import { sharedTestPrismaClient } from './storeHelpers'
 import { v4 as uuidv4 } from 'uuid'
@@ -47,6 +49,28 @@ const testStateUser = (userData?: Partial<StateUserType>): StateUserType => ({
 const testAdminUser = (userData?: Partial<AdminUserType>): AdminUserType => ({
     id: uuidv4(),
     role: 'ADMIN_USER',
+    email: 'iroh@example.com',
+    familyName: 'Iroh',
+    givenName: 'Uncle',
+    ...userData,
+})
+
+const testBusinessOwnerUser = (
+    userData?: Partial<BusinessOwnerUserType>
+): BusinessOwnerUserType => ({
+    id: uuidv4(),
+    role: 'BUSINESSOWNER_USER',
+    email: 'iroh@example.com',
+    familyName: 'Iroh',
+    givenName: 'Uncle',
+    ...userData,
+})
+
+const testHelpdeskUser = (
+    userData?: Partial<HelpdeskUserType>
+): HelpdeskUserType => ({
+    id: uuidv4(),
+    role: 'HELPDESK_USER',
     email: 'iroh@example.com',
     familyName: 'Iroh',
     givenName: 'Uncle',
@@ -100,4 +124,6 @@ export {
     createDBUsersWithFullData,
     iterableCmsUsersMockData,
     testCMSApproverUser,
+    testBusinessOwnerUser,
+    testHelpdeskUser,
 }

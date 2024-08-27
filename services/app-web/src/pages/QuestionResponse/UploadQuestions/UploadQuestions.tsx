@@ -59,9 +59,9 @@ export const UploadQuestions = () => {
     const { setFocusErrorSummaryHeading, errorSummaryHeadingRef } =
         useErrorSummary()
 
-        if (pkg.status === 'DRAFT') {
-            return <GenericErrorPage />
-        }
+    if (pkg.status === 'DRAFT') {
+        return <GenericErrorPage />
+    }
     const showFileUploadError = Boolean(shouldValidate && fileUploadError)
     const fileUploadErrorFocusKey = hasNoFiles
         ? 'questions-upload'

@@ -196,6 +196,7 @@ async function updateDraftContractRatesInsideTransaction(
     }
 
     // unlink old data from disconnected rates
+    // This does nothing, just checks that the rates all exist. We are removing based on LINK being populated...
     for (const ru of args.rateUpdates.unlink) {
         const draftRev = await tx.rateRevisionTable.findFirst({
             where: {

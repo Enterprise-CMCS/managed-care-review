@@ -1,4 +1,4 @@
-import type { StateType } from '../../domain-models'
+import type { CMSUsersUnionType, StateType } from '../../domain-models'
 import statePrograms from '../../../../app-web/src/common-code/data/statePrograms.json'
 import type { PrismaClient } from '@prisma/client'
 
@@ -14,11 +14,39 @@ export async function findAllSupportedStates(
             orderBy: {
                 stateCode: 'asc',
             },
+            include: {
+                assignedCMSUsers: {
+                    where: {
+                        role: {
+                            in: ['CMS_USER', 'CMS_APPROVER_USER'],
+                        },
+                    },
+                    include: {
+                        stateAssignments: true,
+                    },
+                },
+            },
         })
 
-        return allStates.filter((state) =>
+        const states = allStates.filter((state) =>
             pilotStateCodes.includes(state.stateCode)
         )
+
+        return states.map((state) => ({
+            ...state,
+            assignedCMSUsers: state.assignedCMSUsers.map(
+                (user) =>
+                    ({
+                        id: user.id,
+                        role: user.role,
+                        givenName: user.givenName,
+                        familyName: user.familyName,
+                        email: user.email,
+                        stateAssignments: user.stateAssignments,
+                        divisionAssignment: user.divisionAssignment,
+                    }) as CMSUsersUnionType
+            ),
+        }))
     } catch (err) {
         console.error(err)
         return err

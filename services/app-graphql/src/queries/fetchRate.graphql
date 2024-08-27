@@ -57,71 +57,6 @@ fragment rateRevisionFragmentForFetchRate on RateRevision {
             packageStatus
         }
     }
-    contractRevisions {
-        id
-        contract {
-            id
-            stateCode
-            stateNumber
-        }
-        createdAt
-        updatedAt
-        submitInfo {
-            ...updateInformationFields
-        }
-        unlockInfo {
-            ...updateInformationFields
-        }
-        formData {
-            programIDs
-            populationCovered
-            submissionType
-            riskBasedContract
-            submissionDescription
-            stateContacts {
-                name,
-                titleRole
-                email
-            }
-            supportingDocuments {
-                name
-                s3URL
-                sha256
-                dateAdded
-                downloadURL
-            }
-            contractType
-            contractExecutionStatus
-            contractDocuments {
-                name
-                s3URL
-                sha256
-                dateAdded
-                downloadURL
-            }
-            contractDateStart
-            contractDateEnd
-            managedCareEntities
-            federalAuthorities
-            inLieuServicesAndSettings
-            modifiedBenefitsProvided
-            modifiedGeoAreaServed
-            modifiedMedicaidBeneficiaries
-            modifiedRiskSharingStrategy
-            modifiedIncentiveArrangements
-            modifiedWitholdAgreements
-            modifiedStateDirectedPayments
-            modifiedPassThroughPayments
-            modifiedPaymentsForMentalDiseaseInstitutions
-            modifiedMedicalLossRatioStandards
-            modifiedOtherFinancialPaymentIncentive
-            modifiedEnrollmentProcess
-            modifiedGrevienceAndAppeal
-            modifiedNetworkAdequacyStandards
-            modifiedLengthOfContract
-            modifiedNonRiskPaymentArrangements
-        }
-    }
 }
 
 fragment rateFieldsForFetchRate on Rate {
@@ -250,6 +185,7 @@ fragment contractRevisionFragmentForFetchRate on ContractRevision {
     id
     createdAt
     updatedAt
+    contractID
     contractName
 
     submitInfo {

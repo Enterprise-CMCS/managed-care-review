@@ -108,7 +108,7 @@
         "path-browserify": "^1.0.1",
         "plugin": "^0.3.3",
         "protobufjs": "^7.3.0",
-        "qs": "^6.11.0",
+        "qs": "^6.13.0",
         "react": "^18.2.0",
         "react-dom": "^18.2.0",
         "react-error-boundary": "^4.0.10",
@@ -128,9 +128,9 @@
         "zod": "^3.10.1"
     },
     "devDependencies": {
-        "@aws-sdk/client-amplify": "^3.632.0",
-        "@aws-sdk/client-s3": "^3.633.0",
-        "@aws-sdk/s3-request-presigner": "^3.633.0",
+        "@aws-sdk/client-amplify": "^3.637.0",
+        "@aws-sdk/client-s3": "^3.637.0",
+        "@aws-sdk/s3-request-presigner": "^3.637.0",
         "@chromatic-com/storybook": "^1",
         "@esbuild-plugins/node-globals-polyfill": "^0.2.3",
         "@peculiar/webcrypto": "^1.5.0",
