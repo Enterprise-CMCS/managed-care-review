@@ -1,2 +1,3 @@
-export { makeDocumentDateTable } from './makeDocumentDateLookupTable'
-export { makeDocumentS3KeyLookup } from './makeDocumentKeyLookupList'
+export * from './getAllDocuments'
+export * from './makeDocumentDateLookupTable'
+export * from './makeDocumentKeyLookupList'

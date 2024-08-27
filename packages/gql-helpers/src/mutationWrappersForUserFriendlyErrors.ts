@@ -16,13 +16,13 @@ import {
     CreateQuestionResponseInput,
     SubmitContractMutationFn,
     Contract,
-    UnlockedContract
-} from '../gen/gqlClient'
+    UnlockedContract,
+} from './gen/gqlClient'
 import { ApolloError, GraphQLErrors } from '@apollo/client/errors'
 
-import { recordJSException } from '../otelHelpers'
+import { recordJSException } from '@mc-review/otel-helpers'
 import { handleGQLErrors as handleGQLErrorLogging } from './apolloErrors'
-import { ERROR_MESSAGES } from '../constants/errors'
+import { ERROR_MESSAGES } from '@mc-review/constants'
 /*
 Adds user friendly/facing error messages to health plan package mutations.
 - Reminder, we handle graphql requests via apollo client in our web app.
@@ -44,7 +44,6 @@ const divisionToIndexQuestionDivision = (
     division: Division
 ): IndexQuestionDivisions =>
     `${division.toUpperCase()}Questions` as IndexQuestionDivisions
-
 
 export const handleApolloErrorsAndAddUserFacingMessages = (
     apolloError: ApolloError,
@@ -88,7 +87,7 @@ export const handleApolloErrorsAndAddUserFacingMessages = (
         })
     }
 
-    return new Error(message, options)
+    return new Error(message)
 }
 
 export const unlockMutationWrapper = async (

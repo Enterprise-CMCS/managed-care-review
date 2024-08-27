@@ -18,7 +18,7 @@ import { recordJSException } from '@mc-review/otel-helpers'
 import {
     DocumentDateLookupTableType,
     makeDocumentDateTable,
-} from '../documentHelpers/makeDocumentDateLookupTable'
+} from '@mc-review/document-helpers'
 
 // ExpandedRevisionsType - HPP revision plus an additional formData field containing values of formDataProto decoded into typescript
 type ExpandedRevisionsType = HealthPlanRevision & {

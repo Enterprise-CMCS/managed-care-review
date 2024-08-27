@@ -11,8 +11,7 @@ import {
     Rate,
     RateRevision,
 } from './gen/gqlClient'
-import { ActuaryContact } from '@mc-review/hpp'
-import { ActuaryFirmsRecord } from '@mc-review/constants'
+import { ActuaryContact, ActuaryFirmsRecord } from '@mc-review/hpp'
 
 type RateRevisionWithIsLinked = {
     isLinked: boolean
