@@ -13,7 +13,7 @@ import {
 
 import { mockMNState } from './stateMock'
 function mockValidUser(userData?: Partial<StateUser>): StateUser {
-    return {
+    return Object.assign({}, {
         __typename: 'StateUser' as const,
         id: 'foo-id',
         state: mockMNState(),
@@ -21,8 +21,7 @@ function mockValidUser(userData?: Partial<StateUser>): StateUser {
         givenName: 'bob',
         familyName: 'ddmas',
         email: 'bob@dmas.mn.gov',
-        ...userData,
-    }
+    }, userData)
 }
 
 const mockValidStateUser = (userData?: Partial<StateUser>): StateUser => {
@@ -30,7 +29,7 @@ const mockValidStateUser = (userData?: Partial<StateUser>): StateUser => {
 }
 
 function mockValidCMSUser(userData?: Partial<CmsUser>): CmsUser {
-    return {
+    return Object.assign({}, {
         __typename: 'CMSUser' as const,
         id: 'bar-id',
         role: 'CMS_USER',
@@ -39,12 +38,11 @@ function mockValidCMSUser(userData?: Partial<CmsUser>): CmsUser {
         email: 'bob@dmas.mn.gov',
         divisionAssignment: 'DMCO',
         stateAssignments: [],
-        ...userData,
-    }
+    }, userData)
 }
 
 function mockValidCMSApproverUser(userData?: Partial<CmsApproverUser>): CmsApproverUser {
-    return {
+    return Object.assign({}, {
         __typename: 'CMSApproverUser' as const,
         id: 'bar-id',
         role: 'CMS_APPROVER_USER',
@@ -54,23 +52,22 @@ function mockValidCMSApproverUser(userData?: Partial<CmsApproverUser>): CmsAppro
         divisionAssignment: 'DMCO',
         stateAssignments: [],
         ...userData,
-    }
+    }, userData)
 }
 
 function mockValidAdminUser(userData?: Partial<AdminUser>): AdminUser {
-    return {
+    return Object.assign({}, {
         __typename: 'AdminUser' as const,
         id: 'bar-id',
         role: 'ADMIN_USER',
         givenName: 'bobadmin',
         familyName: 'ddmas',
         email: 'bobadmin@dmas.mn.gov',
-        ...userData,
-    }
+    }, userData)
 }
 
 function mockValidHelpDeskUser(userData?: Partial<HelpdeskUser>): HelpdeskUser {
-    return {
+    return Object.assign({}, {
         __typename: 'HelpdeskUser' as const,
         id: 'bar-id',
         role: 'HELPDESK_USER',
@@ -78,7 +75,7 @@ function mockValidHelpDeskUser(userData?: Partial<HelpdeskUser>): HelpdeskUser {
         familyName: 'ddmas',
         email: 'bob@dmas.mn.gov',
         ...userData,
-    }
+    }, userData)
 }
 
 function mockValidBusinessOwnerUser(userData?: Partial<HelpdeskUser>): HelpdeskUser {

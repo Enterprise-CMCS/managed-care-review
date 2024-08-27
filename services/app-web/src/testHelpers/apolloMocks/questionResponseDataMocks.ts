@@ -14,7 +14,7 @@ function mockQuestionsPayload(contractID: string): IndexQuestionsPayload {
                         contractID,
                         createdAt: new Date('2022-12-15'),
                         addedBy: mockValidCMSUser({
-                            divisionAssignment: 'DMCO',
+                            divisionAssignment: undefined,
                         }) as CmsUser,
                         documents: [
                             {
