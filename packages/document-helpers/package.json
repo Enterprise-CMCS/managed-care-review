@@ -8,7 +8,12 @@
         "test": "echo \"Error: no test specified\" && exit 1"
     },
     "dependencies": {
-        "@mc-review/common-code": "workspace:*",
+        "@mc-review/hpp": "workspace:*",
+        "@mc-review/gql-helpers": "workspace:*",
         "typescript": "^4.9.5"
+    },
+    "devDependencies": {
+        "@types/jest": "^29.5.6",
+        "@types/node": "^20.14.12"
     }
 }

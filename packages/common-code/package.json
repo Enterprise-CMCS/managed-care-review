@@ -2,21 +2,23 @@
     "name": "@mc-review/common-code",
     "version": "1.0.0",
     "description": "",
-    "main": "index.js",
+    "main": "build/index.js",
     "scripts": {
         "build": "tsc"
     },
     "dependencies": {
+        "@apollo/client": "3.8.8",
         "@mc-review/constants": "workspace:*",
-        "@mc-review/hpp": "workspace:*",
         "@mc-review/gql-helpers": "workspace:*",
-        "url-parse": "^1.5.10",
+        "@mc-review/hpp": "workspace:*",
         "dayjs": "^1.10.5",
+        "typescript": "^4.9.5",
+        "url-parse": "^1.5.10",
         "zod": "^3.10.1"
     },
     "devDependencies": {
-        "@types/url-parse": "^1.4.3",
         "@types/jest": "^29.5.6",
-        "@types/node": "^20.14.12"
+        "@types/node": "^20.14.12",
+        "@types/url-parse": "^1.4.3"
     }
 }

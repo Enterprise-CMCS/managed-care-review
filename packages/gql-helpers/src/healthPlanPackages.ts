@@ -1,8 +1,8 @@
-import { HealthPlanFormDataType } from '../common-code/healthPlanFormDataType'
-import { base64ToDomain } from '../common-code/proto/healthPlanFormDataProto'
+import { HealthPlanFormDataType } from '@mc-review/hpp'
+import { base64ToDomain } from '@mc-review/hpp'
 
-import { HealthPlanRevision, HealthPlanPackage } from '../gen/gqlClient'
-import { recordJSException } from '../otelHelpers/tracingHelper'
+import { HealthPlanRevision, HealthPlanPackage } from './gen/gqlClient'
+import { recordJSException } from '@mc-review/otel-helpers'
 
 // returns nil if no revision has been submitted
 function getLastSubmittedRevision(

@@ -2,7 +2,7 @@ import {
     ModifiedProvisionsAmendmentRecord,
     ModifiedProvisionsBaseContractRecord,
     ModifiedProvisionsCHIPRecord,
-} from '../constants/modifiedProvisions'
+} from '@mc-review/constants'
 import { Contract } from './gen/gqlClient'
 import {
     CHIPProvisionType,
@@ -15,7 +15,7 @@ import {
     isCHIPProvision,
     isMedicaidAmendmentProvision,
     isMedicaidBaseProvision,
-} from '@mc-review/types'
+} from '@mc-review/hpp'
 import {
     isBaseContract,
     isCHIPOnly,

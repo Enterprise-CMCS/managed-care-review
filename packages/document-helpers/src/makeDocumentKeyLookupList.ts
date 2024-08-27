@@ -1,5 +1,5 @@
 import { parseKey } from '../common-code/s3URLEncoding'
-import { RevisionsLookupType } from '../gqlHelpers/fetchHealthPlanPackageWrapper'
+import { RevisionsLookupType } from '@mc-review/gql-helpers'
 import { getAllDocuments } from './getAllDocuments'
 
 // CurrentPreviousDocsLookup - array of document keys for currentDocuments and previousDocuments

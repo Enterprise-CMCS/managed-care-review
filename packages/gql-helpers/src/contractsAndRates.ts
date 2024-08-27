@@ -11,7 +11,7 @@ import {
     Rate,
     RateRevision,
 } from './gen/gqlClient'
-import { ActuaryContact } from '../common-code/healthPlanFormDataType'
+import { ActuaryContact } from '@mc-review/hpp'
 import { ActuaryFirmsRecord } from '@mc-review/constants'
 
 type RateRevisionWithIsLinked = {

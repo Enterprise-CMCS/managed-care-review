@@ -1,7 +1,7 @@
 import {
     ExpandedRevisionsType,
     RevisionsLookupType,
-} from '../gqlHelpers/fetchHealthPlanPackageWrapper'
+} from '@mc-review/gql-helpers'
 import { getAllDocuments } from './getAllDocuments'
 
 // DocumentDateLookupTableType -  { document lookup key string : date string for "date added" }
@@ -28,23 +28,22 @@ function makeDocumentDateTable(
         previousSubmissionDate: null, // the last time there was a submission on this package
     }
     const listOfRevisionLookups = Object.keys(revisionsLookup)
-    listOfRevisionLookups.forEach(
-        (revisionId: string, index) => {
-            const revision = revisionsLookup[revisionId]
+    listOfRevisionLookups.forEach((revisionId: string, index) => {
+        const revision = revisionsLookup[revisionId]
 
-                const submitDate = revision.submitInfo?.updatedAt
-                if (submitDate && (listOfRevisionLookups.length === 1 || index === 1)) { // if we have a package with only one submitted revision, use that - otherwise use whatever in is the 1 index because thats the last submitted
-                        lookupTable['previousSubmissionDate'] = submitDate
-                }
-
-            const allDocuments = getAllDocuments(revision.formData)
-            allDocuments.forEach((doc) => {
-                const documentKey = doc.sha256 ? doc.sha256 : doc.s3URL
-                const dateAdded = getDateAdded(revision)
-                if (dateAdded) lookupTable[documentKey] = dateAdded
-            })
+        const submitDate = revision.submitInfo?.updatedAt
+        if (submitDate && (listOfRevisionLookups.length === 1 || index === 1)) {
+            // if we have a package with only one submitted revision, use that - otherwise use whatever in is the 1 index because thats the last submitted
+            lookupTable['previousSubmissionDate'] = submitDate
         }
-    )
+
+        const allDocuments = getAllDocuments(revision.formData)
+        allDocuments.forEach((doc) => {
+            const documentKey = doc.sha256 ? doc.sha256 : doc.s3URL
+            const dateAdded = getDateAdded(revision)
+            if (dateAdded) lookupTable[documentKey] = dateAdded
+        })
+    })
     return lookupTable
 }
 

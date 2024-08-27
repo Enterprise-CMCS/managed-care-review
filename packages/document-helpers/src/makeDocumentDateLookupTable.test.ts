@@ -3,9 +3,9 @@ import {
     mockDraftHealthPlanPackage,
     mockSubmittedHealthPlanPackageWithRevision,
 } from '@mc-review/test-helpers'
-import { UnlockedHealthPlanFormDataType } from '../common-code/healthPlanFormDataType'
+import { UnlockedHealthPlanFormDataType } from '@mc-review/hpp'
 import { TextEncoder, TextDecoder } from 'util'
-import { buildRevisionsLookup } from '../gqlHelpers/fetchHealthPlanPackageWrapper'
+import { buildRevisionsLookup } from '@mc-review/gql-helpers'
 
 Object.assign(global, { TextDecoder, TextEncoder })
 

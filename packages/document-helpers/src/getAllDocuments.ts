@@ -1,4 +1,4 @@
-import { HealthPlanFormDataType } from '../common-code/healthPlanFormDataType'
+import { HealthPlanFormDataType } from '@mc-review/hpp'
 
 const getAllDocuments = (pkg: HealthPlanFormDataType) => {
     let allDocuments = [...pkg.contractDocuments, ...pkg.documents]
