@@ -6,15 +6,11 @@
 */
 
 @use 'mcrColors' as *;
-@use 'custom' as *;
 
 // FORM FIELDS
 .usa-label,
 .usa-legend {
     font-weight: bold;
-}
-.usa-form {
-    max-width: $mcr-container-standard-width-fixed;
 }
 
 .usa-hint span {
