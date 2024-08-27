@@ -108,7 +108,7 @@
         "path-browserify": "^1.0.1",
         "plugin": "^0.3.3",
         "protobufjs": "^7.3.0",
-        "qs": "^6.11.0",
+        "qs": "^6.13.0",
         "react": "^18.2.0",
         "react-dom": "^18.2.0",
         "react-error-boundary": "^4.0.10",
