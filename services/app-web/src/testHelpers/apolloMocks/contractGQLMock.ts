@@ -24,12 +24,12 @@ const fetchContractMockSuccess = ({
     contract?: Contract | UnlockedContract
 }): MockedResponse<FetchContractQuery> => {
     let newContract:Contract | undefined
-    if (contract && 'draftRevision' in contract) {
+    if (contract && contract.__typename === 'UnlockedContract') {
         newContract = {
             ...contract,
             __typename: 'Contract',
         }
-    } else if (contract) {
+    } else if (contract && contract.__typename === 'Contract') {
         newContract = contract
     } else {
         newContract =  undefined

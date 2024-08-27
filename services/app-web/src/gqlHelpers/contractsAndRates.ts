@@ -68,7 +68,7 @@ function getVisibleLatestRateRevisions(contract: Contract | UnlockedContract, is
 // returns draft form data for unlocked and draft, and last package submission data for submitted or resubmitted
 // only state users get to see draft data.
 const getVisibleLatestContractFormData = (contract: Contract | UnlockedContract| ContractRevision, isStateUser: boolean): ContractFormData | undefined =>{
-   if (contract.__typename === 'Contract') {
+   if (contract.__typename === 'Contract' || contract.__typename === 'UnlockedContract') {
         if (isStateUser) {
             return contract.draftRevision?.formData ||
                 getLastContractSubmission(contract)?.contractRevision.formData
