@@ -10,6 +10,7 @@ permissions:
 jobs:
   SendDSOEvents:
     runs-on: ubuntu-latest
+    environment: prod
     steps:
       - name: Format OIDC role ARN
         shell: bash
