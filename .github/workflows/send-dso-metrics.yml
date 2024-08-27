@@ -30,7 +30,7 @@ jobs:
             - type: deploy 
               environment: prod
               name: mc-review-promote
-              team: mv-review
+              team: mc-review
               owner: Enterprise-CMCS
               repo: managed-care-review
               workflowfilename: promote.yml
