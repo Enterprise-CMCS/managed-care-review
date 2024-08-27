@@ -77,11 +77,12 @@ export {
     mockContractPackageUnlocked,
     mockContractPackageSubmittedWithRevisions,
     mockEmptyDraftContractAndRate,
+    mockContractPackageUnlockedWithUnlockedType,
     mockContractRevision,
     mockRateRevision
 } from './contractPackageDataMock'
 export { rateDataMock } from './rateDataMock'
-export { fetchContractMockSuccess, updateDraftContractRatesMockSuccess } from './contractGQLMock'
+export { fetchContractMockSuccess, fetchContractMockFail, updateDraftContractRatesMockSuccess, updateContractDraftRevisionMockFail, updateContractDraftRevisionMockSuccess, createContractMockFail, createContractMockSuccess } from './contractGQLMock'
 export { indexRatesMockSuccess, indexRatesMockFailure } from './rateGQLMocks'
 
 export { withdrawAndReplaceRedundantRateMock } from './replaceRateGQLMocks'

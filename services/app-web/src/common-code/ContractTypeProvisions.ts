@@ -3,7 +3,7 @@ import {
     ModifiedProvisionsBaseContractRecord,
     ModifiedProvisionsCHIPRecord,
 } from '../constants/modifiedProvisions'
-import { Contract } from '../gen/gqlClient'
+import { Contract, UnlockedContract } from '../gen/gqlClient'
 import {
     CHIPProvisionType,
     MedicaidBaseProvisionType,
@@ -38,7 +38,7 @@ import { getLastContractSubmission } from '../gqlHelpers/contractsAndRates'
 
 // Returns the list of provision keys that apply for given submission variant
 const generateApplicableProvisionsList = (
-    draftSubmission: Contract
+    draftSubmission: Contract | UnlockedContract
 ):
     | CHIPProvisionType[]
     | MedicaidBaseProvisionType[]
@@ -56,7 +56,7 @@ const generateApplicableProvisionsList = (
 
 // Returns user-friendly label text for the provision based on the given submission variant
 const generateProvisionLabel = (
-    draftSubmission: Contract,
+    draftSubmission: Contract | UnlockedContract,
     provision: GeneralizedProvisionType
 ): string => {
     if (isCHIPOnly(draftSubmission) && isCHIPProvision(provision)) {
@@ -83,7 +83,7 @@ const generateProvisionLabel = (
     That functionality needed for unlocked contracts which can be edited in a non-linear fashion)
 */
 const sortModifiedProvisions = (
-    contract: Contract
+    contract: Contract | UnlockedContract
 ): [GeneralizedProvisionType[], GeneralizedProvisionType[]] => {
     const contractFormData = contract.draftRevision?.formData || getLastContractSubmission(contract)?.contractRevision.formData
     const initialProvisions = {
@@ -132,7 +132,7 @@ const sortModifiedProvisions = (
     Returns boolean for whether a submission variant is missing required provisions
     This is used to determine if we display the missing data warning on review and submit  
 */
-const isMissingProvisions = (contract: Contract): boolean => {
+const isMissingProvisions = (contract: Contract | UnlockedContract): boolean => {
     const requiredProvisions = generateApplicableProvisionsList(contract)
     const [modifiedProvisions, unmodifiedProvisions] =
         sortModifiedProvisions(contract)
@@ -147,7 +147,7 @@ const isMissingProvisions = (contract: Contract): boolean => {
     Returns lang string dictionary for variant
 */
 const getProvisionDictionary = (
-    contract: Contract
+    contract: Contract | UnlockedContract
 ):
     | typeof ModifiedProvisionsCHIPRecord
     | typeof ModifiedProvisionsBaseContractRecord
