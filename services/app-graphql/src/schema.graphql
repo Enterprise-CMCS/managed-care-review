@@ -1701,7 +1701,7 @@ type UnlockedContract {
     "stateCode is the state code (e.g. CA or TN) for the submitting state"
     stateCode: String!
     "state is fuller state data for the submitting state"
-    state: State
+    state: State!
     """
     stateNumber is a unique auto-incrementing number identifying this contract
     This value is used to generate the contractName

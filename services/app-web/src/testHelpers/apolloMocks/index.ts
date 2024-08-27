@@ -74,7 +74,6 @@ export {
     mockContractPackageSubmitted,
     mockContractWithLinkedRateDraft,
     mockContractWithLinkedRateSubmitted,
-    mockContractPackageUnlocked,
     mockContractPackageSubmittedWithRevisions,
     mockEmptyDraftContractAndRate,
     mockContractPackageUnlockedWithUnlockedType,
