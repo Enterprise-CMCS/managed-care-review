@@ -1,15 +1,10 @@
 import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
-import UPDATE_CMS_USER from '../../../../app-graphql/src/mutations/updateCMSUser.graphql'
+import UPDATE_DIVISION_ASSIGNMENT from '../../../../app-graphql/src/mutations/updateDivisionAssignment.graphql'
 import type { InsertUserArgsType } from '../../postgres'
 import { NewPostgresStore } from '../../postgres'
 import { v4 as uuidv4 } from 'uuid'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
-import {
-    assertAnError,
-    assertAnErrorCode,
-    assertAnErrorExtensions,
-} from '../../testHelpers'
-import type { State } from '../../gen/gqlServer'
+import { assertAnError, assertAnErrorCode } from '../../testHelpers'
 import type { Division } from '@prisma/client'
 import { AuditAction } from '@prisma/client'
 import {
@@ -17,80 +12,10 @@ import {
     testAdminUser,
 } from '../../testHelpers/userHelpers'
 
-describe('updateCMSUser', () => {
+describe('updateDivisionAssignment', () => {
     describe.each(iterableCmsUsersMockData)(
-        'updateCMSUser $userRole tests',
+        'updateDivisionAssignment $userRole tests',
         ({ mockUser }) => {
-            it('updates a cms users state assignments', async () => {
-                const prismaClient = await sharedTestPrismaClient()
-                const postgresStore = NewPostgresStore(prismaClient)
-                const server = await constructTestPostgresServer({
-                    store: postgresStore,
-                    context: {
-                        user: testAdminUser(),
-                    },
-                })
-
-                // setup a user in the db for us to modify
-                const cmsUserID = uuidv4()
-                const userToInsert: InsertUserArgsType = {
-                    userID: cmsUserID,
-                    ...mockUser({ id: cmsUserID }),
-                }
-
-                const newUser = await postgresStore.insertUser(userToInsert)
-                if (newUser instanceof Error) {
-                    throw newUser
-                }
-
-                const updateRes = await server.executeOperation({
-                    query: UPDATE_CMS_USER,
-                    variables: {
-                        input: {
-                            cmsUserID: cmsUserID,
-                            stateAssignments: ['CA'],
-                        },
-                    },
-                })
-
-                expect(updateRes.data).toBeDefined()
-                expect(updateRes.errors).toBeUndefined()
-
-                if (!updateRes.data) {
-                    throw new Error('no data')
-                }
-
-                const user = updateRes.data.updateCMSUser.user
-                expect(user.email).toBe(newUser.email)
-                expect(user.stateAssignments).toHaveLength(1)
-                expect(user.stateAssignments[0].code).toBe('CA')
-
-                // change the value and see if it updates
-                const updateRes2 = await server.executeOperation({
-                    query: UPDATE_CMS_USER,
-                    variables: {
-                        input: {
-                            cmsUserID: cmsUserID,
-                            stateAssignments: ['VA', 'MA'],
-                        },
-                    },
-                })
-
-                expect(updateRes2.data).toBeDefined()
-                expect(updateRes2.errors).toBeUndefined()
-
-                if (!updateRes2.data) {
-                    throw new Error('no data')
-                }
-
-                const user2 = updateRes2.data.updateCMSUser.user
-                expect(user2.email).toBe(newUser.email)
-                expect(user2.stateAssignments).toHaveLength(2)
-                expect(
-                    user2.stateAssignments.map((s: State) => s.code)
-                ).toEqual(expect.arrayContaining(['MA', 'VA']))
-            })
-
             it('changes CMS users division assignment and creates an audit log', async () => {
                 const firstDivisionAssignment: Division = 'DMCO'
                 const secondDivisionAssignment: Division = 'DMCP'
@@ -118,7 +43,7 @@ describe('updateCMSUser', () => {
 
                 // make the first update to the division assignment
                 const firstUpdateRes = await server.executeOperation({
-                    query: UPDATE_CMS_USER,
+                    query: UPDATE_DIVISION_ASSIGNMENT,
                     variables: {
                         input: {
                             cmsUserID: cmsUserID,
@@ -134,7 +59,8 @@ describe('updateCMSUser', () => {
                     throw new Error('no data')
                 }
 
-                const firstUpdateToUser = firstUpdateRes.data.updateCMSUser.user
+                const firstUpdateToUser =
+                    firstUpdateRes.data.updateDivisionAssignment.user
                 expect(firstUpdateToUser.email).toBe(newUser.email)
                 // division assignment should now be set
                 expect(firstUpdateToUser.divisionAssignment).toBe(
@@ -143,7 +69,7 @@ describe('updateCMSUser', () => {
 
                 // make the second update to the division assignment
                 const secondUpdateRes = await server.executeOperation({
-                    query: UPDATE_CMS_USER,
+                    query: UPDATE_DIVISION_ASSIGNMENT,
                     variables: {
                         input: {
                             cmsUserID: cmsUserID,
@@ -160,7 +86,7 @@ describe('updateCMSUser', () => {
                 }
 
                 const secondUpdateToUser =
-                    secondUpdateRes.data.updateCMSUser.user
+                    secondUpdateRes.data.updateDivisionAssignment.user
                 expect(secondUpdateToUser.email).toBe(newUser.email)
                 expect(secondUpdateToUser.divisionAssignment).toBe(
                     secondDivisionAssignment
@@ -202,11 +128,11 @@ describe('updateCMSUser', () => {
                 const cmsUserID = uuidv4()
 
                 const updateRes = await server.executeOperation({
-                    query: UPDATE_CMS_USER,
+                    query: UPDATE_DIVISION_ASSIGNMENT,
                     variables: {
                         input: {
                             cmsUserID: cmsUserID,
-                            stateAssignments: ['CA'],
+                            divisionAssignment: 'OACT',
                         },
                     },
                 })
@@ -246,11 +172,11 @@ describe('updateCMSUser', () => {
         }
 
         const updateRes = await server.executeOperation({
-            query: UPDATE_CMS_USER,
+            query: UPDATE_DIVISION_ASSIGNMENT,
             variables: {
                 input: {
                     cmsUserID: cmsUserID,
-                    stateAssignments: ['CA'],
+                    divisionAssignment: 'OACT',
                 },
             },
         })
@@ -275,11 +201,11 @@ describe('updateCMSUser', () => {
         const cmsUserID = uuidv4()
 
         const updateRes = await server.executeOperation({
-            query: UPDATE_CMS_USER,
+            query: UPDATE_DIVISION_ASSIGNMENT,
             variables: {
                 input: {
                     cmsUserID: cmsUserID,
-                    stateAssignments: ['CA'],
+                    divisionAssignment: 'OACT',
                 },
             },
         })
@@ -301,11 +227,11 @@ describe('updateCMSUser', () => {
         const cmsUserID = uuidv4()
 
         const updateRes = await server.executeOperation({
-            query: UPDATE_CMS_USER,
+            query: UPDATE_DIVISION_ASSIGNMENT,
             variables: {
                 input: {
                     cmsUserID: cmsUserID,
-                    stateAssignments: ['CA'],
+                    divisionAssignment: 'OACT',
                 },
             },
         })
@@ -314,76 +240,5 @@ describe('updateCMSUser', () => {
             'user not authorized to modify assignments'
         )
         expect(assertAnErrorCode(updateRes)).toBe('FORBIDDEN')
-    })
-
-    it('returns an error with missing arguments', async () => {
-        const prismaClient = await sharedTestPrismaClient()
-        const postgresStore = NewPostgresStore(prismaClient)
-        const server = await constructTestPostgresServer({
-            store: postgresStore,
-            context: {
-                user: testAdminUser(),
-            },
-        })
-
-        // setup a user in the db for us to modify
-        const cmsUserID = uuidv4()
-        const userToInsert: InsertUserArgsType = {
-            userID: cmsUserID,
-            role: 'CMS_USER',
-            givenName: 'Zuko',
-            familyName: 'Firebender',
-            email: 'zuko@example.com',
-        }
-        const newUser = await postgresStore.insertUser(userToInsert)
-        if (newUser instanceof Error) {
-            throw newUser
-        }
-        const updateRes = await server.executeOperation({
-            query: UPDATE_CMS_USER,
-            variables: {
-                input: {
-                    cmsUserID: cmsUserID,
-                },
-            },
-        })
-
-        expect(assertAnError(updateRes).message).toContain(
-            'No state assignments or division assignment provided'
-        )
-        expect(assertAnErrorCode(updateRes)).toBe('BAD_USER_INPUT')
-    })
-
-    it('returns an error with invalid state codes', async () => {
-        const prismaClient = await sharedTestPrismaClient()
-        const postgresStore = NewPostgresStore(prismaClient)
-        const server = await constructTestPostgresServer({
-            store: postgresStore,
-            context: {
-                user: testAdminUser(),
-            },
-        })
-
-        // setup a user in the db for us to modify
-        const cmsUserID = uuidv4()
-
-        const updateRes = await server.executeOperation({
-            query: UPDATE_CMS_USER,
-            variables: {
-                input: {
-                    cmsUserID: cmsUserID,
-                    stateAssignments: ['CA', 'XX', 'BS'],
-                },
-            },
-        })
-
-        expect(assertAnError(updateRes).message).toContain(
-            'Invalid state codes'
-        )
-        expect(assertAnErrorCode(updateRes)).toBe('BAD_USER_INPUT')
-        expect(assertAnErrorExtensions(updateRes).argumentValues).toEqual([
-            'XX',
-            'BS',
-        ])
     })
 })

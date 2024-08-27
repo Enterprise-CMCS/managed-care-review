@@ -2,7 +2,7 @@ import { screen, waitFor, within } from '@testing-library/react'
 
 import {
     fetchCurrentUserMock,
-    createHealthPlanPackageMockAuthFailure,
+    createContractMockFail,
 } from '../../../testHelpers/apolloMocks'
 import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import { NewStateSubmissionForm } from './NewStateSubmissionForm'
@@ -30,7 +30,7 @@ describe('NewStateSubmissionForm', () => {
                 mocks: [
                     fetchCurrentUserMock({ statusCode: 200 }),
                     fetchCurrentUserMock({ statusCode: 200 }),
-                    createHealthPlanPackageMockAuthFailure(),
+                    createContractMockFail({}),
                 ],
             },
             routerProvider: { route: '/submissions/new' },
@@ -78,7 +78,7 @@ describe('NewStateSubmissionForm', () => {
         await userEvent.click(continueButton)
 
         await waitFor(() => {
-            expect(screen.getByText('System error')).toBeInTheDocument()
+            expect(screen.getAllByText('System error')).toHaveLength(2)
         })
     })
 })

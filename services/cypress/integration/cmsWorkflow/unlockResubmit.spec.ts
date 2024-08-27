@@ -13,7 +13,7 @@ describe('CMS user', () => {
         // fill out contract details
         cy.startNewContractAndRatesSubmission()
         cy.fillOutBaseContractDetails()
-        cy.deprecatedNavigateV1Form('CONTINUE')
+        cy.navigateContractForm('CONTINUE')
 
         // fill out two child rates
         cy.findByRole('heading', {
@@ -249,7 +249,7 @@ describe('CMS user', () => {
             cy.startNewContractAndRatesSubmission()
             cy.fillOutBaseContractDetails()
 
-            cy.deprecatedNavigateV1Form('CONTINUE')
+            cy.navigateContractForm('CONTINUE')
             cy.findByRole('heading', { level: 2, name: /Rate details/ })
 
             // Test unlock and resubmit with a linked rate submission

@@ -3,7 +3,7 @@ import styles from './GraphQLExplorer.module.scss'
 import { useAuth } from '../../contexts/AuthContext'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import { FetchCurrentUserDocument } from '../../gen/gqlClient'
-import { fakeAmplifyFetch } from '../../api'
+import { fakeAmplifyFetch, localGQLFetch } from '../../api'
 import { print } from 'graphql'
 
 import schema from '../../gen/schema.graphql'
@@ -17,19 +17,19 @@ export const GraphQLExplorer = () => {
     }
 
     const isLocal = stageName === 'local'
-    const localHeaders = {
-        'cognito-authentication-provider':
-            JSON.stringify(loggedInUser) || 'NO_USER',
-    }
 
     const handleAmplifyRequest = async (
         endpointUrl: string,
         options: RequestInit
     ) => {
-        return await fakeAmplifyFetch(endpointUrl, {
-            ...options,
-            method: 'POST',
-        })
+        if (isLocal) {
+            return await localGQLFetch(endpointUrl, options)
+        } else {
+            return await fakeAmplifyFetch(endpointUrl, {
+                ...options,
+                method: 'POST',
+            })
+        }
     }
 
     return (
@@ -44,12 +44,8 @@ export const GraphQLExplorer = () => {
                         theme: 'light',
                     },
                     document: FetchCurrentUserDocument.loc?.source.body,
-                    // Configuring request for local env. This is done here so the UI will display localHeaders which can be modified
-                    headers: isLocal ? localHeaders : undefined,
                 }}
-                handleRequest={(endpointUrl, options) =>
-                    handleAmplifyRequest(endpointUrl, options)
-                }
+                handleRequest={handleAmplifyRequest}
             />
         </div>
     )

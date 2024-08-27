@@ -112,3 +112,7 @@ const getRelativePathFromNestedRoute = (formRouteType: RouteT): string =>
 export type HealthPlanFormPageProps = {
     showValidations?: boolean
 }
+
+export type ContractFormPageProps = {
+    showValidations?: boolean
+}

@@ -6,7 +6,7 @@ import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 import type { UserEdge, User } from '../../gen/gqlServer'
 import { assertAnError } from '../../testHelpers'
-import { testAdminUser, testCMSUser } from '../../testHelpers/userHelpers'
+import { testAdminUser, testStateUser } from '../../testHelpers/userHelpers'
 
 describe('indexUsers', () => {
     it('lists all known users', async () => {
@@ -93,7 +93,7 @@ describe('indexUsers', () => {
     it('returns an error if called by a State user', async () => {
         const server = await constructTestPostgresServer({
             context: {
-                user: testCMSUser(),
+                user: testStateUser(),
             },
         })
 

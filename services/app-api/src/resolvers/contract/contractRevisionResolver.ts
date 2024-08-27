@@ -7,6 +7,9 @@ export function contractRevisionResolver(
     store: Store
 ): Resolvers['ContractRevision'] {
     return {
+        contractID: (parent) => {
+            return parent.contract.id
+        },
         contractName(parent: ContractRevisionType): string {
             const stateCode = parent.contract.stateCode
             const programsForContractState = store.findStatePrograms(stateCode)

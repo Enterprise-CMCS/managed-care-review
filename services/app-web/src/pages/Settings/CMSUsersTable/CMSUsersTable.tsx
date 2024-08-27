@@ -11,7 +11,7 @@ import {
     CmsUser,
     useIndexUsersQuery,
     Division,
-    useUpdateCmsUserMutation,
+    useUpdateDivisionAssignmentMutation,
 } from '../../../gen/gqlClient'
 
 import styles from '../Settings.module.scss'
@@ -20,9 +20,11 @@ import { SettingsErrorAlert } from '../SettingsErrorAlert'
 
 import { wrapApolloResult } from '../../../gqlHelpers/apolloQueryWrapper'
 import { handleApolloError } from '../../../gqlHelpers/apolloErrors'
-import { updateCMSUser } from '../../../gqlHelpers/updateCMSUser'
+import { updateDivisionAssignment } from '../../../gqlHelpers/updateDivisionAssignment'
 import { ApolloError } from '@apollo/client'
 import { useTealium } from '../../../hooks'
+import { useAuth } from '../../../contexts/AuthContext'
+import { hasAdminUserPermissions } from '../../../gqlHelpers'
 
 type DivisionSelectOptions = {
     label: string
@@ -102,6 +104,10 @@ function CMSUserTableWithData({
     cmsUsers: CmsUser[]
     setDivision: SetDivisionCallbackType
 }): React.ReactElement {
+    const { loggedInUser } = useAuth()
+
+    const isAdminUser = hasAdminUserPermissions(loggedInUser)
+
     const columns = useMemo(() => {
         const columnHelper = createColumnHelper<CmsUser>()
         return [
@@ -122,22 +128,23 @@ function CMSUserTableWithData({
             }),
             columnHelper.accessor('divisionAssignment', {
                 id: 'divisionAssignment',
-                cell: (info) => {
-                    return (
+                cell: (info) =>
+                    isAdminUser ? (
                         <DivisionSelect
                             currentAssignment={info.getValue()}
                             user={info.row.original}
                             setDivision={setDivision}
                         />
-                    )
-                },
+                    ) : (
+                        info.getValue()
+                    ),
                 header: () => 'Division',
                 meta: {
                     dataTestID: 'division-assignment',
                 },
             }),
         ]
-    }, [setDivision])
+    }, [setDivision, isAdminUser])
 
     const table = useReactTable({
         data: cmsUsers,
@@ -197,15 +204,18 @@ export const CMSUsersTable = (): React.ReactElement => {
         })
     )
 
-    const [updateCmsUserMutation] = useUpdateCmsUserMutation()
+    const [updateDivisionAssignmentMutation] =
+        useUpdateDivisionAssignmentMutation()
 
     const setDivisionCallback: SetDivisionCallbackType = useCallback(
         async (userID: string, division: Division) => {
-            const res = await updateCMSUser(updateCmsUserMutation, {
-                cmsUserID: userID,
-                stateAssignments: [],
-                divisionAssignment: division,
-            })
+            const res = await updateDivisionAssignment(
+                updateDivisionAssignmentMutation,
+                {
+                    cmsUserID: userID,
+                    divisionAssignment: division,
+                }
+            )
 
             if (res instanceof Error) {
                 console.error('Errored attempting to update user: ', res)
@@ -216,7 +226,7 @@ export const CMSUsersTable = (): React.ReactElement => {
             }
             return undefined
         },
-        [updateCmsUserMutation]
+        [updateDivisionAssignmentMutation]
     )
 
     if (result.status === 'LOADING') {
