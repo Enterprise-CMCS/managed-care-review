@@ -6,3 +6,8 @@
     display: flex;
     flex-direction: column;
 }
+
+.notificationContainer {
+    max-width: custom.$mcr-container-standard-width-fixed;
+    padding: 2rem 0;
+}
