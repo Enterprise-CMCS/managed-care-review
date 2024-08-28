@@ -723,12 +723,18 @@ importers:
       '@testing-library/cypress':
         specifier: ^10.0.1
         version: 10.0.1(cypress@13.13.2)
+      axe-core:
+        specifier: ^4.10.0
+        version: 4.10.0
       c8:
         specifier: ^10.1.2
         version: 10.1.2
       cypress:
         specifier: ^13.13.2
         version: 13.13.2
+      cypress-axe:
+        specifier: ^1.5.0
+        version: 1.5.0(axe-core@4.10.0)(cypress@13.13.2)
       husky:
         specifier: ^9.0.11
         version: 9.0.11
@@ -6253,6 +6259,10 @@ packages:
   aws4@1.11.0:
     resolution: {integrity: sha512-xh1Rl34h6Fi1DC2WWKfxUTVqRsNnr6LsKz2+hfwDxQJWmrx8+c7ylaqBMcHfl1U1r2dsifOvKX3LQuLNZ+XSvA==}
 
+  axe-core@4.10.0:
+    resolution: {integrity: sha512-Mr2ZakwQ7XUAjp7pAwQWRhhK8mQQ6JAaNWSjmjxil0R8BPioMtQsTLOolGYkji1rcL++3dCqZA3zWqpT+9Ew6g==}
+    engines: {node: '>=4'}
+
   axe-core@4.2.4:
     resolution: {integrity: sha512-9AiDKFKUCWEQm1Kj4lcq7KFavLqSXdf2m/zJo+NVh4VXlW5iwXRJ6alkKmipCyYorsRnqsICH9XLubP1jBF+Og==}
     engines: {node: '>=4'}
@@ -7119,6 +7129,13 @@ packages:
     resolution: {integrity: sha512-s6OYSXAK3IdKqYO33y09jhypG/bSDHPuyCme/IdEHfWpLf/jKcpitVFyOC6UemgGk8v7Q5u2XE0vvwmanxhGlQ==}
     engines: {node: '>= 10'}
     hasBin: true
+
+  cypress-axe@1.5.0:
+    resolution: {integrity: sha512-Hy/owCjfj+25KMsecvDgo4fC/781ccL+e8p+UUYoadGVM2ogZF9XIKbiM6KI8Y3cEaSreymdD6ZzccbI2bY0lQ==}
+    engines: {node: '>=10'}
+    peerDependencies:
+      axe-core: ^3 || ^4
+      cypress: ^10 || ^11 || ^12 || ^13
 
   cypress-file-upload@5.0.8:
     resolution: {integrity: sha512-+8VzNabRk3zG6x8f8BWArF/xA/W0VK4IZNx3MV0jFWrJS/qKn8eHfa5nU73P9fOQAgwHFJx7zjg4lwOnljMO8g==}
@@ -22253,6 +22270,8 @@ snapshots:
 
   aws4@1.11.0: {}
 
+  axe-core@4.10.0: {}
+
   axe-core@4.2.4: {}
 
   axe-core@4.7.0: {}
@@ -23400,6 +23419,11 @@ snapshots:
   csv-parser@3.0.0:
     dependencies:
       minimist: 1.2.8
+
+  cypress-axe@1.5.0(axe-core@4.10.0)(cypress@13.13.2):
+    dependencies:
+      axe-core: 4.10.0
+      cypress: 13.13.2
 
   cypress-file-upload@5.0.8(cypress@13.13.2):
     dependencies:

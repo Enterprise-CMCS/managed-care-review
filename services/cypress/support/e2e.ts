@@ -1,4 +1,5 @@
 import '@cypress/code-coverage/support'
+import 'cypress-axe'
 
 Cypress.on('uncaught:exception', (err, runnable) => {
     // returning false here prevents Cypress from
