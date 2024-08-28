@@ -13,6 +13,7 @@ import {
     FieldRadio,
     FieldTextarea,
     FieldYesNo,
+    FormNotificationContainer,
     PoliteErrorMessage,
     ReactRouterLinkWithLogging,
 } from '../../../components'
@@ -357,7 +358,7 @@ export const SubmissionType = ({
 
     return (
         <>
-            <div>
+            <FormNotificationContainer>
                 <DynamicStepIndicator
                     formPages={
                         draftSubmission
@@ -373,7 +374,7 @@ export const SubmissionType = ({
                     unlockedInfo={draftSubmission?.draftRevision.unlockInfo}
                     showPageErrorMessage={showPageErrorMessage ?? false}
                 />
-            </div>
+            </FormNotificationContainer>
             <FormContainer id="SubmissionType">
                 <Formik
                     initialValues={submissionTypeInitialValues}

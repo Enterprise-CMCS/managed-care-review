@@ -26,7 +26,7 @@ import { useFetchContractQuery } from '../../../../../gen/gqlClient'
 import { ErrorForbiddenPage } from '../../../../Errors/ErrorForbiddenPage'
 import { Error404 } from '../../../../Errors/Error404Page'
 import { GenericErrorPage } from '../../../../Errors/GenericErrorPage'
-import { Loading } from '../../../../../components'
+import { Loading, FormNotificationContainer } from '../../../../../components'
 import { PageBannerAlerts } from '../../../PageBannerAlerts'
 import { packageName } from '../../../../../common-code/healthPlanFormDataType'
 import { usePage } from '../../../../../contexts/PageContext'
@@ -101,7 +101,7 @@ export const ReviewSubmit = (): React.ReactElement => {
         ) || ''
     return (
         <>
-            <div>
+            <FormNotificationContainer>
                 <DynamicStepIndicator
                     formPages={activeFormPages(contractFormData)}
                     currentFormPage="SUBMISSIONS_REVIEW_SUBMIT"
@@ -111,7 +111,7 @@ export const ReviewSubmit = (): React.ReactElement => {
                     unlockedInfo={contract.draftRevision?.unlockInfo}
                     showPageErrorMessage={false}
                 />
-            </div>
+            </FormNotificationContainer>
             <GridContainer className={styles.reviewSectionWrapper}>
                 <SubmissionTypeSummarySection
                     contract={contract}
