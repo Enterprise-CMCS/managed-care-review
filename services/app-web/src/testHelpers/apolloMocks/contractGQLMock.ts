@@ -24,6 +24,10 @@ const fetchContractMockSuccess = ({
     contract?: Contract | UnlockedContract
 }): MockedResponse<FetchContractQuery> => {
     let newContract:Contract | undefined
+    // contract can be an unlockedContract type
+    // however this API returns a contract type
+    // check which type contract is and if it's UnlockedContract type
+    // to pass the correct mocked type from the API
     if (contract && contract.__typename === 'UnlockedContract') {
         newContract = {
             ...contract,
