@@ -24,6 +24,7 @@ import {
     DynamicStepIndicator,
     LinkWithLogging,
     ReactRouterLinkWithLogging,
+    FormNotificationContainer,
 } from '../../../components'
 import {
     formatForForm,
@@ -81,10 +82,7 @@ import {
     StatutoryRegulatoryAttestationQuestion,
 } from '../../../constants/statutoryRegulatoryAttestation'
 import { FormContainer } from '../../../components/FormContainer/FormContainer'
-import {
-    useCurrentRoute,
-    useRouteParams,
-} from '../../../hooks'
+import { useCurrentRoute, useRouteParams } from '../../../hooks'
 import { useAuth } from '../../../contexts/AuthContext'
 import { ErrorOrLoadingPage } from '../ErrorOrLoadingPage'
 import { PageBannerAlerts } from '../PageBannerAlerts'
@@ -524,7 +522,7 @@ export const ContractDetails = ({
 
     return (
         <>
-            <div>
+            <FormNotificationContainer>
                 <DynamicStepIndicator
                     formPages={activeFormPages(
                         draftSubmission.draftRevision.formData
@@ -536,7 +534,7 @@ export const ContractDetails = ({
                     unlockedInfo={draftSubmission.draftRevision.unlockInfo}
                     showPageErrorMessage={showPageErrorMessage ?? false}
                 />
-            </div>
+            </FormNotificationContainer>
             <FormContainer id="ContactDetails">
                 <Formik
                     initialValues={contractDetailsInitialValues}
