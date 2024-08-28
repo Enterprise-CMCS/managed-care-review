@@ -55,7 +55,6 @@ module.exports = defineConfig({
 
             // Reads graphql schema and converts it to gql for apollo client.
             on('task', {
-                pa11y: pa11y(),
                 readGraphQLSchema() {
                     const gqlSchema = fs.readFileSync(
                         path.resolve(__dirname, './gen/schema.graphql'),
@@ -63,6 +62,16 @@ module.exports = defineConfig({
                     )
                     return gql(`${gqlSchema}`)
                 },
+                log(message) {
+                    console.log(message)
+
+                    return null
+                },
+                table(message) {
+                    console.table(message)
+
+                    return null
+                }
             })
             return newConfig
         },
