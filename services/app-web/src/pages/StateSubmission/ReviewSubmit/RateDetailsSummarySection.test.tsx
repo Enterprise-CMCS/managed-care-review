@@ -8,7 +8,7 @@ import {
     mockValidAdminUser,
     mockContractPackageSubmittedWithRevisions,
     mockValidStateUser,
-    mockContractPackageUnlocked,
+    mockContractPackageUnlockedWithUnlockedType,
     mockContractWithLinkedRateDraft,
     mockContractWithLinkedRateSubmitted,
 } from '../../../testHelpers/apolloMocks'
@@ -1271,7 +1271,7 @@ describe('RateDetailsSummarySection', () => {
     })
 
     it('displays deprecated fields on unlocked submissions for CMS users', async () => {
-        const contract = mockContractPackageUnlocked()
+        const contract = mockContractPackageUnlockedWithUnlockedType()
 
         renderWithProviders(
             <RateDetailsSummarySection

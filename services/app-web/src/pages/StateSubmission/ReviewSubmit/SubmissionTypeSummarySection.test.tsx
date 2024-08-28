@@ -7,7 +7,7 @@ import {
     mockContractPackageSubmitted,
     fetchCurrentUserMock,
     mockValidStateUser,
-    mockContractPackageUnlocked,
+    mockContractPackageUnlockedWithUnlockedType,
 } from '../../../testHelpers/apolloMocks'
 
 describe('SubmissionTypeSummarySection', () => {
@@ -242,7 +242,7 @@ describe('SubmissionTypeSummarySection', () => {
     it('renders expected fields for unlocked package on submission summary for CMS users', () => {
         renderWithProviders(
             <SubmissionTypeSummarySection
-                contract={mockContractPackageUnlocked()}
+                contract={mockContractPackageUnlockedWithUnlockedType()}
                 statePrograms={statePrograms}
                 editNavigateTo="submission-type"
                 submissionName="MN-MSHO-0003"
@@ -267,7 +267,7 @@ describe('SubmissionTypeSummarySection', () => {
     it('renders expected fields for unlocked package on submission summary for state users', () => {
         renderWithProviders(
             <SubmissionTypeSummarySection
-                contract={mockContractPackageUnlocked()}
+                contract={mockContractPackageUnlockedWithUnlockedType()}
                 statePrograms={statePrograms}
                 editNavigateTo="submission-type"
                 submissionName="MN-MSHO-0003"

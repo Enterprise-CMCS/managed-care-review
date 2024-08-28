@@ -3,13 +3,17 @@ import { dayjs } from '../../common-code/dateHelpers/dayjs'
 import { SectionHeader } from '../SectionHeader'
 import { Accordion } from '@trussworks/react-uswds'
 import type { AccordionItemProps } from '@trussworks/react-uswds/lib/components/Accordion/Accordion'
-import { UpdateInformation, Contract } from '../../gen/gqlClient'
+import {
+    UpdateInformation,
+    Contract,
+    UnlockedContract,
+} from '../../gen/gqlClient'
 import styles from './ChangeHistory.module.scss'
 import { LinkWithLogging } from '../TealiumLogging/Link'
 import { getUpdatedByDisplayName } from '../../gqlHelpers/userHelpers'
 
 type ChangeHistoryProps = {
-    contract: Contract
+    contract: Contract | UnlockedContract
 }
 
 type flatRevisions = UpdateInformation & {

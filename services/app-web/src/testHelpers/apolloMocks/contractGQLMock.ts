@@ -1,6 +1,7 @@
 import {
     FetchContractQuery,
     Contract,
+    UnlockedContract,
     FetchContractDocument,
     UpdateDraftContractRatesDocument,
     UpdateContractDraftRevisionMutation,
@@ -20,9 +21,25 @@ import { ApolloError } from '@apollo/client'
 const fetchContractMockSuccess = ({
     contract,
 }: {
-    contract?: Contract
+    contract?: Contract | UnlockedContract
 }): MockedResponse<FetchContractQuery> => {
-    const contractData = contract ? contract : mockContractPackageDraft()
+    let newContract:Contract | undefined
+    // contract can be an unlockedContract type
+    // however this API returns a contract type
+    // check which type contract is and if it's UnlockedContract type
+    // to pass the correct mocked type from the API
+    if (contract && contract.__typename === 'UnlockedContract') {
+        newContract = {
+            ...contract,
+            __typename: 'Contract',
+        }
+    } else if (contract && contract.__typename === 'Contract') {
+        newContract = contract
+    } else {
+        newContract =  undefined
+    }
+
+    const contractData = newContract ? newContract : mockContractPackageDraft()
 
     return {
         request: {
