@@ -9,7 +9,6 @@
     },
     "dependencies": {
         "@mc-review/hpp": "workspace:*",
-        "@mc-review/gql-helpers": "workspace:*",
         "typescript": "^4.9.5"
     },
     "devDependencies": {

@@ -12,7 +12,7 @@
         "proto:copy-web": "rsync -av ./gen/ ../app-web/src/gen",
         "proto:copy-cypress": "rsync -av ./gen/ ../cypress/gen",
         "proto:copy-api": "rsync -av ./gen/healthPlanFormDataProto.cjs ../app-api/src/gen/ && rsync -av ./gen/healthPlanFormDataProto.d.ts ../app-api/src/gen/ && mv ../app-api/src/gen/healthPlanFormDataProto.cjs ../app-api/src/gen/healthPlanFormDataProto.js && rm ./gen/healthPlanFormDataProto.cjs",
-        "proto:copy-types": "rsync -av ./gen/ ../../packages/types/src/gen",
+        "proto:copy-types": "rsync -av ./gen/ ../../packages/hpp/src/gen",
         "precommit": "lint-staged",
         "lint": "protolint lint ."
     },

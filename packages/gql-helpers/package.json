@@ -10,6 +10,7 @@
         "@mc-review/constants": "workspace:*",
         "@mc-review/hpp": "workspace:*",
         "@mc-review/otel-helpers": "workspace:*",
+        "@mc-review/document-helpers": "workspace:*",
         "typescript": "4.9.5"
     },
     "devDependencies": {

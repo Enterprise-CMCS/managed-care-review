@@ -1,14 +1,19 @@
-import {
-    ExpandedRevisionsType,
-    RevisionsLookupType,
-} from '@mc-review/gql-helpers'
 import { getAllDocuments } from './getAllDocuments'
+import { HealthPlanRevision } from '@mc-review/hpp/build/gen/gqlClient'
+import { HealthPlanFormDataType } from '@mc-review/hpp'
 
 // DocumentDateLookupTableType -  { document lookup key string : date string for "date added" }
 type DocumentDateLookupTableType = {
     previousSubmissionDate: string | null
     [key: string]: string | null
 }
+
+// ExpandedRevisionsType - HPP revision plus an additional formData field containing values of formDataProto decoded into typescript
+type ExpandedRevisionsType = HealthPlanRevision & {
+    formData: HealthPlanFormDataType
+}
+
+type RevisionsLookupType = { [revisionID: string]: ExpandedRevisionsType }
 
 // getDateAdded - picks out the submit info updatedAt date for a revision
 // value is undefined if document not yet submitted
