@@ -1,7 +1,7 @@
 import { HealthPlanFormDataType } from '@mc-review/hpp'
 import { base64ToDomain } from '@mc-review/hpp'
 
-import { HealthPlanRevision, HealthPlanPackage } from './gen/gqlClient'
+import { HealthPlanRevision, HealthPlanPackage } from '../gen/gqlClient'
 import { recordJSException } from '@mc-review/otel-helpers'
 
 // returns nil if no revision has been submitted

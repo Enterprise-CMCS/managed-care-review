@@ -49,7 +49,7 @@ generates:
       - 'typescript-react-apollo'
     config:
       enumsAsTypes: true
-  ../../packages/gql-helpers/src/gen/gqlClient.tsx:
+  ../../packages/helpers/src/gen/gqlClient.tsx:
     documents:
       - src/queries/*.graphql
       - src/mutations/*.graphql
@@ -69,7 +69,7 @@ generates:
       - 'typescript-react-apollo'
     config:
       enumsAsTypes: true
-  ../../packages/types/src/gen/gqlClient.tsx:
+  ../../packages/hpp/src/gen/gqlClient.tsx:
     documents:
       - src/queries/*.graphql
       - src/mutations/*.graphql

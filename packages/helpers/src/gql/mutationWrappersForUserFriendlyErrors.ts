@@ -17,7 +17,7 @@ import {
     SubmitContractMutationFn,
     Contract,
     UnlockedContract,
-} from './gen/gqlClient'
+} from '../gen/gqlClient'
 import { ApolloError, GraphQLErrors } from '@apollo/client/errors'
 
 import { recordJSException } from '@mc-review/otel-helpers'

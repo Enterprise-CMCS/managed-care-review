@@ -1,7 +1,7 @@
 import { makeDocumentS3KeyLookup } from './makeDocumentKeyLookupList'
 import { mockSubmittedHealthPlanPackageWithRevision } from '../testHelpers/apolloMocks'
 import { UnlockedHealthPlanFormDataType } from '@mc-review/hpp'
-import { buildRevisionsLookup } from '@mc-review/gql-helpers'
+import { buildRevisionsLookup } from '../gql'
 
 describe('makeDocumentS3KeyLookup', () => {
     const noSubmissionDocuments: Partial<UnlockedHealthPlanFormDataType> = {

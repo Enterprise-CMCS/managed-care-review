@@ -10,7 +10,7 @@ import {
     ContractRevision,
     Rate,
     RateRevision,
-} from './gen/gqlClient'
+} from '../gen/gqlClient'
 import { ActuaryContact, ActuaryFirmsRecord } from '@mc-review/hpp'
 
 type RateRevisionWithIsLinked = {

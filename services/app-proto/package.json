@@ -4,7 +4,7 @@
     "version": "1.0.0",
     "description": "app-proto Typescript definitions and helpers",
     "scripts": {
-        "generate": "pnpm proto:compile && pnpm proto:ts && pnpm proto:generate-cjs && pnpm proto:copy-api && pnpm proto:copy-web && pnpm proto:copy-cypress && pnpm proto:copy-types",
+        "generate": "pnpm proto:compile && pnpm proto:ts && pnpm proto:generate-cjs && pnpm proto:copy-api && pnpm proto:copy-web && pnpm proto:copy-cypress && pnpm proto:copy-hpp",
         "generate:watch": "find src | entr pnpm generate",
         "proto:compile": "rm -rf gen && mkdir gen && pbjs -t static-module -w es6 -o ./gen/healthPlanFormDataProto.js src/health_plan_form_data.proto",
         "proto:generate-cjs": "pbjs -t static-module -w commonjs -o ./gen/healthPlanFormDataProto.cjs src/health_plan_form_data.proto",
@@ -12,7 +12,7 @@
         "proto:copy-web": "rsync -av ./gen/ ../app-web/src/gen",
         "proto:copy-cypress": "rsync -av ./gen/ ../cypress/gen",
         "proto:copy-api": "rsync -av ./gen/healthPlanFormDataProto.cjs ../app-api/src/gen/ && rsync -av ./gen/healthPlanFormDataProto.d.ts ../app-api/src/gen/ && mv ../app-api/src/gen/healthPlanFormDataProto.cjs ../app-api/src/gen/healthPlanFormDataProto.js && rm ./gen/healthPlanFormDataProto.cjs",
-        "proto:copy-types": "rsync -av ./gen/ ../../packages/hpp/src/gen",
+        "proto:copy-hpp": "rsync -av ./gen/ ../../packages/hpp/src/gen",
         "precommit": "lint-staged",
         "lint": "protolint lint ."
     },

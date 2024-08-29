@@ -1,5 +1,5 @@
 {
-    "name": "@mc-review/gql-helpers",
+    "name": "@mc-review/helpers",
     "version": "1.0.0",
     "main": "build/index.js",
     "scripts": {
@@ -10,10 +10,12 @@
         "@mc-review/constants": "workspace:*",
         "@mc-review/hpp": "workspace:*",
         "@mc-review/otel-helpers": "workspace:*",
-        "@mc-review/document-helpers": "workspace:*",
-        "typescript": "4.9.5"
+        "typescript": "4.9.5",
+        "url-parse": "^1.5.10"
     },
     "devDependencies": {
-        "@types/node": "^20.14.12"
+        "@types/jest": "^29.5.6",
+        "@types/node": "^20.14.12",
+        "@types/url-parse": "^1.4.3"
     }
 }

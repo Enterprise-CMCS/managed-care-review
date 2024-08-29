@@ -9,7 +9,7 @@
     "dependencies": {
         "@apollo/client": "3.8.8",
         "@mc-review/constants": "workspace:*",
-        "@mc-review/gql-helpers": "workspace:*",
+        "@mc-review/helpers": "workspace:*",
         "@mc-review/hpp": "workspace:*",
         "dayjs": "^1.10.5",
         "typescript": "^4.9.5",

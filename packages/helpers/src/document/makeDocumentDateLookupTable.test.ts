@@ -5,7 +5,7 @@ import {
 } from '@mc-review/test-helpers'
 import { UnlockedHealthPlanFormDataType } from '@mc-review/hpp'
 import { TextEncoder, TextDecoder } from 'util'
-import { buildRevisionsLookup } from '@mc-review/gql-helpers'
+import { buildRevisionsLookup } from '../gql'
 
 Object.assign(global, { TextDecoder, TextEncoder })
 

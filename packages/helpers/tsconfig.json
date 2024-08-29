@@ -5,9 +5,8 @@
         "lib": ["ES2021", "DOM"],
         "target": "ES2021",
         "moduleResolution": "node",
+        "baseUrl": "/",
         "declaration": true,
-        "composite": true,
-
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,
         "preserveConstEnums": true,
@@ -17,10 +16,8 @@
         "resolveJsonModule": true,
         "jsx": "react",
 
-        "baseUrl": ".",
-        "rootDir": "./src",
-        "outDir": "./build"
+        "outDir": "./build",
+        "rootDir": "./src"
     },
-    "include": ["src/**/*"],
-    "exclude": ["node_modules", "build"]
+    "include": ["src/**/*"]
 }

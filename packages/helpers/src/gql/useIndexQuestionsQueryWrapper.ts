@@ -1,5 +1,5 @@
 import { wrapApolloResult, WrappedApolloResultType } from './apolloQueryWrapper'
-import { useIndexQuestionsQuery } from './gen/gqlClient'
+import { useIndexQuestionsQuery } from '../gen/gqlClient'
 
 type WrappedFetchResultType = WrappedApolloResultType<
     ReturnType<typeof useIndexQuestionsQuery>

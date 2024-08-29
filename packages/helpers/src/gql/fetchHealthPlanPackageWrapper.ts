@@ -4,7 +4,7 @@ import {
     useFetchHealthPlanPackageWithQuestionsQuery,
     HealthPlanRevision,
     HealthPlanPackage,
-} from './gen/gqlClient'
+} from '../gen/gqlClient'
 import { HealthPlanFormDataType } from '@mc-review/hpp'
 import { base64ToDomain } from '@mc-review/hpp'
 import {
@@ -15,10 +15,7 @@ import {
 } from './apolloQueryWrapper'
 import { QueryFunctionOptions } from '@apollo/client'
 import { recordJSException } from '@mc-review/otel-helpers'
-import {
-    DocumentDateLookupTableType,
-    makeDocumentDateTable,
-} from '@mc-review/document-helpers'
+import { DocumentDateLookupTableType, makeDocumentDateTable } from '../document'
 
 // ExpandedRevisionsType - HPP revision plus an additional formData field containing values of formDataProto decoded into typescript
 type ExpandedRevisionsType = HealthPlanRevision & {

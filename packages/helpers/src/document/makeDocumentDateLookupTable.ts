@@ -1,5 +1,5 @@
 import { getAllDocuments } from './getAllDocuments'
-import { HealthPlanRevision } from '@mc-review/hpp/build/gen/gqlClient'
+import { HealthPlanRevision } from '../gen/gqlClient'
 import { HealthPlanFormDataType } from '@mc-review/hpp'
 
 // DocumentDateLookupTableType -  { document lookup key string : date string for "date added" }

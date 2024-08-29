@@ -2,7 +2,7 @@ import {
     UpdateCmsUserInput,
     UpdateCmsUserMutationFn,
     UpdateCmsUserPayload,
-} from './gen/gqlClient'
+} from '../gen/gqlClient'
 
 async function updateCMSUser(
     updateUserMutation: UpdateCmsUserMutationFn,

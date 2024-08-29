@@ -6,7 +6,7 @@ import {
     BusinessOwnerUser,
     HelpdeskUser,
     UpdatedBy,
-} from './gen/gqlClient'
+} from '../gen/gqlClient'
 const hasCMSUserPermissions = (
     user?: User
 ): user is CmsUser | CmsApproverUser => {
