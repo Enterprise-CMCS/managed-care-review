@@ -68,6 +68,105 @@ CI deployment is congifured in `.github/workflows/deploy.yml`.
 
 LaunchDarkly integration docs can be found in [launch-darkly-testing-approach.md](../../docs/technical-design/launch-darkly-testing-approach.md#feature-flag-cypress-testing)
 
+### Accessibility Testing 
+
+We are using the `cypress-axe` plugin to run our a11y tests. `cypress-axe` uses the `axe-core` testing engine.
+
+Our implementation is almost exactly like the [documentation](https://github.com/component-driven/cypress-axe) for `cypress-axe`. The only difference is our custom Cypress command `cy.checkA11yWithWcag22aa()` which is configured to only use `WCAG 2.2 AA` standard for tests. This follows our to follow our ADR [frontend-a11y-toolset](/docs/architectural-decision-records/005-frontend-a11y-toolset.md).
+
+To run axe inject the `axe-core` runtime using `cy.injectAxe()` after `cy.visit()`. Then you can call the custom command `cy.checkA11yWithWcag22aa()` to check a11y against the page. Each time you use `cy.visit()` you will need to inject the runtime again.
+
+The `checkA11yWithWcag22aa` command configures `cy.checkA11y()` with the WCAG 2.2 AA standard we use for the MC-Review app. In the `cy.checkA11y()` there are more options we can configure the check with. The options are specified in the [axe-core documentation](https://www.deque.com/axe/core-documentation/api-documentation).
+```typescript
+Cypress.Commands.add(
+    'checkA11yWithWcag22aa',
+    () => {
+        cy.checkA11y('', {
+            runOnly: {
+                type: 'tag',
+                values: ['wcag22aa']
+            },
+        }, terminalLog)
+    }
+)
+```
+
+In the example below, `cy.logInAsStateUser()` calls `cy.visit()` so we can inject the runtime after and then run the a11y checks.
+Using the app to navigate allows us to check a11y without injecting the runtime again because it is still available
+
+```typescript
+    it('has not a11y errors with submission form and and form erros', () => {
+        // 438-attestation still needs to go through design, there is an a11y violation for links and spacing
+        cy.interceptFeatureFlags({'438-attestation': false})
+        cy.logInAsStateUser()
+    
+        // Inject the axe run-time
+        cy.injectAxe()
+    
+        // Start a base contract only submissions
+        cy.findByTestId('state-dashboard-page').should('exist')
+        cy.findByRole('link', { name: 'Start new submission' }).click()
+    
+        // Check accessibility on Submission type page
+        cy.findByRole('heading', { level: 1, name: /New submission/ })
+        cy.findByRole('button', {
+            name: 'Continue',
+        }).should('not.have.attr', 'aria-disabled')
+        cy.findByRole('button', {
+            name: 'Continue',
+        }).safeClick()
+        cy.checkA11yWithWcag22aa()
+    
+        cy.fillOutContractActionAndRateCertification()
+        cy.deprecatedNavigateV1Form('CONTINUE_FROM_START_NEW')
+    
+        cy.findByRole('heading', { level: 2, name: /Contract details/ })
+        cy.findByRole('button', {
+            name: 'Continue',
+        }).should('not.have.attr', 'aria-disabled')
+        cy.findByRole('button', {
+            name: 'Continue',
+        }).safeClick()
+        cy.checkA11yWithWcag22aa()
+        ...
+```
+
+In the next portion of the same test, we are then navigating by direct links using `cy.visit()` wrapped by our custom command `navigateFormByDirectLink()`. Now that we called `cy.visit()` the last injection of the runtime is unavailable and will need to be re-injected.
+
+```typescript
+    ...
+    // Check accessibility on rate details page
+    cy.navigateFormByDirectLink(`${submissionURL}edit/rate-details`)
+    cy.findByRole('radiogroup', {
+        name: /Was this rate certification included with another submission?/,
+    })
+        .should('exist')
+        .within(() => {
+            cy.findByText('No, this rate certification was not included with any other submissions').click()
+        })
+    cy.injectAxe()
+    cy.findByRole('button', {
+        name: 'Continue',
+    }).should('not.have.attr', 'aria-disabled')
+    cy.findByRole('button', {
+        name: 'Continue',
+    }).safeClick()
+    cy.checkA11yWithWcag22aa()
+
+    //Check accessibility on contacts page
+    cy.navigateFormByDirectLink(`${submissionURL}edit/contacts`)
+    cy.findByRole('heading', { level: 2, name: /Contacts/ })
+    cy.injectAxe()
+    cy.findByRole('button', {
+        name: 'Continue',
+    }).should('not.have.attr', 'aria-disabled')
+    cy.findByRole('button', {
+        name: 'Continue',
+    }).safeClick()
+    cy.checkA11yWithWcag22aa()
+    ...
+```
+
 ### Direct API Requests
 
 The reason for making direct API request through Cypress was to speed up testing by quickly making a new submission to test against. For example, the `questionResponse.spec` test only tests Q&A features but needed a submission in order to get to Q&A, so a new submission was needed and without API request Cypress had to manually go through the state submission form. Now we make a new submission using direct API request which is much faster.
@@ -82,7 +181,6 @@ We mimicked the same setup in the application in Cypress to make graphql request
         -   In `cypress.config` under `setupNodeEvents` there is a task, `readGraphQLSchema`, that can be called in Cypress to load our `GraphQL` schema and convert it to `gql`.
             ```ts
             on('task', {
-                pa11y: pa11y(),
                 readGraphQLSchema() {
                     const gqlSchema = fs.readFileSync(
                         path.resolve(__dirname, './gen/schema.graphql'),
