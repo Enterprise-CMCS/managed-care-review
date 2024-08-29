@@ -91,16 +91,23 @@ export const StateSubmissionForm = (): React.ReactElement => {
 // Utilities
 
 export const activeFormPages = (
-    draft: UnlockedHealthPlanFormDataType | ContractFormData
+    draft: UnlockedHealthPlanFormDataType | ContractFormData,
+    hideSupportingDocs?: boolean
 ): RouteTWithUnknown[] => {
     // If submission type is contract only, rate details is left out of the step indicator
-    return STATE_SUBMISSION_FORM_ROUTES.filter(
-        (formPage) =>
-            !(
-                draft?.submissionType === 'CONTRACT_ONLY' &&
-                formPage === 'SUBMISSIONS_RATE_DETAILS'
-            )
-    )
+    // If feature flag for hiding supporting docs is on, that documents page is left out of the
+    // step indicator
+    return STATE_SUBMISSION_FORM_ROUTES.filter((formPage) => {
+        if (
+            draft?.submissionType === 'CONTRACT_ONLY' &&
+            formPage === 'SUBMISSIONS_RATE_DETAILS'
+        ) {
+            return false
+        } else if (hideSupportingDocs && formPage === 'SUBMISSIONS_DOCUMENTS') {
+            return false
+        }
+        return true
+    })
 }
 
 const getRelativePathFromNestedRoute = (formRouteType: RouteT): string =>

@@ -44,7 +44,11 @@ import {
     yesNoFormValueAsBoolean,
 } from '../../../components/Form/FieldYesNo/FieldYesNo'
 import { SubmissionTypeFormSchema } from './SubmissionTypeSchema'
-import { RoutesRecord, STATE_SUBMISSION_FORM_ROUTES } from '../../../constants'
+import {
+    RoutesRecord,
+    STATE_SUBMISSION_FORM_ROUTES,
+    STATE_SUBMISSION_FORM_ROUTES_WITHOUT_SUPPORTING_DOCS,
+} from '../../../constants'
 import { FormContainer } from '../../../components/FormContainer/FormContainer'
 import { useCurrentRoute } from '../../../hooks'
 import { ErrorOrLoadingPage } from '../ErrorOrLoadingPage'
@@ -53,6 +57,8 @@ import { useRouteParams } from '../../../hooks/useRouteParams'
 import { PageBannerAlerts } from '../PageBannerAlerts'
 import { useErrorSummary } from '../../../hooks/useErrorSummary'
 import { useContractForm } from '../../../hooks/useContractForm'
+import { useLDClient } from 'launchdarkly-react-client-sdk'
+import { featureFlags } from '../../../common-code/featureFlags'
 
 export interface SubmissionTypeFormValues {
     populationCovered?: PopulationCoveredType
@@ -80,9 +86,14 @@ export const SubmissionType = ({
         useErrorSummary()
     const navigate = useNavigate()
     const location = useLocation()
+    const ldClient = useLDClient()
     const isNewSubmission = location.pathname === '/submissions/new'
     const { id } = useRouteParams()
 
+    const hideSupportingDocs = ldClient?.variation(
+        featureFlags.HIDE_SUPPORTING_DOCS_PAGE.flag,
+        featureFlags.HIDE_SUPPORTING_DOCS_PAGE.defaultValue
+    )
     const {
         draftSubmission,
         updateDraft,
@@ -363,9 +374,12 @@ export const SubmissionType = ({
                     formPages={
                         draftSubmission
                             ? activeFormPages(
-                                  draftSubmission.draftRevision.formData
+                                  draftSubmission.draftRevision.formData,
+                                  hideSupportingDocs
                               )
-                            : STATE_SUBMISSION_FORM_ROUTES
+                            : hideSupportingDocs
+                              ? STATE_SUBMISSION_FORM_ROUTES_WITHOUT_SUPPORTING_DOCS
+                              : STATE_SUBMISSION_FORM_ROUTES
                     }
                     currentFormPage={currentRoute}
                 />

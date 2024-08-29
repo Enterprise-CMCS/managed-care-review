@@ -10,6 +10,14 @@ const featureFlags = {
         flag: '438-attestation',
         defaultValue: false,
     },
+    /**
+     * When enabled state users will not see a standalone supporting
+     * docs page
+     */
+    HIDE_SUPPORTING_DOCS_PAGE: {
+        flag: 'hide-supporting-docs-page',
+        defaultValue: false,
+    },
      /**
      * Enables state and CMS rate edit, unlock, resubmit functionality
      */

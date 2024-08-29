@@ -180,6 +180,11 @@ export const ContractDetails = ({
         featureFlags.CONTRACT_438_ATTESTATION.defaultValue
     )
 
+    const hideSupportingDocs = ldClient?.variation(
+        featureFlags.HIDE_SUPPORTING_DOCS_PAGE.flag,
+        featureFlags.HIDE_SUPPORTING_DOCS_PAGE.defaultValue
+    )
+
     // Contract documents state management
     const { getKey, handleDeleteFile, handleUploadFile, handleScanFile } =
         useS3()
@@ -525,7 +530,8 @@ export const ContractDetails = ({
             <FormNotificationContainer>
                 <DynamicStepIndicator
                     formPages={activeFormPages(
-                        draftSubmission.draftRevision.formData
+                        draftSubmission.draftRevision.formData,
+                        hideSupportingDocs
                     )}
                     currentFormPage={currentRoute}
                 />
