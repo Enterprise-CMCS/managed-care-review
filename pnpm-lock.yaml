@@ -713,9 +713,6 @@ importers:
       graphql:
         specifier: ^16.9.0
         version: 16.9.0
-      protobufjs:
-        specifier: ^7.3.0
-        version: 7.3.2
     devDependencies:
       '@bahmutov/cypress-esbuild-preprocessor':
         specifier: ^2.2.0
