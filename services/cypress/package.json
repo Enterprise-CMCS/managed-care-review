@@ -57,7 +57,6 @@
         "cypress-pipe": "^2.0.0",
         "aws-amplify": "^5.0.10",
         "axios": "^1.7.4",
-        "graphql": "^16.9.0",
-        "protobufjs": "^7.3.0"
+        "graphql": "^16.9.0"
     }
 }

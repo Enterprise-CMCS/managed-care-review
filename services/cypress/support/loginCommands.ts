@@ -1,5 +1,3 @@
-import { aliasQuery } from '../utils/graphql-test-utils'
-
 Cypress.Commands.add('logInAsStateUser', () => {
     // Set up gql intercept for requests on app load
 
