@@ -2,7 +2,7 @@
 
 ## Introduction
 
-We use a third-party authentication provider ([IDM](https://confluenceent.cms.gov/display/IDM/IDM+Trainings+and+Guides)) which automatically logs out sessions due to inactivity after about 30 minutes. We don't have direct access to their timekeeping, but we know this is about how long they allow a session to be inactive. Thus, we manually track sessions internally for the same time period.
+We use a third-party authentication provider ([IDM](https://confluenceent.cms.gov/display/IDM/IDM+Trainings+and+Guides)) which automatically logs out sessions due to inactivity after about 30 minutes. Although sessions are handled by AWS Amplify/Cognito after login, we follow the same rules. We currently don't access Cognito to check if our session is active. Instead, we manually track sessions internally in React (`AuthContext.tsx`) for the same time period.
 
 Importantly this featured is permanently feature-flagged since we have different requirements between production/staging and lower environments. More details about feature flags [below](#implementation-details).
 
@@ -14,7 +14,7 @@ Importantly this featured is permanently feature-flagged since we have different
 ### Possible outcomes after the session expiration modal is displayed:
 1. If the user chooses to logout, we redirect to landing page.
 2. If the user extends the session, we refresh their tokens and restart our counter for the session.
-3. If the user takes no action and the browser is still active, the 2 minute countdown will complete and the user will be automatically logged out and a error banner will appear on the landing page notifying them what happened.
+3. If the user takes no action and the browser is still active, the countdown completes and the user is automatically logged out and redirected to landing page. A session expired banner notifies them what happened.
 
 ![session expired banner - relevant for outcome 3](../../.images/session-expired-banner.png)
 
@@ -24,7 +24,7 @@ This auto logout behavior will happen even if the browser tab is in the backgrou
 These are edge cases we decided not to address. Documenting for visibility.
 
 - The user puts computer to sleep while logged in (before session expiration modal is visible) and comes back after the session has expired.
-    - In this case, the session expiration modal will not display. The user will still  appear to be logged in when they relaunch their computer. However, as soon as the user takes an action that hits the API and we get a 403, we will follow the code path for outcome #3 above - automatically log the user and show the session expired error banner.
+    - In this case, the session expiration modal will not display. The user will still appear logged in when they relaunch their computer and browser. However, as soon as the user takes an action that hits the graphql API or tries to upload a file to S3, we will follow the code path for outcome #3 above - logout the user, redirect to landing page, show session expired error banner.
 - The user has MC-Review open in multiple tabs and then logs out of only one tab manually before session expiration.
     - This is not an ideal user experience. This is why we recommend users navigate the application in one tab at time. If the user logs out then goes to another tab that is still open and starts using the application, they will be able to make some requests with the cached user but at a certain point the requests will error (this may or may not be auth errors, sometimes the API may fail first with 400s and thus the generic failed request banner will show)
 
