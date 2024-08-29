@@ -5,7 +5,7 @@ describe('state user in state submission form', () => {
         cy.stubFeatureFlags()
         cy.interceptGraphQL()
     })
-    it('has not a11y errors with submission form and and form erros', () => {
+    it('has no a11y violations on submission form with form input errors', () => {
         // 438-attestation still needs to go through design, there is an a11y violation for links and spacing
         cy.interceptFeatureFlags({'438-attestation': false})
         cy.logInAsStateUser()
@@ -99,7 +99,7 @@ describe('state user in state submission form', () => {
         })
     })
 
-    it('has no errors on CMS dashboard', () => {
+    it('has no a11y violations on CMS dashboards', () => {
         cy.apiCreateAndSubmitContractWithRates(stateUser()).then(() => {
             cy.logInAsCMSUser()
             cy.injectAxe()
