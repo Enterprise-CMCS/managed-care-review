@@ -736,7 +736,7 @@ importers:
         specifier: ^1.5.0
         version: 1.5.0(axe-core@4.10.0)(cypress@13.13.2)
       husky:
-        specifier: ^9.0.11
+        specifier: ^9.1.5
         version: 9.1.5
       lint-staged:
         specifier: ^15.2.2
