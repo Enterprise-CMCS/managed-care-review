@@ -15,4 +15,4 @@ done
 git diff --staged --name-only -z | grep -zv 'pnpm-lock.yaml' | xargs -0 detect-secrets-hook
 
 # Run "precommit" in all pnpm workspaces 
-npx lint-staged --allow-empty
+pnpm lint-staged --allow-empty

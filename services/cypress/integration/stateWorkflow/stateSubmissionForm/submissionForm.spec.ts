@@ -9,7 +9,7 @@ describe('state user in state submission form', () => {
         cy.logInAsStateUser()
 
         // Start a base contract only submissions
-        cy.startNewContractOnlySubmissionWithBaseContract()
+        cy.startNewContractOnlySubmissionWithBaseContractV2()
 
         // Save submission URL
         cy.location().then((fullUrl) => {
@@ -44,18 +44,20 @@ describe('state user in state submission form', () => {
             )
 
             // Change to contract and rates and contract amendment
-            cy.findByText('Contract action and rate certification').click()
+            cy.findByLabelText('Contract action and rate certification').check({force: true})
             cy.findByLabelText('Contract action and rate certification').should(
                 'be.checked'
             )
 
-            cy.findByText('Amendment to base contract').click()
+            cy.findByLabelText('Amendment to base contract').check({force: true})
+            cy.findByLabelText('Amendment to base contract').should('be.checked')
+            cy.get('label[for="riskBasedContractNo"]').click()
             cy.findByRole('textbox', { name: 'Submission description' }).clear().type(
                 'description of contract only submission with amendment'
             )
 
             // Save as draft
-            cy.deprecatedNavigateV1Form('SAVE_DRAFT')
+            cy.navigateContractForm('SAVE_DRAFT')
             cy.findByRole('heading', { level: 1, name: /Submissions dashboard/ })
 
             // Link to type page and continue forward
@@ -64,27 +66,27 @@ describe('state user in state submission form', () => {
             )
             cy.findByTestId('step-indicator').findAllByRole('listitem').should('have.length', 6)
             cy.findByText('Rate details').should('exist')
-            cy.deprecatedNavigateV1Form('CONTINUE')
+            cy.navigateContractForm('CONTINUE')
 
             // CHECK CONTRACT DETAILS PAGE NAVIGATION
             cy.findByRole('heading', { level: 2, name: /Contract details/ })
 
             // Navigate back to previous page
-            cy.deprecatedNavigateV1Form('BACK')
+            cy.navigateContractForm('BACK')
             cy.findByRole('heading', { level: 2, name: /Submission type/ })
-            cy.deprecatedNavigateV1Form('CONTINUE')
+            cy.navigateContractForm('CONTINUE')
 
             // Change to contract amendment, save as draft
             cy.findByRole('heading', { level: 2, name: /Contract details/ })
             cy.fillOutAmendmentToBaseContractDetails()
-            cy.deprecatedNavigateV1Form('SAVE_DRAFT')
+            cy.navigateContractForm('SAVE_DRAFT')
             cy.findByRole('heading', { level: 1, name: /Submissions dashboard/ })
 
             // Link to contract details page and continue
                cy.navigateFormByDirectLink(
                 `/submissions/${draftSubmissionId}/edit/contract-details`
             )
-            cy.deprecatedNavigateV1Form('CONTINUE')
+            cy.navigateContractForm('CONTINUE')
 
             // CHECK RATE DETAILS PAGE NAVIGATION
             cy.findByRole('heading', { level: 2, name: /Rate details/ })
@@ -92,7 +94,7 @@ describe('state user in state submission form', () => {
             // Navigate back to previous page
             cy.navigateContractRatesForm('BACK')
             cy.findByRole('heading', { level: 2, name: /Contract details/ })
-            cy.deprecatedNavigateV1Form('CONTINUE')
+            cy.navigateContractForm('CONTINUE')
 
             // Add base rate data, save as draft
             cy.findByRole('heading', { level: 2, name: /Rate details/ })

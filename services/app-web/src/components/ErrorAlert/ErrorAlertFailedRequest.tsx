@@ -1,62 +1,27 @@
-import React, { useEffect } from 'react'
-import styles from './ErrorAlert.module.scss'
-import { Alert } from '@trussworks/react-uswds'
-import { useStringConstants } from '../../hooks/useStringConstants'
-import { LinkWithLogging } from '../TealiumLogging/Link'
-import { useTealium } from '../../hooks'
+import React from 'react'
+
+import { ErrorAlert } from './ErrorAlert'
+import { RemediationType } from './ErrorRemediations'
 
 export type ErrorAlertFailedRequestProps = {
     message?: string
     heading?: string
+    remediation?: RemediationType
 }
-// TODO: Refactor to use Error Alert and switchover components using GenericApiErrorBanner to use this
+// These API alerts are away displayed with emphasis and always have a remediation step
+// default remediation is to refresh and retry the request
 export const ErrorAlertFailedRequest = ({
     heading,
     message,
+    remediation = 'DEFAULT'
 }: ErrorAlertFailedRequestProps): React.ReactElement => {
-    const stringConstants = useStringConstants()
-    const { logAlertImpressionEvent } = useTealium()
-    const MAIL_TO_SUPPORT = stringConstants.MAIL_TO_SUPPORT
-
-    useEffect(() => {
-        logAlertImpressionEvent({
-            error_type: 'system',
-            error_message: message ?? "We're having trouble loading this page.",
-            type: 'error',
-            extension: 'react-uswds',
-        })
-    }, [logAlertImpressionEvent, message])
 
     return (
-        <Alert
-            role="alert"
-            type="error"
-            heading={heading || 'System error'}
-            headingLevel="h4"
-            validation
-            data-testid="error-alert"
-        >
-            <div className={styles.messageBodyText}>
-                <p className="usa-alert__text">
-                    <b>
-                        {message || "We're having trouble loading this page."}
-                    </b>
-                </p>
-                <p className="usa-alert__text">
-                    <span>
-                        Please refresh your browser and if you continue to
-                        experience an error,&nbsp;
-                    </span>
-                    <LinkWithLogging
-                        variant="unstyled"
-                        href={MAIL_TO_SUPPORT}
-                        target="_blank"
-                        rel="noreferrer"
-                    >
-                        let us know.
-                    </LinkWithLogging>
-                </p>
-            </div>
-        </Alert>
+        <ErrorAlert
+            heading={heading}
+            message={message}
+            remediation={remediation}
+            withEmphasis
+        />
     )
 }

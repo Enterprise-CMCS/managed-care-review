@@ -8,7 +8,7 @@ import {
     mockValidAdminUser,
     mockContractPackageSubmittedWithRevisions,
     mockValidStateUser,
-    mockContractPackageUnlocked,
+    mockContractPackageUnlockedWithUnlockedType,
     mockContractWithLinkedRateDraft,
     mockContractWithLinkedRateSubmitted,
 } from '../../../testHelpers/apolloMocks'
@@ -19,6 +19,7 @@ import { testS3Client } from '../../../testHelpers/s3Helpers'
 import { ActuaryCommunicationRecord } from '../../../constants'
 import * as usePreviousSubmission from '../../../hooks/usePreviousSubmission'
 import { RateRevisionWithIsLinked } from '../../../gqlHelpers/contractsAndRates'
+import { submittedLinkedRatesScenarioMock } from '../../../testHelpers/apolloMocks/rateDataMock'
 
 describe('RateDetailsSummarySection', () => {
     const draftContract = mockContractPackageDraft()
@@ -41,7 +42,6 @@ describe('RateDetailsSummarySection', () => {
                     rateID: '5678',
                     createdAt: new Date('01/01/2021'),
                     updatedAt: new Date('01/01/2021'),
-                    contractRevisions: [],
                     formData: {
                         rateType: 'NEW',
                         rateCapitationType: 'RATE_CELL',
@@ -99,7 +99,6 @@ describe('RateDetailsSummarySection', () => {
                     rateID: '5678',
                     createdAt: new Date('01/01/2021'),
                     updatedAt: new Date('01/01/2021'),
-                    contractRevisions: [],
                     formData: {
                         rateType: 'AMENDMENT',
                         rateCapitationType: 'RATE_CELL',
@@ -343,25 +342,12 @@ describe('RateDetailsSummarySection', () => {
     })
 
     it('does not render replace rate button for rates linked to another contract', async () => {
-        const contract = mockContractWithLinkedRateSubmitted()
-        const contractB = mockContractPackageSubmittedWithRevisions()
+        const { c1 } = submittedLinkedRatesScenarioMock()
         const rateRevs: RateRevisionWithIsLinked[] =
-            contract.packageSubmissions[0].rateRevisions.map((rev) => {
+            c1.packageSubmissions[0].rateRevisions.map((rev) => {
                 const newRev: RateRevisionWithIsLinked = {
                     ...rev,
-                    contractRevisions: [
-                        ...rev.contractRevisions,
-                        // Add a second contract revision to simulate this rate linked to another contract
-                        {
-                            ...contractB.packageSubmissions[0].contractRevision,
-                            __typename: 'RelatedContractRevisions',
-                            contract: {
-                                ...contractB,
-                                __typename: 'ContractOnRevisionType',
-                            },
-                        },
-                    ],
-                    isLinked: false,
+                    isLinked: true,
                 }
                 return newRev
             })
@@ -369,7 +355,7 @@ describe('RateDetailsSummarySection', () => {
         await waitFor(() => {
             renderWithProviders(
                 <RateDetailsSummarySection
-                    contract={contract}
+                    contract={c1}
                     rateRevisions={rateRevs}
                     editNavigateTo="rate-details"
                     submissionName="MN-MSHO-0003"
@@ -1285,7 +1271,7 @@ describe('RateDetailsSummarySection', () => {
     })
 
     it('displays deprecated fields on unlocked submissions for CMS users', async () => {
-        const contract = mockContractPackageUnlocked()
+        const contract = mockContractPackageUnlockedWithUnlockedType()
 
         renderWithProviders(
             <RateDetailsSummarySection

@@ -184,7 +184,7 @@ export const ContractDetailsSummarySection = ({
     const lastSubmittedDate = isPreviousSubmission
         ? getPackageSubmissionAtIndex(contract, lastSubmittedIndex)?.submitInfo
               .updatedAt
-        : getLastContractSubmission(contract)?.submitInfo.updatedAt ?? null
+        : (getLastContractSubmission(contract)?.submitInfo.updatedAt ?? null)
     return (
         <SectionCard
             id="contractDetailsSection"

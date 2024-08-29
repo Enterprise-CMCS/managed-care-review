@@ -27,9 +27,10 @@ import { RoutesRecord } from '../../../constants'
 import {
     ButtonWithLogging,
     DynamicStepIndicator,
+    FormNotificationContainer,
     SectionCard,
 } from '../../../components'
-import { FormContainer } from '../FormContainer'
+import { FormContainer } from '../../../components/FormContainer/FormContainer'
 import {
     useCurrentRoute,
     useHealthPlanPackageForm,
@@ -202,7 +203,7 @@ const Contacts = ({
 
     return (
         <>
-            <div>
+            <FormNotificationContainer>
                 <DynamicStepIndicator
                     formPages={activeFormPages(draftSubmission)}
                     currentFormPage={currentRoute}
@@ -212,7 +213,7 @@ const Contacts = ({
                     unlockedInfo={unlockInfo}
                     showPageErrorMessage={showPageErrorMessage ?? false}
                 />
-            </div>
+            </FormNotificationContainer>
             <FormContainer id="Contacts">
                 <Formik
                     initialValues={contactsInitialValues}

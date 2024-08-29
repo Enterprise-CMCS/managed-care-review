@@ -1,0 +1,13 @@
+@use '../../styles/custom.scss' as custom;
+@use '../../styles/uswdsImports.scss' as uswds;
+
+.formPage {
+    flex: 1 0 auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.notificationContainer {
+    max-width: custom.$mcr-container-standard-width-fixed;
+    padding: 2rem 0;
+}

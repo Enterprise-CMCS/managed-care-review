@@ -13,7 +13,7 @@ import {
     FilterSelect,
     FilterSelectedOptionsType,
 } from '../../../components/FilterAccordion'
-import { DoubleColumnGrid } from '../../../components'
+import { DoubleColumnGrid, LinkWithLogging } from '../../../components'
 import { formatEmails } from './EmailSettingsTables'
 import { Table } from '@trussworks/react-uswds'
 
@@ -21,6 +21,7 @@ import styles from '../Settings.module.scss'
 import { pluralize } from '../../../common-code/formatters'
 import { useTealium } from '../../../hooks'
 import useDeepCompareEffect from 'use-deep-compare-effect'
+import { useStringConstants } from '../../../hooks/useStringConstants'
 
 type StateAnalystsInDashboardType = {
     emails: string[]
@@ -43,6 +44,8 @@ const EmailAnalystsTable = ({
         filters: columnFilters,
     })
     const { logFilterEvent } = useTealium()
+    const stringConstants = useStringConstants()
+    const MAIL_TO_SUPPORT = stringConstants.MAIL_TO_SUPPORT
 
     const tableColumns = useMemo(
         () => [
@@ -143,8 +146,19 @@ const EmailAnalystsTable = ({
         <>
             <h2>State Analyst emails</h2>
             <p>
-                State analysts email settings. Currently a standalone
-                configuration based on the state programs spreadsheet.
+                Below is a list of the DMCO staff assigned to states. If this
+                list is out of date please contact
+                <span>
+                    <LinkWithLogging
+                        href={`mailto: ${MAIL_TO_SUPPORT}`}
+                        variant="unstyled"
+                        target="_blank"
+                        rel="noreferrer"
+                    >
+                        {' '}
+                        {MAIL_TO_SUPPORT}
+                    </LinkWithLogging>
+                </span>
             </p>
 
             <DoubleColumnGrid>
@@ -169,11 +183,17 @@ const EmailAnalystsTable = ({
                     filterOptions={Array.from(
                         emailsColumn.getFacetedUniqueValues().keys()
                     )
+                        .filter((state) => Boolean(state.length)) // filters out all empty assignments as filter options
                         .sort()
                         .map((state) => ({
                             value: state,
                             label: state,
-                        }))}
+                        }))
+                        // Add just one empty assignment filter with label
+                        .concat({
+                            value: [],
+                            label: 'No assignments',
+                        })}
                     onChange={(selectedOptions) =>
                         updateFilters(emailsColumn, selectedOptions, 'emails')
                     }
@@ -196,7 +216,8 @@ const EmailAnalystsTable = ({
                             <tr key={row.id}>
                                 <td>{row.getValue('stateCode')}</td>
                                 <td>
-                                    {formatEmails(row.getValue('emails') || [])}
+                                    {row.getValue &&
+                                        formatEmails(row.getValue('emails'))}
                                 </td>
                             </tr>
                         )

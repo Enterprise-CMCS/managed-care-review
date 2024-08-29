@@ -18,7 +18,7 @@ import classNames from 'classnames'
 import { ErrorSummary } from '../../../components/Form'
 import { activeFormPages } from '../StateSubmissionForm'
 import { RoutesRecord } from '../../../constants'
-import { FormContainer } from '../FormContainer'
+import { FormContainer } from '../../../components/FormContainer/FormContainer'
 import { useAuth } from '../../../contexts/AuthContext'
 import {
     useCurrentRoute,
@@ -26,7 +26,11 @@ import {
     useRouteParams,
 } from '../../../hooks'
 import { ErrorOrLoadingPage } from '../ErrorOrLoadingPage'
-import { DynamicStepIndicator, LinkWithLogging } from '../../../components'
+import {
+    DynamicStepIndicator,
+    FormNotificationContainer,
+    LinkWithLogging,
+} from '../../../components'
 import { PageBannerAlerts } from '../PageBannerAlerts'
 import { useErrorSummary } from '../../../hooks/useErrorSummary'
 
@@ -249,7 +253,7 @@ export const Documents = (): React.ReactElement => {
 
     return (
         <>
-            <div>
+            <FormNotificationContainer>
                 <DynamicStepIndicator
                     formPages={activeFormPages(draftSubmission)}
                     currentFormPage={currentRoute}
@@ -259,7 +263,7 @@ export const Documents = (): React.ReactElement => {
                     unlockedInfo={unlockInfo}
                     showPageErrorMessage={showPageErrorMessage ?? false}
                 />
-            </div>
+            </FormNotificationContainer>
             <FormContainer id="Documents">
                 <UswdsForm
                     className={classNames(

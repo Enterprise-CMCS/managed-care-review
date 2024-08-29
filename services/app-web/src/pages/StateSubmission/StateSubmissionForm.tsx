@@ -25,7 +25,7 @@ import { SubmissionType } from './SubmissionType'
 import { UnlockedHealthPlanFormDataType } from '../../common-code/healthPlanFormDataType'
 import { ContractFormData } from '../../gen/gqlClient'
 import { RateDetails } from './RateDetails'
-import styles from './StateSubmissionForm.module.scss'
+import formContainerStyles from '../../components/FormContainer/FormContainer.module.scss'
 import { SideNavOutletContextType } from '../SubmissionSideNav/SubmissionSideNav'
 
 // Can move this AppRoutes on future pass - leaving it here now to make diff clear
@@ -45,7 +45,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
     return (
         <div
             data-testid="state-submission-form-page"
-            className={styles.formPage}
+            className={formContainerStyles.formPage}
         >
             <Routes>
                 <Route
@@ -110,5 +110,9 @@ const getRelativePathFromNestedRoute = (formRouteType: RouteT): string =>
     })
 
 export type HealthPlanFormPageProps = {
+    showValidations?: boolean
+}
+
+export type ContractFormPageProps = {
     showValidations?: boolean
 }

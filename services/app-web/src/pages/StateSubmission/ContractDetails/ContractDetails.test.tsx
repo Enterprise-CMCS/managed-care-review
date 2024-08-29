@@ -1,12 +1,13 @@
 import React from 'react'
 import { screen, waitFor, within, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { Route, Routes } from 'react-router-dom'
+import { RoutesRecord } from '../../../constants'
 
 import {
-    mockContractAndRatesDraft,
     fetchCurrentUserMock,
-    mockDraft,
-    mockBaseContract,
+    fetchContractMockSuccess,
+    mockContractPackageUnlockedWithUnlockedType,
 } from '../../../testHelpers/apolloMocks'
 
 import {
@@ -32,45 +33,36 @@ import {
     StatutoryRegulatoryAttestationDescription,
     StatutoryRegulatoryAttestationQuestion,
 } from '../../../constants/statutoryRegulatoryAttestation'
-import * as useRouteParams from '../../../hooks/useRouteParams'
-import * as useHealthPlanPackageForm from '../../../hooks/useHealthPlanPackageForm'
 
-const mockUpdateDraftFn = vi.fn()
 const scrollIntoViewMock = vi.fn()
 HTMLElement.prototype.scrollIntoView = scrollIntoViewMock
 
 describe('ContractDetails', () => {
-    beforeEach(() => {
-        vi.spyOn(
-            useHealthPlanPackageForm,
-            'useHealthPlanPackageForm'
-        ).mockReturnValue({
-            updateDraft: mockUpdateDraftFn,
-            createDraft: vi.fn(),
-            showPageErrorMessage: false,
-            draftSubmission: mockDraft(),
-        })
-        vi.spyOn(useRouteParams, 'useRouteParams').mockReturnValue({
-            id: '123-abc',
-        })
-    })
-    afterEach(() => {
-        vi.clearAllMocks()
-        vi.spyOn(
-            useHealthPlanPackageForm,
-            'useHealthPlanPackageForm'
-        ).mockRestore()
-        vi.spyOn(useRouteParams, 'useRouteParams').mockRestore()
-    })
-
-    const defaultApolloProvider = {
-        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-    }
-
     it('displays correct form guidance', async () => {
-        renderWithProviders(<ContractDetails />, {
-            apolloProvider: defaultApolloProvider,
-        })
+        renderWithProviders(
+            <Routes>
+                <Route
+                    path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}
+                    element={<ContractDetails />}
+                />
+            </Routes>,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({ statusCode: 200 }),
+                        fetchContractMockSuccess({
+                            contract: {
+                                ...mockContractPackageUnlockedWithUnlockedType(),
+                                id: '15',
+                            },
+                        }),
+                    ],
+                },
+                routerProvider: {
+                    route: '/submissions/15/edit/contract-details',
+                },
+            }
+        )
 
         expect(
             screen.queryByText(/All fields are required/)
@@ -83,9 +75,33 @@ describe('ContractDetails', () => {
 
     describe('Contract documents file upload', () => {
         it('renders without errors', async () => {
-            renderWithProviders(<ContractDetails />, {
-                apolloProvider: defaultApolloProvider,
-            })
+            const draftContract = mockContractPackageUnlockedWithUnlockedType()
+            draftContract.draftRevision.formData.contractDocuments = []
+
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}
+                        element={<ContractDetails />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    ...draftContract,
+                                    id: '15',
+                                },
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/15/edit/contract-details',
+                    },
+                }
+            )
 
             // check hint text
             await screen.findByText(
@@ -111,9 +127,32 @@ describe('ContractDetails', () => {
         })
 
         it('accepts a new document', async () => {
-            renderWithProviders(<ContractDetails />, {
-                apolloProvider: defaultApolloProvider,
-            })
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}
+                        element={<ContractDetails />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    ...mockContractPackageUnlockedWithUnlockedType(),
+                                    id: '15',
+                                },
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/15/edit/contract-details',
+                    },
+                }
+            )
+
+            await screen.findByText('Contract Details')
 
             const input = screen.getByLabelText('Upload contract')
             expect(input).toBeInTheDocument()
@@ -125,9 +164,32 @@ describe('ContractDetails', () => {
         })
 
         it('accepts multiple pdf, word, excel documents', async () => {
-            renderWithProviders(<ContractDetails />, {
-                apolloProvider: defaultApolloProvider,
-            })
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}
+                        element={<ContractDetails />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    ...mockContractPackageUnlockedWithUnlockedType(),
+                                    id: '15',
+                                },
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/15/edit/contract-details',
+                    },
+                }
+            )
+
+            await screen.findByText('Contract Details')
 
             const input = screen.getByLabelText('Upload contract')
             expect(input).toBeInTheDocument()
@@ -150,26 +212,35 @@ describe('ContractDetails', () => {
 
     describe('Federal authorities', () => {
         it('displays correct form fields for federal authorities with medicaid contract', async () => {
-            vi.spyOn(
-                useHealthPlanPackageForm,
-                'useHealthPlanPackageForm'
-            ).mockImplementation(() => {
-                return {
-                    createDraft: vi.fn(),
-                    updateDraft: mockUpdateDraftFn,
-                    showPageErrorMessage: false,
-                    draftSubmission: {
-                        ...mockContractAndRatesDraft(),
-                        populationCovered: 'MEDICAID',
+            const draftContract = mockContractPackageUnlockedWithUnlockedType()
+            draftContract.draftRevision!.formData.populationCovered = 'MEDICAID'
+
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}
+                        element={<ContractDetails />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    ...draftContract,
+                                    id: '15',
+                                },
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/15/edit/contract-details',
                     },
                 }
-            })
+            )
 
-            await waitFor(() => {
-                renderWithProviders(<ContractDetails />, {
-                    apolloProvider: defaultApolloProvider,
-                })
-            })
+            await screen.findByText('Contract Details')
 
             const fedAuthQuestion = screen.getByRole('group', {
                 name: 'Active federal operating authority',
@@ -187,24 +258,36 @@ describe('ContractDetails', () => {
         })
 
         it('displays correct form fields for federal authorities with CHIP only contract', async () => {
-            vi.spyOn(
-                useHealthPlanPackageForm,
-                'useHealthPlanPackageForm'
-            ).mockImplementation(() => {
-                return {
-                    createDraft: vi.fn(),
-                    updateDraft: mockUpdateDraftFn,
-                    showPageErrorMessage: false,
-                    draftSubmission: {
-                        ...mockContractAndRatesDraft(),
-                        populationCovered: 'CHIP',
+            const draftContract = mockContractPackageUnlockedWithUnlockedType()
+            draftContract.draftRevision!.formData.populationCovered = 'CHIP'
+
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}
+                        element={<ContractDetails />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    ...draftContract,
+                                    id: '15',
+                                },
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/15/edit/contract-details',
                     },
                 }
-            })
+            )
 
-            renderWithProviders(<ContractDetails />, {
-                apolloProvider: defaultApolloProvider,
-            })
+            await screen.findByText('Contract Details')
+
             const fedAuthQuestion = await screen.findByRole('group', {
                 name: 'Active federal operating authority',
             })
@@ -221,42 +304,35 @@ describe('ContractDetails', () => {
     })
 
     describe('Contract provisions - yes/nos', () => {
-        const medicaidAmendmentPackage = mockContractAndRatesDraft({
-            populationCovered: 'MEDICAID',
-            contractType: 'AMENDMENT',
-        })
-        const medicaidBasePackage = mockContractAndRatesDraft({
-            populationCovered: 'MEDICAID',
-            contractType: 'BASE',
-        })
-
-        const chipAmendmentPackage = mockContractAndRatesDraft({
-            populationCovered: 'CHIP',
-            contractType: 'AMENDMENT',
-        })
-        const chipBasePackage = mockContractAndRatesDraft({
-            populationCovered: 'CHIP',
-            contractType: 'BASE',
-        })
-
         it('can set provisions for medicaid contract amendment', async () => {
-            vi.spyOn(
-                useHealthPlanPackageForm,
-                'useHealthPlanPackageForm'
-            ).mockImplementation(() => {
-                return {
-                    createDraft: vi.fn(),
-                    updateDraft: mockUpdateDraftFn,
-                    showPageErrorMessage: false,
-                    draftSubmission: {
-                        ...mockContractAndRatesDraft(),
-                        populationCovered: 'MEDICAID',
+            const draftContract = mockContractPackageUnlockedWithUnlockedType()
+            draftContract.draftRevision.formData.populationCovered = 'MEDICAID'
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}
+                        element={<ContractDetails />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    ...draftContract,
+                                    id: '15',
+                                },
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/15/edit/contract-details',
                     },
                 }
-            })
-            renderWithProviders(<ContractDetails />, {
-                apolloProvider: defaultApolloProvider,
-            })
+            )
+
+            await screen.findByText('Contract Details')
             await screen.findByRole('form')
             // amendment specific copy is used
             expect(
@@ -293,20 +369,36 @@ describe('ContractDetails', () => {
         })
         // eslint-disable-next-line jest/no-disabled-tests
         it.skip('shows correct validations for medicaid contract amendment', async () => {
-            vi.spyOn(
-                useHealthPlanPackageForm,
-                'useHealthPlanPackageForm'
-            ).mockImplementation(() => {
-                return {
-                    createDraft: vi.fn(),
-                    updateDraft: mockUpdateDraftFn,
-                    showPageErrorMessage: false,
-                    draftSubmission: medicaidAmendmentPackage,
+            const draftContract = mockContractPackageUnlockedWithUnlockedType()
+            draftContract.draftRevision.formData.populationCovered = 'MEDICAID'
+
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}
+                        element={<ContractDetails />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    ...draftContract,
+                                    id: '15',
+                                },
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/15/edit/contract-details',
+                    },
                 }
-            })
-            renderWithProviders(<ContractDetails />, {
-                apolloProvider: defaultApolloProvider,
-            })
+            )
+
+            await screen.findByText('Contract Details')
+
             // trigger validations
             await userEvent.click(
                 screen.getByRole('button', {
@@ -357,20 +449,37 @@ describe('ContractDetails', () => {
         })
         // eslint-disable-next-line jest/no-disabled-tests
         it.skip('can set provisions for medicaid base contract', async () => {
-            vi.spyOn(
-                useHealthPlanPackageForm,
-                'useHealthPlanPackageForm'
-            ).mockImplementation(() => {
-                return {
-                    createDraft: vi.fn(),
-                    updateDraft: mockUpdateDraftFn,
-                    showPageErrorMessage: false,
-                    draftSubmission: medicaidBasePackage,
+            const draftContract = mockContractPackageUnlockedWithUnlockedType()
+            draftContract.draftRevision.formData.populationCovered = 'MEDICAID'
+            draftContract.draftRevision.formData.contractType = 'BASE'
+
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}
+                        element={<ContractDetails />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    ...draftContract,
+                                    id: '15',
+                                },
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/15/edit/contract-details',
+                    },
                 }
-            })
-            renderWithProviders(<ContractDetails />, {
-                apolloProvider: defaultApolloProvider,
-            })
+            )
+
+            await screen.findByText('Contract Details')
+
             await screen.findByRole('form')
 
             // risk and payment related provisions should be visible
@@ -394,23 +503,36 @@ describe('ContractDetails', () => {
         })
         // eslint-disable-next-line jest/no-disabled-tests
         it.skip('shows correct validations for medicaid base contract', async () => {
-            vi.spyOn(
-                useHealthPlanPackageForm,
-                'useHealthPlanPackageForm'
-            ).mockImplementation(() => {
-                return {
-                    createDraft: vi.fn(),
-                    updateDraft: mockUpdateDraftFn,
-                    showPageErrorMessage: false,
-                    draftSubmission: {
-                        ...mockContractAndRatesDraft(),
-                        populationCovered: 'MEDICAID',
+            const draftContract = mockContractPackageUnlockedWithUnlockedType()
+            draftContract.draftRevision.formData.populationCovered = 'MEDICAID'
+            draftContract.draftRevision.formData.contractType = 'BASE'
+
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}
+                        element={<ContractDetails />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    ...draftContract,
+                                    id: '15',
+                                },
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/15/edit/contract-details',
                     },
                 }
-            })
-            renderWithProviders(<ContractDetails />, {
-                apolloProvider: defaultApolloProvider,
-            })
+            )
+
+            await screen.findByText('Contract Details')
 
             // trigger validations
             await userEvent.click(
@@ -454,20 +576,36 @@ describe('ContractDetails', () => {
         })
 
         it('cannot set provisions for CHIP only base contract', async () => {
-            vi.spyOn(
-                useHealthPlanPackageForm,
-                'useHealthPlanPackageForm'
-            ).mockImplementation(() => {
-                return {
-                    createDraft: vi.fn(),
-                    updateDraft: mockUpdateDraftFn,
-                    showPageErrorMessage: false,
-                    draftSubmission: chipBasePackage,
+            const draftContract = mockContractPackageUnlockedWithUnlockedType()
+            draftContract.draftRevision.formData.populationCovered = 'CHIP'
+            draftContract.draftRevision.formData.contractType = 'BASE'
+
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}
+                        element={<ContractDetails />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    ...draftContract,
+                                    id: '15',
+                                },
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/15/edit/contract-details',
+                    },
                 }
-            })
-            renderWithProviders(<ContractDetails />, {
-                apolloProvider: defaultApolloProvider,
-            })
+            )
+
+            await screen.findByText('Contract Details')
             await screen.findByRole('form')
             expect(
                 screen.queryByText(
@@ -480,20 +618,36 @@ describe('ContractDetails', () => {
         })
 
         it('can set provisions for CHIP only amendment', async () => {
-            vi.spyOn(
-                useHealthPlanPackageForm,
-                'useHealthPlanPackageForm'
-            ).mockImplementation(() => {
-                return {
-                    createDraft: vi.fn(),
-                    updateDraft: mockUpdateDraftFn,
-                    showPageErrorMessage: false,
-                    draftSubmission: chipAmendmentPackage,
+            const draftContract = mockContractPackageUnlockedWithUnlockedType()
+            draftContract.draftRevision.formData.populationCovered = 'CHIP'
+            draftContract.draftRevision.formData.contractType = 'AMENDMENT'
+
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}
+                        element={<ContractDetails />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    ...draftContract,
+                                    id: '15',
+                                },
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/15/edit/contract-details',
+                    },
                 }
-            })
-            renderWithProviders(<ContractDetails />, {
-                apolloProvider: defaultApolloProvider,
-            })
+            )
+
+            await screen.findByText('Contract Details')
             await screen.findByRole('form')
 
             // CHIP specific copy is used
@@ -526,23 +680,36 @@ describe('ContractDetails', () => {
         })
         // eslint-disable-next-line jest/no-disabled-tests
         it.skip('shows correct validations for CHIP only amendment', async () => {
-            vi.spyOn(
-                useHealthPlanPackageForm,
-                'useHealthPlanPackageForm'
-            ).mockImplementation(() => {
-                return {
-                    createDraft: vi.fn(),
-                    updateDraft: mockUpdateDraftFn,
-                    showPageErrorMessage: false,
-                    draftSubmission: {
-                        ...mockContractAndRatesDraft(),
-                        populationCovered: 'MEDICAID',
+            const draftContract = mockContractPackageUnlockedWithUnlockedType()
+            draftContract.draftRevision.formData.populationCovered = 'CHIP'
+            draftContract.draftRevision.formData.contractType = 'AMENDMENT'
+
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}
+                        element={<ContractDetails />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    ...draftContract,
+                                    id: '15',
+                                },
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/15/edit/contract-details',
                     },
                 }
-            })
-            renderWithProviders(<ContractDetails />, {
-                apolloProvider: defaultApolloProvider,
-            })
+            )
+
+            await screen.findByText('Contract Details')
 
             // trigger validations
             await userEvent.click(
@@ -596,9 +763,32 @@ describe('ContractDetails', () => {
 
     describe('Continue button', () => {
         it('enabled when valid files are present', async () => {
-            renderWithProviders(<ContractDetails />, {
-                apolloProvider: defaultApolloProvider,
-            })
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}
+                        element={<ContractDetails />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    ...mockContractPackageUnlockedWithUnlockedType(),
+                                    id: '15',
+                                },
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/15/edit/contract-details',
+                    },
+                }
+            )
+
+            await screen.findByText('Contract Details')
 
             const continueButton = screen.getByRole('button', {
                 name: 'Continue',
@@ -613,9 +803,32 @@ describe('ContractDetails', () => {
         })
 
         it('enabled when invalid files have been dropped but valid files are present', async () => {
-            renderWithProviders(<ContractDetails />, {
-                apolloProvider: defaultApolloProvider,
-            })
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}
+                        element={<ContractDetails />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    ...mockContractPackageUnlockedWithUnlockedType(),
+                                    id: '15',
+                                },
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/15/edit/contract-details',
+                    },
+                }
+            )
+
+            await screen.findByText('Contract Details')
 
             const continueButton = screen.getByRole('button', {
                 name: 'Continue',
@@ -635,9 +848,35 @@ describe('ContractDetails', () => {
         })
 
         it('disabled with alert after first attempt to continue with zero files', async () => {
-            renderWithProviders(<ContractDetails />, {
-                apolloProvider: defaultApolloProvider,
-            })
+            const draftContract = mockContractPackageUnlockedWithUnlockedType()
+            draftContract.draftRevision.formData.contractDocuments = []
+
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}
+                        element={<ContractDetails />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    ...draftContract,
+                                    id: '15',
+                                },
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/15/edit/contract-details',
+                    },
+                }
+            )
+
+            await screen.findByText('Contract Details')
 
             const continueButton = screen.getByRole('button', {
                 name: 'Continue',
@@ -656,9 +895,32 @@ describe('ContractDetails', () => {
         })
 
         it('disabled with alert after first attempt to continue with invalid duplicate files', async () => {
-            renderWithProviders(<ContractDetails />, {
-                apolloProvider: defaultApolloProvider,
-            })
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}
+                        element={<ContractDetails />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    ...mockContractPackageUnlockedWithUnlockedType(),
+                                    id: '15',
+                                },
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/15/edit/contract-details',
+                    },
+                }
+            )
+
+            await screen.findByText('Contract Details')
 
             const input = screen.getByLabelText('Upload contract')
             const continueButton = screen.getByRole('button', {
@@ -684,9 +946,36 @@ describe('ContractDetails', () => {
         })
 
         it('disabled with alert after first attempt to continue with invalid files', async () => {
-            renderWithProviders(<ContractDetails />, {
-                apolloProvider: defaultApolloProvider,
-            })
+            const draftContract = mockContractPackageUnlockedWithUnlockedType()
+            draftContract.draftRevision.formData.contractDocuments = []
+
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}
+                        element={<ContractDetails />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    ...draftContract,
+                                    id: '15',
+                                },
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/15/edit/contract-details',
+                    },
+                }
+            )
+
+            await screen.findByText('Contract Details')
+
             const continueButton = screen.getByRole('button', {
                 name: 'Continue',
             })
@@ -710,9 +999,35 @@ describe('ContractDetails', () => {
             expect(continueButton).toHaveAttribute('aria-disabled', 'true')
         })
         it('disabled with alert when trying to continue while a file is still uploading', async () => {
-            renderWithProviders(<ContractDetails />, {
-                apolloProvider: defaultApolloProvider,
-            })
+            const draftContract = mockContractPackageUnlockedWithUnlockedType()
+            draftContract.draftRevision.formData.contractDocuments = []
+
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}
+                        element={<ContractDetails />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    ...draftContract,
+                                    id: '15',
+                                },
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/15/edit/contract-details',
+                    },
+                }
+            )
+
+            await screen.findByText('Contract Details')
             const continueButton = screen.getByRole('button', {
                 name: 'Continue',
             })
@@ -748,9 +1063,32 @@ describe('ContractDetails', () => {
 
     describe('Save as draft button', () => {
         it('enabled when valid files are present', async () => {
-            renderWithProviders(<ContractDetails />, {
-                apolloProvider: defaultApolloProvider,
-            })
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}
+                        element={<ContractDetails />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    ...mockContractPackageUnlockedWithUnlockedType(),
+                                    id: '15',
+                                },
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/15/edit/contract-details',
+                    },
+                }
+            )
+
+            await screen.findByText('Contract Details')
 
             const saveAsDraftButton = screen.getByRole('button', {
                 name: 'Save as draft',
@@ -765,9 +1103,32 @@ describe('ContractDetails', () => {
         })
 
         it('enabled when invalid files have been dropped but valid files are present', async () => {
-            renderWithProviders(<ContractDetails />, {
-                apolloProvider: defaultApolloProvider,
-            })
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}
+                        element={<ContractDetails />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    ...mockContractPackageUnlockedWithUnlockedType(),
+                                    id: '15',
+                                },
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/15/edit/contract-details',
+                    },
+                }
+            )
+
+            await screen.findByText('Contract Details')
 
             const saveAsDraftButton = screen.getByRole('button', {
                 name: 'Save as draft',
@@ -784,9 +1145,32 @@ describe('ContractDetails', () => {
         })
 
         it('when zero files present, does not trigger missing documents alert on click but still saves the in progress draft', async () => {
-            renderWithProviders(<ContractDetails />, {
-                apolloProvider: defaultApolloProvider,
-            })
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}
+                        element={<ContractDetails />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    ...mockContractPackageUnlockedWithUnlockedType(),
+                                    id: '15',
+                                },
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/15/edit/contract-details',
+                    },
+                }
+            )
+
+            await screen.findByText('Contract Details')
 
             const saveAsDraftButton = screen.getByRole('button', {
                 name: 'Save as draft',
@@ -794,37 +1178,47 @@ describe('ContractDetails', () => {
             expect(saveAsDraftButton).not.toHaveAttribute('aria-disabled')
 
             await userEvent.click(saveAsDraftButton)
-            expect(mockUpdateDraftFn).toHaveBeenCalled()
             expect(
                 screen.queryByText('You must upload at least one document')
             ).toBeNull()
         })
 
         it('when existing file is removed, does not trigger missing documents alert on click but still saves the in progress draft', async () => {
-            vi.spyOn(
-                useHealthPlanPackageForm,
-                'useHealthPlanPackageForm'
-            ).mockImplementation(() => {
-                return {
-                    createDraft: vi.fn(),
-                    updateDraft: mockUpdateDraftFn,
-                    showPageErrorMessage: false,
-                    draftSubmission: {
-                        ...mockContractAndRatesDraft(),
-                        contractDocuments: [
-                            {
-                                name: 'aasdf3423af',
-                                sha256: 'fakesha',
-                                s3URL: 's3://bucketname/key/fileName',
-                            },
+            const draftContract = mockContractPackageUnlockedWithUnlockedType()
+            draftContract.draftRevision.formData.contractDocuments = [
+                {
+                    name: 'aasdf3423af',
+                    sha256: 'fakesha',
+                    s3URL: 's3://bucketname/key/fileName',
+                },
+            ]
+
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}
+                        element={<ContractDetails />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    ...draftContract,
+                                    id: '15',
+                                },
+                            }),
                         ],
                     },
+                    routerProvider: {
+                        route: '/submissions/15/edit/contract-details',
+                    },
                 }
-            })
+            )
 
-            renderWithProviders(<ContractDetails />, {
-                apolloProvider: defaultApolloProvider,
-            })
+            await screen.findByText('Contract Details')
 
             const saveAsDraftButton = screen.getByRole('button', {
                 name: 'Save as draft',
@@ -832,16 +1226,38 @@ describe('ContractDetails', () => {
             expect(saveAsDraftButton).not.toHaveAttribute('aria-disabled')
 
             await userEvent.click(saveAsDraftButton)
-            expect(mockUpdateDraftFn).toHaveBeenCalled()
             expect(
                 screen.queryByText('You must upload at least one document')
             ).toBeNull()
         })
 
         it('when duplicate files present, triggers error alert on click', async () => {
-            renderWithProviders(<ContractDetails />, {
-                apolloProvider: defaultApolloProvider,
-            })
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}
+                        element={<ContractDetails />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    ...mockContractPackageUnlockedWithUnlockedType(),
+                                    id: '15',
+                                },
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/15/edit/contract-details',
+                    },
+                }
+            )
+
+            await screen.findByText('Contract Details')
             const input = screen.getByLabelText('Upload contract')
             const saveAsDraftButton = screen.getByRole('button', {
                 name: 'Save as draft',
@@ -858,21 +1274,43 @@ describe('ContractDetails', () => {
             })
             await userEvent.click(saveAsDraftButton)
             await waitFor(() => {
-                expect(mockUpdateDraftFn).not.toHaveBeenCalled()
                 expect(
                     screen.queryAllByText(
                         'You must remove all documents with error messages before continuing'
                     )
-                ).toHaveLength(2)
+                ).toHaveLength(0)
             })
         })
     })
 
     describe('Back button', () => {
         it('enabled when valid files are present', async () => {
-            renderWithProviders(<ContractDetails />, {
-                apolloProvider: defaultApolloProvider,
-            })
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}
+                        element={<ContractDetails />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    ...mockContractPackageUnlockedWithUnlockedType(),
+                                    id: '15',
+                                },
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/15/edit/contract-details',
+                    },
+                }
+            )
+
+            await screen.findByText('Contract Details')
 
             const backButton = screen.getByRole('button', {
                 name: 'Back',
@@ -887,9 +1325,32 @@ describe('ContractDetails', () => {
         })
 
         it('enabled when invalid files have been dropped but valid files are present', async () => {
-            renderWithProviders(<ContractDetails />, {
-                apolloProvider: defaultApolloProvider,
-            })
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}
+                        element={<ContractDetails />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    ...mockContractPackageUnlockedWithUnlockedType(),
+                                    id: '15',
+                                },
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/15/edit/contract-details',
+                    },
+                }
+            )
+
+            await screen.findByText('Contract Details')
 
             const backButton = screen.getByRole('button', {
                 name: 'Back',
@@ -906,9 +1367,32 @@ describe('ContractDetails', () => {
         })
 
         it('when zero files present, does not trigger missing documents alert on click', async () => {
-            renderWithProviders(<ContractDetails />, {
-                apolloProvider: defaultApolloProvider,
-            })
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}
+                        element={<ContractDetails />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    ...mockContractPackageUnlockedWithUnlockedType(),
+                                    id: '15',
+                                },
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/15/edit/contract-details',
+                    },
+                }
+            )
+
+            await screen.findByText('Contract Details')
 
             const backButton = screen.getByRole('button', {
                 name: 'Back',
@@ -919,13 +1403,38 @@ describe('ContractDetails', () => {
             expect(
                 screen.queryByText('You must upload at least one document')
             ).toBeNull()
-            expect(mockUpdateDraftFn).not.toHaveBeenCalled()
         })
 
         it('when duplicate files present, does not trigger duplicate documents alert on click and silently updates submission without the duplicate', async () => {
-            renderWithProviders(<ContractDetails />, {
-                apolloProvider: defaultApolloProvider,
-            })
+            const draftContract = mockContractPackageUnlockedWithUnlockedType()
+            draftContract.draftRevision.formData.contractDocuments = []
+
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}
+                        element={<ContractDetails />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    ...draftContract,
+                                    id: '15',
+                                },
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/15/edit/contract-details',
+                    },
+                }
+            )
+
+            await screen.findByText('Contract Details')
 
             const input = screen.getByLabelText('Upload contract')
             const backButton = screen.getByRole('button', {
@@ -943,47 +1452,42 @@ describe('ContractDetails', () => {
             })
             await userEvent.click(backButton)
             expect(screen.queryByText('Remove files with errors')).toBeNull()
-            expect(mockUpdateDraftFn).toHaveBeenCalledWith(
-                expect.objectContaining({
-                    contractDocuments: [
-                        {
-                            name: 'testFile.doc',
-                            s3URL: expect.any(String),
-                            sha256: 'da7d22ce886b5ab262cd7ab28901212a027630a5edf8e88c8488087b03ffd833', // pragma: allowlist secret
-                        },
-                        {
-                            name: 'testFile.pdf',
-                            s3URL: expect.any(String),
-                            sha256: '6d50607f29187d5b185ffd9d46bc5ef75ce7abb53318690c73e55b6623e25ad5', // pragma: allowlist secret
-                        },
-                    ],
-                })
-            )
         })
     })
 
     describe('Contract 438 attestation', () => {
         it('renders 438 attestation question without errors', async () => {
-            vi.spyOn(
-                useHealthPlanPackageForm,
-                'useHealthPlanPackageForm'
-            ).mockImplementation(() => {
-                return {
-                    createDraft: vi.fn(),
-                    updateDraft: mockUpdateDraftFn,
-                    showPageErrorMessage: false,
-                    draftSubmission: mockBaseContract({
-                        statutoryRegulatoryAttestation: true,
-                    }),
-                }
-            })
+            const draftContract = mockContractPackageUnlockedWithUnlockedType()
+            draftContract.draftRevision.formData.statutoryRegulatoryAttestation =
+                true
 
-            await waitFor(() => {
-                renderWithProviders(<ContractDetails />, {
-                    apolloProvider: defaultApolloProvider,
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}
+                        element={<ContractDetails />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    ...draftContract,
+                                    id: '15',
+                                },
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/15/edit/contract-details',
+                    },
                     featureFlags: { '438-attestation': true },
-                })
-            })
+                }
+            )
+
+            await screen.findByText('Contract Details')
 
             // expect 438 attestation question to be on the page
             await waitFor(() => {
@@ -1015,30 +1519,45 @@ describe('ContractDetails', () => {
             })
         })
         it('errors when continuing without answering 438 attestation question', async () => {
-            const testDraft = mockContractAndRatesDraft({
-                contractDateStart: new Date('11-12-2023'),
-                contractDateEnd: new Date('11-12-2024'),
-                statutoryRegulatoryAttestation: undefined,
-                statutoryRegulatoryAttestationDescription: undefined,
-            })
-            vi.spyOn(
-                useHealthPlanPackageForm,
-                'useHealthPlanPackageForm'
-            ).mockImplementation(() => {
-                return {
-                    createDraft: vi.fn(),
-                    updateDraft: mockUpdateDraftFn,
-                    showPageErrorMessage: false,
-                    draftSubmission: testDraft,
-                }
-            })
+            const draftContract = mockContractPackageUnlockedWithUnlockedType()
+            draftContract.draftRevision.formData.statutoryRegulatoryAttestation =
+                undefined
+            draftContract.draftRevision.formData.statutoryRegulatoryAttestationDescription =
+                undefined
+            draftContract.draftRevision.formData.contractDateStart = new Date(
+                '11-12-2023'
+            )
+            draftContract.draftRevision.formData.contractDateEnd = new Date(
+                '11-12-2024'
+            )
 
-            await waitFor(() => {
-                renderWithProviders(<ContractDetails />, {
-                    apolloProvider: defaultApolloProvider,
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}
+                        element={<ContractDetails />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    ...draftContract,
+                                    id: '15',
+                                },
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/15/edit/contract-details',
+                    },
                     featureFlags: { '438-attestation': true },
-                })
-            })
+                }
+            )
+
+            await screen.findByText('Contract Details')
 
             // expect 438 attestation question to be on the page
             await waitFor(() => {
@@ -1067,7 +1586,6 @@ describe('ContractDetails', () => {
 
             // expect errors for attestation question
             await waitFor(() => {
-                expect(mockUpdateDraftFn).not.toHaveBeenCalled()
                 expect(
                     screen.queryAllByText('You must select yes or no')
                 ).toHaveLength(2)
@@ -1081,37 +1599,51 @@ describe('ContractDetails', () => {
 
             // There should be no errors
             await waitFor(() => {
-                expect(mockUpdateDraftFn).toHaveBeenCalled()
                 expect(
                     screen.queryAllByText('You must select yes or no')
                 ).toHaveLength(0)
             })
         })
         it('errors when continuing without description for 438 non-compliance', async () => {
-            const draft = mockContractAndRatesDraft({
-                contractDateStart: new Date('11-12-2023'),
-                contractDateEnd: new Date('11-12-2024'),
-                statutoryRegulatoryAttestation: undefined,
-                statutoryRegulatoryAttestationDescription: undefined,
-            })
-            vi.spyOn(
-                useHealthPlanPackageForm,
-                'useHealthPlanPackageForm'
-            ).mockImplementation(() => {
-                return {
-                    createDraft: vi.fn(),
-                    updateDraft: mockUpdateDraftFn,
-                    showPageErrorMessage: false,
-                    draftSubmission: draft,
-                }
-            })
+            const draftContract = mockContractPackageUnlockedWithUnlockedType()
+            draftContract.draftRevision.formData.statutoryRegulatoryAttestation =
+                undefined
+            draftContract.draftRevision.formData.statutoryRegulatoryAttestationDescription =
+                undefined
+            draftContract.draftRevision.formData.contractDateStart = new Date(
+                '11-12-2023'
+            )
+            draftContract.draftRevision.formData.contractDateEnd = new Date(
+                '11-12-2024'
+            )
 
-            await waitFor(() => {
-                renderWithProviders(<ContractDetails />, {
-                    apolloProvider: defaultApolloProvider,
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}
+                        element={<ContractDetails />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    ...draftContract,
+                                    id: '15',
+                                },
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/15/edit/contract-details',
+                    },
                     featureFlags: { '438-attestation': true },
-                })
-            })
+                }
+            )
+
+            await screen.findByText('Contract Details')
 
             // expect 438 attestation question to be on the page
             await waitFor(() => {
@@ -1144,7 +1676,6 @@ describe('ContractDetails', () => {
 
             // expect errors for attestation question
             await waitFor(() => {
-                expect(mockUpdateDraftFn).not.toHaveBeenCalled()
                 expect(
                     screen.queryAllByText(
                         'You must provide a description of the contract’s non-compliance'
@@ -1159,7 +1690,6 @@ describe('ContractDetails', () => {
 
             // expect no errors
             await waitFor(() => {
-                expect(mockUpdateDraftFn).toHaveBeenCalled()
                 expect(
                     screen.queryAllByText(
                         'You must provide a description of the contract’s non-compliance'

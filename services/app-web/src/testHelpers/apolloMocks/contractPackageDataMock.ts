@@ -1,5 +1,5 @@
 import { mockMNState } from '../../common-code/healthPlanFormDataMocks/healthPlanFormData'
-import { Contract, ContractFormData, ContractRevision, RateRevision } from '../../gen/gqlClient'
+import { Contract, ContractFormData, ContractRevision, RateRevision, UnlockedContract } from '../../gen/gqlClient'
 import { s3DlUrl } from './documentDataMock'
 
 
@@ -11,6 +11,7 @@ function mockContractRevision(name?: string, partial?: Partial<ContractRevision>
         createdAt: new Date('01/01/2024'),
         updatedAt: new Date('12/31/2024'),
         id: `123${name}`,
+        contractID: `contract-123-${name}`,
         submitInfo: {
             updatedAt: new Date(`2024-02-17T03:2${name}:00`),
             updatedBy: {
@@ -34,13 +35,15 @@ function mockContractRevision(name?: string, partial?: Partial<ContractRevision>
                     s3URL: `s3://bucketname/key/contractsupporting${name}1`,
                     sha256: 'fakesha',
                     name: `contractSupporting${name}1`,
-                    dateAdded: new Date('01/15/2024')
+                    dateAdded: new Date('01/15/2024'),
+                    downloadURL: s3DlUrl,
                 },
                 {
                     s3URL: `s3://bucketname/key/contractsupporting${name}2`,
                     sha256: 'fakesha',
                     name: `contractSupporting${name}2`,
-                    dateAdded: new Date('01/13/2024')
+                    dateAdded: new Date('01/13/2024'),
+                    downloadURL: s3DlUrl,
                 },
             ],
             stateContacts: [],
@@ -51,7 +54,8 @@ function mockContractRevision(name?: string, partial?: Partial<ContractRevision>
                     s3URL: `s3://bucketname/key/contract${name}`,
                     sha256: 'fakesha',
                     name: `contract${name}`,
-                    dateAdded: new Date('2024-02-17')
+                    dateAdded: new Date('2024-02-17'),
+                    downloadURL: s3DlUrl,
                 },
             ],
             contractDateStart: new Date(),
@@ -110,7 +114,6 @@ function mockRateRevision(name?: string, partial?: Partial<RateRevision>): RateR
             },
             updatedReason: 'contract unlock'
         },
-        contractRevisions: [],
         formData: {
             __typename: 'RateFormData',
             rateType: 'AMENDMENT',
@@ -192,6 +195,7 @@ function mockContractPackageDraft(
             submitInfo: undefined,
             unlockInfo: undefined,
             id: '123',
+            contractID: 'test-abc-123',
             createdAt: new Date('01/01/2023'),
             updatedAt: new Date('11/01/2023'),
             contractName: 'MCR-0005-alvhalfhdsalfee',
@@ -212,7 +216,6 @@ function mockContractPackageDraft(
                 draftRevision: {
                     id: '123',
                     rateID: '456',
-                    contractRevisions: [],
                     createdAt: new Date(),
                     updatedAt: new Date(),
                     formData: {
@@ -296,6 +299,7 @@ function mockContractWithLinkedRateDraft(
             submitInfo: undefined,
             unlockInfo: undefined,
             id: '123',
+            contractID: 'test-abc-123',
             createdAt: new Date('01/01/2023'),
             updatedAt: new Date('11/01/2023'),
             contractName: 'MCR-0005-alvhalfhdsalfss',
@@ -363,7 +367,6 @@ function mockContractWithLinkedRateDraft(
                 draftRevision: {
                     id: '123',
                     rateID: 'rate-123',
-                    contractRevisions: [],
                     createdAt: new Date(),
                     updatedAt: new Date(),
                     submitInfo: {
@@ -428,7 +431,6 @@ function mockContractWithLinkedRateDraft(
                 revisions: [{
                     id: '456',
                     rateID: 'rate-123',
-                    contractRevisions: [],
                     createdAt: new Date(),
                     updatedAt: new Date(),
                     submitInfo: undefined,
@@ -512,6 +514,7 @@ function mockContractWithLinkedRateSubmitted(
                 createdAt: new Date('01/01/2024'),
                 updatedAt: new Date('12/31/2024'),
                 id: '123',
+                contractID: 'test-abc-123',
                 submitInfo: {
                     updatedAt: new Date(),
                     updatedBy: {
@@ -583,85 +586,6 @@ function mockContractWithLinkedRateSubmitted(
             {
                 id: '123',
                 rateID: 'rate-123',
-                contractRevisions: [
-                    {
-                        contract: {
-                            id: 'test-abc-123',
-                            stateCode: 'MN',
-                            stateNumber: 5,
-                            mccrsID: undefined,
-                        },
-                        createdAt: new Date('01/01/2024'),
-                        updatedAt: new Date('12/31/2024'),
-                        id: '123',
-                        submitInfo: {
-                            updatedAt: new Date(),
-                            updatedBy: {
-                                email: 'example@state.com',
-                                role: 'STATE_USER',
-                                givenName: 'John',
-                                familyName: 'Vila'
-                            },
-                            updatedReason: 'contract submit'
-                        },
-                        unlockInfo: undefined,
-                        formData: {
-                            programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
-                            populationCovered: 'MEDICAID',
-                            submissionType: 'CONTRACT_AND_RATES',
-                            riskBasedContract: true,
-                            submissionDescription: 'A real submission',
-                            supportingDocuments: [
-                                {
-                                    s3URL: 's3://bucketname/key/contractsupporting1',
-                                    sha256: 'fakesha',
-                                    name: 'contractSupporting1',
-                                    dateAdded: new Date('01/15/2024')
-                                },
-                                {
-                                    s3URL: 's3://bucketname/key/contractSupporting2',
-                                    sha256: 'fakesha',
-                                    name: 'contractSupporting2',
-                                    dateAdded: new Date('01/13/2024')
-                                },
-                            ],
-                            stateContacts: [],
-                            contractType: 'AMENDMENT',
-                            contractExecutionStatus: 'EXECUTED',
-                            contractDocuments: [
-                                {
-                                    s3URL: 's3://bucketname/key/contract',
-                                    sha256: 'fakesha',
-                                    name: 'contract',
-                                    dateAdded: new Date('01/01/2024')
-                                },
-                            ],
-                            contractDateStart: new Date(),
-                            contractDateEnd: new Date(),
-                            managedCareEntities: ['MCO'],
-                            federalAuthorities: ['STATE_PLAN'],
-                            inLieuServicesAndSettings: true,
-                            modifiedBenefitsProvided: true,
-                            modifiedGeoAreaServed: false,
-                            modifiedMedicaidBeneficiaries: true,
-                            modifiedRiskSharingStrategy: true,
-                            modifiedIncentiveArrangements: false,
-                            modifiedWitholdAgreements: false,
-                            modifiedStateDirectedPayments: true,
-                            modifiedPassThroughPayments: true,
-                            modifiedPaymentsForMentalDiseaseInstitutions: false,
-                            modifiedMedicalLossRatioStandards: true,
-                            modifiedOtherFinancialPaymentIncentive: false,
-                            modifiedEnrollmentProcess: true,
-                            modifiedGrevienceAndAppeal: false,
-                            modifiedNetworkAdequacyStandards: true,
-                            modifiedLengthOfContract: false,
-                            modifiedNonRiskPaymentArrangements: true,
-                            statutoryRegulatoryAttestation: true,
-                            statutoryRegulatoryAttestationDescription: "everything meets regulatory attestation"
-                        }
-                    }
-                ],
                 createdAt: new Date('12/18/2023'),
                 updatedAt: new Date('12/18/2023'),
                 formData: {
@@ -741,6 +665,7 @@ function mockContractPackageSubmitted(
                 createdAt: new Date('01/01/2024'),
                 updatedAt:  '2024-12-18T16:54:39.173Z',
                 id: '123',
+                contractID: 'test-abc-123',
                 submitInfo: {
                     updatedAt: new Date(),
                     updatedBy: {
@@ -817,89 +742,6 @@ function mockContractPackageSubmitted(
                     rateID: '123',
                     createdAt: new Date('01/01/2023'),
                     updatedAt: new Date('01/01/2023'),
-                    contractRevisions: [
-                        {
-                            contract: {
-                                id: 'test-abc-123',
-                                stateCode: 'MN',
-                                stateNumber: 5,
-                                mccrsID: undefined,
-                            },
-                            createdAt: new Date('01/01/2024'),
-                            updatedAt:  '2024-12-18T16:54:39.173Z',
-                            id: '123',
-                            submitInfo: {
-                                updatedAt: new Date(),
-                                updatedBy: {
-                                    email: 'example@state.com',
-                                    role: 'STATE_USER',
-                                    givenName: 'John',
-                                    familyName: 'Vila'
-                                },
-                                updatedReason: 'contract submit'
-                            },
-                            unlockInfo: undefined,
-                            formData: {
-                                programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
-                                populationCovered: 'MEDICAID',
-                                submissionType: 'CONTRACT_AND_RATES',
-                                riskBasedContract: true,
-                                submissionDescription: 'A real submission',
-                                supportingDocuments: [
-                                    {
-                                        s3URL: 's3://bucketname/key/contractsupporting1',
-                                        sha256: 'fakesha',
-                                        name: 'contractSupporting1',
-                                        dateAdded: new Date('01/15/2024'),
-                                        downloadURL: s3DlUrl
-                                    },
-                                    {
-                                        s3URL: 's3://bucketname/key/contractSupporting2',
-                                        sha256: 'fakesha',
-                                        name: 'contractSupporting2',
-                                        dateAdded: new Date('01/13/2024'),
-                                        downloadURL: s3DlUrl
-                                    },
-                                ],
-                                stateContacts: [],
-                                contractType: 'AMENDMENT',
-                                contractExecutionStatus: 'EXECUTED',
-                                contractDocuments: [
-                                    {
-                                        s3URL: 's3://bucketname/key/contract',
-                                        sha256: 'fakesha',
-                                        name: 'contract',
-                                        dateAdded: new Date('01/01/2024'),
-                                        downloadURL: s3DlUrl
-                                    },
-                                ],
-                                contractDateStart: new Date(),
-                                contractDateEnd: new Date(),
-                                managedCareEntities: ['MCO'],
-                                federalAuthorities: ['STATE_PLAN'],
-                                inLieuServicesAndSettings: true,
-                                modifiedBenefitsProvided: true,
-                                modifiedGeoAreaServed: false,
-                                modifiedMedicaidBeneficiaries: true,
-                                modifiedRiskSharingStrategy: true,
-                                modifiedIncentiveArrangements: false,
-                                modifiedWitholdAgreements: false,
-                                modifiedStateDirectedPayments: true,
-                                modifiedPassThroughPayments: true,
-                                modifiedPaymentsForMentalDiseaseInstitutions: false,
-                                modifiedMedicalLossRatioStandards: true,
-                                modifiedOtherFinancialPaymentIncentive: false,
-                                modifiedEnrollmentProcess: true,
-                                modifiedGrevienceAndAppeal: false,
-                                modifiedNetworkAdequacyStandards: true,
-                                modifiedLengthOfContract: false,
-                                modifiedNonRiskPaymentArrangements: true,
-                                statutoryRegulatoryAttestation: true,
-                                statutoryRegulatoryAttestationDescription: "everything meets regulatory attestation"
-                            }
-                        }
-                    ],
-                    rate: undefined,
                     formData: {
                         rateCertificationName:'rate cert',
                         rateType: 'AMENDMENT',
@@ -1147,6 +989,7 @@ function mockContractPackageWithDifferentProgramsInRevisions (): Contract {
                        "createdAt": "2024-05-07T19:49:36.173Z",
                        "updatedAt": "2024-05-08T17:42:52.696Z",
                        "contractName": "MCR-FL-0221-DENTAL",
+                       "contractID": "e670adsfdfadsfc",
                        "submitInfo": {
                            "updatedAt": "2024-05-08T17:42:52.696Z",
                            "updatedBy": {
@@ -1240,6 +1083,7 @@ function mockContractPackageWithDifferentProgramsInRevisions (): Contract {
                    "createdAt": "2024-05-07T19:49:36.173Z",
                    "updatedAt": "2024-05-08T17:42:52.696Z",
                    "contractName": "MCR-FL-0221-DENTAL",
+                   "contractID": "e670adsfdfadsfc",
                    "submitInfo": {
                        "updatedAt": "2024-05-08T17:42:52.696Z",
                        "updatedBy": {
@@ -1349,6 +1193,7 @@ function mockContractPackageWithDifferentProgramsInRevisions (): Contract {
                        "createdAt": "2024-05-07T19:44:53.732Z",
                        "updatedAt": "2024-05-07T19:46:19.377Z",
                        "contractName": "MCR-FL-0221-PCCME",
+                       "contractID": "e670adsfdfadsfc",
                        "submitInfo": {
                            "updatedAt": "2024-05-07T19:46:19.376Z",
                            "updatedBy": {
@@ -1424,6 +1269,7 @@ function mockContractPackageWithDifferentProgramsInRevisions (): Contract {
                    "createdAt": "2024-05-07T19:44:53.732Z",
                    "updatedAt": "2024-05-07T19:46:19.377Z",
                    "contractName": "MCR-FL-0221-PCCME",
+                   "contractID": "e670adsfdfadsfc",
                    "submitInfo": {
                        "updatedAt": "2024-05-07T19:46:19.376Z",
                        "updatedBy": {
@@ -1500,12 +1346,12 @@ function mockContractPackageWithDifferentProgramsInRevisions (): Contract {
    }
 }
 
-function mockContractPackageUnlocked(
-    partial?: Partial<Contract>
-): Contract {
+function mockContractPackageUnlockedWithUnlockedType(
+    partial?: Partial<UnlockedContract>
+): UnlockedContract {
     return {
         status: 'UNLOCKED',
-        __typename: 'Contract',
+        __typename: 'UnlockedContract',
         createdAt: '2023-01-01T16:54:39.173Z',
         updatedAt: '2024-12-01T16:54:39.173Z',
         initiallySubmittedAt:'2023-01-01',
@@ -1516,14 +1362,15 @@ function mockContractPackageUnlocked(
         mccrsID: '1234',
         draftRevision: {
             __typename: 'ContractRevision',
+            contractID: 'test-abc-123',
             submitInfo: undefined,
             unlockInfo: {
                 updatedAt: '2023-01-01T16:54:39.173Z',
                 updatedBy: {
                     email: 'cms@example.com',
-                    role: 'CMS_USER',
-                    givenName: 'Zuko',
-                    familyName: 'Hotman'
+                    role: 'STATE_USER',
+                    givenName: 'John',
+                    familyName: 'Vila'
                 },
                 updatedReason: 'unlocked for a test',
             },
@@ -1595,16 +1442,15 @@ function mockContractPackageUnlocked(
                 draftRevision: {
                     id: '123',
                     rateID: '456',
-                    contractRevisions: [],
                     createdAt: new Date(),
                     updatedAt: new Date(),
                     unlockInfo: {
                         updatedAt: new Date(),
                         updatedBy: {
                             email: 'cms@example.com',
-                            role: 'CMS_USER',
-                            givenName: 'Zuko',
-                            familyName: 'Hotman'
+                            role: 'STATE_USER',
+                            givenName: 'John',
+                            familyName: 'Vila'
                         },
                         updatedReason: 'unlocked for a test',
                     },
@@ -1667,6 +1513,7 @@ function mockContractPackageUnlocked(
                     contractName: 'MCR-MN-0005-SNBC',
                     createdAt: new Date('01/01/2024'),
                     updatedAt:  '2023-01-01T16:54:39.173Z',
+                    contractID: 'test-abc-123',
                     submitInfo: {
                         updatedAt: '2023-01-01T16:54:39.173Z',
                         updatedBy: {
@@ -1680,11 +1527,11 @@ function mockContractPackageUnlocked(
                     unlockInfo: {
                         updatedAt: '2023-01-01T16:54:39.173Z',
                         updatedBy: {
-                            email: 'example@cms.com',
-                            role: 'CMS_USER',
-                            givenName: 'Bob',
-                            familyName: 'Vila'
-                        },
+                                email: 'example@state.com',
+                                role: 'STATE_USER',
+                                givenName: 'John',
+                                familyName: 'Vila'
+                            },
                         updatedReason: 'unlocked for a test'
                     },
                     id: '123',
@@ -1733,6 +1580,7 @@ function mockContractPackageUnlocked(
                 }
             ],
             contractRevision: {
+                contractID: 'test-abc-123',
                 contractName: 'MCR-MN-0005-SNBC',
                 createdAt: new Date('01/01/2024'),
                 updatedAt: '2024-01-01T18:54:39.173Z',
@@ -1749,9 +1597,9 @@ function mockContractPackageUnlocked(
                 unlockInfo: {
                     updatedAt: '2024-02-01T16:54:39.173Z',
                     updatedBy: {
-                        email: 'example@cms.com',
-                        role: 'CMS_USER',
-                        givenName: 'Bob',
+                        email: 'example@state.com',
+                        role: 'STATE_USER',
+                        givenName: 'John',
                         familyName: 'Vila'
                     },
                     updatedReason: 'unlocked'
@@ -1804,7 +1652,6 @@ function mockContractPackageUnlocked(
                 {
                     id: '1234',
                     rateID: '456',
-                    rate: undefined,
                     createdAt: new Date('01/01/2023'),
                     updatedAt: new Date('01/01/2023'),
                     submitInfo: {
@@ -1817,7 +1664,6 @@ function mockContractPackageUnlocked(
                         },
                         updatedReason: 'initial submission'
                     },
-                    contractRevisions: [],
                     formData: {
                         rateType: 'AMENDMENT',
                         rateCapitationType: 'RATE_CELL',
@@ -1865,7 +1711,6 @@ function mockContractPackageUnlocked(
         ...partial,
     }
 }
-
 function mockContractFormData( partial?: Partial<ContractFormData>): ContractFormData {
     return {
         programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
@@ -1878,13 +1723,15 @@ function mockContractFormData( partial?: Partial<ContractFormData>): ContractFor
                 s3URL: 's3://bucketname/key/contractsupporting1',
                 sha256: 'fakesha',
                 name: 'contractSupporting1',
-                dateAdded: new Date('01/15/2024')
+                dateAdded: new Date('01/15/2024'),
+                downloadURL: s3DlUrl,
             },
             {
                 s3URL: 's3://bucketname/key/contractSupporting2',
                 sha256: 'fakesha',
                 name: 'contractSupporting2',
-                dateAdded: new Date('01/13/2024')
+                dateAdded: new Date('01/13/2024'),
+                downloadURL: s3DlUrl,
             },
         ],
         stateContacts: [
@@ -1901,7 +1748,8 @@ function mockContractFormData( partial?: Partial<ContractFormData>): ContractFor
                 s3URL: 's3://bucketname/one-two/one-two.png',
                 sha256: 'fakesha',
                 name: 'contract document',
-                dateAdded: new Date('01/01/2024')
+                dateAdded: new Date('01/01/2024'),
+                downloadURL: s3DlUrl,
             },
         ],
         contractDateStart: new Date('01/01/2023'),
@@ -1956,13 +1804,15 @@ const mockEmptyDraftContractAndRate = (): Contract => mockContractPackageDraft(
                         s3URL: 's3://bucketname/key/contractsupporting1',
                         sha256: 'fakesha',
                         name: 'contractSupporting1',
-                        dateAdded: new Date('01/15/2024')
+                        dateAdded: new Date('01/15/2024'),
+                        downloadURL: s3DlUrl,
                     },
                     {
                         s3URL: 's3://bucketname/key/contractSupporting2',
                         sha256: 'fakesha',
                         name: 'contractSupporting2',
-                        dateAdded: new Date('01/13/2024')
+                        dateAdded: new Date('01/13/2024'),
+                        downloadURL: s3DlUrl,
                     },
                 ],
                 stateContacts: [],
@@ -1973,7 +1823,8 @@ const mockEmptyDraftContractAndRate = (): Contract => mockContractPackageDraft(
                         s3URL: 's3://bucketname/one-two/one-two.png',
                         sha256: 'fakesha',
                         name: 'contract document',
-                        dateAdded: new Date('01/01/2024')
+                        dateAdded: new Date('01/01/2024'),
+                        downloadURL: s3DlUrl,
                     },
                 ],
                 contractDateStart:undefined,
@@ -2015,7 +1866,6 @@ const mockEmptyDraftContractAndRate = (): Contract => mockContractPackageDraft(
                 draftRevision: {
                     id: '123',
                     rateID: '456',
-                    contractRevisions: [],
                     createdAt: new Date(),
                     updatedAt: new Date(),
                     formData: {
@@ -2026,7 +1876,8 @@ const mockEmptyDraftContractAndRate = (): Contract => mockContractPackageDraft(
                                 s3URL: 's3://bucketname/key/rate',
                                 sha256: 'fakesha',
                                 name: 'rate certification',
-                                dateAdded: new Date('01/13/2024')
+                                dateAdded: new Date('01/13/2024'),
+                                downloadURL: s3DlUrl,
                             },
                         ],
                         supportingDocuments: [
@@ -2034,13 +1885,15 @@ const mockEmptyDraftContractAndRate = (): Contract => mockContractPackageDraft(
                                 s3URL: 's3://bucketname/key/ratesupporting1',
                                 sha256: 'fakesha',
                                 name: 'rateSupporting1',
-                                dateAdded: new Date('01/15/2024')
+                                dateAdded: new Date('01/15/2024'),
+                                downloadURL: s3DlUrl,
                             },
                             {
                                 s3URL: 's3://bucketname/key/rateSupporting2',
                                 sha256: 'fakesha',
                                 name: 'rateSupporting2',
-                                dateAdded: new Date('01/13/2024')
+                                dateAdded: new Date('01/13/2024'),
+                                downloadURL: s3DlUrl,
                             },
                         ],
                         rateDateStart: undefined,
@@ -2080,15 +1933,15 @@ const mockEmptyDraftContractAndRate = (): Contract => mockContractPackageDraft(
 )
 
 export {
+    mockContractRevision,
     mockContractPackageDraft,
     mockContractPackageSubmitted,
     mockContractWithLinkedRateSubmitted,
     mockContractWithLinkedRateDraft,
-    mockContractPackageUnlocked,
     mockContractFormData,
     mockContractPackageSubmittedWithRevisions,
     mockContractPackageWithDifferentProgramsInRevisions,
     mockEmptyDraftContractAndRate,
-    mockContractRevision,
+    mockContractPackageUnlockedWithUnlockedType,
     mockRateRevision
 }

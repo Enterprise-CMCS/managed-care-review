@@ -4,8 +4,8 @@ import { AdminUser } from '../../../gen/gqlClient'
 import { renderWithProviders } from '../../../testHelpers'
 import {
     fetchCurrentUserMock,
-    updateUserMockError,
-    updateUserMockSuccess,
+    updateDivisionMockSuccess,
+    updateDivisionMockError,
     indexUsersQueryMock,
 } from '../../../testHelpers/apolloMocks'
 import { CMSUsersTable } from './CMSUsersTable'
@@ -68,9 +68,8 @@ describe('CMSUsersTable', () => {
                         user: mockValidAdminUser(),
                         statusCode: 200,
                     }),
-                    updateUserMockSuccess({
+                    updateDivisionMockSuccess({
                         cmsUserID: '1',
-                        stateAssignments: [],
                         divisionAssignment: 'OACT',
                     }),
                 ],
@@ -114,9 +113,8 @@ describe('CMSUsersTable', () => {
                         user: mockValidAdminUser(),
                         statusCode: 200,
                     }),
-                    updateUserMockError({
+                    updateDivisionMockError({
                         cmsUserID: '1',
-                        stateAssignments: [],
                         divisionAssignment: 'OACT',
                     }),
                 ],

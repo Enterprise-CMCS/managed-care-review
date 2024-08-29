@@ -1,27 +1,36 @@
 import { formatCalendarDate } from '../../../../app-web/src/common-code/dateHelpers'
-import type { ContractRevisionWithRatesType } from '../../domain-models'
+import type { UnlockedContractType } from '../../domain-models'
 import { packageName as generatePackageName } from '../../common-code/healthPlanFormDataType'
 
 import {
     stripHTMLFromTemplate,
     renderTemplate,
     findContractPrograms,
-    generateCMSReviewerEmailsForContract,
+    generateCMSReviewerEmailsForUnlockedContract,
 } from '../templateHelpers'
 import type { EmailData, EmailConfiguration, StateAnalystsEmails } from '../'
 import type { ProgramType, UpdateInfoType } from '../../domain-models'
 
 export const unlockContractCMSEmail = async (
-    contractRev: ContractRevisionWithRatesType,
+    contract: UnlockedContractType,
     updateInfo: UpdateInfoType,
     config: EmailConfiguration,
     stateAnalystsEmails: StateAnalystsEmails,
     statePrograms: ProgramType[]
 ): Promise<EmailData | Error> => {
     const isTestEnvironment = config.stage !== 'prod'
-    const reviewerEmails = generateCMSReviewerEmailsForContract(
+    const contractRev = contract.draftRevision
+    const rateRevs = contract.draftRates.map((rate) => {
+        if (rate.draftRevision) {
+            return rate.draftRevision
+        } else {
+            return rate.packageSubmissions[0].rateRevision
+        }
+    })
+
+    const reviewerEmails = generateCMSReviewerEmailsForUnlockedContract(
         config,
-        contractRev,
+        contract,
         stateAnalystsEmails
     )
 
@@ -36,8 +45,8 @@ export const unlockContractCMSEmail = async (
     }
 
     const packageName = generatePackageName(
-        contractRev.contract.stateCode,
-        contractRev.contract.stateNumber,
+        contract.stateCode,
+        contract.stateNumber,
         contractRev.formData.programIDs,
         packagePrograms
     )
@@ -54,7 +63,7 @@ export const unlockContractCMSEmail = async (
             contractRev.formData.submissionType === 'CONTRACT_AND_RATES',
         rateInfos:
             isContractAndRates &&
-            contractRev.rateRevisions.map((rate) => ({
+            rateRevs.map((rate) => ({
                 rateName: rate.formData.rateCertificationName,
             })),
     }
@@ -68,6 +77,7 @@ export const unlockContractCMSEmail = async (
     } else {
         return {
             toAddresses: reviewerEmails,
+            replyToAddresses: [],
             sourceEmail: config.emailSource,
             subject: `${
                 isTestEnvironment ? `[${config.stage}] ` : ''

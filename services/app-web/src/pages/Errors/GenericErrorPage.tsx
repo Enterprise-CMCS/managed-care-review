@@ -1,13 +1,11 @@
 import React from 'react'
-import { useStringConstants } from '../../hooks/useStringConstants'
 import styles from './Errors.module.scss'
 
-import { PageHeading, LinkWithLogging } from '../../components'
+import { PageHeading } from '../../components'
 import { GridContainer } from '@trussworks/react-uswds'
+import { ContactSupportLink } from '../../components/ErrorAlert/ContactSupportLink'
 
 export const GenericErrorPage = (): React.ReactElement => {
-    const stringConstants = useStringConstants()
-    const MAIL_TO_SUPPORT = stringConstants.MAIL_TO_SUPPORT
     return (
         <section className={styles.errorsContainer}>
             <GridContainer>
@@ -18,14 +16,7 @@ export const GenericErrorPage = (): React.ReactElement => {
                         your browser and if you continue to experience an
                         error,&nbsp;
                     </span>
-                    <LinkWithLogging
-                        href={`mailto: ${MAIL_TO_SUPPORT}, mc-review-team@truss.works`}
-                        variant="unstyled"
-                        target="_blank"
-                        rel="noreferrer"
-                    >
-                        let us know.
-                    </LinkWithLogging>
+                    <ContactSupportLink/>
                 </p>
             </GridContainer>
         </section>

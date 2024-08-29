@@ -10,7 +10,7 @@ const featureFlags = {
         flag: '438-attestation',
         defaultValue: false,
     },
-     /**
+    /**
      * Enables state and CMS rate edit, unlock, resubmit functionality
      */
     RATE_EDIT_UNLOCK: {
@@ -22,7 +22,7 @@ const featureFlags = {
     /**
      Enables the modal that alerts the user to an expiring session
     */
-     SESSION_EXPIRING_MODAL: {
+    SESSION_EXPIRING_MODAL: {
         flag: 'session-expiring-modal',
         defaultValue: true,
     },
@@ -36,7 +36,7 @@ const featureFlags = {
     /**
      Toggles the site maintenance alert on the landing page
     */
-     SITE_UNDER_MAINTENANCE_BANNER: {
+    SITE_UNDER_MAINTENANCE_BANNER: {
         flag: 'site-under-maintenance-banner',
         defaultValue: 'OFF',
     },

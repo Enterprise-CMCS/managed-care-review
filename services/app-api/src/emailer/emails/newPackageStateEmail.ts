@@ -101,6 +101,7 @@ export const newPackageStateEmail = async (
     } else {
         return {
             toAddresses: receiverEmails,
+            replyToAddresses: [],
             sourceEmail: config.emailSource,
             subject: `${
                 config.stage !== 'prod' ? `[${config.stage}] ` : ''

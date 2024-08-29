@@ -29,8 +29,8 @@ import './apiCommands'
 import './accessibilityCommands'
 import { Contract, HealthPlanPackage } from '../gen/gqlClient';
 import { CMSUserType, DivisionType } from '../utils/apollo-test-utils';
-import { StateUserType } from 'app-api/src/domain-models';
-import { UnlockedHealthPlanFormDataType } from 'app-web/src/common-code/healthPlanFormDataType'
+import { StateUserType } from '../../app-api/src/domain-models';
+import { UnlockedHealthPlanFormDataType } from '../../app-web/src/common-code/healthPlanFormDataType'
 
 type FormButtonKey =
     | 'CONTINUE_FROM_START_NEW'
@@ -53,6 +53,7 @@ declare global {
             // state submission form commands
             waitForDocumentsToLoad(): void
             startNewContractOnlySubmissionWithBaseContract(): void
+            startNewContractOnlySubmissionWithBaseContractV2(): void
             startNewContractOnlySubmissionWithAmendment(): void
             startNewContractAndRatesSubmission(): void
             fillOutContractActionOnlyWithBaseContract(): void
@@ -78,6 +79,10 @@ declare global {
                 waitForLoad?: boolean
             ): void
             navigateContractRatesForm(
+                buttonName: FormButtonKey,
+                waitForLoad?: boolean
+            ): void
+            navigateContractForm(
                 buttonName: FormButtonKey,
                 waitForLoad?: boolean
             ): void

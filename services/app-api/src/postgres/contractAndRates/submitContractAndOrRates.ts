@@ -310,7 +310,7 @@ async function submitContractAndOrRates(
                 if (
                     !currentSubmittedRateConnections[
                         submittedRateRev.rateID
-                    ].includes(previousConnection.contractRevision.contractID)
+                    ]?.includes(previousConnection.contractRevision.contractID)
                 ) {
                     // this previous submission was connected to a now disconnected rate.
                     submissionRelatedContractRevs.push(

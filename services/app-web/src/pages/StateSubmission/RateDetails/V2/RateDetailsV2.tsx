@@ -8,6 +8,7 @@ import {
     ButtonWithLogging,
     DynamicStepIndicator,
     ErrorSummary,
+    FormNotificationContainer,
     SectionCard,
 } from '../../../../components'
 import { RateDetailsFormSchema } from '../RateDetailsSchema'
@@ -373,7 +374,7 @@ const RateDetails = ({
 
     return (
         <>
-            <div>
+            <FormNotificationContainer>
                 {!displayAsStandaloneRate && (
                     <DynamicStepIndicator
                         formPages={STATE_SUBMISSION_FORM_ROUTES}
@@ -392,7 +393,7 @@ const RateDetails = ({
                         showPageErrorMessage={showAPIErrorBanner}
                     />
                 )}
-            </div>
+            </FormNotificationContainer>
 
             <Formik
                 initialValues={initialValues}

@@ -1,6 +1,5 @@
 import {
     GridContainer,
-    Icon,
     Link,
     ModalRef,
     ModalToggleButton,
@@ -15,7 +14,6 @@ import {
     SubmissionUnlockedBanner,
     SubmissionUpdatedBanner,
     DocumentWarningBanner,
-    NavLinkWithLogging,
     LinkWithLogging,
 } from '../../components'
 import { Loading } from '../../components'
@@ -202,52 +200,50 @@ export const SubmissionSummary = (): React.ReactElement => {
                     <DocumentWarningBanner className={styles.banner} />
                 )}
 
-                    <SubmissionTypeSummarySection
-                        subHeaderComponent={
-                            hasCMSPermissions ? (
-                                <div className={styles.subHeader}>
-                                    {contract.mccrsID && (
-                                        <span className={styles.mccrsID}>
-                                            MC-CRS record number:
-                                            <Link
-                                                href={`https://mccrs.internal.cms.gov/Home/Index/${contract.mccrsID}`}
-                                                aria-label="MC-CRS system login"
-                                            >
-                                                {contract.mccrsID}
-                                            </Link>
-                                        </span>
-                                    )}
-                                    <LinkWithLogging
-                                        href={`/submissions/${contract.id}/mccrs-record-number`}
-                                        className={
-                                            contract.mccrsID
-                                                ? styles.editLink
-                                                : ''
-                                        }
-                                        aria-label={editOrAddMCCRSID}
-                                    >
-                                        {editOrAddMCCRSID}
-                                    </LinkWithLogging>
-                                </div>
-                            ) : undefined
-                        }
-                        contract={contract}
-                        submissionName={name}
-                        headerChildComponent={
-                            hasCMSPermissions ? (
-                                <UnlockModalButton
-                                    modalRef={modalRef}
-                                    disabled={['DRAFT', 'UNLOCKED'].includes(
-                                        contract.status
-                                    )}
-                                />
-                            ) : undefined
-                        }
-                        statePrograms={statePrograms}
-                        initiallySubmittedAt={contract.initiallySubmittedAt}
-                        isStateUser={isStateUser}
-                        explainMissingData={explainMissingData}
-                    />
+                <SubmissionTypeSummarySection
+                    subHeaderComponent={
+                        hasCMSPermissions ? (
+                            <div className={styles.subHeader}>
+                                {contract.mccrsID && (
+                                    <span className={styles.mccrsID}>
+                                        MC-CRS record number:
+                                        <Link
+                                            href={`https://mccrs.internal.cms.gov/Home/Index/${contract.mccrsID}`}
+                                            aria-label="MC-CRS system login"
+                                        >
+                                            {contract.mccrsID}
+                                        </Link>
+                                    </span>
+                                )}
+                                <LinkWithLogging
+                                    href={`/submissions/${contract.id}/mccrs-record-number`}
+                                    className={
+                                        contract.mccrsID ? styles.editLink : ''
+                                    }
+                                    aria-label={editOrAddMCCRSID}
+                                >
+                                    {editOrAddMCCRSID}
+                                </LinkWithLogging>
+                            </div>
+                        ) : undefined
+                    }
+                    contract={contract}
+                    submissionName={name}
+                    headerChildComponent={
+                        hasCMSPermissions ? (
+                            <UnlockModalButton
+                                modalRef={modalRef}
+                                disabled={['DRAFT', 'UNLOCKED'].includes(
+                                    contract.status
+                                )}
+                            />
+                        ) : undefined
+                    }
+                    statePrograms={statePrograms}
+                    initiallySubmittedAt={contract.initiallySubmittedAt}
+                    isStateUser={isStateUser}
+                    explainMissingData={explainMissingData}
+                />
 
                 {
                     <ContractDetailsSummarySection

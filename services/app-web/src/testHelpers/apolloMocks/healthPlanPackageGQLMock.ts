@@ -37,7 +37,7 @@ import {
     GraphQLErrorCauseTypes,
     GraphQLErrorCodeTypes,
 } from './apolloErrorCodeMocks'
-import { mockContractPackageUnlocked } from './contractPackageDataMock'
+import { mockContractPackageUnlockedWithUnlockedType } from './contractPackageDataMock'
 
 /*
     DEPRECATED - Remove after Wave 2
@@ -549,8 +549,14 @@ type unlockContractMockSuccessProps = {
     reason: string
 }
 
+const transformUnlockedContractToContract = (contract: UnlockedContract): Contract => {
+    return {
+        ...contract,
+        __typename: 'Contract',
+    }
+}
 const unlockContractMockSuccess = ({
-    contract = mockContractPackageUnlocked(),
+    contract = transformUnlockedContractToContract(mockContractPackageUnlockedWithUnlockedType()),
     id,
     reason,
 }: unlockContractMockSuccessProps): MockedResponse<UnlockContractMutation> => {

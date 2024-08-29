@@ -19,11 +19,12 @@ import {
 } from './questionResponse'
 import {
     fetchCurrentUserResolver,
-    updateCMSUserResolver,
+    updateDivisionAssignment,
     stateUserResolver,
     cmsUserResolver,
     indexUsersResolver,
     cmsApproverUserResolver,
+    updateStateAssignment,
 } from './user'
 import type { EmailParameterStore } from '../parameterStore'
 import type { LDService } from '../launchDarkly/launchDarkly'
@@ -50,6 +51,7 @@ import type { S3ClientT } from '../s3'
 import { createContract } from './contract/createContract'
 import { updateContractDraftRevision } from './contract/updateContractDraftRevision'
 import { withdrawAndReplaceRedundantRateResolver } from './contract/withdrawAndReplaceRedundantRate'
+import { fetchMcReviewSettings } from './settings'
 
 export function configureResolvers(
     store: Store,
@@ -74,6 +76,7 @@ export function configureResolvers(
                 emailer,
                 emailParameterStore
             ),
+            fetchMcReviewSettings: fetchMcReviewSettings(store, emailer),
             // Rates refactor
             indexRates: indexRatesResolver(store),
             fetchRate: fetchRateResolver(store),
@@ -118,7 +121,8 @@ export function configureResolvers(
             updateDraftContractRates: updateDraftContractRates(store),
             withdrawAndReplaceRedundantRate:
                 withdrawAndReplaceRedundantRateResolver(store),
-            updateCMSUser: updateCMSUserResolver(store),
+            updateDivisionAssignment: updateDivisionAssignment(store),
+            updateStateAssignment: updateStateAssignment(store),
             createQuestion: createQuestionResolver(
                 store,
                 emailParameterStore,

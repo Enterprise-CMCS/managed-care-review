@@ -8,7 +8,10 @@ import {
 } from '../../../testHelpers/apolloMocks'
 import { Route, Routes } from 'react-router-dom'
 import { RoutesRecord } from '../../../constants'
-import { mockContractPackageDraft, mockContractPackageUnlocked } from '../../../testHelpers/apolloMocks/contractPackageDataMock'
+import {
+    mockContractPackageDraft,
+    mockContractPackageUnlockedWithUnlockedType,
+} from '../../../testHelpers/apolloMocks/contractPackageDataMock'
 
 describe('ReviewSubmit', () => {
     it('renders without errors', async () => {
@@ -135,7 +138,10 @@ describe('ReviewSubmit', () => {
                     mocks: [
                         fetchCurrentUserMock({ statusCode: 200 }),
                         fetchContractMockSuccess({
-                            contract: {  ...mockContractPackageDraft(),id: 'test-abc-123' },
+                            contract: {
+                                ...mockContractPackageDraft(),
+                                id: 'test-abc-123',
+                            },
                         }),
                     ],
                 },
@@ -172,7 +178,7 @@ describe('ReviewSubmit', () => {
 
     it('extracts the correct dates from unlocked submission and displays them in tables', async () => {
         const contractMock = fetchContractMockSuccess({
-            contract: mockContractPackageUnlocked(),
+            contract: mockContractPackageUnlockedWithUnlockedType(),
         })
 
         renderWithProviders(
@@ -219,7 +225,10 @@ describe('ReviewSubmit', () => {
                     mocks: [
                         fetchCurrentUserMock({ statusCode: 200 }),
                         fetchContractMockSuccess({
-                            contract: {  ...mockContractPackageDraft(), id: 'test-abc-123' },
+                            contract: {
+                                ...mockContractPackageDraft(),
+                                id: 'test-abc-123',
+                            },
                         }),
                     ],
                 },
@@ -259,7 +268,8 @@ describe('ReviewSubmit', () => {
                             user: mockValidStateUser(),
                         }),
                         fetchContractMockSuccess({
-                            contract: mockContractPackageUnlocked(),
+                            contract:
+                                mockContractPackageUnlockedWithUnlockedType(),
                         }),
                     ],
                 },
@@ -296,7 +306,8 @@ describe('ReviewSubmit', () => {
                             user: mockValidStateUser(),
                         }),
                         fetchContractMockSuccess({
-                            contract: mockContractPackageUnlocked(),
+                            contract:
+                                mockContractPackageUnlockedWithUnlockedType(),
                         }),
                     ],
                 },

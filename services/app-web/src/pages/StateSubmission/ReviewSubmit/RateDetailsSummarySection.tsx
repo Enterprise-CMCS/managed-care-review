@@ -20,6 +20,7 @@ import { SectionCard } from '../../../components/SectionCard'
 import {
     Rate,
     Contract,
+    UnlockedContract,
     ContractRevision,
     Program,
     RateRevision,
@@ -42,7 +43,7 @@ import classnames from 'classnames'
 import { hasCMSUserPermissions } from '../../../gqlHelpers'
 
 export type RateDetailsSummarySectionProps = {
-    contract: Contract
+    contract: Contract | UnlockedContract
     contractRev?: ContractRevision
     rateRevisions?: RateRevisionWithIsLinked[]
     editNavigateTo?: string
@@ -113,7 +114,7 @@ export const RateDetailsSummarySection = ({
     const lastSubmittedDate = isPreviousSubmission
         ? getPackageSubmissionAtIndex(contract, lastSubmittedIndex)?.submitInfo
               .updatedAt
-        : getLastContractSubmission(contract)?.submitInfo.updatedAt ?? null
+        : (getLastContractSubmission(contract)?.submitInfo.updatedAt ?? null)
 
     const { getKey, getBulkDlURL } = useS3()
     const [zippedFilesURL, setZippedFilesURL] = useState<
@@ -296,7 +297,7 @@ export const RateDetailsSummarySection = ({
                           rateFormData.rateProgramIDs.length === 0
                       const isLinkedRate = rateRev.isLinked
                       // Is this rate linked to by another contract
-                      const isLinkedTo = rateRev.contractRevisions.length > 1
+                      const isLinkedTo = rateRev.isLinked
 
                       /**
                     Rate programs switched in summer 2024. We still show deprecated program field values when

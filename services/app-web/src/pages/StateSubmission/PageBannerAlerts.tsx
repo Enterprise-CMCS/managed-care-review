@@ -4,7 +4,6 @@ import {
     SubmissionUnlockedBanner,
 } from '../../components'
 import { UpdateInformation, User } from '../../gen/gqlClient'
-import styles from './StateSubmissionForm.module.scss'
 
 const PageBannerAlerts = ({
     showPageErrorMessage,
@@ -26,7 +25,6 @@ const PageBannerAlerts = ({
             )}
             {unlockedInfo && (
                 <SubmissionUnlockedBanner
-                    className={styles.banner}
                     loggedInUser={loggedInUser}
                     unlockedInfo={unlockedInfo}
                 />

@@ -23,7 +23,7 @@ Cypress.Commands.add('assignDivisionToCMSUser', ({
                 })
             })
 
-            cy.wait('@updateCMSUserMutation', { timeout: 20_000 })
+            cy.wait('@updateDivisionAssignmentMutation', { timeout: 20_000 })
 
             // Assigned division to CMS user should now match the one passed into the command.
             cy.findByText(division).should('exist')
