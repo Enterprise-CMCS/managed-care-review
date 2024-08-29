@@ -123,7 +123,7 @@ declare global {
             interceptGraphQL(): void
 
             // Accessibility Commands
-            checkA11yWithSection508(): void
+            checkA11yWithWcag22aa(): void
         }
     }
 }

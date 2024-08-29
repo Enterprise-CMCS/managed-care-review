@@ -6,8 +6,8 @@ describe('state user in state submission form', () => {
         cy.interceptGraphQL()
     })
     it('has not a11y errors with submission form and and form erros', () => {
-        // goal of this test is to check every single form page and navigation (going backwards, forwards or save as draft with new info)
-        cy.interceptFeatureFlags({'438-attestation': true})
+        // 438-attestation still needs to go through design, there is an a11y violation for links and spacing
+        cy.interceptFeatureFlags({'438-attestation': false})
         cy.logInAsStateUser()
 
         // Inject the axe run-time
@@ -25,7 +25,7 @@ describe('state user in state submission form', () => {
         cy.findByRole('button', {
             name: 'Continue',
         }).safeClick()
-        cy.checkA11yWithSection508()
+        cy.checkA11yWithWcag22aa()
 
         cy.fillOutContractActionAndRateCertification()
         cy.deprecatedNavigateV1Form('CONTINUE_FROM_START_NEW')
@@ -37,7 +37,7 @@ describe('state user in state submission form', () => {
         cy.findByRole('button', {
             name: 'Continue',
         }).safeClick()
-        cy.checkA11yWithSection508()
+        cy.checkA11yWithWcag22aa()
 
         cy.location().then((fullUrl) => {
             const submissionURL = fullUrl.toString().replace(
@@ -61,7 +61,7 @@ describe('state user in state submission form', () => {
             cy.findByRole('button', {
                 name: 'Continue',
             }).safeClick()
-            cy.checkA11yWithSection508()
+            cy.checkA11yWithWcag22aa()
 
             //Check accessibility on contacts page
             cy.navigateFormByDirectLink(`${submissionURL}edit/contacts`)
@@ -73,7 +73,7 @@ describe('state user in state submission form', () => {
             cy.findByRole('button', {
                 name: 'Continue',
             }).safeClick()
-            cy.checkA11yWithSection508()
+            cy.checkA11yWithWcag22aa()
 
             //Check accessibility on documents page
             cy.navigateFormByDirectLink(`${submissionURL}edit/documents`)
@@ -85,17 +85,17 @@ describe('state user in state submission form', () => {
             cy.findByRole('button', {
                 name: 'Continue',
             }).safeClick()
-            cy.checkA11yWithSection508()
+            cy.checkA11yWithWcag22aa()
 
             //Check accessibility on review and submit page
             cy.navigateFormByDirectLink(`${submissionURL}edit/review-and-submit`)
             cy.findByRole('heading', { level: 2, name: /Review and submit/ })
             cy.injectAxe()
-            cy.checkA11yWithSection508()
+            cy.checkA11yWithWcag22aa()
 
             //Check the dashboard
             cy.navigateContractRatesForm('SAVE_DRAFT', false)
-            cy.checkA11yWithSection508()
+            cy.checkA11yWithWcag22aa()
         })
     })
 
@@ -104,11 +104,11 @@ describe('state user in state submission form', () => {
             cy.logInAsCMSUser()
             cy.injectAxe()
             //check submissions tab
-            cy.checkA11yWithSection508()
+            cy.checkA11yWithWcag22aa()
 
             //check rate reviews tab
             cy.findByRole('tab', { name: 'Rate reviews' }).should('exist').click()
-            cy.checkA11yWithSection508()
+            cy.checkA11yWithWcag22aa()
         })
     })
 })

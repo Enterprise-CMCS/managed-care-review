@@ -20,12 +20,12 @@ function terminalLog(violations: Record<string, any>[]) {
 }
 
 Cypress.Commands.add(
-    'checkA11yWithSection508',
+    'checkA11yWithWcag22aa',
     () => {
         cy.checkA11y('', {
             runOnly: {
                 type: 'tag',
-                values: ['section508']
+                values: ['wcag22aa']
             },
         }, terminalLog)
     }
