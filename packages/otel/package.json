@@ -1,5 +1,5 @@
 {
-    "name": "@mc-review/otel-helpers",
+    "name": "@mc-review/otel",
     "version": "1.0.0",
     "main": "build/index.js",
     "scripts": {

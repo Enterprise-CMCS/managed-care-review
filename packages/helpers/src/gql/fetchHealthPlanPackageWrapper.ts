@@ -14,7 +14,7 @@ import {
     WrappedApolloResultType,
 } from './apolloQueryWrapper'
 import { QueryFunctionOptions } from '@apollo/client'
-import { recordJSException } from '@mc-review/otel-helpers'
+import { recordJSException } from '@mc-review/otel'
 import { DocumentDateLookupTableType, makeDocumentDateTable } from '../document'
 
 // ExpandedRevisionsType - HPP revision plus an additional formData field containing values of formDataProto decoded into typescript

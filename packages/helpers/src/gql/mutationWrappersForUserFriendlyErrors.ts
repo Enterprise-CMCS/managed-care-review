@@ -20,7 +20,7 @@ import {
 } from '../gen/gqlClient'
 import { ApolloError, GraphQLErrors } from '@apollo/client/errors'
 
-import { recordJSException } from '@mc-review/otel-helpers'
+import { recordJSException } from '@mc-review/otel'
 import { handleGQLErrors as handleGQLErrorLogging } from './apolloErrors'
 import { ERROR_MESSAGES } from '@mc-review/constants'
 /*

@@ -10,7 +10,7 @@
         "@mc-review/constants": "workspace:*",
         "@mc-review/hpp": "workspace:*",
         "@mc-review/mocks": "workspace:*",
-        "@mc-review/otel-helpers": "workspace:*",
+        "@mc-review/otel": "workspace:*",
         "typescript": "4.9.5",
         "url-parse": "^1.5.10"
     },

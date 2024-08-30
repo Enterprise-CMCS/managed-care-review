@@ -124,9 +124,9 @@ importers:
       '@mc-review/mocks':
         specifier: workspace:*
         version: link:../mocks
-      '@mc-review/otel-helpers':
+      '@mc-review/otel':
         specifier: workspace:*
-        version: link:../otel-helpers
+        version: link:../otel
       typescript:
         specifier: 4.9.5
         version: 4.9.5
@@ -200,7 +200,7 @@ importers:
         specifier: ^9.0.0
         version: 9.0.8
 
-  packages/otel-helpers:
+  packages/otel:
     dependencies:
       '@opentelemetry/api':
         specifier: ^1.6.0
