@@ -109,6 +109,9 @@ resources:
             - Effect: Allow
               Action: ${param:githubActionsAllowedAwsActions}
               Resource: '*'
+            - Effect: Allow
+              Action: 'sts:AssumeRole'
+              Resource: !Sub 'arn:aws:iam::${AWS::AccountId}:role/delegatedadmin/developer/ct-cmcs-mac-fc-dso-metrics-report-events-role'
         Roles: [!Ref 'GitHubActionsServiceRole']
     GitHubActionsServiceRole:
       Type: AWS::IAM::Role
