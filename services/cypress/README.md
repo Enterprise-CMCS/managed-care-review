@@ -77,6 +77,8 @@ Our implementation is almost exactly like the [documentation](https://github.com
 To run axe inject the `axe-core` runtime using `cy.injectAxe()` after `cy.visit()`. Then you can call the custom command `cy.checkA11yWithWcag22aa()` to check a11y against the page. Each time you use `cy.visit()` you will need to inject the runtime again.
 
 The `checkA11yWithWcag22aa` command configures `cy.checkA11y()` with the WCAG 2.2 AA standard we use for the MC-Review app. In the `cy.checkA11y()` there are more options we can configure the check with. The options are specified in the [axe-core documentation](https://www.deque.com/axe/core-documentation/api-documentation).
+
+In the example below, you will notice that there are more than the WCAG 2.2 AA standard being used in the test. This is because the rules for each standard are not cumulative. So in order to test all rules, all the standards must be included. If we only include `'wcag22aa'` then only the specific rules added in for that standard will be tested.
 ```typescript
 Cypress.Commands.add(
     'checkA11yWithWcag22aa',
@@ -84,7 +86,7 @@ Cypress.Commands.add(
         cy.checkA11y('', {
             runOnly: {
                 type: 'tag',
-                values: ['wcag22aa']
+                values: ['wcag2a','wcag2aa', 'wcag21a', 'wcag21aa','wcag22aa']
             },
         }, terminalLog)
     }
