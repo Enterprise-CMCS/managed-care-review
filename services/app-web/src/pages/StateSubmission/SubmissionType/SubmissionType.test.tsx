@@ -2,10 +2,10 @@
 import userEvent from '@testing-library/user-event'
 import { screen, waitFor, within } from '@testing-library/react'
 import selectEvent from 'react-select-event'
-import { fetchCurrentUserMock } from '../../../testHelpers/apolloMocks'
+import { fetchCurrentUserMock } from '@mc-review/mocks'
 import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import { SubmissionType } from './'
-import { contractOnly } from '../../../common-code/healthPlanFormDataMocks'
+import { contractOnly } from '@mc-review/hpp'
 import * as useRouteParams from '../../../hooks/useRouteParams'
 import * as useHealthPlanPackageForm from '../../../hooks/useHealthPlanPackageForm'
 

@@ -4,7 +4,7 @@ import { generatePath, useNavigate } from 'react-router-dom'
 import { v4 as uuidv4 } from 'uuid'
 
 import styles from '../StateSubmissionForm.module.scss'
-import { SubmissionDocument } from '../../../common-code/healthPlanFormDataType'
+import { SubmissionDocument } from '@mc-review/hpp'
 import { useS3 } from '../../../contexts/S3Context'
 import { isS3Error } from '../../../s3'
 import {
@@ -17,7 +17,7 @@ import { PageActions } from '../PageActions'
 import classNames from 'classnames'
 import { ErrorSummary } from '../../../components/Form'
 import { activeFormPages } from '../StateSubmissionForm'
-import { RoutesRecord } from '../../../constants'
+import { RoutesRecord } from '@mc-review/constants'
 import { FormContainer } from '../FormContainer'
 import { useAuth } from '../../../contexts/AuthContext'
 import {

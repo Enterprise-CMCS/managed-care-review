@@ -13,7 +13,7 @@ import { generatePath, useNavigate } from 'react-router-dom'
 
 import styles from '../StateSubmissionForm.module.scss'
 
-import { StateContact } from '../../../common-code/healthPlanFormDataType'
+import { StateContact } from '@mc-review/hpp'
 
 import { ErrorSummary, FieldTextInput } from '../../../components/Form'
 
@@ -23,7 +23,7 @@ import {
     activeFormPages,
     type HealthPlanFormPageProps,
 } from '../StateSubmissionForm'
-import { RoutesRecord } from '../../../constants'
+import { RoutesRecord } from '@mc-review/constants'
 import {
     ButtonWithLogging,
     DynamicStepIndicator,

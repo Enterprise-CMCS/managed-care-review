@@ -3,7 +3,7 @@ import { Route, Routes } from 'react-router-dom'
 import { SubmissionSideNav } from '../SubmissionSideNav'
 import { QuestionResponse } from './QuestionResponse'
 import { renderWithProviders } from '../../testHelpers'
-import { RoutesRecord } from '../../constants/routes'
+import { RoutesRecord } from '@mc-review/constants'
 
 import {
     fetchCurrentUserMock,
@@ -11,7 +11,7 @@ import {
     mockQuestionsPayload,
     mockDraftHealthPlanPackage,
     iterableCmsUsersMockData,
-} from '../../testHelpers/apolloMocks'
+} from '@mc-review/mocks'
 import { IndexQuestionsPayload } from '../../gen/gqlClient'
 
 describe('QuestionResponse', () => {

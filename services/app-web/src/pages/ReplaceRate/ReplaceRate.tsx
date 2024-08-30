@@ -17,7 +17,7 @@ import {
     handleAndReturnErrorState,
 } from '../../pages/StateSubmission/ErrorOrLoadingPage'
 import { useAuth } from '../../contexts/AuthContext'
-import { recordJSExceptionWithContext } from '../../otelHelpers'
+import { recordJSExceptionWithContext } from '@mc-review/otel'
 import { Form as UswdsForm } from '@trussworks/react-uswds'
 import { Formik, FormikErrors } from 'formik'
 import {

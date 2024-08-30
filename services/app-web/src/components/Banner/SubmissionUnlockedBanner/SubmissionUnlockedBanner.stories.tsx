@@ -4,7 +4,7 @@ import {
     SubmissionUnlockedBanner,
     UnlockedProps,
 } from './SubmissionUnlockedBanner'
-import { mockValidStateUser } from '../../../testHelpers/apolloMocks'
+import { mockValidStateUser } from '@mc-review/mocks'
 
 export default {
     title: 'Components/Banner/SubmissionUnlockedBanner',

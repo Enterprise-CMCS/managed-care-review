@@ -7,7 +7,7 @@ import {
     fetchCurrentUserMock,
     mockDraft,
     mockBaseContract,
-} from '../../../testHelpers/apolloMocks'
+} from '@mc-review/mocks'
 
 import {
     renderWithProviders,
@@ -26,12 +26,12 @@ import {
     federalAuthorityKeysForCHIP,
     modifiedProvisionMedicaidAmendmentKeys,
     modifiedProvisionMedicaidBaseKeys,
-} from '../../../common-code/healthPlanFormDataType'
+} from '@mc-review/hpp'
 import {
     StatutoryRegulatoryAttestation,
     StatutoryRegulatoryAttestationDescription,
     StatutoryRegulatoryAttestationQuestion,
-} from '../../../constants/statutoryRegulatoryAttestation'
+} from '@mc-review/constants'
 import * as useRouteParams from '../../../hooks/useRouteParams'
 import * as useHealthPlanPackageForm from '../../../hooks/useHealthPlanPackageForm'
 

@@ -1,5 +1,5 @@
 import { GenericErrorPage } from './GenericErrorPage'
-import { recordJSException, recordSpan } from '../../otelHelpers/tracingHelper'
+import { recordJSException, recordSpan } from '@mc-review/otel'
 import { useEffect } from 'react'
 import { EmptyHeader } from '../../components/Header/EmptyHeader'
 import styles from '../App/AppBody.module.scss'

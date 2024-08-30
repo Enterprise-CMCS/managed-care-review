@@ -5,10 +5,13 @@ import {
     fetchCurrentUserMock,
     fetchContractMockSuccess,
     mockValidStateUser,
-} from '../../../testHelpers/apolloMocks'
+} from '@mc-review/mocks'
 import { Route, Routes } from 'react-router-dom'
-import { RoutesRecord } from '../../../constants'
-import { mockContractPackageDraft, mockContractPackageUnlocked } from '../../../testHelpers/apolloMocks/contractPackageDataMock'
+import { RoutesRecord } from '@mc-review/constants'
+import {
+    mockContractPackageDraft,
+    mockContractPackageUnlocked,
+} from '@mc-review/mocks'
 
 describe('ReviewSubmit', () => {
     it('renders without errors', async () => {
@@ -135,7 +138,10 @@ describe('ReviewSubmit', () => {
                     mocks: [
                         fetchCurrentUserMock({ statusCode: 200 }),
                         fetchContractMockSuccess({
-                            contract: {  ...mockContractPackageDraft(),id: 'test-abc-123' },
+                            contract: {
+                                ...mockContractPackageDraft(),
+                                id: 'test-abc-123',
+                            },
                         }),
                     ],
                 },
@@ -219,7 +225,10 @@ describe('ReviewSubmit', () => {
                     mocks: [
                         fetchCurrentUserMock({ statusCode: 200 }),
                         fetchContractMockSuccess({
-                            contract: {  ...mockContractPackageDraft(), id: 'test-abc-123' },
+                            contract: {
+                                ...mockContractPackageDraft(),
+                                id: 'test-abc-123',
+                            },
                         }),
                     ],
                 },

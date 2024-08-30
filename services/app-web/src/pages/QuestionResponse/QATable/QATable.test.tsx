@@ -4,7 +4,7 @@ import {
     iterableCmsUsersMockData,
     mockValidCMSUser,
     mockValidUser,
-} from '../../../testHelpers/apolloMocks'
+} from '@mc-review/mocks'
 import { screen, waitFor } from '@testing-library/react'
 import React from 'react'
 import { QATable, QuestionData } from './QATable'

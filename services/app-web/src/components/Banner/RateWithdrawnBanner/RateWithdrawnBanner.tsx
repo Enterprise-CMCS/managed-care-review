@@ -3,7 +3,7 @@ import React from 'react'
 import { Alert } from '@trussworks/react-uswds'
 import styles from '../Banner.module.scss'
 import { ExpandableText } from '../../ExpandableText'
-import { formatBannerDate } from '../../../common-code/dateHelpers'
+import { formatBannerDate } from '@mc-review/common-code'
 import { getUpdatedByDisplayName } from '../../../gqlHelpers/userHelpers'
 
 export type RateWithdrawnProps = {

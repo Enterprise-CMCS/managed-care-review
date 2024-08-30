@@ -3,7 +3,7 @@ import React from 'react'
 import { LoginStatusType } from '../../../contexts/AuthContext'
 import { User } from '../../../gen/gqlClient'
 import { idmRedirectURL } from '../../../pages/Auth/cognitoAuth'
-import { AuthModeType } from '../../../common-code/config'
+import { AuthModeType } from '@mc-review/common-code'
 
 import styles from '../Header.module.scss'
 import { useStringConstants } from '../../../hooks/useStringConstants'

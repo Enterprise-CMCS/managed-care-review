@@ -36,10 +36,7 @@ import { useS3 } from '../../../contexts/S3Context'
 import { isS3Error } from '../../../s3'
 
 import { ContractDetailsFormSchema } from './ContractDetailsSchema'
-import {
-    ManagedCareEntityRecord,
-    FederalAuthorityRecord,
-} from '../../../constants/healthPlanPackages'
+import { ManagedCareEntityRecord, FederalAuthorityRecord } from '@mc-review/hpp'
 import { PageActions } from '../PageActions'
 import {
     activeFormPages,
@@ -50,31 +47,31 @@ import { ACCEPTED_SUBMISSION_FILE_TYPES } from '../../../components/FileUpload'
 import {
     federalAuthorityKeysForCHIP,
     federalAuthorityKeys,
-} from '../../../common-code/healthPlanFormDataType'
+} from '@mc-review/hpp'
 import {
     generateProvisionLabel,
     generateApplicableProvisionsList,
-} from '../../../common-code/healthPlanSubmissionHelpers/provisions'
+} from '@mc-review/common-code'
 import type {
     ManagedCareEntity,
     SubmissionDocument,
     ContractExecutionStatus,
     FederalAuthority,
-} from '../../../common-code/healthPlanFormDataType'
+} from '@mc-review/hpp'
 import {
     isBaseContract,
     isCHIPOnly,
     isContractAmendment,
     isContractWithProvisions,
-} from '../../../common-code/healthPlanFormDataType/healthPlanFormData'
-import { RoutesRecord } from '../../../constants'
+} from '@mc-review/common-code'
+import { RoutesRecord } from '@mc-review/constants'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
-import { featureFlags } from '../../../common-code/featureFlags'
+import { featureFlags } from '@mc-review/common-code'
 import {
     StatutoryRegulatoryAttestation,
     StatutoryRegulatoryAttestationDescription,
     StatutoryRegulatoryAttestationQuestion,
-} from '../../../constants/statutoryRegulatoryAttestation'
+} from '@mc-review/constants'
 import { FormContainer } from '../FormContainer'
 import {
     useCurrentRoute,

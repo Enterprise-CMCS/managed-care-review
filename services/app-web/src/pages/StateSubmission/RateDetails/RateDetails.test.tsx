@@ -13,18 +13,15 @@ import {
     updateDraftContractRatesMockSuccess,
     mockContractWithLinkedRateDraft,
     mockContractPackageDraft,
-} from '../../../testHelpers/apolloMocks'
+} from '@mc-review/mocks'
 import { Route, Routes, Location } from 'react-router-dom'
-import { RoutesRecord } from '../../../constants'
+import { RoutesRecord } from '@mc-review/constants'
 import userEvent from '@testing-library/user-event'
-import {
-    rateDataMock,
-    rateRevisionDataMock,
-} from '../../../testHelpers/apolloMocks/rateDataMock'
+import { rateDataMock, rateRevisionDataMock } from '@mc-review/mocks'
 import {
     fetchDraftRateMockSuccess,
     indexRatesMockSuccess,
-} from '../../../testHelpers/apolloMocks/rateGQLMocks'
+} from '@mc-review/mocks'
 import {
     clickAddNewRate,
     fillOutFirstRate,

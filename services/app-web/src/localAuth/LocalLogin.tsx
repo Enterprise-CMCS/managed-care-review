@@ -10,7 +10,7 @@ import {
     GridContainer,
 } from '@trussworks/react-uswds'
 import { useNavigate } from 'react-router-dom'
-import { RoutesRecord } from '../constants/routes'
+import { RoutesRecord } from '@mc-review/constants'
 import { loginLocalUser } from '.'
 import styles from './LocalLogin.module.scss'
 

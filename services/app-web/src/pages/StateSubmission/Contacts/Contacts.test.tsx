@@ -5,12 +5,12 @@ import {
     mockContractAndRatesDraft,
     mockBaseContract,
     fetchCurrentUserMock,
-} from '../../../testHelpers/apolloMocks'
+} from '@mc-review/mocks'
 
 import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import { Contacts } from './'
 import userEvent from '@testing-library/user-event'
-import { UnlockedHealthPlanFormDataType } from '../../../common-code/healthPlanFormDataType'
+import { UnlockedHealthPlanFormDataType } from '@mc-review/hpp'
 import * as useRouteParams from '../../../hooks/useRouteParams'
 import * as useHealthPlanPackageForm from '../../../hooks/useHealthPlanPackageForm'
 

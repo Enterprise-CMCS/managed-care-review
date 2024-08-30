@@ -7,7 +7,7 @@ import {
     updateUserMockError,
     updateUserMockSuccess,
     indexUsersQueryMock,
-} from '../../../testHelpers/apolloMocks'
+} from '@mc-review/mocks'
 import { CMSUsersTable } from './CMSUsersTable'
 
 describe('CMSUsersTable', () => {

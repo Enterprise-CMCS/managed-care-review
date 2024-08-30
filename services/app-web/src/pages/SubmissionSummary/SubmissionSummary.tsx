@@ -28,12 +28,12 @@ import styles from './SubmissionSummary.module.scss'
 import { ChangeHistory } from '../../components/ChangeHistory'
 import { UnlockSubmitModal } from '../../components/Modal'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
-import { featureFlags } from '../../common-code/featureFlags'
-import { RoutesRecord } from '../../constants'
+import { featureFlags } from '@mc-review/common-code'
+import { RoutesRecord } from '@mc-review/constants'
 import { useRouteParams } from '../../hooks'
-import { getVisibleLatestContractFormData } from '../../gqlHelpers/contractsAndRates'
+import { getVisibleLatestContractFormData } from '@mc-review/helpers'
 import { generatePath, Navigate } from 'react-router-dom'
-import { hasCMSUserPermissions } from '../../gqlHelpers'
+import { hasCMSUserPermissions } from '@mc-review/helpers'
 
 function UnlockModalButton({
     disabled,

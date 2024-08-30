@@ -25,7 +25,7 @@ import {
     FilterOptionType,
 } from '../FilterAccordion'
 import { InfoTag, TagProps } from '../InfoTag/InfoTag'
-import { pluralize } from '../../common-code/formatters'
+import { pluralize } from '@mc-review/common-code'
 import { DoubleColumnGrid } from '../DoubleColumnGrid'
 import { NavLinkWithLogging } from '../TealiumLogging/Link'
 import { useTealium } from '../../hooks'

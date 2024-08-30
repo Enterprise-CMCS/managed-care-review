@@ -3,7 +3,7 @@ import React, { useState } from 'react'
 import { DataDetail } from '../../../components/DataDetail'
 import { SectionHeader } from '../../../components/SectionHeader'
 import { useS3 } from '../../../contexts/S3Context'
-import { formatCalendarDate } from '../../../common-code/dateHelpers'
+import { formatCalendarDate } from '@mc-review/common-code'
 import { DoubleColumnGrid } from '../../../components/DoubleColumnGrid'
 import { DownloadButton } from '../../../components/DownloadButton'
 import { UploadedDocumentsTable } from '../../../components/SubmissionSummarySection'
@@ -11,7 +11,7 @@ import { usePreviousSubmission } from '../../../hooks/usePreviousSubmission'
 import styles from '../../../components/SubmissionSummarySection/SubmissionSummarySection.module.scss'
 import { GenericErrorPage } from '../../Errors/GenericErrorPage'
 
-import { recordJSException } from '../../../otelHelpers'
+import { recordJSException } from '@mc-review/otel'
 import { DataDetailMissingField } from '../../../components/DataDetail/DataDetailMissingField'
 import { DataDetailContactField } from '../../../components/DataDetail/DataDetailContactField/DataDetailContactField'
 import useDeepCompareEffect from 'use-deep-compare-effect'
@@ -33,13 +33,13 @@ import {
     getLastContractSubmission,
     getPackageSubmissionAtIndex,
     getVisibleLatestRateRevisions,
-} from '../../../gqlHelpers/contractsAndRates'
+} from '@mc-review/helpers'
 import { useAuth } from '../../../contexts/AuthContext'
-import { ActuaryCommunicationRecord } from '../../../constants'
+import { ActuaryCommunicationRecord } from '@mc-review/hpp'
 import { useParams } from 'react-router-dom'
 import { LinkWithLogging } from '../../../components/TealiumLogging/Link'
 import classnames from 'classnames'
-import { hasCMSUserPermissions } from '../../../gqlHelpers'
+import { hasCMSUserPermissions } from '@mc-review/helpers'
 
 export type RateDetailsSummarySectionProps = {
     contract: Contract
@@ -113,7 +113,7 @@ export const RateDetailsSummarySection = ({
     const lastSubmittedDate = isPreviousSubmission
         ? getPackageSubmissionAtIndex(contract, lastSubmittedIndex)?.submitInfo
               .updatedAt
-        : getLastContractSubmission(contract)?.submitInfo.updatedAt ?? null
+        : (getLastContractSubmission(contract)?.submitInfo.updatedAt ?? null)
 
     const { getKey, getBulkDlURL } = useS3()
     const [zippedFilesURL, setZippedFilesURL] = useState<

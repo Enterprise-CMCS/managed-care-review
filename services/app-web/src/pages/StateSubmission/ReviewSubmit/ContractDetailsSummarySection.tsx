@@ -6,9 +6,9 @@ import {
     ContractExecutionStatusRecord,
     FederalAuthorityRecord,
     ManagedCareEntityRecord,
-} from '../../../constants/index'
+} from '@mc-review/hpp'
 import { useS3 } from '../../../contexts/S3Context'
-import { formatCalendarDate } from '../../../common-code/dateHelpers'
+import { formatCalendarDate } from '@mc-review/common-code'
 import { DoubleColumnGrid } from '../../../components/DoubleColumnGrid'
 import { DownloadButton } from '../../../components/DownloadButton'
 import { usePreviousSubmission } from '../../../hooks/usePreviousSubmission'
@@ -19,28 +19,28 @@ import {
     sortModifiedProvisions,
     isMissingProvisions,
     getProvisionDictionary,
-} from '../../../common-code/ContractTypeProvisions'
+} from '@mc-review/common-code'
 import { DataDetailCheckboxList } from '../../../components/DataDetail/DataDetailCheckboxList'
 import {
     isBaseContract,
     isCHIPOnly,
     isContractWithProvisions,
-} from '../../../common-code/ContractType'
+} from '@mc-review/common-code'
 import {
     federalAuthorityKeysForCHIP,
     CHIPFederalAuthority,
-} from '../../../common-code/healthPlanFormDataType'
-import { recordJSException } from '../../../otelHelpers'
+} from '@mc-review/hpp'
+import { recordJSException } from '@mc-review/otel'
 import useDeepCompareEffect from 'use-deep-compare-effect'
 import { InlineDocumentWarning } from '../../../components/DocumentWarning'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
-import { featureFlags } from '../../../common-code/featureFlags'
+import { featureFlags } from '@mc-review/common-code'
 import { Grid } from '@trussworks/react-uswds'
 import { booleanAsYesNoFormValue } from '../../../components/Form/FieldYesNo'
 import {
     StatutoryRegulatoryAttestation,
     StatutoryRegulatoryAttestationQuestion,
-} from '../../../constants/statutoryRegulatoryAttestation'
+} from '@mc-review/constants'
 import { SectionCard } from '../../../components/SectionCard'
 import { Contract, ContractRevision } from '../../../gen/gqlClient'
 import { useParams } from 'react-router-dom'
@@ -49,8 +49,8 @@ import {
     getLastContractSubmission,
     getPackageSubmissionAtIndex,
     getVisibleLatestContractFormData,
-} from '../../../gqlHelpers/contractsAndRates'
-import { hasCMSUserPermissions } from '../../../gqlHelpers'
+} from '@mc-review/helpers'
+import { hasCMSUserPermissions } from '@mc-review/helpers'
 
 export type ContractDetailsSummarySectionProps = {
     contract: Contract
@@ -184,7 +184,7 @@ export const ContractDetailsSummarySection = ({
     const lastSubmittedDate = isPreviousSubmission
         ? getPackageSubmissionAtIndex(contract, lastSubmittedIndex)?.submitInfo
               .updatedAt
-        : getLastContractSubmission(contract)?.submitInfo.updatedAt ?? null
+        : (getLastContractSubmission(contract)?.submitInfo.updatedAt ?? null)
     return (
         <SectionCard
             id="contractDetailsSection"

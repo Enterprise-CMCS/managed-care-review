@@ -6,13 +6,13 @@ import {
     QUESTION_RESPONSE_SHOW_SIDEBAR_ROUTES,
     RoutesRecord,
     STATE_SUBMISSION_FORM_ROUTES,
-} from '../../constants/routes'
+} from '@mc-review/constants'
 import { getRouteName } from '../../routeHelpers'
-import { useFetchHealthPlanPackageWithQuestionsWrapper } from '../../gqlHelpers'
+import { useFetchHealthPlanPackageWithQuestionsWrapper } from '@mc-review/helpers'
 import { Loading, NavLinkWithLogging } from '../../components'
 import { ApolloError } from '@apollo/client'
-import { handleApolloError } from '../../gqlHelpers/apolloErrors'
-import { recordJSException } from '../../otelHelpers'
+import { handleApolloError } from '@mc-review/helpers'
+import { recordJSException } from '@mc-review/otel'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import { Error404 } from '../Errors/Error404Page'
 import {
@@ -20,16 +20,13 @@ import {
     HealthPlanRevision,
     User,
 } from '../../gen/gqlClient'
-import {
-    HealthPlanFormDataType,
-    packageName,
-} from '../../common-code/healthPlanFormDataType'
+import { HealthPlanFormDataType, packageName } from '@mc-review/hpp'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
-import { featureFlags } from '../../common-code/featureFlags'
+import { featureFlags } from '@mc-review/common-code'
 import {
     DocumentDateLookupTableType,
     makeDocumentDateTable,
-} from '../../documentHelpers/makeDocumentDateLookupTable'
+} from '@mc-review/helpers'
 
 export type SideNavOutletContextType = {
     pkg: HealthPlanPackage

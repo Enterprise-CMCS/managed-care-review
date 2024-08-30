@@ -1,13 +1,14 @@
 import { User } from '../gen/gqlClient'
+import { PageTitlesRecord } from '@mc-review/constants'
+import * as React from 'react'
+import { getRouteName } from '../routeHelpers'
+import { createScript } from '../hooks/useScript'
+import { getTealiumPageName } from './tealiumHelpers'
+import { recordJSException } from '@mc-review/otel'
 import {
-    PageTitlesRecord,
-} from '../constants'
-import * as React from 'react';
-import {getRouteName} from '../routeHelpers';
-import {createScript} from '../hooks/useScript';
-import { getTealiumPageName } from './tealiumHelpers';
-import {recordJSException} from '../otelHelpers';
-import { TEALIUM_CONTENT_TYPE_BY_ROUTE, TEALIUM_SUBSECTION_BY_ROUTE } from './constants';
+    TEALIUM_CONTENT_TYPE_BY_ROUTE,
+    TEALIUM_SUBSECTION_BY_ROUTE,
+} from './constants'
 
 // TYPES
 type TealiumEvent =
@@ -30,10 +31,7 @@ type TealiumEvent =
     | 'checkbox_selected'
     | 'checkbox_unselected'
 
-type TealiumEnv =
-    | 'prod'
-    | 'qa'
-    | 'dev'
+type TealiumEnv = 'prod' | 'qa' | 'dev'
 
 type ButtonEventStyle =
     | 'default'
@@ -43,11 +41,7 @@ type ButtonEventStyle =
     | 'outline'
     | 'unstyled'
 
-type ButtonEventType =
-    | 'submit'
-    | 'link'
-    | 'reset'
-    | 'button'
+type ButtonEventType = 'submit' | 'link' | 'reset' | 'button'
 
 type ButtonEventParentComponentType =
     | 'help drawer'
@@ -81,7 +75,7 @@ type TealiumDataObject = {
 }
 
 type TealiumButtonEventObject = {
-    event_name: 'button_engagement',
+    event_name: 'button_engagement'
     text: string
     link_type?: 'link_other'
     button_style?: ButtonEventStyle
@@ -101,7 +95,7 @@ type TealiumDropdownSelectionEventObject = {
 
 // Used for internal links and navigation links
 type TealiumLinkEventObject = {
-    event_name: 'internal_link_clicked' | "navigation_clicked" | "back_button"
+    event_name: 'internal_link_clicked' | 'navigation_clicked' | 'back_button'
     text: string
     link_url: string
     //link_type: string //currently not sending
@@ -165,9 +159,9 @@ type TealiumCheckboxEventObject = {
     field_type: 'optional' | 'required'
 }
 
-type TealiumFilterEventObject = (
-    TealiumFilterAppliedType | TealiumFilterRemovedType
-)
+type TealiumFilterEventObject =
+    | TealiumFilterAppliedType
+    | TealiumFilterRemovedType
 
 type TealiumLinkDataObject = {
     tealium_event: TealiumEvent // event is required for user tracking links
@@ -184,7 +178,8 @@ type TealiumEventObjectTypes = (
     | TealiumAlertImpressionObject
     | TealiumCheckboxEventObject
     | TealiumRadioButtonEventObject
-    ) & Partial<TealiumDataObject>
+) &
+    Partial<TealiumDataObject>
 
 type TealiumClientType = {
     initializeTealium: () => void
@@ -201,7 +196,9 @@ type TealiumClientType = {
     ) => void
 }
 
-const tealiumClient = (tealiumEnv: Omit<TealiumEnv, 'dev'>): TealiumClientType => {
+const tealiumClient = (
+    tealiumEnv: Omit<TealiumEnv, 'dev'>
+): TealiumClientType => {
     return {
         initializeTealium: () => {
             // Suppress automatic page views for SPA
@@ -215,7 +212,9 @@ const tealiumClient = (tealiumEnv: Omit<TealiumEnv, 'dev'>): TealiumClientType =
                 src: `https://tags.tiqcdn.com/utag/cmsgov/${tealiumProfile}/${tealiumEnv}/utag.sync.js`,
                 id: 'tealium-load-tags-sync',
             })
-            if (document.getElementById(initializeTagManagerSnippet.id) === null) {
+            if (
+                document.getElementById(initializeTagManagerSnippet.id) === null
+            ) {
                 document.head.appendChild(initializeTagManagerSnippet)
             }
 
@@ -245,11 +244,11 @@ const tealiumClient = (tealiumEnv: Omit<TealiumEnv, 'dev'>): TealiumClientType =
                 document.body.appendChild(loadTagsSnippet)
             }
         },
-        logUserEvent:  (
+        logUserEvent: (
             linkData: TealiumEventObjectTypes,
             pathname: string,
             loggedInUser?: User,
-            heading?: string | React.ReactElement,
+            heading?: string | React.ReactElement
         ) => {
             const currentRoute = getRouteName(pathname)
             // eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -264,14 +263,14 @@ const tealiumClient = (tealiumEnv: Omit<TealiumEnv, 'dev'>): TealiumClientType =
                 logged_in: `${Boolean(loggedInUser) ?? false}`,
                 userId: loggedInUser?.email,
                 tealium_event: linkData.event_name,
-                ...linkData
+                ...linkData,
             }
             utag.link(tagData)
         },
         logPageView: (
             pathname: string,
             loggedInUser?: User,
-            heading?: string | React.ReactElement,
+            heading?: string | React.ReactElement
         ) => {
             const currentRoute = getRouteName(pathname)
             const tealiumPageName = getTealiumPageName({
@@ -292,32 +291,36 @@ const tealiumClient = (tealiumEnv: Omit<TealiumEnv, 'dev'>): TealiumClientType =
             }
 
             if (!window.utag) {
-                new Promise((resolve) => setTimeout(resolve, 1000)).finally(() => {
-                    if (!window.utag) {
-                        recordJSException('Analytics did not load in time')
-                        return
-                    } else {
-                        window.utag.view(tagData)
+                new Promise((resolve) => setTimeout(resolve, 1000)).finally(
+                    () => {
+                        if (!window.utag) {
+                            recordJSException('Analytics did not load in time')
+                            return
+                        } else {
+                            window.utag.view(tagData)
+                        }
                     }
-                })
+                )
                 // Guardrail on subsequent page view  - protect against multiple calls when route seems similar
             } else {
                 window.utag.view(tagData)
             }
-        }
+        },
     }
 }
 
 const devTealiumClient = (): TealiumClientType => {
     return {
         initializeTealium: () => {
-            console.info('[Tealium - dev] initializeTealium - No logs will be sent in dev environment')
+            console.info(
+                '[Tealium - dev] initializeTealium - No logs will be sent in dev environment'
+            )
         },
-        logUserEvent:  (
+        logUserEvent: (
             linkData: TealiumEventObjectTypes,
             pathname: string,
             loggedInUser?: User,
-            heading?: string | React.ReactElement,
+            heading?: string | React.ReactElement
         ) => {
             const currentRoute = getRouteName(pathname)
             const tagData: TealiumLinkDataObject = {
@@ -330,16 +333,18 @@ const devTealiumClient = (): TealiumClientType => {
                 logged_in: `${Boolean(loggedInUser) ?? false}`,
                 userId: loggedInUser?.email,
                 tealium_event: linkData.event_name,
-                ...linkData
+                ...linkData,
             }
 
-            console.info(`[Tealium - dev] logUserEvent - ${linkData.event_name}`)
+            console.info(
+                `[Tealium - dev] logUserEvent - ${linkData.event_name}`
+            )
             console.info(tagData)
         },
         logPageView: (
             pathname: string,
             loggedInUser?: User,
-            heading?: string | React.ReactElement,
+            heading?: string | React.ReactElement
         ) => {
             const currentRoute = getRouteName(pathname)
             const tealiumPageName = getTealiumPageName({
@@ -360,11 +365,11 @@ const devTealiumClient = (): TealiumClientType => {
 
             console.info('[Tealium - dev] logPageView')
             console.info(tagData)
-        }
+        },
     }
 }
 
-export {tealiumClient, devTealiumClient }
+export { tealiumClient, devTealiumClient }
 export type {
     TealiumLinkDataObject,
     TealiumViewDataObject,
@@ -380,5 +385,5 @@ export type {
     TealiumInlineErrorObject,
     TealiumAlertImpressionObject,
     TealiumRadioButtonEventObject,
-    TealiumCheckboxEventObject
+    TealiumCheckboxEventObject,
 }

@@ -1,6 +1,6 @@
 import { screen, waitFor, within } from '@testing-library/react'
 import { Route, Routes } from 'react-router'
-import { RoutesRecord } from '../../constants/routes'
+import { RoutesRecord } from '@mc-review/constants'
 import {
     fetchCurrentUserMock,
     fetchContractMockSuccess,
@@ -9,12 +9,12 @@ import {
     mockValidStateUser,
     mockContractPackageSubmitted,
     iterableCmsUsersMockData,
-} from '../../testHelpers/apolloMocks'
+} from '@mc-review/mocks'
 import { renderWithProviders } from '../../testHelpers/jestHelpers'
 import { SubmissionSummary } from './SubmissionSummary'
 import { SubmissionSideNav } from '../SubmissionSideNav'
 import { testS3Client } from '../../testHelpers/s3Helpers'
-import { mockContractPackageUnlocked } from '../../testHelpers/apolloMocks/contractPackageDataMock'
+import { mockContractPackageUnlocked } from '@mc-review/mocks'
 import { ReviewSubmit } from '../StateSubmission/ReviewSubmit'
 import { generatePath, Location } from 'react-router-dom'
 

@@ -19,7 +19,7 @@ import { QATable, QuestionData, Division } from './QATable/QATable'
 import { CmsUser, QuestionEdge, StateUser } from '../../gen/gqlClient'
 import { useStringConstants } from '../../hooks/useStringConstants'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
-import { hasCMSUserPermissions } from '../../gqlHelpers'
+import { hasCMSUserPermissions } from '@mc-review/helpers'
 
 type divisionQuestionDataType = {
     division: Division

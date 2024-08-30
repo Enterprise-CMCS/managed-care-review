@@ -12,7 +12,7 @@ export {
     mockUnlockedHealthPlanPackage,
 } from './healthPlanFormDataMock'
 
-export {s3DlUrl} from './documentDataMock';
+export { s3DlUrl } from './documentDataMock'
 
 export {
     fetchHealthPlanPackageMockSuccess,
@@ -43,7 +43,7 @@ export {
     indexUsersQueryMock,
     mockValidHelpDeskUser,
     mockValidCMSApproverUser,
-    iterableCmsUsersMockData
+    iterableCmsUsersMockData,
 } from './userGQLMock'
 
 export {
@@ -56,15 +56,10 @@ export { mockQuestionsPayload } from './questionResponseDataMocks'
 export { fetchEmailSettings } from './emailGQLMock'
 export { mockMNState } from './stateMock'
 
-
-
 export { updateUserMockError, updateUserMockSuccess } from './updateUserMock'
 export { fetchRateMockSuccess } from './rateGQLMocks'
 
-export {
-    createAPIKeySuccess,
-    createAPIKeyNetworkError,
-} from './apiKeyGQLMocks'
+export { createAPIKeySuccess, createAPIKeyNetworkError } from './apiKeyGQLMocks'
 
 // NEW APIS
 export {
@@ -76,10 +71,13 @@ export {
     mockContractPackageSubmittedWithRevisions,
     mockEmptyDraftContractAndRate,
     mockContractRevision,
-    mockRateRevision
+    mockRateRevision,
 } from './contractPackageDataMock'
-export { rateDataMock } from './rateDataMock'
-export { fetchContractMockSuccess, updateDraftContractRatesMockSuccess } from './contractGQLMock'
+export { rateDataMock, rateRevisionDataMock } from './rateDataMock'
+export {
+    fetchContractMockSuccess,
+    updateDraftContractRatesMockSuccess,
+} from './contractGQLMock'
 export { indexRatesMockSuccess, indexRatesMockFailure } from './rateGQLMocks'
 
 export { withdrawAndReplaceRedundantRateMock } from './replaceRateGQLMocks'

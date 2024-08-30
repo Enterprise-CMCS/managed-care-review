@@ -18,9 +18,9 @@ import styles from '../Settings.module.scss'
 import { Loading } from '../../../components'
 import { SettingsErrorAlert } from '../SettingsErrorAlert'
 
-import { wrapApolloResult } from '../../../gqlHelpers/apolloQueryWrapper'
-import { handleApolloError } from '../../../gqlHelpers/apolloErrors'
-import { updateCMSUser } from '../../../gqlHelpers/updateCMSUser'
+import { wrapApolloResult } from '@mc-review/helpers'
+import { handleApolloError } from '@mc-review/helpers'
+import { updateCMSUser } from '@mc-review/helpers'
 import { ApolloError } from '@apollo/client'
 import { useTealium } from '../../../hooks'
 

@@ -7,7 +7,7 @@ import {
     mockContractPackageDraft,
     mockContractPackageSubmitted,
     unlockHealthPlanPackageMockError,
-} from '../../testHelpers/apolloMocks'
+} from '@mc-review/mocks'
 import { UnlockSubmitModal } from './V2/UnlockSubmitModalV2'
 import { renderWithProviders } from '../../testHelpers/jestHelpers'
 import { Location } from 'react-router-dom'
@@ -18,7 +18,7 @@ import {
 import {
     unlockContractMockError,
     unlockContractMockSuccess,
-} from '../../testHelpers/apolloMocks/healthPlanPackageGQLMock'
+} from '@mc-review/mocks'
 
 describe('UnlockSubmitModal', () => {
     // mock implementation so we can clear it between tests, otherwise the last tests will count function calls from previous tests.

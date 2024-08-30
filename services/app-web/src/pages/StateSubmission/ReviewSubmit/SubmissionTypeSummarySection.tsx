@@ -7,9 +7,9 @@ import {
     SubmissionTypeRecord,
     ContractTypeRecord,
     PopulationCoveredRecord,
-} from '../../../constants/healthPlanPackages'
+} from '@mc-review/hpp'
 import { GenericErrorPage } from '../../Errors/GenericErrorPage'
-import { getVisibleLatestContractFormData } from '../../../gqlHelpers/contractsAndRates'
+import { getVisibleLatestContractFormData } from '@mc-review/helpers'
 import { Program, Contract, ContractRevision } from '../../../gen/gqlClient'
 import { booleanAsYesNoUserValue } from '../../../components/Form/FieldYesNo/FieldYesNo'
 import { SectionCard } from '../../../components/SectionCard'

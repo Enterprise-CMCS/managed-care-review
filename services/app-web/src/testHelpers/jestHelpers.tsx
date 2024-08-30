@@ -25,7 +25,7 @@ import {
     FeatureFlagSettings,
     featureFlagKeys,
     featureFlags,
-} from '../common-code/featureFlags'
+} from '@mc-review/common-code'
 import {
     LDProvider,
     ProviderConfig,

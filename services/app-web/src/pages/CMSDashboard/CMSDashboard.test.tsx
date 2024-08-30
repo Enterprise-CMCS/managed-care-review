@@ -7,11 +7,11 @@ import {
     mockMNState,
     mockSubmittedHealthPlanPackage,
     mockUnlockedHealthPlanPackage,
-} from '../../testHelpers/apolloMocks'
+} from '@mc-review/mocks'
 import { renderWithProviders } from '../../testHelpers/jestHelpers'
 import { CMSDashboard, RateReviewsDashboard, SubmissionsDashboard } from './'
 import { Navigate, Route, Routes } from 'react-router-dom'
-import { RoutesRecord } from '../../constants'
+import { RoutesRecord } from '@mc-review/constants'
 
 // copy paste from AppRoutes - this is to allow texting of the react router Outlet
 const CMSDashboardNestedRoutes = () => (

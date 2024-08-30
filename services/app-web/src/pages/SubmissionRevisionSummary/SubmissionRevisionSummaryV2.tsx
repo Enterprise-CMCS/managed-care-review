@@ -7,7 +7,7 @@ import { ContactsSummarySection } from '../StateSubmission/ReviewSubmit/Contacts
 import { RateDetailsSummarySection } from '../StateSubmission/ReviewSubmit/RateDetailsSummarySection'
 import { SubmissionTypeSummarySection } from '../StateSubmission/ReviewSubmit/SubmissionTypeSummarySection'
 import { usePage } from '../../contexts/PageContext'
-import { dayjs } from '../../common-code/dateHelpers'
+import { dayjs } from '@mc-review/common-code'
 import styles from './SubmissionRevisionSummary.module.scss'
 import { PreviousSubmissionBanner } from '../../components'
 import { useFetchContractQuery } from '../../gen/gqlClient'
@@ -16,7 +16,7 @@ import {
     handleAndReturnErrorState,
 } from '../StateSubmission/ErrorOrLoadingPage'
 import { Error404 } from '../Errors/Error404Page'
-import { hasCMSUserPermissions } from '../../gqlHelpers'
+import { hasCMSUserPermissions } from '@mc-review/helpers'
 
 export const SubmissionRevisionSummary = (): React.ReactElement => {
     // Page level state

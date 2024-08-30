@@ -1,6 +1,8 @@
-import { RouteT } from "../constants"
+import { RouteT } from '@mc-review/constants'
 
-const TEALIUM_SUBSECTION_BY_ROUTE: Partial<Record<RouteT| 'UNKNOWN_ROUTE', string>> = {
+const TEALIUM_SUBSECTION_BY_ROUTE: Partial<
+    Record<RouteT | 'UNKNOWN_ROUTE', string>
+> = {
     SUBMISSIONS_TYPE: 'submission edit',
     SUBMISSIONS_CONTRACT_DETAILS: 'submission edit',
     SUBMISSIONS_RATE_DETAILS: 'submission edit',
@@ -15,39 +17,36 @@ const TEALIUM_SUBSECTION_BY_ROUTE: Partial<Record<RouteT| 'UNKNOWN_ROUTE', strin
     SUBMISSIONS_UPLOAD_RESPONSE: 'responses',
 }
 
+const TEALIUM_CONTENT_TYPE_BY_ROUTE: Record<RouteT | 'UNKNOWN_ROUTE', string> =
+    {
+        ROOT: 'homepage',
+        AUTH: 'login',
+        DASHBOARD: 'table',
+        DASHBOARD_SUBMISSIONS: 'table',
+        DASHBOARD_RATES: 'table',
+        HELP: 'glossary',
+        GRAPHQL_EXPLORER: 'dev',
+        API_ACCESS: 'dev',
+        SETTINGS: 'table',
+        RATES_SUMMARY: 'summary',
+        REPLACE_RATE: 'form',
+        RATE_EDIT: 'form',
+        SUBMISSIONS: 'form',
+        SUBMISSIONS_NEW: 'form',
+        SUBMISSIONS_EDIT_TOP_LEVEL: 'form',
+        SUBMISSIONS_TYPE: 'form',
+        SUBMISSIONS_CONTRACT_DETAILS: 'form',
+        SUBMISSIONS_RATE_DETAILS: 'form',
+        SUBMISSIONS_CONTACTS: 'form',
+        SUBMISSIONS_DOCUMENTS: 'form',
+        SUBMISSIONS_REVIEW_SUBMIT: 'form',
+        SUBMISSIONS_SUMMARY: 'summary',
+        SUBMISSIONS_REVISION: 'summary',
+        SUBMISSIONS_QUESTIONS_AND_ANSWERS: 'summary',
+        SUBMISSIONS_MCCRSID: 'form',
+        SUBMISSIONS_UPLOAD_QUESTION: 'form',
+        SUBMISSIONS_UPLOAD_RESPONSE: 'form',
+        UNKNOWN_ROUTE: '404',
+    }
 
-const TEALIUM_CONTENT_TYPE_BY_ROUTE: Record<RouteT | 'UNKNOWN_ROUTE', string> = {
-    ROOT: 'homepage',
-    AUTH: 'login',
-    DASHBOARD: 'table',
-    DASHBOARD_SUBMISSIONS: 'table',
-    DASHBOARD_RATES: 'table',
-    HELP: 'glossary',
-    GRAPHQL_EXPLORER: 'dev',
-    API_ACCESS: 'dev',
-    SETTINGS: 'table',
-    RATES_SUMMARY: 'summary',
-    REPLACE_RATE: 'form',
-    RATE_EDIT: 'form',
-    SUBMISSIONS: 'form',
-    SUBMISSIONS_NEW: 'form',
-    SUBMISSIONS_EDIT_TOP_LEVEL: 'form',
-    SUBMISSIONS_TYPE: 'form',
-    SUBMISSIONS_CONTRACT_DETAILS: 'form',
-    SUBMISSIONS_RATE_DETAILS: 'form',
-    SUBMISSIONS_CONTACTS: 'form',
-    SUBMISSIONS_DOCUMENTS: 'form',
-    SUBMISSIONS_REVIEW_SUBMIT: 'form',
-    SUBMISSIONS_SUMMARY: 'summary',
-    SUBMISSIONS_REVISION: 'summary',
-    SUBMISSIONS_QUESTIONS_AND_ANSWERS: 'summary',
-    SUBMISSIONS_MCCRSID: 'form',
-    SUBMISSIONS_UPLOAD_QUESTION: 'form',
-    SUBMISSIONS_UPLOAD_RESPONSE: 'form',
-    UNKNOWN_ROUTE: '404',
-}
-
-export {
-    TEALIUM_CONTENT_TYPE_BY_ROUTE,
-    TEALIUM_SUBSECTION_BY_ROUTE
-}
+export { TEALIUM_CONTENT_TYPE_BY_ROUTE, TEALIUM_SUBSECTION_BY_ROUTE }

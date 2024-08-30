@@ -1,4 +1,4 @@
-import { mockContractPackageSubmitted } from '../../testHelpers/apolloMocks'
+import { mockContractPackageSubmitted } from '@mc-review/mocks'
 import { ChangeHistory } from './ChangeHistoryV2'
 
 export default {

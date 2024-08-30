@@ -1,6 +1,6 @@
 import { useAuth } from '../contexts/AuthContext'
 import { Program } from '../gen/gqlClient'
-import { hasCMSUserPermissions } from '../gqlHelpers';
+import { hasCMSUserPermissions } from '@mc-review/helpers'
 
 // Get state programs from logged in state users data
 const useStatePrograms = (): Program[] | [] => {

@@ -10,12 +10,12 @@ import {
     mockValidHelpDeskUser,
     mockValidStateUser,
     rateDataMock,
-} from '../../../testHelpers/apolloMocks'
+} from '@mc-review/mocks'
 import { screen, waitFor, within } from '@testing-library/react'
-import { packageName } from '../../../common-code/healthPlanFormDataType'
+import { packageName } from '@mc-review/hpp'
 import { RateFormData, RateRevision } from '../../../gen/gqlClient'
 import { type Location, Route, Routes } from 'react-router-dom'
-import { RoutesRecord } from '../../../constants'
+import { RoutesRecord } from '@mc-review/constants'
 
 describe('SingleRateSummarySection', () => {
     it('can render rate details without errors', async () => {

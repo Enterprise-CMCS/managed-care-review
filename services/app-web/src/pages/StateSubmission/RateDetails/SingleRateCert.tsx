@@ -7,11 +7,7 @@ import {
     Label,
 } from '@trussworks/react-uswds'
 import classnames from 'classnames'
-import {
-    ActuaryContact,
-    RateCapitationType,
-    RateType,
-} from '../../../common-code/healthPlanFormDataType'
+import { ActuaryContact, RateCapitationType, RateType } from '@mc-review/hpp'
 import {
     ButtonWithLogging,
     FieldRadio,
@@ -38,10 +34,7 @@ import {
     getIn,
     useFormikContext,
 } from 'formik'
-import {
-    ActuaryCommunicationType,
-    SharedRateCertDisplay,
-} from '../../../common-code/healthPlanFormDataType/UnlockedHealthPlanFormDataType'
+import { ActuaryCommunicationType, SharedRateCertDisplay } from '@mc-review/hpp'
 import { ActuaryContactFields } from '../Contacts'
 import { useFocus } from '../../../hooks'
 
@@ -121,7 +114,7 @@ const RateDatesErrorMessage = ({
     const validationErrorMessage = hasError
         ? isDateRangeEmpty(startDate, endDate)
             ? 'You must provide a start and an end date'
-            : startDateError ?? endDateError
+            : (startDateError ?? endDateError)
         : null
 
     return (

@@ -14,9 +14,9 @@ import {
     useStatePrograms,
     useTealium,
 } from '../../../../../hooks'
-import { RoutesRecord } from '../../../../../constants'
+import { RoutesRecord } from '@mc-review/constants'
 import { UnlockSubmitModal } from '../../../../../components/Modal/V2/UnlockSubmitModalV2'
-import { getVisibleLatestContractFormData } from '../../../../../gqlHelpers/contractsAndRates'
+import { getVisibleLatestContractFormData } from '@mc-review/helpers'
 import { useAuth } from '../../../../../contexts/AuthContext'
 import { RateDetailsSummarySection } from '../../RateDetailsSummarySection'
 import { ContactsSummarySection } from '../../ContactsSummarySection'
@@ -28,7 +28,7 @@ import { Error404 } from '../../../../Errors/Error404Page'
 import { GenericErrorPage } from '../../../../Errors/GenericErrorPage'
 import { Loading } from '../../../../../components'
 import { PageBannerAlerts } from '../../../PageBannerAlerts'
-import { packageName } from '../../../../../common-code/healthPlanFormDataType'
+import { packageName } from '@mc-review/hpp'
 import { usePage } from '../../../../../contexts/PageContext'
 import { activeFormPages } from '../../../StateSubmissionForm'
 

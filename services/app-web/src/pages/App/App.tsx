@@ -14,7 +14,7 @@ import { PageProvider } from '../../contexts/PageContext'
 import TraceProvider from '../../contexts/TraceContext'
 import { TealiumProvider } from '../../contexts/TealiumContext'
 
-import { AuthModeType } from '../../common-code/config'
+import { AuthModeType } from '@mc-review/common-code'
 import { S3Provider } from '../../contexts/S3Context'
 import type { S3ClientT } from '../../s3'
 import { useScript } from '../../hooks'

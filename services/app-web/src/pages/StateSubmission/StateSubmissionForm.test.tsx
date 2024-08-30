@@ -1,15 +1,15 @@
 import { screen, waitFor } from '@testing-library/react'
 import { generatePath, Location, Route, Routes } from 'react-router-dom'
 import userEvent from '@testing-library/user-event'
-import { SubmissionDocument } from '../../common-code/healthPlanFormDataType'
-import { RoutesRecord } from '../../constants/routes'
-import { fetchCurrentUserMock } from '../../testHelpers/apolloMocks/userGQLMock'
+import { SubmissionDocument } from '@mc-review/hpp'
+import { RoutesRecord } from '@mc-review/constants'
+import { fetchCurrentUserMock } from '@mc-review/mocks'
 import {
     mockDraftHealthPlanPackage,
     mockSubmittedHealthPlanPackage,
     mockUnlockedHealthPlanPackage,
     mockUnlockedHealthPlanPackageWithDocuments,
-} from '../../testHelpers/apolloMocks/healthPlanFormDataMock'
+} from '@mc-review/mocks'
 import {
     fetchHealthPlanPackageMockSuccess,
     fetchHealthPlanPackageMockNotFound,
@@ -17,19 +17,16 @@ import {
     fetchHealthPlanPackageMockAuthFailure,
     updateHealthPlanFormDataMockSuccess,
     updateHealthPlanFormDataMockAuthFailure,
-} from '../../testHelpers/apolloMocks/healthPlanPackageGQLMock'
+} from '@mc-review/mocks'
 // some spies will not work with indexed exports, so I refactored to import them directly from their files
 import { renderWithProviders } from '../../testHelpers/jestHelpers'
 
 import { StateSubmissionForm } from './StateSubmissionForm'
-import {
-    base64ToDomain,
-    domainToBase64,
-} from '../../common-code/proto/healthPlanFormDataProto'
+import { base64ToDomain, domainToBase64 } from '@mc-review/hpp'
 import { testS3Client } from '../../testHelpers/s3Helpers'
 import { getYesNoFieldValue } from '../../testHelpers/fieldHelpers'
 import { SubmissionSideNav } from '../SubmissionSideNav'
-import { fetchStateHealthPlanPackageWithQuestionsMockSuccess } from '../../testHelpers/apolloMocks'
+import { fetchStateHealthPlanPackageWithQuestionsMockSuccess } from '@mc-review/mocks'
 
 describe('StateSubmissionForm', () => {
     afterEach(() => {

@@ -16,14 +16,8 @@ import {
     PoliteErrorMessage,
     ReactRouterLinkWithLogging,
 } from '../../../components'
-import {
-    PopulationCoveredRecord,
-    SubmissionTypeRecord,
-} from '../../../constants/healthPlanPackages'
-import {
-    ContractType,
-    PopulationCoveredType,
-} from '../../../common-code/healthPlanFormDataType'
+import { PopulationCoveredRecord, SubmissionTypeRecord } from '@mc-review/hpp'
+import { ContractType, PopulationCoveredType } from '@mc-review/hpp'
 import {
     SubmissionType as SubmissionTypeT,
     CreateHealthPlanPackageInput,
@@ -40,7 +34,10 @@ import {
     yesNoFormValueAsBoolean,
 } from '../../../components/Form/FieldYesNo/FieldYesNo'
 import { SubmissionTypeFormSchema } from './SubmissionTypeSchema'
-import { RoutesRecord, STATE_SUBMISSION_FORM_ROUTES } from '../../../constants'
+import {
+    RoutesRecord,
+    STATE_SUBMISSION_FORM_ROUTES,
+} from '@mc-review/constants'
 import { FormContainer } from '../FormContainer'
 import { useHealthPlanPackageForm } from '../../../hooks/useHealthPlanPackageForm'
 import { useCurrentRoute } from '../../../hooks'

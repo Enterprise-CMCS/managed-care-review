@@ -5,7 +5,7 @@ import styles from '../StateDashboard/StateDashboard.module.scss'
 
 import { Tabs, TabPanel } from '../../components'
 import { Outlet, useLocation } from 'react-router-dom'
-import { RoutesRecord } from '../../constants'
+import { RoutesRecord } from '@mc-review/constants'
 
 const CMSDashboard = (): React.ReactElement => {
     const { pathname } = useLocation()

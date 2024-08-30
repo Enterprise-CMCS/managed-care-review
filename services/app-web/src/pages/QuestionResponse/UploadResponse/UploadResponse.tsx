@@ -26,8 +26,8 @@ import {
 import { usePage } from '../../../contexts/PageContext'
 import { SideNavOutletContextType } from '../../SubmissionSideNav/SubmissionSideNav'
 import { Breadcrumbs } from '../../../components/Breadcrumbs/Breadcrumbs'
-import { createResponseWrapper } from '../../../gqlHelpers/mutationWrappersForUserFriendlyErrors'
-import { RoutesRecord } from '../../../constants'
+import { createResponseWrapper } from '@mc-review/helpers'
+import { RoutesRecord } from '@mc-review/constants'
 import { GenericErrorPage } from '../../Errors/GenericErrorPage'
 
 export const UploadResponse = () => {

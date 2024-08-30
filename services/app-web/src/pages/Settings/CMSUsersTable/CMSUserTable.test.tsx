@@ -5,7 +5,7 @@ import {
     fetchCurrentUserMock,
     indexUsersQueryMock,
     mockValidAdminUser,
-} from '../../../testHelpers/apolloMocks'
+} from '@mc-review/mocks'
 import { renderWithProviders } from '../../../testHelpers'
 import { MockedResponse } from '@apollo/client/testing'
 import { IndexUsersDocument, IndexUsersQuery } from '../../../gen/gqlClient'

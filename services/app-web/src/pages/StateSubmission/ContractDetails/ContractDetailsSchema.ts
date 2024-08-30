@@ -6,18 +6,18 @@ import {
     GeneralizedProvisionType,
     UnlockedHealthPlanFormDataType,
     federalAuthorityKeysForCHIP,
-} from '../../../common-code/healthPlanFormDataType'
+} from '@mc-review/hpp'
 import {
     isBaseContract,
     isCHIPOnly,
     isContractAmendment,
     isContractWithProvisions,
-} from '../../../common-code/healthPlanFormDataType/healthPlanFormData'
+} from '@mc-review/hpp'
 import {
     isMedicaidAmendmentProvision,
     isMedicaidBaseProvision,
-} from '../../../common-code/healthPlanFormDataType/ModifiedProvisions'
-import { FeatureFlagSettings } from '../../../common-code/featureFlags'
+} from '@mc-review/hpp'
+import { FeatureFlagSettings } from '@mc-review/common-code'
 
 Yup.addMethod(Yup.date, 'validateDateFormat', validateDateFormat)
 

@@ -11,7 +11,7 @@ import {
     fetchEmailSettings,
     fetchCurrentUserMock,
     mockValidAdminUser,
-} from '../../../testHelpers/apolloMocks'
+} from '@mc-review/mocks'
 
 describe('EmailSettings', () => {
     it('should render error message for failed request', async () => {

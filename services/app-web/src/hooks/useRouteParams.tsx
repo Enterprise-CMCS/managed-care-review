@@ -1,7 +1,7 @@
 import { useParams } from 'react-router-dom'
-import { recordJSException } from '../otelHelpers'
+import { recordJSException } from '@mc-review/otel'
 import { useCurrentRoute } from './useCurrentRoute'
-import { STATE_SUBMISSION_FORM_ROUTES } from '../constants'
+import { STATE_SUBMISSION_FORM_ROUTES } from '@mc-review/constants'
 
 // Wraps react-router useParams in better DX and types so we catch invalid param names early
 // original useParams will returns an object of key/value pairs of the dynamic params from the current URL that were matched by the route path.

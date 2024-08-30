@@ -1,7 +1,7 @@
 import { Grid, GridContainer } from '@trussworks/react-uswds'
 import styles from '../SubmissionSummarySection.module.scss'
 import { SectionHeader } from '../../SectionHeader'
-import { HealthPlanFormDataType } from '../../../common-code/healthPlanFormDataType'
+import { HealthPlanFormDataType } from '@mc-review/hpp'
 import { DataDetail, DataDetailContactField } from '../../DataDetail'
 import { SectionCard } from '../../SectionCard'
 

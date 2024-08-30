@@ -1,9 +1,12 @@
+import { TealiumEnv } from './tealium'
 import {
-    TealiumEnv,
-} from './tealium'
-import {PageTitlesRecord, RouteT, STATE_SUBMISSION_FORM_ROUTES, STATE_SUBMISSION_SUMMARY_ROUTES} from '../constants';
-import {User} from '../gen/gqlClient';
-import {hasCMSUserPermissions} from '../gqlHelpers';
+    PageTitlesRecord,
+    RouteT,
+    STATE_SUBMISSION_FORM_ROUTES,
+    STATE_SUBMISSION_SUMMARY_ROUTES,
+} from '@mc-review/constants'
+import { User } from '../gen/gqlClient'
+import { hasCMSUserPermissions } from '@mc-review/helpers'
 
 function getTealiumEnv(stage: string): TealiumEnv {
     switch (stage) {
@@ -70,4 +73,4 @@ const getTealiumPageName = ({
     }
 }
 
-export { getTealiumPageName, getTealiumEnv}
+export { getTealiumPageName, getTealiumEnv }

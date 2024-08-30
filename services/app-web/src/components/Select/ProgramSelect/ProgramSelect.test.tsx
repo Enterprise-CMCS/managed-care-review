@@ -1,9 +1,6 @@
 import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import { ProgramSelect } from './ProgramSelect'
-import {
-    fetchCurrentUserMock,
-    mockMNState,
-} from '../../../testHelpers/apolloMocks'
+import { fetchCurrentUserMock, mockMNState } from '@mc-review/mocks'
 import { screen, waitFor } from '@testing-library/react'
 import selectEvent from 'react-select-event'
 import userEvent from '@testing-library/user-event'

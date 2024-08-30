@@ -28,7 +28,7 @@ import {
     FilterOptionType,
     FilterDateRange,
 } from '../../../components/FilterAccordion'
-import { pluralize } from '../../../common-code/formatters'
+import { pluralize } from '@mc-review/common-code'
 import { DoubleColumnGrid } from '../../../components'
 import { FilterDateRangeRef } from '../../../components/FilterAccordion/FilterDateRange/FilterDateRange'
 import { Loading, NavLinkWithLogging } from '../../../components'

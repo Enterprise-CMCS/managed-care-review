@@ -5,7 +5,7 @@ import {
     iterableCmsUsersMockData,
     mockMNState,
     mockValidAdminUser,
-} from '../../../testHelpers/apolloMocks'
+} from '@mc-review/mocks'
 import { RateReviewsTable } from './RateReviewsTable'
 import { waitFor, screen, within } from '@testing-library/react'
 import selectEvent from 'react-select-event'

@@ -1,14 +1,14 @@
 import React from 'react'
 import { useAuth } from '../../../contexts/AuthContext'
 import { useIndexRatesQuery } from '../../../gen/gqlClient'
-import { mostRecentDate } from '../../../common-code/dateHelpers'
+import { mostRecentDate } from '@mc-review/common-code'
 import styles from '../../StateDashboard/StateDashboard.module.scss'
-import { recordJSException } from '../../../otelHelpers/tracingHelper'
+import { recordJSException } from '@mc-review/otel'
 import { Loading } from '../../../components'
 
 import { RateInDashboardType, RateReviewsTable } from './RateReviewsTable'
 import { ErrorFailedRequestPage } from '../../Errors/ErrorFailedRequestPage'
-import { RateTypeRecord } from '../../../constants/healthPlanPackages'
+import { RateTypeRecord } from '@mc-review/hpp'
 
 const RateReviewsDashboard = (): React.ReactElement => {
     const { loggedInUser } = useAuth()

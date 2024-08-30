@@ -51,7 +51,7 @@ import { ReactComponent as WaIcon } from '../../../assets/icons/wa-icon.svg'
 import { ReactComponent as WiIcon } from '../../../assets/icons/wi-icon.svg'
 import { ReactComponent as WvIcon } from '../../../assets/icons/wv-icon.svg'
 import { ReactComponent as WyIcon } from '../../../assets/icons/wy-icon.svg'
-import { StateCodeType } from '../../../common-code/healthPlanFormDataType'
+import { StateCodeType } from '@mc-review/hpp'
 
 export type StateIconProps = {
     code: StateCodeType

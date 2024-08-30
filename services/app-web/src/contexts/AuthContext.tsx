@@ -1,14 +1,14 @@
 import React, { MutableRefObject, useEffect, useRef, useState } from 'react'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import * as ld from 'launchdarkly-js-client-sdk'
-import { AuthModeType } from '../common-code/config'
+import { AuthModeType } from '@mc-review/common-code'
 import { useFetchCurrentUserQuery, User as UserType } from '../gen/gqlClient'
 import { logoutLocalUser } from '../localAuth'
 import { signOut as cognitoSignOut } from '../pages/Auth/cognitoAuth'
-import { featureFlags } from '../common-code/featureFlags'
-import { dayjs } from '../common-code/dateHelpers/dayjs'
-import { recordJSException } from '../otelHelpers/tracingHelper'
-import { handleApolloError } from '../gqlHelpers/apolloErrors'
+import { featureFlags } from '@mc-review/common-code'
+import { dayjs } from '@mc-review/common-code'
+import { recordJSException } from '@mc-review/otel'
+import { handleApolloError } from '@mc-review/helpers'
 
 type LogoutFn = () => Promise<null>
 

@@ -11,14 +11,14 @@ import {
     mockContractPackageUnlocked,
     mockContractWithLinkedRateDraft,
     mockContractWithLinkedRateSubmitted,
-} from '../../../testHelpers/apolloMocks'
+} from '@mc-review/mocks'
 import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import { RateDetailsSummarySection } from './RateDetailsSummarySection'
 import { Rate } from '../../../gen/gqlClient'
 import { testS3Client } from '../../../testHelpers/s3Helpers'
-import { ActuaryCommunicationRecord } from '../../../constants'
+import { ActuaryCommunicationRecord } from '@mc-review/hpp'
 import * as usePreviousSubmission from '../../../hooks/usePreviousSubmission'
-import { RateRevisionWithIsLinked } from '../../../gqlHelpers/contractsAndRates'
+import { RateRevisionWithIsLinked } from '@mc-review/helpers'
 
 describe('RateDetailsSummarySection', () => {
     const draftContract = mockContractPackageDraft()

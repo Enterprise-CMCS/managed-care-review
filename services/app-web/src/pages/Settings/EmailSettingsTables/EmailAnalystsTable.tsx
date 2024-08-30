@@ -18,7 +18,7 @@ import { formatEmails } from './EmailSettingsTables'
 import { Table } from '@trussworks/react-uswds'
 
 import styles from '../Settings.module.scss'
-import { pluralize } from '../../../common-code/formatters'
+import { pluralize } from '@mc-review/common-code'
 import { useTealium } from '../../../hooks'
 import useDeepCompareEffect from 'use-deep-compare-effect'
 

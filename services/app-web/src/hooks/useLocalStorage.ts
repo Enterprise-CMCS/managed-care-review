@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
-import { LocalStorageKeyType } from '../constants/localStorage'
-import { recordJSException } from '../otelHelpers'
+import { LocalStorageKeyType } from '@mc-review/constants'
+import { recordJSException } from '@mc-review/otel'
 type LocalStorage = {
     key: LocalStorageKeyType
     value: string | string[] | boolean | object | null
@@ -8,7 +8,7 @@ type LocalStorage = {
 
 type UseLocalStorage = [
     LocalStorage['value'],
-    (value: LocalStorage['value']) => void
+    (value: LocalStorage['value']) => void,
 ]
 // Get and set keys in local storage. If key is set to a value of null, clear and remove from local storage, return default fallback value
 function useLocalStorage(

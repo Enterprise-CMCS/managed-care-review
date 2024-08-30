@@ -8,7 +8,7 @@ import {
     DynamicStepIndicator,
 } from './DynamicStepIndicator'
 
-import { STATE_SUBMISSION_FORM_ROUTES } from '../../constants/routes'
+import { STATE_SUBMISSION_FORM_ROUTES } from '@mc-review/constants'
 
 export default {
     title: 'Components/DynamicStepIndicator',

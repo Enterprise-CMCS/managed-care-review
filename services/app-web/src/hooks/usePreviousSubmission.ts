@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useLocation, matchPath } from 'react-router-dom'
-import { RoutesRecord } from '../constants/routes'
+import { RoutesRecord } from '@mc-review/constants'
 
 export const usePreviousSubmission = (): boolean => {
     const [isPreviousSubmission, setIsPreviousSubmission] =

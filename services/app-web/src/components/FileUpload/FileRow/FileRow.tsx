@@ -3,7 +3,7 @@ import { FileItemT } from '../FileProcessor/FileProcessor'
 
 import styles from '../FileUpload.module.scss'
 import { Checkbox } from '@trussworks/react-uswds'
-import { SPACER_GIF } from '../constants'
+import { SPACER_GIF } from '@mc-review/constants'
 import { ButtonWithLogging } from '../../TealiumLogging'
 
 type FileRowProps = {

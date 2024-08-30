@@ -1,4 +1,4 @@
-import { formatCalendarDate } from '../../../common-code/dateHelpers'
+import { formatCalendarDate } from '@mc-review/common-code'
 import {
     DataDetail,
     DoubleColumnGrid,
@@ -44,13 +44,11 @@ export const LinkedRateSummary = ({
                         id="ratingPeriod"
                         label="Rating period"
                         children={
-                            rateForm.rateDateStart && rateForm.rateDateEnd && (
-                                `${formatCalendarDate(
-                                    rateForm?.rateDateStart
-                                )} to ${formatCalendarDate(
-                                    rateForm?.rateDateEnd
-                                )}`
-                            )
+                            rateForm.rateDateStart &&
+                            rateForm.rateDateEnd &&
+                            `${formatCalendarDate(
+                                rateForm?.rateDateStart
+                            )} to ${formatCalendarDate(rateForm?.rateDateEnd)}`
                         }
                     />
                 </DoubleColumnGrid>

@@ -1,4 +1,4 @@
-import { StateType } from '../common-code/healthPlanFormDataType'
+import { StateType } from '@mc-review/hpp'
 import { Division } from '../pages/QuestionResponse/QATable/QATable'
 
 type LocalUserType =

@@ -6,9 +6,9 @@ import {
     ContractExecutionStatusRecord,
     FederalAuthorityRecord,
     ManagedCareEntityRecord,
-} from '../../../constants/index'
+} from '@mc-review/hpp'
 import { useS3 } from '../../../contexts/S3Context'
-import { formatCalendarDate } from '../../../common-code/dateHelpers'
+import { formatCalendarDate } from '@mc-review/common-code'
 import { DoubleColumnGrid } from '../../DoubleColumnGrid'
 import { DownloadButton } from '../../DownloadButton'
 import { usePreviousSubmission } from '../../../hooks/usePreviousSubmission'
@@ -17,31 +17,31 @@ import {
     sortModifiedProvisions,
     isMissingProvisions,
     getProvisionDictionary,
-} from '../../../common-code/healthPlanSubmissionHelpers/provisions'
+} from '@mc-review/common-code'
 import { DataDetailCheckboxList } from '../../DataDetail/DataDetailCheckboxList'
 import {
     isBaseContract,
     isCHIPOnly,
     isContractWithProvisions,
     isSubmitted,
-} from '../../../common-code/healthPlanFormDataType/healthPlanFormData'
+} from '@mc-review/common-code'
 import {
     HealthPlanFormDataType,
     federalAuthorityKeysForCHIP,
     CHIPFederalAuthority,
-} from '../../../common-code/healthPlanFormDataType'
-import { DocumentDateLookupTableType } from '../../../documentHelpers/makeDocumentDateLookupTable'
-import { recordJSException } from '../../../otelHelpers'
+} from '@mc-review/hpp'
+import { DocumentDateLookupTableType } from '@mc-review/helpers'
+import { recordJSException } from '@mc-review/otel'
 import useDeepCompareEffect from 'use-deep-compare-effect'
 import { InlineDocumentWarning } from '../../DocumentWarning'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
-import { featureFlags } from '../../../common-code/featureFlags'
+import { featureFlags } from '@mc-review/common-code'
 import { Grid } from '@trussworks/react-uswds'
 import { booleanAsYesNoFormValue } from '../../Form/FieldYesNo'
 import {
     StatutoryRegulatoryAttestation,
     StatutoryRegulatoryAttestationQuestion,
-} from '../../../constants/statutoryRegulatoryAttestation'
+} from '@mc-review/constants'
 import { SectionCard } from '../../SectionCard'
 import { convertFromSubmissionDocumentsToGenericDocuments } from '../UploadedDocumentsTable/UploadedDocumentsTable'
 

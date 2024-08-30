@@ -6,7 +6,7 @@ import {
     indexUsersQueryMock,
     fetchEmailSettings,
     mockValidAdminUser,
-} from '../../testHelpers/apolloMocks'
+} from '@mc-review/mocks'
 import { renderWithProviders } from '../../testHelpers'
 
 describe('Settings', () => {

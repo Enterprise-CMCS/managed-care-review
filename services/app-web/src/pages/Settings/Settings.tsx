@@ -7,8 +7,8 @@ import { EmailSettingsTable } from './EmailSettingsTables/EmailSettingsTables'
 import { CMSUsersTable } from './CMSUsersTable/CMSUsersTable'
 import { SettingsErrorAlert } from './SettingsErrorAlert'
 import { useLocation } from 'react-router-dom'
-import { recordJSException } from '../../otelHelpers'
-import { hasAdminUserPermissions } from '../../gqlHelpers'
+import { recordJSException } from '@mc-review/otel'
+import { hasAdminUserPermissions } from '@mc-review/helpers'
 
 export const TestMonitoring = (): null => {
     const location = useLocation()

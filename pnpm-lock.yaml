@@ -531,6 +531,21 @@ importers:
       '@mc-review/common-code':
         specifier: workspace:*
         version: link:../../packages/common-code
+      '@mc-review/constants':
+        specifier: workspace:*
+        version: link:../../packages/constants
+      '@mc-review/helpers':
+        specifier: workspace:*
+        version: link:../../packages/helpers
+      '@mc-review/hpp':
+        specifier: workspace:*
+        version: link:../../packages/hpp
+      '@mc-review/mocks':
+        specifier: workspace:*
+        version: link:../../packages/mocks
+      '@mc-review/otel':
+        specifier: workspace:*
+        version: link:../../packages/otel
       '@opentelemetry/api':
         specifier: ^1.6.0
         version: 1.7.0
@@ -13834,7 +13849,7 @@ snapshots:
     dependencies:
       '@aws-crypto/sha256-browser': 5.2.0
       '@aws-crypto/sha256-js': 5.2.0
-      '@aws-sdk/client-sso-oidc': 3.609.0(@aws-sdk/client-sts@3.609.0)
+      '@aws-sdk/client-sso-oidc': 3.609.0(@aws-sdk/client-sts@3.632.0)
       '@aws-sdk/client-sts': 3.609.0
       '@aws-sdk/core': 3.609.0
       '@aws-sdk/credential-provider-node': 3.609.0(@aws-sdk/client-sso-oidc@3.609.0(@aws-sdk/client-sts@3.609.0))(@aws-sdk/client-sts@3.632.0)
@@ -14147,7 +14162,7 @@ snapshots:
     dependencies:
       '@aws-crypto/sha256-browser': 5.2.0
       '@aws-crypto/sha256-js': 5.2.0
-      '@aws-sdk/client-sso-oidc': 3.609.0(@aws-sdk/client-sts@3.632.0)
+      '@aws-sdk/client-sso-oidc': 3.609.0(@aws-sdk/client-sts@3.609.0)
       '@aws-sdk/client-sts': 3.609.0
       '@aws-sdk/core': 3.609.0
       '@aws-sdk/credential-provider-node': 3.609.0(@aws-sdk/client-sso-oidc@3.609.0(@aws-sdk/client-sts@3.609.0))(@aws-sdk/client-sts@3.632.0)

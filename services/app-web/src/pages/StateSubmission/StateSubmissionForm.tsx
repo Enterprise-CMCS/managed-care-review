@@ -15,14 +15,14 @@ import {
     RouteT,
     RouteTWithUnknown,
     RoutesRecord,
-} from '../../constants/routes'
+} from '@mc-review/constants'
 import { getRelativePath } from '../../routeHelpers'
 import { ContractDetails } from './ContractDetails'
 import { Contacts } from './Contacts'
 import { Documents } from './Documents'
 import { ReviewSubmit } from './ReviewSubmit'
 import { SubmissionType } from './SubmissionType'
-import { UnlockedHealthPlanFormDataType } from '../../common-code/healthPlanFormDataType'
+import { UnlockedHealthPlanFormDataType } from '@mc-review/hpp'
 import { ContractFormData } from '../../gen/gqlClient'
 import { RateDetails } from './RateDetails'
 import styles from './StateSubmissionForm.module.scss'

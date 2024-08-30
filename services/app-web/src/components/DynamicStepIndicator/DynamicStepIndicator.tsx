@@ -1,6 +1,6 @@
 import { StepIndicator, StepIndicatorStep } from '@trussworks/react-uswds'
 
-import { PageTitlesRecord, RouteTWithUnknown } from '../../constants/routes'
+import { PageTitlesRecord, RouteTWithUnknown } from '@mc-review/constants'
 import styles from './DynamicStepIndicator.module.scss'
 export type DynamicStepIndicatorProps = {
     formPages: RouteTWithUnknown[]

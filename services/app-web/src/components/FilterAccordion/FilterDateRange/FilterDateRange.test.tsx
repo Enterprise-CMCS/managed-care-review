@@ -1,7 +1,7 @@
 import React from 'react'
 import { FilterDateRange, FilterDateRangeRef } from './FilterDateRange'
 import { renderWithProviders } from '../../../testHelpers'
-import { fetchCurrentUserMock } from '../../../testHelpers/apolloMocks'
+import { fetchCurrentUserMock } from '@mc-review/mocks'
 import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
