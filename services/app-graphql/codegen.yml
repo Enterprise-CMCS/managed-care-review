@@ -89,6 +89,16 @@ generates:
       - 'typescript-react-apollo'
     config:
       enumsAsTypes: true
+  ../../packages/mocks/src/gen/gqlClient.tsx:
+    documents:
+      - src/queries/*.graphql
+      - src/mutations/*.graphql
+    plugins:
+      - 'typescript'
+      - 'typescript-operations'
+      - 'typescript-react-apollo'
+    config:
+      enumsAsTypes: true
   # ./src/common-code/graphql/generated/graphql.schema.json:
   #   plugins:
   #     - 'introspection'
