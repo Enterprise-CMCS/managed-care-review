@@ -9,6 +9,7 @@
         "@apollo/client": "3.8.8",
         "@mc-review/constants": "workspace:*",
         "@mc-review/hpp": "workspace:*",
+        "@mc-review/mocks": "workspace:*",
         "@mc-review/otel-helpers": "workspace:*",
         "typescript": "4.9.5",
         "url-parse": "^1.5.10"

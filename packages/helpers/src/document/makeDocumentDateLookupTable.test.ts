@@ -2,7 +2,7 @@ import { makeDocumentDateTable } from './makeDocumentDateLookupTable'
 import {
     mockDraftHealthPlanPackage,
     mockSubmittedHealthPlanPackageWithRevision,
-} from '@mc-review/test-helpers'
+} from '@mc-review/mocks'
 import { UnlockedHealthPlanFormDataType } from '@mc-review/hpp'
 import { TextEncoder, TextDecoder } from 'util'
 import { buildRevisionsLookup } from '../gql'

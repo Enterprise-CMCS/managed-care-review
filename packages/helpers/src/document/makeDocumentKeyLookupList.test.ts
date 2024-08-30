@@ -1,5 +1,5 @@
 import { makeDocumentS3KeyLookup } from './makeDocumentKeyLookupList'
-import { mockSubmittedHealthPlanPackageWithRevision } from '../testHelpers/apolloMocks'
+import { mockSubmittedHealthPlanPackageWithRevision } from '@mc-review/mocks'
 import { UnlockedHealthPlanFormDataType } from '@mc-review/hpp'
 import { buildRevisionsLookup } from '../gql'
 
