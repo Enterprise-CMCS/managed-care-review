@@ -46,6 +46,9 @@ export {
     provisionCHIPKeys,
     isCHIPProvision,
     isMedicaidAmendmentProvision,
+    isMedicaidBaseProvision,
+    MedicaidBaseProvisionType,
+    CHIPProvisionType,
 } from './ModifiedProvisions'
 
 export type { LockedHealthPlanFormDataType } from './LockedHealthPlanFormDataType'

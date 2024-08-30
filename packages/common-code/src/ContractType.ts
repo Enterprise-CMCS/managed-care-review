@@ -1,5 +1,5 @@
 import { Contract, ContractRevision } from './gen/gqlClient'
-import { getLastContractSubmission } from '@mc-review/gql-helpers'
+import { getLastContractSubmission } from '@mc-review/helpers'
 
 const getContractRev = (contract: Contract): ContractRevision | undefined => {
     if (contract.draftRevision) {

@@ -2,7 +2,7 @@ import {
     ModifiedProvisionsAmendmentRecord,
     ModifiedProvisionsBaseContractRecord,
     ModifiedProvisionsCHIPRecord,
-} from '@mc-review/constants'
+} from '@mc-review/hpp'
 import { Contract } from './gen/gqlClient'
 import {
     CHIPProvisionType,
@@ -22,7 +22,7 @@ import {
     isContractAmendment,
     isContractWithProvisions,
 } from './ContractType'
-import { getLastContractSubmission } from '../gqlHelpers/contractsAndRates'
+import { getLastContractSubmission } from '@mc-review/helpers'
 
 /*
     Each provision key represents a Yes/No question asked on Contract Details. 
