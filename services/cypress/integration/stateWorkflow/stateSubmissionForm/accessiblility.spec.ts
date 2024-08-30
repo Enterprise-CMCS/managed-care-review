@@ -5,7 +5,7 @@ describe('state user in state submission form', () => {
         cy.stubFeatureFlags()
         cy.interceptGraphQL()
     })
-    it('has no a11y violations on submission form with form input errors', () => {
+    it.only('has no a11y violations on submission form with form input errors', () => {
         // 438-attestation still needs to go through design, there is an a11y violation for links and spacing
         cy.interceptFeatureFlags({'438-attestation': false})
         cy.logInAsStateUser()
@@ -28,7 +28,7 @@ describe('state user in state submission form', () => {
         cy.checkA11yWithWcag22aa()
 
         cy.fillOutContractActionAndRateCertification()
-        cy.deprecatedNavigateV1Form('CONTINUE_FROM_START_NEW')
+        cy.navigateContractForm('CONTINUE_FROM_START_NEW')
 
         cy.findByRole('heading', { level: 2, name: /Contract details/ })
         cy.findByRole('button', {
