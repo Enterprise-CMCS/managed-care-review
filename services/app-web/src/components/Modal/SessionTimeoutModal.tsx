@@ -17,9 +17,6 @@ export const SessionTimeoutModal = ({
 
 }: SessionTimeoutModalProps): React.ReactElement | null => {
 
-    // TODO check if modal disappears when logged out
-    // TODO check if modal overrides another modal that is visible (e.g. unlock/resubmit modal)
-    // TODO retest cancel, continue, and do nothing
     const idleTimer = useIdleTimerContext()
     const countdownRemaining = idleTimer.getRemainingTime()* 1000
 

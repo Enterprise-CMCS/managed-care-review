@@ -39,7 +39,7 @@ export const AuthenticatedRouteWrapper = ({
      let timeout = SESSION_DURATION
 
      if (SESSION_TIMEOUT_COUNTDOWN > SESSION_DURATION){
-         recordJSException('SessionTimeoutModal error, duration must be longer than the timeout for idle prompt so we are overriding LD flag value')
+         recordJSException('SessionTimeoutModal – session duration must be longer than the timeout for idle prompt. We are overriding LD flag value.')
          timeout = SESSION_TIMEOUT_COUNTDOWN + 2000
      }
 

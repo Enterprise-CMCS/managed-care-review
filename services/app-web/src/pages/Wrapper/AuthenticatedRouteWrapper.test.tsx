@@ -38,7 +38,7 @@ describe('AuthenticatedRouteWrapper', () => {
         expect(dialog).toHaveClass('is-hidden')
     })
 
-    it("does not render session timeout modal before timeout period is exceeded", async() => {
+    it("hides the session timeout modal when timeout period is not exceeded", async() => {
         renderWithProviders(
             <AuthenticatedRouteWrapper
                 authMode="AWS_COGNITO"
@@ -50,17 +50,23 @@ describe('AuthenticatedRouteWrapper', () => {
         expect(screen.queryByTestId("timeout-dialog")).not.toBeInTheDocument();
       });
 
-    // it("renders session timeout modal after idle prompt period is exceeded", async () => {
-    //     act(() => vi.advanceTimersByTime(3000));
-    //     const dialog = await screen.findByRole('dialog', {name: 'Session Expiring'})
-    //     expect(dialog).toBeVisible();
-    //     expect(mockHandleLogout).not.toHaveBeenCalled();
-    //   });
 
-    // it("logs out and closes session timeout modal after full timeout duration is exceeded", async () => {
-    // act(() => vi.advanceTimersByTime(3000));
-    // const dialog = await screen.findByRole('dialog', {name: 'Session Expiring'})
-    // expect(dialog).toBeVisible();
-    // expect(mockHandleLogout).toHaveBeenCalled();
-    // });
+    it("renders session timeout modal after idle prompt period is exceeded", async () => {
+        await act(() => vi.advanceTimersByTime(3000));
+        const dialog = await screen.findByRole('dialog', {name: 'Session Expiring'})
+        expect(dialog).toBeVisible();
+        // expect(mockHandleLogout).not.toHaveBeenCalled();
+      });
+    it.todo('renders countdown inside session timeout modal that updates every second')
+    it("if user does nothing, logs out and closes session timeout modal after full timeout duration is exceeded", async () => {
+        await act(() => vi.advanceTimersByTime(3000));
+        const dialog = await screen.findByRole('dialog', {name: 'Session Expiring'})
+        expect(dialog).toBeVisible();
+        // expect(mockHandleLogout).toHaveBeenCalled();
+        });
+
+    it.todo('overrides any existing open modal with session timeout modal when idle prompt is displayed')
+    it.todo('hides session timeout after logout') // to test this we need to move a level up
+    it.todo('session timeout modal submit button click will refresh the user session')
+    it.todo('session timeout modal cancel button click will logout user session')
 })
