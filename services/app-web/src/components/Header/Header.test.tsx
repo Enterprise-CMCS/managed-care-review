@@ -141,36 +141,5 @@ describe('Header', () => {
 
             await waitFor(() => expect(spy).toHaveBeenCalledTimes(1))
         })
-
-        it('calls setAlert when logout is unsuccessful', async () => {
-            const spy = vi
-                .spyOn(CognitoAuthApi, 'signOut')
-                .mockRejectedValue('This logout failed!')
-            const mockAlert = vi.fn()
-
-            renderWithProviders(
-                <Header authMode={'AWS_COGNITO'} setAlert={mockAlert} />,
-                {
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchCurrentUserMock({ statusCode: 403 }),
-                        ],
-                    },
-                }
-            )
-
-            await waitFor(() => {
-                const signOutButton = screen.getByRole('button', {
-                    name: /Sign out/i,
-                })
-
-                expect(signOutButton).toBeInTheDocument()
-                void userEvent.click(signOutButton)
-            })
-
-            await waitFor(() => expect(spy).toHaveBeenCalledTimes(1))
-            await waitFor(() => expect(mockAlert).toHaveBeenCalled())
-        })
     })
 })

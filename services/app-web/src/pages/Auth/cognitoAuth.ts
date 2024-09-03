@@ -1,6 +1,7 @@
 import { CognitoUser } from 'amazon-cognito-identity-js'
 import { Auth as AmplifyAuth } from 'aws-amplify'
 import { StateUser } from '../../gen/gqlClient'
+import { recordJSException } from '../../otelHelpers'
 
 type newUser = {
     username: string
@@ -129,33 +130,28 @@ export async function resendSignUp(
 export async function signIn(
     email: string,
     password: string
-): Promise<CognitoUser | AmplifyError> {
+): Promise<CognitoUser | Error> {
     try {
         const result = await AmplifyAuth.signIn(email, password)
         return result.user
     } catch (e) {
         if (isAmplifyError(e)) {
             if (e.code === 'UserNotConfirmedException') {
-                console.info(
-                    'you need to confirm your account, enter the code below'
+                recordJSException(
+                    `AmplifyError ${e.code} – you need to confirm your account, enter the code below`
                 )
-                return e
             } else if (e.code === 'NotAuthorizedException') {
-                console.info('unknown user or password?')
-                return e
+                recordJSException(`AmplifyError ${e.code} – this is probably a bad password`)
             } else if (e.code === 'UserNotFoundException') {
-                console.info('user does not exist')
-                return e
+                recordJSException(`AmplifyError ${e.code} – user does not exist`)
             } else {
-                // if amplify returns an error in a format we don't expect, let's throw it for now.
-                // might be against the spirit of never throw, but this is our boundary with a system we don't control.
-                throw e
+                recordJSException(`UNEXPECTED SIGNIN ERROR AmplifyError ${e.code} – ${e.message}`)
             }
         } else {
-            console.info('didnt even get an amplify error back from login')
-            throw e
+            recordJSException(`UNEXPECTED SIGNIN ERROR – 'didnt even get an amplify error back from login`)
         }
     }
+    throw Error('Cognito SignIn error')
 }
 
 export async function signOut(): Promise<null> {

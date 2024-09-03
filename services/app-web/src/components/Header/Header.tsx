@@ -34,13 +34,7 @@ export const Header = ({
     const { heading } = usePage()
     const { currentRoute: route } = useCurrentRoute()
 
-    const handleLogout = (
-        e: React.MouseEvent<HTMLButtonElement, MouseEvent>
-    ) => {
-        if (!logout) {
-            console.info('Something went wrong ', e)
-            return
-        }
+    const handleLogout = () => {
 
         logout({ authMode, sessionTimeout: false }).catch((e) => {
             recordJSException(`Error with logout: ${e}`)

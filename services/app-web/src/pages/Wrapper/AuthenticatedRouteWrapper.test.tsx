@@ -5,14 +5,14 @@ import { createMocks } from 'react-idle-timer';
 
 describe('AuthenticatedRouteWrapper', () => {
     beforeAll(() => {
-        jest.useFakeTimers();
+        vi.useFakeTimers();
         createMocks();
       });
 
       afterAll(() => {
-        jest.runOnlyPendingTimers();
-        jest.useRealTimers();
-        jest.clearAllMocks();
+        vi.runOnlyPendingTimers();
+        vi.useRealTimers();
+        vi.clearAllMocks();
       });
 
     it('renders without errors', async () => {
@@ -38,7 +38,7 @@ describe('AuthenticatedRouteWrapper', () => {
         expect(dialog).toHaveClass('is-hidden')
     })
 
-    it("does not render session timeout modal before timeout period is exceeded", () => {
+    it("does not render session timeout modal before timeout period is exceeded", async() => {
         renderWithProviders(
             <AuthenticatedRouteWrapper
                 authMode="AWS_COGNITO"
@@ -46,19 +46,19 @@ describe('AuthenticatedRouteWrapper', () => {
             />
         )
 
-        act(() => jest.advanceTimersByTime(1000));
+        await vi.advanceTimersByTime(1000);
         expect(screen.queryByTestId("timeout-dialog")).not.toBeInTheDocument();
       });
 
     // it("renders session timeout modal after idle prompt period is exceeded", async () => {
-    //     act(() => jest.advanceTimersByTime(3000));
+    //     act(() => vi.advanceTimersByTime(3000));
     //     const dialog = await screen.findByRole('dialog', {name: 'Session Expiring'})
     //     expect(dialog).toBeVisible();
     //     expect(mockHandleLogout).not.toHaveBeenCalled();
     //   });
 
     // it("logs out and closes session timeout modal after full timeout duration is exceeded", async () => {
-    // act(() => jest.advanceTimersByTime(3000));
+    // act(() => vi.advanceTimersByTime(3000));
     // const dialog = await screen.findByRole('dialog', {name: 'Session Expiring'})
     // expect(dialog).toBeVisible();
     // expect(mockHandleLogout).toHaveBeenCalled();

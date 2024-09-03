@@ -7,6 +7,7 @@ import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '../../common-code/featureFlags'
 import { SessionTimeoutModal } from '../../components/Modal/SessionTimeoutModal'
 import { IdleTimerProvider } from 'react-idle-timer'
+import { recordJSException } from '../../otelHelpers'
 
 export const AuthenticatedRouteWrapper = ({
     children,
@@ -25,16 +26,23 @@ export const AuthenticatedRouteWrapper = ({
     const closeSessionTimeoutModal = () => {
         modalRef.current?.toggleModal(undefined, false)
     }
-    // Time increments for session timeout actions in milliseconds
-    const SESSION_DURATION: number = ldClient?.variation(
-        featureFlags.MINUTES_UNTIL_SESSION_EXPIRES.flag,
-        featureFlags.MINUTES_UNTIL_SESSION_EXPIRES.defaultValue
-    ) * 1000
-    const SESSION_TIMEOUT_COUNTDOWN = 2 * 60 * 1000 // session expiration modal counts down 2 minutes
-    const RECHECK_FREQUENCY = 1000
-
     const logoutWithSessionTimeout = async () => logout({ authMode, sessionTimeout: true })
     const logoutByUserChoice  = async () => logout({ authMode, sessionTimeout: false})
+
+     // Time increments for session timeout actions must be in milliseconds
+     const SESSION_TIMEOUT_COUNTDOWN = 2 * 60 * 1000
+     const RECHECK_FREQUENCY = 1000
+     const SESSION_DURATION: number = ldClient?.variation(
+         featureFlags.MINUTES_UNTIL_SESSION_EXPIRES.flag,
+         featureFlags.MINUTES_UNTIL_SESSION_EXPIRES.defaultValue
+     ) * 60 * 1000
+     let timeout = SESSION_DURATION
+
+     if (SESSION_TIMEOUT_COUNTDOWN > SESSION_DURATION){
+         recordJSException('SessionTimeoutModal error, duration must be longer than the timeout for idle prompt so we are overriding LD flag value')
+         timeout = SESSION_TIMEOUT_COUNTDOWN + 2000
+     }
+
     return (
             <IdleTimerProvider
             onIdle={logoutWithSessionTimeout}
@@ -44,7 +52,7 @@ export const AuthenticatedRouteWrapper = ({
             }}
             onPrompt={openSessionTimeoutModal}
             promptBeforeIdle={SESSION_TIMEOUT_COUNTDOWN}
-            timeout={SESSION_DURATION}
+            timeout={timeout}
             throttle={RECHECK_FREQUENCY}
     >
             {children}

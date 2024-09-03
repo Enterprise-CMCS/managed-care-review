@@ -157,20 +157,19 @@ function AuthProvider({
     }
 
     /*
-        Refetches current user and confirms authentication
+        Refetches current user and confirms authentication - primarily used with LocalLogin and CognitoLogin - not on IDM
         @param {failureRedirectPath} passed through to logout which is called on certain checkAuth failures
 
         Use this function to reconfirm the user is logged in. Also used in CognitoLogin
     */
     const checkAuth: AuthContextType['checkAuth'] = async (
-        failureRedirectPath = '/'
+        failureRedirectPath = '/?session-timeout'
     ) => {
         try {
             return await refetch()
         } catch (e) {
-            // if we fail auth at a time we expected logged in user, the session may have timed out. Logout fully to reflect that and force Reat state to update
+            // if we fail auth at a time we expected logged in user, the session may have timed out. Logout fully to reflect that and force React state update
             if (loggedInUser) {
-                // TODO get actual session timeout passing through
                 await logout({
                     authMode: authMode,
                     sessionTimeout: true,
