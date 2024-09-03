@@ -36,12 +36,17 @@ export const AuthenticatedRouteWrapper = ({
          featureFlags.MINUTES_UNTIL_SESSION_EXPIRES.flag,
          featureFlags.MINUTES_UNTIL_SESSION_EXPIRES.defaultValue
      ) * 60 * 1000
-     let timeout = SESSION_DURATION
+     let promptCountdown = SESSION_TIMEOUT_COUNTDOWN
 
-     if (SESSION_TIMEOUT_COUNTDOWN > SESSION_DURATION){
+     // Since session duration is controlled by feature flag, make sure it cannot be assigned to incompatible values for IdleTimeoutProvider
+     if (SESSION_DURATION <= SESSION_TIMEOUT_COUNTDOWN){
+        console.log('IN HERE')
          recordJSException('SessionTimeoutModal – session duration must be longer than the timeout for idle prompt. We are overriding LD flag value.')
-         timeout = SESSION_TIMEOUT_COUNTDOWN + 2000
+         promptCountdown = SESSION_DURATION - 2000
      }
+
+     console.log('countdown: ', SESSION_TIMEOUT_COUNTDOWN, 'session duration: ',  SESSION_DURATION, 'promptCountdown: ', promptCountdown
+     )
 
     return (
             <IdleTimerProvider
@@ -51,8 +56,8 @@ export const AuthenticatedRouteWrapper = ({
                 closeSessionTimeoutModal()
             }}
             onPrompt={openSessionTimeoutModal}
-            promptBeforeIdle={SESSION_TIMEOUT_COUNTDOWN}
-            timeout={timeout}
+            promptBeforeIdle={promptCountdown}
+            timeout={SESSION_DURATION}
             throttle={RECHECK_FREQUENCY}
     >
             {children}
