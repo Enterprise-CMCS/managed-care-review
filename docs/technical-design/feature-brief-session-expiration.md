@@ -2,9 +2,9 @@
 
 ## Introduction
 
-We use a third-party authentication provider ([IDM](https://confluenceent.cms.gov/display/IDM/IDM+Trainings+and+Guides)) which automatically logs out sessions due to inactivity after about 30 minutes. Although sessions are handled by AWS Amplify/Cognito after login, we follow the same rules. We currently don't access Cognito to check if our session is active. Instead, we manually track sessions internally in React (`AuthContext.tsx`) for the same time period.
+We use a third-party authentication provider ([IDM](https://confluenceent.cms.gov/display/IDM/IDM+Trainings+and+Guides)) which automatically logs out sessions due to inactivity after about 30 minutes. Although MC-Review user sessions are handled by AWS Amplify/Cognito after login, we follow the same rules. We currently don't access Cognito to check if our session is active. Instead, we manually track sessions internally in state via [`react-idle-timer`](https://idletimer.dev/). This also allows us to follow the CMS Acceptable Risk Safeguards(ARS) controls `AC-11 Idle Session Timeout` and `AC-12(03) Timeout Warning Message`.
 
-Importantly this featured is permanently feature-flagged since we have different requirements between production/staging and lower environments. More details about feature flags [below](#implementation-details).
+Importantly, this featured is also permanently feature-flagged since we have different requirements between production/staging and lower environments. More details about feature flags [below](#implementation-details).
 
 ## Expected behavior
  Two minutes before the session will expire due to inactivity we show a warning modal. The modal displays a live countdown and has CTA buttons with 1. the ability to log out immediately 2. the ability to extend the session. This helps us fulfill accessibility requirements around [WCAG 2.2.1 Timing Adjustable](https://www.w3.org/WAI/WCAG21/Understanding/timing-adjustable.html).
@@ -35,7 +35,3 @@ These are edge cases we decided not to address. Documenting for visibility.
 - Primary logic for the feature is found in `AuthContext.tsx`
     - `MODAL_COUNTDOWN_DURATION` is the hard-coded constant that holds the amount of time the modal will be visible prior to logout for inactivity. It is set to 2 minutes.
     - use of `session-timeout`query param to ensure error banner displays
-    - `sessionExpirationTime` is the date and time at which the session will expire and `updateSessionExpirationTime` is the method to extend the session when the user is active
-    - `setLogoutCountdownDuration` used to decrement the countdown duration for display in the modal
-    - `sessionIsExpiring` boolean tracks whether we're inside the countdown duration (if true, modal is visible) this is updated with `updateSessionExpirationState`
-    - `checkIfSessionsIsAboutToExpire` check current session time on an interval in the background. It determines if it is time to show modal

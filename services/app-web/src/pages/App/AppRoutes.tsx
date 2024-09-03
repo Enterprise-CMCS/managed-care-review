@@ -2,7 +2,7 @@ import React, { Fragment, useEffect, useState } from 'react'
 import { useLocation, Navigate } from 'react-router'
 import { Route, Routes } from 'react-router-dom'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
-import { extendSession, idmRedirectURL } from '../../pages/Auth/cognitoAuth'
+import {  idmRedirectURL } from '../../pages/Auth/cognitoAuth'
 import { assertNever, AuthModeType } from '../../common-code/config'
 import { PageTitlesRecord, RoutesRecord, RouteT } from '../../constants/routes'
 import { getRouteName } from '../../routeHelpers'
@@ -81,7 +81,7 @@ const StateUserRoutes = ({
         featureFlags.RATE_EDIT_UNLOCK.defaultValue
     )
     return (
-        <AuthenticatedRouteWrapper setAlert={setAlert} authMode={authMode}>
+        <AuthenticatedRouteWrapper authMode={authMode}>
             <Routes>
                 <Route
                     path={RoutesRecord.ROOT}
@@ -166,7 +166,7 @@ const CMSUserRoutes = ({
     stageName?: string
 }): React.ReactElement => {
     return (
-        <AuthenticatedRouteWrapper authMode={authMode} setAlert={setAlert}>
+        <AuthenticatedRouteWrapper authMode={authMode}>
             <Routes>
                 <Route
                     path={RoutesRecord.ROOT}
@@ -274,41 +274,17 @@ export const AppRoutes = ({
 }): React.ReactElement => {
     const {
         loggedInUser,
-        sessionIsExpiring,
-        updateSessionExpirationState,
-        updateSessionExpirationTime,
-        checkIfSessionsIsAboutToExpire,
     } = useAuth()
     const { pathname } = useLocation()
-    const ldClient = useLDClient()
     const [redirectPath, setRedirectPath] = useLocalStorage(
         'LOGIN_REDIRECT',
         null
     )
     const stageName = import.meta.env.VITE_APP_STAGE_NAME
-    const showExpirationModal: boolean = ldClient?.variation(
-        featureFlags.SESSION_EXPIRING_MODAL.flag,
-        featureFlags.SESSION_EXPIRING_MODAL.defaultValue
-    )
 
     const route = getRouteName(pathname)
     const { updateHeading } = usePage()
     const [initialPath] = useState(pathname) // this gets written on mount, so we don't call the effect on every path change
-    if (
-        loggedInUser !== undefined &&
-        sessionIsExpiring === false &&
-        showExpirationModal
-    ) {
-        // whenever we load a page, reset the logout timer and refresh the session
-        updateSessionExpirationTime()
-
-        if (authMode !== 'LOCAL') {
-            void extendSession()
-        }
-        updateSessionExpirationState(false)
-        // Every thirty seconds, check if the current time is within `countdownDurationSeconds` of the session expiration time
-        checkIfSessionsIsAboutToExpire()
-    }
 
     // This effect handles our initial redirect on login
     // This way, if you get a link to something and aren't logged in, you get

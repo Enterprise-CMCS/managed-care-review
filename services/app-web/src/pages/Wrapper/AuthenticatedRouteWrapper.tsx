@@ -1,108 +1,58 @@
-import React, { useState } from 'react'
-import { Modal } from '../../components/Modal/Modal'
+import React from 'react'
 import { ModalRef } from '@trussworks/react-uswds'
-import { createRef, useCallback, useEffect } from 'react'
-import { MODAL_COUNTDOWN_DURATION, useAuth } from '../../contexts/AuthContext'
+import { createRef} from 'react'
+import { useAuth } from '../../contexts/AuthContext'
 import { AuthModeType } from '../../common-code/config'
-import { extendSession } from '../Auth/cognitoAuth'
-import styles from '../StateSubmission/ReviewSubmit/ReviewSubmit.module.scss'
-import { dayjs } from '../../common-code/dateHelpers/dayjs'
-import { recordJSException } from '../../otelHelpers'
-import { ErrorAlertSignIn } from '../../components'
+import { useLDClient } from 'launchdarkly-react-client-sdk'
+import { featureFlags } from '../../common-code/featureFlags'
+import { SessionTimeoutModal } from '../../components/Modal/SessionTimeoutModal'
+import { IdleTimerProvider } from 'react-idle-timer'
 
 export const AuthenticatedRouteWrapper = ({
     children,
-    setAlert,
     authMode,
 }: {
     children: React.ReactNode
-    setAlert?: React.Dispatch<React.ReactElement>
     authMode: AuthModeType
 }): React.ReactElement => {
-    const {
-        logout,
-        sessionIsExpiring,
-        logoutCountdownDuration,
-        updateSessionExpirationState,
-        updateSessionExpirationTime,
-        setLogoutCountdownDuration,
-    } = useAuth()
-    const [announcementSeed] = useState<number>(logoutCountdownDuration)
-    const announcementTimes: number[] = []
-    for (let i = announcementSeed; i > 0; i -= 10) {
-        announcementTimes.push(i)
-    }
     const modalRef = createRef<ModalRef>()
+    const ldClient = useLDClient()
+    const  {logout, refreshAuth} = useAuth()
 
-    const logoutSession = useCallback(
-        (forcedSessionSignout: boolean) => {
-            updateSessionExpirationState(false)
-            if (logout) {
-                logout({ sessionTimeout: forcedSessionSignout }).catch((e) => {
-                    recordJSException(`Error with logout: ${e}`)
-                    setAlert && setAlert(<ErrorAlertSignIn />)
-                })
-            }
-        },
-        [logout, setAlert, updateSessionExpirationState]
-    )
-
-    const resetSessionTimeout = () => {
-        updateSessionExpirationState(false)
-        updateSessionExpirationTime()
-        setLogoutCountdownDuration(MODAL_COUNTDOWN_DURATION)
-        if (authMode !== 'LOCAL') {
-            void extendSession()
-        }
+    const openSessionTimeoutModal = () =>{
+        modalRef.current?.toggleModal(undefined, true)
     }
+    const closeSessionTimeoutModal = () => {
+        modalRef.current?.toggleModal(undefined, false)
+    }
+    // Time increments for session timeout actions in milliseconds
+    const SESSION_DURATION: number = ldClient?.variation(
+        featureFlags.MINUTES_UNTIL_SESSION_EXPIRES.flag,
+        featureFlags.MINUTES_UNTIL_SESSION_EXPIRES.defaultValue
+    ) * 1000
+    const SESSION_TIMEOUT_COUNTDOWN = 2 * 60 * 1000 // session expiration modal counts down 2 minutes
+    const RECHECK_FREQUENCY = 1000
 
-    useEffect(() => {
-        modalRef.current?.toggleModal(undefined, sessionIsExpiring)
-    }, [sessionIsExpiring, modalRef])
-
-    useEffect(() => {
-        if (logoutCountdownDuration < 1) {
-            logoutSession(true)
-        }
-    }, [logoutCountdownDuration, logoutSession])
+    const logoutWithSessionTimeout = async () => logout({ authMode, sessionTimeout: true })
+    const logoutByUserChoice  = async () => logout({ authMode, sessionTimeout: false})
     return (
-        <>
-            {
-                <Modal
-                    modalRef={modalRef}
-                    id="extend-session-modal"
-                    modalHeading="Session Expiring"
-                    onSubmitText="Continue Session"
-                    onCancelText="Logout"
-                    onCancel={() => logoutSession(false)}
-                    submitButtonProps={{ className: styles.submitButton }}
-                    onSubmit={resetSessionTimeout}
-                    forceAction={true}
-                >
-                    <p
-                        aria-live={
-                            announcementTimes.includes(logoutCountdownDuration)
-                                ? 'assertive'
-                                : 'off'
-                        }
-                        aria-atomic={true}
-                    >
-                        Your session is going to expire in{' '}
-                        {dayjs
-                            .duration(logoutCountdownDuration, 'seconds')
-                            .format('mm:ss')}{' '}
-                    </p>
-                    <p>
-                        If you would like to extend your session, click the
-                        Continue Session button
-                    </p>
-                    <p>
-                        If you would like to end your session now, click the
-                        Logout button
-                    </p>
-                </Modal>
-            }
+            <IdleTimerProvider
+            onIdle={logoutWithSessionTimeout}
+            onActive={async () => {
+                await refreshAuth()
+                closeSessionTimeoutModal()
+            }}
+            onPrompt={openSessionTimeoutModal}
+            promptBeforeIdle={SESSION_TIMEOUT_COUNTDOWN}
+            timeout={SESSION_DURATION}
+            throttle={RECHECK_FREQUENCY}
+    >
             {children}
-        </>
+            <SessionTimeoutModal
+                modalRef={modalRef}
+                refreshSession={refreshAuth}
+                logoutSession={logoutByUserChoice}
+            />
+            </IdleTimerProvider>
     )
 }

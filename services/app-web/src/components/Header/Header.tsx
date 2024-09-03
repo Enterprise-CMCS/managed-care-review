@@ -42,7 +42,7 @@ export const Header = ({
             return
         }
 
-        logout({ sessionTimeout: false }).catch((e) => {
+        logout({ authMode, sessionTimeout: false }).catch((e) => {
             recordJSException(`Error with logout: ${e}`)
             setAlert && setAlert(<ErrorAlertSignIn />)
         })
