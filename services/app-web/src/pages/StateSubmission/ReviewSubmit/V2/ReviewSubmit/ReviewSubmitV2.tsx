@@ -17,7 +17,7 @@ import {
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 
 import { RoutesRecord } from '../../../../../constants'
-import { UnlockSubmitModal } from '../../../../../components/Modal/V2/UnlockSubmitModalV2'
+import { UnlockSubmitModal } from '../../../../../components/Modal/UnlockSubmitModal'
 import { getVisibleLatestContractFormData } from '../../../../../gqlHelpers/contractsAndRates'
 import { useAuth } from '../../../../../contexts/AuthContext'
 import { RateDetailsSummarySection } from '../../RateDetailsSummarySection'

@@ -14,7 +14,6 @@ import {
 import styles from './Modal.module.scss'
 
 import { ActionButton } from '../ActionButton'
-import { useAuth } from '../../contexts/AuthContext'
 import { ButtonWithLogging } from '../TealiumLogging'
 
 interface ModalComponentProps {
@@ -48,15 +47,9 @@ export const Modal = ({
     modalAlert,
     ...divProps
 }: ModalProps): React.ReactElement => {
-    const { sessionIsExpiring } = useAuth()
-
+    // TODO figure out what to do here - make a global modal there was code about closing every other modal
     /* unless it's the session expiring modal, close it if the session is expiring, so the user can interact
     with the session expiring modal */
-    useEffect(() => {
-        if (id !== 'extend-session-modal' && sessionIsExpiring) {
-            modalRef.current?.toggleModal(undefined, false)
-        }
-    }, [sessionIsExpiring, modalRef, id])
 
     const cancelHandler = (e: React.MouseEvent): void => {
         if (onCancel) {
