@@ -1,3 +1,5 @@
+/// <reference path="./dayjs.d.ts" />
+
 import dayjs from 'dayjs'
 import advancedFormat from 'dayjs/plugin/advancedFormat'
 import isLeapYear from 'dayjs/plugin/isLeapYear'

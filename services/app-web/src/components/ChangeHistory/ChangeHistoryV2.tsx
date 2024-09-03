@@ -6,7 +6,7 @@ import type { AccordionItemProps } from '@trussworks/react-uswds/lib/components/
 import { UpdateInformation, Contract } from '../../gen/gqlClient'
 import styles from './ChangeHistory.module.scss'
 import { LinkWithLogging } from '../TealiumLogging/Link'
-import { getUpdatedByDisplayName } from '../../gqlHelpers/userHelpers'
+import { getUpdatedByDisplayName } from '@mc-review/helpers'
 
 type ChangeHistoryProps = {
     contract: Contract

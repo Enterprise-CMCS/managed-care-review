@@ -4,7 +4,7 @@ import { Alert } from '@trussworks/react-uswds'
 import styles from '../Banner.module.scss'
 import { ExpandableText } from '../../ExpandableText'
 import { formatBannerDate } from '@mc-review/common-code'
-import { getUpdatedByDisplayName } from '../../../gqlHelpers/userHelpers'
+import { getUpdatedByDisplayName } from '@mc-review/helpers'
 
 export type RateWithdrawnProps = {
     withdrawInfo: UpdateInformation

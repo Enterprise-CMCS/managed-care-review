@@ -1,5 +1,5 @@
 import type { Resolvers } from '../../gen/gqlServer'
-import statePrograms from '../../../../app-web/src/common-code/data/statePrograms.json'
+import statePrograms from '@mc-review/hpp'
 import type {
     CMSUserType,
     CMSApproverUserType,

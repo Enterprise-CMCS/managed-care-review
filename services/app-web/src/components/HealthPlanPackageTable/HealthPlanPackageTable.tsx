@@ -17,7 +17,7 @@ import styles from './HealthPlanPackageTable.module.scss'
 import { Table, Tag } from '@trussworks/react-uswds'
 import dayjs from 'dayjs'
 import qs from 'qs'
-import { SubmissionStatusRecord } from '../../constants/healthPlanPackages'
+import { SubmissionStatusRecord } from '@mc-review/hpp'
 import {
     FilterAccordion,
     FilterSelect,

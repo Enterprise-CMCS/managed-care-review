@@ -51,7 +51,7 @@ import {
 import {
     generateProvisionLabel,
     generateApplicableProvisionsList,
-} from '@mc-review/common-code'
+} from '@mc-review/hpp'
 import type {
     ManagedCareEntity,
     SubmissionDocument,
@@ -63,7 +63,7 @@ import {
     isCHIPOnly,
     isContractAmendment,
     isContractWithProvisions,
-} from '@mc-review/common-code'
+} from '@mc-review/hpp'
 import { RoutesRecord } from '@mc-review/constants'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '@mc-review/common-code'

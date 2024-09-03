@@ -10,6 +10,7 @@ export const isGraphQLErrors = (input: unknown): input is GraphQLErrors => {
 }
 
 export * from './apolloErrors'
+export * from './apolloQueryWrapper'
 export * from './contractsAndRates'
 export * from './fetchHealthPlanPackageWrapper'
 export * from './healthPlanPackages'

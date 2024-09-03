@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react'
 import styles from '../Banner.module.scss'
 import { Alert } from '@trussworks/react-uswds'
-import { ERROR_MESSAGES } from '../../../constants/errors'
+import { ERROR_MESSAGES } from '@mc-review/constants'
 import { useStringConstants } from '../../../hooks/useStringConstants'
 import { LinkWithLogging } from '../../TealiumLogging/Link'
 import { useTealium } from '../../../hooks'
@@ -29,7 +29,7 @@ export const GenericApiErrorBanner = ({
             type: 'error',
             extension: 'react-uswds',
         })
-    }, [])
+    })
 
     return (
         <Alert

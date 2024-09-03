@@ -17,14 +17,14 @@ import {
     sortModifiedProvisions,
     isMissingProvisions,
     getProvisionDictionary,
-} from '@mc-review/common-code'
+} from '@mc-review/hpp'
 import { DataDetailCheckboxList } from '../../DataDetail/DataDetailCheckboxList'
 import {
     isBaseContract,
     isCHIPOnly,
     isContractWithProvisions,
     isSubmitted,
-} from '@mc-review/common-code'
+} from '@mc-review/hpp'
 import {
     HealthPlanFormDataType,
     federalAuthorityKeysForCHIP,

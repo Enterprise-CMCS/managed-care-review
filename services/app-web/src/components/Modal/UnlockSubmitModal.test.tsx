@@ -14,7 +14,7 @@ import { Location } from 'react-router-dom'
 import {
     submitContractMockError,
     submitContractMockSuccess,
-} from '../../testHelpers/apolloMocks/contractGQLMock'
+} from '@mc-review/mocks'
 import {
     unlockContractMockError,
     unlockContractMockSuccess,
