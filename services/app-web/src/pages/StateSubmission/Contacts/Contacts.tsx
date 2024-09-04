@@ -10,6 +10,7 @@ import {
     FieldArrayRenderProps,
 } from 'formik'
 import { generatePath, useNavigate } from 'react-router-dom'
+import { useLDClient } from 'launchdarkly-react-client-sdk'
 
 import styles from '../StateSubmissionForm.module.scss'
 
@@ -41,6 +42,7 @@ import { useAuth } from '../../../contexts/AuthContext'
 import { ErrorOrLoadingPage } from '../ErrorOrLoadingPage'
 import { PageBannerAlerts } from '../PageBannerAlerts'
 import { useErrorSummary } from '../../../hooks/useErrorSummary'
+import { featureFlags } from '../../../common-code/featureFlags'
 
 export interface ContactsFormValues {
     stateContacts: StateContact[]
@@ -76,6 +78,7 @@ const Contacts = ({
     const [focusNewContact, setFocusNewContact] = React.useState(false)
     const [focusNewActuaryContact, setFocusNewActuaryContact] =
         React.useState(false)
+    const ldClient = useLDClient()
     const { setFocusErrorSummaryHeading, errorSummaryHeadingRef } =
         useErrorSummary()
     const { logButtonEvent } = useTealium()
@@ -99,6 +102,11 @@ const Contacts = ({
     const newActuaryContactNameRef = React.useRef<HTMLInputElement | null>(null)
 
     const navigate = useNavigate()
+
+    const hideSupportingDocs = ldClient?.variation(
+        featureFlags.HIDE_SUPPORTING_DOCS_PAGE.flag,
+        featureFlags.HIDE_SUPPORTING_DOCS_PAGE.defaultValue
+    )
 
     /*
      Set focus to contact name field when adding new contacts.
@@ -177,7 +185,11 @@ const Contacts = ({
                 if (redirectToDashboard.current) {
                     navigate(RoutesRecord.DASHBOARD_SUBMISSIONS)
                 } else {
-                    navigate(`../documents`)
+                    if (hideSupportingDocs) {
+                        navigate(`../review-and-submit`)
+                    } else {
+                        navigate(`../documents`)
+                    }
                 }
             }
         } catch (serverError) {
@@ -205,7 +217,10 @@ const Contacts = ({
         <>
             <FormNotificationContainer>
                 <DynamicStepIndicator
-                    formPages={activeFormPages(draftSubmission)}
+                    formPages={activeFormPages(
+                        draftSubmission,
+                        hideSupportingDocs
+                    )}
                     currentFormPage={currentRoute}
                 />
                 <PageBannerAlerts

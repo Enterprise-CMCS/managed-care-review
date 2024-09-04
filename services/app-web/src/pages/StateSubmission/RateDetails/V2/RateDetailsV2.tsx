@@ -23,6 +23,7 @@ import {
     RouteT,
     RoutesRecord,
     STATE_SUBMISSION_FORM_ROUTES,
+    STATE_SUBMISSION_FORM_ROUTES_WITHOUT_SUPPORTING_DOCS,
 } from '../../../../constants'
 import {
     HealthPlanPackageStatus,
@@ -100,6 +101,11 @@ const RateDetails = ({
     const useEditUnlockRate = ldClient?.variation(
         featureFlags.RATE_EDIT_UNLOCK.flag,
         featureFlags.RATE_EDIT_UNLOCK.defaultValue
+    )
+
+    const hideSupportingDocs = ldClient?.variation(
+        featureFlags.HIDE_SUPPORTING_DOCS_PAGE.flag,
+        featureFlags.HIDE_SUPPORTING_DOCS_PAGE.defaultValue
     )
     const [showAPIErrorBanner, setShowAPIErrorBanner] = useState<
         boolean | string
@@ -377,7 +383,11 @@ const RateDetails = ({
             <FormNotificationContainer>
                 {!displayAsStandaloneRate && (
                     <DynamicStepIndicator
-                        formPages={STATE_SUBMISSION_FORM_ROUTES}
+                        formPages={
+                            hideSupportingDocs
+                                ? STATE_SUBMISSION_FORM_ROUTES_WITHOUT_SUPPORTING_DOCS
+                                : STATE_SUBMISSION_FORM_ROUTES
+                        }
                         currentFormPage="SUBMISSIONS_RATE_DETAILS"
                     />
                 )}
