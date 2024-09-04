@@ -61,6 +61,9 @@ describe('ContractDetails', () => {
                 routerProvider: {
                     route: '/submissions/15/edit/contract-details',
                 },
+                featureFlags: {
+                    'hide-supporting-docs-page': true,
+                },
             }
         )
 
@@ -149,17 +152,27 @@ describe('ContractDetails', () => {
                     routerProvider: {
                         route: '/submissions/15/edit/contract-details',
                     },
+                    featureFlags: {
+                        'hide-supporting-docs-page': true,
+                    },
                 }
             )
 
             await screen.findByText('Contract Details')
 
-            const input = screen.getByLabelText('Upload contract')
-            expect(input).toBeInTheDocument()
-            await userEvent.upload(input, [TEST_DOC_FILE])
-
+            const contractDoc = screen.getByLabelText('Upload contract')
+            expect(contractDoc).toBeInTheDocument()
+            await userEvent.upload(contractDoc, [TEST_DOC_FILE])
+            const supportingDoc = screen.getByLabelText(
+                'Upload contract-supporting documents'
+            )
+            expect(supportingDoc).toBeInTheDocument()
+            await userEvent.upload(supportingDoc, [TEST_PDF_FILE])
             expect(
                 await screen.findByText(TEST_DOC_FILE.name)
+            ).toBeInTheDocument()
+            expect(
+                await screen.findByText(TEST_PDF_FILE.name)
             ).toBeInTheDocument()
         })
 

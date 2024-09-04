@@ -694,86 +694,90 @@ export const ContractDetails = ({
                                             }
                                         />
                                     </FormGroup>
-                                    <FormGroup
-                                        error={Boolean(
-                                            showFieldErrors(
-                                                'supportingDocuments',
-                                                errors
-                                            )
-                                        )}
-                                    >
-                                        <FileUpload
-                                            id="supportingDocuments"
-                                            name="supportingDocuments"
-                                            label="Upload contract-supporting documents"
-                                            error={showFieldErrors(
-                                                'supportingDocuments',
-                                                errors
+                                    {hideSupportingDocs && (
+                                        <FormGroup
+                                            error={Boolean(
+                                                showFieldErrors(
+                                                    'supportingDocuments',
+                                                    errors
+                                                )
                                             )}
-                                            hint={
-                                                <span
-                                                    className={
-                                                        styles.guidanceTextBlock
-                                                    }
-                                                >
-                                                    <LinkWithLogging
-                                                        aria-label="Document definitions and requirements (opens in new window)"
-                                                        href={
-                                                            '/help#supporting-documents'
+                                        >
+                                            <FileUpload
+                                                id="supportingDocuments"
+                                                name="supportingDocuments"
+                                                label="Upload contract-supporting documents"
+                                                error={showFieldErrors(
+                                                    'supportingDocuments',
+                                                    errors
+                                                )}
+                                                hint={
+                                                    <span
+                                                        className={
+                                                            styles.guidanceTextBlock
                                                         }
-                                                        variant="external"
-                                                        target="_blank"
                                                     >
-                                                        Document definitions and
-                                                        requirements
-                                                    </LinkWithLogging>
-                                                    <span className="padding-top-05">
-                                                        Upload any supporting
-                                                        documents related to the
-                                                        contract.
+                                                        <LinkWithLogging
+                                                            aria-label="Document definitions and requirements (opens in new window)"
+                                                            href={
+                                                                '/help#supporting-documents'
+                                                            }
+                                                            variant="external"
+                                                            target="_blank"
+                                                        >
+                                                            Document definitions
+                                                            and requirements
+                                                        </LinkWithLogging>
+                                                        <span className="padding-top-05">
+                                                            Upload any
+                                                            supporting documents
+                                                            related to the
+                                                            contract.
+                                                        </span>
+                                                        <span className="padding-top-1">
+                                                            This input only
+                                                            accepts PDF, CSV,
+                                                            DOC, DOCX, XLS, XLSX
+                                                            files.
+                                                        </span>
                                                     </span>
-                                                    <span className="padding-top-1">
-                                                        This input only accepts
-                                                        PDF, CSV, DOC, DOCX,
-                                                        XLS, XLSX files.
-                                                    </span>
-                                                </span>
-                                            }
-                                            accept={
-                                                ACCEPTED_SUBMISSION_FILE_TYPES
-                                            }
-                                            initialItems={fileItemsFromDraftSubmission(
-                                                'supporting'
-                                            )}
-                                            uploadFile={(file) =>
-                                                handleUploadFile(
-                                                    file,
-                                                    'HEALTH_PLAN_DOCS'
-                                                )
-                                            }
-                                            scanFile={(key) =>
-                                                handleScanFile(
-                                                    key,
-                                                    'HEALTH_PLAN_DOCS'
-                                                )
-                                            }
-                                            deleteFile={(key) =>
-                                                handleDeleteFile(
-                                                    key,
-                                                    'HEALTH_PLAN_DOCS',
-                                                    previousDocuments
-                                                )
-                                            }
-                                            onFileItemsUpdate={({
-                                                fileItems,
-                                            }) =>
-                                                setFieldValue(
-                                                    `supportingDocuments`,
-                                                    fileItems
-                                                )
-                                            }
-                                        />
-                                    </FormGroup>
+                                                }
+                                                accept={
+                                                    ACCEPTED_SUBMISSION_FILE_TYPES
+                                                }
+                                                initialItems={fileItemsFromDraftSubmission(
+                                                    'supporting'
+                                                )}
+                                                uploadFile={(file) =>
+                                                    handleUploadFile(
+                                                        file,
+                                                        'HEALTH_PLAN_DOCS'
+                                                    )
+                                                }
+                                                scanFile={(key) =>
+                                                    handleScanFile(
+                                                        key,
+                                                        'HEALTH_PLAN_DOCS'
+                                                    )
+                                                }
+                                                deleteFile={(key) =>
+                                                    handleDeleteFile(
+                                                        key,
+                                                        'HEALTH_PLAN_DOCS',
+                                                        previousDocuments
+                                                    )
+                                                }
+                                                onFileItemsUpdate={({
+                                                    fileItems,
+                                                }) =>
+                                                    setFieldValue(
+                                                        `supportingDocuments`,
+                                                        fileItems
+                                                    )
+                                                }
+                                            />
+                                        </FormGroup>
+                                    )}
                                     {contract438Attestation && (
                                         <FormGroup
                                             error={Boolean(
