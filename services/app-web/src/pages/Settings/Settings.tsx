@@ -12,8 +12,6 @@ import {
     hasAdminUserPermissions,
     hasCMSUserPermissions,
 } from '../../gqlHelpers'
-import { useLDClient } from 'launchdarkly-react-client-sdk'
-import { featureFlags } from '../../common-code/featureFlags'
 
 export const TestMonitoring = (): null => {
     const location = useLocation()
@@ -31,17 +29,10 @@ export const TestMonitoring = (): null => {
 }
 export const Settings = (): React.ReactElement => {
     const { loginStatus, loggedInUser } = useAuth()
-    const ldClient = useLDClient()
-
-    const showReadWriteStateAssignments = ldClient?.variation(
-        featureFlags.READ_WRITE_STATE_ASSIGNMENTS.flag,
-        featureFlags.READ_WRITE_STATE_ASSIGNMENTS.defaultValue
-    )
-
     const isAuthenticated = loginStatus === 'LOGGED_IN'
     const isAllowedToSeeSettings =
         hasAdminUserPermissions(loggedInUser) ||
-        (hasCMSUserPermissions(loggedInUser) && showReadWriteStateAssignments)
+        hasCMSUserPermissions(loggedInUser)
 
     const loading = loginStatus === 'LOADING' || !loggedInUser
 

@@ -41,10 +41,14 @@ Cypress.Commands.add(
             JSON.stringify(featureFlagObject)
         )
 
+        const clientSDKMatchers = Cypress.env('AUTH_MODE') === 'LOCAL' ?
+            { method: 'GET', pathname: /^\/ld-clientsdk(\/.*)?$/ } :
+            { method: 'GET', hostname: /\.*clientsdk\.launchdarkly\.us/ }
+
         // Intercepts LD request and returns with our own feature flags and values.
         return cy
             .intercept(
-                { method: 'GET', hostname: /\.*clientsdk\.launchdarkly\.us/ },
+                clientSDKMatchers,
                 { body: featureFlagObject }
             )
             .as('LDApp')
@@ -54,24 +58,32 @@ Cypress.Commands.add(
 // Intercepting feature flag api calls and returns some response. This should stop the app from calling making requests to LD.
 Cypress.Commands.add('stubFeatureFlags', () => {
     // ignore api calls to events endpoint
+    const eventMatchers = Cypress.env('AUTH_MODE') === 'LOCAL' ?
+        { method: 'POST', pathname: /^\/ld-events(\/.*)?$/ } :
+        { method: 'POST', hostname: /\.*events\.launchdarkly\.us/ }
+
     cy.intercept(
-        { method: 'POST', hostname: /\.*events\.launchdarkly\.us/ },
+        eventMatchers,
         // { body: {} }
         (req) => {
             req.on('response', (res) => {
-                res.setDelay(60000)
+                res.setDelay(15000)
             })
             req.reply({ body: {} })
         }
     ).as('LDEvents')
 
+    const clientStreamMatchers = Cypress.env('AUTH_MODE') === 'LOCAL' ?
+        { method: 'GET', pathname: /^\/ld-clientstream(\/.*)?$/ } :
+        { method: 'GET', hostname: /\.*clientstream\.launchdarkly\.us/ }
+
     // turn off push updates from LaunchDarkly (EventSource)
     cy.intercept(
-        { method: 'GET', hostname: /\.*clientstream\.launchdarkly\.us/ },
+        clientStreamMatchers,
         // access the request handler and stub a response
         (req) => {
             req.on('response', (res) => {
-                res.setDelay(60000)
+                res.setDelay(15000)
             })
             req.reply('data: no streaming feature flag data here\n\n', {
                 'content-type': 'text/event-stream; charset=utf-8',

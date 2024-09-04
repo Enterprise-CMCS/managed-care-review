@@ -25,6 +25,7 @@ const TEALIUM_CONTENT_TYPE_BY_ROUTE: Record<RouteT | 'UNKNOWN_ROUTE', string> = 
     HELP: 'glossary',
     GRAPHQL_EXPLORER: 'dev',
     API_ACCESS: 'dev',
+    SETTINGS: 'table',
     MC_REVIEW_SETTINGS: 'table',
     RATES_SUMMARY: 'summary',
     REPLACE_RATE: 'form',

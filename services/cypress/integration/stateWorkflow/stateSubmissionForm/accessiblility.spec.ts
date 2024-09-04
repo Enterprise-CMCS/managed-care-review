@@ -1,73 +1,114 @@
+import { stateUser } from '../../../utils/apollo-test-utils';
+
 describe('state user in state submission form', () => {
     beforeEach(() => {
         cy.stubFeatureFlags()
         cy.interceptGraphQL()
     })
-    // SKIPPED because we currently have a bug that looks related to https://github.com/mfrachet/cypress-audit/issues/136#issuecomment-1311236777
-    // this started when we upgraded node and serverless and started default to ipv6 which prevented tests
-    // current this keeps pa11y from running
-    it.skip('can fill out contract only submission with no a11y errors', () => {
-        // goal of this test is to check every single form page and navigation (going backwards, forwards or save as draft with new info)
-
+    it.only('has no a11y violations on submission form with form input errors', () => {
+        // 438-attestation still needs to go through design, there is an a11y violation for links and spacing
+        cy.interceptFeatureFlags({'438-attestation': false})
         cy.logInAsStateUser()
 
+        // Inject the axe run-time
+        cy.injectAxe()
+
         // Start a base contract only submissions
-        cy.startNewContractOnlySubmissionWithBaseContract()
+        cy.findByTestId('state-dashboard-page').should('exist')
+        cy.findByRole('link', { name: 'Start new submission' }).click()
 
+        // Check accessibility on Submission type page
+        cy.findByRole('heading', { level: 1, name: /New submission/ })
+        cy.findByRole('button', {
+            name: 'Continue',
+        }).should('not.have.attr', 'aria-disabled')
+        cy.findByRole('button', {
+            name: 'Continue',
+        }).safeClick()
+        cy.checkA11yWithWcag22aa()
 
-        cy.findByRole('heading', {
-            level: 2,
-            name: /Contract details/,
-            timeout: 10_000,
-        })
+        cy.fillOutContractActionAndRateCertification()
+        cy.navigateContractForm('CONTINUE_FROM_START_NEW')
 
-            // check contract details a11y
-            cy.pa11y({
-                hideElements: '.usa-step-indicator',
-            actions: ['wait for element #form-guidance to be visible'],
-                threshold: 6,
-            hideElements: '.usa-step-indicator',
-        })
-        cy.deprecatedNavigateV1Form('BACK')
-          // check submissionType a11y
-          cy.pa11y({
-            hideElements: '.usa-step-indicator',
-        actions: ['wait for element #form-guidance to be visible'],
-            threshold: 6,
-        hideElements: '.usa-step-indicator',
-    })
+        cy.findByRole('heading', { level: 2, name: /Contract details/ })
+        cy.findByRole('button', {
+            name: 'Continue',
+        }).should('not.have.attr', 'aria-disabled')
+        cy.findByRole('button', {
+            name: 'Continue',
+        }).safeClick()
+        cy.checkA11yWithWcag22aa()
 
-            cy.deprecatedNavigateV1Form('CONTINUE')
-            cy.deprecatedNavigateV1Form('CONTINUE')
+        cy.location().then((fullUrl) => {
+            const submissionURL = fullUrl.toString().replace(
+                'edit/contract-details',
+                ''
+            )
 
+            // Check accessibility on rate details page
+            cy.navigateFormByDirectLink(`${submissionURL}edit/rate-details`)
+            cy.findByRole('radiogroup', {
+                name: /Was this rate certification included with another submission?/,
+            })
+                .should('exist')
+                .within(() => {
+                    cy.findByText('No, this rate certification was not included with any other submissions').click()
+                })
+            cy.injectAxe()
+            cy.findByRole('button', {
+                name: 'Continue',
+            }).should('not.have.attr', 'aria-disabled')
+            cy.findByRole('button', {
+                name: 'Continue',
+            }).safeClick()
+            cy.checkA11yWithWcag22aa()
+
+            //Check accessibility on contacts page
+            cy.navigateFormByDirectLink(`${submissionURL}edit/contacts`)
             cy.findByRole('heading', { level: 2, name: /Contacts/ })
-            cy.fillOutStateContact()
+            cy.injectAxe()
+            cy.findByRole('button', {
+                name: 'Continue',
+            }).should('not.have.attr', 'aria-disabled')
+            cy.findByRole('button', {
+                name: 'Continue',
+            }).safeClick()
+            cy.checkA11yWithWcag22aa()
 
-           // check contacts a11y
-           cy.pa11y({
-            hideElements: '.usa-step-indicator',
-        actions: ['wait for element #form-guidance to be visible'],
-            threshold: 6,
-        hideElements: '.usa-step-indicator',
-    })
+            //Check accessibility on documents page
+            cy.navigateFormByDirectLink(`${submissionURL}edit/documents`)
+            cy.findByRole('heading', { level: 2, name: /Supporting documents/ })
+            cy.injectAxe()
+            cy.findByRole('button', {
+                name: 'Continue',
+            }).should('not.have.attr', 'aria-disabled')
+            cy.findByRole('button', {
+                name: 'Continue',
+            }).safeClick()
+            cy.checkA11yWithWcag22aa()
 
-            cy.deprecatedNavigateV1Form('SAVE_DRAFT')
-            cy.findByRole('heading', { level: 1, name: /Submissions dashboard/ })
-
-
-            cy.deprecatedNavigateV1Form('CONTINUE')
-            // skip documents page - that will be deleted soon
-            cy.deprecatedNavigateV1Form('CONTINUE')
-
-            // Check that we end up on Review and Submit
+            //Check accessibility on review and submit page
+            cy.navigateFormByDirectLink(`${submissionURL}edit/review-and-submit`)
             cy.findByRole('heading', { level: 2, name: /Review and submit/ })
+            cy.injectAxe()
+            cy.checkA11yWithWcag22aa()
 
-            // check review and submit a11y
-            cy.pa11y({
-                hideElements: '.usa-step-indicator',
-            actions: ['wait for element #form-guidance to be visible'],
-                threshold: 6,
-            hideElements: '.usa-step-indicator',
-        })
+            //Check the dashboard
+            cy.navigateContractRatesForm('SAVE_DRAFT', false)
+            cy.checkA11yWithWcag22aa()
         })
     })
+
+    it('has no a11y violations on CMS dashboards', () => {
+        cy.apiCreateAndSubmitContractWithRates(stateUser()).then(() => {
+            cy.logInAsCMSUser()
+            cy.injectAxe()
+            //check submissions tab
+            cy.checkA11yWithWcag22aa()
+
+            //check rate reviews tab
+            cy.findByRole('tab', { name: 'Rate reviews' }).should('exist').click()
+            cy.checkA11yWithWcag22aa()
+        })
+    })
+})

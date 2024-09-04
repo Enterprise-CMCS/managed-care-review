@@ -26,6 +26,7 @@ import {
     FeatureFlagSettings,
 } from '../../app-web/src/common-code/featureFlags'
 import './apiCommands'
+import './accessibilityCommands'
 import { Contract, HealthPlanPackage } from '../gen/gqlClient';
 import { CMSUserType, DivisionType } from '../utils/apollo-test-utils';
 import { StateUserType } from '../../app-api/src/domain-models';
@@ -110,6 +111,7 @@ declare global {
                 division: DivisionType
             }): void
 
+            // Direct API commands
             apiCreateAndSubmitContractOnlySubmission(stateUser: StateUserType): Cypress.Chainable<Contract>
             apiCreateAndSubmitContractWithRates(stateUser: StateUserType): Cypress.Chainable<Contract>
             apiDeprecatedCreateSubmitHPP(stateUser: StateUserType, formData?: Partial<UnlockedHealthPlanFormDataType>): Cypress.Chainable<HealthPlanPackage>
@@ -117,7 +119,11 @@ declare global {
             apiAssignDivisionToCMSUser(cmsUser: CMSUserType, division: DivisionType): Cypress.Chainable<void>
             apiCreateAndSubmitContractWithRates(stateUser: StateUserType): Cypress.Chainable<Contract>
 
+            // GraphQL intercept commands
             interceptGraphQL(): void
+
+            // Accessibility Commands
+            checkA11yWithWcag22aa(): void
         }
     }
 }

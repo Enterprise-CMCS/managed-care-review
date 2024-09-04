@@ -1,13 +1,8 @@
 import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
 import FETCH_EMAIL_SETTINGS from '../../../../app-graphql/src/queries/fetchEmailSettings.graphql'
-import {
-    testAdminUser,
-    testCMSUser,
-    testStateUser,
-} from '../../testHelpers/userHelpers'
+import { testAdminUser, testStateUser } from '../../testHelpers/userHelpers'
 
 describe('fetchEmailSettings', () => {
-    const testUserCMS = testCMSUser()
     const testUserState = testStateUser()
     const testUserAdmin = testAdminUser()
 
@@ -46,30 +41,6 @@ describe('fetchEmailSettings', () => {
         expect(res.data?.fetchEmailSettings.stateAnalysts).toBeDefined()
     })
 
-    it('returns  error for cms user', async () => {
-        const server = await constructTestPostgresServer({
-            context: {
-                user: testUserCMS,
-            },
-        })
-
-        // make a mock request
-        const res = await server.executeOperation({
-            query: FETCH_EMAIL_SETTINGS,
-        })
-
-        if (res.errors === undefined) {
-            throw new Error('Expected errors to be defined')
-        }
-        expect(res.errors).toHaveLength(1)
-        const resultErr = res.errors[0]
-
-        expect(resultErr?.message).toBe(
-            'Non-admin user not authorized to fetch settings'
-        )
-        expect(resultErr?.extensions?.code).toBe('FORBIDDEN')
-    })
-
     it('returns  error for state user', async () => {
         const server = await constructTestPostgresServer({
             context: {
@@ -88,9 +59,7 @@ describe('fetchEmailSettings', () => {
         expect(res.errors).toHaveLength(1)
         const resultErr = res.errors[0]
 
-        expect(resultErr?.message).toBe(
-            'Non-admin user not authorized to fetch settings'
-        )
+        expect(resultErr?.message).toBe('user not authorized to fetch settings')
         expect(resultErr?.extensions?.code).toBe('FORBIDDEN')
     })
 })
