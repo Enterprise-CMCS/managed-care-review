@@ -1,5 +1,4 @@
 import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import * as ld from 'launchdarkly-js-client-sdk'
 import { AuthModeType } from '../common-code/config'
@@ -15,42 +14,9 @@ import { recordJSException } from '../otelHelpers/tracingHelper'
 import { handleApolloError } from '../gqlHelpers/apolloErrors'
 import { ApolloQueryResult } from '@apollo/client'
 
-    /*
-        Close user session and handle redirect afterward
-
-        @param {sessionTimeout} will pass along a URL query param to display session expired alert
-        @param {redirectPath} optionally changes redirect path on logout - useful for cognito and local login\
-
-        Logout is called when user clicks to logout from header or session expiration modal
-        Also called in the background with session times out
-    */
-        const logout: AuthContextType['logout'] = async ({
-            authMode,
-            sessionTimeout,
-            redirectPath = '/',
-        }) => {
-            const realLogout =
-                authMode === 'LOCAL' ? logoutLocalUser : cognitoSignOut
-
-            try {
-                await realLogout()
-                if (sessionTimeout) {
-                    window.location.href = `${redirectPath}?session-timeout=true`
-                } else {
-                    window.location.href = redirectPath
-                }
-                return
-            } catch (e) {
-                recordJSException(new Error(`Logout Failed. ${JSON.stringify(e)}`))
-                window.location.href = redirectPath
-                return
-            }
-        }
-
 export type LoginStatusType = 'LOADING' | 'LOGGED_OUT' | 'LOGGED_IN'
 
 type AuthContextType = {
-    /* See docs/AuthContext.md for an explanation of some of these variables */
     checkAuth: (
         failureRedirect?: string
     ) => Promise<ApolloQueryResult<FetchCurrentUserQuery> | Error>
@@ -58,11 +24,9 @@ type AuthContextType = {
     loggedInUser: UserType | undefined
     loginStatus: LoginStatusType
     logout: ({
-        authMode,
         sessionTimeout,
         redirectPath,
     }: {
-        authMode: AuthModeType
         sessionTimeout: boolean
         redirectPath?: string
     }) => Promise<void>
@@ -90,7 +54,6 @@ function AuthProvider({
     )
     const [loginStatus, setLoginStatus] =
         useState<LoginStatusType>('LOGGED_OUT')
-    const navigate = useNavigate()
 
     const { loading, data, error, refetch } = useFetchCurrentUserQuery({
         notifyOnNetworkStatusChange: true,
@@ -132,7 +95,6 @@ function AuthProvider({
     if (!loading) {
         if (error) {
             handleApolloError(error, isAuthenticated)
-
             if (isAuthenticated) {
                 setLoggedInUser(undefined)
                 setLoginStatus('LOGGED_OUT')
@@ -140,7 +102,7 @@ function AuthProvider({
                     `[User auth error]: Unable to authenticate user though user seems to be logged in. Message: ${error.message}`
                 )
                 // since we have an auth request error but a potentially logged in user, we log out fully from Auth context and redirect to dashboard for clearer user experience
-                navigate(`/?session-timeout=true`)
+                window.location.href = `/?signin-error=true`
             }
         } else if (data?.fetchCurrentUser) {
             if (!isAuthenticated) {
@@ -155,6 +117,37 @@ function AuthProvider({
             }
         }
     }
+        /*
+        Close user session and handle redirect afterward
+
+        @param {sessionTimeout} will pass along a URL query param to display session expired alert
+        @param {redirectPath} optionally changes redirect path on logout - useful for cognito and local login\
+
+        Logout is called when user clicks to logout from header or session expiration modal
+        Also called in the background with session times out
+    */
+        const logout: AuthContextType['logout'] = async ({
+            sessionTimeout,
+            redirectPath = '/',
+        }) => {
+            const realLogout =
+                authMode === 'LOCAL' ? logoutLocalUser : cognitoSignOut
+
+            try {
+                await realLogout()
+                if (sessionTimeout) {
+                    window.location.href = `${redirectPath}?session-timeout=true`
+                } else {
+                    window.location.href = redirectPath
+                }
+                return
+            } catch (e) {
+                recordJSException(new Error(`Logout Failed. ${JSON.stringify(e)}`))
+                window.location.href = redirectPath
+                return
+            }
+        }
+
 
     /*
         Refetches current user and confirms authentication - primarily used with LocalLogin and CognitoLogin - not on IDM
@@ -171,7 +164,6 @@ function AuthProvider({
             // if we fail auth at a time we expected logged in user, the session may have timed out. Logout fully to reflect that and force React state update
             if (loggedInUser) {
                 await logout({
-                    authMode: authMode,
                     sessionTimeout: true,
                     redirectPath: failureRedirectPath,
                 })

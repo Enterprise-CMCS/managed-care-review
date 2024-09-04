@@ -8,6 +8,8 @@ import { featureFlags } from '../../common-code/featureFlags'
 import { SessionTimeoutModal } from '../../components/Modal/SessionTimeoutModal'
 import { IdleTimerProvider } from 'react-idle-timer'
 
+// AuthenticatedRouteWrapper control access to protected routes and the session timeout modal
+// For more on expected behavior for session timeout see feature-brief-session-expiration.md
 export const AuthenticatedRouteWrapper = ({
     children,
     authMode,
@@ -25,8 +27,8 @@ export const AuthenticatedRouteWrapper = ({
     const closeSessionTimeoutModal = () => {
         modalRef.current?.toggleModal(undefined, false)
     }
-    const logoutBySessionTimeout = async () => logout({ authMode, sessionTimeout: true })
-    const logoutByUserChoice  = async () => logout({ authMode, sessionTimeout: false})
+    const logoutBySessionTimeout = async () => logout({  sessionTimeout: true })
+    const logoutByUserChoice  = async () => logout({  sessionTimeout: false})
     const refreshSession = async () => {
         await refreshAuth()
         closeSessionTimeoutModal()
@@ -46,16 +48,16 @@ export const AuthenticatedRouteWrapper = ({
         }
     }
 
-     // IdleTimeoutProvider - time increments for all constants must be milliseconds
-     const SESSION_TIMEOUT_COUNTDOWN = 2 * 60 * 1000
+     // All time increment constants must be milliseconds
      const RECHECK_FREQUENCY = 500
+     const SESSION_TIMEOUT_COUNTDOWN = 2 * 60 * 1000
      const SESSION_DURATION: number = ldClient?.variation(
-         featureFlags.MINUTES_UNTIL_SESSION_EXPIRES.flag,
-         featureFlags.MINUTES_UNTIL_SESSION_EXPIRES.defaultValue
-     ) * 60 * 1000
-     let promptCountdown = SESSION_TIMEOUT_COUNTDOWN
+        featureFlags.MINUTES_UNTIL_SESSION_EXPIRES.flag,
+        featureFlags.MINUTES_UNTIL_SESSION_EXPIRES.defaultValue
+    ) * 60 * 1000 //  controlled by feature flag for testing in lower environments
+    let promptCountdown = SESSION_TIMEOUT_COUNTDOWN //  may be reassigned if session duration is shorter time period
 
-    // IdleTimeoutProvider – session duration must be longer than prompt countdown, override if not
+    // Session duration must be longer than prompt countdown to allow IdleTimer to load
      if (SESSION_DURATION <= SESSION_TIMEOUT_COUNTDOWN) {
         promptCountdown = SESSION_DURATION - 1000
      }
