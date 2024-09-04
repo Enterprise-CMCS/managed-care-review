@@ -70,7 +70,7 @@ describe('ContractDetails', () => {
         const requiredLabels = await screen.findAllByText('Required')
         expect(requiredLabels).toHaveLength(6)
         const optionalLabels = screen.queryAllByText('Optional')
-        expect(optionalLabels).toHaveLength(0)
+        expect(optionalLabels).toHaveLength(1)
     })
 
     describe('Contract documents file upload', () => {
@@ -107,13 +107,13 @@ describe('ContractDetails', () => {
             await screen.findByText(
                 'Supporting documents can be added later. If you have additional contract actions, you must submit them in a separate submission.'
             )
-            await screen.findByRole('link', { name: /Document definitions/ })
+            await screen.findAllByRole('link', { name: /Document definitions/ })
 
             // check file input presences
-            await screen.findByTestId('file-input')
+            await screen.findAllByTestId('file-input')
 
-            expect(screen.getByTestId('file-input')).toBeInTheDocument()
-            expect(screen.getByTestId('file-input')).toHaveClass(
+            expect(screen.getAllByTestId('file-input')[0]).toBeInTheDocument()
+            expect(screen.getAllByTestId('file-input')[0]).toHaveClass(
                 'usa-file-input'
             )
             expect(
@@ -121,7 +121,7 @@ describe('ContractDetails', () => {
             ).not.toHaveAttribute('aria-disabled')
             expect(
                 within(
-                    screen.getByTestId('file-input-preview-list')
+                    screen.getAllByTestId('file-input-preview-list')[0]
                 ).queryAllByRole('listitem')
             ).toHaveLength(0)
         })
@@ -834,7 +834,7 @@ describe('ContractDetails', () => {
                 name: 'Continue',
             })
             const input = screen.getByLabelText('Upload contract')
-            const targetEl = screen.getByTestId('file-input-droptarget')
+            const targetEl = screen.getAllByTestId('file-input-droptarget')[0]
 
             await userEvent.upload(input, [TEST_DOC_FILE])
             dragAndDrop(targetEl, [TEST_PNG_FILE])
@@ -980,7 +980,7 @@ describe('ContractDetails', () => {
                 name: 'Continue',
             })
 
-            const targetEl = screen.getByTestId('file-input-droptarget')
+            const targetEl = screen.getAllByTestId('file-input-droptarget')[0]
             dragAndDrop(targetEl, [TEST_PNG_FILE])
 
             expect(
@@ -1031,7 +1031,7 @@ describe('ContractDetails', () => {
             const continueButton = screen.getByRole('button', {
                 name: 'Continue',
             })
-            const targetEl = screen.getByTestId('file-input-droptarget')
+            const targetEl = screen.getAllByTestId('file-input-droptarget')[0]
 
             // upload one file
             dragAndDrop(targetEl, [TEST_PDF_FILE])
@@ -1134,7 +1134,7 @@ describe('ContractDetails', () => {
                 name: 'Save as draft',
             })
             const input = screen.getByLabelText('Upload contract')
-            const targetEl = screen.getByTestId('file-input-droptarget')
+            const targetEl = screen.getAllByTestId('file-input-droptarget')[0]
 
             await userEvent.upload(input, [TEST_DOC_FILE])
             dragAndDrop(targetEl, [TEST_PNG_FILE])
@@ -1356,7 +1356,7 @@ describe('ContractDetails', () => {
                 name: 'Back',
             })
             const input = screen.getByLabelText('Upload contract')
-            const targetEl = screen.getByTestId('file-input-droptarget')
+            const targetEl = screen.getAllByTestId('file-input-droptarget')[0]
 
             await userEvent.upload(input, [TEST_DOC_FILE])
             dragAndDrop(targetEl, [TEST_PNG_FILE])
