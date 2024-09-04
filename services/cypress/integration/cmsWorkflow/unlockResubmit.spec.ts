@@ -40,11 +40,6 @@ describe('CMS user', () => {
         }).should('exist')
         cy.fillOutStateContact()
         cy.deprecatedNavigateV1Form('CONTINUE')
-        cy.findByRole('heading', {
-            level: 2,
-            name: /Supporting documents/,
-        }).should('exist')
-        cy.deprecatedNavigateV1Form('CONTINUE')
 
         cy.findByRole('heading', {
             level: 2,
@@ -271,7 +266,6 @@ describe('CMS user', () => {
                 cy.fillOutStateContact()
 
                 cy.deprecatedNavigateV1Form('CONTINUE')
-                cy.findByRole('heading', { level: 2, name: /Supporting documents/ })
 
                 // New API
                 cy.navigateFormByDirectLink(`${submissionURL}edit/rate-details`)

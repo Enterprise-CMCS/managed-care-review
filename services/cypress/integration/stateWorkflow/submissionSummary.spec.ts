@@ -40,10 +40,6 @@ describe('State user can view submissions', () => {
         cy.fillOutStateContact()
         cy.deprecatedNavigateV1Form('CONTINUE')
 
-        cy.findByRole('heading', { level: 2, name: /Supporting documents/ })
-        cy.fillOutSupportingDocuments()
-        cy.deprecatedNavigateV1Form('CONTINUE')
-
         // Store submission name for reference later
         let submissionId = ''
         cy.location().then((fullUrl) => {
