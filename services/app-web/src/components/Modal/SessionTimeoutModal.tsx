@@ -7,18 +7,21 @@ import dayjs from 'dayjs'
 
 type SessionTimeoutModalProps = {
     modalRef: React.RefObject<ModalRef>
-    logoutSession: () => Promise<void>,
-    refreshSession: () => Promise<void>
 }
+
 export const SessionTimeoutModal = ({
   modalRef,
-  logoutSession,
-  refreshSession
-
 }: SessionTimeoutModalProps): React.ReactElement | null => {
     const idleTimer = useIdleTimerContext()
     const [countdownSeconds, setCountdownSeconds]= useState(idleTimer.getRemainingTime() / 1000)
 
+    const handleLogoutSession = async () => {
+        idleTimer.message({action:'LOGOUT_SESSION'}, true)
+    }
+    const handleContinueSession = async () => {
+        idleTimer.message({action:'CONTINUE_SESSION'}, true)
+        idleTimer.activate()
+    }
     useEffect(() => {
         const interval = setInterval(() => {
           setCountdownSeconds(Math.ceil(idleTimer.getRemainingTime() / 1000))
@@ -37,9 +40,9 @@ export const SessionTimeoutModal = ({
         modalHeading="Session Expiring"
         onSubmitText="Continue Session"
         onCancelText="Logout"
-        onCancel={logoutSession}
+        onCancel={handleLogoutSession}
         submitButtonProps={{ className: styles.submitSuccessButton }}
-        onSubmit={refreshSession}
+        onSubmit={handleContinueSession}
         forceAction={true}
     >
         <p

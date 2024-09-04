@@ -7,7 +7,6 @@ import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '../../common-code/featureFlags'
 import { SessionTimeoutModal } from '../../components/Modal/SessionTimeoutModal'
 import { IdleTimerProvider } from 'react-idle-timer'
-import { recordJSException } from '../../otelHelpers'
 
 export const AuthenticatedRouteWrapper = ({
     children,
@@ -26,41 +25,57 @@ export const AuthenticatedRouteWrapper = ({
     const closeSessionTimeoutModal = () => {
         modalRef.current?.toggleModal(undefined, false)
     }
-    const logoutWithSessionTimeout = async () => logout({ authMode, sessionTimeout: true })
+    const logoutBySessionTimeout = async () => logout({ authMode, sessionTimeout: true })
     const logoutByUserChoice  = async () => logout({ authMode, sessionTimeout: false})
     const refreshSession = async () => {
         await refreshAuth()
         closeSessionTimeoutModal()
     }
-     // Time increments for all constants must be milliseconds
+
+    // For multi-tab support we emit messages related to user actions on the session timeout modal
+    const onMessage = async ({action}: {action: 'LOGOUT_SESSION' | 'CONTINUE_SESSION'}) => {
+      switch (action) {
+        case 'LOGOUT_SESSION':
+            await logoutByUserChoice()
+            break;
+        case 'CONTINUE_SESSION':
+                await refreshSession()
+                break
+        default:
+            // no op
+        }
+    }
+
+     // IdleTimeoutProvider - time increments for all constants must be milliseconds
      const SESSION_TIMEOUT_COUNTDOWN = 2 * 60 * 1000
-     const RECHECK_FREQUENCY = 1000
+     const RECHECK_FREQUENCY = 500
      const SESSION_DURATION: number = ldClient?.variation(
          featureFlags.MINUTES_UNTIL_SESSION_EXPIRES.flag,
          featureFlags.MINUTES_UNTIL_SESSION_EXPIRES.defaultValue
      ) * 60 * 1000
      let promptCountdown = SESSION_TIMEOUT_COUNTDOWN
 
-     if (SESSION_DURATION <= SESSION_TIMEOUT_COUNTDOWN){
-        // Make sure we have compatible session duration timeout versus countdown values. Duration should be longer.
-        // IdleTimeoutProvider will throw an error otherwise
+    // IdleTimeoutProvider – session duration must be longer than prompt countdown, override if not
+     if (SESSION_DURATION <= SESSION_TIMEOUT_COUNTDOWN) {
         promptCountdown = SESSION_DURATION - 1000
      }
 
     return (
             <IdleTimerProvider
-            onIdle={logoutWithSessionTimeout}
+            onIdle={logoutBySessionTimeout}
             onActive={refreshSession}
             onPrompt={openSessionTimeoutModal}
             promptBeforeIdle={promptCountdown}
             timeout={SESSION_DURATION}
             throttle={RECHECK_FREQUENCY}
+            // cross tab props
+            onMessage={onMessage}
+            syncTimers={RECHECK_FREQUENCY}
+            crossTab={true}
     >
             {children}
             <SessionTimeoutModal
                 modalRef={modalRef}
-                refreshSession={refreshSession}
-                logoutSession={logoutByUserChoice}
             />
             </IdleTimerProvider>
     )
