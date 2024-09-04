@@ -28,8 +28,11 @@ export const AuthenticatedRouteWrapper = ({
     }
     const logoutWithSessionTimeout = async () => logout({ authMode, sessionTimeout: true })
     const logoutByUserChoice  = async () => logout({ authMode, sessionTimeout: false})
-
-     // Time increments for session timeout actions must be in milliseconds
+    const refreshSession = async () => {
+        await refreshAuth()
+        closeSessionTimeoutModal()
+    }
+     // Time increments for all constants must be milliseconds
      const SESSION_TIMEOUT_COUNTDOWN = 2 * 60 * 1000
      const RECHECK_FREQUENCY = 1000
      const SESSION_DURATION: number = ldClient?.variation(
@@ -38,23 +41,16 @@ export const AuthenticatedRouteWrapper = ({
      ) * 60 * 1000
      let promptCountdown = SESSION_TIMEOUT_COUNTDOWN
 
-     // Since session duration is controlled by feature flag, make sure it cannot be assigned to incompatible values for IdleTimeoutProvider
      if (SESSION_DURATION <= SESSION_TIMEOUT_COUNTDOWN){
-        console.log('IN HERE')
-         recordJSException('SessionTimeoutModal – session duration must be longer than the timeout for idle prompt. We are overriding LD flag value.')
-         promptCountdown = SESSION_DURATION - 2000
+        // Make sure we have compatible session duration timeout versus countdown values. Duration should be longer.
+        // IdleTimeoutProvider will throw an error otherwise
+        promptCountdown = SESSION_DURATION - 1000
      }
-
-     console.log('countdown: ', SESSION_TIMEOUT_COUNTDOWN, 'session duration: ',  SESSION_DURATION, 'promptCountdown: ', promptCountdown
-     )
 
     return (
             <IdleTimerProvider
             onIdle={logoutWithSessionTimeout}
-            onActive={async () => {
-                await refreshAuth()
-                closeSessionTimeoutModal()
-            }}
+            onActive={refreshSession}
             onPrompt={openSessionTimeoutModal}
             promptBeforeIdle={promptCountdown}
             timeout={SESSION_DURATION}
@@ -63,7 +59,7 @@ export const AuthenticatedRouteWrapper = ({
             {children}
             <SessionTimeoutModal
                 modalRef={modalRef}
-                refreshSession={refreshAuth}
+                refreshSession={refreshSession}
                 logoutSession={logoutByUserChoice}
             />
             </IdleTimerProvider>

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {useEffect, useState} from 'react'
 import { ModalRef } from '@trussworks/react-uswds'
 import { Modal } from './Modal'
 import styles from './Modal.module.scss'
@@ -16,9 +16,19 @@ export const SessionTimeoutModal = ({
   refreshSession
 
 }: SessionTimeoutModalProps): React.ReactElement | null => {
-
     const idleTimer = useIdleTimerContext()
-    const countdownRemaining = idleTimer.getRemainingTime()* 1000
+    const [countdownSeconds, setCountdownSeconds]= useState(idleTimer.getRemainingTime() / 1000)
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+          setCountdownSeconds(Math.ceil(idleTimer.getRemainingTime() / 1000))
+        }, 500)
+
+        return () => {
+          clearInterval(interval)
+        }
+      })
+
 
     return (
         <Modal
@@ -38,7 +48,7 @@ export const SessionTimeoutModal = ({
         >
             Your session is going to expire in{' '}
             {dayjs
-                .duration(countdownRemaining, 'seconds')
+                .duration(countdownSeconds, 'seconds')
                 .format('mm:ss')}{' '}
         </p>
         <p>
