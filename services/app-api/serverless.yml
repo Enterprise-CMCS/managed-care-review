@@ -231,7 +231,7 @@ functions:
           cors: true
           authorizer: aws_iam
     timeout: 30
-    memorySize: ${self:custom.lambdaMemory.${self:provider.stage}, self:custom.lambdaMemory.default}
+    memorySize: ${self:custom.lambdaMemory.${sls:stage}, self:custom.lambdaMemory.default}
 
   cleanup:
     handler: src/handlers/cleanup.main
