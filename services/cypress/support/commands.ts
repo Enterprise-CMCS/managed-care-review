@@ -52,6 +52,8 @@ Cypress.Commands.add('interceptGraphQL', () => {
         aliasQuery(req, 'indexHealthPlanPackages')
         aliasQuery(req, 'indexRates')
         aliasQuery(req, 'fetchContract')
+        aliasQuery(req, 'fetchMcReviewSettings')
+        aliasQuery(req, 'fetchEmailSettings')
         aliasMutation(req, 'createHealthPlanPackage')
         aliasMutation(req, 'createContract')
         aliasMutation(req, 'updateHealthPlanFormData')
