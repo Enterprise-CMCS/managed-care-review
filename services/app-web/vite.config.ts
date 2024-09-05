@@ -82,7 +82,21 @@ export default defineConfig(() => ({
     resolve: {
         alias: {
             '~uswds': path.resolve(__dirname, './node_modules/uswds'),
+            '@mc-review/common-code': path.resolve(
+                __dirname,
+                '../../packages/common-code'
+            ),
+            '@mc-review/constants': path.resolve(
+                __dirname,
+                '../../packages/constants'
+            ),
+            '@mc-review/helpers': path.resolve(
+                __dirname,
+                '../../packages/helpers'
+            ),
             '@mc-review/hpp': path.resolve(__dirname, '../../packages/hpp'),
+            '@mc-review/mocks': path.resolve(__dirname, '../../packages/mocks'),
+            '@mc-review/otel': path.resolve(__dirname, '../../packages/otel'),
         },
     },
     css: {
