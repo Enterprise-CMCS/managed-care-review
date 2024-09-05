@@ -94,6 +94,7 @@ export const SubmissionType = ({
         featureFlags.HIDE_SUPPORTING_DOCS_PAGE.flag,
         featureFlags.HIDE_SUPPORTING_DOCS_PAGE.defaultValue
     )
+
     const {
         draftSubmission,
         updateDraft,
