@@ -41,6 +41,12 @@ import { RateSummary } from '../RateSummary'
 import { ReplaceRate } from '../ReplaceRate/ReplaceRate'
 import { RateEdit } from '../RateEdit/RateEdit'
 import { APIAccess } from '../APIAccess/APIAccess'
+import {
+    StateAssignmentTable,
+    AutomatedEmailsTable,
+    SupportEmailsTable,
+    DivisionAssignmentTable,
+} from '../Settings/SettingsTables'
 
 function componentForAuthMode(
     authMode: AuthModeType
@@ -200,7 +206,6 @@ const CMSUserRoutes = ({
                         path={RoutesRecord.SUBMISSIONS_UPLOAD_QUESTION}
                         element={<UploadQuestions />}
                     />
-
                     <Route
                         path={RoutesRecord.SUBMISSIONS_SUMMARY}
                         element={<SubmissionSummary />}
@@ -235,8 +240,36 @@ const CMSUserRoutes = ({
                 <Route
                     path={RoutesRecord.MC_REVIEW_SETTINGS}
                     element={<Settings />}
+                >
+                    <Route
+                        index
+                        element={
+                            <Navigate to={RoutesRecord.STATE_ASSIGNMENTS} />
+                        }
+                    />
+                    <Route
+                        path={RoutesRecord.STATE_ASSIGNMENTS}
+                        element={<StateAssignmentTable />}
+                    />
+                    <Route
+                        path={RoutesRecord.DIVISION_ASSIGNMENTS}
+                        element={<DivisionAssignmentTable />}
+                    />
+                    <Route
+                        path={RoutesRecord.AUTOMATED_EMAILS}
+                        element={<AutomatedEmailsTable />}
+                    />
+                    <Route
+                        path={RoutesRecord.SUPPORT_EMAILS}
+                        element={<SupportEmailsTable />}
+                    />
+                </Route>
+                <Route
+                    path={RoutesRecord.SETTINGS}
+                    // Until we update the helpdesk documentation for the /mc-review-settings route, we are keeping this
+                    // one and just redirecting.
+                    element={<Navigate to="/mc-review-settings" />}
                 />
-                <Route path={RoutesRecord.SETTINGS} element={<Settings />} />
                 <Route path={RoutesRecord.API_ACCESS} element={<APIAccess />} />
                 {UniversalRoutes}
                 <Route path="*" element={<Error404 />} />
