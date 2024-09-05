@@ -5,7 +5,7 @@ import type {
     LockedHealthPlanFormDataType,
     UnlockedHealthPlanFormDataType,
     SubmissionType,
-} from '../../../app-web/src/common-code/healthPlanFormDataType'
+} from '@mc-review/hpp'
 import type { EmailConfiguration, StateAnalystsEmails } from '.'
 import type {
     ContractRevisionWithRatesType,

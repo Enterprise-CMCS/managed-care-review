@@ -1,5 +1,5 @@
 import type { PrismaClient, Division } from '@prisma/client'
-import type { StateCodeType } from '../../../app-web/src/common-code/healthPlanFormDataType'
+import type { StateCodeType } from '@mc-review/hpp'
 import type {
     ProgramType,
     UserType,

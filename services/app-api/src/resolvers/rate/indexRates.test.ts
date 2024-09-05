@@ -10,7 +10,7 @@ import {
     iterableCmsUsersMockData,
     testStateUser,
 } from '../../testHelpers/userHelpers'
-import { formatGQLDate } from '../../common-code/dateHelpers'
+import { formatGQLDate } from '@mc-review/common-code'
 import {
     submitTestRate,
     unlockTestRate,
@@ -22,7 +22,7 @@ import {
     createAndUpdateTestContractWithRate,
 } from '../../testHelpers/gqlContractHelpers'
 import { testS3Client } from '../../../../app-web/src/testHelpers/s3Helpers'
-import statePrograms from '../../../../app-web/src/common-code/data/statePrograms.json'
+import { typedStatePrograms } from '@mc-review/hpp'
 
 describe('indexRates', () => {
     describe.each(iterableCmsUsersMockData)(
@@ -297,10 +297,10 @@ describe('indexRates', () => {
                     ldService,
                     s3Client: mockS3,
                 })
-                const flPrograms = statePrograms.states.filter(
+                const flPrograms = typedStatePrograms.states.filter(
                     (program) => program.code === 'FL'
                 )[0].programs
-                const vaPrograms = statePrograms.states.filter(
+                const vaPrograms = typedStatePrograms.states.filter(
                     (program) => program.code === 'VA'
                 )[0].programs
                 const contract1 = await createAndSubmitTestContractWithRate(

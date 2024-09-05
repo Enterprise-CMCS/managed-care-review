@@ -1,5 +1,5 @@
 import { ForbiddenError } from 'apollo-server-lambda'
-import type { StateCodeType } from '../../common-code/healthPlanFormDataType'
+import type { StateCodeType } from '@mc-review/hpp'
 import type { StateType } from '../../domain-models'
 import { hasAdminPermissions } from '../../domain-models'
 import type { Emailer } from '../../emailer'

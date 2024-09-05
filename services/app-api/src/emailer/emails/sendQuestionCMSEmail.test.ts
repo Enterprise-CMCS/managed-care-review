@@ -5,7 +5,7 @@ import {
     mockQuestionAndResponses,
 } from '../../testHelpers/emailerHelpers'
 import type { CMSUserType, StateType, Question } from '../../domain-models'
-import { packageName } from '../../common-code/healthPlanFormDataType'
+import { packageName } from '@mc-review/hpp'
 import { sendQuestionCMSEmail } from './index'
 import { getTestStateAnalystsEmails } from '../../testHelpers/parameterStoreHelpers'
 

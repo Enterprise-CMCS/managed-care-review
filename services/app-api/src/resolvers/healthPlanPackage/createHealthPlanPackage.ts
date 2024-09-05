@@ -3,7 +3,7 @@ import { isStateUser } from '../../domain-models'
 import type { MutationResolvers, State } from '../../gen/gqlServer'
 import { logError, logSuccess } from '../../logger'
 import type { InsertContractArgsType, Store } from '../../postgres'
-import { pluralize } from '../../../../app-web/src/common-code/formatters'
+import { pluralize } from '@mc-review/common-code'
 import {
     setResolverDetailsOnActiveSpan,
     setErrorAttributesOnActiveSpan,

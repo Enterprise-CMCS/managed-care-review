@@ -47,3 +47,4 @@ export type { ProgramArgType, StateType } from './State'
 
 export * from './StateCodeType'
 export type { StateCodeType } from './StateCodeType'
+export * from './findStatePrograms'

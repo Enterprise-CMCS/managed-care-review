@@ -4,11 +4,8 @@ import {
     mockMNState,
 } from '../../testHelpers/emailerHelpers'
 import { resubmitPackageStateEmail } from './index'
-import type { LockedHealthPlanFormDataType } from '../../common-code/healthPlanFormDataType'
-import {
-    generateRateName,
-    packageName,
-} from '../../common-code/healthPlanFormDataType'
+import type { LockedHealthPlanFormDataType } from '@mc-review/hpp'
+import { generateRateName, packageName } from '@mc-review/hpp'
 
 const resubmitData = {
     updatedBy: {

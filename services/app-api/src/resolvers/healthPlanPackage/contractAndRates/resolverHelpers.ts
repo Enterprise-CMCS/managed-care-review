@@ -11,7 +11,7 @@ import { setErrorAttributesOnActiveSpan } from '../../attributeHelper'
 import type {
     SubmissionDocument,
     UnlockedHealthPlanFormDataType,
-} from '../../../common-code/healthPlanFormDataType'
+} from '@mc-review/hpp'
 import { rateFormDataSchema } from '../../../domain-models/contractAndRates'
 import assert from 'assert'
 import type { ContractOrErrorArrayType } from '../../../postgres/contractAndRates/findAllContractsWithHistoryByState'

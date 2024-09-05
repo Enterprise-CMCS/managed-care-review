@@ -2,11 +2,8 @@ import type {
     FlagValue,
     FeatureFlagLDConstant,
     FeatureFlagSettings,
-} from '../../../app-web/src/common-code/featureFlags'
-import {
-    featureFlagKeys,
-    featureFlags,
-} from '../../../app-web/src/common-code/featureFlags'
+} from '@mc-review/common-code'
+import { featureFlagKeys, featureFlags } from '@mc-review/common-code'
 import type { LDClient } from '@launchdarkly/node-server-sdk'
 import type { Context } from '../handlers/apollo_gql'
 import { logError } from '../logger'

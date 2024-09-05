@@ -1,5 +1,5 @@
 import type { Resolvers } from '../../gen/gqlServer'
-import statePrograms from '@mc-review/hpp'
+import { typedStatePrograms } from '@mc-review/hpp'
 import type {
     CMSUserType,
     CMSApproverUserType,
@@ -8,7 +8,7 @@ import type {
 function getStateAssignments(user: CMSUserType | CMSApproverUserType) {
     const userStates = user.stateAssignments
     const statesWithPrograms = userStates.map((userState) => {
-        const state = statePrograms.states.find(
+        const state = typedStatePrograms.states.find(
             (st) => st.code === userState.stateCode
         )
 
@@ -29,7 +29,9 @@ function getStateAssignments(user: CMSUserType | CMSApproverUserType) {
 export const stateUserResolver: Resolvers['StateUser'] = {
     state(parent) {
         const userState = parent.stateCode
-        const state = statePrograms.states.find((st) => st.code === userState)
+        const state = typedStatePrograms.states.find(
+            (st) => st.code === userState
+        )
 
         if (state === undefined) {
             return {

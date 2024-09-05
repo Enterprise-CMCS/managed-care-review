@@ -4,7 +4,7 @@ import type {
     LockedHealthPlanFormDataType,
     ProgramArgType,
     UnlockedHealthPlanFormDataType,
-} from '../common-code/healthPlanFormDataType'
+} from '@mc-review/hpp'
 import type { ContractRevisionWithRatesType, Question } from '../domain-models'
 import { SESServiceException } from '@aws-sdk/client-ses'
 import { testSendSESEmail } from './awsSESHelpers'

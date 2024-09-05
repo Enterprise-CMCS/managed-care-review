@@ -1,6 +1,6 @@
-import { formatCalendarDate } from '../../../../app-web/src/common-code/dateHelpers'
+import { formatCalendarDate } from '@mc-review/common-code'
 import type { ContractRevisionWithRatesType } from '../../domain-models'
-import { packageName as generatePackageName } from '../../common-code/healthPlanFormDataType'
+import { packageName as generatePackageName } from '@mc-review/hpp'
 
 import {
     stripHTMLFromTemplate,

@@ -1,5 +1,5 @@
-import type { StateCodeType } from '../../../common-code/healthPlanFormDataType'
-import { isValidStateCode } from '../../../common-code/healthPlanFormDataType'
+import type { StateCodeType } from '@mc-review/hpp'
+import { isValidStateCode } from '@mc-review/hpp'
 import { ParameterStore } from '../../awsParameterStore'
 
 type StateAnalystsWithState = {

@@ -1,5 +1,5 @@
 import type { StateType } from '../../domain-models'
-import statePrograms from '../../../../app-web/src/common-code/data/statePrograms.json'
+import { typedStatePrograms } from '@mc-review/hpp'
 import type { PrismaClient } from '@prisma/client'
 
 // Returns postgres state info for the states that currently supported for pilot.
@@ -7,7 +7,7 @@ import type { PrismaClient } from '@prisma/client'
 export async function findAllSupportedStates(
     client: PrismaClient
 ): Promise<StateType[] | Error> {
-    const pilotStateCodes = statePrograms.states.map((state) => state.code)
+    const pilotStateCodes = typedStatePrograms.states.map((state) => state.code)
 
     try {
         const allStates = await client.state.findMany({

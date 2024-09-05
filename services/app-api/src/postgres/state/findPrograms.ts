@@ -1,12 +1,12 @@
 import type { ProgramType } from '../../domain-models'
-import statePrograms from '../../../../app-web/src/common-code/data/statePrograms.json'
+import { typedStatePrograms } from '@mc-review/hpp'
 
 // Currently relies on state programs json; does not query postgres
 function findPrograms(
     stateCode: string,
     programIDs: string[]
 ): ProgramType[] | Error {
-    const programs = statePrograms.states
+    const programs = typedStatePrograms.states
         .find((state) => state.code === stateCode)
         ?.programs.filter((program) => programIDs.includes(program.id))
 

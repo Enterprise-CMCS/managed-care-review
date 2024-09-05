@@ -2,18 +2,15 @@ import type {
     HealthPlanFormDataType,
     RateInfoType,
     SubmissionDocument,
-} from '../../common-code/healthPlanFormDataType'
+} from '@mc-review/hpp'
 import type {
     HealthPlanPackageType,
     HealthPlanRevisionType,
 } from '../HealthPlanPackageType'
 import type { ContractType } from './contractTypes'
-import {
-    toDomain,
-    toProtoBuffer,
-} from '../../common-code/proto/healthPlanFormDataProto'
-import { parsePartialHPFD } from '../../common-code/proto/healthPlanFormDataProto/toDomain'
-import type { PartialHealthPlanFormData } from '../../common-code/proto/healthPlanFormDataProto/toDomain'
+import { toDomain, toProtoBuffer } from '@mc-review/hpp'
+import { parsePartialHPFD } from '@mc-review/hpp'
+import type { PartialHealthPlanFormData } from '@mc-review/hpp'
 import type { ContractRevisionType, RateRevisionType } from './revisionTypes'
 
 function convertContractToDraftRateRevisions(contract: ContractType) {

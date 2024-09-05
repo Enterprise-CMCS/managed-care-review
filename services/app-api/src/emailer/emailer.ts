@@ -18,7 +18,7 @@ import {
 import type {
     LockedHealthPlanFormDataType,
     UnlockedHealthPlanFormDataType,
-} from '../common-code/healthPlanFormDataType'
+} from '@mc-review/hpp'
 import type {
     UpdateInfoType,
     ProgramType,

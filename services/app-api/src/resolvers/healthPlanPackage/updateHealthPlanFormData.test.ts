@@ -2,12 +2,12 @@ import { v4 as uuidv4 } from 'uuid'
 import { findStatePrograms, NewPostgresStore } from '../../postgres'
 import { submitContract } from '../../postgres/contractAndRates/submitContract'
 import UPDATE_HEALTH_PLAN_FORM_DATA from '../../../../app-graphql/src/mutations/updateHealthPlanFormData.graphql'
-import { domainToBase64 } from '../../common-code/proto/healthPlanFormDataProto'
-import { packageName } from '../../common-code/healthPlanFormDataType'
+import { domainToBase64 } from '@mc-review/hpp'
+import { packageName } from '@mc-review/hpp'
 import {
     basicLockedHealthPlanFormData,
     basicHealthPlanFormData,
-} from '../../common-code/healthPlanFormDataMocks'
+} from '@mc-review/hpp'
 import { latestFormData } from '../../testHelpers/healthPlanPackageHelpers'
 import {
     mockStoreThatErrors,

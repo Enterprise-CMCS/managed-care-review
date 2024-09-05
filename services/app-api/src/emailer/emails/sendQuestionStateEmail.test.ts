@@ -9,7 +9,7 @@ import type {
     StateType,
 } from '../../domain-models'
 import type { ContractFormDataType, Question } from '../../domain-models'
-import { packageName } from '../../common-code/healthPlanFormDataType'
+import { packageName } from '@mc-review/hpp'
 import { sendQuestionStateEmail } from './index'
 
 const defaultSubmitters = ['submitter1@example.com', 'submitter2@example.com']

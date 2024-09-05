@@ -1,3 +1,4 @@
 import statePrograms from './statePrograms.json'
+import { StatePrograms } from './types'
 
-export { statePrograms }
+export const typedStatePrograms: StatePrograms = statePrograms
