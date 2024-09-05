@@ -12,6 +12,7 @@ export default defineConfig(() => ({
     base: '/',
     sourcemap: true,
     plugins: [
+        nodePolyfills(),
         react(),
         svgr({
             svgrOptions: {
@@ -22,7 +23,6 @@ export default defineConfig(() => ({
             },
             include: '**/*.svg',
         }),
-        nodePolyfills(),
         graphqlLoader(),
     ],
     server: {
@@ -77,11 +77,12 @@ export default defineConfig(() => ({
         outDir: './build',
     },
     optimizeDeps: {
-        include: ['protobufjs/minimal'],
+        include: ['protobufjs/minimal', 'buffer'],
     },
     resolve: {
         alias: {
             '~uswds': path.resolve(__dirname, './node_modules/uswds'),
+            '@mc-review/hpp': path.resolve(__dirname, '../../packages/hpp'),
         },
     },
     css: {
