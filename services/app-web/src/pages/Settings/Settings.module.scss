@@ -1,40 +1,29 @@
 @use '../../styles/custom.scss' as custom;
 @use '../../styles/uswdsImports.scss' as uswds;
 
-.table {
-    h2 {
-        font-weight: 300;
-    }
-    thead {
-        th {
-            background-color: transparent;
-            border-top: 0;
-            border-left: 0;
-            border-right: 0;
-        }
-        td {
-            word-wrap: break-word;
-            overflow-wrap: break-word;
-        }
-    }
-
-    table {
-        padding-top: 1em;
-        width: 100%;
-    }
-}
-.tabs {
-    padding: 2em 0;
-}
-.pageContainer {
-    padding: 1em 10em;
-    width: 100%;
-    background-color: custom.$mcr-foundation-white;
-}
-.header {
-    text-align: left;
+.filterCount {
+    color: custom.$mcr-foundation-ink;
+    padding-top: uswds.units(3);
 }
 
-.wrapper {
-    height: 100vh;
+.container {
+    max-width: custom.$mcr-container-standard-width-fixed;
+    padding: 2rem 0;
+}
+
+.outletContainer {
+    @include custom.default-page-container;
+    padding: 0 !important; // override GridContainer to make sure our sidenav background alwaysmatches the content inside it
+}
+
+.verticalNavContainer {
+    padding: 2rem;
+    width: 20rem;
+    min-width: 18rem;
+    max-width: custom.$mcr-container-max-width-fixed;
+}
+
+.backLinkContainer {
+    padding-top: uswds.units(2);
+    padding-bottom: uswds.units(4);
 }

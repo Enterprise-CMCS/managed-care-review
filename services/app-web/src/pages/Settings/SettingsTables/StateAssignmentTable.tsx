@@ -2,6 +2,7 @@ import {
     Column,
     ColumnFiltersState,
     createColumnHelper,
+    flexRender,
     getCoreRowModel,
     getFacetedUniqueValues,
     getFilteredRowModel,
@@ -10,18 +11,22 @@ import {
 } from '@tanstack/react-table'
 import React, { useMemo, useRef, useState } from 'react'
 import {
+    FilterAccordion,
+    FilterOptionType,
     FilterSelect,
     FilterSelectedOptionsType,
 } from '../../../components/FilterAccordion'
 import { DoubleColumnGrid, LinkWithLogging } from '../../../components'
-import { formatEmails } from './EmailSettingsTables'
-import { Table } from '@trussworks/react-uswds'
+import { formatEmails } from '../Settings'
+import { Grid, Table } from '@trussworks/react-uswds'
 
 import styles from '../Settings.module.scss'
 import { pluralize } from '../../../common-code/formatters'
 import { useTealium } from '../../../hooks'
 import useDeepCompareEffect from 'use-deep-compare-effect'
 import { useStringConstants } from '../../../hooks/useStringConstants'
+import { useOutletContext } from 'react-router-dom'
+import { MCReviewSettingsContextType } from '../Settings'
 
 type StateAnalystsInDashboardType = {
     emails: string[]
@@ -30,11 +35,27 @@ type StateAnalystsInDashboardType = {
 
 const columnHelper = createColumnHelper<StateAnalystsInDashboardType>()
 
-const EmailAnalystsTable = ({
-    analysts,
-}: {
-    analysts: StateAnalystsInDashboardType[]
-}) => {
+const getAppliedFilters = (columnFilters: ColumnFiltersState, id: string) => {
+    type TempRecord = { value: string; label: string; id: string }
+    const valuesFromUrl = [] as TempRecord[]
+    columnFilters.forEach((filter) => {
+        if (Array.isArray(filter.value)) {
+            filter.value.forEach((value) => {
+                valuesFromUrl.push({
+                    value: value,
+                    label: value,
+                    id: filter.id,
+                })
+            })
+        }
+    })
+    const filterValues = valuesFromUrl
+        .filter((item) => item.id === id)
+        .map((item) => ({ value: item.value, label: item.value }))
+    return filterValues as FilterOptionType[]
+}
+
+const StateAssignmentTable = () => {
     const lastClickedElement = useRef<string | null>(null)
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
     const [prevFilters, setPrevFilters] = useState<{
@@ -46,19 +67,21 @@ const EmailAnalystsTable = ({
     const { logFilterEvent } = useTealium()
     const stringConstants = useStringConstants()
     const MAIL_TO_SUPPORT = stringConstants.MAIL_TO_SUPPORT
+    const { stateAnalysts: analysts } =
+        useOutletContext<MCReviewSettingsContextType>()
 
     const tableColumns = useMemo(
         () => [
             columnHelper.accessor('stateCode', {
                 id: 'stateCode',
                 header: 'State',
-                cell: (info) => <span>{info.getValue()}</span>,
+                cell: (info) => info.getValue(),
                 filterFn: `arrIncludesSome`,
             }),
             columnHelper.accessor('emails', {
                 id: 'emails',
                 header: 'Inbox',
-                cell: (info) => <span>{info.getValue()}</span>,
+                cell: (info) => formatEmails(info.getValue()),
                 filterFn: `arrIncludesSome`,
             }),
         ],
@@ -67,7 +90,7 @@ const EmailAnalystsTable = ({
 
     const reactTable = useReactTable({
         data: analysts.sort((a, b) =>
-            a['stateCode'] > b['stateCode'] ? -1 : 1
+            a['stateCode'] > b['stateCode'] ? 1 : -1
         ),
         filterFns: {
             dateRangeFilter: () => true,
@@ -103,6 +126,30 @@ const EmailAnalystsTable = ({
         lastClickedElement.current = filterName
         column.setFilterValue(
             selectedOptions.map((selection) => selection.value)
+        )
+    }
+
+    const clearFilters = () => {
+        lastClickedElement.current = 'clearFiltersButton'
+        reactTable.resetColumnFilters()
+    }
+
+    const emailFilterOptions = () => {
+        const emails = Array.from(
+            emailsColumn.getFacetedUniqueValues().keys()
+        ).flat()
+
+        return (
+            [...new Set(emails)]
+                .map((state) => ({
+                    value: state,
+                    label: state,
+                }))
+                // Add just one empty assignment filter with label
+                .concat({
+                    value: [],
+                    label: 'No assignments',
+                })
         )
     }
 
@@ -143,8 +190,8 @@ const EmailAnalystsTable = ({
     }, [rowCount, columnFilters, setPrevFilters, prevFilters])
 
     return (
-        <>
-            <h2>State Analyst emails</h2>
+        <Grid className={styles.container}>
+            <h2>State assignments</h2>
             <p>
                 Below is a list of the DMCO staff assigned to states. If this
                 list is out of date please contact
@@ -160,71 +207,79 @@ const EmailAnalystsTable = ({
                     </LinkWithLogging>
                 </span>
             </p>
-
-            <DoubleColumnGrid>
-                <FilterSelect
-                    name="state"
-                    label="State"
-                    filterOptions={Array.from(
-                        stateColumn.getFacetedUniqueValues().keys()
-                    )
-                        .sort()
-                        .map((state) => ({
-                            value: state,
-                            label: state,
-                        }))}
-                    onChange={(selectedOptions) =>
-                        updateFilters(stateColumn, selectedOptions, 'state')
-                    }
-                />
-                <FilterSelect
-                    name="emails"
-                    label="Emails"
-                    filterOptions={Array.from(
-                        emailsColumn.getFacetedUniqueValues().keys()
-                    )
-                        .filter((state) => Boolean(state.length)) // filters out all empty assignments as filter options
-                        .sort()
-                        .map((state) => ({
-                            value: state,
-                            label: state,
-                        }))
-                        // Add just one empty assignment filter with label
-                        .concat({
-                            value: [],
-                            label: 'No assignments',
-                        })}
-                    onChange={(selectedOptions) =>
-                        updateFilters(emailsColumn, selectedOptions, 'emails')
-                    }
-                />
-            </DoubleColumnGrid>
-            <div className={styles.filterCount}>{rowCount}</div>
-            <hr />
-
-            <Table bordered>
-                <caption className="srOnly">Analyst emails</caption>
+            <FilterAccordion
+                onClearFilters={clearFilters}
+                filterTitle={'Filters'}
+            >
+                <DoubleColumnGrid>
+                    <FilterSelect
+                        value={getAppliedFilters(columnFilters, 'stateCode')}
+                        name="state"
+                        label="State"
+                        filterOptions={Array.from(
+                            stateColumn.getFacetedUniqueValues().keys()
+                        )
+                            .sort()
+                            .map((state) => ({
+                                value: state,
+                                label: state,
+                            }))}
+                        onChange={(selectedOptions) =>
+                            updateFilters(stateColumn, selectedOptions, 'state')
+                        }
+                    />
+                    <FilterSelect
+                        value={getAppliedFilters(columnFilters, 'emails')}
+                        name="emails"
+                        label="Emails"
+                        filterOptions={emailFilterOptions()}
+                        onChange={(selectedOptions) =>
+                            updateFilters(
+                                emailsColumn,
+                                selectedOptions,
+                                'emails'
+                            )
+                        }
+                    />
+                </DoubleColumnGrid>
+            </FilterAccordion>
+            <div aria-live="polite" aria-atomic>
+                <div className={styles.filterCount}>{rowCount}</div>
+            </div>
+            <Table fullWidth bordered>
+                <caption className="srOnly">State assignments</caption>
                 <thead>
-                    <tr>
-                        <th>State</th>
-                        <th>Inbox</th>
-                    </tr>
+                    {reactTable.getHeaderGroups().map((headerGroup) => (
+                        <tr key={headerGroup.id}>
+                            {headerGroup.headers.map((header) => (
+                                <th scope="col" key={header.id}>
+                                    {flexRender(
+                                        header.column.columnDef.header,
+                                        header.getContext()
+                                    )}
+                                </th>
+                            ))}
+                        </tr>
+                    ))}
                 </thead>
                 <tbody>
                     {filteredRows.map((row) => {
                         return (
                             <tr key={row.id}>
-                                <td>{row.getValue('stateCode')}</td>
-                                <td>
-                                    {row.getValue &&
-                                        formatEmails(row.getValue('emails'))}
-                                </td>
+                                {row.getVisibleCells().map((cell) => (
+                                    <td key={cell.id}>
+                                        {flexRender(
+                                            cell.column.columnDef.cell,
+                                            cell.getContext()
+                                        )}
+                                    </td>
+                                ))}
                             </tr>
                         )
                     })}
                 </tbody>
             </Table>
-        </>
+        </Grid>
     )
 }
-export { EmailAnalystsTable, type StateAnalystsInDashboardType }
+export { StateAssignmentTable, type StateAnalystsInDashboardType }
