@@ -5,7 +5,10 @@ describe('state user in state submission form', () => {
     })
     it('can navigate forward, back,  and save as draft on each form page', () => {
         // goal of this test is to check every single form page and navigation (going backwards, forwards or save as draft with new info)
-
+        cy.interceptFeatureFlags({
+            '438-attestation': true,
+            'hide-supporting-docs-page': true
+        })
         cy.logInAsStateUser()
 
         // Start a base contract only submissions

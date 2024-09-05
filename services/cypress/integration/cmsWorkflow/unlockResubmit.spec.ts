@@ -234,7 +234,10 @@ describe('CMS user', () => {
     // TODO AFTER LINKED RATES AND LINKED RATES CHANGE HISTORY SHIPS
     it.only('can unlock and resubmit a linked rate and change history updates', () => {
         // turn on feature flag
-        cy.interceptFeatureFlags({'438-attestation': true})
+        cy.interceptFeatureFlags({
+            '438-attestation': true,
+            'hide-supporting-docs-page': true
+        })
 
         // Set up a submission with linked rates
         cy.apiCreateAndSubmitContractWithRates(stateUser()).then(() => {
