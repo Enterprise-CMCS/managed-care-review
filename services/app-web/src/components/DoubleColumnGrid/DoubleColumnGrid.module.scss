@@ -1,8 +1,0 @@
-@use '../../styles/custom.scss' as custom;
-@use '../../styles/uswdsImports.scss' as uswds;
-
-.row {
-    @include uswds.at-media(tablet) {
-        margin-bottom: uswds.units(2);
-    }
-}
