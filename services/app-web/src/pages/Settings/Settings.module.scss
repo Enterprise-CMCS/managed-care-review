@@ -6,19 +6,20 @@
     padding-top: uswds.units(3);
 }
 
-.container {
-    max-width: custom.$mcr-container-standard-width-fixed;
+.tableContainer {
     padding: 2rem 0;
+
+    h2 {
+        font-weight: normal;
+    }
 }
 
 .outletContainer {
     @include custom.default-page-container;
-    padding: 0 !important; // override GridContainer to make sure our sidenav background alwaysmatches the content inside it
 }
 
 .verticalNavContainer {
-    padding: 2rem;
-    width: 20rem;
+    padding: 2rem 2rem 2rem 0;
     min-width: 18rem;
     max-width: custom.$mcr-container-max-width-fixed;
 }

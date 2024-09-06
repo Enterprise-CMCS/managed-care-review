@@ -190,7 +190,7 @@ const StateAssignmentTable = () => {
     }, [rowCount, columnFilters, setPrevFilters, prevFilters])
 
     return (
-        <Grid className={styles.container}>
+        <Grid className={styles.tableContainer}>
             <h2>State assignments</h2>
             <p>
                 Below is a list of the DMCO staff assigned to states. If this

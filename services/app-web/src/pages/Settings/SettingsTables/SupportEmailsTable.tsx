@@ -8,7 +8,7 @@ const SupportEmailsTable = () => {
     const { emailConfig: config } =
         useOutletContext<MCReviewSettingsContextType>()
     return (
-        <Grid className={styles.container}>
+        <Grid className={styles.tableContainer}>
             <h2>Support emails</h2>
             <p>
                 States that need support should contact one of these email

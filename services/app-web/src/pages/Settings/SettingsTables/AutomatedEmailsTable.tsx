@@ -9,7 +9,7 @@ const AutomatedEmailsTable = () => {
     const { emailConfig: config } =
         useOutletContext<MCReviewSettingsContextType>()
     return (
-        <Grid className={styles.container}>
+        <Grid className={styles.tableContainer}>
             <h2>Automated emails</h2>
             <p>
                 Shared inboxes receive emails for different submissions, as
