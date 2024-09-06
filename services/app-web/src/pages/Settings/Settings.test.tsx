@@ -11,6 +11,7 @@ import {
     fetchMcReviewSettingsMock,
     mockValidAdminUser,
     updateDivisionMockSuccess,
+    mockValidCMSUser,
 } from '../../testHelpers/apolloMocks'
 import { renderWithProviders } from '../../testHelpers'
 import {
@@ -19,10 +20,8 @@ import {
     CmsApproverUser,
     CmsUser,
     HelpdeskUser,
-    IndexUsersDocument,
-    IndexUsersQuery,
 } from '../../gen/gqlClient'
-import userEvent from '@testing-library/user-event'
+import { userEvent } from '@testing-library/user-event'
 import { RoutesRecord } from '../../constants'
 import {
     StateAssignmentTable,
@@ -30,7 +29,6 @@ import {
     SupportEmailsTable,
     AutomatedEmailsTable,
 } from './SettingsTables'
-import { MockedResponse } from '@apollo/client/testing'
 import { fetchMcReviewSettingsFailMock } from '../../testHelpers/apolloMocks/mcReviewSettingsGQLMocks'
 import { indexUsersQueryFailMock } from '../../testHelpers/apolloMocks/userGQLMock'
 import { fetchEmailSettingsFailMock } from '../../testHelpers/apolloMocks/emailGQLMock'
@@ -79,13 +77,209 @@ const CommonSettingsRoute = () => (
     </Routes>
 )
 
+const commonSettingPageTest = async () => {
+    // Check State assignments table
+    const tableAnalysts = await screen.findByRole('table', {
+        name: 'State assignments',
+    })
+    expect(tableAnalysts).toBeInTheDocument()
+    const tableRowsAnalysts = await within(tableAnalysts).findAllByRole('row')
+    expect(tableRowsAnalysts).toHaveLength(3)
+    // Check the table headers
+    expect(
+        within(tableAnalysts).getByRole('columnheader', {
+            name: 'Inbox',
+        })
+    ).toBeInTheDocument()
+    expect(
+        within(tableAnalysts).getByRole('columnheader', {
+            name: 'State',
+        })
+    ).toBeInTheDocument()
+
+    // Check the table cells
+    expect(
+        within(tableAnalysts).getByText(
+            /testMN@example.com, cmsApproverUser1@dmas.mn.gov/
+        )
+    ).toBeInTheDocument()
+    expect(
+        within(tableAnalysts).getByText(
+            /cmsUser2@dmas.mn.gov, cmsApproverUser2@dmas.mn.go/
+        )
+    ).toBeInTheDocument()
+    expect(within(tableAnalysts).getByText('MN')).toBeInTheDocument()
+    expect(within(tableAnalysts).getByText('OH')).toBeInTheDocument()
+
+    // Check Division assignments table
+    const divisionLink = await screen.findByRole('link', {
+        name: 'Division assignments',
+    })
+    expect(divisionLink).toBeInTheDocument()
+    await userEvent.click(divisionLink)
+
+    const tableDivision = await screen.findByRole('table', {
+        name: 'Division assignments',
+    })
+    expect(tableDivision).toBeInTheDocument()
+    const tableRowsDivision = await within(tableDivision).findAllByRole('row')
+    expect(tableRowsDivision).toHaveLength(2)
+    // Check the table headers
+    expect(
+        screen.getByRole('columnheader', { name: 'Family Name' })
+    ).toBeInTheDocument()
+    expect(
+        screen.getByRole('columnheader', { name: 'Given Name' })
+    ).toBeInTheDocument()
+    expect(
+        screen.getByRole('columnheader', { name: 'Email' })
+    ).toBeInTheDocument()
+
+    // Check the table cells
+    expect(within(tableDivision).getByText('Hotman')).toBeInTheDocument()
+    expect(within(tableDivision).getByText('Zuko')).toBeInTheDocument()
+    expect(
+        within(tableDivision).getByText('zuko@example.com')
+    ).toBeInTheDocument()
+
+    // Check for automated emails table
+    const automatedEmailsLink = await screen.findByRole('link', {
+        name: 'Automated emails',
+    })
+    expect(automatedEmailsLink).toBeInTheDocument()
+    await userEvent.click(automatedEmailsLink)
+
+    const tableAutomated = await screen.findByRole('table', {
+        name: 'Automated emails',
+    })
+    expect(tableAutomated).toBeInTheDocument()
+
+    const tableRows = await within(tableAutomated).findAllByRole('row')
+    expect(tableRows).toHaveLength(6)
+    // Check the table headers
+    expect(
+        within(tableAutomated).getByRole('columnheader', {
+            name: 'Inbox',
+        })
+    ).toBeInTheDocument()
+    expect(
+        within(tableAutomated).getByRole('columnheader', {
+            name: 'Type',
+        })
+    ).toBeInTheDocument()
+    expect(
+        within(tableAutomated).getByRole('columnheader', {
+            name: 'Description',
+        })
+    ).toBeInTheDocument()
+
+    // Check the table cells
+    expect(
+        within(tableAutomated).getByText('testRate@example.com')
+    ).toBeInTheDocument()
+    expect(
+        within(tableAutomated).getByText('testPolicy@example.com')
+    ).toBeInTheDocument()
+    expect(
+        within(tableAutomated).getByText('testDmco@example.com')
+    ).toBeInTheDocument()
+
+    // Check support table
+    const supportEmailsLink = await screen.findByRole('link', {
+        name: 'Support emails',
+    })
+    expect(supportEmailsLink).toBeInTheDocument()
+    await userEvent.click(supportEmailsLink)
+
+    const tableSupport = await screen.findByRole('table', {
+        name: 'Support emails',
+    })
+    expect(tableSupport).toBeInTheDocument()
+    const tableRowsSupport = await within(tableSupport).findAllByRole('row')
+    expect(tableRowsSupport).toHaveLength(4)
+    // Check the table headers
+    expect(
+        within(tableSupport).getByRole('columnheader', {
+            name: 'Inbox',
+        })
+    ).toBeInTheDocument()
+    expect(
+        within(tableSupport).getByRole('columnheader', { name: 'Type' })
+    ).toBeInTheDocument()
+    expect(
+        within(tableSupport).getByRole('columnheader', {
+            name: 'Description',
+        })
+    ).toBeInTheDocument()
+
+    // Check the table cells
+    expect(
+        within(tableSupport).getByText('helpdesk@example.com')
+    ).toBeInTheDocument()
+    expect(
+        within(tableSupport).getByText('rates@example.com')
+    ).toBeInTheDocument()
+    expect(
+        within(tableSupport).getByText('mcog@example.com')
+    ).toBeInTheDocument()
+}
+
+const commonErrorTests = async () => {
+    expect(await screen.findByText('System error')).toBeInTheDocument()
+    expect(
+        screen.queryByRole('table', {
+            name: 'State assignments',
+        })
+    ).toBeNull()
+
+    // Check Division assignments table
+    const divisionLink = await screen.findByRole('link', {
+        name: 'Division assignments',
+    })
+    expect(divisionLink).toBeInTheDocument()
+    await userEvent.click(divisionLink)
+    expect(await screen.findByText('System error')).toBeInTheDocument()
+    expect(
+        screen.queryByRole('table', {
+            name: 'Division assignments',
+        })
+    ).toBeNull()
+
+    // Check for automated emails table
+    const automatedEmailsLink = await screen.findByRole('link', {
+        name: 'Automated emails',
+    })
+    expect(automatedEmailsLink).toBeInTheDocument()
+    await userEvent.click(automatedEmailsLink)
+    expect(await screen.findByText('System error')).toBeInTheDocument()
+    expect(
+        screen.queryByRole('table', {
+            name: 'Automated emails',
+        })
+    ).toBeNull()
+
+    // Check support table
+    const supportEmailsLink = await screen.findByRole('link', {
+        name: 'Support emails',
+    })
+    expect(supportEmailsLink).toBeInTheDocument()
+    await userEvent.click(supportEmailsLink)
+    expect(await screen.findByText('System error')).toBeInTheDocument()
+    expect(
+        screen.queryByRole('table', {
+            name: 'Support emails',
+        })
+    ).toBeNull()
+}
+
+afterEach(() => {
+    vi.clearAllMocks()
+})
+
 describe.each(combinedAuthorizedUsers)(
     'Settings tests for $userRole with read-write-state-assignments on',
     ({ userRole, mockUser }) => {
-        afterEach(() => {
-            vi.clearAllMocks()
-        })
-        it('renders state assignments setting page', async () => {
+        it('renders settings pages', async () => {
             renderWithProviders(<CommonSettingsRoute />, {
                 apolloProvider: {
                     mocks: [
@@ -105,261 +299,8 @@ describe.each(combinedAuthorizedUsers)(
                 },
             })
 
-            // Check State assignments table
-            const tableAnalysts = await screen.findByRole('table', {
-                name: 'State assignments',
-            })
-            expect(tableAnalysts).toBeInTheDocument()
-            const tableRowsAnalysts =
-                await within(tableAnalysts).findAllByRole('row')
-            expect(tableRowsAnalysts).toHaveLength(3)
-            // Check the table headers
-            expect(
-                within(tableAnalysts).getByRole('columnheader', {
-                    name: 'Inbox',
-                })
-            ).toBeInTheDocument()
-            expect(
-                within(tableAnalysts).getByRole('columnheader', {
-                    name: 'State',
-                })
-            ).toBeInTheDocument()
-
-            // Check the table cells
-            expect(
-                within(tableAnalysts).getByText(
-                    /testMN@example.com, cmsApproverUser1@dmas.mn.gov/
-                )
-            ).toBeInTheDocument()
-            expect(
-                within(tableAnalysts).getByText(
-                    /cmsUser2@dmas.mn.gov, cmsApproverUser2@dmas.mn.go/
-                )
-            ).toBeInTheDocument()
-            expect(within(tableAnalysts).getByText('MN')).toBeInTheDocument()
-            expect(within(tableAnalysts).getByText('OH')).toBeInTheDocument()
-        })
-        it('renders the division assignments page', async () => {
-            renderWithProviders(<CommonSettingsRoute />, {
-                apolloProvider: {
-                    mocks: [
-                        indexUsersQueryMock(),
-                        fetchCurrentUserMock({
-                            user: mockUser(),
-                            statusCode: 200,
-                        }),
-                        fetchMcReviewSettingsMock(),
-                    ],
-                },
-                routerProvider: {
-                    route: '/mc-review-settings',
-                },
-                featureFlags: {
-                    'read-write-state-assignments': true,
-                },
-            })
-
-            // Check Division assignments table
-            const divisionLink = await screen.findByRole('link', {
-                name: 'Division assignments',
-            })
-            expect(divisionLink).toBeInTheDocument()
-            await userEvent.click(divisionLink)
-
-            const tableDivision = await screen.findByRole('table', {
-                name: 'Division assignments',
-            })
-            expect(tableDivision).toBeInTheDocument()
-            const tableRowsDivision =
-                await within(tableDivision).findAllByRole('row')
-            expect(tableRowsDivision).toHaveLength(2)
-            // Check the table headers
-            expect(
-                screen.getByRole('columnheader', { name: 'Family Name' })
-            ).toBeInTheDocument()
-            expect(
-                screen.getByRole('columnheader', { name: 'Given Name' })
-            ).toBeInTheDocument()
-            expect(
-                screen.getByRole('columnheader', { name: 'Email' })
-            ).toBeInTheDocument()
-
-            // Check the table cells
-            expect(
-                within(tableDivision).getByText('Hotman')
-            ).toBeInTheDocument()
-            expect(within(tableDivision).getByText('Zuko')).toBeInTheDocument()
-            expect(
-                within(tableDivision).getByText('zuko@example.com')
-            ).toBeInTheDocument()
-        })
-        it('renders automated emails page', async () => {
-            renderWithProviders(<CommonSettingsRoute />, {
-                apolloProvider: {
-                    mocks: [
-                        indexUsersQueryMock(),
-                        fetchCurrentUserMock({
-                            user: mockUser(),
-                            statusCode: 200,
-                        }),
-                        fetchMcReviewSettingsMock(),
-                    ],
-                },
-                routerProvider: {
-                    route: '/mc-review-settings',
-                },
-                featureFlags: {
-                    'read-write-state-assignments': true,
-                },
-            })
-
-            // Check for automated emails table
-            const automatedEmailsLink = await screen.findByRole('link', {
-                name: 'Automated emails',
-            })
-            expect(automatedEmailsLink).toBeInTheDocument()
-            await userEvent.click(automatedEmailsLink)
-
-            const tableAutomated = await screen.findByRole('table', {
-                name: 'Automated emails',
-            })
-            expect(tableAutomated).toBeInTheDocument()
-
-            const tableRows = await within(tableAutomated).findAllByRole('row')
-            expect(tableRows).toHaveLength(6)
-            // Check the table headers
-            expect(
-                within(tableAutomated).getByRole('columnheader', {
-                    name: 'Inbox',
-                })
-            ).toBeInTheDocument()
-            expect(
-                within(tableAutomated).getByRole('columnheader', {
-                    name: 'Type',
-                })
-            ).toBeInTheDocument()
-            expect(
-                within(tableAutomated).getByRole('columnheader', {
-                    name: 'Description',
-                })
-            ).toBeInTheDocument()
-
-            // Check the table cells
-            expect(
-                within(tableAutomated).getByText('testRate@example.com')
-            ).toBeInTheDocument()
-            expect(
-                within(tableAutomated).getByText('testPolicy@example.com')
-            ).toBeInTheDocument()
-            expect(
-                within(tableAutomated).getByText('testDmco@example.com')
-            ).toBeInTheDocument()
-        })
-        it('should render the email settings tables', async () => {
-            renderWithProviders(<CommonSettingsRoute />, {
-                apolloProvider: {
-                    mocks: [
-                        indexUsersQueryMock(),
-                        fetchCurrentUserMock({
-                            user: mockUser(),
-                            statusCode: 200,
-                        }),
-                        fetchMcReviewSettingsMock(),
-                    ],
-                },
-                routerProvider: {
-                    route: '/mc-review-settings',
-                },
-                featureFlags: {
-                    'read-write-state-assignments': true,
-                },
-            })
-
-            // Check support table
-            const supportEmailsLink = await screen.findByRole('link', {
-                name: 'Support emails',
-            })
-            expect(supportEmailsLink).toBeInTheDocument()
-            await userEvent.click(supportEmailsLink)
-
-            const tableSupport = await screen.findByRole('table', {
-                name: 'Support emails',
-            })
-            expect(tableSupport).toBeInTheDocument()
-            const tableRowsSupport =
-                await within(tableSupport).findAllByRole('row')
-            expect(tableRowsSupport).toHaveLength(4)
-            // Check the table headers
-            expect(
-                within(tableSupport).getByRole('columnheader', {
-                    name: 'Inbox',
-                })
-            ).toBeInTheDocument()
-            expect(
-                within(tableSupport).getByRole('columnheader', { name: 'Type' })
-            ).toBeInTheDocument()
-            expect(
-                within(tableSupport).getByRole('columnheader', {
-                    name: 'Description',
-                })
-            ).toBeInTheDocument()
-
-            // Check the table cells
-            expect(
-                within(tableSupport).getByText('helpdesk@example.com')
-            ).toBeInTheDocument()
-            expect(
-                within(tableSupport).getByText('rates@example.com')
-            ).toBeInTheDocument()
-            expect(
-                within(tableSupport).getByText('mcog@example.com')
-            ).toBeInTheDocument()
-        })
-        it('renders error message on all settings pages', async () => {
-            renderWithProviders(<CommonSettingsRoute />, {
-                apolloProvider: {
-                    mocks: [
-                        indexUsersQueryFailMock(),
-                        fetchCurrentUserMock({
-                            user: mockUser(),
-                            statusCode: 200,
-                        }),
-                        fetchMcReviewSettingsFailMock(),
-                    ],
-                },
-                routerProvider: {
-                    route: '/mc-review-settings',
-                },
-                featureFlags: {
-                    'read-write-state-assignments': true,
-                },
-            })
-
-            expect(await screen.findByText('System error')).toBeInTheDocument()
-
-            // Check Division assignments table
-            const divisionLink = await screen.findByRole('link', {
-                name: 'Division assignments',
-            })
-            expect(divisionLink).toBeInTheDocument()
-            await userEvent.click(divisionLink)
-            expect(await screen.findByText('System error')).toBeInTheDocument()
-
-            // Check for automated emails table
-            const automatedEmailsLink = await screen.findByRole('link', {
-                name: 'Automated emails',
-            })
-            expect(automatedEmailsLink).toBeInTheDocument()
-            await userEvent.click(automatedEmailsLink)
-            expect(await screen.findByText('System error')).toBeInTheDocument()
-
-            // Check support table
-            const supportEmailsLink = await screen.findByRole('link', {
-                name: 'Support emails',
-            })
-            expect(supportEmailsLink).toBeInTheDocument()
-            await userEvent.click(supportEmailsLink)
-            expect(await screen.findByText('System error')).toBeInTheDocument()
+            expect(await screen.findByTestId('sidenav')).toBeInTheDocument()
+            await commonSettingPageTest()
         })
     }
 )
@@ -367,10 +308,7 @@ describe.each(combinedAuthorizedUsers)(
 describe.each(combinedAuthorizedUsers)(
     'Settings tests for $userRole with read-write-state-assignments off',
     ({ userRole, mockUser }) => {
-        afterEach(() => {
-            vi.clearAllMocks()
-        })
-        it('renders state assignments setting page', async () => {
+        it('renders settings pages', async () => {
             renderWithProviders(<CommonSettingsRoute />, {
                 apolloProvider: {
                     mocks: [
@@ -390,281 +328,46 @@ describe.each(combinedAuthorizedUsers)(
                 },
             })
 
-            // Check State assignments table
-            const tableAnalysts = await screen.findByRole('table', {
-                name: 'State assignments',
-            })
-            expect(tableAnalysts).toBeInTheDocument()
-            const tableRowsAnalysts =
-                await within(tableAnalysts).findAllByRole('row')
-            expect(tableRowsAnalysts).toHaveLength(3)
-            // Check the table headers
-            expect(
-                within(tableAnalysts).getByRole('columnheader', {
-                    name: 'Inbox',
-                })
-            ).toBeInTheDocument()
-            expect(
-                within(tableAnalysts).getByRole('columnheader', {
-                    name: 'State',
-                })
-            ).toBeInTheDocument()
-
-            // Check the table cells
-            expect(
-                within(tableAnalysts).getByText(
-                    /testMN@example.com, cmsApproverUser1@dmas.mn.gov/
-                )
-            ).toBeInTheDocument()
-            expect(
-                within(tableAnalysts).getByText(
-                    /cmsUser2@dmas.mn.gov, cmsApproverUser2@dmas.mn.go/
-                )
-            ).toBeInTheDocument()
-            expect(within(tableAnalysts).getByText('MN')).toBeInTheDocument()
-            expect(within(tableAnalysts).getByText('OH')).toBeInTheDocument()
-        })
-        it('renders the division assignments page', async () => {
-            renderWithProviders(<CommonSettingsRoute />, {
-                apolloProvider: {
-                    mocks: [
-                        indexUsersQueryMock(),
-                        fetchCurrentUserMock({
-                            user: mockUser(),
-                            statusCode: 200,
-                        }),
-                        fetchEmailSettings(),
-                    ],
-                },
-                routerProvider: {
-                    route: '/mc-review-settings',
-                },
-                featureFlags: {
-                    'read-write-state-assignments': false,
-                },
-            })
-
-            // Check Division assignments table
-            const divisionLink = await screen.findByRole('link', {
-                name: 'Division assignments',
-            })
-            expect(divisionLink).toBeInTheDocument()
-            await userEvent.click(divisionLink)
-
-            const tableDivision = await screen.findByRole('table', {
-                name: 'Division assignments',
-            })
-            expect(tableDivision).toBeInTheDocument()
-            const tableRowsDivision =
-                await within(tableDivision).findAllByRole('row')
-            expect(tableRowsDivision).toHaveLength(2)
-            // Check the table headers
-            expect(
-                screen.getByRole('columnheader', { name: 'Family Name' })
-            ).toBeInTheDocument()
-            expect(
-                screen.getByRole('columnheader', { name: 'Given Name' })
-            ).toBeInTheDocument()
-            expect(
-                screen.getByRole('columnheader', { name: 'Email' })
-            ).toBeInTheDocument()
-
-            // Check the table cells
-            expect(
-                within(tableDivision).getByText('Hotman')
-            ).toBeInTheDocument()
-            expect(within(tableDivision).getByText('Zuko')).toBeInTheDocument()
-            expect(
-                within(tableDivision).getByText('zuko@example.com')
-            ).toBeInTheDocument()
-        })
-        it('renders automated emails page', async () => {
-            renderWithProviders(<CommonSettingsRoute />, {
-                apolloProvider: {
-                    mocks: [
-                        indexUsersQueryMock(),
-                        fetchCurrentUserMock({
-                            user: mockUser(),
-                            statusCode: 200,
-                        }),
-                        fetchEmailSettings(),
-                    ],
-                },
-                routerProvider: {
-                    route: '/mc-review-settings',
-                },
-                featureFlags: {
-                    'read-write-state-assignments': false,
-                },
-            })
-
-            // Check for automated emails table
-            const automatedEmailsLink = await screen.findByRole('link', {
-                name: 'Automated emails',
-            })
-            expect(automatedEmailsLink).toBeInTheDocument()
-            await userEvent.click(automatedEmailsLink)
-
-            const tableAutomated = await screen.findByRole('table', {
-                name: 'Automated emails',
-            })
-            expect(tableAutomated).toBeInTheDocument()
-
-            const tableRows = await within(tableAutomated).findAllByRole('row')
-            expect(tableRows).toHaveLength(6)
-            // Check the table headers
-            expect(
-                within(tableAutomated).getByRole('columnheader', {
-                    name: 'Inbox',
-                })
-            ).toBeInTheDocument()
-            expect(
-                within(tableAutomated).getByRole('columnheader', {
-                    name: 'Type',
-                })
-            ).toBeInTheDocument()
-            expect(
-                within(tableAutomated).getByRole('columnheader', {
-                    name: 'Description',
-                })
-            ).toBeInTheDocument()
-
-            // Check the table cells
-            expect(
-                within(tableAutomated).getByText('testRate@example.com')
-            ).toBeInTheDocument()
-            expect(
-                within(tableAutomated).getByText('testPolicy@example.com')
-            ).toBeInTheDocument()
-            expect(
-                within(tableAutomated).getByText('testDmco@example.com')
-            ).toBeInTheDocument()
-        })
-        it('should render the email settings tables', async () => {
-            renderWithProviders(<CommonSettingsRoute />, {
-                apolloProvider: {
-                    mocks: [
-                        indexUsersQueryMock(),
-                        fetchCurrentUserMock({
-                            user: mockUser(),
-                            statusCode: 200,
-                        }),
-                        fetchEmailSettings(),
-                    ],
-                },
-                routerProvider: {
-                    route: '/mc-review-settings',
-                },
-                featureFlags: {
-                    'read-write-state-assignments': false,
-                },
-            })
-
-            // Check support table
-            const supportEmailsLink = await screen.findByRole('link', {
-                name: 'Support emails',
-            })
-            expect(supportEmailsLink).toBeInTheDocument()
-            await userEvent.click(supportEmailsLink)
-
-            const tableSupport = await screen.findByRole('table', {
-                name: 'Support emails',
-            })
-            expect(tableSupport).toBeInTheDocument()
-            const tableRowsSupport =
-                await within(tableSupport).findAllByRole('row')
-            expect(tableRowsSupport).toHaveLength(4)
-            // Check the table headers
-            expect(
-                within(tableSupport).getByRole('columnheader', {
-                    name: 'Inbox',
-                })
-            ).toBeInTheDocument()
-            expect(
-                within(tableSupport).getByRole('columnheader', { name: 'Type' })
-            ).toBeInTheDocument()
-            expect(
-                within(tableSupport).getByRole('columnheader', {
-                    name: 'Description',
-                })
-            ).toBeInTheDocument()
-
-            // Check the table cells
-            expect(
-                within(tableSupport).getByText('helpdesk@example.com')
-            ).toBeInTheDocument()
-            expect(
-                within(tableSupport).getByText('rates@example.com')
-            ).toBeInTheDocument()
-            expect(
-                within(tableSupport).getByText('mcog@example.com')
-            ).toBeInTheDocument()
-        })
-        it('renders error message on all settings pages', async () => {
-            renderWithProviders(<CommonSettingsRoute />, {
-                apolloProvider: {
-                    mocks: [
-                        indexUsersQueryFailMock(),
-                        fetchCurrentUserMock({
-                            user: mockUser(),
-                            statusCode: 200,
-                        }),
-                        fetchEmailSettingsFailMock(),
-                    ],
-                },
-                routerProvider: {
-                    route: '/mc-review-settings',
-                },
-                featureFlags: {
-                    'read-write-state-assignments': true,
-                },
-            })
-
-            expect(await screen.findByText('System error')).toBeInTheDocument()
-
-            // Check Division assignments table
-            const divisionLink = await screen.findByRole('link', {
-                name: 'Division assignments',
-            })
-            expect(divisionLink).toBeInTheDocument()
-            await userEvent.click(divisionLink)
-            expect(await screen.findByText('System error')).toBeInTheDocument()
-
-            // Check for automated emails table
-            const automatedEmailsLink = await screen.findByRole('link', {
-                name: 'Automated emails',
-            })
-            expect(automatedEmailsLink).toBeInTheDocument()
-            await userEvent.click(automatedEmailsLink)
-            expect(await screen.findByText('System error')).toBeInTheDocument()
-
-            // Check support table
-            const supportEmailsLink = await screen.findByRole('link', {
-                name: 'Support emails',
-            })
-            expect(supportEmailsLink).toBeInTheDocument()
-            await userEvent.click(supportEmailsLink)
-            expect(await screen.findByText('System error')).toBeInTheDocument()
+            expect(await screen.findByTestId('sidenav')).toBeInTheDocument()
+            await commonSettingPageTest()
         })
     }
 )
 
-describe('Admin only settings page tests', () => {
-    it('shows error if failed request', async () => {
-        const failedRequest = (): MockedResponse<IndexUsersQuery> => {
-            return {
-                request: { query: IndexUsersDocument },
-                error: new Error('A network error occurred'),
-            }
-        }
+describe('Settings page error tests', () => {
+    it('renders error message on all settings pages read-write-state-assignments on', async () => {
         renderWithProviders(<CommonSettingsRoute />, {
             apolloProvider: {
                 mocks: [
+                    indexUsersQueryFailMock(),
                     fetchCurrentUserMock({
-                        user: mockValidAdminUser(),
+                        user: mockValidCMSUser(),
                         statusCode: 200,
                     }),
-                    failedRequest(),
+                    fetchMcReviewSettingsFailMock(),
+                ],
+            },
+            routerProvider: {
+                route: '/mc-review-settings',
+            },
+            featureFlags: {
+                'read-write-state-assignments': true,
+            },
+        })
+
+        expect(await screen.findByTestId('sidenav')).toBeInTheDocument()
+        await commonErrorTests()
+    })
+    it('renders error message on all settings pages with read-write-state-assignments off', async () => {
+        renderWithProviders(<CommonSettingsRoute />, {
+            apolloProvider: {
+                mocks: [
+                    indexUsersQueryFailMock(),
+                    fetchCurrentUserMock({
+                        user: mockValidCMSUser(),
+                        statusCode: 200,
+                    }),
+                    fetchEmailSettingsFailMock(),
                 ],
             },
             routerProvider: {
@@ -674,14 +377,13 @@ describe('Admin only settings page tests', () => {
                 'read-write-state-assignments': false,
             },
         })
-        await screen.findByRole('heading', { name: 'System error' })
-        await screen.findByText(/Please refresh your browser/)
 
-        const table = screen.queryByRole('table', {
-            name: 'CMS Users',
-        })
-        expect(table).toBeNull()
+        expect(await screen.findByTestId('sidenav')).toBeInTheDocument()
+        await commonErrorTests()
     })
+})
+
+describe('Admin only settings page tests', () => {
     it('renders division assignment combobox for admin user', async () => {
         renderWithProviders(<CommonSettingsRoute />, {
             apolloProvider: {
