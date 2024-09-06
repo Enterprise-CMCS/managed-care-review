@@ -233,7 +233,7 @@ const CMSUserRoutes = ({
                     />
                 )}
                 <Route
-                    path={RoutesRecord.MC_REVIEW_SETTINGS}
+                    path={RoutesRecord.MCR_SETTINGS}
                     element={<Settings />}
                 />
                 <Route path={RoutesRecord.SETTINGS} element={<Settings />} />
