@@ -11,18 +11,19 @@ import {
 } from 'formik'
 import { generatePath, useNavigate } from 'react-router-dom'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
-
 import styles from '../StateSubmissionForm.module.scss'
 
-import { StateContact } from '../../../common-code/healthPlanFormDataType'
-
+import {
+    StateContact,
+    UpdateContractDraftRevisionInput,
+} from '../../../gen/gqlClient'
 import { ErrorSummary, FieldTextInput } from '../../../components/Form'
 
 import { useFocus } from '../../../hooks/useFocus'
 import { PageActions } from '../PageActions'
 import {
     activeFormPages,
-    type HealthPlanFormPageProps,
+    type ContractFormPageProps,
 } from '../StateSubmissionForm'
 import { RoutesRecord } from '../../../constants'
 import {
@@ -32,12 +33,8 @@ import {
     SectionCard,
 } from '../../../components'
 import { FormContainer } from '../../../components/FormContainer/FormContainer'
-import {
-    useCurrentRoute,
-    useHealthPlanPackageForm,
-    useRouteParams,
-    useTealium,
-} from '../../../hooks'
+import { useCurrentRoute, useRouteParams, useTealium } from '../../../hooks'
+import { useContractForm } from '../../../hooks/useContractForm'
 import { useAuth } from '../../../contexts/AuthContext'
 import { ErrorOrLoadingPage } from '../ErrorOrLoadingPage'
 import { PageBannerAlerts } from '../PageBannerAlerts'
@@ -73,7 +70,7 @@ const flattenErrors = (
 
 const Contacts = ({
     showValidations = false,
-}: HealthPlanFormPageProps): React.ReactElement => {
+}: ContractFormPageProps): React.ReactElement => {
     const [shouldValidate, setShouldValidate] = React.useState(showValidations)
     const [focusNewContact, setFocusNewContact] = React.useState(false)
     const [focusNewActuaryContact, setFocusNewActuaryContact] =
@@ -87,13 +84,8 @@ const Contacts = ({
     const { loggedInUser } = useAuth()
     const { currentRoute } = useCurrentRoute()
     const { id } = useRouteParams()
-    const {
-        draftSubmission,
-        interimState,
-        updateDraft,
-        showPageErrorMessage,
-        unlockInfo,
-    } = useHealthPlanPackageForm(id)
+    const { draftSubmission, interimState, updateDraft, showPageErrorMessage } =
+        useContractForm(id)
 
     const redirectToDashboard = React.useRef(false)
     const newStateContactNameRef = React.useRef<HTMLInputElement | null>(null) // This ref.current is reset to the newest contact name field each time new contact is added
@@ -134,7 +126,7 @@ const Contacts = ({
     if (interimState || !draftSubmission || !updateDraft)
         return <ErrorOrLoadingPage state={interimState || 'GENERIC_ERROR'} />
 
-    const stateContacts = draftSubmission.stateContacts
+    const stateContacts = draftSubmission.draftRevision.formData.stateContacts
 
     const emptyStateContact = {
         name: '',
@@ -170,31 +162,31 @@ const Contacts = ({
         values: ContactsFormValues,
         formikHelpers: FormikHelpers<ContactsFormValues>
     ) => {
-        draftSubmission.stateContacts = values.stateContacts
+        draftSubmission.draftRevision.formData.stateContacts =
+            values.stateContacts
+        const updatedFormData = draftSubmission.draftRevision.formData
+        delete updatedFormData.__typename
+        const updatedContractInput: UpdateContractDraftRevisionInput = {
+            formData: draftSubmission.draftRevision.formData,
+            contractID: draftSubmission.id,
+            lastSeenUpdatedAt: draftSubmission.draftRevision.updatedAt,
+        }
 
-        try {
-            const updatedSubmission = await updateDraft(draftSubmission)
-            if (updatedSubmission instanceof Error) {
-                formikHelpers.setSubmitting(false)
-                redirectToDashboard.current = false
-                console.info(
-                    'Error updating draft submission: ',
-                    updatedSubmission
-                )
-            } else if (updatedSubmission) {
-                if (redirectToDashboard.current) {
-                    navigate(RoutesRecord.DASHBOARD_SUBMISSIONS)
-                } else {
-                    if (hideSupportingDocs) {
-                        navigate(`../review-and-submit`)
-                    } else {
-                        navigate(`../documents`)
-                    }
-                }
-            }
-        } catch (serverError) {
+        const updatedSubmission = await updateDraft(updatedContractInput)
+        if (updatedSubmission instanceof Error) {
             formikHelpers.setSubmitting(false)
             redirectToDashboard.current = false
+            console.info('Error updating draft submission: ', updatedSubmission)
+        } else if (updatedSubmission) {
+            if (redirectToDashboard.current) {
+                navigate(RoutesRecord.DASHBOARD_SUBMISSIONS)
+            } else {
+                if (hideSupportingDocs) {
+                    navigate(`../review-and-submit`)
+                } else {
+                    navigate(`../documents`)
+                }
+            }
         }
     }
 
@@ -218,14 +210,14 @@ const Contacts = ({
             <FormNotificationContainer>
                 <DynamicStepIndicator
                     formPages={activeFormPages(
-                        draftSubmission,
+                        draftSubmission.draftRevision.formData,
                         hideSupportingDocs
                     )}
                     currentFormPage={currentRoute}
                 />
                 <PageBannerAlerts
                     loggedInUser={loggedInUser}
-                    unlockedInfo={unlockInfo}
+                    unlockedInfo={draftSubmission.draftRevision.unlockInfo}
                     showPageErrorMessage={showPageErrorMessage ?? false}
                 />
             </FormNotificationContainer>
@@ -444,7 +436,8 @@ const Contacts = ({
                                     }}
                                     backOnClick={() =>
                                         navigate(
-                                            draftSubmission.submissionType ===
+                                            draftSubmission.draftRevision
+                                                .formData.submissionType ===
                                                 'CONTRACT_ONLY'
                                                 ? '../contract-details'
                                                 : '../rate-details'
@@ -457,8 +450,8 @@ const Contacts = ({
                                     }}
                                     actionInProgress={isSubmitting}
                                     backOnClickUrl={
-                                        draftSubmission.submissionType ===
-                                        'CONTRACT_ONLY'
+                                        draftSubmission.draftRevision.formData
+                                            .submissionType === 'CONTRACT_ONLY'
                                             ? generatePath(
                                                   RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS,
                                                   { id }
