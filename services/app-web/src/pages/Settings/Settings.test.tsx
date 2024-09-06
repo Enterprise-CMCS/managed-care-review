@@ -31,6 +31,9 @@ import {
     AutomatedEmailsTable,
 } from './SettingsTables'
 import { MockedResponse } from '@apollo/client/testing'
+import { fetchMcReviewSettingsFailMock } from '../../testHelpers/apolloMocks/mcReviewSettingsGQLMocks'
+import { indexUsersQueryFailMock } from '../../testHelpers/apolloMocks/userGQLMock'
+import { fetchEmailSettingsFailMock } from '../../testHelpers/apolloMocks/emailGQLMock'
 
 const combinedAuthorizedUsers: {
     userRole:
@@ -79,6 +82,9 @@ const CommonSettingsRoute = () => (
 describe.each(combinedAuthorizedUsers)(
     'Settings tests for $userRole with read-write-state-assignments on',
     ({ userRole, mockUser }) => {
+        afterEach(() => {
+            vi.clearAllMocks()
+        })
         it('renders state assignments setting page', async () => {
             renderWithProviders(<CommonSettingsRoute />, {
                 apolloProvider: {
@@ -308,13 +314,62 @@ describe.each(combinedAuthorizedUsers)(
             expect(
                 within(tableSupport).getByText('mcog@example.com')
             ).toBeInTheDocument()
+        })
+        it('renders error message on all settings pages', async () => {
+            renderWithProviders(<CommonSettingsRoute />, {
+                apolloProvider: {
+                    mocks: [
+                        indexUsersQueryFailMock(),
+                        fetchCurrentUserMock({
+                            user: mockUser(),
+                            statusCode: 200,
+                        }),
+                        fetchMcReviewSettingsFailMock(),
+                    ],
+                },
+                routerProvider: {
+                    route: '/mc-review-settings',
+                },
+                featureFlags: {
+                    'read-write-state-assignments': true,
+                },
+            })
+
+            expect(await screen.findByText('System error')).toBeInTheDocument()
+
+            // Check Division assignments table
+            const divisionLink = await screen.findByRole('link', {
+                name: 'Division assignments',
+            })
+            expect(divisionLink).toBeInTheDocument()
+            await userEvent.click(divisionLink)
+            expect(await screen.findByText('System error')).toBeInTheDocument()
+
+            // Check for automated emails table
+            const automatedEmailsLink = await screen.findByRole('link', {
+                name: 'Automated emails',
+            })
+            expect(automatedEmailsLink).toBeInTheDocument()
+            await userEvent.click(automatedEmailsLink)
+            expect(await screen.findByText('System error')).toBeInTheDocument()
+
+            // Check support table
+            const supportEmailsLink = await screen.findByRole('link', {
+                name: 'Support emails',
+            })
+            expect(supportEmailsLink).toBeInTheDocument()
+            await userEvent.click(supportEmailsLink)
+            expect(await screen.findByText('System error')).toBeInTheDocument()
         })
     }
 )
 
-describe.each(iterableAdminUsersMockData)(
+describe.each(combinedAuthorizedUsers)(
     'Settings tests for $userRole with read-write-state-assignments off',
     ({ userRole, mockUser }) => {
+        afterEach(() => {
+            vi.clearAllMocks()
+        })
         it('renders state assignments setting page', async () => {
             renderWithProviders(<CommonSettingsRoute />, {
                 apolloProvider: {
@@ -544,6 +599,52 @@ describe.each(iterableAdminUsersMockData)(
             expect(
                 within(tableSupport).getByText('mcog@example.com')
             ).toBeInTheDocument()
+        })
+        it('renders error message on all settings pages', async () => {
+            renderWithProviders(<CommonSettingsRoute />, {
+                apolloProvider: {
+                    mocks: [
+                        indexUsersQueryFailMock(),
+                        fetchCurrentUserMock({
+                            user: mockUser(),
+                            statusCode: 200,
+                        }),
+                        fetchEmailSettingsFailMock(),
+                    ],
+                },
+                routerProvider: {
+                    route: '/mc-review-settings',
+                },
+                featureFlags: {
+                    'read-write-state-assignments': true,
+                },
+            })
+
+            expect(await screen.findByText('System error')).toBeInTheDocument()
+
+            // Check Division assignments table
+            const divisionLink = await screen.findByRole('link', {
+                name: 'Division assignments',
+            })
+            expect(divisionLink).toBeInTheDocument()
+            await userEvent.click(divisionLink)
+            expect(await screen.findByText('System error')).toBeInTheDocument()
+
+            // Check for automated emails table
+            const automatedEmailsLink = await screen.findByRole('link', {
+                name: 'Automated emails',
+            })
+            expect(automatedEmailsLink).toBeInTheDocument()
+            await userEvent.click(automatedEmailsLink)
+            expect(await screen.findByText('System error')).toBeInTheDocument()
+
+            // Check support table
+            const supportEmailsLink = await screen.findByRole('link', {
+                name: 'Support emails',
+            })
+            expect(supportEmailsLink).toBeInTheDocument()
+            await userEvent.click(supportEmailsLink)
+            expect(await screen.findByText('System error')).toBeInTheDocument()
         })
     }
 )

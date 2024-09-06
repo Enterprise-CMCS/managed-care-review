@@ -2,8 +2,11 @@ import {MockedResponse} from '@apollo/client/testing';
 import {FetchMcReviewSettingsDocument, FetchMcReviewSettingsQuery} from '../../gen/gqlClient';
 import {mockMNState} from './stateMock';
 import { v4 as uuidv4 } from 'uuid'
+import {ApolloError} from '@apollo/client';
+import {GraphQLError} from 'graphql/index';
+import {GRAPHQL_ERROR_CAUSE_MESSAGES} from './apolloErrorCodeMocks';
 
-export const fetchMcReviewSettingsMock = (): MockedResponse<FetchMcReviewSettingsQuery> => {
+const fetchMcReviewSettingsMock = (): MockedResponse<FetchMcReviewSettingsQuery> => {
     return {
         request: {
             query: FetchMcReviewSettingsDocument,
@@ -112,3 +115,28 @@ export const fetchMcReviewSettingsMock = (): MockedResponse<FetchMcReviewSetting
         }
     }
 }
+
+const fetchMcReviewSettingsFailMock = (): MockedResponse<ApolloError> => {
+    const graphQLError = new GraphQLError('Error fetching mc-review settings data.',
+        {
+            extensions: {
+                code: 'INTERNAL_SERVER_ERROR',
+                cause: 'DB Error',
+            },
+        }
+    )
+    return {
+        request: {
+            query: FetchMcReviewSettingsDocument,
+            variables: {}
+        },
+        error: new ApolloError({
+            graphQLErrors: [graphQLError]
+        }),
+        result: {
+            data: null
+        }
+    }
+}
+
+export { fetchMcReviewSettingsMock, fetchMcReviewSettingsFailMock }
