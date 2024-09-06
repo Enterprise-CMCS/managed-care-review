@@ -1,8 +1,7 @@
 import React from 'react'
-import { GridContainer, Icon, SideNav } from '@trussworks/react-uswds'
+import { Grid, GridContainer, Icon, SideNav } from '@trussworks/react-uswds'
 import styles from './Settings.module.scss'
-import { Loading, NavLinkWithLogging } from '../../components'
-import { SettingsErrorAlert } from './SettingsErrorAlert'
+import { NavLinkWithLogging } from '../../components'
 import { Outlet, useLocation } from 'react-router-dom'
 import { recordJSException } from '../../otelHelpers'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
@@ -17,6 +16,7 @@ import {
 import { StateAnalystsInDashboardType } from './SettingsTables/StateAssignmentTable'
 import { PageHeadingsRecord, RoutesRecord } from '../../constants'
 import { usePage } from '../../contexts/PageContext'
+import { ApolloError } from '@apollo/client'
 
 export const TestMonitoring = (): null => {
     const location = useLocation()
@@ -48,8 +48,16 @@ const mapStateAnalystsFromParamStore = (
 }
 
 export type MCReviewSettingsContextType = {
-    emailConfig: EmailConfiguration
-    stateAnalysts: StateAnalystsInDashboardType[]
+    emailConfig: {
+        data?: EmailConfiguration
+        loading: boolean
+        error: ApolloError | Error | undefined
+    }
+    stateAnalysts: {
+        data: StateAnalystsInDashboardType[]
+        loading: boolean
+        error: ApolloError | Error | undefined
+    }
 }
 
 const mapStateAnalystFromDB = (
@@ -117,14 +125,22 @@ export const Settings = (): React.ReactElement => {
               emailSettingsData?.fetchEmailSettings.stateAnalysts
           )
 
-    if (loadingSettingsData) return <Loading />
-
-    if (isSettingsError || !emailConfig)
-        return <SettingsErrorAlert error={isSettingsError} />
-
     const context: MCReviewSettingsContextType = {
-        emailConfig,
-        stateAnalysts,
+        emailConfig: {
+            data: emailConfig ?? undefined,
+            loading: loadingSettingsData,
+            error:
+                isSettingsError || !emailConfig
+                    ? new Error(
+                          'Request succeed but contained no email settings data'
+                      )
+                    : undefined,
+        },
+        stateAnalysts: {
+            data: stateAnalysts,
+            loading: loadingSettingsData,
+            error: isSettingsError,
+        },
     }
 
     return (
@@ -178,7 +194,9 @@ export const Settings = (): React.ReactElement => {
                     ]}
                 />
             </div>
-            <Outlet context={context} />
+            <Grid className={styles.tableContainer}>
+                <Outlet context={context} />
+            </Grid>
             <TestMonitoring />
         </GridContainer>
     )

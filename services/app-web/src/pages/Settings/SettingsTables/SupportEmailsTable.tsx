@@ -1,14 +1,21 @@
 import { useOutletContext } from 'react-router-dom'
 import { MCReviewSettingsContextType } from '../Settings'
-import { Grid, Table } from '@trussworks/react-uswds'
-import styles from '../Settings.module.scss'
+import { Table } from '@trussworks/react-uswds'
 import React from 'react'
+import { Loading } from '../../../components'
+import { SettingsErrorAlert } from '../SettingsErrorAlert'
 
 const SupportEmailsTable = () => {
     const { emailConfig: config } =
         useOutletContext<MCReviewSettingsContextType>()
+
+    if (config.loading) return <Loading />
+
+    if (config.error || !config.data)
+        return <SettingsErrorAlert error={config.error} />
+
     return (
-        <Grid className={styles.tableContainer}>
+        <>
             <h2>Support emails</h2>
             <p>
                 States that need support should contact one of these email
@@ -27,23 +34,23 @@ const SupportEmailsTable = () => {
                 </thead>
                 <tbody>
                     <tr>
-                        <td>{config?.helpDeskEmail}</td>
+                        <td>{config?.data?.helpDeskEmail}</td>
                         <td>Help desk email</td>
                         <td>For general MC-Review application support</td>
                     </tr>
                     <tr>
-                        <td>{config?.cmsReviewHelpEmailAddress}</td>
+                        <td>{config?.data?.cmsReviewHelpEmailAddress}</td>
                         <td>Contract help email</td>
                         <td>For contract-related support</td>
                     </tr>
                     <tr>
-                        <td>{config?.cmsRateHelpEmailAddress}</td>
+                        <td>{config?.data?.cmsRateHelpEmailAddress}</td>
                         <td>Rate help email</td>
                         <td>For rate-related support</td>
                     </tr>
                 </tbody>
             </Table>
-        </Grid>
+        </>
     )
 }
 

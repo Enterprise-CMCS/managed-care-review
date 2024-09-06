@@ -1,15 +1,21 @@
 import { useOutletContext } from 'react-router-dom'
 import { MCReviewSettingsContextType } from '../Settings'
-import { Grid, Table } from '@trussworks/react-uswds'
-import styles from '../Settings.module.scss'
+import { Table } from '@trussworks/react-uswds'
 import React from 'react'
 import { formatEmails } from '../Settings'
+import { Loading } from '../../../components'
+import { SettingsErrorAlert } from '../SettingsErrorAlert'
 
 const AutomatedEmailsTable = () => {
     const { emailConfig: config } =
         useOutletContext<MCReviewSettingsContextType>()
+
+    if (config.loading) return <Loading />
+
+    if (config.error) return <SettingsErrorAlert error={config.error} />
+
     return (
-        <Grid className={styles.tableContainer}>
+        <>
             <h2>Automated emails</h2>
             <p>
                 Shared inboxes receive emails for different submissions, as
@@ -26,12 +32,12 @@ const AutomatedEmailsTable = () => {
                 </thead>
                 <tbody>
                     <tr>
-                        <td>{formatEmails(config?.dmcoEmails)}</td>
+                        <td>{formatEmails(config?.data?.dmcoEmails)}</td>
                         <td>DMCO division emails</td>
                         <td>None</td>
                     </tr>
                     <tr>
-                        <td>{formatEmails(config?.dmcpReviewEmails)}</td>
+                        <td>{formatEmails(config?.data?.dmcpReviewEmails)}</td>
                         <td>DMCP division emails used for reviews</td>
                         <td>
                             All submissions; excluding CHIP programs and PR
@@ -39,7 +45,9 @@ const AutomatedEmailsTable = () => {
                         </td>
                     </tr>
                     <tr>
-                        <td>{formatEmails(config?.dmcpSubmissionEmails)}</td>
+                        <td>
+                            {formatEmails(config?.data?.dmcpSubmissionEmails)}
+                        </td>
                         <td>DMCP division emails used for submissions</td>
                         <td>
                             All submissions; excluding CHIP programs and PR
@@ -47,7 +55,7 @@ const AutomatedEmailsTable = () => {
                         </td>
                     </tr>
                     <tr>
-                        <td>{formatEmails(config?.oactEmails)}</td>
+                        <td>{formatEmails(config?.data?.oactEmails)}</td>
                         <td>OACT division emails</td>
                         <td>
                             Contract and rate submissions; excluding CHIP
@@ -55,13 +63,15 @@ const AutomatedEmailsTable = () => {
                         </td>
                     </tr>
                     <tr>
-                        <td>{formatEmails(config?.devReviewTeamEmails)}</td>
+                        <td>
+                            {formatEmails(config?.data?.devReviewTeamEmails)}
+                        </td>
                         <td>Dev team emails</td>
                         <td>All emails (from CMS side and state side)</td>
                     </tr>
                 </tbody>
             </Table>
-        </Grid>
+        </>
     )
 }
 

@@ -21,7 +21,6 @@ import { ApolloError } from '@apollo/client'
 import { useTealium } from '../../../hooks'
 import { useAuth } from '../../../contexts/AuthContext'
 import { hasAdminUserPermissions } from '../../../gqlHelpers'
-import { Grid } from '@trussworks/react-uswds'
 import { LinkWithLogging, Loading } from '../../../components'
 import { useStringConstants } from '../../../hooks/useStringConstants'
 import { wrapApolloResult } from '../../../gqlHelpers/apolloQueryWrapper'
@@ -252,7 +251,7 @@ export const DivisionAssignmentTable = (): React.ReactElement => {
         .map((edge) => edge.node as CmsUser)
 
     return (
-        <Grid className={styles.tableContainer}>
+        <>
             <h2>Division assignments</h2>
             <p>
                 A list of CMS analysts and their division assignments. If this
@@ -278,7 +277,7 @@ export const DivisionAssignmentTable = (): React.ReactElement => {
                     <p>No CMS users to display</p>
                 </div>
             )}
-        </Grid>
+        </>
     )
 }
 

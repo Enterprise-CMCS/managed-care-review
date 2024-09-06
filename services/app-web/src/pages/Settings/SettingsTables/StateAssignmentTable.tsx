@@ -16,9 +16,9 @@ import {
     FilterSelect,
     FilterSelectedOptionsType,
 } from '../../../components/FilterAccordion'
-import { DoubleColumnGrid, LinkWithLogging } from '../../../components'
+import { DoubleColumnGrid, LinkWithLogging, Loading } from '../../../components'
 import { formatEmails } from '../Settings'
-import { Grid, Table } from '@trussworks/react-uswds'
+import { Table } from '@trussworks/react-uswds'
 
 import styles from '../Settings.module.scss'
 import { pluralize } from '../../../common-code/formatters'
@@ -27,6 +27,7 @@ import useDeepCompareEffect from 'use-deep-compare-effect'
 import { useStringConstants } from '../../../hooks/useStringConstants'
 import { useOutletContext } from 'react-router-dom'
 import { MCReviewSettingsContextType } from '../Settings'
+import { SettingsErrorAlert } from '../SettingsErrorAlert'
 
 type StateAnalystsInDashboardType = {
     emails: string[]
@@ -89,7 +90,7 @@ const StateAssignmentTable = () => {
     )
 
     const reactTable = useReactTable({
-        data: analysts.sort((a, b) =>
+        data: analysts.data.sort((a, b) =>
             a['stateCode'] > b['stateCode'] ? 1 : -1
         ),
         filterFns: {
@@ -114,7 +115,7 @@ const StateAssignmentTable = () => {
     const emailsColumn = reactTable.getColumn(
         'emails'
     ) as Column<StateAnalystsInDashboardType>
-    const rowCount = `Displaying ${filteredRows.length} of ${analysts.length} ${pluralize(
+    const rowCount = `Displaying ${filteredRows.length} of ${analysts.data.length} ${pluralize(
         'state',
         filteredRows.length
     )}`
@@ -189,8 +190,13 @@ const StateAssignmentTable = () => {
         }
     }, [rowCount, columnFilters, setPrevFilters, prevFilters])
 
+    if (analysts.loading) return <Loading />
+
+    if (analysts.error || !analysts.data)
+        return <SettingsErrorAlert error={analysts.error} />
+
     return (
-        <Grid className={styles.tableContainer}>
+        <>
             <h2>State assignments</h2>
             <p>
                 Below is a list of the DMCO staff assigned to states. If this
@@ -279,7 +285,7 @@ const StateAssignmentTable = () => {
                     })}
                 </tbody>
             </Table>
-        </Grid>
+        </>
     )
 }
 export { StateAssignmentTable, type StateAnalystsInDashboardType }
