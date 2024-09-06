@@ -1,16 +1,19 @@
+import {interceptors} from 'axios';
+
 describe('Admin user can view application level settings', () => {
     beforeEach(() => {
         cy.stubFeatureFlags()
         cy.interceptGraphQL()
     })
 
-    it.skip('and update user division assignments', () => {
+    it('and update user division assignments', () => {
         // make sure a cms user in db first
         cy.logInAsCMSUser()
         cy.logOut()
 
         cy.logInAsAdminUser({initialURL: '/mc-review-settings'})
         cy.findByRole('link', { name: 'Division assignments'}).click()
+        cy.wait('@indexUsersQuery', { timeout: 20_000 })
         cy.findByRole('table', {name: 'Division assignments'}).should('exist')
         cy.findByText('Zuko').should('exist')
         cy.findAllByText('Hotman').should('have.length.at.least', 1)
@@ -20,7 +23,6 @@ describe('Admin user can view application level settings', () => {
         cy.findByText('Zuko').should('exist').siblings().should('include.text', 'selected.DMCP') // not accesible but dropdowns are not good idea
         cy.assignDivisionToCMSUser({userEmail: 'zuko@example.com', division: 'OACT'})
         cy.findByText('Zuko').should('exist').siblings().should('include.text', 'selected.OACT') // not accesible but dropdowns are not good idea
-
     })
 
     it('and filter down state analysts by state code', () => {
