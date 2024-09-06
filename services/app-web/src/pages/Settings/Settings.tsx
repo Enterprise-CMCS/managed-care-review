@@ -66,6 +66,7 @@ const mapStateAnalystFromDB = (
 export const Settings = (): React.ReactElement => {
     const ldClient = useLDClient()
     const { updateHeading } = usePage()
+    const { pathname } = useLocation()
 
     const readWriteStateAssignments = ldClient?.variation(
         featureFlags.READ_WRITE_STATE_ASSIGNMENTS.flag,
@@ -75,6 +76,10 @@ export const Settings = (): React.ReactElement => {
     updateHeading({
         customHeading: PageHeadingsRecord.MC_REVIEW_SETTINGS,
     })
+
+    const isSelectedLink = (route: string): string => {
+        return route.includes(pathname) ? 'usa-current' : ''
+    }
 
     const {
         loading: loadEmailSettings,
@@ -138,18 +143,36 @@ export const Settings = (): React.ReactElement => {
                 </div>
                 <SideNav
                     items={[
-                        <NavLinkWithLogging to={RoutesRecord.STATE_ASSIGNMENTS}>
+                        <NavLinkWithLogging
+                            to={RoutesRecord.STATE_ASSIGNMENTS}
+                            className={isSelectedLink(
+                                RoutesRecord.STATE_ASSIGNMENTS
+                            )}
+                        >
                             State assignments
                         </NavLinkWithLogging>,
                         <NavLinkWithLogging
                             to={RoutesRecord.DIVISION_ASSIGNMENTS}
+                            className={isSelectedLink(
+                                RoutesRecord.DIVISION_ASSIGNMENTS
+                            )}
                         >
                             Division assignments
                         </NavLinkWithLogging>,
-                        <NavLinkWithLogging to={RoutesRecord.AUTOMATED_EMAILS}>
+                        <NavLinkWithLogging
+                            to={RoutesRecord.AUTOMATED_EMAILS}
+                            className={isSelectedLink(
+                                RoutesRecord.AUTOMATED_EMAILS
+                            )}
+                        >
                             Automated emails
                         </NavLinkWithLogging>,
-                        <NavLinkWithLogging to={RoutesRecord.SUPPORT_EMAILS}>
+                        <NavLinkWithLogging
+                            to={RoutesRecord.SUPPORT_EMAILS}
+                            className={isSelectedLink(
+                                RoutesRecord.SUPPORT_EMAILS
+                            )}
+                        >
                             Support emails
                         </NavLinkWithLogging>,
                     ]}
