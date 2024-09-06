@@ -13,6 +13,10 @@ const ROUTES = [
     'HELP',
     'SETTINGS',
     'MC_REVIEW_SETTINGS',
+    'STATE_ASSIGNMENTS',
+    'DIVISION_ASSIGNMENTS',
+    'AUTOMATED_EMAILS',
+    'SUPPORT_EMAILS',
     'RATES_SUMMARY',
     'RATE_EDIT',
     'REPLACE_RATE',
@@ -52,6 +56,10 @@ const RoutesRecord: Record<RouteT, string> = {
     HELP: '/help',
     SETTINGS: '/settings',
     MC_REVIEW_SETTINGS: '/mc-review-settings',
+    STATE_ASSIGNMENTS: '/mc-review-settings/state-assignments',
+    DIVISION_ASSIGNMENTS: '/mc-review-settings/division-assignments',
+    AUTOMATED_EMAILS: '/mc-review-settings/automated-emails',
+    SUPPORT_EMAILS: '/mc-review-settings/support-emails',
     RATES_SUMMARY: '/rates/:id',
     RATE_EDIT: '/rates/:id/edit',
     REPLACE_RATE: '/submissions/:id/replace-rate/:rateID',
@@ -126,6 +134,7 @@ const PageHeadingsRecord: Partial<Record<RouteTWithUnknown, string>> = {
     DASHBOARD_SUBMISSIONS: 'Submissions dashboard',
     DASHBOARD_RATES: 'Rate reviews dashboard',
     SUBMISSIONS_NEW: 'New submission',
+    MC_REVIEW_SETTINGS: 'MC-Review settings'
 }
 
 /*
@@ -141,6 +150,10 @@ const PageTitlesRecord: Record<RouteT | 'UNKNOWN_ROUTE', string> = {
     HELP: 'Help',
     SETTINGS: 'MC-Review settings',
     MC_REVIEW_SETTINGS: 'MC-Review settings',
+    STATE_ASSIGNMENTS: 'State assignments',
+    DIVISION_ASSIGNMENTS: 'Division assignments',
+    AUTOMATED_EMAILS: 'Automated emails',
+    SUPPORT_EMAILS: 'Support emails',
     DASHBOARD: 'Dashboard',
     DASHBOARD_RATES: 'Rate review dashboard',
     DASHBOARD_SUBMISSIONS: 'Dashboard',
@@ -174,7 +187,7 @@ export {
     STATE_SUBMISSION_FORM_ROUTES_WITHOUT_SUPPORTING_DOCS,
     STATE_SUBMISSION_SUMMARY_ROUTES,
     QUESTION_RESPONSE_SHOW_SIDEBAR_ROUTES,
-    DASHBOARD_ROUTES,
+    DASHBOARD_ROUTES
 }
 
 export type { RouteT, RouteTWithUnknown }

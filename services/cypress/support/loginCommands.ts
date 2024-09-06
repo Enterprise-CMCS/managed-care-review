@@ -112,7 +112,15 @@ Cypress.Commands.add(
         cy.url({ timeout: 20_000 }).should('contain', initialURL)
 
         if (initialURL === '/mc-review-settings') {
-            cy.wait('@indexUsersQuery', { timeout: 20_000 })
+            cy.getFeatureFlagStore(['read-write-state-assignments']).then(
+                (store) => {
+                    if(store['read-write-state-assignments']) {
+                        cy.wait('@fetchMcReviewSettingsQuery')
+                    } else {
+                        cy.wait('@fetchEmailSettingsQuery')
+                    }
+                }
+            )
         } else if (initialURL?.includes('submissions')) {
             cy.wait('@fetchHealthPlanPackageQuery', { timeout: 20_000 })
         } else {
