@@ -92,7 +92,10 @@ export const EditStateAssign = (): React.ReactElement => {
                         >
                             <div id="formInnerContainer">
                             <h2>Edit state assignment</h2>
-
+                            <fieldset>
+                                <legend className="srOnly">
+                                    Update DMCO staff
+                                </legend>
                             <DataDetail id="state-code" label="State">
                                 {stateCode}
                             </DataDetail>
@@ -101,11 +104,6 @@ export const EditStateAssign = (): React.ReactElement => {
                                 None
                             </DataDetail>
 
-
-                            <fieldset>
-                                <legend className="srOnly">
-                                    Update DMCO staff
-                                </legend>
                                 <FormGroup
                                     error={showFieldErrors(
                                         errors.dmcoAssignmentsByID

@@ -58,7 +58,7 @@ describe('EditStateAssign', () => {
             screen.getAllByText('Update DMCO staff')
         ).not.toBeNull()
         expect(
-            screen.getByRole('button', { name: 'Save' })
+            screen.getByRole('button', { name: 'Save changes' })
         ).toBeInTheDocument()
         expect(
             screen.getByRole('button', { name: 'Cancel' })
