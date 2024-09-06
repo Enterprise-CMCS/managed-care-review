@@ -47,6 +47,7 @@ import {
     SupportEmailsTable,
     DivisionAssignmentTable,
 } from '../Settings/SettingsTables'
+import { EditStateAssign } from '../Settings/EditStateAssign/EditStateAssign'
 
 function componentForAuthMode(
     authMode: AuthModeType
@@ -264,6 +265,10 @@ const CMSUserRoutes = ({
                         element={<SupportEmailsTable />}
                     />
                 </Route>
+                <Route
+                        path={RoutesRecord.EDIT_STATE_ASSIGNMENTS}
+                        element={<EditStateAssign />}
+                    />
                 <Route
                     path={RoutesRecord.SETTINGS}
                     // Until we update the helpdesk documentation for the /mc-review-settings route, we are keeping this
