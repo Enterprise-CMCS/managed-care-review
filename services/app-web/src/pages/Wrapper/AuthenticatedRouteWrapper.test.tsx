@@ -1,8 +1,12 @@
-import { act, screen } from '@testing-library/react'
+import { act, screen, waitFor, waitForElementToBeRemoved } from '@testing-library/react'
 import { renderWithProviders } from '../../testHelpers/jestHelpers'
 import { AuthenticatedRouteWrapper } from './AuthenticatedRouteWrapper'
 import { createMocks } from 'react-idle-timer';
-
+import { Landing } from '../Landing/Landing';
+import { Location, Route, Routes } from 'react-router';
+import { RoutesRecord } from '../../constants';
+import * as CognitoAuthApi from '../Auth/cognitoAuth'
+import { fetchCurrentUserMock } from '../../testHelpers/apolloMocks';
 describe('AuthenticatedRouteWrapper', () => {
     beforeAll(() => {
         vi.useFakeTimers();
@@ -38,16 +42,23 @@ describe('AuthenticatedRouteWrapper', () => {
         expect(dialog).toHaveClass('is-hidden')
     })
 
-    it("hides the session timeout modal when timeout period is not exceeded", async() => {
+    it("hides the session timeout modal by when timeout period is not exceeded", async() => {
         renderWithProviders(
             <AuthenticatedRouteWrapper
                 authMode="AWS_COGNITO"
                 children={<div>children go here</div>}
-            />
+            />,
+            {  featureFlags: {
+                'session-expiration-minutes': 3
+            }}
         )
 
-        await vi.advanceTimersByTime(1000);
-        expect(screen.queryByTestId("timeout-dialog")).not.toBeInTheDocument();
+        const dialogOnLoad = await screen.findByRole('dialog', {name: 'Session Expiring'})
+        expect(dialogOnLoad).toBeInTheDocument()
+        expect(dialogOnLoad).toHaveClass('is-hidden')
+        await act(() => vi.advanceTimersByTime(500));
+        const dialogAfterIdle = await screen.findByRole('dialog', {name: 'Session Expiring'})
+        expect(dialogAfterIdle).toHaveClass('is-hidden')
       });
 
 
@@ -61,28 +72,50 @@ describe('AuthenticatedRouteWrapper', () => {
                 'session-expiration-minutes': 2
             }}
         )
+        const dialogOnLoad = await screen.findByRole('dialog', {name: 'Session Expiring'})
+        expect(dialogOnLoad).toBeInTheDocument()
+        expect(dialogOnLoad).toHaveClass('is-hidden')
 
-        await act(() => vi.advanceTimersByTime(3000));
-        const dialog = await screen.findByRole('dialog', {name: 'Session Expiring'})
-        expect(dialog).toBeVisible();
+        await act(() => vi.advanceTimersByTime(1000));
+
+        const dialogAfterIdle = await screen.findByRole('dialog', {name: 'Session Expiring'})
+        expect(dialogAfterIdle).toHaveClass('is-visible')
       });
-    it("if user does nothing, logs out and closes session timeout modal after full timeout duration is exceeded", async () => {
+
+
+    it("renders session timeout modal and if countdown elapses and user does nothing, calls sign out", async () => {
+        const logoutSpy = vi
+        .spyOn(CognitoAuthApi, 'signOut')
+        .mockResolvedValue(null)
+
+
         renderWithProviders(
-            <AuthenticatedRouteWrapper
+            <div>
+                <AuthenticatedRouteWrapper
                 authMode="AWS_COGNITO"
                 children={<div>children go here</div>}
-            />,
+            />
+            </div>,
             {  featureFlags: {
                 'session-expiration-minutes': 2
             }}
         )
-        const dialog = await screen.findByRole('dialog', {name: 'Session Expiring'})
-        expect(dialog).toBeVisible();
-        // expect(mockHandleLogout).toHaveBeenCalled();
+
+            const dialogOnLoad = await screen.findByRole('dialog', {name: 'Session Expiring'})
+            expect(dialogOnLoad).toBeInTheDocument()
+            expect(dialogOnLoad).toHaveClass('is-hidden')
+
+            await act(() => vi.advanceTimersByTime(1000));
+            const dialogAfterIdle = await screen.findByRole('dialog', {name: 'Session Expiring'})
+            expect(dialogAfterIdle).toHaveClass('is-visible')
+
+
+            await act(() => vi.advanceTimersByTime(120100));
+            expect(logoutSpy).toHaveBeenCalled()
+
         });
+
     it.todo('renders countdown inside session timeout modal that updates every second')
-    it.todo('overrides any existing open modal with session timeout modal when idle prompt is displayed')
-    it.todo('hides session timeout after logout') // to test this we need to move a level up
-    it.todo('session timeout modal submit button click will refresh the user session')
-    it.todo('session timeout modal cancel button click will logout user session')
+    it.todo('session timeout modal continue session button click will refresh the user session')
+    it.todo('session timeout modal logout button click will logout user session')
 })
