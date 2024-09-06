@@ -10,7 +10,6 @@ export type {
     PackageOptionType,
 } from './PackageSelect/PackageSelect'
 
-export type {
-    FieldSelect,
-    FieldSelectType
+export {
+    FieldSelect
 } from './FieldSelect/FieldSelect'

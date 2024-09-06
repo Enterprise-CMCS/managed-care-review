@@ -5,8 +5,6 @@ import {
     Label,
 } from '@trussworks/react-uswds'
 import { useNavigate, useParams } from 'react-router-dom'
-import styles from './EditStateAssign.module.scss'
-import { useAuth } from '../../../contexts/AuthContext'
 import { Form as UswdsForm } from '@trussworks/react-uswds'
 import { Formik, FormikErrors } from 'formik'
 import {
@@ -16,11 +14,11 @@ import {
 } from '../../../components'
 import { PageActionsContainer } from '../../StateSubmission/PageActions'
 import { FormContainer } from '../../../components/FormContainer/FormContainer'
-import { User, useUpdateStateAssignmentMutation } from '../../../gen/gqlClient'
+import { useUpdateStateAssignmentMutation } from '../../../gen/gqlClient'
 import { RoutesRecord } from '../../../constants'
-import { FieldSelect } from '../../../components/Select'
 import { isValidStateCode } from '../../../common-code/healthPlanFormDataType'
 import { Error404 } from '../../Errors/Error404Page'
+import { FieldSelect } from '../../../components/Select'
 
 export interface EditStateAssignFormValues {
     dmcoAssignmentsByID: string[]
@@ -55,7 +53,7 @@ export const EditStateAssign = (): React.ReactElement => {
         console.info('submitted - to be implemeneted')
     }
     return (
-        <FormContainer id="EditStateAssign" className={styles.EditStateAssignPage}>
+        <FormContainer id="EditStateAssign" className="standaloneForm">
                 {editError && <GenericApiErrorBanner />}
                 <Formik
                     initialValues={formInitialValues}
@@ -71,7 +69,7 @@ export const EditStateAssign = (): React.ReactElement => {
                                 return handleSubmit(e)
                             }}
                         >
-                            <div className={styles.formInnerContainer}>
+                            <div id="formInnerContainer">
                             <h2>Edit state assignment</h2>
 
                             <DataDetail id="state-code" label="State">
@@ -92,16 +90,15 @@ export const EditStateAssign = (): React.ReactElement => {
                                         errors.dmcoAssignmentsByID
                                     )}
                                 >
-                                    <Label htmlFor={'dmcoAssignments'}>
+                                    <Label htmlFor={'dmcoAssignmentsByID'}>
                                     Update DMCO staff
                                     </Label>
                                     <span
-                                        className={styles.requiredOptionalText}
                                     >
                                         Required
                                     </span>
                                     <FieldSelect
-                                        name="dmcoAssignments"
+                                        name="dmcoAssignmentsByID"
                                         optionDescriptionSingular="user"
                                         dropdownOptions={[]}
                                         initialValues={values.dmcoAssignmentsByID}
@@ -118,9 +115,9 @@ export const EditStateAssign = (): React.ReactElement => {
                                         variant="outline"
                                         data-testid="page-actions-left-secondary"
                                         parent_component_type="page body"
-                                        link_url={RoutesRecord.MCR_SETTINGS} // update this with MCR-4261 values
+                                        link_url={RoutesRecord.STATE_ASSIGNMENTS}
                                         onClick={() =>
-                                            navigate(RoutesRecord.MCR_SETTINGS)// update this with MCR-4261 values
+                                            navigate(RoutesRecord.STATE_ASSIGNMENTS)
                                         }
                                     >
                                         Cancel
@@ -131,7 +128,6 @@ export const EditStateAssign = (): React.ReactElement => {
                                         variant="default"
                                         data-testid="page-actions-right-primary"
                                         parent_component_type="page body"
-                                        link_url={RoutesRecord.MCR_SETTINGS} // update this with MCR-4261 values
                                         animationTimeout={1000}
                                         loading={editLoading}
                                     >

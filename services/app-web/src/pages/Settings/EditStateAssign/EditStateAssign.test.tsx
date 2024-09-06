@@ -19,7 +19,7 @@ const wrapInRoutes = (children: React.ReactNode) => {
                 path={RoutesRecord.SETTINGS}
                 element={<div>State AssignmentsTable </div>}
             />
-            <Route path={RoutesRecord.MCR_SETTINGS_EDIT_STATE_ASSIGN} element={children} />
+            <Route path={RoutesRecord.EDIT_STATE_ASSIGNMENTS} element={children} />
             <Route path="*" element={<Error404 />} />
         </Routes>
     )
@@ -55,8 +55,8 @@ describe('EditStateAssign', () => {
             })
         ).toBeInTheDocument()
         expect(
-            screen.getByText('Update DMCO staff')
-        ).toBeInTheDocument()
+            screen.getAllByText('Update DMCO staff')
+        ).not.toBeNull()
         expect(
             screen.getByRole('button', { name: 'Save' })
         ).toBeInTheDocument()
@@ -76,28 +76,13 @@ describe('EditStateAssign', () => {
                 ],
             },
             routerProvider: {
-                route: `/mc-review-settings/state-assignments/WV/edit`,
+                route: `/mc-review-settings/state-assignments/FOO/edit`,
             },
         })
 
-        await screen.findByRole('form')
-        expect(
-            screen.getByRole('heading', { name: 'Edit state assignment' })
-        ).toBeInTheDocument()
-        expect(
-            screen.getByRole('form', {
-                name: 'Edit state assignment',
-            })
-        ).toBeInTheDocument()
-        expect(
-            screen.getByText('Update DMCO staff')
-        ).toBeInTheDocument()
-        expect(
-            screen.getByRole('button', { name: 'Save' })
-        ).toBeInTheDocument()
-        expect(
-            screen.getByRole('button', { name: 'Cancel' })
-        ).toBeInTheDocument()
+        expect(screen.queryByRole('form')).toBeNull()
+        expect(screen.findByText('404'))
+        expect(screen.getByText('404 / Page not found')).toBeInTheDocument()
     })
 
     it('cancel button moves admin user back to state assignments table', async () => {

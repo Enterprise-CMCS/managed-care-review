@@ -1,5 +1,5 @@
 import { MockedResponse } from '@apollo/client/testing'
-import { ServerError } from '@apollo/client'
+import {ApolloError, ServerError} from '@apollo/client'
 import {
     CmsUser,
     FetchCurrentUserDocument,
@@ -12,6 +12,7 @@ import {
 } from '../../gen/gqlClient'
 
 import { mockMNState } from './stateMock'
+import {GraphQLError} from 'graphql/index';
 function mockValidUser(userData?: Partial<StateUser>): StateUser {
     return Object.assign({}, {
         __typename: 'StateUser' as const,
@@ -157,6 +158,28 @@ const indexUsersQueryMock = (): MockedResponse<IndexUsersQuery> => {
     }
 }
 
+const indexUsersQueryFailMock = (): MockedResponse<ApolloError> => {
+    const graphQLError = new GraphQLError('Error fetching email settings data.',
+        {
+            extensions: {
+                code: 'INTERNAL_SERVER_ERROR',
+                cause: 'DB Error',
+            },
+        }
+    )
+    return {
+        request: {
+            query: IndexUsersDocument,
+        },
+        error: new ApolloError({
+            graphQLErrors: [graphQLError],
+        }),
+        result: {
+            data: null,
+        },
+    }
+}
+
 const iterableCmsUsersMockData: {
     userRole: 'CMS_USER' | 'CMS_APPROVER_USER',
     mockUser: <T>(userData?: Partial<T>) => CmsUser | CmsApproverUser
@@ -200,5 +223,6 @@ export {
     mockValidCMSApproverUser,
     iterableCmsUsersMockData,
     mockValidBusinessOwnerUser,
-    iterableAdminUsersMockData
+    iterableAdminUsersMockData,
+    indexUsersQueryFailMock
 }

@@ -180,7 +180,7 @@ export const ReplaceRate = (): React.ReactElement => {
                                     headingRef={errorSummaryHeadingRef}
                                 />
                             )}
-                            <div className={styles.formInnerContainer}>
+                            <div id="formInnerContainer">
                             <h2>Replace a rate review</h2>
 
                             <DataDetail id="withdrawnRate" label="Current rate">

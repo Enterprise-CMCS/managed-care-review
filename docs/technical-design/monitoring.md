@@ -51,6 +51,6 @@ We export all monitoring and peformance data to New Relic. In order to access ou
 ### How to test monitoring
 
 -   Login as admin user
--   Navigate to `/settings?test=crash` to test a full frontend crash
--   Navigate to `/settings?test=error` to test logging an error
+-   Navigate to `/mc-review-settings?test=crash` to test a full frontend crash
+-   Navigate to `/mc-review-settings?test=error` to test logging an error
 -   To test backend crash - instructions forthcoming.
