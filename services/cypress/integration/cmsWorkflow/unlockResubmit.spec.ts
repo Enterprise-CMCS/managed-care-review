@@ -40,11 +40,6 @@ describe('CMS user', () => {
         }).should('exist')
         cy.fillOutStateContact()
         cy.deprecatedNavigateV1Form('CONTINUE')
-        cy.findByRole('heading', {
-            level: 2,
-            name: /Supporting documents/,
-        }).should('exist')
-        cy.deprecatedNavigateV1Form('CONTINUE')
 
         cy.findByRole('heading', {
             level: 2,
@@ -239,7 +234,10 @@ describe('CMS user', () => {
     // TODO AFTER LINKED RATES AND LINKED RATES CHANGE HISTORY SHIPS
     it.only('can unlock and resubmit a linked rate and change history updates', () => {
         // turn on feature flag
-        cy.interceptFeatureFlags({'438-attestation': true})
+        cy.interceptFeatureFlags({
+            '438-attestation': true,
+            'hide-supporting-docs-page': true
+        })
 
         // Set up a submission with linked rates
         cy.apiCreateAndSubmitContractWithRates(stateUser()).then(() => {
@@ -271,7 +269,6 @@ describe('CMS user', () => {
                 cy.fillOutStateContact()
 
                 cy.deprecatedNavigateV1Form('CONTINUE')
-                cy.findByRole('heading', { level: 2, name: /Supporting documents/ })
 
                 // New API
                 cy.navigateFormByDirectLink(`${submissionURL}edit/rate-details`)

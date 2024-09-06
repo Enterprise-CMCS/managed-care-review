@@ -25,13 +25,6 @@ describe('CMS user can view submission', () => {
         cy.fillOutStateContact()
         cy.deprecatedNavigateV1Form('CONTINUE')
 
-        cy.findByRole('heading', {
-            level: 2,
-            name: /Supporting documents/,
-        }).should('exist')
-        cy.fillOutSupportingDocuments()
-        cy.deprecatedNavigateV1Form('CONTINUE')
-
         // store submission id for reference later
         let submissionId = ''
         cy.location().then((fullUrl) => {
