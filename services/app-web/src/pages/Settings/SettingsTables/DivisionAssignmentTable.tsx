@@ -1,4 +1,4 @@
-import { Table } from '@trussworks/react-uswds'
+import { GridContainer, Table } from '@trussworks/react-uswds'
 import React, { useCallback, useMemo, useState } from 'react'
 import {
     createColumnHelper,
@@ -10,6 +10,7 @@ import Select, { OnChangeValue } from 'react-select'
 import {
     CmsUser,
     Division,
+    useIndexUsersQuery,
     useUpdateDivisionAssignmentMutation,
 } from '../../../gen/gqlClient'
 
@@ -20,9 +21,11 @@ import { ApolloError } from '@apollo/client'
 import { useTealium } from '../../../hooks'
 import { useAuth } from '../../../contexts/AuthContext'
 import { hasAdminUserPermissions } from '../../../gqlHelpers'
-import { useOutletContext } from 'react-router-dom'
-import { MCReviewSettingsContextType } from '../Settings'
 import { Grid } from '@trussworks/react-uswds'
+import { LinkWithLogging, Loading } from '../../../components'
+import { useStringConstants } from '../../../hooks/useStringConstants'
+import { wrapApolloResult } from '../../../gqlHelpers/apolloQueryWrapper'
+import { SettingsErrorAlert } from '../SettingsErrorAlert'
 
 type DivisionSelectOptions = {
     label: string
@@ -150,9 +153,6 @@ function CMSUserTableWithData({
             dateRangeFilter: () => true,
         },
         columns,
-        defaultColumn: {
-            size: 250,
-        },
         getCoreRowModel: getCoreRowModel(),
     })
 
@@ -163,10 +163,7 @@ function CMSUserTableWithData({
                 {table.getHeaderGroups().map((headerGroup) => (
                     <tr key={headerGroup.id}>
                         {headerGroup.headers.map((header) => (
-                            <th
-                                key={header.id}
-                                style={{ width: header.getSize() }}
-                            >
+                            <th key={header.id}>
                                 {header.isPlaceholder
                                     ? null
                                     : flexRender(
@@ -202,7 +199,8 @@ type SetDivisionCallbackType = (
 ) => Promise<undefined | Error>
 
 export const DivisionAssignmentTable = (): React.ReactElement => {
-    const { cmsUsers } = useOutletContext<MCReviewSettingsContextType>()
+    const stringConstants = useStringConstants()
+    const MAIL_TO_SUPPORT = stringConstants.MAIL_TO_SUPPORT
 
     const [updateDivisionAssignmentMutation] =
         useUpdateDivisionAssignmentMutation()
@@ -229,9 +227,47 @@ export const DivisionAssignmentTable = (): React.ReactElement => {
         [updateDivisionAssignmentMutation]
     )
 
+    const { result: indexUsersResult } = wrapApolloResult(
+        useIndexUsersQuery({
+            fetchPolicy: 'cache-and-network',
+        })
+    )
+
+    if (indexUsersResult.status === 'LOADING')
+        return (
+            <GridContainer>
+                <Loading />
+            </GridContainer>
+        )
+
+    if (indexUsersResult.status === 'ERROR')
+        return <SettingsErrorAlert error={indexUsersResult.error} />
+
+    const cmsUsers = indexUsersResult.data.indexUsers.edges
+        .filter(
+            (edge) =>
+                edge.node.__typename === 'CMSUser' ||
+                edge.node.__typename === 'CMSApproverUser'
+        )
+        .map((edge) => edge.node as CmsUser)
+
     return (
-        <Grid className={styles.container}>
+        <Grid className={styles.tableContainer}>
             <h2>Division assignments</h2>
+            <p>
+                A list of CMS analysts and their division assignments. If this
+                list is out of date please contact
+                <span>
+                    <LinkWithLogging
+                        href={`mailto: ${MAIL_TO_SUPPORT}`}
+                        variant="unstyled"
+                        target="_blank"
+                        rel="noreferrer"
+                    >
+                        {` ${MAIL_TO_SUPPORT}.`}
+                    </LinkWithLogging>
+                </span>
+            </p>
             {cmsUsers.length ? (
                 <CMSUserTableWithData
                     cmsUsers={cmsUsers}

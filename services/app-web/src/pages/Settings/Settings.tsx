@@ -8,17 +8,14 @@ import { recordJSException } from '../../otelHelpers'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '../../common-code/featureFlags'
 import {
-    CmsUser,
     EmailConfiguration,
     StateAnalystsConfiguration,
     StateAssignment,
     useFetchEmailSettingsQuery,
     useFetchMcReviewSettingsQuery,
-    useIndexUsersQuery,
 } from '../../gen/gqlClient'
 import { StateAnalystsInDashboardType } from './SettingsTables/StateAssignmentTable'
 import { PageHeadingsRecord, RoutesRecord } from '../../constants'
-import { wrapApolloResult } from '../../gqlHelpers/apolloQueryWrapper'
 import { usePage } from '../../contexts/PageContext'
 
 export const TestMonitoring = (): null => {
@@ -51,7 +48,6 @@ const mapStateAnalystsFromParamStore = (
 }
 
 export type MCReviewSettingsContextType = {
-    cmsUsers: CmsUser[]
     emailConfig: EmailConfiguration
     stateAnalysts: StateAnalystsInDashboardType[]
 }
@@ -80,11 +76,6 @@ export const Settings = (): React.ReactElement => {
         customHeading: PageHeadingsRecord.MC_REVIEW_SETTINGS,
     })
 
-    const { result: indexUsersResult } = wrapApolloResult(
-        useIndexUsersQuery({
-            fetchPolicy: 'cache-and-network',
-        })
-    )
     const {
         loading: loadEmailSettings,
         data: emailSettingsData,
@@ -121,23 +112,12 @@ export const Settings = (): React.ReactElement => {
               emailSettingsData?.fetchEmailSettings.stateAnalysts
           )
 
-    if (loadingSettingsData || indexUsersResult.status === 'LOADING')
-        return <Loading />
+    if (loadingSettingsData) return <Loading />
 
-    if (isSettingsError || indexUsersResult.status === 'ERROR' || !emailConfig)
+    if (isSettingsError || !emailConfig)
         return <SettingsErrorAlert error={isSettingsError} />
 
-    // filter to just CMS users
-    const cmsUsers = indexUsersResult.data.indexUsers.edges
-        .filter(
-            (edge) =>
-                edge.node.__typename === 'CMSUser' ||
-                edge.node.__typename === 'CMSApproverUser'
-        )
-        .map((edge) => edge.node as CmsUser)
-
     const context: MCReviewSettingsContextType = {
-        cmsUsers,
         emailConfig,
         stateAnalysts,
     }
@@ -176,6 +156,7 @@ export const Settings = (): React.ReactElement => {
                 />
             </div>
             <Outlet context={context} />
+            <TestMonitoring />
         </GridContainer>
     )
 }
