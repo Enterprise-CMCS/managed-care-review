@@ -1,13 +1,12 @@
-import { act, screen, waitFor, waitForElementToBeRemoved } from '@testing-library/react'
+import { act, screen} from '@testing-library/react'
 import { renderWithProviders } from '../../testHelpers/jestHelpers'
 import { AuthenticatedRouteWrapper } from './AuthenticatedRouteWrapper'
 import { createMocks } from 'react-idle-timer';
-import { Landing } from '../Landing/Landing';
-import { Location, Route, Routes } from 'react-router';
-import { RoutesRecord } from '../../constants';
 import * as CognitoAuthApi from '../Auth/cognitoAuth'
-import { fetchCurrentUserMock } from '../../testHelpers/apolloMocks';
-describe('AuthenticatedRouteWrapper', () => {
+import { dayjs } from '../../common-code/dateHelpers';
+
+
+describe('AuthenticatedRouteWrapper and SessionTimeoutModal', () => {
     beforeAll(() => {
         vi.useFakeTimers();
         createMocks();
@@ -115,7 +114,76 @@ describe('AuthenticatedRouteWrapper', () => {
 
         });
 
-    it.todo('renders countdown inside session timeout modal that updates every second')
-    it.todo('session timeout modal continue session button click will refresh the user session')
-    it.todo('session timeout modal logout button click will logout user session')
+    it('renders countdown inside session timeout modal that updates every second', async() => {
+        renderWithProviders(
+            <div>
+                <AuthenticatedRouteWrapper
+                authMode="AWS_COGNITO"
+                children={<div>children go here</div>}
+            />
+            </div>,
+            {  featureFlags: {
+                'session-expiration-minutes': 2
+            }}
+        )
+        await screen.findByRole('dialog', {name: 'Session Expiring'})
+        await act(() => vi.advanceTimersByTime(1000))
+        const timeElapsedBefore =  screen.getByTestId('remaining').textContent
+        await act(() => vi.advanceTimersByTime(1000))
+        const timeElapsedAfter =  screen.getByTestId('remaining').textContent
+
+        const diff =  dayjs(timeElapsedBefore, 'mm:ss').diff(dayjs(timeElapsedAfter, 'mm:ss'), 'milliseconds')
+        expect(diff).toBe(1000)
+    })
+
+    it('session timeout modal continue session button click will refresh the user session', async ()=>{
+        const refreshSpy = vi
+        .spyOn(CognitoAuthApi, 'extendSession')
+        .mockResolvedValue(null)
+
+        renderWithProviders(
+            <div>
+                <AuthenticatedRouteWrapper
+                authMode="AWS_COGNITO"
+                children={<div>children go here</div>}
+            />
+            </div>,
+            {  featureFlags: {
+                'session-expiration-minutes': 2
+            }}
+        )
+
+            await act(() => vi.advanceTimersByTime(1000));
+            const dialogAfterIdle = await screen.findByRole('dialog', {name: 'Session Expiring'})
+            expect(dialogAfterIdle).toHaveClass('is-visible');
+            (await screen.findByText('Continue Session')).click()
+            await screen.findByRole('dialog', {name: 'Session Expiring'})
+            expect(dialogAfterIdle).not.toHaveClass('is-visible');
+            expect(refreshSpy).toHaveBeenCalled()
+    })
+
+    it('session timeout modal Logout button click will logout user session', async () =>{
+        const logoutSpy = vi
+        .spyOn(CognitoAuthApi, 'signOut')
+        .mockResolvedValue(null)
+
+
+        renderWithProviders(
+            <div>
+                <AuthenticatedRouteWrapper
+                authMode="AWS_COGNITO"
+                children={<div>children go here</div>}
+            />
+            </div>,
+            {  featureFlags: {
+                'session-expiration-minutes': 2
+            }}
+        )
+
+            await act(() => vi.advanceTimersByTime(1000));
+            const dialogAfterIdle = await screen.findByRole('dialog', {name: 'Session Expiring'})
+            expect(dialogAfterIdle).toHaveClass('is-visible');
+            (await screen.findByText('Logout')).click()
+            expect(logoutSpy).toHaveBeenCalled()
+    })
 })

@@ -49,10 +49,10 @@ export const SessionTimeoutModal = ({
             aria-live={'assertive'}
             aria-atomic={true}
         >
-            Your session is going to expire in{' '}
-            {dayjs
+            Your session is going to expire in&nbsp;
+            <span data-testid="remaining">{dayjs
                 .duration(countdownSeconds, 'seconds')
-                .format('mm:ss')}{' '}
+                .format('mm:ss')}</span>.
         </p>
         <p>
             If you would like to extend your session, click the
