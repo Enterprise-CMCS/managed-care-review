@@ -6,7 +6,7 @@
         "target": "ES2021",
         "moduleResolution": "node",
         "baseUrl": "/",
-        "declaration": true,
+        "declaration": false,
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,
         "preserveConstEnums": true,
@@ -15,7 +15,8 @@
         "esModuleInterop": true,
         "resolveJsonModule": true,
         "jsx": "react",
-        "outDir": "build"
+        "outDir": "build",
+        "allowJs": true
     },
-    "include": ["src/**/*.ts"]
+    "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.js", "src/**/*.d.ts"]
 }
