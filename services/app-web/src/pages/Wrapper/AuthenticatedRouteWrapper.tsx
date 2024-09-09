@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { Children } from 'react'
 import { ModalRef } from '@trussworks/react-uswds'
 import { createRef} from 'react'
 import { useAuth } from '../../contexts/AuthContext'
@@ -55,6 +55,10 @@ export const AuthenticatedRouteWrapper = ({
         featureFlags.MINUTES_UNTIL_SESSION_EXPIRES.flag,
         featureFlags.MINUTES_UNTIL_SESSION_EXPIRES.defaultValue
     ) * 60 * 1000 //  controlled by feature flag for testing in lower environments
+    const SHOW_SESSION_EXPIRATION:boolean = ldClient?.variation(
+        featureFlags.SESSION_EXPIRING_MODAL.flag,
+        featureFlags.SESSION_EXPIRING_MODAL.defaultValue
+    )//  controlled by feature flag for testing in lower environments
     let promptCountdown = SESSION_TIMEOUT_COUNTDOWN //  may be reassigned if session duration is shorter time period
 
     // Session duration must be longer than prompt countdown to allow IdleTimer to load
@@ -62,11 +66,10 @@ export const AuthenticatedRouteWrapper = ({
         promptCountdown = SESSION_DURATION - 1000
      }
 
-    return (
-            <IdleTimerProvider
+    return (<IdleTimerProvider
             onIdle={logoutBySessionTimeout}
             onActive={refreshSession}
-            onPrompt={openSessionTimeoutModal}
+            onPrompt={ SHOW_SESSION_EXPIRATION ? openSessionTimeoutModal: undefined}
             promptBeforeIdle={promptCountdown}
             timeout={SESSION_DURATION}
             throttle={RECHECK_FREQUENCY}
@@ -79,6 +82,5 @@ export const AuthenticatedRouteWrapper = ({
             <SessionTimeoutModal
                 modalRef={modalRef}
             />
-            </IdleTimerProvider>
-    )
+            </IdleTimerProvider>)
 }

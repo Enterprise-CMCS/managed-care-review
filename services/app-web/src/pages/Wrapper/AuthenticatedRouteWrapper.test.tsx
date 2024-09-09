@@ -34,7 +34,11 @@ describe('AuthenticatedRouteWrapper and SessionTimeoutModal', () => {
             <AuthenticatedRouteWrapper
                 authMode="AWS_COGNITO"
                 children={<div>children go here</div>}
-            />
+            />,
+            {  featureFlags: {
+                'session-expiration-minutes': 3,
+                'session-expiring-modal': true
+            }}
         )
         const dialog = await screen.findByRole('dialog', {name: 'Session Expiring'})
         expect(dialog).toBeInTheDocument()
@@ -48,7 +52,8 @@ describe('AuthenticatedRouteWrapper and SessionTimeoutModal', () => {
                 children={<div>children go here</div>}
             />,
             {  featureFlags: {
-                'session-expiration-minutes': 3
+                'session-expiration-minutes': 3,
+                'session-expiring-modal': true
             }}
         )
 
@@ -68,7 +73,8 @@ describe('AuthenticatedRouteWrapper and SessionTimeoutModal', () => {
                 children={<div>children go here</div>}
             />,
             {  featureFlags: {
-                'session-expiration-minutes': 2
+                'session-expiration-minutes': 2,
+                'session-expiring-modal': true
             }}
         )
         const dialogOnLoad = await screen.findByRole('dialog', {name: 'Session Expiring'})
@@ -96,7 +102,8 @@ describe('AuthenticatedRouteWrapper and SessionTimeoutModal', () => {
             />
             </div>,
             {  featureFlags: {
-                'session-expiration-minutes': 2
+                'session-expiration-minutes': 2,
+                'session-expiring-modal': true
             }}
         )
 
@@ -123,7 +130,8 @@ describe('AuthenticatedRouteWrapper and SessionTimeoutModal', () => {
             />
             </div>,
             {  featureFlags: {
-                'session-expiration-minutes': 2
+                'session-expiration-minutes': 2,
+                'session-expiring-modal': true
             }}
         )
         await screen.findByRole('dialog', {name: 'Session Expiring'})
@@ -149,10 +157,11 @@ describe('AuthenticatedRouteWrapper and SessionTimeoutModal', () => {
             />
             </div>,
             {  featureFlags: {
-                'session-expiration-minutes': 2
+                'session-expiration-minutes': 2,
+                'session-expiring-modal': true
             }}
         )
-
+            await screen.findByRole('dialog', {name: 'Session Expiring'})
             await act(() => vi.advanceTimersByTime(1000));
             const dialogAfterIdle = await screen.findByRole('dialog', {name: 'Session Expiring'})
             expect(dialogAfterIdle).toHaveClass('is-visible');
@@ -176,10 +185,11 @@ describe('AuthenticatedRouteWrapper and SessionTimeoutModal', () => {
             />
             </div>,
             {  featureFlags: {
-                'session-expiration-minutes': 2
+                'session-expiration-minutes': 2,
+                'session-expiring-modal': true
             }}
         )
-
+            await screen.findByRole('dialog', {name: 'Session Expiring'})
             await act(() => vi.advanceTimersByTime(1000));
             const dialogAfterIdle = await screen.findByRole('dialog', {name: 'Session Expiring'})
             expect(dialogAfterIdle).toHaveClass('is-visible');
