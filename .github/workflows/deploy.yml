@@ -98,6 +98,10 @@ jobs:
       - name: Generate Code
         run: pnpm -r generate
 
+      - name: Build packages
+        shell: bash
+        run: pnpm build:packages
+
       - name: Web Unit Tests
         env:
           NODE_OPTIONS: --max_old_space_size=6000
@@ -167,12 +171,8 @@ jobs:
       - name: Setup env
         uses: ./.github/actions/setup_env
 
-      - name: Generate GraphQL
-        run: pnpm -r gqlgen
-
-      - name: Generate Protos
-        working-directory: services/app-proto
-        run: pnpm generate
+      - name: Generate code
+        run: pnpm -r generate
 
       - name: Generate Prisma
         env:
@@ -183,6 +183,10 @@ jobs:
         run: |
           pnpm generate
           npx prisma migrate reset --force
+
+      - name: Build packages
+        shell: bash
+        run: pnpm build:packages
 
       - name: API Unit Tests
         env:
