@@ -1,4 +1,4 @@
-import React, { Children } from 'react'
+import React from 'react'
 import { ModalRef } from '@trussworks/react-uswds'
 import { createRef} from 'react'
 import { useAuth } from '../../contexts/AuthContext'
