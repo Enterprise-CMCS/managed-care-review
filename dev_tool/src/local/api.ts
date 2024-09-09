@@ -6,6 +6,11 @@ import { compileProtoWatchOnce } from './proto.js'
 
 export async function installAPIDeps(runner: LabeledProcessRunner) {
     await runner.runCommandAndOutput('api deps', ['pnpm', 'install'], '')
+    await runner.runCommandAndOutput(
+        'build packages',
+        ['pnpm', 'build:packages'],
+        ''
+    )
 
     // prisma requires that prisma generate is run after any pnpm install
     return installPrismaDeps(runner)

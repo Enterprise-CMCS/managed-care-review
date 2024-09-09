@@ -42,6 +42,11 @@ async function runAllLint() {
 async function runAllBuild(runner: LabeledProcessRunner) {
     await runner.runCommandAndOutput('pnpm install', ['pnpm', 'install'], '')
     await runAllGenerate()
+    await runner.runCommandAndOutput(
+        'build packages',
+        ['pnpm', 'build:packages'],
+        ''
+    )
     await runner.runCommandAndOutput('build', ['pnpm', 'build'], '')
 }
 
