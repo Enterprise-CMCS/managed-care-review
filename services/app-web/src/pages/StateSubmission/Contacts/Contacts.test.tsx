@@ -1,61 +1,43 @@
 import { screen, waitFor } from '@testing-library/react'
 
-import {
-    mockDraft,
-    mockContractAndRatesDraft,
-    mockBaseContract,
-    fetchCurrentUserMock,
-} from '../../../testHelpers/apolloMocks'
-
+import { Route, Routes } from 'react-router-dom'
+import { RoutesRecord } from '../../../constants'
 import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import { Contacts } from './'
 import userEvent from '@testing-library/user-event'
-import { UnlockedHealthPlanFormDataType } from '../../../common-code/healthPlanFormDataType'
-import * as useRouteParams from '../../../hooks/useRouteParams'
-import * as useHealthPlanPackageForm from '../../../hooks/useHealthPlanPackageForm'
+import {
+    fetchCurrentUserMock,
+    fetchContractMockSuccess,
+    mockContractPackageUnlockedWithUnlockedType,
+} from '../../../testHelpers/apolloMocks'
 
 describe('Contacts', () => {
-    const mockUpdateDraftFn = vi.fn()
-    beforeEach(() => {
-        vi.spyOn(
-            useHealthPlanPackageForm,
-            'useHealthPlanPackageForm'
-        ).mockReturnValue({
-            updateDraft: mockUpdateDraftFn,
-            createDraft: vi.fn(),
-            showPageErrorMessage: false,
-            draftSubmission: mockDraft(),
-        })
-        vi.spyOn(useRouteParams, 'useRouteParams').mockReturnValue({
-            id: '123-abc',
-        })
-    })
-
-    afterEach(() => {
-        vi.clearAllMocks()
-        vi.spyOn(
-            useHealthPlanPackageForm,
-            'useHealthPlanPackageForm'
-        ).mockRestore()
-        vi.spyOn(useRouteParams, 'useRouteParams').mockRestore()
-    })
-
-    const contractAndRatesWithEmptyContacts =
-        (): UnlockedHealthPlanFormDataType => {
-            const draft = {
-                ...mockContractAndRatesDraft(),
-                addtlActuaryContacts: [],
-                stateContacts: [],
-            }
-            return draft
-        }
-
     it('renders without errors', async () => {
-        renderWithProviders(<Contacts />, {
-            apolloProvider: {
-                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-            },
-        })
+        const draftContract = mockContractPackageUnlockedWithUnlockedType()
+        renderWithProviders(
+            <Routes>
+                <Route
+                    path={RoutesRecord.SUBMISSIONS_CONTACTS}
+                    element={<Contacts />}
+                />
+            </Routes>,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({ statusCode: 200 }),
+                        fetchContractMockSuccess({
+                            contract: {
+                                ...draftContract,
+                                id: '15',
+                            },
+                        }),
+                    ],
+                },
+                routerProvider: {
+                    route: '/submissions/15/edit/contacts',
+                },
+            }
+        )
 
         await waitFor(() => {
             expect(screen.getByTestId('state-contacts')).toBeInTheDocument()
@@ -67,11 +49,31 @@ describe('Contacts', () => {
     })
 
     it('displays correct form guidance for contract only submission', async () => {
-        renderWithProviders(<Contacts />, {
-            apolloProvider: {
-                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-            },
-        })
+        const draftContract = mockContractPackageUnlockedWithUnlockedType()
+        renderWithProviders(
+            <Routes>
+                <Route
+                    path={RoutesRecord.SUBMISSIONS_CONTACTS}
+                    element={<Contacts />}
+                />
+            </Routes>,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({ statusCode: 200 }),
+                        fetchContractMockSuccess({
+                            contract: {
+                                ...draftContract,
+                                id: '15',
+                            },
+                        }),
+                    ],
+                },
+                routerProvider: {
+                    route: '/submissions/15/edit/contacts',
+                },
+            }
+        )
 
         const requiredLabels = await screen.findAllByText('Required')
         expect(requiredLabels).toHaveLength(1)
@@ -80,44 +82,79 @@ describe('Contacts', () => {
     })
 
     it('checks saved mocked state contacts correctly', async () => {
-        vi.spyOn(
-            useHealthPlanPackageForm,
-            'useHealthPlanPackageForm'
-        ).mockImplementation(() => {
-            return {
-                createDraft: vi.fn(),
-                updateDraft: mockUpdateDraftFn,
-                showPageErrorMessage: false,
-                draftSubmission: mockBaseContract(),
+        const draftContract = mockContractPackageUnlockedWithUnlockedType()
+        renderWithProviders(
+            <Routes>
+                <Route
+                    path={RoutesRecord.SUBMISSIONS_CONTACTS}
+                    element={<Contacts />}
+                />
+            </Routes>,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({ statusCode: 200 }),
+                        fetchContractMockSuccess({
+                            contract: {
+                                ...draftContract,
+                                id: '15',
+                            },
+                        }),
+                    ],
+                },
+                routerProvider: {
+                    route: '/submissions/15/edit/contacts',
+                },
             }
-        })
-
-        renderWithProviders(<Contacts />, {
-            apolloProvider: {
-                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-            },
-        })
+        )
+        await screen.findAllByText('Contacts')
 
         // checks the submission values in apollohelper mock
-        expect(screen.getByLabelText('Name')).toHaveValue('Test Person')
-        expect(screen.getByLabelText('Title/Role')).toHaveValue('A Role')
-        expect(screen.getByLabelText('Email')).toHaveValue('test@test.com')
+        expect(screen.getByLabelText('Name')).toHaveValue('State Contact 1')
+        expect(screen.getByLabelText('Title/Role')).toHaveValue(
+            'Test State Contact 1'
+        )
+        expect(screen.getByLabelText('Email')).toHaveValue(
+            'actuarycontact1@test.com'
+        )
     })
 
     it('should not error if whitespace added to email addresses', async () => {
-        renderWithProviders(<Contacts />, {
-            apolloProvider: {
-                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-            },
-        })
+        const draftContract = mockContractPackageUnlockedWithUnlockedType()
+        renderWithProviders(
+            <Routes>
+                <Route
+                    path={RoutesRecord.SUBMISSIONS_CONTACTS}
+                    element={<Contacts />}
+                />
+            </Routes>,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({ statusCode: 200 }),
+                        fetchContractMockSuccess({
+                            contract: {
+                                ...draftContract,
+                                id: '15',
+                            },
+                        }),
+                    ],
+                },
+                routerProvider: {
+                    route: '/submissions/15/edit/contacts',
+                },
+            }
+        )
+        await screen.findAllByText('Contacts')
 
         screen.getAllByLabelText('Name')[0].focus()
         await userEvent.paste('State Contact Person')
 
         screen.getAllByLabelText('Title/Role')[0].focus()
         await userEvent.paste('State Contact Title')
-
-        screen.getAllByLabelText('Email')[0].focus()
+        const email = screen.getAllByLabelText('Email')[0]
+        email.focus()
+        await userEvent.clear(email)
         await userEvent.paste('statecontactwithtrailingwhitespace@test.com  ')
 
         const continueButton = screen.getByRole('button', {
@@ -148,34 +185,39 @@ describe('Contacts', () => {
     })
 
     it('should error and not continue if state contacts are not filled out', async () => {
-        const mock = mockDraft()
-        const emptyContactsDraft = {
-            ...mock,
-            stateContacts: [
-                {
-                    name: '',
-                    titleRole: '',
-                    email: '',
-                },
-            ],
-        }
-        vi.spyOn(
-            useHealthPlanPackageForm,
-            'useHealthPlanPackageForm'
-        ).mockImplementation(() => {
-            return {
-                createDraft: vi.fn(),
-                updateDraft: mockUpdateDraftFn,
-                showPageErrorMessage: false,
-                draftSubmission: emptyContactsDraft,
-            }
-        })
-
-        renderWithProviders(<Contacts />, {
-            apolloProvider: {
-                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+        const draftContract = mockContractPackageUnlockedWithUnlockedType()
+        draftContract.draftRevision.formData.stateContacts = [
+            {
+                name: '',
+                titleRole: '',
+                email: '',
             },
-        })
+        ]
+        renderWithProviders(
+            <Routes>
+                <Route
+                    path={RoutesRecord.SUBMISSIONS_CONTACTS}
+                    element={<Contacts />}
+                />
+            </Routes>,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({ statusCode: 200 }),
+                        fetchContractMockSuccess({
+                            contract: {
+                                ...draftContract,
+                                id: '15',
+                            },
+                        }),
+                    ],
+                },
+                routerProvider: {
+                    route: '/submissions/15/edit/contacts',
+                },
+            }
+        )
+        await screen.findAllByText('Contacts')
 
         const continueButton = screen.getByRole('button', { name: 'Continue' })
 
@@ -195,15 +237,38 @@ describe('Contacts', () => {
     })
 
     it('after "Add state contact" button click, should focus on the field name of the new contact', async () => {
-        renderWithProviders(<Contacts />, {
-            apolloProvider: {
-                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-            },
-        })
+        const draftContract = mockContractPackageUnlockedWithUnlockedType()
+        renderWithProviders(
+            <Routes>
+                <Route
+                    path={RoutesRecord.SUBMISSIONS_CONTACTS}
+                    element={<Contacts />}
+                />
+            </Routes>,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({ statusCode: 200 }),
+                        fetchContractMockSuccess({
+                            contract: {
+                                ...draftContract,
+                                id: '15',
+                            },
+                        }),
+                    ],
+                },
+                routerProvider: {
+                    route: '/submissions/15/edit/contacts',
+                },
+            }
+        )
+        await screen.findAllByText('Contacts')
+
         const addStateContactButton = screen.getByRole('button', {
             name: 'Add another state contact',
         })
         const firstContactName = screen.getByLabelText('Name')
+        await userEvent.clear(firstContactName)
 
         await userEvent.type(firstContactName, 'First person')
         expect(firstContactName).toHaveFocus()
@@ -222,11 +287,33 @@ describe('Contacts', () => {
     })
 
     it('after state contact "Remove contact" button click, should focus on add new contact button', async () => {
-        renderWithProviders(<Contacts />, {
-            apolloProvider: {
-                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-            },
-        })
+        const draftContract = mockContractPackageUnlockedWithUnlockedType()
+        renderWithProviders(
+            <Routes>
+                <Route
+                    path={RoutesRecord.SUBMISSIONS_CONTACTS}
+                    element={<Contacts />}
+                />
+            </Routes>,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({ statusCode: 200 }),
+                        fetchContractMockSuccess({
+                            contract: {
+                                ...draftContract,
+                                id: '15',
+                            },
+                        }),
+                    ],
+                },
+                routerProvider: {
+                    route: '/submissions/15/edit/contacts',
+                },
+            }
+        )
+        await screen.findAllByText('Contacts')
+
         const addStateContactButton = screen.getByRole('button', {
             name: 'Add another state contact',
         })
@@ -245,23 +332,40 @@ describe('Contacts', () => {
     })
 
     it('when there are multiple state contacts, they should numbered', async () => {
-        vi.spyOn(
-            useHealthPlanPackageForm,
-            'useHealthPlanPackageForm'
-        ).mockImplementation(() => {
-            return {
-                createDraft: vi.fn(),
-                updateDraft: mockUpdateDraftFn,
-                showPageErrorMessage: false,
-                draftSubmission: contractAndRatesWithEmptyContacts(),
-            }
-        })
-
-        renderWithProviders(<Contacts />, {
-            apolloProvider: {
-                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+        const draftContract = mockContractPackageUnlockedWithUnlockedType()
+        draftContract.draftRevision.formData.stateContacts = [
+            {
+                name: '',
+                titleRole: '',
+                email: '',
             },
-        })
+        ]
+        renderWithProviders(
+            <Routes>
+                <Route
+                    path={RoutesRecord.SUBMISSIONS_CONTACTS}
+                    element={<Contacts />}
+                />
+            </Routes>,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({ statusCode: 200 }),
+                        fetchContractMockSuccess({
+                            contract: {
+                                ...draftContract,
+                                id: '15',
+                            },
+                        }),
+                    ],
+                },
+                routerProvider: {
+                    route: '/submissions/15/edit/contacts',
+                },
+            }
+        )
+        await screen.findAllByText('Contacts')
+
         const addStateContactButton = screen.getByRole('button', {
             name: 'Add another state contact',
         })

@@ -134,12 +134,9 @@ const Contacts = ({
         email: '',
     }
 
-    if (stateContacts.length === 0) {
-        stateContacts.push(emptyStateContact)
-    }
-
     const contactsInitialValues: ContactsFormValues = {
-        stateContacts: stateContacts,
+        stateContacts:
+            stateContacts.length === 0 ? [emptyStateContact] : stateContacts,
     }
 
     // Handler for Contacts legends so that contacts show up as
