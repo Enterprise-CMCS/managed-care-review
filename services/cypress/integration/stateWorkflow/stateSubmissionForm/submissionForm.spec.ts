@@ -5,7 +5,10 @@ describe('state user in state submission form', () => {
     })
     it('can navigate forward, back,  and save as draft on each form page', () => {
         // goal of this test is to check every single form page and navigation (going backwards, forwards or save as draft with new info)
-
+        cy.interceptFeatureFlags({
+            '438-attestation': true,
+            'hide-supporting-docs-page': true
+        })
         cy.logInAsStateUser()
 
         // Start a base contract only submissions
@@ -31,7 +34,7 @@ describe('state user in state submission form', () => {
             cy.findByLabelText('Contract action and rate certification').should(
                     'not.be.checked'
                 )
-            cy.findByTestId('step-indicator').findAllByRole('listitem').should('have.length', 5)
+            cy.findByTestId('step-indicator').findAllByRole('listitem').should('have.length', 4)
             cy.findByText('Rate details').should('not.exist')
 
             // Navigate back to previous page
@@ -64,7 +67,7 @@ describe('state user in state submission form', () => {
             cy.navigateFormByDirectLink(
                 `/submissions/${draftSubmissionId}/edit/type`
             )
-            cy.findByTestId('step-indicator').findAllByRole('listitem').should('have.length', 6)
+            cy.findByTestId('step-indicator').findAllByRole('listitem').should('have.length', 5)
             cy.findByText('Rate details').should('exist')
             cy.navigateContractForm('CONTINUE')
 
@@ -127,8 +130,6 @@ describe('state user in state submission form', () => {
             cy.navigateFormByDirectLink(
                 `/submissions/${draftSubmissionId}/edit/contacts`
             )
-            cy.deprecatedNavigateV1Form('CONTINUE')
-            // skip documents page - that will be deleted soon
             cy.deprecatedNavigateV1Form('CONTINUE')
 
             // Check that we end up on Review and Submit

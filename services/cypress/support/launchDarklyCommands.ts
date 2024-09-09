@@ -96,7 +96,8 @@ Cypress.Commands.add('stubFeatureFlags', () => {
      * Useful if you want default feature flags for tests that are different than default values set in common-code featureFlags
      **/
     cy.interceptFeatureFlags({
-        '438-attestation': true
+        '438-attestation': true,
+        'hide-supporting-docs-page': true
     })
 })
 

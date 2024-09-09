@@ -130,8 +130,11 @@ Cypress.Commands.add('fillOutBaseContractDetails', () => {
         .blur()
     cy.findByLabelText('Managed Care Organization (MCO)').check({force: true})
     cy.findByLabelText('1932(a) State Plan Authority').check({force: true})
-    cy.findByTestId('file-input-input').attachFile(
-        'documents/trussel-guide.pdf'
+    cy.findAllByTestId('file-input-input').should('have.length', 2)
+    cy.findAllByTestId('file-input-input').each((fileInput) =>
+        cy.wrap(fileInput).attachFile(
+            'documents/trussel-guide.pdf'
+        )
     )
 
     cy.findByText('In Lieu-of Services and Settings (ILOSs) in accordance with 42 CFR § 438.3(e)(2)')
@@ -318,8 +321,10 @@ Cypress.Commands.add('fillOutAmendmentToBaseContractDetails', () => {
             cy.findByText('Yes').click()
         })
 
-    cy.findByTestId('file-input-input').attachFile(
-        'documents/trussel-guide.pdf'
+    cy.findAllByTestId('file-input-input').each((fileInput) =>
+        cy.wrap(fileInput).attachFile(
+            'documents/trussel-guide.pdf'
+        )
     )
 
     cy.verifyDocumentsHaveNoErrors()

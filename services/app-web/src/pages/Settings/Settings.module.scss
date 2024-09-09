@@ -1,40 +1,30 @@
 @use '../../styles/custom.scss' as custom;
 @use '../../styles/uswdsImports.scss' as uswds;
 
-.table {
+.filterCount {
+    color: custom.$mcr-foundation-ink;
+    padding-top: uswds.units(3);
+}
+
+.tableContainer {
+    padding: 2rem 0;
+
     h2 {
-        font-weight: 300;
+        font-weight: normal;
     }
-    thead {
-        th {
-            background-color: transparent;
-            border-top: 0;
-            border-left: 0;
-            border-right: 0;
-        }
-        td {
-            word-wrap: break-word;
-            overflow-wrap: break-word;
-        }
-    }
-
-    table {
-        padding-top: 1em;
-        width: 100%;
-    }
-}
-.tabs {
-    padding: 2em 0;
-}
-.pageContainer {
-    padding: 1em 10em;
-    width: 100%;
-    background-color: custom.$mcr-foundation-white;
-}
-.header {
-    text-align: left;
 }
 
-.wrapper {
-    height: 100vh;
+.outletContainer {
+    @include custom.default-page-container;
+}
+
+.verticalNavContainer {
+    padding: 2rem 2rem 2rem 0;
+    min-width: 18rem;
+    max-width: custom.$mcr-container-max-width-fixed;
+}
+
+.backLinkContainer {
+    padding-top: uswds.units(2);
+    padding-bottom: uswds.units(4);
 }
