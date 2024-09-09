@@ -116,21 +116,21 @@ describe('state user in state submission form', () => {
             cy.findByRole('heading', { level: 2, name: /Contacts/ })
 
             // Navigate back to previous page
-            cy.deprecatedNavigateV1Form('BACK')
+            cy.navigateContractForm('BACK')
             cy.findByRole('heading', { level: 2, name: /Rate details/ })
             cy.navigateContractRatesForm('CONTINUE')
 
             // Add contact data, save as draft
             cy.findByRole('heading', { level: 2, name: /Contacts/ })
             cy.fillOutStateContact()
-            cy.deprecatedNavigateV1Form('SAVE_DRAFT')
+            cy.navigateContractForm('SAVE_DRAFT')
             cy.findByRole('heading', { level: 1, name: /Submissions dashboard/ })
 
             // Link to contacts page and continue
             cy.navigateFormByDirectLink(
                 `/submissions/${draftSubmissionId}/edit/contacts`
             )
-            cy.deprecatedNavigateV1Form('CONTINUE')
+            cy.navigateContractForm('CONTINUE')
 
             // Check that we end up on Review and Submit
             cy.findByRole('heading', { level: 2, name: /Review and submit/ })
