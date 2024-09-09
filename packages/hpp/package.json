@@ -4,7 +4,8 @@
     "main": "build/index.js",
     "types": "build/index.d.ts",
     "scripts": {
-        "build": "tsc"
+        "build": "tsc && pnpm copy-gen-code",
+        "copy-gen-code": "rsync -av --exclude='*.ts' src/gen/ build/gen/"
     },
     "dependencies": {
         "@apollo/client": "3.8.8",
