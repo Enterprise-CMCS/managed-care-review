@@ -82,7 +82,7 @@ export const Settings = (): React.ReactElement => {
     )
 
     updateHeading({
-        customHeading: PageHeadingsRecord.MC_REVIEW_SETTINGS,
+        customHeading: PageHeadingsRecord.MCR_SETTINGS,
     })
 
     const isSelectedLink = (route: string): string => {

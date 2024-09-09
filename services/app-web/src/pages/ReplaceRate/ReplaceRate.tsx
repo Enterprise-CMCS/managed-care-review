@@ -10,7 +10,6 @@ import {
     useFetchContractQuery,
     useWithdrawAndReplaceRedundantRateMutation,
 } from '../../gen/gqlClient'
-import styles from './ReplaceRate.module.scss'
 import {
     ErrorOrLoadingPage,
     handleAndReturnErrorState,
@@ -35,7 +34,6 @@ import {
     ErrorSummary,
 } from '../../components/Form/ErrorSummary/ErrorSummary'
 import { FormContainer } from '../../components/FormContainer/FormContainer'
-import { LinkedRateSummary } from '../StateSubmission/RateDetails/LinkedRateSummary'
 
 export interface ReplaceRateFormValues {
     replacementRateID: string
@@ -156,7 +154,7 @@ export const ReplaceRate = (): React.ReactElement => {
     }
 
     return (
-        <FormContainer id="ReplaceRate" className={styles.replaceRatePage}>
+        <FormContainer id="ReplaceRate" className="standaloneForm">
                 {replaceError && <GenericApiErrorBanner />}
                 <Formik
                     initialValues={formInitialValues}
@@ -180,7 +178,7 @@ export const ReplaceRate = (): React.ReactElement => {
                                     headingRef={errorSummaryHeadingRef}
                                 />
                             )}
-                            <div className={styles.formInnerContainer}>
+                            <div id="formInnerContainer">
                             <h2>Replace a rate review</h2>
 
                             <DataDetail id="withdrawnRate" label="Current rate">
@@ -222,7 +220,6 @@ export const ReplaceRate = (): React.ReactElement => {
                                         Select a replacement rate
                                     </Label>
                                     <span
-                                        className={styles.requiredOptionalText}
                                     >
                                         Required
                                     </span>

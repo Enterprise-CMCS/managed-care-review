@@ -52,7 +52,7 @@ const combinedAuthorizedUsers: {
 
 const CommonSettingsRoute = () => (
     <Routes>
-        <Route path={RoutesRecord.MC_REVIEW_SETTINGS} element={<Settings />}>
+        <Route path={RoutesRecord.MCR_SETTINGS} element={<Settings />}>
             <Route
                 index
                 element={<Navigate to={RoutesRecord.STATE_ASSIGNMENTS} />}
