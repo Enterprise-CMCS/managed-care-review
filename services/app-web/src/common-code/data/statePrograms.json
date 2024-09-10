@@ -846,7 +846,7 @@
                 {
                     "id": "601937ba-a590-41a3-a006-57bec219e75f",
                     "fullName": "Turquoise Care",
-                    "name": "Turquoise Care",
+                    "name": "TC",
                     "isRateProgram": false
                 },
                 {
@@ -1240,7 +1240,7 @@
             "name": "Virginia",
             "programs": [
                 {
-                    "id": "05e5316f-b9ba-4f2a-9a24-9449b63ef8a",
+                    "id": "05e5316f-b9ba-4f2a-9a24-9449b63ef8a1",
                     "fullName": "Cardinal Care Managed Care",
                     "name": "CCMC",
                     "isRateProgram": false
