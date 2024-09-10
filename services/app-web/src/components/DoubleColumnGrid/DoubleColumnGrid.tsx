@@ -1,6 +1,5 @@
 import React from 'react'
 import { Grid } from '@trussworks/react-uswds'
-import styles from './DoubleColumnGrid.module.scss'
 
 export type ChildrenType = (React.ReactChild | React.ReactFragment | React.ReactPortal)
 export type ChildrenPairType = ChildrenType[][]
@@ -28,7 +27,6 @@ export const DoubleColumnGrid = ({
                     <Grid
                         row
                         gap
-                        className={styles.row}
                         key={`grid-row-${rIndex}`}
                         data-testid={`grid-row-${rIndex}`}
                     >
