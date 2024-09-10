@@ -39,7 +39,7 @@ describe('CMS user', () => {
             name: /Contacts/,
         }).should('exist')
         cy.fillOutStateContact()
-        cy.deprecatedNavigateV1Form('CONTINUE')
+        cy.navigateContractForm('CONTINUE')
 
         cy.findByRole('heading', {
             level: 2,
@@ -268,7 +268,7 @@ describe('CMS user', () => {
                 cy.findByRole('heading', { level: 2, name: /Contacts/ })
                 cy.fillOutStateContact()
 
-                cy.deprecatedNavigateV1Form('CONTINUE')
+                cy.navigateContractForm('CONTINUE')
 
                 // New API
                 cy.navigateFormByDirectLink(`${submissionURL}edit/rate-details`)
