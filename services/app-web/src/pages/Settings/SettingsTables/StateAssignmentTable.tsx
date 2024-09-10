@@ -17,7 +17,6 @@ import {
     FilterSelectedOptionsType,
 } from '../../../components/FilterAccordion'
 import { DoubleColumnGrid, LinkWithLogging, Loading } from '../../../components'
-import { formatEmails } from '../Settings'
 import { Table } from '@trussworks/react-uswds'
 
 import styles from '../Settings.module.scss'
@@ -26,12 +25,16 @@ import { useTealium } from '../../../hooks'
 import useDeepCompareEffect from 'use-deep-compare-effect'
 import { useStringConstants } from '../../../hooks/useStringConstants'
 import { useOutletContext } from 'react-router-dom'
-import { MCReviewSettingsContextType } from '../Settings'
+import {type MCReviewSettingsContextType } from '../Settings'
+import {formatEmails, EditLink} from '../'
 import { SettingsErrorAlert } from '../SettingsErrorAlert'
+import { useLDClient } from 'launchdarkly-react-client-sdk'
+import { featureFlags } from '../../../common-code/featureFlags'
 
 type StateAnalystsInDashboardType = {
     emails: string[]
     stateCode: string
+    editLink: string
 }
 
 const columnHelper = createColumnHelper<StateAnalystsInDashboardType>()
@@ -57,6 +60,13 @@ const getAppliedFilters = (columnFilters: ColumnFiltersState, id: string) => {
 }
 
 const StateAssignmentTable = () => {
+    const ldClient = useLDClient()
+    const readWriteStateAssignments = ldClient?.variation(
+        featureFlags.READ_WRITE_STATE_ASSIGNMENTS.flag,
+        featureFlags.READ_WRITE_STATE_ASSIGNMENTS.defaultValue
+    )
+
+
     const lastClickedElement = useRef<string | null>(null)
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
     const [prevFilters, setPrevFilters] = useState<{
@@ -81,10 +91,16 @@ const StateAssignmentTable = () => {
             }),
             columnHelper.accessor('emails', {
                 id: 'emails',
-                header: 'Inbox',
+                header: 'Assign DMCO staff',
                 cell: (info) => formatEmails(info.getValue()),
                 filterFn: `arrIncludesSome`,
             }),
+             columnHelper.accessor('editLink', {
+                id: 'editLink',
+                header: 'Edit state assignment',
+                cell: info => <EditLink rowID={info.row.original.stateCode} url={info.getValue()} />,
+            })
+
         ],
         []
     )
@@ -100,6 +116,11 @@ const StateAssignmentTable = () => {
         columns: tableColumns,
         state: {
             columnFilters,
+        },
+        initialState: {
+            columnVisibility: {
+                editLink: readWriteStateAssignments,
+            },
         },
         onColumnFiltersChange: setColumnFilters,
         getFacetedUniqueValues: getFacetedUniqueValues(),

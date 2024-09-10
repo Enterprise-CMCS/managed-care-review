@@ -43,6 +43,7 @@ const mapStateAnalystsFromParamStore = (
         ? stateAnalysts.map((sa) => ({
               emails: sa.emails,
               stateCode: sa.stateCode,
+              editLink: `/mc-review-settings/state-assignments/${sa.stateCode.toUpperCase()}/edit`
           }))
         : []
 }
@@ -67,6 +68,7 @@ const mapStateAnalystFromDB = (
         ? stateAssignments.map((state) => ({
               stateCode: state.stateCode,
               emails: state.assignedCMSUsers.map((user) => user.email),
+            editLink: `/mc-review-settings/state-assignments/${state.stateCode.toUpperCase()}/edit`
           }))
         : []
 }
