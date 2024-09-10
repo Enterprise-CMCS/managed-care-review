@@ -2,7 +2,7 @@
 This script is used to generate a list of MC-Review state programs. To read more about this script and why it's used see "How to update state programs" technical design docs.
 
 To run:
- pnpm run tsc && node ./import-programs.js path/to/data.csv > ../services/app-web/src/common-code/data/statePrograms.json
+ pnpm run build && node ./import-programs.js path/to/data.csv > ../services/app-web/src/common-code/data/statePrograms.json
 
 The input file is expected to be a valid CSV with at least the following columns:
    1 State (two-character state code, uppercase)
@@ -85,7 +85,7 @@ if (!file || file.trim().length === 0) {
     process.exit(1)
 }
 if (!fs.existsSync(file)) {
-    console.error(`file '${file}' could not be loaded`)
+    console.error(`file '${file}' could not be found`)
     process.exit(1)
 }
 
