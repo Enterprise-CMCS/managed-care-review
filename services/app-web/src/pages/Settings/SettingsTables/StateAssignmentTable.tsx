@@ -91,7 +91,7 @@ const StateAssignmentTable = () => {
             }),
             columnHelper.accessor('emails', {
                 id: 'emails',
-                header: 'Assign DMCO staff',
+                header: 'Assigned DMCO staff',
                 cell: (info) => formatEmails(info.getValue()),
                 filterFn: `arrIncludesSome`,
             }),
