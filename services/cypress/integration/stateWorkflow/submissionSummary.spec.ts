@@ -38,11 +38,7 @@ describe('State user can view submissions', () => {
             name: /Contacts/,
         }).should('exist')
         cy.fillOutStateContact()
-<<<<<<< HEAD
-        cy.navigateContractForm('CONTINUE')
-=======
         cy.deprecatedNavigateV1Form('CONTINUE')
->>>>>>> f7cea251df7d4be1fb80daaf5c8ae8ba133db473
 
         // Store submission name for reference later
         let submissionId = ''
