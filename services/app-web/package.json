@@ -91,7 +91,7 @@
         "@opentelemetry/resources": "^1.18.1",
         "@opentelemetry/sdk-trace-web": "^1.18.1",
         "@opentelemetry/semantic-conventions": "^1.27.0",
-        "@tanstack/react-table": "^8.20.1",
+        "@tanstack/react-table": "^8.20.5",
         "@trussworks/react-uswds": "^4.0.0",
         "@vitejs/plugin-react": "^4.3.0",
         "amazon-cognito-identity-js": "^6.3.12",
