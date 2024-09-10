@@ -40,7 +40,7 @@ export const EditStateAssign = (): React.ReactElement => {
     const [_editStateAssignment, { loading: editLoading, error: editError }] =
         useUpdateStateAssignmentMutation()
 
-    if(!isValidStateCode(stateCode)){
+    if(!isValidStateCode(stateCode.toUpperCase())){
         return <Error404/>
     }
 
