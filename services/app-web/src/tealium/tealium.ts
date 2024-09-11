@@ -71,7 +71,7 @@ type TealiumDataObject = {
     content_type: string
     page_name: string
     page_path: string
-    site_domain: 'cms.gov'
+    site_domain: 'tealium-tags.cms.gov'
     site_environment: string
     site_section: string
     logged_in: 'true' | 'false'
@@ -258,7 +258,7 @@ const tealiumClient = (tealiumEnv: Omit<TealiumEnv, 'dev'>): TealiumClientType =
                 content_language: 'en',
                 page_name: `${heading}: ${PageTitlesRecord[currentRoute]}`,
                 page_path: pathname,
-                site_domain: 'cms.gov',
+                site_domain: 'tealium-tags.cms.gov',
                 site_environment: `${tealiumEnv}`,
                 site_section: `${currentRoute}`,
                 logged_in: `${Boolean(loggedInUser) ?? false}`,
@@ -285,7 +285,7 @@ const tealiumClient = (tealiumEnv: Omit<TealiumEnv, 'dev'>): TealiumClientType =
                 content_type: `${TEALIUM_CONTENT_TYPE_BY_ROUTE[currentRoute]}`,
                 page_name: tealiumPageName,
                 page_path: pathname,
-                site_domain: 'cms.gov',
+                site_domain: 'tealium-tags.cms.gov',
                 site_environment: `${tealiumEnv}`,
                 site_section: `${TEALIUM_SUBSECTION_BY_ROUTE[currentRoute]}`,
                 logged_in: `${Boolean(loggedInUser) ?? false}`,
@@ -323,7 +323,7 @@ const devTealiumClient = (): TealiumClientType => {
                 content_language: 'en',
                 page_name: `${heading}: ${PageTitlesRecord[currentRoute]}`,
                 page_path: pathname,
-                site_domain: 'cms.gov',
+                site_domain: 'tealium-tags.cms.gov',
                 site_environment: 'dev',
                 site_section: `${currentRoute}`,
                 logged_in: `${Boolean(loggedInUser) ?? false}`,
@@ -351,7 +351,7 @@ const devTealiumClient = (): TealiumClientType => {
                 content_type: `${TEALIUM_CONTENT_TYPE_BY_ROUTE[currentRoute]}`,
                 page_name: tealiumPageName,
                 page_path: pathname,
-                site_domain: 'cms.gov',
+                site_domain: 'tealium-tags.cms.gov',
                 site_environment: 'dev',
                 site_section: `${TEALIUM_SUBSECTION_BY_ROUTE[currentRoute]}`,
                 logged_in: `${Boolean(loggedInUser) ?? false}`,
