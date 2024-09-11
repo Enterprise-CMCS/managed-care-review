@@ -1,4 +1,4 @@
-import { act, screen} from '@testing-library/react'
+import { act, screen, waitFor} from '@testing-library/react'
 import { renderWithProviders } from '../../testHelpers/jestHelpers'
 import { AuthenticatedRouteWrapper } from './AuthenticatedRouteWrapper'
 import { createMocks } from 'react-idle-timer';
@@ -21,7 +21,6 @@ describe('AuthenticatedRouteWrapper and SessionTimeoutModal', () => {
     it('renders without errors', async () => {
         renderWithProviders(
             <AuthenticatedRouteWrapper
-                authMode="LOCAL"
                 children={<div>children go here</div>}
             />
         )
@@ -32,7 +31,6 @@ describe('AuthenticatedRouteWrapper and SessionTimeoutModal', () => {
     it('hides the session timeout modal by default', async () => {
         renderWithProviders(
             <AuthenticatedRouteWrapper
-                authMode="AWS_COGNITO"
                 children={<div>children go here</div>}
             />,
             {  featureFlags: {
@@ -48,7 +46,6 @@ describe('AuthenticatedRouteWrapper and SessionTimeoutModal', () => {
     it("hides the session timeout modal by when timeout period is not exceeded", async() => {
         renderWithProviders(
             <AuthenticatedRouteWrapper
-                authMode="AWS_COGNITO"
                 children={<div>children go here</div>}
             />,
             {  featureFlags: {
@@ -58,9 +55,8 @@ describe('AuthenticatedRouteWrapper and SessionTimeoutModal', () => {
         )
 
         const dialogOnLoad = await screen.findByRole('dialog', {name: 'Session Expiring'})
-        expect(dialogOnLoad).toBeInTheDocument()
         expect(dialogOnLoad).toHaveClass('is-hidden')
-        await act(() => vi.advanceTimersByTime(500));
+        await vi.advanceTimersByTimeAsync(500);
         const dialogAfterIdle = await screen.findByRole('dialog', {name: 'Session Expiring'})
         expect(dialogAfterIdle).toHaveClass('is-hidden')
       });
@@ -69,7 +65,6 @@ describe('AuthenticatedRouteWrapper and SessionTimeoutModal', () => {
     it("renders session timeout modal after idle prompt period is exceeded", async () => {
         renderWithProviders(
             <AuthenticatedRouteWrapper
-                authMode="AWS_COGNITO"
                 children={<div>children go here</div>}
             />,
             {  featureFlags: {
@@ -81,10 +76,12 @@ describe('AuthenticatedRouteWrapper and SessionTimeoutModal', () => {
         expect(dialogOnLoad).toBeInTheDocument()
         expect(dialogOnLoad).toHaveClass('is-hidden')
 
-        await act(() => vi.advanceTimersByTime(1000));
+        await vi.advanceTimersByTimeAsync(1000);
 
         const dialogAfterIdle = await screen.findByRole('dialog', {name: 'Session Expiring'})
-        expect(dialogAfterIdle).toHaveClass('is-visible')
+        await waitFor( () => {
+            expect(dialogAfterIdle).toHaveClass('is-visible')
+        })
       });
 
 
@@ -97,7 +94,6 @@ describe('AuthenticatedRouteWrapper and SessionTimeoutModal', () => {
         renderWithProviders(
             <div>
                 <AuthenticatedRouteWrapper
-                authMode="AWS_COGNITO"
                 children={<div>children go here</div>}
             />
             </div>,
@@ -111,12 +107,13 @@ describe('AuthenticatedRouteWrapper and SessionTimeoutModal', () => {
             expect(dialogOnLoad).toBeInTheDocument()
             expect(dialogOnLoad).toHaveClass('is-hidden')
 
-            await act(() => vi.advanceTimersByTime(1000));
+            await vi.advanceTimersByTimeAsync(1000);
             const dialogAfterIdle = await screen.findByRole('dialog', {name: 'Session Expiring'})
-            expect(dialogAfterIdle).toHaveClass('is-visible')
+            await waitFor ( () => {
+                expect(dialogAfterIdle).toHaveClass('is-visible')
+            })
 
-
-            await act(() => vi.advanceTimersByTime(120100));
+            await vi.advanceTimersByTimeAsync(120100);
             expect(logoutSpy).toHaveBeenCalled()
 
         });
@@ -125,7 +122,6 @@ describe('AuthenticatedRouteWrapper and SessionTimeoutModal', () => {
         renderWithProviders(
             <div>
                 <AuthenticatedRouteWrapper
-                authMode="AWS_COGNITO"
                 children={<div>children go here</div>}
             />
             </div>,
@@ -135,9 +131,9 @@ describe('AuthenticatedRouteWrapper and SessionTimeoutModal', () => {
             }}
         )
         await screen.findByRole('dialog', {name: 'Session Expiring'})
-        await act(() => vi.advanceTimersByTime(1000))
+        await vi.advanceTimersByTimeAsync(1000)
         const timeElapsedBefore =  screen.getByTestId('remaining').textContent
-        await act(() => vi.advanceTimersByTime(1000))
+        await vi.advanceTimersByTimeAsync(1000)
         const timeElapsedAfter =  screen.getByTestId('remaining').textContent
 
         const diff =  dayjs(timeElapsedBefore, 'mm:ss').diff(dayjs(timeElapsedAfter, 'mm:ss'), 'milliseconds')
@@ -152,7 +148,6 @@ describe('AuthenticatedRouteWrapper and SessionTimeoutModal', () => {
         renderWithProviders(
             <div>
                 <AuthenticatedRouteWrapper
-                authMode="AWS_COGNITO"
                 children={<div>children go here</div>}
             />
             </div>,
@@ -162,12 +157,16 @@ describe('AuthenticatedRouteWrapper and SessionTimeoutModal', () => {
             }}
         )
             await screen.findByRole('dialog', {name: 'Session Expiring'})
-            await act(() => vi.advanceTimersByTime(1000));
+            await vi.advanceTimersByTimeAsync(1000);
             const dialogAfterIdle = await screen.findByRole('dialog', {name: 'Session Expiring'})
-            expect(dialogAfterIdle).toHaveClass('is-visible');
+           await waitFor( () => {
+            expect(dialogAfterIdle).toHaveClass('is-visible')
+           }) ;
             (await screen.findByText('Continue Session')).click()
             await screen.findByRole('dialog', {name: 'Session Expiring'})
-            expect(dialogAfterIdle).not.toHaveClass('is-visible');
+            await waitFor(() => {
+                expect(dialogAfterIdle).not.toHaveClass('is-visible');
+            })
             expect(refreshSpy).toHaveBeenCalled()
     })
 
@@ -180,7 +179,6 @@ describe('AuthenticatedRouteWrapper and SessionTimeoutModal', () => {
         renderWithProviders(
             <div>
                 <AuthenticatedRouteWrapper
-                authMode="AWS_COGNITO"
                 children={<div>children go here</div>}
             />
             </div>,
@@ -190,9 +188,11 @@ describe('AuthenticatedRouteWrapper and SessionTimeoutModal', () => {
             }}
         )
             await screen.findByRole('dialog', {name: 'Session Expiring'})
-            await act(() => vi.advanceTimersByTime(1000));
-            const dialogAfterIdle = await screen.findByRole('dialog', {name: 'Session Expiring'})
-            expect(dialogAfterIdle).toHaveClass('is-visible');
+            await vi.advanceTimersByTimeAsync(1000);
+            const dialogAfterIdle = await screen.findByRole('dialog', {name: 'Session Expiring'});
+            await waitFor( () => {
+                expect(dialogAfterIdle).toHaveClass('is-visible');
+            });
             (await screen.findByText('Logout')).click()
             expect(logoutSpy).toHaveBeenCalled()
     })
