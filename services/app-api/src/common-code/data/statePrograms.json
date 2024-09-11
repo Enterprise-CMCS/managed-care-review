@@ -845,31 +845,31 @@
             "programs": [
                 {
                     "id": "601937ba-a590-41a3-a006-57bec219e75f",
-                    "fullName": "Centennial Care 2.0",
-                    "name": "CC",
+                    "fullName": "Turquoise Care",
+                    "name": "TC",
                     "isRateProgram": false
                 },
                 {
                     "id": "2f12c537-716a-419d-9822-bc8163b91c13",
-                    "fullName": "Centennial Care BH",
+                    "fullName": "Turquoise Care BH",
                     "name": "BH",
                     "isRateProgram": true
                 },
                 {
                     "id": "66efa54a-9a2b-4c0d-8097-f368da41e44c",
-                    "fullName": "Centennial Care PH",
+                    "fullName": "Turquoise Care PH",
                     "name": "PH",
                     "isRateProgram": true
                 },
                 {
                     "id": "00b57070-60d6-4deb-8b79-72b960e5e512",
-                    "fullName": "Centennial Care LTSS",
+                    "fullName": "Turquoise Care LTSS",
                     "name": "LTSS",
                     "isRateProgram": true
                 },
                 {
                     "id": "bb078c3f-9259-4a29-a370-04368154f0ef",
-                    "fullName": "Centennial Care OAG",
+                    "fullName": "Turquoise Care OAG",
                     "name": "OAG",
                     "isRateProgram": true
                 }
