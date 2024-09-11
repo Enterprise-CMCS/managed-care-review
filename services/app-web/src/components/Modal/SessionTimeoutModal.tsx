@@ -52,7 +52,7 @@ export const SessionTimeoutModal = ({
             Your session is going to expire in&nbsp;
             <span data-testid="remaining">{dayjs
                 .duration(countdownSeconds, 'seconds')
-                .format('mm:ss')}</span>.
+                .format('mm:ss')}</span>
         </p>
         <p>
             If you would like to extend your session, click the

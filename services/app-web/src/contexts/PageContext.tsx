@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { PageHeadingsRecord } from '../constants/routes'
 import { useCurrentRoute } from '../hooks/useCurrentRoute'
+import { ModalRef } from '@trussworks/react-uswds'
 
 /*
     Use sparingly.
@@ -8,10 +9,16 @@ import { useCurrentRoute } from '../hooks/useCurrentRoute'
 */
 type PageContextType = {
     heading?: string | React.ReactElement
+    activeModalID?: string,
     updateHeading: ({
         customHeading,
     }: {
         customHeading?: string | React.ReactElement
+    }) => void
+    updateModalID: ({
+        updatedModalID,
+    }: {
+        updatedModalID?: string
     }) => void
 }
 
@@ -28,7 +35,9 @@ const PageProvider: React.FC<
     const [heading, setHeading] = React.useState<
         string | React.ReactElement | undefined
     >(undefined)
+    const [activeModalID, setactiveModalID] = React.useState<string | undefined>(undefined)
     const { currentRoute: routeName } = useCurrentRoute()
+
     /*
         Set headings in priority order
         1. If there a custom heading, use that (relevant for heading related to the api loaded resource, such as the submission name)
@@ -50,9 +59,23 @@ const PageProvider: React.FC<
         })
     }
 
+    /*
+        Set activeModalID - points to an instance of <Modal/>that is currently visible on the page
+        - reset to undefined when the modal closed and hideen
+        - reset to new string when a new modal opens
+        - ensure only one modal open at a time, any new new modal opened overrides previous modal
+    */
+        const updateModalID = ({
+            updatedModalID,
+        }: {
+            updatedModalID?:string
+        }) => {
+           setactiveModalID(updatedModalID)
+        }
+
     return (
         <PageContext.Provider
-            value={{ heading, updateHeading }}
+            value={{ heading, updateHeading, activeModalID, updateModalID }}
             children={children}
         />
     )

@@ -2,7 +2,6 @@ import {
     GridContainer,
     Link,
     ModalRef,
-    ModalToggleButton,
 } from '@trussworks/react-uswds'
 import React, { useEffect, useRef, useState } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
@@ -24,7 +23,7 @@ import { Error404 } from '../Errors/Error404Page'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import styles from './SubmissionSummary.module.scss'
 import { ChangeHistory } from '../../components/ChangeHistory'
-import { UnlockSubmitModal } from '../../components/Modal'
+import { ModalOpenButton, UnlockSubmitModal } from '../../components/Modal'
 import { RoutesRecord } from '../../constants'
 import { useRouteParams } from '../../hooks'
 import { getVisibleLatestContractFormData } from '../../gqlHelpers/contractsAndRates'
@@ -39,16 +38,14 @@ function UnlockModalButton({
     modalRef: React.RefObject<ModalRef>
 }) {
     return (
-        <ModalToggleButton
+        <ModalOpenButton
             modalRef={modalRef}
             className={styles.submitButton}
-            data-testid="form-submit"
+            id="form-submit"
             disabled={disabled}
-            outline
-            opener
         >
             Unlock submission
-        </ModalToggleButton>
+        </ModalOpenButton>
     )
 }
 

@@ -1,7 +1,6 @@
 import {
     GridContainer,
     ModalRef,
-    ModalToggleButton,
 } from '@trussworks/react-uswds'
 import React, { useRef, useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -34,6 +33,7 @@ import { packageName } from '../../../../../common-code/healthPlanFormDataType'
 import { usePage } from '../../../../../contexts/PageContext'
 import { activeFormPages } from '../../../StateSubmissionForm'
 import { featureFlags } from '../../../../../common-code/featureFlags'
+import { ModalOpenButton } from '../../../../../components/Modal'
 
 export const ReviewSubmit = (): React.ReactElement => {
     const navigate = useNavigate()
@@ -190,22 +190,13 @@ export const ReviewSubmit = (): React.ReactElement => {
                     >
                         Back
                     </ActionButton>
-                    <ModalToggleButton
+                    <ModalOpenButton
                         modalRef={modalRef}
                         className={styles.submitButton}
-                        data-testid="form-submit"
-                        onClick={() =>
-                            logButtonEvent({
-                                text: 'Submit',
-                                button_type: 'button',
-                                button_style: 'success',
-                                parent_component_type: 'page body',
-                            })
-                        }
-                        opener
+                        id="form-submit"
                     >
                         Submit
-                    </ModalToggleButton>
+                    </ModalOpenButton>
                 </PageActionsContainer>
 
                 {/* if the session is expiring, close this modal so the countdown modal can appear */}

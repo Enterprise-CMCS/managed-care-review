@@ -6,6 +6,7 @@ import {
     userClickByTestId,
     renderWithProviders,
 } from '../../testHelpers/jestHelpers'
+import { ModalOpenButton } from './ModalOpenButton/ModalOpenButton'
 
 describe('Modal', () => {
     it('Renders element by default with modal hidden', () => {
@@ -199,13 +200,12 @@ describe('Modal', () => {
                     >
                         <textarea data-testid="modal-children" />
                     </Modal>
-                    <ModalToggleButton
+                    <ModalOpenButton
                         modalRef={modalRef}
-                        data-testid="opener-button"
-                        opener
+                        id="opener-button"
                     >
                         Open modal
-                    </ModalToggleButton>
+                    </ModalOpenButton>
                 </div>
             )
             await userClickByTestId(screen, 'opener-button')
@@ -225,13 +225,13 @@ describe('Modal', () => {
                     >
                         <textarea data-testid="modal-children" />
                     </Modal>
-                    <ModalToggleButton
+                    <ModalOpenButton
                         modalRef={modalRef}
-                        data-testid="opener-button"
+                        id="opener-button"
                         opener
                     >
                         Open modal
-                    </ModalToggleButton>
+                    </ModalOpenButton>
                 </div>
             )
 
@@ -255,13 +255,12 @@ describe('Modal', () => {
                     >
                         <textarea data-testid="modal-children" />
                     </Modal>
-                    <ModalToggleButton
+                    <ModalOpenButton
                         modalRef={modalRef}
-                        data-testid="opener-button"
-                        opener
+                        id="opener-button"
                     >
                         Open modal
-                    </ModalToggleButton>
+                    </ModalOpenButton>
                 </div>
             )
             await userClickByTestId(screen, 'opener-button')
@@ -292,13 +291,12 @@ describe('Modal', () => {
                     >
                         <textarea data-testid="modal-children" />
                     </Modal>
-                    <ModalToggleButton
+                    <ModalOpenButton
                         modalRef={modalRef}
-                        data-testid="opener-button"
-                        opener
+                        id="opener-button"
                     >
                         Open modal
-                    </ModalToggleButton>
+                    </ModalOpenButton>
                 </div>
             )
 

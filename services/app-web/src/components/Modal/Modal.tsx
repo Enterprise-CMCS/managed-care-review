@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {useEffect} from 'react'
 import {
     ButtonGroup,
     Modal as UswdsModal,
@@ -15,6 +15,8 @@ import styles from './Modal.module.scss'
 
 import { ActionButton } from '../ActionButton'
 import { ButtonWithLogging } from '../TealiumLogging'
+import { useIdleTimerContext } from 'react-idle-timer'
+import { usePage } from '../../contexts/PageContext'
 
 interface ModalComponentProps {
     id: string
@@ -47,9 +49,16 @@ export const Modal = ({
     modalAlert,
     ...divProps
 }: ModalProps): React.ReactElement => {
-    // TODO figure out what to do here - make a global modal there was code about closing every other modal
-    /* unless it's the session expiring modal, close it if the session is expiring, so the user can interact
-    with the session expiring modal */
+    const {activeModalID} = usePage()
+    /*
+       Session expiration modal should override all others - single modal handling state is found in usePage
+    */
+    useEffect(() => {
+        const overrideWithNewModal = activeModalID !== id
+        console.log('in effect', overrideWithNewModal)
+        if (overrideWithNewModal) {
+        modalRef.current?.toggleModal(undefined, false)
+    }}, [activeModalID, id, modalRef])
 
     const cancelHandler = (e: React.MouseEvent): void => {
         if (onCancel) {
