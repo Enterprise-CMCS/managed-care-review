@@ -9,16 +9,16 @@ import { ModalRef } from '@trussworks/react-uswds'
 */
 type PageContextType = {
     heading?: string | React.ReactElement
-    activeModalID?: string,
+    activeModalRef?: React.RefObject<ModalRef>
     updateHeading: ({
         customHeading,
     }: {
         customHeading?: string | React.ReactElement
     }) => void
-    updateModalID: ({
-        updatedModalID,
+    updateModalRef: ({
+        updatedModalRef,
     }: {
-        updatedModalID?: string
+        updatedModalRef?: React.RefObject<ModalRef>
     }) => void
 }
 
@@ -35,7 +35,7 @@ const PageProvider: React.FC<
     const [heading, setHeading] = React.useState<
         string | React.ReactElement | undefined
     >(undefined)
-    const [activeModalID, setactiveModalID] = React.useState<string | undefined>(undefined)
+    const [activeModal, setActiveModal] = React.useState<React.RefObject<ModalRef>| undefined>(undefined)
     const { currentRoute: routeName } = useCurrentRoute()
 
     /*
@@ -60,22 +60,22 @@ const PageProvider: React.FC<
     }
 
     /*
-        Set activeModalID - points to an instance of <Modal/>that is currently visible on the page
-        - reset to undefined when the modal closed and hideen
-        - reset to new string when a new modal opens
-        - ensure only one modal open at a time, any new new modal opened overrides previous modal
+        Set activeModalRef to reference currently visible modal
+        - reset to undefined when a modal closed and hidden
+        - reset when a new modal opens in ModalOpenButton and in openSessionTimeoutModal
+        - ensurse only one modal open at a time, any new new modal opened overrides previous modal
     */
-        const updateModalID = ({
-            updatedModalID,
+        const updateModalRef = ({
+            updatedModalRef,
         }: {
-            updatedModalID?:string
+            updatedModalRef?: React.RefObject<ModalRef>
         }) => {
-           setactiveModalID(updatedModalID)
+           setActiveModal(updatedModalRef)
         }
 
     return (
         <PageContext.Provider
-            value={{ heading, updateHeading, activeModalID, updateModalID }}
+            value={{ heading, updateHeading, activeModalRef: activeModal, updateModalRef}}
             children={children}
         />
     )

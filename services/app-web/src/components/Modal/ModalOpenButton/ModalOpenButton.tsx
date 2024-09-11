@@ -20,11 +20,15 @@ export const ModalOpenButton = ({
     ...restProps
 }: ModalOpenButtonProps): React.ReactElement => {
     const { logButtonEvent } = useTealium()
-    const {activeModalID, updateModalID} = usePage()
+    const {activeModalRef, updateModalRef} = usePage()
    const handleOnClick = () => {
-        if(activeModalID){
-            updateModalID({updatedModalID: id})
-        }
+
+    // Make sure our global state tracks what modal is now open
+    if(activeModalRef !== modalRef) {
+        updateModalRef({updatedModalRef: modalRef})
+    }
+
+
         logButtonEvent({
             text: extractText(children),
             button_type: 'button',

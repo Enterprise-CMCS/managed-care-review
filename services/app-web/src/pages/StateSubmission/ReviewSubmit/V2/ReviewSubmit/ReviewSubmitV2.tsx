@@ -11,7 +11,6 @@ import { ActionButton } from '../../../../../components/ActionButton'
 import {
     useRouteParams,
     useStatePrograms,
-    useTealium,
 } from '../../../../../hooks'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 
@@ -43,7 +42,6 @@ export const ReviewSubmit = (): React.ReactElement => {
     const { updateHeading } = usePage()
     const { id } = useRouteParams()
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
-    const { logButtonEvent } = useTealium()
     const ldClient = useLDClient()
 
     const hideSupportingDocs = ldClient?.variation(
@@ -199,7 +197,6 @@ export const ReviewSubmit = (): React.ReactElement => {
                     </ModalOpenButton>
                 </PageActionsContainer>
 
-                {/* if the session is expiring, close this modal so the countdown modal can appear */}
                 <UnlockSubmitModal
                     submissionData={contract}
                     submissionName={submissionName}

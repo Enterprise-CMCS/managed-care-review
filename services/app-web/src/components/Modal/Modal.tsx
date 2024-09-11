@@ -15,7 +15,6 @@ import styles from './Modal.module.scss'
 
 import { ActionButton } from '../ActionButton'
 import { ButtonWithLogging } from '../TealiumLogging'
-import { useIdleTimerContext } from 'react-idle-timer'
 import { usePage } from '../../contexts/PageContext'
 
 interface ModalComponentProps {
@@ -49,22 +48,22 @@ export const Modal = ({
     modalAlert,
     ...divProps
 }: ModalProps): React.ReactElement => {
-    const {activeModalID} = usePage()
-    /*
-       Session expiration modal should override all others - single modal handling state is found in usePage
-    */
-    useEffect(() => {
-        const overrideWithNewModal = activeModalID !== id
-        console.log('in effect', overrideWithNewModal)
-        if (overrideWithNewModal) {
-        modalRef.current?.toggleModal(undefined, false)
-    }}, [activeModalID, id, modalRef])
-
+    const {updateModalRef} = usePage()
     const cancelHandler = (e: React.MouseEvent): void => {
         if (onCancel) {
             onCancel()
         }
+        updateModalRef({updatedModalRef: undefined})
         modalRef.current?.toggleModal(undefined, false)
+    }
+
+    const submitHandler = (e: React.MouseEvent): void => {
+        if (onSubmit) {
+            onSubmit()
+        }
+        updateModalRef({updatedModalRef: undefined})
+        // do not close modal here - close in on submit
+        // sometimes validation will fail and we want to keep modal open but display errors
     }
 
     return (
@@ -110,7 +109,7 @@ export const Modal = ({
                         variant="success"
                         id={`${id}-submit`}
                         parent_component_type="modal"
-                        onClick={onSubmit}
+                        onClick={submitHandler}
                         loading={isSubmitting}
                         {...submitButtonProps}
                     >

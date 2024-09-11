@@ -2,26 +2,32 @@ import React from 'react'
 import { ModalRef } from '@trussworks/react-uswds'
 import { createRef} from 'react'
 import { useAuth } from '../../contexts/AuthContext'
-import { AuthModeType } from '../../common-code/config'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '../../common-code/featureFlags'
 import { SessionTimeoutModal } from '../../components/Modal/SessionTimeoutModal'
 import { IdleTimerProvider } from 'react-idle-timer'
+import { usePage } from '../../contexts/PageContext'
 
 // AuthenticatedRouteWrapper control access to protected routes and the session timeout modal
 // For more on expected behavior for session timeout see feature-brief-session-expiration.md
 export const AuthenticatedRouteWrapper = ({
     children,
-    authMode,
 }: {
     children: React.ReactNode
-    authMode: AuthModeType
 }): React.ReactElement => {
     const modalRef = createRef<ModalRef>()
     const ldClient = useLDClient()
     const  {logout, refreshAuth} = useAuth()
+    const {activeModalRef, updateModalRef} = usePage()
 
     const openSessionTimeoutModal = () =>{
+        // Make sure we close any active modals for session timeout, which overrides the focus trap
+        console.log( 'session timeout modal open' , activeModalRef, modalRef)
+            if(activeModalRef && activeModalRef !== modalRef) {
+            activeModalRef.current?.toggleModal(undefined, false)
+            updateModalRef({updatedModalRef: modalRef})
+        }
+
         modalRef.current?.toggleModal(undefined, true)
     }
     const closeSessionTimeoutModal = () => {
