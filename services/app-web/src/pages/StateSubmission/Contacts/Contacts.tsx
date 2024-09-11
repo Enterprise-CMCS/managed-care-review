@@ -12,7 +12,7 @@ import {
 import { generatePath, useNavigate } from 'react-router-dom'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import styles from '../StateSubmissionForm.module.scss'
-
+import { recordJSException } from '../../../otelHelpers'
 import {
     StateContact,
     UpdateContractDraftRevisionInput,
@@ -173,7 +173,9 @@ const Contacts = ({
         if (updatedSubmission instanceof Error) {
             formikHelpers.setSubmitting(false)
             redirectToDashboard.current = false
-            console.info('Error updating draft submission: ', updatedSubmission)
+            const msg = `Error updating draft submission: ${updatedSubmission}`
+            console.info(msg)
+            recordJSException(msg)
         } else if (updatedSubmission) {
             if (redirectToDashboard.current) {
                 navigate(RoutesRecord.DASHBOARD_SUBMISSIONS)
