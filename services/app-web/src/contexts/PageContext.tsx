@@ -60,10 +60,10 @@ const PageProvider: React.FC<
     }
 
     /*
-        Set activeModalRef to reference currently visible modal
-        - reset to undefined when a modal closed and hidden
-        - reset when a new modal opens in ModalOpenButton and in openSessionTimeoutModal
-        - ensurse only one modal open at a time, any new new modal opened overrides previous modal
+        Set a ref pointing to currently visible modal
+        - is reset in child components when new modal open or back to undefined when existing modal is closed
+        - help ensure only one modal open at a time
+        - used in AuthenticatedRouteWrapper to close open modals when session timeout hit
     */
         const updateModalRef = ({
             updatedModalRef,

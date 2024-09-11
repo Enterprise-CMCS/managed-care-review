@@ -21,9 +21,8 @@ export const AuthenticatedRouteWrapper = ({
     const {activeModalRef, updateModalRef} = usePage()
 
     const openSessionTimeoutModal = () =>{
-        // Make sure we close any active modals for session timeout, which overrides the focus trap
-        console.log( 'session timeout modal open' , activeModalRef, modalRef)
-            if(activeModalRef && activeModalRef !== modalRef) {
+        // Make sure we close any active modals for session timeout, should overrides the focus trap
+        if(activeModalRef && activeModalRef !== modalRef) {
             activeModalRef.current?.toggleModal(undefined, false)
             updateModalRef({updatedModalRef: modalRef})
         }

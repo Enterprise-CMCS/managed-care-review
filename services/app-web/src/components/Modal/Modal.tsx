@@ -62,8 +62,10 @@ export const Modal = ({
             onSubmit()
         }
         updateModalRef({updatedModalRef: undefined})
-        // do not close modal here - close in on submit
-        // sometimes validation will fail and we want to keep modal open but display errors
+        // do not close modal here manually
+        // sometimes validation fails and we want to keep modal open but display errors
+        // consumer should determine wether or not to close modal in onSubmit
+
     }
 
     return (
