@@ -87,7 +87,7 @@ const StateUserRoutes = ({
         featureFlags.RATE_EDIT_UNLOCK.defaultValue
     )
     return (
-        <AuthenticatedRouteWrapper authMode={authMode}>
+        <AuthenticatedRouteWrapper>
             <Routes>
                 <Route
                     path={RoutesRecord.ROOT}
@@ -172,7 +172,7 @@ const CMSUserRoutes = ({
     stageName?: string
 }): React.ReactElement => {
     return (
-        <AuthenticatedRouteWrapper authMode={authMode}>
+        <AuthenticatedRouteWrapper>
             <Routes>
                 <Route
                     path={RoutesRecord.ROOT}
