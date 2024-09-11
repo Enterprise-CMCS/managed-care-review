@@ -23,7 +23,7 @@ describe('CMS user can view submission', () => {
             name: /Contacts/,
         }).should('exist')
         cy.fillOutStateContact()
-        cy.deprecatedNavigateV1Form('CONTINUE')
+        cy.navigateContractForm('CONTINUE')
 
         // store submission id for reference later
         let submissionId = ''

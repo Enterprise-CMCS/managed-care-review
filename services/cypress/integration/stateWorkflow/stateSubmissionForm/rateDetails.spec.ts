@@ -78,7 +78,7 @@ describe('rate details', () => {
         cy.fillOutStateContact()
 
         // Navigate back to rate details page
-        cy.deprecatedNavigateV1Form('BACK')
+        cy.navigateContractForm('BACK')
         cy.findByRole('heading', { level: 2, name: /Rate details/ })
 
         //Remove last rate certification, total two
