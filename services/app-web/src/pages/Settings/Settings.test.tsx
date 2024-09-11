@@ -88,7 +88,7 @@ const commonSettingPageTest = async () => {
     // Check the table headers
     expect(
         within(tableAnalysts).getByRole('columnheader', {
-            name: 'Inbox',
+            name: 'Assigned DMCO staff',
         })
     ).toBeInTheDocument()
     expect(
