@@ -19,8 +19,8 @@ export const SessionTimeoutModal = ({
         idleTimer.message({action:'LOGOUT_SESSION'}, true)
     }
     const handleContinueSession = async () => {
-        idleTimer.message({action:'CONTINUE_SESSION'}, true)
         idleTimer.activate()
+        idleTimer.message({action:'CONTINUE_SESSION'}, true)
     }
     useEffect(() => {
         const interval = setInterval(() => {
