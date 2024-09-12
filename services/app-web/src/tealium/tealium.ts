@@ -212,7 +212,7 @@ const tealiumClient = (tealiumEnv: Omit<TealiumEnv, 'dev'>): TealiumClientType =
 
             // Load utag.sync.js - add to head element - SYNC load from src
             const initializeTagManagerSnippet = createScript({
-                src: `https://tags.tiqcdn.com/utag/cmsgov/${tealiumProfile}/${tealiumEnv}/utag.sync.js`,
+                src: `https://tealium-tags.cms.gov/utag/cmsgov/${tealiumProfile}/${tealiumEnv}/utag.sync.js`,
                 id: 'tealium-load-tags-sync',
             })
             if (document.getElementById(initializeTagManagerSnippet.id) === null) {
@@ -224,7 +224,7 @@ const tealiumClient = (tealiumEnv: Omit<TealiumEnv, 'dev'>): TealiumClientType =
                 t = 'cmsgov/${tealiumProfile}'
                 e = '${tealiumEnv}'
                 a = '/' + t + '/' + e + '/utag.js'
-                l = '//tags.tiqcdn.com/utag' + a
+                l = '//tealium-tags.cms.gov/utag' + a
                 i = document
                 u = 'script'
                 m = i.createElement(u)

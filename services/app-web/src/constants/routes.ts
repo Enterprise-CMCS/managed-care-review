@@ -12,7 +12,8 @@ const ROUTES = [
     'API_ACCESS',
     'HELP',
     'SETTINGS',
-    'MC_REVIEW_SETTINGS',
+    'MCR_SETTINGS',
+    'EDIT_STATE_ASSIGNMENTS',
     'STATE_ASSIGNMENTS',
     'DIVISION_ASSIGNMENTS',
     'AUTOMATED_EMAILS',
@@ -55,8 +56,9 @@ const RoutesRecord: Record<RouteT, string> = {
     API_ACCESS: '/dev/api-access',
     HELP: '/help',
     SETTINGS: '/settings',
-    MC_REVIEW_SETTINGS: '/mc-review-settings',
+    MCR_SETTINGS: '/mc-review-settings',
     STATE_ASSIGNMENTS: '/mc-review-settings/state-assignments',
+    EDIT_STATE_ASSIGNMENTS: '/mc-review-settings/state-assignments/:stateCode/edit',
     DIVISION_ASSIGNMENTS: '/mc-review-settings/division-assignments',
     AUTOMATED_EMAILS: '/mc-review-settings/automated-emails',
     SUPPORT_EMAILS: '/mc-review-settings/support-emails',
@@ -134,7 +136,7 @@ const PageHeadingsRecord: Partial<Record<RouteTWithUnknown, string>> = {
     DASHBOARD_SUBMISSIONS: 'Submissions dashboard',
     DASHBOARD_RATES: 'Rate reviews dashboard',
     SUBMISSIONS_NEW: 'New submission',
-    MC_REVIEW_SETTINGS: 'MC-Review settings'
+    MCR_SETTINGS: 'MC-Review settings'
 }
 
 /*
@@ -149,8 +151,9 @@ const PageTitlesRecord: Record<RouteT | 'UNKNOWN_ROUTE', string> = {
     API_ACCESS: 'API Access',
     HELP: 'Help',
     SETTINGS: 'MC-Review settings',
-    MC_REVIEW_SETTINGS: 'MC-Review settings',
+    MCR_SETTINGS: 'MC-Review settings',
     STATE_ASSIGNMENTS: 'State assignments',
+    EDIT_STATE_ASSIGNMENTS: 'Edit state assignments',
     DIVISION_ASSIGNMENTS: 'Division assignments',
     AUTOMATED_EMAILS: 'Automated emails',
     SUPPORT_EMAILS: 'Support emails',
