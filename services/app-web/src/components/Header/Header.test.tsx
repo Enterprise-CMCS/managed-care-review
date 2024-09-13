@@ -1,7 +1,11 @@
 import { screen, waitFor } from '@testing-library/react'
 import * as CognitoAuthApi from '../../pages/Auth/cognitoAuth'
 import { renderWithProviders } from '../../testHelpers/jestHelpers'
-import { fetchCurrentUserMock } from '../../testHelpers/apolloMocks'
+import {
+    fetchCurrentUserMock,
+    iterableAdminUsersMockData,
+    iterableCmsUsersMockData,
+} from '../../testHelpers/apolloMocks'
 import { Header } from './Header'
 
 describe('Header', () => {
@@ -116,9 +120,6 @@ describe('Header', () => {
                 const yourAccountButton = screen.getByRole('button', {
                     name: 'Your account',
                 })
-                expect(
-                    screen.getByRole('link', { name: 'MC-Review settings' })
-                ).toBeInTheDocument()
                 expect(yourAccountButton).toBeInTheDocument()
                 void user.click(yourAccountButton)
             })
@@ -152,9 +153,6 @@ describe('Header', () => {
                 const yourAccountButton = screen.getByRole('button', {
                     name: 'Your account',
                 })
-                expect(
-                    screen.getByRole('link', { name: 'MC-Review settings' })
-                ).toBeInTheDocument()
                 expect(yourAccountButton).toBeInTheDocument()
                 void user.click(yourAccountButton)
             })
@@ -192,9 +190,6 @@ describe('Header', () => {
                 const yourAccountButton = screen.getByRole('button', {
                     name: 'Your account',
                 })
-                expect(
-                    screen.getByRole('link', { name: 'MC-Review settings' })
-                ).toBeInTheDocument()
                 expect(yourAccountButton).toBeInTheDocument()
                 void user.click(yourAccountButton)
             })
@@ -210,5 +205,62 @@ describe('Header', () => {
             await waitFor(() => expect(spy).toHaveBeenCalledTimes(1))
             await waitFor(() => expect(mockAlert).toHaveBeenCalled())
         })
+
+        it('does not render MC-review settings link for State users', async () => {
+            renderWithProviders(<Header authMode={'AWS_COGNITO'} />, {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            statusCode: 200,
+                        }),
+                    ],
+                },
+            })
+
+            await waitFor(() => {
+                const yourAccountButton = screen.getByRole('button', {
+                    name: 'Your account',
+                })
+                expect(yourAccountButton).toBeInTheDocument()
+            })
+
+            expect(
+                screen.queryByRole('link', { name: 'MC-Review settings' })
+            ).toBeNull()
+        })
     })
 })
+
+const adminAndCmsUsers = [
+    ...iterableAdminUsersMockData,
+    ...iterableCmsUsersMockData,
+]
+
+describe.each(adminAndCmsUsers)(
+    'Admin and CMS users tests',
+    ({ mockUser, userRole }) => {
+        it('renders MC-review settings link for $userRole', async () => {
+            renderWithProviders(<Header authMode={'AWS_COGNITO'} />, {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockUser(),
+                            statusCode: 200,
+                        }),
+                    ],
+                },
+            })
+
+            await waitFor(() => {
+                const yourAccountButton = screen.getByRole('button', {
+                    name: 'Your account',
+                })
+                expect(yourAccountButton).toBeInTheDocument()
+            })
+
+            expect(
+                screen.getByRole('link', { name: 'MC-Review settings' })
+            ).toBeInTheDocument()
+        })
+    }
+)

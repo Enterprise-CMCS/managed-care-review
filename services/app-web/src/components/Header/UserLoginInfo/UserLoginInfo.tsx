@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 
-import { LoginStatusType } from '../../../contexts/AuthContext'
+import { LoginStatusType, useAuth } from '../../../contexts/AuthContext'
 import { User } from '../../../gen/gqlClient'
 import { idmRedirectURL } from '../../../pages/Auth/cognitoAuth'
 import { AuthModeType } from '../../../common-code/config'
@@ -27,6 +27,10 @@ const LoggedInUserInfo = (
     const stringConstants = useStringConstants()
     const [isOpen, setIsOpen] = useState(false)
     const { logButtonEvent } = useTealium()
+    const { loggedInUser } = useAuth()
+
+    const isStateUser = loggedInUser?.role === 'STATE_USER'
+
     const onToggle = (): void => {
         logButtonEvent({
             text: 'Your account',
@@ -52,19 +56,23 @@ const LoggedInUserInfo = (
             </span>
             <nav className={`${styles.primaryNav}`}>
                 <ul className={'usa-nav__primary usa-accordion'}>
-                    <li className={`usa-nav__primary-item`}>
-                        <NavLinkWithLogging
-                            to={'/mc-review-settings'}
-                            variant="unstyled"
-                        >
-                            MC-Review settings
-                        </NavLinkWithLogging>
-                    </li>
-                    <li aria-hidden className={`usa-nav__primary-item`}>
-                        <span aria-hidden className={styles.divider}>
-                            |
-                        </span>
-                    </li>
+                    {!isStateUser && (
+                        <>
+                            <li className={`usa-nav__primary-item`}>
+                                <NavLinkWithLogging
+                                    to={'/mc-review-settings'}
+                                    variant="unstyled"
+                                >
+                                    MC-Review settings
+                                </NavLinkWithLogging>
+                            </li>
+                            <li aria-hidden className={`usa-nav__primary-item`}>
+                                <span aria-hidden className={styles.divider}>
+                                    |
+                                </span>
+                            </li>
+                        </>
+                    )}
                     <li
                         className={`usa-nav__primary-item ${styles.subMenuContainer}`}
                     >
