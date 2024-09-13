@@ -2,6 +2,7 @@ import { screen, waitFor } from '@testing-library/react'
 import { renderWithProviders } from '../../../testHelpers'
 import {
     fetchCurrentUserMock,
+    fetchMcReviewSettingsMock,
     indexUsersQueryMock,
     mockValidAdminUser,
     mockValidBusinessOwnerUser,
@@ -36,6 +37,52 @@ const wrapInRoutes = (children: React.ReactNode) => {
 }
 
 describe('EditStateAssign', () => {
+    const mockUsers: User[] = [
+        mockValidCMSUser({
+            id: '1',
+            givenName: 'OACT',
+            familyName: 'CMSUser',
+            divisionAssignment: 'OACT',
+        }),
+        mockValidCMSApproverUser({
+            id: '2',
+            givenName: 'DMCP',
+            familyName: 'CMSApproverUser',
+            divisionAssignment: 'DMCP',
+        }),
+        mockValidAdminUser({
+            id: '3',
+            givenName: 'Admin',
+            familyName: 'User',
+        }),
+        mockValidStateUser({
+            id: '4',
+            givenName: 'State',
+            familyName: 'User',
+        }),
+        mockValidBusinessOwnerUser({
+            id: '5',
+            givenName: 'BusinessOwner',
+            familyName: 'User',
+        }),
+        mockValidHelpDeskUser({
+            id: '6',
+            givenName: 'HelpDesk',
+            familyName: 'User',
+        }),
+        mockValidCMSUser({
+            id: '7',
+            givenName: 'DMCO',
+            familyName: 'CMSUser',
+            divisionAssignment: 'DMCO',
+        }),
+        mockValidCMSApproverUser({
+            id: '8',
+            givenName: 'DMCO',
+            familyName: 'CMSApproverUser',
+            divisionAssignment: 'DMCO',
+        }),
+    ]
     afterEach(() => {
         vi.resetAllMocks()
     })
@@ -48,6 +95,7 @@ describe('EditStateAssign', () => {
                         user: mockValidAdminUser(),
                         statusCode: 200,
                     }),
+                    fetchMcReviewSettingsMock(),
                     indexUsersQueryMock(),
                 ],
             },
@@ -82,6 +130,7 @@ describe('EditStateAssign', () => {
                         user: mockValidAdminUser(),
                         statusCode: 200,
                     }),
+                    fetchMcReviewSettingsMock(),
                     indexUsersQueryMock(),
                 ],
             },
@@ -104,6 +153,7 @@ describe('EditStateAssign', () => {
                         user: mockValidAdminUser(),
                         statusCode: 200,
                     }),
+                    fetchMcReviewSettingsMock(),
                     indexUsersQueryMock(),
                 ],
             },
@@ -122,53 +172,6 @@ describe('EditStateAssign', () => {
     })
 
     it('expects dropdown to show analyst with CMS or CMSApprover roles assigned to DMCO', async () => {
-        const testUsers: User[] = [
-            mockValidCMSUser({
-                id: '1',
-                givenName: 'OACT',
-                familyName: 'CMSUser',
-                divisionAssignment: 'OACT',
-            }),
-            mockValidCMSApproverUser({
-                id: '2',
-                givenName: 'DMCP',
-                familyName: 'CMSApproverUser',
-                divisionAssignment: 'DMCP',
-            }),
-            mockValidAdminUser({
-                id: '3',
-                givenName: 'Admin',
-                familyName: 'User',
-            }),
-            mockValidStateUser({
-                id: '4',
-                givenName: 'State',
-                familyName: 'User',
-            }),
-            mockValidBusinessOwnerUser({
-                id: '5',
-                givenName: 'BusinessOwner',
-                familyName: 'User',
-            }),
-            mockValidHelpDeskUser({
-                id: '6',
-                givenName: 'HelpDesk',
-                familyName: 'User',
-            }),
-            mockValidCMSUser({
-                id: '7',
-                givenName: 'DMCO',
-                familyName: 'CMSUser',
-                divisionAssignment: 'DMCO',
-            }),
-            mockValidCMSApproverUser({
-                id: '8',
-                givenName: 'DMCO',
-                familyName: 'CMSApproverUser',
-                divisionAssignment: 'DMCO',
-            }),
-        ]
-
         renderWithProviders(wrapInRoutes(<EditStateAssign />), {
             apolloProvider: {
                 mocks: [
@@ -176,7 +179,8 @@ describe('EditStateAssign', () => {
                         user: mockValidAdminUser(),
                         statusCode: 200,
                     }),
-                    indexUsersQueryMock(testUsers),
+                    fetchMcReviewSettingsMock(),
+                    indexUsersQueryMock(mockUsers),
                 ],
             },
             routerProvider: {
@@ -200,5 +204,63 @@ describe('EditStateAssign', () => {
         expect(screen.queryByText('OACT CMSUser')).toBeNull()
     })
 
-    it.todo('shows errors when required fields are not filled in')
+    it('shows errors when required fields are not filled in', async () => {
+        renderWithProviders(wrapInRoutes(<EditStateAssign />), {
+            apolloProvider: {
+                mocks: [
+                    fetchCurrentUserMock({
+                        user: mockValidAdminUser(),
+                        statusCode: 200,
+                    }),
+                    fetchMcReviewSettingsMock(),
+                    indexUsersQueryMock(mockUsers),
+                ],
+            },
+            routerProvider: {
+                route: `/mc-review-settings/state-assignments/TX/edit`,
+            },
+        })
+
+        const saveButton = await screen.findByRole('button', {
+            name: /Save changes/,
+        })
+        expect(saveButton).toBeInTheDocument()
+        await userEvent.click(saveButton)
+
+        // Wait for expected errors
+        await waitFor(() => {
+            expect(
+                screen.getByText('Edit state assignment')
+            ).toBeInTheDocument()
+            const alert = screen.getAllByRole('alert')
+            expect(alert).toHaveLength(2)
+        })
+
+        // Expect error messages
+        expect(screen.getByText('Assign a DMCO analyst')).toBeInTheDocument()
+        expect(
+            screen.getByText('You must select at least one staff member.')
+        ).toBeInTheDocument()
+
+        // Select an analyst from the dropdown
+        await waitFor(async () => {
+            const dropdown = screen.getByRole('combobox')
+            expect(dropdown).toBeInTheDocument()
+            await userEvent.click(dropdown)
+        })
+        const analyst = screen.getByText('DMCO CMSApproverUser')
+        expect(analyst).toBeInTheDocument()
+        await userEvent.click(analyst)
+
+        // Expect the errors to be gone
+        await waitFor(() => {
+            const alert = screen.queryAllByRole('alert')
+            expect(alert).toHaveLength(0)
+        })
+
+        expect(screen.queryByText('Assign a DMCO analyst')).toBeNull()
+        expect(
+            screen.queryByText('You must select at least one staff member.')
+        ).toBeNull()
+    })
 })
