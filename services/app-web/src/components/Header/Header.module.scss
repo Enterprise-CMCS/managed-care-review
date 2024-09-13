@@ -1,25 +1,123 @@
 @use '../../styles/custom.scss' as custom;
 @use '../../styles/uswdsImports.scss' as uswds;
 
-.userInfo {
-    font-weight: uswds.font-weight('light');
-    padding: 0 1rem;
+// This is to override all the styles in USWDS classes.
+@mixin override-uswds-nav {
+    font-weight: uswds.font-weight('light') !important;
+    font-size: 1rem !important;
+    line-height: 1.15rem !important;
     color: custom.$mcr-foundation-white;
+}
 
-    button,
-    a {
-        color: custom.$mcr-foundation-white;
+// Override the USWDS classes to match our own styling.
+.primaryNav {
+    background-color: transparent !important;
 
-        &:hover,
-        &:active,
-        &:visited {
-            color: custom.$mcr-foundation-white;
+    button {
+        padding-top: 0 !important;
+        padding-bottom: 0 !important;
+        padding-left: 0 !important;
+        background-color: custom.$mcr-cmsblue-base !important;
+
+        &:hover {
+            color: custom.$mcr-foundation-white !important;
+        }
+        span::after {
+            background-color: white !important;
+        }
+    }
+
+    ul {
+        li > * {
+            @include override-uswds-nav;
         }
     }
 }
 
+.headerItemsContainer {
+    display: flex;
+    flex-wrap: wrap;
+    @include override-uswds-nav;
+
+    a {
+        text-decoration: underline !important;
+        color: custom.$mcr-foundation-white !important;
+        padding: 0 !important;
+        &:hover,
+        &:active,
+        &:visited {
+            color: custom.$mcr-foundation-white !important;
+            background-color: transparent !important;
+        }
+    }
+}
+
+.subMenuContainer {
+    position: relative;
+    margin-bottom: 0 !important;
+
+    ul {
+        position: absolute !important;
+        right: 0 !important;
+        margin-top: 1.5rem !important;
+        width: fit-content;
+        background-color: custom.$mcr-cmsblue-base !important;
+
+        > li {
+            & + li {
+                margin-top: 1.3rem !important;
+            }
+        }
+    }
+}
+
+.signOutButton {
+    text-decoration: underline !important;
+}
+
 .divider {
     padding: 0 1rem;
+    color: custom.$mcr-foundation-white;
+}
+
+@media (min-width: 63px) and (max-width: 1023px) {
+    .divider {
+        display: none;
+    }
+
+    .headerItemsContainer {
+        display: flex;
+        flex-wrap: wrap;
+        flex-direction: column;
+        justify-content: space-between;
+        padding-top: 1rem;
+        padding-bottom: 1rem;
+
+        li {
+            border-top: none !important;
+            margin-top: 1rem;
+            margin-bottom: 1rem;
+        }
+    }
+
+    .primaryNav {
+        ul {
+            margin-top: unset !important;
+        }
+        a:hover {
+            background-color: transparent !important;
+        }
+    }
+
+    .subMenuContainer {
+        ul {
+            margin-top: 0.5rem !important;
+            padding: 1rem;
+            li {
+                margin: 0;
+            }
+        }
+    }
 }
 
 .landingPageHeading {

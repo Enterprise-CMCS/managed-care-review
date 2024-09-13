@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 
 import { LoginStatusType } from '../../../contexts/AuthContext'
 import { User } from '../../../gen/gqlClient'
@@ -13,6 +13,8 @@ import {
     ButtonWithLogging,
 } from '../../../components'
 import { ContactSupportLink } from '../../ErrorAlert/ContactSupportLink'
+import { NavDropDownButton, Menu } from '@trussworks/react-uswds'
+import { useTealium } from '../../../hooks'
 
 type LogoutHandlerT = (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>
@@ -23,22 +25,83 @@ const LoggedInUserInfo = (
     logout: LogoutHandlerT
 ): React.ReactElement => {
     const stringConstants = useStringConstants()
-    return (
-        <div className={styles.userInfo}>
-            <span>Contact </span>
-            <ContactSupportLink alternateText={stringConstants.MAIL_TO_SUPPORT} />
-            <span className={styles.divider}>|</span>
-            <span>{user.email}</span>
-            <span className={styles.divider}>|</span>
+    const [isOpen, setIsOpen] = useState(false)
+    const { logButtonEvent } = useTealium()
+    const onToggle = (): void => {
+        logButtonEvent({
+            text: 'Your account',
+            button_type: 'button',
+            button_style: 'unstyled',
+            parent_component_type: 'constant header',
+        })
+        setIsOpen((prevIsOpen) => {
+            return !prevIsOpen
+        })
+    }
 
-            <ButtonWithLogging
-                type="button"
-                unstyled
-                parent_component_type="constant header"
-                onClick={logout}
-            >
-                Sign out
-            </ButtonWithLogging>
+    const testMenuItems = [
+        <span key="email">{user.email}</span>,
+        <ButtonWithLogging
+            type="button"
+            unstyled
+            parent_component_type="constant header"
+            onClick={logout}
+            className={styles.signOutButton}
+        >
+            Sign out
+        </ButtonWithLogging>,
+    ]
+
+    return (
+        <div className={styles.headerItemsContainer}>
+            <div>
+                <span>Contact </span>
+                <ContactSupportLink
+                    alternateText={stringConstants.MAIL_TO_SUPPORT}
+                />
+            </div>
+            <span aria-hidden className={styles.divider}>
+                |
+            </span>
+            <nav className={`${styles.primaryNav}`}>
+                <ul className={'usa-nav__primary usa-accordion'}>
+                    <li className={`usa-nav__primary-item`}>
+                        <NavLinkWithLogging
+                            to={'/mc-review-settings'}
+                            variant="unstyled"
+                        >
+                            MC-Review settings
+                        </NavLinkWithLogging>
+                    </li>
+                    <li aria-hidden className={`usa-nav__primary-item`}>
+                        <span aria-hidden className={styles.divider}>
+                            |
+                        </span>
+                    </li>
+                    <li
+                        className={`usa-nav__primary-item ${styles.subMenuContainer}`}
+                    >
+                        <>
+                            <NavDropDownButton
+                                key="testItemOne"
+                                label="Your account"
+                                menuId="accountDropDown"
+                                className={styles.headerSignOutButton}
+                                isOpen={isOpen}
+                                onToggle={(): void => {
+                                    onToggle()
+                                }}
+                            />
+                            <Menu
+                                key="one"
+                                items={testMenuItems}
+                                isOpen={isOpen}
+                                id="accountDropDown"
+                            />
+                        </>
+                    </li>
+                </ul>
+            </nav>
         </div>
     )
 }
