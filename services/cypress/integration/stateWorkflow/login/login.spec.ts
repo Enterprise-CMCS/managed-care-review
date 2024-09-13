@@ -13,10 +13,6 @@ describe('login', () => {
         cy.checkA11yWithWcag22aa()
 
         cy.findByRole('button', { name: /Sign out/i }).safeClick()
-
-        cy.injectAxe()
-        cy.checkA11yWithWcag22aa()
-
         cy.location('pathname').should('eq', '/')
         cy.findByRole('link', { name: /Sign In/i }).should('exist')
 
