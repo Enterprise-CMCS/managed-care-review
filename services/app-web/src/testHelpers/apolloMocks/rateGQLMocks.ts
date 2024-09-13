@@ -1,8 +1,8 @@
 import {
     FetchRateDocument,
     FetchRateQuery,
-    IndexRatesDocument,
-    IndexRatesQuery,
+    IndexRatesForDashboardDocument,
+    IndexRatesForDashboardQuery,
     Rate,
     RateRevision,
 } from '../../gen/gqlClient'
@@ -58,7 +58,7 @@ const fetchDraftRateMockSuccess = (
 const indexRatesMockSuccess = (
     stateCode?: string,
     rates?: Rate[]
-): MockedResponse<IndexRatesQuery> => {
+): MockedResponse<IndexRatesForDashboardQuery> => {
     const mockRates = rates ?? [
         { ...rateDataMock(), id: 'test-id-123', stateNumber: 3 },
         { ...rateDataMock(), id: 'test-id-124', stateNumber: 2 },
@@ -71,7 +71,7 @@ const indexRatesMockSuccess = (
     })
     return {
         request: {
-            query: IndexRatesDocument,
+            query: IndexRatesForDashboardDocument,
             variables: {
                 input:{
                     stateCode: stateCode
@@ -89,7 +89,7 @@ const indexRatesMockSuccess = (
     }
 }
 
-const indexRatesMockFailure = (): MockedResponse<IndexRatesQuery> => {
+const indexRatesMockFailure = (): MockedResponse<IndexRatesForDashboardQuery> => {
     const graphQLError = new GraphQLError('Issue finding rates with history', {
         extensions: {
             code: 'NOT_FOUND',
@@ -98,7 +98,7 @@ const indexRatesMockFailure = (): MockedResponse<IndexRatesQuery> => {
     })
     return {
         request: {
-            query: IndexRatesDocument,
+            query: IndexRatesForDashboardDocument,
         },
         result: {
             data: null,
