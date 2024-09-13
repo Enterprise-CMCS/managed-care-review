@@ -39,19 +39,6 @@ const LoggedInUserInfo = (
         })
     }
 
-    const testMenuItems = [
-        <span key="email">{user.email}</span>,
-        <ButtonWithLogging
-            type="button"
-            unstyled
-            parent_component_type="constant header"
-            onClick={logout}
-            className={styles.signOutButton}
-        >
-            Sign out
-        </ButtonWithLogging>,
-    ]
-
     return (
         <div className={styles.headerItemsContainer}>
             <div>
@@ -94,7 +81,18 @@ const LoggedInUserInfo = (
                             />
                             <Menu
                                 key="one"
-                                items={testMenuItems}
+                                items={[
+                                    <span key="email">{user.email}</span>,
+                                    <ButtonWithLogging
+                                        type="button"
+                                        unstyled
+                                        parent_component_type="constant header"
+                                        onClick={logout}
+                                        className={styles.signOutButton}
+                                    >
+                                        Sign out
+                                    </ButtonWithLogging>,
+                                ]}
                                 isOpen={isOpen}
                                 id="accountDropDown"
                             />
