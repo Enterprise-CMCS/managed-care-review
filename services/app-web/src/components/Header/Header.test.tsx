@@ -110,8 +110,19 @@ describe('Header', () => {
             })
 
             await waitFor(() => {
+                const yourAccountButton = screen.getByRole('button', {
+                    name: 'Your account',
+                })
+                expect(
+                    screen.getByRole('link', { name: 'MC-Review settings' })
+                ).toBeInTheDocument()
+                expect(yourAccountButton).toBeInTheDocument()
+                void userEvent.click(yourAccountButton)
+            })
+
+            await waitFor(() => {
                 const signOutButton = screen.getByRole('button', {
-                    name: /Sign out/i,
+                    name: 'Sign out',
                 })
                 expect(signOutButton).toBeInTheDocument()
             })
@@ -132,8 +143,19 @@ describe('Header', () => {
             })
 
             await waitFor(() => {
+                const yourAccountButton = screen.getByRole('button', {
+                    name: 'Your account',
+                })
+                expect(
+                    screen.getByRole('link', { name: 'MC-Review settings' })
+                ).toBeInTheDocument()
+                expect(yourAccountButton).toBeInTheDocument()
+                void userEvent.click(yourAccountButton)
+            })
+
+            await waitFor(() => {
                 const signOutButton = screen.getByRole('button', {
-                    name: /Sign out/i,
+                    name: 'Sign out',
                 })
                 expect(signOutButton).toBeInTheDocument()
                 void userEvent.click(signOutButton)
@@ -161,10 +183,20 @@ describe('Header', () => {
             )
 
             await waitFor(() => {
-                const signOutButton = screen.getByRole('button', {
-                    name: /Sign out/i,
+                const yourAccountButton = screen.getByRole('button', {
+                    name: 'Your account',
                 })
+                expect(
+                    screen.getByRole('link', { name: 'MC-Review settings' })
+                ).toBeInTheDocument()
+                expect(yourAccountButton).toBeInTheDocument()
+                void userEvent.click(yourAccountButton)
+            })
 
+            await waitFor(() => {
+                const signOutButton = screen.getByRole('button', {
+                    name: 'Sign out',
+                })
                 expect(signOutButton).toBeInTheDocument()
                 void userEvent.click(signOutButton)
             })
