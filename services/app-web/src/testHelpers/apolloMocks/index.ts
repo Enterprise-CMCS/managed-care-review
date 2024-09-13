@@ -82,7 +82,12 @@ export {
 } from './contractPackageDataMock'
 export { rateDataMock } from './rateDataMock'
 export { fetchContractMockSuccess, fetchContractMockFail, updateDraftContractRatesMockSuccess, updateContractDraftRevisionMockFail, updateContractDraftRevisionMockSuccess, createContractMockFail, createContractMockSuccess } from './contractGQLMock'
-export { indexRatesMockSuccess, indexRatesMockFailure } from './rateGQLMocks'
+export { 
+    indexRatesMockSuccess, 
+    indexRatesForDashboardMockSuccess, 
+    indexRatesMockFailure,
+    indexRatesForDashboardMockFailure,
+} from './rateGQLMocks'
 
 export { withdrawAndReplaceRedundantRateMock } from './replaceRateGQLMocks'
 
