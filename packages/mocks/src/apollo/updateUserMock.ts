@@ -1,22 +1,22 @@
 import { MockedResponse } from '@apollo/client/testing'
 import { GraphQLError } from 'graphql'
 import {
-    UpdateCmsUserDocument,
-    UpdateCmsUserInput,
-    UpdateCmsUserMutation,
+    UpdateDivisionAssignmentDocument,
+    UpdateDivisionAssignmentInput,
+    UpdateDivisionAssignmentMutation,
 } from '../gen/gqlClient'
 
-const updateUserMockSuccess = (
-    updateInput: UpdateCmsUserInput
-): MockedResponse<UpdateCmsUserMutation> => {
+const updateDivisionMockSuccess = (
+    updateInput: UpdateDivisionAssignmentInput
+): MockedResponse<UpdateDivisionAssignmentMutation> => {
     return {
         request: {
-            query: UpdateCmsUserDocument,
+            query: UpdateDivisionAssignmentDocument,
             variables: { input: updateInput },
         },
         result: {
             data: {
-                updateCMSUser: {
+                updateDivisionAssignment: {
                     user: {
                         __typename: 'CMSUser',
                         id: updateInput.cmsUserID,
@@ -33,9 +33,9 @@ const updateUserMockSuccess = (
     }
 }
 
-const updateUserMockError = (
-    updateInput: UpdateCmsUserInput
-): MockedResponse<UpdateCmsUserMutation> => {
+const updateDivisionMockError = (
+    updateInput: UpdateDivisionAssignmentInput
+): MockedResponse<UpdateDivisionAssignmentMutation> => {
     const graphQLError = new GraphQLError('Error attempting to unlock.', {
         extensions: {
             code: 'NOT_FOUND',
@@ -44,7 +44,7 @@ const updateUserMockError = (
 
     return {
         request: {
-            query: UpdateCmsUserDocument,
+            query: UpdateDivisionAssignmentDocument,
             variables: { input: updateInput },
         },
         result: {
@@ -53,4 +53,4 @@ const updateUserMockError = (
     }
 }
 
-export { updateUserMockSuccess, updateUserMockError }
+export { updateDivisionMockSuccess, updateDivisionMockError }

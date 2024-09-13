@@ -10,7 +10,8 @@ import { GenericDocument } from '../../../gen/gqlClient'
 import { DocumentDateLookupTableType } from '@mc-review/helpers'
 import { LinkWithLogging, NavLinkWithLogging } from '../../TealiumLogging'
 import { hasCMSUserPermissions } from '@mc-review/helpers'
-
+import { useLDClient } from 'launchdarkly-react-client-sdk'
+import { featureFlags } from '@mc-review/common-code'
 // This is used to convert from deprecated FE domain types from protos to GQL GenericDocuments by added in a dateAdded
 export const convertFromSubmissionDocumentsToGenericDocuments = (
     deprecatedDocs: SubmissionDocument[],
@@ -54,10 +55,16 @@ export const UploadedDocumentsTable = ({
     const { loggedInUser } = useAuth()
     const isStateUser = loggedInUser?.__typename === 'StateUser'
     const isCMSUser = hasCMSUserPermissions(loggedInUser)
+    const ldClient = useLDClient()
     const { getDocumentsWithS3KeyAndUrl } = useDocument()
     const [refreshedDocs, setRefreshedDocs] =
         useState<DocumentWithS3Data[]>(initialDocState)
-    const shouldShowEditButton = !hideDynamicFeedback && isSupportingDocuments // at this point only contract supporting documents need the inline EDIT button - this can be deleted when we move supporting docs to ContractDetails page
+    const hideSupportingDocs = ldClient?.variation(
+        featureFlags.HIDE_SUPPORTING_DOCS_PAGE.flag,
+        featureFlags.HIDE_SUPPORTING_DOCS_PAGE.defaultValue
+    )
+    const shouldShowEditButton =
+        !hideDynamicFeedback && isSupportingDocuments && !hideSupportingDocs // at this point only contract supporting documents need the inline EDIT button - this can be deleted when we move supporting docs to ContractDetails page
     // canDisplayDateForDocument -  guards against passing in null or undefined to dayjs
     // don't display prior to the initial submission
     const canDisplayDateAddedForDocument = (doc: DocumentWithS3Data) => {

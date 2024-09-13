@@ -25,7 +25,7 @@ import { SubmissionType } from './SubmissionType'
 import { UnlockedHealthPlanFormDataType } from '@mc-review/hpp'
 import { ContractFormData } from '../../gen/gqlClient'
 import { RateDetails } from './RateDetails'
-import styles from './StateSubmissionForm.module.scss'
+import formContainerStyles from '../../components/FormContainer/FormContainer.module.scss'
 import { SideNavOutletContextType } from '../SubmissionSideNav/SubmissionSideNav'
 
 // Can move this AppRoutes on future pass - leaving it here now to make diff clear
@@ -45,7 +45,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
     return (
         <div
             data-testid="state-submission-form-page"
-            className={styles.formPage}
+            className={formContainerStyles.formPage}
         >
             <Routes>
                 <Route
@@ -91,16 +91,23 @@ export const StateSubmissionForm = (): React.ReactElement => {
 // Utilities
 
 export const activeFormPages = (
-    draft: UnlockedHealthPlanFormDataType | ContractFormData
+    draft: UnlockedHealthPlanFormDataType | ContractFormData,
+    hideSupportingDocs?: boolean
 ): RouteTWithUnknown[] => {
     // If submission type is contract only, rate details is left out of the step indicator
-    return STATE_SUBMISSION_FORM_ROUTES.filter(
-        (formPage) =>
-            !(
-                draft?.submissionType === 'CONTRACT_ONLY' &&
-                formPage === 'SUBMISSIONS_RATE_DETAILS'
-            )
-    )
+    // If feature flag for hiding supporting docs is on, that documents page is left out of the
+    // step indicator
+    return STATE_SUBMISSION_FORM_ROUTES.filter((formPage) => {
+        if (
+            draft?.submissionType === 'CONTRACT_ONLY' &&
+            formPage === 'SUBMISSIONS_RATE_DETAILS'
+        ) {
+            return false
+        } else if (hideSupportingDocs && formPage === 'SUBMISSIONS_DOCUMENTS') {
+            return false
+        }
+        return true
+    })
 }
 
 const getRelativePathFromNestedRoute = (formRouteType: RouteT): string =>
@@ -110,5 +117,9 @@ const getRelativePathFromNestedRoute = (formRouteType: RouteT): string =>
     })
 
 export type HealthPlanFormPageProps = {
+    showValidations?: boolean
+}
+
+export type ContractFormPageProps = {
     showValidations?: boolean
 }

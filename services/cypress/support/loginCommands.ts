@@ -1,5 +1,3 @@
-import { aliasQuery } from '../utils/graphql-test-utils'
-
 Cypress.Commands.add('logInAsStateUser', () => {
     // Set up gql intercept for requests on app load
 
@@ -113,8 +111,16 @@ Cypress.Commands.add(
         cy.wait('@fetchCurrentUserQuery', { timeout: 20_000 })
         cy.url({ timeout: 20_000 }).should('contain', initialURL)
 
-        if (initialURL === '/settings') {
-            cy.wait('@indexUsersQuery', { timeout: 20_000 })
+        if (initialURL === '/mc-review-settings') {
+            cy.getFeatureFlagStore(['read-write-state-assignments']).then(
+                (store) => {
+                    if(store['read-write-state-assignments']) {
+                        cy.wait('@fetchMcReviewSettingsQuery')
+                    } else {
+                        cy.wait('@fetchEmailSettingsQuery')
+                    }
+                }
+            )
         } else if (initialURL?.includes('submissions')) {
             cy.wait('@fetchHealthPlanPackageQuery', { timeout: 20_000 })
         } else {

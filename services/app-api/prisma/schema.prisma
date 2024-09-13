@@ -282,7 +282,7 @@ model State {
   latestStateSubmissionNumber Int                      @default(0)
   latestStateRateCertNumber   Int                      @default(0)
   statePackages               HealthPlanPackageTable[]
-  users                       User[]
+  assignedCMSUsers            User[]                   @relation("StateToAssignedCMSUser")
   contracts                   ContractTable[]
   rates                       RateTable[]
   statePrograms               StateProgram[]
@@ -309,7 +309,7 @@ model User {
   role                  Role
   divisionAssignment    Division?
   stateCode             String?
-  stateAssignments      State[]
+  stateAssignments      State[]            @relation("StateToAssignedCMSUser")
   questions             Question[]
   responses             QuestionResponse[]
   audits                UserAudit[]

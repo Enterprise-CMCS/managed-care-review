@@ -1,5 +1,5 @@
 import { MockedResponse } from '@apollo/client/testing'
-import { ServerError } from '@apollo/client'
+import { ApolloError, ServerError } from '@apollo/client'
 import {
     CmsUser,
     FetchCurrentUserDocument,
@@ -10,20 +10,25 @@ import {
     StateUser,
     HelpdeskUser,
     CmsApproverUser,
+    BusinessOwnerUser,
 } from '../gen/gqlClient'
 
 import { mockMNState } from './stateMock'
+import { GraphQLError } from 'graphql/index'
 function mockValidUser(userData?: Partial<StateUser>): StateUser {
-    return {
-        __typename: 'StateUser' as const,
-        id: 'foo-id',
-        state: mockMNState(),
-        role: 'STATE_USER',
-        givenName: 'bob',
-        familyName: 'ddmas',
-        email: 'bob@dmas.mn.gov',
-        ...userData,
-    }
+    return Object.assign(
+        {},
+        {
+            __typename: 'StateUser' as const,
+            id: 'foo-id',
+            state: mockMNState(),
+            role: 'STATE_USER',
+            givenName: 'bob',
+            familyName: 'ddmas',
+            email: 'bob@dmas.mn.gov',
+        },
+        userData
+    )
 }
 
 const mockValidStateUser = (userData?: Partial<StateUser>): StateUser => {
@@ -31,52 +36,80 @@ const mockValidStateUser = (userData?: Partial<StateUser>): StateUser => {
 }
 
 function mockValidCMSUser(userData?: Partial<CmsUser>): CmsUser {
-    return {
-        __typename: 'CMSUser' as const,
-        id: 'bar-id',
-        role: 'CMS_USER',
-        givenName: 'bob',
-        familyName: 'ddmas',
-        email: 'bob@dmas.mn.gov',
-        divisionAssignment: 'DMCO',
-        stateAssignments: [],
-        ...userData,
-    }
+    return Object.assign(
+        {},
+        {
+            __typename: 'CMSUser' as const,
+            id: 'bar-id',
+            role: 'CMS_USER',
+            givenName: 'bob',
+            familyName: 'ddmas',
+            email: 'bob@dmas.mn.gov',
+            divisionAssignment: 'DMCO',
+            stateAssignments: [],
+        },
+        userData
+    )
 }
 
 function mockValidCMSApproverUser(
     userData?: Partial<CmsApproverUser>
 ): CmsApproverUser {
-    return {
-        __typename: 'CMSApproverUser' as const,
-        id: 'bar-id',
-        role: 'CMS_APPROVER_USER',
-        givenName: 'bob',
-        familyName: 'ddmas',
-        email: 'bob@dmas.mn.gov',
-        divisionAssignment: 'DMCO',
-        stateAssignments: [],
-        ...userData,
-    }
+    return Object.assign(
+        {},
+        {
+            __typename: 'CMSApproverUser' as const,
+            id: 'bar-id',
+            role: 'CMS_APPROVER_USER',
+            givenName: 'bob',
+            familyName: 'ddmas',
+            email: 'bob@dmas.mn.gov',
+            divisionAssignment: 'DMCO',
+            stateAssignments: [],
+            ...userData,
+        },
+        userData
+    )
 }
 
 function mockValidAdminUser(userData?: Partial<AdminUser>): AdminUser {
-    return {
-        __typename: 'AdminUser' as const,
-        id: 'bar-id',
-        role: 'ADMIN_USER',
-        givenName: 'bobadmin',
-        familyName: 'ddmas',
-        email: 'bobadmin@dmas.mn.gov',
-        ...userData,
-    }
+    return Object.assign(
+        {},
+        {
+            __typename: 'AdminUser' as const,
+            id: 'bar-id',
+            role: 'ADMIN_USER',
+            givenName: 'bobadmin',
+            familyName: 'ddmas',
+            email: 'bobadmin@dmas.mn.gov',
+        },
+        userData
+    )
 }
 
 function mockValidHelpDeskUser(userData?: Partial<HelpdeskUser>): HelpdeskUser {
+    return Object.assign(
+        {},
+        {
+            __typename: 'HelpdeskUser' as const,
+            id: 'bar-id',
+            role: 'HELPDESK_USER',
+            givenName: 'bob',
+            familyName: 'ddmas',
+            email: 'bob@dmas.mn.gov',
+            ...userData,
+        },
+        userData
+    )
+}
+
+function mockValidBusinessOwnerUser(
+    userData?: Partial<HelpdeskUser>
+): HelpdeskUser {
     return {
         __typename: 'HelpdeskUser' as const,
         id: 'bar-id',
-        role: 'HELPDESK_USER',
+        role: 'BUSINESSOWNER_USER',
         givenName: 'bob',
         familyName: 'ddmas',
         email: 'bob@dmas.mn.gov',
@@ -151,6 +184,29 @@ const indexUsersQueryMock = (): MockedResponse<IndexUsersQuery> => {
     }
 }
 
+const indexUsersQueryFailMock = (): MockedResponse<ApolloError> => {
+    const graphQLError = new GraphQLError(
+        'Error fetching email settings data.',
+        {
+            extensions: {
+                code: 'INTERNAL_SERVER_ERROR',
+                cause: 'DB Error',
+            },
+        }
+    )
+    return {
+        request: {
+            query: IndexUsersDocument,
+        },
+        error: new ApolloError({
+            graphQLErrors: [graphQLError],
+        }),
+        result: {
+            data: null,
+        },
+    }
+}
+
 const iterableCmsUsersMockData: {
     userRole: 'CMS_USER' | 'CMS_APPROVER_USER'
     mockUser: <T>(userData?: Partial<T>) => CmsUser | CmsApproverUser
@@ -165,6 +221,26 @@ const iterableCmsUsersMockData: {
     },
 ]
 
+const iterableAdminUsersMockData: {
+    userRole: 'HELPDESK_USER' | 'BUSINESSOWNER_USER' | 'ADMIN_USER'
+    mockUser: <T>(
+        userData?: Partial<T>
+    ) => AdminUser | BusinessOwnerUser | HelpdeskUser
+}[] = [
+    {
+        userRole: 'ADMIN_USER',
+        mockUser: mockValidAdminUser,
+    },
+    {
+        userRole: 'BUSINESSOWNER_USER',
+        mockUser: mockValidBusinessOwnerUser,
+    },
+    {
+        userRole: 'HELPDESK_USER',
+        mockUser: mockValidHelpDeskUser,
+    },
+]
+
 export {
     fetchCurrentUserMock,
     mockValidStateUser,
@@ -175,4 +251,7 @@ export {
     mockValidHelpDeskUser,
     mockValidCMSApproverUser,
     iterableCmsUsersMockData,
+    mockValidBusinessOwnerUser,
+    iterableAdminUsersMockData,
+    indexUsersQueryFailMock,
 }

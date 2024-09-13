@@ -9,10 +9,10 @@ import {
     findContractPrograms,
 } from '../templateHelpers'
 import { submissionQuestionResponseURL } from '../generateURLs'
-import type { ContractRevisionWithRatesType } from '../../domain-models/contractAndRates'
+import type { ContractRevisionType } from '../../domain-models/contractAndRates'
 
 export const sendQuestionStateEmail = async (
-    contractRev: ContractRevisionWithRatesType,
+    contractRev: ContractRevisionType,
     submitterEmails: string[],
     config: EmailConfiguration,
     statePrograms: ProgramType[],
@@ -66,8 +66,8 @@ export const sendQuestionStateEmail = async (
     } else {
         return {
             toAddresses: receiverEmails,
+            replyToAddresses: [],
             sourceEmail: config.emailSource,
-            replyToAddresses: [config.helpDeskEmail],
             subject: `${
                 config.stage !== 'prod' ? `[${config.stage}] ` : ''
             }New questions about ${packageName}`,

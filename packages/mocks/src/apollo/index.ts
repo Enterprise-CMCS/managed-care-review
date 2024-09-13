@@ -20,3 +20,4 @@ export * from './contractGQLMock'
 export * from './rateGQLMocks'
 
 export * from './replaceRateGQLMocks'
+export * from './mcReviewSettingsGQLMocks'

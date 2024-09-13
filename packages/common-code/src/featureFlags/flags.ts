@@ -6,22 +6,30 @@
  */
 
 const featureFlags = {
-    /**
-     * Enables state and CMS Q&A features
-     */
-    CMS_QUESTIONS: {
-        flag: 'cms-questions',
-        defaultValue: false,
-    },
     CONTRACT_438_ATTESTATION: {
         flag: '438-attestation',
         defaultValue: false,
     },
-     /**
+    /**
+     * When enabled state users will not see a standalone supporting
+     * docs page
+     */
+    HIDE_SUPPORTING_DOCS_PAGE: {
+        flag: 'hide-supporting-docs-page',
+        defaultValue: false,
+    },
+    /**
      * Enables state and CMS rate edit, unlock, resubmit functionality
      */
     RATE_EDIT_UNLOCK: {
         flag: 'rate-edit-unlock',
+        defaultValue: false,
+    },
+    /**
+     * Allows CMS and Admin users to read and write state assignments
+     */
+    READ_WRITE_STATE_ASSIGNMENTS: {
+        flag: 'read-write-state-assignments',
         defaultValue: false,
     },
     // PERMANENT FLAGS
@@ -29,7 +37,7 @@ const featureFlags = {
     /**
      Enables the modal that alerts the user to an expiring session
     */
-     SESSION_EXPIRING_MODAL: {
+    SESSION_EXPIRING_MODAL: {
         flag: 'session-expiring-modal',
         defaultValue: true,
     },
@@ -43,7 +51,7 @@ const featureFlags = {
     /**
      Toggles the site maintenance alert on the landing page
     */
-     SITE_UNDER_MAINTENANCE_BANNER: {
+    SITE_UNDER_MAINTENANCE_BANNER: {
         flag: 'site-under-maintenance-banner',
         defaultValue: 'OFF',
     },

@@ -10,6 +10,7 @@ import {
     ContractRevision,
     Rate,
     RateRevision,
+    UnlockedContract,
 } from '../gen/gqlClient'
 import { ActuaryContact, ActuaryFirmsRecord } from '@mc-review/hpp'
 
@@ -20,7 +21,7 @@ type RateRevisionWithIsLinked = {
 // This function returns a revision with isLinked field as well manually calculated from parent rate
 // There are cases where we need the revision itself to be able to track its own linked status, decontextualized from the parent rate or parent contract
 function getVisibleLatestRateRevisions(
-    contract: Contract,
+    contract: Contract | UnlockedContract,
     isEditing: boolean
 ): RateRevisionWithIsLinked[] | undefined {
     if (isEditing) {
@@ -87,10 +88,13 @@ function getVisibleLatestRateRevisions(
 // returns draft form data for unlocked and draft, and last package submission data for submitted or resubmitted
 // only state users get to see draft data.
 const getVisibleLatestContractFormData = (
-    contract: Contract | ContractRevision,
+    contract: Contract | UnlockedContract | ContractRevision,
     isStateUser: boolean
 ): ContractFormData | undefined => {
-    if (contract.__typename === 'Contract') {
+    if (
+        contract.__typename === 'Contract' ||
+        contract.__typename === 'UnlockedContract'
+    ) {
         if (isStateUser) {
             return (
                 contract.draftRevision?.formData ||
@@ -104,7 +108,7 @@ const getVisibleLatestContractFormData = (
 }
 
 const getLastContractSubmission = (
-    contract: Contract
+    contract: Contract | UnlockedContract
 ): ContractPackageSubmission | undefined => {
     return (
         (contract.packageSubmissions && contract.packageSubmissions[0]) ??
@@ -113,14 +117,14 @@ const getLastContractSubmission = (
 }
 
 const getPackageSubmissionAtIndex = (
-    contract: Contract,
+    contract: Contract | UnlockedContract,
     indx: number
 ): ContractPackageSubmission | undefined => {
     return contract.packageSubmissions[indx] ?? undefined
 }
 // revisionVersion is a integer used in the URLs for previous submission - numbering the submission in order from first submitted
 const getIndexFromRevisionVersion = (
-    contract: Contract,
+    contract: Contract | UnlockedContract,
     revisionVersion: number
 ) => contract.packageSubmissions.length - (Number(revisionVersion) - 1)
 const getDraftRates = (contract: Contract): Rate[] | undefined => {

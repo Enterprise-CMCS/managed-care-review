@@ -12,6 +12,12 @@ const ROUTES = [
     'API_ACCESS',
     'HELP',
     'SETTINGS',
+    'MCR_SETTINGS',
+    'EDIT_STATE_ASSIGNMENTS',
+    'STATE_ASSIGNMENTS',
+    'DIVISION_ASSIGNMENTS',
+    'AUTOMATED_EMAILS',
+    'SUPPORT_EMAILS',
     'RATES_SUMMARY',
     'RATE_EDIT',
     'REPLACE_RATE',
@@ -50,6 +56,13 @@ const RoutesRecord: Record<RouteT, string> = {
     API_ACCESS: '/dev/api-access',
     HELP: '/help',
     SETTINGS: '/settings',
+    MCR_SETTINGS: '/mc-review-settings',
+    STATE_ASSIGNMENTS: '/mc-review-settings/state-assignments',
+    EDIT_STATE_ASSIGNMENTS:
+        '/mc-review-settings/state-assignments/:stateCode/edit',
+    DIVISION_ASSIGNMENTS: '/mc-review-settings/division-assignments',
+    AUTOMATED_EMAILS: '/mc-review-settings/automated-emails',
+    SUPPORT_EMAILS: '/mc-review-settings/support-emails',
     RATES_SUMMARY: '/rates/:id',
     RATE_EDIT: '/rates/:id/edit',
     REPLACE_RATE: '/submissions/:id/replace-rate/:rateID',
@@ -87,6 +100,15 @@ const STATE_SUBMISSION_FORM_ROUTES: RouteTWithUnknown[] = [
     'SUBMISSIONS_REVIEW_SUBMIT',
 ]
 
+const STATE_SUBMISSION_FORM_ROUTES_WITHOUT_SUPPORTING_DOCS: RouteTWithUnknown[] =
+    [
+        'SUBMISSIONS_TYPE',
+        'SUBMISSIONS_CONTRACT_DETAILS',
+        'SUBMISSIONS_RATE_DETAILS',
+        'SUBMISSIONS_CONTACTS',
+        'SUBMISSIONS_REVIEW_SUBMIT',
+    ]
+
 const STATE_SUBMISSION_SUMMARY_ROUTES: RouteTWithUnknown[] = [
     'SUBMISSIONS_SUMMARY',
     'SUBMISSIONS_REVISION',
@@ -116,6 +138,7 @@ const PageHeadingsRecord: Partial<Record<RouteTWithUnknown, string>> = {
     DASHBOARD_SUBMISSIONS: 'Submissions dashboard',
     DASHBOARD_RATES: 'Rate reviews dashboard',
     SUBMISSIONS_NEW: 'New submission',
+    MCR_SETTINGS: 'MC-Review settings',
 }
 
 /*
@@ -129,7 +152,13 @@ const PageTitlesRecord: Record<RouteT | 'UNKNOWN_ROUTE', string> = {
     GRAPHQL_EXPLORER: 'GraphQL explorer',
     API_ACCESS: 'API Access',
     HELP: 'Help',
-    SETTINGS: 'Settings',
+    SETTINGS: 'MC-Review settings',
+    MCR_SETTINGS: 'MC-Review settings',
+    STATE_ASSIGNMENTS: 'State assignments',
+    EDIT_STATE_ASSIGNMENTS: 'Edit state assignments',
+    DIVISION_ASSIGNMENTS: 'Division assignments',
+    AUTOMATED_EMAILS: 'Automated emails',
+    SUPPORT_EMAILS: 'Support emails',
     DASHBOARD: 'Dashboard',
     DASHBOARD_RATES: 'Rate review dashboard',
     DASHBOARD_SUBMISSIONS: 'Dashboard',
@@ -160,6 +189,7 @@ export {
     RoutesRecord,
     ROUTES,
     STATE_SUBMISSION_FORM_ROUTES,
+    STATE_SUBMISSION_FORM_ROUTES_WITHOUT_SUPPORTING_DOCS,
     STATE_SUBMISSION_SUMMARY_ROUTES,
     QUESTION_RESPONSE_SHOW_SIDEBAR_ROUTES,
     DASHBOARD_ROUTES,

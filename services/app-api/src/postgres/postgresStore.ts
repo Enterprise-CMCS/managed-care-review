@@ -82,8 +82,8 @@ type Store = {
 
     updateCmsUserProperties: (
         userID: string,
-        states: StateCodeType[],
         idOfUserPerformingUpdate: string,
+        states?: StateCodeType[],
         divisionAssignment?: Division,
         description?: string | null
     ) => Promise<CMSUsersUnionType | Error>

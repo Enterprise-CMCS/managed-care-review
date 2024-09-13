@@ -1,0 +1,50 @@
+name: Send DSO metrics events
+
+on:
+  schedule:
+    - cron: '0 * * * *'
+
+permissions:
+  id-token: write
+
+jobs:
+  SendDSOEvents:
+    runs-on: ubuntu-latest
+    environment: prod
+    steps:
+      - name: Format OIDC role ARN
+        shell: bash
+        id: format-oidc-role-arn
+        run: |
+          ARN="arn:aws:iam::${{ secrets.PROD_AWS_ACCOUNT_ID }}:role/delegatedadmin/developer/github-oidc-prod-ServiceRole"
+          echo "arn=$ARN" >> $GITHUB_OUTPUT
+
+      - name: Send DSO events
+        uses: Enterprise-CMCS/mac-fc-scan-github@v1.0.1
+        with:
+          aws-account-id: ${{ secrets.PROD_AWS_ACCOUNT_ID }}
+          oidc-role: ${{ steps.format-oidc-role-arn.outputs.arn }}
+          github-access-token: ${{ secrets.GITHUB_TOKEN }}
+          scan-config: |
+            events:  # a list of event specifications such as the following one
+            - type: deploy 
+              environment: prod
+              name: mc-review-promote
+              team: mc-review
+              owner: Enterprise-CMCS
+              repo: managed-care-review
+              workflowfilename: promote.yml
+              branch: main
+
+            - type: test
+              environment: prod
+              name: mc-review-test
+              team: mc-review
+              owner: Enterprise-CMCS
+              repo: managed-care-review
+              workflowfilename: promote.yml
+              branch: main
+              start:
+                job: unit-tests
+              end:
+                job: unit-tests

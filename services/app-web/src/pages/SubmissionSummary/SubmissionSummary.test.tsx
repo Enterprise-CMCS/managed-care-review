@@ -14,7 +14,7 @@ import { renderWithProviders } from '../../testHelpers/jestHelpers'
 import { SubmissionSummary } from './SubmissionSummary'
 import { SubmissionSideNav } from '../SubmissionSideNav'
 import { testS3Client } from '../../testHelpers/s3Helpers'
-import { mockContractPackageUnlocked } from '@mc-review/mocks'
+import { mockContractPackageUnlockedWithUnlockedType } from '@mc-review/mocks'
 import { ReviewSubmit } from '../StateSubmission/ReviewSubmit'
 import { generatePath, Location } from 'react-router-dom'
 
@@ -40,7 +40,8 @@ describe('SubmissionSummary', () => {
                                     statusCode: 200,
                                 }),
                                 fetchContractMockSuccess({
-                                    contract: mockContractPackageUnlocked(),
+                                    contract:
+                                        mockContractPackageUnlockedWithUnlockedType(),
                                 }),
                                 fetchStateHealthPlanPackageWithQuestionsMockSuccess(
                                     {
@@ -96,7 +97,8 @@ describe('SubmissionSummary', () => {
                                     user: mockUser(),
                                 }),
                                 fetchContractMockSuccess({
-                                    contract: mockContractPackageUnlocked(),
+                                    contract:
+                                        mockContractPackageUnlockedWithUnlockedType(),
                                 }),
                                 fetchStateHealthPlanPackageWithQuestionsMockSuccess(
                                     {
@@ -146,7 +148,8 @@ describe('SubmissionSummary', () => {
                                     user: mockUser(),
                                 }),
                                 fetchContractMockSuccess({
-                                    contract: mockContractPackageUnlocked(),
+                                    contract:
+                                        mockContractPackageUnlockedWithUnlockedType(),
                                 }),
                                 fetchStateHealthPlanPackageWithQuestionsMockSuccess(
                                     {
@@ -339,7 +342,8 @@ describe('SubmissionSummary', () => {
                                     }
                                 ),
                                 fetchContractMockSuccess({
-                                    contract: mockContractPackageUnlocked(),
+                                    contract:
+                                        mockContractPackageUnlockedWithUnlockedType(),
                                 }),
                             ],
                         },
@@ -401,7 +405,8 @@ describe('SubmissionSummary', () => {
 
             describe('Submission package data display', () => {
                 it('renders the OLD data for an unlocked submission for CMS user, ignoring unsubmitted changes from state user', async () => {
-                    const contract = mockContractPackageUnlocked()
+                    const contract =
+                        mockContractPackageUnlockedWithUnlockedType()
                     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                     contract.draftRevision!.formData.submissionDescription =
                         'NEW_DESCRIPTION'
@@ -586,7 +591,8 @@ describe('SubmissionSummary', () => {
                                         }
                                     ),
                                     fetchContractMockSuccess({
-                                        contract: mockContractPackageUnlocked(),
+                                        contract:
+                                            mockContractPackageUnlockedWithUnlockedType(),
                                     }),
                                 ],
                             },
@@ -622,9 +628,12 @@ describe('SubmissionSummary', () => {
                                         statusCode: 200,
                                     }),
                                     fetchContractMockSuccess({
-                                        contract: mockContractPackageUnlocked({
-                                            id: '15',
-                                        }),
+                                        contract:
+                                            mockContractPackageUnlockedWithUnlockedType(
+                                                {
+                                                    id: '15',
+                                                }
+                                            ),
                                     }),
                                 ],
                             },
@@ -821,7 +830,8 @@ describe('SubmissionSummary', () => {
                                 }
                             ),
                             fetchContractMockSuccess({
-                                contract: mockContractPackageUnlocked(),
+                                contract:
+                                    mockContractPackageUnlockedWithUnlockedType(),
                             }),
                         ],
                     },

@@ -1,70 +1,20 @@
-import React, { useEffect } from 'react'
-import styles from '../Banner.module.scss'
-import { Alert } from '@trussworks/react-uswds'
-import { ERROR_MESSAGES } from '@mc-review/constants'
-import { useStringConstants } from '../../../hooks/useStringConstants'
-import { LinkWithLogging } from '../../TealiumLogging/Link'
-import { useTealium } from '../../../hooks'
+import React from 'react'
+import { ErrorAlertFailedRequest } from '../../ErrorAlert'
+import { ErrorAlertValidationError } from '../../ErrorAlert/ErrorAlertValidationError'
 
 export type GenericApiErrorProps = {
     heading?: string
     message?: string
-    suggestion?: string
+    validationFail?: boolean
 }
 
 export const GenericApiErrorBanner = ({
     heading,
     message,
-    suggestion,
+    validationFail = false,
 }: GenericApiErrorProps): React.ReactElement => {
-    const stringConstants = useStringConstants()
-    const { logAlertImpressionEvent } = useTealium()
-    const MAIL_TO_SUPPORT = stringConstants.MAIL_TO_SUPPORT
-
-    useEffect(() => {
-        logAlertImpressionEvent({
-            error_type: 'system',
-            error_message:
-                'Please refresh your browser and if you continue to experience an error let us know.',
-            type: 'error',
-            extension: 'react-uswds',
-        })
-    })
-
-    return (
-        <Alert
-            role="alert"
-            type="error"
-            heading={heading || 'System error'}
-            headingLevel="h4"
-            validation
-            data-testid="error-alert"
-        >
-            <div className={styles.bannerBodyText}>
-                <p className="usa-alert__text">
-                    <b>{message || ERROR_MESSAGES.generic_error}</b>
-                </p>
-                <p className="usa-alert__text">
-                    {suggestion ? (
-                        <span>{suggestion} </span>
-                    ) : (
-                        <>
-                            <span>
-                                Please refresh your browser and if you continue
-                                to experience an error,&nbsp;
-                            </span>
-                            <LinkWithLogging
-                                href={`mailto: ${MAIL_TO_SUPPORT}, mc-review-team@truss.works`}
-                                variant="unstyled"
-                                target="_blank"
-                                rel="noreferrer"
-                            >
-                                let us know.
-                            </LinkWithLogging>
-                        </>
-                    )}
-                </p>
-            </div>
-        </Alert>
-    )
+    if (validationFail) {
+        return <ErrorAlertValidationError heading={heading} message={message} />
+    }
+    return <ErrorAlertFailedRequest heading={heading} message={message} />
 }

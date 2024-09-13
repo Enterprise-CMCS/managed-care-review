@@ -11,6 +11,7 @@ module.exports = () => {
         packager: 'pnpm',
         bundle: true,
         exclude: ['prisma', '@prisma/client'],
+        sourcemap: true,
         plugins: [
             {
                 name: 'graphql-loader',

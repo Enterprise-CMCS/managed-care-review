@@ -10,10 +10,10 @@ import {
     getQuestionRound,
 } from '../templateHelpers'
 import { submissionQuestionResponseURL } from '../generateURLs'
-import type { ContractRevisionWithRatesType } from '../../domain-models/contractAndRates'
+import type { ContractRevisionType } from '../../domain-models/contractAndRates'
 
 export const sendQuestionResponseStateEmail = async (
-    contractRev: ContractRevisionWithRatesType,
+    contractRev: ContractRevisionType,
     config: EmailConfiguration,
     submitterEmails: string[],
     statePrograms: ProgramType[],
@@ -77,8 +77,8 @@ export const sendQuestionResponseStateEmail = async (
     } else {
         return {
             toAddresses: receiverEmails,
+            replyToAddresses: [],
             sourceEmail: config.emailSource,
-            replyToAddresses: [config.helpDeskEmail],
             subject: `${
                 config.stage !== 'prod' ? `[${config.stage}] ` : ''
             }Response submitted to CMS for ${packageName}`,

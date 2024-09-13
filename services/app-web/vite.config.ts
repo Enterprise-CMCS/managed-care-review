@@ -10,7 +10,6 @@ import path from 'path'
 
 export default defineConfig(() => ({
     base: '/',
-    sourcemap: true,
     plugins: [
         nodePolyfills(),
         react(),
@@ -75,6 +74,7 @@ export default defineConfig(() => ({
     },
     build: {
         outDir: './build',
+        sourcemap: true,
     },
     optimizeDeps: {
         include: ['protobufjs/minimal', 'buffer'],

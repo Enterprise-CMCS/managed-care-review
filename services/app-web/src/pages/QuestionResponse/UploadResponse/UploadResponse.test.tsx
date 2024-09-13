@@ -52,9 +52,6 @@ describe('UploadResponse', () => {
                 routerProvider: {
                     route: `/submissions/15/question-and-answers/${division}/${questionID}/upload-response`,
                 },
-                featureFlags: {
-                    'cms-questions': true,
-                },
             }
         )
 
@@ -93,9 +90,6 @@ describe('UploadResponse', () => {
                 },
                 routerProvider: {
                     route: `/submissions/15/question-and-answers/dmco/${questionID}/upload-response`,
-                },
-                featureFlags: {
-                    'cms-questions': true,
                 },
             }
         )
@@ -144,9 +138,6 @@ describe('UploadResponse', () => {
                 routerProvider: {
                     route: `/submissions/15/question-and-answers/dmco/${questionID}/upload-response`,
                 },
-                featureFlags: {
-                    'cms-questions': true,
-                },
             }
         )
 
@@ -192,9 +183,6 @@ describe('UploadResponse', () => {
                 },
                 routerProvider: {
                     route: `/submissions/15/question-and-answers/dmco/${questionID}/upload-response`,
-                },
-                featureFlags: {
-                    'cms-questions': true,
                 },
             }
         )
@@ -245,9 +233,6 @@ describe('UploadResponse', () => {
                 },
                 routerProvider: {
                     route: `/submissions/15/question-and-answers/dmco/${questionID}/upload-response`,
-                },
-                featureFlags: {
-                    'cms-questions': true,
                 },
             }
         )
@@ -311,9 +296,6 @@ describe('UploadResponse', () => {
                 routerProvider: {
                     route: `/submissions/15/question-and-answers/dmco/${questionID}/upload-response`,
                 },
-                featureFlags: {
-                    'cms-questions': true,
-                },
             }
         )
         await screen.findByRole('heading', {
@@ -365,9 +347,6 @@ describe('UploadResponse', () => {
                     },
                     routerProvider: {
                         route: `/submissions/15/question-and-answers/${division}/${questionID}/upload-response`,
-                    },
-                    featureFlags: {
-                        'cms-questions': true,
                     },
                 }
             )

@@ -26,10 +26,11 @@ import {
     FeatureFlagSettings,
 } from '../../app-web/src/common-code/featureFlags'
 import './apiCommands'
+import './accessibilityCommands'
 import { Contract, HealthPlanPackage } from '../gen/gqlClient';
 import { CMSUserType, DivisionType } from '../utils/apollo-test-utils';
-import { StateUserType } from 'app-api/src/domain-models';
-import { UnlockedHealthPlanFormDataType } from 'app-web/src/common-code/healthPlanFormDataType'
+import { StateUserType } from '../../app-api/src/domain-models';
+import { UnlockedHealthPlanFormDataType } from '../../app-web/src/common-code/healthPlanFormDataType'
 
 type FormButtonKey =
     | 'CONTINUE_FROM_START_NEW'
@@ -52,6 +53,7 @@ declare global {
             // state submission form commands
             waitForDocumentsToLoad(): void
             startNewContractOnlySubmissionWithBaseContract(): void
+            startNewContractOnlySubmissionWithBaseContractV2(): void
             startNewContractOnlySubmissionWithAmendment(): void
             startNewContractAndRatesSubmission(): void
             fillOutContractActionOnlyWithBaseContract(): void
@@ -80,6 +82,10 @@ declare global {
                 buttonName: FormButtonKey,
                 waitForLoad?: boolean
             ): void
+            navigateContractForm(
+                buttonName: FormButtonKey,
+                waitForLoad?: boolean
+            ): void
             navigateFormByDirectLink(url: string, waitForLoad?: boolean): void
 
             // dashboard commands
@@ -105,6 +111,7 @@ declare global {
                 division: DivisionType
             }): void
 
+            // Direct API commands
             apiCreateAndSubmitContractOnlySubmission(stateUser: StateUserType): Cypress.Chainable<Contract>
             apiCreateAndSubmitContractWithRates(stateUser: StateUserType): Cypress.Chainable<Contract>
             apiDeprecatedCreateSubmitHPP(stateUser: StateUserType, formData?: Partial<UnlockedHealthPlanFormDataType>): Cypress.Chainable<HealthPlanPackage>
@@ -112,7 +119,11 @@ declare global {
             apiAssignDivisionToCMSUser(cmsUser: CMSUserType, division: DivisionType): Cypress.Chainable<void>
             apiCreateAndSubmitContractWithRates(stateUser: StateUserType): Cypress.Chainable<Contract>
 
+            // GraphQL intercept commands
             interceptGraphQL(): void
+
+            // Accessibility Commands
+            checkA11yWithWcag22aa(): void
         }
     }
 }

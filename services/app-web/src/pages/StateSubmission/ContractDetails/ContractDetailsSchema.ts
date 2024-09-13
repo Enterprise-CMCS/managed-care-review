@@ -4,7 +4,6 @@ import { validateDateFormat } from '../../../formHelpers'
 import {
     isCHIPProvision,
     GeneralizedProvisionType,
-    UnlockedHealthPlanFormDataType,
     federalAuthorityKeysForCHIP,
 } from '@mc-review/hpp'
 import {
@@ -12,17 +11,19 @@ import {
     isCHIPOnly,
     isContractAmendment,
     isContractWithProvisions,
-} from '@mc-review/hpp'
+} from '@mc-review/common-code'
 import {
     isMedicaidAmendmentProvision,
     isMedicaidBaseProvision,
 } from '@mc-review/hpp'
 import { FeatureFlagSettings } from '@mc-review/common-code'
+import { UnlockedContract } from '../../../gen/gqlClient'
+import { validateFileItemsList } from '../../../formHelpers/validators'
 
 Yup.addMethod(Yup.date, 'validateDateFormat', validateDateFormat)
 
 export const ContractDetailsFormSchema = (
-    draftSubmission: UnlockedHealthPlanFormDataType,
+    draftSubmission: UnlockedContract,
     activeFeatureFlags: FeatureFlagSettings = {}
 ) => {
     const yesNoError = (provision: GeneralizedProvisionType) => {
@@ -79,7 +80,8 @@ export const ContractDetailsFormSchema = (
             .validateDateFormat('YYYY-MM-DD', true)
             .typeError('The start date must be in MM/DD/YYYY format')
             .defined('You must enter a start date'),
-
+        contractDocuments: validateFileItemsList({ required: true }),
+        supportingDocuments: validateFileItemsList({ required: false }),
         contractDateEnd: Yup.date()
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore-next-line

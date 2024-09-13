@@ -5,7 +5,7 @@ import {
     fetchCurrentUserMock,
     mockContractPackageSubmitted,
     mockContractPackageSubmittedWithRevisions,
-    mockContractPackageUnlocked,
+    mockContractPackageUnlockedWithUnlockedType,
     mockContractRevision,
     mockRateRevision,
     mockValidCMSUser,
@@ -40,7 +40,9 @@ describe('Change History', () => {
 
     it('can render change history for unlocked submission', () => {
         renderWithProviders(
-            <ChangeHistory contract={mockContractPackageUnlocked()} />,
+            <ChangeHistory
+                contract={mockContractPackageUnlockedWithUnlockedType()}
+            />,
             {
                 apolloProvider: {
                     mocks: [
@@ -278,7 +280,7 @@ describe('Change History', () => {
         ).not.toHaveTextContent('View past submission version')
     })
     it('should not list links for initial submission when initial submission is unlocked', () => {
-        const submittedContract = mockContractPackageUnlocked()
+        const submittedContract = mockContractPackageUnlockedWithUnlockedType()
         renderWithProviders(<ChangeHistory contract={submittedContract} />)
         //Initial submission should not have a link
         expect(

@@ -97,6 +97,7 @@ function AuthProvider({
             )
             modalCountdownTimers.current = []
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [sessionIsExpiring]) // full dep array causes a loop, because we're resetting the dep in the useEffect
 
     const isAuthenticated = loggedInUser !== undefined

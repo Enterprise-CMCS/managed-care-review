@@ -1,5 +1,5 @@
-mutation updateCMSUser($input: UpdateCMSUserInput!) {
-    updateCMSUser(input: $input) {
+mutation updateDivisionAssignment($input: UpdateDivisionAssignmentInput!) {
+    updateDivisionAssignment(input: $input) {
         user {
             __typename
             ... on CMSUser {

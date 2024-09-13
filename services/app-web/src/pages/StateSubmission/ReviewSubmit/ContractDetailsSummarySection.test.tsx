@@ -333,6 +333,7 @@ describe('ContractDetailsSummarySection', () => {
                         submitInfo: undefined,
                         unlockInfo: undefined,
                         id: '123',
+                        contractID: 'test-abc-123',
                         createdAt: new Date(),
                         updatedAt: new Date(),
                         contractName: 'MCR-0005-alvhalfhdsalfdd',

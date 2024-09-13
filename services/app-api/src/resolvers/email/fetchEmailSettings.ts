@@ -1,7 +1,7 @@
 import { ForbiddenError } from 'apollo-server-lambda'
 import type { StateCodeType } from '@mc-review/hpp'
 import type { StateType } from '../../domain-models'
-import { hasAdminPermissions } from '../../domain-models'
+import { hasAdminPermissions, hasCMSPermissions } from '../../domain-models'
 import type { Emailer } from '../../emailer'
 import type { QueryResolvers } from '../../gen/gqlServer'
 import { logError, logSuccess } from '../../logger'
@@ -22,8 +22,8 @@ export function fetchEmailSettingsResolver(
         const { user, ctx, tracer } = context
         const span = tracer?.startSpan('fetchEmailSettings', {}, ctx)
         setResolverDetailsOnActiveSpan('fetchEmailSettings', user, span)
-        if (!hasAdminPermissions(user)) {
-            const errMessage = 'Non-admin user not authorized to fetch settings'
+        if (!hasAdminPermissions(user) && !hasCMSPermissions(user)) {
+            const errMessage = 'user not authorized to fetch settings'
             logError('fetchEmailSettings', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new ForbiddenError(errMessage)

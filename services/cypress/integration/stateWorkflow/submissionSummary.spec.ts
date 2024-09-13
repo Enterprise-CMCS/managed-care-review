@@ -9,13 +9,13 @@ describe('State user can view submissions', () => {
 
         // add a draft contract only submission
         cy.startNewContractOnlySubmissionWithBaseContract()
-        cy.deprecatedNavigateV1Form('SAVE_DRAFT')
+        cy.navigateContractForm('SAVE_DRAFT')
 
         // add a submitted contract and rates submission
         cy.startNewContractAndRatesSubmission()
 
         cy.fillOutBaseContractDetails()
-        cy.deprecatedNavigateV1Form('CONTINUE')
+        cy.navigateContractForm('CONTINUE')
 
         cy.findByRole('heading', {
             level: 2,
@@ -38,11 +38,7 @@ describe('State user can view submissions', () => {
             name: /Contacts/,
         }).should('exist')
         cy.fillOutStateContact()
-        cy.deprecatedNavigateV1Form('CONTINUE')
-
-        cy.findByRole('heading', { level: 2, name: /Supporting documents/ })
-        cy.fillOutSupportingDocuments()
-        cy.deprecatedNavigateV1Form('CONTINUE')
+        cy.navigateContractForm('CONTINUE')
 
         // Store submission name for reference later
         let submissionId = ''

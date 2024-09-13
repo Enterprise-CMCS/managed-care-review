@@ -49,7 +49,6 @@ describe('SubmissionSideNav', () => {
                 routerProvider: {
                     route: '/submissions/15',
                 },
-                featureFlags: { 'cms-questions': true },
             }
         )
 
@@ -122,7 +121,6 @@ describe('SubmissionSideNav', () => {
                     route: '/submissions/15',
                 },
                 location: (location) => (testLocation = location),
-                featureFlags: { 'cms-questions': true },
             }
         )
 
@@ -229,7 +227,6 @@ describe('SubmissionSideNav', () => {
                 routerProvider: {
                     route: '/submissions/15',
                 },
-                featureFlags: { 'cms-questions': true },
             }
         )
         expect(
@@ -266,7 +263,6 @@ describe('SubmissionSideNav', () => {
                 routerProvider: {
                     route: '/submissions/15',
                 },
-                featureFlags: { 'cms-questions': true },
             }
         )
 
@@ -314,7 +310,6 @@ describe('SubmissionSideNav', () => {
                     routerProvider: {
                         route: '/submissions/15',
                     },
-                    featureFlags: { 'cms-questions': true },
                 }
             )
 
@@ -357,7 +352,6 @@ describe('SubmissionSideNav', () => {
                     routerProvider: {
                         route: '/submissions/15',
                     },
-                    featureFlags: { 'cms-questions': true },
                 }
             )
 
@@ -400,7 +394,6 @@ describe('SubmissionSideNav', () => {
                     routerProvider: {
                         route: '/submissions/15',
                     },
-                    featureFlags: { 'cms-questions': true },
                 }
             )
 
@@ -435,7 +428,6 @@ describe('SubmissionSideNav', () => {
                         ],
                     },
                     routerProvider: { route: '/submissions/404' },
-                    featureFlags: { 'cms-questions': true },
                 }
             )
 
@@ -474,7 +466,6 @@ describe('SubmissionSideNav', () => {
                     routerProvider: {
                         route: '/submissions/15/question-and-answers',
                     },
-                    featureFlags: { 'cms-questions': true },
                 }
             )
 

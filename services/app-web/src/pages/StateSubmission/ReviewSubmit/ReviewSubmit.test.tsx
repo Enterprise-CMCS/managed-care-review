@@ -10,7 +10,7 @@ import { Route, Routes } from 'react-router-dom'
 import { RoutesRecord } from '@mc-review/constants'
 import {
     mockContractPackageDraft,
-    mockContractPackageUnlocked,
+    mockContractPackageUnlockedWithUnlockedType,
 } from '@mc-review/mocks'
 
 describe('ReviewSubmit', () => {
@@ -178,7 +178,7 @@ describe('ReviewSubmit', () => {
 
     it('extracts the correct dates from unlocked submission and displays them in tables', async () => {
         const contractMock = fetchContractMockSuccess({
-            contract: mockContractPackageUnlocked(),
+            contract: mockContractPackageUnlockedWithUnlockedType(),
         })
 
         renderWithProviders(
@@ -268,7 +268,8 @@ describe('ReviewSubmit', () => {
                             user: mockValidStateUser(),
                         }),
                         fetchContractMockSuccess({
-                            contract: mockContractPackageUnlocked(),
+                            contract:
+                                mockContractPackageUnlockedWithUnlockedType(),
                         }),
                     ],
                 },
@@ -305,7 +306,8 @@ describe('ReviewSubmit', () => {
                             user: mockValidStateUser(),
                         }),
                         fetchContractMockSuccess({
-                            contract: mockContractPackageUnlocked(),
+                            contract:
+                                mockContractPackageUnlockedWithUnlockedType(),
                         }),
                     ],
                 },

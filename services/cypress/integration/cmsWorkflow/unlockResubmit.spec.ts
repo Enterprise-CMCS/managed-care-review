@@ -13,7 +13,7 @@ describe('CMS user', () => {
         // fill out contract details
         cy.startNewContractAndRatesSubmission()
         cy.fillOutBaseContractDetails()
-        cy.deprecatedNavigateV1Form('CONTINUE')
+        cy.navigateContractForm('CONTINUE')
 
         // fill out two child rates
         cy.findByRole('heading', {
@@ -39,12 +39,7 @@ describe('CMS user', () => {
             name: /Contacts/,
         }).should('exist')
         cy.fillOutStateContact()
-        cy.deprecatedNavigateV1Form('CONTINUE')
-        cy.findByRole('heading', {
-            level: 2,
-            name: /Supporting documents/,
-        }).should('exist')
-        cy.deprecatedNavigateV1Form('CONTINUE')
+        cy.navigateContractForm('CONTINUE')
 
         cy.findByRole('heading', {
             level: 2,
@@ -239,7 +234,10 @@ describe('CMS user', () => {
     // TODO AFTER LINKED RATES AND LINKED RATES CHANGE HISTORY SHIPS
     it.only('can unlock and resubmit a linked rate and change history updates', () => {
         // turn on feature flag
-        cy.interceptFeatureFlags({'438-attestation': true})
+        cy.interceptFeatureFlags({
+            '438-attestation': true,
+            'hide-supporting-docs-page': true
+        })
 
         // Set up a submission with linked rates
         cy.apiCreateAndSubmitContractWithRates(stateUser()).then(() => {
@@ -249,7 +247,7 @@ describe('CMS user', () => {
             cy.startNewContractAndRatesSubmission()
             cy.fillOutBaseContractDetails()
 
-            cy.deprecatedNavigateV1Form('CONTINUE')
+            cy.navigateContractForm('CONTINUE')
             cy.findByRole('heading', { level: 2, name: /Rate details/ })
 
             // Test unlock and resubmit with a linked rate submission
@@ -270,8 +268,7 @@ describe('CMS user', () => {
                 cy.findByRole('heading', { level: 2, name: /Contacts/ })
                 cy.fillOutStateContact()
 
-                cy.deprecatedNavigateV1Form('CONTINUE')
-                cy.findByRole('heading', { level: 2, name: /Supporting documents/ })
+                cy.navigateContractForm('CONTINUE')
 
                 // New API
                 cy.navigateFormByDirectLink(`${submissionURL}edit/rate-details`)
@@ -280,8 +277,8 @@ describe('CMS user', () => {
 
                 cy.navigateContractRatesForm('CONTINUE')
                 cy.findByRole('heading', { level: 2, name: /Contacts/ })
+                cy.visit(`${submissionURL}edit/review-and-submit`)
 
-                cy.navigateFormByDirectLink(`${submissionURL}edit/review-and-submit`)
                 cy.findByRole('heading', { level: 2, name: /Review and submit/ })
 
                 // Submit, sent to dashboard
@@ -394,7 +391,8 @@ describe('CMS user', () => {
 
                     //Check for view previous submission link in the initial accordion item to exist
                     cy.findByTestId('revision-link-1').should('be.visible')
-                    cy.clickSubmissionLink('revision-link-1')
+                    cy.findByTestId('revision-link-1').should('exist').click()
+
                     //Making sure we are on SubmissionRevisionSummary page and contains version text
                     cy.findByTestId('revision-version')
                         .should('exist')
@@ -404,7 +402,7 @@ describe('CMS user', () => {
                     //Previous submission banner should exist and able to click link to go back to current submission
                     cy.findByTestId('previous-submission-banner').should('exist')
                     //Navigate back to current submission using link inside banner.
-                    cy.clickSubmissionLink('currentSubmissionLink')
+                    cy.findByTestId('currentSubmissionLink').should('exist').click()
                     //Make sure banner and revision version text are gone.
                     cy.findByTestId('previous-submission-banner').should(
                         'not.exist'
@@ -417,7 +415,7 @@ describe('CMS user', () => {
                     // Resubmit again
                     cy.logOut()
                     cy.logInAsStateUser()
-                    cy.navigateFormByDirectLink(reviewURL)
+                    cy.visit(reviewURL)
                     cy.wait('@fetchContractQuery', { timeout: 20_000 })
                     cy.findByTestId('unlockedBanner').should('exist')
                     cy.submitStateSubmissionForm({
@@ -428,7 +426,7 @@ describe('CMS user', () => {
                     )
 
                     // Visit the submission url and check the history
-                    cy.navigateFormByDirectLink(submissionURL)
+                    cy.visit(submissionURL)
                     cy.findByTestId('updatedSubmissionBanner').should('exist')
 
                     // No document dates or other fields are undefined

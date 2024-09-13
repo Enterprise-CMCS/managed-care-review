@@ -57,9 +57,6 @@ describe('UploadQuestions', () => {
                         routerProvider: {
                             route: `/submissions/15/question-and-answers/${division}/upload-questions`,
                         },
-                        featureFlags: {
-                            'cms-questions': true,
-                        },
                     }
                 )
 
@@ -112,9 +109,6 @@ describe('UploadQuestions', () => {
                         },
                         routerProvider: {
                             route: `/submissions/15/question-and-answers/dmco/upload-questions`,
-                        },
-                        featureFlags: {
-                            'cms-questions': true,
                         },
                     }
                 )
@@ -190,9 +184,6 @@ describe('UploadQuestions', () => {
                             route: `/submissions/15/question-and-answers/dmco/upload-questions`,
                         },
                         location: (location) => (testLocation = location),
-                        featureFlags: {
-                            'cms-questions': true,
-                        },
                     }
                 )
 
@@ -255,9 +246,6 @@ describe('UploadQuestions', () => {
                                 ),
                             ],
                         },
-                        featureFlags: {
-                            'cms-questions': true,
-                        },
                     }
                 )
                 await screen.findByRole('heading', {
@@ -306,9 +294,6 @@ describe('UploadQuestions', () => {
                                     }
                                 ),
                             ],
-                        },
-                        featureFlags: {
-                            'cms-questions': true,
                         },
                     }
                 )
@@ -363,9 +348,6 @@ describe('UploadQuestions', () => {
                                     }
                                 ),
                             ],
-                        },
-                        featureFlags: {
-                            'cms-questions': true,
                         },
                     }
                 )
@@ -448,9 +430,6 @@ describe('UploadQuestions', () => {
                                 }),
                             ],
                         },
-                        featureFlags: {
-                            'cms-questions': true,
-                        },
                     }
                 )
 
@@ -505,9 +484,6 @@ describe('UploadQuestions', () => {
                             },
                             routerProvider: {
                                 route: `/submissions/15/question-and-answers/dmco/upload-questions`,
-                            },
-                            featureFlags: {
-                                'cms-questions': true,
                             },
                         }
                     )

@@ -1,13 +1,13 @@
 import React, { useEffect } from 'react'
 import { Alert } from '@trussworks/react-uswds'
-import { useStringConstants } from '../../../hooks/useStringConstants'
+
 import classnames from 'classnames'
 import { useTealium } from '../../../hooks'
+import { ContactSupportLink } from '../../ErrorAlert/ContactSupportLink'
 
 export const DocumentWarningBanner = ({
     className,
 }: React.HTMLAttributes<HTMLDivElement>): React.ReactElement => {
-    const stringConstants = useStringConstants()
     const { logAlertImpressionEvent } = useTealium()
 
     useEffect(() => {
@@ -18,9 +18,8 @@ export const DocumentWarningBanner = ({
             type: 'warn',
             extension: 'react-uswds',
         })
-    }, [])
+    }, [logAlertImpressionEvent])
 
-    const MAIL_TO_SUPPORT = stringConstants.MAIL_TO_SUPPORT
     return (
         <Alert
             role="alert"
@@ -34,14 +33,7 @@ export const DocumentWarningBanner = ({
                 Some documents aren’t available right now. Refresh the page to
                 try again. If you still see this message,&nbsp;
             </span>
-            <a
-                href={`mailto: ${MAIL_TO_SUPPORT}, mc-review-team@truss.works`}
-                className="usa-link"
-                target="_blank"
-                rel="noreferrer"
-            >
-                email the help desk.
-            </a>
+            <ContactSupportLink />
         </Alert>
     )
 }

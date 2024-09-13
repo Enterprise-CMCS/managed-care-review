@@ -1,5 +1,7 @@
 # Define Frontend Toolset for Accessibility Standards
 
+## This ADR has been superseded by [028-updated-frontend-a11y-toolset](028-updated-frontend-a11y-toolset.md)
+
 Decide on a toolset to help ensure MCRRS frontend development follows accessibility standards (specifically WCAG AA guidelines).
 
 Tooling is not a replacement for engineers/designers with strong expertise in HTML or manual testing with assistive technology. Thus, the toolset will focus on the types of accessibility issues where tooling is useful. This includes validating HTML attributes, checking basic page structure, ensuring media content has descriptive tags, ensuring that buttons are used appropriately, and checking for basic color contrast.

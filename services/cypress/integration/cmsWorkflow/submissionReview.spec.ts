@@ -8,7 +8,7 @@ describe('CMS user can view submission', () => {
         cy.logInAsStateUser()
         cy.startNewContractAndRatesSubmission()
         cy.fillOutBaseContractDetails()
-        cy.deprecatedNavigateV1Form('CONTINUE')
+        cy.navigateContractForm('CONTINUE')
 
         cy.findByRole('heading', {
             level: 2,
@@ -23,14 +23,7 @@ describe('CMS user can view submission', () => {
             name: /Contacts/,
         }).should('exist')
         cy.fillOutStateContact()
-        cy.deprecatedNavigateV1Form('CONTINUE')
-
-        cy.findByRole('heading', {
-            level: 2,
-            name: /Supporting documents/,
-        }).should('exist')
-        cy.fillOutSupportingDocuments()
-        cy.deprecatedNavigateV1Form('CONTINUE')
+        cy.navigateContractForm('CONTINUE')
 
         // store submission id for reference later
         let submissionId = ''

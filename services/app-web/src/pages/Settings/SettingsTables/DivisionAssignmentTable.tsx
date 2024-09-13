@@ -1,4 +1,4 @@
-import { Table } from '@trussworks/react-uswds'
+import { GridContainer, Table } from '@trussworks/react-uswds'
 import React, { useCallback, useMemo, useState } from 'react'
 import {
     createColumnHelper,
@@ -9,20 +9,22 @@ import {
 import Select, { OnChangeValue } from 'react-select'
 import {
     CmsUser,
-    useIndexUsersQuery,
     Division,
-    useUpdateCmsUserMutation,
+    useIndexUsersQuery,
+    useUpdateDivisionAssignmentMutation,
 } from '../../../gen/gqlClient'
 
 import styles from '../Settings.module.scss'
-import { Loading } from '../../../components'
-import { SettingsErrorAlert } from '../SettingsErrorAlert'
-
-import { wrapApolloResult } from '@mc-review/helpers'
 import { handleApolloError } from '@mc-review/helpers'
-import { updateCMSUser } from '@mc-review/helpers'
+import { updateDivisionAssignment } from '@mc-review/helpers'
 import { ApolloError } from '@apollo/client'
 import { useTealium } from '../../../hooks'
+import { useAuth } from '../../../contexts/AuthContext'
+import { hasAdminUserPermissions } from '@mc-review/helpers'
+import { LinkWithLogging, Loading } from '../../../components'
+import { useStringConstants } from '../../../hooks/useStringConstants'
+import { wrapApolloResult } from '@mc-review/helpers'
+import { SettingsErrorAlert } from '../SettingsErrorAlert'
 
 type DivisionSelectOptions = {
     label: string
@@ -102,42 +104,47 @@ function CMSUserTableWithData({
     cmsUsers: CmsUser[]
     setDivision: SetDivisionCallbackType
 }): React.ReactElement {
+    const { loggedInUser } = useAuth()
+
+    const isAdminUser = hasAdminUserPermissions(loggedInUser)
+
     const columns = useMemo(() => {
         const columnHelper = createColumnHelper<CmsUser>()
         return [
             columnHelper.accessor('familyName', {
                 id: 'familyName',
                 cell: (info) => info.getValue(),
-                header: () => 'Family Name',
+                header: 'Family Name',
             }),
             columnHelper.accessor('givenName', {
                 id: 'givenName',
                 cell: (info) => info.getValue(),
-                header: () => 'Given Name',
+                header: 'Given Name',
             }),
             columnHelper.accessor('email', {
                 id: 'email',
                 cell: (info) => info.getValue(),
-                header: () => 'Email',
+                header: 'Email',
             }),
             columnHelper.accessor('divisionAssignment', {
                 id: 'divisionAssignment',
-                cell: (info) => {
-                    return (
+                cell: (info) =>
+                    isAdminUser ? (
                         <DivisionSelect
                             currentAssignment={info.getValue()}
                             user={info.row.original}
                             setDivision={setDivision}
                         />
-                    )
-                },
-                header: () => 'Division',
+                    ) : (
+                        info.getValue()
+                    ),
+                header: 'Division',
                 meta: {
                     dataTestID: 'division-assignment',
                 },
             }),
         ]
-    }, [setDivision])
+    }, [setDivision, isAdminUser])
 
     const table = useReactTable({
         data: cmsUsers,
@@ -149,9 +156,9 @@ function CMSUserTableWithData({
     })
 
     return (
-        <Table>
-            <caption className="srOnly">CMS Users</caption>
-            <thead className={styles.header}>
+        <Table bordered fullWidth className={styles.table}>
+            <caption className="srOnly">Division assignments</caption>
+            <thead>
                 {table.getHeaderGroups().map((headerGroup) => (
                     <tr key={headerGroup.id}>
                         {headerGroup.headers.map((header) => (
@@ -190,22 +197,22 @@ type SetDivisionCallbackType = (
     division: Division
 ) => Promise<undefined | Error>
 
-export const CMSUsersTable = (): React.ReactElement => {
-    const { result } = wrapApolloResult(
-        useIndexUsersQuery({
-            fetchPolicy: 'cache-and-network',
-        })
-    )
+export const DivisionAssignmentTable = (): React.ReactElement => {
+    const stringConstants = useStringConstants()
+    const MAIL_TO_SUPPORT = stringConstants.MAIL_TO_SUPPORT
 
-    const [updateCmsUserMutation] = useUpdateCmsUserMutation()
+    const [updateDivisionAssignmentMutation] =
+        useUpdateDivisionAssignmentMutation()
 
     const setDivisionCallback: SetDivisionCallbackType = useCallback(
         async (userID: string, division: Division) => {
-            const res = await updateCMSUser(updateCmsUserMutation, {
-                cmsUserID: userID,
-                stateAssignments: [],
-                divisionAssignment: division,
-            })
+            const res = await updateDivisionAssignment(
+                updateDivisionAssignmentMutation,
+                {
+                    cmsUserID: userID,
+                    divisionAssignment: division,
+                }
+            )
 
             if (res instanceof Error) {
                 console.error('Errored attempting to update user: ', res)
@@ -216,24 +223,26 @@ export const CMSUsersTable = (): React.ReactElement => {
             }
             return undefined
         },
-        [updateCmsUserMutation]
+        [updateDivisionAssignmentMutation]
     )
 
-    if (result.status === 'LOADING') {
+    const { result: indexUsersResult } = wrapApolloResult(
+        useIndexUsersQuery({
+            fetchPolicy: 'cache-and-network',
+        })
+    )
+
+    if (indexUsersResult.status === 'LOADING')
         return (
-            <div className={styles.table}>
-                <h2>CMS users</h2>
+            <GridContainer>
                 <Loading />
-            </div>
+            </GridContainer>
         )
-    }
 
-    if (result.status === 'ERROR') {
-        return <SettingsErrorAlert error={result.error} />
-    }
+    if (indexUsersResult.status === 'ERROR')
+        return <SettingsErrorAlert error={indexUsersResult.error} />
 
-    // filter to just CMS users
-    const cmsUsers = result.data.indexUsers.edges
+    const cmsUsers = indexUsersResult.data.indexUsers.edges
         .filter(
             (edge) =>
                 edge.node.__typename === 'CMSUser' ||
@@ -242,8 +251,22 @@ export const CMSUsersTable = (): React.ReactElement => {
         .map((edge) => edge.node as CmsUser)
 
     return (
-        <div className={styles.table}>
-            <h2>CMS users</h2>
+        <>
+            <h2>Division assignments</h2>
+            <p>
+                A list of CMS analysts and their division assignments. If this
+                list is out of date please contact
+                <span>
+                    <LinkWithLogging
+                        href={`mailto: ${MAIL_TO_SUPPORT}`}
+                        variant="unstyled"
+                        target="_blank"
+                        rel="noreferrer"
+                    >
+                        {` ${MAIL_TO_SUPPORT}.`}
+                    </LinkWithLogging>
+                </span>
+            </p>
             {cmsUsers.length ? (
                 <CMSUserTableWithData
                     cmsUsers={cmsUsers}
@@ -254,8 +277,8 @@ export const CMSUsersTable = (): React.ReactElement => {
                     <p>No CMS users to display</p>
                 </div>
             )}
-        </div>
+        </>
     )
 }
 
-CMSUsersTable.whyDidYouRender = true
+DivisionAssignmentTable.whyDidYouRender = true

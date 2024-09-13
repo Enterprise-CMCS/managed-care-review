@@ -41,6 +41,13 @@ import { RateSummary } from '../RateSummary'
 import { ReplaceRate } from '../ReplaceRate/ReplaceRate'
 import { RateEdit } from '../RateEdit/RateEdit'
 import { APIAccess } from '../APIAccess/APIAccess'
+import {
+    StateAssignmentTable,
+    AutomatedEmailsTable,
+    SupportEmailsTable,
+    DivisionAssignmentTable,
+} from '../Settings/SettingsTables'
+import { EditStateAssign } from '../Settings/EditStateAssign/EditStateAssign'
 
 function componentForAuthMode(
     authMode: AuthModeType
@@ -68,12 +75,10 @@ const UniversalRoutes = (
 const StateUserRoutes = ({
     authMode,
     setAlert,
-    showQuestionResponse,
     stageName,
 }: {
     authMode: AuthModeType
     setAlert?: React.Dispatch<React.ReactElement>
-    showQuestionResponse: boolean
     stageName?: string
 }): React.ReactElement => {
     // feature flag
@@ -122,20 +127,15 @@ const StateUserRoutes = ({
                     </>
                 )}
                 <Route element={<SubmissionSideNav />}>
-                    {showQuestionResponse && (
-                        <>
-                            <Route
-                                path={
-                                    RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS
-                                }
-                                element={<QuestionResponse />}
-                            />
-                            <Route
-                                path={RoutesRecord.SUBMISSIONS_UPLOAD_RESPONSE}
-                                element={<UploadResponse />}
-                            />
-                        </>
-                    )}
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS}
+                        element={<QuestionResponse />}
+                    />
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_UPLOAD_RESPONSE}
+                        element={<UploadResponse />}
+                    />
+
                     <Route
                         path={RoutesRecord.SUBMISSIONS_SUMMARY}
                         element={<SubmissionSummary />}
@@ -166,12 +166,10 @@ const StateUserRoutes = ({
 const CMSUserRoutes = ({
     authMode,
     setAlert,
-    showQuestionResponse,
     stageName,
 }: {
     authMode: AuthModeType
     setAlert?: React.Dispatch<React.ReactElement>
-    showQuestionResponse: boolean
     stageName?: string
 }): React.ReactElement => {
     return (
@@ -201,20 +199,14 @@ const CMSUserRoutes = ({
                 </Route>
 
                 <Route element={<SubmissionSideNav />}>
-                    {showQuestionResponse && (
-                        <>
-                            <Route
-                                path={
-                                    RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS
-                                }
-                                element={<QuestionResponse />}
-                            />
-                            <Route
-                                path={RoutesRecord.SUBMISSIONS_UPLOAD_QUESTION}
-                                element={<UploadQuestions />}
-                            />
-                        </>
-                    )}
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS}
+                        element={<QuestionResponse />}
+                    />
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_UPLOAD_QUESTION}
+                        element={<UploadQuestions />}
+                    />
                     <Route
                         path={RoutesRecord.SUBMISSIONS_SUMMARY}
                         element={<SubmissionSummary />}
@@ -246,7 +238,43 @@ const CMSUserRoutes = ({
                         element={<GraphQLExplorer />}
                     />
                 )}
-                <Route path={RoutesRecord.SETTINGS} element={<Settings />} />
+                <Route
+                    path={RoutesRecord.MCR_SETTINGS}
+                    element={<Settings />}
+                >
+                    <Route
+                        index
+                        element={
+                            <Navigate to={RoutesRecord.STATE_ASSIGNMENTS} />
+                        }
+                    />
+                    <Route
+                        path={RoutesRecord.STATE_ASSIGNMENTS}
+                        element={<StateAssignmentTable />}
+                    />
+                    <Route
+                        path={RoutesRecord.DIVISION_ASSIGNMENTS}
+                        element={<DivisionAssignmentTable />}
+                    />
+                    <Route
+                        path={RoutesRecord.AUTOMATED_EMAILS}
+                        element={<AutomatedEmailsTable />}
+                    />
+                    <Route
+                        path={RoutesRecord.SUPPORT_EMAILS}
+                        element={<SupportEmailsTable />}
+                    />
+                </Route>
+                <Route
+                        path={RoutesRecord.EDIT_STATE_ASSIGNMENTS}
+                        element={<EditStateAssign />}
+                    />
+                <Route
+                    path={RoutesRecord.SETTINGS}
+                    // Until we update the helpdesk documentation for the /mc-review-settings route, we are keeping this
+                    // one and just redirecting.
+                    element={<Navigate to="/mc-review-settings" />}
+                />
                 <Route path={RoutesRecord.API_ACCESS} element={<APIAccess />} />
                 {UniversalRoutes}
                 <Route path="*" element={<Error404 />} />
@@ -299,11 +327,6 @@ export const AppRoutes = ({
     const showExpirationModal: boolean = ldClient?.variation(
         featureFlags.SESSION_EXPIRING_MODAL.flag,
         featureFlags.SESSION_EXPIRING_MODAL.defaultValue
-    )
-
-    const showQuestionResponse = ldClient?.variation(
-        featureFlags.CMS_QUESTIONS.flag,
-        featureFlags.CMS_QUESTIONS.defaultValue
     )
 
     const route = getRouteName(pathname)
@@ -389,7 +412,6 @@ export const AppRoutes = ({
             <StateUserRoutes
                 authMode={authMode}
                 setAlert={setAlert}
-                showQuestionResponse={showQuestionResponse}
                 stageName={stageName}
             />
         )
@@ -398,7 +420,6 @@ export const AppRoutes = ({
             <CMSUserRoutes
                 authMode={authMode}
                 setAlert={setAlert}
-                showQuestionResponse={showQuestionResponse}
                 stageName={stageName}
             />
         )

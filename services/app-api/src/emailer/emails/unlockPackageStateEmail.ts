@@ -72,7 +72,7 @@ export const unlockPackageStateEmail = async (
     } else {
         return {
             toAddresses: receiverEmails,
-            replyToAddresses: [config.helpDeskEmail],
+            replyToAddresses: [],
             sourceEmail: config.emailSource,
             subject: `${
                 isTestEnvironment ? `[${config.stage}] ` : ''

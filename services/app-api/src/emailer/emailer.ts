@@ -22,8 +22,9 @@ import type {
 import type {
     UpdateInfoType,
     ProgramType,
-    ContractRevisionWithRatesType,
     Question,
+    ContractRevisionType,
+    UnlockedContractType,
 } from '../domain-models'
 import { SESServiceException } from '@aws-sdk/client-ses'
 
@@ -84,13 +85,13 @@ type Emailer = {
         statePrograms: ProgramType[]
     ) => Promise<void | Error>
     sendUnlockContractCMSEmail: (
-        contractRev: ContractRevisionWithRatesType,
+        contract: UnlockedContractType,
         updateInfo: UpdateInfoType,
         stateAnalystsEmails: StateAnalystsEmails,
         statePrograms: ProgramType[]
     ) => Promise<void | Error>
     sendUnlockContractStateEmail: (
-        contractRev: ContractRevisionWithRatesType,
+        contract: UnlockedContractType,
         updateInfo: UpdateInfoType,
         statePrograms: ProgramType[],
         submitterEmails: string[]
@@ -120,26 +121,26 @@ type Emailer = {
         statePrograms: ProgramType[]
     ) => Promise<void | Error>
     sendQuestionsStateEmail: (
-        contract: ContractRevisionWithRatesType,
+        contract: ContractRevisionType,
         submitterEmails: string[],
         statePrograms: ProgramType[],
         question: Question
     ) => Promise<void | Error>
     sendQuestionsCMSEmail: (
-        contract: ContractRevisionWithRatesType,
+        contract: ContractRevisionType,
         stateAnalystsEmails: StateAnalystsEmails,
         statePrograms: ProgramType[],
         questions: Question[]
     ) => Promise<void | Error>
     sendQuestionResponseCMSEmail: (
-        contractRevision: ContractRevisionWithRatesType,
+        contractRevision: ContractRevisionType,
         statePrograms: ProgramType[],
         stateAnalystsEmails: StateAnalystsEmails,
         currentQuestion: Question,
         allContractQuestions: Question[]
     ) => Promise<void | Error>
     sendQuestionResponseStateEmail: (
-        contractRevision: ContractRevisionWithRatesType,
+        contractRevision: ContractRevisionType,
         statePrograms: ProgramType[],
         submitterEmails: string[],
         currentQuestion: Question,

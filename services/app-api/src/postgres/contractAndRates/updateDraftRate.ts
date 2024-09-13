@@ -32,7 +32,7 @@ async function updateDraftRate(
 
     try {
         // Given all the Rates associated with this draft, find the most recent submitted to update.
-        const currentRev = await client.rateRevisionTable.findFirst({
+        const draftRev = await client.rateRevisionTable.findFirst({
             where: {
                 rateID: rateID,
                 submitInfoID: null,
@@ -41,20 +41,63 @@ async function updateDraftRate(
                 createdAt: 'desc',
             },
         })
-        if (!currentRev) {
+        if (!draftRev) {
             console.error('No Draft Rev!')
             return new Error('cant find a draft rev to submit')
         }
+
+        // get all the now-related contracts, find the matching ratePosition if any, otherwise add one to the current max
+        const existingLinks = await client.draftRateJoinTable.findMany({
+            where: {
+                contractID: {
+                    in: args.contractIDs,
+                },
+            },
+        })
+
+        const newLinks = args.contractIDs.map((contractID) => {
+            let ratePosition = 1
+            for (const link of existingLinks.filter(
+                (l) => l.contractID === contractID
+            )) {
+                if (rateID === args.rateID) {
+                    ratePosition = link.ratePosition
+                    break
+                }
+                if (link.ratePosition >= ratePosition) {
+                    ratePosition = link.ratePosition + 1
+                }
+            }
+
+            return {
+                contractID,
+                ratePosition,
+            }
+        })
+
         // Clear all related resources on the revision
         // Then update resource, adjusting all simple fields and creating new linked resources for fields holding relationships to other day
         await client.rateRevisionTable.update({
             where: {
-                id: currentRev.id,
+                id: draftRev.id,
             },
             data: {
                 ...prismaUpdateRateFormDataFromDomain(formData),
             },
         })
+
+        await client.rateTable.update({
+            where: {
+                id: rateID,
+            },
+            data: {
+                draftContracts: {
+                    deleteMany: {},
+                    create: newLinks,
+                },
+            },
+        })
+
         return findRateWithHistory(client, rateID)
     } catch (err) {
         console.error('Prisma error updating rate', err)

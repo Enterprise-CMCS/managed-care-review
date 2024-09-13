@@ -246,11 +246,10 @@ export const UnlockSubmitModal = ({
                 heading: modalValues.errorHeading,
                 message: result.message,
                 // When we have generic/unknown errors override any suggestions and display the fallback "please refresh text"
-                suggestion:
-                    result.message === ERROR_MESSAGES.submit_error_generic ||
-                    result.message === ERROR_MESSAGES.unlock_error_generic
-                        ? undefined
-                        : modalValues.errorSuggestion,
+                validationFail:
+                    result.message === ERROR_MESSAGES.submit_missing_field
+                        ? true
+                        : false,
             })
         } else {
             modalRef.current?.toggleModal(undefined, false)

@@ -13,11 +13,56 @@ import {
     iterableCmsUsersMockData,
 } from '@mc-review/mocks'
 import { IndexQuestionsPayload } from '../../gen/gqlClient'
+import { useStringConstants } from '../../hooks/useStringConstants'
 
 describe('QuestionResponse', () => {
     describe.each(iterableCmsUsersMockData)(
         '$userRole QuestionResponse tests',
         ({ userRole, mockUser }) => {
+            it('render error if CMS user does not have division set', async () =>{
+                const stringConstants = useStringConstants()
+                const user = mockUser({divisionAssignment: undefined})
+                renderWithProviders(
+                    <Routes>
+                        <Route element={<SubmissionSideNav />}>
+                            <Route
+                                path={
+                                    RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS
+                                }
+                                element={<QuestionResponse />}
+                            />
+                        </Route>
+                    </Routes>,
+                    {
+                        apolloProvider: {
+                            mocks: [
+                                fetchCurrentUserMock({ user, statusCode: 200}),
+                                fetchStateHealthPlanPackageWithQuestionsMockSuccess(
+                                    {
+                                        id: '15',
+                                        questions:  mockQuestionsPayload('15'),
+                                    }
+                                ),
+                            ],
+                        },
+                        routerProvider: {
+                            route: '/submissions/15/question-and-answers',
+                        },
+                    }
+                )
+
+                expect(await screen.findByRole('heading', {name: 'Missing division'})).toBeInTheDocument()
+                const feedbackLink = screen.getByRole('link', {
+                    name: `email the help desk`,
+                })
+                expect(feedbackLink).toHaveAttribute(
+                    'href',
+                    stringConstants.MAIL_TO_SUPPORT_HREF
+                )
+
+
+
+        })
             it('renders expected questions correctly with rounds', async () => {
                 const mockQuestions = mockQuestionsPayload('15')
 
@@ -49,9 +94,6 @@ describe('QuestionResponse', () => {
                         },
                         routerProvider: {
                             route: '/submissions/15/question-and-answers',
-                        },
-                        featureFlags: {
-                            'cms-questions': true,
                         },
                     }
                 )
@@ -206,9 +248,6 @@ describe('QuestionResponse', () => {
                         routerProvider: {
                             route: '/submissions/15/question-and-answers',
                         },
-                        featureFlags: {
-                            'cms-questions': true,
-                        },
                     }
                 )
 
@@ -266,9 +305,6 @@ describe('QuestionResponse', () => {
                         },
                         routerProvider: {
                             route: '/submissions/15/question-and-answers',
-                        },
-                        featureFlags: {
-                            'cms-questions': true,
                         },
                     }
                 )
@@ -334,9 +370,6 @@ describe('QuestionResponse', () => {
                         routerProvider: {
                             route: '/submissions/15/question-and-answers',
                         },
-                        featureFlags: {
-                            'cms-questions': true,
-                        },
                     }
                 )
 
@@ -388,9 +421,6 @@ describe('QuestionResponse', () => {
                         routerProvider: {
                             route: '/submissions/15/question-and-answers?submit=question',
                         },
-                        featureFlags: {
-                            'cms-questions': true,
-                        },
                     }
                 )
 
@@ -428,9 +458,6 @@ describe('QuestionResponse', () => {
                         },
                         routerProvider: {
                             route: '/submissions/15/question-and-answers',
-                        },
-                        featureFlags: {
-                            'cms-questions': true,
                         },
                     }
                 )
@@ -478,9 +505,6 @@ describe('QuestionResponse', () => {
                             routerProvider: {
                                 route: '/submissions/15/question-and-answers',
                             },
-                            featureFlags: {
-                                'cms-questions': true,
-                            },
                         }
                     )
 
@@ -525,9 +549,6 @@ describe('QuestionResponse', () => {
                     routerProvider: {
                         route: '/submissions/15/question-and-answers?submit=response',
                     },
-                    featureFlags: {
-                        'cms-questions': true,
-                    },
                 }
             )
 
@@ -565,9 +586,6 @@ describe('QuestionResponse', () => {
                     },
                     routerProvider: {
                         route: '/submissions/15/question-and-answers',
-                    },
-                    featureFlags: {
-                        'cms-questions': true,
                     },
                 }
             )

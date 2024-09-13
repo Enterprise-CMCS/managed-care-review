@@ -92,7 +92,7 @@ export const newPackageCMSEmail = async (
     } else {
         return {
             toAddresses: reviewerEmails,
-            replyToAddresses: [config.helpDeskEmail],
+            replyToAddresses: [],
             sourceEmail: config.emailSource,
             subject: `${
                 isTestEnvironment ? `[${config.stage}] ` : ''

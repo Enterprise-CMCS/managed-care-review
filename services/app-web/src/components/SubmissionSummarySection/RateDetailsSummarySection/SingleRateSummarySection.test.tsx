@@ -9,40 +9,39 @@ import {
     mockValidCMSUser,
     mockValidHelpDeskUser,
     mockValidStateUser,
-    rateDataMock,
 } from '@mc-review/mocks'
 import { screen, waitFor, within } from '@testing-library/react'
-import { packageName } from '@mc-review/hpp'
-import { RateFormData, RateRevision } from '../../../gen/gqlClient'
 import { type Location, Route, Routes } from 'react-router-dom'
 import { RoutesRecord } from '@mc-review/constants'
+import {
+    rateUnlockedWithHistoryMock,
+    rateWithHistoryMock,
+} from '@mc-review/mocks'
 
 describe('SingleRateSummarySection', () => {
     it('can render rate details without errors', async () => {
-        const rateData = rateDataMock()
+        const rateData = rateWithHistoryMock()
         rateData.revisions[0].formData.deprecatedRateProgramIDs = ['123']
-        await waitFor(() => {
-            renderWithProviders(
-                <SingleRateSummarySection
-                    rate={rateData}
-                    isSubmitted={true}
-                    statePrograms={rateData.state.programs}
-                />,
-                {
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({
-                                statusCode: 200,
-                                user: mockValidCMSUser(),
-                            }),
-                        ],
-                    },
-                    featureFlags: {
-                        'rate-edit-unlock': true,
-                    },
-                }
-            )
-        })
+        renderWithProviders(
+            <SingleRateSummarySection
+                rate={rateData}
+                isSubmitted={true}
+                statePrograms={rateData.state.programs}
+            />,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            statusCode: 200,
+                            user: mockValidCMSUser(),
+                        }),
+                    ],
+                },
+                featureFlags: {
+                    'rate-edit-unlock': true,
+                },
+            }
+        )
         // Wait for all the documents to be in the table
         await screen.findByText(
             rateData.revisions[0].formData.rateDocuments[0].name
@@ -109,8 +108,13 @@ describe('SingleRateSummarySection', () => {
     })
     // can delete the next test when linked rates flag is permanently on
     it('renders documents with linked submissions correctly for CMS users (legacy feature)', async () => {
-        const rateData = rateDataMock()
-        const parentContractRev = rateData.revisions[0].contractRevisions[0]
+        const rateData = rateWithHistoryMock()
+        const lastSubmission = rateData.packageSubmissions?.[0]
+        if (!lastSubmission) {
+            throw new Error('no sub')
+        }
+
+        const parentContractRev = lastSubmission.contractRevisions[0]
         const rateDoc = rateData.revisions[0].formData.rateDocuments[0]
         const supportingDoc =
             rateData.revisions[0].formData.supportingDocuments[0]
@@ -119,33 +123,26 @@ describe('SingleRateSummarySection', () => {
         const linkedSubmissionTwo =
             rateData.revisions[0].formData.packagesWithSharedRateCerts[1]
 
-        const contractPackageName = packageName(
-            parentContractRev.contract.stateCode,
-            parentContractRev.contract.stateNumber,
-            parentContractRev.formData.programIDs,
-            rateData.state.programs
-        )
+        const contractPackageName = parentContractRev.contractName
 
-        await waitFor(() => {
-            renderWithProviders(
-                <SingleRateSummarySection
-                    rate={rateData}
-                    isSubmitted={true}
-                    statePrograms={rateData.state.programs}
-                />,
-                {
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({
-                                statusCode: 200,
-                                user: mockValidCMSUser(),
-                            }),
-                        ],
-                    },
-                    featureFlags: { 'rate-edit-unlock': true },
-                }
-            )
-        })
+        renderWithProviders(
+            <SingleRateSummarySection
+                rate={rateData}
+                isSubmitted={true}
+                statePrograms={rateData.state.programs}
+            />,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            statusCode: 200,
+                            user: mockValidCMSUser(),
+                        }),
+                    ],
+                },
+                featureFlags: { 'rate-edit-unlock': true },
+            }
+        )
 
         expect(
             screen.getByRole('heading', { name: 'Rate documents' })
@@ -181,7 +178,7 @@ describe('SingleRateSummarySection', () => {
             })
         ).toHaveAttribute(
             'href',
-            `/submissions/${parentContractRev.contract.id}`
+            `/submissions/${parentContractRev.contractID}`
         )
 
         // Expect rate certification document and linked submissions
@@ -222,38 +219,35 @@ describe('SingleRateSummarySection', () => {
         ).toBeInTheDocument()
     })
     it('renders rates linked to other contract actions correctly', async () => {
-        const rateData = rateDataMock()
-        const parentContractRev = rateData.revisions[0].contractRevisions[0]
+        const rateData = rateWithHistoryMock()
+        const parentContractRev =
+            rateData.packageSubmissions?.[2].contractRevisions[0]
+        if (!parentContractRev) {
+            throw new Error('no parent')
+        }
 
-        const contractPackageName = packageName(
-            parentContractRev.contract.stateCode,
-            parentContractRev.contract.stateNumber,
-            parentContractRev.formData.programIDs,
-            rateData.state.programs
+        const contractPackageName = parentContractRev.contractName
+
+        renderWithProviders(
+            <SingleRateSummarySection
+                rate={rateData}
+                isSubmitted={true}
+                statePrograms={rateData.state.programs}
+            />,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            statusCode: 200,
+                            user: mockValidCMSUser(),
+                        }),
+                    ],
+                },
+                featureFlags: {
+                    'rate-edit-unlock': true,
+                },
+            }
         )
-
-        await waitFor(() => {
-            renderWithProviders(
-                <SingleRateSummarySection
-                    rate={rateData}
-                    isSubmitted={true}
-                    statePrograms={rateData.state.programs}
-                />,
-                {
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({
-                                statusCode: 200,
-                                user: mockValidCMSUser(),
-                            }),
-                        ],
-                    },
-                    featureFlags: {
-                        'rate-edit-unlock': true,
-                    },
-                }
-            )
-        })
 
         expect(
             screen.getByRole('heading', { name: 'Rate documents' })
@@ -276,19 +270,13 @@ describe('SingleRateSummarySection', () => {
             })
         ).toHaveAttribute(
             'href',
-            `/submissions/${parentContractRev.contract.id}`
+            `/submissions/${parentContractRev.contractID}`
         )
     })
 
     describe('Unlock rate', () => {
         it('renders the unlock button to CMS users when rate edit and unlock is enabled', async () => {
-            const rateData = rateDataMock(
-                {
-                    rateType: undefined,
-                    rateDateCertified: undefined,
-                } as unknown as Partial<RateRevision>,
-                { status: 'UNLOCKED' }
-            )
+            const rateData = rateWithHistoryMock()
             renderWithProviders(
                 <SingleRateSummarySection
                     rate={rateData}
@@ -318,7 +306,7 @@ describe('SingleRateSummarySection', () => {
         it('renders unlock button that redirects to contract submission page when linked rates on but standalone rate edit and unlock is still disabled', async () => {
             let testLocation: Location // set up location to track URL changes
 
-            const rateData = rateDataMock()
+            const rateData = rateWithHistoryMock()
             renderWithProviders(
                 <Routes>
                     <Route
@@ -370,13 +358,7 @@ describe('SingleRateSummarySection', () => {
         })
 
         it('disables the unlock button for CMS users when rate already unlocked', async () => {
-            const rateData = rateDataMock(
-                {
-                    rateType: undefined,
-                    rateDateCertified: undefined,
-                } as unknown as Partial<RateRevision>,
-                { status: 'UNLOCKED' }
-            )
+            const rateData = rateUnlockedWithHistoryMock()
             renderWithProviders(
                 <SingleRateSummarySection
                     rate={rateData}
@@ -405,13 +387,7 @@ describe('SingleRateSummarySection', () => {
         })
 
         it('does not render the unlock button to state users', async () => {
-            const rateData = rateDataMock(
-                {
-                    rateType: undefined,
-                    rateDateCertified: undefined,
-                } as unknown as Partial<RateRevision>,
-                { status: 'UNLOCKED' }
-            )
+            const rateData = rateWithHistoryMock()
             renderWithProviders(
                 <SingleRateSummarySection
                     rate={rateData}
@@ -445,28 +421,31 @@ describe('SingleRateSummarySection', () => {
     })
 
     describe('Missing data error notifications', () => {
-        const draftRates = mockEmptyDraftContractAndRate().draftRates
+        const mockEmptyRateData = () => {
+            const emptyDraftRates = mockEmptyDraftContractAndRate().draftRates
+            if (!emptyDraftRates) {
+                throw new Error('Unexpected error: draft rates is undefined')
+            }
 
-        if (!draftRates) {
-            throw new Error('Unexpected error: draft rates is undefined')
+            const emptyRateFormData = emptyDraftRates[0].draftRevision?.formData
+
+            if (!emptyRateFormData) {
+                throw new Error('no form data')
+            }
+
+            const rateData = rateWithHistoryMock()
+            const sub = rateData.packageSubmissions?.[0]
+            if (!sub) {
+                throw new Error('no sub')
+            }
+            sub.rateRevision.formData = emptyRateFormData
+
+            return rateData
         }
-
-        const emptyRateFormData = draftRates[0].draftRevision
-            ?.formData as RateFormData
-
-        const mockEmptyRateData = () =>
-            rateDataMock(
-                {
-                    formData: {
-                        ...emptyRateFormData,
-                        rateType: 'AMENDMENT',
-                    },
-                },
-                { status: 'UNLOCKED' }
-            )
 
         it('should not display missing field text to CMS users', async () => {
             const rateData = mockEmptyRateData()
+
             renderWithProviders(
                 <SingleRateSummarySection
                     rate={rateData}
@@ -501,6 +480,17 @@ describe('SingleRateSummarySection', () => {
 
         it('should display missing field text to state users', async () => {
             const rateData = mockEmptyRateData()
+
+            if (
+                !rateData.packageSubmissions ||
+                rateData.packageSubmissions.length === 0
+            ) {
+                throw new Error('no package subs')
+            }
+
+            rateData.packageSubmissions[0].rateRevision.formData.rateType =
+                'AMENDMENT'
+
             renderWithProviders(
                 <SingleRateSummarySection
                     rate={rateData}
