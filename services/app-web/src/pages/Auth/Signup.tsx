@@ -2,7 +2,7 @@ import React, { useState, Dispatch, SetStateAction } from 'react'
 import { Form, FormGroup, Label, TextInput } from '@trussworks/react-uswds'
 
 import { signUp } from './cognitoAuth'
-import { recordJSException } from '../../otelHelpers'
+import { recordJSException } from '@mc-review/otel'
 import { ButtonWithLogging } from '../../components'
 
 export function showError(error: string): void {

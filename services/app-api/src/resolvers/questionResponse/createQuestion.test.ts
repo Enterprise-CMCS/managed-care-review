@@ -10,14 +10,14 @@ import {
     defaultFloridaProgram,
 } from '../../testHelpers/gqlHelpers'
 import { getTestStateAnalystsEmails } from '../../testHelpers/parameterStoreHelpers'
-import { packageName } from '../../common-code/healthPlanFormDataType'
+import { packageName } from '@mc-review/hpp'
 import { assertAnError, assertAnErrorCode } from '../../testHelpers'
 import {
     createDBUsersWithFullData,
     testCMSApproverUser,
     testCMSUser,
 } from '../../testHelpers/userHelpers'
-import { base64ToDomain } from '../../common-code/proto/healthPlanFormDataProto'
+import { base64ToDomain } from '@mc-review/hpp'
 import { testEmailConfig, testEmailer } from '../../testHelpers/emailerHelpers'
 
 describe('createQuestion', () => {

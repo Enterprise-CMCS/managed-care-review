@@ -1,9 +1,7 @@
 import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import { FieldSelect } from './FieldSelect'
-import {
-    fetchCurrentUserMock,
-    mockMNState,
-} from '../../../testHelpers/apolloMocks'
+import { mockMNState } from '@mc-review/hpp'
+import { fetchCurrentUserMock } from '@mc-review/mocks'
 import { screen, waitFor } from '@testing-library/react'
 import selectEvent from 'react-select-event'
 import userEvent from '@testing-library/user-event'
@@ -55,7 +53,7 @@ describe('FieldSelect', () => {
                 initialValues={[]}
                 dropdownOptions={dropdownOptions}
                 onChange={mockOnChange}
-            />,
+            />
         )
         const combobox = await screen.findByRole('combobox')
 

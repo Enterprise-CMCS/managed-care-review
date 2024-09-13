@@ -1,8 +1,5 @@
-import {
-    ActuaryContact,
-    StateContact,
-} from '../../../common-code/healthPlanFormDataType'
-import { getActuaryFirm } from '../../../gqlHelpers/contractsAndRates'
+import { ActuaryContact, StateContact } from '@mc-review/hpp'
+import { getActuaryFirm } from '@mc-review/helpers'
 import { DataDetailMissingField } from '../DataDetailMissingField'
 import {
     ActuaryContact as GQLActuaryContact,

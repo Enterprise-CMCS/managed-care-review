@@ -1,15 +1,12 @@
 import { GridContainer } from '@trussworks/react-uswds'
 import React from 'react'
 import { useLocation } from 'react-router-dom'
-import { packageName } from '../../common-code/healthPlanFormDataType'
+import { packageName } from '@mc-review/hpp'
 import { useAuth } from '../../contexts/AuthContext'
 import { useIndexHealthPlanPackagesQuery } from '../../gen/gqlClient'
 import styles from './StateDashboard.module.scss'
 import { SubmissionSuccessMessage } from './SubmissionSuccessMessage'
-import {
-    handleApolloError,
-    isLikelyUserAuthError,
-} from '../../gqlHelpers/apolloErrors'
+import { handleApolloError, isLikelyUserAuthError } from '@mc-review/helpers'
 import {
     ErrorAlertSignIn,
     HealthPlanPackageTable,
@@ -18,7 +15,7 @@ import {
     GenericApiErrorBanner,
     NavLinkWithLogging,
 } from '../../components'
-import { getCurrentRevisionFromHealthPlanPackage } from '../../gqlHelpers'
+import { getCurrentRevisionFromHealthPlanPackage } from '@mc-review/helpers'
 
 /**
  * We only pull a subset of data out of the submission and revisions for display in Dashboard

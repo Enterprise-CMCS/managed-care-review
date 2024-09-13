@@ -5,8 +5,8 @@ import {
     indexRatesMockFailure,
     iterableCmsUsersMockData,
     rateDataMock,
-} from '../../../testHelpers/apolloMocks'
-import { indexRatesMockSuccess } from '../../../testHelpers/apolloMocks'
+} from '@mc-review/mocks'
+import { indexRatesMockSuccess } from '@mc-review/mocks'
 import { screen, waitFor } from '@testing-library/react'
 import { Rate } from '../../../gen/gqlClient'
 

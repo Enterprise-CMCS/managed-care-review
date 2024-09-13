@@ -6,11 +6,11 @@ import {
     fetchCurrentUserMock,
     mockValidCMSUser,
     indexHealthPlanPackagesMockSuccess,
-} from '../../../testHelpers/apolloMocks'
+} from '@mc-review/mocks'
 import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import * as usePreviousSubmission from '../../../hooks/usePreviousSubmission'
 import { RateDetailsSummarySection } from './RateDetailsSummarySection'
-import { RateInfoType } from '../../../common-code/healthPlanFormDataType'
+import { RateInfoType } from '@mc-review/hpp'
 import { testS3Client } from '../../../testHelpers/s3Helpers'
 
 describe('RateDetailsSummarySection', () => {

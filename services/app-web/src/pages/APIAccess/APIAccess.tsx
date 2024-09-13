@@ -2,13 +2,13 @@ import { ApolloError } from '@apollo/client'
 import { Grid, GridContainer, Link } from '@trussworks/react-uswds'
 import path from 'path-browserify'
 import { useState } from 'react'
-import { RoutesRecord } from '../../constants'
+import { RoutesRecord } from '@mc-review/constants'
 import {
     CreateApiKeyPayload,
     useCreateApiKeyMutation,
 } from '../../gen/gqlClient'
-import { handleApolloError } from '../../gqlHelpers/apolloErrors'
-import { recordJSException } from '../../otelHelpers'
+import { handleApolloError } from '@mc-review/helpers'
+import { recordJSException } from '@mc-review/otel'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import styles from './APIAccess.module.scss'
 import { ButtonWithLogging, LinkWithLogging } from '../../components'

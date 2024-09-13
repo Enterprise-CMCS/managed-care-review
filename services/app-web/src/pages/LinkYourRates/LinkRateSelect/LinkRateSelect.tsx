@@ -8,8 +8,8 @@ import Select, {
 } from 'react-select'
 import styles from '../../../components/Select/Select.module.scss'
 import { IndexRatesInput, useIndexRatesQuery } from '../../../gen/gqlClient'
-import { programNames } from '../../../common-code/healthPlanFormDataType'
-import { formatCalendarDate } from '../../../common-code/dateHelpers'
+import { programNames } from '@mc-review/hpp'
+import { formatCalendarDate } from '@mc-review/common-code'
 import {
     FormikRateForm,
     convertGQLRateToRateForm,

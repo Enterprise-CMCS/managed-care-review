@@ -6,7 +6,7 @@ import {
     fetchCurrentUserMock,
     fetchContractMockSuccess,
     mockContractPackageDraft,
-} from '../../../testHelpers/apolloMocks'
+} from '@mc-review/mocks'
 import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import { SubmissionType } from './'
 

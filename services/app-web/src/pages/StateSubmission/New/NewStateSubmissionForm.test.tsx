@@ -1,9 +1,6 @@
 import { screen, waitFor, within } from '@testing-library/react'
 
-import {
-    fetchCurrentUserMock,
-    createContractMockFail,
-} from '../../../testHelpers/apolloMocks'
+import { fetchCurrentUserMock, createContractMockFail } from '@mc-review/mocks'
 import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import { NewStateSubmissionForm } from './NewStateSubmissionForm'
 import userEvent from '@testing-library/user-event'

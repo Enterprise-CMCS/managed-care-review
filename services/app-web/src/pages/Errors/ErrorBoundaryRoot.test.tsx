@@ -2,8 +2,8 @@ import { renderWithProviders } from '../../testHelpers'
 import { ErrorBoundary } from 'react-error-boundary'
 import { ErrorBoundaryRoot } from './ErrorBoundaryRoot'
 import { screen, waitFor } from '@testing-library/react'
-import { fetchCurrentUserMock } from '../../testHelpers/apolloMocks'
-import * as tracingHelper from '../../otelHelpers/tracingHelper'
+import { fetchCurrentUserMock } from '@mc-review/mocks'
+import * as tracingHelper from '@mc-review/otel'
 import { expect, vi } from 'vitest'
 
 describe('Error boundary tests', () => {

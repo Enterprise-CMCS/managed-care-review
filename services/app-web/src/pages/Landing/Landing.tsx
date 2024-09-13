@@ -1,7 +1,7 @@
 import React from 'react'
 import { GridContainer, Grid } from '@trussworks/react-uswds'
 import styles from './Landing.module.scss'
-import { featureFlags } from '../../common-code/featureFlags'
+import { featureFlags } from '@mc-review/common-code'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { useLocation } from 'react-router-dom'
 import {

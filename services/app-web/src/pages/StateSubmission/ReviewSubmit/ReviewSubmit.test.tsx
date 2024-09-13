@@ -5,13 +5,13 @@ import {
     fetchCurrentUserMock,
     fetchContractMockSuccess,
     mockValidStateUser,
-} from '../../../testHelpers/apolloMocks'
+} from '@mc-review/mocks'
 import { Route, Routes } from 'react-router-dom'
-import { RoutesRecord } from '../../../constants'
+import { RoutesRecord } from '@mc-review/constants'
 import {
     mockContractPackageDraft,
     mockContractPackageUnlockedWithUnlockedType,
-} from '../../../testHelpers/apolloMocks/contractPackageDataMock'
+} from '@mc-review/mocks'
 
 describe('ReviewSubmit', () => {
     it('renders without errors', async () => {

@@ -5,13 +5,13 @@ import {
     fetchRateMockSuccess,
     iterableCmsUsersMockData,
     mockValidStateUser,
-} from '../../testHelpers/apolloMocks'
+} from '@mc-review/mocks'
 import { RateSummary } from './RateSummary'
-import { RoutesRecord } from '../../constants'
+import { RoutesRecord } from '@mc-review/constants'
 import { Route, Routes } from 'react-router-dom'
 import { RateEdit } from '../RateEdit/RateEdit'
-import { dayjs } from '../../common-code/dateHelpers'
-import { rateWithHistoryMock } from '../../testHelpers/apolloMocks/rateDataMock'
+import { dayjs } from '@mc-review/common-code'
+import { rateWithHistoryMock } from '@mc-review/mocks'
 
 // Wrap test component in some top level routes to allow getParams to be tested
 const wrapInRoutes = (children: React.ReactNode) => {

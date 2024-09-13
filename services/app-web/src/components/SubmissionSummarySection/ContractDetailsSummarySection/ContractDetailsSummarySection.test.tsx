@@ -5,13 +5,13 @@ import {
     fetchCurrentUserMock,
     mockContractAndRatesDraft,
     mockStateSubmission,
-} from '../../../testHelpers/apolloMocks'
-import { UnlockedHealthPlanFormDataType } from '../../../common-code/healthPlanFormDataType'
+} from '@mc-review/mocks'
+import { UnlockedHealthPlanFormDataType } from '@mc-review/hpp'
 import { testS3Client } from '../../../testHelpers/s3Helpers'
 import {
     StatutoryRegulatoryAttestation,
     StatutoryRegulatoryAttestationQuestion,
-} from '../../../constants/statutoryRegulatoryAttestation'
+} from '@mc-review/constants'
 
 describe('ContractDetailsSummarySection', () => {
     const defaultApolloMocks = {

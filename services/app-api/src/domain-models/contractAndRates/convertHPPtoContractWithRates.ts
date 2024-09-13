@@ -1,7 +1,7 @@
 import type {
     RateInfoType,
     UnlockedHealthPlanFormDataType,
-} from '../../common-code/healthPlanFormDataType'
+} from '@mc-review/hpp'
 import type {
     ContractFormData,
     RateFormData,

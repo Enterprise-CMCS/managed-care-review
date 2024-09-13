@@ -1,6 +1,6 @@
 import { packageStatus, packageSubmittedAt } from '../../domain-models'
-import { protoToBase64 } from '../../common-code/proto/healthPlanFormDataProto'
-import statePrograms from '../../../../app-web/src/common-code/data/statePrograms.json'
+import { protoToBase64 } from '@mc-review/hpp'
+import { typedStatePrograms } from '@mc-review/hpp'
 import type { Resolvers } from '../../gen/gqlServer'
 import type { Store } from '../../postgres'
 import { convertToIndexQuestionsPayload } from '../../postgres/questionResponse'
@@ -42,7 +42,7 @@ export function healthPlanPackageResolver(
         },
         state(parent) {
             const packageState = parent.stateCode
-            const state = statePrograms.states.find(
+            const state = typedStatePrograms.states.find(
                 (st) => st.code === packageState
             )
 

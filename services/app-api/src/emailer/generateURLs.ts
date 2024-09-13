@@ -1,7 +1,7 @@
 import { URL } from 'url'
 import { compile } from 'path-to-regexp'
 
-import { RoutesRecord } from '../../../app-web/src/constants/routes'
+import { RoutesRecord } from '@mc-review/constants'
 
 // Generates the correct url for the review and submit page for a given package id
 // React Router uses the path-to-regexp library to generate URLs, we import it here to avoid loading

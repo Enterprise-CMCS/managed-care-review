@@ -4,7 +4,7 @@ import {
     SubmissionUpdatedBanner,
     UpdatedProps,
 } from './SubmissionUpdatedBanner'
-import { mockValidStateUser } from '../../../testHelpers/apolloMocks'
+import { mockValidStateUser } from '@mc-review/mocks'
 
 export default {
     title: 'Components/Banner/SubmissionUpdatedBanner',

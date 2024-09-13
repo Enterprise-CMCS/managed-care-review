@@ -7,7 +7,7 @@ import {
     mockDraftHealthPlanPackage,
     mockSubmittedHealthPlanPackage,
     mockUnlockedHealthPlanPackage,
-} from '../../testHelpers/apolloMocks'
+} from '@mc-review/mocks'
 import { renderWithProviders } from '../../testHelpers/jestHelpers'
 
 describe('StateDashboard', () => {

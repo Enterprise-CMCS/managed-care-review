@@ -1,4 +1,4 @@
-import type { StateCodeType } from '../../common-code/healthPlanFormDataType'
+import type { StateCodeType } from '@mc-review/hpp'
 import type { Division, PrismaClient } from '@prisma/client'
 import { AuditAction } from '@prisma/client'
 import type { CMSUsersUnionType } from '../../domain-models'

@@ -6,7 +6,7 @@ import {
     fetchCurrentUserMock,
     mockValidCMSUser,
     indexHealthPlanPackagesMockSuccess,
-} from '../../testHelpers/apolloMocks'
+} from '@mc-review/mocks'
 
 // Routing and routes configuration
 describe('AppRoutes', () => {

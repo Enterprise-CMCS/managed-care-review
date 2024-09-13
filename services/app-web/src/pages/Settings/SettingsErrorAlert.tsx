@@ -5,8 +5,8 @@ import {
     ErrorAlertSignIn,
     GenericApiErrorBanner,
 } from '../../components'
-import { handleApolloError } from '../../gqlHelpers/apolloErrors'
-import { recordJSException } from '../../otelHelpers'
+import { handleApolloError } from '@mc-review/helpers'
+import { recordJSException } from '@mc-review/otel'
 import styles from './Settings.module.scss'
 
 export const SettingsErrorAlert = ({

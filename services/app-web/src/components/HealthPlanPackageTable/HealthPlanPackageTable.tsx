@@ -17,7 +17,7 @@ import styles from './HealthPlanPackageTable.module.scss'
 import { Table, Tag } from '@trussworks/react-uswds'
 import dayjs from 'dayjs'
 import qs from 'qs'
-import { SubmissionStatusRecord } from '../../constants/healthPlanPackages'
+import { SubmissionStatusRecord } from '@mc-review/hpp'
 import {
     FilterAccordion,
     FilterSelect,
@@ -25,7 +25,7 @@ import {
     FilterOptionType,
 } from '../FilterAccordion'
 import { InfoTag, TagProps } from '../InfoTag/InfoTag'
-import { pluralize } from '../../common-code/formatters'
+import { pluralize } from '@mc-review/common-code'
 import { DoubleColumnGrid } from '../DoubleColumnGrid'
 import { NavLinkWithLogging } from '../TealiumLogging/Link'
 import { useTealium } from '../../hooks'

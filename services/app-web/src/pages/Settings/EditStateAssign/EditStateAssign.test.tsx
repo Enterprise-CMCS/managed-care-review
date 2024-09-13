@@ -1,10 +1,7 @@
 import { screen, waitFor } from '@testing-library/react'
 import { renderWithProviders } from '../../../testHelpers'
-import {
-    fetchCurrentUserMock,
-    mockValidAdminUser
-} from '../../../testHelpers/apolloMocks'
-import { RoutesRecord } from '../../../constants'
+import { fetchCurrentUserMock, mockValidAdminUser } from '@mc-review/mocks'
+import { RoutesRecord } from '@mc-review/constants'
 import { Location, Route, Routes } from 'react-router-dom'
 import { EditStateAssign } from './EditStateAssign'
 import userEvent from '@testing-library/user-event'
@@ -19,7 +16,10 @@ const wrapInRoutes = (children: React.ReactNode) => {
                 path={RoutesRecord.SETTINGS}
                 element={<div>State AssignmentsTable </div>}
             />
-            <Route path={RoutesRecord.EDIT_STATE_ASSIGNMENTS} element={children} />
+            <Route
+                path={RoutesRecord.EDIT_STATE_ASSIGNMENTS}
+                element={children}
+            />
             <Route path="*" element={<Error404 />} />
         </Routes>
     )
@@ -54,9 +54,7 @@ describe('EditStateAssign', () => {
                 name: 'Edit state assignment',
             })
         ).toBeInTheDocument()
-        expect(
-            screen.getAllByText('Update DMCO staff')
-        ).not.toBeNull()
+        expect(screen.getAllByText('Update DMCO staff')).not.toBeNull()
         expect(
             screen.getByRole('button', { name: 'Save changes' })
         ).toBeInTheDocument()
@@ -81,7 +79,6 @@ describe('EditStateAssign', () => {
         })
 
         expect(screen.queryByRole('form')).toBeNull()
-        expect(screen.findByText('404'))
         expect(screen.getByText('404 / Page not found')).toBeInTheDocument()
     })
 
@@ -104,7 +101,9 @@ describe('EditStateAssign', () => {
         await screen.findByRole('form')
         await userEvent.click(screen.getByText('Cancel'))
         await waitFor(() => {
-            expect(testLocation.pathname).toBe(`/mc-review-settings/state-assignments`)
+            expect(testLocation.pathname).toBe(
+                `/mc-review-settings/state-assignments`
+            )
         })
     })
 

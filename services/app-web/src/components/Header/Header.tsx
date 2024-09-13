@@ -1,7 +1,7 @@
 import { Grid, GridContainer } from '@trussworks/react-uswds'
 import React from 'react'
 import { NavLink } from 'react-router-dom'
-import { AuthModeType } from '../../common-code/config'
+import { AuthModeType } from '@mc-review/common-code'
 import { useCurrentRoute } from '../../hooks/useCurrentRoute'
 import { useAuth } from '../../contexts/AuthContext'
 import { usePage } from '../../contexts/PageContext'
@@ -9,7 +9,7 @@ import { Logo } from '../Logo'
 import styles from './Header.module.scss'
 import { PageHeadingRow } from './PageHeadingRow/PageHeadingRow'
 import { UserLoginInfo } from './UserLoginInfo/UserLoginInfo'
-import { recordJSException } from '../../otelHelpers'
+import { recordJSException } from '@mc-review/otel'
 import { ErrorAlertSignIn } from '../ErrorAlert'
 
 export type HeaderProps = {

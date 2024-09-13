@@ -5,7 +5,7 @@ import {
     createTestQuestion,
     createTestQuestionResponse,
 } from '../../testHelpers/gqlHelpers'
-import { base64ToDomain } from '../../common-code/proto/healthPlanFormDataProto'
+import { base64ToDomain } from '@mc-review/hpp'
 import { assertAnError, assertAnErrorCode } from '../../testHelpers'
 import {
     createDBUsersWithFullData,
@@ -14,7 +14,7 @@ import {
 import { testEmailConfig, testEmailer } from '../../testHelpers/emailerHelpers'
 import { latestFormData } from '../../testHelpers/healthPlanPackageHelpers'
 import { findStatePrograms } from '../../postgres'
-import { packageName } from '../../common-code/healthPlanFormDataType'
+import { packageName } from '@mc-review/hpp'
 import { getTestStateAnalystsEmails } from '../../testHelpers/parameterStoreHelpers'
 
 describe('createQuestionResponse', () => {

@@ -5,7 +5,7 @@ import { SubmissionSideNav } from './SubmissionSideNav'
 import { SubmissionSummary } from '../SubmissionSummary'
 import { QuestionResponse } from '../QuestionResponse'
 import { renderWithProviders } from '../../testHelpers'
-import { RoutesRecord } from '../../constants/routes'
+import { RoutesRecord } from '@mc-review/constants'
 import React from 'react'
 import {
     fetchContractMockSuccess,
@@ -17,7 +17,7 @@ import {
     mockQuestionsPayload,
     mockSubmittedHealthPlanPackage,
     mockValidCMSUser,
-} from '../../testHelpers/apolloMocks'
+} from '@mc-review/mocks'
 
 describe('SubmissionSideNav', () => {
     it('loads sidebar nav with expected links', async () => {

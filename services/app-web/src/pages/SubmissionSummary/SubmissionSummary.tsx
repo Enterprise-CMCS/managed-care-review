@@ -25,11 +25,11 @@ import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import styles from './SubmissionSummary.module.scss'
 import { ChangeHistory } from '../../components/ChangeHistory'
 import { UnlockSubmitModal } from '../../components/Modal'
-import { RoutesRecord } from '../../constants'
+import { RoutesRecord } from '@mc-review/constants'
 import { useRouteParams } from '../../hooks'
-import { getVisibleLatestContractFormData } from '../../gqlHelpers/contractsAndRates'
+import { getVisibleLatestContractFormData } from '@mc-review/helpers'
 import { generatePath, Navigate } from 'react-router-dom'
-import { hasCMSUserPermissions } from '../../gqlHelpers'
+import { hasCMSUserPermissions } from '@mc-review/helpers'
 
 function UnlockModalButton({
     disabled,

@@ -16,11 +16,11 @@ import { PoliteErrorMessage } from '../../PoliteErrorMessage'
 import * as Yup from 'yup'
 import styles from '../UnlockSubmitModal.module.scss'
 import { GenericApiErrorProps } from '../../Banner/GenericApiErrorBanner/GenericApiErrorBanner'
-import { ERROR_MESSAGES } from '../../../constants/errors'
+import { ERROR_MESSAGES } from '@mc-review/constants'
 import {
     submitMutationWrapperV2,
     unlockMutationWrapperV2,
-} from '../../../gqlHelpers/mutationWrappersForUserFriendlyErrors'
+} from '@mc-review/helpers'
 
 const RATE_UNLOCK_SUBMIT_TYPES = [
     'SUBMIT_RATE',

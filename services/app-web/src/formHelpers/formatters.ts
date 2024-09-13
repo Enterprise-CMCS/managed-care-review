@@ -1,10 +1,10 @@
-import { dayjs } from '../../../app-web/src/common-code/dateHelpers'
-import {
-    SubmissionDocument,
-    ActuaryContact,
-} from '../common-code/healthPlanFormDataType'
+import { dayjs } from '@mc-review/common-code'
+import { SubmissionDocument, ActuaryContact } from '@mc-review/hpp'
 import { FileItemT } from '../components'
-import { GenericDocument, ActuaryContact as  GQLActuaryContact } from '../gen/gqlClient'
+import {
+    GenericDocument,
+    ActuaryContact as GQLActuaryContact,
+} from '../gen/gqlClient'
 import { S3ClientT } from '../s3'
 import { v4 as uuidv4 } from 'uuid'
 
@@ -24,9 +24,7 @@ const formatForApi = (attribute: string): string | null => {
 
 // Convert api data for use in form.  Form fields must be a string.
 // Empty values as an empty string, dates in date picker as YYYY-MM-DD, boolean as "Yes" "No" values
-function formatForForm<T> (
-    attribute: T
-): string {
+function formatForForm<T>(attribute: T): string {
     if (attribute === null || attribute === undefined) {
         return ''
     } else if (attribute instanceof Date) {
@@ -39,18 +37,26 @@ function formatForForm<T> (
 }
 
 // This function can be cleaned up when we move off domain types and only use graphql
-const formatActuaryContactsForForm = (actuaryContacts?: ActuaryContact[] | GQLActuaryContact[]) : ActuaryContact[] => {
-    return actuaryContacts &&  actuaryContacts.length > 0
-        ? actuaryContacts.map( (contact) => {
-            const {name, titleRole,email,actuarialFirm, actuarialFirmOther} = contact
-                    return {
-                    name: name ?? '',
-                    titleRole: titleRole ?? '',
-                    email: email ?? '',
-                    actuarialFirmOther: actuarialFirmOther ?? undefined,
-                    actuarialFirm: actuarialFirm ?? undefined,
-                }
-        })
+const formatActuaryContactsForForm = (
+    actuaryContacts?: ActuaryContact[] | GQLActuaryContact[]
+): ActuaryContact[] => {
+    return actuaryContacts && actuaryContacts.length > 0
+        ? actuaryContacts.map((contact) => {
+              const {
+                  name,
+                  titleRole,
+                  email,
+                  actuarialFirm,
+                  actuarialFirmOther,
+              } = contact
+              return {
+                  name: name ?? '',
+                  titleRole: titleRole ?? '',
+                  email: email ?? '',
+                  actuarialFirmOther: actuarialFirmOther ?? undefined,
+                  actuarialFirm: actuarialFirm ?? undefined,
+              }
+          })
         : [
               {
                   name: '',
@@ -62,30 +68,34 @@ const formatActuaryContactsForForm = (actuaryContacts?: ActuaryContact[] | GQLAc
           ]
 }
 
-const formatAddtlActuaryContactsForForm = (actuaryContacts?: ActuaryContact[] | GQLActuaryContact[]) : ActuaryContact[] => {
-    return actuaryContacts &&  actuaryContacts.length > 0
-        ? actuaryContacts.map( (contact) => {
-            const {name, titleRole,email,actuarialFirm, actuarialFirmOther} = contact
-                    return {
-                    name: name ?? '',
-                    titleRole: titleRole ?? '',
-                    email: email ?? '',
-                    actuarialFirmOther: actuarialFirmOther ?? undefined,
-                    actuarialFirm: actuarialFirm ?? undefined,
-                }
-        })
+const formatAddtlActuaryContactsForForm = (
+    actuaryContacts?: ActuaryContact[] | GQLActuaryContact[]
+): ActuaryContact[] => {
+    return actuaryContacts && actuaryContacts.length > 0
+        ? actuaryContacts.map((contact) => {
+              const {
+                  name,
+                  titleRole,
+                  email,
+                  actuarialFirm,
+                  actuarialFirmOther,
+              } = contact
+              return {
+                  name: name ?? '',
+                  titleRole: titleRole ?? '',
+                  email: email ?? '',
+                  actuarialFirmOther: actuarialFirmOther ?? undefined,
+                  actuarialFirm: actuarialFirm ?? undefined,
+              }
+          })
         : []
 }
 
-
-
 const formatFormDateForGQL = (attribute: string): string | undefined => {
-    return (attribute === '') ? undefined :  attribute
+    return attribute === '' ? undefined : attribute
 }
 
-const formatDocumentsForGQL = (
-    fileItems: FileItemT[]
-): GenericDocument[] => {
+const formatDocumentsForGQL = (fileItems: FileItemT[]): GenericDocument[] => {
     return fileItems.reduce((cleanedFileItems, fileItem) => {
         if (fileItem.status === 'UPLOAD_ERROR') {
             console.info(
@@ -164,8 +174,6 @@ const formatFormDateForDomain = (attribute: string): Date | undefined => {
     return dayjs.utc(attribute).toDate()
 }
 
-
-
 const formatDocumentsForDomain = (
     fileItems: FileItemT[]
 ): SubmissionDocument[] => {
@@ -224,5 +232,5 @@ export {
     formatActuaryContactsForForm,
     formatAddtlActuaryContactsForForm,
     formatDocumentsForGQL,
-    formatFormDateForGQL
+    formatFormDateForGQL,
 }

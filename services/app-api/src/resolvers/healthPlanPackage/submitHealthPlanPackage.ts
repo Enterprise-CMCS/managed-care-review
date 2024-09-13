@@ -9,7 +9,7 @@ import {
     isValidAndCurrentLockedHealthPlanFormData,
     isContractOnly,
     isCHIPOnly,
-} from '../../common-code/healthPlanFormDataType/healthPlanFormData'
+} from '@mc-review/hpp'
 import type { UpdateInfoType } from '../../domain-models'
 import {
     isStateUser,
@@ -32,7 +32,7 @@ import { GraphQLError } from 'graphql'
 import type {
     HealthPlanFormDataType,
     LockedHealthPlanFormDataType,
-} from '../../common-code/healthPlanFormDataType'
+} from '@mc-review/hpp'
 import type {
     FeatureFlagSettings,
     LDService,

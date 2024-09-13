@@ -2,13 +2,13 @@ import React from 'react'
 import { screen, waitFor, within, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { Route, Routes } from 'react-router-dom'
-import { RoutesRecord } from '../../../constants'
+import { RoutesRecord } from '@mc-review/constants'
 
 import {
     fetchCurrentUserMock,
     fetchContractMockSuccess,
     mockContractPackageUnlockedWithUnlockedType,
-} from '../../../testHelpers/apolloMocks'
+} from '@mc-review/mocks'
 
 import {
     renderWithProviders,
@@ -27,12 +27,12 @@ import {
     federalAuthorityKeysForCHIP,
     modifiedProvisionMedicaidAmendmentKeys,
     modifiedProvisionMedicaidBaseKeys,
-} from '../../../common-code/healthPlanFormDataType'
+} from '@mc-review/hpp'
 import {
     StatutoryRegulatoryAttestation,
     StatutoryRegulatoryAttestationDescription,
     StatutoryRegulatoryAttestationQuestion,
-} from '../../../constants/statutoryRegulatoryAttestation'
+} from '@mc-review/constants'
 
 const scrollIntoViewMock = vi.fn()
 HTMLElement.prototype.scrollIntoView = scrollIntoViewMock

@@ -2,7 +2,7 @@ import type { Context } from '../../handlers/apollo_gql'
 
 import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
 import FETCH_CURRENT_USER from '../../../../app-graphql/src/queries/fetchCurrentUser.graphql'
-import statePrograms from '../../../../app-web/src/common-code/data/statePrograms.json'
+import { typedStatePrograms } from '@mc-review/hpp'
 import { testStateUser } from '../../testHelpers/userHelpers'
 
 describe('currentUser', () => {
@@ -18,7 +18,8 @@ describe('currentUser', () => {
         expect(res.data?.fetchCurrentUser.email).toBe('james@example.com')
         expect(res.data?.fetchCurrentUser.state.code).toBe('FL')
         const FLPrograms =
-            statePrograms.states.find((st) => st.code === 'FL')?.programs ?? []
+            typedStatePrograms.states.find((st) => st.code === 'FL')
+                ?.programs ?? []
         expect(res.data?.fetchCurrentUser.state.programs).toHaveLength(
             FLPrograms.length
         )

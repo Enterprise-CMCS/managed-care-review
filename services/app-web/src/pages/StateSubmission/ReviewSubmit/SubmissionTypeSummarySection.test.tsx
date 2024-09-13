@@ -8,7 +8,7 @@ import {
     fetchCurrentUserMock,
     mockValidStateUser,
     mockContractPackageUnlockedWithUnlockedType,
-} from '../../../testHelpers/apolloMocks'
+} from '@mc-review/mocks'
 
 describe('SubmissionTypeSummarySection', () => {
     afterEach(() => {

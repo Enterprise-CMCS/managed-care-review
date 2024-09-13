@@ -1,9 +1,9 @@
 import { screen, render } from '@testing-library/react'
 import { DynamicStepIndicator } from './DynamicStepIndicator'
 
-import { STATE_SUBMISSION_FORM_ROUTES } from '../../constants/routes'
+import { STATE_SUBMISSION_FORM_ROUTES } from '@mc-review/constants'
 import { activeFormPages } from '../../pages/StateSubmission/StateSubmissionForm'
-import { mockContractFormData } from '../../testHelpers/apolloMocks/contractPackageDataMock'
+import { mockContractFormData } from '@mc-review/mocks'
 
 describe('DynamicStepIndicator', () => {
     it('renders without errors', () => {

@@ -13,10 +13,8 @@ export const GenericApiErrorBanner = ({
     message,
     validationFail = false,
 }: GenericApiErrorProps): React.ReactElement => {
-    if (validationFail){
+    if (validationFail) {
         return <ErrorAlertValidationError heading={heading} message={message} />
     }
-    return (
-        <ErrorAlertFailedRequest heading={heading} message={message}/>
-    )
+    return <ErrorAlertFailedRequest heading={heading} message={message} />
 }

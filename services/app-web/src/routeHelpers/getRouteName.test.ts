@@ -1,5 +1,5 @@
 import { getRouteName } from './'
-import { RouteT, RoutesRecord } from '../constants/routes'
+import { RouteT, RoutesRecord } from '@mc-review/constants'
 
 describe('getRouteName', () => {
     describe('calculates valid routes properly', () => {

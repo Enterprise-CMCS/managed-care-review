@@ -12,7 +12,7 @@ import {
 import { generatePath, useNavigate } from 'react-router-dom'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import styles from '../StateSubmissionForm.module.scss'
-import { recordJSException } from '../../../otelHelpers'
+import { recordJSException } from '@mc-review/otel'
 import {
     StateContact,
     UpdateContractDraftRevisionInput,
@@ -25,7 +25,7 @@ import {
     activeFormPages,
     type ContractFormPageProps,
 } from '../StateSubmissionForm'
-import { RoutesRecord } from '../../../constants'
+import { RoutesRecord } from '@mc-review/constants'
 import {
     ButtonWithLogging,
     DynamicStepIndicator,
@@ -39,7 +39,7 @@ import { useAuth } from '../../../contexts/AuthContext'
 import { ErrorOrLoadingPage } from '../ErrorOrLoadingPage'
 import { PageBannerAlerts } from '../PageBannerAlerts'
 import { useErrorSummary } from '../../../hooks/useErrorSummary'
-import { featureFlags } from '../../../common-code/featureFlags'
+import { featureFlags } from '@mc-review/common-code'
 
 export interface ContactsFormValues {
     stateContacts: StateContact[]

@@ -1,6 +1,6 @@
 import { Grid } from '@trussworks/react-uswds'
 import dayjs from 'dayjs'
-import { HealthPlanFormDataType } from '../../../common-code/healthPlanFormDataType'
+import { HealthPlanFormDataType } from '@mc-review/hpp'
 import { DataDetail } from '../../../components/DataDetail'
 import { DoubleColumnGrid } from '../../../components/DoubleColumnGrid'
 import { SectionHeader } from '../../../components/SectionHeader'
@@ -8,7 +8,7 @@ import {
     SubmissionTypeRecord,
     ContractTypeRecord,
     PopulationCoveredRecord,
-} from '../../../constants/healthPlanPackages'
+} from '@mc-review/hpp'
 import { Program } from '../../../gen/gqlClient'
 import { usePreviousSubmission } from '../../../hooks/usePreviousSubmission'
 import { booleanAsYesNoUserValue } from '../../../components/Form/FieldYesNo/FieldYesNo'

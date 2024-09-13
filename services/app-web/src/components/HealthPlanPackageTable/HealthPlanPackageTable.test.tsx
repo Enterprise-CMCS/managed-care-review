@@ -6,7 +6,7 @@ import {
 import { screen, waitFor, within } from '@testing-library/react'
 import selectEvent from 'react-select-event'
 import userEvent from '@testing-library/user-event'
-import { fetchCurrentUserMock } from '../../testHelpers/apolloMocks'
+import { fetchCurrentUserMock } from '@mc-review/mocks'
 import { User } from '../../gen/gqlClient'
 
 const submissions: PackageInDashboardType[] = [

@@ -4,7 +4,7 @@ import { ContactsSummarySection } from './ContactsSummarySection'
 import {
     mockContractPackageDraft,
     mockContractPackageSubmitted,
-} from '../../../testHelpers/apolloMocks'
+} from '@mc-review/mocks'
 
 describe('ContactsSummarySection', () => {
     const draftSubmission = mockContractPackageDraft()

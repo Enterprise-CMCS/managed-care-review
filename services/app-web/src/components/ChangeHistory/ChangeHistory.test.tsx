@@ -10,7 +10,7 @@ import {
     mockRateRevision,
     mockValidCMSUser,
     mockValidStateUser,
-} from '../../testHelpers/apolloMocks'
+} from '@mc-review/mocks'
 import { renderWithProviders } from '../../testHelpers'
 import dayjs from 'dayjs'
 

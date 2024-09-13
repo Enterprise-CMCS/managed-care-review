@@ -6,8 +6,8 @@ import {
     fetchCurrentUserMock,
     fetchRateMockSuccess,
     mockValidStateUser,
-} from '../../testHelpers/apolloMocks'
-import { RoutesRecord } from '../../constants'
+} from '@mc-review/mocks'
+import { RoutesRecord } from '@mc-review/constants'
 import { Route, Routes } from 'react-router-dom'
 
 // Wrap test component in some top level routes to allow getParams to be tested

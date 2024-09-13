@@ -4,7 +4,7 @@ import {
     RateDetailsSummarySectionProps,
     RateDetailsSummarySection,
 } from './RateDetailsSummarySection'
-import { mockContractPackageDraft } from '../../../testHelpers/apolloMocks'
+import { mockContractPackageDraft } from '@mc-review/mocks'
 
 export default {
     title: 'Components/SubmissionSummary/RateDetailsSummarySection/V2',

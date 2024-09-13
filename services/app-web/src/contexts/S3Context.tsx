@@ -3,7 +3,7 @@ import { isS3Error } from '../s3'
 import { S3FileData } from '../components'
 import type { S3ClientT } from '../s3'
 import { BucketShortName } from '../s3/s3Amplify'
-import { recordJSException } from '../otelHelpers'
+import { recordJSException } from '@mc-review/otel'
 
 type S3ContextT = {
     handleUploadFile: (

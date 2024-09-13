@@ -1,6 +1,6 @@
 import * as Yup from 'yup'
-import { dayjs } from '../../../common-code/dateHelpers'
-import { FeatureFlagSettings } from '../../../common-code/featureFlags'
+import { dayjs } from '@mc-review/common-code'
+import { FeatureFlagSettings } from '@mc-review/common-code'
 import { validateDateFormat } from '../../../formHelpers'
 import {
     validateFileItemsList,
@@ -14,17 +14,20 @@ const SingleRateCertSchema = (_activeFeatureFlags: FeatureFlagSettings) =>
         rateDocuments: validateFileItemsListSingleUpload({ required: true }),
         supportingDocuments: validateFileItemsList({ required: false }),
         hasSharedRateCert: Yup.string().optional(), // legacy field
-        packagesWithSharedRateCerts:  Yup.array().optional() // legacy field
-        .when('hasSharedRateCert', {
-            is: 'YES',
-            then: Yup.array().min(
-                1,
-                'You must select at least one submission'
-            ),
-        })
-        .required(),
-        rateProgramIDs: Yup.array(
-        ).min(1, 'You must select which rate(s) are included in this certification'),
+        packagesWithSharedRateCerts: Yup.array()
+            .optional() // legacy field
+            .when('hasSharedRateCert', {
+                is: 'YES',
+                then: Yup.array().min(
+                    1,
+                    'You must select at least one submission'
+                ),
+            })
+            .required(),
+        rateProgramIDs: Yup.array().min(
+            1,
+            'You must select which rate(s) are included in this certification'
+        ),
         rateType: Yup.string().defined(
             'You must choose a rate certification type'
         ),
@@ -156,45 +159,50 @@ const SingleRateCertSchema = (_activeFeatureFlags: FeatureFlagSettings) =>
         ),
         actuaryCommunicationPreference: Yup.string().required(
             'You must select a communication preference'
-        )
-})
+        ),
+    })
 
-
-const RateDetailsFormSchema = (activeFeatureFlags?: FeatureFlagSettings, isMultiRate?: boolean) => {
-    return isMultiRate ?
-        Yup.object().shape({
-            rateForms: Yup.array().of(
-            Yup.object()
-                .when('.ratePreviouslySubmitted', {
-                    // make the user select something for rate preivously submitted yes no question
-                    is: undefined,
-                    then: Yup.object().shape({
-                        ratePreviouslySubmitted: Yup.string().defined(
-                            "You must select yes or no "
-                        ),
-                    }),
-                        })
-                .when('.ratePreviouslySubmitted', {
-                    // make the user select a linked rate, skip all other validations for a previously submitted rate
-                    is: 'YES',
-                    then: Yup.object().shape({
-                        linkRateSelect: Yup.string().defined('You must select a rate certification'),
-                    }),
-                })
-                .when('.ratePreviouslySubmitted', {
-                    // continue with normal rate form validations when its a new rate
-                    is: 'NO',
-                    then: SingleRateCertSchema(activeFeatureFlags || {})
-                })
-        )})
-        // This the standlaone rate unlock page schema
-        // it does not use linked rate form fields at all - user must always fill rate data from scratch
-        // eventually this could be just a single rate cert schema, but for now since the UI is shared, it still uses an array like RateDetails
-        : Yup.object().shape({
-            rateForms: Yup.array().of(
-                SingleRateCertSchema(activeFeatureFlags || {})
-            )
-        })
-    }
+const RateDetailsFormSchema = (
+    activeFeatureFlags?: FeatureFlagSettings,
+    isMultiRate?: boolean
+) => {
+    return isMultiRate
+        ? Yup.object().shape({
+              rateForms: Yup.array().of(
+                  Yup.object()
+                      .when('.ratePreviouslySubmitted', {
+                          // make the user select something for rate preivously submitted yes no question
+                          is: undefined,
+                          then: Yup.object().shape({
+                              ratePreviouslySubmitted: Yup.string().defined(
+                                  'You must select yes or no '
+                              ),
+                          }),
+                      })
+                      .when('.ratePreviouslySubmitted', {
+                          // make the user select a linked rate, skip all other validations for a previously submitted rate
+                          is: 'YES',
+                          then: Yup.object().shape({
+                              linkRateSelect: Yup.string().defined(
+                                  'You must select a rate certification'
+                              ),
+                          }),
+                      })
+                      .when('.ratePreviouslySubmitted', {
+                          // continue with normal rate form validations when its a new rate
+                          is: 'NO',
+                          then: SingleRateCertSchema(activeFeatureFlags || {}),
+                      })
+              ),
+          })
+        : // This the standlaone rate unlock page schema
+          // it does not use linked rate form fields at all - user must always fill rate data from scratch
+          // eventually this could be just a single rate cert schema, but for now since the UI is shared, it still uses an array like RateDetails
+          Yup.object().shape({
+              rateForms: Yup.array().of(
+                  SingleRateCertSchema(activeFeatureFlags || {})
+              ),
+          })
+}
 
 export { RateDetailsFormSchema }

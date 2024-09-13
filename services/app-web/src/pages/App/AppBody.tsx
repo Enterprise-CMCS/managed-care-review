@@ -4,10 +4,10 @@ import styles from './AppBody.module.scss'
 import { AppRoutes } from './AppRoutes'
 import { Footer, Header, LinkWithLogging, Loading } from '../../components'
 import { useOTEL } from '../../hooks/useOTEL'
-import { AuthModeType } from '../../common-code/config'
+import { AuthModeType } from '@mc-review/common-code'
 import { useAuth } from '../../contexts/AuthContext'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
-import { featureFlags } from '../../common-code/featureFlags'
+import { featureFlags } from '@mc-review/common-code'
 import { Landing } from '../Landing/Landing'
 
 export function AppBody({

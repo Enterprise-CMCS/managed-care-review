@@ -22,10 +22,7 @@ import type {
     UnlockedContract,
 } from '../gen/gqlServer'
 import { latestFormData } from './healthPlanPackageHelpers'
-import type {
-    HealthPlanFormDataType,
-    StateCodeType,
-} from '../common-code/healthPlanFormDataType'
+import type { HealthPlanFormDataType, StateCodeType } from '@mc-review/hpp'
 import { addNewRateToTestContract } from './gqlRateHelpers'
 import UPDATE_CONTRACT_DRAFT_REVISION from 'app-graphql/src/mutations/updateContractDraftRevision.graphql'
 import type { ContractFormDataType } from '../domain-models'

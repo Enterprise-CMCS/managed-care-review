@@ -1,25 +1,27 @@
-import { useState, useEffect} from 'react'
-import { usePage } from "../contexts/PageContext"
+import { useState, useEffect } from 'react'
+import { usePage } from '../contexts/PageContext'
 import { useStatePrograms } from './useStatePrograms'
-import { useFetchHealthPlanPackageWrapper} from '../gqlHelpers'
+import { useFetchHealthPlanPackageWrapper } from '@mc-review/helpers'
 import {
     CreateHealthPlanPackageInput,
     HealthPlanPackage,
     UpdateInformation,
     useCreateHealthPlanPackageMutation,
-    useUpdateHealthPlanFormDataMutation
+    useUpdateHealthPlanFormDataMutation,
 } from '../gen/gqlClient'
-import { UnlockedHealthPlanFormDataType, packageName } from '../common-code/healthPlanFormDataType'
-import { domainToBase64 } from '../common-code/proto/healthPlanFormDataProto'
-import { recordJSException } from '../otelHelpers'
-import { handleApolloError } from '../gqlHelpers/apolloErrors'
+import { UnlockedHealthPlanFormDataType, packageName } from '@mc-review/hpp'
+import { domainToBase64 } from '@mc-review/hpp'
+import { recordJSException } from '@mc-review/otel'
+import { handleApolloError } from '@mc-review/helpers'
 import { ApolloError } from '@apollo/client'
-import { makeDocumentDateTable, makeDocumentS3KeyLookup } from '../documentHelpers'
-import { DocumentDateLookupTableType } from '../documentHelpers/makeDocumentDateLookupTable'
+import {
+    makeDocumentDateTable,
+    makeDocumentS3KeyLookup,
+} from '@mc-review/helpers'
+import { DocumentDateLookupTableType } from '@mc-review/helpers'
 import type { InterimState } from '../pages/StateSubmission/ErrorOrLoadingPage'
 
-
-type  UseHealthPlanPackageForm = {
+type UseHealthPlanPackageForm = {
     draftSubmission?: UnlockedHealthPlanFormDataType
     unlockInfo?: UpdateInformation
     showPageErrorMessage: string | boolean
@@ -27,25 +29,33 @@ type  UseHealthPlanPackageForm = {
     updateDraft: (
         input: UnlockedHealthPlanFormDataType
     ) => Promise<HealthPlanPackage | Error>
-    createDraft: (input: CreateHealthPlanPackageInput) => Promise<HealthPlanPackage | Error>
+    createDraft: (
+        input: CreateHealthPlanPackageInput
+    ) => Promise<HealthPlanPackage | Error>
     documentDateLookupTable?: DocumentDateLookupTableType
-    interimState?:  InterimState
+    interimState?: InterimState
     submissionName?: string
 }
 // This hook is for use on form pages still relying on the old HealthPlanPackage APIS and domain model types
 // This is intentionally throwaway code that replicates logic formally in StateSubmissionForm
 // PLease delete and remove this file when HealthPlanPackage is fully out of the Form
 
-const useHealthPlanPackageForm = (packageID?: string): UseHealthPlanPackageForm => {
+const useHealthPlanPackageForm = (
+    packageID?: string
+): UseHealthPlanPackageForm => {
     // Set up defaults for the return value for hook
     let interimState: UseHealthPlanPackageForm['interimState'] = undefined // enum to determine what Interim UI should override form page
     let previousDocuments: UseHealthPlanPackageForm['previousDocuments'] = [] // used for document upload tables
     let draftSubmission: UseHealthPlanPackageForm['draftSubmission'] = undefined // form data from current package revision, used to load form
     let unlockInfo: UseHealthPlanPackageForm['unlockInfo'] = undefined
     let documentDateLookupTable = undefined
-    const [showPageErrorMessage, setShowPageErrorMessage] = useState<boolean | string>(false) // string is a custom error message, defaults to generic of true
+    const [showPageErrorMessage, setShowPageErrorMessage] = useState<
+        boolean | string
+    >(false) // string is a custom error message, defaults to generic of true
     const { updateHeading } = usePage()
-    const [pkgNameForHeading, setPkgNameForHeading] = useState<string | undefined>(undefined)
+    const [pkgNameForHeading, setPkgNameForHeading] = useState<
+        string | undefined
+    >(undefined)
 
     useEffect(() => {
         updateHeading({ customHeading: pkgNameForHeading })
@@ -53,15 +63,25 @@ const useHealthPlanPackageForm = (packageID?: string): UseHealthPlanPackageForm 
 
     const statePrograms = useStatePrograms()
 
-    const { result: fetchResult } = useFetchHealthPlanPackageWrapper(packageID ?? 'new-draft',packageID? false: true)
+    const { result: fetchResult } = useFetchHealthPlanPackageWrapper(
+        packageID ?? 'new-draft',
+        packageID ? false : true
+    )
     const [createFormData] = useCreateHealthPlanPackageMutation()
 
-    const createDraft: UseHealthPlanPackageForm['createDraft']  = async (
+    const createDraft: UseHealthPlanPackageForm['createDraft'] = async (
         input: CreateHealthPlanPackageInput
     ): Promise<HealthPlanPackage | Error> => {
         setShowPageErrorMessage(false)
-        const {populationCovered,programIDs,riskBasedContract, submissionType, submissionDescription, contractType} = input
-        if(populationCovered === undefined || contractType === undefined) {
+        const {
+            populationCovered,
+            programIDs,
+            riskBasedContract,
+            submissionType,
+            submissionDescription,
+            contractType,
+        } = input
+        if (populationCovered === undefined || contractType === undefined) {
             return new Error('wrong')
         }
         try {
@@ -74,8 +94,9 @@ const useHealthPlanPackageForm = (packageID?: string): UseHealthPlanPackageForm 
                         submissionType,
                         submissionDescription,
                         contractType,
+                    },
                 },
-            }})
+            })
             const createdSubmission: HealthPlanPackage | undefined =
                 createResult?.data?.createHealthPlanPackage.pkg
 
@@ -99,7 +120,7 @@ const useHealthPlanPackageForm = (packageID?: string): UseHealthPlanPackageForm 
     }
     const [updateFormData] = useUpdateHealthPlanFormDataMutation()
 
-    const updateDraft: UseHealthPlanPackageForm['updateDraft']  = async (
+    const updateDraft: UseHealthPlanPackageForm['updateDraft'] = async (
         input: UnlockedHealthPlanFormDataType
     ): Promise<HealthPlanPackage | Error> => {
         const base64Draft = domainToBase64(input)
@@ -138,25 +159,39 @@ const useHealthPlanPackageForm = (packageID?: string): UseHealthPlanPackageForm 
 
     if (fetchResult.status === 'LOADING') {
         interimState = 'LOADING'
-        return {interimState, createDraft, updateDraft, showPageErrorMessage }
+        return { interimState, createDraft, updateDraft, showPageErrorMessage }
     }
 
     if (fetchResult.status === 'ERROR') {
         const err = fetchResult.error
-        if (err instanceof ApolloError){
+        if (err instanceof ApolloError) {
             handleApolloError(err, true)
             if (err.graphQLErrors[0]?.extensions?.code === 'NOT_FOUND') {
-                    interimState = 'NOT_FOUND'
-                    return {interimState,createDraft, updateDraft,  showPageErrorMessage }
+                interimState = 'NOT_FOUND'
+                return {
+                    interimState,
+                    createDraft,
+                    updateDraft,
+                    showPageErrorMessage,
+                }
             }
         }
         if (err.name !== 'SKIPPED') {
             recordJSException(err)
-            interimState = 'GENERIC_ERROR'// api failure or protobuf decode failure
-            return { interimState,  createDraft, updateDraft,  showPageErrorMessage}
+            interimState = 'GENERIC_ERROR' // api failure or protobuf decode failure
+            return {
+                interimState,
+                createDraft,
+                updateDraft,
+                showPageErrorMessage,
+            }
         }
-        return {interimState: undefined, createDraft, updateDraft,  showPageErrorMessage}
-
+        return {
+            interimState: undefined,
+            createDraft,
+            updateDraft,
+            showPageErrorMessage,
+        }
     }
 
     const { data, revisionsLookup } = fetchResult
@@ -173,7 +208,7 @@ const useHealthPlanPackageForm = (packageID?: string): UseHealthPlanPackageForm 
     // if we've gotten back a submitted revision, it can't be edited
     if (formDataFromLatestRevision.status !== 'DRAFT') {
         interimState = 'INVALID_STATUS'
-        return {createDraft, updateDraft,  showPageErrorMessage}
+        return { createDraft, updateDraft, showPageErrorMessage }
     }
 
     const submissionName = packageName(
@@ -188,10 +223,20 @@ const useHealthPlanPackageForm = (packageID?: string): UseHealthPlanPackageForm 
 
     // set up data to return
     draftSubmission = formDataFromLatestRevision
-    unlockInfo =  latestRevision.unlockInfo ?? undefined // An unlocked revision is defined by having unlockInfo on it, pull it out here if it exists
+    unlockInfo = latestRevision.unlockInfo ?? undefined // An unlocked revision is defined by having unlockInfo on it, pull it out here if it exists
     documentDateLookupTable = documentDates
-    return {draftSubmission, unlockInfo, previousDocuments, documentDateLookupTable,  updateDraft, createDraft, interimState, showPageErrorMessage, submissionName }
+    return {
+        draftSubmission,
+        unlockInfo,
+        previousDocuments,
+        documentDateLookupTable,
+        updateDraft,
+        createDraft,
+        interimState,
+        showPageErrorMessage,
+        submissionName,
+    }
 }
 
-export {useHealthPlanPackageForm}
-export type {UseHealthPlanPackageForm}
+export { useHealthPlanPackageForm }
+export type { UseHealthPlanPackageForm }

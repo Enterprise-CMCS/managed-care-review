@@ -9,11 +9,8 @@ import {
     mockMNState,
     mockMSState,
 } from '../../testHelpers/emailerHelpers'
-import type { LockedHealthPlanFormDataType } from '../../common-code/healthPlanFormDataType'
-import {
-    generateRateName,
-    packageName,
-} from '../../common-code/healthPlanFormDataType'
+import type { LockedHealthPlanFormDataType } from '@mc-review/hpp'
+import { generateRateName, packageName } from '@mc-review/hpp'
 import { newPackageCMSEmail } from './index'
 
 test('to addresses list includes review team email addresses', async () => {

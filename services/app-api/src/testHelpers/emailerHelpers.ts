@@ -4,7 +4,7 @@ import type {
     LockedHealthPlanFormDataType,
     ProgramArgType,
     UnlockedHealthPlanFormDataType,
-} from '../common-code/healthPlanFormDataType'
+} from '@mc-review/hpp'
 import type {
     ContractRevisionType,
     Question,
