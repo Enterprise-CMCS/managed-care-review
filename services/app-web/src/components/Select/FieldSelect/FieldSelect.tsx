@@ -19,7 +19,7 @@ type FieldSelectOptionType = {
 
 type FieldSelectType = {
     name: string
-    initialValues: string[]
+    initialValues: FieldSelectOptionType[]
     dropdownOptions: FieldSelectOptionType[]
     label: string
     optionDescriptionSingular?: string
@@ -55,25 +55,6 @@ const FieldSelect = ({
             isDisabled ? ', disabled' : ''
         }`
     }
-
-    const defaultValues =
-        initialValues.length && dropdownOptions.length
-            ? initialValues.map((value) => {
-                  const name = dropdownOptions?.find(
-                      (option) => option.value === value
-                  )?.label
-                  if (!name) {
-                      return {
-                          value: value,
-                          label: `Unknown ${optionDescriptionSingular}`,
-                      }
-                  }
-                  return {
-                      label: name,
-                      value: value,
-                  }
-              })
-            : []
 
     const handleOnChangeWithLogging = async (
         newValue: OnChangeValue<FieldSelectOptionType, true>,
@@ -117,7 +98,7 @@ const FieldSelect = ({
 
     return (
         <Select
-            value={defaultValues}
+            defaultValue={initialValues}
             placeholder={
                 isLoading
                     ? `Loading ${optionDescriptionSingular}s...`
