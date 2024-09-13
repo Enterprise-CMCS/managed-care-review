@@ -8,9 +8,13 @@ import { SessionTimeoutModal } from '../../components/Modal/SessionTimeoutModal'
 import { IdleTimerProvider } from 'react-idle-timer'
 import { usePage } from '../../contexts/PageContext'
 
+const SESSION_ACTIONS = {
+    LOGOUT_SESSION: 'LOGOUT_SESSION',
+    CONTINUE_SESSION: 'CONTINUE_SESSSION'
+}
 // AuthenticatedRouteWrapper control access to protected routes and the session timeout modal
 // For more on expected behavior for session timeout see feature-brief-session-expiration.md
-export const AuthenticatedRouteWrapper = ({
+const AuthenticatedRouteWrapper = ({
     children,
 }: {
     children: React.ReactNode
@@ -89,3 +93,5 @@ export const AuthenticatedRouteWrapper = ({
             />
             </IdleTimerProvider>)
 }
+
+export {SESSION_ACTIONS, AuthenticatedRouteWrapper}

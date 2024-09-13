@@ -4,6 +4,7 @@ import { Modal } from './Modal'
 import styles from './Modal.module.scss'
 import { useIdleTimerContext } from 'react-idle-timer'
 import dayjs from 'dayjs'
+import { SESSION_ACTIONS } from '../../pages/Wrapper/AuthenticatedRouteWrapper'
 
 type SessionTimeoutModalProps = {
     modalRef: React.RefObject<ModalRef>
@@ -16,11 +17,11 @@ export const SessionTimeoutModal = ({
     const [countdownSeconds, setCountdownSeconds]= useState(idleTimer.getRemainingTime() / 1000)
 
     const handleLogoutSession = async () => {
-        idleTimer.message({action:'LOGOUT_SESSION'}, true)
+        idleTimer.message({action: SESSION_ACTIONS.LOGOUT_SESSION}, true)
     }
     const handleContinueSession = async () => {
         idleTimer.activate()
-        idleTimer.message({action:'CONTINUE_SESSION'}, true)
+        idleTimer.message({action:SESSION_ACTIONS.CONTINUE_SESSION}, true)
     }
     useEffect(() => {
         const interval = setInterval(() => {
