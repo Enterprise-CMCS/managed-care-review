@@ -8,7 +8,7 @@ import {
     IndexUsersDocument,
     IndexUsersQuery,
     StateUser,
-    HelpdeskUser, CmsApproverUser, BusinessOwnerUser
+    HelpdeskUser, CmsApproverUser, BusinessOwnerUser, IndexUsersPayload
 } from '../../gen/gqlClient'
 
 import { mockMNState } from './stateMock'
@@ -129,30 +129,43 @@ fetchCurrentUserMockProps): MockedResponse<Record<string, any>> => {
     }
 }
 
-const indexUsersQueryMock = (): MockedResponse<IndexUsersQuery> => {
+const indexUsersQueryMock = (users?: UserType[]): MockedResponse<IndexUsersQuery> => {
+    const indexUsers: IndexUsersPayload | undefined = users ? {
+        totalCount: users.length,
+        __typename: 'IndexUsersPayload',
+        edges: users.map(user => ({
+            __typename: 'UserEdge',
+            node: {
+                ...user
+            }
+        }))
+    } : {
+        totalCount: 1,
+        __typename: 'IndexUsersPayload',
+        edges: [
+            {
+                __typename: 'UserEdge',
+                node: {
+                    __typename: 'CMSUser',
+                    role: 'CMS_USER',
+                    id: '1',
+                    familyName: 'Hotman',
+                    givenName: 'Zuko',
+                    divisionAssignment: null,
+                    email: 'zuko@example.com',
+                    stateAssignments: [],
+                },
+            },
+        ],
+    }
+
     return {
         request: {
             query: IndexUsersDocument,
         },
         result: {
             data: {
-                indexUsers: {
-                    totalCount: 1,
-                    edges: [
-                        {
-                            node: {
-                                __typename: 'CMSUser',
-                                role: 'CMS_USER',
-                                id: '1',
-                                familyName: 'Hotman',
-                                givenName: 'Zuko',
-                                divisionAssignment: null,
-                                email: 'zuko@example.com',
-                                stateAssignments: [],
-                            },
-                        },
-                    ],
-                },
+                indexUsers: indexUsers,
             },
         },
     }
