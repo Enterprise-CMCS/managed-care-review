@@ -10,36 +10,36 @@ import {
     FieldArrayRenderProps,
 } from 'formik'
 import { generatePath, useNavigate } from 'react-router-dom'
-
+import { useLDClient } from 'launchdarkly-react-client-sdk'
 import styles from '../StateSubmissionForm.module.scss'
-
-import { StateContact } from '../../../common-code/healthPlanFormDataType'
-
+import { recordJSException } from '../../../otelHelpers'
+import {
+    StateContact,
+    UpdateContractDraftRevisionInput,
+} from '../../../gen/gqlClient'
 import { ErrorSummary, FieldTextInput } from '../../../components/Form'
 
 import { useFocus } from '../../../hooks/useFocus'
 import { PageActions } from '../PageActions'
 import {
     activeFormPages,
-    type HealthPlanFormPageProps,
+    type ContractFormPageProps,
 } from '../StateSubmissionForm'
 import { RoutesRecord } from '../../../constants'
 import {
     ButtonWithLogging,
     DynamicStepIndicator,
+    FormNotificationContainer,
     SectionCard,
 } from '../../../components'
-import { FormContainer } from '../FormContainer'
-import {
-    useCurrentRoute,
-    useHealthPlanPackageForm,
-    useRouteParams,
-    useTealium,
-} from '../../../hooks'
+import { FormContainer } from '../../../components/FormContainer/FormContainer'
+import { useCurrentRoute, useRouteParams, useTealium } from '../../../hooks'
+import { useContractForm } from '../../../hooks/useContractForm'
 import { useAuth } from '../../../contexts/AuthContext'
 import { ErrorOrLoadingPage } from '../ErrorOrLoadingPage'
 import { PageBannerAlerts } from '../PageBannerAlerts'
 import { useErrorSummary } from '../../../hooks/useErrorSummary'
+import { featureFlags } from '../../../common-code/featureFlags'
 
 export interface ContactsFormValues {
     stateContacts: StateContact[]
@@ -70,11 +70,12 @@ const flattenErrors = (
 
 const Contacts = ({
     showValidations = false,
-}: HealthPlanFormPageProps): React.ReactElement => {
+}: ContractFormPageProps): React.ReactElement => {
     const [shouldValidate, setShouldValidate] = React.useState(showValidations)
     const [focusNewContact, setFocusNewContact] = React.useState(false)
     const [focusNewActuaryContact, setFocusNewActuaryContact] =
         React.useState(false)
+    const ldClient = useLDClient()
     const { setFocusErrorSummaryHeading, errorSummaryHeadingRef } =
         useErrorSummary()
     const { logButtonEvent } = useTealium()
@@ -83,13 +84,8 @@ const Contacts = ({
     const { loggedInUser } = useAuth()
     const { currentRoute } = useCurrentRoute()
     const { id } = useRouteParams()
-    const {
-        draftSubmission,
-        interimState,
-        updateDraft,
-        showPageErrorMessage,
-        unlockInfo,
-    } = useHealthPlanPackageForm(id)
+    const { draftSubmission, interimState, updateDraft, showPageErrorMessage } =
+        useContractForm(id)
 
     const redirectToDashboard = React.useRef(false)
     const newStateContactNameRef = React.useRef<HTMLInputElement | null>(null) // This ref.current is reset to the newest contact name field each time new contact is added
@@ -98,6 +94,11 @@ const Contacts = ({
     const newActuaryContactNameRef = React.useRef<HTMLInputElement | null>(null)
 
     const navigate = useNavigate()
+
+    const hideSupportingDocs = ldClient?.variation(
+        featureFlags.HIDE_SUPPORTING_DOCS_PAGE.flag,
+        featureFlags.HIDE_SUPPORTING_DOCS_PAGE.defaultValue
+    )
 
     /*
      Set focus to contact name field when adding new contacts.
@@ -125,7 +126,7 @@ const Contacts = ({
     if (interimState || !draftSubmission || !updateDraft)
         return <ErrorOrLoadingPage state={interimState || 'GENERIC_ERROR'} />
 
-    const stateContacts = draftSubmission.stateContacts
+    const stateContacts = draftSubmission.draftRevision.formData.stateContacts
 
     const emptyStateContact = {
         name: '',
@@ -133,12 +134,9 @@ const Contacts = ({
         email: '',
     }
 
-    if (stateContacts.length === 0) {
-        stateContacts.push(emptyStateContact)
-    }
-
     const contactsInitialValues: ContactsFormValues = {
-        stateContacts: stateContacts,
+        stateContacts:
+            stateContacts.length === 0 ? [emptyStateContact] : stateContacts,
     }
 
     // Handler for Contacts legends so that contacts show up as
@@ -161,27 +159,33 @@ const Contacts = ({
         values: ContactsFormValues,
         formikHelpers: FormikHelpers<ContactsFormValues>
     ) => {
-        draftSubmission.stateContacts = values.stateContacts
+        draftSubmission.draftRevision.formData.stateContacts =
+            values.stateContacts
+        const updatedFormData = draftSubmission.draftRevision.formData
+        delete updatedFormData.__typename
+        const updatedContractInput: UpdateContractDraftRevisionInput = {
+            formData: draftSubmission.draftRevision.formData,
+            contractID: draftSubmission.id,
+            lastSeenUpdatedAt: draftSubmission.draftRevision.updatedAt,
+        }
 
-        try {
-            const updatedSubmission = await updateDraft(draftSubmission)
-            if (updatedSubmission instanceof Error) {
-                formikHelpers.setSubmitting(false)
-                redirectToDashboard.current = false
-                console.info(
-                    'Error updating draft submission: ',
-                    updatedSubmission
-                )
-            } else if (updatedSubmission) {
-                if (redirectToDashboard.current) {
-                    navigate(RoutesRecord.DASHBOARD_SUBMISSIONS)
+        const updatedSubmission = await updateDraft(updatedContractInput)
+        if (updatedSubmission instanceof Error) {
+            formikHelpers.setSubmitting(false)
+            redirectToDashboard.current = false
+            const msg = `Error updating draft submission: ${updatedSubmission}`
+            console.info(msg)
+            recordJSException(msg)
+        } else if (updatedSubmission) {
+            if (redirectToDashboard.current) {
+                navigate(RoutesRecord.DASHBOARD_SUBMISSIONS)
+            } else {
+                if (hideSupportingDocs) {
+                    navigate(`../review-and-submit`)
                 } else {
                     navigate(`../documents`)
                 }
             }
-        } catch (serverError) {
-            formikHelpers.setSubmitting(false)
-            redirectToDashboard.current = false
         }
     }
 
@@ -202,17 +206,20 @@ const Contacts = ({
 
     return (
         <>
-            <div>
+            <FormNotificationContainer>
                 <DynamicStepIndicator
-                    formPages={activeFormPages(draftSubmission)}
+                    formPages={activeFormPages(
+                        draftSubmission.draftRevision.formData,
+                        hideSupportingDocs
+                    )}
                     currentFormPage={currentRoute}
                 />
                 <PageBannerAlerts
                     loggedInUser={loggedInUser}
-                    unlockedInfo={unlockInfo}
+                    unlockedInfo={draftSubmission.draftRevision.unlockInfo}
                     showPageErrorMessage={showPageErrorMessage ?? false}
                 />
-            </div>
+            </FormNotificationContainer>
             <FormContainer id="Contacts">
                 <Formik
                     initialValues={contactsInitialValues}
@@ -428,7 +435,8 @@ const Contacts = ({
                                     }}
                                     backOnClick={() =>
                                         navigate(
-                                            draftSubmission.submissionType ===
+                                            draftSubmission.draftRevision
+                                                .formData.submissionType ===
                                                 'CONTRACT_ONLY'
                                                 ? '../contract-details'
                                                 : '../rate-details'
@@ -441,8 +449,8 @@ const Contacts = ({
                                     }}
                                     actionInProgress={isSubmitting}
                                     backOnClickUrl={
-                                        draftSubmission.submissionType ===
-                                        'CONTRACT_ONLY'
+                                        draftSubmission.draftRevision.formData
+                                            .submissionType === 'CONTRACT_ONLY'
                                             ? generatePath(
                                                   RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS,
                                                   { id }

@@ -54,7 +54,6 @@ describe('UserLoginInfo', () => {
 
     it('renders link to support email', () => {
         const stringConstants = useStringConstants()
-        const MAIL_TO_SUPPORT = stringConstants.MAIL_TO_SUPPORT
         const jestFn = vi.fn()
 
         renderWithProviders(
@@ -67,11 +66,11 @@ describe('UserLoginInfo', () => {
             />
         )
         const feedbackLink = screen.getByRole('link', {
-            name: `${MAIL_TO_SUPPORT}`,
+            name: `${stringConstants.MAIL_TO_SUPPORT}`,
         })
         expect(feedbackLink).toHaveAttribute(
             'href',
-            `mailto: ${MAIL_TO_SUPPORT}, mc-review-team@truss.works`
+            stringConstants.MAIL_TO_SUPPORT_HREF
         )
     })
 

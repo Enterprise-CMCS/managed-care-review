@@ -10,6 +10,7 @@ permissions:
 jobs:
   SendDSOEvents:
     runs-on: ubuntu-latest
+    environment: prod
     steps:
       - name: Format OIDC role ARN
         shell: bash
@@ -23,13 +24,13 @@ jobs:
         with:
           aws-account-id: ${{ secrets.PROD_AWS_ACCOUNT_ID }}
           oidc-role: ${{ steps.format-oidc-role-arn.outputs.arn }}
-          github-access-token: ${{ secrets.GITHUB_ACCESS_TOKEN }}
+          github-access-token: ${{ secrets.GITHUB_TOKEN }}
           scan-config: |
             events:  # a list of event specifications such as the following one
             - type: deploy 
               environment: prod
               name: mc-review-promote
-              team: mv-review
+              team: mc-review
               owner: Enterprise-CMCS
               repo: managed-care-review
               workflowfilename: promote.yml

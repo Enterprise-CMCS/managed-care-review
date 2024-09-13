@@ -2,12 +2,7 @@ import { useEffect } from 'react'
 import { GridContainer } from '@trussworks/react-uswds'
 import styles from './QuestionResponse.module.scss'
 
-import {
-    Loading,
-    SectionHeader,
-    NavLinkWithLogging,
-    LinkWithLogging,
-} from '../../components'
+import { Loading, SectionHeader, NavLinkWithLogging } from '../../components'
 import { useLocation, useOutletContext } from 'react-router-dom'
 import { usePage } from '../../contexts/PageContext'
 import { SideNavOutletContextType } from '../SubmissionSideNav/SubmissionSideNav'
@@ -17,9 +12,9 @@ import {
 } from '../../components/Banner'
 import { QATable, QuestionData, Division } from './QATable/QATable'
 import { CmsUser, QuestionEdge, StateUser } from '../../gen/gqlClient'
-import { useStringConstants } from '../../hooks/useStringConstants'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import { hasCMSUserPermissions } from '../../gqlHelpers'
+import { ContactSupportLink } from '../../components/ErrorAlert/ContactSupportLink'
 
 type divisionQuestionDataType = {
     division: Division
@@ -59,8 +54,6 @@ const getDivisionOrder = (division?: Division): Division[] =>
     }) as Division[]
 
 export const QuestionResponse = () => {
-    const stringConstants = useStringConstants()
-    const MAIL_TO_SUPPORT = stringConstants.MAIL_TO_SUPPORT
     // router context
     const location = useLocation()
     const submitType = new URLSearchParams(location.search).get('submit')
@@ -106,7 +99,6 @@ export const QuestionResponse = () => {
                 ),
             })
     )
-
     const mapQASections = () =>
         questions.map((divisionQuestions) => (
             <section
@@ -126,7 +118,6 @@ export const QuestionResponse = () => {
                 ))}
             </section>
         ))
-
     return (
         <div className={styles.background}>
             <GridContainer className={styles.container}>
@@ -136,16 +127,9 @@ export const QuestionResponse = () => {
                         message={
                             <span>
                                 You must be assigned to a division in order to
-                                ask questions about a submission. Contact{' '}
-                                <LinkWithLogging
-                                    variant="unstyled"
-                                    href={`mailto:${MAIL_TO_SUPPORT}`}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                >
-                                    {MAIL_TO_SUPPORT}
-                                </LinkWithLogging>{' '}
-                                to add your division.
+                                ask questions about a submission. Please&nbsp;
+                                <ContactSupportLink />
+                                &nbsp;to add your division.
                             </span>
                         }
                     />

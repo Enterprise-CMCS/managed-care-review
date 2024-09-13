@@ -1,9 +1,4 @@
-import {
-    ButtonGroup,
-    FormGroup,
-    GridContainer,
-    Label,
-} from '@trussworks/react-uswds'
+import { ButtonGroup, FormGroup, Label } from '@trussworks/react-uswds'
 import React, { useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { usePage } from '../../contexts/PageContext'
@@ -11,7 +6,6 @@ import {
     useFetchContractQuery,
     useWithdrawAndReplaceRedundantRateMutation,
 } from '../../gen/gqlClient'
-import styles from './ReplaceRate.module.scss'
 import {
     ErrorOrLoadingPage,
     handleAndReturnErrorState,
@@ -35,6 +29,7 @@ import {
     ErrorSummaryProps,
     ErrorSummary,
 } from '../../components/Form/ErrorSummary/ErrorSummary'
+import { FormContainer } from '../../components/FormContainer/FormContainer'
 
 export interface ReplaceRateFormValues {
     replacementRateID: string
@@ -155,40 +150,38 @@ export const ReplaceRate = (): React.ReactElement => {
     }
 
     return (
-        <div className={styles.background}>
-            <GridContainer className={styles.gridContainer}>
-                {replaceError && <GenericApiErrorBanner />}
-                <Formik
-                    initialValues={formInitialValues}
-                    onSubmit={(values) => onSubmit(values)}
-                    validationSchema={ReplaceRateSchema}
-                >
-                    {({ errors, values, handleSubmit }) => (
-                        <UswdsForm
-                            className={styles.formContainer}
-                            id="ReplaceRateForm"
-                            aria-label={'Withdraw and replace rate on contract'}
-                            aria-describedby="form-guidance"
-                            onSubmit={(e) => {
-                                setShouldValidate(true)
-                                setFocusErrorSummaryHeading(true)
-                                return handleSubmit(e)
-                            }}
-                        >
-                            {shouldValidate && (
-                                <ErrorSummary
-                                    errors={generateErrorSummaryErrors(errors)}
-                                    headingRef={errorSummaryHeadingRef}
-                                />
-                            )}
-
+        <FormContainer id="ReplaceRate" className="standaloneForm">
+            {replaceError && <GenericApiErrorBanner />}
+            <Formik
+                initialValues={formInitialValues}
+                onSubmit={(values) => onSubmit(values)}
+                validationSchema={ReplaceRateSchema}
+            >
+                {({ errors, values, handleSubmit }) => (
+                    <UswdsForm
+                        id="ReplaceRateForm"
+                        aria-label={'Withdraw and replace rate on contract'}
+                        aria-describedby="form-guidance"
+                        onSubmit={(e) => {
+                            setShouldValidate(true)
+                            setFocusErrorSummaryHeading(true)
+                            return handleSubmit(e)
+                        }}
+                    >
+                        {shouldValidate && (
+                            <ErrorSummary
+                                errors={generateErrorSummaryErrors(errors)}
+                                headingRef={errorSummaryHeadingRef}
+                            />
+                        )}
+                        <div id="formInnerContainer">
                             <h2>Replace a rate review</h2>
 
                             <DataDetail id="withdrawnRate" label="Current rate">
                                 {withdrawnRateRevisionName}
                             </DataDetail>
 
-                            <fieldset className="usa-fieldset">
+                            <fieldset>
                                 <legend className="srOnly">
                                     Withdraw and replace rate on contract
                                 </legend>
@@ -222,11 +215,7 @@ export const ReplaceRate = (): React.ReactElement => {
                                     <Label htmlFor={'replacementRateID'}>
                                         Select a replacement rate
                                     </Label>
-                                    <span
-                                        className={styles.requiredOptionalText}
-                                    >
-                                        Required
-                                    </span>
+                                    <span>Required</span>
                                     {showFieldErrors(
                                         errors.replacementRateID
                                     ) && (
@@ -252,39 +241,40 @@ export const ReplaceRate = (): React.ReactElement => {
                                     />
                                 </FormGroup>
                             </fieldset>
-                            <PageActionsContainer>
-                                <ButtonGroup type="default">
-                                    <ActionButton
-                                        type="button"
-                                        variant="outline"
-                                        data-testid="page-actions-left-secondary"
-                                        parent_component_type="page body"
-                                        link_url={`/submissions/${id}`}
-                                        onClick={() =>
-                                            navigate(`/submissions/${id}`)
-                                        }
-                                    >
-                                        Cancel
-                                    </ActionButton>
+                        </div>
 
-                                    <ActionButton
-                                        type="submit"
-                                        variant="default"
-                                        data-testid="page-actions-right-primary"
-                                        parent_component_type="page body"
-                                        link_url={`/submissions/${id}`}
-                                        animationTimeout={1000}
-                                        loading={replaceLoading}
-                                    >
-                                        Replace rate
-                                    </ActionButton>
-                                </ButtonGroup>
-                            </PageActionsContainer>
-                        </UswdsForm>
-                    )}
-                </Formik>
-            </GridContainer>
-        </div>
+                        <PageActionsContainer>
+                            <ButtonGroup type="default">
+                                <ActionButton
+                                    type="button"
+                                    variant="outline"
+                                    data-testid="page-actions-left-secondary"
+                                    parent_component_type="page body"
+                                    link_url={`/submissions/${id}`}
+                                    onClick={() =>
+                                        navigate(`/submissions/${id}`)
+                                    }
+                                >
+                                    Cancel
+                                </ActionButton>
+
+                                <ActionButton
+                                    type="submit"
+                                    variant="default"
+                                    data-testid="page-actions-right-primary"
+                                    parent_component_type="page body"
+                                    link_url={`/submissions/${id}`}
+                                    animationTimeout={1000}
+                                    loading={replaceLoading}
+                                >
+                                    Replace rate
+                                </ActionButton>
+                            </ButtonGroup>
+                        </PageActionsContainer>
+                    </UswdsForm>
+                )}
+            </Formik>
+        </FormContainer>
     )
 }
 

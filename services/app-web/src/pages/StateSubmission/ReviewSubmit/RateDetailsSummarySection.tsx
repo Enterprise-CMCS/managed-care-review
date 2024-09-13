@@ -20,6 +20,7 @@ import { SectionCard } from '../../../components/SectionCard'
 import {
     Rate,
     Contract,
+    UnlockedContract,
     ContractRevision,
     Program,
     RateRevision,
@@ -42,7 +43,7 @@ import classnames from 'classnames'
 import { hasCMSUserPermissions } from '../../../gqlHelpers'
 
 export type RateDetailsSummarySectionProps = {
-    contract: Contract
+    contract: Contract | UnlockedContract
     contractRev?: ContractRevision
     rateRevisions?: RateRevisionWithIsLinked[]
     editNavigateTo?: string

@@ -87,7 +87,7 @@ jobs:
         run: pnpm test:coverage
 
       - name: publish code coverage
-        uses: paambaati/codeclimate-action@v8.0.0
+        uses: paambaati/codeclimate-action@v9.0.0
         continue-on-error: true
         env:
           CC_TEST_REPORTER_ID: f7474ffe9522492f5380eb86189480f352c841718c1fe6a63f169353c7cee243

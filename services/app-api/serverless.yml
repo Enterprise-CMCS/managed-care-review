@@ -64,6 +64,9 @@ custom:
     - ${ssm:/configuration/${sls:stage}/vpc/subnets/private/a/id, ssm:/configuration/default/vpc/subnets/private/a/id}
     - ${ssm:/configuration/${sls:stage}/vpc/subnets/private/b/id, ssm:/configuration/default/vpc/subnets/private/b/id}
     - ${ssm:/configuration/${sls:stage}/vpc/subnets/private/c/id, ssm:/configuration/default/vpc/subnets/private/c/id}
+  lambdaMemory:
+    prod: 4096
+    default: 1024
 
 provider:
   name: aws
@@ -227,7 +230,8 @@ functions:
           method: post
           cors: true
           authorizer: aws_iam
-    timeout: 30 # zipping large amount of files hits default time out of 6 seconds
+    timeout: 30
+    memorySize: ${self:custom.lambdaMemory.${sls:stage}, self:custom.lambdaMemory.default}
 
   cleanup:
     handler: src/handlers/cleanup.main

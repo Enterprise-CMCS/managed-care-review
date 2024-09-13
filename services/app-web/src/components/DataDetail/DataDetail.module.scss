@@ -5,7 +5,7 @@
     margin-bottom: uswds.units(4);
 
     @include uswds.at-media(tablet) {
-        margin-bottom: 0;
+        margin-bottom: uswds.units(2);
     }
 
     dt {

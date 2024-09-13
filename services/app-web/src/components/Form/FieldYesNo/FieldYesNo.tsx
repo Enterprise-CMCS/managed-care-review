@@ -109,8 +109,14 @@ export type FieldYesNoFormValue = 'YES' | 'NO' | undefined // Use for formik str
 export type FieldYesNoUserValue = 'Yes' | 'No' | undefined // Use for user facing display
 export type FieldYesNoBoolean = true | false | undefined // Use for sending to backend
 
-export const booleanAsYesNoFormValue = (bool?: boolean): FieldYesNoFormValue =>
-    bool ? 'YES' : bool === false ? 'NO' : undefined
+export const booleanAsYesNoFormValue = (
+    bool?: boolean | null
+): FieldYesNoFormValue => {
+    if (bool === null) {
+        return undefined
+    }
+    return bool ? 'YES' : bool === false ? 'NO' : undefined
+}
 
 export const booleanAsYesNoUserValue = (bool?: boolean): FieldYesNoUserValue =>
     bool ? 'Yes' : bool === false ? 'No' : undefined

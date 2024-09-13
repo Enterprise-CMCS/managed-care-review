@@ -70,6 +70,11 @@ export const LinkRateSelect = ({
 
     const rateNames: LinkRateOptionType[] = rates.map((rate) => {
         const revision = rate.revisions[0]
+        const rateProgramIDs =
+            revision.formData.rateProgramIDs.length > 0
+                ? revision.formData.rateProgramIDs
+                : revision.formData.deprecatedRateProgramIDs
+
         return {
             value: rate.id,
             label:
@@ -80,7 +85,7 @@ export const LinkRateSelect = ({
                 'Unknown rate certification',
             rateProgramIDs: programNames(
                 rate.state.programs,
-                revision.formData.rateProgramIDs
+                rateProgramIDs
             ).join(', '),
             rateDateStart: formatCalendarDate(revision.formData.rateDateStart),
             rateDateEnd: formatCalendarDate(revision.formData.rateDateEnd),

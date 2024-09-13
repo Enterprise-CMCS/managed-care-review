@@ -17,6 +17,14 @@ const featureFlags = {
         flag: 'rate-edit-unlock',
         defaultValue: false,
     },
+    /**
+     * When enabled state users will not see a standalone supporting
+     * docs page
+     */
+    HIDE_SUPPORTING_DOCS_PAGE: {
+        flag: 'hide-supporting-docs-page',
+        defaultValue: false,
+    },
     // PERMANENT FLAGS
 
     /**

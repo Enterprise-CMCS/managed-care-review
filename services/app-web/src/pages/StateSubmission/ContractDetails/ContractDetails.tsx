@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React from 'react'
 import dayjs from 'dayjs'
 import {
     Form as UswdsForm,
@@ -9,12 +9,11 @@ import {
 } from '@trussworks/react-uswds'
 import { v4 as uuidv4 } from 'uuid'
 import { generatePath, useNavigate } from 'react-router-dom'
-import { Formik, FormikErrors } from 'formik'
+import { Formik, FormikErrors, getIn } from 'formik'
 import styles from '../StateSubmissionForm.module.scss'
 
 import {
     FileUpload,
-    S3FileData,
     FileItemT,
     FieldRadio,
     FieldCheckbox,
@@ -25,15 +24,14 @@ import {
     DynamicStepIndicator,
     LinkWithLogging,
     ReactRouterLinkWithLogging,
+    FormNotificationContainer,
 } from '../../../components'
 import {
     formatForForm,
-    formatFormDateForDomain,
     formatUserInputDate,
     isDateRangeEmpty,
 } from '../../../formHelpers'
 import { useS3 } from '../../../contexts/S3Context'
-import { isS3Error } from '../../../s3'
 
 import { ContractDetailsFormSchema } from './ContractDetailsSchema'
 import {
@@ -43,9 +41,14 @@ import {
 import { PageActions } from '../PageActions'
 import {
     activeFormPages,
-    type HealthPlanFormPageProps,
+    type ContractFormPageProps,
 } from '../StateSubmissionForm'
-import { formatYesNoForProto } from '../../../formHelpers/formatters'
+import {
+    formatYesNoForProto,
+    formatDocumentsForGQL,
+    formatDocumentsForForm,
+    formatFormDateForGQL,
+} from '../../../formHelpers/formatters'
 import { ACCEPTED_SUBMISSION_FILE_TYPES } from '../../../components/FileUpload'
 import {
     federalAuthorityKeysForCHIP,
@@ -54,10 +57,9 @@ import {
 import {
     generateProvisionLabel,
     generateApplicableProvisionsList,
-} from '../../../common-code/healthPlanSubmissionHelpers/provisions'
+} from '../../../common-code/ContractTypeProvisions'
 import type {
     ManagedCareEntity,
-    SubmissionDocument,
     ContractExecutionStatus,
     FederalAuthority,
 } from '../../../common-code/healthPlanFormDataType'
@@ -66,25 +68,30 @@ import {
     isCHIPOnly,
     isContractAmendment,
     isContractWithProvisions,
-} from '../../../common-code/healthPlanFormDataType/healthPlanFormData'
+} from '../../../common-code/ContractType'
 import { RoutesRecord } from '../../../constants'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '../../../common-code/featureFlags'
+import {
+    booleanAsYesNoFormValue,
+    yesNoFormValueAsBoolean,
+} from '../../../components/Form/FieldYesNo/FieldYesNo'
 import {
     StatutoryRegulatoryAttestation,
     StatutoryRegulatoryAttestationDescription,
     StatutoryRegulatoryAttestationQuestion,
 } from '../../../constants/statutoryRegulatoryAttestation'
-import { FormContainer } from '../FormContainer'
-import {
-    useCurrentRoute,
-    useHealthPlanPackageForm,
-    useRouteParams,
-} from '../../../hooks'
+import { FormContainer } from '../../../components/FormContainer/FormContainer'
+import { useCurrentRoute, useRouteParams } from '../../../hooks'
 import { useAuth } from '../../../contexts/AuthContext'
 import { ErrorOrLoadingPage } from '../ErrorOrLoadingPage'
 import { PageBannerAlerts } from '../PageBannerAlerts'
 import { useErrorSummary } from '../../../hooks/useErrorSummary'
+import { useContractForm } from '../../../hooks/useContractForm'
+import {
+    UpdateContractDraftRevisionInput,
+    ContractDraftRevisionFormDataInput,
+} from '../../../gen/gqlClient'
 
 function formattedDatePlusOneDay(initialValue: string): string {
     const dayjsValue = dayjs(initialValue)
@@ -115,7 +122,10 @@ const ContractDatesErrorMessage = ({
             : validationErrorMessage}
     </PoliteErrorMessage>
 )
-export interface ContractDetailsFormValues {
+
+export type ContractDetailsFormValues = {
+    contractDocuments: FileItemT[]
+    supportingDocuments: FileItemT[]
     contractExecutionStatus: ContractExecutionStatus | undefined
     contractDateStart: string
     contractDateEnd: string
@@ -141,12 +151,12 @@ export interface ContractDetailsFormValues {
     statutoryRegulatoryAttestation: string | undefined
     statutoryRegulatoryAttestationDescription: string | undefined
 }
-type FormError =
+export type FormError =
     FormikErrors<ContractDetailsFormValues>[keyof FormikErrors<ContractDetailsFormValues>]
 
 export const ContractDetails = ({
     showValidations = false,
-}: HealthPlanFormPageProps): React.ReactElement => {
+}: ContractFormPageProps): React.ReactElement => {
     const [shouldValidate, setShouldValidate] = React.useState(showValidations)
     const navigate = useNavigate()
     const ldClient = useLDClient()
@@ -163,40 +173,41 @@ export const ContractDetails = ({
         updateDraft,
         previousDocuments,
         showPageErrorMessage,
-        unlockInfo,
-    } = useHealthPlanPackageForm(id)
+    } = useContractForm(id)
 
     const contract438Attestation = ldClient?.variation(
         featureFlags.CONTRACT_438_ATTESTATION.flag,
         featureFlags.CONTRACT_438_ATTESTATION.defaultValue
     )
 
-    // Contract documents state management
-    const { deleteFile, uploadFile, scanFile, getKey, getS3URL } = useS3()
-    const [fileItems, setFileItems] = useState<FileItemT[]>([]) // eventually this will include files from api
-    const hasValidFiles =
-        fileItems.length > 0 &&
-        fileItems.every((item) => item.status === 'UPLOAD_COMPLETE')
-    const hasLoadingFiles =
-        fileItems.some((item) => item.status === 'PENDING') ||
-        fileItems.some((item) => item.status === 'SCANNING')
-    const showFileUploadError = shouldValidate && !hasValidFiles
-    const documentsErrorMessage =
-        showFileUploadError && hasLoadingFiles
-            ? 'You must wait for all documents to finish uploading before continuing'
-            : showFileUploadError && fileItems.length === 0
-              ? ' You must upload at least one document'
-              : showFileUploadError && !hasValidFiles
-                ? ' You must remove all documents with error messages before continuing'
-                : undefined
-    const documentsErrorKey =
-        fileItems.length === 0 ? 'documents' : '#file-items-list'
+    const hideSupportingDocs = ldClient?.variation(
+        featureFlags.HIDE_SUPPORTING_DOCS_PAGE.flag,
+        featureFlags.HIDE_SUPPORTING_DOCS_PAGE.defaultValue
+    )
 
+    // Contract documents state management
+    const { getKey, handleDeleteFile, handleUploadFile, handleScanFile } =
+        useS3()
     if (interimState || !draftSubmission)
         return <ErrorOrLoadingPage state={interimState || 'GENERIC_ERROR'} />
-    const fileItemsFromDraftSubmission: FileItemT[] | undefined =
-        draftSubmission &&
-        draftSubmission.contractDocuments.map((doc) => {
+
+    const fileItemsFromDraftSubmission = (
+        docType: string
+    ): FileItemT[] | undefined => {
+        if (
+            (draftSubmission &&
+                docType === 'contract' &&
+                !draftSubmission.draftRevision.formData.contractDocuments) ||
+            (draftSubmission &&
+                docType === 'supporting' &&
+                !draftSubmission.draftRevision.formData.supportingDocuments)
+        )
+            undefined
+        const docs =
+            docType === 'contract'
+                ? draftSubmission.draftRevision.formData.contractDocuments
+                : draftSubmission.draftRevision.formData.supportingDocuments
+        return docs.map((doc) => {
             const key = getKey(doc.s3URL)
             if (!key) {
                 return {
@@ -217,52 +228,7 @@ export const ContractDetails = ({
                 sha256: doc.sha256,
             }
         })
-
-    const onFileItemsUpdate = async ({
-        fileItems,
-    }: {
-        fileItems: FileItemT[]
-    }) => {
-        setFileItems(fileItems)
     }
-
-    const handleDeleteFile = async (key: string) => {
-        const isSubmittedFile =
-            previousDocuments &&
-            Boolean(
-                previousDocuments.some((previousKey) => previousKey === key)
-            )
-
-        if (!isSubmittedFile) {
-            const result = await deleteFile(key, 'HEALTH_PLAN_DOCS')
-            if (isS3Error(result)) {
-                throw new Error(`Error in S3 key: ${key}`)
-            }
-        }
-    }
-
-    const handleUploadFile = async (file: File): Promise<S3FileData> => {
-        const s3Key = await uploadFile(file, 'HEALTH_PLAN_DOCS')
-
-        if (isS3Error(s3Key)) {
-            throw new Error(`Error in S3: ${file.name}`)
-        }
-
-        const s3URL = await getS3URL(s3Key, file.name, 'HEALTH_PLAN_DOCS')
-        return { key: s3Key, s3URL: s3URL }
-    }
-
-    const handleScanFile = async (key: string): Promise<void | Error> => {
-        try {
-            await scanFile(key, 'HEALTH_PLAN_DOCS')
-        } catch (e) {
-            if (isS3Error(e)) {
-                throw new Error(`Error in S3: ${key}`)
-            }
-            throw new Error('Scanning error: Scanning retry timed out')
-        }
-    }
-
     const applicableProvisions =
         generateApplicableProvisionsList(draftSubmission)
 
@@ -271,243 +237,303 @@ export const ContractDetails = ({
         : federalAuthorityKeys
 
     const contractDetailsInitialValues: ContractDetailsFormValues = {
+        contractDocuments: formatDocumentsForForm({
+            documents: draftSubmission.draftRevision.formData.contractDocuments,
+            getKey: getKey,
+        }),
+        supportingDocuments: formatDocumentsForForm({
+            documents:
+                draftSubmission.draftRevision.formData.supportingDocuments,
+            getKey: getKey,
+        }),
         contractExecutionStatus:
-            draftSubmission?.contractExecutionStatus ?? undefined,
+            draftSubmission.draftRevision.formData.contractExecutionStatus ??
+            undefined,
         contractDateStart:
             (draftSubmission &&
-                formatForForm(draftSubmission.contractDateStart)) ??
+                formatForForm(
+                    draftSubmission.draftRevision.formData.contractDateStart
+                )) ??
             '',
         contractDateEnd:
             (draftSubmission &&
-                formatForForm(draftSubmission.contractDateEnd)) ??
+                formatForForm(
+                    draftSubmission.draftRevision.formData.contractDateEnd
+                )) ??
             '',
         managedCareEntities:
-            (draftSubmission?.managedCareEntities as ManagedCareEntity[]) ?? [],
-        federalAuthorities: draftSubmission?.federalAuthorities ?? [],
-        inLieuServicesAndSettings: formatForForm(
-            draftSubmission?.contractAmendmentInfo?.modifiedProvisions
-                .inLieuServicesAndSettings
-        ),
-
-        modifiedBenefitsProvided: formatForForm(
-            draftSubmission?.contractAmendmentInfo?.modifiedProvisions
-                .modifiedBenefitsProvided
-        ),
-        modifiedGeoAreaServed: formatForForm(
-            draftSubmission?.contractAmendmentInfo?.modifiedProvisions
-                .modifiedGeoAreaServed
-        ),
-        modifiedMedicaidBeneficiaries: formatForForm(
-            draftSubmission?.contractAmendmentInfo?.modifiedProvisions
-                .modifiedMedicaidBeneficiaries
-        ),
-        modifiedRiskSharingStrategy: formatForForm(
-            draftSubmission?.contractAmendmentInfo?.modifiedProvisions
-                .modifiedRiskSharingStrategy
-        ),
-        modifiedIncentiveArrangements: formatForForm(
-            draftSubmission?.contractAmendmentInfo?.modifiedProvisions
-                .modifiedIncentiveArrangements
-        ),
-        modifiedWitholdAgreements: formatForForm(
-            draftSubmission?.contractAmendmentInfo?.modifiedProvisions
-                .modifiedWitholdAgreements
-        ),
-        modifiedStateDirectedPayments: formatForForm(
-            draftSubmission?.contractAmendmentInfo?.modifiedProvisions
-                .modifiedStateDirectedPayments
-        ),
-        modifiedPassThroughPayments: formatForForm(
-            draftSubmission?.contractAmendmentInfo?.modifiedProvisions
-                .modifiedPassThroughPayments
-        ),
-        modifiedPaymentsForMentalDiseaseInstitutions: formatForForm(
-            draftSubmission?.contractAmendmentInfo?.modifiedProvisions
-                .modifiedPaymentsForMentalDiseaseInstitutions
-        ),
-        modifiedMedicalLossRatioStandards: formatForForm(
-            draftSubmission?.contractAmendmentInfo?.modifiedProvisions
-                .modifiedMedicalLossRatioStandards
-        ),
-        modifiedOtherFinancialPaymentIncentive: formatForForm(
-            draftSubmission?.contractAmendmentInfo?.modifiedProvisions
-                .modifiedOtherFinancialPaymentIncentive
-        ),
-        modifiedEnrollmentProcess: formatForForm(
-            draftSubmission?.contractAmendmentInfo?.modifiedProvisions
-                .modifiedEnrollmentProcess
-        ),
-        modifiedGrevienceAndAppeal: formatForForm(
-            draftSubmission?.contractAmendmentInfo?.modifiedProvisions
-                .modifiedGrevienceAndAppeal
-        ),
-        modifiedNetworkAdequacyStandards: formatForForm(
-            draftSubmission?.contractAmendmentInfo?.modifiedProvisions
-                .modifiedNetworkAdequacyStandards
-        ),
-        modifiedLengthOfContract: formatForForm(
-            draftSubmission?.contractAmendmentInfo?.modifiedProvisions
-                .modifiedLengthOfContract
-        ),
-        modifiedNonRiskPaymentArrangements: formatForForm(
-            draftSubmission?.contractAmendmentInfo?.modifiedProvisions
-                .modifiedNonRiskPaymentArrangements
-        ),
-        statutoryRegulatoryAttestation: formatForForm(
-            draftSubmission?.statutoryRegulatoryAttestation
-        ),
-        statutoryRegulatoryAttestationDescription: formatForForm(
-            draftSubmission?.statutoryRegulatoryAttestationDescription
-        ),
+            (draftSubmission.draftRevision.formData
+                .managedCareEntities as ManagedCareEntity[]) ?? [],
+        federalAuthorities:
+            draftSubmission.draftRevision.formData.federalAuthorities ?? [],
+        inLieuServicesAndSettings:
+            booleanAsYesNoFormValue(
+                draftSubmission.draftRevision.formData.inLieuServicesAndSettings
+            ) ?? '',
+        modifiedBenefitsProvided:
+            booleanAsYesNoFormValue(
+                draftSubmission.draftRevision.formData.modifiedBenefitsProvided
+            ) ?? '',
+        modifiedGeoAreaServed:
+            booleanAsYesNoFormValue(
+                draftSubmission.draftRevision.formData.modifiedGeoAreaServed
+            ) ?? '',
+        modifiedMedicaidBeneficiaries:
+            booleanAsYesNoFormValue(
+                draftSubmission.draftRevision.formData
+                    .modifiedMedicaidBeneficiaries
+            ) ?? '',
+        modifiedRiskSharingStrategy:
+            booleanAsYesNoFormValue(
+                draftSubmission.draftRevision.formData
+                    .modifiedRiskSharingStrategy
+            ) ?? '',
+        modifiedIncentiveArrangements:
+            booleanAsYesNoFormValue(
+                draftSubmission.draftRevision.formData
+                    .modifiedIncentiveArrangements
+            ) ?? '',
+        modifiedWitholdAgreements:
+            booleanAsYesNoFormValue(
+                draftSubmission.draftRevision.formData.modifiedWitholdAgreements
+            ) ?? '',
+        modifiedStateDirectedPayments:
+            booleanAsYesNoFormValue(
+                draftSubmission.draftRevision.formData
+                    .modifiedStateDirectedPayments
+            ) ?? '',
+        modifiedPassThroughPayments:
+            booleanAsYesNoFormValue(
+                draftSubmission.draftRevision.formData
+                    .modifiedPassThroughPayments
+            ) ?? '',
+        modifiedPaymentsForMentalDiseaseInstitutions:
+            booleanAsYesNoFormValue(
+                draftSubmission.draftRevision.formData
+                    .modifiedPaymentsForMentalDiseaseInstitutions
+            ) ?? '',
+        modifiedMedicalLossRatioStandards:
+            booleanAsYesNoFormValue(
+                draftSubmission.draftRevision.formData
+                    .modifiedMedicalLossRatioStandards
+            ) ?? '',
+        modifiedOtherFinancialPaymentIncentive:
+            booleanAsYesNoFormValue(
+                draftSubmission.draftRevision.formData
+                    .modifiedOtherFinancialPaymentIncentive
+            ) ?? '',
+        modifiedEnrollmentProcess:
+            booleanAsYesNoFormValue(
+                draftSubmission.draftRevision.formData.modifiedEnrollmentProcess
+            ) ?? '',
+        modifiedGrevienceAndAppeal:
+            booleanAsYesNoFormValue(
+                draftSubmission.draftRevision.formData
+                    .modifiedGrevienceAndAppeal
+            ) ?? '',
+        modifiedNetworkAdequacyStandards:
+            booleanAsYesNoFormValue(
+                draftSubmission.draftRevision.formData
+                    .modifiedNetworkAdequacyStandards
+            ) ?? '',
+        modifiedLengthOfContract:
+            booleanAsYesNoFormValue(
+                draftSubmission.draftRevision.formData.modifiedLengthOfContract
+            ) ?? '',
+        modifiedNonRiskPaymentArrangements:
+            booleanAsYesNoFormValue(
+                draftSubmission.draftRevision.formData
+                    .modifiedNonRiskPaymentArrangements
+            ) ?? '',
+        statutoryRegulatoryAttestation:
+            booleanAsYesNoFormValue(
+                draftSubmission.draftRevision.formData
+                    .statutoryRegulatoryAttestation
+            ) ?? '',
+        statutoryRegulatoryAttestationDescription:
+            draftSubmission.draftRevision.formData
+                .statutoryRegulatoryAttestationDescription ?? '',
     }
 
-    const showFieldErrors = (error?: FormError) =>
-        shouldValidate && Boolean(error)
+    const showFieldErrors = (
+        fieldName: keyof ContractDetailsFormValues,
+        errors: FormikErrors<ContractDetailsFormValues>
+    ): string | undefined => {
+        if (!shouldValidate) return undefined
+        return getIn(errors, `${fieldName}`)
+    }
+
+    const genecontractErrorsummaryErrors = (
+        errors: FormikErrors<ContractDetailsFormValues>,
+        values: ContractDetailsFormValues
+    ) => {
+        const errorsObject: { [field: string]: string } = {}
+        Object.entries(errors).forEach(([field, value]) => {
+            if (typeof value === 'string') {
+                errorsObject[field] = value
+            }
+            if (Array.isArray(value) && Array.length > 0) {
+                Object.entries(value).forEach(
+                    ([arrItemField, arrItemValue]) => {
+                        if (typeof arrItemValue === 'string') {
+                            errorsObject[arrItemField] = arrItemValue
+                        }
+                    }
+                )
+            }
+        })
+        values.contractDocuments.forEach((item) => {
+            const key = 'contractDocuments'
+            if (item.status === 'DUPLICATE_NAME_ERROR') {
+                errorsObject[key] =
+                    'You must remove all documents with error messages before continuing'
+            } else if (item.status === 'SCANNING_ERROR') {
+                errorsObject[key] =
+                    'You must remove files that failed the security scan'
+            } else if (item.status === 'UPLOAD_ERROR') {
+                errorsObject[key] =
+                    'You must remove or retry files that failed to upload'
+            }
+        })
+        // return errors
+        return errorsObject
+    }
 
     const handleFormSubmit = async (
         values: ContractDetailsFormValues,
         setSubmitting: (isSubmitting: boolean) => void, // formik setSubmitting
         options: {
-            shouldValidateDocuments: boolean
             redirectPath: string
         }
     ) => {
-        // Currently documents validation happens (outside of the yup schema, which only handles the formik form data)
-        // if there are any errors present in the documents list and we are in a validation state (relevant for Save as Draft) force user to clear validations to continue
-        if (options.shouldValidateDocuments) {
-            if (!hasValidFiles) {
-                setShouldValidate(true)
-                setFocusErrorSummaryHeading(true)
-                setSubmitting(false)
-                return
+        const updatedDraftSubmissionFormData: ContractDraftRevisionFormDataInput =
+            {
+                contractExecutionStatus: values.contractExecutionStatus,
+                contractDateStart: formatFormDateForGQL(
+                    values.contractDateStart
+                ),
+                contractDateEnd: formatFormDateForGQL(values.contractDateEnd),
+                riskBasedContract:
+                    draftSubmission.draftRevision.formData.riskBasedContract,
+                populationCovered:
+                    draftSubmission.draftRevision.formData.populationCovered,
+                programIDs:
+                    draftSubmission.draftRevision.formData.programIDs || [],
+                stateContacts:
+                    draftSubmission.draftRevision.formData.stateContacts || [],
+                contractDocuments:
+                    formatDocumentsForGQL(values.contractDocuments) || [],
+                supportingDocuments:
+                    formatDocumentsForGQL(values.supportingDocuments) || [],
+                managedCareEntities: values.managedCareEntities,
+                federalAuthorities: values.federalAuthorities,
+                submissionType:
+                    draftSubmission.draftRevision.formData.submissionType,
+                statutoryRegulatoryAttestation: formatYesNoForProto(
+                    values.statutoryRegulatoryAttestation
+                ),
+                // If contract is in compliance, we set the description to undefined. This clears out previous non-compliance description
+                statutoryRegulatoryAttestationDescription:
+                    values.statutoryRegulatoryAttestationDescription,
             }
+
+        if (
+            draftSubmission === undefined ||
+            !updateDraft ||
+            !draftSubmission.draftRevision
+        ) {
+            console.info(draftSubmission, updateDraft)
+            console.info(
+                'ERROR, SubmissionType for does not have props needed to update a draft.'
+            )
+            return
         }
-
-        const contractDocuments = fileItems.reduce(
-            (formDataDocuments, fileItem) => {
-                if (fileItem.status === 'UPLOAD_ERROR') {
-                    console.info(
-                        'Attempting to save files that failed upload, discarding invalid files'
-                    )
-                } else if (fileItem.status === 'SCANNING_ERROR') {
-                    console.info(
-                        'Attempting to save files that failed scanning, discarding invalid files'
-                    )
-                } else if (fileItem.status === 'DUPLICATE_NAME_ERROR') {
-                    console.info(
-                        'Attempting to save files that are duplicate names, discarding duplicate'
-                    )
-                } else if (!fileItem.s3URL) {
-                    console.info(
-                        'Attempting to save a seemingly valid file item is not yet uploaded to S3, this should not happen on form submit. Discarding file.'
-                    )
-                } else if (!fileItem.sha256) {
-                    console.info(
-                        'Attempting to save a seemingly valid file item with no sha. this should not happen on form submit. Discarding file.'
-                    )
-                } else {
-                    formDataDocuments.push({
-                        name: fileItem.name,
-                        s3URL: fileItem.s3URL,
-                        sha256: fileItem.sha256,
-                    })
-                }
-                return formDataDocuments
-            },
-            [] as SubmissionDocument[]
-        )
-
-        draftSubmission.contractExecutionStatus = values.contractExecutionStatus
-        draftSubmission.contractDateStart = formatFormDateForDomain(
-            values.contractDateStart
-        )
-        draftSubmission.contractDateEnd = formatFormDateForDomain(
-            values.contractDateEnd
-        )
-        draftSubmission.managedCareEntities = values.managedCareEntities
-        draftSubmission.federalAuthorities = values.federalAuthorities
-        draftSubmission.contractDocuments = contractDocuments
-        draftSubmission.statutoryRegulatoryAttestation = formatYesNoForProto(
-            values.statutoryRegulatoryAttestation
-        )
-        // If contract is in compliance, we set the description to undefined. This clears out previous non-compliance description
-        draftSubmission.statutoryRegulatoryAttestationDescription =
-            values.statutoryRegulatoryAttestationDescription
-
         if (isContractWithProvisions(draftSubmission)) {
-            draftSubmission.contractAmendmentInfo = {
-                modifiedProvisions: {
-                    inLieuServicesAndSettings: formatYesNoForProto(
-                        values.inLieuServicesAndSettings
-                    ),
-                    modifiedBenefitsProvided: formatYesNoForProto(
-                        values.modifiedBenefitsProvided
-                    ),
-                    modifiedGeoAreaServed: formatYesNoForProto(
-                        values.modifiedGeoAreaServed
-                    ),
-                    modifiedMedicaidBeneficiaries: formatYesNoForProto(
-                        values.modifiedMedicaidBeneficiaries
-                    ),
-                    modifiedRiskSharingStrategy: formatYesNoForProto(
-                        values.modifiedRiskSharingStrategy
-                    ),
-                    modifiedIncentiveArrangements: formatYesNoForProto(
-                        values.modifiedIncentiveArrangements
-                    ),
-                    modifiedWitholdAgreements: formatYesNoForProto(
-                        values.modifiedWitholdAgreements
-                    ),
-                    modifiedStateDirectedPayments: formatYesNoForProto(
-                        values.modifiedStateDirectedPayments
-                    ),
-                    modifiedPassThroughPayments: formatYesNoForProto(
-                        values.modifiedPassThroughPayments
-                    ),
-                    modifiedPaymentsForMentalDiseaseInstitutions:
-                        formatYesNoForProto(
-                            values.modifiedPaymentsForMentalDiseaseInstitutions
-                        ),
-                    modifiedMedicalLossRatioStandards: formatYesNoForProto(
-                        values.modifiedMedicalLossRatioStandards
-                    ),
-                    modifiedOtherFinancialPaymentIncentive: formatYesNoForProto(
-                        values.modifiedOtherFinancialPaymentIncentive
-                    ),
-                    modifiedEnrollmentProcess: formatYesNoForProto(
-                        values.modifiedEnrollmentProcess
-                    ),
-                    modifiedGrevienceAndAppeal: formatYesNoForProto(
-                        values.modifiedGrevienceAndAppeal
-                    ),
-                    modifiedNetworkAdequacyStandards: formatYesNoForProto(
-                        values.modifiedNetworkAdequacyStandards
-                    ),
-                    modifiedLengthOfContract: formatYesNoForProto(
-                        values.modifiedLengthOfContract
-                    ),
-                    modifiedNonRiskPaymentArrangements: formatYesNoForProto(
-                        values.modifiedNonRiskPaymentArrangements
-                    ),
-                },
-            }
+            updatedDraftSubmissionFormData.inLieuServicesAndSettings =
+                yesNoFormValueAsBoolean(values.inLieuServicesAndSettings)
+            updatedDraftSubmissionFormData.modifiedBenefitsProvided =
+                yesNoFormValueAsBoolean(values.modifiedBenefitsProvided)
+            updatedDraftSubmissionFormData.modifiedGeoAreaServed =
+                yesNoFormValueAsBoolean(values.modifiedGeoAreaServed)
+            updatedDraftSubmissionFormData.modifiedMedicaidBeneficiaries =
+                yesNoFormValueAsBoolean(values.modifiedMedicaidBeneficiaries)
+            updatedDraftSubmissionFormData.modifiedRiskSharingStrategy =
+                yesNoFormValueAsBoolean(values.modifiedRiskSharingStrategy)
+            updatedDraftSubmissionFormData.modifiedIncentiveArrangements =
+                yesNoFormValueAsBoolean(values.modifiedIncentiveArrangements)
+            updatedDraftSubmissionFormData.modifiedWitholdAgreements =
+                yesNoFormValueAsBoolean(values.modifiedWitholdAgreements)
+            updatedDraftSubmissionFormData.modifiedStateDirectedPayments =
+                yesNoFormValueAsBoolean(values.modifiedStateDirectedPayments)
+            updatedDraftSubmissionFormData.modifiedPassThroughPayments =
+                yesNoFormValueAsBoolean(values.modifiedPassThroughPayments)
+            updatedDraftSubmissionFormData.modifiedPaymentsForMentalDiseaseInstitutions =
+                yesNoFormValueAsBoolean(
+                    values.modifiedPaymentsForMentalDiseaseInstitutions
+                )
+            updatedDraftSubmissionFormData.modifiedMedicalLossRatioStandards =
+                yesNoFormValueAsBoolean(
+                    values.modifiedMedicalLossRatioStandards
+                )
+            updatedDraftSubmissionFormData.modifiedOtherFinancialPaymentIncentive =
+                yesNoFormValueAsBoolean(
+                    values.modifiedOtherFinancialPaymentIncentive
+                )
+            updatedDraftSubmissionFormData.modifiedEnrollmentProcess =
+                yesNoFormValueAsBoolean(values.modifiedEnrollmentProcess)
+            updatedDraftSubmissionFormData.modifiedGrevienceAndAppeal =
+                yesNoFormValueAsBoolean(values.modifiedGrevienceAndAppeal)
+            updatedDraftSubmissionFormData.modifiedNetworkAdequacyStandards =
+                yesNoFormValueAsBoolean(values.modifiedNetworkAdequacyStandards)
+            updatedDraftSubmissionFormData.modifiedLengthOfContract =
+                yesNoFormValueAsBoolean(values.modifiedLengthOfContract)
+            updatedDraftSubmissionFormData.modifiedNonRiskPaymentArrangements =
+                yesNoFormValueAsBoolean(
+                    values.modifiedNonRiskPaymentArrangements
+                )
         } else {
-            draftSubmission.contractAmendmentInfo = undefined
+            updatedDraftSubmissionFormData.inLieuServicesAndSettings = undefined
+            updatedDraftSubmissionFormData.modifiedBenefitsProvided = undefined
+            updatedDraftSubmissionFormData.modifiedGeoAreaServed = undefined
+            updatedDraftSubmissionFormData.modifiedMedicaidBeneficiaries =
+                undefined
+            updatedDraftSubmissionFormData.modifiedRiskSharingStrategy =
+                undefined
+            updatedDraftSubmissionFormData.modifiedIncentiveArrangements =
+                undefined
+            updatedDraftSubmissionFormData.modifiedWitholdAgreements = undefined
+            updatedDraftSubmissionFormData.modifiedStateDirectedPayments =
+                undefined
+            updatedDraftSubmissionFormData.modifiedPassThroughPayments =
+                undefined
+            updatedDraftSubmissionFormData.modifiedPaymentsForMentalDiseaseInstitutions =
+                undefined
+            updatedDraftSubmissionFormData.modifiedMedicalLossRatioStandards =
+                undefined
+            updatedDraftSubmissionFormData.modifiedOtherFinancialPaymentIncentive =
+                undefined
+            updatedDraftSubmissionFormData.modifiedEnrollmentProcess = undefined
+            updatedDraftSubmissionFormData.modifiedGrevienceAndAppeal =
+                undefined
+            updatedDraftSubmissionFormData.modifiedNetworkAdequacyStandards =
+                undefined
+            updatedDraftSubmissionFormData.modifiedLengthOfContract = undefined
+            updatedDraftSubmissionFormData.modifiedNonRiskPaymentArrangements =
+                undefined
         }
 
-        try {
-            const updatedSubmission = await updateDraft(draftSubmission)
-            if (updatedSubmission instanceof Error) {
-                setSubmitting(false)
-                console.info(
-                    'Error updating draft submission: ',
-                    updatedSubmission
-                )
-            } else if (updatedSubmission) {
-                navigate(options.redirectPath)
-            }
-        } catch (serverError) {
+        const updatedContract: UpdateContractDraftRevisionInput = {
+            formData: updatedDraftSubmissionFormData,
+            contractID: draftSubmission.id,
+            lastSeenUpdatedAt: draftSubmission.draftRevision.updatedAt,
+        }
+
+        const updatedSubmission = await updateDraft(updatedContract)
+        if (updatedSubmission instanceof Error) {
             setSubmitting(false)
+            console.info('Error updating draft submission: ', updatedSubmission)
+        } else if (updatedSubmission) {
+            navigate(options.redirectPath)
         }
     }
 
@@ -515,26 +541,28 @@ export const ContractDetails = ({
 
     return (
         <>
-            <div>
+            <FormNotificationContainer>
                 <DynamicStepIndicator
-                    formPages={activeFormPages(draftSubmission)}
+                    formPages={activeFormPages(
+                        draftSubmission.draftRevision.formData,
+                        hideSupportingDocs
+                    )}
                     currentFormPage={currentRoute}
                 />
                 <PageBannerAlerts
                     loggedInUser={loggedInUser}
-                    unlockedInfo={unlockInfo}
+                    unlockedInfo={draftSubmission.draftRevision.unlockInfo}
                     showPageErrorMessage={showPageErrorMessage ?? false}
                 />
-            </div>
+            </FormNotificationContainer>
             <FormContainer id="ContactDetails">
                 <Formik
                     initialValues={contractDetailsInitialValues}
                     onSubmit={(values, { setSubmitting }) => {
                         return handleFormSubmit(values, setSubmitting, {
-                            shouldValidateDocuments: true,
                             redirectPath:
-                                draftSubmission.submissionType ===
-                                'CONTRACT_ONLY'
+                                draftSubmission.draftRevision.formData
+                                    .submissionType === 'CONTRACT_ONLY'
                                     ? `../contacts`
                                     : `../rate-details`,
                         })
@@ -573,29 +601,32 @@ export const ContractDetails = ({
 
                                     {shouldValidate && (
                                         <ErrorSummary
-                                            errors={
-                                                documentsErrorMessage
-                                                    ? {
-                                                          [documentsErrorKey]:
-                                                              documentsErrorMessage,
-                                                          ...errors,
-                                                      }
-                                                    : errors
-                                            }
+                                            errors={genecontractErrorsummaryErrors(
+                                                errors,
+                                                values
+                                            )}
                                             headingRef={errorSummaryHeadingRef}
                                         />
                                     )}
 
                                     <FormGroup
-                                        error={showFileUploadError}
+                                        error={Boolean(
+                                            showFieldErrors(
+                                                'contractDocuments',
+                                                errors
+                                            )
+                                        )}
                                         className="margin-top-0"
                                     >
                                         <FileUpload
-                                            id="documents"
-                                            name="documents"
+                                            id="contractDocuments"
+                                            name="contractDocuments"
                                             label="Upload contract"
                                             aria-required
-                                            error={documentsErrorMessage}
+                                            error={showFieldErrors(
+                                                'contractDocuments',
+                                                errors
+                                            )}
                                             hint={
                                                 <span
                                                     className={
@@ -631,21 +662,129 @@ export const ContractDetails = ({
                                             accept={
                                                 ACCEPTED_SUBMISSION_FILE_TYPES
                                             }
-                                            initialItems={
-                                                fileItemsFromDraftSubmission
+                                            initialItems={fileItemsFromDraftSubmission(
+                                                'contract'
+                                            )}
+                                            uploadFile={(file) =>
+                                                handleUploadFile(
+                                                    file,
+                                                    'HEALTH_PLAN_DOCS'
+                                                )
                                             }
-                                            uploadFile={handleUploadFile}
-                                            scanFile={handleScanFile}
-                                            deleteFile={handleDeleteFile}
-                                            onFileItemsUpdate={
-                                                onFileItemsUpdate
+                                            scanFile={(key) =>
+                                                handleScanFile(
+                                                    key,
+                                                    'HEALTH_PLAN_DOCS'
+                                                )
+                                            }
+                                            deleteFile={(key) =>
+                                                handleDeleteFile(
+                                                    key,
+                                                    'HEALTH_PLAN_DOCS',
+                                                    previousDocuments
+                                                )
+                                            }
+                                            onFileItemsUpdate={({
+                                                fileItems,
+                                            }) =>
+                                                setFieldValue(
+                                                    `contractDocuments`,
+                                                    fileItems
+                                                )
                                             }
                                         />
                                     </FormGroup>
+                                    {hideSupportingDocs && (
+                                        <FormGroup
+                                            error={Boolean(
+                                                showFieldErrors(
+                                                    'supportingDocuments',
+                                                    errors
+                                                )
+                                            )}
+                                        >
+                                            <FileUpload
+                                                id="supportingDocuments"
+                                                name="supportingDocuments"
+                                                label="Upload contract-supporting documents"
+                                                error={showFieldErrors(
+                                                    'supportingDocuments',
+                                                    errors
+                                                )}
+                                                hint={
+                                                    <span
+                                                        className={
+                                                            styles.guidanceTextBlock
+                                                        }
+                                                    >
+                                                        <LinkWithLogging
+                                                            aria-label="Document definitions and requirements (opens in new window)"
+                                                            href={
+                                                                '/help#supporting-documents'
+                                                            }
+                                                            variant="external"
+                                                            target="_blank"
+                                                        >
+                                                            Document definitions
+                                                            and requirements
+                                                        </LinkWithLogging>
+                                                        <span className="padding-top-05">
+                                                            Upload any
+                                                            supporting documents
+                                                            related to the
+                                                            contract.
+                                                        </span>
+                                                        <span className="padding-top-1">
+                                                            This input only
+                                                            accepts PDF, CSV,
+                                                            DOC, DOCX, XLS, XLSX
+                                                            files.
+                                                        </span>
+                                                    </span>
+                                                }
+                                                accept={
+                                                    ACCEPTED_SUBMISSION_FILE_TYPES
+                                                }
+                                                initialItems={fileItemsFromDraftSubmission(
+                                                    'supporting'
+                                                )}
+                                                uploadFile={(file) =>
+                                                    handleUploadFile(
+                                                        file,
+                                                        'HEALTH_PLAN_DOCS'
+                                                    )
+                                                }
+                                                scanFile={(key) =>
+                                                    handleScanFile(
+                                                        key,
+                                                        'HEALTH_PLAN_DOCS'
+                                                    )
+                                                }
+                                                deleteFile={(key) =>
+                                                    handleDeleteFile(
+                                                        key,
+                                                        'HEALTH_PLAN_DOCS',
+                                                        previousDocuments
+                                                    )
+                                                }
+                                                onFileItemsUpdate={({
+                                                    fileItems,
+                                                }) =>
+                                                    setFieldValue(
+                                                        `supportingDocuments`,
+                                                        fileItems
+                                                    )
+                                                }
+                                            />
+                                        </FormGroup>
+                                    )}
                                     {contract438Attestation && (
                                         <FormGroup
-                                            error={showFieldErrors(
-                                                errors.statutoryRegulatoryAttestation
+                                            error={Boolean(
+                                                showFieldErrors(
+                                                    'statutoryRegulatoryAttestation',
+                                                    errors
+                                                )
                                             )}
                                         >
                                             <Fieldset
@@ -693,8 +832,11 @@ export const ContractDetails = ({
                                                         </Link>
                                                     </span>
                                                 </div>
-                                                {showFieldErrors(
-                                                    errors.statutoryRegulatoryAttestation
+                                                {Boolean(
+                                                    showFieldErrors(
+                                                        'statutoryRegulatoryAttestation',
+                                                        errors
+                                                    )
                                                 ) && (
                                                     <PoliteErrorMessage
                                                         formFieldLabel={
@@ -758,8 +900,11 @@ export const ContractDetails = ({
                                                     id="statutoryRegulatoryAttestationDescription"
                                                     name="statutoryRegulatoryAttestationDescription"
                                                     aria-required
-                                                    showError={showFieldErrors(
-                                                        errors.statutoryRegulatoryAttestationDescription
+                                                    showError={Boolean(
+                                                        showFieldErrors(
+                                                            'statutoryRegulatoryAttestationDescription',
+                                                            errors
+                                                        )
                                                     )}
                                                     hint={
                                                         <ReactRouterLinkWithLogging
@@ -783,8 +928,11 @@ export const ContractDetails = ({
                                             </div>
                                         )}
                                     <FormGroup
-                                        error={showFieldErrors(
-                                            errors.contractExecutionStatus
+                                        error={Boolean(
+                                            showFieldErrors(
+                                                'contractExecutionStatus',
+                                                errors
+                                            )
                                         )}
                                     >
                                         <Fieldset
@@ -800,8 +948,11 @@ export const ContractDetails = ({
                                             >
                                                 Required
                                             </span>
-                                            {showFieldErrors(
-                                                errors.contractExecutionStatus
+                                            {Boolean(
+                                                showFieldErrors(
+                                                    'contractExecutionStatus',
+                                                    errors
+                                                )
                                             ) && (
                                                 <PoliteErrorMessage formFieldLabel="Contract status">
                                                     {
@@ -837,11 +988,17 @@ export const ContractDetails = ({
                                         <>
                                             <FormGroup
                                                 error={
-                                                    showFieldErrors(
-                                                        errors.contractDateStart
+                                                    Boolean(
+                                                        showFieldErrors(
+                                                            'contractDateStart',
+                                                            errors
+                                                        )
                                                     ) ||
-                                                    showFieldErrors(
-                                                        errors.contractDateEnd
+                                                    Boolean(
+                                                        showFieldErrors(
+                                                            'contractDateEnd',
+                                                            errors
+                                                        )
                                                     )
                                                 }
                                             >
@@ -862,9 +1019,17 @@ export const ContractDetails = ({
                                                     >
                                                         Required
                                                     </span>
-                                                    {showFieldErrors(
-                                                        errors.contractDateStart ||
-                                                            errors.contractDateEnd
+                                                    {Boolean(
+                                                        showFieldErrors(
+                                                            'contractDateStart',
+                                                            errors
+                                                        ) ||
+                                                            Boolean(
+                                                                showFieldErrors(
+                                                                    'contractDateEnd',
+                                                                    errors
+                                                                )
+                                                            )
                                                     ) && (
                                                         <ContractDatesErrorMessage
                                                             values={values}
@@ -944,8 +1109,11 @@ export const ContractDetails = ({
                                                 </Fieldset>
                                             </FormGroup>
                                             <FormGroup
-                                                error={showFieldErrors(
-                                                    errors.managedCareEntities
+                                                error={Boolean(
+                                                    showFieldErrors(
+                                                        'managedCareEntities',
+                                                        errors
+                                                    )
                                                 )}
                                             >
                                                 <Fieldset
@@ -974,8 +1142,11 @@ export const ContractDetails = ({
                                                             Check all that apply
                                                         </span>
                                                     </div>
-                                                    {showFieldErrors(
-                                                        errors.managedCareEntities
+                                                    {Boolean(
+                                                        showFieldErrors(
+                                                            'managedCareEntities',
+                                                            errors
+                                                        )
                                                     ) && (
                                                         <PoliteErrorMessage formFieldLabel="Managed Care entities">
                                                             {
@@ -1035,8 +1206,11 @@ export const ContractDetails = ({
                                             </FormGroup>
 
                                             <FormGroup
-                                                error={showFieldErrors(
-                                                    errors.federalAuthorities
+                                                error={Boolean(
+                                                    showFieldErrors(
+                                                        'federalAuthorities',
+                                                        errors
+                                                    )
                                                 )}
                                             >
                                                 <Fieldset
@@ -1065,8 +1239,11 @@ export const ContractDetails = ({
                                                             Check all that apply
                                                         </span>
                                                     </div>
-                                                    {showFieldErrors(
-                                                        errors.federalAuthorities
+                                                    {Boolean(
+                                                        showFieldErrors(
+                                                            'federalAuthorities',
+                                                            errors
+                                                        )
                                                     ) && (
                                                         <PoliteErrorMessage formFieldLabel="Active federal operating authority">
                                                             {
@@ -1136,10 +1313,11 @@ export const ContractDetails = ({
                                                                         draftSubmission,
                                                                         modifiedProvisionName
                                                                     )}
-                                                                    showError={showFieldErrors(
-                                                                        errors[
-                                                                            modifiedProvisionName
-                                                                        ]
+                                                                    showError={Boolean(
+                                                                        showFieldErrors(
+                                                                            modifiedProvisionName,
+                                                                            errors
+                                                                        )
                                                                     )}
                                                                     variant="SUBHEAD"
                                                                 />
@@ -1154,48 +1332,36 @@ export const ContractDetails = ({
 
                                 <PageActions
                                     saveAsDraftOnClick={async () => {
-                                        // do not need to trigger validations if file list is empty
-                                        if (fileItems.length === 0) {
-                                            await handleFormSubmit(
-                                                values,
-                                                setSubmitting,
-                                                {
-                                                    shouldValidateDocuments:
-                                                        false,
-                                                    redirectPath:
-                                                        RoutesRecord.DASHBOARD_SUBMISSIONS,
-                                                }
-                                            )
-                                        } else {
-                                            await handleFormSubmit(
-                                                values,
-                                                setSubmitting,
-                                                {
-                                                    shouldValidateDocuments:
-                                                        true,
-                                                    redirectPath:
-                                                        RoutesRecord.DASHBOARD_SUBMISSIONS,
-                                                }
-                                            )
-                                        }
+                                        await handleFormSubmit(
+                                            values,
+                                            setSubmitting,
+                                            {
+                                                redirectPath:
+                                                    RoutesRecord.DASHBOARD_SUBMISSIONS,
+                                            }
+                                        )
                                     }}
                                     backOnClick={async () => {
                                         // do not need to validate or resubmit if no documents are uploaded
-                                        if (fileItems.length === 0) {
+                                        if (
+                                            values.contractDocuments.length ===
+                                            0
+                                        ) {
                                             navigate('../type')
                                         } else {
                                             await handleFormSubmit(
                                                 values,
                                                 setSubmitting,
                                                 {
-                                                    shouldValidateDocuments:
-                                                        false,
                                                     redirectPath: '../type',
                                                 }
                                             )
                                         }
                                     }}
-                                    disableContinue={showFileUploadError}
+                                    disableContinue={
+                                        shouldValidate &&
+                                        !!Object.keys(errors).length
+                                    }
                                     actionInProgress={isSubmitting}
                                     backOnClickUrl={generatePath(
                                         RoutesRecord.SUBMISSIONS_TYPE,
@@ -1205,8 +1371,8 @@ export const ContractDetails = ({
                                         RoutesRecord.DASHBOARD_SUBMISSIONS
                                     }
                                     continueOnClickUrl={
-                                        draftSubmission.submissionType ===
-                                        'CONTRACT_ONLY'
+                                        draftSubmission.draftRevision.formData
+                                            .submissionType === 'CONTRACT_ONLY'
                                             ? '/edit/contacts'
                                             : '/edit/rate-details'
                                     }

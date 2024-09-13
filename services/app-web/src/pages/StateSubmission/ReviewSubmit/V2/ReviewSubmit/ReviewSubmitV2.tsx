@@ -14,6 +14,8 @@ import {
     useStatePrograms,
     useTealium,
 } from '../../../../../hooks'
+import { useLDClient } from 'launchdarkly-react-client-sdk'
+
 import { RoutesRecord } from '../../../../../constants'
 import { UnlockSubmitModal } from '../../../../../components/Modal/V2/UnlockSubmitModalV2'
 import { getVisibleLatestContractFormData } from '../../../../../gqlHelpers/contractsAndRates'
@@ -26,11 +28,12 @@ import { useFetchContractQuery } from '../../../../../gen/gqlClient'
 import { ErrorForbiddenPage } from '../../../../Errors/ErrorForbiddenPage'
 import { Error404 } from '../../../../Errors/Error404Page'
 import { GenericErrorPage } from '../../../../Errors/GenericErrorPage'
-import { Loading } from '../../../../../components'
+import { Loading, FormNotificationContainer } from '../../../../../components'
 import { PageBannerAlerts } from '../../../PageBannerAlerts'
 import { packageName } from '../../../../../common-code/healthPlanFormDataType'
 import { usePage } from '../../../../../contexts/PageContext'
 import { activeFormPages } from '../../../StateSubmissionForm'
+import { featureFlags } from '../../../../../common-code/featureFlags'
 
 export const ReviewSubmit = (): React.ReactElement => {
     const navigate = useNavigate()
@@ -41,6 +44,12 @@ export const ReviewSubmit = (): React.ReactElement => {
     const { id } = useRouteParams()
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
     const { logButtonEvent } = useTealium()
+    const ldClient = useLDClient()
+
+    const hideSupportingDocs = ldClient?.variation(
+        featureFlags.HIDE_SUPPORTING_DOCS_PAGE.flag,
+        featureFlags.HIDE_SUPPORTING_DOCS_PAGE.defaultValue
+    )
 
     const { data, loading, error } = useFetchContractQuery({
         variables: {
@@ -101,9 +110,12 @@ export const ReviewSubmit = (): React.ReactElement => {
         ) || ''
     return (
         <>
-            <div>
+            <FormNotificationContainer>
                 <DynamicStepIndicator
-                    formPages={activeFormPages(contractFormData)}
+                    formPages={activeFormPages(
+                        contractFormData,
+                        hideSupportingDocs
+                    )}
                     currentFormPage="SUBMISSIONS_REVIEW_SUBMIT"
                 />
                 <PageBannerAlerts
@@ -111,7 +123,7 @@ export const ReviewSubmit = (): React.ReactElement => {
                     unlockedInfo={contract.draftRevision?.unlockInfo}
                     showPageErrorMessage={false}
                 />
-            </div>
+            </FormNotificationContainer>
             <GridContainer className={styles.reviewSectionWrapper}>
                 <SubmissionTypeSummarySection
                     contract={contract}
@@ -167,7 +179,13 @@ export const ReviewSubmit = (): React.ReactElement => {
                         variant="outline"
                         link_url="../documents"
                         parent_component_type="page body"
-                        onClick={() => navigate('../documents')}
+                        onClick={() =>
+                            navigate(
+                                hideSupportingDocs
+                                    ? '../contacts'
+                                    : '../documents'
+                            )
+                        }
                         disabled={isSubmitting}
                     >
                         Back

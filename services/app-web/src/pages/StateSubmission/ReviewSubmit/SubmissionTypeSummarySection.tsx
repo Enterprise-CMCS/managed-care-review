@@ -10,13 +10,18 @@ import {
 } from '../../../constants/healthPlanPackages'
 import { GenericErrorPage } from '../../Errors/GenericErrorPage'
 import { getVisibleLatestContractFormData } from '../../../gqlHelpers/contractsAndRates'
-import { Program, Contract, ContractRevision } from '../../../gen/gqlClient'
+import {
+    Program,
+    Contract,
+    UnlockedContract,
+    ContractRevision,
+} from '../../../gen/gqlClient'
 import { booleanAsYesNoUserValue } from '../../../components/Form/FieldYesNo/FieldYesNo'
 import { SectionCard } from '../../../components/SectionCard'
 import styles from '../../../components/SubmissionSummarySection/SubmissionSummarySection.module.scss'
 
 export type SubmissionTypeSummarySectionProps = {
-    contract: Contract
+    contract: Contract | UnlockedContract
     statePrograms: Program[]
     contractRev?: ContractRevision
     editNavigateTo?: string

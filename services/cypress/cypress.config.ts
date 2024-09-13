@@ -1,6 +1,5 @@
 const { defineConfig } = require('cypress')
 const { gql } = require('@apollo/client')
-const { pa11y, prepareAudit } = require('@cypress-audit/pa11y')
 const fs = require('fs')
 const path = require('path')
 const createBundler = require('@bahmutov/cypress-esbuild-preprocessor')
@@ -49,13 +48,9 @@ module.exports = defineConfig({
                 process.env.COGNITO_IDENTITY_POOL_ID
             newConfig.env.COGNITO_USER_POOL_WEB_CLIENT_ID =
                 process.env.COGNITO_USER_POOL_WEB_CLIENT_ID
-            on('before:browser:launch', (browser, launchOptions) => {
-                prepareAudit(launchOptions)
-            })
 
             // Reads graphql schema and converts it to gql for apollo client.
             on('task', {
-                pa11y: pa11y(),
                 readGraphQLSchema() {
                     const gqlSchema = fs.readFileSync(
                         path.resolve(__dirname, './gen/schema.graphql'),
@@ -63,6 +58,16 @@ module.exports = defineConfig({
                     )
                     return gql(`${gqlSchema}`)
                 },
+                log(message) {
+                    console.log(message)
+
+                    return null
+                },
+                table(message) {
+                    console.table(message)
+
+                    return null
+                }
             })
             return newConfig
         },

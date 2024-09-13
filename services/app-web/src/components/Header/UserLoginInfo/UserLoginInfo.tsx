@@ -12,6 +12,7 @@ import {
     LinkWithLogging,
     ButtonWithLogging,
 } from '../../../components'
+import { ContactSupportLink } from '../../ErrorAlert/ContactSupportLink'
 
 type LogoutHandlerT = (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>
@@ -22,18 +23,12 @@ const LoggedInUserInfo = (
     logout: LogoutHandlerT
 ): React.ReactElement => {
     const stringConstants = useStringConstants()
-    const MAIL_TO_SUPPORT = stringConstants.MAIL_TO_SUPPORT
     return (
         <div className={styles.userInfo}>
             <span>Contact </span>
-            <LinkWithLogging
-                href={`mailto: ${MAIL_TO_SUPPORT}, mc-review-team@truss.works`}
-                variant="unstyled"
-                target="_blank"
-                rel="noreferrer"
-            >
-                {MAIL_TO_SUPPORT}
-            </LinkWithLogging>
+            <ContactSupportLink
+                alternateText={stringConstants.MAIL_TO_SUPPORT}
+            />
             <span className={styles.divider}>|</span>
             <span>{user.email}</span>
             <span className={styles.divider}>|</span>

@@ -1,5 +1,3 @@
-import {aliasMutation, aliasQuery} from '../utils/graphql-test-utils';
-
 Cypress.Commands.add(
     'addQuestion',
     ({ documentPath }: { documentPath: string }) => {

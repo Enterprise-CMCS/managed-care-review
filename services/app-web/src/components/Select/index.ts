@@ -9,3 +9,7 @@ export type {
     PackageSelectPropType,
     PackageOptionType,
 } from './PackageSelect/PackageSelect'
+
+export {
+    FieldSelect
+} from './FieldSelect/FieldSelect'
