@@ -134,6 +134,7 @@ Cypress.Commands.add(
 )
 
 Cypress.Commands.add('logOut', () => {
+    cy.findByRole('button', { name: 'Your account' }).should('exist').click()
     cy.findByRole('button', { name: 'Sign out' }).should('exist').click()
     cy.findByText(
         'Medicaid and CHIP Managed Care Reporting and Review System',

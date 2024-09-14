@@ -1,9 +1,11 @@
 import { screen, waitFor } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
-
 import * as CognitoAuthApi from '../../pages/Auth/cognitoAuth'
 import { renderWithProviders } from '../../testHelpers/jestHelpers'
-import { fetchCurrentUserMock } from '../../testHelpers/apolloMocks'
+import {
+    fetchCurrentUserMock,
+    iterableAdminUsersMockData,
+    iterableCmsUsersMockData,
+} from '../../testHelpers/apolloMocks'
 import { Header } from './Header'
 
 describe('Header', () => {
@@ -48,12 +50,14 @@ describe('Header', () => {
         })
 
         it('redirects when signin Link is clicked', async () => {
-            renderWithProviders(<Header authMode={'AWS_COGNITO'} />)
+            const { user } = renderWithProviders(
+                <Header authMode={'AWS_COGNITO'} />
+            )
             await waitFor(() => {
                 const signInButton = screen.getByRole('link', {
                     name: /Sign In/i,
                 })
-                void userEvent.click(signInButton)
+                void user.click(signInButton)
                 expect(signInButton).toHaveAttribute('href', '/auth')
             })
         })
@@ -103,15 +107,26 @@ describe('Header', () => {
         })
 
         it('displays sign out button', async () => {
-            renderWithProviders(<Header authMode={'AWS_COGNITO'} />, {
-                apolloProvider: {
-                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                },
+            const { user } = renderWithProviders(
+                <Header authMode={'AWS_COGNITO'} />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
+            )
+
+            await waitFor(() => {
+                const yourAccountButton = screen.getByRole('button', {
+                    name: 'Your account',
+                })
+                expect(yourAccountButton).toBeInTheDocument()
+                void user.click(yourAccountButton)
             })
 
             await waitFor(() => {
                 const signOutButton = screen.getByRole('button', {
-                    name: /Sign out/i,
+                    name: 'Sign out',
                 })
                 expect(signOutButton).toBeInTheDocument()
             })
@@ -122,21 +137,32 @@ describe('Header', () => {
                 .spyOn(CognitoAuthApi, 'signOut')
                 .mockResolvedValue(null)
 
-            renderWithProviders(<Header authMode={'AWS_COGNITO'} />, {
-                apolloProvider: {
-                    mocks: [
-                        fetchCurrentUserMock({ statusCode: 200 }),
-                        fetchCurrentUserMock({ statusCode: 403 }),
-                    ],
-                },
+            const { user } = renderWithProviders(
+                <Header authMode={'AWS_COGNITO'} />,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchCurrentUserMock({ statusCode: 403 }),
+                        ],
+                    },
+                }
+            )
+
+            await waitFor(() => {
+                const yourAccountButton = screen.getByRole('button', {
+                    name: 'Your account',
+                })
+                expect(yourAccountButton).toBeInTheDocument()
+                void user.click(yourAccountButton)
             })
 
             await waitFor(() => {
                 const signOutButton = screen.getByRole('button', {
-                    name: /Sign out/i,
+                    name: 'Sign out',
                 })
                 expect(signOutButton).toBeInTheDocument()
-                void userEvent.click(signOutButton)
+                void user.click(signOutButton)
             })
 
             await waitFor(() => expect(spy).toHaveBeenCalledTimes(1))
@@ -148,7 +174,7 @@ describe('Header', () => {
                 .mockRejectedValue('This logout failed!')
             const mockAlert = vi.fn()
 
-            renderWithProviders(
+            const { user } = renderWithProviders(
                 <Header authMode={'AWS_COGNITO'} setAlert={mockAlert} />,
                 {
                     apolloProvider: {
@@ -161,16 +187,80 @@ describe('Header', () => {
             )
 
             await waitFor(() => {
-                const signOutButton = screen.getByRole('button', {
-                    name: /Sign out/i,
+                const yourAccountButton = screen.getByRole('button', {
+                    name: 'Your account',
                 })
+                expect(yourAccountButton).toBeInTheDocument()
+                void user.click(yourAccountButton)
+            })
 
+            await waitFor(() => {
+                const signOutButton = screen.getByRole('button', {
+                    name: 'Sign out',
+                })
                 expect(signOutButton).toBeInTheDocument()
-                void userEvent.click(signOutButton)
+                void user.click(signOutButton)
             })
 
             await waitFor(() => expect(spy).toHaveBeenCalledTimes(1))
             await waitFor(() => expect(mockAlert).toHaveBeenCalled())
         })
+
+        it('does not render MC-review settings link for State users', async () => {
+            renderWithProviders(<Header authMode={'AWS_COGNITO'} />, {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            statusCode: 200,
+                        }),
+                    ],
+                },
+            })
+
+            await waitFor(() => {
+                const yourAccountButton = screen.getByRole('button', {
+                    name: 'Your account',
+                })
+                expect(yourAccountButton).toBeInTheDocument()
+            })
+
+            expect(
+                screen.queryByRole('link', { name: 'MC-Review settings' })
+            ).toBeNull()
+        })
     })
 })
+
+const adminAndCmsUsers = [
+    ...iterableAdminUsersMockData,
+    ...iterableCmsUsersMockData,
+]
+
+describe.each(adminAndCmsUsers)(
+    'Admin and CMS users tests',
+    ({ mockUser, userRole }) => {
+        it('renders MC-review settings link for $userRole', async () => {
+            renderWithProviders(<Header authMode={'AWS_COGNITO'} />, {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockUser(),
+                            statusCode: 200,
+                        }),
+                    ],
+                },
+            })
+
+            await waitFor(() => {
+                const yourAccountButton = screen.getByRole('button', {
+                    name: 'Your account',
+                })
+                expect(yourAccountButton).toBeInTheDocument()
+            })
+
+            expect(
+                screen.getByRole('link', { name: 'MC-Review settings' })
+            ).toBeInTheDocument()
+        })
+    }
+)
