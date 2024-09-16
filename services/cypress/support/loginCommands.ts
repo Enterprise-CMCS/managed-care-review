@@ -22,7 +22,7 @@ Cypress.Commands.add('logInAsStateUser', () => {
         throw new Error(`Auth mode is not defined or is IDM: ${authMode}`)
     }
     //Wait for both queries to finish.
-    cy.wait(['@fetchCurrentUserQuery', '@indexHealthPlanPackagesQuery'], {
+    cy.wait(['@fetchCurrentUserQuery', '@indexContractsQuery'], {
         timeout: 80_000,
     })
     cy.findByTestId('state-dashboard-page', { timeout: 10_000 }).should('exist')
