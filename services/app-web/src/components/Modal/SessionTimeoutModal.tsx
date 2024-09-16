@@ -33,7 +33,7 @@ export const SessionTimeoutModal = ({
         }
       })
 
-
+    const countdownElapsed = countdownSeconds == 0
     return (
         <Modal
         modalRef={modalRef}
@@ -42,7 +42,7 @@ export const SessionTimeoutModal = ({
         onSubmitText="Continue Session"
         onCancelText="Logout"
         onCancel={handleLogoutSession}
-        submitButtonProps={{ className: styles.submitSuccessButton, disabled: countdownSeconds == 0}}
+        submitButtonProps={{ className: styles.submitSuccessButton, disabled: countdownElapsed}}
         onSubmit={handleContinueSession}
         forceAction={true}
     >
@@ -56,12 +56,11 @@ export const SessionTimeoutModal = ({
                 .format('mm:ss')}</span>
         </p>
         <p>
-            If you would like to extend your session, click the
-            Continue Session button
+        {countdownElapsed ? 'Your session is now expired.' : 'If you would like to extend your session, click the Continue Session button.'}
         </p>
         <p>
             If you would like to end your session now, click the
-            Logout button
+            Logout button.
         </p>
     </Modal>
     )
