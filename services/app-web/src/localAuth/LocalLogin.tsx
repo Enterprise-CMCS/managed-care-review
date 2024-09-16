@@ -123,7 +123,7 @@ export function LocalLogin(): React.ReactElement {
 
     async function login(user: LocalUserType) {
         loginLocalUser(user)
-            const result = await checkAuth('/auth?signin-error')
+            const result = await checkAuth()
 
             if(result instanceof Error){
                 setShowFormAlert(true)

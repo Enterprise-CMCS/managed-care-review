@@ -9,6 +9,7 @@ import {
     ErrorAlertSessionExpired,
     ErrorAlertScheduledMaintenance,
     LinkWithLogging,
+    ErrorAlertSignIn,
 } from '../../components'
 
 function maintenanceBannerForVariation(flag: string): React.ReactNode {
@@ -36,6 +37,9 @@ export const Landing = (): React.ReactElement => {
         'session-timeout'
     )
 
+    const redirectFromSigninError = new URLSearchParams(location.search).get(
+        'signin-error'
+    )
     return (
         <>
             <section className={styles.detailsSection}>
@@ -43,6 +47,9 @@ export const Landing = (): React.ReactElement => {
                     {maybeMaintenaceBanner}
                     {redirectFromSessionTimeout && !maybeMaintenaceBanner && (
                         <ErrorAlertSessionExpired />
+                    )}
+                     {redirectFromSigninError && !maybeMaintenaceBanner && (
+                        <ErrorAlertSignIn />
                     )}
                     <Grid row gap className="margin-top-2">
                         <Grid tablet={{ col: 6 }}>

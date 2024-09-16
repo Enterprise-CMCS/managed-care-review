@@ -44,20 +44,20 @@ export function Login({ defaultEmail }: Props): React.ReactElement {
     async function handleSubmit(event: React.FormEvent) {
         event.preventDefault()
 
-        try {
-            await signIn(fields.loginEmail, fields.loginPassword)
-
+        const result =  await signIn(fields.loginEmail, fields.loginPassword)
+        if (result instanceof Error) {
+            setShowFormAlert(true)
+        } else {
             // we think we signed in, double check that amplify - API connection agrees
-            const authResult = await checkAuth('/auth?signin-error')
+            const authResult = await checkAuth()
             if(authResult instanceof Error) {
                 recordJSException(`Cognito Login Error - unexpected error after succeeding on signIn – ${authResult}`)
                 setShowFormAlert(true)
             } else {
                 navigate(RoutesRecord.ROOT)
             }
-        } catch (err) {
-            setShowFormAlert(true)
         }
+
     }
 
     return (

@@ -12,6 +12,7 @@ const SESSION_ACTIONS = {
     LOGOUT_SESSION: 'LOGOUT_SESSION',
     CONTINUE_SESSION: 'CONTINUE_SESSSION'
 }
+
 // AuthenticatedRouteWrapper control access to protected routes and the session timeout modal
 // For more on expected behavior for session timeout see feature-brief-session-expiration.md
 const AuthenticatedRouteWrapper = ({
@@ -36,8 +37,8 @@ const AuthenticatedRouteWrapper = ({
     const closeSessionTimeoutModal = () => {
         modalRef.current?.toggleModal(undefined, false)
     }
-    const logoutBySessionTimeout = async () => logout({  sessionTimeout: true })
-    const logoutByUserChoice  = async () => logout({  sessionTimeout: false})
+    const logoutBySessionTimeout = async () => await logout({type: 'TIMEOUT'})
+    const logoutByUserChoice  = async () =>  await logout({type: 'DEFAULT'})
     const refreshSession = async () => {
         await refreshAuth()
         closeSessionTimeoutModal()

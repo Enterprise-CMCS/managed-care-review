@@ -117,7 +117,7 @@ describe('Auth', () => {
         it('when login fails, display error alert', async () => {
             const loginSpy = vi
                 .spyOn(CognitoAuthApi, 'signIn')
-                .mockRejectedValue(new Error('Login failed'))
+                .mockResolvedValue(new Error('Login failed'))
 
             let testLocation: Location
 

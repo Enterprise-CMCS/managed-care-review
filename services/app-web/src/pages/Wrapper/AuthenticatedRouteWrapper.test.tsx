@@ -1,4 +1,4 @@
-import { act, screen, waitFor} from '@testing-library/react'
+import { screen, waitFor} from '@testing-library/react'
 import { renderWithProviders } from '../../testHelpers/jestHelpers'
 import { AuthenticatedRouteWrapper } from './AuthenticatedRouteWrapper'
 import { createMocks } from 'react-idle-timer';
