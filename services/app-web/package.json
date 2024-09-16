@@ -93,7 +93,7 @@
         "@opentelemetry/semantic-conventions": "^1.27.0",
         "@tanstack/react-table": "^8.20.5",
         "@trussworks/react-uswds": "^4.0.0",
-        "@vitejs/plugin-react": "^4.3.0",
+        "@vitejs/plugin-react": "^4.3.1",
         "amazon-cognito-identity-js": "^6.3.12",
         "aws-amplify": "^5.0.10",
         "axios": "^1.7.4",
