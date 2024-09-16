@@ -42,7 +42,7 @@ export const SessionTimeoutModal = ({
         onSubmitText="Continue Session"
         onCancelText="Logout"
         onCancel={handleLogoutSession}
-        submitButtonProps={{ className: styles.submitSuccessButton }}
+        submitButtonProps={{ className: styles.submitSuccessButton, disabled: countdownSeconds == 0}}
         onSubmit={handleContinueSession}
         forceAction={true}
     >
