@@ -6,6 +6,7 @@ import {
     fetchCurrentUserMock,
     mockValidCMSUser,
     indexHealthPlanPackagesMockSuccess,
+    indexContractsMockSuccess,
 } from '../../testHelpers/apolloMocks'
 
 // Routing and routes configuration
@@ -26,7 +27,7 @@ describe('AppRoutes', () => {
                 apolloProvider: {
                     mocks: [
                         fetchCurrentUserMock({ statusCode: 200 }),
-                        indexHealthPlanPackagesMockSuccess(),
+                        indexContractsMockSuccess(),
                     ],
                 },
                 featureFlags: { 'session-expiring-modal': false },
