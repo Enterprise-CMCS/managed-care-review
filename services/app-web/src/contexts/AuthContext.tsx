@@ -17,9 +17,9 @@ import { ApolloQueryResult } from '@apollo/client'
 // Constants and types
 type LoginStatusType = 'LOADING' | 'LOGGED_OUT' | 'LOGGED_IN'
 type LogoutType = 'TIMEOUT' | 'ERROR' | 'DEFAULT'
-const LOGOUT_TYPES:  Record<LogoutType, string> = {
-    TIMEOUT: 'SESSION_TIMEOUT',
-    ERROR: 'SESSION_ERROR',
+const LOGOUT_TYPES:  Record<LogoutType, LogoutType> = {
+    TIMEOUT: 'TIMEOUT',
+    ERROR: 'ERROR',
     DEFAULT: 'DEFAULT'
 }
 const LOGOUT_PATHS: Record<LogoutType, string> = {
@@ -138,7 +138,7 @@ function AuthProvider({
         Also called in the background with session times out
     */
         const logout: AuthContextType['logout'] = async ({
-            type = 'DEFAULT',
+            type,
         }) => {
             const realLogout =
                 authMode === 'LOCAL' ? logoutLocalUser : cognitoSignOut
