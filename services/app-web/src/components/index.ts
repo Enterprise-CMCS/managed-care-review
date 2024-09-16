@@ -66,6 +66,13 @@ export type {
     PackageTableProps,
 } from './HealthPlanPackageTable'
 
+export { ContractTable } from './ContractTable'
+
+export type {
+    ContractInDashboardType,
+    ContractTableProps,
+} from './ContractTable'
+
 export {
     ErrorAlert,
     ErrorAlertSignIn,

@@ -10,10 +10,12 @@ import {
     SubmitContractMutation,
     SubmitContractDocument,
     CreateContractMutation,
-    CreateContractDocument
+    CreateContractDocument,
+    IndexContractsDocument,
+    IndexContractsQuery,
 } from '../../gen/gqlClient'
 import { MockedResponse } from '@apollo/client/testing'
-import { mockContractPackageDraft, mockContractPackageSubmittedWithRevisions } from './contractPackageDataMock'
+import { mockContractPackageDraft, mockContractPackageSubmittedWithRevisions, mockContractPackageUnlockedWithUnlockedType } from './contractPackageDataMock'
 import { GRAPHQL_ERROR_CAUSE_MESSAGES, GraphQLErrorCauseTypes, GraphQLErrorCodeTypes } from './apolloErrorCodeMocks'
 import { GraphQLError } from 'graphql'
 import { ApolloError } from '@apollo/client'
@@ -334,4 +336,42 @@ const submitContractMockError = ({
         },
     }
 }
-export { fetchContractMockSuccess, fetchContractMockFail, updateDraftContractRatesMockSuccess, updateContractDraftRevisionMockFail, updateContractDraftRevisionMockSuccess, submitContractMockSuccess, submitContractMockError, createContractMockFail, createContractMockSuccess }
+
+const indexContractsMockSuccess = (
+    submissions: Contract[] = [
+        { ...mockContractPackageUnlockedWithUnlockedType(), id: 'test-id-123', __typename: 'Contract' },
+        { ...mockContractPackageSubmittedWithRevisions(), id: 'test-id-124' },
+    ]
+): MockedResponse<IndexContractsQuery> => {
+    const submissionEdges = submissions.map((sub) => {
+        return {
+            node: sub,
+        }
+    })
+    return {
+        request: {
+            query: IndexContractsDocument,
+        },
+        result: {
+            data: {
+                indexContracts: {
+                    totalCount: submissionEdges.length,
+                    edges: submissionEdges,
+                },
+            },
+        },
+    }
+}
+
+export { 
+    fetchContractMockSuccess,
+    fetchContractMockFail,
+    updateDraftContractRatesMockSuccess,
+    updateContractDraftRevisionMockFail,
+    updateContractDraftRevisionMockSuccess,
+    submitContractMockSuccess,
+    submitContractMockError,
+    createContractMockFail,
+    createContractMockSuccess,
+    indexContractsMockSuccess,
+}
