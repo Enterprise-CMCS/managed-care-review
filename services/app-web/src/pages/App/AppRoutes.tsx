@@ -150,7 +150,7 @@ const StateUserRoutes = ({
                     element={<SubmissionRevisionSummary />}
                 />
                 {UniversalRoutes}
-                {(stageName === 'dev' || stageName === 'local') && (
+                {isExplorerAllowed(stageName) && (
                     <Route
                         path={RoutesRecord.GRAPHQL_EXPLORER}
                         element={<GraphQLExplorer />}
@@ -232,7 +232,7 @@ const CMSUserRoutes = ({
                     path={RoutesRecord.SUBMISSIONS_REVISION}
                     element={<SubmissionRevisionSummary />}
                 />
-                {stageName !== 'prod' && (
+                {isExplorerAllowed(stageName) && (
                     <Route
                         path={RoutesRecord.GRAPHQL_EXPLORER}
                         element={<GraphQLExplorer />}
@@ -395,4 +395,12 @@ export const AppRoutes = ({
             />
         )
     }
+}
+
+const isExplorerAllowed = (stage: string | undefined): boolean => {
+    const RESTRICTED_STAGES = ['val', 'prod']
+    if (stage === undefined) {
+        return false
+    }
+    return !RESTRICTED_STAGES.includes(stage)
 }
