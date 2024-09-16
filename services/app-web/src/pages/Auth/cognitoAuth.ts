@@ -1,6 +1,7 @@
 import { CognitoUser } from 'amazon-cognito-identity-js'
 import { Auth as AmplifyAuth } from 'aws-amplify'
 import { StateUser } from '../../gen/gqlClient'
+import { recordJSException } from '../../otelHelpers'
 
 type newUser = {
     username: string
@@ -19,7 +20,7 @@ type AmplifyErrorCodes =
     | 'NetworkError'
     | 'InvalidParameterException'
 
-export interface AmplifyError {
+interface AmplifyError {
     code: AmplifyErrorCodes
     name: string
     message: string
@@ -51,11 +52,11 @@ export function idmRedirectURL(): string {
     return url
 }
 
-export async function signUp(
+async function signUp(
     user: newUser
-): Promise<CognitoUser | AmplifyError> {
-    try {
-        const result = await AmplifyAuth.signUp({
+): Promise<CognitoUser | Error> {
+  try {
+    const response = await AmplifyAuth.signUp({
             username: user.username,
             password: user.password,
             attributes: {
@@ -65,115 +66,111 @@ export async function signUp(
                 'custom:role': 'macmcrrs-state-user',
             },
         })
-        return result.user
-    } catch (e) {
-        console.info('ERROR SIGNUP', e)
-
-        if (isAmplifyError(e)) {
-            if (e.code === 'UsernameExistsException') {
+        return response.user
+    } catch (response) {
+        if (isAmplifyError(response)) {
+            if (response.code === 'UsernameExistsException') {
                 console.info('that username already exists....')
-                return e
-            } else if (e.code === 'NetworkError') {
+            }
+            if (response.code === 'NetworkError') {
                 console.info(
                     'Failed to connect correctly to Amplify on Signup??'
                 )
-                return e
-            } else {
-                // if amplify returns an error in a format we don't expect, let's throw it for now.
-                // might be against the spirit of never throw, but this is our boundary with a system we don't control.
-                console.info('unexpected cognito error!')
-                throw e
             }
-        } else {
-            throw e
         }
+        return response
     }
 }
 
-export async function confirmSignUp(
+async function confirmSignUp(
     email: string,
     code: string
-): Promise<null | AmplifyError> {
+): Promise<null | Error> {
     try {
         await AmplifyAuth.confirmSignUp(email, code)
         return null
-    } catch (e) {
-        if (isAmplifyError(e)) {
-            if (e.code === 'ExpiredCodeException') {
-                console.info(
-                    'your code is expired, we are sending another one.'
-                )
-                return e
-            } else {
-                throw e
-            }
-        } else {
-            throw e
-        }
+    } catch (response) {
+        if (isAmplifyError(response) && (response.code === 'ExpiredCodeException')) {
+            console.info(
+                'Your code is expired, amplify will send another one.'
+            )
+    }
+    recordJSException(response)
+    return response
     }
 }
 
-export async function resendSignUp(
+async function resendSignUp(
     email: string
-): Promise<null | AmplifyError> {
-    try {
-        await AmplifyAuth.resendSignUp(email)
-        return null
-    } catch (e) {
-        // no known handleable errors for this one...
-        console.info('unknown err', e)
-        throw e
-    }
+): Promise<null | Error> {
+   try {
+    await AmplifyAuth.resendSignUp(email)
+    return null
+   } catch (response ) {
+    recordJSException(response)
+    return response
+   }
 }
 
-export async function signIn(
+async function signIn(
     email: string,
     password: string
-): Promise<CognitoUser | AmplifyError> {
+): Promise<CognitoUser | Error> {
     try {
-        const result = await AmplifyAuth.signIn(email, password)
-        return result.user
-    } catch (e) {
-        if (isAmplifyError(e)) {
-            if (e.code === 'UserNotConfirmedException') {
-                console.info(
-                    'you need to confirm your account, enter the code below'
+        const response = await AmplifyAuth.signIn(email, password)
+        return response.user
+    } catch (response) {
+        if(isAmplifyError(response)) {
+            if (response.code === 'UserNotConfirmedException') {
+                recordJSException(
+                    `AmplifyError ${response.code} – you need to confirm your account, enter the code below`
                 )
-                return e
-            } else if (e.code === 'NotAuthorizedException') {
-                console.info('unknown user or password?')
-                return e
-            } else if (e.code === 'UserNotFoundException') {
-                console.info('user does not exist')
-                return e
+            } else if (response.code === 'NotAuthorizedException') {
+                recordJSException(`AmplifyError ${response.code} – this is probably a bad password`)
+            } else if (response.code === 'UserNotFoundException') {
+                recordJSException(`AmplifyError ${response.code} – user does not exist`)
             } else {
-                // if amplify returns an error in a format we don't expect, let's throw it for now.
-                // might be against the spirit of never throw, but this is our boundary with a system we don't control.
-                throw e
+                recordJSException(`UNEXPECTED AmplifyError ${response.code} – ${response.message}`)
             }
         } else {
-            console.info('didnt even get an amplify error back from login')
-            throw e
+            recordJSException(`UNEXPECTED SIGNIN ERROR – 'didnt even get an amplify error back from login`)
         }
+        return response
     }
 }
 
-export async function signOut(): Promise<null> {
-    try {
-        await AmplifyAuth.signOut()
-        return null
-    } catch (e) {
-        console.info('error signing out: ', e)
-        throw e
+async function signOut(): Promise<null | Error> {
+   try {
+    await AmplifyAuth.signOut()
+    return null
+    } catch (response) {
+            recordJSException( response)
+           return response
     }
+
 }
 
-export async function extendSession(): Promise<null> {
+async function extendSession(): Promise<null | Error> {
     try {
         await AmplifyAuth.currentSession()
         return null
-    } catch (e) {
-        console.info('error extending session: ', e)
-        throw e
+    } catch (response) {
+        recordJSException(response)
+        return response
     }
+
+}
+
+export {
+    extendSession,
+    confirmSignUp,
+    resendSignUp,
+    signIn,
+    signUp,
+    signOut,
+}
+
+export type {
+    AmplifyError,
+    AmplifyErrorCodes
 }

@@ -9,8 +9,6 @@ import { Logo } from '../Logo'
 import styles from './Header.module.scss'
 import { PageHeadingRow } from './PageHeadingRow/PageHeadingRow'
 import { UserLoginInfo } from './UserLoginInfo/UserLoginInfo'
-import { recordJSException } from '../../otelHelpers'
-import { ErrorAlertSignIn } from '../ErrorAlert'
 
 export type HeaderProps = {
     authMode: AuthModeType
@@ -34,18 +32,9 @@ export const Header = ({
     const { heading } = usePage()
     const { currentRoute: route } = useCurrentRoute()
 
-    const handleLogout = (
-        e: React.MouseEvent<HTMLButtonElement, MouseEvent>
-    ) => {
-        if (!logout) {
-            console.info('Something went wrong ', e)
-            return
-        }
-
-        logout({ sessionTimeout: false }).catch((e) => {
-            recordJSException(`Error with logout: ${e}`)
-            setAlert && setAlert(<ErrorAlertSignIn />)
-        })
+    const handleLogout = async () => {
+        await logout({type: 'ERROR'})
+        // no need to handle errors, logout will handle
     }
 
     return route !== 'GRAPHQL_EXPLORER' ? (

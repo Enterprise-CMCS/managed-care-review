@@ -112,6 +112,7 @@
         "react": "^18.2.0",
         "react-dom": "^18.2.0",
         "react-error-boundary": "^4.0.10",
+        "react-idle-timer": "^5.7.2",
         "react-router": "^6.23.1",
         "react-router-dom": "^6.23.1",
         "react-select": "^5.7.7",

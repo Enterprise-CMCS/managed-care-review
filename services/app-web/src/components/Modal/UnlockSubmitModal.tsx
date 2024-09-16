@@ -8,19 +8,18 @@ import {
     useUnlockContractMutation,
     FetchHealthPlanPackageWithQuestionsDocument,
     FetchContractDocument,
-} from '../../../gen/gqlClient'
+} from '../../gen/gqlClient'
 import { useFormik } from 'formik'
-import { usePrevious } from '../../../hooks/usePrevious'
-import { Modal } from '../Modal'
-import { PoliteErrorMessage } from '../../PoliteErrorMessage'
+import { usePrevious } from '../../hooks/usePrevious'
+import { Modal } from './Modal'
+import { PoliteErrorMessage } from '../PoliteErrorMessage'
 import * as Yup from 'yup'
-import styles from '../UnlockSubmitModal.module.scss'
-import { GenericApiErrorProps } from '../../Banner/GenericApiErrorBanner/GenericApiErrorBanner'
-import { ERROR_MESSAGES } from '../../../constants/errors'
+import { GenericApiErrorProps } from '../Banner/GenericApiErrorBanner/GenericApiErrorBanner'
+import { ERROR_MESSAGES } from '../../constants/errors'
 import {
     submitMutationWrapperV2,
     unlockMutationWrapperV2,
-} from '../../../gqlHelpers/mutationWrappersForUserFriendlyErrors'
+} from '../../gqlHelpers/mutationWrappersForUserFriendlyErrors'
 
 const RATE_UNLOCK_SUBMIT_TYPES = [
     'SUBMIT_RATE',
@@ -338,7 +337,6 @@ export const UnlockSubmitModal = ({
                             name="unlockSubmitModalInput"
                             data-testid="unlockSubmitModalInput"
                             aria-labelledby="unlock-submit-modal-input-hint"
-                            className={styles.modalInputTextarea}
                             aria-required
                             error={!!formik.errors.unlockSubmitModalInput}
                             onChange={formik.handleChange}

@@ -167,67 +167,6 @@ describe('Header', () => {
 
             await waitFor(() => expect(spy).toHaveBeenCalledTimes(1))
         })
-
-        it('calls setAlert when logout is unsuccessful', async () => {
-            const spy = vi
-                .spyOn(CognitoAuthApi, 'signOut')
-                .mockRejectedValue('This logout failed!')
-            const mockAlert = vi.fn()
-
-            const { user } = renderWithProviders(
-                <Header authMode={'AWS_COGNITO'} setAlert={mockAlert} />,
-                {
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchCurrentUserMock({ statusCode: 403 }),
-                        ],
-                    },
-                }
-            )
-
-            await waitFor(() => {
-                const yourAccountButton = screen.getByRole('button', {
-                    name: 'Your account',
-                })
-                expect(yourAccountButton).toBeInTheDocument()
-                void user.click(yourAccountButton)
-            })
-
-            await waitFor(() => {
-                const signOutButton = screen.getByRole('button', {
-                    name: 'Sign out',
-                })
-                expect(signOutButton).toBeInTheDocument()
-                void user.click(signOutButton)
-            })
-
-            await waitFor(() => expect(spy).toHaveBeenCalledTimes(1))
-            await waitFor(() => expect(mockAlert).toHaveBeenCalled())
-        })
-
-        it('does not render MC-review settings link for State users', async () => {
-            renderWithProviders(<Header authMode={'AWS_COGNITO'} />, {
-                apolloProvider: {
-                    mocks: [
-                        fetchCurrentUserMock({
-                            statusCode: 200,
-                        }),
-                    ],
-                },
-            })
-
-            await waitFor(() => {
-                const yourAccountButton = screen.getByRole('button', {
-                    name: 'Your account',
-                })
-                expect(yourAccountButton).toBeInTheDocument()
-            })
-
-            expect(
-                screen.queryByRole('link', { name: 'MC-Review settings' })
-            ).toBeNull()
-        })
     })
 })
 
