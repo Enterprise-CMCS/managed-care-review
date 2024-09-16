@@ -37,11 +37,16 @@ const AuthenticatedRouteWrapper = ({
     const closeSessionTimeoutModal = () => {
         modalRef.current?.toggleModal(undefined, false)
     }
-    const logoutBySessionTimeout = async () => await logout({type: 'TIMEOUT'})
-    const logoutByUserChoice  = async () =>  await logout({type: 'DEFAULT'})
-    const refreshSession = async () => {
-        await refreshAuth()
+    const logoutBySessionTimeout = async () => {
         closeSessionTimeoutModal()
+        await logout({type: 'TIMEOUT'})}
+    const logoutByUserChoice  = async () =>  {
+        closeSessionTimeoutModal()
+        await logout({type: 'DEFAULT'})
+    }
+    const refreshSession = async () => {
+        closeSessionTimeoutModal()
+        await refreshAuth()
     }
 
     // For multi-tab support we emit messages related to user actions on the session timeout modal
