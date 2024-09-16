@@ -55,7 +55,8 @@ export function idmRedirectURL(): string {
 async function signUp(
     user: newUser
 ): Promise<CognitoUser | Error> {
-   const response = await AmplifyAuth.signUp({
+  try {
+    const response = await AmplifyAuth.signUp({
             username: user.username,
             password: user.password,
             attributes: {
@@ -65,8 +66,8 @@ async function signUp(
                 'custom:role': 'macmcrrs-state-user',
             },
         })
-
-    if (response instanceof Error) {
+        return response.user
+    } catch (response) {
         if (isAmplifyError(response)) {
             if (response.code === 'UsernameExistsException') {
                 console.info('that username already exists....')
@@ -78,48 +79,47 @@ async function signUp(
             }
         }
         return response
-    } else {
-            return response.user
-        }
-
+    }
 }
 
 async function confirmSignUp(
     email: string,
     code: string
 ): Promise<null | Error> {
-    const response = await AmplifyAuth.confirmSignUp(email, code)
-     if(response instanceof Error){
-        if (isAmplifyError(response) && (response.code === 'ExpiredCodeException')) {
-                console.info(
-                    'Your code is expired, amplify will send another one.'
-                )
-        }
-        recordJSException(response)
-        return response
-    } else {
+    try {
+        await AmplifyAuth.confirmSignUp(email, code)
         return null
+    } catch (response) {
+        if (isAmplifyError(response) && (response.code === 'ExpiredCodeException')) {
+            console.info(
+                'Your code is expired, amplify will send another one.'
+            )
+    }
+    recordJSException(response)
+    return response
     }
 }
 
 async function resendSignUp(
     email: string
 ): Promise<null | Error> {
-   const response = await AmplifyAuth.resendSignUp(email)
-    if (response instanceof Error) {
-        recordJSException(response)
-        return response
-    } else {
-        return null
-    }
+   try {
+    await AmplifyAuth.resendSignUp(email)
+    return null
+   } catch (response ) {
+    recordJSException(response)
+    return response
+   }
 }
 
 async function signIn(
     email: string,
     password: string
 ): Promise<CognitoUser | Error> {
-    const response = await AmplifyAuth.signIn(email, password)
-    if (response instanceof Error) {
+    try {
+        const response = await AmplifyAuth.signIn(email, password)
+        return response.user
+    } catch (response) {
         if(isAmplifyError(response)) {
             if (response.code === 'UserNotConfirmedException') {
                 recordJSException(
@@ -135,28 +135,28 @@ async function signIn(
         } else {
             recordJSException(`UNEXPECTED SIGNIN ERROR – 'didnt even get an amplify error back from login`)
         }
+        return response
     }
-
-    return response
 }
 
 async function signOut(): Promise<null | Error> {
-    const response = await AmplifyAuth.signOut()
-    if (response instanceof Error) {
-     recordJSException( response)
-    return response
-    } else {
-        return null
+   try {
+    await AmplifyAuth.signOut()
+    return null
+    } catch (response) {
+            recordJSException( response)
+           return response
     }
+
 }
 
 async function extendSession(): Promise<null | Error> {
-    const response =  await AmplifyAuth.currentSession()
-    if (response instanceof Error) {
+    try {
+        await AmplifyAuth.currentSession()
+        return null
+    } catch (response) {
         recordJSException(response)
         return response
-    } else {
-        return null
     }
 
 }
