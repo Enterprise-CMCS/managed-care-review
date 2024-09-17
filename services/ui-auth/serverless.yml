@@ -59,6 +59,9 @@ resources:
         - Fn::Equals:
             - ${sls:stage}
             - 'prod'
+        - Fn::Equals:
+            - ${sls:stage}
+            - 'mtsecfindingusers'
   Resources:
     CognitoUserPool:
       Type: AWS::Cognito::UserPool
