@@ -8,7 +8,7 @@ import {
     mockContractPackageSubmitted,
     unlockHealthPlanPackageMockError,
 } from '../../testHelpers/apolloMocks'
-import { UnlockSubmitModal } from './V2/UnlockSubmitModalV2'
+import { UnlockSubmitModal } from './UnlockSubmitModal'
 import { renderWithProviders } from '../../testHelpers/jestHelpers'
 import { Location } from 'react-router-dom'
 import {

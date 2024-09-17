@@ -25,8 +25,8 @@ import { useTealium } from '../../../hooks'
 import useDeepCompareEffect from 'use-deep-compare-effect'
 import { useStringConstants } from '../../../hooks/useStringConstants'
 import { useOutletContext } from 'react-router-dom'
-import {type MCReviewSettingsContextType } from '../Settings'
-import {formatEmails, EditLink} from '../'
+import { type MCReviewSettingsContextType } from '../Settings'
+import { formatEmails, EditLink } from '../'
 import { SettingsErrorAlert } from '../SettingsErrorAlert'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '../../../common-code/featureFlags'
@@ -66,7 +66,6 @@ const StateAssignmentTable = () => {
         featureFlags.READ_WRITE_STATE_ASSIGNMENTS.defaultValue
     )
 
-
     const lastClickedElement = useRef<string | null>(null)
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
     const [prevFilters, setPrevFilters] = useState<{
@@ -95,12 +94,16 @@ const StateAssignmentTable = () => {
                 cell: (info) => formatEmails(info.getValue()),
                 filterFn: `arrIncludesSome`,
             }),
-             columnHelper.accessor('editLink', {
+            columnHelper.accessor('editLink', {
                 id: 'editLink',
                 header: 'Edit state assignment',
-                cell: info => <EditLink rowID={info.row.original.stateCode} url={info.getValue()} />,
-            })
-
+                cell: (info) => (
+                    <EditLink
+                        rowID={info.row.original.stateCode}
+                        url={info.getValue()}
+                    />
+                ),
+            }),
         ],
         []
     )

@@ -1,9 +1,6 @@
 import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import { FieldSelect } from './FieldSelect'
-import {
-    fetchCurrentUserMock,
-    mockMNState,
-} from '../../../testHelpers/apolloMocks'
+import { fetchCurrentUserMock } from '../../../testHelpers/apolloMocks'
 import { screen, waitFor } from '@testing-library/react'
 import selectEvent from 'react-select-event'
 import userEvent from '@testing-library/user-event'
@@ -38,7 +35,6 @@ describe('FieldSelect', () => {
         { value: 'test-id-126', label: 'MCR-MN-0007-SNBC' },
         { value: 'test-id-127', label: 'MCR-MN-0008-MSC+' },
     ]
-    const statePrograms = mockMNState().programs
     let mockOnChange = vi.fn()
     beforeEach(
         () =>
@@ -55,7 +51,8 @@ describe('FieldSelect', () => {
                 initialValues={[]}
                 dropdownOptions={dropdownOptions}
                 onChange={mockOnChange}
-            />,
+                label={'fieldSelect'}
+            />
         )
         const combobox = await screen.findByRole('combobox')
 
@@ -79,6 +76,7 @@ describe('FieldSelect', () => {
                 initialValues={[]}
                 dropdownOptions={dropdownOptions}
                 onChange={mockOnChange}
+                label={'fieldSelect'}
             />
         )
         const combobox = await screen.findByRole('combobox')
@@ -99,36 +97,33 @@ describe('FieldSelect', () => {
         await selectEvent.select(combobox, 'MCR-MN-0005-MSC+-PMAP-SNBC')
         await selectEvent.select(combobox, 'MCR-MN-0008-MSC+')
 
-        /* I gave up trying to wait for click effects to render and tested the call itself
-        the click effects are now tested in rateDetails.spec cypress tests */
-        expect(mockOnChange).toHaveBeenNthCalledWith(
-            1,
-            expect.arrayContaining([
-                expect.objectContaining({
-                    value: 'test-id-124',
-                }),
-            ]),
-            expect.anything() // This matches any received value for the second argument
-        )
+        // Expect onChange to be called twice
+        expect(mockOnChange.mock.calls).toHaveLength(2)
 
-        expect(mockOnChange).toHaveBeenNthCalledWith(
-            2,
-            expect.arrayContaining([
-                expect.objectContaining({
-                    value: 'test-id-127',
-                }),
-            ]),
-            expect.anything() // This matches any received value for the second argument
-        )
+        // Expect only the second selection remains in the onChange return
+        expect(mockOnChange.mock.results[0].value).toStrictEqual([
+            'test-id-124',
+        ])
+
+        // Expect that no selection is returned on the last call
+        expect(mockOnChange.mock.results[1].value).toStrictEqual([
+            'test-id-124',
+            'test-id-127',
+        ])
     })
 
     it('can remove all selected programs', async () => {
         renderWithProviders(
             <FieldSelect
                 name="fieldSelect"
-                initialValues={['test-id-127', 'test-id-126']}
+                initialValues={[
+                    { value: 'test-id-126', label: 'MCR-MN-0007-SNBC' },
+                    { value: 'test-id-127', label: 'MCR-MN-0008-MSC+' },
+                ]}
+                //initialValues={['test-id-127', 'test-id-126']}
                 dropdownOptions={dropdownOptions}
                 onChange={mockOnChange}
+                label={'fieldSelect'}
             />,
             {
                 apolloProvider: {
@@ -167,19 +162,21 @@ describe('FieldSelect', () => {
             expect.arrayContaining([
                 expect.objectContaining({
                     value: 'test-id-127',
+                    label: 'MCR-MN-0008-MSC+',
                 }),
             ]),
             expect.anything() // This matches any received value for the second argument
         )
 
-        expect(mockOnChange).toHaveBeenNthCalledWith(
-            2,
-            expect.arrayContaining([
-                expect.objectContaining({
-                    value: 'test-id-126',
-                }),
-            ]),
-            expect.anything() // This matches any received value for the second argument
-        )
+        // Expect onChange to be called twice
+        expect(mockOnChange.mock.calls).toHaveLength(2)
+
+        // Expect only the second selection remains in the onChange return
+        expect(mockOnChange.mock.results[0].value).toStrictEqual([
+            'test-id-127',
+        ])
+
+        // Expect that no selection is returned on the last call
+        expect(mockOnChange.mock.results[1].value).toStrictEqual([])
     })
 })

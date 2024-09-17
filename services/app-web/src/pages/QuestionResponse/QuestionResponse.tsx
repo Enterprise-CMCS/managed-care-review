@@ -2,12 +2,7 @@ import { useEffect } from 'react'
 import { GridContainer } from '@trussworks/react-uswds'
 import styles from './QuestionResponse.module.scss'
 
-import {
-    Loading,
-    SectionHeader,
-    NavLinkWithLogging,
-    LinkWithLogging,
-} from '../../components'
+import { Loading, SectionHeader, NavLinkWithLogging } from '../../components'
 import { useLocation, useOutletContext } from 'react-router-dom'
 import { usePage } from '../../contexts/PageContext'
 import { SideNavOutletContextType } from '../SubmissionSideNav/SubmissionSideNav'
@@ -17,7 +12,6 @@ import {
 } from '../../components/Banner'
 import { QATable, QuestionData, Division } from './QATable/QATable'
 import { CmsUser, QuestionEdge, StateUser } from '../../gen/gqlClient'
-import { useStringConstants } from '../../hooks/useStringConstants'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import { hasCMSUserPermissions } from '../../gqlHelpers'
 import { ContactSupportLink } from '../../components/ErrorAlert/ContactSupportLink'
@@ -134,7 +128,8 @@ export const QuestionResponse = () => {
                             <span>
                                 You must be assigned to a division in order to
                                 ask questions about a submission. Please&nbsp;
-                                <ContactSupportLink />&nbsp;to add your division.
+                                <ContactSupportLink />
+                                &nbsp;to add your division.
                             </span>
                         }
                     />
