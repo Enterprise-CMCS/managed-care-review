@@ -2,7 +2,7 @@ import React, { Fragment, useEffect, useState } from 'react'
 import { useLocation, Navigate } from 'react-router'
 import { Route, Routes } from 'react-router-dom'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
-import {  idmRedirectURL } from '../../pages/Auth/cognitoAuth'
+import { idmRedirectURL } from '../../pages/Auth/cognitoAuth'
 import { assertNever, AuthModeType } from '../../common-code/config'
 import { PageTitlesRecord, RoutesRecord, RouteT } from '../../constants/routes'
 import { getRouteName } from '../../routeHelpers'
@@ -150,7 +150,7 @@ const StateUserRoutes = ({
                     element={<SubmissionRevisionSummary />}
                 />
                 {UniversalRoutes}
-                {stageName !== 'prod' && (
+                {isExplorerAllowed(stageName) && (
                     <Route
                         path={RoutesRecord.GRAPHQL_EXPLORER}
                         element={<GraphQLExplorer />}
@@ -232,16 +232,13 @@ const CMSUserRoutes = ({
                     path={RoutesRecord.SUBMISSIONS_REVISION}
                     element={<SubmissionRevisionSummary />}
                 />
-                {stageName !== 'prod' && (
+                {isExplorerAllowed(stageName) && (
                     <Route
                         path={RoutesRecord.GRAPHQL_EXPLORER}
                         element={<GraphQLExplorer />}
                     />
                 )}
-                <Route
-                    path={RoutesRecord.MCR_SETTINGS}
-                    element={<Settings />}
-                >
+                <Route path={RoutesRecord.MCR_SETTINGS} element={<Settings />}>
                     <Route
                         index
                         element={
@@ -266,9 +263,9 @@ const CMSUserRoutes = ({
                     />
                 </Route>
                 <Route
-                        path={RoutesRecord.EDIT_STATE_ASSIGNMENTS}
-                        element={<EditStateAssign />}
-                    />
+                    path={RoutesRecord.EDIT_STATE_ASSIGNMENTS}
+                    element={<EditStateAssign />}
+                />
                 <Route
                     path={RoutesRecord.SETTINGS}
                     // Until we update the helpdesk documentation for the /mc-review-settings route, we are keeping this
@@ -310,9 +307,7 @@ export const AppRoutes = ({
     authMode: AuthModeType
     setAlert?: React.Dispatch<React.ReactElement>
 }): React.ReactElement => {
-    const {
-        loggedInUser,
-    } = useAuth()
+    const { loggedInUser } = useAuth()
     const { pathname } = useLocation()
     const [redirectPath, setRedirectPath] = useLocalStorage(
         'LOGIN_REDIRECT',
@@ -400,4 +395,12 @@ export const AppRoutes = ({
             />
         )
     }
+}
+
+const isExplorerAllowed = (stage: string | undefined): boolean => {
+    const RESTRICTED_STAGES = ['val', 'prod']
+    if (stage === undefined) {
+        return false
+    }
+    return !RESTRICTED_STAGES.includes(stage)
 }
