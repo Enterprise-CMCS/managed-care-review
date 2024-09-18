@@ -33,8 +33,6 @@ const SubmissionsDashboard = (): React.ReactElement => {
     data?.indexContracts.edges
         .map((edge) => edge.node)
         .forEach((sub) => {
-            const currentRevision = sub.packageSubmissions[0].contractRevision
-            const currentFormData = currentRevision.formData
             // Errors - data handling
             if (sub.status === 'DRAFT') {
                 recordJSException(
@@ -42,6 +40,8 @@ const SubmissionsDashboard = (): React.ReactElement => {
                 )
                 return
             }
+            const currentRevision = sub.packageSubmissions[0].contractRevision
+            const currentFormData = currentRevision.formData
 
             if (
                 currentRevision?.submitInfo?.updatedAt === undefined &&
