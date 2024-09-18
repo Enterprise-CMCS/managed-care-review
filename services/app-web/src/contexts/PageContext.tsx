@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { PageHeadingsRecord } from '../constants/routes'
 import { useCurrentRoute } from '../hooks/useCurrentRoute'
+import { ModalRef } from '@trussworks/react-uswds'
 
 /*
     Use sparingly.
@@ -8,10 +9,16 @@ import { useCurrentRoute } from '../hooks/useCurrentRoute'
 */
 type PageContextType = {
     heading?: string | React.ReactElement
+    activeModalRef?: React.RefObject<ModalRef>
     updateHeading: ({
         customHeading,
     }: {
         customHeading?: string | React.ReactElement
+    }) => void
+    updateModalRef: ({
+        updatedModalRef,
+    }: {
+        updatedModalRef?: React.RefObject<ModalRef>
     }) => void
 }
 
@@ -28,7 +35,11 @@ const PageProvider: React.FC<
     const [heading, setHeading] = React.useState<
         string | React.ReactElement | undefined
     >(undefined)
+    const [activeModal, setActiveModal] = React.useState<
+        React.RefObject<ModalRef> | undefined
+    >(undefined)
     const { currentRoute: routeName } = useCurrentRoute()
+
     /*
         Set headings in priority order
         1. If there a custom heading, use that (relevant for heading related to the api loaded resource, such as the submission name)
@@ -50,9 +61,28 @@ const PageProvider: React.FC<
         })
     }
 
+    /*
+        Set a ref pointing to currently visible modal
+        - is reset in child components when new modal open or back to undefined when existing modal is closed
+        - help ensure only one modal open at a time
+        - used in AuthenticatedRouteWrapper to close open modals when session timeout hit
+    */
+    const updateModalRef = ({
+        updatedModalRef,
+    }: {
+        updatedModalRef?: React.RefObject<ModalRef>
+    }) => {
+        setActiveModal(updatedModalRef)
+    }
+
     return (
         <PageContext.Provider
-            value={{ heading, updateHeading }}
+            value={{
+                heading,
+                updateHeading,
+                activeModalRef: activeModal,
+                updateModalRef,
+            }}
             children={children}
         />
     )

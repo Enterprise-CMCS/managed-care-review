@@ -1,6 +1,6 @@
 # Tealium Logging
 ## Background
-We use a tool called Tealium to hook into the CMS customer analytics tools. The data is then sent to Adobe Analytics (previously CMS used Google Analytics). Access to analytics tools is set up through another team, Blast Analytics. They are contractors with a focus on analytics and work across all CMS domains. 
+We use a tool called Tealium to hook into the CMS customer analytics tools. The data is then sent to Adobe Analytics (previously CMS used Google Analytics). Access to analytics tools is set up through another team, Blast Analytics. They are contractors with a focus on analytics and work across all CMS domains.
 
 ## Implementation
 
@@ -27,7 +27,7 @@ The `useTealium` hook utilizes tealium client functions in the Context to provid
 There are wrapper functions in this hook for specific user event types to constrain the event and parameter values before passing it to `logUserEvent`. This allows type safety and a reference to what event and parameter values the event accepts.
 
 ```typescript
-const context = React.useContext(TealiumContext) 
+const context = React.useContext(TealiumContext)
 
 ...
 
@@ -47,11 +47,11 @@ const logButtonEvent = (
 ```
 These `useTealium` functions are then used in components like `Button` and `Link` to log when they are clicked. Since most of these components are configured and used similarly, wrapper components were made with built-in logging to replace the default components for easy implementation of logging. They can be found in `components/TealiumLogging`.
 
-Not all components are wrapped like this. Some, like `ModalToggleButton` are rarely used, so in those cases we can directly use `logButtonEvent` in the `onClick` prop.
+Not all components are wrapped like this, it is still possible to directly use tealium actions.
 
 ### Adding user event types
 
-To add a new user event type: 
+To add a new user event type:
 - Define a type for the event parameter values for the event type. You can find all the data fields for a given event in the [Tagging Strategy](https://confluence.cms.gov/pages/viewpage.action?spaceKey=BLSTANALYT&title=mc-review.onemac.cms.gov+-+Tagging+Strategy) doc on confluence.
 - Then we add that type to `TealiumEventObjectTypes`.
 ```typescript

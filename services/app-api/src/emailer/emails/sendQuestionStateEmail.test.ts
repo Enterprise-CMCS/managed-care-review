@@ -17,6 +17,7 @@ const defaultSubmitters = ['submitter1@example.com', 'submitter2@example.com']
 const flState: StateType = {
     stateCode: 'FL',
     name: 'Florida',
+    assignedCMSUsers: [],
 }
 
 const cmsUser: CMSUserType = {

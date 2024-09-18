@@ -14,6 +14,7 @@ const stateAnalysts = getTestStateAnalystsEmails('FL')
 const flState: StateType = {
     stateCode: 'FL',
     name: 'Florida',
+    assignedCMSUsers: [],
 }
 
 const cmsUser: CMSUserType = {
