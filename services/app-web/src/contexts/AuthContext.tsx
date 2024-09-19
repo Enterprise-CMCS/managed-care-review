@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import * as ld from 'launchdarkly-js-client-sdk'
 import { AuthModeType } from '../common-code/config'
-import {extendSession} from '../pages/Auth/cognitoAuth'
+import { extendSession } from '../pages/Auth/cognitoAuth'
 import {
     FetchCurrentUserQuery,
     useFetchCurrentUserQuery,
@@ -17,15 +17,15 @@ import { ApolloQueryResult } from '@apollo/client'
 // Constants and types
 type LoginStatusType = 'LOADING' | 'LOGGED_OUT' | 'LOGGED_IN'
 type LogoutType = 'TIMEOUT' | 'ERROR' | 'DEFAULT'
-const LOGOUT_TYPES:  Record<LogoutType, LogoutType> = {
+const LOGOUT_TYPES: Record<LogoutType, LogoutType> = {
     TIMEOUT: 'TIMEOUT',
     ERROR: 'ERROR',
-    DEFAULT: 'DEFAULT'
+    DEFAULT: 'DEFAULT',
 }
 const LOGOUT_PATHS: Record<LogoutType, string> = {
     TIMEOUT: `/?session-timeout=true`,
     ERROR: `/?signin-error=true`,
-    DEFAULT: `/`
+    DEFAULT: `/`,
 }
 
 type AuthContextType = {
@@ -35,11 +35,7 @@ type AuthContextType = {
     refreshAuth: () => Promise<void>
     loggedInUser: UserType | undefined
     loginStatus: LoginStatusType
-    logout: ({
-        type,
-    }: {
-        type: LogoutType,
-    }) => Promise<void>
+    logout: ({ type }: { type: LogoutType }) => Promise<void>
 }
 
 // MAIN
@@ -113,7 +109,7 @@ function AuthProvider({
                     `[User auth error]: Unable to authenticate user though user seems to be logged in. Message: ${error.message}`
                 )
                 // since we have an auth request error but a potentially logged in user, we log out fully from Auth context and redirect to dashboard for clearer user experience
-                window.location.href =  LOGOUT_PATHS.ERROR
+                window.location.href = LOGOUT_PATHS.ERROR
             }
         } else if (data?.fetchCurrentUser) {
             if (!isAuthenticated) {
@@ -128,7 +124,7 @@ function AuthProvider({
             }
         }
     }
-        /*
+    /*
         Close user session and handle redirect afterward
 
         @param {sessionTimeout} will pass along a URL query param to display session expired alert
@@ -137,15 +133,15 @@ function AuthProvider({
         Logout is called when user clicks to logout from header or session expiration modal
         Also called in the background with session times out
     */
-        const logout: AuthContextType['logout'] = async ({
-            type,
-        }) => {
-            const realLogout =
-                authMode === 'LOCAL' ? logoutLocalUser : cognitoSignOut
+    const logout: AuthContextType['logout'] = async ({ type }) => {
+        const realLogout =
+            authMode === 'LOCAL' ? logoutLocalUser : cognitoSignOut
 
-        const logoutResponse =  await realLogout()
+        const logoutResponse = await realLogout()
         if (logoutResponse instanceof Error) {
-            recordJSException(new Error(`Logout Failed. ${JSON.stringify(logoutResponse)}`))
+            recordJSException(
+                new Error(`Logout Failed. ${JSON.stringify(logoutResponse)}`)
+            )
             window.location.href = LOGOUT_PATHS.ERROR
         } else {
             switch (type) {
@@ -153,7 +149,7 @@ function AuthProvider({
                     window.location.href = LOGOUT_PATHS.TIMEOUT
                     return
                 }
-                case  LOGOUT_TYPES.ERROR: {
+                case LOGOUT_TYPES.ERROR: {
                     window.location.href = LOGOUT_PATHS.ERROR
                     return
                 }
@@ -163,10 +159,7 @@ function AuthProvider({
                 }
             }
         }
-
-
-        }
-
+    }
 
     /*
         Refetches current user via graphql to confirm authentication
@@ -182,17 +175,17 @@ function AuthProvider({
             // if we fail auth at a time we expected logged in user, the session may have timed out. Logout fully to reflect that and force React state update
             if (loggedInUser) {
                 await logout({
-                    type: 'TIMEOUT'
+                    type: 'TIMEOUT',
                 })
             } else {
                 await logout({
-                    type: 'DEFAULT'
+                    type: 'DEFAULT',
                 })
             }
             return new Error(e)
         }
     }
- /*
+    /*
         Refreshes the cognito session token
         Also can reconfirm authentication, if unexpectedly logged out we know that session may have timed out
         @param {failureRedirectPath} passed through to logout which is called on certain checkAuth failures
@@ -200,15 +193,15 @@ function AuthProvider({
     const refreshAuth = async () => {
         if (authMode !== 'LOCAL') {
             const result = await extendSession()
-            if (result instanceof Error){
+            if (result instanceof Error) {
                 if (loggedInUser) {
                     await logout({
-                        type: 'TIMEOUT'
+                        type: 'TIMEOUT',
                     })
-            }
+                }
             }
         }
-            return
+        return
     }
 
     return (
@@ -219,7 +212,6 @@ function AuthProvider({
                 checkAuth,
                 refreshAuth,
                 logout,
-
             }}
             children={children}
         />
@@ -228,9 +220,6 @@ function AuthProvider({
 
 const useAuth = (): AuthContextType => React.useContext(AuthContext)
 
-export { LOGOUT_TYPES,LOGOUT_PATHS,  AuthProvider, useAuth }
+export { LOGOUT_TYPES, LOGOUT_PATHS, AuthProvider, useAuth }
 
-export type {
-    LoginStatusType,
-    AuthContextType
-}
+export type { LoginStatusType, AuthContextType }

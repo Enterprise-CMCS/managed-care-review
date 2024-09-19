@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react'
+import React from 'react'
 import {
     ButtonGroup,
     Modal as UswdsModal,
@@ -48,24 +48,23 @@ export const Modal = ({
     modalAlert,
     ...divProps
 }: ModalProps): React.ReactElement => {
-    const {updateModalRef} = usePage()
-    const cancelHandler = (e: React.MouseEvent): void => {
+    const { updateModalRef } = usePage()
+    const cancelHandler = (_e: React.MouseEvent): void => {
         if (onCancel) {
             onCancel()
         }
-        updateModalRef({updatedModalRef: undefined})
+        updateModalRef({ updatedModalRef: undefined })
         modalRef.current?.toggleModal(undefined, false)
     }
 
-    const submitHandler = (e: React.MouseEvent): void => {
+    const submitHandler = (_e: React.MouseEvent): void => {
         if (onSubmit) {
             onSubmit()
         }
-        updateModalRef({updatedModalRef: undefined})
+        updateModalRef({ updatedModalRef: undefined })
         // do not close modal here manually
         // sometimes validation fails and we want to keep modal open but display errors
         // consumer should determine wether or not to close modal in onSubmit
-
     }
 
     return (

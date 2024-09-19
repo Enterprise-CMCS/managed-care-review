@@ -56,15 +56,15 @@ function App({
             <TraceProvider>
                 <BrowserRouter>
                     <ApolloProvider client={apolloClient}>
-                            <AuthProvider authMode={authMode}>
-                                <S3Provider client={s3Client}>
+                        <AuthProvider authMode={authMode}>
+                            <S3Provider client={s3Client}>
                                 <PageProvider>
                                     <TealiumProvider client={newTealiumClient}>
                                         <AppBody authMode={authMode} />
                                     </TealiumProvider>
                                 </PageProvider>
-                                </S3Provider>
-                            </AuthProvider>
+                            </S3Provider>
+                        </AuthProvider>
                     </ApolloProvider>
                 </BrowserRouter>
             </TraceProvider>

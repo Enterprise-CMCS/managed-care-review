@@ -1,4 +1,4 @@
-import { screen, waitFor  } from '@testing-library/react'
+import { screen, waitFor } from '@testing-library/react'
 
 import { renderWithProviders } from '../../testHelpers/jestHelpers'
 import { AppRoutes } from './AppRoutes'
