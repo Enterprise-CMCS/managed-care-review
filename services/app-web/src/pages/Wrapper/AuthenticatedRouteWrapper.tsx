@@ -1,108 +1,113 @@
-import React, { useState } from 'react'
-import { Modal } from '../../components/Modal/Modal'
+import React from 'react'
 import { ModalRef } from '@trussworks/react-uswds'
-import { createRef, useCallback, useEffect } from 'react'
-import { MODAL_COUNTDOWN_DURATION, useAuth } from '../../contexts/AuthContext'
-import { AuthModeType } from '../../common-code/config'
-import { extendSession } from '../Auth/cognitoAuth'
-import styles from '../StateSubmission/ReviewSubmit/ReviewSubmit.module.scss'
-import { dayjs } from '../../common-code/dateHelpers/dayjs'
-import { recordJSException } from '../../otelHelpers'
-import { ErrorAlertSignIn } from '../../components'
+import { createRef } from 'react'
+import { useAuth } from '../../contexts/AuthContext'
+import { useLDClient } from 'launchdarkly-react-client-sdk'
+import { featureFlags } from '../../common-code/featureFlags'
+import { SessionTimeoutModal } from '../../components/Modal/SessionTimeoutModal'
+import { IdleTimerProvider } from 'react-idle-timer'
+import { usePage } from '../../contexts/PageContext'
 
-export const AuthenticatedRouteWrapper = ({
+const SESSION_ACTIONS = {
+    LOGOUT_SESSION: 'LOGOUT_SESSION',
+    CONTINUE_SESSION: 'CONTINUE_SESSSION',
+}
+
+// AuthenticatedRouteWrapper control access to protected routes and the session timeout modal
+// For more on expected behavior for session timeout see feature-brief-session-expiration.md
+const AuthenticatedRouteWrapper = ({
     children,
-    setAlert,
-    authMode,
 }: {
     children: React.ReactNode
-    setAlert?: React.Dispatch<React.ReactElement>
-    authMode: AuthModeType
 }): React.ReactElement => {
-    const {
-        logout,
-        sessionIsExpiring,
-        logoutCountdownDuration,
-        updateSessionExpirationState,
-        updateSessionExpirationTime,
-        setLogoutCountdownDuration,
-    } = useAuth()
-    const [announcementSeed] = useState<number>(logoutCountdownDuration)
-    const announcementTimes: number[] = []
-    for (let i = announcementSeed; i > 0; i -= 10) {
-        announcementTimes.push(i)
-    }
     const modalRef = createRef<ModalRef>()
+    const ldClient = useLDClient()
+    const { logout, refreshAuth } = useAuth()
+    const { activeModalRef, updateModalRef } = usePage()
 
-    const logoutSession = useCallback(
-        (forcedSessionSignout: boolean) => {
-            updateSessionExpirationState(false)
-            if (logout) {
-                logout({ sessionTimeout: forcedSessionSignout }).catch((e) => {
-                    recordJSException(`Error with logout: ${e}`)
-                    setAlert && setAlert(<ErrorAlertSignIn />)
-                })
-            }
-        },
-        [logout, setAlert, updateSessionExpirationState]
-    )
+    const openSessionTimeoutModal = () => {
+        // Make sure we close any active modals for session timeout, should overrides the focus trap
+        if (activeModalRef && activeModalRef !== modalRef) {
+            activeModalRef.current?.toggleModal(undefined, false)
+            updateModalRef({ updatedModalRef: modalRef })
+        }
 
-    const resetSessionTimeout = () => {
-        updateSessionExpirationState(false)
-        updateSessionExpirationTime()
-        setLogoutCountdownDuration(MODAL_COUNTDOWN_DURATION)
-        if (authMode !== 'LOCAL') {
-            void extendSession()
+        modalRef.current?.toggleModal(undefined, true)
+    }
+    const closeSessionTimeoutModal = () => {
+        modalRef.current?.toggleModal(undefined, false)
+    }
+    const logoutBySessionTimeout = async () => {
+        closeSessionTimeoutModal()
+        await logout({ type: 'TIMEOUT' })
+    }
+    const logoutByUserChoice = async () => {
+        closeSessionTimeoutModal()
+        await logout({ type: 'DEFAULT' })
+    }
+    const refreshSession = async () => {
+        closeSessionTimeoutModal()
+        await refreshAuth()
+    }
+
+    // For multi-tab support we emit messages related to user actions on the session timeout modal
+    const onMessage = async ({
+        action,
+    }: {
+        action: 'LOGOUT_SESSION' | 'CONTINUE_SESSION'
+    }) => {
+        switch (action) {
+            case 'LOGOUT_SESSION':
+                await logoutByUserChoice()
+                break
+            case 'CONTINUE_SESSION':
+                await refreshSession()
+                break
+            default:
+            // no op
         }
     }
 
-    useEffect(() => {
-        modalRef.current?.toggleModal(undefined, sessionIsExpiring)
-    }, [sessionIsExpiring, modalRef])
+    // All time increment constants must be milliseconds
+    const RECHECK_FREQUENCY = 500
+    const SESSION_TIMEOUT_COUNTDOWN = 2 * 60 * 1000
+    const SESSION_DURATION: number =
+        ldClient?.variation(
+            featureFlags.MINUTES_UNTIL_SESSION_EXPIRES.flag,
+            featureFlags.MINUTES_UNTIL_SESSION_EXPIRES.defaultValue
+        ) *
+        60 *
+        1000 //  controlled by feature flag for testing in lower environments
+    const SHOW_SESSION_EXPIRATION: boolean = ldClient?.variation(
+        featureFlags.SESSION_EXPIRING_MODAL.flag,
+        featureFlags.SESSION_EXPIRING_MODAL.defaultValue
+    ) //  controlled by feature flag for testing in lower environments
+    let promptCountdown = SESSION_TIMEOUT_COUNTDOWN //  may be reassigned if session duration is shorter time period
 
-    useEffect(() => {
-        if (logoutCountdownDuration < 1) {
-            logoutSession(true)
-        }
-    }, [logoutCountdownDuration, logoutSession])
+    // Session duration must be longer than prompt countdown to allow IdleTimer to load
+    if (SESSION_DURATION <= SESSION_TIMEOUT_COUNTDOWN) {
+        promptCountdown = SESSION_DURATION - 1000
+    }
+
     return (
-        <>
-            {
-                <Modal
-                    modalRef={modalRef}
-                    id="extend-session-modal"
-                    modalHeading="Session Expiring"
-                    onSubmitText="Continue Session"
-                    onCancelText="Logout"
-                    onCancel={() => logoutSession(false)}
-                    submitButtonProps={{ className: styles.submitButton }}
-                    onSubmit={resetSessionTimeout}
-                    forceAction={true}
-                >
-                    <p
-                        aria-live={
-                            announcementTimes.includes(logoutCountdownDuration)
-                                ? 'assertive'
-                                : 'off'
-                        }
-                        aria-atomic={true}
-                    >
-                        Your session is going to expire in{' '}
-                        {dayjs
-                            .duration(logoutCountdownDuration, 'seconds')
-                            .format('mm:ss')}{' '}
-                    </p>
-                    <p>
-                        If you would like to extend your session, click the
-                        Continue Session button
-                    </p>
-                    <p>
-                        If you would like to end your session now, click the
-                        Logout button
-                    </p>
-                </Modal>
+        <IdleTimerProvider
+            onIdle={logoutBySessionTimeout}
+            onActive={refreshSession}
+            onPrompt={
+                SHOW_SESSION_EXPIRATION ? openSessionTimeoutModal : undefined
             }
+            promptBeforeIdle={promptCountdown}
+            timeout={SESSION_DURATION}
+            throttle={RECHECK_FREQUENCY}
+            // cross tab props
+            onMessage={onMessage}
+            syncTimers={RECHECK_FREQUENCY}
+            crossTab={true}
+        >
             {children}
-        </>
+            <SessionTimeoutModal modalRef={modalRef} />
+        </IdleTimerProvider>
     )
 }
+
+export { SESSION_ACTIONS, AuthenticatedRouteWrapper }

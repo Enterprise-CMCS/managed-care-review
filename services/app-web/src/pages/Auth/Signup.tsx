@@ -2,7 +2,6 @@ import React, { useState, Dispatch, SetStateAction } from 'react'
 import { Form, FormGroup, Label, TextInput } from '@trussworks/react-uswds'
 
 import { signUp } from './cognitoAuth'
-import { recordJSException } from '../../otelHelpers'
 import { ButtonWithLogging } from '../../components'
 
 export function showError(error: string): void {
@@ -47,29 +46,20 @@ export function Signup({
         event.preventDefault()
         setIsLoading(true)
 
-        try {
-            const result = await signUp({
-                username: fields.email,
-                password: fields.password,
-                given_name: fields.firstName,
-                family_name: fields.lastName,
-                stateCode: 'MN',
-            })
-            setIsLoading(false)
+        const result = await signUp({
+            username: fields.email,
+            password: fields.password,
+            given_name: fields.firstName,
+            family_name: fields.lastName,
+            stateCode: 'MN',
+        })
+        setIsLoading(false)
 
-            if ('code' in result) {
-                const err = result
-                console.info('got an error back from signup: ', err)
-            } else {
-                const user = result
-                console.info('got a user back', user)
-                setEmail(fields.email)
-                triggerConfirmation()
-            }
-        } catch (err) {
-            setIsLoading(false)
+        if (result instanceof Error) {
             showError('An unexpected error occurred!')
-            recordJSException(new Error(err))
+        } else {
+            setEmail(fields.email)
+            triggerConfirmation()
         }
     }
 

@@ -1,23 +1,15 @@
-import {
-    GridContainer,
-    ModalRef,
-    ModalToggleButton,
-} from '@trussworks/react-uswds'
+import { GridContainer, ModalRef } from '@trussworks/react-uswds'
 import React, { useRef, useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { DynamicStepIndicator } from '../../../../../components'
 import { PageActionsContainer } from '../../../PageActions'
 import styles from '../../ReviewSubmit.module.scss'
 import { ActionButton } from '../../../../../components/ActionButton'
-import {
-    useRouteParams,
-    useStatePrograms,
-    useTealium,
-} from '../../../../../hooks'
+import { useRouteParams, useStatePrograms } from '../../../../../hooks'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 
 import { RoutesRecord } from '../../../../../constants'
-import { UnlockSubmitModal } from '../../../../../components/Modal/V2/UnlockSubmitModalV2'
+import { UnlockSubmitModal } from '../../../../../components/Modal/UnlockSubmitModal'
 import { getVisibleLatestContractFormData } from '../../../../../gqlHelpers/contractsAndRates'
 import { useAuth } from '../../../../../contexts/AuthContext'
 import { RateDetailsSummarySection } from '../../RateDetailsSummarySection'
@@ -34,6 +26,7 @@ import { packageName } from '../../../../../common-code/healthPlanFormDataType'
 import { usePage } from '../../../../../contexts/PageContext'
 import { activeFormPages } from '../../../StateSubmissionForm'
 import { featureFlags } from '../../../../../common-code/featureFlags'
+import { ModalOpenButton } from '../../../../../components/Modal'
 
 export const ReviewSubmit = (): React.ReactElement => {
     const navigate = useNavigate()
@@ -43,7 +36,6 @@ export const ReviewSubmit = (): React.ReactElement => {
     const { updateHeading } = usePage()
     const { id } = useRouteParams()
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
-    const { logButtonEvent } = useTealium()
     const ldClient = useLDClient()
 
     const hideSupportingDocs = ldClient?.variation(
@@ -190,25 +182,15 @@ export const ReviewSubmit = (): React.ReactElement => {
                     >
                         Back
                     </ActionButton>
-                    <ModalToggleButton
+                    <ModalOpenButton
                         modalRef={modalRef}
                         className={styles.submitButton}
-                        data-testid="form-submit"
-                        onClick={() =>
-                            logButtonEvent({
-                                text: 'Submit',
-                                button_type: 'button',
-                                button_style: 'success',
-                                parent_component_type: 'page body',
-                            })
-                        }
-                        opener
+                        id="form-submit"
                     >
                         Submit
-                    </ModalToggleButton>
+                    </ModalOpenButton>
                 </PageActionsContainer>
 
-                {/* if the session is expiring, close this modal so the countdown modal can appear */}
                 <UnlockSubmitModal
                     submissionData={contract}
                     submissionName={submissionName}

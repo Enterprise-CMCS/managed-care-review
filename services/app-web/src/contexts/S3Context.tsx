@@ -4,6 +4,7 @@ import { S3FileData } from '../components'
 import type { S3ClientT } from '../s3'
 import { BucketShortName } from '../s3/s3Amplify'
 import { recordJSException } from '../otelHelpers'
+import { useAuth } from './AuthContext'
 
 type S3ContextT = {
     handleUploadFile: (
@@ -41,6 +42,7 @@ const useS3 = (): S3ContextT => {
     }
 
     const { deleteFile, uploadFile, scanFile, getS3URL } = context
+    const { checkAuth, logout } = useAuth()
 
     const handleUploadFile = async (
         file: File,
@@ -51,9 +53,14 @@ const useS3 = (): S3ContextT => {
         if (isS3Error(s3Key)) {
             const error = new Error(`Error in S3: ${file.name}`)
             recordJSException(error)
+            // s3 file upload failing could be due to IDM session timeout
+            // double check the user still has their session, if not, logout to update the React state with their login status
+            const responseCheckAuth = await checkAuth()
+            if (responseCheckAuth instanceof Error) {
+                await logout({ type: 'TIMEOUT' })
+            }
             throw error
         }
-
         const s3URL = await getS3URL(s3Key, file.name, bucket)
         return { key: s3Key, s3URL: s3URL }
     }
@@ -69,6 +76,12 @@ const useS3 = (): S3ContextT => {
                 const error = new Error(`Error in S3: ${key}`)
                 recordJSException(error)
                 throw error
+            }
+            // s3 file upload failing could be due to IDM session timeout
+            // double check the user still has their session, if not, logout to update the React state with their login status
+            const responseCheckAuth = await checkAuth()
+            if (responseCheckAuth instanceof Error) {
+                await logout({ type: 'TIMEOUT' })
             }
             const error = new Error('Scanning error: Scanning retry timed out')
             recordJSException(error)

@@ -126,10 +126,10 @@ const commonSettingPageTest = async () => {
     expect(tableRowsDivision).toHaveLength(2)
     // Check the table headers
     expect(
-        screen.getByRole('columnheader', { name: 'Family Name' })
+        screen.getByRole('columnheader', { name: 'Last name' })
     ).toBeInTheDocument()
     expect(
-        screen.getByRole('columnheader', { name: 'Given Name' })
+        screen.getByRole('columnheader', { name: 'First name' })
     ).toBeInTheDocument()
     expect(
         screen.getByRole('columnheader', { name: 'Email' })

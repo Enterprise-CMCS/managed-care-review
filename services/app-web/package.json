@@ -112,6 +112,7 @@
         "react": "^18.2.0",
         "react-dom": "^18.2.0",
         "react-error-boundary": "^4.0.10",
+        "react-idle-timer": "^5.7.2",
         "react-router": "^6.23.1",
         "react-router-dom": "^6.23.1",
         "react-select": "^5.7.7",
@@ -128,9 +129,9 @@
         "zod": "^3.10.1"
     },
     "devDependencies": {
-        "@aws-sdk/client-amplify": "^3.645.0",
-        "@aws-sdk/client-s3": "^3.645.0",
-        "@aws-sdk/s3-request-presigner": "^3.645.0",
+        "@aws-sdk/client-amplify": "^3.651.1",
+        "@aws-sdk/client-s3": "^3.651.1",
+        "@aws-sdk/s3-request-presigner": "^3.651.1",
         "@chromatic-com/storybook": "^1",
         "@esbuild-plugins/node-globals-polyfill": "^0.2.3",
         "@peculiar/webcrypto": "^1.5.0",

@@ -87,20 +87,7 @@ fragment rateRevisionFragmentForIndexContract on RateRevision {
     formData {
         rateType
         rateCapitationType
-        rateDocuments {
-            name
-            s3URL
-            sha256
-            dateAdded
-            downloadURL
-        }
-        supportingDocuments {
-            name
-            s3URL
-            sha256
-            dateAdded
-            downloadURL
-        }
+        
         rateDateStart
         rateDateEnd
         rateDateCertified
@@ -149,24 +136,8 @@ fragment contractFormDataFragmentForIndex on ContractFormData {
         email
     }
 
-    supportingDocuments {
-        name
-        s3URL
-        sha256
-        dateAdded
-        downloadURL
-    }
-
     contractType
     contractExecutionStatus
-    contractDocuments {
-        name
-        s3URL
-        sha256
-        dateAdded
-        downloadURL
-    }
-
     contractDateStart
     contractDateEnd
     managedCareEntities
