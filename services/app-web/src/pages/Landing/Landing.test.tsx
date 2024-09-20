@@ -24,7 +24,6 @@ describe('Landing', () => {
         ).toBeNull()
     })
 
-
     it('displays signin error when query parameter included', async () => {
         renderWithProviders(<Landing />, {
             routerProvider: { route: '/?signin-error' },

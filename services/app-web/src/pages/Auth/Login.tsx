@@ -16,7 +16,9 @@ export function Login({ defaultEmail }: Props): React.ReactElement {
     const hasSigninError = new URLSearchParams(location.search).get(
         'signin-error'
     )
-    const [showFormAlert, setShowFormAlert] = React.useState(hasSigninError? true: false)
+    const [showFormAlert, setShowFormAlert] = React.useState(
+        hasSigninError ? true : false
+    )
     const [fields, setFields] = useState({
         loginEmail: defaultEmail || '',
         loginPassword: '',
@@ -24,12 +26,11 @@ export function Login({ defaultEmail }: Props): React.ReactElement {
 
     const navigate = useNavigate()
     const { loginStatus, checkAuth } = useAuth()
-    useEffect( () => {
+    useEffect(() => {
         if (loginStatus === 'LOGGED_IN') {
             navigate(RoutesRecord.ROOT)
         }
-    },[loginStatus, navigate])
-
+    }, [loginStatus, navigate])
 
     const onFieldChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const { id, value } = event.target
@@ -44,25 +45,26 @@ export function Login({ defaultEmail }: Props): React.ReactElement {
     async function handleSubmit(event: React.FormEvent) {
         event.preventDefault()
 
-        const result =  await signIn(fields.loginEmail, fields.loginPassword)
+        const result = await signIn(fields.loginEmail, fields.loginPassword)
         if (result instanceof Error) {
             setShowFormAlert(true)
         } else {
             // we think we signed in, double check that amplify - API connection agrees
             const authResult = await checkAuth()
-            if(authResult instanceof Error) {
-                recordJSException(`Cognito Login Error - unexpected error after succeeding on signIn – ${authResult}`)
+            if (authResult instanceof Error) {
+                recordJSException(
+                    `Cognito Login Error - unexpected error after succeeding on signIn – ${authResult}`
+                )
                 setShowFormAlert(true)
             } else {
                 navigate(RoutesRecord.ROOT)
             }
         }
-
     }
 
     return (
         <Form onSubmit={handleSubmit} name="Login" aria-label="Login Form">
-            {showFormAlert &&   <ErrorAlertSignIn />}
+            {showFormAlert && <ErrorAlertSignIn />}
             <FormGroup>
                 <Label htmlFor="loginEmail">Email</Label>
                 <TextInput

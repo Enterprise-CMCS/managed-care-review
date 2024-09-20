@@ -1,4 +1,4 @@
-import { screen, waitFor  } from '@testing-library/react'
+import { screen, waitFor } from '@testing-library/react'
 
 import { renderWithProviders } from '../../testHelpers/jestHelpers'
 import { AppRoutes } from './AppRoutes'
@@ -6,6 +6,7 @@ import {
     fetchCurrentUserMock,
     mockValidCMSUser,
     indexHealthPlanPackagesMockSuccess,
+    indexContractsMockSuccess,
 } from '../../testHelpers/apolloMocks'
 
 // Routing and routes configuration tested here, best layer for testing behaviors that cross several pages
@@ -26,7 +27,7 @@ describe('AppRoutes and routing configuration', () => {
                 apolloProvider: {
                     mocks: [
                         fetchCurrentUserMock({ statusCode: 200 }),
-                        indexHealthPlanPackagesMockSuccess(),
+                        indexContractsMockSuccess(),
                     ],
                 },
                 featureFlags: { 'session-expiring-modal': false },

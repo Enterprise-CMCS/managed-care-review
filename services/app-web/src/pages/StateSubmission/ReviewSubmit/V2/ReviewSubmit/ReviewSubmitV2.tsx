@@ -1,17 +1,11 @@
-import {
-    GridContainer,
-    ModalRef,
-} from '@trussworks/react-uswds'
+import { GridContainer, ModalRef } from '@trussworks/react-uswds'
 import React, { useRef, useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { DynamicStepIndicator } from '../../../../../components'
 import { PageActionsContainer } from '../../../PageActions'
 import styles from '../../ReviewSubmit.module.scss'
 import { ActionButton } from '../../../../../components/ActionButton'
-import {
-    useRouteParams,
-    useStatePrograms,
-} from '../../../../../hooks'
+import { useRouteParams, useStatePrograms } from '../../../../../hooks'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 
 import { RoutesRecord } from '../../../../../constants'

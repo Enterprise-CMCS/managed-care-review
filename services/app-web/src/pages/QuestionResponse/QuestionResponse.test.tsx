@@ -19,9 +19,9 @@ describe('QuestionResponse', () => {
     describe.each(iterableCmsUsersMockData)(
         '$userRole QuestionResponse tests',
         ({ userRole, mockUser }) => {
-            it('render error if CMS user does not have division set', async () =>{
+            it('render error if CMS user does not have division set', async () => {
                 const stringConstants = useStringConstants()
-                const user = mockUser({divisionAssignment: undefined})
+                const user = mockUser({ divisionAssignment: undefined })
                 renderWithProviders(
                     <Routes>
                         <Route element={<SubmissionSideNav />}>
@@ -36,11 +36,11 @@ describe('QuestionResponse', () => {
                     {
                         apolloProvider: {
                             mocks: [
-                                fetchCurrentUserMock({ user, statusCode: 200}),
+                                fetchCurrentUserMock({ user, statusCode: 200 }),
                                 fetchStateHealthPlanPackageWithQuestionsMockSuccess(
                                     {
                                         id: '15',
-                                        questions:  mockQuestionsPayload('15'),
+                                        questions: mockQuestionsPayload('15'),
                                     }
                                 ),
                             ],
@@ -51,7 +51,11 @@ describe('QuestionResponse', () => {
                     }
                 )
 
-                expect(await screen.findByRole('heading', {name: 'Missing division'})).toBeInTheDocument()
+                expect(
+                    await screen.findByRole('heading', {
+                        name: 'Missing division',
+                    })
+                ).toBeInTheDocument()
                 const feedbackLink = screen.getByRole('link', {
                     name: `email the help desk`,
                 })
@@ -59,10 +63,7 @@ describe('QuestionResponse', () => {
                     'href',
                     stringConstants.MAIL_TO_SUPPORT_HREF
                 )
-
-
-
-        })
+            })
             it('renders expected questions correctly with rounds', async () => {
                 const mockQuestions = mockQuestionsPayload('15')
 
