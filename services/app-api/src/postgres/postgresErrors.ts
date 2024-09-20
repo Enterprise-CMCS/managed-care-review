@@ -13,7 +13,7 @@ class UserInputPostgresError extends Error {
     constructor(message: string) {
         super(message)
 
-        Object.setPrototypeOf(this, NotFoundError.prototype)
+        Object.setPrototypeOf(this, UserInputPostgresError.prototype)
     }
 }
 
