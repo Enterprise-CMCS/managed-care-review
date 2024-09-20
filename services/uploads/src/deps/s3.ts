@@ -179,9 +179,9 @@ async function getObjectContentType(
     })
 
     try {
-        const response = await client.send(command)
+        const res = await client.send(command)
         return {
-            ContentType: response.ContentType,
+            ContentType: res.ContentType,
         }
     } catch (err) {
         return err
