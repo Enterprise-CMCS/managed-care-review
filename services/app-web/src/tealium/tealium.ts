@@ -218,6 +218,7 @@ const tealiumClient = (tealiumEnv: Omit<TealiumEnv, 'dev'>): TealiumClientType =
                 : `https://${tealiumHostname}/${tealiumProfile}/${tealiumEnv}/utag.sync.js`,
                 id: 'tealium-load-tags-sync',
             })
+            console.info(initializeTagManagerSnippet.src)
             if (document.getElementById(initializeTagManagerSnippet.id) === null) {
                 document.head.appendChild(initializeTagManagerSnippet)
             }
@@ -243,7 +244,7 @@ const tealiumClient = (tealiumEnv: Omit<TealiumEnv, 'dev'>): TealiumClientType =
                 inlineScriptAsString: inlineScript,
                 id: 'tealium-load-tags-async',
             })
-
+            console.info(inlineScript, 'inline script')
             if (document.getElementById(loadTagsSnippet.id) === null) {
                 document.body.appendChild(loadTagsSnippet)
             }
