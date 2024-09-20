@@ -79,7 +79,7 @@ const unauthorizedUserTests = [
 
 describe.each(authorizedUserTests)(
     'updateStateAssignment as $userType tests',
-    ({ mockUser, userType }) => {
+    ({ mockUser }) => {
         // setup a user in the db for us to modify
         const mockTestCMSUser = (): InsertUserArgsType => ({
             userID: uuidv4(),
@@ -208,7 +208,7 @@ describe.each(authorizedUserTests)(
             })
 
             expect(assertAnError(updateResUndefined).message).toContain(
-                'cannot update state assignments with no assignments'
+                'Variable "$input" got invalid value'
             )
             expect(assertAnErrorCode(updateResUndefined)).toBe('BAD_USER_INPUT')
             expect(
@@ -226,12 +226,12 @@ describe.each(authorizedUserTests)(
             })
 
             expect(assertAnError(updateResNull).message).toContain(
-                'cannot update state assignments with no assignments'
+                'Variable "$input" got invalid value'
             )
             expect(assertAnErrorCode(updateResNull)).toBe('BAD_USER_INPUT')
             expect(
                 assertAnErrorExtensions(updateResNull).argumentValues
-            ).toBeNull()
+            ).toBeUndefined()
         })
         it('returns an error with invalid state codes', async () => {
             const prismaClient = await sharedTestPrismaClient()
