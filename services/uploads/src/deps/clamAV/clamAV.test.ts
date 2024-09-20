@@ -53,6 +53,8 @@ describe('clamAV', () => {
                     'freshclam.conf'
                 ),
                 pathToDefintions: tmpDefsDir,
+                pathToClamdScan: 'clamscan',
+                isLocal: true,
             },
             s3Client
         )

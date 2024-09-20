@@ -27,6 +27,7 @@ describe('scanFiles', () => {
                     'freshclam.conf'
                 ),
                 pathToDefintions: tmpDefsDir,
+                isLocal: true,
             },
             s3Client
         )
@@ -100,6 +101,7 @@ describe('scanFiles', () => {
                     'freshclam.conf'
                 ),
                 pathToDefintions: tmpDefsDir,
+                isLocal: true,
             },
             s3Client
         )

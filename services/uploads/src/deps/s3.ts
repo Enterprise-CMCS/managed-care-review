@@ -36,6 +36,10 @@ interface S3UploadsClient {
         targetDir: string
     ) => Promise<undefined | Error>
     getObjectTags: (key: string, bucket: string) => Promise<Tag[] | Error>
+    getObjectContentType: (
+        key: string,
+        bucket: string
+    ) => Promise<{ ContentType?: string } | Error>
     tagObject: (
         key: string,
         bucket: string,
@@ -69,6 +73,8 @@ function uploadsClient(s3Client: S3Client): S3UploadsClient {
         downloadAllFiles: (keys, bucket, targetDir) =>
             downloadAllFiles(s3Client, keys, bucket, targetDir),
         getObjectTags: (key, bucket) => getObjectTags(s3Client, key, bucket),
+        getObjectContentType: (key, bucket) =>
+            getObjectContentType(s3Client, key, bucket),
         tagObject: (key, bucket, tagSet) =>
             tagObject(s3Client, key, bucket, tagSet),
         deleteObjects: (keys, buckets) =>
@@ -153,6 +159,30 @@ async function getObjectTags(
         }
 
         return new Error('Didnt get tags back from S3')
+    } catch (err) {
+        return err
+    }
+}
+
+/*
+ * Retrieve the file's content type without downloading.
+ */
+
+async function getObjectContentType(
+    client: S3Client,
+    key: string,
+    bucket: string
+): Promise<{ ContentType?: string } | Error> {
+    const command = new HeadObjectCommand({
+        Bucket: bucket,
+        Key: key,
+    })
+
+    try {
+        const response = await client.send(command)
+        return {
+            ContentType: response.ContentType,
+        }
     } catch (err) {
         return err
     }

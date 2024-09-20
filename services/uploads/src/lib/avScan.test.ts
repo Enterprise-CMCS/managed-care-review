@@ -29,6 +29,7 @@ describe('avScan', () => {
                     'freshclam.conf'
                 ),
                 pathToDefintions: tmpDefsDir,
+                isLocal: true,
             },
             s3Client
         )
@@ -59,7 +60,7 @@ describe('avScan', () => {
             clamAV,
             goodFileKey,
             'test-uploads',
-            MAX_FILE_SIZE,
+            MAX_FILE_SIZE
         )
         if (scanResult instanceof Error) {
             throw scanResult
@@ -98,6 +99,7 @@ describe('avScan', () => {
                     'freshclam.conf'
                 ),
                 pathToDefintions: tmpDefsDir,
+                isLocal: true,
             },
             s3Client
         )
@@ -128,7 +130,7 @@ describe('avScan', () => {
             clamAV,
             badFileKey,
             'test-uploads',
-            MAX_FILE_SIZE,
+            MAX_FILE_SIZE
         )
         if (scanResult instanceof Error) {
             throw scanResult
@@ -167,6 +169,7 @@ describe('avScan', () => {
                     'freshclam.conf'
                 ),
                 pathToDefintions: tmpDefsDir,
+                isLocal: true,
             },
             s3Client
         )
@@ -197,7 +200,7 @@ describe('avScan', () => {
             clamAV,
             badFileKey,
             'test-uploads',
-            2,
+            2
         )
         if (scanResult instanceof Error) {
             throw scanResult
@@ -236,6 +239,7 @@ describe('avScan', () => {
                     'freshclam.conf'
                 ),
                 pathToDefintions: tmpDefsDir,
+                isLocal: true,
             },
             s3Client
         )
@@ -270,7 +274,7 @@ describe('avScan', () => {
             clamAV,
             badFileKey,
             'test-uploads',
-            MAX_FILE_SIZE,
+            MAX_FILE_SIZE
         )
         if (scanResult instanceof Error) {
             throw scanResult
@@ -309,6 +313,7 @@ describe('avScan', () => {
                     'freshclam.conf'
                 ),
                 pathToDefintions: tmpDefsDir,
+                isLocal: true,
             },
             s3Client
         )
@@ -322,7 +327,7 @@ describe('avScan', () => {
             clamAV,
             badFileKey,
             'test-uploads',
-            MAX_FILE_SIZE,
+            MAX_FILE_SIZE
         )
         if (!(scanResult instanceof Error)) {
             throw new Error('Didnt error on a nonexistant file')

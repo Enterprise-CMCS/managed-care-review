@@ -29,6 +29,7 @@ describe('auditUploads', () => {
                     'freshclam.conf'
                 ),
                 pathToDefintions: tmpDefsDir,
+                isLocal: true,
             },
             s3Client
         )

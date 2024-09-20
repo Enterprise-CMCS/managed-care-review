@@ -14,6 +14,8 @@ export async function scanFiles(
 ): Promise<string[] | Error> {
     // clamScan wants files to be top level in the scanned directory, so we map each key to a UUID
     const filemap: { [filename: string]: string } = {}
+    //const mimeTypeErrors: string[] = []
+
     for (const key of keys) {
         console.info('Downloading file to be scanned', key)
         const scanFileName = `${crypto.randomUUID()}.tmp`
@@ -26,6 +28,38 @@ export async function scanFiles(
             console.error('failed to download one of the scan files', err)
             return err
         }
+        /*
+        // check file mime type matches: pen test finding
+        try {
+            const fileBuffer = await fs.readFile(scanFilePath)
+            const detectedType = await fileTypeFromBuffer(fileBuffer)
+
+            // Get the Content-Type from S3 metadata
+            const metadata = await s3Client.getObjectContentType(bucket, key)
+            if (metadata instanceof Error) {
+                console.error(
+                    `Could not get file's content type from S3 bucket`
+                )
+                return metadata
+            }
+            const declaredContentType = metadata.ContentType
+
+            if (detectedType && declaredContentType) {
+                if (detectedType.mime !== declaredContentType) {
+                    console.warn(
+                        `MIME type mismatch for ${key}: Content-Type is ${declaredContentType}, detected type is ${detectedType.mime}`
+                    )
+                    mimeTypeErrors.push(`MIME type mismatch for ${key}`)
+                } else {
+                    console.log(`MIME type check passed for ${key}`)
+                }
+            } else {
+                console.warn(`Could not determine MIME type for ${key}`)
+            }
+        } catch (mimeError) {
+            console.error(`Error checking MIME type for ${key}:`, mimeError)
+        }
+            */
     }
 
     console.info('Scanning Files')
