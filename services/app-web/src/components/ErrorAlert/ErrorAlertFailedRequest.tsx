@@ -13,9 +13,8 @@ export type ErrorAlertFailedRequestProps = {
 export const ErrorAlertFailedRequest = ({
     heading,
     message,
-    remediation = 'DEFAULT'
+    remediation = 'DEFAULT',
 }: ErrorAlertFailedRequestProps): React.ReactElement => {
-
     return (
         <ErrorAlert
             heading={heading}

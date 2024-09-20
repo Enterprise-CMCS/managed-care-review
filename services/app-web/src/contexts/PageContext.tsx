@@ -35,7 +35,9 @@ const PageProvider: React.FC<
     const [heading, setHeading] = React.useState<
         string | React.ReactElement | undefined
     >(undefined)
-    const [activeModal, setActiveModal] = React.useState<React.RefObject<ModalRef>| undefined>(undefined)
+    const [activeModal, setActiveModal] = React.useState<
+        React.RefObject<ModalRef> | undefined
+    >(undefined)
     const { currentRoute: routeName } = useCurrentRoute()
 
     /*
@@ -65,17 +67,22 @@ const PageProvider: React.FC<
         - help ensure only one modal open at a time
         - used in AuthenticatedRouteWrapper to close open modals when session timeout hit
     */
-        const updateModalRef = ({
-            updatedModalRef,
-        }: {
-            updatedModalRef?: React.RefObject<ModalRef>
-        }) => {
-           setActiveModal(updatedModalRef)
-        }
+    const updateModalRef = ({
+        updatedModalRef,
+    }: {
+        updatedModalRef?: React.RefObject<ModalRef>
+    }) => {
+        setActiveModal(updatedModalRef)
+    }
 
     return (
         <PageContext.Provider
-            value={{ heading, updateHeading, activeModalRef: activeModal, updateModalRef}}
+            value={{
+                heading,
+                updateHeading,
+                activeModalRef: activeModal,
+                updateModalRef,
+            }}
             children={children}
         />
     )

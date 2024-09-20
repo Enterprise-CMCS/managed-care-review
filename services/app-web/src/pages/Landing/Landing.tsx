@@ -48,7 +48,7 @@ export const Landing = (): React.ReactElement => {
                     {redirectFromSessionTimeout && !maybeMaintenaceBanner && (
                         <ErrorAlertSessionExpired />
                     )}
-                     {redirectFromSigninError && !maybeMaintenaceBanner && (
+                    {redirectFromSigninError && !maybeMaintenaceBanner && (
                         <ErrorAlertSignIn />
                     )}
                     <Grid row gap className="margin-top-2">

@@ -1,6 +1,5 @@
 import React from 'react'
 import {
-    Alert,
     Card,
     CardHeader,
     CardMedia,
@@ -117,22 +116,22 @@ export function LocalLogin(): React.ReactElement {
     const hasSigninError = new URLSearchParams(location.search).get(
         'signin-error'
     )
-    const [showFormAlert, setShowFormAlert] = React.useState(hasSigninError? true : false)
+    const [showFormAlert, setShowFormAlert] = React.useState(
+        hasSigninError ? true : false
+    )
     const navigate = useNavigate()
     const { checkAuth, loginStatus } = useAuth()
 
     async function login(user: LocalUserType) {
         loginLocalUser(user)
-            const result = await checkAuth()
+        const result = await checkAuth()
 
-            if(result instanceof Error){
-                setShowFormAlert(true)
-                recordJSException(result)
-            } else {
-                navigate(RoutesRecord.ROOT)
-            }
-
-
+        if (result instanceof Error) {
+            setShowFormAlert(true)
+            recordJSException(result)
+        } else {
+            navigate(RoutesRecord.ROOT)
+        }
     }
 
     return (
@@ -140,9 +139,7 @@ export function LocalLogin(): React.ReactElement {
             <h2>Auth Page</h2>
             <h3>Local Login</h3>
             <div>Login as one of our hard coded users:</div>
-            {showFormAlert && (
-                <ErrorAlertSignIn />
-            )}
+            {showFormAlert && <ErrorAlertSignIn />}
             <CardGroup>
                 {localUsers.map((user) => {
                     const fromString = {

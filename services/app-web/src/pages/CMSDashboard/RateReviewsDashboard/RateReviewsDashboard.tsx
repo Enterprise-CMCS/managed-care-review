@@ -1,6 +1,6 @@
 import React from 'react'
 import { useAuth } from '../../../contexts/AuthContext'
-import { useIndexRatesQuery } from '../../../gen/gqlClient'
+import { useIndexRatesForDashboardQuery } from '../../../gen/gqlClient'
 import { mostRecentDate } from '../../../common-code/dateHelpers'
 import styles from '../../StateDashboard/StateDashboard.module.scss'
 import { recordJSException } from '../../../otelHelpers/tracingHelper'
@@ -13,7 +13,7 @@ import { RateTypeRecord } from '../../../constants/healthPlanPackages'
 const RateReviewsDashboard = (): React.ReactElement => {
     const { loggedInUser } = useAuth()
     const isAdminUser = loggedInUser?.role === 'ADMIN_USER'
-    const { data, loading, error } = useIndexRatesQuery({
+    const { data, loading, error } = useIndexRatesForDashboardQuery({
         variables: { input: { stateCode: undefined } },
     })
 

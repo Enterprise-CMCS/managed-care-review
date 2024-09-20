@@ -55,14 +55,12 @@ export function Signup({
         })
         setIsLoading(false)
 
-            if (result instanceof Error) {
-                showError('An unexpected error occurred!')
-
-            } else {
-                setEmail(fields.email)
-                triggerConfirmation()
-            }
-
+        if (result instanceof Error) {
+            showError('An unexpected error occurred!')
+        } else {
+            setEmail(fields.email)
+            triggerConfirmation()
+        }
     }
 
     return (
