@@ -67,13 +67,6 @@ export type {
     ContractTableProps,
 } from './ContractTable'
 
-export { ContractTable } from './ContractTable'
-
-export type {
-    ContractInDashboardType,
-    ContractTableProps,
-} from './ContractTable'
-
 export {
     ErrorAlert,
     ErrorAlertSignIn,
