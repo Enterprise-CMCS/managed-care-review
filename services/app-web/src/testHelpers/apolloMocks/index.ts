@@ -91,7 +91,12 @@ export {
     createContractMockSuccess,
     indexContractsMockSuccess
 } from './contractGQLMock'
-export { indexRatesMockSuccess, indexRatesMockFailure } from './rateGQLMocks'
+export { 
+    indexRatesMockSuccess, 
+    indexRatesForDashboardMockSuccess, 
+    indexRatesMockFailure,
+    indexRatesForDashboardMockFailure,
+} from './rateGQLMocks'
 
 export { withdrawAndReplaceRedundantRateMock } from './replaceRateGQLMocks'
 

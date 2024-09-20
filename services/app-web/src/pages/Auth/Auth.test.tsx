@@ -13,11 +13,14 @@ import {
 import { CognitoLogin } from './CognitoLogin'
 import { LocalLogin } from '../../localAuth'
 import { fetchCurrentUserMock } from '../../testHelpers/apolloMocks'
-/*  
+/*
 This file should only have basic user flows for auth. Form and implementation details are tested at the component level.
 */
 
 describe('Auth', () => {
+    afterEach(() => {
+        vi.clearAllMocks()
+    })
     describe('Cognito Login', () => {
         const userLogin = async (screen: Screen<typeof queries>) => {
             await userClickByRole(screen, 'button', {
@@ -37,16 +40,15 @@ describe('Auth', () => {
             await userClickByRole(screen, 'button', { name: 'Login' })
         }
 
-        it('displays signup form when logged out', () => {
+        it('displays signup form when logged out', async () => {
             renderWithProviders(<CognitoLogin />, {
                 apolloProvider: {
                     mocks: [fetchCurrentUserMock({ statusCode: 403 })],
                 },
             })
 
-            expect(
-                screen.getByRole('form', { name: 'Signup Form' })
-            ).toBeInTheDocument()
+            await screen.findByRole('form', { name: 'Signup Form' })
+
             expect(
                 screen.getByRole('button', { name: /SignUp/i })
             ).toBeInTheDocument()
@@ -95,7 +97,7 @@ describe('Auth', () => {
                     apolloProvider: {
                         mocks: [
                             fetchCurrentUserMock({ statusCode: 403 }),
-                            fetchCurrentUserMock({ statusCode: 403 }),
+                            fetchCurrentUserMock({ statusCode: 200 }),
                         ],
                     },
                     routerProvider: {
@@ -111,10 +113,10 @@ describe('Auth', () => {
             await waitFor(() => expect(testLocation.pathname).toBe('/'))
         })
 
-        it('when login fails, stay on page and display error alert', async () => {
+        it('when login fails, display error alert', async () => {
             const loginSpy = vi
                 .spyOn(CognitoAuthApi, 'signIn')
-                .mockRejectedValue(new Error('Login failed'))
+                .mockResolvedValue(new Error('Login failed'))
 
             let testLocation: Location
 
@@ -137,6 +139,9 @@ describe('Auth', () => {
             await waitFor(() => {
                 expect(loginSpy).toHaveBeenCalledTimes(1)
                 expect(testLocation.pathname).toBe('/auth')
+                expect(
+                    screen.getByRole('heading', { name: 'Sign in error' })
+                ).toBeInTheDocument()
             })
         })
     })
@@ -146,18 +151,16 @@ describe('Auth', () => {
             window.localStorage.clear()
         })
 
-        it('displays aang and toph and zuko and roku and izumi and iroh when logged out', () => {
+        it('displays aang and toph and zuko and roku and izumi and iroh when logged out', async () => {
             renderWithProviders(<LocalLogin />, {
                 apolloProvider: {
                     mocks: [fetchCurrentUserMock({ statusCode: 403 })],
                 },
             })
 
-            expect(
-                screen.getByRole('img', {
-                    name: /Aang/i,
-                })
-            ).toBeInTheDocument()
+            await screen.findByRole('img', {
+                name: /Aang/i,
+            })
 
             expect(
                 screen.getByRole('img', {
@@ -273,6 +276,9 @@ describe('Auth', () => {
             await userClickByTestId(screen, 'TophButton')
             await waitFor(() => {
                 expect(testLocation.pathname).toBe('/auth')
+                expect(
+                    screen.getByRole('heading', { name: 'Sign in error' })
+                ).toBeInTheDocument()
             })
         })
     })

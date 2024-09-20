@@ -9,8 +9,8 @@ import {
     indexContractsMockSuccess,
 } from '../../testHelpers/apolloMocks'
 
-// Routing and routes configuration
-describe('AppRoutes', () => {
+// Routing and routes configuration tested here, best layer for testing behaviors that cross several pages
+describe('AppRoutes and routing configuration', () => {
     Object.defineProperty(window, 'scrollTo', {
         writable: true,
         value: vi.fn(),

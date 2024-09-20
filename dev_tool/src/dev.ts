@@ -226,10 +226,18 @@ async function main() {
                     .command(
                         'api',
                         'run app-api locally. Will run the graphql compiler too.',
-                        () => {
+                        (yargs) => {
+                            return yargs.option('prof', {
+                                type: 'boolean',
+                                default: false,
+                                describe:
+                                    'run app-api with node --prof collecting profiling trace data',
+                            })
+                        },
+                        (opts) => {
                             const runner = new LabeledProcessRunner()
 
-                            runAPILocally(runner)
+                            runAPILocally(runner, opts.prof)
                         }
                     )
                     .command(

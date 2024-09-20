@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React from 'react'
 import {
     ButtonGroup,
     Modal as UswdsModal,
@@ -14,8 +14,8 @@ import {
 import styles from './Modal.module.scss'
 
 import { ActionButton } from '../ActionButton'
-import { useAuth } from '../../contexts/AuthContext'
 import { ButtonWithLogging } from '../TealiumLogging'
+import { usePage } from '../../contexts/PageContext'
 
 interface ModalComponentProps {
     id: string
@@ -48,21 +48,23 @@ export const Modal = ({
     modalAlert,
     ...divProps
 }: ModalProps): React.ReactElement => {
-    const { sessionIsExpiring } = useAuth()
-
-    /* unless it's the session expiring modal, close it if the session is expiring, so the user can interact
-    with the session expiring modal */
-    useEffect(() => {
-        if (id !== 'extend-session-modal' && sessionIsExpiring) {
-            modalRef.current?.toggleModal(undefined, false)
-        }
-    }, [sessionIsExpiring, modalRef, id])
-
-    const cancelHandler = (e: React.MouseEvent): void => {
+    const { updateModalRef } = usePage()
+    const cancelHandler = (_e: React.MouseEvent): void => {
         if (onCancel) {
             onCancel()
         }
+        updateModalRef({ updatedModalRef: undefined })
         modalRef.current?.toggleModal(undefined, false)
+    }
+
+    const submitHandler = (_e: React.MouseEvent): void => {
+        if (onSubmit) {
+            onSubmit()
+        }
+        updateModalRef({ updatedModalRef: undefined })
+        // do not close modal here manually
+        // sometimes validation fails and we want to keep modal open but display errors
+        // consumer should determine wether or not to close modal in onSubmit
     }
 
     return (
@@ -108,7 +110,7 @@ export const Modal = ({
                         variant="success"
                         id={`${id}-submit`}
                         parent_component_type="modal"
-                        onClick={onSubmit}
+                        onClick={submitHandler}
                         loading={isSubmitting}
                         {...submitButtonProps}
                     >

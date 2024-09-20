@@ -21,7 +21,7 @@ CustomStylesWithContactSupportLink.args = {
     message:
         'Here is an error alert with extra padding and a light gray background.',
     style: { backgroundColor: '#F0F0F0', padding: '2em' },
-    remediation: 'DEFAULT'
+    remediation: 'DEFAULT',
 }
 
 // List of application context-specific error alert components for quick reference.
@@ -30,7 +30,7 @@ export const ListOfApplicationErrorAlerts = (): React.ReactElement => (
         <ErrorAlertFailedRequest />
         <ErrorAlertValidationError />
         <ErrorAlertSiteUnavailable />
-        <ErrorAlertScheduledMaintenance/>
+        <ErrorAlertScheduledMaintenance />
         <ErrorAlertSignIn />
         <ErrorAlertSessionExpired />
     </div>
