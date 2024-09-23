@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useLayoutEffect } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import {
     ColumnFiltersState,
     createColumnHelper,
@@ -6,75 +6,113 @@ import {
     getCoreRowModel,
     getFilteredRowModel,
     getSortedRowModel,
-    getFacetedMinMaxValues,
     useReactTable,
     getFacetedUniqueValues,
     Column,
-    FilterFn,
 } from '@tanstack/react-table'
 import { useAtom } from 'jotai/react'
-import { atom } from 'jotai'
 import { atomWithHash } from 'jotai-location'
-import { loadable } from 'jotai/vanilla/utils'
-import { HealthPlanPackageStatus, Program } from '../../../gen/gqlClient'
-import styles from '../../../components/HealthPlanPackageTable/HealthPlanPackageTable.module.scss'
+import { HealthPlanPackageStatus, Program, User } from '../../gen/gqlClient'
+import styles from './HealthPlanPackageTable.module.scss'
 import { Table, Tag } from '@trussworks/react-uswds'
 import dayjs from 'dayjs'
 import qs from 'qs'
+import { SubmissionStatusRecord } from '../../constants/healthPlanPackages'
 import {
     FilterAccordion,
     FilterSelect,
     FilterSelectedOptionsType,
     FilterOptionType,
-    FilterDateRange,
-} from '../../../components/FilterAccordion'
-import { pluralize } from '../../../common-code/formatters'
-import { DoubleColumnGrid } from '../../../components'
-import { FilterDateRangeRef } from '../../../components/FilterAccordion/FilterDateRange/FilterDateRange'
-import { Loading, NavLinkWithLogging } from '../../../components'
-import { useTealium } from '../../../hooks'
+} from '../FilterAccordion'
+import { InfoTag, TagProps } from '../InfoTag/InfoTag'
+import { pluralize } from '../../common-code/formatters'
+import { DoubleColumnGrid } from '../DoubleColumnGrid'
+import { NavLinkWithLogging } from '../TealiumLogging/Link'
+import { useTealium } from '../../hooks'
 import useDeepCompareEffect from 'use-deep-compare-effect'
-
-type RatingPeriodFilterType = [string, string] | []
 
 export type RateInDashboardType = {
     id: string
     name: string
-    rateNumber: number
-    submittedAt: string
+    submittedAt?: string
     updatedAt: Date
     status: HealthPlanPackageStatus
     programs: Program[]
-    rateType: string
-    rateDateStart: Date
-    rateDateEnd: Date
-    stateName: string
+    rateType?: string
+    ratePeriodStart: Date
+    ratePeriodEnd: Date
+    stateName?: string
 }
 
-export type RateTableProps = {
-    tableData: RateInDashboardType[]
+export type PackageInDashboardType = {
+    id: string
+    name: string
+    submittedAt?: string
+    updatedAt: Date
+    status: HealthPlanPackageStatus
+    programs: Program[]
+    submissionType?: string
+    stateName?: string
+}
+
+export type PackageTableProps = {
+    tableData: PackageInDashboardType[]
+    user: User
+    showFilters?: boolean
     caption?: string
-    isAdminUser?: boolean
 }
 
-function rateURL(rate: RateInDashboardType): string {
-    return `/rates/${rate.id}`
+const isSubmitted = (status: HealthPlanPackageStatus) =>
+    status === 'SUBMITTED' || status === 'RESUBMITTED'
+
+function submissionURL(
+    id: PackageInDashboardType['id'],
+    status: PackageInDashboardType['status'],
+    isNotStateUser: boolean
+): string {
+    if (isNotStateUser) {
+        return `/submissions/${id}`
+    } else if (status === 'DRAFT') {
+        return `/submissions/${id}/edit/type`
+    } else if (status === 'UNLOCKED') {
+        return `/submissions/${id}/edit/review-and-submit`
+    }
+    return `/submissions/${id}`
 }
 
-const rateTypeOptions = [
+const StatusTag = ({
+    status,
+}: {
+    status: HealthPlanPackageStatus
+}): React.ReactElement => {
+    let color: TagProps['color'] = 'gold'
+    if (isSubmitted(status)) {
+        color = 'green'
+    } else if (status === 'UNLOCKED') {
+        color = 'blue'
+    }
+
+    const statusText = isSubmitted(status)
+        ? SubmissionStatusRecord.SUBMITTED
+        : SubmissionStatusRecord[status]
+
+    return <InfoTag color={color}>{statusText}</InfoTag>
+}
+
+const submissionTypeOptions = [
     {
-        label: 'Certification',
-        value: 'Certification',
+        label: 'Contract action only',
+        value: 'Contract action only',
     },
     {
-        label: 'Amendment',
-        value: 'Amendment',
+        label: 'Contract action and rate certification',
+        value: 'Contract action and rate certification',
     },
 ]
 
 /* To keep the memoization from being refreshed every time, this needs to be
     created outside the render function */
-const columnHelper = createColumnHelper<RateInDashboardType>()
+const columnHelper = createColumnHelper<PackageInDashboardType>()
 
 type ReadableFilters = {
     [key: string]: string[]
@@ -88,7 +126,12 @@ const fromColumnFiltersToReadableUrl = (input: ColumnFiltersState) => {
     return qs.stringify(output, { arrayFormat: 'comma', encode: false })
 }
 
-const fromReadableUrlToColumnFilters = (input: string): ColumnFiltersState => {
+const fromReadableUrlToColumnFilters = (
+    input: string | null
+): ColumnFiltersState => {
+    if (!input) {
+        return []
+    }
     const parsed = qs.parse(input) as { [key: string]: string }
     return Object.entries(parsed).map(([id, value]) => ({
         id,
@@ -101,13 +144,9 @@ const columnHash = atomWithHash('filters', [] as ColumnFiltersState, {
     deserialize: fromReadableUrlToColumnFilters,
 })
 
-/* This returns the url filters along with a loading status. This is used to prevent flickering on first load with filters
-    in the url. */
-const loadableColumnHash = loadable(atom(async (get) => get(columnHash)))
-
 /* transform react-table's ColumnFilterState (stringified, formatted, and stored in the URL) to react-select's FilterOptionType
     and return only the items matching the FilterSelect component that's calling the function*/
-const getSelectedFiltersFromColumnState = (
+const getSelectedFiltersFromUrl = (
     columnFilters: ColumnFiltersState,
     id: string
 ) => {
@@ -124,68 +163,24 @@ const getSelectedFiltersFromColumnState = (
             })
         }
     })
-
     const filterValues = valuesFromUrl
         .filter((item) => item.id === id)
         .map((item) => ({ value: item.value, label: item.value }))
-
     return filterValues as FilterOptionType[]
 }
 
-const getDateRangeFilterFromUrl = (
-    columnFilters: ColumnFiltersState,
-    id: string
-): RatingPeriodFilterType => {
-    const filterLookup: { [key: string]: string[] } = {}
-    columnFilters.forEach(
-        (filter) => (filterLookup[filter.id] = filter.value as string[])
-    )
-
-    if (filterLookup[id]) {
-        return [filterLookup[id][0], filterLookup[id][1]]
-    }
-
-    return ['', '']
-}
-
-const dateRangeFilter: FilterFn<RatingPeriodFilterType> = (
-    row,
-    columnId,
-    value: RatingPeriodFilterType
-) => {
-    if (value.length === 0) {
-        return true
-    }
-    const fromDate = new Date(value[0]).getTime()
-    const toDate = new Date(value[1]).getTime()
-    const columnDate = new Date(row.getValue(columnId)).getTime()
-
-    const ratingPeriodFilterResults = [
-        //If date is greater than rating period TO filter date. Return true if filter date is not valud
-        Number.isNaN(fromDate) ? true : columnDate >= fromDate,
-        //If date is greater than rating period FROM filter date. Return true if filter date is not valud
-        Number.isNaN(toDate) ? true : columnDate <= toDate,
-    ]
-
-    return ratingPeriodFilterResults.every((result) => result)
-}
-
-type TableVariantConfig = {
-    tableName: string
-    rowIDName: string
-}
-export const RateReviewsTable = ({
+export const HealthPlanPackageTable = ({
     caption,
     tableData,
-    isAdminUser = false,
-}: RateTableProps): React.ReactElement => {
+    user,
+    showFilters = false,
+}: PackageTableProps): React.ReactElement => {
+    const tableConfig = {
+        tableName: 'Submissions',
+        rowIDName: 'submission',
+    }
     const lastClickedElement = useRef<string | null>(null)
-    const filterDateRangeRef = useRef<FilterDateRangeRef>(null)
     const [columnFilters, setColumnFilters] = useAtom(columnHash)
-    const [defaultFiltersFromUrl] = useAtom(loadableColumnHash)
-    const [defaultColumnFilters, setDefaultColumnState] = useState<
-        ColumnFiltersState | undefined
-    >(undefined)
     const [prevFilters, setPrevFilters] = useState<{
         filters: ColumnFiltersState
         results?: string
@@ -193,11 +188,6 @@ export const RateReviewsTable = ({
         filters: columnFilters,
     })
     const { logFilterEvent } = useTealium()
-
-    const tableConfig: TableVariantConfig = {
-        tableName: 'Rate Reviews',
-        rowIDName: 'rate',
-    }
 
     /* we store the last clicked element in a ref so that when the url is updated and the page rerenders
         we can focus that element.  this useEffect (with no dependency array) will run once on each render.
@@ -231,18 +221,22 @@ export const RateReviewsTable = ({
 
     const [tableCaption, setTableCaption] = useState<React.ReactNode | null>()
 
+    const isNotStateUser = user.__typename !== 'StateUser'
     const tableColumns = React.useMemo(
         () => [
             columnHelper.accessor((row) => row, {
-                header: 'Rate review',
+                header: 'ID',
                 cell: (info) => (
                     <NavLinkWithLogging
                         key={`${tableConfig.rowIDName}-id-${
                             info.getValue().id
                         }`}
-                        to={rateURL(info.getValue())}
+                        to={submissionURL(
+                            info.getValue().id,
+                            info.getValue().status,
+                            isNotStateUser
+                        )}
                         className={`${styles.ID}`}
-                        data-testid={`rate-link-${info.getValue().id}`}
                     >
                         {info.getValue().name}
                     </NavLinkWithLogging>
@@ -260,10 +254,14 @@ export const RateReviewsTable = ({
                 },
                 filterFn: `arrIncludesSome`,
             }),
-            columnHelper.accessor('rateNumber', {
-                id: 'rateNumber',
-                header: 'Rate #',
+            columnHelper.accessor('submissionType', {
+                id: 'submissionType',
+                header: 'Submission type',
                 cell: (info) => <span>{info.getValue()}</span>,
+                meta: {
+                    dataTestID: 'submission-type',
+                },
+                filterFn: `arrIncludesSome`,
             }),
             columnHelper.accessor('programs', {
                 header: 'Programs',
@@ -283,38 +281,6 @@ export const RateReviewsTable = ({
                     dataTestID: `${tableConfig.rowIDName}-programs`,
                 },
             }),
-            columnHelper.accessor('rateType', {
-                id: 'rateType',
-                header: 'Rate Type',
-                cell: (info) => <span>{info.getValue()}</span>,
-                meta: {
-                    dataTestID: 'rate-type',
-                },
-                filterFn: `arrIncludesSome`,
-            }),
-            columnHelper.accessor('rateDateStart', {
-                id: 'rateDateStart',
-                header: 'Rate period start date',
-                cell: (info) =>
-                    info.getValue()
-                        ? dayjs(info.getValue()).format('MM/DD/YYYY')
-                        : '',
-                meta: {
-                    dataTestID: `${tableConfig.rowIDName}-date`,
-                },
-                filterFn: 'dateRangeFilter',
-            }),
-            columnHelper.accessor('rateDateEnd', {
-                id: 'rateDateEnd',
-                header: 'Rate period end date',
-                cell: (info) =>
-                    info.getValue()
-                        ? dayjs(info.getValue()).format('MM/DD/YYYY')
-                        : '',
-                meta: {
-                    dataTestID: `${tableConfig.rowIDName}-date`,
-                },
-            }),
             columnHelper.accessor('submittedAt', {
                 header: 'Submission date',
                 cell: (info) =>
@@ -325,32 +291,47 @@ export const RateReviewsTable = ({
                     dataTestID: `${tableConfig.rowIDName}-date`,
                 },
             }),
+            columnHelper.accessor('updatedAt', {
+                header: 'Last updated',
+                cell: (info) =>
+                    info.getValue()
+                        ? dayjs(info.getValue()).format('MM/DD/YYYY')
+                        : '',
+                meta: {
+                    dataTestID: `${tableConfig.rowIDName}-last-updated`,
+                },
+            }),
+            columnHelper.accessor('status', {
+                header: 'Status',
+                cell: (info) => <StatusTag status={info.getValue()} />,
+                meta: {
+                    dataTestID: `${tableConfig.rowIDName}-status`,
+                },
+            }),
         ],
-        [tableConfig.rowIDName]
+        [isNotStateUser, tableConfig.rowIDName]
     )
 
     const reactTable = useReactTable({
         data: tableData.sort((a, b) =>
             a['updatedAt'] > b['updatedAt'] ? -1 : 1
         ),
-        initialState: {
-            columnVisibility: {
-                rateNumber: isAdminUser,
-            },
-        },
         columns: tableColumns,
         filterFns: {
-            dateRangeFilter: dateRangeFilter,
-        },
-        state: {
-            columnFilters,
+            dateRangeFilter: () => true,
         },
         getCoreRowModel: getCoreRowModel(),
+        state: {
+            columnFilters,
+            columnVisibility: {
+                stateName: isNotStateUser,
+                submissionType: isNotStateUser,
+            },
+        },
         onColumnFiltersChange: setColumnFilters,
         getFacetedUniqueValues: getFacetedUniqueValues(),
         getFilteredRowModel: getFilteredRowModel(),
         getSortedRowModel: getSortedRowModel(),
-        getFacetedMinMaxValues: getFacetedMinMaxValues(),
     })
 
     const filteredRows = reactTable.getRowModel().rows
@@ -358,13 +339,10 @@ export const RateReviewsTable = ({
 
     const stateColumn = reactTable.getColumn(
         'stateName'
-    ) as Column<RateInDashboardType>
-    const rateTypeColumn = reactTable.getColumn(
-        'rateType'
-    ) as Column<RateInDashboardType>
-    const rateDateStartColumn = reactTable.getColumn(
-        'rateDateStart'
-    ) as Column<RateInDashboardType>
+    ) as Column<PackageInDashboardType>
+    const submissionTypeColumn = reactTable.getColumn(
+        'submissionType'
+    ) as Column<PackageInDashboardType>
 
     // Filter options based on table data instead of static list of options.
     const stateFilterOptions = Array.from(
@@ -382,58 +360,30 @@ export const RateReviewsTable = ({
         filterLength
     )} applied`
 
-    const submissionCount = `Displaying ${filteredRows.length} of ${
-        tableData.length
-    } ${pluralize('rate review', tableData.length)}`
+    const submissionCount = !showFilters
+        ? `${tableData.length} ${pluralize('submission', tableData.length)}`
+        : `Displaying ${filteredRows.length} of ${tableData.length} ${pluralize(
+              'submission',
+              tableData.length
+          )}`
 
     const updateFilters = (
-        column: Column<RateInDashboardType>,
+        column: Column<PackageInDashboardType>,
         selectedOptions: FilterSelectedOptionsType,
-        filterRefName: string
+        filterName: string
     ) => {
-        lastClickedElement.current = filterRefName
+        lastClickedElement.current = filterName
         setTableCaption(null)
         column.setFilterValue(
-            selectedOptions.map((selection) => selection?.value)
-        )
-    }
-
-    const updateRatingPeriodFilter = (
-        date: [string | undefined, string | undefined],
-        filterColumn: Column<RateInDashboardType>,
-        elementName: string
-    ) => {
-        lastClickedElement.current = elementName
-        setTableCaption(null)
-
-        filterColumn.setFilterValue(
-            (value: RatingPeriodFilterType): RatingPeriodFilterType => {
-                const prevDates = value ?? ['', '']
-                // When updating, we need to set either the `from` or `to` in that array while preserving the opposite input
-                // value to not clear it out.
-                // This handles the existing `from` or `to` input date when updating the opposite input. When calling
-                // this function, the updated input has a value and the other should be undefined. If both are present,
-                // it will set both.
-                const fromDate = date[0] ?? prevDates[0]
-                const toDate = date[1] ?? prevDates[1]
-                const newDates = [fromDate, toDate] as RatingPeriodFilterType
-
-                if (newDates.every((date) => !date)) {
-                    return []
-                }
-
-                return newDates
-            }
+            selectedOptions.map((selection) => selection.value)
         )
     }
 
     const clearFilters = () => {
-        setTableCaption(null)
-        setColumnFilters([])
-        if (filterDateRangeRef.current) {
-            filterDateRangeRef.current.clearFilter()
-        }
         lastClickedElement.current = 'clearFiltersButton'
+        setTableCaption(null)
+
+        setColumnFilters([])
     }
 
     //Store caption element in state in order for screen readers to read dynamic captions.
@@ -441,22 +391,23 @@ export const RateReviewsTable = ({
         setTableCaption(
             <caption className={caption ? '' : styles.srOnly}>
                 {caption ?? tableConfig.tableName}
-                <span className={styles.srOnly}>{`, ${filtersApplied}`}</span>
+                {showFilters && (
+                    <span
+                        className={styles.srOnly}
+                    >{`, ${filtersApplied}`}</span>
+                )}
                 <span className={styles.srOnly}>{`, ${submissionCount}.`}</span>
             </caption>
         )
-    }, [filtersApplied, submissionCount, caption, tableConfig.tableName])
+    }, [
+        filtersApplied,
+        submissionCount,
+        caption,
+        showFilters,
+        tableConfig.tableName,
+    ])
 
-    useLayoutEffect(() => {
-        // Do not set default column state again
-        if (
-            defaultFiltersFromUrl.state === 'hasData' &&
-            !defaultColumnFilters
-        ) {
-            setDefaultColumnState(defaultFiltersFromUrl.data)
-        }
-    }, [defaultFiltersFromUrl, defaultColumnFilters])
-
+    // Handles logging when filters change.
     useDeepCompareEffect(() => {
         const filterCategories = columnFilters.map((f) => f.id).join(',')
         const prevFilterCategories = prevFilters.filters
@@ -492,107 +443,63 @@ export const RateReviewsTable = ({
         }
     }, [submissionCount, columnFilters, setPrevFilters, prevFilters])
 
-    if (defaultColumnFilters === undefined) {
-        return <Loading />
-    }
-
     return (
         <>
             {tableData.length ? (
                 <>
-                    <FilterAccordion
-                        onClearFilters={clearFilters}
-                        filterTitle="Filters"
-                    >
-                        <DoubleColumnGrid>
-                            <FilterSelect
-                                value={getSelectedFiltersFromColumnState(
-                                    columnFilters,
-                                    'stateName'
-                                )}
-                                defaultValue={getSelectedFiltersFromColumnState(
-                                    defaultColumnFilters,
-                                    'stateName'
-                                )}
-                                name="state"
-                                label="State"
-                                filterOptions={stateFilterOptions}
-                                onChange={(selectedOptions) =>
-                                    updateFilters(
-                                        stateColumn,
-                                        selectedOptions,
-                                        'state'
-                                    )
-                                }
-                            />
-                            <FilterSelect
-                                value={getSelectedFiltersFromColumnState(
-                                    columnFilters,
-                                    'rateType'
-                                )}
-                                defaultValue={getSelectedFiltersFromColumnState(
-                                    defaultColumnFilters,
-                                    'rateType'
-                                )}
-                                name="rateType"
-                                label="Rate Type"
-                                filterOptions={rateTypeOptions}
-                                onChange={(selectedOptions) =>
-                                    updateFilters(
-                                        rateTypeColumn,
-                                        selectedOptions,
-                                        'rateType'
-                                    )
-                                }
-                            />
-                        </DoubleColumnGrid>
-                        <FilterDateRange
-                            ref={filterDateRangeRef}
-                            legend={'Rating period start date'}
-                            startDateHint="mm/dd/yyyy"
-                            startDateLabel="From"
-                            startDatePickerProps={{
-                                id: 'ratingPeriodStartFrom',
-                                name: 'ratingPeriodStartFrom',
-                                defaultValue: getDateRangeFilterFromUrl(
-                                    defaultColumnFilters,
-                                    'rateDateStart'
-                                )[0],
-                                onChange: (date) =>
-                                    updateRatingPeriodFilter(
-                                        [date, undefined],
-                                        rateDateStartColumn,
-                                        'ratingPeriodStartFrom'
-                                    ),
-                            }}
-                            endDateHint="mm/dd/yyyy"
-                            endDateLabel="To"
-                            endDatePickerProps={{
-                                id: 'ratingPeriodStartTo',
-                                name: 'ratingPeriodStartTo',
-                                defaultValue: getDateRangeFilterFromUrl(
-                                    defaultColumnFilters,
-                                    'rateDateStart'
-                                )[1],
-                                onChange: (date) =>
-                                    updateRatingPeriodFilter(
-                                        [undefined, date],
-                                        rateDateStartColumn,
-                                        'ratingPeriodStartTo'
-                                    ),
-                            }}
-                        />
-                    </FilterAccordion>
+                    {showFilters && (
+                        <FilterAccordion
+                            onClearFilters={clearFilters}
+                            filterTitle="Filters"
+                        >
+                            <DoubleColumnGrid>
+                                <FilterSelect
+                                    value={getSelectedFiltersFromUrl(
+                                        columnFilters,
+                                        'stateName'
+                                    )}
+                                    name="state"
+                                    label="State"
+                                    filterOptions={stateFilterOptions}
+                                    onChange={(selectedOptions) =>
+                                        updateFilters(
+                                            stateColumn,
+                                            selectedOptions,
+                                            'state'
+                                        )
+                                    }
+                                />
+                                <FilterSelect
+                                    value={getSelectedFiltersFromUrl(
+                                        columnFilters,
+                                        'submissionType'
+                                    )}
+                                    name="submissionType"
+                                    label="Submission type"
+                                    filterOptions={submissionTypeOptions}
+                                    onChange={(selectedOptions) =>
+                                        updateFilters(
+                                            submissionTypeColumn,
+                                            selectedOptions,
+                                            'submissionType'
+                                        )
+                                    }
+                                />
+                            </DoubleColumnGrid>
+                        </FilterAccordion>
+                    )}
                     <div aria-live="polite" aria-atomic>
-                        <div className={styles.filterCount}>
-                            {filtersApplied}
-                        </div>
+                        {showFilters && (
+                            <div className={styles.filterCount}>
+                                {filtersApplied}
+                            </div>
+                        )}
                         <div className={styles.filterCount}>
                             {submissionCount}
                         </div>
                     </div>
                     <Table fullWidth>
-                        <thead data-testid="rate-reviews-table">
+                        <thead>
                             {reactTable.getHeaderGroups().map((headerGroup) => (
                                 <tr key={headerGroup.id}>
                                     {headerGroup.headers.map((header) => (
@@ -649,7 +556,7 @@ export const RateReviewsTable = ({
                 </>
             ) : (
                 <div
-                    data-testid="rate-reviews-table"
+                    data-testid="dashboard-table"
                     className={styles.panelEmptyNoSubmissionsYet}
                 >
                     <h3>
