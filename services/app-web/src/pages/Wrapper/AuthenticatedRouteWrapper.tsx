@@ -9,7 +9,8 @@ import { IdleTimerProvider } from 'react-idle-timer'
 import { usePage } from '../../contexts/PageContext'
 
 const SESSION_ACTIONS = {
-    LOGOUT_SESSION: 'LOGOUT_SESSION',
+    LOGOUT_SESSION_BY_CHOICE: 'LOGOUT_SESSION_BY_CHOICE',
+    LOGOUT_SESSION_BY_TIMEOUT: 'LOGOUT_SESSION_BY_TIMEOUT',
     CONTINUE_SESSION: 'CONTINUE_SESSSION'
 }
 
@@ -40,6 +41,7 @@ const AuthenticatedRouteWrapper = ({
     const logoutBySessionTimeout = async () => {
         closeSessionTimeoutModal()
         await logout({type: 'TIMEOUT'})}
+
     const logoutByUserChoice  = async () =>  {
         closeSessionTimeoutModal()
         await logout({type: 'DEFAULT'})
@@ -50,11 +52,14 @@ const AuthenticatedRouteWrapper = ({
     }
 
     // For multi-tab support we emit messages related to user actions on the session timeout modal
-    const onMessage = async ({action}: {action: 'LOGOUT_SESSION' | 'CONTINUE_SESSION'}) => {
+    const onMessage = async ({action}: {action: 'LOGOUT_SESSION_BY_CHOICE' | 'LOGOUT_SESSION_BY_TIMEOUT' | 'CONTINUE_SESSION'}) => {
       switch (action) {
-        case 'LOGOUT_SESSION':
+        case 'LOGOUT_SESSION_BY_CHOICE':
             await logoutByUserChoice()
             break;
+        case 'LOGOUT_SESSION_BY_TIMEOUT':
+            await logoutBySessionTimeout()
+        break;
         case 'CONTINUE_SESSION':
                 await refreshSession()
                 break

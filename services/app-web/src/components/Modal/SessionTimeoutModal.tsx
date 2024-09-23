@@ -17,7 +17,7 @@ export const SessionTimeoutModal = ({
     const [countdownSeconds, setCountdownSeconds]= useState(idleTimer.getRemainingTime() / 1000)
 
     const handleLogoutSession = async () => {
-        idleTimer.message({action: SESSION_ACTIONS.LOGOUT_SESSION}, true)
+        idleTimer.message({action: SESSION_ACTIONS.LOGOUT_SESSION_BY_CHOICE}, true)
     }
     const handleContinueSession = async () => {
         idleTimer.activate()
