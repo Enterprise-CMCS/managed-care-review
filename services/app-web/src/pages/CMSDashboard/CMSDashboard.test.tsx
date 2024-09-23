@@ -1,19 +1,17 @@
-// eslint-disable @typescript-eslint/no-non-null-assertion
 import { screen, waitFor, within } from '@testing-library/react'
 import {
     fetchCurrentUserMock,
+    indexHealthPlanPackagesMockSuccess,
     iterableCmsUsersMockData,
+    mockDraftHealthPlanPackage,
     mockMNState,
-    indexContractsMockSuccess,
-    mockContractPackageUnlockedWithUnlockedType,
-    mockContractPackageDraft,
-    mockContractPackageSubmitted,
+    mockSubmittedHealthPlanPackage,
+    mockUnlockedHealthPlanPackage,
 } from '../../testHelpers/apolloMocks'
 import { renderWithProviders } from '../../testHelpers/jestHelpers'
 import { CMSDashboard, RateReviewsDashboard, SubmissionsDashboard } from './'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { RoutesRecord } from '../../constants'
-import { Contract } from '../../gen/gqlClient'
 
 // copy paste from AppRoutes - this is to allow texting of the react router Outlet
 const CMSDashboardNestedRoutes = () => (
@@ -50,7 +48,7 @@ describe('CMSDashboard', () => {
                                     statusCode: 200,
                                     user: mockUser(),
                                 }),
-                                indexContractsMockSuccess([]),
+                                indexHealthPlanPackagesMockSuccess([]),
                             ],
                         },
                         routerProvider: { route: '/dashboard/rate-reviews' },
@@ -77,7 +75,7 @@ describe('CMSDashboard', () => {
                                         statusCode: 200,
                                         user: mockUser(),
                                     }),
-                                    indexContractsMockSuccess([]),
+                                    indexHealthPlanPackagesMockSuccess([]),
                                 ],
                             },
                             routerProvider: { route: '/dashboard/submissions' },
@@ -89,12 +87,9 @@ describe('CMSDashboard', () => {
                 })
 
                 it('displays submissions table excluding any in progress drafts', async () => {
-                    const draft = mockContractPackageDraft()
-                    const submitted = mockContractPackageSubmitted()
-                    const unlocked: Contract = {
-                        ...mockContractPackageUnlockedWithUnlockedType(),
-                        __typename: 'Contract',
-                    }
+                    const draft = mockDraftHealthPlanPackage()
+                    const submitted = mockSubmittedHealthPlanPackage()
+                    const unlocked = mockUnlockedHealthPlanPackage()
                     draft.id = 'test-abc-draft'
                     submitted.id = 'test-abc-submitted'
                     unlocked.id = 'test-abc-unlocked'
@@ -108,7 +103,7 @@ describe('CMSDashboard', () => {
                                     statusCode: 200,
                                     user: mockUser(),
                                 }),
-                                indexContractsMockSuccess(submissions),
+                                indexHealthPlanPackagesMockSuccess(submissions),
                             ],
                         },
                         routerProvider: { route: '/dashboard/submissions' },
@@ -131,10 +126,8 @@ describe('CMSDashboard', () => {
                 })
 
                 it('displays submission type as expected for current revision that is submitted/resubmitted', async () => {
-                    const submitted = mockContractPackageSubmitted()
+                    const submitted = mockSubmittedHealthPlanPackage()
                     submitted.id = '123-4'
-                    submitted.packageSubmissions[0].contractRevision.formData.submissionType =
-                        'CONTRACT_ONLY'
                     const submissions = [submitted]
                     renderWithProviders(<CMSDashboardNestedRoutes />, {
                         apolloProvider: {
@@ -143,7 +136,7 @@ describe('CMSDashboard', () => {
                                     statusCode: 200,
                                     user: mockUser(),
                                 }),
-                                indexContractsMockSuccess(submissions),
+                                indexHealthPlanPackagesMockSuccess(submissions),
                             ],
                         },
                         routerProvider: { route: '/dashboard/submissions' },
@@ -157,12 +150,9 @@ describe('CMSDashboard', () => {
                     )
                 })
 
-                it('displays each contract status tag as expected for current revision that is submitted/resubmitted', async () => {
-                    const unlocked: Contract = {
-                        ...mockContractPackageUnlockedWithUnlockedType(),
-                        __typename: 'Contract',
-                    }
-                    const submitted = mockContractPackageSubmitted()
+                it('displays each health plan package status tag as expected for current revision that is submitted/resubmitted', async () => {
+                    const unlocked = mockUnlockedHealthPlanPackage()
+                    const submitted = mockSubmittedHealthPlanPackage()
                     submitted.id = 'test-abc-submitted'
                     unlocked.id = 'test-abc-unlocked'
 
@@ -174,7 +164,7 @@ describe('CMSDashboard', () => {
                                     statusCode: 200,
                                     user: mockUser(),
                                 }),
-                                indexContractsMockSuccess(submissions),
+                                indexHealthPlanPackagesMockSuccess(submissions),
                             ],
                         },
                         routerProvider: { route: '/dashboard/submissions' },
@@ -197,23 +187,16 @@ describe('CMSDashboard', () => {
 
                 it('displays name, type, programs and last update based on previously submitted revision for UNLOCKED package', async () => {
                     const mockMN = mockMNState() // this is the state used in apolloMocks
-                    const unlocked: Contract = {
-                        ...mockContractPackageUnlockedWithUnlockedType(),
-                        __typename: 'Contract',
-                    }
-                    // Set new data on the unlocked form. This would be a state users update and the CMS user should not see this data.
-                    unlocked.draftRevision!.formData.submissionType =
-                        'CONTRACT_AND_RATES'
-                    unlocked.draftRevision!.formData.programIDs = [
-                        mockMN.programs[0].id,
-                        mockMN.programs[1].id,
-                        mockMN.programs[2].id,
-                    ]
-                    unlocked.draftRevision!.updatedAt = new Date('2022-01-15')
-                    unlocked.draftRevision!.unlockInfo!.updatedAt = new Date(
-                        '2100-01-22'
-                    )
 
+                    // Set new data on the unlocked form. This would be a state users update and the CMS user should not see this data.
+                    const unlocked = mockUnlockedHealthPlanPackage(
+                        {
+                            submissionType: 'CONTRACT_ONLY',
+                            updatedAt: new Date('2022-01-15'),
+                            programIDs: [mockMN.programs[2].id],
+                        },
+                        { updatedAt: new Date('2100-01-22') }
+                    )
                     unlocked.id = 'test-state-edit-in-progress-unlocked'
 
                     const submissions = [unlocked]
@@ -224,7 +207,7 @@ describe('CMSDashboard', () => {
                                     statusCode: 200,
                                     user: mockUser(),
                                 }),
-                                indexContractsMockSuccess(submissions),
+                                indexHealthPlanPackagesMockSuccess(submissions),
                             ],
                         },
                         routerProvider: { route: '/dashboard/submissions' },
@@ -253,7 +236,7 @@ describe('CMSDashboard', () => {
                     const submissionNameLink =
                         within(unlockedRow).getByTestId('submission-id')
                     expect(submissionNameLink).toHaveTextContent(
-                        'MCR-MN-0005-SNBC'
+                        'MSC+-PMAP-SNBC'
                     )
 
                     // Confirm we are using updated at from the previous submitted revision unlock info
@@ -264,11 +247,8 @@ describe('CMSDashboard', () => {
                 })
 
                 it('should display filters on cms dashboard', async () => {
-                    const unlocked: Contract = {
-                        ...mockContractPackageUnlockedWithUnlockedType(),
-                        __typename: 'Contract',
-                    }
-                    const submitted = mockContractPackageSubmitted()
+                    const unlocked = mockUnlockedHealthPlanPackage()
+                    const submitted = mockSubmittedHealthPlanPackage()
                     submitted.id = 'test-abc-submitted'
                     unlocked.id = 'test-abc-unlocked'
                     const screen = renderWithProviders(
@@ -280,7 +260,7 @@ describe('CMSDashboard', () => {
                                         statusCode: 200,
                                         user: mockUser(),
                                     }),
-                                    indexContractsMockSuccess([
+                                    indexHealthPlanPackagesMockSuccess([
                                         submitted,
                                         unlocked,
                                     ]),

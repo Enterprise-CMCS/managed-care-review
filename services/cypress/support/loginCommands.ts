@@ -57,7 +57,7 @@ Cypress.Commands.add(
         }
 
         cy.wait('@fetchCurrentUserQuery', { timeout: 20_000 })
-        cy.wait('@indexContractsQuery', { timeout: 80_000 })
+        cy.wait('@indexHealthPlanPackagesQuery', { timeout: 80_000 })
         cy.findByTestId('cms-dashboard-page', { timeout: 10_000 }).should(
             'exist'
         )
@@ -77,7 +77,7 @@ Cypress.Commands.add(
                 )
                 cy.findByRole('heading', { name: /rate reviews/ }).should('exist')
             } else {
-                cy.wait('@indexContractsQuery', { timeout: 80_000 })
+                cy.wait('@indexHealthPlanPackagesQuery', { timeout: 80_000 })
             }
         }
     }
@@ -124,7 +124,7 @@ Cypress.Commands.add(
         } else if (initialURL?.includes('submissions')) {
             cy.wait('@fetchHealthPlanPackageQuery', { timeout: 20_000 })
         } else {
-            cy.wait('@indexContractsQuery', { timeout: 80_000 })
+            cy.wait('@indexHealthPlanPackagesQuery', { timeout: 80_000 })
             cy.findByTestId('cms-dashboard-page', { timeout: 10_000 }).should(
                 'exist'
             )

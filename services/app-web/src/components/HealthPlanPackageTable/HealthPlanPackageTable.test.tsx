@@ -1,12 +1,15 @@
 import { renderWithProviders } from '../../testHelpers/jestHelpers'
-import { ContractTable, ContractInDashboardType } from './ContractTable'
+import {
+    HealthPlanPackageTable,
+    PackageInDashboardType,
+} from './HealthPlanPackageTable'
 import { screen, waitFor, within } from '@testing-library/react'
 import selectEvent from 'react-select-event'
 import userEvent from '@testing-library/user-event'
 import { fetchCurrentUserMock } from '../../testHelpers/apolloMocks'
 import { User } from '../../gen/gqlClient'
 
-const submissions: ContractInDashboardType[] = [
+const submissions: PackageInDashboardType[] = [
     {
         id: '2f7f1274-3927-4367-bec6-870587a0f0c6',
         name: 'MCR-MN-0063-PMAP',
@@ -139,7 +142,7 @@ const apolloProviderWithCMSUser = () => ({
     ],
 })
 
-describe('ContractTable for CMS User (with filters)', () => {
+describe('HealthPlanPackageTable for CMS User (with filters)', () => {
     beforeEach(() => {
         window.location.assign('#')
         vi.clearAllMocks()
@@ -147,7 +150,7 @@ describe('ContractTable for CMS User (with filters)', () => {
 
     it('renders table and caption if passed in', async () => {
         renderWithProviders(
-            <ContractTable
+            <HealthPlanPackageTable
                 tableData={submissions}
                 user={mockCMSUser()}
                 caption="Table 1"
@@ -163,7 +166,7 @@ describe('ContractTable for CMS User (with filters)', () => {
 
     it('renders table with expected number of submissions', async () => {
         renderWithProviders(
-            <ContractTable
+            <HealthPlanPackageTable
                 tableData={submissions}
                 user={mockCMSUser()}
                 showFilters
@@ -183,7 +186,11 @@ describe('ContractTable for CMS User (with filters)', () => {
 
     it('displays no submission text when no submitted packages exist', async () => {
         renderWithProviders(
-            <ContractTable tableData={[]} user={mockCMSUser()} showFilters />,
+            <HealthPlanPackageTable
+                tableData={[]}
+                user={mockCMSUser()}
+                showFilters
+            />,
             {
                 apolloProvider: apolloProviderWithStateUser(),
             }
@@ -199,7 +206,7 @@ describe('ContractTable for CMS User (with filters)', () => {
 
     it('displays submissions table with expected headers for cms users', async () => {
         renderWithProviders(
-            <ContractTable
+            <HealthPlanPackageTable
                 tableData={submissions}
                 user={mockCMSUser()}
                 showFilters
@@ -222,7 +229,7 @@ describe('ContractTable for CMS User (with filters)', () => {
 
     it('displays submissions table sorted by that revisions last updated column', async () => {
         renderWithProviders(
-            <ContractTable
+            <HealthPlanPackageTable
                 tableData={submissions}
                 user={mockCMSUser()}
                 showFilters
@@ -248,7 +255,7 @@ describe('ContractTable for CMS User (with filters)', () => {
     })
 
     it('has correct submission links for cms users', async () => {
-        const stateSubmissions: ContractInDashboardType[] = [
+        const stateSubmissions: PackageInDashboardType[] = [
             {
                 ...submissions[0],
                 id: 'unlocked-submission',
@@ -257,7 +264,7 @@ describe('ContractTable for CMS User (with filters)', () => {
             },
         ]
         renderWithProviders(
-            <ContractTable
+            <HealthPlanPackageTable
                 tableData={stateSubmissions}
                 user={mockCMSUser()}
                 showFilters
@@ -276,7 +283,10 @@ describe('ContractTable for CMS User (with filters)', () => {
 
     it('displays the expected program tags for current revision that is submitted/resubmitted', async () => {
         renderWithProviders(
-            <ContractTable tableData={submissions} user={mockCMSUser()} />,
+            <HealthPlanPackageTable
+                tableData={submissions}
+                user={mockCMSUser()}
+            />,
             {
                 apolloProvider: apolloProviderWithCMSUser(),
             }
@@ -306,7 +316,7 @@ describe('ContractTable for CMS User (with filters)', () => {
 
     it('should display filters on dashboard page when showFilters is true', async () => {
         renderWithProviders(
-            <ContractTable
+            <HealthPlanPackageTable
                 tableData={submissions}
                 user={mockCMSUser()}
                 showFilters
@@ -333,7 +343,10 @@ describe('ContractTable for CMS User (with filters)', () => {
 
     it('should not display filters on dashboard page when showFilters is false', async () => {
         renderWithProviders(
-            <ContractTable tableData={submissions} user={mockCMSUser()} />,
+            <HealthPlanPackageTable
+                tableData={submissions}
+                user={mockCMSUser()}
+            />,
             {
                 apolloProvider: apolloProviderWithCMSUser(),
             }
@@ -350,7 +363,7 @@ describe('ContractTable for CMS User (with filters)', () => {
 
     it('can filter table by submission state', async () => {
         renderWithProviders(
-            <ContractTable
+            <HealthPlanPackageTable
                 tableData={submissions}
                 user={mockCMSUser()}
                 showFilters
@@ -409,7 +422,7 @@ describe('ContractTable for CMS User (with filters)', () => {
     })
 
     it('can filter by state and submission type', async () => {
-        const stateSubmissions: ContractInDashboardType[] = [
+        const stateSubmissions: PackageInDashboardType[] = [
             {
                 ...submissions[0],
                 id: 'one',
@@ -431,7 +444,7 @@ describe('ContractTable for CMS User (with filters)', () => {
         ]
 
         renderWithProviders(
-            <ContractTable
+            <HealthPlanPackageTable
                 tableData={stateSubmissions}
                 user={mockCMSUser()}
                 showFilters
@@ -511,7 +524,7 @@ describe('ContractTable for CMS User (with filters)', () => {
     })
 
     it('should clear all filters when clear filter button is clicked', async () => {
-        const stateSubmissions: ContractInDashboardType[] = [
+        const stateSubmissions: PackageInDashboardType[] = [
             {
                 ...submissions[0],
                 id: 'one',
@@ -533,7 +546,7 @@ describe('ContractTable for CMS User (with filters)', () => {
         ]
 
         renderWithProviders(
-            <ContractTable
+            <HealthPlanPackageTable
                 tableData={stateSubmissions}
                 user={mockCMSUser()}
                 showFilters
@@ -600,7 +613,7 @@ describe('ContractTable for CMS User (with filters)', () => {
 
     it('displays no results found when filters return no results', async () => {
         renderWithProviders(
-            <ContractTable
+            <HealthPlanPackageTable
                 tableData={submissions}
                 user={mockCMSUser()}
                 showFilters
@@ -665,7 +678,7 @@ describe('ContractTable for CMS User (with filters)', () => {
     })
 
     it('displays the total filters applied', async () => {
-        const stateSubmissions: ContractInDashboardType[] = [
+        const stateSubmissions: PackageInDashboardType[] = [
             {
                 ...submissions[0],
                 id: 'one',
@@ -693,7 +706,7 @@ describe('ContractTable for CMS User (with filters)', () => {
         ]
 
         renderWithProviders(
-            <ContractTable
+            <HealthPlanPackageTable
                 tableData={stateSubmissions}
                 user={mockCMSUser()}
                 showFilters
@@ -786,14 +799,17 @@ describe('ContractTable for CMS User (with filters)', () => {
     })
 })
 
-describe('ContractTable state user tests', () => {
+describe('HealthPlanPackageTable state user tests', () => {
     beforeEach(() => {
         window.location.assign('#')
     })
 
     it('does not display State and Submission type columns for state users', async () => {
         renderWithProviders(
-            <ContractTable tableData={submissions} user={mockStateUser()} />,
+            <HealthPlanPackageTable
+                tableData={submissions}
+                user={mockStateUser()}
+            />,
             {
                 apolloProvider: apolloProviderWithStateUser(),
             }
@@ -813,7 +829,7 @@ describe('ContractTable state user tests', () => {
     })
 
     it('has correct submission links for state users', async () => {
-        const stateSubmissions: ContractInDashboardType[] = [
+        const stateSubmissions: PackageInDashboardType[] = [
             {
                 ...submissions[0],
                 id: 'unlocked-submission',
@@ -834,7 +850,7 @@ describe('ContractTable state user tests', () => {
             },
         ]
         renderWithProviders(
-            <ContractTable
+            <HealthPlanPackageTable
                 tableData={stateSubmissions}
                 user={mockStateUser()}
             />,

@@ -40,7 +40,7 @@ const parseContracts = (
         const errMessage = `Failed to parse the following contracts:\n${errorParseContracts.join(
             '\n'
         )}`
-        logError('indexContractsResolver', errMessage)
+        logError('indexHealthPlanPackagesResolver', errMessage)
         setErrorAttributesOnActiveSpan(errMessage, span)
     }
 

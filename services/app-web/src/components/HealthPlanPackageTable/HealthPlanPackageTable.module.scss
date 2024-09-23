@@ -1,0 +1,59 @@
+@use '../../styles/custom.scss' as custom;
+@use '../../styles/uswdsImports.scss' as uswds;
+
+.panelEmptyNoFilteredResults {
+    margin-top: uswds.units(8);
+
+    h3 {
+        font-size: 1rem;
+        font-weight: uswds.font-weight('bold');
+        text-align: center;
+    }
+    p {
+        font-weight: uswds.font-weight('normal');
+        font-size: 0.875rem;
+        text-align: center;
+    }
+}
+
+.panelEmptyNoSubmissionsYet {
+    margin-top: uswds.units(8);
+
+    h3 {
+        font-weight: uswds.font-weight('normal');
+        color: uswds.color('base');
+        text-align: center;
+    }
+}
+
+.ID {
+    word-break: break-all;
+}
+
+.programTag {
+    background: custom.$mcr-primary-lighter;
+    color: custom.$mcr-foundation-ink;
+    display: inline-flex;
+    text-align: center;
+    overflow-wrap: break-word;
+}
+
+.submittedTag {
+    background: custom.$mcr-success-base;
+}
+
+.draftTag {
+    background: custom.$mcr-gold-dark;
+    color: custom.$mcr-foundation-ink;
+}
+
+.unlockedTag {
+    background: custom.$mcr-cyan-light;
+    color: custom.$mcr-foundation-ink;
+}
+
+.filterCount {
+    font-weight: uswds.font-weight('bold');
+    color: custom.$mcr-foundation-ink;
+    padding-top: uswds.units(3);
+}

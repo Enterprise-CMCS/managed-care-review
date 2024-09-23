@@ -12,7 +12,7 @@ import {
 import {
     ErrorAlertSignIn,
     ContractTable,
-    ContractInDashboardType,
+    PackageInDashboardType,
     Loading,
     GenericApiErrorBanner,
     NavLinkWithLogging,
@@ -61,7 +61,7 @@ export const StateDashboard = (): React.ReactElement => {
     const programs = loggedInUser.state.programs.filter(
         (program) => !program.isRateProgram
     )
-    const submissionRows: ContractInDashboardType[] = []
+    const submissionRows: PackageInDashboardType[] = []
 
     data?.indexContracts.edges
         .map((edge) => edge.node)
