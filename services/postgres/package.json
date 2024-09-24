@@ -17,6 +17,6 @@
     },
     "dependencies": {
         "@aws-sdk/client-cloudformation": "^3.654.0",
-        "@aws-sdk/client-s3": "^3.654.0"
+        "@aws-sdk/client-s3": "^3.657.0"
     }
 }
