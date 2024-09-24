@@ -42,7 +42,7 @@ async function updateStateAssignedUsersInTransaction(
     })
 
     if (previousUsers.length !== assignedUserIDs.length) {
-        const badUserMessage = `Some assigned user IDs do not exist or are duplicative`
+        const badUserMessage = `Some assigned user IDs do not exist or are duplicative. ${previousUsers.length} users found in database`
         return new UserInputPostgresError(badUserMessage)
     }
 
