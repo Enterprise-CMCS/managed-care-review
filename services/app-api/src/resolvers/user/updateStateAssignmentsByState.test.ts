@@ -10,9 +10,10 @@ import { v4 as uuidv4 } from 'uuid'
 import type { InsertUserArgsType } from '../../postgres'
 import { NewPostgresStore } from '../../postgres'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
-import UPDATE_STATE_ASSIGNMENTS from '../../../../app-graphql/src/mutations/updateStateAssignment.graphql'
+import UPDATE_STATE_ASSIGNMENTS_BY_STATE from '../../../../app-graphql/src/mutations/updateStateAssignmentsByState.graphql'
+import INDEX_USERS from '../../../../app-graphql/src/queries/indexUsers.graphql'
 import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
-import type { State } from '../../gen/gqlServer'
+import type { User, UserEdge } from '../../gen/gqlServer'
 import {
     assertAnError,
     assertAnErrorCode,
@@ -78,7 +79,7 @@ const unauthorizedUserTests = [
 ]
 
 describe.each(authorizedUserTests)(
-    'updateStateAssignment as $userType tests',
+    'updateStateAssignmentByState as $userType tests',
     ({ mockUser }) => {
         // setup a user in the db for us to modify
         const mockTestCMSUser = (): InsertUserArgsType => ({
@@ -101,9 +102,15 @@ describe.each(authorizedUserTests)(
             const postgresStore = NewPostgresStore(prismaClient)
 
             const newUser = await postgresStore.insertUser(mockTestCMSUser())
+            const secondUser = await postgresStore.insertUser(mockTestCMSUser())
+            const thirdUser = await postgresStore.insertUser(mockTestCMSUser())
 
-            if (newUser instanceof Error) {
-                throw newUser
+            if (
+                newUser instanceof Error ||
+                secondUser instanceof Error ||
+                thirdUser instanceof Error
+            ) {
+                throw new Error('no user')
             }
 
             const server = await constructTestPostgresServer({
@@ -114,11 +121,11 @@ describe.each(authorizedUserTests)(
             })
 
             const updateRes = await server.executeOperation({
-                query: UPDATE_STATE_ASSIGNMENTS,
+                query: UPDATE_STATE_ASSIGNMENTS_BY_STATE,
                 variables: {
                     input: {
-                        cmsUserID: newUser.id,
-                        stateAssignments: ['CA'],
+                        stateCode: 'CA',
+                        assignedUsers: [newUser.id],
                     },
                 },
             })
@@ -130,19 +137,21 @@ describe.each(authorizedUserTests)(
                 throw new Error('no data')
             }
 
-            const user = updateRes.data.updateStateAssignment.user
-            expect(user.email).toBe(newUser.email)
-            expect(user.stateAssignments).toHaveLength(1)
+            const users =
+                updateRes.data.updateStateAssignmentsByState.assignedUsers
+            expect(users).toHaveLength(1)
+            const user = users[0]
+            expect(user.id).toBe(newUser.id)
             expect(user.stateAssignments[0].code).toBe('CA')
             expect(user.divisionAssignment).toBe('OACT')
 
             // change the value and see if it updates
             const updateRes2 = await server.executeOperation({
-                query: UPDATE_STATE_ASSIGNMENTS,
+                query: UPDATE_STATE_ASSIGNMENTS_BY_STATE,
                 variables: {
                     input: {
-                        cmsUserID: newUser.id,
-                        stateAssignments: ['VA', 'MA'],
+                        stateCode: 'CA',
+                        assignedUsers: [secondUser.id, thirdUser.id],
                     },
                 },
             })
@@ -154,13 +163,98 @@ describe.each(authorizedUserTests)(
                 throw new Error('no data')
             }
 
-            const user2 = updateRes2.data.updateStateAssignment.user
-            expect(user2.email).toBe(newUser.email)
-            expect(user2.stateAssignments).toHaveLength(2)
-            expect(user2.stateAssignments.map((s: State) => s.code)).toEqual(
-                expect.arrayContaining(['MA', 'VA'])
+            const users2 =
+                updateRes2.data.updateStateAssignmentsByState.assignedUsers
+            expect(users2).toHaveLength(2)
+
+            const updateRes3 = await server.executeOperation({
+                query: UPDATE_STATE_ASSIGNMENTS_BY_STATE,
+                variables: {
+                    input: {
+                        stateCode: 'NC',
+                        assignedUsers: [secondUser.id],
+                    },
+                },
+            })
+
+            expect(updateRes3.data).toBeDefined()
+            expect(updateRes3.errors).toBeUndefined()
+
+            const allUsersQuery = await server.executeOperation({
+                query: INDEX_USERS,
+                variables: {},
+            })
+
+            expect(allUsersQuery.data).toBeDefined()
+            expect(allUsersQuery.errors).toBeUndefined()
+
+            if (!allUsersQuery.data) {
+                throw new Error('no data')
+            }
+
+            const theseUserIDs = [newUser.id, secondUser.id, thirdUser.id]
+            const theseUsers = allUsersQuery.data.indexUsers.edges
+                .map((e: UserEdge) => e.node)
+                .filter((n: User) => theseUserIDs.includes(n.id))
+
+            const firstUserFound = theseUsers.find(
+                (u: User) => u.id === newUser.id
             )
-            expect(user2.divisionAssignment).toBe('OACT')
+            const secondUserFound = theseUsers.find(
+                (u: User) => u.id === secondUser.id
+            )
+            const thirdUserFound = theseUsers.find(
+                (u: User) => u.id === thirdUser.id
+            )
+
+            expect(firstUserFound.stateAssignments).toHaveLength(0)
+            expect(secondUserFound.stateAssignments).toHaveLength(2)
+            expect(thirdUserFound.stateAssignments).toHaveLength(1)
+
+            // finally, check the audit table.
+            const allAudits = await prismaClient.userAudit.findMany({
+                where: {
+                    modifiedUserId: {
+                        in: [newUser.id, secondUser.id, thirdUser.id],
+                    },
+                },
+                orderBy: {
+                    createdAt: 'asc',
+                },
+            })
+            expect(allAudits).toHaveLength(5)
+
+            // 1, add, remove
+            const firstAudits = allAudits.filter(
+                (a) => a.modifiedUserId === newUser.id
+            )
+            expect(firstAudits).toHaveLength(2)
+            expect(firstAudits[0].priorValue).toBe('[]')
+            if (!firstAudits[1].priorValue) {
+                throw new Error('no Prior')
+            }
+            const priorJSON = firstAudits[1].priorValue
+            let firstPriorVal = null
+            if (typeof priorJSON === 'string') {
+                firstPriorVal = JSON.parse(priorJSON)
+            } else {
+                throw new Error('got back a weird type from JSON')
+            }
+            expect(firstPriorVal).toHaveLength(1)
+            expect(firstPriorVal[0].stateCode).toBe('CA')
+            // 2, add, add
+            const secondAudits = allAudits.filter(
+                (a) => a.modifiedUserId === secondUser.id
+            )
+            expect(secondAudits).toHaveLength(2)
+            expect(secondAudits[0].priorValue).toBe('[]')
+            expect(secondAudits[1].priorValue).not.toBe('[]')
+            // 3, add
+            const thirdAudits = allAudits.filter(
+                (a) => a.modifiedUserId === thirdUser.id
+            )
+            expect(thirdAudits).toHaveLength(1)
+            expect(thirdAudits[0].priorValue).toBe('[]')
         })
         it('errors if state assignments are empty, undefined, or null', async () => {
             const prismaClient = await sharedTestPrismaClient()
@@ -180,11 +274,11 @@ describe.each(authorizedUserTests)(
             })
 
             const updateResEmpty = await server.executeOperation({
-                query: UPDATE_STATE_ASSIGNMENTS,
+                query: UPDATE_STATE_ASSIGNMENTS_BY_STATE,
                 variables: {
                     input: {
-                        cmsUserID: newUser.id,
-                        stateAssignments: [],
+                        stateCode: 'CA',
+                        assignedUsers: [],
                     },
                 },
             })
@@ -198,11 +292,11 @@ describe.each(authorizedUserTests)(
             ).toEqual([])
 
             const updateResUndefined = await server.executeOperation({
-                query: UPDATE_STATE_ASSIGNMENTS,
+                query: UPDATE_STATE_ASSIGNMENTS_BY_STATE,
                 variables: {
                     input: {
-                        cmsUserID: newUser.id,
-                        stateAssignments: undefined,
+                        stateCode: 'CA',
+                        assignedUsers: undefined,
                     },
                 },
             })
@@ -211,16 +305,13 @@ describe.each(authorizedUserTests)(
                 'Variable "$input" got invalid value'
             )
             expect(assertAnErrorCode(updateResUndefined)).toBe('BAD_USER_INPUT')
-            expect(
-                assertAnErrorExtensions(updateResUndefined).argumentValues
-            ).toBeUndefined()
 
             const updateResNull = await server.executeOperation({
-                query: UPDATE_STATE_ASSIGNMENTS,
+                query: UPDATE_STATE_ASSIGNMENTS_BY_STATE,
                 variables: {
                     input: {
-                        cmsUserID: newUser.id,
-                        stateAssignments: null,
+                        stateCode: 'CA',
+                        assignedUsers: null,
                     },
                 },
             })
@@ -229,11 +320,8 @@ describe.each(authorizedUserTests)(
                 'Variable "$input" got invalid value'
             )
             expect(assertAnErrorCode(updateResNull)).toBe('BAD_USER_INPUT')
-            expect(
-                assertAnErrorExtensions(updateResNull).argumentValues
-            ).toBeUndefined()
         })
-        it('returns an error with invalid state codes', async () => {
+        it('returns an error with invalid state code', async () => {
             const prismaClient = await sharedTestPrismaClient()
             const postgresStore = NewPostgresStore(prismaClient)
 
@@ -251,23 +339,20 @@ describe.each(authorizedUserTests)(
             })
 
             const updateRes = await server.executeOperation({
-                query: UPDATE_STATE_ASSIGNMENTS,
+                query: UPDATE_STATE_ASSIGNMENTS_BY_STATE,
                 variables: {
                     input: {
-                        cmsUserID: newUser.id,
-                        stateAssignments: ['CA', 'XX', 'BS'],
+                        stateCode: 'XX',
+                        assignedUsers: [newUser.id],
                     },
                 },
             })
 
             expect(assertAnError(updateRes).message).toContain(
-                'cannot update state assignments with invalid assignments'
+                'cannot update state assignments for invalid state'
             )
             expect(assertAnErrorCode(updateRes)).toBe('BAD_USER_INPUT')
-            expect(assertAnErrorExtensions(updateRes).argumentValues).toEqual([
-                'XX',
-                'BS',
-            ])
+            expect(assertAnErrorExtensions(updateRes).argumentValues).toBe('XX')
         })
         it('errors if the target is not a CMS user', async () => {
             const prismaClient = await sharedTestPrismaClient()
@@ -287,17 +372,19 @@ describe.each(authorizedUserTests)(
             }
 
             const updateRes = await server.executeOperation({
-                query: UPDATE_STATE_ASSIGNMENTS,
+                query: UPDATE_STATE_ASSIGNMENTS_BY_STATE,
                 variables: {
                     input: {
-                        cmsUserID: newStateUser.id,
-                        stateAssignments: ['CA'],
+                        stateCode: 'CA',
+                        assignedUsers: [newStateUser.id],
                     },
                 },
             })
 
+            expect(updateRes.errors).toBeDefined()
+
             expect(assertAnError(updateRes).message).toContain(
-                'cmsUserID does not exist'
+                'Attempted to assign non-cms-users to a state'
             )
             expect(assertAnErrorCode(updateRes)).toBe('BAD_USER_INPUT')
         })
@@ -312,17 +399,51 @@ describe.each(authorizedUserTests)(
             })
 
             const updateRes = await server.executeOperation({
-                query: UPDATE_STATE_ASSIGNMENTS,
+                query: UPDATE_STATE_ASSIGNMENTS_BY_STATE,
                 variables: {
                     input: {
-                        cmsUserID: 'not-an-existing-user',
-                        stateAssignments: ['CA'],
+                        stateCode: 'CA',
+                        assignedUsers: ['not-existing-user-id'],
                     },
                 },
             })
 
             expect(assertAnError(updateRes).message).toContain(
-                'cmsUserID does not exist'
+                'Some assigned user IDs do not exist or are duplicative'
+            )
+            expect(assertAnErrorCode(updateRes)).toBe('BAD_USER_INPUT')
+        })
+
+        it('errors if a userID is doubled', async () => {
+            const prismaClient = await sharedTestPrismaClient()
+            const postgresStore = NewPostgresStore(prismaClient)
+            const server = await constructTestPostgresServer({
+                store: postgresStore,
+                context: {
+                    user: mockUser,
+                },
+            })
+
+            const newCMSUser = await postgresStore.insertUser(mockTestCMSUser())
+
+            if (newCMSUser instanceof Error) {
+                throw newCMSUser
+            }
+
+            const updateRes = await server.executeOperation({
+                query: UPDATE_STATE_ASSIGNMENTS_BY_STATE,
+                variables: {
+                    input: {
+                        stateCode: 'CA',
+                        assignedUsers: [newCMSUser.id, newCMSUser.id],
+                    },
+                },
+            })
+
+            expect(updateRes.errors).toBeDefined()
+
+            expect(assertAnError(updateRes).message).toContain(
+                'Some assigned user IDs do not exist or are duplicative'
             )
             expect(assertAnErrorCode(updateRes)).toBe('BAD_USER_INPUT')
         })
@@ -342,15 +463,12 @@ describe.each(unauthorizedUserTests)(
                 },
             })
 
-            // setup a user in the db for us to modify
-            const cmsUserID = uuidv4()
-
             const updateRes = await server.executeOperation({
-                query: UPDATE_STATE_ASSIGNMENTS,
+                query: UPDATE_STATE_ASSIGNMENTS_BY_STATE,
                 variables: {
                     input: {
-                        cmsUserID: cmsUserID,
-                        stateAssignments: ['CA'],
+                        stateCode: 'CA',
+                        assignedUsers: ['not-existing-user-id'],
                     },
                 },
             })

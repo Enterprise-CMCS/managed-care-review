@@ -358,6 +358,22 @@ type Mutation {
     updateStateAssignment(input: UpdateStateAssignmentInput!): UpdateCMSUserPayload!
 
     """
+    updateStateAssignmentByState updates which CMSUsers are assigned to a given state.
+
+    This can only be called by an AdminUser or a DMCO CMS user.
+    The cmsUserID must be a CMSUser's id, not a state user
+
+    Errors:
+    - ForbiddenError:
+    - A non AdminUser called this
+    - A non DMCO CMS user called this
+    - UserInputError
+    - cmsUserID was not a CMSUser's ID
+    - stateCodes included an invalid state code
+    """
+    updateStateAssignmentsByState(input: UpdateStateAssignmentsByStateInput!): UpdateStateAssignmentsByStatePayload!
+
+    """
     createQuestion creates a new Question for the given HealthPlanPackage
     A CMS User can add text to a note field and append a document to their question
     They can also specify a due date, and specify rate IDs that are associated with the question
@@ -753,7 +769,19 @@ input UpdateDivisionAssignmentInput {
 input UpdateStateAssignmentInput {
     cmsUserID: ID!
     "stateAssignments is an array of stateCodes (e.g. ['CA', 'NM', 'TN'])"
-    stateAssignments: [String!]
+    stateAssignments: [String!]!
+}
+
+input UpdateStateAssignmentsByStateInput {
+    stateCode: ID!
+    "stateAssignments is an array of userIDs (uuids)"
+    assignedUsers: [String!]!
+}
+
+type UpdateStateAssignmentsByStatePayload {
+    stateCode: ID!
+    "stateAssignments is an array of userIDs (uuids)"
+    assignedUsers: [CMSUsersUnion!]!
 }
 
 type UpdateCMSUserPayload {

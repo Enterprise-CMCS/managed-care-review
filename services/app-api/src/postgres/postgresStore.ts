@@ -59,6 +59,7 @@ import type { UnlockRateArgsType } from './contractAndRates/unlockRate'
 import { findRateWithHistory } from './contractAndRates/findRateWithHistory'
 import { updateDraftContractRates } from './contractAndRates/updateDraftContractRates'
 import type { UpdateDraftContractRatesArgsType } from './contractAndRates/updateDraftContractRates'
+import { updateStateAssignedUsers } from './state/updateStateAssignedUsers'
 
 type Store = {
     findPrograms: (
@@ -78,6 +79,12 @@ type Store = {
 
     insertManyUsers: (
         users: InsertUserArgsType[]
+    ) => Promise<UserType[] | Error>
+
+    updateStateAssignedUsers: (
+        idOfUserPerformingUpdate: string,
+        stateCode: StateCodeType,
+        assignedUserIDs: string[]
     ) => Promise<UserType[] | Error>
 
     updateCmsUserProperties: (
@@ -174,6 +181,17 @@ function NewPostgresStore(client: PrismaClient): Store {
                 idOfUserPerformingUpdate,
                 divisionAssignment,
                 description
+            ),
+        updateStateAssignedUsers: (
+            idOfUserPerformingUpdate,
+            stateCode,
+            assignedUserIDs
+        ) =>
+            updateStateAssignedUsers(
+                client,
+                idOfUserPerformingUpdate,
+                stateCode,
+                assignedUserIDs
             ),
         findStatePrograms: findStatePrograms,
         findAllSupportedStates: () => findAllSupportedStates(client),
