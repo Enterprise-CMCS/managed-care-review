@@ -19,6 +19,7 @@ const ERROR_MESSAGES = {
     question_error_generic: 'Error attempting to add question.',
     response_error_generic: 'Error attempting to add response.',
     email_error_generic: 'Error attempting to send email.',
+    update_state_assignments_generic: 'Error attempting to update state assignments',
 }
 
 export { ERROR_MESSAGES }
