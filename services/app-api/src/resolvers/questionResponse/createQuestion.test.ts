@@ -1,5 +1,4 @@
 import CREATE_QUESTION from 'app-graphql/src/mutations/createQuestion.graphql'
-import { v4 as uuidv4 } from 'uuid'
 import {
     constructTestPostgresServer,
     createAndSubmitTestHealthPlanPackage,
@@ -17,7 +16,6 @@ import {
     assertAnError,
     assertAnErrorCode,
     createAndSubmitTestContract,
-    must,
 } from '../../testHelpers'
 import {
     createDBUsersWithFullData,
@@ -28,23 +26,7 @@ import { base64ToDomain } from '../../common-code/proto/healthPlanFormDataProto'
 import { testEmailConfig, testEmailer } from '../../testHelpers/emailerHelpers'
 import { testLDService } from '../../testHelpers/launchDarklyHelpers'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
-import type { InsertUserArgsType } from '../../postgres'
 import { NewPostgresStore } from '../../postgres'
-import type { DivisionType } from '../../domain-models'
-
-function mockTestCMSUser(
-    name: string,
-    division: DivisionType
-): InsertUserArgsType {
-    return {
-        userID: uuidv4(),
-        ...testCMSUser({
-            id: uuidv4(),
-            email: `${name}@example.com`,
-            divisionAssignment: division,
-        }),
-    }
-}
 
 describe('createQuestion', () => {
     const cmsUser = testCMSUser()
@@ -475,16 +457,21 @@ describe('createQuestion', () => {
         })
 
         // add some users to the db, assign them to the state
+        const assignedUsers = [
+            testCMSUser({
+                givenName: 'Roku',
+                email: 'roku@example.com',
+            }),
+            testCMSUser({
+                givenName: 'Izumi',
+                email: 'izumi@example.com',
+            }),
+        ]
 
-        const newUser = must(
-            await postgresStore.insertUser(mockTestCMSUser('Roku', 'DMCO'))
-        )
-        const secondUser = must(
-            await postgresStore.insertUser(mockTestCMSUser('Izumi', 'DMCO'))
-        )
+        await createDBUsersWithFullData(assignedUsers)
 
-        const assignedUserIDs = [newUser.id, secondUser.id]
-        const assignedUserEmails = [newUser.email, secondUser.email]
+        const assignedUserIDs = assignedUsers.map((u) => u.id)
+        const assignedUserEmails = assignedUsers.map((u) => u.email)
 
         await updateTestStateAssignments(cmsServer, 'FL', assignedUserIDs)
 

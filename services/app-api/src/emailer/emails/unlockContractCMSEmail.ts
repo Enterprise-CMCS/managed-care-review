@@ -51,9 +51,6 @@ export const unlockContractCMSEmail = async (
         packagePrograms
     )
 
-    const isContractAndRates =
-        contractRev.formData.submissionType === 'CONTRACT_AND_RATES'
-
     const data = {
         packageName,
         unlockedBy: updateInfo.updatedBy.email,
@@ -61,11 +58,9 @@ export const unlockContractCMSEmail = async (
         unlockedReason: updateInfo.updatedReason,
         shouldIncludeRates:
             contractRev.formData.submissionType === 'CONTRACT_AND_RATES',
-        rateInfos:
-            isContractAndRates &&
-            rateRevs.map((rate) => ({
-                rateName: rate.formData.rateCertificationName,
-            })),
+        rateInfos: rateRevs.map((rate) => ({
+            rateName: rate.formData.rateCertificationName,
+        })),
     }
 
     const result = await renderTemplate<typeof data>(
