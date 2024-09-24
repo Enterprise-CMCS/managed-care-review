@@ -51,11 +51,27 @@ resources:
         - Fn::Equals:
             - ''
             - ${self:custom.sesSourceEmailAddress}
+    IsValOrProd:
+      Fn::Or:
+        - Fn::Equals:
+            - ${sls:stage}
+            - 'val'
+        - Fn::Equals:
+            - ${sls:stage}
+            - 'prod'
+        - Fn::Equals:
+            - ${sls:stage}
+            - 'mtsecfindingusers'
   Resources:
     CognitoUserPool:
       Type: AWS::Cognito::UserPool
       Properties:
         UserPoolName: ${sls:stage}-user-pool
+        AdminCreateUserConfig:
+          AllowAdminCreateUserOnly: !If
+            - IsValOrProd
+            - true
+            - false
         UsernameAttributes:
           - email
         AutoVerifiedAttributes:

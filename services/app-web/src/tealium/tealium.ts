@@ -202,7 +202,8 @@ type TealiumClientType = {
 }
 
 const tealiumClient = (tealiumEnv: Omit<TealiumEnv, 'dev'>): TealiumClientType => {
-    const tealiumHostname = (tealiumEnv == 'prod') ? 'tags.tiqcdn.com' : 'tealium-tags.cms.gov'
+    const isProd = tealiumEnv == 'prod'
+    const tealiumHostname = isProd ? 'tags.tiqcdn.com' : 'tealium-tags.cms.gov'
     return {
         initializeTealium: () => {
             // Suppress automatic page views for SPA
@@ -213,19 +214,21 @@ const tealiumClient = (tealiumEnv: Omit<TealiumEnv, 'dev'>): TealiumClientType =
 
             // Load utag.sync.js - add to head element - SYNC load from src
             const initializeTagManagerSnippet = createScript({
-                src: `https://${tealiumHostname}/utag/cmsgov/${tealiumProfile}/${tealiumEnv}/utag.sync.js`,
+                src: isProd ? `https://${tealiumHostname}/utag/cmsgov/${tealiumProfile}/${tealiumEnv}/utag.sync.js`
+                : `https://${tealiumHostname}/${tealiumProfile}/${tealiumEnv}/utag.sync.js`,
                 id: 'tealium-load-tags-sync',
             })
+
             if (document.getElementById(initializeTagManagerSnippet.id) === null) {
                 document.head.appendChild(initializeTagManagerSnippet)
             }
 
             // Load utag.js - Add to body element- ASYNC load inline script
             const inlineScript = `(function (t, e, a, l, i, u, m) {
-                t = 'cmsgov/${tealiumProfile}'
+                t = ${isProd ? `cmsgov/${tealiumProfile}` : `${tealiumProfile}`}
                 e = '${tealiumEnv}'
                 a = '/' + t + '/' + e + '/utag.js'
-                l = '//${tealiumHostname}/utag' + a
+                l = ${isProd ? `//${tealiumHostname}/utag` : `//${tealiumHostname}`} + a
                 i = document
                 u = 'script'
                 m = i.createElement(u)
@@ -241,7 +244,6 @@ const tealiumClient = (tealiumEnv: Omit<TealiumEnv, 'dev'>): TealiumClientType =
                 inlineScriptAsString: inlineScript,
                 id: 'tealium-load-tags-async',
             })
-
             if (document.getElementById(loadTagsSnippet.id) === null) {
                 document.body.appendChild(loadTagsSnippet)
             }

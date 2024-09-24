@@ -409,7 +409,41 @@ describe.each(authorizedUserTests)(
             })
 
             expect(assertAnError(updateRes).message).toContain(
-                'Attempted to assign non existing users to the state'
+                'Some assigned user IDs do not exist or are duplicative'
+            )
+            expect(assertAnErrorCode(updateRes)).toBe('BAD_USER_INPUT')
+        })
+
+        it('errors if a userID is doubled', async () => {
+            const prismaClient = await sharedTestPrismaClient()
+            const postgresStore = NewPostgresStore(prismaClient)
+            const server = await constructTestPostgresServer({
+                store: postgresStore,
+                context: {
+                    user: mockUser,
+                },
+            })
+
+            const newCMSUser = await postgresStore.insertUser(mockTestCMSUser())
+
+            if (newCMSUser instanceof Error) {
+                throw newCMSUser
+            }
+
+            const updateRes = await server.executeOperation({
+                query: UPDATE_STATE_ASSIGNMENTS_BY_STATE,
+                variables: {
+                    input: {
+                        stateCode: 'CA',
+                        assignedUsers: [newCMSUser.id, newCMSUser.id],
+                    },
+                },
+            })
+
+            expect(updateRes.errors).toBeDefined()
+
+            expect(assertAnError(updateRes).message).toContain(
+                'Some assigned user IDs do not exist or are duplicative'
             )
             expect(assertAnErrorCode(updateRes)).toBe('BAD_USER_INPUT')
         })
