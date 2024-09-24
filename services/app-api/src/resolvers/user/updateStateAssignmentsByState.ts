@@ -86,7 +86,7 @@ export function updateStateAssignmentsByState(
                 throw new UserInputError(errMsg, {
                     argumentName: 'assignedUsers',
                     argumentValues: assignedUsers,
-                    cause: 'USERS_ARE_NOT_STATE_USERS',
+                    cause: 'BAD_ASSIGNED_USERS',
                 })
             }
 

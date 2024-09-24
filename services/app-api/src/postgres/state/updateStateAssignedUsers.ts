@@ -41,6 +41,11 @@ async function updateStateAssignedUsersInTransaction(
         },
     })
 
+    if (previousUsers.length !== assignedUserIDs.length) {
+        const badUserMessage = `Some assigned user IDs do not exist or are duplicative`
+        return new UserInputPostgresError(badUserMessage)
+    }
+
     const nonCMSUsers = previousUsers.filter(
         (u) => !['CMS_USER', 'CMS_APPROVER_USER'].includes(u.role)
     )
@@ -116,11 +121,6 @@ async function updateStateAssignedUsersInTransaction(
 
         return users
     } catch (err) {
-        if (err.code === 'P2025') {
-            // this is because an ID doesn't exist in the db. This can only be a user ID b/c we've multiple times validated the StateCode
-            const invalidUserIDMsg = `Attempted to assign non existing users to the state`
-            return new UserInputPostgresError(invalidUserIDMsg)
-        }
         return err
     }
 }
