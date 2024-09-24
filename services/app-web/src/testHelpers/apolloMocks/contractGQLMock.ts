@@ -11,8 +11,8 @@ import {
     SubmitContractDocument,
     CreateContractMutation,
     CreateContractDocument,
-    IndexContractsDocument,
-    IndexContractsQuery,
+    IndexContractsForDashboardDocument,
+    IndexContractsForDashboardQuery,
 } from '../../gen/gqlClient'
 import { MockedResponse } from '@apollo/client/testing'
 import { mockContractPackageDraft, mockContractPackageSubmittedWithRevisions, mockContractPackageUnlockedWithUnlockedType } from './contractPackageDataMock'
@@ -342,7 +342,7 @@ const indexContractsMockSuccess = (
         { ...mockContractPackageUnlockedWithUnlockedType(), id: 'test-id-123', __typename: 'Contract' },
         { ...mockContractPackageSubmittedWithRevisions(), id: 'test-id-124' },
     ]
-): MockedResponse<IndexContractsQuery> => {
+): MockedResponse<IndexContractsForDashboardQuery> => {
     const submissionEdges = submissions.map((sub) => {
         return {
             node: sub,
@@ -350,7 +350,7 @@ const indexContractsMockSuccess = (
     })
     return {
         request: {
-            query: IndexContractsDocument,
+            query: IndexContractsForDashboardDocument,
         },
         result: {
             data: {
