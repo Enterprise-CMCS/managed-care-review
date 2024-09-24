@@ -5,7 +5,6 @@ import { AppRoutes } from './AppRoutes'
 import {
     fetchCurrentUserMock,
     mockValidCMSUser,
-    indexHealthPlanPackagesMockSuccess,
     indexContractsMockSuccess,
 } from '../../testHelpers/apolloMocks'
 
@@ -54,7 +53,7 @@ describe('AppRoutes and routing configuration', () => {
                             statusCode: 200,
                             user: mockValidCMSUser(),
                         }),
-                        indexHealthPlanPackagesMockSuccess(),
+                        indexContractsMockSuccess(),
                     ],
                 },
                 featureFlags: { 'session-expiring-modal': false },
