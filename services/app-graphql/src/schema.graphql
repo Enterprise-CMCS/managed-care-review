@@ -774,13 +774,12 @@ input UpdateStateAssignmentInput {
 
 input UpdateStateAssignmentsByStateInput {
     stateCode: ID!
-    "stateAssignments is an array of userIDs (uuids)"
+    "assignedUsers is an array of userIDs (uuids)"
     assignedUsers: [String!]!
 }
 
 type UpdateStateAssignmentsByStatePayload {
     stateCode: ID!
-    "stateAssignments is an array of userIDs (uuids)"
     assignedUsers: [CMSUsersUnion!]!
 }
 

@@ -24,7 +24,7 @@ import {
     StateAssignment,
     useFetchMcReviewSettingsQuery,
     useIndexUsersQuery,
-    useUpdateStateAssignmentMutation,
+    useUpdateStateAssignmentsByStateMutation,
 } from '../../../gen/gqlClient'
 import { RoutesRecord } from '../../../constants'
 import { isValidStateCode } from '../../../common-code/healthPlanFormDataType'
@@ -35,6 +35,7 @@ import { SettingsErrorAlert } from '../SettingsErrorAlert'
 import { FilterOptionType } from '../../../components/FilterAccordion'
 import styles from './EditStateAssign.module.scss'
 import * as Yup from 'yup'
+import { updateStateAssignmentsWrapper } from '../../../gqlHelpers/mutationWrappersForUserFriendlyErrors'
 
 const EditStateAssignmentSchema = Yup.object().shape({
     dmcoAssignmentsByID: Yup.array().min(
@@ -71,8 +72,8 @@ export const EditStateAssign = (): React.ReactElement => {
         })
     )
 
-    const [_editStateAssignment, { loading: editLoading, error: editError }] =
-        useUpdateStateAssignmentMutation()
+    const [updateAssignmentsMutation, { loading: editLoading, error: editError }] =
+        useUpdateStateAssignmentsByStateMutation()
 
     if (!isValidStateCode(stateCode.toUpperCase())) {
         return <Error404 />
@@ -81,8 +82,19 @@ export const EditStateAssign = (): React.ReactElement => {
     const showFieldErrors = (error?: FormError) =>
         shouldValidate && Boolean(error)
 
-    const onSubmit = (values: EditStateAssignFormValues) => {
-        console.info('submitted - to be implemented')
+    const onSubmit = async (values: EditStateAssignFormValues) => {
+        const result = await updateStateAssignmentsWrapper(
+            updateAssignmentsMutation, 
+            stateCode,
+            values.dmcoAssignmentsByID
+        )
+
+        if (result instanceof Error) {
+            console.error(result)
+            // react should be displaying the error using the updateError var
+        } else {
+            navigate(RoutesRecord.STATE_ASSIGNMENTS)
+        }
     }
 
     if (indexUsersResult.status === 'LOADING' || loadingMcReviewSettings)
@@ -192,12 +204,12 @@ export const EditStateAssign = (): React.ReactElement => {
                                         id="current-dmco-assignments"
                                         label="DMCO staff assigned"
                                     >
-                                        {values.dmcoAssignmentsByID.length >
+                                        {formInitialValues.dmcoAssignmentsByID.length >
                                         0 ? (
                                             <ul>
-                                                {values.dmcoAssignmentsByID.map(
-                                                    (analyst) => (
-                                                        <li>{analyst.label}</li>
+                                                {formInitialValues.dmcoAssignmentsByID.map(
+                                                    (analyst) =>  (
+                                                        <li key={analyst.value}>{analyst.label}</li>
                                                     )
                                                 )}
                                             </ul>
@@ -225,7 +237,7 @@ export const EditStateAssign = (): React.ReactElement => {
                                             </PoliteErrorMessage>
                                         )}
                                         <FieldSelect
-                                            label="Update DMCO staff"
+                                            label="Update DMCO stdaff"
                                             name="dmcoAssignmentsByID"
                                             optionDescriptionSingular="user"
                                             dropdownOptions={dropdownOptions}
