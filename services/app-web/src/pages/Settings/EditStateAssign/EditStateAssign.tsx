@@ -44,12 +44,12 @@ const EditStateAssignmentSchema = Yup.object().shape({
     ),
 })
 
-export interface EditStateAssignFormValues {
+export interface EditStateAssignFormValuesType {
     dmcoAssignmentsByID: FilterOptionType[]
 }
 
 type FormError =
-    FormikErrors<EditStateAssignFormValues>[keyof FormikErrors<EditStateAssignFormValues>]
+    FormikErrors<EditStateAssignFormValuesType>[keyof FormikErrors<EditStateAssignFormValuesType>]
 
 export const EditStateAssign = (): React.ReactElement => {
     const { stateCode } = useParams()
@@ -72,8 +72,10 @@ export const EditStateAssign = (): React.ReactElement => {
         })
     )
 
-    const [updateAssignmentsMutation, { loading: editLoading, error: editError }] =
-        useUpdateStateAssignmentsByStateMutation()
+    const [
+        updateAssignmentsMutation,
+        { loading: editLoading, error: editError },
+    ] = useUpdateStateAssignmentsByStateMutation()
 
     if (!isValidStateCode(stateCode.toUpperCase())) {
         return <Error404 />
@@ -82,11 +84,13 @@ export const EditStateAssign = (): React.ReactElement => {
     const showFieldErrors = (error?: FormError) =>
         shouldValidate && Boolean(error)
 
-    const onSubmit = async (values: EditStateAssignFormValues) => {
+    const onSubmit = async (values: EditStateAssignFormValuesType) => {
+        const assignedUserIDs = values.dmcoAssignmentsByID.map((v) => v.value)
+
         const result = await updateStateAssignmentsWrapper(
-            updateAssignmentsMutation, 
+            updateAssignmentsMutation,
             stateCode,
-            values.dmcoAssignmentsByID
+            assignedUserIDs
         )
 
         if (result instanceof Error) {
@@ -125,7 +129,7 @@ export const EditStateAssign = (): React.ReactElement => {
     const assignedUsers = stateAssignments?.assignedCMSUsers ?? []
 
     // Form setup
-    const formInitialValues: EditStateAssignFormValues = {
+    const formInitialValues: EditStateAssignFormValuesType = {
         dmcoAssignmentsByID: assignedUsers.map((user) => ({
             label: `${user.givenName} ${user.familyName}`,
             value: user.id,
@@ -204,12 +208,18 @@ export const EditStateAssign = (): React.ReactElement => {
                                         id="current-dmco-assignments"
                                         label="DMCO staff assigned"
                                     >
-                                        {formInitialValues.dmcoAssignmentsByID.length >
-                                        0 ? (
+                                        {formInitialValues.dmcoAssignmentsByID
+                                            .length > 0 ? (
                                             <ul>
                                                 {formInitialValues.dmcoAssignmentsByID.map(
-                                                    (analyst) =>  (
-                                                        <li key={analyst.value}>{analyst.label}</li>
+                                                    (assignedUser) => (
+                                                        <li
+                                                            key={
+                                                                assignedUser.value
+                                                            }
+                                                        >
+                                                            {assignedUser.label}
+                                                        </li>
                                                     )
                                                 )}
                                             </ul>
