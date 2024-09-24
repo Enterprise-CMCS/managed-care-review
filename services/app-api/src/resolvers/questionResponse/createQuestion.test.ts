@@ -1,4 +1,5 @@
 import CREATE_QUESTION from 'app-graphql/src/mutations/createQuestion.graphql'
+import { v4 as uuidv4 } from 'uuid'
 import {
     constructTestPostgresServer,
     createAndSubmitTestHealthPlanPackage,
@@ -8,10 +9,16 @@ import {
     createTestQuestion,
     indexTestQuestions,
     defaultFloridaProgram,
+    updateTestStateAssignments,
 } from '../../testHelpers/gqlHelpers'
 import { getTestStateAnalystsEmails } from '../../testHelpers/parameterStoreHelpers'
 import { packageName } from '../../common-code/healthPlanFormDataType'
-import { assertAnError, assertAnErrorCode } from '../../testHelpers'
+import {
+    assertAnError,
+    assertAnErrorCode,
+    createAndSubmitTestContract,
+    must,
+} from '../../testHelpers'
 import {
     createDBUsersWithFullData,
     testCMSApproverUser,
@@ -19,6 +26,25 @@ import {
 } from '../../testHelpers/userHelpers'
 import { base64ToDomain } from '../../common-code/proto/healthPlanFormDataProto'
 import { testEmailConfig, testEmailer } from '../../testHelpers/emailerHelpers'
+import { testLDService } from '../../testHelpers/launchDarklyHelpers'
+import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
+import type { InsertUserArgsType } from '../../postgres'
+import { NewPostgresStore } from '../../postgres'
+import type { DivisionType } from '../../domain-models'
+
+function mockTestCMSUser(
+    name: string,
+    division: DivisionType
+): InsertUserArgsType {
+    return {
+        userID: uuidv4(),
+        ...testCMSUser({
+            id: uuidv4(),
+            email: `${name}@example.com`,
+            divisionAssignment: division,
+        }),
+    }
+}
 
 describe('createQuestion', () => {
     const cmsUser = testCMSUser()
@@ -422,6 +448,81 @@ describe('createQuestion', () => {
                 ),
                 bodyHTML: expect.stringContaining(
                     `http://localhost/submissions/${sub.id}/question-and-answers`
+                ),
+            })
+        )
+    })
+
+    it('send CMS email to state analysts from database', async () => {
+        const ldService = testLDService({
+            'read-write-state-assignments': true,
+        })
+
+        const prismaClient = await sharedTestPrismaClient()
+        const postgresStore = NewPostgresStore(prismaClient)
+
+        const config = testEmailConfig()
+        const mockEmailer = testEmailer(config)
+        //mock invoke email submit lambda
+        const stateServer = await constructTestPostgresServer()
+        const cmsServer = await constructTestPostgresServer({
+            store: postgresStore,
+            context: {
+                user: cmsUser,
+            },
+            ldService,
+            emailer: mockEmailer,
+        })
+
+        // add some users to the db, assign them to the state
+
+        const newUser = must(
+            await postgresStore.insertUser(mockTestCMSUser('Roku', 'DMCO'))
+        )
+        const secondUser = must(
+            await postgresStore.insertUser(mockTestCMSUser('Izumi', 'DMCO'))
+        )
+
+        const assignedUserIDs = [newUser.id, secondUser.id]
+        const assignedUserEmails = [newUser.email, secondUser.email]
+
+        await updateTestStateAssignments(cmsServer, 'FL', assignedUserIDs)
+
+        const stateSubmission = await createAndSubmitTestContract(stateServer)
+
+        await createTestQuestion(cmsServer, stateSubmission.id)
+
+        const currentRevision =
+            stateSubmission.packageSubmissions[0].contractRevision
+
+        const programs = [defaultFloridaProgram()]
+        const name = packageName(
+            stateSubmission.stateCode,
+            stateSubmission.stateNumber,
+            currentRevision.formData.programIDs,
+            programs
+        )
+
+        const cmsEmails = [...config.devReviewTeamEmails, ...assignedUserEmails]
+
+        // email subject line is correct for CMS email
+        // email is sent to the state anaylsts since it
+        // was submitted by a DCMO user
+        // Mock emailer is called 2 times,
+        // first called to send the state email, then to CMS
+        expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
+            2,
+            expect.objectContaining({
+                subject: expect.stringContaining(
+                    `[LOCAL] Questions sent for ${name}`
+                ),
+                sourceEmail: config.emailSource,
+                toAddresses: expect.arrayContaining(Array.from(cmsEmails)),
+                bodyText: expect.stringContaining(
+                    `DMCO sent questions to the state for submission ${name}`
+                ),
+                bodyHTML: expect.stringContaining(
+                    `http://localhost/submissions/${stateSubmission.id}/question-and-answers`
                 ),
             })
         )

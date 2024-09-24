@@ -128,7 +128,8 @@ export function configureResolvers(
             createQuestion: createQuestionResolver(
                 store,
                 emailParameterStore,
-                emailer
+                emailer,
+                launchDarkly
             ),
             createQuestionResponse: createQuestionResponseResolver(
                 store,
