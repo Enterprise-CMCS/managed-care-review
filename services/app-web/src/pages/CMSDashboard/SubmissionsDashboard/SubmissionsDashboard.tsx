@@ -1,7 +1,7 @@
 import React from 'react'
 import { SubmissionTypeRecord } from '../../../constants/healthPlanPackages'
 import { useAuth } from '../../../contexts/AuthContext'
-import { useIndexContractsQuery } from '../../../gen/gqlClient'
+import { useIndexContractsForDashboardQuery } from '../../../gen/gqlClient'
 import { mostRecentDate } from '../../../common-code/dateHelpers'
 import styles from '../../StateDashboard/StateDashboard.module.scss'
 import { recordJSException } from '../../../otelHelpers/tracingHelper'
@@ -14,7 +14,7 @@ import { ErrorFailedRequestPage } from '../../Errors/ErrorFailedRequestPage'
 
 const SubmissionsDashboard = (): React.ReactElement => {
     const { loggedInUser } = useAuth()
-    const { loading, data, error } = useIndexContractsQuery({
+    const { loading, data, error } = useIndexContractsForDashboardQuery({
         fetchPolicy: 'network-only',
     })
 
