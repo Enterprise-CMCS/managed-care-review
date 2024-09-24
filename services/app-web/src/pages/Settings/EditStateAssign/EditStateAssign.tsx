@@ -247,7 +247,7 @@ export const EditStateAssign = (): React.ReactElement => {
                                             </PoliteErrorMessage>
                                         )}
                                         <FieldSelect
-                                            label="Update DMCO stdaff"
+                                            label="Update DMCO staff"
                                             name="dmcoAssignmentsByID"
                                             optionDescriptionSingular="user"
                                             dropdownOptions={dropdownOptions}
