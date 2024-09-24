@@ -17,7 +17,7 @@ import {
 } from '../attributeHelper'
 import { GraphQLError } from 'graphql/index'
 import type { ContractOrErrorArrayType } from '../../postgres/contractAndRates/findAllContractsWithHistoryByState'
-
+import { performance } from 'perf_hooks'
 const parseContracts = (
     contractsWithHistory: ContractOrErrorArrayType,
     span?: Span
@@ -60,7 +60,7 @@ const formatContracts = (results: ContractType[]) => {
 
     return { totalCount: edges.length, edges }
 }
-
+performance.mark('GQLHandler-start')
 export function indexContractsResolver(
     store: Store
 ): QueryResolvers['indexContracts'] {
@@ -136,3 +136,4 @@ export function indexContractsResolver(
         }
     }
 }
+performance.measure('IndexContractsResolver', 'GQLHandler-start')

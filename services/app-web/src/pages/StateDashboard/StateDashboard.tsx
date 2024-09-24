@@ -2,7 +2,7 @@ import { GridContainer } from '@trussworks/react-uswds'
 import React from 'react'
 import { useLocation } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
-import { useIndexContractsQuery } from '../../gen/gqlClient'
+import { useIndexContractsForDashboardQuery } from '../../gen/gqlClient'
 import styles from './StateDashboard.module.scss'
 import { SubmissionSuccessMessage } from './SubmissionSuccessMessage'
 import {
@@ -27,7 +27,7 @@ export const StateDashboard = (): React.ReactElement => {
     const { loginStatus, loggedInUser } = useAuth()
     const location = useLocation()
 
-    const { loading, data, error } = useIndexContractsQuery({
+    const { loading, data, error } = useIndexContractsForDashboardQuery({
         fetchPolicy: 'network-only',
     })
 
