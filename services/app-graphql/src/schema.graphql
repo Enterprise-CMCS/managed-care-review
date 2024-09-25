@@ -342,7 +342,7 @@ type Mutation {
     updateDivisionAssignment(input: UpdateDivisionAssignmentInput!): UpdateCMSUserPayload!
 
     """
-    updateStateAssignment updates CMSUser state assignments.
+    updateStateAssignment updates an individual CMSUser state assignments.
 
     This can only be called by an AdminUser or a DMCO CMS user.
     The cmsUserID must be a CMSUser's id, not a state user
@@ -358,7 +358,7 @@ type Mutation {
     updateStateAssignment(input: UpdateStateAssignmentInput!): UpdateCMSUserPayload!
 
     """
-    updateStateAssignmentByState updates which CMSUsers are assigned to a given state.
+    updateStateAssignmentByState updates a group of CMSUsers to be assigned to a given state.
 
     This can only be called by an AdminUser or a DMCO CMS user.
     The cmsUserID must be a CMSUser's id, not a state user

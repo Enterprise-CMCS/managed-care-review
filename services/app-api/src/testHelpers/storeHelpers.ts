@@ -54,6 +54,9 @@ function mockStoreThatErrors(): Store {
         findAllUsers: async () => {
             return genericError
         },
+        findStateAssignedUsers: async () => {
+            return genericError
+        },
         findUser: async (_ID) => {
             return genericError
         },

@@ -12,6 +12,7 @@ import { isValidStateCode } from '../../common-code/healthPlanFormDataType'
 import { NotFoundError } from '../../postgres'
 import { GraphQLError } from 'graphql/index'
 
+// Update cms users assigned to a specific state
 export function updateStateAssignmentsByState(
     store: Store
 ): MutationResolvers['updateStateAssignmentsByState'] {
