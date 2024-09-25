@@ -16,7 +16,7 @@
         "serverless-stack-termination-protection": "^2.0.2"
     },
     "dependencies": {
-        "@aws-sdk/client-cloudformation": "^3.654.0",
-        "@aws-sdk/client-s3": "^3.657.0"
+        "@aws-sdk/client-cloudformation": "^3.658.0",
+        "@aws-sdk/client-s3": "^3.658.0"
     }
 }
