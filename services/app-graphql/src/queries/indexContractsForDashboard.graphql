@@ -1,0 +1,153 @@
+query indexContractsForDashboard {
+    indexContracts {
+        totalCount
+        edges {
+            node {
+                id
+                status
+                createdAt
+                updatedAt
+                initiallySubmittedAt
+                stateCode
+                mccrsID
+                stateNumber
+                state {
+                    code
+                    name
+                    programs {
+                        id
+                        name
+                        fullName
+                        isRateProgram
+                    }
+                }
+
+                draftRevision {
+                    id
+                    createdAt
+                    updatedAt
+                    contractName
+
+                    submitInfo {
+                        ...updateInformationFields
+                    }
+
+                    unlockInfo {
+                        ...updateInformationFields
+                    }
+
+                    formData {
+                        programIDs
+                        populationCovered
+                        submissionType
+                        riskBasedContract
+                        submissionDescription
+                        stateContacts {
+                            name
+                            titleRole
+                            email
+                        }
+                        contractType
+                        contractExecutionStatus
+                        contractDateStart
+                        contractDateEnd
+                        managedCareEntities
+                        federalAuthorities
+                        inLieuServicesAndSettings
+                        modifiedBenefitsProvided
+                        modifiedGeoAreaServed
+                        modifiedMedicaidBeneficiaries
+                        modifiedRiskSharingStrategy
+                        modifiedIncentiveArrangements
+                        modifiedWitholdAgreements
+                        modifiedStateDirectedPayments
+                        modifiedPassThroughPayments
+                        modifiedPaymentsForMentalDiseaseInstitutions
+                        modifiedMedicaidBeneficiaries
+                        modifiedMedicalLossRatioStandards
+                        modifiedOtherFinancialPaymentIncentive
+                        modifiedEnrollmentProcess
+                        modifiedGrevienceAndAppeal
+                        modifiedNetworkAdequacyStandards
+                        modifiedLengthOfContract
+                        modifiedNonRiskPaymentArrangements
+                        statutoryRegulatoryAttestation
+                        statutoryRegulatoryAttestationDescription
+                    }
+                }
+
+                packageSubmissions {
+                    cause
+                    submitInfo {
+                        ...updateInformationFields
+                    }
+
+                    contractRevision {
+                        id
+                        createdAt
+                        updatedAt
+                        contractName
+
+                        submitInfo {
+                            ...updateInformationFields
+                        }
+
+                        unlockInfo {
+                            ...updateInformationFields
+                        }
+
+                        formData {
+                            programIDs
+                            populationCovered
+                            submissionType
+                            riskBasedContract
+                            submissionDescription
+                            stateContacts {
+                                name
+                                titleRole
+                                email
+                            }
+                            contractType
+                            contractExecutionStatus
+                            contractDateStart
+                            contractDateEnd
+                            managedCareEntities
+                            federalAuthorities
+                            inLieuServicesAndSettings
+                            modifiedBenefitsProvided
+                            modifiedGeoAreaServed
+                            modifiedMedicaidBeneficiaries
+                            modifiedRiskSharingStrategy
+                            modifiedIncentiveArrangements
+                            modifiedWitholdAgreements
+                            modifiedStateDirectedPayments
+                            modifiedPassThroughPayments
+                            modifiedPaymentsForMentalDiseaseInstitutions
+                            modifiedMedicaidBeneficiaries
+                            modifiedMedicalLossRatioStandards
+                            modifiedOtherFinancialPaymentIncentive
+                            modifiedEnrollmentProcess
+                            modifiedGrevienceAndAppeal
+                            modifiedNetworkAdequacyStandards
+                            modifiedLengthOfContract
+                            modifiedNonRiskPaymentArrangements
+                            statutoryRegulatoryAttestation
+                            statutoryRegulatoryAttestationDescription
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+fragment updateInformationFields on UpdateInformation {
+    updatedAt
+    updatedBy {
+        email
+        role
+        familyName
+        givenName
+    }
+    updatedReason
+}

@@ -78,9 +78,7 @@ const FieldSelect = ({
             })
         }
 
-        await helpers.setValue(
-            newValue.map((item: { value: string }) => item.value)
-        )
+        await helpers.setValue(newValue)
     }
 
     const noOptionsMessage = () => {
