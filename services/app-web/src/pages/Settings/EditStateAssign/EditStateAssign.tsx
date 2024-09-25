@@ -63,7 +63,6 @@ export const EditStateAssign = (): React.ReactElement => {
     const {stateAnalysts} = useOutletContext<MCReviewSettingsContextType>()
     const setLastUpdated = stateAnalysts.setLastUpdated
     const navigate = useNavigate()
-    setLastUpdated(null)
 
     const {
         loading: loadingMcReviewSettings,
@@ -91,14 +90,18 @@ export const EditStateAssign = (): React.ReactElement => {
         shouldValidate && Boolean(error)
 
     const onSubmit = async (values: EditStateAssignFormValuesType) => {
+        // for submit form data
         const assignedUserIDs = values.dmcoAssignmentsByID.map((v) => v.value)
-        setLastUpdated({state:  stateName, removed: formInitialValues.dmcoAssignmentsByID.map( (assignment)=> assignment.label),  added: values.dmcoAssignmentsByID.map( (assignment)=> assignment.label)})
+
+        // for display
+        const assignedUsers = values.dmcoAssignmentsByID.map( (assignment)=> assignment.label)
+        const removedUsers = formInitialValues.dmcoAssignmentsByID.map( (assignment)=> assignment.label).filter( (name) => !assignedUsers.includes(name))
+        setLastUpdated({state:  stateName, removed: removedUsers,  added: assignedUsers })
         const result = await updateStateAssignmentsWrapper(
             updateAssignmentsMutation,
             stateCode,
             assignedUserIDs
         )
-
         if (result instanceof Error) {
             recordJSException(result)
             // editError will ensure banner is displayed, no need to handle here.

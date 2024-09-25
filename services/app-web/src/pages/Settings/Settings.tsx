@@ -163,9 +163,10 @@ export const Settings = (): React.ReactElement => {
             loading: loadingSettingsData,
             error: isSettingsError,
             lastUpdated: lastUpdatedAnalysts,
-            setLastUpdated: setLastUpdatedAnalysts,
+            setLastUpdated: (analysts) => {setLastUpdatedAnalysts(analysts)},
         },
     }
+
     if(SETTINGS_HIDE_SIDEBAR_ROUTES.includes(currentRoute)){
         return <Outlet context={context} />
        }
