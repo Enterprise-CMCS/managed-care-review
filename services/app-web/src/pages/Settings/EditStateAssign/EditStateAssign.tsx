@@ -60,8 +60,8 @@ export const EditStateAssign = (): React.ReactElement => {
     }
     // Page level state
     const [shouldValidate, setShouldValidate] = React.useState(false)
-    const {stateAnalysts} = useOutletContext<MCReviewSettingsContextType>()
-    const setLastUpdated = stateAnalysts.setLastUpdated
+    const settingsContext = useOutletContext<MCReviewSettingsContextType>()
+    const setLastUpdated = settingsContext?.stateAnalysts.setLastUpdated
     const navigate = useNavigate()
 
     const {
@@ -85,7 +85,7 @@ export const EditStateAssign = (): React.ReactElement => {
         return <Error404 />
     }
 
-    const stateName = stateAnalysts.data.find( (data) => data.stateCode == stateCode)?.stateName || stateCode.toUpperCase()
+    const stateName = settingsContext?.stateAnalysts.data.find( (data) => data.stateCode == stateCode)?.stateName || stateCode.toUpperCase()
     const showFieldErrors = (error?: FormError) =>
         shouldValidate && Boolean(error)
 
