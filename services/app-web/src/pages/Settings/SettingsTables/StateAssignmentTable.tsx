@@ -26,13 +26,18 @@ import useDeepCompareEffect from 'use-deep-compare-effect'
 import { useStringConstants } from '../../../hooks/useStringConstants'
 import { useOutletContext } from 'react-router-dom'
 import { type MCReviewSettingsContextType } from '../Settings'
-import { formatEmails, EditLink } from '../'
+import {EditLink, formatUserNamesFromUsers, formatEmailsFromUsers  } from '../'
 import { SettingsErrorAlert } from '../SettingsErrorAlert'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '../../../common-code/featureFlags'
 
+type AnalystDisplayType = {email: string,
+    givenName?: string,
+    familyName?: string
+}
+
 type StateAnalystsInDashboardType = {
-    emails: string[]
+    analysts: AnalystDisplayType[]
     stateCode: string
     editLink: string
 }
@@ -88,10 +93,10 @@ const StateAssignmentTable = () => {
                 cell: (info) => info.getValue(),
                 filterFn: `arrIncludesSome`,
             }),
-            columnHelper.accessor('emails', {
-                id: 'emails',
+            columnHelper.accessor('analysts', {
+                id: 'analysts',
                 header: 'Assigned DMCO staff',
-                cell: (info) => formatEmails(info.getValue()),
+                cell: (info) => readWriteStateAssignments? formatUserNamesFromUsers(info.getValue()) : formatEmailsFromUsers(info.getValue()),
                 filterFn: `arrIncludesSome`,
             }),
             columnHelper.accessor('editLink', {
@@ -136,8 +141,8 @@ const StateAssignmentTable = () => {
     const stateColumn = reactTable.getColumn(
         'stateCode'
     ) as Column<StateAnalystsInDashboardType>
-    const emailsColumn = reactTable.getColumn(
-        'emails'
+    const analystsColumn = reactTable.getColumn(
+        'analysts'
     ) as Column<StateAnalystsInDashboardType>
     const rowCount = `Displaying ${filteredRows.length} of ${analysts.data.length} ${pluralize(
         'state',
@@ -160,12 +165,12 @@ const StateAssignmentTable = () => {
     }
 
     const emailFilterOptions = () => {
-        const emails = Array.from(
-            emailsColumn.getFacetedUniqueValues().keys()
+        const analysts = Array.from(
+            analystsColumn.getFacetedUniqueValues().keys()
         ).flat()
 
         return (
-            [...new Set(emails)]
+            [...new Set(analysts)]
                 .map((state) => ({
                     value: state,
                     label: state,
@@ -259,15 +264,15 @@ const StateAssignmentTable = () => {
                         }
                     />
                     <FilterSelect
-                        value={getAppliedFilters(columnFilters, 'emails')}
-                        name="emails"
-                        label="Emails"
+                        value={getAppliedFilters(columnFilters, 'analysts')}
+                        name="analysts"
+                        label="Analyst"
                         filterOptions={emailFilterOptions()}
                         onChange={(selectedOptions) =>
                             updateFilters(
-                                emailsColumn,
+                                analystsColumn,
                                 selectedOptions,
-                                'emails'
+                                'analysts'
                             )
                         }
                     />
@@ -312,4 +317,4 @@ const StateAssignmentTable = () => {
         </>
     )
 }
-export { StateAssignmentTable, type StateAnalystsInDashboardType }
+export { StateAssignmentTable, type StateAnalystsInDashboardType, type AnalystDisplayType }

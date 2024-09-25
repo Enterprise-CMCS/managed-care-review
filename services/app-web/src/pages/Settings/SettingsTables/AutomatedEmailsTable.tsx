@@ -2,9 +2,9 @@ import { useOutletContext } from 'react-router-dom'
 import { MCReviewSettingsContextType } from '../Settings'
 import { Table } from '@trussworks/react-uswds'
 import React from 'react'
-import { formatEmails } from '../Settings'
 import { Loading } from '../../../components'
 import { SettingsErrorAlert } from '../SettingsErrorAlert'
+import { formatEmails } from '../SettingsCells/SettingsCells'
 
 const AutomatedEmailsTable = () => {
     const { emailConfig: config } =

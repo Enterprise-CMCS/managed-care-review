@@ -33,15 +33,12 @@ export const TestMonitoring = (): null => {
     return null
 }
 
-export const formatEmails = (arr?: string[]) =>
-    arr ? arr.join(', ') : 'NOT DEFINED'
-
 const mapStateAnalystsFromParamStore = (
     stateAnalysts?: StateAnalystsConfiguration[] | null
 ): StateAnalystsInDashboardType[] => {
     return stateAnalysts
         ? stateAnalysts.map((sa) => ({
-              emails: sa.emails,
+              analysts: sa.emails.map( (email) => { return {givenName: 'N/A', familyName: 'N/A', email} }), // not given or family names because parameter store cannot guarantee this context
               stateCode: sa.stateCode,
               editLink: `/mc-review-settings/state-assignments/${sa.stateCode.toUpperCase()}/edit`,
           }))
@@ -67,7 +64,7 @@ const mapStateAnalystFromDB = (
     return stateAssignments
         ? stateAssignments.map((state) => ({
               stateCode: state.stateCode,
-              emails: state.assignedCMSUsers.map((user) => user.email),
+              analysts: state.assignedCMSUsers.map((user) => {return { givenName: user.givenName, familyName: user.familyName, email: user.email}}),
               editLink: `/mc-review-settings/state-assignments/${state.stateCode.toUpperCase()}/edit`,
           }))
         : []
