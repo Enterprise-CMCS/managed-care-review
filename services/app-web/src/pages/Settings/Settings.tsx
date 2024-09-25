@@ -1,4 +1,4 @@
-import React, {useState} from 'react'
+import React, {useState, useEffect} from 'react'
 import { Grid, GridContainer, Icon, SideNav } from '@trussworks/react-uswds'
 import styles from './Settings.module.scss'
 import { NavLinkWithLogging } from '../../components'
@@ -116,9 +116,15 @@ export const Settings = (): React.ReactElement => {
         loading: loadingMcReviewSettings,
         data: mcrSettingsData,
         error: mcReviewError,
+        refetch: refetchMcReviewSettings
     } = useFetchMcReviewSettingsQuery({
         skip: !readWriteStateAssignments,
+        notifyOnNetworkStatusChange: true,
     })
+
+    useEffect(()=> {
+       void refetchMcReviewSettings()
+    }, [currentRoute, refetchMcReviewSettings])
 
     const loadingSettingsData = readWriteStateAssignments
         ? loadingMcReviewSettings
