@@ -261,11 +261,11 @@ const CMSUserRoutes = ({
                         path={RoutesRecord.SUPPORT_EMAILS}
                         element={<SupportEmailsTable />}
                     />
-                </Route>
-                <Route
+                    <Route
                     path={RoutesRecord.EDIT_STATE_ASSIGNMENTS}
                     element={<EditStateAssign />}
                 />
+                </Route>
                 <Route
                     path={RoutesRecord.SETTINGS}
                     // Until we update the helpdesk documentation for the /mc-review-settings route, we are keeping this

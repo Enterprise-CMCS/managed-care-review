@@ -6,7 +6,7 @@ import {
     Label,
     Grid,
 } from '@trussworks/react-uswds'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useOutletContext, useParams } from 'react-router-dom'
 import { Form as UswdsForm } from '@trussworks/react-uswds'
 import { Formik, FormikErrors } from 'formik'
 import {
@@ -36,6 +36,8 @@ import { FilterOptionType } from '../../../components/FilterAccordion'
 import styles from './EditStateAssign.module.scss'
 import * as Yup from 'yup'
 import { updateStateAssignmentsWrapper } from '../../../gqlHelpers/mutationWrappersForUserFriendlyErrors'
+import { recordJSException } from '../../../otelHelpers'
+import { MCReviewSettingsContextType } from '../Settings'
 
 const EditStateAssignmentSchema = Yup.object().shape({
     dmcoAssignmentsByID: Yup.array().min(
@@ -58,7 +60,10 @@ export const EditStateAssign = (): React.ReactElement => {
     }
     // Page level state
     const [shouldValidate, setShouldValidate] = React.useState(false)
+    const {stateAnalysts} = useOutletContext<MCReviewSettingsContextType>()
+    const setLastUpdated = stateAnalysts.setLastUpdated
     const navigate = useNavigate()
+    setLastUpdated(null)
 
     const {
         loading: loadingMcReviewSettings,
@@ -81,12 +86,13 @@ export const EditStateAssign = (): React.ReactElement => {
         return <Error404 />
     }
 
+    const stateName = stateAnalysts.data.find( (data) => data.stateCode == stateCode)?.stateName || stateCode.toUpperCase()
     const showFieldErrors = (error?: FormError) =>
         shouldValidate && Boolean(error)
 
     const onSubmit = async (values: EditStateAssignFormValuesType) => {
         const assignedUserIDs = values.dmcoAssignmentsByID.map((v) => v.value)
-
+        setLastUpdated({state:  stateName, removed: formInitialValues.dmcoAssignmentsByID.map( (assignment)=> assignment.label),  added: values.dmcoAssignmentsByID.map( (assignment)=> assignment.label)})
         const result = await updateStateAssignmentsWrapper(
             updateAssignmentsMutation,
             stateCode,
@@ -94,10 +100,10 @@ export const EditStateAssign = (): React.ReactElement => {
         )
 
         if (result instanceof Error) {
-            console.error(result)
-            // react should be displaying the error using the updateError var
+            recordJSException(result)
+            // editError will ensure banner is displayed, no need to handle here.
         } else {
-            navigate(RoutesRecord.STATE_ASSIGNMENTS)
+            navigate(`${RoutesRecord.STATE_ASSIGNMENTS}/?submit=state-assignments`)
         }
     }
 

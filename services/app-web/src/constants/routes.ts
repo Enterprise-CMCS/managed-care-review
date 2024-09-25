@@ -123,6 +123,9 @@ const QUESTION_RESPONSE_SHOW_SIDEBAR_ROUTES: RouteTWithUnknown[] = [
     'SUBMISSIONS_REVIEW_SUBMIT',
 ]
 
+const SETTINGS_HIDE_SIDEBAR_ROUTES: RouteT = [
+    'EDIT_STATE_ASSIGNMENTS'
+]
 /*
     Page headings used in the <header> when user logged in.
     Dynamic headings, when necessary, are set in page specific parent component.
@@ -186,6 +189,7 @@ export {
     PageTitlesRecord,
     RoutesRecord,
     ROUTES,
+    SETTINGS_HIDE_SIDEBAR_ROUTES,
     STATE_SUBMISSION_FORM_ROUTES,
     STATE_SUBMISSION_FORM_ROUTES_WITHOUT_SUPPORTING_DOCS,
     STATE_SUBMISSION_SUMMARY_ROUTES,

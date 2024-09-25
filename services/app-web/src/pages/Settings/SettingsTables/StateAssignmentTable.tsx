@@ -39,6 +39,7 @@ type AnalystDisplayType = {email: string,
 type StateAnalystsInDashboardType = {
     analysts: AnalystDisplayType[]
     stateCode: string
+    stateName: string,
     editLink: string
 }
 

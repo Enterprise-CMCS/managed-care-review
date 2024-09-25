@@ -6,9 +6,9 @@ import { AnalystDisplayType } from '../SettingsTables/StateAssignmentTable'
 const formatEmails = (arr?: string[]) =>
     arr ? arr.join(', ') : 'NOT DEFINED'
 
-// TODO Eventually this should take in UserType or CMSUnionType
+const formatUserName = (user: AnalystDisplayType) => `${user.givenName} ${user.familyName}`
 const formatEmailsFromUsers = (arr?: AnalystDisplayType[]) => (arr ? arr.map(analyst => analyst.email).join(', ') : 'NOT DEFINED')
-const formatUserNamesFromUsers = (arr?: AnalystDisplayType[]) =>  (arr ? arr.map(analyst => `${analyst.givenName} ${analyst.familyName}`).join(', ') : '')
+const formatUserNamesFromUsers = (arr?: AnalystDisplayType[]) =>  (arr ? arr.map(analyst => formatUserName(analyst)).join(', ') : '')
 
 const EditLink = ({ url, rowID }: { url: string; rowID: string }) => {
     return (
@@ -21,4 +21,4 @@ const EditLink = ({ url, rowID }: { url: string; rowID: string }) => {
         </NavLinkWithLogging>
     )
 }
-export { EditLink, formatEmails, formatEmailsFromUsers, formatUserNamesFromUsers }
+export { EditLink, formatEmails, formatEmailsFromUsers, formatUserNamesFromUsers, formatUserName }
