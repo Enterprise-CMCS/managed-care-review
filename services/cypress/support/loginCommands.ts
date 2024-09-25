@@ -22,7 +22,7 @@ Cypress.Commands.add('logInAsStateUser', () => {
         throw new Error(`Auth mode is not defined or is IDM: ${authMode}`)
     }
     //Wait for both queries to finish.
-    cy.wait(['@fetchCurrentUserQuery', '@indexContractsQuery'], {
+    cy.wait(['@fetchCurrentUserQuery', '@indexContractsForDashboardQuery'], {
         timeout: 80_000,
     })
     cy.findByTestId('state-dashboard-page', { timeout: 10_000 }).should('exist')
@@ -57,7 +57,7 @@ Cypress.Commands.add(
         }
 
         cy.wait('@fetchCurrentUserQuery', { timeout: 20_000 })
-        cy.wait('@indexHealthPlanPackagesQuery', { timeout: 80_000 })
+        cy.wait('@indexContractsForDashboardQuery', { timeout: 80_000 })
         cy.findByTestId('cms-dashboard-page', { timeout: 10_000 }).should(
             'exist'
         )
@@ -77,7 +77,7 @@ Cypress.Commands.add(
                 )
                 cy.findByRole('heading', { name: /rate reviews/ }).should('exist')
             } else {
-                cy.wait('@indexHealthPlanPackagesQuery', { timeout: 80_000 })
+                cy.wait('@indexContractsForDashboardQuery', { timeout: 80_000 })
             }
         }
     }
@@ -124,7 +124,7 @@ Cypress.Commands.add(
         } else if (initialURL?.includes('submissions')) {
             cy.wait('@fetchHealthPlanPackageQuery', { timeout: 20_000 })
         } else {
-            cy.wait('@indexHealthPlanPackagesQuery', { timeout: 80_000 })
+            cy.wait('@indexContractsForDashboardQuery', { timeout: 80_000 })
             cy.findByTestId('cms-dashboard-page', { timeout: 10_000 }).should(
                 'exist'
             )
