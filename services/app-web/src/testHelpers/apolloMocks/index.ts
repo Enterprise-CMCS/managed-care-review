@@ -79,11 +79,14 @@ export {
     mockContractPackageUnlockedWithUnlockedType,
     mockContractRevision,
     mockRateRevision,
+    mockContractPackageSubmittedWithQuestions,
 } from './contractPackageDataMock'
 export { rateDataMock } from './rateDataMock'
 export { 
     fetchContractMockSuccess,
     fetchContractMockFail,
+    fetchContractWithQuestionsMockSuccess,
+    fetchContractWithQuestionsMockFail,
     updateDraftContractRatesMockSuccess,
     updateContractDraftRevisionMockFail,
     updateContractDraftRevisionMockSuccess,

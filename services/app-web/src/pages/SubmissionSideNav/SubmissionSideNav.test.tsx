@@ -6,21 +6,21 @@ import { SubmissionSummary } from '../SubmissionSummary'
 import { QuestionResponse } from '../QuestionResponse'
 import { renderWithProviders } from '../../testHelpers'
 import { RoutesRecord } from '../../constants/routes'
-import React from 'react'
 import {
     fetchContractMockSuccess,
     fetchCurrentUserMock,
-    fetchStateHealthPlanPackageWithQuestionsMockNotFound,
-    fetchStateHealthPlanPackageWithQuestionsMockSuccess,
     mockContractPackageSubmitted,
-    mockDraftHealthPlanPackage,
+    mockContractPackageSubmittedWithQuestions,
     mockQuestionsPayload,
-    mockSubmittedHealthPlanPackage,
     mockValidCMSUser,
+    fetchContractWithQuestionsMockSuccess,
+    fetchContractWithQuestionsMockFail,
+    mockContractPackageDraft,
 } from '../../testHelpers/apolloMocks'
 
 describe('SubmissionSideNav', () => {
     it('loads sidebar nav with expected links', async () => {
+        const contract = mockContractPackageSubmitted()
         renderWithProviders(
             <Routes>
                 <Route element={<SubmissionSideNav />}>
@@ -41,8 +41,11 @@ describe('SubmissionSideNav', () => {
                             user: mockValidCMSUser(),
                             statusCode: 200,
                         }),
-                        fetchStateHealthPlanPackageWithQuestionsMockSuccess({
-                            id: '15',
+                        fetchContractWithQuestionsMockSuccess({
+                            contract: {
+                                ...contract,
+                                id: '15',
+                            },
                         }),
                     ],
                 },
@@ -89,7 +92,7 @@ describe('SubmissionSideNav', () => {
 
     it('sidebar nav links routes to correct pages', async () => {
         let testLocation: Location
-        const testContract = { ...mockContractPackageSubmitted(), id: '15' }
+        const testContract = mockContractPackageSubmittedWithQuestions('15')
         renderWithProviders(
             <Routes>
                 <Route element={<SubmissionSideNav />}>
@@ -110,11 +113,30 @@ describe('SubmissionSideNav', () => {
                             user: mockValidCMSUser(),
                             statusCode: 200,
                         }),
-                        fetchStateHealthPlanPackageWithQuestionsMockSuccess({
-                            id: '15',
+                        fetchContractWithQuestionsMockSuccess({
+                            contract: {
+                                ...testContract,
+                                id: '15',
+                            },
                         }),
-                        fetchContractMockSuccess({ contract: testContract }),
-                        fetchContractMockSuccess({ contract: testContract }), // this is needed twice for the tests to pass since we navigate back and forth
+                        fetchContractWithQuestionsMockSuccess({
+                            contract: {
+                                ...testContract,
+                                id: '15',
+                            },
+                        }),
+                        fetchContractMockSuccess({
+                            contract: {
+                                ...testContract,
+                                id: '15',
+                            },
+                        }),
+                        fetchContractMockSuccess({
+                            contract: {
+                                ...testContract,
+                                id: '15',
+                            },
+                        }),
                     ],
                 },
                 routerProvider: {
@@ -200,6 +222,7 @@ describe('SubmissionSideNav', () => {
     })
 
     it('renders back to dashboard link for state users', async () => {
+        const contract = mockContractPackageSubmitted()
         renderWithProviders(
             <Routes>
                 <Route element={<SubmissionSideNav />}>
@@ -219,8 +242,11 @@ describe('SubmissionSideNav', () => {
                         fetchCurrentUserMock({
                             statusCode: 200,
                         }),
-                        fetchStateHealthPlanPackageWithQuestionsMockSuccess({
-                            id: '15',
+                        fetchContractWithQuestionsMockSuccess({
+                            contract: {
+                                ...contract,
+                                id: '15',
+                            },
                         }),
                     ],
                 },
@@ -235,6 +261,7 @@ describe('SubmissionSideNav', () => {
     })
 
     it('renders back to dashboard link for CMS users', async () => {
+        const contract = mockContractPackageSubmitted()
         renderWithProviders(
             <Routes>
                 <Route element={<SubmissionSideNav />}>
@@ -255,8 +282,11 @@ describe('SubmissionSideNav', () => {
                             user: mockValidCMSUser(),
                             statusCode: 200,
                         }),
-                        fetchStateHealthPlanPackageWithQuestionsMockSuccess({
-                            id: '15',
+                        fetchContractWithQuestionsMockSuccess({
+                            contract: {
+                                ...contract,
+                                id: '15',
+                            },
                         }),
                     ],
                 },
@@ -275,8 +305,8 @@ describe('SubmissionSideNav', () => {
 
     describe('Submission package data display', () => {
         it('Submission with no revisions shows a generic error', async () => {
-            const pkg = mockSubmittedHealthPlanPackage()
-            pkg.revisions = []
+            const contract = mockContractPackageSubmitted()
+            contract.packageSubmissions = []
 
             renderWithProviders(
                 <Routes>
@@ -299,54 +329,12 @@ describe('SubmissionSideNav', () => {
                             fetchCurrentUserMock({
                                 statusCode: 200,
                             }),
-                            fetchStateHealthPlanPackageWithQuestionsMockSuccess(
-                                {
+                            fetchContractWithQuestionsMockSuccess({
+                                contract: {
+                                    ...contract,
                                     id: '15',
-                                    stateSubmission: pkg,
-                                }
-                            ),
-                        ],
-                    },
-                    routerProvider: {
-                        route: '/submissions/15',
-                    },
-                }
-            )
-
-            expect(await screen.findByText('System error')).toBeInTheDocument()
-        })
-
-        it('Submission with broken proto shows a generic error', async () => {
-            const pkg = mockSubmittedHealthPlanPackage()
-            pkg.revisions[0].node.formDataProto = 'BORKED'
-
-            renderWithProviders(
-                <Routes>
-                    <Route element={<SubmissionSideNav />}>
-                        <Route
-                            path={
-                                RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS
-                            }
-                            element={<QuestionResponse />}
-                        />
-                        <Route
-                            path={RoutesRecord.SUBMISSIONS_SUMMARY}
-                            element={<SubmissionSummary />}
-                        />
-                    </Route>
-                </Routes>,
-                {
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({
-                                statusCode: 200,
+                                },
                             }),
-                            fetchStateHealthPlanPackageWithQuestionsMockSuccess(
-                                {
-                                    id: '15',
-                                    stateSubmission: pkg,
-                                }
-                            ),
                         ],
                     },
                     routerProvider: {
@@ -359,8 +347,7 @@ describe('SubmissionSideNav', () => {
         })
 
         it('DRAFT displays an error to a CMS user', async () => {
-            const pkg = mockDraftHealthPlanPackage()
-
+            const contract = mockContractPackageDraft()
             renderWithProviders(
                 <Routes>
                     <Route element={<SubmissionSideNav />}>
@@ -383,12 +370,12 @@ describe('SubmissionSideNav', () => {
                                 user: mockValidCMSUser(),
                                 statusCode: 200,
                             }),
-                            fetchStateHealthPlanPackageWithQuestionsMockSuccess(
-                                {
+                            fetchContractWithQuestionsMockSuccess({
+                                contract: {
+                                    ...contract,
                                     id: '15',
-                                    stateSubmission: pkg,
-                                }
-                            ),
+                                },
+                            }),
                         ],
                     },
                     routerProvider: {
@@ -401,6 +388,8 @@ describe('SubmissionSideNav', () => {
         })
 
         it('shows a generic 404 page when package is not found', async () => {
+            const contract = mockContractPackageSubmittedWithQuestions()
+
             renderWithProviders(
                 <Routes>
                     <Route element={<SubmissionSideNav />}>
@@ -420,11 +409,24 @@ describe('SubmissionSideNav', () => {
                     apolloProvider: {
                         mocks: [
                             fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchStateHealthPlanPackageWithQuestionsMockNotFound(
-                                {
-                                    id: '404',
-                                }
-                            ),
+                            fetchContractWithQuestionsMockSuccess({
+                                contract: {
+                                    ...contract,
+                                },
+                            }),
+                            fetchContractWithQuestionsMockSuccess({
+                                contract: {
+                                    ...contract,
+                                    id: '15',
+                                },
+                            }),
+                            fetchContractWithQuestionsMockFail({
+                                id: '404',
+                                error: {
+                                    code: 'NOT_FOUND',
+                                    cause: 'DB_ERROR',
+                                },
+                            }),
                         ],
                     },
                     routerProvider: { route: '/submissions/404' },
@@ -434,8 +436,11 @@ describe('SubmissionSideNav', () => {
             const notFound = await screen.findByText('404 / Page not found')
             expect(notFound).toBeInTheDocument()
         })
+
         it('shows a generic error page when user is undefined', async () => {
             const testQuestions = mockQuestionsPayload('15')
+            const contract = mockContractPackageSubmitted()
+            contract.questions = testQuestions
             renderWithProviders(
                 <Routes>
                     <Route element={<SubmissionSideNav />}>
@@ -455,12 +460,12 @@ describe('SubmissionSideNav', () => {
                     apolloProvider: {
                         mocks: [
                             fetchCurrentUserMock({ statusCode: 403 }),
-                            fetchStateHealthPlanPackageWithQuestionsMockSuccess(
-                                {
+                            fetchContractWithQuestionsMockSuccess({
+                                contract: {
+                                    ...contract,
                                     id: '15',
-                                    questions: testQuestions,
-                                }
-                            ),
+                                },
+                            }),
                         ],
                     },
                     routerProvider: {

@@ -3,6 +3,8 @@ import {
     Contract,
     UnlockedContract,
     FetchContractDocument,
+    FetchContractWithQuestionsDocument,
+    FetchContractWithQuestionsQuery,
     UpdateDraftContractRatesDocument,
     UpdateContractDraftRevisionMutation,
     UpdateContractDraftRevisionDocument,
@@ -97,6 +99,45 @@ const fetchContractMockFail = ({
     }
 }
 
+const fetchContractWithQuestionsMockSuccess = ({
+    contract,
+}: {
+    contract?: Contract | UnlockedContract
+}): MockedResponse<FetchContractWithQuestionsQuery> => {
+    let newContract:Contract | undefined
+    // contract can be an unlockedContract type
+    // however this API returns a contract type
+    // check which type contract is and if it's UnlockedContract type
+    // to pass the correct mocked type from the API
+    if (contract && contract.__typename === 'UnlockedContract') {
+        newContract = {
+            ...contract,
+            __typename: 'Contract',
+        }
+    } else if (contract && contract.__typename === 'Contract') {
+        newContract = contract
+    } else {
+        newContract =  undefined
+    }
+
+    const contractData = newContract ? newContract : mockContractPackageDraft()
+    return {
+        request: {
+            query: FetchContractWithQuestionsDocument,
+            variables: { input: { contractID: contractData.id } },
+        },
+        result: {
+            data: {
+                fetchContract: {
+                    contract: {
+                        ...contractData,
+                    },
+                },
+            },
+        },
+    }
+}
+
 const createContractMockFail = ({
     error,
 }: {
@@ -121,6 +162,43 @@ const createContractMockFail = ({
         request: {
             query: CreateContractDocument,
             variables: { input: { contractID: '123' } },
+        },
+        error: new ApolloError({
+            graphQLErrors: [graphQLError],
+        }),
+        result: {
+            data: null,
+            errors: [graphQLError],
+        },
+    }
+}
+
+const fetchContractWithQuestionsMockFail = ({
+    id,
+    error,
+}: {
+    id: string
+    error?: {
+        code: GraphQLErrorCodeTypes
+        cause: GraphQLErrorCauseTypes
+    }
+}): MockedResponse<FetchContractWithQuestionsQuery | ApolloError> => {
+    const graphQLError = new GraphQLError(
+        error
+            ? GRAPHQL_ERROR_CAUSE_MESSAGES[error.cause]
+            : 'Error attempting to submit.',
+        {
+            extensions: {
+                code: error?.code,
+                cause: error?.cause,
+            },
+        }
+    )
+
+    return {
+        request: {
+            query: FetchContractWithQuestionsDocument,
+            variables: { input: { contractID: id } },
         },
         error: new ApolloError({
             graphQLErrors: [graphQLError],
@@ -366,6 +444,8 @@ const indexContractsMockSuccess = (
 export { 
     fetchContractMockSuccess,
     fetchContractMockFail,
+    fetchContractWithQuestionsMockSuccess,
+    fetchContractWithQuestionsMockFail,
     updateDraftContractRatesMockSuccess,
     updateContractDraftRevisionMockFail,
     updateContractDraftRevisionMockSuccess,

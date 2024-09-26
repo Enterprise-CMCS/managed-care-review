@@ -57,7 +57,7 @@ export const QuestionResponse = () => {
     // router context
     const location = useLocation()
     const submitType = new URLSearchParams(location.search).get('submit')
-    const { user, packageData, packageName, pkg } =
+    const { user, contractFormData, packageName, contract } =
         useOutletContext<SideNavOutletContextType>()
     let division: Division | undefined = undefined
 
@@ -68,7 +68,7 @@ export const QuestionResponse = () => {
         updateHeading({ customHeading: packageName })
     }, [packageName, updateHeading])
 
-    if (!packageData || !user) {
+    if (!contractFormData || !user) {
         return (
             <GridContainer>
                 <Loading />
@@ -76,7 +76,7 @@ export const QuestionResponse = () => {
         )
     }
 
-    if (pkg.status === 'DRAFT') {
+    if (contract.status === 'DRAFT') {
         return <GenericErrorPage />
     }
 
@@ -91,11 +91,11 @@ export const QuestionResponse = () => {
 
     divisionOrder.forEach(
         (division) =>
-            pkg.questions?.[`${division}Questions`].totalCount &&
+            contract.questions?.[`${division}Questions`].totalCount &&
             questions.push({
                 division: division,
                 questions: extractQuestions(
-                    pkg.questions?.[`${division}Questions`].edges
+                    contract.questions?.[`${division}Questions`].edges
                 ),
             })
     )
