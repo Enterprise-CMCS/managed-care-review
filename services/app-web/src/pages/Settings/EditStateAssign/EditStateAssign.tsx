@@ -96,7 +96,7 @@ export const EditStateAssign = (): React.ReactElement => {
         // for display
         const assignedUsers = values.dmcoAssignmentsByID.map( (assignment)=> assignment.label)
         const removedUsers = formInitialValues.dmcoAssignmentsByID.map( (assignment)=> assignment.label).filter( (name) => !assignedUsers.includes(name))
-        setLastUpdated({state:  stateName, removed: removedUsers,  added: assignedUsers })
+        setLastUpdated((_prevState) => {return {state:  stateName, removed: removedUsers,  added: assignedUsers }})
         const result = await updateStateAssignmentsWrapper(
             updateAssignmentsMutation,
             stateCode,

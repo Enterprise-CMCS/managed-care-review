@@ -28,10 +28,10 @@ export const AssignedStaffUpdateBanner = ({
             <div className={styles.bannerBodyText}>
                    <span> The following changes have been made for {state} analysts:</span>
                     <ul>
-                        {removed && removed.map( (person) =>
-                        <li>{person} was removed</li>)}
-                        {added && added.map( (person) =>
-                        <li>{person} was assigned to this state</li>)}
+                        {removed && removed.map( (person, indx) =>
+                        <li key={`add-${indx}`}>{person} was removed</li>)}
+                        {added && added.map( (person, indx) =>
+                        <li key={`remove-${indx}`}>{person} was assigned to this state</li>)}
                     </ul>
             </div>
         </Alert>

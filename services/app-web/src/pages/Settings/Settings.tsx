@@ -84,7 +84,6 @@ const mapStateAnalystFromDB = (
 
 export const Settings = (): React.ReactElement => {
     const ldClient = useLDClient()
-    const { updateHeading } = usePage()
     const { currentRoute } = useCurrentRoute()
     const { pathname } = useLocation()
     const [ lastUpdatedAnalysts, setLastUpdatedAnalysts] = useState<LastUpdatedAnalystsType |null>(null)
@@ -96,10 +95,6 @@ export const Settings = (): React.ReactElement => {
     // determine if we should display a recent submit success banner
     const submitType = new URLSearchParams(location.search).get('submit')
     const showAnalystsUpdatedBanner = readWriteStateAssignments && submitType == 'state-assignments'
-
-    updateHeading({
-        customHeading: PageHeadingsRecord.MCR_SETTINGS,
-    })
 
     const isSelectedLink = (route: string): string => {
         return route.includes(pathname) ? 'usa-current' : ''
@@ -122,9 +117,15 @@ export const Settings = (): React.ReactElement => {
         notifyOnNetworkStatusChange: true,
     })
 
+    // Refetch data if there's an updated banner visible
+    // right now we only have one case of updated (assigned analysts) but this could be extended to handle other cases
     useEffect(()=> {
-       void refetchMcReviewSettings()
-    }, [currentRoute, refetchMcReviewSettings])
+       if (showAnalystsUpdatedBanner) {
+        // this refetch data will just populate when available, no loading state currently
+        // reminder, loadMcReviewSettings only covers initial load
+        void refetchMcReviewSettings()
+       }
+    }, [showAnalystsUpdatedBanner, refetchMcReviewSettings])
 
     const loadingSettingsData = readWriteStateAssignments
         ? loadingMcReviewSettings

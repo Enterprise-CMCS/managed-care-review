@@ -123,24 +123,9 @@ const QUESTION_RESPONSE_SHOW_SIDEBAR_ROUTES: RouteTWithUnknown[] = [
     'SUBMISSIONS_REVIEW_SUBMIT',
 ]
 
-const SETTINGS_HIDE_SIDEBAR_ROUTES: RouteT = [
+const SETTINGS_HIDE_SIDEBAR_ROUTES: RouteT[] = [
     'EDIT_STATE_ASSIGNMENTS'
 ]
-/*
-    Page headings used in the <header> when user logged in.
-    Dynamic headings, when necessary, are set in page specific parent component.
-    Every route does not need a page heading in the record.
-    It is a design choice what goes here. For example, we do not any headings when logged in user is on the help page.
-    For a quick way to check page headings, look for the h1 of the application in the DOM tree. It is the dark blue row of the header.
-
-*/
-const PageHeadingsRecord: Partial<Record<RouteTWithUnknown, string>> = {
-    ROOT: 'Dashboard',
-    DASHBOARD_SUBMISSIONS: 'Submissions dashboard',
-    DASHBOARD_RATES: 'Rate reviews dashboard',
-    SUBMISSIONS_NEW: 'New submission',
-    MCR_SETTINGS: 'MC-Review settings'
-}
 
 /*
     Static page titles used in <title>.
@@ -182,6 +167,25 @@ const PageTitlesRecord: Record<RouteT | 'UNKNOWN_ROUTE', string> = {
     SUBMISSIONS_UPLOAD_QUESTION: 'Add questions',
     SUBMISSIONS_UPLOAD_RESPONSE: 'Add response',
     UNKNOWN_ROUTE: 'Not found',
+}
+
+/*
+    Page headings used in the <header> when user logged in.
+    Dynamic headings, when necessary, are set in page specific parent component.
+    Every route does not need a page heading in the record.
+    It is a design choice what goes here. For example, we do not any headings when logged in user is on the help page.
+    For a quick way to check page headings, look for the h1 of the application in the DOM tree. It is the dark blue row of the header.
+
+*/
+const PageHeadingsRecord: Partial<Record<RouteTWithUnknown, string>> = {
+    ROOT: 'Dashboard',
+    DASHBOARD_SUBMISSIONS: 'Submissions dashboard',
+    DASHBOARD_RATES: 'Rate reviews dashboard',
+    SUBMISSIONS_NEW: 'New submission',
+    MCR_SETTINGS: PageTitlesRecord.MCR_SETTINGS,
+    STATE_ASSIGNMENTS: PageTitlesRecord.MCR_SETTINGS,
+    EDIT_STATE_ASSIGNMENTS: PageTitlesRecord.MCR_SETTINGS,
+    DIVISION_ASSIGNMENTS: PageTitlesRecord.MCR_SETTINGS,
 }
 
 export {
