@@ -34,7 +34,8 @@ export const UploadQuestions = () => {
     // eslint-disable-next-line @typescript-eslint/no-use-before-define
     const { division, id } = useParams<{ division: string; id: string }>()
     const navigate = useNavigate()
-    const { packageName, pkg } = useOutletContext<SideNavOutletContextType>()
+    const { packageName, contract } =
+        useOutletContext<SideNavOutletContextType>()
 
     // api
     const [createQuestion, { loading: apiLoading, error: apiError }] =
@@ -59,7 +60,7 @@ export const UploadQuestions = () => {
     const { setFocusErrorSummaryHeading, errorSummaryHeadingRef } =
         useErrorSummary()
 
-    if (pkg.status === 'DRAFT') {
+    if (contract.status === 'DRAFT') {
         return <GenericErrorPage />
     }
     const showFileUploadError = Boolean(shouldValidate && fileUploadError)
