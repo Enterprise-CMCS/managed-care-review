@@ -75,7 +75,7 @@ describe('clamAV', () => {
         }
 
         // assert things.
-        expect(res).toStrictEqual(['badList.csv', 'badDummy.pdf'])
+        expect(res).toEqual(['badDummy.pdf', 'badExcel.xls'])
 
         await rm(tmpDefsDir, { force: true, recursive: true })
     })

@@ -122,7 +122,6 @@ describe('avScan', () => {
         if (res) {
             throw res
         }
-        console.info(res)
 
         // TEST
         // run check file
