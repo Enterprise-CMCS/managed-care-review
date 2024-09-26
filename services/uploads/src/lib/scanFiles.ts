@@ -4,6 +4,7 @@ import crypto from 'crypto'
 import { ClamAV } from '../deps/clamAV'
 import { S3UploadsClient } from '../deps/s3'
 import { fileTypeFromBuffer } from 'file-type'
+import { lookup } from 'mime-types'
 
 // returns a list of aws keys that are infected
 // scanDir is the directory where files should be downloaded and scanned and should exist already
@@ -16,7 +17,6 @@ export async function scanFiles(
 ): Promise<string[] | Error> {
     // clamScan wants files to be top level in the scanned directory, so we map each key to a UUID
     const filemap: { [filename: string]: string } = {}
-    const mimeTypeErrors: Error[] = []
 
     for (const key of keys) {
         console.info('Downloading file to be scanned', key)
@@ -36,28 +36,34 @@ export async function scanFiles(
             const fileBuffer = await fs.readFile(scanFilePath)
             const detectedType = await fileTypeFromBuffer(fileBuffer)
 
-            // Get the Content-Type from S3 metadata
-            const metadata = await s3Client.getObjectContentType(key, bucket)
-            if (metadata instanceof Error) {
-                console.error(
-                    `Could not get file's content type from S3 bucket`
+            // get the mime type based on the file's declared extension
+            const originalFilename = await s3Client.getOriginalFilename(
+                key,
+                bucket
+            )
+            if (originalFilename instanceof Error) {
+                const err = new Error(
+                    `Could not get the original filename of file ${originalFilename}`
                 )
-                return metadata
+                console.error(err)
+                return err
             }
-            const declaredContentType = metadata.ContentType
+            const declaredContentType = lookup(path.extname(originalFilename))
 
             if (detectedType && declaredContentType) {
                 if (detectedType.mime !== declaredContentType) {
                     const err = new Error(
                         `MIME type mismatch for ${key}: Content-Type is ${declaredContentType}, detected type is ${detectedType.mime}`
                     )
-                    mimeTypeErrors.push(err)
+                    console.error(err)
+                    return err
                 }
             } else {
                 const err = new Error(
                     `Could not determine MIME type for ${key}`
                 )
-                mimeTypeErrors.push(err)
+                console.error(err)
+                return err
             }
         } catch (mimeError) {
             return mimeError

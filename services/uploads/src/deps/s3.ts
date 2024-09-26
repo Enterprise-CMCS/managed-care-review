@@ -14,6 +14,8 @@ import {
 } from '@aws-sdk/client-s3'
 
 import fs from 'fs'
+import { fileTypeFromBuffer } from 'file-type'
+import { readFile } from 'fs/promises'
 import path from 'path'
 import { Readable } from 'stream'
 
@@ -40,6 +42,10 @@ interface S3UploadsClient {
         key: string,
         bucket: string
     ) => Promise<{ ContentType?: string } | Error>
+    getOriginalFilename: (
+        key: string,
+        bucket: string
+    ) => Promise<string | Error>
     tagObject: (
         key: string,
         bucket: string,
@@ -75,6 +81,8 @@ function uploadsClient(s3Client: S3Client): S3UploadsClient {
         getObjectTags: (key, bucket) => getObjectTags(s3Client, key, bucket),
         getObjectContentType: (key, bucket) =>
             getObjectContentType(s3Client, key, bucket),
+        getOriginalFilename: (key, bucket) =>
+            getOriginalFileName(s3Client, key, bucket),
         tagObject: (key, bucket, tagSet) =>
             tagObject(s3Client, key, bucket, tagSet),
         deleteObjects: (keys, buckets) =>
@@ -182,6 +190,34 @@ async function getObjectContentType(
         const res = await client.send(command)
         return {
             ContentType: res.ContentType,
+        }
+    } catch (err) {
+        return err
+    }
+}
+
+async function getOriginalFileName(
+    client: S3Client,
+    key: string,
+    bucket: string
+): Promise<string | Error> {
+    const command = new HeadObjectCommand({
+        Bucket: bucket,
+        Key: key,
+    })
+
+    try {
+        const res = await client.send(command)
+        const contentDis = res.ContentDisposition
+        if (!contentDis) {
+            return new Error('Content-Disposition not found in object metadata')
+        }
+
+        const filenameMatch = contentDis.match(/filename=(.*?)($|;)/i)
+        if (filenameMatch && filenameMatch[1]) {
+            return filenameMatch[1].replace(/["']/g, '').trim()
+        } else {
+            return new Error('Filename not found in Content-Disposition')
         }
     } catch (err) {
         return err
@@ -362,10 +398,14 @@ async function uploadObject(
     bucket: string,
     filepath: string
 ): Promise<undefined | Error> {
+    const contentType = await getFileMimeType(filepath)
+    const fileName = path.basename(filepath)
     const putCmd = new PutObjectCommand({
         Bucket: bucket,
         Key: key,
         Body: fs.createReadStream(filepath),
+        ContentType: contentType,
+        ContentDisposition: `attachment; filename=${fileName}`,
     })
 
     try {
@@ -397,6 +437,12 @@ async function tagObject(
         console.error(err)
         return err
     }
+}
+
+async function getFileMimeType(filePath: string): Promise<string> {
+    const buffer = await readFile(filePath)
+    const fileType = await fileTypeFromBuffer(buffer)
+    return fileType?.mime || 'application/octet-stream'
 }
 
 export { S3UploadsClient, NewS3UploadsClient, NewTestS3UploadsClient }

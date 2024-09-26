@@ -1,5 +1,5 @@
 import { S3UploadsClient } from '../deps/s3'
-import { mkdtemp } from 'fs/promises'
+import { mkdtemp, rm } from 'fs/promises'
 import { ClamAV } from '../deps/clamAV'
 import { generateVirusScanTagSet, ScanStatus } from './tags'
 import { scanFiles } from './scanFiles'
@@ -9,7 +9,7 @@ export async function scanFile(
     clamAV: ClamAV,
     key: string,
     bucket: string,
-    maxFileSize: number,
+    maxFileSize: number
 ): Promise<undefined | Error> {
     //You need to verify that you are not getting too large a file
     //currently lambdas max out at 500MB storage.
@@ -24,7 +24,6 @@ export async function scanFile(
         // tag with skipped.
         tagResult = 'SKIPPED'
     } else {
-
         // make a tmp directory to scan this file in
         const tmpScanDir = await mkdtemp('/tmp/clamscan-')
 
@@ -46,6 +45,7 @@ export async function scanFile(
             }
         }
 
+        await rm(tmpScanDir, { force: true, recursive: true })
     }
 
     const tags = generateVirusScanTagSet(tagResult)
