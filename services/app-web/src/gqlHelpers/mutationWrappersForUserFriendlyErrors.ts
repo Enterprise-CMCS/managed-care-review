@@ -17,7 +17,9 @@ import {
     SubmitContractMutationFn,
     Contract,
     UnlockedContract,
-    UpdateStateAssignmentsByStateMutationFn
+    UpdateStateAssignmentsByStateMutationFn,
+    FetchMcReviewSettingsDocument,
+    FetchMcReviewSettingsQuery
 } from '../gen/gqlClient'
 import { ApolloError, GraphQLErrors } from '@apollo/client/errors'
 
@@ -234,7 +236,7 @@ export async function updateStateAssignmentsWrapper(
     assignedUserIDs: string[],
 ): Promise<undefined | GraphQLErrors | Error> {
 
-    const input = { 
+    const input = {
         stateCode,
         assignedUsers: assignedUserIDs,
     }
@@ -244,6 +246,37 @@ export async function updateStateAssignmentsWrapper(
             variables: {
                 input,
             },
+            update(cache, { data }) {
+                if (data) {
+                    const stateCode = data.updateStateAssignmentsByState.stateCode
+                    const updatedUsers = data.updateStateAssignmentsByState.assignedUsers
+                    const previousSettings =  cache.readQuery<FetchMcReviewSettingsQuery>(
+                        {
+                            query: FetchMcReviewSettingsDocument,
+                        }
+                    )
+
+                    if (previousSettings) {
+                        const previousAssignmentsForAllStates = previousSettings.fetchMcReviewSettings.stateAssignments
+                        cache.writeQuery({
+                            query: FetchMcReviewSettingsDocument,
+                            data: {
+                                fetchMcReviewSettings: {
+                                    stateAssignments: {
+                                      ... previousAssignmentsForAllStates,
+                                      [stateCode]: {
+                                            assignedCMSUsers: updatedUsers
+                                        }
+                                      }
+                                    },
+                                },
+                            },
+                        )
+                    }
+                    }
+
+                },
+            onQueryUpdated: () => true,
         })
 
         if (data?.updateStateAssignmentsByState.assignedUsers) {

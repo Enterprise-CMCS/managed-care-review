@@ -117,12 +117,12 @@ export const Settings = (): React.ReactElement => {
         notifyOnNetworkStatusChange: true,
     })
 
-    // Refetch data if there's an updated banner visible
-    // right now we only have one case of updated (assigned analysts) but this could be extended to handle other cases
+    // Refetch all data in background if there's been recent update
+
     useEffect(()=> {
        if (showAnalystsUpdatedBanner) {
-        // this refetch data will just populate when available, no loading state currently
-        // reminder, loadMcReviewSettings only covers initial load
+            // right now we only have one case of setting data that can change in the background (assigned analysts)
+        // this refetch data will just rerender data when available, no loading state currently since changes are likely very small
         void refetchMcReviewSettings()
        }
     }, [showAnalystsUpdatedBanner, refetchMcReviewSettings])
