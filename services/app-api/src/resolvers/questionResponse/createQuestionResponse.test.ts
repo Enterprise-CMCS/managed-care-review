@@ -4,18 +4,26 @@ import {
     createAndSubmitTestHealthPlanPackage,
     createTestQuestion,
     createTestQuestionResponse,
+    defaultFloridaProgram,
+    updateTestStateAssignments,
 } from '../../testHelpers/gqlHelpers'
 import { base64ToDomain } from '../../common-code/proto/healthPlanFormDataProto'
-import { assertAnError, assertAnErrorCode } from '../../testHelpers'
+import {
+    assertAnError,
+    assertAnErrorCode,
+    createAndSubmitTestContract,
+} from '../../testHelpers'
 import {
     createDBUsersWithFullData,
     testCMSUser,
 } from '../../testHelpers/userHelpers'
 import { testEmailConfig, testEmailer } from '../../testHelpers/emailerHelpers'
 import { latestFormData } from '../../testHelpers/healthPlanPackageHelpers'
-import { findStatePrograms } from '../../postgres'
+import { findStatePrograms, NewPostgresStore } from '../../postgres'
 import { packageName } from '../../common-code/healthPlanFormDataType'
 import { getTestStateAnalystsEmails } from '../../testHelpers/parameterStoreHelpers'
+import { testLDService } from '../../testHelpers/launchDarklyHelpers'
+import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 
 describe('createQuestionResponse', () => {
     const cmsUser = testCMSUser()
@@ -196,6 +204,92 @@ describe('createQuestionResponse', () => {
                 ),
                 bodyHTML: expect.stringContaining(
                     `<a href="http://localhost/submissions/${submittedPkg.id}/question-and-answers">View submission Q&A</a>`
+                ),
+            })
+        )
+    })
+
+    it('send CMS email to state analysts from database', async () => {
+        const ldService = testLDService({
+            'read-write-state-assignments': true,
+        })
+
+        const prismaClient = await sharedTestPrismaClient()
+        const postgresStore = NewPostgresStore(prismaClient)
+
+        const config = testEmailConfig()
+        const mockEmailer = testEmailer(config)
+        //mock invoke email submit lambda
+        const stateServer = await constructTestPostgresServer({
+            store: postgresStore,
+            ldService,
+            emailer: mockEmailer,
+        })
+        const cmsServer = await constructTestPostgresServer({
+            store: postgresStore,
+            context: {
+                user: cmsUser,
+            },
+            ldService,
+        })
+
+        // add some users to the db, assign them to the state
+        const assignedUsers = [
+            testCMSUser({
+                givenName: 'Roku',
+                email: 'roku@example.com',
+            }),
+            testCMSUser({
+                givenName: 'Izumi',
+                email: 'izumi@example.com',
+            }),
+        ]
+
+        await createDBUsersWithFullData(assignedUsers)
+
+        const assignedUserIDs = assignedUsers.map((u) => u.id)
+        const assignedUserEmails = assignedUsers.map((u) => u.email)
+
+        await updateTestStateAssignments(cmsServer, 'FL', assignedUserIDs)
+
+        const stateSubmission = await createAndSubmitTestContract(stateServer)
+
+        const question = (
+            await createTestQuestion(cmsServer, stateSubmission.id)
+        ).question
+        await createTestQuestionResponse(stateServer, question.id)
+
+        const currentRevision =
+            stateSubmission.packageSubmissions[0].contractRevision
+
+        const programs = [defaultFloridaProgram()]
+        const name = packageName(
+            stateSubmission.stateCode,
+            stateSubmission.stateNumber,
+            currentRevision.formData.programIDs,
+            programs
+        )
+
+        const cmsEmails = [...config.devReviewTeamEmails, ...assignedUserEmails]
+
+        // email subject line is correct for CMS email
+        // email is sent to the state anaylsts since it
+        // was submitted by a DCMO user
+        // Mock emailer is called 4 times, twice for submit, twice for response,
+        // first called to send the state email, then to CMS
+        expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
+            3,
+            expect.objectContaining({
+                subject: expect.stringContaining(
+                    `[LOCAL] New Responses for ${name}`
+                ),
+                sourceEmail: config.emailSource,
+                toAddresses: expect.arrayContaining(Array.from(cmsEmails)),
+                bodyText: expect.stringContaining(
+                    `The state submitted responses to DMCO's questions about ${name}`
+                ),
+                bodyHTML: expect.stringContaining(
+                    `<a href="http://localhost/submissions/${stateSubmission.id}/question-and-answers">View submission Q&A</a>`
                 ),
             })
         )

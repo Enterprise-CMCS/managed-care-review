@@ -8,7 +8,7 @@ import {
     IndexUsersDocument,
     IndexUsersQuery,
     StateUser,
-    HelpdeskUser, CmsApproverUser, BusinessOwnerUser, IndexUsersPayload
+    HelpdeskUser, CmsApproverUser, BusinessOwnerUser, IndexUsersPayload, UpdateStateAssignmentsByStateMutation, UpdateStateAssignmentsByStatePayload, CmsUsersUnion, UpdateStateAssignmentsByStateDocument, User, UpdateStateAssignmentsByStateMutationVariables
 } from '../../gen/gqlClient'
 
 import { mockMNState } from './stateMock'
@@ -193,6 +193,77 @@ const indexUsersQueryFailMock = (): MockedResponse<ApolloError> => {
     }
 }
 
+// I could not figure out how to have more generic users work down here, 
+// I had to specify all the user data in the data: section. If it was typed at all
+// the type checking would fail.
+function updateStateAssignmentsMutationMockSuccess(stateCode: string = 'CA', userIDs: string[] = ['1', '2']): 
+    MockedResponse<UpdateStateAssignmentsByStateMutation, UpdateStateAssignmentsByStateMutationVariables> {
+
+    return {
+        request: {
+            query: UpdateStateAssignmentsByStateDocument,
+            variables: {
+                input: {
+                    stateCode,
+                    assignedUsers: userIDs,
+                }
+            }
+        },
+        result: {
+            data: {
+              "updateStateAssignmentsByState": {
+                stateCode,
+                assignedUsers: userIDs.map((id) => ({
+                     __typename: 'CMSUser',
+                    role: 'CMS_USER',
+                    id,
+                    familyName: 'Hotman',
+                    givenName: 'Zuko',
+                    divisionAssignment: 'OACT',
+                    email: 'zuko@example.com',
+                    stateAssignments: [{ 
+                        __typename: 'State',
+                        code: 'CA', 
+                        name: 'California', 
+                        programs: [] 
+                    }],
+                }))
+              },
+            }
+        },
+    }
+}
+
+
+function updateStateAssignmentsMutationMockFailure(stateCode: string = 'CA', userIDs: string[] = ['1', '2']): MockedResponse<ApolloError> {
+    const graphQLError = new GraphQLError('Error fetching email settings data.',
+        {
+            extensions: {
+                code: 'INTERNAL_SERVER_ERROR',
+                cause: 'DB Error',
+            },
+        }
+    )
+    return {
+        request: {
+            query: UpdateStateAssignmentsByStateDocument,
+            variables: {
+                input: {
+                    stateCode,
+                    assignedUsers: userIDs,
+                }
+            }
+        },
+        error: new ApolloError({
+            graphQLErrors: [graphQLError],
+        }),
+        result: {
+            data: null,
+        },
+    }
+}
+
+
 const iterableCmsUsersMockData: {
     userRole: 'CMS_USER' | 'CMS_APPROVER_USER',
     mockUser: <T>(userData?: Partial<T>) => CmsUser | CmsApproverUser
@@ -237,5 +308,7 @@ export {
     iterableCmsUsersMockData,
     mockValidBusinessOwnerUser,
     iterableAdminUsersMockData,
-    indexUsersQueryFailMock
+    indexUsersQueryFailMock,
+    updateStateAssignmentsMutationMockSuccess,
+    updateStateAssignmentsMutationMockFailure,
 }

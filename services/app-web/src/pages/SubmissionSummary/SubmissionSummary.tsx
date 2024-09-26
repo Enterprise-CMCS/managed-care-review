@@ -1,8 +1,4 @@
-import {
-    GridContainer,
-    Link,
-    ModalRef,
-} from '@trussworks/react-uswds'
+import { GridContainer, Link, ModalRef } from '@trussworks/react-uswds'
 import React, { useEffect, useRef, useState } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
 import { ContractDetailsSummarySection } from '../StateSubmission/ReviewSubmit/ContractDetailsSummarySection'

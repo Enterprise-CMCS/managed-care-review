@@ -12,16 +12,22 @@ import { GraphQLError } from 'graphql'
 import { isValidCmsDivison } from '../../domain-models'
 import type { Emailer } from '../../emailer'
 import type { EmailParameterStore } from '../../parameterStore'
+import type { LDService } from '../../launchDarkly/launchDarkly'
+import type { StateCodeType } from '../../testHelpers'
 
 export function createQuestionResolver(
     store: Store,
     emailParameterStore: EmailParameterStore,
-    emailer: Emailer
+    emailer: Emailer,
+    launchDarkly: LDService
 ): MutationResolvers['createQuestion'] {
     return async (_parent, { input }, context) => {
         const { user, ctx, tracer } = context
         const span = tracer?.startSpan('createQuestion', {}, ctx)
 
+        const featureFlags = await launchDarkly.allFlags(context)
+        const readStateAnalystsFromDBFlag =
+            featureFlags?.['read-write-state-assignments']
         if (!hasCMSPermissions(user)) {
             const msg = 'user not authorized to create a question'
             logError('createQuestion', msg)
@@ -149,15 +155,47 @@ export function createQuestionResolver(
             })
         }
 
-        let stateAnalystsEmails =
-            await emailParameterStore.getStateAnalystsEmails(
-                contractResult.stateCode
-            )
-        //If error log it and set stateAnalystsEmails to empty string as to not interrupt the emails.
-        if (stateAnalystsEmails instanceof Error) {
-            logError('getStateAnalystsEmails', stateAnalystsEmails.message)
-            setErrorAttributesOnActiveSpan(stateAnalystsEmails.message, span)
-            stateAnalystsEmails = []
+        let stateAnalystsEmails: string[] = []
+        if (readStateAnalystsFromDBFlag) {
+            // not great that state code type isn't being used in ContractType but I'll risk the conversion for now
+            const stateAnalystsEmailsResult =
+                await store.findStateAssignedUsers(
+                    contractResult.stateCode as StateCodeType
+                )
+
+            if (stateAnalystsEmailsResult instanceof Error) {
+                logError(
+                    'getStateAnalystsEmails',
+                    stateAnalystsEmailsResult.message
+                )
+                setErrorAttributesOnActiveSpan(
+                    stateAnalystsEmailsResult.message,
+                    span
+                )
+            } else {
+                stateAnalystsEmails = stateAnalystsEmailsResult.map(
+                    (u) => u.email
+                )
+            }
+        } else {
+            const stateAnalystsEmailsResult =
+                await emailParameterStore.getStateAnalystsEmails(
+                    contractResult.stateCode
+                )
+
+            //If error log it and set stateAnalystsEmails to empty string as to not interrupt the emails.
+            if (stateAnalystsEmailsResult instanceof Error) {
+                logError(
+                    'getStateAnalystsEmails',
+                    stateAnalystsEmailsResult.message
+                )
+                setErrorAttributesOnActiveSpan(
+                    stateAnalystsEmailsResult.message,
+                    span
+                )
+            } else {
+                stateAnalystsEmails = stateAnalystsEmailsResult
+            }
         }
 
         const sendQuestionsCMSEmailResult = await emailer.sendQuestionsCMSEmail(

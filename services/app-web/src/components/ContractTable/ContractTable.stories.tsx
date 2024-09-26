@@ -1,13 +1,13 @@
 import { StoryFn } from '@storybook/react'
 import {
-    HealthPlanPackageTable,
-    PackageTableProps,
-    PackageInDashboardType,
-} from './HealthPlanPackageTable'
+    ContractTable,
+    ContractTableProps,
+    ContractInDashboardType,
+} from './ContractTable'
 import ProvidersDecorator from '../../../.storybook/providersDecorator'
 import { User } from '../../gen/gqlClient'
 
-const tableData: PackageInDashboardType[] = [
+const tableData: ContractInDashboardType[] = [
     {
         id: '576e5a1e-6ae6-4936-9ee4-7034cb2072dd',
         name: 'MCR-MN-0071-PMAP',
@@ -93,12 +93,12 @@ const mockCMSUser: User = {
 }
 
 export default {
-    title: 'Components/HealthPlanPackageTable',
-    component: HealthPlanPackageTable,
+    title: 'Components/ContractTable',
+    component: ContractTable,
 }
 
-const Template: StoryFn<PackageTableProps> = (args) => (
-    <HealthPlanPackageTable {...args} />
+const Template: StoryFn<ContractTableProps> = (args) => (
+    <ContractTable {...args} />
 )
 
 export const Default = Template.bind({})

@@ -267,7 +267,12 @@ const mockRateRevision = (
 const mockRate = (ratePartial?: Partial<RateType>): RateType => {
     const submitInfo: UpdateInfoType = {
         updatedAt: new Date('02/01/2021'),
-        updatedBy: 'someone@example.com',
+        updatedBy: {
+            role: 'STATE_USER',
+            email: 'someone@example.com',
+            givenName: 'Someone',
+            familyName: 'Example',
+        },
         updatedReason: 'Initial submission',
     }
     const rateRev = mockRateRevision({

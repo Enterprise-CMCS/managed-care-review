@@ -1,5 +1,5 @@
-import React, { createRef } from 'react'
-import { ModalRef, ModalToggleButton } from '@trussworks/react-uswds'
+import { createRef } from 'react'
+import { ModalRef } from '@trussworks/react-uswds'
 import { screen, waitFor, fireEvent } from '@testing-library/react'
 import { Modal } from './Modal'
 import {
@@ -200,10 +200,7 @@ describe('Modal', () => {
                     >
                         <textarea data-testid="modal-children" />
                     </Modal>
-                    <ModalOpenButton
-                        modalRef={modalRef}
-                        id="opener-button"
-                    >
+                    <ModalOpenButton modalRef={modalRef} id="opener-button">
                         Open modal
                     </ModalOpenButton>
                 </div>
@@ -255,10 +252,7 @@ describe('Modal', () => {
                     >
                         <textarea data-testid="modal-children" />
                     </Modal>
-                    <ModalOpenButton
-                        modalRef={modalRef}
-                        id="opener-button"
-                    >
+                    <ModalOpenButton modalRef={modalRef} id="opener-button">
                         Open modal
                     </ModalOpenButton>
                 </div>
@@ -267,7 +261,7 @@ describe('Modal', () => {
 
             expect(modalRef.current?.modalIsOpen).toBe(true)
 
-            await fireEvent.keyDown(screen.getByText(/Test Modal Title/i), {
+            fireEvent.keyDown(screen.getByText(/Test Modal Title/i), {
                 key: 'Escape',
                 code: 'Escape',
                 keyCode: 27,
@@ -291,10 +285,7 @@ describe('Modal', () => {
                     >
                         <textarea data-testid="modal-children" />
                     </Modal>
-                    <ModalOpenButton
-                        modalRef={modalRef}
-                        id="opener-button"
-                    >
+                    <ModalOpenButton modalRef={modalRef} id="opener-button">
                         Open modal
                     </ModalOpenButton>
                 </div>

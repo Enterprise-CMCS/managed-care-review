@@ -2,11 +2,11 @@ import { renderWithProviders } from '../../../testHelpers'
 import { RateReviewsDashboard } from './RateReviewsDashboard'
 import {
     fetchCurrentUserMock,
-    indexRatesMockFailure,
+    indexRatesForDashboardMockSuccess,
+    indexRatesForDashboardMockFailure,
     iterableCmsUsersMockData,
     rateDataMock,
 } from '../../../testHelpers/apolloMocks'
-import { indexRatesMockSuccess } from '../../../testHelpers/apolloMocks'
 import { screen, waitFor } from '@testing-library/react'
 import { Rate } from '../../../gen/gqlClient'
 
@@ -22,7 +22,7 @@ describe('RateReviewsDashboard', () => {
                                 statusCode: 200,
                                 user: mockUser(),
                             }),
-                            indexRatesMockSuccess(),
+                            indexRatesForDashboardMockSuccess(),
                         ],
                     },
                 })
@@ -83,7 +83,7 @@ describe('RateReviewsDashboard', () => {
                                 statusCode: 200,
                                 user: mockUser(),
                             }),
-                            indexRatesMockSuccess(undefined, rates),
+                            indexRatesForDashboardMockSuccess(undefined, rates),
                         ],
                     },
                 })
@@ -110,7 +110,7 @@ describe('RateReviewsDashboard', () => {
                                 statusCode: 200,
                                 user: mockUser(),
                             }),
-                            indexRatesMockFailure(),
+                            indexRatesForDashboardMockFailure(),
                         ],
                     },
                 })

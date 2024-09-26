@@ -3,12 +3,13 @@ import { screen, waitFor, within } from '@testing-library/react'
 import { StateDashboard } from './StateDashboard'
 import {
     fetchCurrentUserMock,
-    indexHealthPlanPackagesMockSuccess,
-    mockDraftHealthPlanPackage,
-    mockSubmittedHealthPlanPackage,
-    mockUnlockedHealthPlanPackage,
+    indexContractsMockSuccess,
+    mockContractPackageUnlockedWithUnlockedType,
+    mockContractPackageDraft,
+    mockContractPackageSubmitted,
 } from '../../testHelpers/apolloMocks'
 import { renderWithProviders } from '../../testHelpers/jestHelpers'
+import { Contract } from '../../gen/gqlClient'
 
 describe('StateDashboard', () => {
     it('display submission heading', async () => {
@@ -16,7 +17,7 @@ describe('StateDashboard', () => {
             apolloProvider: {
                 mocks: [
                     fetchCurrentUserMock({ statusCode: 200 }),
-                    indexHealthPlanPackagesMockSuccess(),
+                    indexContractsMockSuccess(),
                 ],
             },
         })
@@ -36,7 +37,7 @@ describe('StateDashboard', () => {
             apolloProvider: {
                 mocks: [
                     fetchCurrentUserMock({ statusCode: 200 }),
-                    indexHealthPlanPackagesMockSuccess(),
+                    indexContractsMockSuccess(),
                 ],
             },
         })
@@ -88,13 +89,25 @@ describe('StateDashboard', () => {
         }
 
         // set draft current revision to a far future updatedAt. Set unlocked to nearer future. This allows us to test sorting.
-        const draft = mockDraftHealthPlanPackage({
-            updatedAt: new Date('2100-01-01'),
-        })
-        const submitted = mockSubmittedHealthPlanPackage()
-        const unlocked = mockUnlockedHealthPlanPackage({
-            updatedAt: new Date('2098-01-01'),
-        })
+        const draft = mockContractPackageDraft()
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        draft.draftRevision!.updatedAt = new Date('2100-01-01')
+        const submitted = mockContractPackageSubmitted()
+        submitted.packageSubmissions[0].contractRevision.updatedAt = new Date(
+            '1991-01-01'
+        )
+
+        const unlockedType = mockContractPackageUnlockedWithUnlockedType()
+        const unlocked: Contract = {
+            ...mockContractPackageUnlockedWithUnlockedType({
+                draftRevision: {
+                    ...unlockedType.draftRevision,
+                    updatedAt: new Date('2020-01-01'),
+                },
+            }),
+            __typename: 'Contract',
+        }
+
         draft.id = 'test-abc-draft'
         submitted.id = 'test-abc-submitted'
         unlocked.id = 'test-abc-unlocked'
@@ -105,7 +118,7 @@ describe('StateDashboard', () => {
             apolloProvider: {
                 mocks: [
                     fetchCurrentUserMock({ statusCode: 200, user: mockUser }),
-                    indexHealthPlanPackagesMockSuccess(submissions),
+                    indexContractsMockSuccess(submissions),
                 ],
             },
         })
@@ -167,13 +180,25 @@ describe('StateDashboard', () => {
         }
 
         // set draft current revision to a far future updatedAt. Set unlocked to nearer future. This allows us to test sorting.
-        const draft = mockDraftHealthPlanPackage({
-            updatedAt: new Date('2100-01-01'),
-        })
-        const submitted = mockSubmittedHealthPlanPackage()
-        const unlocked = mockUnlockedHealthPlanPackage({
-            updatedAt: new Date('2098-01-01'),
-        })
+        const draft = mockContractPackageDraft()
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        draft.draftRevision!.updatedAt = new Date('2100-01-01')
+        const submitted = mockContractPackageSubmitted()
+        submitted.packageSubmissions[0].contractRevision.updatedAt = new Date(
+            '1991-01-01'
+        )
+
+        const unlockedType = mockContractPackageUnlockedWithUnlockedType()
+        const unlocked: Contract = {
+            ...mockContractPackageUnlockedWithUnlockedType({
+                draftRevision: {
+                    ...unlockedType.draftRevision,
+                    updatedAt: new Date('2020-01-01'),
+                },
+            }),
+            __typename: 'Contract',
+        }
+
         draft.id = 'test-abc-draft'
         submitted.id = 'test-abc-submitted'
         unlocked.id = 'test-abc-unlocked'
@@ -184,7 +209,7 @@ describe('StateDashboard', () => {
             apolloProvider: {
                 mocks: [
                     fetchCurrentUserMock({ statusCode: 200, user: mockUser }),
-                    indexHealthPlanPackagesMockSuccess(submissions),
+                    indexContractsMockSuccess(submissions),
                 ],
             },
         })
@@ -199,7 +224,7 @@ describe('StateDashboard', () => {
             apolloProvider: {
                 mocks: [
                     fetchCurrentUserMock({ statusCode: 200 }),
-                    indexHealthPlanPackagesMockSuccess(),
+                    indexContractsMockSuccess(),
                 ],
             },
         })

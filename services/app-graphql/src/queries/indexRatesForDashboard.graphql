@@ -1,0 +1,131 @@
+query indexRatesForDashboard($input: IndexRatesInput) {
+    indexRates(input: $input) {
+        totalCount
+        edges {
+            node {
+                id
+                createdAt
+                updatedAt
+                stateCode
+                stateNumber
+                state {
+                    code
+                    name
+                    programs {
+                        id
+                        name
+                        fullName
+                        isRateProgram
+                    }
+                }
+                status
+                withdrawInfo {
+                    ...updateInformationFields
+                }
+                initiallySubmittedAt
+                parentContractID
+
+                draftRevision {
+                    id
+                    rateID
+                    createdAt
+                    updatedAt
+                    unlockInfo {
+                        ...updateInformationFields
+                    }
+                    submitInfo {
+                        ...updateInformationFields
+                    }
+                    formData {
+                        rateType,
+                        rateCapitationType,
+                        rateDateStart,
+                        rateDateEnd,
+                        rateDateCertified,
+                        amendmentEffectiveDateStart,
+                        amendmentEffectiveDateEnd,
+                        rateProgramIDs,
+                        deprecatedRateProgramIDs,
+                        rateCertificationName,
+                        certifyingActuaryContacts {
+                            name
+                            titleRole
+                            email
+                            actuarialFirm
+                            actuarialFirmOther
+                        },
+                        addtlActuaryContacts {
+                            name
+                            titleRole
+                            email
+                            actuarialFirm
+                            actuarialFirmOther
+                        },
+                        actuaryCommunicationPreference
+                        packagesWithSharedRateCerts {
+                            packageName
+                            packageId
+                            packageStatus
+                        }
+                    }
+                }
+
+                revisions {
+                    id
+                    rateID
+                    createdAt
+                    updatedAt
+                    unlockInfo {
+                        ...updateInformationFields
+                    }
+                    submitInfo {
+                        ...updateInformationFields
+                    }
+                    formData {
+                        rateType,
+                        rateCapitationType,
+                        rateDateStart,
+                        rateDateEnd,
+                        rateDateCertified,
+                        amendmentEffectiveDateStart,
+                        amendmentEffectiveDateEnd,
+                        rateProgramIDs,
+                        deprecatedRateProgramIDs,
+                        rateCertificationName,
+                        certifyingActuaryContacts {
+                            name
+                            titleRole
+                            email
+                            actuarialFirm
+                            actuarialFirmOther
+                        },
+                        addtlActuaryContacts {
+                            name
+                            titleRole
+                            email
+                            actuarialFirm
+                            actuarialFirmOther
+                        },
+                        actuaryCommunicationPreference
+                        packagesWithSharedRateCerts {
+                            packageName
+                            packageId
+                            packageStatus
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+fragment updateInformationFields on UpdateInformation {
+    updatedAt
+    updatedBy {
+        email
+        role
+        familyName
+        givenName
+    }
+    updatedReason
+}

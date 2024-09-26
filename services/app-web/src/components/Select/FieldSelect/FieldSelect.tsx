@@ -1,4 +1,3 @@
-import React from 'react'
 import styles from '../Select.module.scss'
 import Select, {
     ActionMeta,
@@ -79,9 +78,7 @@ const FieldSelect = ({
             })
         }
 
-        await helpers.setValue(
-            newValue.map((item: { value: string }) => item.value)
-        )
+        await helpers.setValue(newValue)
     }
 
     const noOptionsMessage = () => {
