@@ -17,7 +17,7 @@ import {
     IndexContractsQuery,
 } from '../../gen/gqlClient'
 import { MockedResponse } from '@apollo/client/testing'
-import { mockContractPackageDraft, mockContractPackageSubmittedWithRevisions, mockContractPackageUnlockedWithUnlockedType } from './contractPackageDataMock'
+import { mockContractPackageDraft, mockContractPackageSubmittedWithQuestions, mockContractPackageSubmittedWithRevisions, mockContractPackageUnlockedWithUnlockedType } from './contractPackageDataMock'
 import { GRAPHQL_ERROR_CAUSE_MESSAGES, GraphQLErrorCauseTypes, GraphQLErrorCodeTypes } from './apolloErrorCodeMocks'
 import { GraphQLError } from 'graphql'
 import { ApolloError } from '@apollo/client'
@@ -120,7 +120,7 @@ const fetchContractWithQuestionsMockSuccess = ({
         newContract =  undefined
     }
 
-    const contractData = newContract ? newContract : mockContractPackageDraft()
+    const contractData = newContract ? newContract : mockContractPackageSubmittedWithQuestions()
     return {
         request: {
             query: FetchContractWithQuestionsDocument,
