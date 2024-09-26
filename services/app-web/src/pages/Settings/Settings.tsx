@@ -14,8 +14,7 @@ import {
     useFetchMcReviewSettingsQuery,
 } from '../../gen/gqlClient'
 import { StateAnalystsInDashboardType} from './SettingsTables/StateAssignmentTable'
-import { PageHeadingsRecord, RoutesRecord } from '../../constants'
-import { usePage } from '../../contexts/PageContext'
+import { RoutesRecord } from '../../constants'
 import { ApolloError } from '@apollo/client'
 import { AssignedStaffUpdateBanner } from '../../components/Banner/AssignedStaffUpdateBanner/AssignedStaffUpdateBanner'
 import { useCurrentRoute } from '../../hooks'
