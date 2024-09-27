@@ -59,7 +59,7 @@ describe('auditUploads', () => {
         const goodSourceFiles = ['dummy.pdf', 'goodList.csv'].map((name) =>
             path.join(testFilesToScanPath, name)
         )
-        const badSourceFiles = ['badDummy.pdf', 'badExcel.xlsx'].map((name) =>
+        const badSourceFiles = ['badDummy.pdf', 'badExcel.xls'].map((name) =>
             path.join(testFilesToScanPath, name)
         )
 

@@ -3,7 +3,7 @@ import fs from 'fs/promises'
 import crypto from 'crypto'
 import { ClamAV } from '../deps/clamAV'
 import { S3UploadsClient } from '../deps/s3'
-import { fileTypeFromBuffer } from 'file-type'
+import { fileTypeFromBuffer, FileTypeResult } from 'file-type'
 import { lookup } from 'mime-types'
 
 // returns a list of aws keys that are infected
@@ -33,9 +33,6 @@ export async function scanFiles(
 
         // check file mime type matches: pen test finding
         try {
-            const fileBuffer = await fs.readFile(scanFilePath)
-            const detectedType = await fileTypeFromBuffer(fileBuffer)
-
             // get the mime type based on the file's declared extension
             const originalFilename = await s3Client.getOriginalFilename(
                 key,
@@ -50,17 +47,21 @@ export async function scanFiles(
             }
             const declaredContentType = lookup(path.extname(originalFilename))
 
-            if (detectedType && declaredContentType) {
-                if (detectedType.mime !== declaredContentType) {
-                    const err = new Error(
-                        `MIME type mismatch for ${key}: Content-Type is ${declaredContentType}, detected type is ${detectedType.mime}`
-                    )
-                    console.error(err)
-                    return err
-                }
-            } else {
+            // check declared file against it's contents
+            const isValid = await validateFileContent(
+                scanFilePath,
+                declaredContentType
+            )
+
+            if (isValid instanceof Error) {
+                console.error(isValid)
+                return isValid
+            }
+
+            if (!isValid) {
+                console.info(`original: ${originalFilename}`)
                 const err = new Error(
-                    `Could not determine MIME type for ${key}`
+                    `MIME type mismatch for ${key}: Content does not match declared type ${declaredContentType}`
                 )
                 console.error(err)
                 return err
@@ -79,4 +80,66 @@ export async function scanFiles(
     }
 
     return res.map((filename) => filemap[filename])
+}
+
+async function validateFileContent(
+    filePath: string,
+    declaredMimeType: string
+): Promise<boolean | Error> {
+    try {
+        const fileBuffer = await fs.readFile(filePath)
+        let detectedType: DetectedFileType | undefined =
+            await fileTypeFromBuffer(fileBuffer)
+
+        if (!detectedType) {
+            const fileContent = fileBuffer.toString().slice(0, 1000)
+
+            if (isCSV(fileContent)) {
+                detectedType = csvFileType
+            } else if (isPlainText(fileContent)) {
+                detectedType = txtFileType
+            } else {
+                // If it's not CSV or plain text and we couldn't detect it, consider it a mismatch
+                return false
+            }
+        }
+        return detectedType.mime === declaredMimeType
+    } catch (err) {
+        console.error(err)
+        return err
+    }
+}
+
+function isCSV(content: string): boolean {
+    const lines = content.split('\n').slice(0, 5) // Check first 5 lines
+    if (lines.length < 2) return false // Need at least 2 lines for a valid CSV
+
+    const commaCount = lines[0].split(',').length
+    if (commaCount < 2) return false // Need at least one comma for CSV
+
+    // Check if all lines have the same number of commas
+    return lines.every((line) => line.split(',').length === commaCount)
+}
+
+function isPlainText(content: string): boolean {
+    // Check if the content contains only printable ASCII characters and common whitespace
+    return /^[\x20-\x7E\t\n\r]*$/.test(content)
+}
+
+// CustomFileType adds 'csv' and 'txt' to mime types
+interface CustomFileType {
+    ext: 'csv' | 'txt'
+    mime: 'text/csv' | 'text/plain'
+}
+
+type DetectedFileType = FileTypeResult | CustomFileType
+
+const csvFileType: CustomFileType = {
+    ext: 'csv',
+    mime: 'text/csv',
+}
+
+const txtFileType: CustomFileType = {
+    ext: 'txt',
+    mime: 'text/plain',
 }

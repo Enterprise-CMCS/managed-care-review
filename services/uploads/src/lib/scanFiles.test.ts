@@ -72,7 +72,7 @@ describe('scanFiles', () => {
         }
 
         expect(scannedFiles).toHaveLength(2)
-        expect(scannedFiles).toContain('allusers/badList.csv')
+        expect(scannedFiles).toContain('allusers/badExcel.xls')
         expect(scannedFiles).toContain('allusers/badDummy.pdf')
 
         await rm(tmpDefsDir, { force: true, recursive: true })

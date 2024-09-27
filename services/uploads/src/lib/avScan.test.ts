@@ -368,7 +368,7 @@ describe('avScan', () => {
             'deps',
             'clamAV',
             'testData',
-            'dummyMimeCheck.docx'
+            'badMimeCheck.docx'
         )
         const badFileKey = path.join('allusers', crypto.randomUUID())
 
