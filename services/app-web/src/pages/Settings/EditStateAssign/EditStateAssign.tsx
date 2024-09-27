@@ -117,7 +117,6 @@ export const EditStateAssign = (): React.ReactElement => {
         )
         if (result instanceof Error) {
             recordJSException(result)
-            console.info(result)
             // editError will ensure banner is displayed, no need to handle here.
         } else {
             navigate(

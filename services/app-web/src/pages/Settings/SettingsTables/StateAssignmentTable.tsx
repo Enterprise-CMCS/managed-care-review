@@ -17,7 +17,7 @@ import {
     FilterSelectedOptionsType,
 } from '../../../components/FilterAccordion'
 import { DoubleColumnGrid, LinkWithLogging, Loading } from '../../../components'
-import { Table } from '@trussworks/react-uswds'
+import { GridContainer, Table } from '@trussworks/react-uswds'
 
 import styles from '../Settings.module.scss'
 import { pluralize } from '../../../common-code/formatters'
@@ -26,20 +26,21 @@ import useDeepCompareEffect from 'use-deep-compare-effect'
 import { useStringConstants } from '../../../hooks/useStringConstants'
 import { useOutletContext } from 'react-router-dom'
 import { type MCReviewSettingsContextType } from '../Settings'
-import {EditLink, formatUserNamesFromUsers, formatEmailsFromUsers  } from '../'
+import { EditLink, formatUserNamesFromUsers, formatEmailsFromUsers } from '../'
 import { SettingsErrorAlert } from '../SettingsErrorAlert'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '../../../common-code/featureFlags'
 
-type AnalystDisplayType = {email: string,
-    givenName?: string,
+type AnalystDisplayType = {
+    email: string
+    givenName?: string
     familyName?: string
 }
 
 type StateAnalystsInDashboardType = {
     analysts: AnalystDisplayType[]
     stateCode: string
-    stateName: string,
+    stateName: string
     editLink: string
 }
 
@@ -97,7 +98,10 @@ const StateAssignmentTable = () => {
             columnHelper.accessor('analysts', {
                 id: 'analysts',
                 header: 'Assigned DMCO staff',
-                cell: (info) => readWriteStateAssignments? formatUserNamesFromUsers(info.getValue()) : formatEmailsFromUsers(info.getValue()),
+                cell: (info) =>
+                    readWriteStateAssignments
+                        ? formatUserNamesFromUsers(info.getValue())
+                        : formatEmailsFromUsers(info.getValue()),
                 filterFn: `arrIncludesSome`,
             }),
             columnHelper.accessor('editLink', {
@@ -111,7 +115,7 @@ const StateAssignmentTable = () => {
                 ),
             }),
         ],
-        []
+        [readWriteStateAssignments]
     )
 
     const reactTable = useReactTable({
@@ -220,7 +224,12 @@ const StateAssignmentTable = () => {
         }
     }, [rowCount, columnFilters, setPrevFilters, prevFilters])
 
-    if (analysts.loading) return <Loading />
+    if (analysts.loading)
+        return (
+            <GridContainer>
+                <Loading />
+            </GridContainer>
+        )
 
     if (analysts.error || !analysts.data)
         return <SettingsErrorAlert error={analysts.error} />
@@ -318,4 +327,8 @@ const StateAssignmentTable = () => {
         </>
     )
 }
-export { StateAssignmentTable, type StateAnalystsInDashboardType, type AnalystDisplayType }
+export {
+    StateAssignmentTable,
+    type StateAnalystsInDashboardType,
+    type AnalystDisplayType,
+}
