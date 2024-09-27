@@ -337,7 +337,7 @@ describe('avScan', () => {
         await rm(tmpDefsDir, { force: true, recursive: true })
     })
 
-    it('marks error if MIME types differ', async () => {
+    it('marks infected if MIME types differ', async () => {
         const thisDir = __dirname
         const tmpDefsDir = await mkdtemp('/tmp/freshclam-')
 
@@ -402,7 +402,7 @@ describe('avScan', () => {
             throw res2
         }
 
-        expect(virusScanStatus(res2)).toBe('ERROR')
+        expect(virusScanStatus(res2)).toBe('INFECTED')
 
         await rm(tmpDefsDir, { force: true, recursive: true })
     })
