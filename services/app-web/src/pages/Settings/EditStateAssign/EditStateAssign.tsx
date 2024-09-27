@@ -85,7 +85,10 @@ export const EditStateAssign = (): React.ReactElement => {
         return <Error404 />
     }
 
-    const stateName = settingsContext?.stateAnalysts.data.find( (data) => data.stateCode == stateCode)?.stateName || stateCode.toUpperCase()
+    const stateName =
+        settingsContext?.stateAnalysts.data.find(
+            (data) => data.stateCode == stateCode
+        )?.stateName || stateCode.toUpperCase()
     const showFieldErrors = (error?: FormError) =>
         shouldValidate && Boolean(error)
 
@@ -94,9 +97,19 @@ export const EditStateAssign = (): React.ReactElement => {
         const assignedUserIDs = values.dmcoAssignmentsByID.map((v) => v.value)
 
         // for display
-        const assignedUsers = values.dmcoAssignmentsByID.map( (assignment)=> assignment.label)
-        const removedUsers = formInitialValues.dmcoAssignmentsByID.map( (assignment)=> assignment.label).filter( (name) => !assignedUsers.includes(name))
-        setLastUpdated((_prevState) => {return {state:  stateName, removed: removedUsers,  added: assignedUsers }})
+        const assignedUsers = values.dmcoAssignmentsByID.map(
+            (assignment) => assignment.label
+        )
+        const removedUsers = formInitialValues.dmcoAssignmentsByID
+            .map((assignment) => assignment.label)
+            .filter((name) => !assignedUsers.includes(name))
+        setLastUpdated((_prevState) => {
+            return {
+                state: stateName,
+                removed: removedUsers,
+                added: assignedUsers,
+            }
+        })
         const result = await updateStateAssignmentsWrapper(
             updateAssignmentsMutation,
             stateCode,
@@ -104,9 +117,12 @@ export const EditStateAssign = (): React.ReactElement => {
         )
         if (result instanceof Error) {
             recordJSException(result)
+            console.info(result)
             // editError will ensure banner is displayed, no need to handle here.
         } else {
-            navigate(`${RoutesRecord.STATE_ASSIGNMENTS}/?submit=state-assignments`)
+            navigate(
+                `${RoutesRecord.STATE_ASSIGNMENTS}/?submit=state-assignments`
+            )
         }
     }
 
