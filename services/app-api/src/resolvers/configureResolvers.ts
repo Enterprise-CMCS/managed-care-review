@@ -52,6 +52,7 @@ import { createContract } from './contract/createContract'
 import { updateContractDraftRevision } from './contract/updateContractDraftRevision'
 import { withdrawAndReplaceRedundantRateResolver } from './contract/withdrawAndReplaceRedundantRate'
 import { fetchMcReviewSettings } from './settings'
+import { updateStateAssignmentsByState } from './user/updateStateAssignmentsByState'
 
 export function configureResolvers(
     store: Store,
@@ -123,15 +124,18 @@ export function configureResolvers(
                 withdrawAndReplaceRedundantRateResolver(store),
             updateDivisionAssignment: updateDivisionAssignment(store),
             updateStateAssignment: updateStateAssignment(store),
+            updateStateAssignmentsByState: updateStateAssignmentsByState(store),
             createQuestion: createQuestionResolver(
                 store,
                 emailParameterStore,
-                emailer
+                emailer,
+                launchDarkly
             ),
             createQuestionResponse: createQuestionResponseResolver(
                 store,
                 emailer,
-                emailParameterStore
+                emailParameterStore,
+                launchDarkly
             ),
             createAPIKey: createAPIKeyResolver(jwt),
             unlockRate: unlockRate(store),

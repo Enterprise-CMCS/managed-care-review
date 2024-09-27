@@ -24,7 +24,7 @@ import {
     StateAssignment,
     useFetchMcReviewSettingsQuery,
     useIndexUsersQuery,
-    useUpdateStateAssignmentMutation,
+    useUpdateStateAssignmentsByStateMutation,
 } from '../../../gen/gqlClient'
 import { RoutesRecord } from '../../../constants'
 import { isValidStateCode } from '../../../common-code/healthPlanFormDataType'
@@ -35,6 +35,7 @@ import { SettingsErrorAlert } from '../SettingsErrorAlert'
 import { FilterOptionType } from '../../../components/FilterAccordion'
 import styles from './EditStateAssign.module.scss'
 import * as Yup from 'yup'
+import { updateStateAssignmentsWrapper } from '../../../gqlHelpers/mutationWrappersForUserFriendlyErrors'
 
 const EditStateAssignmentSchema = Yup.object().shape({
     dmcoAssignmentsByID: Yup.array().min(
@@ -43,12 +44,12 @@ const EditStateAssignmentSchema = Yup.object().shape({
     ),
 })
 
-export interface EditStateAssignFormValues {
+export interface EditStateAssignFormValuesType {
     dmcoAssignmentsByID: FilterOptionType[]
 }
 
 type FormError =
-    FormikErrors<EditStateAssignFormValues>[keyof FormikErrors<EditStateAssignFormValues>]
+    FormikErrors<EditStateAssignFormValuesType>[keyof FormikErrors<EditStateAssignFormValuesType>]
 
 export const EditStateAssign = (): React.ReactElement => {
     const { stateCode } = useParams()
@@ -71,8 +72,10 @@ export const EditStateAssign = (): React.ReactElement => {
         })
     )
 
-    const [_editStateAssignment, { loading: editLoading, error: editError }] =
-        useUpdateStateAssignmentMutation()
+    const [
+        updateAssignmentsMutation,
+        { loading: editLoading, error: editError },
+    ] = useUpdateStateAssignmentsByStateMutation()
 
     if (!isValidStateCode(stateCode.toUpperCase())) {
         return <Error404 />
@@ -81,8 +84,21 @@ export const EditStateAssign = (): React.ReactElement => {
     const showFieldErrors = (error?: FormError) =>
         shouldValidate && Boolean(error)
 
-    const onSubmit = (values: EditStateAssignFormValues) => {
-        console.info('submitted - to be implemented')
+    const onSubmit = async (values: EditStateAssignFormValuesType) => {
+        const assignedUserIDs = values.dmcoAssignmentsByID.map((v) => v.value)
+
+        const result = await updateStateAssignmentsWrapper(
+            updateAssignmentsMutation,
+            stateCode,
+            assignedUserIDs
+        )
+
+        if (result instanceof Error) {
+            console.error(result)
+            // react should be displaying the error using the updateError var
+        } else {
+            navigate(RoutesRecord.STATE_ASSIGNMENTS)
+        }
     }
 
     if (indexUsersResult.status === 'LOADING' || loadingMcReviewSettings)
@@ -113,7 +129,7 @@ export const EditStateAssign = (): React.ReactElement => {
     const assignedUsers = stateAssignments?.assignedCMSUsers ?? []
 
     // Form setup
-    const formInitialValues: EditStateAssignFormValues = {
+    const formInitialValues: EditStateAssignFormValuesType = {
         dmcoAssignmentsByID: assignedUsers.map((user) => ({
             label: `${user.givenName} ${user.familyName}`,
             value: user.id,
@@ -192,12 +208,18 @@ export const EditStateAssign = (): React.ReactElement => {
                                         id="current-dmco-assignments"
                                         label="DMCO staff assigned"
                                     >
-                                        {values.dmcoAssignmentsByID.length >
-                                        0 ? (
+                                        {formInitialValues.dmcoAssignmentsByID
+                                            .length > 0 ? (
                                             <ul>
-                                                {values.dmcoAssignmentsByID.map(
-                                                    (analyst) => (
-                                                        <li>{analyst.label}</li>
+                                                {formInitialValues.dmcoAssignmentsByID.map(
+                                                    (assignedUser) => (
+                                                        <li
+                                                            key={
+                                                                assignedUser.value
+                                                            }
+                                                        >
+                                                            {assignedUser.label}
+                                                        </li>
                                                     )
                                                 )}
                                             </ul>

@@ -56,10 +56,6 @@ export const unlockContractStateEmail = async (
         packagePrograms
     )
 
-    const isContractAndRates =
-        contractFormData.submissionType === 'CONTRACT_AND_RATES' &&
-        Boolean(rateRevs.length)
-
     const contractURL = reviewAndSubmitURL(
         contractRev.contract.id,
         config.baseUrl
@@ -72,11 +68,9 @@ export const unlockContractStateEmail = async (
         unlockedReason: updateInfo.updatedReason,
         shouldIncludeRates:
             contractFormData.submissionType === 'CONTRACT_AND_RATES',
-        rateInfos:
-            isContractAndRates &&
-            rateRevs.map((rate) => ({
-                rateName: rate.formData.rateCertificationName,
-            })),
+        rateInfos: rateRevs.map((rate) => ({
+            rateName: rate.formData.rateCertificationName,
+        })),
         submissionURL: contractURL,
     }
 

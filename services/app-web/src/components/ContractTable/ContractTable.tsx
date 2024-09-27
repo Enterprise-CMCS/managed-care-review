@@ -13,7 +13,7 @@ import {
 import { useAtom } from 'jotai/react'
 import { atomWithHash } from 'jotai-location'
 import { HealthPlanPackageStatus, Program, User } from '../../gen/gqlClient'
-import styles from './HealthPlanPackageTable.module.scss'
+import styles from './ContractTable.module.scss'
 import { Table, Tag } from '@trussworks/react-uswds'
 import dayjs from 'dayjs'
 import qs from 'qs'
@@ -44,7 +44,7 @@ export type RateInDashboardType = {
     stateName?: string
 }
 
-export type PackageInDashboardType = {
+export type ContractInDashboardType = {
     id: string
     name: string
     submittedAt?: string
@@ -55,8 +55,8 @@ export type PackageInDashboardType = {
     stateName?: string
 }
 
-export type PackageTableProps = {
-    tableData: PackageInDashboardType[]
+export type ContractTableProps = {
+    tableData: ContractInDashboardType[]
     user: User
     showFilters?: boolean
     caption?: string
@@ -66,8 +66,8 @@ const isSubmitted = (status: HealthPlanPackageStatus) =>
     status === 'SUBMITTED' || status === 'RESUBMITTED'
 
 function submissionURL(
-    id: PackageInDashboardType['id'],
-    status: PackageInDashboardType['status'],
+    id: ContractInDashboardType['id'],
+    status: ContractInDashboardType['status'],
     isNotStateUser: boolean
 ): string {
     if (isNotStateUser) {
@@ -112,7 +112,7 @@ const submissionTypeOptions = [
 
 /* To keep the memoization from being refreshed every time, this needs to be
     created outside the render function */
-const columnHelper = createColumnHelper<PackageInDashboardType>()
+const columnHelper = createColumnHelper<ContractInDashboardType>()
 
 type ReadableFilters = {
     [key: string]: string[]
@@ -169,12 +169,12 @@ const getSelectedFiltersFromUrl = (
     return filterValues as FilterOptionType[]
 }
 
-export const HealthPlanPackageTable = ({
+export const ContractTable = ({
     caption,
     tableData,
     user,
     showFilters = false,
-}: PackageTableProps): React.ReactElement => {
+}: ContractTableProps): React.ReactElement => {
     const tableConfig = {
         tableName: 'Submissions',
         rowIDName: 'submission',
@@ -339,10 +339,10 @@ export const HealthPlanPackageTable = ({
 
     const stateColumn = reactTable.getColumn(
         'stateName'
-    ) as Column<PackageInDashboardType>
+    ) as Column<ContractInDashboardType>
     const submissionTypeColumn = reactTable.getColumn(
         'submissionType'
-    ) as Column<PackageInDashboardType>
+    ) as Column<ContractInDashboardType>
 
     // Filter options based on table data instead of static list of options.
     const stateFilterOptions = Array.from(
@@ -368,7 +368,7 @@ export const HealthPlanPackageTable = ({
           )}`
 
     const updateFilters = (
-        column: Column<PackageInDashboardType>,
+        column: Column<ContractInDashboardType>,
         selectedOptions: FilterSelectedOptionsType,
         filterName: string
     ) => {

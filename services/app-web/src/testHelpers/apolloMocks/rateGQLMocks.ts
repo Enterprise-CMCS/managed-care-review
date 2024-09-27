@@ -2,6 +2,8 @@ import {
     FetchRateDocument,
     FetchRateQuery,
     IndexRatesDocument,
+    IndexRatesForDashboardDocument,
+    IndexRatesForDashboardQuery,
     IndexRatesQuery,
     Rate,
     RateRevision,
@@ -55,6 +57,40 @@ const fetchDraftRateMockSuccess = (
     }
 }
 
+const indexRatesForDashboardMockSuccess = (
+    stateCode?: string,
+    rates?: Rate[]
+): MockedResponse<IndexRatesForDashboardQuery> => {
+    const mockRates = rates ?? [
+        { ...rateDataMock(), id: 'test-id-123', stateNumber: 3 },
+        { ...rateDataMock(), id: 'test-id-124', stateNumber: 2 },
+        { ...rateDataMock(), id: 'test-id-125', stateNumber: 1 },
+    ]
+    const ratesEdge = mockRates.map((rate) => {
+        return {
+            node: rate,
+        }
+    })
+    return {
+        request: {
+            query: IndexRatesForDashboardDocument,
+            variables: {
+                input:{
+                    stateCode: stateCode
+                }
+            }
+        },
+        result: {
+            data: {
+                indexRates: {
+                    totalCount: ratesEdge.length,
+                    edges: ratesEdge,
+                },
+            },
+        },
+    }
+}
+
 const indexRatesMockSuccess = (
     stateCode?: string,
     rates?: Rate[]
@@ -89,6 +125,24 @@ const indexRatesMockSuccess = (
     }
 }
 
+const indexRatesForDashboardMockFailure = (): MockedResponse<IndexRatesForDashboardQuery> => {
+    const graphQLError = new GraphQLError('Issue finding rates with history', {
+        extensions: {
+            code: 'NOT_FOUND',
+            cause: 'DB_ERROR',
+        },
+    })
+    return {
+        request: {
+            query: IndexRatesForDashboardDocument,
+        },
+        result: {
+            data: null,
+            errors: [graphQLError],
+        },
+    }
+}
+
 const indexRatesMockFailure = (): MockedResponse<IndexRatesQuery> => {
     const graphQLError = new GraphQLError('Issue finding rates with history', {
         extensions: {
@@ -107,4 +161,11 @@ const indexRatesMockFailure = (): MockedResponse<IndexRatesQuery> => {
     }
 }
 
-export { fetchRateMockSuccess, indexRatesMockSuccess, indexRatesMockFailure, fetchDraftRateMockSuccess }
+export { 
+    fetchRateMockSuccess, 
+    indexRatesMockSuccess, 
+    indexRatesForDashboardMockSuccess,
+    indexRatesForDashboardMockFailure,
+    indexRatesMockFailure, 
+    fetchDraftRateMockSuccess 
+}

@@ -59,6 +59,8 @@ import type { UnlockRateArgsType } from './contractAndRates/unlockRate'
 import { findRateWithHistory } from './contractAndRates/findRateWithHistory'
 import { updateDraftContractRates } from './contractAndRates/updateDraftContractRates'
 import type { UpdateDraftContractRatesArgsType } from './contractAndRates/updateDraftContractRates'
+import { updateStateAssignedUsers } from './state/updateStateAssignedUsers'
+import { findStateAssignedUsers } from './state/findStateAssignedUsers'
 
 type Store = {
     findPrograms: (
@@ -74,10 +76,20 @@ type Store = {
 
     findUser: (id: string) => Promise<UserType | undefined | Error>
 
+    findStateAssignedUsers: (
+        stateCode: StateCodeType
+    ) => Promise<UserType[] | Error>
+
     insertUser: (user: InsertUserArgsType) => Promise<UserType | Error>
 
     insertManyUsers: (
         users: InsertUserArgsType[]
+    ) => Promise<UserType[] | Error>
+
+    updateStateAssignedUsers: (
+        idOfUserPerformingUpdate: string,
+        stateCode: StateCodeType,
+        assignedUserIDs: string[]
     ) => Promise<UserType[] | Error>
 
     updateCmsUserProperties: (
@@ -175,9 +187,22 @@ function NewPostgresStore(client: PrismaClient): Store {
                 divisionAssignment,
                 description
             ),
+        updateStateAssignedUsers: (
+            idOfUserPerformingUpdate,
+            stateCode,
+            assignedUserIDs
+        ) =>
+            updateStateAssignedUsers(
+                client,
+                idOfUserPerformingUpdate,
+                stateCode,
+                assignedUserIDs
+            ),
         findStatePrograms: findStatePrograms,
         findAllSupportedStates: () => findAllSupportedStates(client),
         findAllUsers: () => findAllUsers(client),
+        findStateAssignedUsers: (stateCode) =>
+            findStateAssignedUsers(client, stateCode),
         insertQuestion: (questionInput, user) =>
             insertQuestion(client, questionInput, user),
         findAllQuestionsByContract: (pkgID) =>

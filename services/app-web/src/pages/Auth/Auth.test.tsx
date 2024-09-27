@@ -18,7 +18,7 @@ This file should only have basic user flows for auth. Form and implementation de
 */
 
 describe('Auth', () => {
-    afterEach( ()=>{
+    afterEach(() => {
         vi.clearAllMocks()
     })
     describe('Cognito Login', () => {
@@ -40,13 +40,12 @@ describe('Auth', () => {
             await userClickByRole(screen, 'button', { name: 'Login' })
         }
 
-        it('displays signup form when logged out',async () => {
+        it('displays signup form when logged out', async () => {
             renderWithProviders(<CognitoLogin />, {
                 apolloProvider: {
                     mocks: [fetchCurrentUserMock({ statusCode: 403 })],
                 },
             })
-
 
             await screen.findByRole('form', { name: 'Signup Form' })
 
@@ -97,8 +96,8 @@ describe('Auth', () => {
                 {
                     apolloProvider: {
                         mocks: [
-                            fetchCurrentUserMock({statusCode: 403}),
-                            fetchCurrentUserMock({statusCode: 200}),
+                            fetchCurrentUserMock({ statusCode: 403 }),
+                            fetchCurrentUserMock({ statusCode: 200 }),
                         ],
                     },
                     routerProvider: {
@@ -140,10 +139,10 @@ describe('Auth', () => {
             await waitFor(() => {
                 expect(loginSpy).toHaveBeenCalledTimes(1)
                 expect(testLocation.pathname).toBe('/auth')
-                expect(screen.getByRole('heading', {name:'Sign in error'})).toBeInTheDocument()
+                expect(
+                    screen.getByRole('heading', { name: 'Sign in error' })
+                ).toBeInTheDocument()
             })
-
-
         })
     })
 
@@ -159,10 +158,9 @@ describe('Auth', () => {
                 },
             })
 
-         await screen.findByRole('img', {
-                    name: /Aang/i,
-                })
-
+            await screen.findByRole('img', {
+                name: /Aang/i,
+            })
 
             expect(
                 screen.getByRole('img', {
@@ -278,7 +276,9 @@ describe('Auth', () => {
             await userClickByTestId(screen, 'TophButton')
             await waitFor(() => {
                 expect(testLocation.pathname).toBe('/auth')
-                expect(screen.getByRole('heading', {name:'Sign in error'})).toBeInTheDocument()
+                expect(
+                    screen.getByRole('heading', { name: 'Sign in error' })
+                ).toBeInTheDocument()
             })
         })
     })

@@ -7,6 +7,7 @@ import UPDATE_HEALTH_PLAN_FORM_DATA from 'app-graphql/src/mutations/updateHealth
 import CREATE_QUESTION from 'app-graphql/src/mutations/createQuestion.graphql'
 import INDEX_QUESTIONS from 'app-graphql/src/queries/indexQuestions.graphql'
 import CREATE_QUESTION_RESPONSE from 'app-graphql/src/mutations/createQuestionResponse.graphql'
+import UPDATE_STATE_ASSIGNMENTS_BY_STATE from 'app-graphql/src/mutations/updateStateAssignmentsByState.graphql'
 import typeDefs from 'app-graphql/src/schema.graphql'
 import type {
     HealthPlanFormDataType,
@@ -26,6 +27,7 @@ import type {
     CreateQuestionResponsePayload,
     CreateQuestionPayload,
     IndexQuestionsPayload,
+    UpdateStateAssignmentsByStatePayload,
 } from '../gen/gqlServer'
 import type { Context } from '../handlers/apollo_gql'
 import type { Store } from '../postgres'
@@ -506,6 +508,34 @@ const createTestQuestionResponse = async (
 
     return createdResponse.data.createQuestionResponse
 }
+
+const updateTestStateAssignments = async (
+    server: ApolloServer,
+    stateCode: string,
+    assignedUserIDs: string[]
+): Promise<UpdateStateAssignmentsByStatePayload> => {
+    const updatedAssignments = await server.executeOperation({
+        query: UPDATE_STATE_ASSIGNMENTS_BY_STATE,
+        variables: {
+            input: {
+                stateCode,
+                assignedUsers: assignedUserIDs,
+            },
+        },
+    })
+
+    if (updatedAssignments.errors)
+        throw new Error(
+            `updateStateAssignmentsByState mutation failed with errors ${updatedAssignments.errors}`
+        )
+
+    if (!updatedAssignments.data) {
+        throw new Error('updateStateAssignmentsByState returned nothing')
+    }
+
+    return updatedAssignments.data.updateStateAssignmentsByState
+}
+
 export {
     constructTestPostgresServer,
     createTestHealthPlanPackage,
@@ -523,4 +553,5 @@ export {
     indexTestQuestions,
     createTestQuestionResponse,
     updateTestHealthPlanPackage,
+    updateTestStateAssignments,
 }

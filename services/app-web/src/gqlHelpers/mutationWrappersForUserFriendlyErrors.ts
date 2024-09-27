@@ -16,7 +16,8 @@ import {
     CreateQuestionResponseInput,
     SubmitContractMutationFn,
     Contract,
-    UnlockedContract
+    UnlockedContract,
+    UpdateStateAssignmentsByStateMutationFn
 } from '../gen/gqlClient'
 import { ApolloError, GraphQLErrors } from '@apollo/client/errors'
 
@@ -34,6 +35,7 @@ type MutationType =
     | 'UNLOCK_HEALTH_PLAN_PACKAGE'
     | 'CREATE_QUESTION'
     | 'UNLOCK_RATE'
+    | 'UPDATE_STATE_ASSIGNMENTS_BY_STATE'
 
 type IndexQuestionDivisions =
     | 'DMCOQuestions'
@@ -221,6 +223,41 @@ export const submitMutationWrapperV2 = async (
         return handleApolloErrorsAndAddUserFacingMessages(
             error,
             'SUBMIT_HEALTH_PLAN_PACKAGE'
+        )
+    }
+}
+
+
+export async function updateStateAssignmentsWrapper(
+    updateStateAssignments: UpdateStateAssignmentsByStateMutationFn,
+    stateCode: string,
+    assignedUserIDs: string[],
+): Promise<undefined | GraphQLErrors | Error> {
+
+    const input = { 
+        stateCode,
+        assignedUsers: assignedUserIDs,
+    }
+
+    try {
+        const { data } = await updateStateAssignments({
+            variables: {
+                input,
+            },
+        })
+
+        if (data?.updateStateAssignmentsByState.assignedUsers) {
+            return undefined
+        } else {
+            recordJSException(
+                `[UNEXPECTED]: Error attempting to update state assignments, no data present but returning 200.`
+            )
+            return new Error(ERROR_MESSAGES.update_state_assignments_generic)
+        }
+    } catch (error) {
+        return handleApolloErrorsAndAddUserFacingMessages(
+            error,
+            'UPDATE_STATE_ASSIGNMENTS_BY_STATE'
         )
     }
 }

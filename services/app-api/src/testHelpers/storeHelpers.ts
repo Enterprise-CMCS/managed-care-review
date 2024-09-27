@@ -54,6 +54,9 @@ function mockStoreThatErrors(): Store {
         findAllUsers: async () => {
             return genericError
         },
+        findStateAssignedUsers: async () => {
+            return genericError
+        },
         findUser: async (_ID) => {
             return genericError
         },
@@ -95,6 +98,9 @@ function mockStoreThatErrors(): Store {
             return genericError
         },
         updateDraftContract: async (_args) => {
+            return genericError
+        },
+        updateStateAssignedUsers: async (_args) => {
             return genericError
         },
         findAllContractsWithHistoryByState: async (_ID) => {
