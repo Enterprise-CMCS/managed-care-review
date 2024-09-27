@@ -257,26 +257,33 @@ export async function updateStateAssignmentsWrapper(
                     )
 
                     if (previousSettings) {
-                        const previousAssignmentsForAllStates = previousSettings.fetchMcReviewSettings.stateAssignments
+                        const cachedData = [...previousSettings.fetchMcReviewSettings.stateAssignments]
+                        const stateIndex = cachedData.findIndex(state => state.stateCode === stateCode)
+                        if (stateIndex === -1) {
+                            recordJSException(
+                                `[UNEXPECTED]: Error attempting to update state assignments cache, state not found in cache.`
+                            )
+                            return new Error(ERROR_MESSAGES.update_state_assignments_generic)
+                        }
+
+                        cachedData[stateIndex] = {
+                            ...cachedData[stateIndex],
+                            assignedCMSUsers: updatedUsers
+                        }
+
                         cache.writeQuery({
                             query: FetchMcReviewSettingsDocument,
                             data: {
                                 fetchMcReviewSettings: {
-                                    stateAssignments: {
-                                      ... previousAssignmentsForAllStates,
-                                      [stateCode]: {
-                                            assignedCMSUsers: updatedUsers
-                                        }
-                                      }
+                                    ...previousSettings.fetchMcReviewSettings,
+                                    stateAssignments: cachedData
                                     },
                                 },
                             },
                         )
                     }
-                    }
-
-                },
-            onQueryUpdated: () => true,
+                }
+            },
         })
 
         if (data?.updateStateAssignmentsByState.assignedUsers) {
