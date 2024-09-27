@@ -78,39 +78,6 @@ const CommonSettingsRoute = () => (
 )
 
 const commonSettingPageTest = async () => {
-    // Check State assignments table
-    const tableAnalysts = await screen.findByRole('table', {
-        name: 'State assignments',
-    })
-    expect(tableAnalysts).toBeInTheDocument()
-    const tableRowsAnalysts = await within(tableAnalysts).findAllByRole('row')
-    expect(tableRowsAnalysts).toHaveLength(3)
-    // Check the table headers
-    expect(
-        within(tableAnalysts).getByRole('columnheader', {
-            name: 'Assigned DMCO staff',
-        })
-    ).toBeInTheDocument()
-    expect(
-        within(tableAnalysts).getByRole('columnheader', {
-            name: 'State',
-        })
-    ).toBeInTheDocument()
-
-    // Check the table cells
-    expect(
-        within(tableAnalysts).getByText(
-            /testMN@example.com, cmsApproverUser1@dmas.mn.gov/
-        )
-    ).toBeInTheDocument()
-    expect(
-        within(tableAnalysts).getByText(
-            /cmsUser2@dmas.mn.gov, cmsApproverUser2@dmas.mn.go/
-        )
-    ).toBeInTheDocument()
-    expect(within(tableAnalysts).getByText('MN')).toBeInTheDocument()
-    expect(within(tableAnalysts).getByText('OH')).toBeInTheDocument()
-
     // Check Division assignments table
     const divisionLink = await screen.findByRole('link', {
         name: 'Division assignments',
@@ -300,6 +267,41 @@ describe.each(combinedAuthorizedUsers)(
             })
 
             expect(await screen.findByTestId('sidenav')).toBeInTheDocument()
+
+            // Check State assignments table
+            const tableAnalysts = await screen.findByRole('table', {
+                name: 'State assignments',
+            })
+            expect(tableAnalysts).toBeInTheDocument()
+            const tableRowsAnalysts =
+                await within(tableAnalysts).findAllByRole('row')
+            expect(tableRowsAnalysts).toHaveLength(3)
+            // Check the table headers
+            expect(
+                within(tableAnalysts).getByRole('columnheader', {
+                    name: 'Assigned DMCO staff',
+                })
+            ).toBeInTheDocument()
+            expect(
+                within(tableAnalysts).getByRole('columnheader', {
+                    name: 'State',
+                })
+            ).toBeInTheDocument()
+
+            // Check the table cells
+            expect(
+                within(tableAnalysts).getByText(
+                    /cmsUser1 cmsUser1, cmsApproverUser1 cmsApproverUser1/
+                )
+            ).toBeInTheDocument()
+            expect(
+                within(tableAnalysts).getByText(
+                    /cmsUser2 cmsUser2, cmsApproverUser2 cmsApproverUser2/
+                )
+            ).toBeInTheDocument()
+            expect(within(tableAnalysts).getByText('MN')).toBeInTheDocument()
+            expect(within(tableAnalysts).getByText('OH')).toBeInTheDocument()
+
             await commonSettingPageTest()
         })
     }
@@ -329,6 +331,41 @@ describe.each(combinedAuthorizedUsers)(
             })
 
             expect(await screen.findByTestId('sidenav')).toBeInTheDocument()
+
+            // Check State assignments table
+            const tableAnalysts = await screen.findByRole('table', {
+                name: 'State assignments',
+            })
+            expect(tableAnalysts).toBeInTheDocument()
+            const tableRowsAnalysts =
+                await within(tableAnalysts).findAllByRole('row')
+            expect(tableRowsAnalysts).toHaveLength(3)
+            // Check the table headers
+            expect(
+                within(tableAnalysts).getByRole('columnheader', {
+                    name: 'Assigned DMCO staff',
+                })
+            ).toBeInTheDocument()
+            expect(
+                within(tableAnalysts).getByRole('columnheader', {
+                    name: 'State',
+                })
+            ).toBeInTheDocument()
+
+            // Check the table cells
+            expect(
+                within(tableAnalysts).getByText(
+                    /testMN@example.com, cmsApproverUser1@dmas.mn.gov/
+                )
+            ).toBeInTheDocument()
+            expect(
+                within(tableAnalysts).getByText(
+                    /cmsUser2@dmas.mn.gov, cmsApproverUser2@dmas.mn.go/
+                )
+            ).toBeInTheDocument()
+            expect(within(tableAnalysts).getByText('MN')).toBeInTheDocument()
+            expect(within(tableAnalysts).getByText('OH')).toBeInTheDocument()
+
             await commonSettingPageTest()
         })
     }

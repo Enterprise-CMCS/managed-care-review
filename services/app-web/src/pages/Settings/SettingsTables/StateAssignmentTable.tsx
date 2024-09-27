@@ -76,6 +76,7 @@ const analystFilter: FilterFn<AnalystDisplayType[]> = (
     const assignedAnalystsEmail: string[] = rowData.map(
         (analyst) => analyst.email
     )
+
     if (!filterValue || filterValue.length === 0) {
         return true
     }
