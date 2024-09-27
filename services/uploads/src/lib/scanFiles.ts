@@ -30,56 +30,80 @@ export async function scanFiles(
             console.error('failed to download one of the scan files', err)
             return err
         }
+    }
+    // Perform virus scan
+    console.info('Scanning Files')
+    const virusScanResult = clamAV.scanForInfectedFiles(scanDir)
+    console.info('VIRUSES SCANNED', virusScanResult)
 
-        // check file mime type matches: pen test finding
+    if (virusScanResult instanceof Error) {
+        return virusScanResult
+    }
+
+    // Perform MIME type check
+    console.info('Checking MIME Types')
+    const mimeCheckResult = await checkMimeTypes(
+        s3Client,
+        bucket,
+        scanDir,
+        filemap
+    )
+    if (mimeCheckResult instanceof Error) {
+        return mimeCheckResult
+    }
+
+    // combine the results
+    const infectedFiles = virusScanResult.map((filename) => filemap[filename])
+
+    return [...new Set([...infectedFiles, ...mimeCheckResult])]
+}
+
+async function checkMimeTypes(
+    s3Client: S3UploadsClient,
+    bucket: string,
+    scanDir: string,
+    filemap: { [filename: string]: string }
+): Promise<string[] | Error> {
+    const mismatchedFiles: string[] = []
+
+    for (const [scanFileName, key] of Object.entries(filemap)) {
         try {
-            // get the mime type based on the file's declared extension
+            const scanFilePath = path.join(scanDir, scanFileName)
             const originalFilename = await s3Client.getOriginalFilename(
                 key,
                 bucket
             )
             if (originalFilename instanceof Error) {
-                const err = new Error(
-                    `Could not get the original filename of file ${originalFilename}`
+                return new Error(
+                    `Could not get the original filename of file ${key}`
                 )
-                console.error(err)
-                return err
             }
-            const declaredContentType = lookup(path.extname(originalFilename))
 
-            // check declared file against it's contents
+            const declaredContentType = lookup(path.extname(originalFilename))
             const isValid = await validateFileContent(
                 scanFilePath,
                 declaredContentType
             )
 
             if (isValid instanceof Error) {
-                console.error(isValid)
                 return isValid
             }
 
             if (!isValid) {
-                console.info(`original: ${originalFilename}`)
-                const err = new Error(
+                console.info(`Original filename: ${originalFilename}`)
+                console.error(
                     `MIME type mismatch for ${key}: Content does not match declared type ${declaredContentType}`
                 )
-                console.error(err)
-                return err
+                mismatchedFiles.push(key)
             }
         } catch (mimeError) {
-            return mimeError
+            return mimeError instanceof Error
+                ? mimeError
+                : new Error('An unknown error occurred during MIME type check')
         }
     }
 
-    console.info('Scanning Files')
-    const res = clamAV.scanForInfectedFiles(scanDir)
-    console.info('VIRUSES SCANNED', res)
-
-    if (res instanceof Error) {
-        return res
-    }
-
-    return res.map((filename) => filemap[filename])
+    return mismatchedFiles
 }
 
 async function validateFileContent(
