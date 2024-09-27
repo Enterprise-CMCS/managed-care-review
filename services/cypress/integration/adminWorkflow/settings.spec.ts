@@ -40,7 +40,7 @@ describe('Admin user can view application level settings', () => {
          //click into emails filters, do nothing, then go over state filter
          cy.findByRole('button', { name: 'Filters'}).click()
          cy.findByRole('combobox', {
-            name: 'emails filter selection', timeout: 2_000
+            name: 'analysts filter selection', timeout: 2_000
         }).click({
             force: true,
         })
