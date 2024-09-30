@@ -1,3 +1,24 @@
+export const userLoginData = {
+    ZUKO: {
+        email: 'zuko@example.com',
+        buttonTestID: 'ZukoButton'
+    },
+    ROKU: {
+        email: 'roku@example.com',
+        buttonTestID: 'RokuButton'
+    },
+    IZUMI: {
+        email: 'izumi@example.com',
+        buttonTestID: 'IzumiButton'
+    },
+    AZULA: {
+        email: 'azula@example.com',
+        buttonTestID: 'AzulaButton'
+    }
+}
+
+export type CMSUserLoginNames = keyof typeof userLoginData;
+
 Cypress.Commands.add('logInAsStateUser', () => {
     // Set up gql intercept for requests on app load
 
@@ -31,7 +52,10 @@ Cypress.Commands.add('logInAsStateUser', () => {
 
 Cypress.Commands.add(
     'logInAsCMSUser',
-    ({ initialURL } = { initialURL: '/' }) => {
+    (args) => {
+        const cmsUser = args?.cmsUser || 'ZUKO'
+        const initialURL = args?.initialURL || '/'
+
         cy.visit('/auth')
 
         //Add assertion looking for test on the page before findByRole
@@ -42,13 +66,13 @@ Cypress.Commands.add(
         const authMode = Cypress.env('AUTH_MODE')
 
         if (authMode === 'LOCAL') {
-            cy.findByTestId('ZukoButton').click()
+            cy.findByTestId(userLoginData[cmsUser].buttonTestID).click()
         } else if (authMode === 'AWS_COGNITO') {
             const testUsersPassword = Cypress.env('TEST_USERS_PASS')
             if (!testUsersPassword)
                 throw Error('Cannot login test user without a password')
             cy.findByText('Show Login Form').click()
-            cy.findByTestId('loginEmail').type('zuko@example.com')
+            cy.findByTestId('loginEmail').type(userLoginData[cmsUser].email)
             cy.findByTestId('loginPassword').type(testUsersPassword)
             cy.findByRole('button', { name: 'Login' })
                 .click()
