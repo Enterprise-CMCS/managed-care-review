@@ -18,11 +18,13 @@ import { EditStateAssign } from './EditStateAssign'
 import { Error404 } from '../../Errors/Error404Page'
 import { User } from '../../../gen/gqlClient'
 import { updateStateAssignmentsMutationMockFailure, updateStateAssignmentsMutationMockSuccess } from '../../../testHelpers/apolloMocks/userGQLMock'
+import { Settings } from '../Settings'
 
 // Wrap test component in some top level routes to allow getParams to be tested
 const wrapInRoutes = (children: React.ReactNode) => {
     return (
         <Routes>
+             <Route path={RoutesRecord.MCR_SETTINGS} element={<Settings />}>
             <Route
                 path={RoutesRecord.STATE_ASSIGNMENTS}
                 element={<div>State AssignmentsTable </div>}
@@ -32,6 +34,7 @@ const wrapInRoutes = (children: React.ReactNode) => {
                 element={children}
             />
             <Route path="*" element={<Error404 />} />
+            </Route>
         </Routes>
     )
 }

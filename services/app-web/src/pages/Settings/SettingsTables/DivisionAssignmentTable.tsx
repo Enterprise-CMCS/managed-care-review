@@ -150,6 +150,7 @@ function CMSUserTableWithData({
         data: cmsUsers,
         filterFns: {
             dateRangeFilter: () => true,
+            analystFilter: () => true,
         },
         columns,
         getCoreRowModel: getCoreRowModel(),

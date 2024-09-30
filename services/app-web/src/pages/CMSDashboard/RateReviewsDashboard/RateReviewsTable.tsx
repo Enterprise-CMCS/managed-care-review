@@ -339,8 +339,10 @@ export const RateReviewsTable = ({
             },
         },
         columns: tableColumns,
+        // Find the custom filter interface definition in services/app-web/src/types/tanstack-table.d.ts
         filterFns: {
             dateRangeFilter: dateRangeFilter,
+            analystFilter: () => true,
         },
         state: {
             columnFilters,

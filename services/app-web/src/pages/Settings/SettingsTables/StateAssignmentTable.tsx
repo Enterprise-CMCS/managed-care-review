@@ -2,6 +2,7 @@ import {
     Column,
     ColumnFiltersState,
     createColumnHelper,
+    FilterFn,
     flexRender,
     getCoreRowModel,
     getFacetedUniqueValues,
@@ -17,7 +18,7 @@ import {
     FilterSelectedOptionsType,
 } from '../../../components/FilterAccordion'
 import { DoubleColumnGrid, LinkWithLogging, Loading } from '../../../components'
-import { Table } from '@trussworks/react-uswds'
+import { GridContainer, Table } from '@trussworks/react-uswds'
 
 import styles from '../Settings.module.scss'
 import { pluralize } from '../../../common-code/formatters'
@@ -26,14 +27,21 @@ import useDeepCompareEffect from 'use-deep-compare-effect'
 import { useStringConstants } from '../../../hooks/useStringConstants'
 import { useOutletContext } from 'react-router-dom'
 import { type MCReviewSettingsContextType } from '../Settings'
-import { formatEmails, EditLink } from '../'
+import { EditLink, formatUserNamesFromUsers, formatEmailsFromUsers } from '../'
 import { SettingsErrorAlert } from '../SettingsErrorAlert'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '../../../common-code/featureFlags'
 
+type AnalystDisplayType = {
+    email: string
+    givenName?: string
+    familyName?: string
+}
+
 type StateAnalystsInDashboardType = {
-    emails: string[]
+    analysts: AnalystDisplayType[]
     stateCode: string
+    stateName: string
     editLink: string
 }
 
@@ -57,6 +65,31 @@ const getAppliedFilters = (columnFilters: ColumnFiltersState, id: string) => {
         .filter((item) => item.id === id)
         .map((item) => ({ value: item.value, label: item.value }))
     return filterValues as FilterOptionType[]
+}
+
+const analystFilter: FilterFn<AnalystDisplayType[]> = (
+    row,
+    columnId,
+    filterValue: string[]
+) => {
+    const rowData: AnalystDisplayType[] = row.getValue(columnId)
+    const assignedAnalystsEmail: string[] = rowData.map(
+        (analyst) => analyst.email
+    )
+
+    if (!filterValue || filterValue.length === 0) {
+        return true
+    }
+
+    if (filterValue.includes('No assignment')) {
+        return (
+            filterValue.some((filter) =>
+                assignedAnalystsEmail.includes(filter)
+            ) || assignedAnalystsEmail.length === 0
+        )
+    }
+
+    return filterValue.some((filter) => assignedAnalystsEmail.includes(filter))
 }
 
 const StateAssignmentTable = () => {
@@ -88,11 +121,14 @@ const StateAssignmentTable = () => {
                 cell: (info) => info.getValue(),
                 filterFn: `arrIncludesSome`,
             }),
-            columnHelper.accessor('emails', {
-                id: 'emails',
+            columnHelper.accessor('analysts', {
+                id: 'analysts',
                 header: 'Assigned DMCO staff',
-                cell: (info) => formatEmails(info.getValue()),
-                filterFn: `arrIncludesSome`,
+                cell: (info) =>
+                    readWriteStateAssignments
+                        ? formatUserNamesFromUsers(info.getValue())
+                        : formatEmailsFromUsers(info.getValue()),
+                filterFn: 'analystFilter',
             }),
             columnHelper.accessor('editLink', {
                 id: 'editLink',
@@ -105,15 +141,17 @@ const StateAssignmentTable = () => {
                 ),
             }),
         ],
-        []
+        [readWriteStateAssignments]
     )
 
     const reactTable = useReactTable({
         data: analysts.data.sort((a, b) =>
             a['stateCode'] > b['stateCode'] ? 1 : -1
         ),
+        // Find the custom filter interface definition in services/app-web/src/types/tanstack-table.d.ts
         filterFns: {
             dateRangeFilter: () => true,
+            analystFilter: analystFilter,
         },
         getCoreRowModel: getCoreRowModel(),
         columns: tableColumns,
@@ -136,8 +174,8 @@ const StateAssignmentTable = () => {
     const stateColumn = reactTable.getColumn(
         'stateCode'
     ) as Column<StateAnalystsInDashboardType>
-    const emailsColumn = reactTable.getColumn(
-        'emails'
+    const analystsColumn = reactTable.getColumn(
+        'analysts'
     ) as Column<StateAnalystsInDashboardType>
     const rowCount = `Displaying ${filteredRows.length} of ${analysts.data.length} ${pluralize(
         'state',
@@ -159,23 +197,32 @@ const StateAssignmentTable = () => {
         reactTable.resetColumnFilters()
     }
 
-    const emailFilterOptions = () => {
-        const emails = Array.from(
-            emailsColumn.getFacetedUniqueValues().keys()
-        ).flat()
+    const emailFilterOptions = (): FilterOptionType[] => {
+        const uniqueAnalysts: AnalystDisplayType[] = []
+        // Filtering out duplicate analysts by email.
+        Array.from(analystsColumn.getFacetedUniqueValues().keys())
+            .flat()
+            .forEach((currentAnalyst) => {
+                const uniqueAnalyst = uniqueAnalysts.find(
+                    (analyst: AnalystDisplayType) =>
+                        analyst.email === currentAnalyst.email
+                )
+                if (!uniqueAnalyst) {
+                    return uniqueAnalysts.push(currentAnalyst)
+                }
+            })
 
-        return (
-            [...new Set(emails)]
-                .map((state) => ({
-                    value: state,
-                    label: state,
-                }))
-                // Add just one empty assignment filter with label
-                .concat({
-                    value: [],
-                    label: 'No assignments',
-                })
-        )
+        const options: FilterOptionType[] = uniqueAnalysts.map((analyst) => ({
+            value: analyst.email,
+            label: readWriteStateAssignments
+                ? formatUserNamesFromUsers([analyst])
+                : formatEmailsFromUsers([analyst]),
+        }))
+
+        return options.concat({
+            value: 'No assignment',
+            label: 'No assignment',
+        })
     }
 
     // Handles logging when filters change.
@@ -214,7 +261,12 @@ const StateAssignmentTable = () => {
         }
     }, [rowCount, columnFilters, setPrevFilters, prevFilters])
 
-    if (analysts.loading) return <Loading />
+    if (analysts.loading)
+        return (
+            <GridContainer>
+                <Loading />
+            </GridContainer>
+        )
 
     if (analysts.error || !analysts.data)
         return <SettingsErrorAlert error={analysts.error} />
@@ -259,15 +311,15 @@ const StateAssignmentTable = () => {
                         }
                     />
                     <FilterSelect
-                        value={getAppliedFilters(columnFilters, 'emails')}
-                        name="emails"
-                        label="Emails"
+                        value={getAppliedFilters(columnFilters, 'analysts')}
+                        name="analysts"
+                        label="Analyst"
                         filterOptions={emailFilterOptions()}
                         onChange={(selectedOptions) =>
                             updateFilters(
-                                emailsColumn,
+                                analystsColumn,
                                 selectedOptions,
-                                'emails'
+                                'analysts'
                             )
                         }
                     />
@@ -312,4 +364,8 @@ const StateAssignmentTable = () => {
         </>
     )
 }
-export { StateAssignmentTable, type StateAnalystsInDashboardType }
+export {
+    StateAssignmentTable,
+    type StateAnalystsInDashboardType,
+    type AnalystDisplayType,
+}

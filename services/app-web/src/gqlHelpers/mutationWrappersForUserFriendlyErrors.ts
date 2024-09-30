@@ -17,7 +17,9 @@ import {
     SubmitContractMutationFn,
     Contract,
     UnlockedContract,
-    UpdateStateAssignmentsByStateMutationFn
+    UpdateStateAssignmentsByStateMutationFn,
+    FetchMcReviewSettingsDocument,
+    FetchMcReviewSettingsQuery
 } from '../gen/gqlClient'
 import { ApolloError, GraphQLErrors } from '@apollo/client/errors'
 
@@ -234,7 +236,7 @@ export async function updateStateAssignmentsWrapper(
     assignedUserIDs: string[],
 ): Promise<undefined | GraphQLErrors | Error> {
 
-    const input = { 
+    const input = {
         stateCode,
         assignedUsers: assignedUserIDs,
     }
@@ -243,6 +245,44 @@ export async function updateStateAssignmentsWrapper(
         const { data } = await updateStateAssignments({
             variables: {
                 input,
+            },
+            update(cache, { data }) {
+                if (data) {
+                    const stateCode = data.updateStateAssignmentsByState.stateCode
+                    const updatedUsers = data.updateStateAssignmentsByState.assignedUsers
+                    const previousSettings =  cache.readQuery<FetchMcReviewSettingsQuery>(
+                        {
+                            query: FetchMcReviewSettingsDocument,
+                        }
+                    )
+
+                    if (previousSettings) {
+                        const cachedAssignments = [...previousSettings.fetchMcReviewSettings.stateAssignments]
+                        const stateIndex = cachedAssignments.findIndex(state => state.stateCode === stateCode)
+                        if (stateIndex === -1) {
+                            recordJSException(
+                                `[UNEXPECTED]: Error attempting to update state assignments cache, state not found in cache.`
+                            )
+                            return new Error(ERROR_MESSAGES.update_state_assignments_generic)
+                        }
+
+                        cachedAssignments[stateIndex] = {
+                            ...cachedAssignments[stateIndex],
+                            assignedCMSUsers: updatedUsers
+                        }
+
+                        cache.writeQuery({
+                            query: FetchMcReviewSettingsDocument,
+                            data: {
+                                fetchMcReviewSettings: {
+                                    ...previousSettings.fetchMcReviewSettings,
+                                    stateAssignments: cachedAssignments
+                                    },
+                                },
+                            },
+                        )
+                    }
+                }
             },
         })
 
