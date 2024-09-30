@@ -276,7 +276,7 @@ describe.each(combinedAuthorizedUsers)(
             expect(tableAnalysts).toBeInTheDocument()
             const tableRowsAnalysts =
                 await within(tableAnalysts).findAllByRole('row')
-            expect(tableRowsAnalysts).toHaveLength(3)
+            expect(tableRowsAnalysts).toHaveLength(4)
             // Check the table headers
             expect(
                 within(tableAnalysts).getByRole('columnheader', {
@@ -340,7 +340,7 @@ describe.each(combinedAuthorizedUsers)(
             expect(tableAnalysts).toBeInTheDocument()
             const tableRowsAnalysts =
                 await within(tableAnalysts).findAllByRole('row')
-            expect(tableRowsAnalysts).toHaveLength(3)
+            expect(tableRowsAnalysts).toHaveLength(4)
             // Check the table headers
             expect(
                 within(tableAnalysts).getByRole('columnheader', {
@@ -451,7 +451,7 @@ describe('Settings page filters tests', () => {
         expect(rowsFilteredOnce).toHaveLength(2)
         expect(rowsFilteredOnce[1]).toHaveTextContent('cmsUser1 cmsUser1') // row[0] is the header
         expect(rowsFilteredOnce[1]).toHaveTextContent('MN')
-        expect(screen.getByText('Displaying 1 of 2 state')).toBeInTheDocument()
+        expect(screen.getByText('Displaying 1 of 3 state')).toBeInTheDocument()
 
         selectEvent.openMenu(analystFilterCombobox)
 
@@ -479,7 +479,7 @@ describe('Settings page filters tests', () => {
         expect(rowsFilteredTwice[1]).toHaveTextContent('MN')
         expect(rowsFilteredTwice[2]).toHaveTextContent('cmsUser2 cmsUser2') // row[0] is the header
         expect(rowsFilteredTwice[2]).toHaveTextContent('OH')
-        expect(screen.getByText('Displaying 2 of 2 states')).toBeInTheDocument()
+        expect(screen.getByText('Displaying 2 of 3 states')).toBeInTheDocument()
 
         // Add State Filter
         selectEvent.openMenu(stateFilterCombobox)
@@ -504,7 +504,7 @@ describe('Settings page filters tests', () => {
         const rowsFilteredThrice = await screen.findAllByRole('row')
         expect(rowsFilteredThrice).toHaveLength(2)
         expect(rowsFilteredThrice[1]).toHaveTextContent('OH') // row[0] is the header
-        expect(screen.getByText('Displaying 1 of 2 state')).toBeInTheDocument()
+        expect(screen.getByText('Displaying 1 of 3 state')).toBeInTheDocument()
 
         const clearFiltersButton = screen.getByRole('button', {
             name: /Clear filters/,
@@ -513,8 +513,92 @@ describe('Settings page filters tests', () => {
 
         await userEvent.click(clearFiltersButton)
         await waitFor(() => {
-            expect(screen.getAllByRole('row')).toHaveLength(3)
+            expect(screen.getAllByRole('row')).toHaveLength(4)
         })
+    })
+    it('filters on no state assignments', async () => {
+        renderWithProviders(<CommonSettingsRoute />, {
+            apolloProvider: {
+                mocks: [
+                    indexUsersQueryMock(),
+                    fetchCurrentUserMock({
+                        user: mockValidAdminUser(),
+                        statusCode: 200,
+                    }),
+                    fetchMcReviewSettingsMock(),
+                ],
+            },
+            routerProvider: {
+                route: '/mc-review-settings',
+            },
+            featureFlags: {
+                'read-write-state-assignments': true,
+            },
+        })
+
+        expect(await screen.findByTestId('sidenav')).toBeInTheDocument()
+
+        // Check State assignments table
+        const tableAnalysts = await screen.findByRole('table', {
+            name: 'State assignments',
+        })
+        expect(tableAnalysts).toBeInTheDocument()
+        const tableRowsAnalysts =
+            await within(tableAnalysts).findAllByRole('row')
+        expect(tableRowsAnalysts).toHaveLength(4)
+
+        const accordionButton = screen.getByTestId(
+            'accordionButton_filterAccordionItems'
+        )
+
+        await waitFor(async () => {
+            //Expect filter accordion and state filter to exist
+            expect(screen.queryByTestId('accordion')).toBeInTheDocument()
+            //Expand filter accordion
+            await userEvent.click(accordionButton)
+        })
+
+        const analystFilterCombobox = screen.getByRole('combobox', {
+            name: 'analysts filter selection',
+        })
+        const stateFilterCombobox = screen.getByRole('combobox', {
+            name: 'state filter selection',
+        })
+
+        expect(stateFilterCombobox).toBeInTheDocument()
+        expect(analystFilterCombobox).toBeInTheDocument()
+
+        // Add Analyst filter
+        selectEvent.openMenu(analystFilterCombobox)
+        const analystComboboxOptions = screen.getByTestId(
+            'analysts-filter-options'
+        )
+        expect(analystComboboxOptions).toBeInTheDocument()
+        await waitFor(async () => {
+            //Expected No assignment option is present
+            expect(
+                within(analystComboboxOptions).getByText('No assignment')
+            ).toBeInTheDocument()
+            await selectEvent.select(analystComboboxOptions, 'No assignment')
+        })
+
+        //Expect only FL to show on table
+        const rowsFilteredOnce = await screen.findAllByRole('row')
+        expect(rowsFilteredOnce).toHaveLength(2)
+        expect(rowsFilteredOnce[1]).toHaveTextContent('FL')
+        expect(screen.getByText('Displaying 1 of 3 state')).toBeInTheDocument()
+
+        // Clear filters and expect all options to be displayed
+        const clearFiltersButton = screen.getByRole('button', {
+            name: /Clear filters/,
+        })
+        expect(clearFiltersButton).toBeInTheDocument()
+
+        await userEvent.click(clearFiltersButton)
+        await waitFor(() => {
+            expect(screen.getAllByRole('row')).toHaveLength(4)
+        })
+        expect(screen.getByText('Displaying 3 of 3 states')).toBeInTheDocument()
     })
 })
 
