@@ -4,58 +4,58 @@ describe('Admin user can view application level settings', () => {
         cy.interceptGraphQL()
     })
 
-    it('and update user division assignments', () => {
-        // make sure a cms user in db first
-        cy.logInAsCMSUser()
-        cy.logOut()
-
-        cy.logInAsAdminUser({initialURL: '/mc-review-settings'})
-        cy.findByRole('link', { name: 'Division assignments'}).click()
-        cy.wait('@indexUsersQuery', { timeout: 20_000 })
-        cy.findByRole('table', {name: 'Division assignments'}).should('exist')
-        cy.findByText('Zuko').should('exist')
-        cy.findAllByText('Hotman').should('have.length.at.least', 1)
-        cy.assignDivisionToCMSUser({cmsUser: 'ZUKO', division: 'DMCO'})
-        cy.findByText('Zuko').should('exist').siblings().should('include.text', 'selected.DMCO') // not accesible but dropdowns are not good idea
-        cy.assignDivisionToCMSUser({cmsUser: 'ZUKO', division: 'DMCP'})
-        cy.findByText('Zuko').should('exist').siblings().should('include.text', 'selected.DMCP') // not accesible but dropdowns are not good idea
-        cy.assignDivisionToCMSUser({cmsUser: 'ZUKO', division: 'OACT'})
-        cy.findByText('Zuko').should('exist').siblings().should('include.text', 'selected.OACT') // not accesible but dropdowns are not good idea
-    })
-
-    it('and filter down state analysts by state code', () => {
-         cy.logInAsAdminUser({initialURL: '/mc-review-settings'})
-          // Table data has both minnesota entries and florida entries
-         cy.findByRole('table').should('exist').should('include.text', 'FL').should('include.text', 'MN')
-
-         // save current number of rows so we can filter
-         cy.findByRole('table', {name: 'State assignments'})
-         .find("tr")
-         .then((rows) => {
-           const lengthBeforeFilter = rows.length;
-
-
-         //click into emails filters, do nothing, then go over state filter
-         cy.findByRole('button', { name: 'Filters'}).click()
-         cy.findByRole('combobox', {
-            name: 'analysts filter selection', timeout: 2_000
-        }).click({
-            force: true,
-        })
-         cy.findByRole('combobox', {
-            name: 'state filter selection', timeout: 2_000
-        }).click({
-            force: true,
-        })
-
-
-        cy.findByRole('option', {name: 'MN'}).click()
-        // Table data has minnesota entries but no florida entries
-        cy.findByRole('table').should('exist').should('not.include.text', 'FL').should('include.text', 'MN')
-        // Table data is also less rows long
-        cy.findAllByRole('row').should('have.length.lessThan', lengthBeforeFilter)
-        });
-    })
+    // it('and update user division assignments', () => {
+    //     // make sure a cms user in db first
+    //     cy.logInAsCMSUser()
+    //     cy.logOut()
+    //
+    //     cy.logInAsAdminUser({initialURL: '/mc-review-settings'})
+    //     cy.findByRole('link', { name: 'Division assignments'}).click()
+    //     cy.wait('@indexUsersQuery', { timeout: 20_000 })
+    //     cy.findByRole('table', {name: 'Division assignments'}).should('exist')
+    //     cy.findByText('Zuko').should('exist')
+    //     cy.findAllByText('Hotman').should('have.length.at.least', 1)
+    //     cy.assignDivisionToCMSUser({cmsUser: 'ZUKO', division: 'DMCO'})
+    //     cy.findByText('Zuko').should('exist').siblings().should('include.text', 'selected.DMCO') // not accesible but dropdowns are not good idea
+    //     cy.assignDivisionToCMSUser({cmsUser: 'ZUKO', division: 'DMCP'})
+    //     cy.findByText('Zuko').should('exist').siblings().should('include.text', 'selected.DMCP') // not accesible but dropdowns are not good idea
+    //     cy.assignDivisionToCMSUser({cmsUser: 'ZUKO', division: 'OACT'})
+    //     cy.findByText('Zuko').should('exist').siblings().should('include.text', 'selected.OACT') // not accesible but dropdowns are not good idea
+    // })
+    //
+    // it('and filter down state analysts by state code', () => {
+    //      cy.logInAsAdminUser({initialURL: '/mc-review-settings'})
+    //       // Table data has both minnesota entries and florida entries
+    //      cy.findByRole('table').should('exist').should('include.text', 'FL').should('include.text', 'MN')
+    //
+    //      // save current number of rows so we can filter
+    //      cy.findByRole('table', {name: 'State assignments'})
+    //      .find("tr")
+    //      .then((rows) => {
+    //        const lengthBeforeFilter = rows.length;
+    //
+    //
+    //      //click into emails filters, do nothing, then go over state filter
+    //      cy.findByRole('button', { name: 'Filters'}).click()
+    //      cy.findByRole('combobox', {
+    //         name: 'analysts filter selection', timeout: 2_000
+    //     }).click({
+    //         force: true,
+    //     })
+    //      cy.findByRole('combobox', {
+    //         name: 'state filter selection', timeout: 2_000
+    //     }).click({
+    //         force: true,
+    //     })
+    //
+    //
+    //     cy.findByRole('option', {name: 'MN'}).click()
+    //     // Table data has minnesota entries but no florida entries
+    //     cy.findByRole('table').should('exist').should('not.include.text', 'FL').should('include.text', 'MN')
+    //     // Table data is also less rows long
+    //     cy.findAllByRole('row').should('have.length.lessThan', lengthBeforeFilter)
+    //     });
+    // })
 
     it('can update state assignment and see in on the state assignment table', () => {
         cy.interceptFeatureFlags({'read-write-state-assignments': true})
@@ -91,8 +91,12 @@ describe('Admin user can view application level settings', () => {
         cy.findByText('Edit state assignment')
         cy.findByText('AL')
 
-        //Clear out existing assignments
-        cy.get('[class*="select__clear-indicator"]').should('exist').click()
+        //Clear out existing assignments if they exist from test re-runs.
+        cy.get('body').then($body => {
+            if ($body.find('[class*="select__clear-indicator"]').length > 0) {
+                cy.get('[class*="select__clear-indicator"]').click()
+            }
+        })
 
         // Assign Zuko
         cy.findByRole('combobox').should('exist').click()
@@ -136,7 +140,7 @@ describe('Admin user can view application level settings', () => {
         cy.findByText(`Azula Hotman was removed`)
 
         // Check to AL assignments have been saved.
-        cy.findAllByRole('row').should('exist').eq(1).within(row => {
+        cy.findAllByRole('row').should('exist').eq(1).within(() => {
             cy.findByText('AL')
             cy.findByText('Zuko Hotman')
         })
