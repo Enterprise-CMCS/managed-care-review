@@ -257,8 +257,8 @@ export async function updateStateAssignmentsWrapper(
                     )
 
                     if (previousSettings) {
-                        const cachedData = [...previousSettings.fetchMcReviewSettings.stateAssignments]
-                        const stateIndex = cachedData.findIndex(state => state.stateCode === stateCode)
+                        const cachedAssignments = [...previousSettings.fetchMcReviewSettings.stateAssignments]
+                        const stateIndex = cachedAssignments.findIndex(state => state.stateCode === stateCode)
                         if (stateIndex === -1) {
                             recordJSException(
                                 `[UNEXPECTED]: Error attempting to update state assignments cache, state not found in cache.`
@@ -266,8 +266,8 @@ export async function updateStateAssignmentsWrapper(
                             return new Error(ERROR_MESSAGES.update_state_assignments_generic)
                         }
 
-                        cachedData[stateIndex] = {
-                            ...cachedData[stateIndex],
+                        cachedAssignments[stateIndex] = {
+                            ...cachedAssignments[stateIndex],
                             assignedCMSUsers: updatedUsers
                         }
 
@@ -276,7 +276,7 @@ export async function updateStateAssignmentsWrapper(
                             data: {
                                 fetchMcReviewSettings: {
                                     ...previousSettings.fetchMcReviewSettings,
-                                    stateAssignments: cachedData
+                                    stateAssignments: cachedAssignments
                                     },
                                 },
                             },
