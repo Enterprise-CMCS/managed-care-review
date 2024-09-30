@@ -67,7 +67,7 @@ Cypress.Commands.add(
             cy.url({ timeout: 20_000 }).should('contain', initialURL)
 
             if (initialURL.includes('submissions/')) {
-                cy.wait('@fetchHealthPlanPackageWithQuestionsQuery', {
+                cy.wait('@fetchContractWithQuestionsQuery', {
                     timeout: 20_000,
                 }) // for cases where CMs user goes to specific submission on login, likely from email link
             } else if (initialURL.includes('rate-reviews')) {
