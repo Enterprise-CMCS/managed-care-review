@@ -5,10 +5,12 @@ import { SubmissionDocument } from '../../common-code/healthPlanFormDataType'
 import { RoutesRecord } from '../../constants/routes'
 import { fetchCurrentUserMock } from '../../testHelpers/apolloMocks/userGQLMock'
 import {
+    mockContractPackageSubmitted,
     mockDraftHealthPlanPackage,
-    mockSubmittedHealthPlanPackage,
     mockUnlockedHealthPlanPackage,
+    mockValidCMSUser,
     mockUnlockedHealthPlanPackageWithDocuments,
+    updateContractDraftRevisionMockSuccess,
 } from '../../testHelpers/apolloMocks/'
 import {
     fetchContractMockSuccess,
@@ -17,33 +19,21 @@ import {
     updateContractDraftRevisionMockFail,
     mockContractPackageUnlockedWithUnlockedType,
     fetchContractWithQuestionsMockSuccess,
-    mockContractPackageSubmittedWithQuestions
 } from '../../testHelpers/apolloMocks'
-import {
-    fetchHealthPlanPackageMockSuccess,
-    fetchHealthPlanPackageMockNetworkFailure,
-    fetchHealthPlanPackageMockAuthFailure,
-    updateHealthPlanFormDataMockSuccess,
-} from '../../testHelpers/apolloMocks/healthPlanPackageGQLMock'
+import { fetchHealthPlanPackageMockSuccess } from '../../testHelpers/apolloMocks/healthPlanPackageGQLMock'
 // some spies will not work with indexed exports, so I refactored to import them directly from their files
 import { renderWithProviders } from '../../testHelpers/jestHelpers'
-import * as useContractForm from '../../hooks/useContractForm'
 
 import { StateSubmissionForm } from './StateSubmissionForm'
-import {
-    base64ToDomain,
-    domainToBase64,
-} from '../../common-code/proto/healthPlanFormDataProto'
 import { testS3Client } from '../../testHelpers/s3Helpers'
 import { getYesNoFieldValue } from '../../testHelpers/fieldHelpers'
 import { SubmissionSideNav } from '../SubmissionSideNav'
 import { fetchStateHealthPlanPackageWithQuestionsMockSuccess } from '../../testHelpers/apolloMocks'
-const mockUpdateDraftFn = vi.fn()
 
 describe('StateSubmissionForm', () => {
     describe('loads draft submission', () => {
         it('redirects user to submission summary page when status is submitted', async () => {
-            const contract = mockContractPackageSubmittedWithQuestions()
+            const contract = mockContractPackageSubmitted()
             let testLocation: Location
             renderWithProviders(
                 <Routes>
@@ -57,7 +47,10 @@ describe('StateSubmissionForm', () => {
                 {
                     apolloProvider: {
                         mocks: [
-                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchCurrentUserMock({
+                                user: mockValidCMSUser(),
+                                statusCode: 200,
+                            }),
                             fetchContractWithQuestionsMockSuccess({
                                 contract: {
                                     ...contract,
@@ -136,8 +129,9 @@ describe('StateSubmissionForm', () => {
             })
         })
 
-        it.skip('loads documents fields for /submissions/:id/edit/documents', async () => {
-            const mockSubmission = mockContractPackageDraft()
+        it('loads documents fields for /submissions/:id/edit/documents', async () => {
+            const mockContract = mockContractPackageDraft()
+            const mockSubmission = mockDraftHealthPlanPackage()
             renderWithProviders(
                 <Routes>
                     <Route element={<SubmissionSideNav />}>
@@ -151,15 +145,24 @@ describe('StateSubmissionForm', () => {
                     apolloProvider: {
                         mocks: [
                             fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchHealthPlanPackageMockSuccess({
+                                id: '12',
+                            }),
+                            fetchStateHealthPlanPackageWithQuestionsMockSuccess(
+                                {
+                                    id: '12',
+                                    stateSubmission: mockSubmission,
+                                }
+                            ),
                             fetchContractWithQuestionsMockSuccess({
                                 contract: {
-                                    ...mockSubmission,
+                                    ...mockContract,
                                     id: '12',
                                 },
                             }),
-                            fetchContractWithQuestionsMockSuccess({
+                            fetchContractMockSuccess({
                                 contract: {
-                                    ...mockSubmission,
+                                    ...mockContract,
                                     id: '12',
                                 },
                             }),
@@ -181,8 +184,9 @@ describe('StateSubmissionForm', () => {
     })
 
     describe('loads unlocked submission', () => {
-        it.skip('displays unlock banner with correct data for an unlocked submission', async () => {
-            const mockSubmission = mockContractPackageUnlockedWithUnlockedType()
+        it('displays unlock banner with correct data for an unlocked submission', async () => {
+            const mockContract = mockContractPackageUnlockedWithUnlockedType()
+            const mockSubmission = mockUnlockedHealthPlanPackage()
             renderWithProviders(
                 <Routes>
                     <Route element={<SubmissionSideNav />}>
@@ -198,21 +202,25 @@ describe('StateSubmissionForm', () => {
                             fetchCurrentUserMock({ statusCode: 200 }),
                             fetchContractWithQuestionsMockSuccess({
                                 contract: {
-                                    ...mockSubmission,
-                                    id: '15',
-                                },
-                            }),
-                            fetchContractWithQuestionsMockSuccess({
-                                contract: {
-                                    ...mockSubmission,
+                                    ...mockContract,
                                     id: '15',
                                 },
                             }),
                             fetchContractMockSuccess({
                                 contract: {
-                                    ...mockSubmission,
+                                    ...mockContract,
                                     id: '15',
                                 },
+                            }),
+                            fetchStateHealthPlanPackageWithQuestionsMockSuccess(
+                                {
+                                    id: '15',
+                                    stateSubmission: mockSubmission,
+                                }
+                            ),
+                            fetchHealthPlanPackageMockSuccess({
+                                id: '15',
+                                submission: mockSubmission,
                             }),
                         ],
                     },
@@ -238,20 +246,10 @@ describe('StateSubmissionForm', () => {
     })
 
     describe('when user edits submission', () => {
-        it.skip('change draft submission description and navigate to contract details', async () => {
-            const mockSubmission = mockDraftHealthPlanPackage({
-                submissionDescription:
-                    'A real submission but updated something',
-            })
-            const formData = base64ToDomain(
-                mockSubmission.revisions[0].node.formDataProto
-            )
-            if (formData instanceof Error) throw Error
-
-            formData.submissionDescription =
+        it('change draft submission description and navigate to contract details', async () => {
+            const mockSubmission = mockContractPackageDraft()
+            mockSubmission.draftRevision!.formData.submissionDescription =
                 'A real submission but updated something'
-
-            const updatedFormData = domainToBase64(formData)
 
             renderWithProviders(
                 <Routes>
@@ -266,30 +264,24 @@ describe('StateSubmissionForm', () => {
                     apolloProvider: {
                         mocks: [
                             fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchHealthPlanPackageMockSuccess({
-                                submission: mockSubmission,
-                                id: '15',
-                            }),
-                            updateHealthPlanFormDataMockSuccess({
-                                id: '15',
-                                pkg: mockSubmission,
-                                updatedFormData,
-                            }),
-                            fetchHealthPlanPackageMockSuccess({
-                                id: '15',
-                            }),
-                            fetchContractMockSuccess({
+                            updateContractDraftRevisionMockSuccess({
                                 contract: {
-                                    ...mockContractPackageDraft(),
+                                    ...mockSubmission,
                                     id: '15',
                                 },
                             }),
-                            fetchStateHealthPlanPackageWithQuestionsMockSuccess(
-                                {
+                            fetchContractMockSuccess({
+                                contract: {
+                                    ...mockSubmission,
                                     id: '15',
-                                    stateSubmission: mockSubmission,
-                                }
-                            ),
+                                },
+                            }),
+                            fetchContractWithQuestionsMockSuccess({
+                                contract: {
+                                    ...mockSubmission,
+                                    id: '15',
+                                },
+                            }),
                         ],
                     },
                     routerProvider: { route: '/submissions/15/edit/type' },
@@ -312,7 +304,7 @@ describe('StateSubmissionForm', () => {
             continueButton.click()
         })
 
-        it.skip('works even if other sections of the form have been filled out', async () => {
+        it('works even if other sections of the form have been filled out', async () => {
             const mockDocs: SubmissionDocument[] = [
                 {
                     name: 'somedoc.pdf',
@@ -320,20 +312,12 @@ describe('StateSubmissionForm', () => {
                     sha256: 'fakesha',
                 },
             ]
-            const mockSubmission = mockDraftHealthPlanPackage({
-                id: '15',
-                documents: mockDocs,
-            })
+            const mockSubmission = mockContractPackageDraft()
+            mockSubmission.draftRevision!.formData.contractDocuments = mockDocs
 
-            const formData = base64ToDomain(
-                mockSubmission.revisions[0].node.formDataProto
-            )
-            if (formData instanceof Error) throw Error
-
-            formData.submissionDescription =
+            const updatedSubmission = mockContractPackageDraft()
+            updatedSubmission.draftRevision!.formData.submissionDescription =
                 'A real submission but updated something'
-
-            const updatedFormData = domainToBase64(formData)
 
             renderWithProviders(
                 <Routes>
@@ -348,30 +332,24 @@ describe('StateSubmissionForm', () => {
                     apolloProvider: {
                         mocks: [
                             fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchHealthPlanPackageMockSuccess({
-                                id: '15',
-                                submission: mockSubmission,
-                            }),
-                            updateHealthPlanFormDataMockSuccess({
-                                id: '15',
-                                pkg: mockSubmission,
-                                updatedFormData,
-                            }),
-                            fetchContractMockSuccess({
+                            updateContractDraftRevisionMockSuccess({
                                 contract: {
-                                    ...mockContractPackageDraft(),
+                                    ...updatedSubmission,
                                     id: '15',
                                 },
                             }),
-                            fetchHealthPlanPackageMockSuccess({
-                                id: '15',
-                            }),
-                            fetchStateHealthPlanPackageWithQuestionsMockSuccess(
-                                {
+                            fetchContractMockSuccess({
+                                contract: {
+                                    ...mockSubmission,
                                     id: '15',
-                                    stateSubmission: mockSubmission,
-                                }
-                            ),
+                                },
+                            }),
+                            fetchContractWithQuestionsMockSuccess({
+                                contract: {
+                                    ...mockSubmission,
+                                    id: '15',
+                                },
+                            }),
                         ],
                     },
                     routerProvider: { route: '/submissions/15/edit/type' },
@@ -396,15 +374,8 @@ describe('StateSubmissionForm', () => {
     })
 
     describe('errors', () => {
-        it.skip('shows a generic error fetching submission fails at submission type', async () => {
-            vi.spyOn(useContractForm, 'useContractForm').mockReturnValue({
-                updateDraft: mockUpdateDraftFn,
-                createDraft: vi.fn(),
-                showPageErrorMessage: true,
-                draftSubmission: undefined,
-            })
-
-            const mockSubmission = mockDraftHealthPlanPackage()
+        it('shows a generic error fetching submission fails at submission type', async () => {
+            const mockSubmission = mockContractPackageDraft()
             renderWithProviders(
                 <Routes>
                     <Route element={<SubmissionSideNav />}>
@@ -418,13 +389,12 @@ describe('StateSubmissionForm', () => {
                     apolloProvider: {
                         mocks: [
                             fetchCurrentUserMock({ statusCode: 200 }),
-                            // fetchHealthPlanPackageMockAuthFailure(),
-                            fetchStateHealthPlanPackageWithQuestionsMockSuccess(
-                                {
+                            fetchContractWithQuestionsMockSuccess({
+                                contract: {
+                                    ...mockSubmission,
                                     id: '15',
-                                    stateSubmission: mockSubmission,
-                                }
-                            ),
+                                },
+                            }),
                             fetchContractMockFail({
                                 id: '15',
                             }),
@@ -438,15 +408,8 @@ describe('StateSubmissionForm', () => {
             expect(loading).toBeInTheDocument()
         })
 
-        it.skip('shows a generic error fetching submission fails at contract details', async () => {
-            vi.spyOn(useContractForm, 'useContractForm').mockReturnValue({
-                updateDraft: mockUpdateDraftFn,
-                createDraft: vi.fn(),
-                showPageErrorMessage: true,
-                draftSubmission: undefined,
-            })
-
-            const mockSubmission = mockDraftHealthPlanPackage()
+        it('shows a generic error fetching submission fails at contract details', async () => {
+            const mockSubmission = mockContractPackageDraft()
             renderWithProviders(
                 <Routes>
                     <Route element={<SubmissionSideNav />}>
@@ -460,13 +423,15 @@ describe('StateSubmissionForm', () => {
                     apolloProvider: {
                         mocks: [
                             fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchHealthPlanPackageMockNetworkFailure(),
-                            fetchStateHealthPlanPackageWithQuestionsMockSuccess(
-                                {
+                            fetchContractMockFail({
+                                id: '15',
+                            }),
+                            fetchContractWithQuestionsMockSuccess({
+                                contract: {
+                                    ...mockSubmission,
                                     id: '15',
-                                    stateSubmission: mockSubmission,
-                                }
-                            ),
+                                },
+                            }),
                         ],
                     },
                     routerProvider: {
@@ -479,8 +444,8 @@ describe('StateSubmissionForm', () => {
             expect(loading).toBeInTheDocument()
         })
 
-        it.skip('shows a generic error fetching submission fails at documents', async () => {
-            const mockSubmission = mockDraftHealthPlanPackage()
+        it('shows a generic error fetching submission fails at documents', async () => {
+            const mockSubmission = mockContractPackageDraft()
             renderWithProviders(
                 <Routes>
                     <Route element={<SubmissionSideNav />}>
@@ -494,13 +459,13 @@ describe('StateSubmissionForm', () => {
                     apolloProvider: {
                         mocks: [
                             fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchHealthPlanPackageMockAuthFailure(),
-                            fetchStateHealthPlanPackageWithQuestionsMockSuccess(
-                                {
+                            fetchContractMockFail({ id: '15' }),
+                            fetchContractWithQuestionsMockSuccess({
+                                contract: {
+                                    ...mockSubmission,
                                     id: '15',
-                                    stateSubmission: mockSubmission,
-                                }
-                            ),
+                                },
+                            }),
                         ],
                     },
                     routerProvider: { route: '/submissions/15/edit/documents' },
@@ -511,50 +476,43 @@ describe('StateSubmissionForm', () => {
             expect(loading).toBeInTheDocument()
         })
 
-        it.skip('shows a generic error when updating submission fails', async () => {
-            const mockSubmission = mockDraftHealthPlanPackage({
-                submissionDescription:
-                    'A real submission but updated something',
-            })
-
-            vi.spyOn(useContractForm, 'useContractForm').mockReturnValue({
-                updateDraft: mockUpdateDraftFn,
-                createDraft: vi.fn(),
-                showPageErrorMessage: true,
-                draftSubmission: undefined,
-            })
-
-            renderWithProviders(
-                <Routes>
-                    <Route element={<SubmissionSideNav />}>
-                        <Route
-                            path={RoutesRecord.SUBMISSIONS_EDIT_TOP_LEVEL}
-                            element={<StateSubmissionForm />}
-                        />
-                    </Route>
-                </Routes>,
-                {
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchHealthPlanPackageMockSuccess({
-                                submission: mockSubmission,
-                                id: '15',
-                            }),
-                            fetchStateHealthPlanPackageWithQuestionsMockSuccess(
-                                {
-                                    id: '15',
-                                    stateSubmission: mockSubmission,
-                                }
-                            ),
-                            updateContractDraftRevisionMockFail({
-                                contract: { id: '15' },
-                            }),
-                        ],
-                    },
-                    routerProvider: { route: '/submissions/15/edit/type' },
-                }
-            )
+        it('shows a generic error when updating submission fails', async () => {
+            const mockSubmission = mockContractPackageDraft()
+            ;(mockSubmission.draftRevision!.formData.submissionDescription =
+                'A real submission but updated something'),
+                renderWithProviders(
+                    <Routes>
+                        <Route element={<SubmissionSideNav />}>
+                            <Route
+                                path={RoutesRecord.SUBMISSIONS_EDIT_TOP_LEVEL}
+                                element={<StateSubmissionForm />}
+                            />
+                        </Route>
+                    </Routes>,
+                    {
+                        apolloProvider: {
+                            mocks: [
+                                fetchCurrentUserMock({ statusCode: 200 }),
+                                fetchContractMockSuccess({
+                                    contract: {
+                                        ...mockSubmission,
+                                        id: '15',
+                                    },
+                                }),
+                                fetchContractWithQuestionsMockSuccess({
+                                    contract: {
+                                        ...mockSubmission,
+                                        id: '15',
+                                    },
+                                }),
+                                updateContractDraftRevisionMockFail({
+                                    contract: { id: '15' },
+                                }),
+                            ],
+                        },
+                        routerProvider: { route: '/submissions/15/edit/type' },
+                    }
+                )
 
             await waitFor(() =>
                 expect(
@@ -577,7 +535,7 @@ describe('StateSubmissionForm', () => {
             })
         })
 
-        it.skip('shows a generic 404 page when package is not found', async () => {
+        it('shows a generic 404 page when package is not found', async () => {
             renderWithProviders(
                 <Routes>
                     <Route element={<SubmissionSideNav />}>
@@ -614,8 +572,9 @@ describe('StateSubmissionForm', () => {
             deleteCallKeys.push(key)
         }
 
-        it.skip('does not delete files from past revisions', async () => {
+        it('does not delete files from past revisions', async () => {
             const submission = mockUnlockedHealthPlanPackageWithDocuments()
+            const mockSubmission = mockContractPackageUnlockedWithUnlockedType()
             renderWithProviders(
                 <Routes>
                     <Route element={<SubmissionSideNav />}>
@@ -632,6 +591,18 @@ describe('StateSubmissionForm', () => {
                             fetchHealthPlanPackageMockSuccess({
                                 id: '15',
                                 submission,
+                            }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    ...mockSubmission,
+                                    id: '15',
+                                },
+                            }),
+                            fetchContractWithQuestionsMockSuccess({
+                                contract: {
+                                    ...mockSubmission,
+                                    id: '15',
+                                },
                             }),
                             fetchStateHealthPlanPackageWithQuestionsMockSuccess(
                                 {
@@ -669,8 +640,8 @@ describe('StateSubmissionForm', () => {
             expect(deleteCallKeys).toEqual(['three-one'])
         })
 
-        it.skip('loads contract details fields for /submissions/:id/edit/contract-details with amendments', async () => {
-            const mockSubmission = mockDraftHealthPlanPackage()
+        it('loads contract details fields for /submissions/:id/edit/contract-details with amendments', async () => {
+            const mockSubmission = mockContractPackageDraft()
 
             renderWithProviders(
                 <Routes>
@@ -685,16 +656,12 @@ describe('StateSubmissionForm', () => {
                     apolloProvider: {
                         mocks: [
                             fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchHealthPlanPackageMockSuccess({
-                                id: '12',
-                                submission: mockSubmission,
-                            }),
-                            fetchStateHealthPlanPackageWithQuestionsMockSuccess(
-                                {
-                                    stateSubmission: mockSubmission,
+                            fetchContractWithQuestionsMockSuccess({
+                                contract: {
+                                    ...mockSubmission,
                                     id: '12',
-                                }
-                            ),
+                                },
+                            }),
                             fetchContractMockSuccess({
                                 contract: {
                                     ...mockContractPackageDraft(),

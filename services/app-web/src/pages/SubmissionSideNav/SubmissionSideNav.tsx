@@ -11,6 +11,7 @@ import { getRouteName } from '../../routeHelpers'
 import {
     ContractFormData,
     ContractPackageSubmission,
+    ContractRevision,
     useFetchContractWithQuestionsQuery,
 } from '../../gen/gqlClient'
 import { Loading, NavLinkWithLogging } from '../../components'
@@ -24,8 +25,8 @@ import { Contract, User } from '../../gen/gqlClient'
 export type SideNavOutletContextType = {
     contract: Contract
     packageName: string
-    currentRevision: ContractPackageSubmission
-    contractFormData: ContractFormData
+    currentRevision: ContractPackageSubmission | ContractRevision
+    contractFormData: ContractFormData | undefined
     // documentDates: DocumentDateLookupTableType
     user: User
 }
@@ -108,19 +109,32 @@ export const SubmissionSideNav = () => {
     }
 
     // Current Revision is either the last submitted revision (cms users) or the most recent revision (for state users looking submission form)
-    const edge =
+    const submittedEdge =
+        (submissionStatus === 'SUBMITTED' ||
+            submissionStatus === 'RESUBMITTED') &&
+        loggedInUser.role != 'STATE_USER' &&
+        contract.packageSubmissions[0]
+    const draftEdge =
         (submissionStatus === 'UNLOCKED' || submissionStatus === 'DRAFT') &&
-        loggedInUser.role === 'STATE_USER'
-            ? contract.packageSubmissions[0]
-            : contract.packageSubmissions.find((sub) => sub.submitInfo)
-    if (!edge) {
+        loggedInUser.role === 'STATE_USER' &&
+        contract.draftRevision
+    if (!submittedEdge && !draftEdge) {
         const errMsg = `Not able to determine current revision for sidebar: ${contract.id}, programming error.`
         recordJSException(errMsg)
         return <GenericErrorPage />
     }
-    const currentRevision = edge
-    const contractFormData = currentRevision.contractRevision.formData
-    const contractName = currentRevision.contractRevision.contractName
+    const currentRevision = submittedEdge || draftEdge
+    const contractFormData = submittedEdge
+        ? submittedEdge.contractRevision.formData
+        : draftEdge && draftEdge.formData
+    const contractName = submittedEdge
+        ? submittedEdge.contractRevision.contractName
+        : draftEdge && draftEdge.contractName
+    if (!contractName || !contractFormData || !currentRevision) {
+        const errMsg = `Not able to derive data from current revision for sidebar: ${contract.id}, programming error.`
+        recordJSException(errMsg)
+        return <GenericErrorPage />
+    }
     const outletContext: SideNavOutletContextType = {
         contract,
         packageName: contractName,
