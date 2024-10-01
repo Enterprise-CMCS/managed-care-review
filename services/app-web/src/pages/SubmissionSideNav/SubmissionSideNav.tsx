@@ -112,11 +112,9 @@ export const SubmissionSideNav = () => {
     const submittedEdge =
         (submissionStatus === 'SUBMITTED' ||
             submissionStatus === 'RESUBMITTED') &&
-        loggedInUser.role != 'STATE_USER' &&
         contract.packageSubmissions[0]
     const draftEdge =
         (submissionStatus === 'UNLOCKED' || submissionStatus === 'DRAFT') &&
-        loggedInUser.role === 'STATE_USER' &&
         contract.draftRevision
     if (!submittedEdge && !draftEdge) {
         const errMsg = `Not able to determine current revision for sidebar: ${contract.id}, programming error.`
