@@ -72,7 +72,7 @@ describe('ContractDetails', () => {
         ).not.toBeInTheDocument()
         const requiredLabels = await screen.findAllByText('Required')
         expect(requiredLabels).toHaveLength(6)
-        const optionalLabels = screen.queryAllByText('Optional')
+        const optionalLabels = await screen.findAllByText('Optional')
         expect(optionalLabels).toHaveLength(1)
     })
 
