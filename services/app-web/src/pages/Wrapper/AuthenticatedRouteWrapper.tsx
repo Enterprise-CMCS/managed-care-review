@@ -23,12 +23,12 @@ const AuthenticatedRouteWrapper = ({
 }): React.ReactElement => {
     const modalRef = createRef<ModalRef>()
     const ldClient = useLDClient()
-    const  {logout, refreshAuth} = useAuth()
+    const {logout, refreshAuth} = useAuth()
     const {activeModalRef, updateModalRef} = usePage()
 
-    const openSessionTimeoutModal = () =>{
+    const openSessionTimeoutModal = () => {
         // Make sure we close any active modals for session timeout, should overrides the focus trap
-        if(activeModalRef && activeModalRef !== modalRef) {
+        if (activeModalRef && activeModalRef !== modalRef) {
             activeModalRef.current?.toggleModal(undefined, false)
             updateModalRef({updatedModalRef: modalRef})
         }
@@ -42,7 +42,7 @@ const AuthenticatedRouteWrapper = ({
         closeSessionTimeoutModal()
         await logout({type: 'TIMEOUT'})}
 
-    const logoutByUserChoice  = async () =>  {
+    const logoutByUserChoice = async () => {
         closeSessionTimeoutModal()
         await logout({type: 'DEFAULT'})
     }
@@ -82,9 +82,9 @@ const AuthenticatedRouteWrapper = ({
     let promptCountdown = SESSION_TIMEOUT_COUNTDOWN //  may be reassigned if session duration is shorter time period
 
     // Session duration must be longer than prompt countdown to allow IdleTimer to load
-     if (SESSION_DURATION <= SESSION_TIMEOUT_COUNTDOWN) {
+    if (SESSION_DURATION <= SESSION_TIMEOUT_COUNTDOWN) {
         promptCountdown = SESSION_DURATION - 1000
-     }
+    }
 
     return (<IdleTimerProvider
             onIdle={logoutBySessionTimeout}

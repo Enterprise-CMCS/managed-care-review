@@ -195,7 +195,6 @@ function AuthProvider({
                 await logout({
                     type: 'TIMEOUT'
                 })
-
             }
         }
         return
