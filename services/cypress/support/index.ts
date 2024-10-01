@@ -31,6 +31,7 @@ import { Contract, HealthPlanPackage } from '../gen/gqlClient';
 import { CMSUserType, DivisionType } from '../utils/apollo-test-utils';
 import { StateUserType } from '../../app-api/src/domain-models';
 import { UnlockedHealthPlanFormDataType } from '../../app-web/src/common-code/healthPlanFormDataType'
+import { CMSUserLoginNames } from './loginCommands';
 
 type FormButtonKey =
     | 'CONTINUE_FROM_START_NEW'
@@ -46,7 +47,7 @@ declare global {
 
             // login commands
             logInAsStateUser(): void
-            logInAsCMSUser(args?: { initialURL: string }): void
+            logInAsCMSUser(args?: { initialURL?: string, cmsUser?: CMSUserLoginNames }): void
             logInAsAdminUser(args?: { initialURL: string }): void
             logOut(): void
 
@@ -104,10 +105,10 @@ declare global {
 
             // User settings commands
             assignDivisionToCMSUser({
-                userEmail,
+                cmsUser,
                 division,
             }: {
-                userEmail: string
+                cmsUser: CMSUserLoginNames
                 division: DivisionType
             }): void
 
