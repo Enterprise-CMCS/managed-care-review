@@ -37,6 +37,10 @@ const fetchEmailSettings = (): MockedResponse<FetchEmailSettingsQuery> => {
                         {
                             emails: ['cmsUser2@dmas.mn.gov', 'cmsApproverUser2@dmas.mn.gov'],
                             stateCode: 'OH'
+                        },
+                        {
+                            emails: [],
+                            stateCode: 'FL'
                         }
                     ],
                 },

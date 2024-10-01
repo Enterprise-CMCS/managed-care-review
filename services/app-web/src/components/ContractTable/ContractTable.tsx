@@ -319,6 +319,7 @@ export const ContractTable = ({
         columns: tableColumns,
         filterFns: {
             dateRangeFilter: () => true,
+            analystFilter: () => true,
         },
         getCoreRowModel: getCoreRowModel(),
         state: {
