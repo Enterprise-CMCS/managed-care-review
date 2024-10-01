@@ -302,6 +302,10 @@ describe.each(combinedAuthorizedUsers)(
             ).toBeInTheDocument()
             expect(within(tableAnalysts).getByText('MN')).toBeInTheDocument()
             expect(within(tableAnalysts).getByText('OH')).toBeInTheDocument()
+            expect(within(tableAnalysts).getByLabelText('Ohio')).toBeInTheDocument()
+            expect(within(tableAnalysts).getByLabelText('Minnesota')).toBeInTheDocument()
+            expect(within(tableAnalysts).getByRole('link', {name: 'Edit Minnesota'})).toBeInTheDocument()
+            expect(within(tableAnalysts).getByRole('link', {name: 'Edit Ohio'})).toBeInTheDocument()
 
             await commonSettingPageTest()
         })

@@ -10,11 +10,12 @@ const formatUserName = (user: AnalystDisplayType) => `${user.givenName} ${user.f
 const formatEmailsFromUsers = (arr?: AnalystDisplayType[]) => (arr ? arr.map(analyst => analyst.email).join(', ') : 'NOT DEFINED')
 const formatUserNamesFromUsers = (arr?: AnalystDisplayType[]) =>  (arr ? arr.map(analyst => formatUserName(analyst)).join(', ') : '')
 
-const EditLink = ({ url, rowID }: { url: string; rowID: string }) => {
+const EditLink = ({ url, rowID, fieldName }: { url: string; rowID: string, fieldName: string }) => {
     return (
         <NavLinkWithLogging
             key={rowID}
             to={url}
+            aria-label={`Edit ${fieldName}`}
             data-testid={`edit-link-${rowID}`}
         >
             Edit
