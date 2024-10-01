@@ -118,7 +118,7 @@ const StateAssignmentTable = () => {
             columnHelper.accessor('stateCode', {
                 id: 'stateCode',
                 header: 'State',
-                cell: (info) => info.getValue(),
+                cell: (info) => <span aria-label={info.row.original.stateName}>{info.getValue()}</span>,
                 filterFn: `arrIncludesSome`,
             }),
             columnHelper.accessor('analysts', {
