@@ -7,7 +7,7 @@ import {getRouteName} from '../routeHelpers';
 import {createScript} from '../hooks/useScript';
 import { getTealiumPageName } from './tealiumHelpers';
 import {recordJSException} from '../otelHelpers';
-import { TEALIUM_CONTENT_TYPE_BY_ROUTE, TEALIUM_SUBSECTION_BY_ROUTE } from './constants';
+import { TEALIUM_CONTENT_TYPE_BY_ROUTE } from './constants';
 
 // TYPES
 type TealiumEvent =
@@ -73,11 +73,10 @@ type TealiumDataObject = {
     page_path: string
     site_domain: 'cms.gov'
     site_environment: string
-    site_section: string
     logged_in: 'true' | 'false'
     userId?: string // custom attribute
     packageId?: string // custom attribute
-    tealium_event?: TealiumEvent // this is required by tealium, TBD what allowed values aer here, usually this is supposed to be configured first .
+    tealium_event?: TealiumEvent // this is required by tealium, TBD what allowed values are here, usually this is supposed to be configured first .
 }
 
 type TealiumButtonEventObject = {
@@ -261,7 +260,6 @@ const tealiumClient = (tealiumEnv: Omit<TealiumEnv, 'dev'>): TealiumClientType =
                 page_path: pathname,
                 site_domain: 'cms.gov',
                 site_environment: `${tealiumEnv}`,
-                site_section: `${currentRoute}`,
                 logged_in: `${Boolean(loggedInUser) ?? false}`,
                 userId: loggedInUser?.email,
                 tealium_event: linkData.event_name,
@@ -288,7 +286,6 @@ const tealiumClient = (tealiumEnv: Omit<TealiumEnv, 'dev'>): TealiumClientType =
                 page_path: pathname,
                 site_domain: 'cms.gov',
                 site_environment: `${tealiumEnv}`,
-                site_section: `${TEALIUM_SUBSECTION_BY_ROUTE[currentRoute]}`,
                 logged_in: `${Boolean(loggedInUser) ?? false}`,
             }
 
@@ -326,7 +323,7 @@ const devTealiumClient = (): TealiumClientType => {
                 page_path: pathname,
                 site_domain: 'cms.gov',
                 site_environment: 'dev',
-                site_section: `${currentRoute}`,
+                // site_section: `${currentRoute}`,
                 logged_in: `${Boolean(loggedInUser) ?? false}`,
                 userId: loggedInUser?.email,
                 tealium_event: linkData.event_name,
@@ -354,7 +351,6 @@ const devTealiumClient = (): TealiumClientType => {
                 page_path: pathname,
                 site_domain: 'cms.gov',
                 site_environment: 'dev',
-                site_section: `${TEALIUM_SUBSECTION_BY_ROUTE[currentRoute]}`,
                 logged_in: `${Boolean(loggedInUser) ?? false}`,
             }
 
