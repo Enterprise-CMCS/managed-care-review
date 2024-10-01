@@ -69,6 +69,7 @@ export type {
     Question,
     Document,
     QuestionList,
+    RateQuestion,
 } from './QuestionsType'
 
 export type {

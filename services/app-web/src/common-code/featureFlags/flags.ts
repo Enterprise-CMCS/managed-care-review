@@ -32,8 +32,11 @@ const featureFlags = {
         flag: 'read-write-state-assignments',
         defaultValue: false
     },
+    QA_BY_RATES: {
+        flag: 'qa-by-rates',
+        defaultValue: false
+    },
     // PERMANENT FLAGS
-
     /**
      Enables the modal that alerts the user to an expiring session
     */

@@ -9,14 +9,21 @@ const document = z.object({
     downloadURL: z.string().optional(),
 })
 
-const question = z.object({
+const commonQuestionSchema = z.object({
     id: z.string().uuid(),
-    contractID: z.string().uuid(),
     createdAt: z.date(),
     addedBy: cmsUserSchema,
     division: divisionType, // DMCO, DMCP, OACT
     documents: z.array(document),
     responses: z.array(questionResponseType),
+})
+
+const question = commonQuestionSchema.extend({
+    contractID: z.string().uuid(),
+})
+
+const rateQuestion = commonQuestionSchema.extend({
+    rateID: z.string().uuid(),
 })
 
 const questionEdge = z.object({
@@ -51,6 +58,8 @@ type IndexQuestionsPayload = z.infer<typeof indexQuestionsPayload>
 
 type Question = z.infer<typeof question>
 
+type RateQuestion = z.infer<typeof rateQuestion>
+
 type QuestionList = z.infer<typeof questionList>
 
 type Document = z.infer<typeof document>
@@ -62,6 +71,7 @@ export type {
     Question,
     Document,
     QuestionList,
+    RateQuestion,
 }
 
 export {
@@ -71,4 +81,5 @@ export {
     question,
     document,
     questionList,
+    rateQuestion,
 }
