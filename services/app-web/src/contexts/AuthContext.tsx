@@ -164,7 +164,6 @@ function AuthProvider({
     /*
         Refetches current user via graphql to confirm authentication
         Also can reconfirm authentication, if unexpectedly logged out we know that session may have timed out or user was logged out of another tab
-        @param {failureRedirectPath} passed through to logout which is called on certain checkAuth failures
 
         Use this function to reconfirm the user is logged in. Also used in CognitoLogin
     */
@@ -188,17 +187,14 @@ function AuthProvider({
     /*
         Refreshes the cognito session token
         Also can reconfirm authentication, if unexpectedly logged out we know that session may have timed out
-        @param {failureRedirectPath} passed through to logout which is called on certain checkAuth failures
     */
     const refreshAuth = async () => {
         if (authMode !== 'LOCAL') {
             const result = await extendSession()
-            if (result instanceof Error) {
-                if (loggedInUser) {
-                    await logout({
-                        type: 'TIMEOUT',
-                    })
-                }
+            if (result instanceof Error){
+                await logout({
+                    type: 'TIMEOUT'
+                })
             }
         }
         return
