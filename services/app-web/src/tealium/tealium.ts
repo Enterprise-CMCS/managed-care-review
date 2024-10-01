@@ -8,6 +8,7 @@ import {createScript} from '../hooks/useScript';
 import { getTealiumPageName } from './tealiumHelpers';
 import {recordJSException} from '../otelHelpers';
 import { TEALIUM_CONTENT_TYPE_BY_ROUTE } from './constants';
+import {removeNullAndUndefined} from'../common-code/data/dataUtilities'
 
 // TYPES
 type TealiumEvent =
@@ -254,7 +255,7 @@ const tealiumClient = (tealiumEnv: Omit<TealiumEnv, 'dev'>): TealiumClientType =
             const currentRoute = getRouteName(pathname)
             // eslint-disable-next-line @typescript-eslint/no-empty-function
             const utag = window.utag || { link: () => {}, view: () => {} }
-            const tagData: TealiumLinkDataObject = {
+            const tagData: TealiumLinkDataObject = removeNullAndUndefined({
                 content_language: 'en',
                 page_name: `${heading}: ${PageTitlesRecord[currentRoute]}`,
                 page_path: pathname,
@@ -264,7 +265,7 @@ const tealiumClient = (tealiumEnv: Omit<TealiumEnv, 'dev'>): TealiumClientType =
                 userId: loggedInUser?.email,
                 tealium_event: linkData.event_name,
                 ...linkData
-            }
+            })
             utag.link(tagData)
         },
         logPageView: async (
@@ -279,7 +280,7 @@ const tealiumClient = (tealiumEnv: Omit<TealiumEnv, 'dev'>): TealiumClientType =
                 user: loggedInUser,
             })
 
-            const tagData: TealiumViewDataObject = {
+            const tagData: TealiumViewDataObject = removeNullAndUndefined({
                 content_language: 'en',
                 content_type: `${TEALIUM_CONTENT_TYPE_BY_ROUTE[currentRoute]}`,
                 page_name: tealiumPageName,
@@ -287,7 +288,7 @@ const tealiumClient = (tealiumEnv: Omit<TealiumEnv, 'dev'>): TealiumClientType =
                 site_domain: 'cms.gov',
                 site_environment: `${tealiumEnv}`,
                 logged_in: `${Boolean(loggedInUser) ?? false}`,
-            }
+            })
 
             if (!window.utag) {
                 await new Promise((resolve) => setTimeout(resolve, 1000)).finally(() => {
@@ -344,7 +345,7 @@ const devTealiumClient = (): TealiumClientType => {
                 route: currentRoute,
                 user: loggedInUser,
             })
-            const tagData: TealiumViewDataObject = {
+            const tagData: TealiumViewDataObject = removeNullAndUndefined({
                 content_language: 'en',
                 content_type: `${TEALIUM_CONTENT_TYPE_BY_ROUTE[currentRoute]}`,
                 page_name: tealiumPageName,
@@ -352,7 +353,7 @@ const devTealiumClient = (): TealiumClientType => {
                 site_domain: 'cms.gov',
                 site_environment: 'dev',
                 logged_in: `${Boolean(loggedInUser) ?? false}`,
-            }
+            })
 
             console.info('[Tealium - dev] logPageView')
             console.info(tagData)
