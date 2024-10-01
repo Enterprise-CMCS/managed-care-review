@@ -202,8 +202,7 @@ type TealiumClientType = {
 }
 
 const tealiumClient = (tealiumEnv: Omit<TealiumEnv, 'dev'>): TealiumClientType => {
-    const isProd = tealiumEnv == 'prod'
-    const tealiumHostname = isProd ? 'tags.tiqcdn.com' : 'tealium-tags.cms.gov'
+    const tealiumHostname =  'tealium-tags.cms.gov'
     return {
         initializeTealium: () => {
             // Suppress automatic page views for SPA
@@ -214,8 +213,7 @@ const tealiumClient = (tealiumEnv: Omit<TealiumEnv, 'dev'>): TealiumClientType =
 
             // Load utag.sync.js - add to head element - SYNC load from src
             const initializeTagManagerSnippet = createScript({
-                src: isProd ? `https://${tealiumHostname}/utag/cmsgov/${tealiumProfile}/${tealiumEnv}/utag.sync.js`
-                : `https://${tealiumHostname}/${tealiumProfile}/${tealiumEnv}/utag.sync.js`,
+                src: `https://${tealiumHostname}/${tealiumProfile}/${tealiumEnv}/utag.sync.js`,
                 id: 'tealium-load-tags-sync',
             })
 
@@ -225,10 +223,10 @@ const tealiumClient = (tealiumEnv: Omit<TealiumEnv, 'dev'>): TealiumClientType =
 
             // Load utag.js - Add to body element- ASYNC load inline script
             const inlineScript = `(function (t, e, a, l, i, u, m) {
-                t = ${isProd ? `cmsgov/${tealiumProfile}` : `${tealiumProfile}`}
+                t = '${tealiumProfile}'
                 e = '${tealiumEnv}'
                 a = '/' + t + '/' + e + '/utag.js'
-                l = ${isProd ? `//${tealiumHostname}/utag` : `//${tealiumHostname}`} + a
+                l = ${`//${tealiumHostname}`} + a
                 i = document
                 u = 'script'
                 m = i.createElement(u)
