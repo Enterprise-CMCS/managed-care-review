@@ -137,6 +137,7 @@ const StateAssignmentTable = () => {
                     <EditLink
                         rowID={info.row.original.stateCode}
                         url={info.getValue()}
+                        fieldName={info.row.original.stateName}
                     />
                 ),
             }),
