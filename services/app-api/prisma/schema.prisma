@@ -64,6 +64,8 @@ model RateTable {
   withdrawInfoID String?
   withdrawInfo   UpdateInfoTable? @relation("withdrawRateInfo", fields: [withdrawInfoID], references: [id])
 
+  questions RateQuestion[]
+
   draftContracts DraftRateJoinTable[]
 
   revisions RateRevisionTable[]
@@ -300,20 +302,22 @@ model StateProgram {
 }
 
 model User {
-  id                    String             @id @default(uuid())
-  createdAt             DateTime           @default(now())
-  updatedAt             DateTime           @default(now()) @updatedAt
+  id                    String                 @id @default(uuid())
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @default(now()) @updatedAt
   givenName             String
   familyName            String
   email                 String
   role                  Role
   divisionAssignment    Division?
   stateCode             String?
-  stateAssignments      State[]            @relation("StateToAssignedCMSUser")
+  stateAssignments      State[]                @relation("StateToAssignedCMSUser")
   questions             Question[]
+  rateQuestions         RateQuestion[]
   responses             QuestionResponse[]
+  rateResponses         RateQuestionResponse[]
   audits                UserAudit[]
-  updatedByAuditEntries UserAudit[]        @relation("UpdatedBy")
+  updatedByAuditEntries UserAudit[]            @relation("UpdatedBy")
   updateInfos           UpdateInfoTable[]
 }
 
@@ -372,6 +376,50 @@ model QuestionResponse {
   addedByUserID String
   addedBy       User                       @relation(fields: [addedByUserID], references: [id])
   documents     QuestionResponseDocument[]
+}
+
+model RateQuestion {
+  id            String                 @id @default(uuid())
+  createdAt     DateTime               @default(now())
+  updatedAt     DateTime               @default(now()) @updatedAt
+  rateID        String
+  rate          RateTable              @relation(fields: [rateID], references: [id])
+  addedBy       User                   @relation(fields: [addedByUserID], references: [id])
+  addedByUserID String
+  division      Division
+  documents     RateQuestionDocument[]
+  responses     RateQuestionResponse[]
+}
+
+model RateQuestionResponse {
+  id            String                         @id @default(uuid())
+  createdAt     DateTime                       @default(now())
+  updatedAt     DateTime                       @updatedAt
+  questionID    String
+  question      RateQuestion                   @relation(fields: [questionID], references: [id])
+  addedByUserID String
+  addedBy       User                           @relation(fields: [addedByUserID], references: [id])
+  documents     RateQuestionResponseDocument[]
+}
+
+model RateQuestionDocument {
+  id         String       @id @default(uuid())
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @default(now()) @updatedAt
+  name       String
+  s3URL      String
+  questionID String
+  question   RateQuestion @relation(fields: [questionID], references: [id])
+}
+
+model RateQuestionResponseDocument {
+  id         String               @id @default(uuid())
+  createdAt  DateTime             @default(now())
+  updatedAt  DateTime             @updatedAt
+  name       String
+  s3URL      String
+  responseID String
+  response   RateQuestionResponse @relation(fields: [responseID], references: [id])
 }
 
 enum Division {
