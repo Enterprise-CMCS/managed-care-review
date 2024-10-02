@@ -8,6 +8,7 @@ import {
 } from '../../testHelpers/userHelpers'
 import {
     createAndSubmitTestContractWithRate,
+    createAndUpdateTestContractWithRate,
     submitTestContract,
     unlockTestContract,
 } from '../../testHelpers/gqlContractHelpers'
@@ -119,6 +120,35 @@ describe('createRateQuestion', () => {
                 ],
                 addedBy: cmsUser,
             })
+        )
+    })
+    it('returns an error if rate is in DRAFT', async () => {
+        const stateServer = await constructTestPostgresServer()
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: cmsUser,
+            },
+        })
+        const submittedContractAndRate = must(
+            await createAndUpdateTestContractWithRate(stateServer)
+        )
+
+        const rateID = submittedContractAndRate.draftRates?.[0].id
+
+        if (!rateID) {
+            throw new Error(
+                'Unexpected error: Rate not found in test draft contract and rate'
+            )
+        }
+
+        const rateQuestionRes = must(
+            await createTestRateQuestion(cmsServer, rateID)
+        )
+
+        expect(rateQuestionRes.errors).toBeDefined()
+        expect(assertAnErrorCode(rateQuestionRes)).toBe('BAD_USER_INPUT')
+        expect(assertAnError(rateQuestionRes).message).toBe(
+            'Issue creating question for rate. Message: Cannot create question for rate in DRAFT status'
         )
     })
     it('returns an error of a state user attempts to create a rate question', async () => {
