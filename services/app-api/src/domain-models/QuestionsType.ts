@@ -50,6 +50,11 @@ const createQuestionInput = z.object({
     documents: z.array(document),
 })
 
+const createRateQuestionInput = z.object({
+    rateID: z.string().uuid(),
+    documents: z.array(document),
+})
+
 type CreateQuestionPayload = z.infer<typeof createQuestionPayload>
 
 type CreateQuestionInput = z.infer<typeof createQuestionInput>
@@ -58,7 +63,9 @@ type IndexQuestionsPayload = z.infer<typeof indexQuestionsPayload>
 
 type Question = z.infer<typeof question>
 
-type RateQuestion = z.infer<typeof rateQuestion>
+type RateQuestionType = z.infer<typeof rateQuestion>
+
+type CreateRateQuestionInputType = z.infer<typeof createRateQuestionInput>
 
 type QuestionList = z.infer<typeof questionList>
 
@@ -71,7 +78,8 @@ export type {
     Question,
     Document,
     QuestionList,
-    RateQuestion,
+    RateQuestionType,
+    CreateRateQuestionInputType,
 }
 
 export {
@@ -82,4 +90,5 @@ export {
     document,
     questionList,
     rateQuestion,
+    createRateQuestionInput,
 }

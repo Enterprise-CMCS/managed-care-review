@@ -1,0 +1,39 @@
+mutation createRateQuestion($input: CreateRateQuestionInput!) {
+    createRateQuestion(input: $input) {
+        question {
+            id
+            rateID
+            addedBy {
+                ... on CMSUser {
+                    id
+                    role
+                    email
+                    givenName
+                    familyName
+                    divisionAssignment
+                    stateAssignments {
+                        code
+                        name
+                    }
+                }
+                ... on CMSApproverUser {
+                    id
+                    role
+                    email
+                    givenName
+                    familyName
+                    divisionAssignment
+                    stateAssignments {
+                        code
+                        name
+                    }
+                }
+            }
+            division
+            documents {
+                name
+                s3URL
+            }
+        }
+    }
+}

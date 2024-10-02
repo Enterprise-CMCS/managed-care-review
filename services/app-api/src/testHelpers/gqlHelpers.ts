@@ -8,6 +8,7 @@ import CREATE_QUESTION from 'app-graphql/src/mutations/createQuestion.graphql'
 import INDEX_QUESTIONS from 'app-graphql/src/queries/indexQuestions.graphql'
 import CREATE_QUESTION_RESPONSE from 'app-graphql/src/mutations/createQuestionResponse.graphql'
 import UPDATE_STATE_ASSIGNMENTS_BY_STATE from 'app-graphql/src/mutations/updateStateAssignmentsByState.graphql'
+import CREATE_RATE_QUESTION from 'app-graphql/src/mutations/createRateQuestion.graphql'
 import typeDefs from 'app-graphql/src/schema.graphql'
 import type {
     HealthPlanFormDataType,
@@ -18,6 +19,7 @@ import type {
     CreateQuestionInput,
     InsertQuestionResponseArgs,
     ProgramType,
+    CreateRateQuestionInputType,
 } from '../domain-models'
 import type { Emailer } from '../emailer'
 import { newLocalEmailer } from '../emailer'
@@ -51,6 +53,7 @@ import type { S3ClientT } from '../s3'
 import { convertRateInfoToRateFormDataInput } from '../domain-models/contractAndRates/convertHPPtoContractWithRates'
 import { createAndUpdateTestContractWithoutRates } from './gqlContractHelpers'
 import { addNewRateToTestContract } from './gqlRateHelpers'
+import type { GraphQLResponse } from 'apollo-server-types'
 
 // Since our programs are checked into source code, we have a program we
 // use as our default
@@ -449,6 +452,30 @@ const createTestQuestion = async (
     return createdQuestion.data.createQuestion
 }
 
+const createTestRateQuestion = async (
+    server: ApolloServer,
+    rateID: string,
+    questionData?: Omit<CreateRateQuestionInputType, 'rateID'>
+): Promise<GraphQLResponse> => {
+    const question = questionData || {
+        documents: [
+            {
+                name: 'Test Question',
+                s3URL: 's3://bucketname/key/test1',
+            },
+        ],
+    }
+    return await server.executeOperation({
+        query: CREATE_RATE_QUESTION,
+        variables: {
+            input: {
+                rateID,
+                ...question,
+            },
+        },
+    })
+}
+
 const indexTestQuestions = async (
     server: ApolloServer,
     contractID: string
@@ -554,4 +581,5 @@ export {
     createTestQuestionResponse,
     updateTestHealthPlanPackage,
     updateTestStateAssignments,
+    createTestRateQuestion,
 }
