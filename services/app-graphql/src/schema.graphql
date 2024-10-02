@@ -424,6 +424,26 @@ type Mutation {
     ): CreateQuestionResponsePayload!
 
     """
+    createRateQuestion creates a new Question for the given rate
+    A CMS User can add text to a note field and append a document to their question
+    They can also specify a due date, and specify rate IDs that are associated with the question
+
+    This can only be called by a CMSUser
+
+    Errors:
+    - ForbiddenError:
+    - A non CMSUser called this
+    - A CMS user with unassigned division
+    - UserInputError
+    - A rate cannot be found with the given `rateID`
+    - The rate is in the DRAFT state
+    - The due date is in the past
+    """
+    createRateQuestion(
+        input: CreateRateQuestionInput!
+    ): CreateRateQuestionPayload!
+
+    """
     createAPIKey creates a valid API key for the logged in user, valid for 90 days
     """
     createAPIKey: CreateAPIKeyPayload!
@@ -662,6 +682,22 @@ input CreateQuestionInput {
 type CreateQuestionPayload {
     "The newly created Question"
     question: Question!
+}
+
+input CreateRateQuestionInput {
+    "The ID of the rate for which to create a question"
+    rateID: ID!
+    "A list of documents to attach to the question"
+    documents: [DocumentInput!]! # should be Generic Document with sha256
+    "A note to attach to the question"
+    noteText: String
+    "The date the answer to the question is due"
+    dueDate: Date
+}
+
+type CreateRateQuestionPayload {
+    "The newly created rate question"
+    question: RateQuestion!
 }
 
 #input UpdateQuestionInput {
@@ -1088,6 +1124,25 @@ type QuestionResponse {
     addedBy: StateUser!
     documents: [Document!]!
     #    noteText: String
+}
+
+"""
+Question is a question sent by CMS to the States for a response, associated with a single rate.
+CMS may upload one or more documents full of questions to a single Question. States submit a
+QuestionResponse with documents that answer the questions posed by CMS.
+"""
+type RateQuestion {
+    id: ID!
+    rateID: ID!
+    createdAt: DateTime!
+    addedBy: CMSUsersUnion!
+    documents: [Document!]!
+    division: Division!
+    #    noteText: String
+    #    dueDate: Date
+    #    rateIDs: [String!]
+    #
+    responses: [QuestionResponse!]!
 }
 
 type EmailConfiguration {
