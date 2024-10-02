@@ -27,7 +27,6 @@ export type SideNavOutletContextType = {
     packageName: string
     currentRevision: ContractPackageSubmission | ContractRevision
     contractFormData: ContractFormData | undefined
-    // documentDates: DocumentDateLookupTableType
     user: User
 }
 

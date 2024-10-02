@@ -534,14 +534,6 @@ describe('QuestionResponse', () => {
                                         }),
                                         statusCode: 200,
                                     }),
-                                    // fetchStateHealthPlanPackageWithQuestionsMockSuccess(
-                                    //     {
-                                    //         id: '15',
-                                    //         stateSubmission: mockSubmission,
-                                    //         questions:
-                                    //             mockQuestionsPayload('15'),
-                                    //     }
-                                    // ),
                                     fetchContractWithQuestionsMockSuccess({
                                         contract: {
                                             ...contract,

@@ -18,6 +18,7 @@ import {
     fetchContractWithQuestionsMockSuccess,
     mockContractPackageDraft,
     mockContractPackageSubmittedWithQuestions,
+    mockContractPackageSubmitted,
 } from '../../../testHelpers/apolloMocks'
 import {
     createQuestionNetworkFailure,
@@ -30,9 +31,10 @@ describe('UploadQuestions', () => {
     describe.each(iterableCmsUsersMockData)(
         '$userRole UploadQuestions tests',
         ({ userRole, mockUser }) => {
+            // const mockUser = mockValidCMSUser
             it('displays file upload for correct cms division', async () => {
                 const division = 'testDivision'
-                const contract = mockContractPackageSubmittedWithQuestions('15')
+                const contract = mockContractPackageSubmitted()
 
                 renderWithProviders(
                     <Routes>
@@ -49,12 +51,6 @@ describe('UploadQuestions', () => {
                                 fetchCurrentUserMock({
                                     user: mockUser(),
                                     statusCode: 200,
-                                }),
-                                fetchContractWithQuestionsMockSuccess({
-                                    contract: {
-                                        ...contract,
-                                        id: '15',
-                                    },
                                 }),
                                 fetchContractWithQuestionsMockSuccess({
                                     contract: {
@@ -94,7 +90,7 @@ describe('UploadQuestions', () => {
             })
 
             it('file upload accepts multiple pdf, word, excel documents', async () => {
-                const contract = mockContractPackageSubmittedWithQuestions('15')
+                const contract = mockContractPackageSubmitted()
 
                 renderWithProviders(
                     <Routes>
@@ -111,12 +107,6 @@ describe('UploadQuestions', () => {
                                 fetchCurrentUserMock({
                                     user: mockUser(),
                                     statusCode: 200,
-                                }),
-                                fetchContractWithQuestionsMockSuccess({
-                                    contract: {
-                                        ...contract,
-                                        id: '15',
-                                    },
                                 }),
                                 fetchContractWithQuestionsMockSuccess({
                                     contract: {
@@ -162,7 +152,7 @@ describe('UploadQuestions', () => {
 
             it('allows submission with an uploaded doc', async () => {
                 let testLocation: Location
-                const contract = mockContractPackageSubmittedWithQuestions('15')
+                const contract = mockContractPackageSubmitted()
 
                 const { user } = renderWithProviders(
                     <Routes>
@@ -194,12 +184,6 @@ describe('UploadQuestions', () => {
                                             s3URL: 's3://fake-bucket/fakeS3Key0-testFile.doc/testFile.doc',
                                         },
                                     ],
-                                }),
-                                fetchContractWithQuestionsMockSuccess({
-                                    contract: {
-                                        ...contract,
-                                        id: '15',
-                                    },
                                 }),
                             ],
                         },
@@ -243,7 +227,7 @@ describe('UploadQuestions', () => {
             })
 
             it('displays form validation error if attempting to add question with zero files', async () => {
-                const contract = mockContractPackageSubmittedWithQuestions('15')
+                const contract = mockContractPackageSubmitted()
 
                 const { user } = renderWithProviders(
                     <Routes>
@@ -263,12 +247,6 @@ describe('UploadQuestions', () => {
                                 fetchCurrentUserMock({
                                     user: mockUser(),
                                     statusCode: 200,
-                                }),
-                                fetchContractWithQuestionsMockSuccess({
-                                    contract: {
-                                        ...contract,
-                                        id: '15',
-                                    },
                                 }),
                                 fetchContractWithQuestionsMockSuccess({
                                     contract: {
@@ -363,7 +341,7 @@ describe('UploadQuestions', () => {
             })
 
             it('displays file upload error alert if attempting to add question while a file is still uploading', async () => {
-                const contract = mockContractPackageSubmittedWithQuestions('15')
+                const contract = mockContractPackageSubmitted()
                 renderWithProviders(
                     <Routes>
                         <Route element={<SubmissionSideNav />}>
@@ -382,12 +360,6 @@ describe('UploadQuestions', () => {
                                 fetchCurrentUserMock({
                                     user: mockUser(),
                                     statusCode: 200,
-                                }),
-                                fetchContractWithQuestionsMockSuccess({
-                                    contract: {
-                                        ...contract,
-                                        id: '15',
-                                    },
                                 }),
                                 fetchContractWithQuestionsMockSuccess({
                                     contract: {
@@ -443,7 +415,7 @@ describe('UploadQuestions', () => {
             })
 
             it('displays api error if createQuestion fails', async () => {
-                const contract = mockContractPackageSubmittedWithQuestions('15')
+                const contract = mockContractPackageSubmitted()
                 const { user } = renderWithProviders(
                     <Routes>
                         <Route element={<SubmissionSideNav />}>
@@ -462,12 +434,6 @@ describe('UploadQuestions', () => {
                                 fetchCurrentUserMock({
                                     user: mockUser(),
                                     statusCode: 200,
-                                }),
-                                fetchContractWithQuestionsMockSuccess({
-                                    contract: {
-                                        ...contract,
-                                        id: '15',
-                                    },
                                 }),
                                 fetchContractWithQuestionsMockSuccess({
                                     contract: {
