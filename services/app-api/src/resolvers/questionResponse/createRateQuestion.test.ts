@@ -122,7 +122,7 @@ describe('createRateQuestion', () => {
             })
         )
     })
-    it('returns an error if rate is in DRAFT', async () => {
+    it('returns an error if the rate is in DRAFT', async () => {
         const stateServer = await constructTestPostgresServer()
         const cmsServer = await constructTestPostgresServer({
             context: {
