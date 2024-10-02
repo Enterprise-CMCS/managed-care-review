@@ -13,7 +13,7 @@ import type {
     UnlockedContractType,
     CMSUsersUnionType,
     RateQuestionType,
-    CreateRateQuestionInput,
+    CreateRateQuestionInputType,
 } from '../domain-models'
 import { findPrograms, findStatePrograms } from '../postgres'
 import type { InsertUserArgsType } from './user'
@@ -117,7 +117,7 @@ type Store = {
     ) => Promise<Question | Error>
 
     insertRateQuestion: (
-        questionInput: CreateRateQuestionInput,
+        questionInput: CreateRateQuestionInputType,
         user: CMSUsersUnionType
     ) => Promise<RateQuestionType | Error>
 

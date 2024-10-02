@@ -3,7 +3,7 @@ import type {
     RateQuestionType,
     DivisionType,
     CMSUsersUnionType,
-    CreateRateQuestionInput,
+    CreateRateQuestionInputType,
 } from '../../domain-models'
 import {
     questionInclude,
@@ -12,7 +12,7 @@ import {
 
 export async function insertRateQuestion(
     client: PrismaClient,
-    questionInput: CreateRateQuestionInput,
+    questionInput: CreateRateQuestionInputType,
     user: CMSUsersUnionType
 ): Promise<RateQuestionType | Error> {
     const documents = questionInput.documents.map((document) => ({

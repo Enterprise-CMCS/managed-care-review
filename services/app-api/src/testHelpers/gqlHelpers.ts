@@ -19,7 +19,7 @@ import type {
     CreateQuestionInput,
     InsertQuestionResponseArgs,
     ProgramType,
-    CreateRateQuestionInput,
+    CreateRateQuestionInputType,
 } from '../domain-models'
 import type { Emailer } from '../emailer'
 import { newLocalEmailer } from '../emailer'
@@ -455,7 +455,7 @@ const createTestQuestion = async (
 const createTestRateQuestion = async (
     server: ApolloServer,
     rateID: string,
-    questionData?: Omit<CreateRateQuestionInput, 'rateID'>
+    questionData?: Omit<CreateRateQuestionInputType, 'rateID'>
 ): Promise<GraphQLResponse> => {
     const question = questionData || {
         documents: [
