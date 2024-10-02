@@ -166,7 +166,7 @@ describe('createRateQuestion', () => {
             'user not authorized to create a question'
         )
     })
-    it('returns error on invalid rate id', async () => {
+    it('returns an error on invalid rate id', async () => {
         const cmsServer = await constructTestPostgresServer({
             context: {
                 user: cmsUser,
@@ -184,7 +184,7 @@ describe('createRateQuestion', () => {
             `Rate with id ${invalidRateID} does not exist`
         )
     })
-    it('returns error when CMS user division is unassigned', async () => {
+    it('returns an error when CMS user division is unassigned', async () => {
         const cmsUserWithNoDivision = testCMSUser({
             divisionAssignment: undefined,
         })
