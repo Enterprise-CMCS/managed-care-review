@@ -16,10 +16,12 @@ import {
     fetchCurrentUserMock,
     mockDraftHealthPlanPackage,
     mockValidUser,
+    mockContractPackageDraft,
+    mockContractPackageSubmittedWithQuestions,
+    fetchContractWithQuestionsMockSuccess
 } from '../../../testHelpers/apolloMocks'
 import {
     createQuestionResponseNetworkFailure,
-    fetchStateHealthPlanPackageWithQuestionsMockSuccess,
 } from '../../../testHelpers/apolloMocks/questionResponseGQLMock'
 import { SubmissionSideNav } from '../../SubmissionSideNav'
 
@@ -28,6 +30,8 @@ describe('UploadResponse', () => {
     const questionID = 'testQuestion'
 
     it('displays file upload for correct cms division', async () => {
+        const contract = mockContractPackageSubmittedWithQuestions('15')
+        
         renderWithProviders(
             <Routes>
                 <Route element={<SubmissionSideNav />}>
@@ -44,8 +48,11 @@ describe('UploadResponse', () => {
                             user: mockValidUser(),
                             statusCode: 200,
                         }),
-                        fetchStateHealthPlanPackageWithQuestionsMockSuccess({
-                            id: '15',
+                        fetchContractWithQuestionsMockSuccess({
+                            contract: {
+                                ...contract,
+                                id: '15',
+                            },
                         }),
                     ],
                 },
@@ -67,6 +74,8 @@ describe('UploadResponse', () => {
     })
 
     it('file upload accepts multiple pdf, word, excel documents', async () => {
+        const contract = mockContractPackageSubmittedWithQuestions('15')
+        
         renderWithProviders(
             <Routes>
                 <Route element={<SubmissionSideNav />}>
@@ -83,8 +92,11 @@ describe('UploadResponse', () => {
                             user: mockValidUser(),
                             statusCode: 200,
                         }),
-                        fetchStateHealthPlanPackageWithQuestionsMockSuccess({
-                            id: '15',
+                        fetchContractWithQuestionsMockSuccess({
+                            contract: {
+                                ...contract,
+                                id: '15',
+                            },
                         }),
                     ],
                 },
@@ -114,6 +126,8 @@ describe('UploadResponse', () => {
     })
 
     it('displays form validation error if attempting to add question with zero files', async () => {
+        const contract = mockContractPackageSubmittedWithQuestions('15')
+        
         renderWithProviders(
             <Routes>
                 <Route element={<SubmissionSideNav />}>
@@ -130,8 +144,11 @@ describe('UploadResponse', () => {
                             user: mockValidUser(),
                             statusCode: 200,
                         }),
-                        fetchStateHealthPlanPackageWithQuestionsMockSuccess({
-                            id: '15',
+                        fetchContractWithQuestionsMockSuccess({
+                            contract: {
+                                ...contract,
+                                id: '15',
+                            },
                         }),
                     ],
                 },
@@ -160,6 +177,8 @@ describe('UploadResponse', () => {
     })
 
     it('displays file upload alert if attempting to add question with all invalid files', async () => {
+        const contract = mockContractPackageSubmittedWithQuestions('15')
+        
         renderWithProviders(
             <Routes>
                 <Route element={<SubmissionSideNav />}>
@@ -176,8 +195,11 @@ describe('UploadResponse', () => {
                             user: mockValidUser(),
                             statusCode: 200,
                         }),
-                        fetchStateHealthPlanPackageWithQuestionsMockSuccess({
-                            id: '15',
+                        fetchContractWithQuestionsMockSuccess({
+                            contract: {
+                                ...contract,
+                                id: '15',
+                            },
                         }),
                     ],
                 },
@@ -210,6 +232,8 @@ describe('UploadResponse', () => {
     })
 
     it('displays file upload error alert if attempting to add question while a file is still uploading', async () => {
+        const contract = mockContractPackageSubmittedWithQuestions('15')
+        
         renderWithProviders(
             <Routes>
                 <Route element={<SubmissionSideNav />}>
@@ -226,8 +250,11 @@ describe('UploadResponse', () => {
                             user: mockValidUser(),
                             statusCode: 200,
                         }),
-                        fetchStateHealthPlanPackageWithQuestionsMockSuccess({
-                            id: '15',
+                        fetchContractWithQuestionsMockSuccess({
+                            contract: {
+                                ...contract,
+                                id: '15',
+                            },
                         }),
                     ],
                 },
@@ -271,6 +298,8 @@ describe('UploadResponse', () => {
     })
 
     it('displays api error if createQuestionResponse fails', async () => {
+        const contract = mockContractPackageSubmittedWithQuestions('15')
+        
         renderWithProviders(
             <Routes>
                 <Route element={<SubmissionSideNav />}>
@@ -287,8 +316,11 @@ describe('UploadResponse', () => {
                             user: mockValidUser(),
                             statusCode: 200,
                         }),
-                        fetchStateHealthPlanPackageWithQuestionsMockSuccess({
-                            id: '15',
+                        fetchContractWithQuestionsMockSuccess({
+                            contract: {
+                                ...contract,
+                                id: '15',
+                            },
                         }),
                         createQuestionResponseNetworkFailure(),
                     ],
@@ -320,7 +352,7 @@ describe('UploadResponse', () => {
     })
     describe('errors', () => {
         it('shows generic error if submission is a draft', async () => {
-            const mockSubmission = mockDraftHealthPlanPackage()
+            const contract = mockContractPackageDraft()
             renderWithProviders(
                 <Routes>
                     <Route element={<SubmissionSideNav />}>
@@ -337,12 +369,12 @@ describe('UploadResponse', () => {
                                 user: mockValidUser(),
                                 statusCode: 200,
                             }),
-                            fetchStateHealthPlanPackageWithQuestionsMockSuccess(
-                                {
+                            fetchContractWithQuestionsMockSuccess({
+                                contract: {
+                                    ...contract,
                                     id: '15',
-                                    stateSubmission: mockSubmission,
-                                }
-                            ),
+                                },
+                            }),
                         ],
                     },
                     routerProvider: {

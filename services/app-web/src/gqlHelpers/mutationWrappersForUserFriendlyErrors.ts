@@ -5,6 +5,8 @@ import {
     UnlockHealthPlanPackageMutationFn,
     UnlockContractMutationFn,
     FetchHealthPlanPackageWithQuestionsQuery,
+    FetchContractWithQuestionsQuery,
+    FetchContractWithQuestionsDocument,
     FetchHealthPlanPackageWithQuestionsDocument,
     IndexQuestionsPayload,
     CreateQuestionMutation,
@@ -318,36 +320,36 @@ export const createQuestionWrapper = async (
                 if (data) {
                     const newQuestion = data.createQuestion.question as Question
                     const result =
-                        cache.readQuery<FetchHealthPlanPackageWithQuestionsQuery>(
+                        cache.readQuery<FetchContractWithQuestionsQuery>(
                             {
-                                query: FetchHealthPlanPackageWithQuestionsDocument,
+                                query: FetchContractWithQuestionsDocument,
                                 variables: {
                                     input: {
-                                        pkgID: newQuestion.contractID,
+                                        contractID: newQuestion.contractID,
                                     },
                                 },
                             }
                         )
 
-                    const pkg = result?.fetchHealthPlanPackage.pkg
+                    const contract = result?.fetchContract.contract
 
-                    if (pkg) {
+                    if (contract) {
                         const indexQuestionDivision =
                             divisionToIndexQuestionDivision(
                                 newQuestion.division
                             )
-                        const questions = pkg.questions as IndexQuestionsPayload
+                        const questions = contract.questions as IndexQuestionsPayload
                         const divisionQuestions =
                             questions[indexQuestionDivision]
 
                         cache.writeQuery({
-                            query: FetchHealthPlanPackageWithQuestionsDocument,
+                            query: FetchContractWithQuestionsDocument,
                             data: {
-                                fetchHealthPlanPackage: {
-                                    pkg: {
-                                        ...pkg,
+                                fetchContract: {
+                                    contract: {
+                                        ...contract,
                                         questions: {
-                                            ...pkg.questions,
+                                            ...contract.questions,
                                             [indexQuestionDivision]: {
                                                 totalCount:
                                                     divisionQuestions.totalCount
@@ -392,7 +394,7 @@ export const createQuestionWrapper = async (
 
 export const createResponseWrapper = async (
     createResponse: CreateQuestionResponseMutationFn,
-    pkgID: string,
+    contractID: string,
     input: CreateQuestionResponseInput,
     division: Division
 ): Promise<CreateQuestionResponseMutation | GraphQLErrors | Error> => {
@@ -404,29 +406,29 @@ export const createResponseWrapper = async (
                     const newResponse =
                         data.createQuestionResponse.question.responses[0]
                     const result =
-                        cache.readQuery<FetchHealthPlanPackageWithQuestionsQuery>(
+                        cache.readQuery<FetchContractWithQuestionsQuery>(
                             {
-                                query: FetchHealthPlanPackageWithQuestionsDocument,
+                                query: FetchContractWithQuestionsDocument,
                                 variables: {
                                     input: {
-                                        pkgID: pkgID,
+                                        contractID: contractID,
                                     },
                                 },
                             }
                         )
-                    const pkg = result?.fetchHealthPlanPackage.pkg
+                    const contract = result?.fetchContract.contract
 
-                    if (pkg) {
-                        const questions = pkg.questions as IndexQuestionsPayload
+                    if (contract) {
+                        const questions = contract.questions as IndexQuestionsPayload
                         const indexQuestionDivision =
                             divisionToIndexQuestionDivision(division)
                         const divisionQuestions =
                             questions[indexQuestionDivision]
 
-                        const updatedPkg = {
-                            ...pkg,
+                        const updatedContract = {
+                            ...contract,
                             questions: {
-                                ...pkg.questions,
+                                ...contract.questions,
                                 [indexQuestionDivision]: {
                                     ...divisionQuestions,
                                     edges: divisionQuestions.edges.map(
@@ -455,10 +457,10 @@ export const createResponseWrapper = async (
                         }
 
                         cache.writeQuery({
-                            query: FetchHealthPlanPackageWithQuestionsDocument,
+                            query: FetchContractWithQuestionsDocument,
                             data: {
-                                fetchHealthPlanPackage: {
-                                    pkg: updatedPkg,
+                                fetchContract: {
+                                    contract: updatedContract,
                                 },
                             },
                         })

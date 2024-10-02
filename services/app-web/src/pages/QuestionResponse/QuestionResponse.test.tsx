@@ -7,10 +7,11 @@ import { RoutesRecord } from '../../constants/routes'
 
 import {
     fetchCurrentUserMock,
-    fetchStateHealthPlanPackageWithQuestionsMockSuccess,
+    fetchContractWithQuestionsMockSuccess,
     mockQuestionsPayload,
-    mockDraftHealthPlanPackage,
     iterableCmsUsersMockData,
+    mockContractPackageSubmittedWithQuestions,
+    mockContractPackageDraft,
 } from '../../testHelpers/apolloMocks'
 import { IndexQuestionsPayload } from '../../gen/gqlClient'
 import { useStringConstants } from '../../hooks/useStringConstants'
@@ -22,6 +23,7 @@ describe('QuestionResponse', () => {
             it('render error if CMS user does not have division set', async () => {
                 const stringConstants = useStringConstants()
                 const user = mockUser({ divisionAssignment: undefined })
+                const contract = mockContractPackageSubmittedWithQuestions('15')
                 renderWithProviders(
                     <Routes>
                         <Route element={<SubmissionSideNav />}>
@@ -37,12 +39,12 @@ describe('QuestionResponse', () => {
                         apolloProvider: {
                             mocks: [
                                 fetchCurrentUserMock({ user, statusCode: 200 }),
-                                fetchStateHealthPlanPackageWithQuestionsMockSuccess(
-                                    {
+                                fetchContractWithQuestionsMockSuccess({
+                                    contract: {
+                                        ...contract,
                                         id: '15',
-                                        questions: mockQuestionsPayload('15'),
-                                    }
-                                ),
+                                    },
+                                }),
                             ],
                         },
                         routerProvider: {
@@ -65,7 +67,7 @@ describe('QuestionResponse', () => {
                 )
             })
             it('renders expected questions correctly with rounds', async () => {
-                const mockQuestions = mockQuestionsPayload('15')
+                const contract = mockContractPackageSubmittedWithQuestions('15')
 
                 renderWithProviders(
                     <Routes>
@@ -85,12 +87,18 @@ describe('QuestionResponse', () => {
                                     user: mockUser(),
                                     statusCode: 200,
                                 }),
-                                fetchStateHealthPlanPackageWithQuestionsMockSuccess(
-                                    {
+                                fetchContractWithQuestionsMockSuccess({
+                                    contract: {
+                                        ...contract,
                                         id: '15',
-                                        questions: mockQuestions,
-                                    }
-                                ),
+                                    },
+                                }),
+                                fetchContractWithQuestionsMockSuccess({
+                                    contract: {
+                                        ...contract,
+                                        id: '15',
+                                    },
+                                }),
                             ],
                         },
                         routerProvider: {
@@ -218,6 +226,8 @@ describe('QuestionResponse', () => {
                 ).toBeInTheDocument()
             })
             it('renders the CMS users division questions first', async () => {
+                const contract = mockContractPackageSubmittedWithQuestions('15')
+
                 renderWithProviders(
                     <Routes>
                         <Route element={<SubmissionSideNav />}>
@@ -238,12 +248,18 @@ describe('QuestionResponse', () => {
                                     }),
                                     statusCode: 200,
                                 }),
-                                fetchStateHealthPlanPackageWithQuestionsMockSuccess(
-                                    {
+                                fetchContractWithQuestionsMockSuccess({
+                                    contract: {
+                                        ...contract,
                                         id: '15',
-                                        questions: mockQuestionsPayload('15'),
-                                    }
-                                ),
+                                    },
+                                }),
+                                fetchContractWithQuestionsMockSuccess({
+                                    contract: {
+                                        ...contract,
+                                        id: '15',
+                                    },
+                                }),
                             ],
                         },
                         routerProvider: {
@@ -275,6 +291,8 @@ describe('QuestionResponse', () => {
                         edges: [],
                     },
                 }
+                const contract = mockContractPackageSubmittedWithQuestions('15')
+                contract.questions = mockQuestionWithNoOACT
 
                 renderWithProviders(
                     <Routes>
@@ -296,12 +314,18 @@ describe('QuestionResponse', () => {
                                     }),
                                     statusCode: 200,
                                 }),
-                                fetchStateHealthPlanPackageWithQuestionsMockSuccess(
-                                    {
+                                fetchContractWithQuestionsMockSuccess({
+                                    contract: {
+                                        ...contract,
                                         id: '15',
-                                        questions: mockQuestionWithNoOACT,
-                                    }
-                                ),
+                                    },
+                                }),
+                                fetchContractWithQuestionsMockSuccess({
+                                    contract: {
+                                        ...contract,
+                                        id: '15',
+                                    },
+                                }),
                             ],
                         },
                         routerProvider: {
@@ -339,6 +363,8 @@ describe('QuestionResponse', () => {
                         edges: [],
                     },
                 }
+                const contract = mockContractPackageSubmittedWithQuestions('15')
+                contract.questions = mockQuestionWithNoOACT
 
                 renderWithProviders(
                     <Routes>
@@ -360,12 +386,12 @@ describe('QuestionResponse', () => {
                                     }),
                                     statusCode: 200,
                                 }),
-                                fetchStateHealthPlanPackageWithQuestionsMockSuccess(
-                                    {
+                                fetchContractWithQuestionsMockSuccess({
+                                    contract: {
+                                        ...contract,
                                         id: '15',
-                                        questions: mockQuestionWithNoOACT,
-                                    }
-                                ),
+                                    },
+                                }),
                             ],
                         },
                         routerProvider: {
@@ -392,7 +418,7 @@ describe('QuestionResponse', () => {
                 ).toBeInTheDocument()
             })
             it('renders with question submit banner after question submitted', async () => {
-                const mockQuestions = mockQuestionsPayload('15')
+                const contract = mockContractPackageSubmittedWithQuestions('15')
                 renderWithProviders(
                     <Routes>
                         <Route element={<SubmissionSideNav />}>
@@ -411,12 +437,18 @@ describe('QuestionResponse', () => {
                                     user: mockUser(),
                                     statusCode: 200,
                                 }),
-                                fetchStateHealthPlanPackageWithQuestionsMockSuccess(
-                                    {
+                                fetchContractWithQuestionsMockSuccess({
+                                    contract: {
+                                        ...contract,
                                         id: '15',
-                                        questions: mockQuestions,
-                                    }
-                                ),
+                                    },
+                                }),
+                                fetchContractWithQuestionsMockSuccess({
+                                    contract: {
+                                        ...contract,
+                                        id: '15',
+                                    },
+                                }),
                             ],
                         },
                         routerProvider: {
@@ -432,6 +464,8 @@ describe('QuestionResponse', () => {
                 expect(screen.getByText('Questions sent')).toBeInTheDocument()
             })
             it('CMS users see add questions link on Q&A page', async () => {
+                const contract = mockContractPackageSubmittedWithQuestions('15')
+
                 renderWithProviders(
                     <Routes>
                         <Route element={<SubmissionSideNav />}>
@@ -450,11 +484,18 @@ describe('QuestionResponse', () => {
                                     user: mockUser(),
                                     statusCode: 200,
                                 }),
-                                fetchStateHealthPlanPackageWithQuestionsMockSuccess(
-                                    {
+                                fetchContractWithQuestionsMockSuccess({
+                                    contract: {
+                                        ...contract,
                                         id: '15',
-                                    }
-                                ),
+                                    },
+                                }),
+                                fetchContractWithQuestionsMockSuccess({
+                                    contract: {
+                                        ...contract,
+                                        id: '15',
+                                    },
+                                }),
                             ],
                         },
                         routerProvider: {
@@ -472,7 +513,7 @@ describe('QuestionResponse', () => {
             })
             describe('errors', () => {
                 it('shows generic error if submission is a draft', async () => {
-                    const mockSubmission = mockDraftHealthPlanPackage()
+                    const contract = mockContractPackageDraft()
                     renderWithProviders(
                         <Routes>
                             <Route element={<SubmissionSideNav />}>
@@ -493,14 +534,12 @@ describe('QuestionResponse', () => {
                                         }),
                                         statusCode: 200,
                                     }),
-                                    fetchStateHealthPlanPackageWithQuestionsMockSuccess(
-                                        {
+                                    fetchContractWithQuestionsMockSuccess({
+                                        contract: {
+                                            ...contract,
                                             id: '15',
-                                            stateSubmission: mockSubmission,
-                                            questions:
-                                                mockQuestionsPayload('15'),
-                                        }
-                                    ),
+                                        },
+                                    }),
                                 ],
                             },
                             routerProvider: {
@@ -521,7 +560,8 @@ describe('QuestionResponse', () => {
 
     describe('STATE_USER QuestionResponse tests', () => {
         it('renders with response submit banner after response submitted', async () => {
-            const mockQuestions = mockQuestionsPayload('15')
+            const contract = mockContractPackageSubmittedWithQuestions('15')
+
             renderWithProviders(
                 <Routes>
                     <Route element={<SubmissionSideNav />}>
@@ -539,12 +579,12 @@ describe('QuestionResponse', () => {
                             fetchCurrentUserMock({
                                 statusCode: 200,
                             }),
-                            fetchStateHealthPlanPackageWithQuestionsMockSuccess(
-                                {
+                            fetchContractWithQuestionsMockSuccess({
+                                contract: {
+                                    ...contract,
                                     id: '15',
-                                    questions: mockQuestions,
-                                }
-                            ),
+                                },
+                            }),
                         ],
                     },
                     routerProvider: {
@@ -561,6 +601,8 @@ describe('QuestionResponse', () => {
         })
 
         it('State users does not see add questions link on Q&A page', async () => {
+            const contract = mockContractPackageSubmittedWithQuestions('15')
+
             renderWithProviders(
                 <Routes>
                     <Route element={<SubmissionSideNav />}>
@@ -578,11 +620,12 @@ describe('QuestionResponse', () => {
                             fetchCurrentUserMock({
                                 statusCode: 200,
                             }),
-                            fetchStateHealthPlanPackageWithQuestionsMockSuccess(
-                                {
+                            fetchContractWithQuestionsMockSuccess({
+                                contract: {
+                                    ...contract,
                                     id: '15',
-                                }
-                            ),
+                                },
+                            }),
                         ],
                     },
                     routerProvider: {
