@@ -1,4 +1,10 @@
-import type { IndexQuestionsPayload, Question } from '../../domain-models'
+import type {
+    CMSUserType,
+    IndexQuestionsPayload,
+    Question,
+    QuestionResponseType,
+    RateQuestion,
+} from '../../domain-models'
 import type { Prisma } from '@prisma/client'
 
 const questionInclude = {
@@ -23,16 +29,34 @@ type PrismaQuestionType = Prisma.QuestionGetPayload<{
     include: typeof questionInclude
 }>
 
-const questionPrismaToDomainType = (
-    prismaQuestion: PrismaQuestionType
-): Question => ({
-    ...prismaQuestion,
-    addedBy: {
-        ...prismaQuestion.addedBy,
-        stateAssignments: [],
-    } as Question['addedBy'],
-    responses: prismaQuestion.responses as Question['responses'],
-})
+type PrismaRateQuestionType = Prisma.RateQuestionGetPayload<{
+    include: typeof questionInclude
+}>
+
+// Both types are similar only difference is one related to a contract and the other a rate.
+const commonQuestionPrismaToDomainType = <
+    T extends PrismaQuestionType | PrismaRateQuestionType,
+    U extends Question | RateQuestion,
+>(
+    prismaQuestion: T
+): U =>
+    ({
+        ...prismaQuestion,
+        addedBy: {
+            ...prismaQuestion.addedBy,
+            stateAssignments: [],
+        } as CMSUserType,
+        responses: prismaQuestion.responses as QuestionResponseType[],
+    }) as unknown as U
+
+const questionPrismaToDomainType = commonQuestionPrismaToDomainType<
+    PrismaQuestionType,
+    Question
+>
+const rateQuestionPrismaToDomainType = commonQuestionPrismaToDomainType<
+    PrismaRateQuestionType,
+    RateQuestion
+>
 
 const convertToIndexQuestionsPayload = (
     questions: Question[]
@@ -72,4 +96,5 @@ export {
     questionInclude,
     questionPrismaToDomainType,
     convertToIndexQuestionsPayload,
+    rateQuestionPrismaToDomainType,
 }

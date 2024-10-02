@@ -70,6 +70,7 @@ export type {
     Document,
     QuestionList,
     RateQuestion,
+    CreateRateQuestionInput,
 } from './QuestionsType'
 
 export type {
