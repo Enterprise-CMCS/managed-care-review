@@ -3,7 +3,7 @@ import type {
     IndexQuestionsPayload,
     Question,
     QuestionResponseType,
-    RateQuestion,
+    RateQuestionType,
 } from '../../domain-models'
 import type { Prisma } from '@prisma/client'
 
@@ -36,7 +36,7 @@ type PrismaRateQuestionType = Prisma.RateQuestionGetPayload<{
 // Both types are similar only difference is one related to a contract and the other a rate.
 const commonQuestionPrismaToDomainType = <
     T extends PrismaQuestionType | PrismaRateQuestionType,
-    U extends Question | RateQuestion,
+    U extends Question | RateQuestionType,
 >(
     prismaQuestion: T
 ): U =>
@@ -55,7 +55,7 @@ const questionPrismaToDomainType = commonQuestionPrismaToDomainType<
 >
 const rateQuestionPrismaToDomainType = commonQuestionPrismaToDomainType<
     PrismaRateQuestionType,
-    RateQuestion
+    RateQuestionType
 >
 
 const convertToIndexQuestionsPayload = (

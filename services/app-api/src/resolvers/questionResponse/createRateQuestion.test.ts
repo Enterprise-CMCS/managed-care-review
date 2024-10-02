@@ -141,9 +141,7 @@ describe('createRateQuestion', () => {
             )
         }
 
-        const rateQuestionRes = must(
-            await createTestRateQuestion(cmsServer, rateID)
-        )
+        const rateQuestionRes = await createTestRateQuestion(cmsServer, rateID)
 
         expect(rateQuestionRes.errors).toBeDefined()
         expect(assertAnErrorCode(rateQuestionRes)).toBe('BAD_USER_INPUT')

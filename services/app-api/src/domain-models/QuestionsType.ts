@@ -63,7 +63,7 @@ type IndexQuestionsPayload = z.infer<typeof indexQuestionsPayload>
 
 type Question = z.infer<typeof question>
 
-type RateQuestion = z.infer<typeof rateQuestion>
+type RateQuestionType = z.infer<typeof rateQuestion>
 
 type CreateRateQuestionInput = z.infer<typeof createRateQuestionInput>
 
@@ -78,7 +78,7 @@ export type {
     Question,
     Document,
     QuestionList,
-    RateQuestion,
+    RateQuestionType,
     CreateRateQuestionInput,
 }
 

@@ -1,5 +1,5 @@
 import type { PrismaClient } from '@prisma/client'
-import type { RateQuestion } from '../../domain-models'
+import type { RateQuestionType } from '../../domain-models'
 import {
     questionInclude,
     rateQuestionPrismaToDomainType,
@@ -8,7 +8,7 @@ import {
 export async function findAllQuestionsByRate(
     client: PrismaClient,
     rateID: string
-): Promise<RateQuestion[] | Error> {
+): Promise<RateQuestionType[] | Error> {
     try {
         const result = await client.rateQuestion.findMany({
             where: {

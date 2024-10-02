@@ -1,11 +1,10 @@
 import type { PrismaClient } from '@prisma/client'
 import type {
-    RateQuestion,
+    RateQuestionType,
     DivisionType,
     CMSUsersUnionType,
     CreateRateQuestionInput,
 } from '../../domain-models'
-import { v4 as uuidv4 } from 'uuid'
 import {
     questionInclude,
     rateQuestionPrismaToDomainType,
@@ -15,9 +14,8 @@ export async function insertRateQuestion(
     client: PrismaClient,
     questionInput: CreateRateQuestionInput,
     user: CMSUsersUnionType
-): Promise<RateQuestion | Error> {
+): Promise<RateQuestionType | Error> {
     const documents = questionInput.documents.map((document) => ({
-        id: uuidv4(),
         name: document.name,
         s3URL: document.s3URL,
     }))
@@ -25,7 +23,6 @@ export async function insertRateQuestion(
     try {
         const result = await client.rateQuestion.create({
             data: {
-                id: uuidv4(),
                 rate: {
                     connect: {
                         id: questionInput.rateID,
