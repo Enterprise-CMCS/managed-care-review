@@ -559,5 +559,10 @@ describe('fetchRate', () => {
         expect(rateQuestions2.DMCOQuestions.edges[0].node.addedBy).toEqual(
             expect.objectContaining(dmco2CmsUser)
         )
+        // Expect earlier DMCO question to be at index 1
+        expect(rateQuestions2.DMCOQuestions.edges).toHaveLength(2)
+        expect(rateQuestions2.DMCOQuestions.edges[1].node.addedBy).toEqual(
+            expect.objectContaining(dmcoCmsUser)
+        )
     })
 })
