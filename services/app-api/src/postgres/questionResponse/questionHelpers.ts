@@ -1,6 +1,7 @@
 import type {
-    CMSUserType,
+    CMSUsersUnionType,
     IndexQuestionsPayload,
+    IndexRateQuestionsPayload,
     Question,
     QuestionResponseType,
     RateQuestionType,
@@ -22,7 +23,11 @@ const questionInclude = {
             createdAt: 'desc',
         },
     },
-    addedBy: true,
+    addedBy: {
+        include: {
+            stateAssignments: true,
+        },
+    },
 } satisfies Prisma.QuestionInclude
 
 type PrismaQuestionType = Prisma.QuestionGetPayload<{
@@ -35,66 +40,60 @@ type PrismaRateQuestionType = Prisma.RateQuestionGetPayload<{
 
 // Both types are similar only difference is one related to a contract and the other a rate.
 const commonQuestionPrismaToDomainType = <
-    T extends PrismaQuestionType | PrismaRateQuestionType,
-    U extends Question | RateQuestionType,
+    P extends PrismaQuestionType | PrismaRateQuestionType,
+    R extends Question | RateQuestionType,
 >(
-    prismaQuestion: T
-): U =>
+    prismaQuestion: P
+): R =>
     ({
         ...prismaQuestion,
-        addedBy: {
-            ...prismaQuestion.addedBy,
-            stateAssignments: [],
-        } as CMSUserType,
+        addedBy: prismaQuestion.addedBy as CMSUsersUnionType,
         responses: prismaQuestion.responses as QuestionResponseType[],
-    }) as unknown as U
+    }) as unknown as R
 
-const questionPrismaToDomainType = commonQuestionPrismaToDomainType<
-    PrismaQuestionType,
-    Question
->
-const rateQuestionPrismaToDomainType = commonQuestionPrismaToDomainType<
-    PrismaRateQuestionType,
-    RateQuestionType
->
+const questionPrismaToDomainType = (
+    prismaQuestion: PrismaQuestionType
+): Question => commonQuestionPrismaToDomainType(prismaQuestion)
+const rateQuestionPrismaToDomainType = (
+    prismaQuestion: PrismaRateQuestionType
+): RateQuestionType => commonQuestionPrismaToDomainType(prismaQuestion)
 
-const convertToIndexQuestionsPayload = (
-    questions: Question[]
-): IndexQuestionsPayload => {
-    const questionsPayload: IndexQuestionsPayload = {
-        DMCOQuestions: {
-            totalCount: 0,
-            edges: [],
-        },
-        DMCPQuestions: {
-            totalCount: 0,
-            edges: [],
-        },
-        OACTQuestions: {
-            totalCount: 0,
-            edges: [],
-        },
-    }
-
-    questions.forEach((question) => {
-        if (question.division === 'DMCP') {
-            questionsPayload.DMCPQuestions.edges.push({ node: question })
-            questionsPayload.DMCPQuestions.totalCount++
-        } else if (question.division === 'OACT') {
-            questionsPayload.OACTQuestions.edges.push({ node: question })
-            questionsPayload.OACTQuestions.totalCount++
-        } else if (question.division === 'DMCO') {
-            questionsPayload.DMCOQuestions.edges.push({ node: question })
-            questionsPayload.DMCOQuestions.totalCount++
-        }
+const convertToCommonIndexQuestionsPayload = <
+    P extends Question | RateQuestionType,
+    R extends IndexQuestionsPayload | IndexRateQuestionsPayload,
+>(
+    questions: P[]
+): R => {
+    const getDivisionQuestionsEdge = (
+        division: 'DMCP' | 'DMCO' | 'OACT',
+        questions: P[]
+    ) => ({
+        totalCount: questions.filter((q) => q.division === division).length,
+        edges: questions
+            .filter((q) => q.division === division)
+            .map((question) => ({ node: question })),
     })
 
-    return questionsPayload
+    return {
+        DMCOQuestions: getDivisionQuestionsEdge('DMCO', questions),
+        DMCPQuestions: getDivisionQuestionsEdge('DMCP', questions),
+        OACTQuestions: getDivisionQuestionsEdge('OACT', questions),
+    } as unknown as R
 }
+
+const convertToIndexQuestionsPayload = (
+    contractQuestions: Question[]
+): IndexQuestionsPayload =>
+    convertToCommonIndexQuestionsPayload(contractQuestions)
+const convertToIndexRateQuestionsPayload = (
+    rateQuestions: RateQuestionType[]
+): IndexRateQuestionsPayload =>
+    convertToCommonIndexQuestionsPayload(rateQuestions)
 
 export {
     questionInclude,
     questionPrismaToDomainType,
     convertToIndexQuestionsPayload,
+    convertToIndexRateQuestionsPayload,
     rateQuestionPrismaToDomainType,
 }

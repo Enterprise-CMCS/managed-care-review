@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { cmsUserSchema } from './UserType'
+import { cmsUsersUnionSchema } from './UserType'
 import { questionResponseType } from './QuestionResponseType'
 import { divisionType } from './DivisionType'
 
@@ -12,7 +12,7 @@ const document = z.object({
 const commonQuestionSchema = z.object({
     id: z.string().uuid(),
     createdAt: z.date(),
-    addedBy: cmsUserSchema,
+    addedBy: cmsUsersUnionSchema,
     division: divisionType, // DMCO, DMCP, OACT
     documents: z.array(document),
     responses: z.array(questionResponseType),
@@ -30,15 +30,30 @@ const questionEdge = z.object({
     node: question,
 })
 
+const rateQuestionEdge = z.object({
+    node: rateQuestion,
+})
+
 const questionList = z.object({
     totalCount: z.number(),
     edges: z.array(questionEdge),
+})
+
+const rateQuestionList = z.object({
+    totalCount: z.number(),
+    edges: z.array(rateQuestionEdge),
 })
 
 const indexQuestionsPayload = z.object({
     DMCOQuestions: questionList,
     DMCPQuestions: questionList,
     OACTQuestions: questionList,
+})
+
+const indexRateQuestionsPayload = z.object({
+    DMCOQuestions: rateQuestionList,
+    DMCPQuestions: rateQuestionList,
+    OACTQuestions: rateQuestionList,
 })
 
 const createQuestionPayload = z.object({
@@ -71,6 +86,8 @@ type QuestionList = z.infer<typeof questionList>
 
 type Document = z.infer<typeof document>
 
+type IndexRateQuestionsPayload = z.infer<typeof indexRateQuestionsPayload>
+
 export type {
     IndexQuestionsPayload,
     CreateQuestionPayload,
@@ -80,6 +97,7 @@ export type {
     QuestionList,
     RateQuestionType,
     CreateRateQuestionInputType,
+    IndexRateQuestionsPayload,
 }
 
 export {
