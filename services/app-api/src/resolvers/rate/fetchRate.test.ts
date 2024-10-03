@@ -1,12 +1,18 @@
 import FETCH_RATE from '../../../../app-graphql/src/queries/fetchRate.graphql'
+import FETCH_RATE_WITH_QUESTIONS from '../../../../app-graphql/src/queries/fetchRateWithQuestions.graphql'
 import { testLDService } from '../../testHelpers/launchDarklyHelpers'
 import {
     constructTestPostgresServer,
+    createTestRateQuestion,
     defaultFloridaRateProgram,
     unlockTestHealthPlanPackage,
     updateTestHealthPlanFormData,
 } from '../../testHelpers/gqlHelpers'
-import { testCMSUser } from '../../testHelpers/userHelpers'
+import {
+    createDBUsersWithFullData,
+    testCMSApproverUser,
+    testCMSUser,
+} from '../../testHelpers/userHelpers'
 import { submitTestRate, updateTestRate } from '../../testHelpers'
 import { v4 as uuidv4 } from 'uuid'
 import {
@@ -18,6 +24,7 @@ import {
 } from '../../testHelpers/gqlRateHelpers'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 import {
+    createAndSubmitTestContractWithRate,
     createAndUpdateTestContractWithoutRates,
     fetchTestContract,
     submitTestContract,
@@ -454,5 +461,103 @@ describe('fetchRate', () => {
                 .tz(rateRevA1.formData.supportingDocuments[1].dateAdded, 'UTC')
                 .format('YYYY-MM-DD')
         ).toBe('2024-02-02')
+    })
+
+    it('returns the questions on for a rate', async () => {
+        // Create four CMS users, seed and assign divisions
+        const dmcoCmsUser = testCMSUser()
+        const dmco2CmsUser = testCMSUser({
+            role: 'CMS_USER',
+            email: 'zuko2@example.com',
+            familyName: 'Zuko2',
+            givenName: 'Prince',
+            divisionAssignment: 'DMCO' as const,
+        })
+        const oactApproverUser = testCMSApproverUser({
+            divisionAssignment: 'OACT',
+        })
+        const dmcpCmsUser = testCMSUser({
+            divisionAssignment: 'DMCP',
+        })
+        await createDBUsersWithFullData([
+            dmcoCmsUser,
+            oactApproverUser,
+            dmcpCmsUser,
+            dmco2CmsUser,
+        ])
+
+        // Create servers
+        const server = await constructTestPostgresServer()
+        const dmcoServer = await constructTestPostgresServer({
+            context: {
+                user: dmcoCmsUser,
+            },
+        })
+        const dmco2Server = await constructTestPostgresServer({
+            context: {
+                user: dmco2CmsUser,
+            },
+        })
+        const dmcpServer = await constructTestPostgresServer({
+            context: {
+                user: dmcpCmsUser,
+            },
+        })
+        const oactServer = await constructTestPostgresServer({
+            context: {
+                user: oactApproverUser,
+            },
+        })
+
+        // Set up contract and rate submission and submit 1 question for each division
+        const submittedRate = await createAndSubmitTestContractWithRate(server)
+        const rateID =
+            submittedRate.packageSubmissions[0].rateRevisions[0].rateID
+
+        await createTestRateQuestion(dmcoServer, rateID)
+        await createTestRateQuestion(dmcpServer, rateID)
+        await createTestRateQuestion(oactServer, rateID)
+
+        const result = await server.executeOperation({
+            query: FETCH_RATE_WITH_QUESTIONS,
+            variables: {
+                input: {
+                    rateID,
+                },
+            },
+        })
+        const rateQuestions = result.data?.fetchRate.rate.questions
+
+        // Expect each question in the correct division by the correct user
+        expect(rateQuestions.DMCOQuestions.edges).toHaveLength(1)
+        expect(rateQuestions.DMCOQuestions.edges[0].node.addedBy).toEqual(
+            expect.objectContaining(dmcoCmsUser)
+        )
+        expect(rateQuestions.DMCPQuestions.edges).toHaveLength(1)
+        expect(rateQuestions.DMCPQuestions.edges[0].node.addedBy).toEqual(
+            expect.objectContaining(dmcpCmsUser)
+        )
+        expect(rateQuestions.OACTQuestions.edges).toHaveLength(1)
+        expect(rateQuestions.OACTQuestions.edges[0].node.addedBy).toEqual(
+            expect.objectContaining(oactApproverUser)
+        )
+
+        // Test newly created dmco question and its order
+        await createTestRateQuestion(dmco2Server, rateID)
+        const result2 = await server.executeOperation({
+            query: FETCH_RATE_WITH_QUESTIONS,
+            variables: {
+                input: {
+                    rateID,
+                },
+            },
+        })
+        const rateQuestions2 = result2.data?.fetchRate.rate.questions
+
+        // Expect 2 DMCO questions and latest created question at index 1 by dmco2CmsUser
+        expect(rateQuestions2.DMCOQuestions.edges).toHaveLength(2)
+        expect(rateQuestions2.DMCOQuestions.edges[0].node.addedBy).toEqual(
+            expect.objectContaining(dmco2CmsUser)
+        )
     })
 })
