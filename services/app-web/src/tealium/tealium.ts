@@ -121,7 +121,6 @@ const tealiumClient = (tealiumEnv: Omit<TealiumEnv, 'dev'>): TealiumClientType =
 }
 
 const devTealiumClient = (isLocal: boolean ): TealiumClientType => {
-    console.log('isLocal', isLocal)
     return {
         initializeTealium: () => {
            if (isLocal) {

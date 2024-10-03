@@ -39,5 +39,14 @@ export const mockUseTealiumHookFunctions = (): UseTealiumHookType => ({
     },
     logRadioButtonEvent: () => {
         return
-    }
+    },
+    logExternalLinkEvent: () => {
+        return
+    },
+    logAccordionEvent: () => {
+        return
+    },
+    logFormSubmitEvent: () => {
+        return
+    },
 })

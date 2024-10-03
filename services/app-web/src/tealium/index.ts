@@ -13,7 +13,7 @@ export {
 } from './constants'
 
 export type {
-    TealiumLinkDataObject,
+    TealiumInteractionEventDataObject,
     TealiumViewDataObject,
     TealiumEvent,
     TealiumButtonEventObject,
@@ -29,6 +29,5 @@ export type {
     TealiumRadioButtonEventObject,
     TealiumCheckboxEventObject,
     TealiumAccordionEventObject,
-    TealiumFormFilledEventObject,
     TealiumFormSubmitEventObject
 } from './types'

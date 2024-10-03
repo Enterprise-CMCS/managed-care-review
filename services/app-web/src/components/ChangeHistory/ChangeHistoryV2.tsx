@@ -164,7 +164,7 @@ export const ChangeHistory = ({
                 ),
                 expanded: false,
                 handleToggle: () => {
-                    logAccordionEvent({event_name: 'accordion_opened', heading: getUpdatedByDisplayName(r.updatedBy), link_type:'link_other'})
+                    logAccordionEvent({event_name: 'accordion_opened', heading: getUpdatedByDisplayName(r.updatedBy) ?? 'unknown', link_type:'link_other'})
                 },
                 id: dayjs(r.updatedAt).toISOString(),
             }

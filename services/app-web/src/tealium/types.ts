@@ -22,7 +22,7 @@ type TealiumEvent =
     | 'checkbox_unselected'
     | 'accordion_opened'
     | 'accordion_closed'
-    |  'form_field_submit'
+    | 'form_field_submit'
     | 'header_click'
     | 'contact_click'
     | 'file_download'
@@ -166,12 +166,10 @@ type TealiumAccordionEventObject = {
     link_type: 'link_other'
 }
 
-type TealiumFormFilledEventObject = {
-    event_name: 'form_field_filled'
+type TealiumFormSubmitEventObject = {
+    event_name: 'form_field_submit'
+    heading: string,
     form_name: string
-    form_field_label: string
-    field_type: 'optional' | 'required'
-    form_fill_status: boolean,
     link_type: 'link_other'
 }
 
@@ -196,6 +194,7 @@ type TealiumEventObjectTypes = (
     | TealiumCheckboxEventObject
     | TealiumRadioButtonEventObject
     | TealiumAccordionEventObject
+    | TealiumFormSubmitEventObject
     ) & Partial<TealiumDataObject>
 
 type TealiumClientType = {
@@ -230,5 +229,5 @@ export type {
     TealiumRadioButtonEventObject,
     TealiumCheckboxEventObject,
     TealiumAccordionEventObject,
-    TealiumFormFilledEventObject,
+    TealiumFormSubmitEventObject
 }

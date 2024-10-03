@@ -166,7 +166,7 @@ const useTealium = (): UseTealiumHookType => {
     const logFormSubmitEvent = (
         tealiumData: TealiumFormSubmitEventObject
     ) =>  {
-        const logData: TealiumFormSubmitEventObject = {
+        const logData: TealiumFormSubmitEventObject= {
             ...tealiumData,
             link_type: 'link_other',
             event_name: 'form_field_submit'
