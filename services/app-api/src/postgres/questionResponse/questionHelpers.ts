@@ -1,8 +1,8 @@
 import type {
     CMSUsersUnionType,
-    IndexQuestionsPayload,
+    IndexContractQuestionsPayload,
     IndexRateQuestionsPayload,
-    Question,
+    ContractQuestionType,
     QuestionResponseType,
     RateQuestionType,
 } from '../../domain-models'
@@ -28,9 +28,9 @@ const questionInclude = {
             stateAssignments: true,
         },
     },
-} satisfies Prisma.QuestionInclude
+} satisfies Prisma.ContractQuestionInclude | Prisma.RateQuestionInclude
 
-type PrismaQuestionType = Prisma.QuestionGetPayload<{
+type PrismaQuestionType = Prisma.ContractQuestionGetPayload<{
     include: typeof questionInclude
 }>
 
@@ -41,7 +41,7 @@ type PrismaRateQuestionType = Prisma.RateQuestionGetPayload<{
 // Both types are similar only difference is one related to a contract and the other a rate.
 const commonQuestionPrismaToDomainType = <
     P extends PrismaQuestionType | PrismaRateQuestionType,
-    R extends Question | RateQuestionType,
+    R extends ContractQuestionType | RateQuestionType,
 >(
     prismaQuestion: P
 ): R =>
@@ -53,14 +53,14 @@ const commonQuestionPrismaToDomainType = <
 
 const questionPrismaToDomainType = (
     prismaQuestion: PrismaQuestionType
-): Question => commonQuestionPrismaToDomainType(prismaQuestion)
+): ContractQuestionType => commonQuestionPrismaToDomainType(prismaQuestion)
 const rateQuestionPrismaToDomainType = (
     prismaQuestion: PrismaRateQuestionType
 ): RateQuestionType => commonQuestionPrismaToDomainType(prismaQuestion)
 
 const convertToCommonIndexQuestionsPayload = <
-    P extends Question | RateQuestionType,
-    R extends IndexQuestionsPayload | IndexRateQuestionsPayload,
+    P extends ContractQuestionType | RateQuestionType,
+    R extends IndexContractQuestionsPayload | IndexRateQuestionsPayload,
 >(
     questions: P[]
 ): R => {
@@ -82,8 +82,8 @@ const convertToCommonIndexQuestionsPayload = <
 }
 
 const convertToIndexQuestionsPayload = (
-    contractQuestions: Question[]
-): IndexQuestionsPayload =>
+    contractQuestions: ContractQuestionType[]
+): IndexContractQuestionsPayload =>
     convertToCommonIndexQuestionsPayload(contractQuestions)
 const convertToIndexRateQuestionsPayload = (
     rateQuestions: RateQuestionType[]

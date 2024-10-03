@@ -15,22 +15,22 @@ import type { EmailParameterStore } from '../../parameterStore'
 import type { LDService } from '../../launchDarkly/launchDarkly'
 import type { StateCodeType } from '../../testHelpers'
 
-export function createQuestionResolver(
+export function createContractQuestionResolver(
     store: Store,
     emailParameterStore: EmailParameterStore,
     emailer: Emailer,
     launchDarkly: LDService
-): MutationResolvers['createQuestion'] {
+): MutationResolvers['createContractQuestion'] {
     return async (_parent, { input }, context) => {
         const { user, ctx, tracer } = context
-        const span = tracer?.startSpan('createQuestion', {}, ctx)
+        const span = tracer?.startSpan('createContractQuestion', {}, ctx)
 
         const featureFlags = await launchDarkly.allFlags(context)
         const readStateAnalystsFromDBFlag =
             featureFlags?.['read-write-state-assignments']
         if (!hasCMSPermissions(user)) {
             const msg = 'user not authorized to create a question'
-            logError('createQuestion', msg)
+            logError('createContractQuestion', msg)
             setErrorAttributesOnActiveSpan(msg, span)
             throw new ForbiddenError(msg)
         }
@@ -42,14 +42,14 @@ export function createQuestionResolver(
         ) {
             const msg =
                 'users without an assigned division are not authorized to create a question'
-            logError('createQuestion', msg)
+            logError('createContractQuestion', msg)
             setErrorAttributesOnActiveSpan(msg, span)
             throw new ForbiddenError(msg)
         }
 
         if (input.documents.length === 0) {
             const msg = 'question documents are required'
-            logError('createQuestion', msg)
+            logError('createContractQuestion', msg)
             setErrorAttributesOnActiveSpan(msg, span)
             throw new UserInputError(msg)
         }
@@ -61,7 +61,7 @@ export function createQuestionResolver(
         if (contractResult instanceof Error) {
             if (contractResult instanceof NotFoundError) {
                 const errMessage = `Package with id ${input.contractID} does not exist`
-                logError('createQuestion', errMessage)
+                logError('createContractQuestion', errMessage)
                 setErrorAttributesOnActiveSpan(errMessage, span)
                 throw new GraphQLError(errMessage, {
                     extensions: { code: 'NOT_FOUND' },
@@ -69,7 +69,7 @@ export function createQuestionResolver(
             }
 
             const errMessage = `Issue finding a package. Message: ${contractResult.message}`
-            logError('createQuestion', errMessage)
+            logError('createContractQuestion', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new GraphQLError(errMessage, {
                 extensions: {
@@ -82,7 +82,7 @@ export function createQuestionResolver(
         // Return error if package status is DRAFT, contract will have no submitted revisions
         if (contractResult.revisions.length === 0) {
             const errMessage = `Issue creating question for health plan package. Message: Cannot create question for health plan package in DRAFT status`
-            logError('createQuestion', errMessage)
+            logError('createContractQuestion', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new UserInputError(errMessage)
         }
@@ -106,7 +106,7 @@ export function createQuestionResolver(
         )
         if (allQuestions instanceof Error) {
             const errMessage = `Issue finding all questions associated with the contract: ${contractResult.id}`
-            logError('createQuestion', errMessage)
+            logError('createContractQuestion', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new Error(errMessage)
         }
@@ -120,11 +120,14 @@ export function createQuestionResolver(
             ...input,
             documents: docs,
         }
-        const questionResult = await store.insertQuestion(inputFormatted, user)
+        const questionResult = await store.insertContractQuestion(
+            inputFormatted,
+            user
+        )
 
         if (questionResult instanceof Error) {
             const errMessage = `Issue creating question for package. Message: ${questionResult.message}`
-            logError('createQuestion', errMessage)
+            logError('createContractQuestion', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new Error(errMessage)
         }
@@ -220,7 +223,7 @@ export function createQuestionResolver(
                 },
             })
         }
-        logSuccess('createQuestion')
+        logSuccess('createContractQuestion')
         setSuccessAttributesOnActiveSpan(span)
 
         return {

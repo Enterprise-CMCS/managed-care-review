@@ -275,7 +275,7 @@ fragment updateInformationFields on UpdateInformation {
     updatedReason
 }
 
-fragment questionEdgeFragment on QuestionEdge {
+fragment questionEdgeFragment on ContractQuestionEdge {
     node {
         id
         contractID

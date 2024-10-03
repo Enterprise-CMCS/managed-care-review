@@ -51,7 +51,7 @@ export {
 export {
     fetchStateHealthPlanPackageWithQuestionsMockSuccess,
     fetchStateHealthPlanPackageWithQuestionsMockNotFound,
-    createQuestionNetworkFailure,
+    createContractQuestionNetworkFailure,
 } from './questionResponseGQLMock'
 
 export { mockQuestionsPayload } from './questionResponseDataMocks'
