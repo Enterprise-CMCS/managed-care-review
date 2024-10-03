@@ -554,7 +554,7 @@ describe('fetchRate', () => {
         })
         const rateQuestions2 = result2.data?.fetchRate.rate.questions
 
-        // Expect 2 DMCO questions and latest created question at index 1 by dmco2CmsUser
+        // Expect 2 DMCO questions and the latest created question at index 0 by dmco2CmsUser
         expect(rateQuestions2.DMCOQuestions.edges).toHaveLength(2)
         expect(rateQuestions2.DMCOQuestions.edges[0].node.addedBy).toEqual(
             expect.objectContaining(dmco2CmsUser)
