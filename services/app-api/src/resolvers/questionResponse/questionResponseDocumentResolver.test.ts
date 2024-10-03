@@ -1,15 +1,15 @@
+import FETCH_CONTRACT_WITH_QUESTIONS from '../../../../app-graphql/src/queries/fetchContractWithQuestions.graphql'
 import {
     constructTestPostgresServer,
-    createAndSubmitTestHealthPlanPackage,
     createTestQuestion,
     createTestQuestionResponse,
-    indexTestQuestions,
 } from '../../testHelpers/gqlHelpers'
 import {
     testCMSUser,
     createDBUsersWithFullData,
 } from '../../testHelpers/userHelpers'
 import { testS3Client } from '../../testHelpers/s3Helpers'
+import { createAndSubmitTestContract } from '../../testHelpers'
 
 describe(`questionResponseDocumentResolver`, () => {
     const mockS3 = testS3Client()
@@ -48,12 +48,11 @@ describe(`questionResponseDocumentResolver`, () => {
             s3Client: mockS3,
         })
 
-        const submittedPkg =
-            await createAndSubmitTestHealthPlanPackage(stateServer)
+        const contract = await createAndSubmitTestContract(stateServer)
 
         const createdDMCOQuestion = await createTestQuestion(
             dmcoCMSServer,
-            submittedPkg.id,
+            contract.id,
             {
                 documents: [
                     {
@@ -63,15 +62,13 @@ describe(`questionResponseDocumentResolver`, () => {
                 ],
             }
         )
-
         const responseToDMCO = await createTestQuestionResponse(
             stateServer,
             createdDMCOQuestion.question.id
         )
-
         const createdDMCPQuestion = await createTestQuestion(
             dmcpCMSServer,
-            submittedPkg.id,
+            contract.id,
             {
                 documents: [
                     {
@@ -81,15 +78,13 @@ describe(`questionResponseDocumentResolver`, () => {
                 ],
             }
         )
-
         const responseToDMCP = await createTestQuestionResponse(
             stateServer,
             createdDMCPQuestion.question.id
         )
-
         const createdOACTQuestion = await createTestQuestion(
             oactCMServer,
-            submittedPkg.id,
+            contract.id,
             {
                 documents: [
                     {
@@ -99,16 +94,20 @@ describe(`questionResponseDocumentResolver`, () => {
                 ],
             }
         )
-
         const responseToOACT = await createTestQuestionResponse(
             stateServer,
             createdOACTQuestion.question.id
         )
-
-        const indexQuestionsResult = await indexTestQuestions(
-            stateServer,
-            submittedPkg.id
-        )
+        const contractWithQuestions = await stateServer.executeOperation({
+            query: FETCH_CONTRACT_WITH_QUESTIONS,
+            variables: {
+                input: {
+                    contractID: contract.id,
+                },
+            },
+        })
+        const indexQuestionsResult =
+            contractWithQuestions.data?.fetchContract.contract.questions
 
         expect(indexQuestionsResult).toEqual(
             expect.objectContaining({
@@ -119,7 +118,7 @@ describe(`questionResponseDocumentResolver`, () => {
                             node: expect.objectContaining({
                                 id: expect.any(String),
                                 createdAt: expect.any(Date),
-                                contractID: submittedPkg.id,
+                                contractID: contract.id,
                                 division: 'DMCO',
                                 documents: [
                                     {
@@ -140,7 +139,7 @@ describe(`questionResponseDocumentResolver`, () => {
                             node: expect.objectContaining({
                                 id: expect.any(String),
                                 createdAt: expect.any(Date),
-                                contractID: submittedPkg.id,
+                                contractID: contract.id,
                                 division: 'DMCP',
                                 documents: [
                                     {
@@ -161,7 +160,7 @@ describe(`questionResponseDocumentResolver`, () => {
                             node: expect.objectContaining({
                                 id: expect.any(String),
                                 createdAt: expect.any(Date),
-                                contractID: submittedPkg.id,
+                                contractID: contract.id,
                                 division: 'OACT',
                                 documents: [
                                     {

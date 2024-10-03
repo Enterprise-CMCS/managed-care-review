@@ -12,9 +12,8 @@ import {
     updateHealthPlanFormDataResolver,
 } from './healthPlanPackage'
 import {
-    indexQuestionsResolver,
-    createQuestionResolver,
-    createQuestionResponseResolver,
+    createContractQuestionResolver,
+    createContractQuestionResponseResolver,
     questionResponseDocumentResolver,
     createRateQuestionResolver,
 } from './questionResponse'
@@ -72,7 +71,6 @@ export function configureResolvers(
             indexHealthPlanPackages: indexHealthPlanPackagesResolver(store),
             indexContracts: indexContractsResolver(store),
             indexUsers: indexUsersResolver(store),
-            indexQuestions: indexQuestionsResolver(store),
             fetchEmailSettings: fetchEmailSettingsResolver(
                 store,
                 emailer,
@@ -126,18 +124,19 @@ export function configureResolvers(
             updateDivisionAssignment: updateDivisionAssignment(store),
             updateStateAssignment: updateStateAssignment(store),
             updateStateAssignmentsByState: updateStateAssignmentsByState(store),
-            createQuestion: createQuestionResolver(
+            createContractQuestion: createContractQuestionResolver(
                 store,
                 emailParameterStore,
                 emailer,
                 launchDarkly
             ),
-            createQuestionResponse: createQuestionResponseResolver(
-                store,
-                emailer,
-                emailParameterStore,
-                launchDarkly
-            ),
+            createContractQuestionResponse:
+                createContractQuestionResponseResolver(
+                    store,
+                    emailer,
+                    emailParameterStore,
+                    launchDarkly
+                ),
             createRateQuestion: createRateQuestionResolver(store),
             createAPIKey: createAPIKeyResolver(jwt),
             unlockRate: unlockRate(store),

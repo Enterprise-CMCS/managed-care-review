@@ -4,7 +4,11 @@ import {
     mockMNState,
     mockQuestionAndResponses,
 } from '../../testHelpers/emailerHelpers'
-import type { CMSUserType, StateType, Question } from '../../domain-models'
+import type {
+    CMSUserType,
+    StateType,
+    ContractQuestionType,
+} from '../../domain-models'
 import { packageName } from '../../common-code/healthPlanFormDataType'
 import { sendQuestionCMSEmail } from './index'
 import { getTestStateAnalystsEmails } from '../../testHelpers/parameterStoreHelpers'
@@ -27,7 +31,7 @@ const cmsUser: CMSUserType = {
     stateAssignments: [flState],
 }
 
-const questions: Question[] = [
+const questions: ContractQuestionType[] = [
     mockQuestionAndResponses({
         id: 'test-question-id-1',
         addedBy: cmsUser,
@@ -75,7 +79,7 @@ test('to addresses list includes state analyst and OACT group emails when an OAC
         ...cmsUser,
         divisionAssignment: 'OACT',
     }
-    const questionsFromOACT: Question[] = [
+    const questionsFromOACT: ContractQuestionType[] = [
         {
             ...questions[0],
             addedBy: oactUser,
@@ -110,7 +114,7 @@ test('to addresses list includes state analyst and DMCP group emails when a DMCP
         ...cmsUser,
         divisionAssignment: 'DMCP',
     }
-    const questionsFromDMCP: Question[] = [
+    const questionsFromDMCP: ContractQuestionType[] = [
         {
             ...questions[0],
             addedBy: dmcpUser,

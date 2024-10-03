@@ -13,7 +13,7 @@ import {
     mockContractPackageSubmittedWithQuestions,
     mockContractPackageDraft,
 } from '../../testHelpers/apolloMocks'
-import { IndexQuestionsPayload } from '../../gen/gqlClient'
+import { IndexContractQuestionsPayload } from '../../gen/gqlClient'
 import { useStringConstants } from '../../hooks/useStringConstants'
 
 describe('QuestionResponse', () => {
@@ -284,7 +284,7 @@ describe('QuestionResponse', () => {
                 expect(qaSections[2]).toHaveTextContent('Asked by DMCP')
             })
             it('does not render the divisions question if no question exist', async () => {
-                const mockQuestionWithNoOACT: IndexQuestionsPayload = {
+                const mockQuestionWithNoOACT: IndexContractQuestionsPayload = {
                     ...mockQuestionsPayload('15'),
                     OACTQuestions: {
                         totalCount: 0,
@@ -349,7 +349,7 @@ describe('QuestionResponse', () => {
                 expect(qaSections[1]).toHaveTextContent('Asked by DMCP')
             })
             it('renders no questions have been submitted yet text', async () => {
-                const mockQuestionWithNoOACT: IndexQuestionsPayload = {
+                const mockQuestionWithNoOACT: IndexContractQuestionsPayload = {
                     DMCOQuestions: {
                         totalCount: 0,
                         edges: [],

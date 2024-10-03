@@ -19,8 +19,8 @@ import { ACCEPTED_SUBMISSION_FILE_TYPES } from '../../../components/FileUpload'
 import { PageActionsContainer } from '../../StateSubmission/PageActions'
 import { useErrorSummary } from '../../../hooks/useErrorSummary'
 import {
-    CreateQuestionInput,
-    useCreateQuestionMutation,
+    CreateContractQuestionInput,
+    useCreateContractQuestionMutation,
 } from '../../../gen/gqlClient'
 import { SideNavOutletContextType } from '../../SubmissionSideNav/SubmissionSideNav'
 import { usePage } from '../../../contexts/PageContext'
@@ -39,7 +39,7 @@ export const UploadQuestions = () => {
 
     // api
     const [createQuestion, { loading: apiLoading, error: apiError }] =
-        useCreateQuestionMutation()
+        useCreateContractQuestionMutation()
 
     // page level state
     const [shouldValidate, setShouldValidate] = React.useState(false)
@@ -85,7 +85,7 @@ export const UploadQuestions = () => {
             }
         })
 
-        const input: CreateQuestionInput = {
+        const input: CreateContractQuestionInput = {
             contractID: id as string,
             documents: questionDocs,
         }

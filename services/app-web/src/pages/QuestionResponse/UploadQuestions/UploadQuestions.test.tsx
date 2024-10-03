@@ -21,8 +21,8 @@ import {
     mockContractPackageSubmitted,
 } from '../../../testHelpers/apolloMocks'
 import {
-    createQuestionNetworkFailure,
-    createQuestionSuccess,
+    createContractQuestionNetworkFailure,
+    createContractQuestionSuccess,
 } from '../../../testHelpers/apolloMocks/questionResponseGQLMock'
 import { SubmissionSideNav } from '../../SubmissionSideNav'
 import { Location } from 'react-router-dom'
@@ -176,7 +176,7 @@ describe('UploadQuestions', () => {
                                         id: '15',
                                     },
                                 }),
-                                createQuestionSuccess({
+                                createContractQuestionSuccess({
                                     contractID: '15',
                                     documents: [
                                         {
@@ -441,7 +441,7 @@ describe('UploadQuestions', () => {
                                         id: '15',
                                     },
                                 }),
-                                createQuestionNetworkFailure({
+                                createContractQuestionNetworkFailure({
                                     contractID: '15',
                                     documents: [
                                         {

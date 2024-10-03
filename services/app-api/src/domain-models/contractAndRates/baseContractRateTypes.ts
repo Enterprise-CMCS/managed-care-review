@@ -5,7 +5,10 @@ import {
 } from './packageSubmissions'
 import { contractRevisionSchema, rateRevisionSchema } from './revisionTypes'
 import { statusSchema } from './statusType'
-import { indexQuestionsPayload } from '../QuestionsType'
+import {
+    indexContractQuestionsPayload,
+    indexRateQuestionsPayload,
+} from '../QuestionsType'
 import { updateInfoSchema } from './updateInfoType'
 
 // Contract represents the contract specific information in a submission package
@@ -27,7 +30,7 @@ const contractWithoutDraftRatesSchema = z.object({
 
     packageSubmissions: z.array(contractPackageSubmissionSchema),
 
-    questions: indexQuestionsPayload.optional(),
+    questions: indexContractQuestionsPayload.optional(),
 })
 
 type ContractWithoutDraftRatesType = z.infer<
@@ -49,6 +52,8 @@ const rateWithoutDraftContractsSchema = z.object({
     revisions: z.array(rateRevisionSchema),
 
     packageSubmissions: z.array(ratePackageSubmissionSchema),
+
+    questions: indexRateQuestionsPayload.optional(),
 })
 
 type RateWithoutDraftContractsType = z.infer<

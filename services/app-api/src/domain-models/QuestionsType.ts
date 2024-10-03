@@ -18,7 +18,7 @@ const commonQuestionSchema = z.object({
     responses: z.array(questionResponseType),
 })
 
-const question = commonQuestionSchema.extend({
+const contractQuestion = commonQuestionSchema.extend({
     contractID: z.string().uuid(),
 })
 
@@ -26,17 +26,17 @@ const rateQuestion = commonQuestionSchema.extend({
     rateID: z.string().uuid(),
 })
 
-const questionEdge = z.object({
-    node: question,
+const contractQuestionEdge = z.object({
+    node: contractQuestion,
 })
 
 const rateQuestionEdge = z.object({
     node: rateQuestion,
 })
 
-const questionList = z.object({
+const contractQuestionList = z.object({
     totalCount: z.number(),
-    edges: z.array(questionEdge),
+    edges: z.array(contractQuestionEdge),
 })
 
 const rateQuestionList = z.object({
@@ -44,10 +44,10 @@ const rateQuestionList = z.object({
     edges: z.array(rateQuestionEdge),
 })
 
-const indexQuestionsPayload = z.object({
-    DMCOQuestions: questionList,
-    DMCPQuestions: questionList,
-    OACTQuestions: questionList,
+const indexContractQuestionsPayload = z.object({
+    DMCOQuestions: contractQuestionList,
+    DMCPQuestions: contractQuestionList,
+    OACTQuestions: contractQuestionList,
 })
 
 const indexRateQuestionsPayload = z.object({
@@ -56,11 +56,11 @@ const indexRateQuestionsPayload = z.object({
     OACTQuestions: rateQuestionList,
 })
 
-const createQuestionPayload = z.object({
-    question: question,
+const createContractQuestionPayload = z.object({
+    question: contractQuestion,
 })
 
-const createQuestionInput = z.object({
+const createContractQuestionInput = z.object({
     contractID: z.string().uuid(),
     documents: z.array(document),
 })
@@ -70,43 +70,48 @@ const createRateQuestionInput = z.object({
     documents: z.array(document),
 })
 
-type CreateQuestionPayload = z.infer<typeof createQuestionPayload>
+type CreateContractQuestionPayload = z.infer<
+    typeof createContractQuestionPayload
+>
 
-type CreateQuestionInput = z.infer<typeof createQuestionInput>
+type CreateContractQuestionInput = z.infer<typeof createContractQuestionInput>
 
-type IndexQuestionsPayload = z.infer<typeof indexQuestionsPayload>
+type IndexContractQuestionsPayload = z.infer<
+    typeof indexContractQuestionsPayload
+>
 
-type Question = z.infer<typeof question>
+type ContractQuestionType = z.infer<typeof contractQuestion>
 
 type RateQuestionType = z.infer<typeof rateQuestion>
 
 type CreateRateQuestionInputType = z.infer<typeof createRateQuestionInput>
 
-type QuestionList = z.infer<typeof questionList>
+type ContractQuestionList = z.infer<typeof contractQuestionList>
 
 type Document = z.infer<typeof document>
 
 type IndexRateQuestionsPayload = z.infer<typeof indexRateQuestionsPayload>
 
 export type {
-    IndexQuestionsPayload,
-    CreateQuestionPayload,
-    CreateQuestionInput,
-    Question,
+    IndexContractQuestionsPayload,
+    CreateContractQuestionPayload,
+    CreateContractQuestionInput,
+    ContractQuestionList,
+    ContractQuestionType,
     Document,
-    QuestionList,
     RateQuestionType,
     CreateRateQuestionInputType,
     IndexRateQuestionsPayload,
 }
 
 export {
-    indexQuestionsPayload,
-    createQuestionInput,
-    createQuestionPayload,
-    question,
+    indexContractQuestionsPayload,
+    createContractQuestionInput,
+    createContractQuestionPayload,
+    contractQuestion,
     document,
-    questionList,
+    contractQuestionList,
     rateQuestion,
     createRateQuestionInput,
+    indexRateQuestionsPayload,
 }
