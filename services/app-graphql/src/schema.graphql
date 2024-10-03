@@ -648,13 +648,31 @@ type IndexQuestionsPayload {
     OACTQuestions: QuestionList!
 }
 
+type IndexRateQuestionsPayload {
+    "Questions for a given rate that were asked by DMCO within CMS"
+    DMCOQuestions: RateQuestionList!
+    "Questions for a given rate that were asked by DMCP within CMS"
+    DMCPQuestions: RateQuestionList!
+    "Questions for a given rate that were asked by OACT within CMS"
+    OACTQuestions: RateQuestionList!
+}
+
 type QuestionList {
     totalCount: Int
     edges: [QuestionEdge!]!
 }
 
+type RateQuestionList {
+    totalCount: Int
+    edges: [RateQuestionEdge!]!
+}
+
 type QuestionEdge {
     node: Question!
+}
+
+type RateQuestionEdge {
+    node: RateQuestion!
 }
 
 input DocumentInput {
@@ -1642,6 +1660,12 @@ type Rate {
     was associated with.
     """
     packageSubmissions: [RatePackageSubmission!]
+    """
+    questions field is an array of questions asked about the rate by CMS. Each questions also contains responses
+    to the question submitted by the State. DRAFT rates will not have questions, only rates that have been submitted
+    , unlocked, or resubmitted. The array is in descending order by createdAt.
+    """
+    questions: IndexRateQuestionsPayload
 }
 
 """
@@ -1760,6 +1784,12 @@ type Contract {
     submission is in the first position in the array.
     """
     packageSubmissions: [ContractPackageSubmission!]!
+
+    """
+    questions field is an array of questions asked about the contract by CMS. Each questions also contains responses
+    to the question submitted by the State. DRAFT contracts will not have questions, only contracts that have been submitted
+    , unlocked, or resubmitted. The array is in descending order by createdAt.
+    """
     questions: IndexQuestionsPayload
 }
 
