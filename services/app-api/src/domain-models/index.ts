@@ -71,6 +71,7 @@ export type {
     QuestionList,
     RateQuestionType,
     CreateRateQuestionInputType,
+    IndexRateQuestionsPayload,
 } from './QuestionsType'
 
 export type {

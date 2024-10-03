@@ -4,6 +4,7 @@ export {
     convertToIndexQuestionsPayload,
     questionPrismaToDomainType,
     rateQuestionPrismaToDomainType,
+    convertToIndexRateQuestionsPayload,
 } from './questionHelpers'
 export { insertQuestionResponse } from './insertQuestionResponse'
 export { insertRateQuestion } from './insertRateQuestion'
