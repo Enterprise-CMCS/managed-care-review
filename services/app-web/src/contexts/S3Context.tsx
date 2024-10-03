@@ -65,7 +65,7 @@ const useS3 = (): S3ContextT => {
             const s3URL = await getS3URL(s3Key, file.name, bucket)
             return { key: s3Key, s3URL: s3URL }
         } catch (err) {
-            console.error(err)
+            console.error(`uploadFile error ${err}`)
             throw err
         }
     }
