@@ -84,12 +84,10 @@ const useS3 = (): S3ContextT => {
             }
             // s3 file upload failing could be due to IDM session timeout
             // double check the user still has their session, if not, logout to update the React state with their login status
-            /* test disable
             const responseCheckAuth = await checkAuth()
             if (responseCheckAuth instanceof Error) {
                 await logout({ type: 'TIMEOUT' })
             }
-                */
             const error = new Error('Scanning error: Scanning retry timed out')
             recordJSException(error)
             throw error
