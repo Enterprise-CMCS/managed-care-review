@@ -4,7 +4,7 @@ import { S3FileData } from '../components'
 import type { S3ClientT } from '../s3'
 import { BucketShortName } from '../s3/s3Amplify'
 import { recordJSException } from '../otelHelpers'
-//import { useAuth } from './AuthContext'
+import { useAuth } from './AuthContext'
 
 type S3ContextT = {
     handleUploadFile: (
@@ -42,29 +42,32 @@ const useS3 = (): S3ContextT => {
     }
 
     const { deleteFile, uploadFile, scanFile, getS3URL } = context
-    //const { checkAuth, logout } = useAuth()
+    const { checkAuth, logout } = useAuth()
 
     const handleUploadFile = async (
         file: File,
         bucket: BucketShortName
     ): Promise<S3FileData> => {
-        const s3Key = await uploadFile(file, bucket)
+        try {
+            const s3Key = await uploadFile(file, bucket)
 
-        if (isS3Error(s3Key)) {
-            const error = new Error(`Error in S3: ${file.name}`)
-            recordJSException(error)
-            /*
-            // s3 file upload failing could be due to IDM session timeout
-            // double check the user still has their session, if not, logout to update the React state with their login status
-            const responseCheckAuth = await checkAuth()
-            if (responseCheckAuth instanceof Error) {
-                await logout({ type: 'TIMEOUT' })
+            if (isS3Error(s3Key)) {
+                const error = new Error(`Error in S3: ${file.name}`)
+                recordJSException(error)
+                // s3 file upload failing could be due to IDM session timeout
+                // double check the user still has their session, if not, logout to update the React state with their login status
+                const responseCheckAuth = await checkAuth()
+                if (responseCheckAuth instanceof Error) {
+                    await logout({ type: 'TIMEOUT' })
+                }
+                throw error
             }
-                */
-            throw error
+            const s3URL = await getS3URL(s3Key, file.name, bucket)
+            return { key: s3Key, s3URL: s3URL }
+        } catch (err) {
+            console.error(err)
+            throw err
         }
-        const s3URL = await getS3URL(s3Key, file.name, bucket)
-        return { key: s3Key, s3URL: s3URL }
     }
 
     const handleScanFile = async (

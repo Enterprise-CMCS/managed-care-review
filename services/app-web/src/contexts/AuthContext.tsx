@@ -169,7 +169,9 @@ function AuthProvider({
     */
     const checkAuth: AuthContextType['checkAuth'] = async () => {
         try {
-            return await refetch()
+            const refetchRes = await refetch()
+            console.info(`refetch result: ${refetchRes}`)
+            return refetchRes
         } catch (e) {
             // if we fail auth at a time we expected logged in user, the session may have timed out. Logout fully to reflect that and force React state update
             if (loggedInUser) {
@@ -191,9 +193,9 @@ function AuthProvider({
     const refreshAuth = async () => {
         if (authMode !== 'LOCAL') {
             const result = await extendSession()
-            if (result instanceof Error){
+            if (result instanceof Error) {
                 await logout({
-                    type: 'TIMEOUT'
+                    type: 'TIMEOUT',
                 })
             }
         }
