@@ -30,7 +30,7 @@ describe.only('documents', () => {
                 cy.findByText(/0 complete, 0 errors, 2 pending/)
                 cy.waitForDocumentsToLoad()
 
-                cy.findByText(/2 complete, 1 error, 0 pending/).should('exist')
+                cy.findByText(/1 complete, 1 error, 0 pending/).should('exist')
 
                 cy.findByText('Failed security scan, please remove', {
                     timeout: 200_000,
