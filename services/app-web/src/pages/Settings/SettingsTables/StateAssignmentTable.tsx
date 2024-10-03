@@ -31,6 +31,7 @@ import { EditLink, formatUserNamesFromUsers, formatEmailsFromUsers } from '../'
 import { SettingsErrorAlert } from '../SettingsErrorAlert'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '../../../common-code/featureFlags'
+import { getTealiumFiltersChanged } from '../../../tealium/tealiumHelpers'
 
 type AnalystDisplayType = {
     email: string
@@ -232,6 +233,7 @@ const StateAssignmentTable = () => {
         const prevFilterCategories = prevFilters.filters
             .map((f) => f.id)
             .join(',')
+        const filterCategoriesForAnalytics = getTealiumFiltersChanged(columnFilters)
         // Any changes in results or filters
         if (
             filterCategories !== prevFilterCategories ||
@@ -242,7 +244,7 @@ const StateAssignmentTable = () => {
                 logFilterEvent({
                     event_name: 'filter_removed',
                     search_result_count: rowCount,
-                    filter_categories_used: filterCategories,
+                    filter_categories_used:  filterCategoriesForAnalytics
                 })
                 // If there are filters, then we applied new filters
             } else if (columnFilters.length > 0) {
@@ -252,7 +254,7 @@ const StateAssignmentTable = () => {
                     results_count_after_filtering: rowCount,
                     results_count_prior_to_filtering:
                         prevFilters.results ?? 'No prior count, filter on load',
-                    filter_categories_used: filterCategories,
+                    filter_categories_used:  filterCategoriesForAnalytics
                 })
             }
             setPrevFilters({

@@ -40,6 +40,8 @@ export const DataDetailContactField = ({
                 target="_blank"
                 variant="external"
                 rel="noreferrer"
+                event_name='contact_click'
+                contact_method='email'
             >
                 {email}
             </LinkWithLogging>

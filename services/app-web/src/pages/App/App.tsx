@@ -35,6 +35,7 @@ function App({
 }: AppProps): React.ReactElement {
     const environmentName = import.meta.env.VITE_APP_STAGE_NAME || ''
     const isHigherEnv = ['prod', 'val', 'main'].includes(environmentName)
+    const isLocal = environmentName == 'local'
     const nrSnippet = generateNRScriptContent({
         accountID: getEnv('VITE_APP_NR_ACCOUNT_ID'),
         trustKey: getEnv('VITE_APP_NR_TRUST_KEY'),
@@ -49,7 +50,7 @@ function App({
     })
     const tealiumEnv = getTealiumEnv(environmentName)
     const newTealiumClient =
-        tealiumEnv === 'dev' ? devTealiumClient() : tealiumClient(tealiumEnv)
+        tealiumEnv === 'dev' ? devTealiumClient(isLocal) : tealiumClient(tealiumEnv)
 
     return (
         <ErrorBoundary FallbackComponent={ErrorBoundaryRoot}>

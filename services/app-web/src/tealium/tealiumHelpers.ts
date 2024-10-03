@@ -1,9 +1,8 @@
-import {
-    TealiumEnv,
-} from './tealium'
+import { ColumnFilter, ColumnFiltersState } from '@tanstack/react-table';
 import {PageTitlesRecord, RouteT, STATE_SUBMISSION_FORM_ROUTES, STATE_SUBMISSION_SUMMARY_ROUTES} from '../constants';
 import {User} from '../gen/gqlClient';
 import {hasCMSUserPermissions} from '../gqlHelpers';
+import { TealiumEnv } from './types';
 
 function getTealiumEnv(stage: string): TealiumEnv {
     switch (stage) {
@@ -70,4 +69,22 @@ const getTealiumPageName = ({
     }
 }
 
-export { getTealiumPageName, getTealiumEnv}
+const getTealiumFiltersChanged = (filters:  ColumnFiltersState): string => {
+    const filterCategories: {[filterID: string]:  string}= {}
+
+
+    filters.forEach((filter : ColumnFilter) => {
+        if (filterCategories[filter.id])  {
+            const filterValues = Array.isArray(filter.value)? filter.value.map( (f) => f.label).join(',') : filter.value as string
+            filterCategories[filter.id] = filterCategories[filter.id].concat(`, ${filterValues}}`)
+        } else {
+            filterCategories[filter.id] =  Array.isArray(filter.value)? filter.value.map( (f) => f.label).join(',') : filter.value as string
+        }
+    })
+
+    return Object.keys(filterCategories).map( (filterID) => {
+        return `${filterID}: ${filterCategories[filterID]}}`
+    }).join(' – ')
+}
+
+export { getTealiumPageName, getTealiumEnv,getTealiumFiltersChanged}

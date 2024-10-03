@@ -18,7 +18,7 @@ We are using `TealiumProvider` in `App.tsx` to:
 
 There are three tealium clients in the codebase to use in different environments
 - `tealiumClient` is used in `prod` and `val` environments where events are logged to Tealium.
-- `devTealiumClient` is used in all lower environments and events will not be logged to Tealium.
+- `devTealiumClient` is used in all lower environments and events will not be logged to Tealium. Console.infos instead in local env only.
 - `testTealiumClient` used in `renderWithProviders` for unit tests and functions do nothing, but are there so tests do not break.
 
 ### Use

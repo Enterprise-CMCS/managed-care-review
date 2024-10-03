@@ -30,6 +30,7 @@ import { DoubleColumnGrid } from '../DoubleColumnGrid'
 import { NavLinkWithLogging } from '../TealiumLogging/Link'
 import { useTealium } from '../../hooks'
 import useDeepCompareEffect from 'use-deep-compare-effect'
+import { getTealiumFiltersChanged } from '../../tealium/tealiumHelpers'
 
 export type RateInDashboardType = {
     id: string
@@ -414,6 +415,7 @@ export const ContractTable = ({
         const prevFilterCategories = prevFilters.filters
             .map((f) => f.id)
             .join(',')
+            const filterCategoriesForAnalytics = getTealiumFiltersChanged(columnFilters)
         // Any changes in results or filters
         if (
             filterCategories !== prevFilterCategories ||
@@ -424,7 +426,7 @@ export const ContractTable = ({
                 logFilterEvent({
                     event_name: 'filter_removed',
                     search_result_count: submissionCount,
-                    filter_categories_used: filterCategories,
+                    filter_categories_used:  filterCategoriesForAnalytics
                 })
                 // If there are filters, then we applied new filters
             } else if (columnFilters.length > 0) {
@@ -434,7 +436,7 @@ export const ContractTable = ({
                     results_count_after_filtering: submissionCount,
                     results_count_prior_to_filtering:
                         prevFilters.results ?? 'No prior count, filter on load',
-                    filter_categories_used: filterCategories,
+                    filter_categories_used:  filterCategoriesForAnalytics,
                 })
             }
             setPrevFilters({

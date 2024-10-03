@@ -10,7 +10,6 @@ export {
 
 export {
     TEALIUM_CONTENT_TYPE_BY_ROUTE,
-    TEALIUM_SUBSECTION_BY_ROUTE
 } from './constants'
 
 export type {
@@ -28,5 +27,8 @@ export type {
     TealiumAlertImpressionObject,
     TealiumInlineErrorObject,
     TealiumRadioButtonEventObject,
-    TealiumCheckboxEventObject
-} from './tealium'
+    TealiumCheckboxEventObject,
+    TealiumAccordionEventObject,
+    TealiumFormFilledEventObject,
+    TealiumFormSubmitEventObject
+} from './types'
