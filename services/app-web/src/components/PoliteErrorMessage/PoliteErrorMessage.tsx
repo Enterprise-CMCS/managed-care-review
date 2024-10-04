@@ -26,16 +26,19 @@ export const PoliteErrorMessage = forwardRef(
         ref: PoliteErrorMessageRef
     ): React.ReactElement | null => {
         const { logInlineErrorEvent } = useTealium()
-
         useEffect(() => {
-            logInlineErrorEvent({
-                error_type: 'validation',
-                error_message: extractText(children),
-                form_field_label: formFieldLabel,
-            })
+            if (children) {
+                logInlineErrorEvent({
+                    error_type: 'validation',
+                    error_message: extractText(children),
+                    form_field_label: formFieldLabel,
+                })
+            }
         }, [logInlineErrorEvent, formFieldLabel, children])
 
-        if (!children) return null
+        if (!children) {
+            return null
+        }
 
         const classes = classnames('usa-error-message', className)
         return (
