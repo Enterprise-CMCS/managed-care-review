@@ -8,7 +8,7 @@ type PoliteErrorMessageProps = {
     id?: string
     className?: string
     formFieldLabel: string
-} & JSX.IntrinsicElements['span']
+} & React.HTMLAttributes<HTMLSpanElement>
 
 export type PoliteErrorMessageRef = React.Ref<HTMLSpanElement> | null
 // This component is almost the same as react-uswds ErrorMessage, but by default polite :).
@@ -36,9 +36,7 @@ export const PoliteErrorMessage = forwardRef(
             }
         }, [logInlineErrorEvent, formFieldLabel, children])
 
-        if (!children) {
-            return null
-        }
+        if (!children) return null
 
         const classes = classnames('usa-error-message', className)
         return (
