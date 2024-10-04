@@ -75,15 +75,15 @@ const getTealiumFiltersChanged = (filters:  ColumnFiltersState): string => {
 
     filters.forEach((filter : ColumnFilter) => {
         if (filterCategories[filter.id])  {
-            const filterValues = Array.isArray(filter.value)? filter.value.map( (f) => f.label).join(',') : filter.value as string
-            filterCategories[filter.id] = filterCategories[filter.id].concat(`, ${filterValues}}`)
+            const filterValues = Array.isArray(filter.value)? filter.value.map((f) => f).join(', ') : filter.value as string
+            filterCategories[filter.id] = filterCategories[filter.id].concat(`, ${filterValues}`)
         } else {
-            filterCategories[filter.id] =  Array.isArray(filter.value)? filter.value.map( (f) => f.label).join(',') : filter.value as string
+            filterCategories[filter.id] =  Array.isArray(filter.value)? filter.value.map((f) => f).join(', ') : filter.value as string
         }
     })
 
     return Object.keys(filterCategories).map( (filterID) => {
-        return `${filterID}: ${filterCategories[filterID]}}`
+        return `{ ${filterID}: ${filterCategories[filterID]} }`
     }).join(' – ')
 }
 
