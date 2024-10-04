@@ -37,10 +37,13 @@ describe.only('documents', () => {
                 }).should('exist')
 
                 // Remove the virus-infected file
-                cy.findByText('Failed security scan, please remove')
-                    .parent()
-                    .find('button[aria-label="Remove eicar_com.pdf document"]')
-                    .click()
+                cy.contains('Failed security scan, please remove')
+                    .closest('li')
+                    .within(() => {
+                        cy.findByRole('button', {
+                            name: /Remove eicar_com.pdf document/,
+                        }).click()
+                    })
 
                 // Verify the file has been removed
                 cy.findByText(/1 complete, 0 errors, 0 pending/).should('exist')
