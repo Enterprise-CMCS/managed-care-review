@@ -357,7 +357,7 @@ export const createQuestionWrapper = async (
                                                 edges: [
                                                     {
                                                         __typename:
-                                                            'QuestionEdge',
+                                                            'ContractQuestionEdge',
                                                         node: {
                                                             ...newQuestion,
                                                             responses: [],
@@ -436,7 +436,7 @@ export const createResponseWrapper = async (
                                                 newResponse.questionID
                                             ) {
                                                 return {
-                                                    __typename: 'QuestionEdge',
+                                                    __typename: 'ContractQuestionEdge',
                                                     node: {
                                                         ...edge.node,
                                                         responses: [

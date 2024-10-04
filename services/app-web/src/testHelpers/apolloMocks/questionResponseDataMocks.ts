@@ -1,15 +1,15 @@
-import { CmsUser, IndexQuestionsPayload, StateUser } from '../../gen/gqlClient'
+import { CmsUser, IndexContractQuestionsPayload, StateUser } from '../../gen/gqlClient'
 import { mockValidCMSUser, mockValidUser } from './userGQLMock'
 
-function mockQuestionsPayload(contractID: string): IndexQuestionsPayload {
+function mockQuestionsPayload(contractID: string): IndexContractQuestionsPayload {
     return {
         DMCOQuestions: {
             totalCount: 2,
             edges: [
                 {
-                    __typename: 'QuestionEdge' as const,
+                    __typename: 'ContractQuestionEdge' as const,
                     node: {
-                        __typename: 'Question' as const,
+                        __typename: 'ContractQuestion' as const,
                         id: 'dmco-question-1-id',
                         contractID,
                         createdAt: new Date('2022-12-15'),
@@ -43,9 +43,9 @@ function mockQuestionsPayload(contractID: string): IndexQuestionsPayload {
                     },
                 },
                 {
-                    __typename: 'QuestionEdge' as const,
+                    __typename: 'ContractQuestionEdge' as const,
                     node: {
-                        __typename: 'Question' as const,
+                        __typename: 'ContractQuestion' as const,
                         id: 'dmco-question-2-id',
                         contractID,
                         createdAt: new Date('2022-12-18'),
@@ -87,9 +87,9 @@ function mockQuestionsPayload(contractID: string): IndexQuestionsPayload {
             totalCount: 1,
             edges: [
                 {
-                    __typename: 'QuestionEdge' as const,
+                    __typename: 'ContractQuestionEdge' as const,
                     node: {
-                        __typename: 'Question' as const,
+                        __typename: 'ContractQuestion' as const,
                         id: 'dmcp-question-1-id',
                         contractID,
                         createdAt: new Date('2022-12-15'),
@@ -128,9 +128,9 @@ function mockQuestionsPayload(contractID: string): IndexQuestionsPayload {
             totalCount: 1,
             edges: [
                 {
-                    __typename: 'QuestionEdge' as const,
+                    __typename: 'ContractQuestionEdge' as const,
                     node: {
-                        __typename: 'Question' as const,
+                        __typename: 'ContractQuestion' as const,
                         id: 'oact-question-1-id',
                         contractID,
                         createdAt: new Date('2022-12-15'),

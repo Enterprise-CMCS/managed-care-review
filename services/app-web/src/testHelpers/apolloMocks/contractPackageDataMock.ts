@@ -1,8 +1,7 @@
 import { mockMNState } from '../../common-code/healthPlanFormDataMocks/healthPlanFormData'
-import { Contract, ContractFormData, ContractRevision, RateRevision, UnlockedContract } from '../../gen/gqlClient'
+import { Contract, ContractFormData, ContractRevision, RateRevision, UnlockedContract, CmsUser, StateUser } from '../../gen/gqlClient'
 import { s3DlUrl } from './documentDataMock'
 
-import { CmsUser, IndexQuestionsPayload, StateUser } from '../../gen/gqlClient'
 import { mockValidCMSUser, mockValidUser } from './userGQLMock'
 
 function mockContractRevision(name?: string, partial?: Partial<ContractRevision>): ContractRevision {
@@ -457,9 +456,9 @@ function mockContractPackageSubmittedWithQuestions(
                 totalCount: 2,
                 edges: [
                     {
-                        __typename: 'QuestionEdge' as const,
+                        __typename: 'ContractQuestionEdge' as const,
                         node: {
-                            __typename: 'Question' as const,
+                            __typename: 'ContractQuestion' as const,
                             id: 'dmco-question-1-id',
                             contractID,
                             createdAt: new Date('2022-12-15'),
@@ -493,9 +492,9 @@ function mockContractPackageSubmittedWithQuestions(
                         },
                     },
                     {
-                        __typename: 'QuestionEdge' as const,
+                        __typename: 'ContractQuestionEdge' as const,
                         node: {
-                            __typename: 'Question' as const,
+                            __typename: 'ContractQuestion' as const,
                             id: 'dmco-question-2-id',
                             contractID,
                             createdAt: new Date('2022-12-18'),
@@ -537,9 +536,9 @@ function mockContractPackageSubmittedWithQuestions(
                 totalCount: 1,
                 edges: [
                     {
-                        __typename: 'QuestionEdge' as const,
+                        __typename: 'ContractQuestionEdge' as const,
                         node: {
-                            __typename: 'Question' as const,
+                            __typename: 'ContractQuestion' as const,
                             id: 'dmcp-question-1-id',
                             contractID,
                             createdAt: new Date('2022-12-15'),
@@ -578,9 +577,9 @@ function mockContractPackageSubmittedWithQuestions(
                 totalCount: 1,
                 edges: [
                     {
-                        __typename: 'QuestionEdge' as const,
+                        __typename: 'ContractQuestionEdge' as const,
                         node: {
-                            __typename: 'Question' as const,
+                            __typename: 'ContractQuestion' as const,
                             id: 'oact-question-1-id',
                             contractID,
                             createdAt: new Date('2022-12-15'),
