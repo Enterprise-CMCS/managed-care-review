@@ -129,9 +129,9 @@
         "zod": "^3.10.1"
     },
     "devDependencies": {
-        "@aws-sdk/client-amplify": "^3.662.0",
-        "@aws-sdk/client-s3": "^3.663.0",
-        "@aws-sdk/s3-request-presigner": "^3.663.0",
+        "@aws-sdk/client-amplify": "^3.664.0",
+        "@aws-sdk/client-s3": "^3.664.0",
+        "@aws-sdk/s3-request-presigner": "^3.664.0",
         "@chromatic-com/storybook": "^1",
         "@esbuild-plugins/node-globals-polyfill": "^0.2.3",
         "@peculiar/webcrypto": "^1.5.0",
