@@ -91,7 +91,7 @@ const useS3 = (): S3ContextT => {
         } catch (e) {
             const error = new Error(`handleScanFile error: ${e}`)
             console.error(error)
-            return error
+            throw error
         }
     }
     // We often don't want to actually delete a resource from s3 and that's what permanentFileKeys is for
