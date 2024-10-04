@@ -75,22 +75,23 @@ const useS3 = (): S3ContextT => {
         bucket: BucketShortName
     ): Promise<void | Error> => {
         try {
-            await scanFile(key, bucket)
-        } catch (e) {
-            if (isS3Error(e)) {
-                const error = new Error(`Error in S3: ${key}`)
+            const s3Key = await scanFile(key, bucket)
+            if (isS3Error(s3Key)) {
+                const error = Error(`Error in S3: ${key}`)
                 recordJSException(error)
-                throw error
+
+                // s3 file upload failing could be due to IDM session timeout
+                // double check the user still has their session, if not, logout to update the React state with their login status
+                const responseCheckAuth = await checkAuth()
+                if (responseCheckAuth instanceof Error) {
+                    await logout({ type: 'TIMEOUT' })
+                }
+                return error
             }
-            // s3 file upload failing could be due to IDM session timeout
-            // double check the user still has their session, if not, logout to update the React state with their login status
-            const responseCheckAuth = await checkAuth()
-            if (responseCheckAuth instanceof Error) {
-                await logout({ type: 'TIMEOUT' })
-            }
-            const error = new Error('Scanning error: Scanning retry timed out')
-            recordJSException(error)
-            throw error
+        } catch (e) {
+            const error = new Error(`handleScanFile error: ${e}`)
+            console.error(error)
+            return error
         }
     }
     // We often don't want to actually delete a resource from s3 and that's what permanentFileKeys is for
