@@ -4,6 +4,8 @@ import { Accordion } from '@trussworks/react-uswds'
 import { FilterSelectPropType } from './FilterSelect/FilterSelect'
 import type { AccordionItemProps } from '@trussworks/react-uswds/lib/components/Accordion/Accordion'
 import { ButtonWithLogging } from '../TealiumLogging'
+import { useTealium } from '../../hooks'
+import { extractText } from '../TealiumLogging/tealiamLoggingHelpers'
 
 export interface FilterAccordionPropType {
     onClearFilters: () => void
@@ -18,6 +20,7 @@ export const FilterAccordion = ({
     filterTitle,
     children,
 }: FilterAccordionPropType) => {
+    const {logAccordionEvent} = useTealium()
     /* multiple FilterSelect components are passed into the parent as children, and here we map
     over them to display them inside the accordion */
     const childFilters = React.Children.map(children, (child) => {
@@ -44,9 +47,12 @@ export const FilterAccordion = ({
             ),
             expanded: false,
             id: 'filterAccordionItems',
+            handleToggle: () => {
+                logAccordionEvent({event_name: 'accordion_opened', heading: extractText(filterTitle), link_type:'link_other'})
+            }
         },
     ]
     return (
-        <Accordion items={accordionItems} className={styles.filterAccordion} />
+    <Accordion items={accordionItems} className={styles.filterAccordion} />
     )
 }

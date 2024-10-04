@@ -11,6 +11,7 @@ import {
 import styles from './ChangeHistory.module.scss'
 import { LinkWithLogging } from '../TealiumLogging/Link'
 import { getUpdatedByDisplayName } from '../../gqlHelpers/userHelpers'
+import { useTealium } from '../../hooks'
 
 type ChangeHistoryProps = {
     contract: Contract | UnlockedContract
@@ -24,6 +25,7 @@ type flatRevisions = UpdateInformation & {
 export const ChangeHistory = ({
     contract,
 }: ChangeHistoryProps): React.ReactElement => {
+    const {logAccordionEvent} = useTealium()
     const flattenedRevisions = (): flatRevisions[] => {
         const result: flatRevisions[] = []
 
@@ -161,6 +163,9 @@ export const ChangeHistory = ({
                     </div>
                 ),
                 expanded: false,
+                handleToggle: () => {
+                    logAccordionEvent({event_name: 'accordion_opened', heading: getUpdatedByDisplayName(r.updatedBy) ?? 'unknown', link_type:'link_other'})
+                },
                 id: dayjs(r.updatedAt).toISOString(),
             }
         }
