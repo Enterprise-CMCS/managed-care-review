@@ -39,7 +39,7 @@ describe.only('documents', () => {
                 // Remove the virus-infected file
                 cy.findByText('Failed security scan, please remove')
                     .parent()
-                    .find('button[aria-label="Remove badDummy.pdf document"]')
+                    .find('button[aria-label="Remove eicar_com.pdf document"]')
                     .click()
 
                 // Verify the file has been removed
