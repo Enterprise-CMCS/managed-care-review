@@ -35,6 +35,24 @@ describe.only('documents', () => {
                 cy.findByText('Failed security scan, please remove', {
                     timeout: 200_000,
                 }).should('exist')
+
+                // Remove the virus-infected file
+                cy.findByText('Failed security scan, please remove')
+                    .parent()
+                    .find('button[aria-label="Remove badDummy.pdf document"]')
+                    .click()
+
+                // Verify the file has been removed
+                cy.findByText(/1 complete, 0 errors, 0 pending/).should('exist')
+                cy.findByText('Failed security scan, please remove').should(
+                    'not.exist'
+                )
+
+                // Upload a clean file
+                fileInput.attachFile(['documents/how-to-open-source.pdf'])
+                cy.findByText(/1 complete, 0 errors, 1 pending/)
+                cy.waitForDocumentsToLoad()
+                cy.findByText(/2 complete, 0 errors, 0 pending/).should('exist')
             })
         })
     }
