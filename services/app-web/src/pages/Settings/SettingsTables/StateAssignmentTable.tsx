@@ -17,14 +17,13 @@ import {
     FilterSelect,
     FilterSelectedOptionsType,
 } from '../../../components/FilterAccordion'
-import { DoubleColumnGrid, LinkWithLogging, Loading } from '../../../components'
+import { DoubleColumnGrid, Loading } from '../../../components'
 import { GridContainer, Table } from '@trussworks/react-uswds'
 
 import styles from '../Settings.module.scss'
 import { pluralize } from '../../../common-code/formatters'
 import { useTealium } from '../../../hooks'
 import useDeepCompareEffect from 'use-deep-compare-effect'
-import { useStringConstants } from '../../../hooks/useStringConstants'
 import { useOutletContext } from 'react-router-dom'
 import { type MCReviewSettingsContextType } from '../Settings'
 import { EditLink, formatUserNamesFromUsers, formatEmailsFromUsers } from '../'
@@ -109,8 +108,6 @@ const StateAssignmentTable = () => {
         filtersForAnalytics: '',
     })
     const { logFilterEvent } = useTealium()
-    const stringConstants = useStringConstants()
-    const MAIL_TO_SUPPORT = stringConstants.MAIL_TO_SUPPORT
     const { stateAnalysts: analysts } =
         useOutletContext<MCReviewSettingsContextType>()
 
@@ -282,19 +279,8 @@ const StateAssignmentTable = () => {
         <>
             <h2>State assignments</h2>
             <p>
-                Below is a list of the DMCO staff assigned to states. If this
-                list is out of date please contact
-                <span>
-                    <LinkWithLogging
-                        href={`mailto: ${MAIL_TO_SUPPORT}`}
-                        variant="unstyled"
-                        target="_blank"
-                        rel="noreferrer"
-                    >
-                        {' '}
-                        {MAIL_TO_SUPPORT}
-                    </LinkWithLogging>
-                </span>
+                Below is a list of the DMCO analysts assigned to states. To edit
+                the analysts click on the edit link below.
             </p>
             <FilterAccordion
                 onClearFilters={clearFilters}
