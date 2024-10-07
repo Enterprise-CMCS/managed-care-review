@@ -2,6 +2,8 @@ import { sendSESEmail } from '../emailer'
 
 import {
     getSESEmailParams,
+    newContractCMSEmail,
+    newContractStateEmail,
     newPackageCMSEmail,
     newPackageStateEmail,
     unlockContractCMSEmail,
@@ -9,7 +11,8 @@ import {
     unlockPackageCMSEmail,
     unlockPackageStateEmail,
     resubmitPackageStateEmail,
-    resubmitPackageCMSEmail,
+    resubmitContractStateEmail,
+    resubmitContractCMSEmail,
     sendQuestionStateEmail,
     sendQuestionCMSEmail,
     sendQuestionResponseCMSEmail,
@@ -23,6 +26,7 @@ import type {
     UpdateInfoType,
     ProgramType,
     Question,
+    ContractType,
     ContractRevisionType,
     UnlockedContractType,
 } from '../domain-models'
@@ -74,6 +78,16 @@ type SendEmailFunction = (emailData: EmailData) => Promise<void | Error>
 type Emailer = {
     config: EmailConfiguration
     sendEmail: SendEmailFunction
+    sendCMSNewContract: (
+        contract: ContractType,
+        stateAnalystsEmails: StateAnalystsEmails,
+        statePrograms: ProgramType[]
+    ) => Promise<void | Error>
+    sendStateNewContract: (
+        contract: ContractType,
+        submitterEmails: string[],
+        statePrograms: ProgramType[]
+    ) => Promise<void | Error>
     sendCMSNewPackage: (
         formData: LockedHealthPlanFormDataType,
         stateAnalystsEmails: StateAnalystsEmails,
@@ -109,13 +123,13 @@ type Emailer = {
         submitterEmails: string[]
     ) => Promise<void | Error>
     sendResubmittedStateEmail: (
-        formData: LockedHealthPlanFormDataType,
+        contract: ContractType,
         updateInfo: UpdateInfoType,
         submitterEmails: string[],
         statePrograms: ProgramType[]
     ) => Promise<void | Error>
     sendResubmittedCMSEmail: (
-        formData: LockedHealthPlanFormDataType,
+        contract: ContractType,
         updateInfo: UpdateInfoType,
         stateAnalystsEmails: StateAnalystsEmails,
         statePrograms: ProgramType[]
@@ -162,6 +176,40 @@ function emailer(
     return {
         config,
         sendEmail,
+        sendCMSNewContract: async function (
+            contract,
+            stateAnalystsEmails,
+            statePrograms
+        ) {
+            const emailData = await newContractCMSEmail(
+                contract,
+                config,
+                stateAnalystsEmails,
+                statePrograms
+            )
+            if (emailData instanceof Error) {
+                return emailData
+            } else {
+                return await this.sendEmail(emailData)
+            }
+        },
+        sendStateNewContract: async function (
+            contract,
+            submitterEmails,
+            statePrograms
+        ) {
+            const emailData = await newContractStateEmail(
+                contract,
+                submitterEmails,
+                config,
+                statePrograms
+            )
+            if (emailData instanceof Error) {
+                return emailData
+            } else {
+                return await this.sendEmail(emailData)
+            }
+        },
         sendCMSNewPackage: async function (
             formData,
             stateAnalystsEmails,
@@ -273,13 +321,13 @@ function emailer(
             }
         },
         sendResubmittedStateEmail: async function (
-            formData,
+            contract,
             updateInfo,
             submitterEmails,
             statePrograms
         ) {
-            const emailData = await resubmitPackageStateEmail(
-                formData,
+            const emailData = await resubmitContractStateEmail(
+                contract,
                 submitterEmails,
                 updateInfo,
                 config,
@@ -292,13 +340,13 @@ function emailer(
             }
         },
         sendResubmittedCMSEmail: async function (
-            formData,
+            contract,
             updateInfo,
             stateAnalystsEmails,
             statePrograms
         ) {
-            const emailData = await resubmitPackageCMSEmail(
-                formData,
+            const emailData = await resubmitContractCMSEmail(
+                contract,
                 updateInfo,
                 config,
                 stateAnalystsEmails,
