@@ -48,21 +48,26 @@ const useS3 = (): S3ContextT => {
         file: File,
         bucket: BucketShortName
     ): Promise<S3FileData> => {
-        const s3Key = await uploadFile(file, bucket)
+        try {
+            const s3Key = await uploadFile(file, bucket)
 
-        if (isS3Error(s3Key)) {
-            const error = new Error(`Error in S3: ${file.name}`)
-            recordJSException(error)
-            // s3 file upload failing could be due to IDM session timeout
-            // double check the user still has their session, if not, logout to update the React state with their login status
-            const responseCheckAuth = await checkAuth()
-            if (responseCheckAuth instanceof Error) {
-                await logout({ type: 'TIMEOUT' })
+            if (isS3Error(s3Key)) {
+                const error = new Error(`Error in S3: ${file.name}`)
+                recordJSException(error)
+                // s3 file upload failing could be due to IDM session timeout
+                // double check the user still has their session, if not, logout to update the React state with their login status
+                const responseCheckAuth = await checkAuth()
+                if (responseCheckAuth instanceof Error) {
+                    await logout({ type: 'TIMEOUT' })
+                }
+                throw error
             }
-            throw error
+            const s3URL = await getS3URL(s3Key, file.name, bucket)
+            return { key: s3Key, s3URL: s3URL }
+        } catch (err) {
+            console.error(`uploadFile error ${err}`)
+            throw err
         }
-        const s3URL = await getS3URL(s3Key, file.name, bucket)
-        return { key: s3Key, s3URL: s3URL }
     }
 
     const handleScanFile = async (
@@ -70,21 +75,22 @@ const useS3 = (): S3ContextT => {
         bucket: BucketShortName
     ): Promise<void | Error> => {
         try {
-            await scanFile(key, bucket)
-        } catch (e) {
-            if (isS3Error(e)) {
-                const error = new Error(`Error in S3: ${key}`)
+            const s3Key = await scanFile(key, bucket)
+            if (isS3Error(s3Key)) {
+                const error = Error(`Error in S3: ${key}`)
                 recordJSException(error)
-                throw error
+
+                // s3 file upload failing could be due to IDM session timeout
+                // double check the user still has their session, if not, logout to update the React state with their login status
+                const responseCheckAuth = await checkAuth()
+                if (responseCheckAuth instanceof Error) {
+                    await logout({ type: 'TIMEOUT' })
+                }
+                return error
             }
-            // s3 file upload failing could be due to IDM session timeout
-            // double check the user still has their session, if not, logout to update the React state with their login status
-            const responseCheckAuth = await checkAuth()
-            if (responseCheckAuth instanceof Error) {
-                await logout({ type: 'TIMEOUT' })
-            }
-            const error = new Error('Scanning error: Scanning retry timed out')
-            recordJSException(error)
+        } catch (e) {
+            const error = new Error(`handleScanFile error: ${e}`)
+            console.error(error)
             throw error
         }
     }
