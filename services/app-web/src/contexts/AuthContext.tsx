@@ -191,9 +191,9 @@ function AuthProvider({
     const refreshAuth = async () => {
         if (authMode !== 'LOCAL') {
             const result = await extendSession()
-            if (result instanceof Error){
+            if (result instanceof Error) {
                 await logout({
-                    type: 'TIMEOUT'
+                    type: 'TIMEOUT',
                 })
             }
         }
