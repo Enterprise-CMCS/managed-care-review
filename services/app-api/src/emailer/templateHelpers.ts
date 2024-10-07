@@ -12,10 +12,10 @@ import type {
     ProgramType,
     RateRevisionType,
     UnlockedContractType,
+    ContractQuestionType,
 } from '../domain-models'
 import { logError } from '../logger'
 import { pruneDuplicateEmails } from './formatters'
-import type { Question } from '../domain-models'
 
 // ETA SETUP
 Eta.configure({
@@ -328,8 +328,8 @@ const stripHTMLFromTemplate = (template: string) => {
 }
 
 const getQuestionRound = (
-    allQuestions: Question[],
-    currentQuestion: Question
+    allQuestions: ContractQuestionType[],
+    currentQuestion: ContractQuestionType
 ): number | Error => {
     // Filter out other divisions question and sort by created at in ascending order
     const divisionQuestions = allQuestions

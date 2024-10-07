@@ -14,12 +14,12 @@ import type { EmailParameterStore } from '../../parameterStore'
 import type { LDService } from '../../launchDarkly/launchDarkly'
 import type { StateCodeType } from '../../common-code/healthPlanFormDataType'
 
-export function createQuestionResponseResolver(
+export function createContractQuestionResponseResolver(
     store: Store,
     emailer: Emailer,
     emailParameterStore: EmailParameterStore,
     launchDarkly: LDService
-): MutationResolvers['createQuestionResponse'] {
+): MutationResolvers['createContractQuestionResponse'] {
     return async (_parent, { input }, context) => {
         const { user, ctx, tracer } = context
         const span = tracer?.startSpan('createQuestionResponse', {}, ctx)
@@ -51,7 +51,7 @@ export function createQuestionResponseResolver(
             ...input,
             documents: docs,
         }
-        const createResponseResult = await store.insertQuestionResponse(
+        const createResponseResult = await store.insertContractQuestionResponse(
             inputFormatted,
             user
         )

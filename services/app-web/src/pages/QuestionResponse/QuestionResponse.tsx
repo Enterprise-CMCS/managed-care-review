@@ -11,7 +11,7 @@ import {
     UserAccountWarningBanner,
 } from '../../components/Banner'
 import { QATable, QuestionData, Division } from './QATable/QATable'
-import { CmsUser, QuestionEdge, StateUser } from '../../gen/gqlClient'
+import { CmsUser, ContractQuestionEdge, StateUser } from '../../gen/gqlClient'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import { hasCMSUserPermissions } from '../../gqlHelpers'
 import { ContactSupportLink } from '../../components/ErrorAlert/ContactSupportLink'
@@ -21,7 +21,7 @@ type divisionQuestionDataType = {
     questions: QuestionData[]
 }
 
-const extractQuestions = (edges?: QuestionEdge[]): QuestionData[] => {
+const extractQuestions = (edges?: ContractQuestionEdge[]): QuestionData[] => {
     if (!edges) {
         return []
     }

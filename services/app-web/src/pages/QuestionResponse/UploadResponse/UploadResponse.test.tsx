@@ -14,15 +14,12 @@ import { RoutesRecord } from '../../../constants/routes'
 import { ACCEPTED_SUBMISSION_FILE_TYPES } from '../../../components/FileUpload'
 import {
     fetchCurrentUserMock,
-    mockDraftHealthPlanPackage,
     mockValidUser,
     mockContractPackageDraft,
     mockContractPackageSubmittedWithQuestions,
-    fetchContractWithQuestionsMockSuccess
+    fetchContractWithQuestionsMockSuccess,
 } from '../../../testHelpers/apolloMocks'
-import {
-    createQuestionResponseNetworkFailure,
-} from '../../../testHelpers/apolloMocks/questionResponseGQLMock'
+import { createContractQuestionResponseNetworkFailure } from '../../../testHelpers/apolloMocks/questionResponseGQLMock'
 import { SubmissionSideNav } from '../../SubmissionSideNav'
 
 describe('UploadResponse', () => {
@@ -31,7 +28,7 @@ describe('UploadResponse', () => {
 
     it('displays file upload for correct cms division', async () => {
         const contract = mockContractPackageSubmittedWithQuestions('15')
-        
+
         renderWithProviders(
             <Routes>
                 <Route element={<SubmissionSideNav />}>
@@ -75,7 +72,7 @@ describe('UploadResponse', () => {
 
     it('file upload accepts multiple pdf, word, excel documents', async () => {
         const contract = mockContractPackageSubmittedWithQuestions('15')
-        
+
         renderWithProviders(
             <Routes>
                 <Route element={<SubmissionSideNav />}>
@@ -127,7 +124,7 @@ describe('UploadResponse', () => {
 
     it('displays form validation error if attempting to add question with zero files', async () => {
         const contract = mockContractPackageSubmittedWithQuestions('15')
-        
+
         renderWithProviders(
             <Routes>
                 <Route element={<SubmissionSideNav />}>
@@ -178,7 +175,7 @@ describe('UploadResponse', () => {
 
     it('displays file upload alert if attempting to add question with all invalid files', async () => {
         const contract = mockContractPackageSubmittedWithQuestions('15')
-        
+
         renderWithProviders(
             <Routes>
                 <Route element={<SubmissionSideNav />}>
@@ -233,7 +230,7 @@ describe('UploadResponse', () => {
 
     it('displays file upload error alert if attempting to add question while a file is still uploading', async () => {
         const contract = mockContractPackageSubmittedWithQuestions('15')
-        
+
         renderWithProviders(
             <Routes>
                 <Route element={<SubmissionSideNav />}>
@@ -297,9 +294,9 @@ describe('UploadResponse', () => {
         ).toHaveLength(2)
     })
 
-    it('displays api error if createQuestionResponse fails', async () => {
+    it('displays api error if createContractQuestionResponse fails', async () => {
         const contract = mockContractPackageSubmittedWithQuestions('15')
-        
+
         renderWithProviders(
             <Routes>
                 <Route element={<SubmissionSideNav />}>
@@ -322,7 +319,7 @@ describe('UploadResponse', () => {
                                 id: '15',
                             },
                         }),
-                        createQuestionResponseNetworkFailure(),
+                        createContractQuestionResponseNetworkFailure(),
                     ],
                 },
                 routerProvider: {

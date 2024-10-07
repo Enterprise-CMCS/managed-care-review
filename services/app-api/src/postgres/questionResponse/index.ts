@@ -1,11 +1,11 @@
 export { findAllQuestionsByContract } from './findAllQuestionsByContract'
-export { insertQuestion } from './insertQuestion'
+export { insertContractQuestion } from './insertContractQuestion'
 export {
     convertToIndexQuestionsPayload,
     questionPrismaToDomainType,
     rateQuestionPrismaToDomainType,
     convertToIndexRateQuestionsPayload,
 } from './questionHelpers'
-export { insertQuestionResponse } from './insertQuestionResponse'
+export { insertContractQuestionResponse } from './insertContractQuestionResponse'
 export { insertRateQuestion } from './insertRateQuestion'
 export { findAllQuestionsByRate } from './findAllQuestionsByRate'
