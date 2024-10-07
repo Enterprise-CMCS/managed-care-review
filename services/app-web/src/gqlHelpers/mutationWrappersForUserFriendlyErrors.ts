@@ -1,23 +1,25 @@
 import {
-    CreateQuestionMutationFn,
+    CreateContractQuestionMutationFn,
     HealthPlanPackage,
     SubmitHealthPlanPackageMutationFn,
     UnlockHealthPlanPackageMutationFn,
     UnlockContractMutationFn,
-    FetchHealthPlanPackageWithQuestionsQuery,
-    FetchHealthPlanPackageWithQuestionsDocument,
-    IndexQuestionsPayload,
-    CreateQuestionMutation,
-    CreateQuestionResponseMutationFn,
-    CreateQuestionResponseMutation,
-    Question,
+    FetchContractWithQuestionsQuery,
+    FetchContractWithQuestionsDocument,
+    IndexContractQuestionsPayload,
+    CreateContractQuestionMutation,
+    CreateContractQuestionResponseMutationFn,
+    CreateContractQuestionResponseMutation,
+    ContractQuestion,
     Division,
-    CreateQuestionInput,
-    CreateQuestionResponseInput,
+    CreateContractQuestionInput,
+    CreateContractQuestionResponseInput,
     SubmitContractMutationFn,
     Contract,
     UnlockedContract,
-    UpdateStateAssignmentsByStateMutationFn
+    UpdateStateAssignmentsByStateMutationFn,
+    FetchMcReviewSettingsDocument,
+    FetchMcReviewSettingsQuery
 } from '../gen/gqlClient'
 import { ApolloError, GraphQLErrors } from '@apollo/client/errors'
 
@@ -234,7 +236,7 @@ export async function updateStateAssignmentsWrapper(
     assignedUserIDs: string[],
 ): Promise<undefined | GraphQLErrors | Error> {
 
-    const input = { 
+    const input = {
         stateCode,
         assignedUsers: assignedUserIDs,
     }
@@ -243,6 +245,44 @@ export async function updateStateAssignmentsWrapper(
         const { data } = await updateStateAssignments({
             variables: {
                 input,
+            },
+            update(cache, { data }) {
+                if (data) {
+                    const stateCode = data.updateStateAssignmentsByState.stateCode
+                    const updatedUsers = data.updateStateAssignmentsByState.assignedUsers
+                    const previousSettings =  cache.readQuery<FetchMcReviewSettingsQuery>(
+                        {
+                            query: FetchMcReviewSettingsDocument,
+                        }
+                    )
+
+                    if (previousSettings) {
+                        const cachedAssignments = [...previousSettings.fetchMcReviewSettings.stateAssignments]
+                        const stateIndex = cachedAssignments.findIndex(state => state.stateCode === stateCode)
+                        if (stateIndex === -1) {
+                            recordJSException(
+                                `[UNEXPECTED]: Error attempting to update state assignments cache, state not found in cache.`
+                            )
+                            return new Error(ERROR_MESSAGES.update_state_assignments_generic)
+                        }
+
+                        cachedAssignments[stateIndex] = {
+                            ...cachedAssignments[stateIndex],
+                            assignedCMSUsers: updatedUsers
+                        }
+
+                        cache.writeQuery({
+                            query: FetchMcReviewSettingsDocument,
+                            data: {
+                                fetchMcReviewSettings: {
+                                    ...previousSettings.fetchMcReviewSettings,
+                                    stateAssignments: cachedAssignments
+                                    },
+                                },
+                            },
+                        )
+                    }
+                }
             },
         })
 
@@ -268,46 +308,46 @@ export async function updateStateAssignmentsWrapper(
  * cache.evict() to force a refetch, but would then cause the loading UI to show.
  **/
 export const createQuestionWrapper = async (
-    createQuestion: CreateQuestionMutationFn,
-    input: CreateQuestionInput
-): Promise<CreateQuestionMutation | GraphQLErrors | Error> => {
+    createQuestion: CreateContractQuestionMutationFn,
+    input: CreateContractQuestionInput
+): Promise<CreateContractQuestionMutation | GraphQLErrors | Error> => {
     try {
         const result = await createQuestion({
             variables: { input },
             update(cache, { data }) {
                 if (data) {
-                    const newQuestion = data.createQuestion.question as Question
+                    const newQuestion = data.createContractQuestion.question as ContractQuestion
                     const result =
-                        cache.readQuery<FetchHealthPlanPackageWithQuestionsQuery>(
+                        cache.readQuery<FetchContractWithQuestionsQuery>(
                             {
-                                query: FetchHealthPlanPackageWithQuestionsDocument,
+                                query: FetchContractWithQuestionsDocument,
                                 variables: {
                                     input: {
-                                        pkgID: newQuestion.contractID,
+                                        contractID: newQuestion.contractID,
                                     },
                                 },
                             }
                         )
 
-                    const pkg = result?.fetchHealthPlanPackage.pkg
+                    const contract = result?.fetchContract.contract
 
-                    if (pkg) {
+                    if (contract) {
                         const indexQuestionDivision =
                             divisionToIndexQuestionDivision(
                                 newQuestion.division
                             )
-                        const questions = pkg.questions as IndexQuestionsPayload
+                        const questions = contract.questions as IndexContractQuestionsPayload
                         const divisionQuestions =
                             questions[indexQuestionDivision]
 
                         cache.writeQuery({
-                            query: FetchHealthPlanPackageWithQuestionsDocument,
+                            query: FetchContractWithQuestionsDocument,
                             data: {
-                                fetchHealthPlanPackage: {
-                                    pkg: {
-                                        ...pkg,
+                                fetchContract: {
+                                    contract: {
+                                        ...contract,
                                         questions: {
-                                            ...pkg.questions,
+                                            ...contract.questions,
                                             [indexQuestionDivision]: {
                                                 totalCount:
                                                     divisionQuestions.totalCount
@@ -317,7 +357,7 @@ export const createQuestionWrapper = async (
                                                 edges: [
                                                     {
                                                         __typename:
-                                                            'QuestionEdge',
+                                                            'ContractQuestionEdge',
                                                         node: {
                                                             ...newQuestion,
                                                             responses: [],
@@ -337,7 +377,7 @@ export const createQuestionWrapper = async (
             onQueryUpdated: () => true,
         })
 
-        if (result.data?.createQuestion) {
+        if (result.data?.createContractQuestion) {
             return result.data
         } else {
             recordJSException(
@@ -351,42 +391,42 @@ export const createQuestionWrapper = async (
 }
 
 export const createResponseWrapper = async (
-    createResponse: CreateQuestionResponseMutationFn,
-    pkgID: string,
-    input: CreateQuestionResponseInput,
+    createResponse: CreateContractQuestionResponseMutationFn,
+    contractID: string,
+    input: CreateContractQuestionResponseInput,
     division: Division
-): Promise<CreateQuestionResponseMutation | GraphQLErrors | Error> => {
+): Promise<CreateContractQuestionResponseMutation | GraphQLErrors | Error> => {
     try {
         const result = await createResponse({
             variables: { input },
             update(cache, { data }) {
                 if (data) {
                     const newResponse =
-                        data.createQuestionResponse.question.responses[0]
+                        data.createContractQuestionResponse.question.responses[0]
                     const result =
-                        cache.readQuery<FetchHealthPlanPackageWithQuestionsQuery>(
+                        cache.readQuery<FetchContractWithQuestionsQuery>(
                             {
-                                query: FetchHealthPlanPackageWithQuestionsDocument,
+                                query: FetchContractWithQuestionsDocument,
                                 variables: {
                                     input: {
-                                        pkgID: pkgID,
+                                        contractID: contractID,
                                     },
                                 },
                             }
                         )
-                    const pkg = result?.fetchHealthPlanPackage.pkg
+                    const contract = result?.fetchContract.contract
 
-                    if (pkg) {
-                        const questions = pkg.questions as IndexQuestionsPayload
+                    if (contract) {
+                        const questions = contract.questions as IndexContractQuestionsPayload
                         const indexQuestionDivision =
                             divisionToIndexQuestionDivision(division)
                         const divisionQuestions =
                             questions[indexQuestionDivision]
 
-                        const updatedPkg = {
-                            ...pkg,
+                        const updatedContract = {
+                            ...contract,
                             questions: {
-                                ...pkg.questions,
+                                ...contract.questions,
                                 [indexQuestionDivision]: {
                                     ...divisionQuestions,
                                     edges: divisionQuestions.edges.map(
@@ -396,7 +436,7 @@ export const createResponseWrapper = async (
                                                 newResponse.questionID
                                             ) {
                                                 return {
-                                                    __typename: 'QuestionEdge',
+                                                    __typename: 'ContractQuestionEdge',
                                                     node: {
                                                         ...edge.node,
                                                         responses: [
@@ -415,10 +455,10 @@ export const createResponseWrapper = async (
                         }
 
                         cache.writeQuery({
-                            query: FetchHealthPlanPackageWithQuestionsDocument,
+                            query: FetchContractWithQuestionsDocument,
                             data: {
-                                fetchHealthPlanPackage: {
-                                    pkg: updatedPkg,
+                                fetchContract: {
+                                    contract: updatedContract,
                                 },
                             },
                         })
@@ -428,7 +468,7 @@ export const createResponseWrapper = async (
             onQueryUpdated: () => true,
         })
 
-        if (result.data?.createQuestionResponse) {
+        if (result.data?.createContractQuestionResponse) {
             return result.data
         } else {
             recordJSException(

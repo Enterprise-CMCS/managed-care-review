@@ -19,7 +19,10 @@ export const SessionTimeoutModal = ({
     )
 
     const handleLogoutSession = async () => {
-        idleTimer.message({ action: SESSION_ACTIONS.LOGOUT_SESSION }, true)
+        idleTimer.message(
+            { action: SESSION_ACTIONS.LOGOUT_SESSION_BY_CHOICE },
+            true
+        )
     }
     const handleContinueSession = async () => {
         idleTimer.activate()

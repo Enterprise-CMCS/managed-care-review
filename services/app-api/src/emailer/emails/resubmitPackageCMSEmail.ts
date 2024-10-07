@@ -55,7 +55,7 @@ export const resubmitPackageCMSEmail = async (
         resubmittedBy: updateInfo.updatedBy.email,
         resubmittedOn: formatCalendarDate(updateInfo.updatedAt),
         resubmissionReason: updateInfo.updatedReason,
-        shouldIncludeRates: pkg.submissionType === 'CONTRACT_AND_RATES',
+        shouldIncludeRates: isContractAndRates,
         rateInfos:
             isContractAndRates &&
             pkg.rateInfos.map((rate) => ({

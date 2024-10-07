@@ -1,32 +1,30 @@
-import CREATE_QUESTION from 'app-graphql/src/mutations/createQuestion.graphql'
+import CREATE_QUESTION from 'app-graphql/src/mutations/createContractQuestion.graphql'
 import {
     constructTestPostgresServer,
-    createAndSubmitTestHealthPlanPackage,
-    createTestHealthPlanPackage,
-    resubmitTestHealthPlanPackage,
-    unlockTestHealthPlanPackage,
     createTestQuestion,
-    indexTestQuestions,
-    defaultFloridaProgram,
     updateTestStateAssignments,
 } from '../../testHelpers/gqlHelpers'
 import { getTestStateAnalystsEmails } from '../../testHelpers/parameterStoreHelpers'
-import { packageName } from '../../common-code/healthPlanFormDataType'
 import {
     assertAnError,
     assertAnErrorCode,
     createAndSubmitTestContract,
+    createTestContract,
+    fetchTestContractWithQuestions,
 } from '../../testHelpers'
 import {
     createDBUsersWithFullData,
     testCMSApproverUser,
     testCMSUser,
 } from '../../testHelpers/userHelpers'
-import { base64ToDomain } from '../../common-code/proto/healthPlanFormDataProto'
 import { testEmailConfig, testEmailer } from '../../testHelpers/emailerHelpers'
 import { testLDService } from '../../testHelpers/launchDarklyHelpers'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 import { NewPostgresStore } from '../../postgres'
+import {
+    submitTestContract,
+    unlockTestContract,
+} from '../../testHelpers/gqlContractHelpers'
 
 describe('createQuestion', () => {
     const cmsUser = testCMSUser()
@@ -43,18 +41,14 @@ describe('createQuestion', () => {
             },
         })
 
-        const submittedPkg =
-            await createAndSubmitTestHealthPlanPackage(stateServer)
+        const contract = await createAndSubmitTestContract(stateServer)
 
-        const createdQuestion = await createTestQuestion(
-            cmsServer,
-            submittedPkg.id
-        )
+        const createdQuestion = await createTestQuestion(cmsServer, contract.id)
 
         expect(createdQuestion.question).toEqual(
             expect.objectContaining({
                 id: expect.any(String),
-                contractID: submittedPkg.id,
+                contractID: contract.id,
                 division: 'DMCO',
                 documents: [
                     {
@@ -73,26 +67,12 @@ describe('createQuestion', () => {
                 user: cmsUser,
             },
         })
+        const contract = await createAndSubmitTestContract(stateServer)
 
-        const submittedPkg =
-            await createAndSubmitTestHealthPlanPackage(stateServer)
-
-        const unlockedPkg = await unlockTestHealthPlanPackage(
-            cmsServer,
-            submittedPkg.id,
-            'test unlock'
-        )
-
-        await createTestQuestion(cmsServer, submittedPkg.id)
-
-        // Resubmit package
-        await resubmitTestHealthPlanPackage(
-            stateServer,
-            unlockedPkg.id,
-            'resubmit reason'
-        )
-
-        await createTestQuestion(cmsServer, submittedPkg.id, {
+        await unlockTestContract(cmsServer, contract.id, 'test unlock')
+        await createTestQuestion(cmsServer, contract.id)
+        await submitTestContract(stateServer, contract.id, 'resubmit reason')
+        await createTestQuestion(cmsServer, contract.id, {
             documents: [
                 {
                     name: 'Test Question 2',
@@ -101,10 +81,12 @@ describe('createQuestion', () => {
             ],
         })
 
-        const indexQuestionsPayload = await indexTestQuestions(
-            cmsServer,
-            submittedPkg.id
+        const contractWithQuestions = await fetchTestContractWithQuestions(
+            stateServer,
+            contract.id
         )
+
+        const indexQuestionsPayload = contractWithQuestions.questions
 
         // Expect package to have two questions
         expect(indexQuestionsPayload).toEqual(
@@ -116,7 +98,7 @@ describe('createQuestion', () => {
                             node: expect.objectContaining({
                                 id: expect.any(String),
                                 createdAt: expect.any(Date),
-                                contractID: submittedPkg.id,
+                                contractID: contract.id,
                                 division: 'DMCO',
                                 documents: [
                                     {
@@ -132,7 +114,7 @@ describe('createQuestion', () => {
                             node: expect.objectContaining({
                                 id: expect.any(String),
                                 createdAt: expect.any(Date),
-                                contractID: submittedPkg.id,
+                                contractID: contract.id,
                                 division: 'DMCO',
                                 documents: [
                                     {
@@ -165,13 +147,13 @@ describe('createQuestion', () => {
             },
         })
 
-        const draftPkg = await createTestHealthPlanPackage(stateServer)
+        const draftContract = await createTestContract(stateServer)
 
         const createdQuestion = await cmsServer.executeOperation({
             query: CREATE_QUESTION,
             variables: {
                 input: {
-                    contractID: draftPkg.id,
+                    contractID: draftContract.id,
                     documents: [
                         {
                             name: 'Test Question',
@@ -190,14 +172,13 @@ describe('createQuestion', () => {
     })
     it('returns an error if a state user attempts to create a question for a package', async () => {
         const stateServer = await constructTestPostgresServer()
-        const submittedPkg =
-            await createAndSubmitTestHealthPlanPackage(stateServer)
+        const contract = await createAndSubmitTestContract(stateServer)
 
         const createdQuestion = await stateServer.executeOperation({
             query: CREATE_QUESTION,
             variables: {
                 input: {
-                    contractID: submittedPkg.id,
+                    contractID: contract.id,
                     documents: [
                         {
                             name: 'Test Question',
@@ -222,7 +203,7 @@ describe('createQuestion', () => {
             },
         })
 
-        await createAndSubmitTestHealthPlanPackage(stateServer)
+        await createAndSubmitTestContract(stateServer)
 
         const createdQuestion = await cmsServer.executeOperation({
             query: CREATE_QUESTION,
@@ -257,7 +238,7 @@ describe('createQuestion', () => {
             },
         })
 
-        await createAndSubmitTestHealthPlanPackage(stateServer)
+        await createAndSubmitTestContract(stateServer)
 
         const createdQuestion = await cmsServer.executeOperation({
             query: CREATE_QUESTION,
@@ -292,7 +273,7 @@ describe('createQuestion', () => {
             },
         })
 
-        await createAndSubmitTestHealthPlanPackage(stateServer)
+        await createAndSubmitTestContract(stateServer)
 
         const createdQuestion = await cmsServer.executeOperation({
             query: CREATE_QUESTION,
@@ -327,29 +308,18 @@ describe('createQuestion', () => {
             emailer: mockEmailer,
         })
 
-        const stateSubmission =
-            await createAndSubmitTestHealthPlanPackage(stateServer)
+        const contract = await createAndSubmitTestContract(stateServer)
 
-        await createTestQuestion(cmsServer, stateSubmission.id)
+        await createTestQuestion(cmsServer, contract.id)
 
-        const currentRevision = stateSubmission.revisions[0].node.formDataProto
-
-        const sub = base64ToDomain(currentRevision)
-        if (sub instanceof Error) {
-            throw sub
-        }
-
-        const programs = [defaultFloridaProgram()]
-        const name = packageName(
-            sub.stateCode,
-            sub.stateNumber,
-            sub.programIDs,
-            programs
-        )
+        const formData =
+            contract.packageSubmissions[0].contractRevision.formData
+        const contractName =
+            contract.packageSubmissions[0].contractRevision.contractName
 
         const stateReceiverEmails = [
             'james@example.com',
-            ...sub.stateContacts.map((contact) => contact.email),
+            ...formData.stateContacts.map((contact) => contact.email),
         ]
 
         // email subject line is correct for state email
@@ -358,17 +328,17 @@ describe('createQuestion', () => {
             1,
             expect.objectContaining({
                 subject: expect.stringContaining(
-                    `[LOCAL] New questions about ${name}`
+                    `[LOCAL] New questions about ${contractName}`
                 ),
                 sourceEmail: config.emailSource,
                 toAddresses: expect.arrayContaining(
                     Array.from(stateReceiverEmails)
                 ),
                 bodyText: expect.stringContaining(
-                    `CMS asked questions about ${name}`
+                    `CMS asked questions about ${contractName}`
                 ),
                 bodyHTML: expect.stringContaining(
-                    `http://localhost/submissions/${sub.id}/question-and-answers`
+                    `http://localhost/submissions/${contract.id}/question-and-answers`
                 ),
             })
         )
@@ -386,26 +356,16 @@ describe('createQuestion', () => {
             emailer: mockEmailer,
         })
 
-        const stateSubmission =
-            await createAndSubmitTestHealthPlanPackage(stateServer)
+        const contract = await createAndSubmitTestContract(stateServer)
 
-        await createTestQuestion(cmsServer, stateSubmission.id)
+        await createTestQuestion(cmsServer, contract.id)
 
-        const currentRevision = stateSubmission.revisions[0].node.formDataProto
+        const contractName =
+            contract.packageSubmissions[0].contractRevision.contractName
 
-        const sub = base64ToDomain(currentRevision)
-        if (sub instanceof Error) {
-            throw sub
-        }
-
-        const programs = [defaultFloridaProgram()]
-        const name = packageName(
-            sub.stateCode,
-            sub.stateNumber,
-            sub.programIDs,
-            programs
+        const stateAnalystsEmails = getTestStateAnalystsEmails(
+            contract.stateCode
         )
-        const stateAnalystsEmails = getTestStateAnalystsEmails(sub.stateCode)
 
         const cmsEmails = [
             ...config.devReviewTeamEmails,
@@ -421,15 +381,15 @@ describe('createQuestion', () => {
             2,
             expect.objectContaining({
                 subject: expect.stringContaining(
-                    `[LOCAL] Questions sent for ${name}`
+                    `[LOCAL] Questions sent for ${contractName}`
                 ),
                 sourceEmail: config.emailSource,
                 toAddresses: expect.arrayContaining(Array.from(cmsEmails)),
                 bodyText: expect.stringContaining(
-                    `DMCO sent questions to the state for submission ${name}`
+                    `DMCO sent questions to the state for submission ${contractName}`
                 ),
                 bodyHTML: expect.stringContaining(
-                    `http://localhost/submissions/${sub.id}/question-and-answers`
+                    `http://localhost/submissions/${contract.id}/question-and-answers`
                 ),
             })
         )
@@ -479,16 +439,8 @@ describe('createQuestion', () => {
 
         await createTestQuestion(cmsServer, stateSubmission.id)
 
-        const currentRevision =
-            stateSubmission.packageSubmissions[0].contractRevision
-
-        const programs = [defaultFloridaProgram()]
-        const name = packageName(
-            stateSubmission.stateCode,
-            stateSubmission.stateNumber,
-            currentRevision.formData.programIDs,
-            programs
-        )
+        const contractName =
+            stateSubmission.packageSubmissions[0].contractRevision.contractName
 
         const cmsEmails = [...config.devReviewTeamEmails, ...assignedUserEmails]
 
@@ -501,12 +453,12 @@ describe('createQuestion', () => {
             2,
             expect.objectContaining({
                 subject: expect.stringContaining(
-                    `[LOCAL] Questions sent for ${name}`
+                    `[LOCAL] Questions sent for ${contractName}`
                 ),
                 sourceEmail: config.emailSource,
                 toAddresses: expect.arrayContaining(Array.from(cmsEmails)),
                 bodyText: expect.stringContaining(
-                    `DMCO sent questions to the state for submission ${name}`
+                    `DMCO sent questions to the state for submission ${contractName}`
                 ),
                 bodyHTML: expect.stringContaining(
                     `http://localhost/submissions/${stateSubmission.id}/question-and-answers`
@@ -533,28 +485,18 @@ describe('createQuestion', () => {
             },
             emailer: mockEmailer,
         })
-        const stateSubmission =
-            await createAndSubmitTestHealthPlanPackage(stateServer)
+        const stateSubmission = await createAndSubmitTestContract(stateServer)
 
         await createTestQuestion(cmsDMCPServer, stateSubmission.id)
         await createTestQuestion(cmsServer, stateSubmission.id)
         await createTestQuestion(cmsServer, stateSubmission.id)
 
-        const currentRevision = stateSubmission.revisions[0].node.formDataProto
+        const contractName =
+            stateSubmission.packageSubmissions[0].contractRevision.contractName
 
-        const sub = base64ToDomain(currentRevision)
-        if (sub instanceof Error) {
-            throw sub
-        }
-
-        const programs = [defaultFloridaProgram()]
-        const name = packageName(
-            sub.stateCode,
-            sub.stateNumber,
-            sub.programIDs,
-            programs
+        const stateAnalystsEmails = getTestStateAnalystsEmails(
+            stateSubmission.stateCode
         )
-        const stateAnalystsEmails = getTestStateAnalystsEmails(sub.stateCode)
 
         const cmsEmails = [
             ...config.devReviewTeamEmails,
@@ -570,7 +512,7 @@ describe('createQuestion', () => {
             6,
             expect.objectContaining({
                 subject: expect.stringContaining(
-                    `[LOCAL] Questions sent for ${name}`
+                    `[LOCAL] Questions sent for ${contractName}`
                 ),
                 sourceEmail: config.emailSource,
                 toAddresses: expect.arrayContaining(Array.from(cmsEmails)),

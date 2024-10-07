@@ -11,7 +11,6 @@ import {
     useFetchHealthPlanPackageWrapper,
     useFetchHealthPlanPackageWithQuestionsWrapper,
 } from './fetchHealthPlanPackageWrapper'
-import { useIndexQuestionsQueryWrapper } from './useIndexQuestionsQueryWrapper'
 import { hasCMSUserPermissions, hasAdminUserPermissions, getUpdatedByDisplayName } from './userHelpers'
 import { updateDivisionAssignment } from './updateDivisionAssignment'
 
@@ -31,7 +30,6 @@ export {
     useFetchHealthPlanPackageWrapper,
     unlockMutationWrapper,
     submitMutationWrapper,
-    useIndexQuestionsQueryWrapper,
     useFetchHealthPlanPackageWithQuestionsWrapper,
     hasCMSUserPermissions,
     hasAdminUserPermissions,

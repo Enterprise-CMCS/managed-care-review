@@ -19,8 +19,8 @@ import { ACCEPTED_SUBMISSION_FILE_TYPES } from '../../../components/FileUpload'
 import { PageActionsContainer } from '../../StateSubmission/PageActions'
 import { useErrorSummary } from '../../../hooks/useErrorSummary'
 import {
-    CreateQuestionInput,
-    useCreateQuestionMutation,
+    CreateContractQuestionInput,
+    useCreateContractQuestionMutation,
 } from '../../../gen/gqlClient'
 import { SideNavOutletContextType } from '../../SubmissionSideNav/SubmissionSideNav'
 import { usePage } from '../../../contexts/PageContext'
@@ -34,11 +34,12 @@ export const UploadQuestions = () => {
     // eslint-disable-next-line @typescript-eslint/no-use-before-define
     const { division, id } = useParams<{ division: string; id: string }>()
     const navigate = useNavigate()
-    const { packageName, pkg } = useOutletContext<SideNavOutletContextType>()
+    const { packageName, contract } =
+        useOutletContext<SideNavOutletContextType>()
 
     // api
     const [createQuestion, { loading: apiLoading, error: apiError }] =
-        useCreateQuestionMutation()
+        useCreateContractQuestionMutation()
 
     // page level state
     const [shouldValidate, setShouldValidate] = React.useState(false)
@@ -59,7 +60,7 @@ export const UploadQuestions = () => {
     const { setFocusErrorSummaryHeading, errorSummaryHeadingRef } =
         useErrorSummary()
 
-    if (pkg.status === 'DRAFT') {
+    if (contract.status === 'DRAFT') {
         return <GenericErrorPage />
     }
     const showFileUploadError = Boolean(shouldValidate && fileUploadError)
@@ -84,7 +85,7 @@ export const UploadQuestions = () => {
             }
         })
 
-        const input: CreateQuestionInput = {
+        const input: CreateContractQuestionInput = {
             contractID: id as string,
             documents: questionDocs,
         }

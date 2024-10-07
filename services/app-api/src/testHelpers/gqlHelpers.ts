@@ -4,10 +4,10 @@ import SUBMIT_HEALTH_PLAN_PACKAGE from 'app-graphql/src/mutations/submitHealthPl
 import UNLOCK_HEALTH_PLAN_PACKAGE from 'app-graphql/src/mutations/unlockHealthPlanPackage.graphql'
 import FETCH_HEALTH_PLAN_PACKAGE from 'app-graphql/src/queries/fetchHealthPlanPackage.graphql'
 import UPDATE_HEALTH_PLAN_FORM_DATA from 'app-graphql/src/mutations/updateHealthPlanFormData.graphql'
-import CREATE_QUESTION from 'app-graphql/src/mutations/createQuestion.graphql'
-import INDEX_QUESTIONS from 'app-graphql/src/queries/indexQuestions.graphql'
-import CREATE_QUESTION_RESPONSE from 'app-graphql/src/mutations/createQuestionResponse.graphql'
+import CREATE_CONTRACT_QUESTION from 'app-graphql/src/mutations/createContractQuestion.graphql'
+import CREATE_CONTRACT_QUESTION_RESPONSE from 'app-graphql/src/mutations/createContractQuestionResponse.graphql'
 import UPDATE_STATE_ASSIGNMENTS_BY_STATE from 'app-graphql/src/mutations/updateStateAssignmentsByState.graphql'
+import CREATE_RATE_QUESTION from 'app-graphql/src/mutations/createRateQuestion.graphql'
 import typeDefs from 'app-graphql/src/schema.graphql'
 import type {
     HealthPlanFormDataType,
@@ -15,18 +15,18 @@ import type {
     StateCodeType,
 } from '../common-code/healthPlanFormDataType'
 import type {
-    CreateQuestionInput,
+    CreateContractQuestionInput,
     InsertQuestionResponseArgs,
     ProgramType,
+    CreateRateQuestionInputType,
 } from '../domain-models'
 import type { Emailer } from '../emailer'
 import { newLocalEmailer } from '../emailer'
 import type {
     CreateHealthPlanPackageInput,
     HealthPlanPackage,
-    CreateQuestionResponsePayload,
-    CreateQuestionPayload,
-    IndexQuestionsPayload,
+    CreateContractQuestionResponsePayload,
+    CreateContractQuestionPayload,
     UpdateStateAssignmentsByStatePayload,
 } from '../gen/gqlServer'
 import type { Context } from '../handlers/apollo_gql'
@@ -51,6 +51,7 @@ import type { S3ClientT } from '../s3'
 import { convertRateInfoToRateFormDataInput } from '../domain-models/contractAndRates/convertHPPtoContractWithRates'
 import { createAndUpdateTestContractWithoutRates } from './gqlContractHelpers'
 import { addNewRateToTestContract } from './gqlRateHelpers'
+import type { GraphQLResponse } from 'apollo-server-types'
 
 // Since our programs are checked into source code, we have a program we
 // use as our default
@@ -417,8 +418,8 @@ const fetchTestHealthPlanPackageById = async (
 const createTestQuestion = async (
     server: ApolloServer,
     contractID: string,
-    questionData?: Omit<CreateQuestionInput, 'contractID'>
-): Promise<CreateQuestionPayload> => {
+    questionData?: Omit<CreateContractQuestionInput, 'contractID'>
+): Promise<CreateContractQuestionPayload> => {
     const question = questionData || {
         documents: [
             {
@@ -428,7 +429,7 @@ const createTestQuestion = async (
         ],
     }
     const createdQuestion = await server.executeOperation({
-        query: CREATE_QUESTION,
+        query: CREATE_CONTRACT_QUESTION,
         variables: {
             input: {
                 contractID,
@@ -446,39 +447,38 @@ const createTestQuestion = async (
         throw new Error('createTestQuestion returned nothing')
     }
 
-    return createdQuestion.data.createQuestion
+    return createdQuestion.data.createContractQuestion
 }
 
-const indexTestQuestions = async (
+const createTestRateQuestion = async (
     server: ApolloServer,
-    contractID: string
-): Promise<IndexQuestionsPayload> => {
-    const indexQuestionsResult = await server.executeOperation({
-        query: INDEX_QUESTIONS,
+    rateID: string,
+    questionData?: Omit<CreateRateQuestionInputType, 'rateID'>
+): Promise<GraphQLResponse> => {
+    const question = questionData || {
+        documents: [
+            {
+                name: 'Test Question',
+                s3URL: 's3://bucketname/key/test1',
+            },
+        ],
+    }
+    return await server.executeOperation({
+        query: CREATE_RATE_QUESTION,
         variables: {
             input: {
-                contractID,
+                rateID,
+                ...question,
             },
         },
     })
-
-    if (indexQuestionsResult.errors)
-        throw new Error(
-            `indexTestQuestions query failed with errors ${indexQuestionsResult.errors}`
-        )
-
-    if (!indexQuestionsResult.data) {
-        throw new Error('indexTestQuestions returned nothing')
-    }
-
-    return indexQuestionsResult.data.indexQuestions
 }
 
 const createTestQuestionResponse = async (
     server: ApolloServer,
     questionID: string,
     responseData?: Omit<InsertQuestionResponseArgs, 'questionID'>
-): Promise<CreateQuestionResponsePayload> => {
+): Promise<CreateContractQuestionResponsePayload> => {
     const response = responseData || {
         documents: [
             {
@@ -488,7 +488,7 @@ const createTestQuestionResponse = async (
         ],
     }
     const createdResponse = await server.executeOperation({
-        query: CREATE_QUESTION_RESPONSE,
+        query: CREATE_CONTRACT_QUESTION_RESPONSE,
         variables: {
             input: {
                 ...response,
@@ -506,7 +506,7 @@ const createTestQuestionResponse = async (
         throw new Error('createTestQuestionResponse returned nothing')
     }
 
-    return createdResponse.data.createQuestionResponse
+    return createdResponse.data.createContractQuestionResponse
 }
 
 const updateTestStateAssignments = async (
@@ -550,8 +550,8 @@ export {
     defaultFloridaProgram,
     defaultFloridaRateProgram,
     createTestQuestion,
-    indexTestQuestions,
     createTestQuestionResponse,
     updateTestHealthPlanPackage,
     updateTestStateAssignments,
+    createTestRateQuestion,
 }

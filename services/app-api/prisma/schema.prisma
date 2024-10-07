@@ -43,7 +43,7 @@ model ContractTable {
   state       State   @relation(fields: [stateCode], references: [stateCode])
   stateNumber Int
 
-  questions Question[]
+  questions ContractQuestion[]
 
   draftRates DraftRateJoinTable[]
 
@@ -63,6 +63,8 @@ model RateTable {
 
   withdrawInfoID String?
   withdrawInfo   UpdateInfoTable? @relation("withdrawRateInfo", fields: [withdrawInfoID], references: [id])
+
+  questions RateQuestion[]
 
   draftContracts DraftRateJoinTable[]
 
@@ -300,20 +302,22 @@ model StateProgram {
 }
 
 model User {
-  id                    String             @id @default(uuid())
-  createdAt             DateTime           @default(now())
-  updatedAt             DateTime           @default(now()) @updatedAt
+  id                    String                     @id @default(uuid())
+  createdAt             DateTime                   @default(now())
+  updatedAt             DateTime                   @default(now()) @updatedAt
   givenName             String
   familyName            String
   email                 String
   role                  Role
   divisionAssignment    Division?
   stateCode             String?
-  stateAssignments      State[]            @relation("StateToAssignedCMSUser")
-  questions             Question[]
-  responses             QuestionResponse[]
+  stateAssignments      State[]                    @relation("StateToAssignedCMSUser")
+  questions             ContractQuestion[]
+  rateQuestions         RateQuestion[]
+  responses             ContractQuestionResponse[]
+  rateResponses         RateQuestionResponse[]
   audits                UserAudit[]
-  updatedByAuditEntries UserAudit[]        @relation("UpdatedBy")
+  updatedByAuditEntries UserAudit[]                @relation("UpdatedBy")
   updateInfos           UpdateInfoTable[]
 }
 
@@ -330,48 +334,92 @@ model UserAudit {
   priorValue      Json?
 }
 
-model Question {
-  id            String             @id @default(uuid())
-  createdAt     DateTime           @default(now())
-  updatedAt     DateTime           @default(now()) @updatedAt
+model ContractQuestion {
+  id            String                     @id @default(uuid())
+  createdAt     DateTime                   @default(now())
+  updatedAt     DateTime                   @default(now()) @updatedAt
   contractID    String
-  contract      ContractTable      @relation(fields: [contractID], references: [id])
-  addedBy       User               @relation(fields: [addedByUserID], references: [id])
+  contract      ContractTable              @relation(fields: [contractID], references: [id])
+  addedBy       User                       @relation(fields: [addedByUserID], references: [id])
   addedByUserID String
   division      Division
-  documents     QuestionDocument[]
-  responses     QuestionResponse[]
+  documents     ContractQuestionDocument[]
+  responses     ContractQuestionResponse[]
 }
 
-model QuestionDocument {
-  id         String   @id @default(uuid())
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @default(now()) @updatedAt
+model ContractQuestionDocument {
+  id         String           @id @default(uuid())
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @default(now()) @updatedAt
   name       String
   s3URL      String
   questionID String
-  question   Question @relation(fields: [questionID], references: [id])
+  question   ContractQuestion @relation(fields: [questionID], references: [id])
 }
 
-model QuestionResponseDocument {
-  id         String           @id @default(uuid())
-  createdAt  DateTime         @default(now())
-  updatedAt  DateTime         @updatedAt
-  response   QuestionResponse @relation(fields: [responseID], references: [id])
+model ContractQuestionResponseDocument {
+  id         String                   @id @default(uuid())
+  createdAt  DateTime                 @default(now())
+  updatedAt  DateTime                 @updatedAt
+  response   ContractQuestionResponse @relation(fields: [responseID], references: [id])
   responseID String
   name       String
   s3URL      String
 }
 
-model QuestionResponse {
-  id            String                     @id @default(uuid())
-  createdAt     DateTime                   @default(now())
-  updatedAt     DateTime                   @updatedAt
+model ContractQuestionResponse {
+  id            String                             @id @default(uuid())
+  createdAt     DateTime                           @default(now())
+  updatedAt     DateTime                           @updatedAt
   questionID    String
-  question      Question                   @relation(fields: [questionID], references: [id])
+  question      ContractQuestion                   @relation(fields: [questionID], references: [id])
   addedByUserID String
-  addedBy       User                       @relation(fields: [addedByUserID], references: [id])
-  documents     QuestionResponseDocument[]
+  addedBy       User                               @relation(fields: [addedByUserID], references: [id])
+  documents     ContractQuestionResponseDocument[]
+}
+
+model RateQuestion {
+  id            String                 @id @default(uuid())
+  createdAt     DateTime               @default(now())
+  updatedAt     DateTime               @default(now()) @updatedAt
+  rateID        String
+  rate          RateTable              @relation(fields: [rateID], references: [id])
+  addedBy       User                   @relation(fields: [addedByUserID], references: [id])
+  addedByUserID String
+  division      Division
+  documents     RateQuestionDocument[]
+  responses     RateQuestionResponse[]
+}
+
+model RateQuestionResponse {
+  id            String                         @id @default(uuid())
+  createdAt     DateTime                       @default(now())
+  updatedAt     DateTime                       @updatedAt
+  questionID    String
+  question      RateQuestion                   @relation(fields: [questionID], references: [id])
+  addedByUserID String
+  addedBy       User                           @relation(fields: [addedByUserID], references: [id])
+  documents     RateQuestionResponseDocument[]
+}
+
+model RateQuestionDocument {
+  id         String       @id @default(uuid())
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @default(now()) @updatedAt
+  name       String
+  s3URL      String
+  questionID String
+  question   RateQuestion @relation(fields: [questionID], references: [id])
+}
+
+model RateQuestionResponseDocument {
+  id         String               @id @default(uuid())
+  createdAt  DateTime             @default(now())
+  updatedAt  DateTime             @updatedAt
+  name       String
+  s3URL      String
+  responseID String
+  response   RateQuestionResponse @relation(fields: [responseID], references: [id])
 }
 
 enum Division {

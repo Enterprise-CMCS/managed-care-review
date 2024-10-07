@@ -32,6 +32,7 @@ import type { ContractFormDataType } from '../domain-models'
 import type { CreateHealthPlanPackageInput } from '../gen/gqlServer'
 import CREATE_CONTRACT from 'app-graphql/src/mutations/createContract.graphql'
 import { mockGqlContractDraftRevisionFormDataInput } from './gqlContractInputMocks'
+import FETCH_CONTRACT_WITH_QUESTIONS from '*.graphql'
 
 const createAndSubmitTestContract = async (
     server: ApolloServer,
@@ -149,6 +150,32 @@ async function fetchTestContract(
 
     if (!result.data) {
         throw new Error('fetchTestContract returned nothing')
+    }
+
+    return result.data.fetchContract.contract
+}
+
+const fetchTestContractWithQuestions = async (
+    server: ApolloServer,
+    contractID: string
+): Promise<Contract> => {
+    const result = await server.executeOperation({
+        query: FETCH_CONTRACT_WITH_QUESTIONS,
+        variables: {
+            input: {
+                contractID: contractID,
+            },
+        },
+    })
+
+    if (result.errors) {
+        throw new Error(
+            `fetchTestContractWithQuestions query failed with errors ${result.errors}`
+        )
+    }
+
+    if (!result.data) {
+        throw new Error('fetchTestContractWithQuestions returned nothing')
     }
 
     return result.data.fetchContract.contract
@@ -410,6 +437,7 @@ export {
     unlockTestContract,
     createAndSubmitTestContract,
     fetchTestContract,
+    fetchTestContractWithQuestions,
     createAndUpdateTestContractWithoutRates,
     createAndUpdateTestContractWithRate,
     createAndSubmitTestContractWithRate,

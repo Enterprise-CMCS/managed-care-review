@@ -63,12 +63,15 @@ export type {
 } from './HealthPlanPackageType'
 
 export type {
-    IndexQuestionsPayload,
-    CreateQuestionPayload,
-    CreateQuestionInput,
-    Question,
+    IndexContractQuestionsPayload,
+    CreateContractQuestionPayload,
+    CreateContractQuestionInput,
+    ContractQuestionType,
     Document,
-    QuestionList,
+    ContractQuestionList,
+    RateQuestionType,
+    CreateRateQuestionInputType,
+    IndexRateQuestionsPayload,
 } from './QuestionsType'
 
 export type {

@@ -1,31 +1,31 @@
 import type { PrismaClient } from '@prisma/client'
 import type {
-    Question,
-    CreateQuestionInput,
+    RateQuestionType,
     DivisionType,
     CMSUsersUnionType,
+    CreateRateQuestionInputType,
 } from '../../domain-models'
-import { v4 as uuidv4 } from 'uuid'
-import { questionPrismaToDomainType, questionInclude } from './questionHelpers'
+import {
+    questionInclude,
+    rateQuestionPrismaToDomainType,
+} from './questionHelpers'
 
-export async function insertQuestion(
+export async function insertRateQuestion(
     client: PrismaClient,
-    questionInput: CreateQuestionInput,
+    questionInput: CreateRateQuestionInputType,
     user: CMSUsersUnionType
-): Promise<Question | Error> {
+): Promise<RateQuestionType | Error> {
     const documents = questionInput.documents.map((document) => ({
-        id: uuidv4(),
         name: document.name,
         s3URL: document.s3URL,
     }))
 
     try {
-        const result = await client.question.create({
+        const result = await client.rateQuestion.create({
             data: {
-                id: uuidv4(),
-                contract: {
+                rate: {
                     connect: {
-                        id: questionInput.contractID,
+                        id: questionInput.rateID,
                     },
                 },
                 addedBy: {
@@ -41,7 +41,7 @@ export async function insertQuestion(
             include: questionInclude,
         })
 
-        return questionPrismaToDomainType(result)
+        return rateQuestionPrismaToDomainType(result)
     } catch (e) {
         return e
     }

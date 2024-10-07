@@ -1,4 +1,4 @@
-import INDEX_CONTRACTS from '../../../../app-graphql/src/queries/indexContracts.graphql'
+import INDEX_CONTRACTS from '../../../../app-graphql/src/queries/indexContractsForDashboard.graphql'
 import {
     constructTestPostgresServer,
     createTestHealthPlanPackage,

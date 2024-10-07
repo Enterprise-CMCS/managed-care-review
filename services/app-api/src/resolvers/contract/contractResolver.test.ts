@@ -1,13 +1,12 @@
+import FETCH_CONTRACT_WITH_QUESTIONS from '../../../../app-graphql/src/queries/fetchContractWithQuestions.graphql'
 import {
     constructTestPostgresServer,
     createTestQuestion,
     createTestQuestionResponse,
-    indexTestQuestions,
 } from '../../testHelpers/gqlHelpers'
-
-import FETCH_CONTRACT_WITH_QUESTIONS from '../../../../app-graphql/src/queries/fetchContractWithQuestions.graphql'
 import {
     createAndUpdateTestContractWithoutRates,
+    fetchTestContractWithQuestions,
     submitTestContract,
 } from '../../testHelpers/gqlContractHelpers'
 import { testS3Client } from '../../testHelpers'
@@ -115,10 +114,12 @@ describe('contractResolver', () => {
             createdOACTQuestion.question.id
         )
 
-        const indexQuestionsResult = await indexTestQuestions(
+        const contractWithQuestions = await fetchTestContractWithQuestions(
             stateServer,
             stateSubmission.id
         )
+        const indexQuestionsResult = contractWithQuestions.questions
+
         draft.questions = indexQuestionsResult
         const fetchContractResult = await stateServer.executeOperation({
             query: FETCH_CONTRACT_WITH_QUESTIONS,

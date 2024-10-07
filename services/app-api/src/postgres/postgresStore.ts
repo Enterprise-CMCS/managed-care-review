@@ -4,14 +4,16 @@ import type {
     ProgramType,
     UserType,
     StateUserType,
-    Question,
-    CreateQuestionInput,
+    ContractQuestionType,
+    CreateContractQuestionInput,
     InsertQuestionResponseArgs,
     StateType,
     RateType,
     ContractType,
     UnlockedContractType,
     CMSUsersUnionType,
+    RateQuestionType,
+    CreateRateQuestionInputType,
 } from '../domain-models'
 import { findPrograms, findStatePrograms } from '../postgres'
 import type { InsertUserArgsType } from './user'
@@ -24,8 +26,10 @@ import {
 } from './user'
 import {
     findAllQuestionsByContract,
-    insertQuestion,
-    insertQuestionResponse,
+    insertContractQuestion,
+    insertContractQuestionResponse,
+    insertRateQuestion,
+    findAllQuestionsByRate,
 } from './questionResponse'
 import { findAllSupportedStates } from './state'
 import {
@@ -100,17 +104,28 @@ type Store = {
         description?: string | null
     ) => Promise<CMSUsersUnionType | Error>
 
-    insertQuestion: (
-        questionInput: CreateQuestionInput,
+    insertContractQuestion: (
+        questionInput: CreateContractQuestionInput,
         user: CMSUsersUnionType
-    ) => Promise<Question | Error>
+    ) => Promise<ContractQuestionType | Error>
 
-    findAllQuestionsByContract: (pkgID: string) => Promise<Question[] | Error>
+    findAllQuestionsByContract: (
+        pkgID: string
+    ) => Promise<ContractQuestionType[] | Error>
 
-    insertQuestionResponse: (
+    insertContractQuestionResponse: (
         questionInput: InsertQuestionResponseArgs,
         user: StateUserType
-    ) => Promise<Question | Error>
+    ) => Promise<ContractQuestionType | Error>
+
+    insertRateQuestion: (
+        questionInput: CreateRateQuestionInputType,
+        user: CMSUsersUnionType
+    ) => Promise<RateQuestionType | Error>
+
+    findAllQuestionsByRate: (
+        rateID: string
+    ) => Promise<RateQuestionType[] | Error>
 
     insertDraftContract: (
         args: InsertContractArgsType
@@ -203,12 +218,17 @@ function NewPostgresStore(client: PrismaClient): Store {
         findAllUsers: () => findAllUsers(client),
         findStateAssignedUsers: (stateCode) =>
             findStateAssignedUsers(client, stateCode),
-        insertQuestion: (questionInput, user) =>
-            insertQuestion(client, questionInput, user),
+
+        insertContractQuestion: (questionInput, user) =>
+            insertContractQuestion(client, questionInput, user),
         findAllQuestionsByContract: (pkgID) =>
             findAllQuestionsByContract(client, pkgID),
-        insertQuestionResponse: (questionInput, user) =>
-            insertQuestionResponse(client, questionInput, user),
+        insertContractQuestionResponse: (questionInput, user) =>
+            insertContractQuestionResponse(client, questionInput, user),
+        insertRateQuestion: (questionInput, user) =>
+            insertRateQuestion(client, questionInput, user),
+        findAllQuestionsByRate: (rateID) =>
+            findAllQuestionsByRate(client, rateID),
 
         insertDraftContract: (args) => insertDraftContract(client, args),
         findContractWithHistory: (args) =>

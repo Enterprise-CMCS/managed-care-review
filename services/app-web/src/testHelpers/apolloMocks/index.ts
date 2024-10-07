@@ -51,7 +51,7 @@ export {
 export {
     fetchStateHealthPlanPackageWithQuestionsMockSuccess,
     fetchStateHealthPlanPackageWithQuestionsMockNotFound,
-    createQuestionNetworkFailure,
+    createContractQuestionNetworkFailure,
 } from './questionResponseGQLMock'
 
 export { mockQuestionsPayload } from './questionResponseDataMocks'
@@ -79,11 +79,14 @@ export {
     mockContractPackageUnlockedWithUnlockedType,
     mockContractRevision,
     mockRateRevision,
+    mockContractPackageSubmittedWithQuestions,
 } from './contractPackageDataMock'
 export { rateDataMock } from './rateDataMock'
 export { 
     fetchContractMockSuccess,
     fetchContractMockFail,
+    fetchContractWithQuestionsMockSuccess,
+    fetchContractWithQuestionsMockFail,
     updateDraftContractRatesMockSuccess,
     updateContractDraftRevisionMockFail,
     updateContractDraftRevisionMockSuccess,

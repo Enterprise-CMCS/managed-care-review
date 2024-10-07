@@ -8,33 +8,25 @@ import {
     STATE_SUBMISSION_FORM_ROUTES,
 } from '../../constants/routes'
 import { getRouteName } from '../../routeHelpers'
-import { useFetchHealthPlanPackageWithQuestionsWrapper } from '../../gqlHelpers'
+import {
+    ContractFormData,
+    ContractPackageSubmission,
+    ContractRevision,
+    useFetchContractWithQuestionsQuery,
+} from '../../gen/gqlClient'
 import { Loading, NavLinkWithLogging } from '../../components'
 import { ApolloError } from '@apollo/client'
 import { handleApolloError } from '../../gqlHelpers/apolloErrors'
 import { recordJSException } from '../../otelHelpers'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import { Error404 } from '../Errors/Error404Page'
-import {
-    HealthPlanPackage,
-    HealthPlanRevision,
-    User,
-} from '../../gen/gqlClient'
-import {
-    HealthPlanFormDataType,
-    packageName,
-} from '../../common-code/healthPlanFormDataType'
-import {
-    DocumentDateLookupTableType,
-    makeDocumentDateTable,
-} from '../../documentHelpers/makeDocumentDateLookupTable'
+import { Contract, User } from '../../gen/gqlClient'
 
 export type SideNavOutletContextType = {
-    pkg: HealthPlanPackage
+    contract: Contract
     packageName: string
-    currentRevision: HealthPlanRevision
-    packageData: HealthPlanFormDataType
-    documentDates: DocumentDateLookupTableType
+    currentRevision: ContractPackageSubmission | ContractRevision
+    contractFormData: ContractFormData | undefined
     user: User
 }
 
@@ -59,12 +51,18 @@ export const SubmissionSideNav = () => {
         }
     }
 
-    const { result: fetchResult } =
-        useFetchHealthPlanPackageWithQuestionsWrapper(id)
+    const { data, loading, error } = useFetchContractWithQuestionsQuery({
+        variables: {
+            input: {
+                contractID: id,
+            },
+        },
+        fetchPolicy: 'network-only',
+    })
 
-    if (fetchResult.status === 'ERROR') {
-        const err = fetchResult.error
-        console.error('Error from API fetch', fetchResult.error)
+    if (error) {
+        const err = error
+        console.error('Error from API fetch', error)
         if (err instanceof ApolloError) {
             handleApolloError(err, true)
 
@@ -77,7 +75,7 @@ export const SubmissionSideNav = () => {
         return <GenericErrorPage /> // api failure or protobuf decode failure
     }
 
-    if (fetchResult.status === 'LOADING') {
+    if (loading) {
         return (
             <GridContainer>
                 <Loading />
@@ -85,20 +83,19 @@ export const SubmissionSideNav = () => {
         )
     }
 
-    const { data, revisionsLookup } = fetchResult
-    const pkg = data.fetchHealthPlanPackage.pkg
+    const contract = data?.fetchContract.contract
 
     // Display generic error page if getting logged in user returns undefined.
-    if (!loggedInUser) {
+    if (!loggedInUser || !contract) {
         return <GenericErrorPage />
     }
 
-    const submissionStatus = pkg.status
+    const submissionStatus = contract.status
 
     //The sideNav should not be visible to a state user if the submission is a draft that has never been submitted
     const showSidebar =
         submissionStatus !== 'DRAFT' &&
-        pkg.initiallySubmittedAt !== null &&
+        contract.initiallySubmittedAt !== null &&
         QUESTION_RESPONSE_SHOW_SIDEBAR_ROUTES.includes(routeName)
 
     const isStateUser = loggedInUser?.role === 'STATE_USER'
@@ -111,31 +108,35 @@ export const SubmissionSideNav = () => {
     }
 
     // Current Revision is either the last submitted revision (cms users) or the most recent revision (for state users looking submission form)
-    const edge =
+    const submittedEdge =
+        (submissionStatus === 'SUBMITTED' ||
+            submissionStatus === 'RESUBMITTED') &&
+        contract.packageSubmissions[0]
+    const draftEdge =
         (submissionStatus === 'UNLOCKED' || submissionStatus === 'DRAFT') &&
-        loggedInUser.role === 'STATE_USER'
-            ? pkg.revisions[0]
-            : pkg.revisions.find((rEdge) => rEdge.node.submitInfo)
-    if (!edge) {
-        const errMsg = `Not able to determine current revision for sidebar: ${pkg.id}, programming error.`
+        contract.draftRevision
+    if (!submittedEdge && !draftEdge) {
+        const errMsg = `Not able to determine current revision for sidebar: ${contract.id}, programming error.`
         recordJSException(errMsg)
         return <GenericErrorPage />
     }
-    const currentRevision = edge.node
-    const packageData = revisionsLookup[currentRevision.id].formData
-    const pkgName = packageName(
-        packageData.stateCode,
-        packageData.stateNumber,
-        packageData.programIDs,
-        pkg.state.programs
-    )
-    const documentDates = makeDocumentDateTable(revisionsLookup)
+    const currentRevision = submittedEdge || draftEdge
+    const contractFormData = submittedEdge
+        ? submittedEdge.contractRevision.formData
+        : draftEdge && draftEdge.formData
+    const contractName = submittedEdge
+        ? submittedEdge.contractRevision.contractName
+        : draftEdge && draftEdge.contractName
+    if (!contractName || !contractFormData || !currentRevision) {
+        const errMsg = `Not able to derive data from current revision for sidebar: ${contract.id}, programming error.`
+        recordJSException(errMsg)
+        return <GenericErrorPage />
+    }
     const outletContext: SideNavOutletContextType = {
-        pkg,
-        packageName: pkgName,
+        contract,
+        packageName: contractName,
         currentRevision,
-        packageData,
-        documentDates,
+        contractFormData,
         user: loggedInUser,
     }
 

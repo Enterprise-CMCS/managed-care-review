@@ -8,7 +8,10 @@ import type {
     ContractRevisionType,
     StateType,
 } from '../../domain-models'
-import type { ContractFormDataType, Question } from '../../domain-models'
+import type {
+    ContractFormDataType,
+    ContractQuestionType,
+} from '../../domain-models'
 import { packageName } from '../../common-code/healthPlanFormDataType'
 import { sendQuestionResponseStateEmail } from './index'
 
@@ -30,7 +33,7 @@ const cmsUser: CMSUserType = {
     stateAssignments: [flState],
 }
 
-const questions: Question[] = [
+const questions: ContractQuestionType[] = [
     {
         id: '1234',
         contractID: 'contract-id-test',
