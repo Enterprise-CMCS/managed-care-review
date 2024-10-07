@@ -279,8 +279,8 @@ const StateAssignmentTable = () => {
         <>
             <h2>State assignments</h2>
             <p>
-                Below is a list of the DMCO analysts assigned to states. To edit
-                the analysts click on the edit link below.
+                Below is a list of the DMCO staff assigned to states. To edit
+                the assigned staff click on the edit link below.
             </p>
             <FilterAccordion
                 onClearFilters={clearFilters}
