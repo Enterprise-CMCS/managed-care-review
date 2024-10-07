@@ -90,7 +90,6 @@ RateQuestionResponseDocument {
 State ||--o{ ContractTable : stateCode
 State ||--o{ RateTable : stateCode
 ContractTable ||--o{ Question : contractID
-RateTable ||--o{ RateQuestion : rateID
 User  ||--o{  Question : addedByUserID
 User  ||--o{  QuestionResponse : addedByUserID
 User  ||--o{  RateQuestion : addedByUserID
@@ -159,6 +158,7 @@ RateTable ||--|{ RateRevisionTable : rate
 ContractRevisionTable }|--|{ RateRevisionsOnContractRevisionsTable : contractRevisions
 RateRevisionTable }|--|{ RateRevisionsOnContractRevisionsTable : rateRevisions
 RateRevisionsOnContractRevisionsTable }|--|{ UpdateInfoTable: updateinfo
+RateTable ||--o{ RateQuestion : rateID
 
 ContractRevisionTable ||--|{ UpdateInfoTable: unlock-submit
 RateRevisionTable ||--|{ UpdateInfoTable: unlock-submit
