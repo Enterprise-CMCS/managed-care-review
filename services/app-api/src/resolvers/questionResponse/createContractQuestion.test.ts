@@ -1,5 +1,4 @@
 import CREATE_QUESTION from 'app-graphql/src/mutations/createContractQuestion.graphql'
-import FETCH_CONTRACT_WITH_QUESTIONS from 'app-graphql/src/queries/fetchContractWithQuestions.graphql'
 import {
     constructTestPostgresServer,
     createTestQuestion,
@@ -11,6 +10,7 @@ import {
     assertAnErrorCode,
     createAndSubmitTestContract,
     createTestContract,
+    fetchTestContractWithQuestions,
 } from '../../testHelpers'
 import {
     createDBUsersWithFullData,
@@ -81,17 +81,12 @@ describe('createQuestion', () => {
             ],
         })
 
-        const contractWithQuestions = await stateServer.executeOperation({
-            query: FETCH_CONTRACT_WITH_QUESTIONS,
-            variables: {
-                input: {
-                    contractID: contract.id,
-                },
-            },
-        })
+        const contractWithQuestions = await fetchTestContractWithQuestions(
+            stateServer,
+            contract.id
+        )
 
-        const indexQuestionsPayload =
-            contractWithQuestions.data?.fetchContract.contract.questions
+        const indexQuestionsPayload = contractWithQuestions.questions
 
         // Expect package to have two questions
         expect(indexQuestionsPayload).toEqual(

@@ -1,4 +1,3 @@
-import FETCH_CONTRACT_WITH_QUESTIONS from '../../../../app-graphql/src/queries/fetchContractWithQuestions.graphql'
 import {
     constructTestPostgresServer,
     createTestQuestion,
@@ -9,7 +8,10 @@ import {
     createDBUsersWithFullData,
 } from '../../testHelpers/userHelpers'
 import { testS3Client } from '../../testHelpers/s3Helpers'
-import { createAndSubmitTestContract } from '../../testHelpers'
+import {
+    createAndSubmitTestContract,
+    fetchTestContractWithQuestions,
+} from '../../testHelpers'
 
 describe(`questionResponseDocumentResolver`, () => {
     const mockS3 = testS3Client()
@@ -98,16 +100,11 @@ describe(`questionResponseDocumentResolver`, () => {
             stateServer,
             createdOACTQuestion.question.id
         )
-        const contractWithQuestions = await stateServer.executeOperation({
-            query: FETCH_CONTRACT_WITH_QUESTIONS,
-            variables: {
-                input: {
-                    contractID: contract.id,
-                },
-            },
-        })
-        const indexQuestionsResult =
-            contractWithQuestions.data?.fetchContract.contract.questions
+        const contractWithQuestions = await fetchTestContractWithQuestions(
+            stateServer,
+            contract.id
+        )
+        const indexQuestionsResult = contractWithQuestions.questions
 
         expect(indexQuestionsResult).toEqual(
             expect.objectContaining({

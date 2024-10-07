@@ -6,6 +6,7 @@ import {
 } from '../../testHelpers/gqlHelpers'
 import {
     createAndUpdateTestContractWithoutRates,
+    fetchTestContractWithQuestions,
     submitTestContract,
 } from '../../testHelpers/gqlContractHelpers'
 import { testS3Client } from '../../testHelpers'
@@ -113,16 +114,11 @@ describe('contractResolver', () => {
             createdOACTQuestion.question.id
         )
 
-        const contractWithQuestions = await stateServer.executeOperation({
-            query: FETCH_CONTRACT_WITH_QUESTIONS,
-            variables: {
-                input: {
-                    contractID: stateSubmission.id,
-                },
-            },
-        })
-        const indexQuestionsResult =
-            contractWithQuestions.data?.fetchContract.contract.questions
+        const contractWithQuestions = await fetchTestContractWithQuestions(
+            stateServer,
+            stateSubmission.id
+        )
+        const indexQuestionsResult = contractWithQuestions.questions
 
         draft.questions = indexQuestionsResult
         const fetchContractResult = await stateServer.executeOperation({
