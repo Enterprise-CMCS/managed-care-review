@@ -40,3 +40,15 @@ updates:
         applies-to: version-updates
         patterns:
           - '@storybook/*'
+    npm-minor-patch:
+      patterns:
+        - '*'
+      exclude-patterns:
+        - '@aws-sdk/*'
+        - '@prisma/client'
+        - 'prisma'
+        - '@opentelemetry/*'
+        - '@storybook/*'
+      update-types:
+        - 'minor'
+        - 'patch'
