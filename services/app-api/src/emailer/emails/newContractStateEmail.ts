@@ -1,4 +1,3 @@
-import type { LockedHealthPlanFormDataType } from '../../common-code/healthPlanFormDataType'
 import { packageName as generatePackageName } from '../../common-code/healthPlanFormDataType'
 import { formatCalendarDate } from '../../../../app-web/src/common-code/dateHelpers'
 import { formatEmailAddresses, pruneDuplicateEmails } from '../formatters'
@@ -30,7 +29,6 @@ export const newContractStateEmail = async (
         ...config.devReviewTeamEmails,
     ])
 
-
     //This checks to make sure all programs contained in submission exists for the state.
     const packagePrograms = findContractPrograms(contractRev, statePrograms)
 
@@ -49,7 +47,7 @@ export const newContractStateEmail = async (
         formData.submissionType === 'CONTRACT_AND_RATES' &&
         Boolean(contract.packageSubmissions[0].rateRevisions.length)
 
-    const contractURL = submissionSummaryURL(contractRev.id, config.baseUrl)
+    const contractURL = submissionSummaryURL(contract.id, config.baseUrl)
 
     const data = {
         shouldIncludeRates: isContractAndRates,
@@ -85,7 +83,7 @@ export const newContractStateEmail = async (
                           )
                         : formatCalendarDate(rate.formData.rateDateStart),
                 rateDatesEnd:
-                    rate.formData.rateType === 'AMENDMENT' 
+                    rate.formData.rateType === 'AMENDMENT'
                         ? formatCalendarDate(
                               rate.formData.amendmentEffectiveDateEnd
                           )
