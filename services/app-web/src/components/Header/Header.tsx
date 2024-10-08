@@ -33,7 +33,7 @@ export const Header = ({
     const { currentRoute: route } = useCurrentRoute()
 
     const handleLogout = async () => {
-        await logout({type: 'DEFAULT'})
+        await logout({ type: 'DEFAULT' })
         // no need to handle errors, logout will handle
     }
 

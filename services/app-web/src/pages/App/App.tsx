@@ -50,7 +50,9 @@ function App({
     })
     const tealiumEnv = getTealiumEnv(environmentName)
     const newTealiumClient =
-        tealiumEnv === 'dev' ? devTealiumClient(isLocal) : tealiumClient(tealiumEnv)
+        tealiumEnv === 'dev'
+            ? devTealiumClient(isLocal)
+            : tealiumClient(tealiumEnv)
 
     return (
         <ErrorBoundary FallbackComponent={ErrorBoundaryRoot}>

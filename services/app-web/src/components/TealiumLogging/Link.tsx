@@ -18,12 +18,7 @@ type TealiumDataType = Omit<
 type LinkWithLoggingType = TealiumDataType & DefaultLinkProps
 const LinkWithLogging = (props: LinkWithLoggingType) => {
     const { logInternalLinkEvent } = useTealium()
-    const {
-        href,
-        onClick,
-        children,
-        ...rest
-    } = props
+    const { href, onClick, children, ...rest } = props
     return (
         <Link
             onClick={(e) => {

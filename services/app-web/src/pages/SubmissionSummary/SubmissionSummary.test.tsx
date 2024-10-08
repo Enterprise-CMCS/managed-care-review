@@ -25,7 +25,7 @@ describe('SubmissionSummary', () => {
         ({ userRole, mockUser }) => {
             it('renders submission unlocked banner for CMS user', async () => {
                 const contract = mockContractPackageUnlockedWithUnlockedType()
-                
+
                 renderWithProviders(
                     <Routes>
                         <Route element={<SubmissionSideNav />}>
@@ -85,7 +85,7 @@ describe('SubmissionSummary', () => {
 
             it('pulls the right version of UNLOCKED data for CMS users', async () => {
                 const contract = mockContractPackageUnlockedWithUnlockedType()
-                
+
                 renderWithProviders(
                     <Routes>
                         <Route element={<SubmissionSideNav />}>
@@ -139,7 +139,7 @@ describe('SubmissionSummary', () => {
 
             it('displays the legacy shared rates across submissions UI for CMS users when unlocked', async () => {
                 const contract = mockContractPackageUnlockedWithUnlockedType()
-                
+
                 renderWithProviders(
                     <Routes>
                         <Route element={<SubmissionSideNav />}>
@@ -183,7 +183,7 @@ describe('SubmissionSummary', () => {
 
             it('renders add mccrs-id link for CMS user', async () => {
                 const contract = mockContractPackageSubmittedWithQuestions()
-                
+
                 renderWithProviders(
                     <Routes>
                         <Route element={<SubmissionSideNav />}>
@@ -234,7 +234,7 @@ describe('SubmissionSummary', () => {
 
             it('renders edit mccrs-id link for CMS user when submission has a mccrs id', async () => {
                 const contract = mockContractPackageSubmittedWithQuestions()
-                contract.mccrsID='1234'
+                contract.mccrsID = '1234'
                 renderWithProviders(
                     <Routes>
                         <Route element={<SubmissionSideNav />}>
@@ -356,7 +356,7 @@ describe('SubmissionSummary', () => {
 
             it('renders back to dashboard link for CMS users', async () => {
                 const contract = mockContractPackageUnlockedWithUnlockedType()
-                
+
                 renderWithProviders(
                     <Routes>
                         <Route element={<SubmissionSideNav />}>
@@ -401,7 +401,7 @@ describe('SubmissionSummary', () => {
 
             it('renders the sidenav for CMS users', async () => {
                 const contract = mockContractPackageSubmittedWithQuestions('15')
-                
+
                 renderWithProviders(
                     <Routes>
                         <Route element={<SubmissionSideNav />}>
@@ -505,8 +505,9 @@ describe('SubmissionSummary', () => {
 
             describe('CMS user unlock submission', () => {
                 it('renders the unlock button', async () => {
-                    const contract = mockContractPackageUnlockedWithUnlockedType()
-                    
+                    const contract =
+                        mockContractPackageUnlockedWithUnlockedType()
+
                     renderWithProviders(
                         <Routes>
                             <Route element={<SubmissionSideNav />}>
@@ -729,7 +730,7 @@ describe('SubmissionSummary', () => {
     describe('STATE_USER SubmissionSummary tests', () => {
         it('renders without errors', async () => {
             const contract = mockContractPackageSubmittedWithQuestions('15')
-            
+
             renderWithProviders(
                 <Routes>
                     <Route element={<SubmissionSideNav />}>
@@ -771,7 +772,7 @@ describe('SubmissionSummary', () => {
             const contract = mockContractPackageSubmitted({
                 status: 'RESUBMITTED',
             })
-            
+
             renderWithProviders(
                 <Routes>
                     <Route element={<SubmissionSideNav />}>
@@ -823,7 +824,7 @@ describe('SubmissionSummary', () => {
 
         it('does not render an add mccrs-id link for state user', async () => {
             const contract = mockContractPackageSubmittedWithQuestions('15')
-            
+
             renderWithProviders(
                 <Routes>
                     <Route element={<SubmissionSideNav />}>
@@ -920,7 +921,7 @@ describe('SubmissionSummary', () => {
 
         it('renders back to dashboard link for state users', async () => {
             const contract = mockContractPackageSubmittedWithQuestions('15')
-            
+
             renderWithProviders(
                 <Routes>
                     <Route element={<SubmissionSideNav />}>
@@ -968,7 +969,7 @@ describe('SubmissionSummary', () => {
 
         it('renders the sidenav for State users', async () => {
             const contract = mockContractPackageSubmittedWithQuestions('15')
-            
+
             renderWithProviders(
                 <Routes>
                     <Route element={<SubmissionSideNav />}>

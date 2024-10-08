@@ -127,7 +127,7 @@ export const UnlockSubmitModal = ({
     modalRef,
     setIsSubmitting,
 }: UnlockSubmitModalProps): React.ReactElement | null => {
-    const { logFormSubmitEvent} = useTealium()
+    const { logFormSubmitEvent } = useTealium()
     const [focusErrorsInModal, setFocusErrorsInModal] = useState(true)
     const [modalAlert, setModalAlert] = useState<
         GenericApiErrorProps | undefined
@@ -188,7 +188,7 @@ export const UnlockSubmitModal = ({
             heading: modalValues.modalHeading ?? 'unknown',
             form_name: modalType.toLowerCase(),
             event_name: 'form_field_submit',
-            link_type: 'link_other'
+            link_type: 'link_other',
         })
 
         switch (modalType) {

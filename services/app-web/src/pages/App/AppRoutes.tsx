@@ -262,9 +262,9 @@ const CMSUserRoutes = ({
                         element={<SupportEmailsTable />}
                     />
                     <Route
-                    path={RoutesRecord.EDIT_STATE_ASSIGNMENTS}
-                    element={<EditStateAssign />}
-                />
+                        path={RoutesRecord.EDIT_STATE_ASSIGNMENTS}
+                        element={<EditStateAssign />}
+                    />
                 </Route>
                 <Route
                     path={RoutesRecord.SETTINGS}
