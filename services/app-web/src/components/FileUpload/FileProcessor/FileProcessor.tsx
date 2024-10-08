@@ -21,6 +21,7 @@ export type FileItemT = {
     s3URL?: string // only items uploaded to s3 have this
     sha256?: string
     status: FileStatus
+    dateAdded?: Date
 }
 
 const fileTypes = {
