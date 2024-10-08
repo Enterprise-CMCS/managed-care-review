@@ -43,7 +43,7 @@ export const newContractCMSEmail = async (
         packagePrograms
     )
 
-    const packageURL = submissionSummaryURL(contractRev.id, config.baseUrl)
+    const packageURL = submissionSummaryURL(contract.id, config.baseUrl)
 
     const isContractAndRates =
         contractRev.formData.submissionType === 'CONTRACT_AND_RATES' &&
@@ -52,15 +52,20 @@ export const newContractCMSEmail = async (
     const data = {
         shouldIncludeRates: isContractAndRates,
         packageName: packageName,
-        submissionType: SubmissionTypeRecord[contractRev.formData.submissionType],
+        submissionType:
+            SubmissionTypeRecord[contractRev.formData.submissionType],
         stateCode: contract.stateCode,
         submissionDescription: contractRev.formData.submissionDescription,
         contractDatesLabel:
             contractRev.formData.contractType === 'AMENDMENT'
                 ? 'Contract amendment effective dates'
                 : 'Contract effective dates',
-        contractDatesStart: formatCalendarDate(contractRev.formData.contractDateStart),
-        contractDatesEnd: formatCalendarDate(contractRev.formData.contractDateEnd),
+        contractDatesStart: formatCalendarDate(
+            contractRev.formData.contractDateStart
+        ),
+        contractDatesEnd: formatCalendarDate(
+            contractRev.formData.contractDateEnd
+        ),
         rateInfos:
             isContractAndRates &&
             contract.packageSubmissions[0].rateRevisions.map((rate) => ({
@@ -85,7 +90,10 @@ export const newContractCMSEmail = async (
         submissionURL: packageURL,
     }
 
-    const result = await renderTemplate<typeof data>('newContractCMSEmail', data)
+    const result = await renderTemplate<typeof data>(
+        'newContractCMSEmail',
+        data
+    )
     if (result instanceof Error) {
         return result
     } else {

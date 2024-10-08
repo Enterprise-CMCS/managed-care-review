@@ -1,0 +1,3 @@
+Managed Care submission: <b><%= it.packageName %></b> was received from <b><%= it.stateCode %></b>.
+<br /><br />
+<%~ includeFile('./newPackageSummary', it) %>
