@@ -63,7 +63,10 @@ export const sendQuestionResponseStateEmail = async (
         packageName,
         questionResponseURL,
         cmsRequestorDivision: division,
-        dateAsked: formatCalendarDate(currentQuestion.createdAt),
+        dateAsked: formatCalendarDate(
+            currentQuestion.createdAt,
+            'America/New_York'
+        ),
         questionRound,
     }
 

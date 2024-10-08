@@ -54,7 +54,10 @@ export const unlockContractCMSEmail = async (
     const data = {
         packageName,
         unlockedBy: updateInfo.updatedBy.email,
-        unlockedOn: formatCalendarDate(updateInfo.updatedAt),
+        unlockedOn: formatCalendarDate(
+            updateInfo.updatedAt,
+            'America/New_York'
+        ),
         unlockedReason: updateInfo.updatedReason,
         shouldIncludeRates:
             contractRev.formData.submissionType === 'CONTRACT_AND_RATES',

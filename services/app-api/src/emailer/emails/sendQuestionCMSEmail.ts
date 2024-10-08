@@ -60,7 +60,10 @@ export const sendQuestionCMSEmail = async (
         cmsRequestorEmail: newQuestion.addedBy.email,
         cmsRequestorName: `${newQuestion.addedBy.givenName} ${newQuestion.addedBy.familyName}`,
         cmsRequestorDivision: newQuestion.addedBy.divisionAssignment,
-        dateAsked: formatCalendarDate(newQuestion.createdAt),
+        dateAsked: formatCalendarDate(
+            newQuestion.createdAt,
+            'America/New_York'
+        ),
         questionRound,
     }
 

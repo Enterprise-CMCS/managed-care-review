@@ -50,7 +50,10 @@ export const resubmitPackageStateEmail = async (
     const data = {
         packageName,
         resubmittedBy: updateInfo.updatedBy.email,
-        resubmittedOn: formatCalendarDate(updateInfo.updatedAt),
+        resubmittedOn: formatCalendarDate(
+            updateInfo.updatedAt,
+            'America/New_York'
+        ),
         resubmissionReason: updateInfo.updatedReason,
         shouldIncludeRates: isContractAndRates,
         rateInfos:

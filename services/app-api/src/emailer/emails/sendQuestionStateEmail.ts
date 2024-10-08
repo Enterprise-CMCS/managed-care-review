@@ -53,7 +53,10 @@ export const sendQuestionStateEmail = async (
         cmsRequestorEmail: currentQuestion.addedBy.email,
         cmsRequestorName: `${currentQuestion.addedBy.givenName} ${currentQuestion.addedBy.familyName}`,
         cmsRequestorDivision: currentQuestion.addedBy.divisionAssignment,
-        dateAsked: formatCalendarDate(currentQuestion.createdAt),
+        dateAsked: formatCalendarDate(
+            currentQuestion.createdAt,
+            'America/New_York'
+        ),
     }
 
     const result = await renderTemplate<typeof data>(

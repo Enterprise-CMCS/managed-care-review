@@ -66,7 +66,10 @@ export const sendQuestionResponseCMSEmail = async (
         stateResponseSubmitterEmail: latestResponse.addedBy.email,
         stateResponseSubmitterName: `${latestResponse.addedBy.givenName} ${latestResponse.addedBy.familyName}`,
         questionRound,
-        dateAsked: formatCalendarDate(currentQuestion.createdAt),
+        dateAsked: formatCalendarDate(
+            currentQuestion.createdAt,
+            'America/New_York'
+        ),
     }
 
     const result = await renderTemplate<typeof data>(
