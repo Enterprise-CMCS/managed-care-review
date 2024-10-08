@@ -9,7 +9,7 @@ import {
 } from '../../testHelpers/apolloMocks'
 import { renderWithProviders } from '../../testHelpers/jestHelpers'
 import { SubmissionRevisionSummary } from './SubmissionRevisionSummaryV2'
-import { dayjs } from '../../common-code/dateHelpers'
+import { formatCalendarDate } from '../../common-code/dateHelpers'
 import { mockContractPackageWithDifferentProgramsInRevisions } from '../../testHelpers/apolloMocks/contractPackageDataMock'
 
 describe('SubmissionRevisionSummary', () => {
@@ -62,7 +62,7 @@ describe('SubmissionRevisionSummary', () => {
                 screen.debug()
             })
 
-            it('extracts the correct dates from the submission and displays them in tables', async () => {
+            it('extracts the correct document dates from the submission and displays them in tables', async () => {
                 renderWithProviders(
                     <Routes>
                         <Route
@@ -101,11 +101,12 @@ describe('SubmissionRevisionSummary', () => {
                     ).toBeInTheDocument()
                     expect(
                         within(rows[1]).getByText(
-                            dayjs(
+                            formatCalendarDate(
                                 mockContractPackageSubmittedWithRevisions()
                                     .packageSubmissions[1]?.contractRevision
-                                    ?.submitInfo?.updatedAt
-                            ).format('M/D/YY')
+                                    ?.formData.contractDocuments[0].dateAdded,
+                                'America/New_York'
+                            )
                         )
                     ).toBeInTheDocument()
                 })
@@ -157,9 +158,10 @@ describe('SubmissionRevisionSummary', () => {
                         name: 'MCR-MN-0005-SNBC',
                     })
                 ).toBeInTheDocument()
+                // API returns UTC timezone, we display timestamped dates in ET timezone so 1 day before on these tests.
                 expect(
                     await screen.findByLabelText('Submitted')
-                ).toHaveTextContent('01/01/24')
+                ).toHaveTextContent('12/31/2023')
             })
 
             it('renders the right indexed version 1', async () => {

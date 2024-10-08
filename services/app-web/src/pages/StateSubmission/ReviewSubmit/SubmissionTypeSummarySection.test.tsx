@@ -63,6 +63,7 @@ describe('SubmissionTypeSummarySection', () => {
                 statePrograms={statePrograms}
                 submissionName="MN-MSHO-0003"
                 isStateUser={true}
+                initiallySubmittedAt={stateSubmission.initiallySubmittedAt}
             />,
             {
                 apolloProvider: {
@@ -86,6 +87,10 @@ describe('SubmissionTypeSummarySection', () => {
         expect(
             screen.queryByText(/You must provide this information/)
         ).toBeNull()
+        // API returns UTC timezone, we display timestamped dates in ET timezone so 1 day before on these tests.
+        expect(screen.getByLabelText('Submitted')).toHaveTextContent(
+            '11/26/2024'
+        )
     })
 
     it('renders expected fields for draft package on review and submit', () => {

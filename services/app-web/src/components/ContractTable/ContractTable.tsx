@@ -15,7 +15,6 @@ import { atomWithHash } from 'jotai-location'
 import { HealthPlanPackageStatus, Program, User } from '../../gen/gqlClient'
 import styles from './ContractTable.module.scss'
 import { Table, Tag } from '@trussworks/react-uswds'
-import dayjs from 'dayjs'
 import qs from 'qs'
 import { SubmissionStatusRecord } from '../../constants/healthPlanPackages'
 import {
@@ -31,6 +30,7 @@ import { NavLinkWithLogging } from '../TealiumLogging/Link'
 import { useTealium } from '../../hooks'
 import useDeepCompareEffect from 'use-deep-compare-effect'
 import { getTealiumFiltersChanged } from '../../tealium/tealiumHelpers'
+import { formatCalendarDate } from '../../common-code/dateHelpers'
 
 export type ContractInDashboardType = {
     id: string
@@ -273,7 +273,10 @@ export const ContractTable = ({
                 header: 'Submission date',
                 cell: (info) =>
                     info.getValue()
-                        ? dayjs(info.getValue()).format('MM/DD/YYYY')
+                        ? formatCalendarDate(
+                              info.getValue(),
+                              'America/New_York'
+                          )
                         : '',
                 meta: {
                     dataTestID: `${tableConfig.rowIDName}-date`,
@@ -283,7 +286,10 @@ export const ContractTable = ({
                 header: 'Last updated',
                 cell: (info) =>
                     info.getValue()
-                        ? dayjs(info.getValue()).format('MM/DD/YYYY')
+                        ? formatCalendarDate(
+                              info.getValue(),
+                              'America/New_York'
+                          )
                         : '',
                 meta: {
                     dataTestID: `${tableConfig.rowIDName}-last-updated`,
