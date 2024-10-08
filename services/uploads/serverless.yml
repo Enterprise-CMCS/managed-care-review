@@ -40,6 +40,14 @@ provider:
             - !Sub arn:aws:s3:::${self:service}-${sls:stage}-qa-${AWS::AccountId}/*
         - Effect: 'Allow'
           Action:
+            - s3:GetObject
+            - s3:GetObjectAttributes
+            - s3:GetObjectTagging
+            - s3:PutObject
+            - s3:PutObjectAcl
+            - s3:PutObjectTagging
+            - s3:PutObjectVersionTagging
+            - s3:DeleteObject
             - s3:ListBucket
           Resource:
             - !Sub arn:aws:s3:::${self:service}-${sls:stage}-uploads-${AWS::AccountId}
