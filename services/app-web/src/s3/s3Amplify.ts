@@ -78,9 +78,33 @@ function newAmplifyS3Client(bucketConfig: S3BucketConfigType): S3ClientT {
             bucket: BucketShortName
         ): Promise<void | S3Error> => {
             try {
-                await Storage.remove(filename, {
-                    bucket: bucketConfig[bucket],
-                })
+                // Get the current metadata of the file
+                // Construct the full key including the bucket prefix
+                const fullKey = `${bucketConfig[bucket]}/${filename}`
+
+                // Get the current metadata of the file
+                const { metadata } = await Storage.getProperties(fullKey)
+
+                // Add or update the 'deleted' tag
+                const updatedMetadata = {
+                    ...metadata,
+                    deleted: 'true',
+                    deletedAt: new Date().toISOString(),
+                }
+
+                // Update the file's metadata
+                await Storage.copy(
+                    { key: filename },
+                    { key: filename },
+                    {
+                        bucket: bucketConfig[bucket],
+                        metadata: updatedMetadata,
+                    }
+                )
+
+                console.info(
+                    `File ${filename} tagged as deleted in bucket ${bucket}`
+                )
                 return
             } catch (err) {
                 assertIsS3PutError(err)
