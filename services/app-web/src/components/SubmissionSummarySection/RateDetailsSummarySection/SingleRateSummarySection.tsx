@@ -344,7 +344,8 @@ export const SingleRateSummarySection = ({
                             label="Rate submission date"
                             explainMissingData={explainMissingData}
                             children={formatCalendarDate(
-                                rate.initiallySubmittedAt
+                                rate.initiallySubmittedAt,
+                                'America/New_York'
                             )}
                         />
                         <DataDetail
