@@ -77,15 +77,23 @@ function newAmplifyS3Client(bucketConfig: S3BucketConfigType): S3ClientT {
             filename: string,
             bucket: BucketShortName
         ): Promise<void | S3Error> => {
+            // Construct the full key including the bucket prefix
+            const fullKey = `${bucketConfig[bucket]}/${filename}`
+            console.info(`Attempting to tag file as deleted: ${fullKey}`)
+            let metadata
+
             try {
-                // Get the current metadata of the file
-                // Construct the full key including the bucket prefix
-                const fullKey = `${bucketConfig[bucket]}/${filename}`
+                const result = await Storage.getProperties(fullKey)
+                metadata = result.metadata
+                console.info('Successfully got file properties', metadata)
+            } catch (getPropertiesError) {
+                console.error('Error in getProperties:', getPropertiesError)
+                throw getPropertiesError
+            }
 
-                // Get the current metadata of the file
-                const { metadata } = await Storage.getProperties(fullKey)
-
+            try {
                 // Add or update the 'deleted' tag
+                console.info('Preparing updated metadata')
                 const updatedMetadata = {
                     ...metadata,
                     deleted: 'true',
@@ -93,20 +101,25 @@ function newAmplifyS3Client(bucketConfig: S3BucketConfigType): S3ClientT {
                 }
 
                 // Update the file's metadata
-                await Storage.copy(
-                    { key: filename },
-                    { key: filename },
-                    {
-                        bucket: bucketConfig[bucket],
-                        metadata: updatedMetadata,
-                    }
-                )
+                console.info('Copying file to update metadata')
+                try {
+                    await Storage.copy(
+                        { key: fullKey },
+                        { key: fullKey },
+                        { metadata: updatedMetadata }
+                    )
+                    console.info('Successfully updated file metadata')
+                } catch (copyError) {
+                    console.error('Error in Storage.copy:', copyError)
+                    throw copyError
+                }
 
                 console.info(
                     `File ${filename} tagged as deleted in bucket ${bucket}`
                 )
                 return
             } catch (err) {
+                console.error('Error in tagFileAsDeleted:', err)
                 assertIsS3PutError(err)
                 recordJSException(err)
                 if (err.name === 'Error' && err.message === 'Network Error') {
