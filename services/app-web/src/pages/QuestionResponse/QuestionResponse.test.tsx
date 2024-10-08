@@ -43,6 +43,14 @@ describe('QuestionResponse', () => {
                                     contract: {
                                         ...contract,
                                         id: '15',
+                                        mccrsID: undefined,
+                                    },
+                                }),
+                                fetchContractWithQuestionsMockSuccess({
+                                    contract: {
+                                        ...contract,
+                                        id: '15',
+                                        mccrsID: undefined,
                                     },
                                 }),
                             ],
