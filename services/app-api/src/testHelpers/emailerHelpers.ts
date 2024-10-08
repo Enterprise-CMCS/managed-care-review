@@ -7,6 +7,7 @@ import type {
 } from '../common-code/healthPlanFormDataType'
 import type {
     ContractRevisionType,
+    ContractType,
     Question,
     RatePackageSubmissionType,
     RateRevisionType,
@@ -60,6 +61,8 @@ const testDuplicateStateAnalystsEmails: string[] = [
     'duplicate@example.com',
     'duplicate@example.com',
 ]
+const s3DlUrl =
+    'https://fake-bucket.s3.amazonaws.com/file.pdf?AWSAccessKeyId=AKIAIOSFODNN7EXAMPLE&Expires=1719564800&Signature=abc123def456ghijk' //pragma: allowlist secret
 
 const sendTestEmails = async (emailData: EmailData): Promise<void | Error> => {
     try {
@@ -326,6 +329,181 @@ const mockUnlockedContract = (
 
         revisions: [],
         packageSubmissions: [],
+        ...contractPartial,
+    }
+}
+
+const mockContract = (
+    contractPartial?: Partial<ContractType>
+): ContractType => {
+    return {
+        id: 'test-contract-123',
+        createdAt: new Date('01/01/2021'),
+        updatedAt: new Date('02/01/2021'),
+        status: 'SUBMITTED',
+        stateCode: 'MN',
+        stateNumber: 4,
+        revisions: [],
+        packageSubmissions: [
+            {
+                submitInfo: {
+                    updatedAt: new Date('01/01/2023'),
+                    updatedBy: {
+                        email: 'example@state.com',
+                        role: 'STATE_USER',
+                        givenName: 'John',
+                        familyName: 'Vila',
+                    },
+                    updatedReason: 'contract submit',
+                },
+                submittedRevisions: [],
+                contractRevision: {
+                    createdAt: new Date('01/01/2024'),
+                    updatedAt: new Date('01/01/2025'),
+                    id: '123',
+                    contract: {
+                        id: 'test-abc-123',
+                        stateCode: 'MN',
+                        stateNumber: 4,
+                    },
+                    submitInfo: {
+                        updatedAt: new Date(),
+                        updatedBy: {
+                            email: 'example@state.com',
+                            role: 'STATE_USER',
+                            givenName: 'John',
+                            familyName: 'Vila',
+                        },
+                        updatedReason: 'contract submit',
+                    },
+                    unlockInfo: undefined,
+                    formData: {
+                        programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
+                        populationCovered: 'MEDICAID',
+                        submissionType: 'CONTRACT_AND_RATES',
+                        riskBasedContract: true,
+                        submissionDescription: 'A real submission',
+                        supportingDocuments: [
+                            {
+                                s3URL: 's3://bucketname/key/contractsupporting1',
+                                sha256: 'fakesha',
+                                name: 'contractSupporting1',
+                                dateAdded: new Date('01/15/2024'),
+                                downloadURL: s3DlUrl,
+                            },
+                            {
+                                s3URL: 's3://bucketname/key/contractSupporting2',
+                                sha256: 'fakesha',
+                                name: 'contractSupporting2',
+                                dateAdded: new Date('01/13/2024'),
+                                downloadURL: s3DlUrl,
+                            },
+                        ],
+                        stateContacts: [],
+                        contractType: 'AMENDMENT',
+                        contractExecutionStatus: 'EXECUTED',
+                        contractDocuments: [
+                            {
+                                s3URL: 's3://bucketname/key/contract',
+                                sha256: 'fakesha',
+                                name: 'contract',
+                                dateAdded: new Date('01/01/2024'),
+                                downloadURL: s3DlUrl,
+                            },
+                        ],
+                        contractDateStart: new Date(),
+                        contractDateEnd: new Date(),
+                        managedCareEntities: ['MCO'],
+                        federalAuthorities: ['STATE_PLAN'],
+                        inLieuServicesAndSettings: true,
+                        modifiedBenefitsProvided: true,
+                        modifiedGeoAreaServed: false,
+                        modifiedMedicaidBeneficiaries: true,
+                        modifiedRiskSharingStrategy: true,
+                        modifiedIncentiveArrangements: false,
+                        modifiedWitholdAgreements: false,
+                        modifiedStateDirectedPayments: true,
+                        modifiedPassThroughPayments: true,
+                        modifiedPaymentsForMentalDiseaseInstitutions: false,
+                        modifiedMedicalLossRatioStandards: true,
+                        modifiedOtherFinancialPaymentIncentive: false,
+                        modifiedEnrollmentProcess: true,
+                        modifiedGrevienceAndAppeal: false,
+                        modifiedNetworkAdequacyStandards: true,
+                        modifiedLengthOfContract: false,
+                        modifiedNonRiskPaymentArrangements: true,
+                        statutoryRegulatoryAttestation: true,
+                        statutoryRegulatoryAttestationDescription:
+                            'everything meets regulatory attestation',
+                    },
+                },
+                rateRevisions: [
+                    {
+                        id: '1234',
+                        rateID: '123',
+                        createdAt: new Date('01/01/2023'),
+                        updatedAt: new Date('01/01/2023'),
+                        formData: {
+                            rateCertificationName: 'rate cert',
+                            rateType: 'AMENDMENT',
+                            rateCapitationType: 'RATE_CELL',
+                            rateDocuments: [
+                                {
+                                    s3URL: 's3://bucketname/key/rate',
+                                    sha256: 'fakesha',
+                                    name: 'rate',
+                                    dateAdded: new Date('01/01/2023'),
+                                    downloadURL: s3DlUrl,
+                                },
+                            ],
+                            supportingDocuments: [
+                                {
+                                    s3URL: 's3://bucketname/key/rateSupporting1',
+                                    sha256: 'fakesha',
+                                    name: 'rate supporting 1',
+                                    dateAdded: new Date('01/15/2023'),
+                                    downloadURL: s3DlUrl,
+                                },
+                                {
+                                    s3URL: 's3://bucketname/key/rateSupporting1',
+                                    sha256: 'fakesha',
+                                    name: 'rate supporting 2',
+                                    dateAdded: new Date('01/15/2023'),
+                                    downloadURL: s3DlUrl,
+                                },
+                            ],
+                            rateDateStart: new Date(),
+                            rateDateEnd: new Date(),
+                            rateDateCertified: new Date(),
+                            amendmentEffectiveDateStart: new Date(),
+                            amendmentEffectiveDateEnd: new Date(),
+                            rateProgramIDs: [
+                                'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
+                            ],
+                            deprecatedRateProgramIDs: [],
+                            certifyingActuaryContacts: [
+                                {
+                                    actuarialFirm: 'DELOITTE',
+                                    name: 'Actuary Contact 1',
+                                    titleRole: 'Test Actuary Contact 1',
+                                    email: 'actuarycontact1@test.com',
+                                },
+                            ],
+                            addtlActuaryContacts: [
+                                {
+                                    actuarialFirm: 'DELOITTE',
+                                    name: 'Actuary Contact 1',
+                                    titleRole: 'Test Actuary Contact 1',
+                                    email: 'actuarycontact1@test.com',
+                                },
+                            ],
+                            actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+                            packagesWithSharedRateCerts: [],
+                        },
+                    },
+                ],
+            },
+        ],
         ...contractPartial,
     }
 }
@@ -742,6 +920,7 @@ export {
     mockContractAmendmentFormData,
     mockContractOnlyFormData,
     mockContractRev,
+    mockContract,
     mockContractAndRatesFormData,
     mockUnlockedContract,
     mockUnlockedContractAndRatesFormData,

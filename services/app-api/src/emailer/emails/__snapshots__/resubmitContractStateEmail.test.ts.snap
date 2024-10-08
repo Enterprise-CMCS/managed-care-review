@@ -1,0 +1,13 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`renders overall email as expected 1`] = `
+"Submission MCR-MN-0004-SNBC was successfully resubmitted<br />
+<br />
+<b>Submitted by:</b> bob@example.com<br />
+<b>Updated on:</b> 02/01/2022<br />
+<b>Changes made:</b> Added rate certification.<br />
+<b>Rate name</b>: MCR-MN-0003-MSHO-RATE-20210202-20211201-CERTIFICATION-20201201<br />
+<br />
+If you need to make any further changes, please contact CMS.
+"
+`;
