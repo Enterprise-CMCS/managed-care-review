@@ -12,6 +12,7 @@ import styles from './ChangeHistory.module.scss'
 import { LinkWithLogging } from '../TealiumLogging/Link'
 import { getUpdatedByDisplayName } from '../../gqlHelpers/userHelpers'
 import { useTealium } from '../../hooks'
+import { formatDateTime } from '../../common-code/dateHelpers'
 
 type ChangeHistoryProps = {
     contract: Contract | UnlockedContract
@@ -25,7 +26,7 @@ type flatRevisions = UpdateInformation & {
 export const ChangeHistory = ({
     contract,
 }: ChangeHistoryProps): React.ReactElement => {
-    const {logAccordionEvent} = useTealium()
+    const { logAccordionEvent } = useTealium()
     const flattenedRevisions = (): flatRevisions[] => {
         const result: flatRevisions[] = []
 
@@ -105,11 +106,7 @@ export const ChangeHistory = ({
             return {
                 title: (
                     <div>
-                        {dayjs
-                            .utc(r.updatedAt)
-                            .tz('America/New_York')
-                            .format('MM/DD/YY h:mma')}{' '}
-                        ET - {isSubsequentSubmission ? 'Submission' : 'Unlock'}
+                        {`${formatDateTime(r.updatedAt, 'America/New_York')} ET - ${isSubsequentSubmission ? 'Submission' : 'Unlock'}`}
                     </div>
                 ),
                 // Display this code if this is the initial contract. We only want to display the link of the initial contract
@@ -164,7 +161,12 @@ export const ChangeHistory = ({
                 ),
                 expanded: false,
                 handleToggle: () => {
-                    logAccordionEvent({event_name: 'accordion_opened', heading: getUpdatedByDisplayName(r.updatedBy) ?? 'unknown', link_type:'link_other'})
+                    logAccordionEvent({
+                        event_name: 'accordion_opened',
+                        heading:
+                            getUpdatedByDisplayName(r.updatedBy) ?? 'unknown',
+                        link_type: 'link_other',
+                    })
                 },
                 id: dayjs(r.updatedAt).toISOString(),
             }
