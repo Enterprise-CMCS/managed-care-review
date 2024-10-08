@@ -1,6 +1,6 @@
-import {dayjs} from './dayjs';
+import {formatDateTime} from './calendarDate';
 
 export const formatBannerDate = (date?: Date) =>
     date
-        ? dayjs.utc(date).tz('America/New_York').format('MM/DD/YY h:mma')
+        ? `${formatDateTime(date,'America/New_York')} ET`
         : 'Not available'

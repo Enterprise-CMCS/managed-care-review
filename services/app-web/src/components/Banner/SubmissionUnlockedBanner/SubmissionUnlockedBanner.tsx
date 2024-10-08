@@ -36,7 +36,6 @@ export const SubmissionUnlockedBanner = ({
                 <p className="usa-alert__text">
                     <b>Unlocked on:&nbsp;</b>
                     {formatBannerDate(unlockedInfo?.updatedAt)}
-                    &nbsp;ET
                 </p>
                 <ExpandableText>
                     <>
