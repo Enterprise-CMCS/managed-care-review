@@ -52,7 +52,7 @@ describe('SubmissionRevisionSummary', () => {
                         name: 'Contract details',
                     })
                 ).toBeInTheDocument()
-                const submissionVersion = `02/16/24 10:22pm ET version`
+                const submissionVersion = `02/16/2024 10:22pm ET version`
                 expect(
                     await screen.findByText(submissionVersion)
                 ).toBeInTheDocument()
