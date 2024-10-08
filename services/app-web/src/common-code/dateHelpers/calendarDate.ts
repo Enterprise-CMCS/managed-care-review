@@ -1,21 +1,33 @@
 import { dayjs } from './dayjs'
 
-// We store calendar dates in UTC for consistency. This formats a date like '12/02/2022'.
-// These formatted dates, should only be used for display, never saved to the database.
-function formatCalendarDate(date: Date | undefined | string, timeZone?: 'UTC' | 'America/New_York'): string {
-    const tz = timeZone || 'UTC'
+/**
+ * We store calendar dates in UTC for consistency. This formats a date time into 'MM/DD/YYYY' based on timezone.
+ * @param date date to be formatted
+ * @param timeZone Timezone formatted date should be in.
+ * "UTC" is usually for displaying user inputted calendar dates like contract start/end dates.
+ * "America/New_York" is usually for app generated timestamps, where timezones are important. This should be only used
+ * for display and not saving. We have decided to show these types of dates in "America/New_York" for the app.
+ */
+function formatCalendarDate(date: Date | undefined | string, timeZone: 'UTC' | 'America/New_York'): string {
     if (!date || !dayjs(date).isValid()) {
         return ''
     }
-    return dayjs(date).tz(tz).format('MM/DD/YYYY')
+    return dayjs(date).tz(timeZone).format('MM/DD/YYYY')
 }
 
-function formatDateTime(date: Date | undefined | string, timeZone?: 'UTC' | 'America/New_York'): string {
-    const tz = timeZone || 'America/New_York'
+/**
+ * We store calendar dates in UTC for consistency. This formats a date time into 'MM/DD/YYYY h:mma' based on timezone.
+ * @param date date to be formatted
+ * @param timeZone Timezone formatted date should be in.
+ * "UTC" is usually for displaying user inputted calendar dates like contract start/end dates.
+ * "America/New_York" is usually for app generated timestamps, where timezones are important. This should be only used
+ * for display and not saving. We have decided to show these types of dates in "America/New_York" for the app.
+ */
+function formatDateTime(date: Date | undefined | string, timeZone: 'UTC' | 'America/New_York'): string {
     if (!date || !dayjs(date).isValid()) {
         return ''
     }
-    return dayjs(date).tz(tz).format('MM/DD/YYYY h:mma')
+    return dayjs(date).tz(timeZone).format('MM/DD/YYYY h:mma')
 }
 
 function formatRateNameDate(date: Date | undefined): string {

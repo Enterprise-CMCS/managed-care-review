@@ -48,8 +48,9 @@ export const LinkedRateSummary = ({
                             rateForm.rateDateStart &&
                             rateForm.rateDateEnd &&
                             `${formatCalendarDate(
-                                rateForm?.rateDateStart
-                            )} to ${formatCalendarDate(rateForm?.rateDateEnd)}`
+                                rateForm?.rateDateStart,
+                                'UTC'
+                            )} to ${formatCalendarDate(rateForm?.rateDateEnd, 'UTC')}`
                         }
                     />
                 </DoubleColumnGrid>

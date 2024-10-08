@@ -263,9 +263,11 @@ export const ContractDetailsSummarySection = ({
                             contractFormData?.contractDateStart &&
                             contractFormData?.contractDateEnd
                                 ? `${formatCalendarDate(
-                                      contractFormData?.contractDateStart
+                                      contractFormData?.contractDateStart,
+                                      'UTC'
                                   )} to ${formatCalendarDate(
-                                      contractFormData?.contractDateEnd
+                                      contractFormData?.contractDateEnd,
+                                      'UTC'
                                   )}`
                                 : undefined
                         }
