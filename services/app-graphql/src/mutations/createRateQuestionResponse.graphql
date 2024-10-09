@@ -1,8 +1,8 @@
-mutation createContractQuestionResponse($input: CreateQuestionResponseInput!) {
-    createContractQuestionResponse(input: $input) {
+mutation createRateQuestionResponse($input: CreateQuestionResponseInput!) {
+    createRateQuestionResponse(input: $input) {
         question {
             id
-            contractID
+            rateID
             createdAt
             addedBy {
                 ... on CMSUser {
