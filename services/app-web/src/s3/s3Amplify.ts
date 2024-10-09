@@ -105,8 +105,8 @@ function newAmplifyS3Client(bucketConfig: S3BucketConfigType): S3ClientT {
                 console.info('Copying file to update metadata')
                 try {
                     await Storage.copy(
-                        { key: fullKey },
-                        { key: fullKey },
+                        { key: filename },
+                        { key: filename },
                         { metadata: updatedMetadata }
                     )
                     console.info('Successfully updated file metadata')
