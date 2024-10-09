@@ -83,7 +83,8 @@ function newAmplifyS3Client(bucketConfig: S3BucketConfigType): S3ClientT {
             let metadata
 
             try {
-                const result = await Storage.getProperties(fullKey)
+                console.info(`filename: ${filename}`)
+                const result = await Storage.getProperties(filename)
                 metadata = result.metadata
                 console.info('Successfully got file properties', metadata)
             } catch (getPropertiesError) {
