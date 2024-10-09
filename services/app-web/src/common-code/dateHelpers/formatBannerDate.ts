@@ -1,6 +1,6 @@
-import {formatDateTime} from './calendarDate';
+import { formatToEasternTime } from './calendarDate';
 
 export const formatBannerDate = (date?: Date) =>
     date
-        ? `${formatDateTime(date,'America/New_York')}`
+        ? `${formatToEasternTime(date)}`
         : 'Not available'
