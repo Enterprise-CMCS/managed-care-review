@@ -78,7 +78,7 @@ function newAmplifyS3Client(bucketConfig: S3BucketConfigType): S3ClientT {
             bucket: BucketShortName
         ): Promise<void | S3Error> => {
             // Construct the full key including the bucket prefix
-            const fullKey = `${bucketConfig[bucket]}/allusers/${filename}`
+            const fullKey = `allusers/${filename}`
             console.info(`Attempting to tag file as deleted: ${fullKey}`)
             let metadata
 
@@ -105,8 +105,8 @@ function newAmplifyS3Client(bucketConfig: S3BucketConfigType): S3ClientT {
                 console.info('Copying file to update metadata')
                 try {
                     await Storage.copy(
-                        { key: filename },
-                        { key: filename },
+                        { key: fullKey },
+                        { key: fullKey },
                         { metadata: updatedMetadata }
                     )
                     console.info('Successfully updated file metadata')
