@@ -211,9 +211,11 @@ resources:
                   Action:
                     - 's3:*'
                   Resource:
+                    - ${self:custom.document_uploads_bucket_arn}
+                    - ${self:custom.document_uploads_bucket_arn}/*
+                    - ${self:custom.qa_uploads_bucket_arn}
+                    - ${self:custom.qa_uploads_bucket_arn}/*
                     # Must use Join here.  See: https://github.com/serverless/serverless/issues/3565
-                    - ${self:custom.document_uploads_bucket_arn}/allusers/*
-                    - ${self:custom.qa_uploads_bucket_arn}/allusers/*
                     # This private bucket is used by any files stored "private" by Amplify
                     # https://docs.amplify.aws/lib/storage/configureaccess/q/platform/js/
                     - Fn::Join:
