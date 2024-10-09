@@ -4,7 +4,10 @@ import type {
     StateUserType,
     ContractQuestionType,
 } from '../../domain-models'
-import { questionInclude, questionPrismaToDomainType } from './questionHelpers'
+import {
+    questionInclude,
+    contractQuestionPrismaToDomainType,
+} from './questionHelpers'
 import { NotFoundError } from '../postgresErrors'
 
 export async function insertContractQuestionResponse(
@@ -39,7 +42,7 @@ export async function insertContractQuestionResponse(
             include: questionInclude,
         })
 
-        return questionPrismaToDomainType(result)
+        return contractQuestionPrismaToDomainType(result)
     } catch (e) {
         // Return a NotFoundError if prisma fails on the primary key constraint
         // An operation failed because it depends on one or more records
@@ -47,7 +50,6 @@ export async function insertContractQuestionResponse(
         if (e.code === 'P2025') {
             return new NotFoundError('Question was not found to respond to')
         }
-
         return e
     }
 }

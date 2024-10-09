@@ -5,7 +5,10 @@ import type {
     DivisionType,
     CMSUsersUnionType,
 } from '../../domain-models'
-import { questionPrismaToDomainType, questionInclude } from './questionHelpers'
+import {
+    contractQuestionPrismaToDomainType,
+    questionInclude,
+} from './questionHelpers'
 
 export async function insertContractQuestion(
     client: PrismaClient,
@@ -38,7 +41,7 @@ export async function insertContractQuestion(
             include: questionInclude,
         })
 
-        return questionPrismaToDomainType(result)
+        return contractQuestionPrismaToDomainType(result)
     } catch (e) {
         return e
     }
