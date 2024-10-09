@@ -8,6 +8,7 @@ import CREATE_CONTRACT_QUESTION from 'app-graphql/src/mutations/createContractQu
 import CREATE_CONTRACT_QUESTION_RESPONSE from 'app-graphql/src/mutations/createContractQuestionResponse.graphql'
 import UPDATE_STATE_ASSIGNMENTS_BY_STATE from 'app-graphql/src/mutations/updateStateAssignmentsByState.graphql'
 import CREATE_RATE_QUESTION from 'app-graphql/src/mutations/createRateQuestion.graphql'
+import CREATE_RATE_QUESTION_RESPONSE from 'app-graphql/src/mutations/createRateQuestionResponse.graphql'
 import typeDefs from 'app-graphql/src/schema.graphql'
 import type {
     HealthPlanFormDataType,
@@ -474,6 +475,31 @@ const createTestRateQuestion = async (
     })
 }
 
+const createTestRateQuestionResponse = async (
+    server: ApolloServer,
+    questionID: string,
+    responseData?: Omit<InsertQuestionResponseArgs, 'questionID'>
+): Promise<GraphQLResponse> => {
+    const response = responseData || {
+        documents: [
+            {
+                name: 'Test Question Response',
+                s3URL: 's3://bucketname/key/test1',
+            },
+        ],
+    }
+
+    return await server.executeOperation({
+        query: CREATE_RATE_QUESTION_RESPONSE,
+        variables: {
+            input: {
+                ...response,
+                questionID,
+            },
+        },
+    })
+}
+
 const createTestQuestionResponse = async (
     server: ApolloServer,
     questionID: string,
@@ -554,4 +580,5 @@ export {
     updateTestHealthPlanPackage,
     updateTestStateAssignments,
     createTestRateQuestion,
+    createTestRateQuestionResponse,
 }
