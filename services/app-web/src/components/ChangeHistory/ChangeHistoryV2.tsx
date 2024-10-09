@@ -106,7 +106,7 @@ export const ChangeHistory = ({
             return {
                 title: (
                     <div>
-                        {`${formatDateTime(r.updatedAt, 'America/New_York')} ET - ${isSubsequentSubmission ? 'Submission' : 'Unlock'}`}
+                        {`${formatDateTime(r.updatedAt, 'America/New_York')} - ${isSubsequentSubmission ? 'Submission' : 'Unlock'}`}
                     </div>
                 ),
                 // Display this code if this is the initial contract. We only want to display the link of the initial contract

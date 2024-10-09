@@ -16,7 +16,7 @@ function formatCalendarDate(date: Date | undefined | string, timeZone: 'UTC' | '
 }
 
 /**
- * We store calendar dates in UTC for consistency. This formats a date time into 'MM/DD/YYYY h:mma' based on timezone.
+ * We store calendar dates in UTC for consistency. This formats a date time into 'MM/DD/YYYY h:mma timezone'.
  * @param date date to be formatted
  * @param timeZone Timezone formatted date should be in.
  * "UTC" is usually for displaying user inputted calendar dates like contract start/end dates.
@@ -27,7 +27,9 @@ function formatDateTime(date: Date | undefined | string, timeZone: 'UTC' | 'Amer
     if (!date || !dayjs(date).isValid()) {
         return ''
     }
-    return dayjs(date).tz(timeZone).format('MM/DD/YYYY h:mma')
+    const formattedDate = dayjs(date).tz(timeZone).format('MM/DD/YYYY h:mma')
+    const tz = timeZone === 'UTC' ? timeZone : 'ET'
+    return `${formattedDate} ${tz}`
 }
 
 function formatRateNameDate(date: Date | undefined): string {

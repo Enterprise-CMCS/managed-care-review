@@ -123,7 +123,7 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
                                 className={styles.submissionVersion}
                                 data-testid="revision-version"
                             >
-                                {`${formatDateTime(submitInfo?.updatedAt, 'America/New_York')} ET version`}
+                                {`${formatDateTime(submitInfo?.updatedAt, 'America/New_York')} version`}
                             </p>
                         )
                     }
