@@ -78,7 +78,7 @@ function newAmplifyS3Client(bucketConfig: S3BucketConfigType): S3ClientT {
             bucket: BucketShortName
         ): Promise<void | S3Error> => {
             // Construct the full key including the bucket prefix
-            const fullKey = `${bucketConfig[bucket]}/${filename}`
+            const fullKey = `${bucketConfig[bucket]}/allusers/${filename}`
             console.info(`Attempting to tag file as deleted: ${fullKey}`)
             let metadata
 
