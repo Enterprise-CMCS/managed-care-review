@@ -47,7 +47,10 @@ export const unlockPackageCMSEmail = async (
     const data = {
         packageName,
         unlockedBy: updateInfo.updatedBy.email,
-        unlockedOn: formatCalendarDate(updateInfo.updatedAt),
+        unlockedOn: formatCalendarDate(
+            updateInfo.updatedAt,
+            'America/New_York'
+        ),
         unlockedReason: updateInfo.updatedReason,
         shouldIncludeRates: pkg.submissionType === 'CONTRACT_AND_RATES',
         rateInfos:

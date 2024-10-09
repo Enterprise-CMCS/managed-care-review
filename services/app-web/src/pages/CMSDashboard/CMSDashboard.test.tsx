@@ -260,7 +260,8 @@ describe('CMSDashboard', () => {
                     const lastUpdated = within(unlockedRow).getByTestId(
                         'submission-last-updated'
                     )
-                    expect(lastUpdated).toHaveTextContent('01/22/2100')
+                    // API returns UTC timezone, we display timestamped dates in ET timezone so 1 day before on these tests.
+                    expect(lastUpdated).toHaveTextContent('01/21/2100')
                 })
 
                 it('should display filters on cms dashboard', async () => {

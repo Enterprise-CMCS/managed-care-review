@@ -293,9 +293,11 @@ export const RateDetailsSummarySection = ({
                                             rateInfo.rateDateStart &&
                                             rateInfo.rateDateEnd ? (
                                                 `${formatCalendarDate(
-                                                    rateInfo.rateDateStart
+                                                    rateInfo.rateDateStart,
+                                                    'UTC'
                                                 )} to ${formatCalendarDate(
-                                                    rateInfo.rateDateEnd
+                                                    rateInfo.rateDateEnd,
+                                                    'UTC'
                                                 )}`
                                             ) : (
                                                 <DataDetailMissingField />
@@ -311,7 +313,8 @@ export const RateDetailsSummarySection = ({
                                         }
                                         explainMissingData={!isSubmitted}
                                         children={formatCalendarDate(
-                                            rateInfo.rateDateCertified
+                                            rateInfo.rateDateCertified,
+                                            'UTC'
                                         )}
                                     />
                                     {rateInfo.rateAmendmentInfo ? (
@@ -321,10 +324,12 @@ export const RateDetailsSummarySection = ({
                                             explainMissingData={!isSubmitted}
                                             children={`${formatCalendarDate(
                                                 rateInfo.rateAmendmentInfo
-                                                    .effectiveDateStart
+                                                    .effectiveDateStart,
+                                                'UTC'
                                             )} to ${formatCalendarDate(
                                                 rateInfo.rateAmendmentInfo
-                                                    .effectiveDateEnd
+                                                    .effectiveDateEnd,
+                                                'UTC'
                                             )}`}
                                         />
                                     ) : null}

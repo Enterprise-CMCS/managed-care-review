@@ -7,7 +7,7 @@ import { ContactsSummarySection } from '../StateSubmission/ReviewSubmit/Contacts
 import { RateDetailsSummarySection } from '../StateSubmission/ReviewSubmit/RateDetailsSummarySection'
 import { SubmissionTypeSummarySection } from '../StateSubmission/ReviewSubmit/SubmissionTypeSummarySection'
 import { usePage } from '../../contexts/PageContext'
-import { dayjs } from '../../common-code/dateHelpers'
+import { formatToEasternTime } from '../../common-code/dateHelpers'
 import styles from './SubmissionRevisionSummary.module.scss'
 import { PreviousSubmissionBanner } from '../../components'
 import { useFetchContractQuery } from '../../gen/gqlClient'
@@ -123,10 +123,7 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
                                 className={styles.submissionVersion}
                                 data-testid="revision-version"
                             >
-                                {`${dayjs
-                                    .utc(submitInfo?.updatedAt)
-                                    .tz('America/New_York')
-                                    .format('MM/DD/YY h:mma')} ET version`}
+                                {`${formatToEasternTime(submitInfo?.updatedAt)} version`}
                             </p>
                         )
                     }

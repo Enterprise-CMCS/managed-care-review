@@ -160,7 +160,7 @@ export const SingleRateSummarySection = ({
         if (!startDate || !endDate) {
             return undefined
         }
-        return `${formatCalendarDate(startDate)} to ${formatCalendarDate(endDate)}`
+        return `${formatCalendarDate(startDate, 'UTC')} to ${formatCalendarDate(endDate, 'UTC')}`
     }
 
     const validateActuary = (actuary: ActuaryContact): boolean => {
@@ -325,7 +325,8 @@ export const SingleRateSummarySection = ({
                             }
                             explainMissingData={explainMissingData}
                             children={formatCalendarDate(
-                                formData.rateDateCertified
+                                formData.rateDateCertified,
+                                'UTC'
                             )}
                         />
                         {isRateAmendment ? (
@@ -344,7 +345,8 @@ export const SingleRateSummarySection = ({
                             label="Rate submission date"
                             explainMissingData={explainMissingData}
                             children={formatCalendarDate(
-                                rate.initiallySubmittedAt
+                                rate.initiallySubmittedAt,
+                                'America/New_York'
                             )}
                         />
                         <DataDetail

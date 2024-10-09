@@ -32,7 +32,7 @@ import type { ContractFormDataType } from '../domain-models'
 import type { CreateHealthPlanPackageInput } from '../gen/gqlServer'
 import CREATE_CONTRACT from 'app-graphql/src/mutations/createContract.graphql'
 import { mockGqlContractDraftRevisionFormDataInput } from './gqlContractInputMocks'
-import FETCH_CONTRACT_WITH_QUESTIONS from '*.graphql'
+import FETCH_CONTRACT_WITH_QUESTIONS from '../../../app-graphql/src/queries/fetchContractWithQuestions.graphql'
 
 const createAndSubmitTestContract = async (
     server: ApolloServer,

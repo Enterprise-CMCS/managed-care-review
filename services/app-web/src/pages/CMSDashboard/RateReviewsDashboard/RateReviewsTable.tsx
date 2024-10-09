@@ -19,7 +19,6 @@ import { loadable } from 'jotai/vanilla/utils'
 import { HealthPlanPackageStatus, Program } from '../../../gen/gqlClient'
 import styles from '../../../components/ContractTable/ContractTable.module.scss'
 import { Table, Tag } from '@trussworks/react-uswds'
-import dayjs from 'dayjs'
 import qs from 'qs'
 import {
     FilterAccordion,
@@ -35,6 +34,7 @@ import { Loading, NavLinkWithLogging } from '../../../components'
 import { useTealium } from '../../../hooks'
 import useDeepCompareEffect from 'use-deep-compare-effect'
 import { getTealiumFiltersChanged } from '../../../tealium/tealiumHelpers'
+import { formatCalendarDate } from '../../../common-code/dateHelpers'
 
 type RatingPeriodFilterType = [string, string] | []
 
@@ -298,7 +298,10 @@ export const RateReviewsTable = ({
                 header: 'Rate period start date',
                 cell: (info) =>
                     info.getValue()
-                        ? dayjs(info.getValue()).format('MM/DD/YYYY')
+                        ? formatCalendarDate(
+                              info.getValue(),
+                              'America/New_York'
+                          )
                         : '',
                 meta: {
                     dataTestID: `${tableConfig.rowIDName}-date`,
@@ -310,7 +313,10 @@ export const RateReviewsTable = ({
                 header: 'Rate period end date',
                 cell: (info) =>
                     info.getValue()
-                        ? dayjs(info.getValue()).format('MM/DD/YYYY')
+                        ? formatCalendarDate(
+                              info.getValue(),
+                              'America/New_York'
+                          )
                         : '',
                 meta: {
                     dataTestID: `${tableConfig.rowIDName}-date`,
@@ -320,7 +326,10 @@ export const RateReviewsTable = ({
                 header: 'Submission date',
                 cell: (info) =>
                     info.getValue()
-                        ? dayjs(info.getValue()).format('MM/DD/YYYY')
+                        ? formatCalendarDate(
+                              info.getValue(),
+                              'America/New_York'
+                          )
                         : '',
                 meta: {
                     dataTestID: `${tableConfig.rowIDName}-date`,

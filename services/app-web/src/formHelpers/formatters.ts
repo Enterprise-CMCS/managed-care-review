@@ -77,8 +77,6 @@ const formatAddtlActuaryContactsForForm = (actuaryContacts?: ActuaryContact[] | 
         : []
 }
 
-
-
 const formatFormDateForGQL = (attribute: string): string | undefined => {
     return (attribute === '') ? undefined :  attribute
 }
@@ -112,6 +110,7 @@ const formatDocumentsForGQL = (
                 name: fileItem.name,
                 s3URL: fileItem.s3URL,
                 sha256: fileItem.sha256,
+                dateAdded: fileItem.dateAdded ?? undefined
             })
         }
         return cleanedFileItems
@@ -140,6 +139,7 @@ const formatDocumentsForForm = ({
                     s3URL: undefined,
                     sha256: doc.sha256,
                     status: 'UPLOAD_ERROR',
+                    dateAdded: doc.dateAdded
                 }
             }
             return {
@@ -149,6 +149,7 @@ const formatDocumentsForForm = ({
                 s3URL: doc.s3URL,
                 sha256: doc.sha256,
                 status: 'UPLOAD_COMPLETE',
+                dateAdded: doc.dateAdded
             }
         }) || []
     )

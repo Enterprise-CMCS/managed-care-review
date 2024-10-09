@@ -34,7 +34,6 @@ export const RateWithdrawnBanner = ({
                 <p className="usa-alert__text">
                     <b>Withdrawn on:&nbsp;</b>
                     {formatBannerDate(updatedAt)}
-                    &nbsp;ET
                 </p>
                 <ExpandableText>
                     <>

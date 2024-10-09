@@ -12,6 +12,7 @@ type SubmissionDocument = {
     name: string
     s3URL: string
     sha256: string
+    dateAdded?: Date
 }
 
 type ContractAmendmentInfo = {

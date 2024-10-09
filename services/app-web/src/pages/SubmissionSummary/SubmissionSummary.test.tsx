@@ -201,9 +201,10 @@ describe('SubmissionSummary', () => {
                                     user: mockUser(),
                                 }),
                                 fetchContractMockSuccess({
-                                    contract: mockContractPackageSubmitted({
+                                    contract: {
+                                        ...contract,
                                         id: 'test-abc-123',
-                                    }),
+                                    },
                                 }),
                                 fetchContractWithQuestionsMockSuccess({
                                     contract: {
@@ -432,7 +433,7 @@ describe('SubmissionSummary', () => {
                                 }),
                                 fetchContractMockSuccess({
                                     contract: {
-                                        ...mockContractPackageSubmitted(),
+                                        ...contract,
                                         id: 'test-abc-123',
                                     },
                                 }),
@@ -556,7 +557,7 @@ describe('SubmissionSummary', () => {
                     ).toBeInTheDocument()
                 })
 
-                it('extracts the correct dates from the submission and displays them in tables', async () => {
+                it('extracts the correct document dates from the submission and displays them in tables', async () => {
                     renderWithProviders(
                         <Routes>
                             <Route element={<SubmissionSideNav />}>
@@ -597,32 +598,33 @@ describe('SubmissionSummary', () => {
                         expect(
                             within(rows[0]).getByText('Date added')
                         ).toBeInTheDocument()
+                        // API returns UTC timezone, we display timestamped dates in ET timezone so 1 day before on these tests.
                         expect(
-                            within(rows[1]).getByText('1/1/24')
+                            within(rows[1]).getByText('12/31/2023')
                         ).toBeInTheDocument()
                         expect(
                             within(rows[2]).getByText('Date added')
                         ).toBeInTheDocument()
                         expect(
-                            within(rows[3]).getByText('1/15/24')
+                            within(rows[3]).getByText('01/14/2024')
                         ).toBeInTheDocument()
                         expect(
-                            within(rows[4]).getByText('1/13/24')
+                            within(rows[4]).getByText('01/12/2024')
                         ).toBeInTheDocument()
                         expect(
                             within(rows[5]).getByText('Date added')
                         ).toBeInTheDocument()
                         expect(
-                            within(rows[6]).getByText('1/1/23')
+                            within(rows[6]).getByText('12/31/2022')
                         ).toBeInTheDocument()
                         expect(
                             within(rows[7]).getByText('Date added')
                         ).toBeInTheDocument()
                         expect(
-                            within(rows[8]).getByText('1/15/23')
+                            within(rows[8]).getByText('01/14/2023')
                         ).toBeInTheDocument()
                         expect(
-                            within(rows[9]).getByText('1/15/23')
+                            within(rows[9]).getByText('01/14/2023')
                         ).toBeInTheDocument()
                     })
                 })
@@ -747,7 +749,10 @@ describe('SubmissionSummary', () => {
                                 statusCode: 200,
                             }),
                             fetchContractMockSuccess({
-                                contract: mockContractPackageSubmitted(),
+                                contract: {
+                                    ...contract,
+                                    id: 'test-abc-123',
+                                },
                             }),
                             fetchContractWithQuestionsMockSuccess({
                                 contract: {
@@ -944,7 +949,10 @@ describe('SubmissionSummary', () => {
                                 },
                             }),
                             fetchContractMockSuccess({
-                                contract: mockContractPackageSubmitted(),
+                                contract: {
+                                    ...contract,
+                                    id: 'test-abc-123',
+                                },
                             }),
                         ],
                     },
@@ -994,7 +1002,7 @@ describe('SubmissionSummary', () => {
                             }),
                             fetchContractMockSuccess({
                                 contract: {
-                                    ...mockContractPackageSubmitted(),
+                                    ...contract,
                                     id: 'test-abc-123',
                                 },
                             }),

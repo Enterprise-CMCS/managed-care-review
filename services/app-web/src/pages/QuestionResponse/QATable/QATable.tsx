@@ -6,10 +6,10 @@ import {
     QuestionResponse,
     User,
 } from '../../../gen/gqlClient'
-import dayjs from 'dayjs'
 import { useDocument } from '../../../hooks/useDocument'
 import useDeepCompareEffect from 'use-deep-compare-effect'
 import { LinkWithLogging, NavLinkWithLogging } from '../../../components'
+import { formatCalendarDate } from '../../../common-code/dateHelpers'
 
 type QuestionDocumentWithLink = {
     s3URL: string
@@ -142,7 +142,12 @@ export const QATable = ({
                                     doc.name
                                 )}
                             </td>
-                            <td>{dayjs(doc.createdAt).format('M/D/YY')}</td>
+                            <td>
+                                {formatCalendarDate(
+                                    doc.createdAt,
+                                    'America/New_York'
+                                )}
+                            </td>
                             <td>{getAddedByName(doc.addedBy)}</td>
                         </tr>
                     ))}
