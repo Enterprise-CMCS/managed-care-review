@@ -77,18 +77,12 @@ function newAmplifyS3Client(bucketConfig: S3BucketConfigType): S3ClientT {
             filename: string,
             bucket: BucketShortName
         ): Promise<void | S3Error> => {
-            // Construct the full key including the bucket prefix
-            const fullKey = filename.startsWith('allusers/')
-                ? filename
-                : `allusers/${filename}`
-            console.info(`Attempting to tag file as deleted: ${fullKey}`)
+            console.info(`Attempting to tag file as deleted: ${filename}`)
             let metadata
 
             try {
-                console.info(`filename: ${filename}`)
                 const result = await Storage.getProperties(filename)
                 metadata = result.metadata
-                console.info('Successfully got file properties', metadata)
             } catch (getPropertiesError) {
                 console.error('Error in getProperties:', getPropertiesError)
                 throw getPropertiesError
@@ -96,7 +90,6 @@ function newAmplifyS3Client(bucketConfig: S3BucketConfigType): S3ClientT {
 
             try {
                 // Add or update the 'deleted' tag
-                console.info('Preparing updated metadata')
                 const updatedMetadata = {
                     ...metadata,
                     deleted: 'true',
@@ -104,14 +97,12 @@ function newAmplifyS3Client(bucketConfig: S3BucketConfigType): S3ClientT {
                 }
 
                 // Update the file's metadata
-                console.info('Copying file to update metadata')
                 try {
                     await Storage.copy(
                         { key: filename },
                         { key: filename },
                         { metadata: updatedMetadata }
                     )
-                    console.info('Successfully updated file metadata')
                 } catch (copyError) {
                     console.error('Error in Storage.copy:', copyError)
                     throw copyError
@@ -122,7 +113,9 @@ function newAmplifyS3Client(bucketConfig: S3BucketConfigType): S3ClientT {
                 )
                 return
             } catch (err) {
-                console.error('Error in tagFileAsDeleted:', err)
+                console.error(
+                    `Error in tagFileAsDeleted for ${filename}: ${err}`
+                )
                 assertIsS3PutError(err)
                 recordJSException(err)
                 if (err.name === 'Error' && err.message === 'Network Error') {
@@ -132,7 +125,6 @@ function newAmplifyS3Client(bucketConfig: S3BucketConfigType): S3ClientT {
                         message: 'Error deleting file from the cloud.',
                     }
                 }
-                console.info('Unexpected Error deleting file from S3', err)
                 throw err
             }
         },
