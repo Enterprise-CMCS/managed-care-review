@@ -95,7 +95,9 @@ function newAmplifyS3Client(bucketConfig: S3BucketConfigType): S3ClientT {
                     deleted: 'true',
                     deletedAt: new Date().toISOString(),
                 }
-                console.info(`updatedMetadata: ${updatedMetadata}`)
+                console.info(
+                    `updatedMetadata: ${JSON.stringify(updatedMetadata)}`
+                )
 
                 // Update the file's metadata
                 try {
@@ -104,7 +106,7 @@ function newAmplifyS3Client(bucketConfig: S3BucketConfigType): S3ClientT {
                         { key: filename },
                         { metadata: updatedMetadata }
                     )
-                    console.info(`result: ${res}`)
+                    console.info(`result: ${JSON.stringify(res)}`)
                 } catch (copyError) {
                     console.error('Error in Storage.copy:', copyError)
                     throw copyError
