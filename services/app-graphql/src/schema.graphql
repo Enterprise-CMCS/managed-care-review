@@ -705,6 +705,9 @@ type CreateRateQuestionPayload {
 #    question: Question!
 #}
 
+"""
+Generic input type for both Contract and Rate Question.
+"""
 input CreateQuestionResponseInput {
     "The ID of the question for which to create a response"
     questionID: ID!
