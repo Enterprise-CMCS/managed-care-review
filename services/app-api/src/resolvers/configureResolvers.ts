@@ -16,6 +16,7 @@ import {
     createContractQuestionResponseResolver,
     questionResponseDocumentResolver,
     createRateQuestionResolver,
+    createRateQuestionResponseResolver,
 } from './questionResponse'
 import {
     fetchCurrentUserResolver,
@@ -138,6 +139,8 @@ export function configureResolvers(
                     launchDarkly
                 ),
             createRateQuestion: createRateQuestionResolver(store),
+            createRateQuestionResponse:
+                createRateQuestionResponseResolver(store),
             createAPIKey: createAPIKeyResolver(jwt),
             unlockRate: unlockRate(store),
             submitRate: submitRate(store, launchDarkly),

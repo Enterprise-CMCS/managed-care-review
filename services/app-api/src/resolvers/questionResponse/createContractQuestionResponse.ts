@@ -22,21 +22,25 @@ export function createContractQuestionResponseResolver(
 ): MutationResolvers['createContractQuestionResponse'] {
     return async (_parent, { input }, context) => {
         const { user, ctx, tracer } = context
-        const span = tracer?.startSpan('createQuestionResponse', {}, ctx)
+        const span = tracer?.startSpan(
+            'createContractQuestionResponse',
+            {},
+            ctx
+        )
 
         const featureFlags = await launchDarkly.allFlags(context)
         const readStateAnalystsFromDBFlag =
             featureFlags?.['read-write-state-assignments']
         if (!isStateUser(user)) {
             const msg = 'user not authorized to create a question response'
-            logError('createQuestionResponse', msg)
+            logError('createContractQuestionResponse', msg)
             setErrorAttributesOnActiveSpan(msg, span)
             throw new ForbiddenError(msg)
         }
 
         if (input.documents.length === 0) {
             const msg = 'question response documents are required'
-            logError('createQuestionResponse', msg)
+            logError('createContractQuestionResponse', msg)
             setErrorAttributesOnActiveSpan(msg, span)
             throw new UserInputError(msg)
         }
@@ -58,14 +62,14 @@ export function createContractQuestionResponseResolver(
 
         if (createResponseResult instanceof Error) {
             if (createResponseResult instanceof NotFoundError) {
-                const errMessage = `Question with ID: ${input.questionID} not found to attach response to`
-                logError('createQuestionResponse', errMessage)
+                const errMessage = `Contract question with ID: ${input.questionID} not found to attach response to`
+                logError('createContractQuestionResponse', errMessage)
                 setErrorAttributesOnActiveSpan(errMessage, span)
                 throw new UserInputError(errMessage)
             }
 
-            const errMessage = `Issue creating question response for question ${input.questionID}. Message: ${createResponseResult.message}`
-            logError('createQuestionResponse', errMessage)
+            const errMessage = `Issue creating question response for contract question ${input.questionID}. Message: ${createResponseResult.message}`
+            logError('createContractQuestionResponse', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new Error(errMessage)
         }
@@ -75,7 +79,7 @@ export function createContractQuestionResponseResolver(
         )
         if (questions instanceof Error) {
             const errMessage = `Issue finding all questions for contract with ID ${createResponseResult.contractID}. Message: ${questions.message}`
-            logError('createQuestionResponse', errMessage)
+            logError('createContractQuestionResponse', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new GraphQLError(errMessage, {
                 extensions: {
@@ -91,7 +95,7 @@ export function createContractQuestionResponseResolver(
         if (contract instanceof Error) {
             if (contract instanceof NotFoundError) {
                 const errMessage = `Package with id ${createResponseResult.contractID} does not exist`
-                logError('createQuestionResponse', errMessage)
+                logError('createContractQuestionResponse', errMessage)
                 setErrorAttributesOnActiveSpan(errMessage, span)
                 throw new GraphQLError(errMessage, {
                     extensions: { code: 'NOT_FOUND' },
@@ -99,7 +103,7 @@ export function createContractQuestionResponseResolver(
             }
 
             const errMessage = `Issue finding a package. Message: ${contract.message}`
-            logError('createQuestionResponse', errMessage)
+            logError('createContractQuestionResponse', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new GraphQLError(errMessage, {
                 extensions: {
@@ -111,7 +115,7 @@ export function createContractQuestionResponseResolver(
 
         const statePrograms = store.findStatePrograms(contract.stateCode)
         if (statePrograms instanceof Error) {
-            logError('createQuestionResponse', statePrograms.message)
+            logError('createContractQuestionResponse', statePrograms.message)
             setErrorAttributesOnActiveSpan(statePrograms.message, span)
             throw new GraphQLError(statePrograms.message, {
                 extensions: {
@@ -217,7 +221,7 @@ export function createContractQuestionResponseResolver(
             })
         }
 
-        logSuccess('createQuestionResponse')
+        logSuccess('createContractQuestionResponse')
         setSuccessAttributesOnActiveSpan(span)
 
         return {

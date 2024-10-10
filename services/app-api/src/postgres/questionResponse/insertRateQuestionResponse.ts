@@ -1,27 +1,27 @@
 import type { PrismaClient } from '@prisma/client'
 import type {
     InsertQuestionResponseArgs,
+    RateQuestionType,
     StateUserType,
-    ContractQuestionType,
 } from '../../domain-models'
 import {
     questionInclude,
-    contractQuestionPrismaToDomainType,
+    rateQuestionPrismaToDomainType,
 } from './questionHelpers'
 import { NotFoundError } from '../postgresErrors'
 
-export async function insertContractQuestionResponse(
+export async function insertRateQuestionResponse(
     client: PrismaClient,
     response: InsertQuestionResponseArgs,
     user: StateUserType
-): Promise<ContractQuestionType | Error> {
+): Promise<RateQuestionType | Error> {
     const documents = response.documents.map((document) => ({
         name: document.name,
         s3URL: document.s3URL,
     }))
 
     try {
-        const result = await client.contractQuestion.update({
+        const result = await client.rateQuestion.update({
             where: {
                 id: response.questionID,
             },
@@ -42,7 +42,7 @@ export async function insertContractQuestionResponse(
             include: questionInclude,
         })
 
-        return contractQuestionPrismaToDomainType(result)
+        return rateQuestionPrismaToDomainType(result)
     } catch (e) {
         // Return a NotFoundError if prisma fails on the primary key constraint
         // An operation failed because it depends on one or more records

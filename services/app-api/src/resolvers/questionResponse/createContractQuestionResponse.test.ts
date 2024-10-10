@@ -20,7 +20,7 @@ import { getTestStateAnalystsEmails } from '../../testHelpers/parameterStoreHelp
 import { testLDService } from '../../testHelpers/launchDarklyHelpers'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 
-describe('createQuestionResponse', () => {
+describe('createContractQuestionResponse', () => {
     const cmsUser = testCMSUser()
     beforeAll(async () => {
         //Inserting a new CMS user, with division assigned, in postgres in order to create the question to user relationship.
@@ -88,7 +88,7 @@ describe('createQuestionResponse', () => {
         expect(createResponseResult).toBeDefined()
         expect(assertAnErrorCode(createResponseResult)).toBe('BAD_USER_INPUT')
         expect(assertAnError(createResponseResult).message).toBe(
-            `Question with ID: ${fakeID} not found to attach response to`
+            `Contract question with ID: ${fakeID} not found to attach response to`
         )
     })
 

@@ -51,7 +51,7 @@ const commonQuestionPrismaToDomainType = <
         responses: prismaQuestion.responses as QuestionResponseType[],
     }) as unknown as R
 
-const questionPrismaToDomainType = (
+const contractQuestionPrismaToDomainType = (
     prismaQuestion: PrismaQuestionType
 ): ContractQuestionType => commonQuestionPrismaToDomainType(prismaQuestion)
 const rateQuestionPrismaToDomainType = (
@@ -92,7 +92,7 @@ const convertToIndexRateQuestionsPayload = (
 
 export {
     questionInclude,
-    questionPrismaToDomainType,
+    contractQuestionPrismaToDomainType,
     convertToIndexQuestionsPayload,
     convertToIndexRateQuestionsPayload,
     rateQuestionPrismaToDomainType,

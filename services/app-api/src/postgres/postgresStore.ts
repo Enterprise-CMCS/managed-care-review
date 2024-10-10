@@ -30,6 +30,7 @@ import {
     insertContractQuestionResponse,
     insertRateQuestion,
     findAllQuestionsByRate,
+    insertRateQuestionResponse,
 } from './questionResponse'
 import { findAllSupportedStates } from './state'
 import {
@@ -117,6 +118,11 @@ type Store = {
         questionInput: InsertQuestionResponseArgs,
         user: StateUserType
     ) => Promise<ContractQuestionType | Error>
+
+    insertRateQuestionResponse: (
+        questionInput: InsertQuestionResponseArgs,
+        user: StateUserType
+    ) => Promise<RateQuestionType | Error>
 
     insertRateQuestion: (
         questionInput: CreateRateQuestionInputType,
@@ -227,6 +233,8 @@ function NewPostgresStore(client: PrismaClient): Store {
             insertContractQuestionResponse(client, questionInput, user),
         insertRateQuestion: (questionInput, user) =>
             insertRateQuestion(client, questionInput, user),
+        insertRateQuestionResponse: (questionInput, user) =>
+            insertRateQuestionResponse(client, questionInput, user),
         findAllQuestionsByRate: (rateID) =>
             findAllQuestionsByRate(client, rateID),
 

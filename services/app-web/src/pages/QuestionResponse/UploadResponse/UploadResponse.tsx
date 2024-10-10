@@ -19,7 +19,7 @@ import { ACCEPTED_SUBMISSION_FILE_TYPES } from '../../../components/FileUpload'
 import { PageActionsContainer } from '../../StateSubmission/PageActions'
 import { useErrorSummary } from '../../../hooks/useErrorSummary'
 import {
-    CreateContractQuestionResponseInput,
+    CreateQuestionResponseInput,
     useCreateContractQuestionResponseMutation,
     Division,
 } from '../../../gen/gqlClient'
@@ -90,7 +90,7 @@ export const UploadResponse = () => {
             }
         })
 
-        const input: CreateContractQuestionResponseInput = {
+        const input: CreateQuestionResponseInput = {
             questionID: questionID as string,
             documents: responseDocs,
         }

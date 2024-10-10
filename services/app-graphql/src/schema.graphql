@@ -397,7 +397,7 @@ type Mutation {
         - A Question cannot be found given `questionID`
     """
     createContractQuestionResponse(
-        input: CreateContractQuestionResponseInput!
+        input: CreateQuestionResponseInput!
     ): CreateContractQuestionResponsePayload!
 
     """
@@ -419,6 +419,10 @@ type Mutation {
     createRateQuestion(
         input: CreateRateQuestionInput!
     ): CreateRateQuestionPayload!
+
+    createRateQuestionResponse(
+        input: CreateQuestionResponseInput!
+    ): CreateRateQuestionResponsePayload!
 
     """
     createAPIKey creates a valid API key for the logged in user, valid for 90 days
@@ -701,7 +705,10 @@ type CreateRateQuestionPayload {
 #    question: Question!
 #}
 
-input CreateContractQuestionResponseInput {
+"""
+Generic input type for both Contract and Rate Question.
+"""
+input CreateQuestionResponseInput {
     "The ID of the question for which to create a response"
     questionID: ID!
     "A list of documents to attach to the response"
@@ -711,8 +718,13 @@ input CreateContractQuestionResponseInput {
 }
 
 type CreateContractQuestionResponsePayload {
-    "Question with newly created response"
+    "Contract Question with newly created response"
     question: ContractQuestion!
+}
+
+type CreateRateQuestionResponsePayload {
+    "Rate Question with newly created response"
+    question: RateQuestion!
 }
 
 type UserEdge {

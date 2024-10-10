@@ -13,7 +13,7 @@ import {
     ContractQuestion,
     Division,
     CreateContractQuestionInput,
-    CreateContractQuestionResponseInput,
+    CreateQuestionResponseInput,
     SubmitContractMutationFn,
     Contract,
     UnlockedContract,
@@ -393,7 +393,7 @@ export const createQuestionWrapper = async (
 export const createResponseWrapper = async (
     createResponse: CreateContractQuestionResponseMutationFn,
     contractID: string,
-    input: CreateContractQuestionResponseInput,
+    input: CreateQuestionResponseInput,
     division: Division
 ): Promise<CreateContractQuestionResponseMutation | GraphQLErrors | Error> => {
     try {

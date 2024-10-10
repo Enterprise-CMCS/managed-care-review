@@ -1,6 +1,9 @@
 import type { PrismaClient } from '@prisma/client'
 import type { ContractQuestionType } from '../../domain-models'
-import { questionPrismaToDomainType, questionInclude } from './questionHelpers'
+import {
+    contractQuestionPrismaToDomainType,
+    questionInclude,
+} from './questionHelpers'
 
 export async function findAllQuestionsByContract(
     client: PrismaClient,
@@ -18,7 +21,7 @@ export async function findAllQuestionsByContract(
         })
 
         return findResult.map((question) =>
-            questionPrismaToDomainType(question)
+            contractQuestionPrismaToDomainType(question)
         )
     } catch (e: unknown) {
         if (e instanceof Error) {
