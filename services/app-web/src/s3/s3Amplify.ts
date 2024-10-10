@@ -77,12 +77,46 @@ function newAmplifyS3Client(bucketConfig: S3BucketConfigType): S3ClientT {
             filename: string,
             bucket: BucketShortName
         ): Promise<void | S3Error> => {
+            console.info(`Attempting to tag file as deleted: ${filename}`)
+            let metadata
+
             try {
-                await Storage.remove(filename, {
-                    bucket: bucketConfig[bucket],
-                })
+                const result = await Storage.getProperties(filename)
+                metadata = result.metadata
+            } catch (getPropertiesError) {
+                console.error('Error in getProperties:', getPropertiesError)
+                throw getPropertiesError
+            }
+
+            try {
+                // Add or update the 'deleted' tag
+                const updatedMetadata = {
+                    ...metadata,
+                    deleted: 'true',
+                    deletedAt: new Date().toISOString(),
+                }
+                console.info(
+                    `updatedMetadata: ${JSON.stringify(updatedMetadata)}`
+                )
+
+                // Update the file's metadata
+                try {
+                    const res = await Storage.copy(
+                        { key: filename },
+                        { key: filename },
+                        { metadata: updatedMetadata }
+                    )
+                    console.info(`result: ${JSON.stringify(res)}`)
+                } catch (copyError) {
+                    console.error('Error in Storage.copy:', copyError)
+                    throw copyError
+                }
+
                 return
             } catch (err) {
+                console.error(
+                    `Error in tagFileAsDeleted for ${filename}: ${err}`
+                )
                 assertIsS3PutError(err)
                 recordJSException(err)
                 if (err.name === 'Error' && err.message === 'Network Error') {
@@ -92,7 +126,6 @@ function newAmplifyS3Client(bucketConfig: S3BucketConfigType): S3ClientT {
                         message: 'Error deleting file from the cloud.',
                     }
                 }
-                console.info('Unexpected Error deleting file from S3', err)
                 throw err
             }
         },
