@@ -111,8 +111,11 @@ function newAmplifyS3Client(bucketConfig: S3BucketConfigType): S3ClientT {
                         `File moved and tagged: ${JSON.stringify(copyResult)}`
                     )
 
-                    await Storage.remove(filename, { level: 'private' })
+                    const delResult = await Storage.remove(filename, {
+                        level: 'private',
+                    })
                     console.info(`Original file removed: ${filename}`)
+                    console.info(`delResult: ${JSON.stringify(delResult)}`)
 
                     return
                 } catch (copyError) {
