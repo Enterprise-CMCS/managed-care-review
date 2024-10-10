@@ -32,25 +32,12 @@ const tealiumClient = (tealiumEnv: Omit<TealiumEnv, 'dev'>): TealiumClientType =
             }
 
             // Load utag.js - Add to body element- ASYNC load inline script
-            const inlineScript = `(function (t, e, a, l, i, u, m) {
-                t = '${tealiumProfile}'
-                e = '${tealiumEnv}'
-                a = '/' + t + '/' + e + '/utag.js'
-                l = ${`//${tealiumHostname}`} + a
-                i = document
-                u = 'script'
-                m = i.createElement(u)
-                m.src = l
-                m.type = 'text/java' + u
-                m.async = true
-                l = i.getElementsByTagName(u)[0]
-                l.parentNode.insertBefore(m, l)
-            })()`
+            const asyncSrc = `//${tealiumHostname}/${tealiumProfile}/${tealiumEnv}/utag.js`
 
             const loadTagsSnippet = createScript({
-                src: '',
-                inlineScriptAsString: inlineScript,
+                src: asyncSrc,
                 id: 'tealium-load-tags-async',
+                async: true
             })
             if (document.getElementById(loadTagsSnippet.id) === null) {
                 document.body.appendChild(loadTagsSnippet)
