@@ -100,19 +100,25 @@ function newAmplifyS3Client(bucketConfig: S3BucketConfigType): S3ClientT {
                 )
 
                 // Update the file's metadata
+                const newKey = `deleted/${filename}`
                 try {
-                    const res = await Storage.copy(
+                    const copyResult = await Storage.copy(
                         { key: filename },
-                        { key: filename },
+                        { key: newKey },
                         { metadata: updatedMetadata }
                     )
-                    console.info(`result: ${JSON.stringify(res)}`)
+                    console.info(
+                        `File moved and tagged: ${JSON.stringify(copyResult)}`
+                    )
+
+                    await Storage.remove(filename, { level: 'private' })
+                    console.info(`Original file removed: ${filename}`)
+
+                    return
                 } catch (copyError) {
                     console.error('Error in Storage.copy:', copyError)
                     throw copyError
                 }
-
-                return
             } catch (err) {
                 console.error(
                     `Error in tagFileAsDeleted for ${filename}: ${err}`
