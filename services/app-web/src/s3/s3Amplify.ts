@@ -78,6 +78,7 @@ function newAmplifyS3Client(bucketConfig: S3BucketConfigType): S3ClientT {
             bucket: BucketShortName
         ): Promise<void | S3Error> => {
             console.info(`deleteFile requested for ${filename} in ${bucket}`)
+            return
         },
         /*  
             Poll for scanning completion
