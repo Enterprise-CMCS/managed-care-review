@@ -92,8 +92,8 @@ function newAmplifyS3Client(bucketConfig: S3BucketConfigType): S3ClientT {
                 // Add or update the 'deleted' tag
                 const updatedMetadata = {
                     ...metadata,
-                    deleted: 'true',
-                    deletedAt: new Date().toISOString(),
+                    'x-amz-meta-deleted': 'true',
+                    'x-amz-meta-deletedAt': new Date().toISOString(),
                 }
                 console.info(
                     `updatedMetadata: ${JSON.stringify(updatedMetadata)}`
