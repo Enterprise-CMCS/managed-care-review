@@ -77,24 +77,7 @@ function newAmplifyS3Client(bucketConfig: S3BucketConfigType): S3ClientT {
             filename: string,
             bucket: BucketShortName
         ): Promise<void | S3Error> => {
-            try {
-                await Storage.remove(filename, {
-                    bucket: bucketConfig[bucket],
-                })
-                return
-            } catch (err) {
-                assertIsS3PutError(err)
-                recordJSException(err)
-                if (err.name === 'Error' && err.message === 'Network Error') {
-                    console.info('Error deleting file', err)
-                    return {
-                        code: 'NETWORK_ERROR',
-                        message: 'Error deleting file from the cloud.',
-                    }
-                }
-                console.info('Unexpected Error deleting file from S3', err)
-                throw err
-            }
+            console.info(`deleteFile requested for ${filename} in ${bucket}`)
         },
         /*  
             Poll for scanning completion
