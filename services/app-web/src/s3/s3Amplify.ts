@@ -92,30 +92,21 @@ function newAmplifyS3Client(bucketConfig: S3BucketConfigType): S3ClientT {
                 // Add or update the 'deleted' tag
                 const updatedMetadata = {
                     ...metadata,
-                    deleted: 'true',
-                    deletedAt: new Date().toISOString(),
+                    'x-amz-meta-deleted': 'true',
+                    'x-amz-meta-deletedat': new Date().toISOString(),
                 }
                 console.info(
                     `updatedMetadata: ${JSON.stringify(updatedMetadata)}`
                 )
 
                 // Update the file's metadata
-                const newKey = `deleted/${filename}`
                 try {
                     const copyResult = await Storage.copy(
                         { key: filename },
-                        { key: newKey },
+                        { key: filename },
                         { metadata: updatedMetadata }
                     )
-                    console.info(
-                        `File moved and tagged: ${JSON.stringify(copyResult)}`
-                    )
-
-                    const delResult = await Storage.remove(filename, {
-                        level: 'private',
-                    })
-                    console.info(`Original file removed: ${filename}`)
-                    console.info(`delResult: ${JSON.stringify(delResult)}`)
+                    console.info(`File tagged: ${JSON.stringify(copyResult)}`)
 
                     return
                 } catch (copyError) {
