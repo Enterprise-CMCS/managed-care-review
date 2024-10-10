@@ -74,8 +74,8 @@
         "axe-core": "^4.10.0",
         "cypress-axe": "^1.5.0",
         "danger": "^11.2.6",
-        "husky": "^9.1.5",
-        "lint-staged": "^15.2.7",
+        "husky": "^9.1.6",
+        "lint-staged": "^15.2.10",
         "prettier": "^3.3.3"
     }
 }
