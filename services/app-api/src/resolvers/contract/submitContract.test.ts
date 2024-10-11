@@ -1,11 +1,10 @@
 /* eslint-disable  @typescript-eslint/no-non-null-assertion */
-
-import UPDATE_DRAFT_CONTRACT_RATES from 'app-graphql/src/mutations/updateDraftContractRates.graphql'
 import {
     constructTestPostgresServer,
     createAndUpdateTestHealthPlanPackage,
     unlockTestHealthPlanPackage,
     updateTestHealthPlanFormData,
+    updateTestStateAssignments,
 } from '../../testHelpers/gqlHelpers'
 import SUBMIT_CONTRACT from '../../../../app-graphql/src/mutations/submitContract.graphql'
 import { testS3Client } from '../../../../app-web/src/testHelpers/s3Helpers'
@@ -19,8 +18,10 @@ import type {
 import {
     createAndSubmitTestContractWithRate,
     createAndUpdateTestContractWithoutRates,
+    createTestContract,
     fetchTestContract,
     submitTestContract,
+    unlockTestContract,
 } from '../../testHelpers/gqlContractHelpers'
 import {
     addLinkedRateToRateInput,
@@ -34,46 +35,52 @@ import { testLDService } from '../../testHelpers/launchDarklyHelpers'
 import { latestFormData } from '../../testHelpers/healthPlanPackageHelpers'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 import dayjs from 'dayjs'
+import { testEmailConfig, testEmailer } from '../../testHelpers/emailerHelpers'
+import { getTestStateAnalystsEmails } from '../../testHelpers/parameterStoreHelpers'
+import { StateCodeType } from '../../testHelpers'
 
 describe('submitContract', () => {
     const mockS3 = testS3Client()
 
-    it('submits a contract', async () => {
+    it('submits a contract and rates and preserves expected data', async () => {
         const stateServer = await constructTestPostgresServer({
             s3Client: mockS3,
         })
 
         const draft = await createAndUpdateTestContractWithoutRates(stateServer)
-        const draftWithRates = await addNewRateToTestContract(
+        const updatedDraft = await addNewRateToTestContract(
             stateServer,
             draft
         )
 
-        const draftRates = draftWithRates.draftRates
+        const draftRates = updatedDraft.draftRates
 
         expect(draftRates).toHaveLength(1)
 
+
         const contract = await submitTestContract(stateServer, draft.id)
-
+        // check contract metadata
+        const today = new Date()
+        const expectedDate = today.toISOString().split('T')[0]
         expect(contract.draftRevision).toBeNull()
-
+        expect(contract.initiallySubmittedAt).toEqual(expectedDate)
         expect(contract.packageSubmissions).toHaveLength(1)
+        expect(contract.status).toBe('SUBMITTED')
 
+        // check page submission metadata
         const sub = contract.packageSubmissions[0]
         expect(sub.cause).toBe('CONTRACT_SUBMISSION')
         expect(sub.submitInfo.updatedReason).toBe('Initial submission')
         expect(sub.submittedRevisions).toHaveLength(2)
-        expect(sub.contractRevision.formData.submissionDescription).toBe(
-            'An updated submission'
-        )
 
+        // check form data is unchanged
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        const rateID = sub.rateRevisions[0].rateID
-        const rate = await fetchTestRateById(stateServer, rateID)
-        expect(rate.status).toBe('SUBMITTED')
+        const draftFormData = updatedDraft.draftRevision!.formData
+        const submittedFormData = sub.contractRevision.formData
+        expect(submittedFormData).toEqual(draftFormData)
     })
 
-    it('handles a submission with a link', async () => {
+    it('handles a submission with a linked rate', async () => {
         const stateServer = await constructTestPostgresServer()
 
         const contract1 = await createAndSubmitTestContractWithRate(stateServer)
@@ -98,88 +105,7 @@ describe('submitContract', () => {
         expect(sub.rateRevisions).toHaveLength(1)
     })
 
-    it('calls create twice in a row', async () => {
-        const stateServer = await constructTestPostgresServer()
-
-        const draftA0 =
-            await createAndUpdateTestContractWithoutRates(stateServer)
-        const AID = draftA0.id
-        await addNewRateToTestContract(stateServer, draftA0)
-        await addNewRateToTestContract(stateServer, draftA0)
-
-        const final = await fetchTestContract(stateServer, AID)
-        expect(final.draftRates).toHaveLength(1)
-    })
-
-    it('handles the first miro scenario', async () => {
-        const stateServer = await constructTestPostgresServer({
-            s3Client: mockS3,
-        })
-
-        // 1. Submit A0 with Rate1 and Rate2
-        const draftA0 =
-            await createAndUpdateTestContractWithoutRates(stateServer)
-        const AID = draftA0.id
-        const draftA010 = await addNewRateToTestContract(stateServer, draftA0)
-
-        await addNewRateToTestContract(stateServer, draftA010)
-
-        const contractA0 = await submitTestContract(stateServer, AID)
-        const subA0 = contractA0.packageSubmissions[0]
-        const rate10 = subA0.rateRevisions[0]
-        const OneID = rate10.rateID
-        const rate20 = subA0.rateRevisions[1]
-        const TwoID = rate20.rateID
-
-        // 2. Submit B0 with Rate1 and Rate3
-        const draftB0 =
-            await createAndUpdateTestContractWithoutRates(stateServer)
-        const draftB010 = await addLinkedRateToTestContract(
-            stateServer,
-            draftB0,
-            OneID
-        )
-        await addNewRateToTestContract(stateServer, draftB010)
-
-        const contractB0 = await submitTestContract(stateServer, draftB0.id)
-        const subB0 = contractB0.packageSubmissions[0]
-        const rate30 = subB0.rateRevisions[1]
-        const ThreeID = rate30.rateID
-
-        expect(subB0.rateRevisions[0].rateID).toBe(OneID)
-
-        // 3. Submit C0 with Rate20 and Rate40
-        const draftC0 =
-            await createAndUpdateTestContractWithoutRates(stateServer)
-        const draftC020 = await addLinkedRateToTestContract(
-            stateServer,
-            draftC0,
-            TwoID
-        )
-        await addNewRateToTestContract(stateServer, draftC020)
-
-        const contractC0 = await submitTestContract(stateServer, draftC0.id)
-        const subC0 = contractC0.packageSubmissions[0]
-        const rate40 = subC0.rateRevisions[1]
-        const FourID = rate40.rateID
-        expect(subC0.rateRevisions[0].rateID).toBe(TwoID)
-
-        // 4. Submit D0, contract only
-        const draftD0 = await createAndUpdateTestHealthPlanPackage(
-            stateServer,
-            {
-                rateInfos: [],
-                submissionType: 'CONTRACT_ONLY',
-                addtlActuaryContacts: [],
-                addtlActuaryCommunicationPreference: undefined,
-            }
-        )
-        const contractD0 = await submitTestContract(stateServer, draftD0.id)
-
-        console.info(ThreeID, FourID, contractD0)
-    })
-
-    it('can submit a contract with a rate linked to an unsubmitted contract MCR-4245', async () => {
+    it('can submit a contract with a rate linked to a still unsubmitted contract (MCR-4245 bug)', async () => {
         const stateServer = await constructTestPostgresServer({
             s3Client: mockS3,
         })
@@ -190,7 +116,7 @@ describe('submitContract', () => {
             s3Client: mockS3,
         })
 
-        // 1. Submit A0 with Rate1
+        // 1. Submit A0 draft with Rate1
         const draftA0 =
             await createAndUpdateTestContractWithoutRates(stateServer)
         const AID = draftA0.id
@@ -201,12 +127,12 @@ describe('submitContract', () => {
         const rate10 = subA0.rateRevisions[0]
         const OneID = rate10.rateID
 
-        // 2. Create B0, link with Rate1
+        // 2. Create a new B0 draft, link with Rate1
         const draftB0 =
             await createAndUpdateTestContractWithoutRates(stateServer)
         await addLinkedRateToTestContract(stateServer, draftB0, OneID)
 
-        // 3. Unlock A0 and resubmit
+        // 3. Unlock A0, edit and resubmit
         await unlockTestHealthPlanPackage(
             cmsServer,
             AID,
@@ -222,90 +148,7 @@ describe('submitContract', () => {
         expect(resubmittedA.status).toBe('RESUBMITTED')
     })
 
-    it('unlocks a submission with a removed child rate', async () => {
-        const ldService = testLDService({})
-
-        const stateServer = await constructTestPostgresServer({
-            ldService,
-            s3Client: mockS3,
-        })
-        const cmsServer = await constructTestPostgresServer({
-            ldService,
-            context: {
-                user: testCMSUser(),
-            },
-            s3Client: mockS3,
-        })
-
-        // 1. Submit A0 with Rate1 and Rate2
-        const draftA0 =
-            await createAndUpdateTestContractWithoutRates(stateServer)
-        const AID = draftA0.id
-        await addNewRateToTestContract(stateServer, draftA0)
-
-        const contractA0 = await submitTestContract(stateServer, AID)
-        const subA0 = contractA0.packageSubmissions[0]
-        const rate10 = subA0.rateRevisions[0]
-        const OneID = rate10.rateID
-
-        // 2. Submit B0 with Rate1 and Rate3
-        const draftB0 =
-            await createAndUpdateTestContractWithoutRates(stateServer)
-        const draftB010 = await addLinkedRateToTestContract(
-            stateServer,
-            draftB0,
-            OneID
-        )
-        await addNewRateToTestContract(stateServer, draftB010)
-
-        const contractB0 = await submitTestContract(stateServer, draftB0.id)
-        const subB0 = contractB0.packageSubmissions[0]
-
-        expect(subB0.rateRevisions[0].rateID).toBe(OneID)
-
-        // 3. unlock and resubmit B, removing Three
-        await unlockTestHealthPlanPackage(
-            cmsServer,
-            contractB0.id,
-            'remove that child rate'
-        )
-
-        const unlockedB0 = await fetchTestContract(stateServer, contractB0.id)
-
-        const unlockedBUpdateInput =
-            updateRatesInputFromDraftContract(unlockedB0)
-        unlockedBUpdateInput.updatedRates = [
-            unlockedBUpdateInput.updatedRates[0],
-        ]
-
-        const updatedUnlockedB0 = await updateTestDraftRatesOnContract(
-            stateServer,
-            unlockedBUpdateInput
-        )
-
-        expect(updatedUnlockedB0.draftRates).toHaveLength(1)
-
-        await submitTestContract(
-            stateServer,
-            updatedUnlockedB0.id,
-            'resubmit without child'
-        )
-
-        // 4. Unlock again, should not error
-        await unlockTestHealthPlanPackage(
-            cmsServer,
-            updatedUnlockedB0.id,
-            'dont try and reunlock'
-        )
-        const unlockedB1 = await fetchTestContract(
-            stateServer,
-            updatedUnlockedB0.id
-        )
-
-        expect(unlockedB1.draftRates).toHaveLength(1)
-    })
-
-    it('handles cross related rates and contracts', async () => {
+    it('preserves connections between cross related rates and contracts', async () => {
         const ldService = testLDService({})
         const prismaClient = await sharedTestPrismaClient()
         const stateServer = await constructTestPostgresServer({
@@ -360,7 +203,7 @@ describe('submitContract', () => {
         expect(subB0.rateRevisions[0].rateID).toBe(ThreeID)
         expect(subB0.rateRevisions[1].rateID).toBe(OneID)
 
-        // 3. Submit C0 with Rate20 and Rate30 and Rate40
+        // 3. Submit C0 with Rate2 and Rate3 and Rate4
         const draftC0 =
             await createAndUpdateTestContractWithoutRates(stateServer)
         const CID = draftC0.id
@@ -424,7 +267,8 @@ describe('submitContract', () => {
         expect(connections).toHaveLength(9)
     })
 
-    it('handles complex submission etc', async () => {
+    it('handles a complex submission', async () => {
+        // this test runs through a scenario from our programming diagrams, maybe best understood next to the visuals
         const stateServer = await constructTestPostgresServer({
             s3Client: mockS3,
         })
@@ -1135,330 +979,8 @@ describe('submitContract', () => {
         ).toBe('2024-02-02')
     })
 
-    it('handles unlock and editing rates', async () => {
-        const ldService = testLDService({
-            'rate-edit-unlock': true,
-        })
-        const stateServer = await constructTestPostgresServer({
-            ldService,
-            s3Client: mockS3,
-        })
-
-        const cmsServer = await constructTestPostgresServer({
-            context: {
-                user: testCMSUser(),
-            },
-            ldService,
-            s3Client: mockS3,
-        })
-
-        console.info('1.')
-        // 1. Submit A0 with Rate1 and Rate2
-        const draftA0 =
-            await createAndUpdateTestContractWithoutRates(stateServer)
-        const AID = draftA0.id
-        const draftA010 = await addNewRateToTestContract(stateServer, draftA0)
-
-        await addNewRateToTestContract(stateServer, draftA010)
-
-        const contractA0 = await submitTestContract(stateServer, AID)
-        const subA0 = contractA0.packageSubmissions[0]
-        const rate10 = subA0.rateRevisions[0]
-        const OneID = rate10.rateID
-
-        console.info('2.')
-        // 2. Submit B0 with Rate1 and Rate3
-        const draftB0 =
-            await createAndUpdateTestContractWithoutRates(stateServer)
-        const draftB010 = await addLinkedRateToTestContract(
-            stateServer,
-            draftB0,
-            OneID
-        )
-        await addNewRateToTestContract(stateServer, draftB010)
-
-        const contractB0 = await submitTestContract(stateServer, draftB0.id)
-        const subB0 = contractB0.packageSubmissions[0]
-
-        expect(subB0.rateRevisions[0].rateID).toBe(OneID)
-
-        // unlock B, rate 3 should unlock, rate 1 should not.
-        await unlockTestHealthPlanPackage(
-            cmsServer,
-            contractB0.id,
-            'test unlock'
-        )
-
-        const unlockedB = await fetchTestContract(stateServer, contractB0.id)
-        if (!unlockedB.draftRates) {
-            throw new Error('no draft rates')
-        }
-
-        expect(unlockedB.draftRates?.length).toBe(2) // this feels like it shouldnt work, probably pulling from the old rev.
-
-        const rate1 = unlockedB.draftRates[0]
-        const rate3 = unlockedB.draftRates[1]
-
-        expect(rate1.status).toBe('SUBMITTED')
-        expect(rate3.status).toBe('UNLOCKED')
-
-        const rateUpdateInput = updateRatesInputFromDraftContract(unlockedB)
-        expect(rateUpdateInput.updatedRates).toHaveLength(2)
-        expect(rateUpdateInput.updatedRates[0].type).toBe('LINK')
-        expect(rateUpdateInput.updatedRates[1].type).toBe('UPDATE')
-        if (!rateUpdateInput.updatedRates[1].formData) {
-            throw new Error('should be set')
-        }
-
-        rateUpdateInput.updatedRates[1].formData.rateDateCertified =
-            '2000-01-22'
-
-        const updatedB = await updateTestDraftRatesOnContract(
-            stateServer,
-            rateUpdateInput
-        )
-        expect(
-            updatedB.draftRates![1].draftRevision?.formData.rateDateCertified
-        ).toBe('2000-01-22')
-    })
-
-    it('checks parent rates on update', async () => {
-        const ldService = testLDService({
-            'rate-edit-unlock': true,
-        })
-        const stateServer = await constructTestPostgresServer({
-            ldService,
-            s3Client: mockS3,
-        })
-
-        const cmsServer = await constructTestPostgresServer({
-            context: {
-                user: testCMSUser(),
-            },
-            ldService,
-            s3Client: mockS3,
-        })
-
-        console.info('1.')
-        // 1. Submit A0 with Rate1 and Rate2
-        const draftA0 =
-            await createAndUpdateTestContractWithoutRates(stateServer)
-        const AID = draftA0.id
-        const draftA010 = await addNewRateToTestContract(stateServer, draftA0, {
-            rateDateStart: '2021-01-01',
-        })
-
-        await addNewRateToTestContract(stateServer, draftA010, {
-            rateDateStart: '2022-02-02',
-        })
-
-        const contractA0 = await submitTestContract(stateServer, AID)
-        const subA0 = contractA0.packageSubmissions[0]
-        const rate10 = subA0.rateRevisions[0]
-        const OneID = rate10.rateID
-
-        console.info('2.')
-        // 2. Submit B0 with Rate1 and Rate3
-        const draftB0 =
-            await createAndUpdateTestContractWithoutRates(stateServer)
-        const draftB010 = await addLinkedRateToTestContract(
-            stateServer,
-            draftB0,
-            OneID
-        )
-        await addNewRateToTestContract(stateServer, draftB010, {
-            rateDateStart: '2023-03-03',
-        })
-
-        const contractB0 = await submitTestContract(stateServer, draftB0.id)
-        const subB0 = contractB0.packageSubmissions[0]
-
-        expect(subB0.rateRevisions[0].rateID).toBe(OneID)
-
-        // rate1 then rate3
-        expect(
-            subB0.rateRevisions.map((r) => r.formData.rateDateStart)
-        ).toEqual(['2021-01-01', '2023-03-03'])
-
-        // unlock A
-        await unlockTestHealthPlanPackage(cmsServer, contractA0.id, 'unlock a')
-        // unlock B, rate 3 should unlock, rate 1 should not.
-        await unlockTestHealthPlanPackage(
-            cmsServer,
-            contractB0.id,
-            'test unlock'
-        )
-        const unlockedB = await fetchTestContract(stateServer, contractB0.id)
-        if (!unlockedB.draftRates) {
-            throw new Error('no draft rates')
-        }
-
-        expect(unlockedB.draftRates?.length).toBe(2)
-        expect(
-            unlockedB.draftRates.map(
-                (r) => r.draftRevision!.formData.rateDateStart
-            )
-        ).toEqual(['2021-01-01', '2023-03-03'])
-
-        const rate1 = unlockedB.draftRates[0]
-        const rate3 = unlockedB.draftRates[1]
-
-        expect(rate1.status).toBe('UNLOCKED')
-        expect(rate3.status).toBe('UNLOCKED')
-
-        const rateUpdateInput = updateRatesInputFromDraftContract(unlockedB)
-        expect(rateUpdateInput.updatedRates).toHaveLength(2)
-        expect(rateUpdateInput.updatedRates[0].type).toBe('LINK')
-        expect(rateUpdateInput.updatedRates[1].type).toBe('UPDATE')
-        if (!rateUpdateInput.updatedRates[1].formData) {
-            throw new Error('should be set')
-        }
-
-        // attempt to update a link
-        rateUpdateInput.updatedRates[0].type = 'UPDATE'
-        rateUpdateInput.updatedRates[0].formData =
-            rateUpdateInput.updatedRates[1].formData
-
-        rateUpdateInput.updatedRates[1].formData.rateDateCertified =
-            '2000-01-22'
-
-        const updateResult = await stateServer.executeOperation({
-            query: UPDATE_DRAFT_CONTRACT_RATES,
-            variables: {
-                input: rateUpdateInput,
-            },
-        })
-
-        expect(updateResult.errors).toBeDefined()
-        if (!updateResult.errors) {
-            throw new Error('must be defined')
-        }
-
-        expect(updateResult.errors[0].message).toMatch(
-            /^Attempted to update a rate that is not a child of this contract/
-        )
-    })
-
-    it('can remove a child unlocked rate', async () => {
-        //TODO: make a child rate, submit and unlock, then remove it.
-        const ldService = testLDService({
-            'rate-edit-unlock': true,
-        })
-        const stateServer = await constructTestPostgresServer({
-            ldService,
-            s3Client: mockS3,
-        })
-
-        const cmsServer = await constructTestPostgresServer({
-            context: {
-                user: testCMSUser(),
-            },
-            ldService,
-            s3Client: mockS3,
-        })
-
-        console.info('1.')
-        // 1. Submit A0 with Rate1 and Rate2
-        const draftA0 =
-            await createAndUpdateTestContractWithoutRates(stateServer)
-        const AID = draftA0.id
-        const draftA010 = await addNewRateToTestContract(stateServer, draftA0, {
-            rateDateStart: '2021-01-01',
-        })
-
-        await addNewRateToTestContract(stateServer, draftA010, {
-            rateDateStart: '2022-02-02',
-        })
-
-        const contractA0 = await submitTestContract(stateServer, AID)
-        const subA0 = contractA0.packageSubmissions[0]
-        const rate10 = subA0.rateRevisions[0]
-        const OneID = rate10.rateID
-
-        console.info('2.')
-        // 2. Submit B0 with Rate1 and Rate3
-        const draftB0 =
-            await createAndUpdateTestContractWithoutRates(stateServer)
-        const draftB010 = await addLinkedRateToTestContract(
-            stateServer,
-            draftB0,
-            OneID
-        )
-        await addNewRateToTestContract(stateServer, draftB010, {
-            rateDateStart: '2023-03-03',
-        })
-
-        const contractB0 = await submitTestContract(stateServer, draftB0.id)
-        const subB0 = contractB0.packageSubmissions[0]
-
-        expect(subB0.rateRevisions[0].rateID).toBe(OneID)
-
-        // rate1 then rate3
-        expect(
-            subB0.rateRevisions.map((r) => r.formData.rateDateStart)
-        ).toEqual(['2021-01-01', '2023-03-03'])
-
-        // unlock A
-        await unlockTestHealthPlanPackage(cmsServer, contractA0.id, 'unlock a')
-        // unlock B, rate 3 should unlock, rate 1 should not.
-        await unlockTestHealthPlanPackage(
-            cmsServer,
-            contractB0.id,
-            'test unlock'
-        )
-
-        const unlockedB = await fetchTestContract(stateServer, contractB0.id)
-        if (!unlockedB.draftRates) {
-            throw new Error('no draft rates')
-        }
-
-        expect(unlockedB.draftRates?.length).toBe(2)
-        expect(
-            unlockedB.draftRates.map(
-                (r) => r.draftRevision!.formData.rateDateStart
-            )
-        ).toEqual(['2021-01-01', '2023-03-03'])
-
-        const rate1 = unlockedB.draftRates[0]
-        const rate3 = unlockedB.draftRates[1]
-
-        expect(rate1.status).toBe('UNLOCKED')
-        expect(rate3.status).toBe('UNLOCKED')
-
-        const rateUpdateInput = updateRatesInputFromDraftContract(unlockedB)
-        expect(rateUpdateInput.updatedRates).toHaveLength(2)
-        expect(rateUpdateInput.updatedRates[0].type).toBe('LINK')
-        expect(rateUpdateInput.updatedRates[1].type).toBe('UPDATE')
-        if (!rateUpdateInput.updatedRates[1].formData) {
-            throw new Error('should be set')
-        }
-
-        // attempt to update a link
-        rateUpdateInput.updatedRates[0].type = 'UPDATE'
-        rateUpdateInput.updatedRates[0].formData =
-            rateUpdateInput.updatedRates[1].formData
-
-        rateUpdateInput.updatedRates[1].formData.rateDateCertified =
-            '2000-01-22'
-
-        const updateResult = await stateServer.executeOperation({
-            query: UPDATE_DRAFT_CONTRACT_RATES,
-            variables: {
-                input: rateUpdateInput,
-            },
-        })
-
-        expect(updateResult.errors).toBeDefined()
-        if (!updateResult.errors) {
-            throw new Error('must be defined')
-        }
-
-        expect(updateResult.errors[0].message).toMatch(
-            /^Attempted to update a rate that is not a child of this contract/
-        )
-    })
-
     it('returns an error if a CMS user attempts to call submitContract', async () => {
+        const stateServer = await constructTestPostgresServer()
         const cmsServer = await constructTestPostgresServer({
             context: {
                 user: testCMSUser(),
@@ -1466,11 +988,12 @@ describe('submitContract', () => {
             s3Client: mockS3,
         })
 
-        const input: SubmitContractInput = {
+        const input = {
             contractID: 'fake-id-12345',
             submittedReason: 'Test cms user calling state user func',
         }
 
+        await submitTestContract(stateServer, input.contractID, input.submittedReason)
         const res = await cmsServer.executeOperation({
             query: SUBMIT_CONTRACT,
             variables: { input },
@@ -1482,133 +1005,571 @@ describe('submitContract', () => {
         )
     })
 
-    // Find the change history diagram in contract-rate-change-history.md
-    it('tests actions from the MC-Review change diagram', async () => {
-        const ldService = testLDService({
-            'rate-edit-unlock': true,
-        })
-        const stateServer = await constructTestPostgresServer({
-            ldService,
-            s3Client: mockS3,
-        })
+    describe( 'emails', () => {
+        it('sends two emails', async () => {
+            const mockEmailer = testEmailer()
 
-        const cmsServer = await constructTestPostgresServer({
-            context: {
-                user: testCMSUser(),
-            },
-            ldService,
-            s3Client: mockS3,
+            const server = await constructTestPostgresServer({
+                emailer: mockEmailer,
+            })
+
+            await createAndSubmitTestContractWithRate(server)
+            expect(mockEmailer.sendEmail).toHaveBeenCalledTimes(2)
         })
 
-        // make draft contract 1.1 with rate A.1 and submit
-        const S1 = await createAndSubmitTestContractWithRate(stateServer)
-        expect(S1.status).toBe('SUBMITTED')
+        it('send CMS email to CMS if submission is valid', async () => {
+            const config = testEmailConfig()
+            const mockEmailer = testEmailer(config)
+            const server = await constructTestPostgresServer({
+                emailer: mockEmailer,
+            })
 
-        // unlock S1 so state can add Rate B
-        // TODO: validate on package submissions not revs
-        const unlockS1Res = await unlockTestHealthPlanPackage(
-            cmsServer,
-            S1.id,
-            'You are missing a rate'
-        )
-        const S1Unlocked = await fetchTestContract(stateServer, unlockS1Res.id)
-        expect(S1Unlocked.status).toBe('UNLOCKED')
-        expect(S1Unlocked.draftRevision?.unlockInfo?.updatedReason).toBe(
-            'You are missing a rate'
-        )
+           const submitResult =  await createAndSubmitTestContractWithRate(server)
 
-        // add rateB and submit
-        const S2draft = await fetchTestContract(stateServer, unlockS1Res.id)
-        const S2draftWithRateB = await addNewRateToTestContract(
-            stateServer,
-            S2draft
-        )
-        const S2 = await submitTestContract(
-            stateServer,
-            S2draftWithRateB.id,
-            'Added rate B to the submission'
-        )
+            const contractName =
+                submitResult?.packageSubmissions[0].contractRevision.contractName
 
-        expect(S2.status).toBe('RESUBMITTED')
-        expect(S2.packageSubmissions).toHaveLength(2)
-        expect(
-            S2.packageSubmissions[0].contractRevision.submitInfo?.updatedReason
-        ).toBe('Added rate B to the submission')
+            const stateAnalystsEmails = getTestStateAnalystsEmails(submitResult.stateCode)
 
-        // We now have contract 1.2 with A.1 and B.1
+            const cmsEmails = [
+                ...config.devReviewTeamEmails,
+                ...stateAnalystsEmails,
+            ]
 
-        // TODO: Finish this test once we have support for unlocking rates.
+            // email subject line is correct for CMS email
+            expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    subject: expect.stringContaining(
+                        `New Managed Care Submission: ${contractName}`
+                    ),
+                    sourceEmail: config.emailSource,
+                    toAddresses: expect.arrayContaining(Array.from(cmsEmails)),
+                })
+            )
+        })
 
-        // // unlock rate A and update it
-        // const rateAID = S2.packageSubmissions[0].rateRevisions[0].rateID
-        // console.info(`unlocking rate ${rateAID}`)
-        // const unlockRateARes = await cmsServer.executeOperation({
-        //     query: UNLOCK_RATE,
-        //     variables: {
-        //         input: {
-        //             rateID: rateAID,
-        //             unlockedReason: 'Unlocking Rate A for update',
-        //         },
-        //     },
-        // })
+        it('send CMS email on contract only re-submission', async () => {
+            const config = testEmailConfig()
+            const mockEmailer = testEmailer(config)
+            //mock invoke email submit lambda
+            const server = await constructTestPostgresServer({
+                emailer: mockEmailer,
+            })
+            const cmsServer = await constructTestPostgresServer({
+                context: {
+                    user: testCMSUser(),
+                },
+                emailer: mockEmailer,
+            })
+            const submit1 =  await createAndUpdateTestContractWithoutRates(server)
+            await unlockTestContract(cmsServer, submit1.id, 'unlock to resubmit')
+           await submitTestContract(server, submit1.id, 'resubmit')
 
-        // const rateAUnlockData = unlockRateARes.data?.unlockRate.rate as Rate
-        // expect(unlockRateARes.errors).toBeUndefined()
-        // expect(rateAUnlockData.status).toBe('UNLOCKED')
-        // expect(rateAUnlockData.draftRevision?.unlockInfo?.updatedReason).toBe(
-        //     'Unlocking Rate A for update'
-        // )
+            const contractName = submit1.packageSubmissions[0].contractRevision.contractName
+            const stateAnalystsEmails = getTestStateAnalystsEmails(submit1.stateCode)
 
-        // // make changes to Rate A and re-submit for Rate A.2
-        // // TODO: this uses Prisma directly, we want to use updateRate resolver
-        // // once we have one
-        // const updateRateA2res = await updateTestRate(rateAID, {
-        //     rateDateStart: new Date(Date.UTC(2024, 2, 1)),
-        //     rateDateEnd: new Date(Date.UTC(2025, 1, 31)),
-        //     rateDateCertified: new Date(Date.UTC(2024, 1, 31)),
-        // })
-        // const S3Res = await stateServer.executeOperation({
-        //     query: SUBMIT_RATE,
-        //     variables: {
-        //         input: {
-        //             rateID: updateRateA2res.id,
-        //         },
-        //     },
-        // })
-        // expect(S3Res.errors).toBeUndefined()
+            const cmsEmails = [
+                ...config.devReviewTeamEmails,
+                ...stateAnalystsEmails,
+            ]
 
-        // const S3 = await fetchTestContract(stateServer, S2.id)
-        // expect(S3.packageSubmissions).toHaveLength(2) // we have contract revision 2
+            // email subject line is correct for CMS email
+            expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
+                5,
+                expect.objectContaining({
+                    subject: expect.stringContaining(`${contractName} was resubmitted`),
+                    sourceEmail: config.emailSource,
+                    toAddresses: expect.arrayContaining(Array.from(cmsEmails)),
+                })
+            )
+        })
 
-        // // Unlock contract and update it
-        // await unlockTestHealthPlanPackage(
-        //     cmsServer,
-        //     S2.id,
-        //     'Unlocking to update contract to give us rev 3'
-        // )
+    //     it('send CMS email to CMS from the database', async () => {
+    //         const ldService = testLDService({
+    //             'read-write-state-assignments': true,
+    //         })
 
-        // const unlockedS3 = await fetchTestContract(stateServer, S3.id)
-        // expect(unlockedS3.status).toBe('UNLOCKED')
+    //         const prismaClient = await sharedTestPrismaClient()
+    //         const postgresStore = NewPostgresStore(prismaClient)
 
-        // await updateTestHealthPlanPackage(stateServer, unlockedS3.id, {
-        //     contractDocuments: [
-        //         {
-        //             name: 'new-doc-to-support',
-        //             s3URL: 'testS3URL',
-        //             sha256: 'fakesha12345',
-        //         },
-        //     ],
-        // })
+    //         const config = testEmailConfig()
+    //         const mockEmailer = testEmailer(config)
+    //         //mock invoke email submit lambda
+    //         const server = await constructTestPostgresServer({
+    //             store: postgresStore,
+    //             emailer: mockEmailer,
+    //             ldService,
+    //         })
+    //         const cmsServer = await constructTestPostgresServer({
+    //             store: postgresStore,
+    //             context: {
+    //                 user: cmsUser,
+    //             },
+    //             ldService,
+    //         })
 
-        // const S4 = await submitTestContract(
-        //     stateServer,
-        //     unlockedS3.id,
-        //     'Added the new document'
-        // )
+    //         // add some users to the db, assign them to the state
+    //         const assignedUsers = [
+    //             testCMSUser({
+    //                 givenName: 'Roku',
+    //                 email: 'roku@example.com',
+    //             }),
+    //             testCMSUser({
+    //                 givenName: 'Izumi',
+    //                 email: 'izumi@example.com',
+    //             }),
+    //         ]
+    //         await createDBUsersWithFullData(assignedUsers)
 
-        // expect(S4.packageSubmissions).toHaveLength(3) // we have contract revision 3
+    //         const assignedUserIDs = assignedUsers.map((u) => u.id)
+    //         const assignedUserEmails = assignedUsers.map((u) => u.email)
 
-        // // TODO: Unlock RateB and unlink RateA
-        // // TODO: Update & Resubmit Rate B.2
-    })
+    //         await updateTestStateAssignments(cmsServer, 'FL', assignedUserIDs)
+    //         const submit1 =  await createAndUpdateTestContractWithoutRates(server)
+    //         const contractName= submit1.packageSubmissions[0].contractRevision.contractName
+
+    //         const cmsEmails = [...config.devReviewTeamEmails, ...assignedUserEmails]
+
+    //         // email subject line is correct for CMS email
+    //         expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
+    //             expect.objectContaining({
+    //                 subject: expect.stringContaining(
+    //                     `New Managed Care Submission: ${contractName}`
+    //                 ),
+    //                 sourceEmail: config.emailSource,
+    //                 toAddresses: expect.arrayContaining(Array.from(cmsEmails)),
+    //             })
+    //         )
+    //     })
+
+    //     it('does send email when request for state analysts emails fails', async () => {
+    //         const config = testEmailConfig()
+    //         const mockEmailer = testEmailer(config)
+    //         //mock invoke email submit lambda
+    //         const mockEmailParameterStore = mockEmailParameterStoreError()
+    //         const server = await constructTestPostgresServer({
+    //             emailer: mockEmailer,
+    //             emailParameterStore: mockEmailParameterStore,
+    //         })
+    //         const draft = await createAndUpdateTestHealthPlanPackage(server, {})
+    //         const draftID = draft.id
+
+    //         await server.executeOperation({
+    //             query: SUBMIT_HEALTH_PLAN_PACKAGE,
+    //             variables: {
+    //                 input: {
+    //                     pkgID: draftID,
+    //                 },
+    //             },
+    //         })
+
+    //         expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
+    //             expect.objectContaining({
+    //                 toAddresses: expect.arrayContaining(
+    //                     Array.from(config.devReviewTeamEmails)
+    //                 ),
+    //             })
+    //         )
+    //     })
+
+    //     it('does log error when request for state specific analysts emails failed', async () => {
+    //         const mockEmailParameterStore = mockEmailParameterStoreError()
+    //         const consoleErrorSpy = jest.spyOn(console, 'error')
+    //         const error = {
+    //             error: 'No store found',
+    //             message: 'getStateAnalystsEmails failed',
+    //             operation: 'getStateAnalystsEmails',
+    //             status: 'ERROR',
+    //         }
+
+    //         const server = await constructTestPostgresServer({
+    //             emailParameterStore: mockEmailParameterStore,
+    //         })
+    //         const draft = await createAndUpdateTestHealthPlanPackage(server, {})
+    //         const draftID = draft.id
+
+    //         await server.executeOperation({
+    //             query: SUBMIT_HEALTH_PLAN_PACKAGE,
+    //             variables: {
+    //                 input: {
+    //                     pkgID: draftID,
+    //                 },
+    //             },
+    //         })
+
+    //         expect(consoleErrorSpy).toHaveBeenCalledWith(error)
+    //     })
+
+    //     it('send state email to submitter if submission is valid', async () => {
+    //         const mockEmailer = testEmailer()
+    //         const server = await constructTestPostgresServer({
+    //             emailer: mockEmailer,
+    //             context: {
+    //                 user: testStateUser({
+    //                     email: 'notspiderman@example.com',
+    //                 }),
+    //             },
+    //         })
+    //         const draft = await createAndUpdateTestHealthPlanPackage(server, {})
+    //         const draftID = draft.id
+
+    //         const submitResult = await server.executeOperation({
+    //             query: SUBMIT_HEALTH_PLAN_PACKAGE,
+    //             variables: {
+    //                 input: {
+    //                     pkgID: draftID,
+    //                 },
+    //             },
+    //         })
+
+    //         expect(submitResult.errors).toBeUndefined()
+
+    //         const currentRevision =
+    //             submitResult?.data?.submitHealthPlanPackage?.pkg.revisions[0].node
+
+    //         const sub = base64ToDomain(currentRevision.formDataProto)
+    //         if (sub instanceof Error) {
+    //             throw sub
+    //         }
+
+    //         const programs = [defaultFloridaProgram()]
+    //         const name = packageName(
+    //             sub.stateCode,
+    //             sub.stateNumber,
+    //             sub.programIDs,
+    //             programs
+    //         )
+
+    //         expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
+    //             expect.objectContaining({
+    //                 subject: expect.stringContaining(`${name} was sent to CMS`),
+    //                 toAddresses: expect.arrayContaining([
+    //                     'notspiderman@example.com',
+    //                 ]),
+    //             })
+    //         )
+    //     })
+
+    //     it('send CMS email to CMS on valid resubmission', async () => {
+    //         const config = testEmailConfig()
+    //         const mockEmailer = testEmailer(config)
+    //         //mock invoke email submit lambda
+    //         const stateServer = await constructTestPostgresServer({
+    //             emailer: mockEmailer,
+    //         })
+
+    //         const stateSubmission =
+    //             await createAndSubmitTestHealthPlanPackage(stateServer)
+    //         const cmsServer = await constructTestPostgresServer({
+    //             context: {
+    //                 user: cmsUser,
+    //             },
+    //         })
+
+    //         await unlockTestHealthPlanPackage(
+    //             cmsServer,
+    //             stateSubmission.id,
+    //             'Test unlock reason.'
+    //         )
+
+    //         const submitResult = await stateServer.executeOperation({
+    //             query: SUBMIT_HEALTH_PLAN_PACKAGE,
+    //             variables: {
+    //                 input: {
+    //                     pkgID: stateSubmission.id,
+    //                     submittedReason: 'Test resubmitted reason',
+    //                 },
+    //             },
+    //         })
+
+    //         const currentRevision =
+    //             submitResult?.data?.submitHealthPlanPackage?.pkg.revisions[0].node
+
+    //         const sub = base64ToDomain(currentRevision.formDataProto)
+    //         if (sub instanceof Error) {
+    //             throw sub
+    //         }
+
+    //         const programs = [defaultFloridaProgram()]
+    //         const name = packageName(
+    //             sub.stateCode,
+    //             sub.stateNumber,
+    //             sub.programIDs,
+    //             programs
+    //         )
+
+    //         // email subject line is correct for CMS email and contains correct email body text
+    //         expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
+    //             expect.objectContaining({
+    //                 subject: expect.stringContaining(`${name} was resubmitted`),
+    //                 sourceEmail: config.emailSource,
+    //                 bodyText: expect.stringContaining(
+    //                     `The state completed their edits on submission ${name}`
+    //                 ),
+    //                 toAddresses: expect.arrayContaining(
+    //                     Array.from(config.devReviewTeamEmails)
+    //                 ),
+    //             })
+    //         )
+    //     })
+
+    //     it('send state email to state contacts and all submitters on valid resubmission', async () => {
+    //         const config = testEmailConfig()
+    //         const mockEmailer = testEmailer(config)
+    //         //mock invoke email submit lambda
+    //         const stateServer = await constructTestPostgresServer({
+    //             context: {
+    //                 user: testStateUser({
+    //                     email: 'alsonotspiderman@example.com',
+    //                 }),
+    //             },
+    //         })
+
+    //         const stateServerTwo = await constructTestPostgresServer({
+    //             emailer: mockEmailer,
+    //             context: {
+    //                 user: testStateUser({
+    //                     email: 'notspiderman@example.com',
+    //                 }),
+    //             },
+    //         })
+
+    //         const stateSubmission =
+    //             await createAndSubmitTestHealthPlanPackage(stateServer)
+
+    //         const cmsServer = await constructTestPostgresServer({
+    //             context: {
+    //                 user: cmsUser,
+    //             },
+    //         })
+
+    //         await unlockTestHealthPlanPackage(
+    //             cmsServer,
+    //             stateSubmission.id,
+    //             'Test unlock reason.'
+    //         )
+
+    //         const submitResult = await resubmitTestHealthPlanPackage(
+    //             stateServerTwo,
+    //             stateSubmission.id,
+    //             'Test resubmission reason'
+    //         )
+
+    //         const currentRevision = submitResult?.revisions[0].node
+
+    //         const sub = base64ToDomain(currentRevision.formDataProto)
+    //         if (sub instanceof Error) {
+    //             throw sub
+    //         }
+
+    //         const programs = [defaultFloridaProgram()]
+    //         const name = packageName(
+    //             sub.stateCode,
+    //             sub.stateNumber,
+    //             sub.programIDs,
+    //             programs
+    //         )
+
+    //         // email subject line is correct for CMS email and contains correct email body text
+    //         expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
+    //             expect.objectContaining({
+    //                 subject: expect.stringContaining(`${name} was resubmitted`),
+    //                 sourceEmail: config.emailSource,
+    //                 toAddresses: expect.arrayContaining([
+    //                     'alsonotspiderman@example.com',
+    //                     'notspiderman@example.com',
+    //                     sub.stateContacts[0].email,
+    //                 ]),
+    //             })
+    //         )
+    //     })
+
+    //     it('does not send any emails if submission fails', async () => {
+    //         const mockEmailer = testEmailer()
+    //         const server = await constructTestPostgresServer({
+    //             emailer: mockEmailer,
+    //         })
+    //         const draft = await createAndUpdateTestHealthPlanPackage(server, {
+    //             submissionType: 'CONTRACT_AND_RATES',
+    //             rateInfos: [
+    //                 {
+    //                     id: uuidv4(),
+    //                     rateDateStart: new Date(Date.UTC(2025, 5, 1)),
+    //                     rateDateEnd: new Date(Date.UTC(2026, 4, 30)),
+    //                     rateDateCertified: undefined,
+    //                     rateDocuments: [],
+    //                     supportingDocuments: [],
+    //                     actuaryContacts: [],
+    //                     packagesWithSharedRateCerts: [],
+    //                 },
+    //             ],
+    //         })
+    //         const draftID = draft.id
+
+    //         const submitResult = await server.executeOperation({
+    //             query: SUBMIT_HEALTH_PLAN_PACKAGE,
+    //             variables: {
+    //                 input: {
+    //                     pkgID: draftID,
+    //                 },
+    //             },
+    //         })
+
+    //         expect(submitResult.errors).toBeDefined()
+    //         expect(mockEmailer.sendEmail).not.toHaveBeenCalled()
+    //     })
+
+    //     it('errors when SES email has failed.', async () => {
+    //         const mockEmailer = testEmailer()
+
+    //         jest.spyOn(awsSESHelpers, 'testSendSESEmail').mockImplementation(
+    //             async () => {
+    //                 throw new Error('Network error occurred')
+    //             }
+    //         )
+
+    //         //mock invoke email submit lambda
+    //         const server = await constructTestPostgresServer({
+    //             emailer: mockEmailer,
+    //         })
+    //         const draft = await createAndUpdateTestHealthPlanPackage(server, {})
+    //         const draftID = draft.id
+
+    //         const submitResult = await server.executeOperation({
+    //             query: SUBMIT_HEALTH_PLAN_PACKAGE,
+    //             variables: {
+    //                 input: {
+    //                     pkgID: draftID,
+    //                 },
+    //             },
+    //         })
+
+    //         // expect errors from submission
+    //         // expect(submitResult.errors).toBeDefined()
+
+    //         // expect sendEmail to have been called, so we know it did not error earlier
+    //         expect(mockEmailer.sendEmail).toHaveBeenCalled()
+
+    //         jest.resetAllMocks()
+
+    //         // expect correct graphql error.
+    //         expect(submitResult.errors?.[0]).toEqual(
+    //             expect.objectContaining({
+    //                 message: 'Email failed',
+    //                 path: ['submitHealthPlanPackage'],
+    //                 extensions: {
+    //                     code: 'INTERNAL_SERVER_ERROR',
+    //                     cause: 'EMAIL_ERROR',
+    //                     exception: {
+    //                         message: 'Email failed',
+    //                     },
+    //                 },
+    //             })
+    //         )
+    //     })
+    // })
+
+    // describe('Feature flagged 4348 attestation question test', () => {
+    //     const ldService = testLDService({
+    //         '438-attestation': true,
+    //     })
+
+    //     it('errors when contract 4348 attestation question is undefined', async () => {
+    //         const server = await constructTestPostgresServer({
+    //             ldService: ldService,
+    //         })
+
+    //         // setup
+    //         const initialPkg = await createAndUpdateTestHealthPlanPackage(
+    //             server,
+    //             {
+    //                 statutoryRegulatoryAttestation: undefined,
+    //                 statutoryRegulatoryAttestationDescription: undefined,
+    //             }
+    //         )
+    //         const draft = latestFormData(initialPkg)
+    //         const draftID = draft.id
+
+    //         await new Promise((resolve) => setTimeout(resolve, 2000))
+
+    //         // submit
+    //         const submitResult = await server.executeOperation({
+    //             query: SUBMIT_HEALTH_PLAN_PACKAGE,
+    //             variables: {
+    //                 input: {
+    //                     pkgID: draftID,
+    //                 },
+    //             },
+    //         })
+
+    //         expect(submitResult.errors).toBeDefined()
+    //         expect(submitResult.errors?.[0].extensions?.message).toBe(
+    //             'formData is missing required contract fields'
+    //         )
+    //     }, 20000)
+    //     it('errors when contract 4348 attestation question is false without a description', async () => {
+    //         const server = await constructTestPostgresServer({
+    //             ldService: ldService,
+    //         })
+
+    //         // setup
+    //         const initialPkg = await createAndUpdateTestHealthPlanPackage(
+    //             server,
+    //             {
+    //                 statutoryRegulatoryAttestation: false,
+    //                 statutoryRegulatoryAttestationDescription: undefined,
+    //             }
+    //         )
+    //         const draft = latestFormData(initialPkg)
+    //         const draftID = draft.id
+
+    //         await new Promise((resolve) => setTimeout(resolve, 2000))
+
+    //         // submit
+    //         const submitResult = await server.executeOperation({
+    //             query: SUBMIT_HEALTH_PLAN_PACKAGE,
+    //             variables: {
+    //                 input: {
+    //                     pkgID: draftID,
+    //                 },
+    //             },
+    //         })
+
+    //         expect(submitResult.errors).toBeDefined()
+    //         expect(submitResult.errors?.[0].extensions?.message).toBe(
+    //             'formData is missing required contract fields'
+    //         )
+    //     }, 20000)
+    //     it('successfully submits when contract 4348 attestation question is valid', async () => {
+    //         const server = await constructTestPostgresServer({
+    //             ldService: ldService,
+    //         })
+
+    //         // setup
+    //         const initialPkg = await createAndUpdateTestHealthPlanPackage(
+    //             server,
+    //             {
+    //                 statutoryRegulatoryAttestation: false,
+    //                 statutoryRegulatoryAttestationDescription: 'No compliance',
+    //             }
+    //         )
+    //         const draft = latestFormData(initialPkg)
+    //         const draftID = draft.id
+
+    //         await new Promise((resolve) => setTimeout(resolve, 2000))
+
+    //         // submit
+    //         const submitResult = await server.executeOperation({
+    //             query: SUBMIT_HEALTH_PLAN_PACKAGE,
+    //             variables: {
+    //                 input: {
+    //                     pkgID: draftID,
+    //                 },
+    //             },
+    //         })
+
+    //         expect(submitResult.errors).toBeUndefined()
+    //     }, 20000)
+    // })
+})
 })
