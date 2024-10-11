@@ -81,3 +81,6 @@ export type {
 } from './QuestionResponseType'
 
 export type { APIKeyType } from './apiKey'
+
+export type { DocumentType } from './DocumentType'
+export { documentSchema } from './DocumentType'
