@@ -82,5 +82,5 @@ export type {
 
 export type { APIKeyType } from './apiKey'
 
-export type { DocumentType } from './DocumentType'
-export { documentSchema } from './DocumentType'
+export type { AuditDocument } from './DocumentType'
+export { auditDocumentSchema } from './DocumentType'

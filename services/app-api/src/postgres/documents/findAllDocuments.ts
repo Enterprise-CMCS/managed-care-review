@@ -1,28 +1,75 @@
 import type { PrismaClient } from '@prisma/client'
-import type { DocumentType } from '../../domain-models'
-import { documentSchema } from '../../domain-models'
+import type { AuditDocument } from '../../domain-models'
+import { auditDocumentSchema } from '../../domain-models'
+import type { z } from 'zod'
 
 export async function findAllDocuments(
     client: PrismaClient
-): Promise<DocumentType[] | Error> {
+): Promise<AuditDocument[] | Error> {
     try {
-        const allContractDocs = await client['contractDocument'].findMany()
-        const parsedDocs = allContractDocs.map((doc) => {
-            const result = documentSchema.safeParse(doc)
-            if (!result.success) {
-                console.error(
-                    `Validation failed for document ${doc.id}:`,
-                    result.error
-                )
-                return null
-            }
-            return result.data
-        })
+        const [contractDocs, rateDocs] = await Promise.all([
+            getContractDocuments(client),
+            getRateDocuments(client),
+        ])
+        if (contractDocs instanceof Error) return contractDocs
+        if (rateDocs instanceof Error) return rateDocs
 
-        return parsedDocs.filter((doc): doc is DocumentType => doc !== null)
+        const allDocs = [...contractDocs, ...rateDocs]
+        const parsedDocs = allDocs.map((doc) =>
+            auditDocumentSchema.safeParse(doc)
+        )
+
+        const validDocs: AuditDocument[] = []
+        const errors: z.ZodError[] = []
+
+        parsedDocs.forEach((result) => {
+            if (result.success) {
+                validDocs.push(result.data)
+            } else {
+                errors.push(result.error)
+            }
+        })
+        if (errors.length > 0) {
+            return new Error(
+                `Failed to parse ${errors.length} documents: ${errors.map((e) => e.message).join(', ')}`
+            )
+        }
+
+        return validDocs
     } catch (err) {
-        const error = new Error(`Could not fetch all documents from pg: ${err}`)
-        console.error(error)
-        return error
+        console.error('Error fetching documents:', err)
+        return err
+    }
+}
+
+async function getContractDocuments(
+    prisma: PrismaClient
+): Promise<Omit<AuditDocument, 'type'>[] | Error> {
+    try {
+        const docs = await prisma.contractDocument.findMany()
+        return docs.map((doc) => ({
+            ...doc,
+            contractRevisionID: doc.contractRevisionID,
+        }))
+    } catch (err) {
+        return err instanceof Error
+            ? err
+            : new Error('Failed to fetch contract documents')
+    }
+}
+
+async function getRateDocuments(
+    prisma: PrismaClient
+): Promise<Omit<AuditDocument, 'type'>[] | Error> {
+    try {
+        const docs = await prisma.rateDocument.findMany()
+        return docs.map((doc) => ({
+            ...doc,
+            rateRevisionID: doc.rateRevisionID,
+        }))
+    } catch (err) {
+        return err instanceof Error
+            ? err
+            : new Error('Failed to fetch rate documents')
     }
 }
