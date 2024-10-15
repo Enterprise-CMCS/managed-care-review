@@ -15,9 +15,11 @@ export async function findAllDocuments(
         if (rateDocs instanceof Error) return rateDocs
 
         const allDocs = [...contractDocs, ...rateDocs]
+        console.info(`Got some docs back: ${JSON.stringify(allDocs)}`)
         const parsedDocs = allDocs.map((doc) =>
             auditDocumentSchema.safeParse(doc)
         )
+        console.info(`Got some parsed docs: ${JSON.stringify(parsedDocs)}`)
 
         const validDocs: AuditDocument[] = []
         const errors: z.ZodError[] = []
