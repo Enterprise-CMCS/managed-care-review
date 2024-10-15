@@ -1,7 +1,7 @@
 import { screen, waitFor, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { Route, Routes } from 'react-router-dom'
-import { UploadQuestions } from '../../QuestionResponse'
+import { UploadContractQuestions } from '../../QuestionResponse'
 import {
     dragAndDrop,
     renderWithProviders,
@@ -41,7 +41,7 @@ describe('UploadQuestions', () => {
                         <Route element={<SubmissionSideNav />}>
                             <Route
                                 path={RoutesRecord.SUBMISSIONS_UPLOAD_CONTRACT_QUESTION}
-                                element={<UploadQuestions />}
+                                element={<UploadContractQuestions />}
                             />
                         </Route>
                     </Routes>,
@@ -97,7 +97,7 @@ describe('UploadQuestions', () => {
                         <Route element={<SubmissionSideNav />}>
                             <Route
                                 path={RoutesRecord.SUBMISSIONS_UPLOAD_CONTRACT_QUESTION}
-                                element={<UploadQuestions />}
+                                element={<UploadContractQuestions />}
                             />
                         </Route>
                     </Routes>,
@@ -159,7 +159,7 @@ describe('UploadQuestions', () => {
                         <Route element={<SubmissionSideNav />}>
                             <Route
                                 path={RoutesRecord.SUBMISSIONS_UPLOAD_CONTRACT_QUESTION}
-                                element={<UploadQuestions />}
+                                element={<UploadContractQuestions />}
                             />
                         </Route>
                     </Routes>,
@@ -234,7 +234,7 @@ describe('UploadQuestions', () => {
                         <Route element={<SubmissionSideNav />}>
                             <Route
                                 path={RoutesRecord.SUBMISSIONS_UPLOAD_CONTRACT_QUESTION}
-                                element={<UploadQuestions />}
+                                element={<UploadContractQuestions />}
                             />
                         </Route>
                     </Routes>,
@@ -285,7 +285,7 @@ describe('UploadQuestions', () => {
                         <Route element={<SubmissionSideNav />}>
                             <Route
                                 path={RoutesRecord.SUBMISSIONS_UPLOAD_CONTRACT_QUESTION}
-                                element={<UploadQuestions />}
+                                element={<UploadContractQuestions />}
                             />
                         </Route>
                     </Routes>,
@@ -347,7 +347,7 @@ describe('UploadQuestions', () => {
                         <Route element={<SubmissionSideNav />}>
                             <Route
                                 path={RoutesRecord.SUBMISSIONS_UPLOAD_CONTRACT_QUESTION}
-                                element={<UploadQuestions />}
+                                element={<UploadContractQuestions />}
                             />
                         </Route>
                     </Routes>,
@@ -421,7 +421,7 @@ describe('UploadQuestions', () => {
                         <Route element={<SubmissionSideNav />}>
                             <Route
                                 path={RoutesRecord.SUBMISSIONS_UPLOAD_CONTRACT_QUESTION}
-                                element={<UploadQuestions />}
+                                element={<UploadContractQuestions />}
                             />
                         </Route>
                     </Routes>,
@@ -485,7 +485,7 @@ describe('UploadQuestions', () => {
                                     path={
                                         RoutesRecord.SUBMISSIONS_UPLOAD_CONTRACT_QUESTION
                                     }
-                                    element={<UploadQuestions />}
+                                    element={<UploadContractQuestions />}
                                 />
                             </Route>
                         </Routes>,

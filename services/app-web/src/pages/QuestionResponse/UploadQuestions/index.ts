@@ -1,1 +1,1 @@
-export { UploadQuestions } from './UploadQuestions'
+export { UploadContractQuestions } from './UploadContractQuestions'

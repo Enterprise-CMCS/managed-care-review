@@ -34,7 +34,7 @@ import { SubmissionSideNav } from '../SubmissionSideNav'
 import {
     QuestionResponse,
     UploadResponse,
-    UploadQuestions,
+    UploadContractQuestions,
 } from '../QuestionResponse'
 import { GraphQLExplorer } from '../GraphQLExplorer/GraphQLExplorer'
 import { RateSummary } from '../RateSummary'
@@ -205,7 +205,7 @@ const CMSUserRoutes = ({
                     />
                     <Route
                         path={RoutesRecord.SUBMISSIONS_UPLOAD_CONTRACT_QUESTION}
-                        element={<UploadQuestions />}
+                        element={<UploadContractQuestions />}
                     />
                     <Route
                         path={RoutesRecord.SUBMISSIONS_SUMMARY}
