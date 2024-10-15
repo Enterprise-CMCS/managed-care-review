@@ -29,7 +29,7 @@ describe('QuestionResponse', () => {
                         <Route element={<SubmissionSideNav />}>
                             <Route
                                 path={
-                                    RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS
+                                    RoutesRecord.SUBMISSIONS_CONTRACT_QUESTIONS_AND_ANSWERS
                                 }
                                 element={<QuestionResponse />}
                             />
@@ -82,7 +82,7 @@ describe('QuestionResponse', () => {
                         <Route element={<SubmissionSideNav />}>
                             <Route
                                 path={
-                                    RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS
+                                    RoutesRecord.SUBMISSIONS_CONTRACT_QUESTIONS_AND_ANSWERS
                                 }
                                 element={<QuestionResponse />}
                             />
@@ -241,7 +241,7 @@ describe('QuestionResponse', () => {
                         <Route element={<SubmissionSideNav />}>
                             <Route
                                 path={
-                                    RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS
+                                    RoutesRecord.SUBMISSIONS_CONTRACT_QUESTIONS_AND_ANSWERS
                                 }
                                 element={<QuestionResponse />}
                             />
@@ -307,7 +307,7 @@ describe('QuestionResponse', () => {
                         <Route element={<SubmissionSideNav />}>
                             <Route
                                 path={
-                                    RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS
+                                    RoutesRecord.SUBMISSIONS_CONTRACT_QUESTIONS_AND_ANSWERS
                                 }
                                 element={<QuestionResponse />}
                             />
@@ -379,7 +379,7 @@ describe('QuestionResponse', () => {
                         <Route element={<SubmissionSideNav />}>
                             <Route
                                 path={
-                                    RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS
+                                    RoutesRecord.SUBMISSIONS_CONTRACT_QUESTIONS_AND_ANSWERS
                                 }
                                 element={<QuestionResponse />}
                             />
@@ -432,7 +432,7 @@ describe('QuestionResponse', () => {
                         <Route element={<SubmissionSideNav />}>
                             <Route
                                 path={
-                                    RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS
+                                    RoutesRecord.SUBMISSIONS_CONTRACT_QUESTIONS_AND_ANSWERS
                                 }
                                 element={<QuestionResponse />}
                             />
@@ -479,7 +479,7 @@ describe('QuestionResponse', () => {
                         <Route element={<SubmissionSideNav />}>
                             <Route
                                 path={
-                                    RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS
+                                    RoutesRecord.SUBMISSIONS_CONTRACT_QUESTIONS_AND_ANSWERS
                                 }
                                 element={<QuestionResponse />}
                             />
@@ -527,7 +527,7 @@ describe('QuestionResponse', () => {
                             <Route element={<SubmissionSideNav />}>
                                 <Route
                                     path={
-                                        RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS
+                                        RoutesRecord.SUBMISSIONS_CONTRACT_QUESTIONS_AND_ANSWERS
                                     }
                                     element={<QuestionResponse />}
                                 />
@@ -575,7 +575,7 @@ describe('QuestionResponse', () => {
                     <Route element={<SubmissionSideNav />}>
                         <Route
                             path={
-                                RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS
+                                RoutesRecord.SUBMISSIONS_CONTRACT_QUESTIONS_AND_ANSWERS
                             }
                             element={<QuestionResponse />}
                         />
@@ -616,7 +616,7 @@ describe('QuestionResponse', () => {
                     <Route element={<SubmissionSideNav />}>
                         <Route
                             path={
-                                RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS
+                                RoutesRecord.SUBMISSIONS_CONTRACT_QUESTIONS_AND_ANSWERS
                             }
                             element={<QuestionResponse />}
                         />
