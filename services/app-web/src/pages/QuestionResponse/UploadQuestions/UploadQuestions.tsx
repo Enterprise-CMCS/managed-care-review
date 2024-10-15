@@ -25,7 +25,7 @@ import {
 import { SideNavOutletContextType } from '../../SubmissionSideNav/SubmissionSideNav'
 import { usePage } from '../../../contexts/PageContext'
 import { Breadcrumbs } from '../../../components/Breadcrumbs/Breadcrumbs'
-import { createQuestionWrapper } from '../../../gqlHelpers/mutationWrappersForUserFriendlyErrors'
+import { createContractQuestionWrapper } from '../../../gqlHelpers/mutationWrappersForUserFriendlyErrors'
 import { RoutesRecord } from '../../../constants'
 import { GenericErrorPage } from '../../Errors/GenericErrorPage'
 
@@ -90,7 +90,7 @@ export const UploadQuestions = () => {
             documents: questionDocs,
         }
 
-        const createResult = await createQuestionWrapper(createQuestion, input)
+        const createResult = await createContractQuestionWrapper(createQuestion, input)
 
         if (createResult instanceof Error) {
             console.info(createResult.message)
@@ -110,7 +110,7 @@ export const UploadQuestions = () => {
                     { link: `/submissions/${id}`, text: packageName },
                     {
                         text: 'Add questions',
-                        link: RoutesRecord.SUBMISSIONS_UPLOAD_QUESTION,
+                        link: RoutesRecord.SUBMISSIONS_UPLOAD_CONTRACT_QUESTION,
                     },
                 ]}
             />

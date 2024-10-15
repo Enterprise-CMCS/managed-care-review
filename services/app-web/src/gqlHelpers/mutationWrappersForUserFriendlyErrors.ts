@@ -307,7 +307,7 @@ export async function updateStateAssignmentsWrapper(
  * workflow. So, when calling Q&A mutations the Q&A page will not refetch the data. The alternative would be to use
  * cache.evict() to force a refetch, but would then cause the loading UI to show.
  **/
-export const createQuestionWrapper = async (
+export const createContractQuestionWrapper = async (
     createQuestion: CreateContractQuestionMutationFn,
     input: CreateContractQuestionInput
 ): Promise<CreateContractQuestionMutation | GraphQLErrors | Error> => {

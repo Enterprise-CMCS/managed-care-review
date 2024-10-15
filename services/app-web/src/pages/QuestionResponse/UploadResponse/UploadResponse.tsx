@@ -120,7 +120,7 @@ export const UploadResponse = () => {
                     { link: `/submissions/${id}`, text: packageName },
                     {
                         text: 'Add response',
-                        link: RoutesRecord.SUBMISSIONS_UPLOAD_RESPONSE,
+                        link: RoutesRecord.SUBMISSIONS_UPLOAD_CONTRACT_RESPONSE,
                     },
                 ]}
             />

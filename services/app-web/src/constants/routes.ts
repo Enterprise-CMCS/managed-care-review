@@ -19,6 +19,8 @@ const ROUTES = [
     'AUTOMATED_EMAILS',
     'SUPPORT_EMAILS',
     'RATES_SUMMARY',
+    'RATES_UPLOAD_QUESTION',
+    'RATES_UPLOAD_RESPONSE',
     'RATE_EDIT',
     'REPLACE_RATE',
     'SUBMISSIONS',
@@ -34,8 +36,8 @@ const ROUTES = [
     'SUBMISSIONS_SUMMARY',
     'SUBMISSIONS_MCCRSID',
     'SUBMISSIONS_QUESTIONS_AND_ANSWERS',
-    'SUBMISSIONS_UPLOAD_QUESTION',
-    'SUBMISSIONS_UPLOAD_RESPONSE',
+    'SUBMISSIONS_UPLOAD_CONTRACT_QUESTION',
+    'SUBMISSIONS_UPLOAD_CONTRACT_RESPONSE',
 ] as const // iterable union type
 type RouteT = (typeof ROUTES)[number]
 type RouteTWithUnknown = RouteT | 'UNKNOWN_ROUTE'
@@ -64,6 +66,10 @@ const RoutesRecord: Record<RouteT, string> = {
     SUPPORT_EMAILS: '/mc-review-settings/support-emails',
     RATES_SUMMARY: '/rates/:id',
     RATE_EDIT: '/rates/:id/edit',
+    RATES_UPLOAD_QUESTION:
+    '/rates/:id/question-and-answers/:division/upload-questions',
+    RATES_UPLOAD_RESPONSE:
+    '/rates/:id/question-and-answers/:division/:questionID/upload-response',
     REPLACE_RATE: '/submissions/:id/replace-rate/:rateID',
     SUBMISSIONS: '/submissions',
     SUBMISSIONS_NEW: '/submissions/new',
@@ -78,10 +84,11 @@ const RoutesRecord: Record<RouteT, string> = {
     SUBMISSIONS_MCCRSID: '/submissions/:id/mccrs-record-number',
     SUBMISSIONS_REVISION: '/submissions/:id/revisions/:revisionVersion',
     SUBMISSIONS_QUESTIONS_AND_ANSWERS: '/submissions/:id/question-and-answers',
-    SUBMISSIONS_UPLOAD_QUESTION:
+    SUBMISSIONS_UPLOAD_CONTRACT_QUESTION:
         '/submissions/:id/question-and-answers/:division/upload-questions',
-    SUBMISSIONS_UPLOAD_RESPONSE:
+    SUBMISSIONS_UPLOAD_CONTRACT_RESPONSE:
         '/submissions/:id/question-and-answers/:division/:questionID/upload-response',
+
 }
 
 // Constants for releated descendant routes
@@ -164,8 +171,8 @@ const PageTitlesRecord: Record<RouteT | 'UNKNOWN_ROUTE', string> = {
     SUBMISSIONS_REVISION: 'Submission revision',
     SUBMISSIONS_SUMMARY: 'Submission summary',
     SUBMISSIONS_QUESTIONS_AND_ANSWERS: 'Q&A',
-    SUBMISSIONS_UPLOAD_QUESTION: 'Add questions',
-    SUBMISSIONS_UPLOAD_RESPONSE: 'Add response',
+    SUBMISSIONS_UPLOAD_CONTRACT_QUESTION: 'Add questions',
+    SUBMISSIONS_UPLOAD_CONTRACT_RESPONSE: 'Add response',
     UNKNOWN_ROUTE: 'Not found',
 }
 

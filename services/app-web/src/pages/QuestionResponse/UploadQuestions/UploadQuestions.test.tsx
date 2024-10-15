@@ -40,7 +40,7 @@ describe('UploadQuestions', () => {
                     <Routes>
                         <Route element={<SubmissionSideNav />}>
                             <Route
-                                path={RoutesRecord.SUBMISSIONS_UPLOAD_QUESTION}
+                                path={RoutesRecord.SUBMISSIONS_UPLOAD_CONTRACT_QUESTION}
                                 element={<UploadQuestions />}
                             />
                         </Route>
@@ -96,7 +96,7 @@ describe('UploadQuestions', () => {
                     <Routes>
                         <Route element={<SubmissionSideNav />}>
                             <Route
-                                path={RoutesRecord.SUBMISSIONS_UPLOAD_QUESTION}
+                                path={RoutesRecord.SUBMISSIONS_UPLOAD_CONTRACT_QUESTION}
                                 element={<UploadQuestions />}
                             />
                         </Route>
@@ -158,7 +158,7 @@ describe('UploadQuestions', () => {
                     <Routes>
                         <Route element={<SubmissionSideNav />}>
                             <Route
-                                path={RoutesRecord.SUBMISSIONS_UPLOAD_QUESTION}
+                                path={RoutesRecord.SUBMISSIONS_UPLOAD_CONTRACT_QUESTION}
                                 element={<UploadQuestions />}
                             />
                         </Route>
@@ -233,7 +233,7 @@ describe('UploadQuestions', () => {
                     <Routes>
                         <Route element={<SubmissionSideNav />}>
                             <Route
-                                path={RoutesRecord.SUBMISSIONS_UPLOAD_QUESTION}
+                                path={RoutesRecord.SUBMISSIONS_UPLOAD_CONTRACT_QUESTION}
                                 element={<UploadQuestions />}
                             />
                         </Route>
@@ -284,7 +284,7 @@ describe('UploadQuestions', () => {
                     <Routes>
                         <Route element={<SubmissionSideNav />}>
                             <Route
-                                path={RoutesRecord.SUBMISSIONS_UPLOAD_QUESTION}
+                                path={RoutesRecord.SUBMISSIONS_UPLOAD_CONTRACT_QUESTION}
                                 element={<UploadQuestions />}
                             />
                         </Route>
@@ -346,7 +346,7 @@ describe('UploadQuestions', () => {
                     <Routes>
                         <Route element={<SubmissionSideNav />}>
                             <Route
-                                path={RoutesRecord.SUBMISSIONS_UPLOAD_QUESTION}
+                                path={RoutesRecord.SUBMISSIONS_UPLOAD_CONTRACT_QUESTION}
                                 element={<UploadQuestions />}
                             />
                         </Route>
@@ -420,7 +420,7 @@ describe('UploadQuestions', () => {
                     <Routes>
                         <Route element={<SubmissionSideNav />}>
                             <Route
-                                path={RoutesRecord.SUBMISSIONS_UPLOAD_QUESTION}
+                                path={RoutesRecord.SUBMISSIONS_UPLOAD_CONTRACT_QUESTION}
                                 element={<UploadQuestions />}
                             />
                         </Route>
@@ -483,7 +483,7 @@ describe('UploadQuestions', () => {
                             <Route element={<SubmissionSideNav />}>
                                 <Route
                                     path={
-                                        RoutesRecord.SUBMISSIONS_UPLOAD_QUESTION
+                                        RoutesRecord.SUBMISSIONS_UPLOAD_CONTRACT_QUESTION
                                     }
                                     element={<UploadQuestions />}
                                 />

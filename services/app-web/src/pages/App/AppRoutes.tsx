@@ -132,7 +132,7 @@ const StateUserRoutes = ({
                         element={<QuestionResponse />}
                     />
                     <Route
-                        path={RoutesRecord.SUBMISSIONS_UPLOAD_RESPONSE}
+                        path={RoutesRecord.SUBMISSIONS_UPLOAD_CONTRACT_RESPONSE}
                         element={<UploadResponse />}
                     />
 
@@ -204,7 +204,7 @@ const CMSUserRoutes = ({
                         element={<QuestionResponse />}
                     />
                     <Route
-                        path={RoutesRecord.SUBMISSIONS_UPLOAD_QUESTION}
+                        path={RoutesRecord.SUBMISSIONS_UPLOAD_CONTRACT_QUESTION}
                         element={<UploadQuestions />}
                     />
                     <Route
