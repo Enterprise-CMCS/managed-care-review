@@ -20,7 +20,6 @@ const ROUTES = [
     'SUPPORT_EMAILS',
     'RATES_SUMMARY',
     'RATES_UPLOAD_QUESTION',
-    'RATES_UPLOAD_RESPONSE',
     'RATE_EDIT',
     'REPLACE_RATE',
     'SUBMISSIONS',
@@ -68,8 +67,6 @@ const RoutesRecord: Record<RouteT, string> = {
     RATE_EDIT: '/rates/:id/edit',
     RATES_UPLOAD_QUESTION:
     '/rates/:id/question-and-answers/:division/upload-questions',
-    RATES_UPLOAD_RESPONSE:
-    '/rates/:id/question-and-answers/:division/:questionID/upload-response',
     REPLACE_RATE: '/submissions/:id/replace-rate/:rateID',
     SUBMISSIONS: '/submissions',
     SUBMISSIONS_NEW: '/submissions/new',
