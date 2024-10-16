@@ -14,7 +14,13 @@ export async function findAllDocuments(
         if (contractDocs instanceof Error) return contractDocs
         if (rateDocs instanceof Error) return rateDocs
 
-        const allDocs = [...contractDocs, ...rateDocs]
+        const allDocs = [
+            ...contractDocs.map((doc) => ({
+                ...doc,
+                type: 'contract' as const,
+            })),
+            ...rateDocs.map((doc) => ({ ...doc, type: 'rate' as const })),
+        ]
         console.info(`Got some docs back: ${JSON.stringify(allDocs)}`)
         const parsedDocs = allDocs.map((doc) =>
             auditDocumentSchema.safeParse(doc)

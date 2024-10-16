@@ -9,20 +9,17 @@ const baseDocumentSchema = z.object({
 })
 
 const contractDocumentSchema = baseDocumentSchema.extend({
-    type: z.literal('contractDocument'),
     contractRevisionID: z.string(),
     sha256: z.string(),
 })
 
 const rateDocumentSchema = baseDocumentSchema.extend({
-    type: z.literal('rateDocument'),
     rateRevisionID: z.string(),
     sha256: z.string(),
 })
-
 const auditDocumentSchema = z.union([
-    contractDocumentSchema,
-    rateDocumentSchema,
+    contractDocumentSchema.extend({ type: z.literal('contract') }),
+    rateDocumentSchema.extend({ type: z.literal('rate') }),
 ])
 
 export type AuditDocument = z.infer<typeof auditDocumentSchema>
