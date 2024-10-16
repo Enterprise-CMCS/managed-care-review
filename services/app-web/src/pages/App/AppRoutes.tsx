@@ -48,6 +48,7 @@ import {
     DivisionAssignmentTable,
 } from '../Settings/SettingsTables'
 import { EditStateAssign } from '../Settings/EditStateAssign/EditStateAssign'
+import { UploadRateQuestions } from '../QuestionResponse/UploadQuestions'
 
 function componentForAuthMode(
     authMode: AuthModeType
@@ -172,6 +173,11 @@ const CMSUserRoutes = ({
     setAlert?: React.Dispatch<React.ReactElement>
     stageName?: string
 }): React.ReactElement => {
+    const ldClient = useLDClient()
+    const showQAByRates  = ldClient?.variation(
+        featureFlags.QA_BY_RATES.flag,
+        featureFlags.QA_BY_RATES.defaultValue
+    )
     return (
         <AuthenticatedRouteWrapper>
             <Routes>
@@ -212,6 +218,13 @@ const CMSUserRoutes = ({
                         element={<SubmissionSummary />}
                     />
                 </Route>
+
+                {showQAByRates &&
+                    <Route
+                        path={RoutesRecord.RATES_UPLOAD_QUESTION }
+                        element={<UploadRateQuestions/>}
+                 />}
+
 
                 <Route
                     path={RoutesRecord.RATES_SUMMARY}
