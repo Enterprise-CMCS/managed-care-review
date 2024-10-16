@@ -24,10 +24,10 @@
         "octokit": "^3.1.2"
     },
     "devDependencies": {
-        "@actions/core": "^1.6.0",
+        "@actions/core": "^1.11.1",
         "@octokit/action": "^5.0.2",
         "csv-parser": "^3.0.0",
-        "lint-staged": "^15.2.7",
+        "lint-staged": "^15.2.10",
         "typescript": "^4.5.4",
         "uuid": "^9.0.0"
     }
