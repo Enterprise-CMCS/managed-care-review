@@ -15,7 +15,7 @@ import { ACCEPTED_SUBMISSION_FILE_TYPES } from '../../../components/FileUpload'
 import {
     fetchCurrentUserMock,
     iterableCmsUsersMockData,
-    fetchRateWithQuestionsMockSuccess,
+    fetchContractWithQuestionsMockSuccess,
     mockContractPackageDraft,
     mockContractPackageSubmittedWithQuestions,
     mockContractPackageSubmitted,
@@ -29,7 +29,7 @@ import { Location } from 'react-router-dom'
 
 describe('UploadRateQuestions', () => {
     describe.each(iterableCmsUsersMockData)(
-        '$userRole UploadRateQuestions tests',
+        '$userRole UploadQuestions tests',
         ({ userRole, mockUser }) => {
             // const mockUser = mockValidCMSUser
             it('displays file upload for correct cms division', async () => {
@@ -52,7 +52,7 @@ describe('UploadRateQuestions', () => {
                                     user: mockUser(),
                                     statusCode: 200,
                                 }),
-                                fetchRateWithQuestionsMockSuccess({
+                                fetchContractWithQuestionsMockSuccess({
                                     contract: {
                                         ...contract,
                                         id: '15',
@@ -108,7 +108,7 @@ describe('UploadRateQuestions', () => {
                                     user: mockUser(),
                                     statusCode: 200,
                                 }),
-                                fetchRateWithQuestionsMockSuccess({
+                                fetchContractWithQuestionsMockSuccess({
                                     contract: {
                                         ...contract,
                                         id: '15',
@@ -170,7 +170,7 @@ describe('UploadRateQuestions', () => {
                                     user: mockUser(),
                                     statusCode: 200,
                                 }),
-                                fetchRateWithQuestionsMockSuccess({
+                                fetchContractWithQuestionsMockSuccess({
                                     contract: {
                                         ...contract,
                                         id: '15',
@@ -248,7 +248,7 @@ describe('UploadRateQuestions', () => {
                                     user: mockUser(),
                                     statusCode: 200,
                                 }),
-                                fetchRateWithQuestionsMockSuccess({
+                                fetchContractWithQuestionsMockSuccess({
                                     contract: {
                                         ...contract,
                                         id: '15',
@@ -299,13 +299,13 @@ describe('UploadRateQuestions', () => {
                                     user: mockUser(),
                                     statusCode: 200,
                                 }),
-                                fetchRateWithQuestionsMockSuccess({
+                                fetchContractWithQuestionsMockSuccess({
                                     contract: {
                                         ...contract,
                                         id: '15',
                                     },
                                 }),
-                                fetchRateWithQuestionsMockSuccess({
+                                fetchContractWithQuestionsMockSuccess({
                                     contract: {
                                         ...contract,
                                         id: '15',
@@ -361,7 +361,7 @@ describe('UploadRateQuestions', () => {
                                     user: mockUser(),
                                     statusCode: 200,
                                 }),
-                                fetchRateWithQuestionsMockSuccess({
+                                fetchContractWithQuestionsMockSuccess({
                                     contract: {
                                         ...contract,
                                         id: '15',
@@ -435,7 +435,7 @@ describe('UploadRateQuestions', () => {
                                     user: mockUser(),
                                     statusCode: 200,
                                 }),
-                                fetchRateWithQuestionsMockSuccess({
+                                fetchContractWithQuestionsMockSuccess({
                                     contract: {
                                         ...contract,
                                         id: '15',
@@ -496,7 +496,7 @@ describe('UploadRateQuestions', () => {
                                         user: mockUser(),
                                         statusCode: 200,
                                     }),
-                                    fetchRateWithQuestionsMockSuccess({
+                                    fetchContractWithQuestionsMockSuccess({
                                         contract: {
                                             ...contract,
                                             id: '15',
