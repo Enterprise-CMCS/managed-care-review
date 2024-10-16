@@ -12,18 +12,43 @@ import {
 
 import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
 import { GraphQLError } from 'graphql'
-import { submitHealthPlanPackageResolver } from '../healthPlanPackage'
 import {
     setResolverDetailsOnActiveSpan,
     setErrorAttributesOnActiveSpan,
     setSuccessAttributesOnActiveSpan,
 } from '../attributeHelper'
 import type { MutationResolvers, State } from '../../gen/gqlServer'
-
-import { UpdateInfoType } from '../../domain-models'
+import { parseContract } from '../../domain-models/contractAndRates/dataValidatorHelpers'
+import { UpdateInfoType, PackageStatusType } from '../../domain-models'
 import { UpdateInformation } from '../../gen/gqlClient'
 import { UpdateDraftContractRatesArgsType } from '../../postgres/contractAndRates/updateDraftContractRates'
 import { StateCodeType } from '../../common-code/healthPlanFormDataType'
+import type { Span } from '@opentelemetry/api'
+
+const validateStatusAndUpdateInfo = (
+    status: PackageStatusType,
+    updateInfo: UpdateInfoType,
+    span?: Span,
+    submittedReason?: string
+) => {
+    if (status === 'UNLOCKED' && submittedReason) {
+        updateInfo.updatedReason = submittedReason // !destructive - edits the actual update info attached to submission
+    } else if (status === 'UNLOCKED' && !submittedReason) {
+        const errMessage = 'Resubmission requires a reason'
+        logError('submitContract', errMessage)
+        setErrorAttributesOnActiveSpan(errMessage, span)
+        throw new UserInputError(errMessage)
+    } else if (status === 'RESUBMITTED' || status === 'SUBMITTED') {
+        const errMessage = `Attempted to submit an already submitted package.`
+        logError('submitContract', errMessage)
+        throw new GraphQLError(errMessage, {
+            extensions: {
+                code: 'INTERNAL_SERVER_ERROR',
+                cause: 'INVALID_PACKAGE_STATUS',
+            },
+        })
+    }
+}
 export function submitContract(
     store: Store,
     emailer: Emailer,
@@ -32,12 +57,12 @@ export function submitContract(
 ): MutationResolvers['submitContract'] {
     return async (parent, { input }, context) => {
         const featureFlags = await launchDarkly.allFlags(context)
-        const readStateAnalystsFromDBFlag =
+        const readStateAnalystsFromDBFlag = 
             featureFlags?.['read-write-state-assignments']
 
         const { user, ctx, tracer } = context
-        const span = tracer?.startSpan('submitHealthPlanPackage', {}, ctx)
-        setResolverDetailsOnActiveSpan('submitHealthPlanPackage', user, span)
+        const span = tracer?.startSpan('submitContract', {}, ctx)
+        setResolverDetailsOnActiveSpan('submitContract', user, span)
 
         const { submittedReason, contractID } = input
         span?.setAttribute('mcreview.contract_id', contractID)
@@ -51,7 +76,7 @@ export function submitContract(
         // This resolver is only callable by state users
         if (!isStateUser(user)) {
             logError(
-                'submitHealthPlanPackage',
+                'submitContract',
                 'user not authorized to fetch state data'
             )
             setErrorAttributesOnActiveSpan(
@@ -70,7 +95,7 @@ export function submitContract(
 
         if (contractWithHistory instanceof Error) {
             const errMessage = `Issue finding a contract with history with id ${input.contractID}. Message: ${contractWithHistory.message}`
-            logError('fetchHealthPlanPackage', errMessage)
+            logError('fetchContract', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
 
             if (contractWithHistory instanceof NotFoundError) {
@@ -93,7 +118,7 @@ export function submitContract(
         // Validate user authorized to fetch state
         if (contractWithHistory.stateCode !== stateFromCurrentUser) {
             logError(
-                'submitHealthPlanPackage',
+                'submitContract',
                 'user not authorized to fetch data from a different state'
             )
             setErrorAttributesOnActiveSpan(
@@ -105,13 +130,12 @@ export function submitContract(
             )
         }
 
-        // validateStatusAndUpdateInfo(
-        //     contractWithHistory.status,
-        //     updateInfo,
-        //     span,
-        //     submittedReason || undefined
-        // )
-
+        validateStatusAndUpdateInfo(
+            contractWithHistory.status,
+            updateInfo,
+            span,
+            submittedReason || undefined
+        )
         if (!contractWithHistory.draftRevision) {
             throw new Error(
                 'PROGRAMMING ERROR: Status should not be submittable without a draft revision'
@@ -120,35 +144,16 @@ export function submitContract(
         const initialFormData = contractWithHistory.draftRevision.formData
         const contractRevisionID = contractWithHistory.draftRevision.id
 
-        // Clear out linked rates from initial data before parse and submit. 
-        // We should not validate on the linked rates at all (besides there being at least one rate)
-        const childRateIDs =
-            contractWithHistory.draftRates?.reduce<string[]>(
-                (rateIDs, rate) => {
-                    if (
-                        rate.id &&
-                        rate.parentContractID === contractWithHistory.id
-                    ) {
-                        rateIDs.push(rate.id)
-                    }
-                    return rateIDs
-                },
-                []
-            ) ?? []
-
-        const onlyChildRateInfos = contractWithHistory.draftRates?.filter(
-            (rateInfo) => {
-                return rateInfo.id && childRateIDs.includes(rateInfo.id)
-            }
-        )
-
-        const formDataNoLinkedRates = {
-            ...initialFormData,
-            rateInfos: onlyChildRateInfos,
+        const parsedContract = parseContract(contractWithHistory, featureFlags)
+        if (parsedContract instanceof Error) {
+            const errMessage = parsedContract.message
+            logError('submitContract', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+            throw new UserInputError(errMessage, {
+                message: parsedContract.message,
+            })
         }
 
-        ///////////// parse and submit
-        ///////////// Submission Error check
         // If this contract is being submitted as CONTRACT_ONLY but still has associations with rates
         // we need to prune those rates at submission time to make the submission clean
         if (
@@ -196,7 +201,7 @@ export function submitContract(
             if (rateResult instanceof Error) {
                 const errMessage =
                     'Error while attempting to clean up rates from a now CONTRACT_ONLY submission'
-                logError('submitHealthPlanPackage', errMessage)
+                logError('submitContract', errMessage)
                 setErrorAttributesOnActiveSpan(errMessage, span)
                 throw new Error(errMessage)
             }
@@ -226,7 +231,7 @@ export function submitContract(
         })
         if (updateResult instanceof Error) {
             const errMessage = `Failed to update submitted contract info with ID: ${contractRevisionID}; ${updateResult.message}`
-            logError('submitHealthPlanPackage', errMessage)
+            logError('submitContract', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new GraphQLError(errMessage, {
                 extensions: {
@@ -251,7 +256,7 @@ export function submitContract(
         })
         if (submitContractResult instanceof Error) {
             const errMessage = `Failed to submit contract revision with ID: ${contractRevisionID}; ${submitContractResult.message}`
-            logError('submitHealthPlanPackage', errMessage)
+            logError('submitContract', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new GraphQLError(errMessage, {
                 extensions: {
@@ -325,7 +330,7 @@ export function submitContract(
 
         let cmsContractEmailResult
         let stateContractEmailResult
-
+        
         if (status === 'RESUBMITTED') {
             cmsContractEmailResult = await emailer.sendResubmittedCMSEmail(
                 updateResult,
@@ -341,12 +346,12 @@ export function submitContract(
             )
         } else if (status === 'SUBMITTED') {
             cmsContractEmailResult = await emailer.sendCMSNewContract(
-                updateResult,
+                submitContractResult,
                 stateAnalystsEmails,
                 statePrograms
             )
             stateContractEmailResult = await emailer.sendStateNewContract(
-                updateResult,
+                submitContractResult,
                 submitterEmails,
                 statePrograms
             )
@@ -358,14 +363,14 @@ export function submitContract(
         ) {
             if (cmsContractEmailResult instanceof Error) {
                 logError(
-                    'submitHealthPlanPackage - CMS email failed',
+                    'submitContract - CMS email failed',
                     cmsContractEmailResult
                 )
                 setErrorAttributesOnActiveSpan('CMS email failed', span)
             }
             if (stateContractEmailResult instanceof Error) {
                 logError(
-                    'submitHealthPlanPackage - state email failed',
+                    'submitContract - state email failed',
                     stateContractEmailResult
                 )
                 setErrorAttributesOnActiveSpan('state email failed', span)
