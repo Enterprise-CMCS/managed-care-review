@@ -7,11 +7,13 @@ erDiagram
 
 Contract {
     String id
+    String externalURL
     DateTime initiallySubmittedAt
     DateTime updatedAt
     StateCode stateCode
     String name
     String mccrsID
+    String submissionReason
 
     String[] programNicknames
     PopulationCoveredEnum populationCovered "MEDICAID, CHIP, MEDICAID_AND_CHIP" 
@@ -53,10 +55,12 @@ Contract {
 
 Rate {
     String id
+    String externalURL
     DateTime initiallySubmittedAt
     DateTime updatedAt
     StateCode stateCode
     String name
+    String submissionReason
     
     RateTypeEnum rateType "NEW, AMENDMENT"
     RateCapitationTypeEnum rateCapitationType "RATE_CELL, RATE_RANGE"
@@ -70,6 +74,8 @@ Rate {
     CalendarDate rateDateCertified
     CalendarDate amendmentEffectiveDateStart
     CalendarDate amendmentEffectiveDateEnd
+
+    Enum actuaryCommunicationPreference "OACT_TO_ACTUARY, OACT_TO_STATE"
 }
 
 Document {
@@ -77,8 +83,18 @@ Document {
     string fileName
 }
 
+Contact {
+    string email
+    string givenName
+    string familyName
+    string title
+    string ActuarialFirm
+}
 
 Contract }|--|{ Rate : "many to many"
 Contract ||--|{ Document : "one to many"
 Rate ||--|{ Document : "one to many"
+Rate }|--|{ Contact : "certifying actuaries"
+Rate }|--|{ Contact : "additional actuaries"
+Contract }|--|{ Contact : "state contacts"
 ```
