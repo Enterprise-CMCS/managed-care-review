@@ -6,7 +6,7 @@ This is an ER diagram of the data that is planned to be sent to Salesforce on su
 erDiagram
 
 Contract {
-    String id
+    String externalID
     String externalURL
     DateTime initiallySubmittedAt
     DateTime updatedAt
@@ -54,7 +54,7 @@ Contract {
 }
 
 Rate {
-    String id
+    String externalID
     String externalURL
     DateTime initiallySubmittedAt
     DateTime updatedAt
