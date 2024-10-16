@@ -72,6 +72,13 @@ Rate {
     CalendarDate amendmentEffectiveDateEnd
 }
 
+Document {
+    FileData fileData
+    string fileName
+}
+
 
 Contract }|--|{ Rate : "many to many"
+Contract ||--|{ Document : "one to many"
+Rate ||--|{ Document : "one to many"
 ```
