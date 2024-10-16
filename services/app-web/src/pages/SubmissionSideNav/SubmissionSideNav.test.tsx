@@ -16,10 +16,12 @@ import {
     fetchContractWithQuestionsMockSuccess,
     fetchContractWithQuestionsMockFail,
     mockContractPackageDraft,
+    mockValidStateUser,
 } from '../../testHelpers/apolloMocks'
+import { RateRevision } from '../../gen/gqlClient'
 
 describe('SubmissionSideNav', () => {
-    it('loads sidebar nav with expected links', async () => {
+    it('loads sidebar nav with expected links for CMS user', async () => {
         const contract = mockContractPackageSubmitted()
         renderWithProviders(
             <Routes>
@@ -51,6 +53,9 @@ describe('SubmissionSideNav', () => {
                 },
                 routerProvider: {
                     route: '/submissions/15',
+                },
+                featureFlags: {
+                    'qa-by-rates': true,
                 },
             }
         )
@@ -87,6 +92,118 @@ describe('SubmissionSideNav', () => {
         expect(qaLink).toHaveAttribute(
             'href',
             '/submissions/15/question-and-answers'
+        )
+
+        const rate1Link = withinSideNav.queryByRole('link', {
+            name: /Rate questions: SNBC/,
+        })
+        // Expect no Q&A rate link to be on the page. CMS users only see this on rate summary page.
+        expect(rate1Link).toBeNull()
+    })
+
+    it('loads sidebar nav with expected links for state user', async () => {
+        const contract = mockContractPackageSubmitted()
+        const rateRevision = contract.packageSubmissions[0].rateRevisions[0]
+        const secondRate: RateRevision = {
+            ...rateRevision,
+            id: 'second-rate-revision',
+            rateID: 'second-rate',
+            formData: {
+                ...rateRevision.formData,
+                rateProgramIDs: ['ea16a6c0-5fc6-4df8-adac-c627e76660ab'],
+            },
+        }
+        contract.packageSubmissions[0].rateRevisions.push(secondRate)
+        renderWithProviders(
+            <Routes>
+                <Route element={<SubmissionSideNav />}>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS}
+                        element={<QuestionResponse />}
+                    />
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                        element={<SubmissionSummary />}
+                    />
+                </Route>
+            </Routes>,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockValidStateUser(),
+                            statusCode: 200,
+                        }),
+                        fetchContractWithQuestionsMockSuccess({
+                            contract: {
+                                ...contract,
+                                id: '15',
+                            },
+                        }),
+                    ],
+                },
+                routerProvider: {
+                    route: '/submissions/15',
+                },
+                featureFlags: {
+                    'qa-by-rates': true,
+                },
+            }
+        )
+
+        // Wait for sidebar nav to exist.
+        await waitFor(() => {
+            expect(screen.queryByTestId('sidenav')).toBeInTheDocument()
+        })
+
+        const withinSideNav = within(screen.getByTestId('sidenav'))
+
+        const summaryLink = withinSideNav.getByRole('link', {
+            name: /Submission summary/,
+        })
+
+        // Expect submission summary link to exist within sidebar nav
+        expect(summaryLink).toBeInTheDocument()
+        // Expect submission summary link to be currently selected and highlighted
+        expect(summaryLink).toHaveClass('usa-current')
+        // Expect submission summary link to have correct href url
+        expect(summaryLink).toHaveAttribute('href', '/submissions/15')
+
+        const qaLink = withinSideNav.getByRole('link', { name: /Q&A/ })
+        // Expect Q&A link to exist within sidebar nav.
+        expect(qaLink).toBeInTheDocument()
+        // Expect Q&A link to not be currently selected
+        expect(qaLink).not.toHaveClass('usa-current')
+        // Expect Q&A link to have correct href url
+        expect(qaLink).toHaveAttribute(
+            'href',
+            '/submissions/15/question-and-answers'
+        )
+
+        const rate1Link = withinSideNav.getByRole('link', {
+            name: /Rate questions: SNBC/,
+        })
+        // Expect first rate link to exist within sidebar nav.
+        expect(rate1Link).toBeInTheDocument()
+        // Expect first rate link to not be currently selected
+        expect(rate1Link).not.toHaveClass('usa-current')
+        // Expect first rate link to have correct href url
+        expect(rate1Link).toHaveAttribute(
+            'href',
+            '/submissions/15/rate/123/question-and-answers'
+        )
+
+        const rate2Link = withinSideNav.getByRole('link', {
+            name: /Rate questions: MSC+/,
+        })
+        // Expect second rate link to exist within sidebar nav.
+        expect(rate2Link).toBeInTheDocument()
+        // Expect second rate link to not be currently selected
+        expect(rate2Link).not.toHaveClass('usa-current')
+        // Expect second rate link to have correct href url
+        expect(rate2Link).toHaveAttribute(
+            'href',
+            '/submissions/15/rate/second-rate/question-and-answers'
         )
     })
 
