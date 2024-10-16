@@ -7,25 +7,30 @@ export async function findAllDocuments(
     client: PrismaClient
 ): Promise<AuditDocument[] | Error> {
     try {
-        const [contractDocs, rateDocs] = await Promise.all([
-            getContractDocuments(client),
-            getRateDocuments(client),
-        ])
+        const [contractDocs, rateDocs, contractSupportingDocs] =
+            await Promise.all([
+                getContractDocuments(client),
+                getRateDocuments(client),
+                getContractSupportingDocuments(client),
+            ])
         if (contractDocs instanceof Error) return contractDocs
         if (rateDocs instanceof Error) return rateDocs
+        if (contractSupportingDocs instanceof Error)
+            return contractSupportingDocs
 
         const allDocs = [
             ...contractDocs.map((doc) => ({
                 ...doc,
-                type: 'contract' as const,
+                type: 'contractDoc' as const,
             })),
-            ...rateDocs.map((doc) => ({ ...doc, type: 'rate' as const })),
+            ...rateDocs.map((doc) => ({ ...doc, type: 'rateDoc' as const })),
         ]
         console.info(`Got some docs back: ${JSON.stringify(allDocs)}`)
         const parsedDocs = allDocs.map((doc) =>
             auditDocumentSchema.safeParse(doc)
         )
         console.info(`Got some parsed docs: ${JSON.stringify(parsedDocs)}`)
+        console.info(`Got ${parsedDocs.length} parsed docs back`)
 
         const validDocs: AuditDocument[] = []
         const errors: z.ZodError[] = []
@@ -79,5 +84,19 @@ async function getRateDocuments(
         return err instanceof Error
             ? err
             : new Error('Failed to fetch rate documents')
+    }
+}
+
+async function getContractSupportingDocuments(
+    prisma: PrismaClient
+): Promise<Omit<AuditDocument, 'type'>[] | Error> {
+    try {
+        const docs = await prisma.contractSupportingDocument.findMany()
+        return docs.map((doc) => ({
+            ...doc,
+            contractRevisionID: doc.contractRevisionID,
+        }))
+    } catch (err) {
+        return err
     }
 }
