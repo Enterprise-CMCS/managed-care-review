@@ -7,8 +7,9 @@ import {
 } from '../../../testHelpers/apolloMocks'
 import { screen, waitFor } from '@testing-library/react'
 import React from 'react'
-import { QATable, QuestionData } from './QATable'
+import { QATable } from './QATable'
 import { CmsUser, StateUser } from '../../../gen/gqlClient'
+import { QuestionData } from '../QuestionResponseHelpers'
 
 const stateUser = mockValidUser() as StateUser
 const cmsUser = mockValidCMSUser() as CmsUser
