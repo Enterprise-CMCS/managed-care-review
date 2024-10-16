@@ -14,16 +14,17 @@ Contract {
     String name
     String mccrsID
     String submissionReason
+    Rate[] relatedRates
 
     String[] programNicknames
-    PopulationCoveredEnum populationCovered "MEDICAID, CHIP, MEDICAID_AND_CHIP" 
-    SubmissionTypeEnum submissionType "CONTRACT_ONLY, CONTRACT_AND_RATES"
+    Enum populationCovered "MEDICAID, CHIP, MEDICAID_AND_CHIP" 
+    Enum submissionType "CONTRACT_ONLY, CONTRACT_AND_RATES"
     Boolean riskBasedContract
     String submissionDescription
     Document[] contractDocuments
     Document[] supportingDocuments
-    ContractTypeEnum contractType "BASE, AMENDMENT"
-    ContractExecutionStatusEnum contractExecutionStatus "EXECUTED, UNEXECUTED"
+    Enum contractType "BASE, AMENDMENT"
+    Enum contractExecutionStatus "EXECUTED, UNEXECUTED"
     CalendarDate contractDateStart
     CalendarDate contractDateEnd
     String[] managedCareEntities
@@ -51,6 +52,7 @@ Contract {
     Boolean statutoryRegulatoryAttestation
     Boolean statutoryRegulatoryAttestationDescription
     
+    Contact[] stateContacts
 }
 
 Rate {
@@ -61,9 +63,10 @@ Rate {
     StateCode stateCode
     String name
     String submissionReason
+    Contract[] relatedContracts
     
-    RateTypeEnum rateType "NEW, AMENDMENT"
-    RateCapitationTypeEnum rateCapitationType "RATE_CELL, RATE_RANGE"
+    Enum rateType "NEW, AMENDMENT"
+    Enum rateCapitationType "RATE_CELL, RATE_RANGE"
 
     String[] programNicknames
     Document[] rateDocuments
@@ -76,6 +79,9 @@ Rate {
     CalendarDate amendmentEffectiveDateEnd
 
     Enum actuaryCommunicationPreference "OACT_TO_ACTUARY, OACT_TO_STATE"
+
+    Contact[] certifyingActuaries
+    Contact[] additionalActuaries
 }
 
 Document {
