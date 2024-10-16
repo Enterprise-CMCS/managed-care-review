@@ -109,29 +109,6 @@ const rateFormDataSchema = z.object({
         .optional(),
 })
 
-const submitRateFormDataSchema = z.object({
-    id: z.string(), // 10.4.23 eng pairing - we discussed future reactor that would delete this from the rate revision form data schema all together.
-    rateID: z.string(), // 10.4.23 eng pairing - we discussed future refactor to move this up to rate revision schema.
-    rateType: rateTypeSchema,
-    rateCapitationType: rateCapitationTypeSchema,
-    rateDocuments: z.array(documentSchema),
-    supportingDocuments: z.array(documentSchema).optional(),
-    rateDateStart: z.date(),
-    rateDateEnd: z.date(),
-    rateDateCertified: z.date(),
-    amendmentEffectiveDateStart: z.date(),
-    amendmentEffectiveDateEnd: z.date(),
-    deprecatedRateProgramIDs: z.array(z.string()),
-    rateProgramIDs: z.array(z.string()),
-    rateCertificationName: z.string(),
-    certifyingActuaryContacts: z.array(actuaryContactSchema),
-    addtlActuaryContacts: z.array(actuaryContactSchema).optional(),
-    actuaryCommunicationPreference: actuaryCommunicationTypeSchema,
-    packagesWithSharedRateCerts: z
-        .array(packagesWithSharedRateCerts)
-        .optional(),
-})
-
 type DocumentType = z.infer<typeof documentSchema>
 type ContractFormDataType = z.infer<typeof contractFormDataSchema>
 type RateFormDataType = z.infer<typeof rateFormDataSchema>
@@ -139,7 +116,12 @@ type RateFormDataType = z.infer<typeof rateFormDataSchema>
 type ContractFormEditableType = Partial<ContractFormDataType>
 type RateFormEditableType = Partial<RateFormDataType>
 
-export { contractFormDataSchema, rateFormDataSchema, preprocessNulls }
+export {
+    contractFormDataSchema,
+    rateFormDataSchema,
+    preprocessNulls,
+    documentSchema,
+}
 
 export type {
     ContractFormDataType,
