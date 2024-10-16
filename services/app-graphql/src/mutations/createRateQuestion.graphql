@@ -5,28 +5,10 @@ mutation createRateQuestion($input: CreateRateQuestionInput!) {
             rateID
             addedBy {
                 ... on CMSUser {
-                    id
-                    role
-                    email
-                    givenName
-                    familyName
-                    divisionAssignment
-                    stateAssignments {
-                        code
-                        name
-                    }
+                    ...cmsUserFragment
                 }
                 ... on CMSApproverUser {
-                    id
-                    role
-                    email
-                    givenName
-                    familyName
-                    divisionAssignment
-                    stateAssignments {
-                        code
-                        name
-                    }
+                    ...cmsApproverUserFragment
                 }
             }
             division

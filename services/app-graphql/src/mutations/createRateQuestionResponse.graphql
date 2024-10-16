@@ -6,28 +6,10 @@ mutation createRateQuestionResponse($input: CreateQuestionResponseInput!) {
             createdAt
             addedBy {
                 ... on CMSUser {
-                    id
-                    role
-                    email
-                    givenName
-                    familyName
-                    divisionAssignment
-                    stateAssignments {
-                        code
-                        name
-                    }
+                    ...cmsUserFragment
                 }
                 ... on CMSApproverUser {
-                    id
-                    role
-                    email
-                    givenName
-                    familyName
-                    divisionAssignment
-                    stateAssignments {
-                        code
-                        name
-                    }
+                    ...cmsApproverUserFragment
                 }
             }
             division
@@ -36,29 +18,8 @@ mutation createRateQuestionResponse($input: CreateQuestionResponseInput!) {
                 s3URL
             }
             responses {
-                id
-                questionID
-                createdAt
-                addedBy {
-                    id
-                    role
-                    email
-                    givenName
-                    familyName
-                    state {
-                        code
-                        name
-                        programs {
-                            id
-                            name
-                            fullName
-                            isRateProgram
-                        }
-                    }
-                }
-                documents {
-                    name
-                    s3URL
+                ... on QuestionResponse {
+                    ...questionResponseFragment
                 }
             }
         }
