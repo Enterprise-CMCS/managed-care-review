@@ -1,32 +1,15 @@
 import styles from './QATable.module.scss'
 import { useState } from 'react'
-import {
-    CmsUser,
-    Document,
-    QuestionResponse,
-    User,
-} from '../../../gen/gqlClient'
+import { User } from '../../../gen/gqlClient'
 import { useDocument } from '../../../hooks/useDocument'
 import useDeepCompareEffect from 'use-deep-compare-effect'
 import { LinkWithLogging, NavLinkWithLogging } from '../../../components'
 import { formatCalendarDate } from '../../../common-code/dateHelpers'
-
-type QuestionDocumentWithLink = {
-    s3URL: string
-    name: string
-    url?: string | null
-}
-
-export type QuestionData = {
-    id: string
-    contractID: string
-    createdAt: Date
-    addedBy: CmsUser
-    documents: Document[]
-    responses: QuestionResponse[]
-}
-
-export type Division = 'DMCO' | 'DMCP' | 'OACT'
+import type {
+    QuestionDocumentWithLink,
+    Division,
+    QuestionData,
+} from '../QuestionResponseHelpers'
 
 type TableData = QuestionDocumentWithLink & {
     createdAt: Date

@@ -10,48 +10,22 @@ import {
     QuestionResponseSubmitBanner,
     UserAccountWarningBanner,
 } from '../../components/Banner'
-import { QATable, QuestionData, Division } from './QATable/QATable'
-import { CmsUser, ContractQuestionEdge, StateUser } from '../../gen/gqlClient'
+import { QuestionData, Division } from './QuestionResponseHelpers'
+import { QATable } from './QATable/QATable'
+import { CmsUser } from '../../gen/gqlClient'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import { hasCMSUserPermissions } from '../../gqlHelpers'
 import { ContactSupportLink } from '../../components/ErrorAlert/ContactSupportLink'
+import {
+    extractQuestions,
+    getUserDivision,
+    getDivisionOrder,
+} from './QuestionResponseHelpers'
 
 type divisionQuestionDataType = {
     division: Division
     questions: QuestionData[]
 }
-
-const extractQuestions = (edges?: ContractQuestionEdge[]): QuestionData[] => {
-    if (!edges) {
-        return []
-    }
-    return edges.map(({ node }) => ({
-        ...node,
-        addedBy: node.addedBy as CmsUser,
-        responses: node.responses.map((response) => ({
-            ...response,
-            addedBy: response.addedBy as StateUser,
-        })),
-    }))
-}
-
-const getUserDivision = (user: CmsUser): Division | undefined => {
-    if (user.divisionAssignment) {
-        return user.divisionAssignment
-    }
-    return undefined
-}
-
-const getDivisionOrder = (division?: Division): Division[] =>
-    ['DMCO', 'DMCP', 'OACT'].sort((a, b) => {
-        if (a === division) {
-            return -1
-        }
-        if (b === division) {
-            return 1
-        }
-        return 0
-    }) as Division[]
 
 export const QuestionResponse = () => {
     // router context
