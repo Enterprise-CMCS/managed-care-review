@@ -31,7 +31,7 @@ generates:
         RatePackageSubmission: ../domain-models#RatePackageSubmissionWithCauseType
   ../app-web/src/gen/gqlClient.tsx:
     documents:
-      - src/fragments/*graphql
+      - src/fragments/*.graphql
       - src/queries/*.graphql
       - src/mutations/*.graphql
     plugins:
@@ -42,7 +42,7 @@ generates:
       enumsAsTypes: true
   ../cypress/gen/gqlClient.ts:
     documents:
-      - src/fragments/*graphql
+      - src/fragments/*.graphql
       - src/queries/*.graphql
       - src/mutations/*.graphql
     plugins:
