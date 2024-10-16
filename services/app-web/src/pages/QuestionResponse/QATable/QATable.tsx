@@ -1,13 +1,12 @@
 import styles from './QATable.module.scss'
 import { useState } from 'react'
-import { User } from '../../../gen/gqlClient'
+import { User, Division } from '../../../gen/gqlClient'
 import { useDocument } from '../../../hooks/useDocument'
 import useDeepCompareEffect from 'use-deep-compare-effect'
 import { LinkWithLogging, NavLinkWithLogging } from '../../../components'
 import { formatCalendarDate } from '../../../common-code/dateHelpers'
 import type {
     QuestionDocumentWithLink,
-    Division,
     QuestionData,
 } from '../QuestionResponseHelpers'
 

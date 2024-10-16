@@ -1,6 +1,5 @@
 import {CmsUser, ContractQuestionEdge, Document, QuestionResponse, StateUser} from '../../../gen/gqlClient';
-
-type Division = 'DMCO' | 'DMCP' | 'OACT'
+import { Division } from '../../../gen/gqlClient';
 
 type QuestionData = {
     id: string
@@ -56,7 +55,6 @@ export {
 }
 
 export type {
-    Division,
     QuestionData,
     QuestionDocumentWithLink
 }

@@ -10,9 +10,9 @@ import {
     QuestionResponseSubmitBanner,
     UserAccountWarningBanner,
 } from '../../components/Banner'
-import { QuestionData, Division } from './QuestionResponseHelpers'
+import { QuestionData } from './QuestionResponseHelpers'
 import { QATable } from './QATable/QATable'
-import { CmsUser } from '../../gen/gqlClient'
+import { CmsUser, Division } from '../../gen/gqlClient'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import { hasCMSUserPermissions } from '../../gqlHelpers'
 import { ContactSupportLink } from '../../components/ErrorAlert/ContactSupportLink'

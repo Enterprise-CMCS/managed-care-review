@@ -1,7 +1,10 @@
 import styles from './QuestionResponse.module.scss'
-import { CmsUser, useFetchRateWithQuestionsQuery } from '../../gen/gqlClient'
+import {
+    CmsUser,
+    useFetchRateWithQuestionsQuery,
+    Division,
+} from '../../gen/gqlClient'
 import { useParams } from 'react-router-dom'
-import type { Division } from './QuestionResponseHelpers'
 import { GridContainer } from '@trussworks/react-uswds'
 import { Loading, SectionHeader } from '../../components'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
