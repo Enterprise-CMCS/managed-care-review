@@ -39,7 +39,7 @@
         "@aws-sdk/lib-storage": "^3.670.0",
         "@aws-sdk/s3-request-presigner": "^3.670.0",
         "@launchdarkly/node-server-sdk": "9.5.4",
-        "@opentelemetry/api": "^1.6.0",
+        "@opentelemetry/api": "^1.9.0",
         "@opentelemetry/core": "^1.26.0",
         "@opentelemetry/exporter-trace-otlp-http": "^0.45.1",
         "@opentelemetry/id-generator-aws-xray": "^1.2.1",
