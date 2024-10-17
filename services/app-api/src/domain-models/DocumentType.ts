@@ -28,6 +28,10 @@ const rateSupportingDocumentSchema = baseDocumentSchema.extend({
     sha256: z.string(),
 })
 
+const contractQuestionDocumentSchema = baseDocumentSchema.extend({
+    questionID: z.string(),
+})
+
 const auditDocumentSchema = z.union([
     contractDocumentSchema.extend({ type: z.literal('contractDoc') }),
     rateDocumentSchema.extend({ type: z.literal('rateDoc') }),
@@ -36,6 +40,10 @@ const auditDocumentSchema = z.union([
     }),
     rateSupportingDocumentSchema.extend({
         type: z.literal('rateSupportingDoc'),
+    }),
+
+    contractQuestionDocumentSchema.extend({
+        type: z.literal('contractQuestionDoc'),
     }),
 ])
 
