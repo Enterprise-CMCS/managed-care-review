@@ -7,16 +7,22 @@ export async function findAllDocuments(
     client: PrismaClient
 ): Promise<AuditDocument[] | Error> {
     try {
-        const [contractDocs, rateDocs, contractSupportingDocs] =
-            await Promise.all([
-                getContractDocuments(client),
-                getRateDocuments(client),
-                getContractSupportingDocuments(client),
-            ])
+        const [
+            contractDocs,
+            rateDocs,
+            contractSupportingDocs,
+            rateSupportingDocs,
+        ] = await Promise.all([
+            getContractDocuments(client),
+            getRateDocuments(client),
+            getContractSupportingDocuments(client),
+            getRateSupportingDocuments(client),
+        ])
         if (contractDocs instanceof Error) return contractDocs
         if (rateDocs instanceof Error) return rateDocs
         if (contractSupportingDocs instanceof Error)
             return contractSupportingDocs
+        if (rateSupportingDocs instanceof Error) return rateSupportingDocs
 
         const allDocs = [
             ...contractDocs.map((doc) => ({
@@ -97,6 +103,24 @@ async function getContractSupportingDocuments(
             contractRevisionID: doc.contractRevisionID,
         }))
     } catch (err) {
-        return err
+        return err instanceof Error
+            ? err
+            : new Error('Failed to fetch contract supporting documents')
+    }
+}
+
+async function getRateSupportingDocuments(
+    prisma: PrismaClient
+): Promise<Omit<AuditDocument, 'type'>[] | Error> {
+    try {
+        const docs = await prisma.rateSupportingDocument.findMany()
+        return docs.map((doc) => ({
+            ...doc,
+            rateRevisionID: doc.rateRevisionID,
+        }))
+    } catch (err) {
+        return err instanceof Error
+            ? err
+            : new Error('Failed to fetch rate supporting documents')
     }
 }
