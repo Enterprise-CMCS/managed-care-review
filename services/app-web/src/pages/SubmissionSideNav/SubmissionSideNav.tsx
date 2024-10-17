@@ -238,7 +238,7 @@ export const SubmissionSideNav = () => {
                                     )}
                                     event_name="navigation_clicked"
                                 >
-                                    Q&A
+                                    Contract questions
                                 </NavLinkWithLogging>,
                                 ...(showQAbyRates && isStateUser
                                     ? generateRateLinks()

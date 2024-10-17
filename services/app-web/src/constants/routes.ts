@@ -167,7 +167,7 @@ const PageTitlesRecord: Record<RouteT | 'UNKNOWN_ROUTE', string> = {
     SUBMISSIONS_REVISION: 'Submission revision',
     SUBMISSIONS_SUMMARY: 'Submission summary',
     SUBMISSIONS_QUESTIONS_AND_ANSWERS: 'Q&A',
-    SUBMISSIONS_RATE_QUESTIONS_AND_ANSWERS: 'Q&A',
+    SUBMISSIONS_RATE_QUESTIONS_AND_ANSWERS: 'Rate Q&A',
     SUBMISSIONS_UPLOAD_QUESTION: 'Add questions',
     SUBMISSIONS_UPLOAD_RESPONSE: 'Add response',
     UNKNOWN_ROUTE: 'Not found',

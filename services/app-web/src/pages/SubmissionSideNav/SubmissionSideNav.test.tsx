@@ -75,7 +75,9 @@ describe('SubmissionSideNav', () => {
         const summaryLink = withinSideNav.getByRole('link', {
             name: /Submission summary/,
         })
-        const qaLink = withinSideNav.getByRole('link', { name: /Q&A/ })
+        const qaLink = withinSideNav.getByRole('link', {
+            name: /Contract questions/,
+        })
 
         // Expect submission summary link to exist within sidebar nav
         expect(summaryLink).toBeInTheDocument()
@@ -169,7 +171,9 @@ describe('SubmissionSideNav', () => {
         // Expect submission summary link to have correct href url
         expect(summaryLink).toHaveAttribute('href', '/submissions/15')
 
-        const qaLink = withinSideNav.getByRole('link', { name: /Q&A/ })
+        const qaLink = withinSideNav.getByRole('link', {
+            name: /Contract questions/,
+        })
         // Expect Q&A link to exist within sidebar nav.
         expect(qaLink).toBeInTheDocument()
         // Expect Q&A link to not be currently selected
@@ -275,7 +279,9 @@ describe('SubmissionSideNav', () => {
         const summaryLink = withinSideNav.getByRole('link', {
             name: /Submission summary/,
         })
-        const qaLink = withinSideNav.getByRole('link', { name: /Q&A/ })
+        const qaLink = withinSideNav.getByRole('link', {
+            name: /Contract questions/,
+        })
 
         // Expect submission summary and Q&A link to exist within sidebar nav
         expect(summaryLink).toBeInTheDocument()
