@@ -1,6 +1,8 @@
 import {
     FetchRateDocument,
     FetchRateQuery,
+    FetchRateWithQuestionsDocument,
+    FetchRateWithQuestionsQuery,
     IndexRatesDocument,
     IndexRatesForDashboardDocument,
     IndexRatesForDashboardQuery,
@@ -9,7 +11,7 @@ import {
     RateRevision,
 } from '../../gen/gqlClient'
 import { MockedResponse } from '@apollo/client/testing'
-import { draftRateDataMock, rateDataMock } from './rateDataMock'
+import { draftRateDataMock, rateDataMock, mockRateSubmittedWithQuestions } from './rateDataMock'
 import { GraphQLError } from 'graphql/index'
 
 const fetchRateMockSuccess = (
@@ -161,11 +163,34 @@ const indexRatesMockFailure = (): MockedResponse<IndexRatesQuery> => {
     }
 }
 
-export { 
-    fetchRateMockSuccess, 
-    indexRatesMockSuccess, 
+const fetchRateWithQuestionsMockSuccess = ({
+    rate
+}: {
+    rate?: Rate
+}): MockedResponse<FetchRateWithQuestionsQuery> => {
+    const rateData = rate ??  mockRateSubmittedWithQuestions('rate-123')
+    return {
+        request: {
+            query: FetchRateWithQuestionsDocument,
+            variables: { input: { rateID: rateData.id } },
+        },
+        result: {
+            data: {
+                fetchRate: {
+                    rate: {
+                        ...rateData,
+                    },
+                },
+            },
+        },
+    }
+}
+export {
+    fetchRateMockSuccess,
+    indexRatesMockSuccess,
     indexRatesForDashboardMockSuccess,
     indexRatesForDashboardMockFailure,
-    indexRatesMockFailure, 
-    fetchDraftRateMockSuccess 
+    indexRatesMockFailure,
+    fetchDraftRateMockSuccess,
+    fetchRateWithQuestionsMockSuccess
 }

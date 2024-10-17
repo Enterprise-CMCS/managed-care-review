@@ -9,6 +9,9 @@ import {
     FetchHealthPlanPackageWithQuestionsQuery,
     HealthPlanPackage,
     IndexContractQuestionsPayload,
+    CreateRateQuestionInput,
+    CreateRateQuestionMutation,
+    CreateRateQuestionDocument,
 } from '../../gen/gqlClient'
 import { mockValidCMSUser } from './userGQLMock'
 import { mockSubmittedHealthPlanPackage, mockQuestionsPayload } from './'
@@ -69,6 +72,57 @@ const createContractQuestionNetworkFailure = (
         error: new Error('A network error occurred'),
     }
 }
+
+
+const createRateQuestionSuccess = (
+    question?: CreateRateQuestionInput | Partial<CreateRateQuestionInput>
+): MockedResponse<CreateRateQuestionMutation> => {
+    const defaultQuestionInput: CreateRateQuestionInput = {
+        // dueDate: new Date('11-11-2100'),
+        rateID: '123-abc',
+        documents: [
+            {
+                name: 'Test document',
+                s3URL: 's3://test-document.doc',
+            },
+        ],
+    }
+
+    const testInput = { ...defaultQuestionInput, ...question }
+
+    return {
+        request: {
+            query: CreateRateQuestionDocument,
+            variables: { input: testInput },
+        },
+        result: {
+            data: {
+                createRateQuestion: {
+                    question: {
+                        id: 'test123',
+                        rateID: testInput.rateID,
+                        addedBy: mockValidCMSUser(),
+                        division: 'DMCO',
+                        documents: testInput.documents,
+                    },
+                },
+            },
+        },
+    }
+}
+
+const createRateQuestionNetworkFailure = (
+    input: CreateRateQuestionInput
+): MockedResponse<CreateRateQuestionMutation> => {
+    return {
+        request: {
+            query: CreateRateQuestionDocument,
+            variables: { input },
+        },
+        error: new Error('A network error occurred'),
+    }
+}
+
 const createContractQuestionResponseNetworkFailure = (
     _question?: QuestionResponseType | Partial<QuestionResponseType>
 ): MockedResponse<CreateContractQuestionMutation> => {
@@ -138,4 +192,6 @@ export {
     createContractQuestionSuccess,
     fetchStateHealthPlanPackageWithQuestionsMockSuccess,
     fetchStateHealthPlanPackageWithQuestionsMockNotFound,
+    createRateQuestionNetworkFailure,
+    createRateQuestionSuccess,
 }

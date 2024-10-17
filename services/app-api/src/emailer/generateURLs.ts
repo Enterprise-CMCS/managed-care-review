@@ -28,7 +28,7 @@ function submissionSummaryURL(id: string, base: string): string {
 }
 
 function submissionQuestionResponseURL(id: string, base: string): string {
-    const pattern = RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS
+    const pattern = RoutesRecord.SUBMISSIONS_CONTRACT_QUESTIONS_AND_ANSWERS
     const toPath = compile(pattern, { encode: encodeURIComponent })
     const path = toPath({ id })
     const url = new URL(path, base).href

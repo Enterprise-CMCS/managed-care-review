@@ -1,3 +1,3 @@
 export { QuestionResponse } from './QuestionResponse'
-export { UploadQuestions } from './UploadQuestions'
+export { UploadContractQuestions } from './UploadQuestions'
 export { UploadResponse } from './UploadResponse'
