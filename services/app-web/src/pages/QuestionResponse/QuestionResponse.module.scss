@@ -62,3 +62,9 @@
         }
     }
 }
+
+.outstandingQuestionsHeader {
+    font-weight: normal;
+    border-bottom: 1px solid custom.$mcr-gray-lighter;
+    padding-bottom: uswds.units(2);
+}

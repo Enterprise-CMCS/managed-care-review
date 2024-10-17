@@ -19,40 +19,10 @@ query fetchMcReviewSettings {
             assignedCMSUsers {
                 __typename
                 ... on CMSUser {
-                    id
-                    email
-                    role
-                    familyName
-                    givenName
-                    stateAssignments {
-                        code
-                        name
-                        programs {
-                            id
-                            name
-                            fullName
-                            isRateProgram
-                        }
-                    }
-                    divisionAssignment
+                    ...cmsUserFragment
                 }
                 ... on CMSApproverUser {
-                    id
-                    email
-                    role
-                    familyName
-                    givenName
-                    stateAssignments {
-                        code
-                        name
-                        programs {
-                            id
-                            name
-                            fullName
-                            isRateProgram
-                        }
-                    }
-                    divisionAssignment
+                    ...cmsApproverUserFragment
                 }
             }
         }

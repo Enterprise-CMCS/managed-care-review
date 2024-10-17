@@ -237,13 +237,3 @@ fragment submittableRevisionsFieldsForSubmit on SubmittableRevision {
     }
 }
 
-fragment updateInformationFields on UpdateInformation {
-    updatedAt
-    updatedBy {
-        email
-        role
-        familyName
-        givenName
-    }
-    updatedReason
-}

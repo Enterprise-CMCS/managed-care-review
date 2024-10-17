@@ -6,7 +6,7 @@ import {
     QUESTION_RESPONSE_SHOW_SIDEBAR_ROUTES,
     RoutesRecord,
     STATE_SUBMISSION_FORM_ROUTES,
-} from '../../constants/routes'
+} from '../../constants'
 import { getRouteName } from '../../routeHelpers'
 import {
     ContractFormData,
@@ -21,6 +21,8 @@ import { recordJSException } from '../../otelHelpers'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import { Error404 } from '../Errors/Error404Page'
 import { Contract, User } from '../../gen/gqlClient'
+import { useLDClient } from 'launchdarkly-react-client-sdk'
+import { featureFlags } from '../../common-code/featureFlags'
 
 export type SideNavOutletContextType = {
     contract: Contract
@@ -31,7 +33,7 @@ export type SideNavOutletContextType = {
 }
 
 export const SubmissionSideNav = () => {
-    const { id } = useParams()
+    const { id, rateID } = useParams()
     if (!id) {
         throw new Error(
             'PROGRAMMING ERROR: id param not set in state submission form.'
@@ -39,8 +41,13 @@ export const SubmissionSideNav = () => {
     }
     const { loggedInUser } = useAuth()
     const { pathname } = useLocation()
-
     const routeName = getRouteName(pathname)
+
+    const ldClient = useLDClient()
+    const showQAbyRates: boolean = ldClient?.variation(
+        featureFlags.QA_BY_RATES.flag,
+        featureFlags.QA_BY_RATES.defaultValue
+    )
 
     const isSelectedLink = (route: string | string[]): string => {
         //We pass an array of the form routes in order to display the sideNav on all of the pages
@@ -48,6 +55,12 @@ export const SubmissionSideNav = () => {
             return route.includes(routeName) ? 'usa-current' : ''
         } else {
             return routeName === route ? 'usa-current' : ''
+        }
+    }
+
+    const isSelectedRateLink = (id: string) => {
+        if (routeName === 'SUBMISSIONS_RATE_QUESTIONS_AND_ANSWERS') {
+            return rateID ? (rateID === id ? 'usa-current' : '') : ''
         }
     }
 
@@ -132,6 +145,36 @@ export const SubmissionSideNav = () => {
         recordJSException(errMsg)
         return <GenericErrorPage />
     }
+
+    const generateRateLinks = () => {
+        const rateRevision = contract.packageSubmissions[0].rateRevisions
+        const programs = contract.state.programs
+
+        if (submissionStatus === 'DRAFT' || !rateRevision) {
+            return []
+        }
+
+        return rateRevision.map((rev) => {
+            const ratePrograms = rev.formData.rateProgramIDs
+                .map(
+                    (id) =>
+                        programs.find((program) => program.id === id)?.name ||
+                        'Unknown Program'
+                )
+                .join(' ')
+            return (
+                <NavLinkWithLogging
+                    to={`/submissions/${id}/rate/${rev.rateID}/question-and-answers`}
+                    className={isSelectedRateLink(rev.rateID)}
+                    event_name="navigation_clicked"
+                >
+                    Rate questions: <br />
+                    {ratePrograms}
+                </NavLinkWithLogging>
+            )
+        })
+    }
+
     const outletContext: SideNavOutletContextType = {
         contract,
         packageName: contractName,
@@ -195,8 +238,11 @@ export const SubmissionSideNav = () => {
                                     )}
                                     event_name="navigation_clicked"
                                 >
-                                    Q&A
+                                    Contract questions
                                 </NavLinkWithLogging>,
+                                ...(showQAbyRates && isStateUser
+                                    ? generateRateLinks()
+                                    : []),
                             ]}
                         />
                     </div>
