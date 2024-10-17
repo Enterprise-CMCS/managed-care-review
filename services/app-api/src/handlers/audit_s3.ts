@@ -104,7 +104,9 @@ async function isDocumentInS3(
     s3URL: string
 ): Promise<boolean> {
     try {
+        console.info(`Attempting to check ${s3URL}`)
         const { bucket, key } = parseS3URL(s3URL)
+        console.info(`Got back ${bucket} and ${key}`)
         const command = new HeadObjectCommand({
             Bucket: bucket,
             Key: key,
