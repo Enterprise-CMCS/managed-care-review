@@ -36,6 +36,14 @@ const contractQuestionResponseDocumentSchema = baseDocumentSchema.extend({
     responseID: z.string(),
 })
 
+const rateQuestionDocumentSchema = baseDocumentSchema.extend({
+    questionID: z.string(),
+})
+
+const rateQuestionResponseDocumentSchema = baseDocumentSchema.extend({
+    responseID: z.string(),
+})
+
 const auditDocumentSchema = z.union([
     contractDocumentSchema.extend({ type: z.literal('contractDoc') }),
     rateDocumentSchema.extend({ type: z.literal('rateDoc') }),
@@ -52,6 +60,12 @@ const auditDocumentSchema = z.union([
 
     contractQuestionResponseDocumentSchema.extend({
         type: z.literal('contractQuestionResponseDoc'),
+    }),
+    rateQuestionDocumentSchema.extend({
+        type: z.literal('rateQuestionDoc'),
+    }),
+    rateQuestionResponseDocumentSchema.extend({
+        type: z.literal('rateQuestionResponseDoc'),
     }),
 ])
 

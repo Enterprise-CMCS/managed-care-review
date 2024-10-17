@@ -14,6 +14,8 @@ export async function findAllDocuments(
             rateSupportingDocs,
             contractQuestionDocs,
             contractQuestionResponseDocs,
+            rateQuestionDocs,
+            rateQuestionResponseDocs,
         ] = await Promise.all([
             getContractDocuments(client),
             getRateDocuments(client),
@@ -21,6 +23,8 @@ export async function findAllDocuments(
             getRateSupportingDocuments(client),
             getContractQuestionDocument(client),
             getContractQuestionResponseDocument(client),
+            getRateQuestionDocument(client),
+            getRateQuestionResponseDocument(client),
         ])
         if (contractDocs instanceof Error) return contractDocs
         if (rateDocs instanceof Error) return rateDocs
@@ -30,6 +34,10 @@ export async function findAllDocuments(
         if (contractQuestionDocs instanceof Error) return contractQuestionDocs
         if (contractQuestionResponseDocs instanceof Error)
             return contractQuestionResponseDocs
+
+        if (rateQuestionDocs instanceof Error) return rateQuestionDocs
+        if (rateQuestionResponseDocs instanceof Error)
+            return rateQuestionResponseDocs
 
         const allDocs = [
             ...contractDocs.map((doc) => ({
@@ -52,6 +60,14 @@ export async function findAllDocuments(
             ...contractQuestionResponseDocs.map((doc) => ({
                 ...doc,
                 type: 'contractQuestionResponseDoc' as const,
+            })),
+            ...rateQuestionDocs.map((doc) => ({
+                ...doc,
+                type: 'rateQuestionDoc' as const,
+            })),
+            ...rateQuestionResponseDocs.map((doc) => ({
+                ...doc,
+                type: 'rateQuestionResponseDoc' as const,
             })),
         ]
 
@@ -177,6 +193,38 @@ async function getContractQuestionResponseDocument(
     } catch (err) {
         return err instanceof Error
             ? err
-            : new Error('Failed to fetch contract question documents')
+            : new Error('Failed to fetch contract question response documents')
+    }
+}
+
+async function getRateQuestionDocument(
+    prisma: PrismaClient
+): Promise<Omit<AuditDocument, 'type'>[] | Error> {
+    try {
+        const docs = await prisma.rateQuestionDocument.findMany()
+        return docs.map((doc) => ({
+            ...doc,
+            questionID: doc.questionID,
+        }))
+    } catch (err) {
+        return err instanceof Error
+            ? err
+            : new Error('Failed to fetch rate question documents')
+    }
+}
+
+async function getRateQuestionResponseDocument(
+    prisma: PrismaClient
+): Promise<Omit<AuditDocument, 'type'>[] | Error> {
+    try {
+        const docs = await prisma.rateQuestionResponseDocument.findMany()
+        return docs.map((doc) => ({
+            ...doc,
+            responseID: doc.responseID,
+        }))
+    } catch (err) {
+        return err instanceof Error
+            ? err
+            : new Error('Failed to fetch rate question response documents')
     }
 }
