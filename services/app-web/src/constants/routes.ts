@@ -155,6 +155,7 @@ const PageTitlesRecord: Record<RouteT | 'UNKNOWN_ROUTE', string> = {
     RATES_SUMMARY: 'Rate summary',
     RATE_EDIT: 'Edit rate',
     REPLACE_RATE: 'Replace rate',
+    RATES_UPLOAD_QUESTION: 'Add rate questions',
     SUBMISSIONS: 'Submissions',
     SUBMISSIONS_NEW: 'New submission',
     SUBMISSIONS_EDIT_TOP_LEVEL: 'Submissions',
