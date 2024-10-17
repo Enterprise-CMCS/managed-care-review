@@ -1,78 +1,22 @@
 query fetchCurrentUser {
     fetchCurrentUser {
         ... on CMSUser {
-            id
-            email
-            role
-            familyName
-            givenName
-            stateAssignments {
-                code
-                name
-                programs {
-                    id
-                    name
-                    fullName
-                    isRateProgram
-                }
-            }
-            divisionAssignment
+            ...cmsUserFragment
         }
         ... on CMSApproverUser {
-            id
-            email
-            role
-            familyName
-            givenName
-            stateAssignments {
-                code
-                name
-                programs {
-                    id
-                    name
-                    fullName
-                    isRateProgram
-                }
-            }
-            divisionAssignment
+            ...cmsApproverUserFragment
         }
         ... on StateUser {
-            id
-            email
-            role
-            familyName
-            givenName
-            state {
-                code
-                name
-                programs {
-                    id
-                    name
-                    fullName
-                    isRateProgram
-                }
-            }
+            ...stateUserFragment
         }
         ... on AdminUser {
-            id
-            email
-            role
-            familyName
-            givenName
+            ...adminUserFragment
         }
         ... on HelpdeskUser {
-            id
-            email
-            role
-            familyName
-            givenName
+            ...helpdeskUserFragment
         }
         ... on BusinessOwnerUser {
-            id
-            email
-            role
-            familyName
-            givenName
+            ...businessUserFragment
         }
     }
 }

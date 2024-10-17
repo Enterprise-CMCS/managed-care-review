@@ -53,7 +53,7 @@ describe('Q&A', () => {
                     }).should('exist')
 
                     // Find QA Link and click
-                    cy.findByRole('link', { name: /Q&A/ }).click()
+                    cy.findByRole('link', { name: /Contract questions/ }).click()
                     cy.url({ timeout: 10_000 }).should(
                         'contain',
                         `${contract.id}/question-and-answers`

@@ -36,6 +36,7 @@ const fetchRateMockSuccess = (
         },
     }
 }
+
 const fetchDraftRateMockSuccess = (
     rate?: Partial<Rate>,
     revision?: Partial<RateRevision>
@@ -164,11 +165,13 @@ const indexRatesMockFailure = (): MockedResponse<IndexRatesQuery> => {
 }
 
 const fetchRateWithQuestionsMockSuccess = ({
-    rate
+    rate, rateRev
 }: {
-    rate?: Rate
+    rate?: Partial<Rate>,
+    rateRev?: Partial<RateRevision>
 }): MockedResponse<FetchRateWithQuestionsQuery> => {
-    const rateData = rate ??  mockRateSubmittedWithQuestions('rate-123')
+    const rateID = rate?.id ??  rateRev?.rateID ?? 'rate-123'
+    const rateData =  mockRateSubmittedWithQuestions({ ...rate, id: rateID}, rateRev)
     return {
         request: {
             query: FetchRateWithQuestionsDocument,

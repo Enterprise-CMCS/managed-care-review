@@ -49,6 +49,7 @@ import {
 } from '../Settings/SettingsTables'
 import { EditStateAssign } from '../Settings/EditStateAssign/EditStateAssign'
 import { UploadRateQuestions } from '../QuestionResponse/UploadQuestions'
+import { RateQuestionResponse } from '../QuestionResponse/RateQuestionResponse'
 
 function componentForAuthMode(
     authMode: AuthModeType
@@ -74,8 +75,6 @@ const UniversalRoutes = (
 )
 
 const StateUserRoutes = ({
-    authMode,
-    setAlert,
     stageName,
 }: {
     authMode: AuthModeType
@@ -88,6 +87,12 @@ const StateUserRoutes = ({
         featureFlags.RATE_EDIT_UNLOCK.flag,
         featureFlags.RATE_EDIT_UNLOCK.defaultValue
     )
+
+    const showQAbyRates: boolean = ldClient?.variation(
+        featureFlags.QA_BY_RATES.flag,
+        featureFlags.QA_BY_RATES.defaultValue
+    )
+
     return (
         <AuthenticatedRouteWrapper>
             <Routes>
@@ -145,6 +150,14 @@ const StateUserRoutes = ({
                         path={RoutesRecord.SUBMISSIONS_EDIT_TOP_LEVEL}
                         element={<StateSubmissionForm />}
                     />
+                    {showQAbyRates && (
+                        <Route
+                            path={
+                                RoutesRecord.SUBMISSIONS_RATE_QUESTIONS_AND_ANSWERS
+                            }
+                            element={<RateQuestionResponse />}
+                        />
+                    )}
                 </Route>
                 <Route
                     path={RoutesRecord.SUBMISSIONS_REVISION}
@@ -165,8 +178,6 @@ const StateUserRoutes = ({
 }
 
 const CMSUserRoutes = ({
-    authMode,
-    setAlert,
     stageName,
 }: {
     authMode: AuthModeType

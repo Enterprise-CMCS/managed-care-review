@@ -45,7 +45,7 @@ describe('UploadRateQuestions', () => {
         ({ userRole, mockUser }) => {
             it('displays file upload for correct cms division', async () => {
                 const division = 'dmco'
-                const rate =  mockRateSubmittedWithQuestions('15')
+                const rate =  mockRateSubmittedWithQuestions({ id: '15'})
 
                 renderWithProviders(
                     renderUploadQuestionUI(),
@@ -91,7 +91,7 @@ describe('UploadRateQuestions', () => {
             })
 
             it('file upload accepts multiple pdf, word, excel documents', async () => {
-                const rate =   mockRateSubmittedWithQuestions('15')
+                const rate =   mockRateSubmittedWithQuestions({ id: '15'})
 
                 renderWithProviders(
                   renderUploadQuestionUI(),
@@ -143,7 +143,7 @@ describe('UploadRateQuestions', () => {
 
             it.skip('allows submission with an uploaded doc', async () => {
                 let testLocation: Location
-                const rate =   mockRateSubmittedWithQuestions('15')
+                const rate =   mockRateSubmittedWithQuestions({ id: '15'})
 
                 const { user } = renderWithProviders(
                   renderUploadQuestionUI(),
@@ -211,7 +211,7 @@ describe('UploadRateQuestions', () => {
             })
 
             it('displays form validation error if attempting to add question with zero files', async () => {
-                const rate =   mockRateSubmittedWithQuestions('15')
+                const rate =   mockRateSubmittedWithQuestions({ id: '15'})
 
                 const { user } = renderWithProviders(
                     renderUploadQuestionUI(),
@@ -256,7 +256,7 @@ describe('UploadRateQuestions', () => {
             })
 
             it('displays file upload alert if attempting to add question with all invalid files', async () => {
-                const rate =   mockRateSubmittedWithQuestions('15')
+                const rate =   mockRateSubmittedWithQuestions({ id: '15'})
                 const { user } = renderWithProviders(
                   renderUploadQuestionUI(),
                     {
@@ -311,7 +311,7 @@ describe('UploadRateQuestions', () => {
             })
 
             it('displays file upload error alert if attempting to add question while a file is still uploading', async () => {
-                const rate =   mockRateSubmittedWithQuestions('15')
+                const rate =   mockRateSubmittedWithQuestions({ id: '15'})
                 renderWithProviders(
                   renderUploadQuestionUI(),
                     {
@@ -378,7 +378,7 @@ describe('UploadRateQuestions', () => {
             })
 
             it.skip('displays api error if createQuestion fails', async () => {
-                const rate =  mockRateSubmittedWithQuestions('15')
+                const rate =  mockRateSubmittedWithQuestions({ id: '15'})
                 const { user } = renderWithProviders(
                   renderUploadQuestionUI(),
                     {
@@ -434,7 +434,7 @@ describe('UploadRateQuestions', () => {
 
             describe('errors', () => {
                 it('shows generic error if submission is a draft', async () => {
-                   const rate = mockRateSubmittedWithQuestions('15')
+                   const rate = mockRateSubmittedWithQuestions({ id: '15', status: 'DRAFT'})
                     renderWithProviders(
                         renderUploadQuestionUI(),
                         {
@@ -445,11 +445,7 @@ describe('UploadRateQuestions', () => {
                                         statusCode: 200,
                                     }),
                                     fetchRateWithQuestionsMockSuccess({
-                                        rate: {
-                                            ...rate,
-                                            status: "DRAFT",
-                                            id: '15',
-                                        },
+                                        rate: rate,
                                     }),
                                 ],
                             },

@@ -37,6 +37,9 @@ const ROUTES = [
     'SUBMISSIONS_CONTRACT_QUESTIONS_AND_ANSWERS',
     'SUBMISSIONS_UPLOAD_CONTRACT_QUESTION',
     'SUBMISSIONS_UPLOAD_CONTRACT_RESPONSE',
+    'SUBMISSIONS_RATE_QUESTIONS_AND_ANSWERS',
+    'SUBMISSIONS_UPLOAD_CONTRACT_QUESTION',
+    'SUBMISSIONS_UPLOAD_CONTRACT_RESPONSE',
 ] as const // iterable union type
 type RouteT = (typeof ROUTES)[number]
 type RouteTWithUnknown = RouteT | 'UNKNOWN_ROUTE'
@@ -80,9 +83,10 @@ const RoutesRecord: Record<RouteT, string> = {
     SUBMISSIONS_SUMMARY: '/submissions/:id',
     SUBMISSIONS_MCCRSID: '/submissions/:id/mccrs-record-number',
     SUBMISSIONS_REVISION: '/submissions/:id/revisions/:revisionVersion',
-    SUBMISSIONS_CONTRACT_QUESTIONS_AND_ANSWERS: '/submissions/:id/question-and-answers',
+    SUBMISSIONS_CONTRACT_QUESTIONS_AND_ANSWERS: 'submissions/:id/question-and-answers',
+    SUBMISSIONS_RATE_QUESTIONS_AND_ANSWERS: 'submissions/:id/rate/:rateID/question-and-answers',
     SUBMISSIONS_UPLOAD_CONTRACT_QUESTION:
-        '/submissions/:id/question-and-answers/:division/upload-questions',
+    '/submissions/:id/question-and-answers/:division/:questionID/upload-questions',
     SUBMISSIONS_UPLOAD_CONTRACT_RESPONSE:
         '/submissions/:id/question-and-answers/:division/:questionID/upload-response',
 
@@ -118,6 +122,7 @@ const STATE_SUBMISSION_SUMMARY_ROUTES: RouteTWithUnknown[] = [
 
 const QUESTION_RESPONSE_SHOW_SIDEBAR_ROUTES: RouteTWithUnknown[] = [
     'SUBMISSIONS_CONTRACT_QUESTIONS_AND_ANSWERS',
+    'SUBMISSIONS_RATE_QUESTIONS_AND_ANSWERS',
     'SUBMISSIONS_SUMMARY',
     'SUBMISSIONS_TYPE',
     'SUBMISSIONS_CONTRACT_DETAILS',
@@ -171,6 +176,7 @@ const PageTitlesRecord: Record<RouteT | 'UNKNOWN_ROUTE', string> = {
     SUBMISSIONS_CONTRACT_QUESTIONS_AND_ANSWERS: 'Q&A',
     SUBMISSIONS_UPLOAD_CONTRACT_QUESTION: 'Add questions',
     SUBMISSIONS_UPLOAD_CONTRACT_RESPONSE: 'Add response',
+    SUBMISSIONS_RATE_QUESTIONS_AND_ANSWERS: 'Rate Q&A',
     UNKNOWN_ROUTE: 'Not found',
 }
 

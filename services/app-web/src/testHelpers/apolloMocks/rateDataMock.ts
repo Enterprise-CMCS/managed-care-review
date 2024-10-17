@@ -4,10 +4,8 @@ import {
     ContractPackageSubmission,
     ContractRevision,
     Rate,
-    RateFormData,
     RatePackageSubmission,
     RateRevision,
-    StateAssignmentUser,
     StateUser,
     UpdateInformation,
 } from '../../gen/gqlClient'
@@ -337,16 +335,16 @@ function submittedLinkedRatesScenarioMock(): {
 
 }
 
-// ntended for use with related GQL Moc file.
+// intended for use with related GQL Moc file.
 function mockRateSubmittedWithQuestions(
-    rateID: string,
+    rate: Partial<Rate> & { id: string},
     partial?: Partial<RateRevision>
 ): Rate {
-
+    const rateID = rate.id
     const rateRev =  (): RateRevision => {
         return {
             id: '1234',
-            rateID: rateID??  '123',
+            rateID: rateID,
             createdAt: new Date('01/01/2023'),
             updatedAt: new Date('01/01/2023'),
             __typename: 'RateRevision',
@@ -424,16 +422,16 @@ function mockRateSubmittedWithQuestions(
     }}
 
     return {
-        status: 'SUBMITTED',
+        status: rate.status?? 'SUBMITTED',
         __typename: 'Rate',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        id: rateID?? '123',
-        stateCode: 'MN',
-        state: mockMNState(),
-        stateNumber: 5,
-        parentContractID: 'parent-contract-id',
-        initiallySubmittedAt: '2024-12-18T16:54:39.173Z',
+        createdAt: rate.createdAt?? new Date(),
+        updatedAt: rate.updatedAt??new Date(),
+        id: rateID,
+        stateCode: rate.stateCode ??'MN',
+        state: rate.state ?? mockMNState(),
+        stateNumber: rate.stateNumber ??  5,
+        parentContractID:  rate.parentContractID ??  'parent-contract-id',
+        initiallySubmittedAt: rate.initiallySubmittedAt ??  '2024-12-18T16:54:39.173Z',
         revisions: [rateRev()],
         draftRevision: null,
         withdrawInfo: null,
