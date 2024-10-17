@@ -1,4 +1,4 @@
-import { validateContractDraftRevisionInput } from './dataValidatorHelpers'
+import { validateContractDraftRevisionInput, parseContract } from './dataValidatorHelpers'
 import {
     mockGqlContractDraftRevisionFormDataInput,
     must,
@@ -6,7 +6,8 @@ import {
 import type { ContractDraftRevisionFormDataInput } from '../../gen/gqlServer'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 import { NewPostgresStore } from '../../postgres'
-
+import type { ContractType } from './contractTypes'
+import { mockContractRevision } from '../../testHelpers'
 describe('validateContractDraftRevisionInput', () => {
     it('Validates input form data and removes statutoryRegulatoryAttestationDescription', async () => {
         const prismaClient = await sharedTestPrismaClient()
@@ -176,3 +177,85 @@ describe('validateContractDraftRevisionInput', () => {
         )
     })
 })
+
+// describe('parseContract', () => {
+//     it('return error if invalid form data', async () => {
+//         const formData = {
+//             ...mockGqlContractDraftRevisionFormDataInput(stateCode),
+//             stateContacts: [
+//                 {
+//                     name: 'Bill',
+//                     titleRole: 'A Title',
+//                     email: '', // Accepts empty string because users can save as draft with incomplete data.
+//                 },
+//             ],
+//             submissionDescription: null,
+//             contractType: null,
+//             riskBasedContract: null,
+//             contractDateStart: null,
+//             contractDateEnd: null,
+//             contractExecutionStatus: null,
+//             inLieuServicesAndSettings: null,
+//             modifiedBenefitsProvided: null,
+//             modifiedGeoAreaServed: null,
+//             modifiedMedicaidBeneficiaries: null,
+//             modifiedRiskSharingStrategy: null,
+//             modifiedIncentiveArrangements: null,
+//             modifiedWitholdAgreements: null,
+//             modifiedStateDirectedPayments: null,
+//             modifiedPassThroughPayments: null,
+//             modifiedPaymentsForMentalDiseaseInstitutions: null,
+//             modifiedMedicalLossRatioStandards: null,
+//             modifiedOtherFinancialPaymentIncentive: null,
+//             modifiedEnrollmentProcess: null,
+//             modifiedGrevienceAndAppeal: null,
+//             modifiedNetworkAdequacyStandards: null,
+//             modifiedLengthOfContract: null,
+//             modifiedNonRiskPaymentArrangements: null,
+//             statutoryRegulatoryAttestation: null,
+//             statutoryRegulatoryAttestationDescription: null,
+//         }
+
+//         const expectedResult = {
+//             ...formData,
+//             submissionDescription: undefined,
+//             contractType: undefined,
+//             riskBasedContract: undefined,
+//             contractDateStart: undefined,
+//             contractDateEnd: undefined,
+//             contractExecutionStatus: undefined,
+//             inLieuServicesAndSettings: undefined,
+//             modifiedBenefitsProvided: undefined,
+//             modifiedGeoAreaServed: undefined,
+//             modifiedMedicaidBeneficiaries: undefined,
+//             modifiedRiskSharingStrategy: undefined,
+//             modifiedIncentiveArrangements: undefined,
+//             modifiedWitholdAgreements: undefined,
+//             modifiedStateDirectedPayments: undefined,
+//             modifiedPassThroughPayments: undefined,
+//             modifiedPaymentsForMentalDiseaseInstitutions: undefined,
+//             modifiedMedicalLossRatioStandards: undefined,
+//             modifiedOtherFinancialPaymentIncentive: undefined,
+//             modifiedEnrollmentProcess: undefined,
+//             modifiedGrevienceAndAppeal: undefined,
+//             modifiedNetworkAdequacyStandards: undefined,
+//             modifiedLengthOfContract: undefined,
+//             modifiedNonRiskPaymentArrangements: undefined,
+//             statutoryRegulatoryAttestation: undefined,
+//             statutoryRegulatoryAttestationDescription: undefined,
+//         }
+
+//         const validatedFormData = must(
+//             validateContractDraftRevisionInput(
+//                 formData,
+//                 stateCode,
+//                 postgresStore,
+//                 {
+//                     '438-attestation': true,
+//                 }
+//             )
+//         )
+
+//         expect(validatedFormData).toEqual(expectedResult)
+//     })
+// })

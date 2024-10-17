@@ -1570,6 +1570,6 @@ describe('submitContract', () => {
 
     //         expect(submitResult.errors).toBeUndefined()
     //     }, 20000)
-    // })
+    // }) 
 })
 })

@@ -560,18 +560,18 @@ export function submitHealthPlanPackageResolver(
         let statePackageEmailResult
 
         if (status === 'RESUBMITTED') {
-            cmsPackageEmailResult = await emailer.sendResubmittedCMSEmail(
-                lockedFormData,
-                updateInfo,
-                stateAnalystsEmails,
-                statePrograms
-            )
-            statePackageEmailResult = await emailer.sendResubmittedStateEmail(
-                lockedFormData,
-                updateInfo,
-                submitterEmails,
-                statePrograms
-            )
+            // cmsPackageEmailResult = await emailer.sendResubmittedCMSEmail(
+            //     lockedFormData,
+            //     updateInfo,
+            //     stateAnalystsEmails,
+            //     statePrograms
+            // )
+            // statePackageEmailResult = await emailer.sendResubmittedStateEmail(
+            //     lockedFormData,
+            //     updateInfo,
+            //     submitterEmails,
+            //     statePrograms
+            // )
         } else if (status === 'SUBMITTED') {
             cmsPackageEmailResult = await emailer.sendCMSNewPackage(
                 lockedFormData,

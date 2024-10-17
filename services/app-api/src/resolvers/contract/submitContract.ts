@@ -5,7 +5,9 @@ import type { Store } from '../../postgres'
 import { NotFoundError } from '../../postgres'
 import { logError, logSuccess } from '../../logger'
 import { isStateUser, contractSubmitters } from '../../domain-models'
-
+import { type CHIPFederalAuthority,
+    federalAuthorityKeysForCHIP,
+} from '../../common-code/healthPlanFormDataType'
 import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
 import { GraphQLError } from 'graphql'
 import {
@@ -19,6 +21,8 @@ import type { UpdateInfoType, PackageStatusType } from '../../domain-models'
 import type { UpdateDraftContractRatesArgsType } from '../../postgres/contractAndRates/updateDraftContractRates'
 import type { StateCodeType } from '../../common-code/healthPlanFormDataType'
 import type { Span } from '@opentelemetry/api'
+import { isContractWithProvisions, isCHIPOnly, isContractOnly, generateApplicableProvisionsList } from '../../common-code/contractAndRates/contractData'
+import { GeneralizedModifiedProvisions } from '../../common-code/contractAndRates/ModifiedProvisions'
 
 const validateStatusAndUpdateInfo = (
     status: PackageStatusType,
@@ -142,6 +146,33 @@ export function submitContract(
             contractWithHistory.draftRates?.filter((rate) => {
                 return rate.draftRevision?.formData
             })
+
+        // Remove fields from edits on irrelevant logic branches
+        // - CONTRACT_ONLY submission type should not contain any CONTRACT_AND_RATE rates data.
+        // - CHIP_ONLY population covered should not contain any provision or authority relevant to other population.
+        // - We delete at submission instead of update to preserve rates data in case user did not 
+        // intend or would like to revert the submission type before submitting.
+        if(contractWithHistory.draftRevision?.formData.submissionType === 'CONTRACT_ONLY') {
+            contractWithHistory.draftRates = []
+        }
+
+        if(isCHIPOnly(contractWithHistory)) {
+             // remove invalid provisions
+            if (isContractWithProvisions(contractWithHistory)) {
+                const validProvisionsKeys = generateApplicableProvisionsList(contractWithHistory)
+                const validProvisionsData: Partial<GeneralizedModifiedProvisions> = {}
+                validProvisionsKeys.forEach((provision) => {
+                    contractWithHistory.draftRevision!.formData[provision] = validProvisionsData[provision] 
+                })
+            }
+
+            contractWithHistory.draftRevision.formData.federalAuthorities = contractWithHistory.draftRevision.formData.federalAuthorities.filter((authority) =>
+                federalAuthorityKeysForCHIP.includes(
+                    authority as CHIPFederalAuthority
+                )
+            )
+        }
+
         const contractToParse = contractWithHistory
         contractToParse.draftRates = draftRatesWithoutLinkedRates
         const parsedContract = parseContract(contractToParse, featureFlags)

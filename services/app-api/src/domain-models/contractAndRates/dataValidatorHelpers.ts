@@ -122,8 +122,6 @@ const parseContract = (
             draftRates: z.array(
                 rateWithoutDraftContractsSchema.extend({
                     draftRevision: rateRevisionSchema.extend({
-                        //     formData: rateFormDataSchema
-                        // })
                         formData: rateFormDataSchema.superRefine(
                             (
                                 {
