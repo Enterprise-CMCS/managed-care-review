@@ -123,9 +123,16 @@ async function isDocumentInS3(
 
 function parseS3URL(s3URL: string): { bucket: string; key: string } {
     const url = new URL(s3URL)
+    const fullPath = url.pathname.slice(1) // Remove leading '/'
+
+    // Extract the UUID part
+    const uuidPart = fullPath.split('/')[0]
+    // Construct the new key
+    const key = `allusers/${uuidPart}`
+
     return {
         bucket: url.hostname,
-        key: url.pathname.slice(1),
+        key: key,
     }
 }
 
