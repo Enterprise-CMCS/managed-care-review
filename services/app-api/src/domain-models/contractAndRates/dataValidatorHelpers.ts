@@ -117,6 +117,7 @@ const parseContract = (
                             formData,
                             featureFlags
                         ),
+                    populationCovered: validatePopulationCovered(formData),
                 }),
             }),
             draftRates: z.array(

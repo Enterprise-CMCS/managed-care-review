@@ -1,4 +1,7 @@
-import { validateContractDraftRevisionInput, parseContract } from './dataValidatorHelpers'
+import {
+    validateContractDraftRevisionInput,
+    parseContract,
+} from './dataValidatorHelpers'
 import {
     mockGqlContractDraftRevisionFormDataInput,
     must,
@@ -7,7 +10,6 @@ import type { ContractDraftRevisionFormDataInput } from '../../gen/gqlServer'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 import { NewPostgresStore } from '../../postgres'
 import type { ContractType } from './contractTypes'
-import { mockContractRevision } from '../../testHelpers'
 describe('validateContractDraftRevisionInput', () => {
     it('Validates input form data and removes statutoryRegulatoryAttestationDescription', async () => {
         const prismaClient = await sharedTestPrismaClient()
@@ -177,85 +179,181 @@ describe('validateContractDraftRevisionInput', () => {
         )
     })
 })
+const s3DlUrl =
+    'https://fake-bucket.s3.amazonaws.com/file.pdf?AWSAccessKeyId=AKIAIOSFODNN7EXAMPLE&Expires=1719564800&Signature=abc123def456ghijk' //pragma: allowlist secret
 
-// describe('parseContract', () => {
-//     it('return error if invalid form data', async () => {
-//         const formData = {
-//             ...mockGqlContractDraftRevisionFormDataInput(stateCode),
-//             stateContacts: [
-//                 {
-//                     name: 'Bill',
-//                     titleRole: 'A Title',
-//                     email: '', // Accepts empty string because users can save as draft with incomplete data.
-//                 },
-//             ],
-//             submissionDescription: null,
-//             contractType: null,
-//             riskBasedContract: null,
-//             contractDateStart: null,
-//             contractDateEnd: null,
-//             contractExecutionStatus: null,
-//             inLieuServicesAndSettings: null,
-//             modifiedBenefitsProvided: null,
-//             modifiedGeoAreaServed: null,
-//             modifiedMedicaidBeneficiaries: null,
-//             modifiedRiskSharingStrategy: null,
-//             modifiedIncentiveArrangements: null,
-//             modifiedWitholdAgreements: null,
-//             modifiedStateDirectedPayments: null,
-//             modifiedPassThroughPayments: null,
-//             modifiedPaymentsForMentalDiseaseInstitutions: null,
-//             modifiedMedicalLossRatioStandards: null,
-//             modifiedOtherFinancialPaymentIncentive: null,
-//             modifiedEnrollmentProcess: null,
-//             modifiedGrevienceAndAppeal: null,
-//             modifiedNetworkAdequacyStandards: null,
-//             modifiedLengthOfContract: null,
-//             modifiedNonRiskPaymentArrangements: null,
-//             statutoryRegulatoryAttestation: null,
-//             statutoryRegulatoryAttestationDescription: null,
-//         }
+describe('parseContract', () => {
+    it('return error if invalid form data', async () => {
+        const contract: ContractType = {
+            status: 'SUBMITTED',
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            id: 'test-abc-123',
+            stateCode: 'MN',
+            stateNumber: 5,
+            mccrsID: undefined,
+            revisions: [],
+            draftRevision: {
+                id: '12345',
+                submitInfo: undefined,
+                unlockInfo: undefined,
+                contract: {
+                    id: '123',
+                    stateCode: 'MN',
+                    stateNumber: 4,
+                },
+                createdAt: new Date(11 / 27 / 2023),
+                updatedAt: new Date(11 / 27 / 2023),
+                formData: {
+                    programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
+                    populationCovered: 'CHIP',
+                    submissionType: 'CONTRACT_AND_RATES',
+                    riskBasedContract: true,
+                    submissionDescription: 'A real submission',
+                    supportingDocuments: [
+                        {
+                            s3URL: 's3://bucketname/key/contractsupporting1',
+                            sha256: 'fakesha',
+                            name: 'contractSupporting1',
+                            dateAdded: new Date('01/15/2024'),
+                            downloadURL: s3DlUrl,
+                        },
+                        {
+                            s3URL: 's3://bucketname/key/contractSupporting2',
+                            sha256: 'fakesha',
+                            name: 'contractSupporting2',
+                            dateAdded: new Date('01/13/2024'),
+                            downloadURL: s3DlUrl,
+                        },
+                    ],
+                    stateContacts: [],
+                    contractType: 'AMENDMENT',
+                    contractExecutionStatus: 'EXECUTED',
+                    contractDocuments: [
+                        {
+                            s3URL: 's3://bucketname/key/contract',
+                            sha256: 'fakesha',
+                            name: 'contract',
+                            dateAdded: new Date('01/01/2024'),
+                            downloadURL: s3DlUrl,
+                        },
+                    ],
+                    contractDateStart: new Date(),
+                    contractDateEnd: new Date(),
+                    managedCareEntities: ['MCO'],
+                    federalAuthorities: ['STATE_PLAN'],
+                    inLieuServicesAndSettings: true,
+                    modifiedBenefitsProvided: true,
+                    modifiedGeoAreaServed: false,
+                    modifiedMedicaidBeneficiaries: true,
+                    modifiedRiskSharingStrategy: true,
+                    modifiedIncentiveArrangements: false,
+                    modifiedWitholdAgreements: false,
+                    modifiedStateDirectedPayments: true,
+                    modifiedPassThroughPayments: true,
+                    modifiedPaymentsForMentalDiseaseInstitutions: false,
+                    modifiedMedicalLossRatioStandards: true,
+                    modifiedOtherFinancialPaymentIncentive: false,
+                    modifiedEnrollmentProcess: true,
+                    modifiedGrevienceAndAppeal: false,
+                    modifiedNetworkAdequacyStandards: true,
+                    modifiedLengthOfContract: false,
+                    modifiedNonRiskPaymentArrangements: true,
+                    statutoryRegulatoryAttestation: true,
+                    statutoryRegulatoryAttestationDescription:
+                        'everything meets regulatory attestation',
+                },
+            },
+            draftRates: [],
+            // {
+            //     id: '1234',
+            //     createdAt: new Date('01/01/2023'),
+            //     updatedAt: new Date('01/01/2023'),
+            //     stateCode: 'MN',
+            //     stateNumber: 10,
+            //     parentContractID: 'foo-bar',
+            //     state: mockMNState(),
+            //     status: 'DRAFT',
+            //     initiallySubmittedAt: '2023-10-16',
+            //     draftRevision: {
+            //         id: '1234',
+            //         createdAt: new Date('01/01/2023'),
+            //         updatedAt: new Date('01/01/2023'),
+            //         unlockInfo: undefined,
+            //         submitInfo: undefined,
+            //         formData: {
+            //             rateCertificationName:'rate cert',
+            //             rateType: 'AMENDMENT',
+            //             rateCapitationType: 'RATE_CELL',
+            //             rateDocuments: [
+            //                 {
+            //                     s3URL: 's3://bucketname/key/rate',
+            //                     sha256: 'fakesha',
+            //                     name: 'rate',
+            //                     dateAdded: new Date('01/01/2023'),
+            //                     downloadURL: s3DlUrl
+            //                 },
+            //             ],
+            //             supportingDocuments: [
+            //                 {
+            //                     s3URL: 's3://bucketname/key/rateSupporting1',
+            //                     sha256: 'fakesha',
+            //                     name: 'rate supporting 1',
+            //                     dateAdded: new Date('01/15/2023'),
+            //                     downloadURL: s3DlUrl
+            //                 },
+            //                 {
+            //                     s3URL: 's3://bucketname/key/rateSupporting1',
+            //                     sha256: 'fakesha',
+            //                     name: 'rate supporting 2',
+            //                     dateAdded: new Date('01/15/2023'),
+            //                     downloadURL: s3DlUrl
+            //                 },
+            //             ],
+            //             rateDateStart: new Date(),
+            //             rateDateEnd: new Date(),
+            //             rateDateCertified: new Date(),
+            //             amendmentEffectiveDateStart: new Date(),
+            //             amendmentEffectiveDateEnd: new Date(),
+            //             rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
+            //             deprecatedRateProgramIDs: [],
+            //             certifyingActuaryContacts: [
+            //                 {
+            //                     actuarialFirm: 'DELOITTE',
+            //                     name: 'Actuary Contact 1',
+            //                     titleRole: 'Test Actuary Contact 1',
+            //                     email: 'actuarycontact1@test.com',
+            //                 },
+            //             ],
+            //             addtlActuaryContacts: [
+            //                 {
+            //                     actuarialFirm: 'DELOITTE',
+            //                     name: 'Actuary Contact 1',
+            //                     titleRole: 'Test Actuary Contact 1',
+            //                     email: 'actuarycontact1@test.com',
+            //                 },
+            //             ],
+            //             actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+            //             packagesWithSharedRateCerts: []
+            //         }
+            //     }
+            // },
+            // ],
+            packageSubmissions: [],
+        }
+        const parsedContract = parseContract(contract, {
+            '438-attestation': true,
+        })
 
-//         const expectedResult = {
-//             ...formData,
-//             submissionDescription: undefined,
-//             contractType: undefined,
-//             riskBasedContract: undefined,
-//             contractDateStart: undefined,
-//             contractDateEnd: undefined,
-//             contractExecutionStatus: undefined,
-//             inLieuServicesAndSettings: undefined,
-//             modifiedBenefitsProvided: undefined,
-//             modifiedGeoAreaServed: undefined,
-//             modifiedMedicaidBeneficiaries: undefined,
-//             modifiedRiskSharingStrategy: undefined,
-//             modifiedIncentiveArrangements: undefined,
-//             modifiedWitholdAgreements: undefined,
-//             modifiedStateDirectedPayments: undefined,
-//             modifiedPassThroughPayments: undefined,
-//             modifiedPaymentsForMentalDiseaseInstitutions: undefined,
-//             modifiedMedicalLossRatioStandards: undefined,
-//             modifiedOtherFinancialPaymentIncentive: undefined,
-//             modifiedEnrollmentProcess: undefined,
-//             modifiedGrevienceAndAppeal: undefined,
-//             modifiedNetworkAdequacyStandards: undefined,
-//             modifiedLengthOfContract: undefined,
-//             modifiedNonRiskPaymentArrangements: undefined,
-//             statutoryRegulatoryAttestation: undefined,
-//             statutoryRegulatoryAttestationDescription: undefined,
-//         }
+        if (!(parsedContract instanceof Error)) {
+            throw new Error(
+                'Unexpected error: Was expecting validateContractDraftRevisionInput to return and error'
+            )
+        }
 
-//         const validatedFormData = must(
-//             validateContractDraftRevisionInput(
-//                 formData,
-//                 stateCode,
-//                 postgresStore,
-//                 {
-//                     '438-attestation': true,
-//                 }
-//             )
-//         )
-
-//         expect(validatedFormData).toEqual(expectedResult)
-//     })
-// })
+        expect(parsedContract.message).toContain(
+            `populationCoveredSchema of CHIP cannot be submissionType of CONTRACT_AND_RATES`
+        )
+        // TODO add additional cases
+    })
+})
