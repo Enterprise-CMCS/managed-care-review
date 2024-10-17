@@ -57,6 +57,7 @@ export const UploadRateQuestions = () => {
             />
         )
     }
+
     if (!rate || rate.status === 'DRAFT') {
         return <GenericErrorPage />
     }
