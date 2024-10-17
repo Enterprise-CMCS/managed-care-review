@@ -13,12 +13,14 @@ export async function findAllDocuments(
             contractSupportingDocs,
             rateSupportingDocs,
             contractQuestionDocs,
+            contractQuestionResponseDocs,
         ] = await Promise.all([
             getContractDocuments(client),
             getRateDocuments(client),
             getContractSupportingDocuments(client),
             getRateSupportingDocuments(client),
             getContractQuestionDocument(client),
+            getContractQuestionResponseDocument(client),
         ])
         if (contractDocs instanceof Error) return contractDocs
         if (rateDocs instanceof Error) return rateDocs
@@ -26,6 +28,8 @@ export async function findAllDocuments(
             return contractSupportingDocs
         if (rateSupportingDocs instanceof Error) return rateSupportingDocs
         if (contractQuestionDocs instanceof Error) return contractQuestionDocs
+        if (contractQuestionResponseDocs instanceof Error)
+            return contractQuestionResponseDocs
 
         const allDocs = [
             ...contractDocs.map((doc) => ({
@@ -45,7 +49,12 @@ export async function findAllDocuments(
                 ...doc,
                 type: 'contractQuestionDoc' as const,
             })),
+            ...contractQuestionResponseDocs.map((doc) => ({
+                ...doc,
+                type: 'contractQuestionResponseDoc' as const,
+            })),
         ]
+
         console.info(`Got some docs back: ${JSON.stringify(allDocs)}`)
         const parsedDocs = allDocs.map((doc) =>
             auditDocumentSchema.safeParse(doc)
@@ -148,6 +157,22 @@ async function getContractQuestionDocument(
         return docs.map((doc) => ({
             ...doc,
             questionID: doc.questionID,
+        }))
+    } catch (err) {
+        return err instanceof Error
+            ? err
+            : new Error('Failed to fetch contract question documents')
+    }
+}
+
+async function getContractQuestionResponseDocument(
+    prisma: PrismaClient
+): Promise<Omit<AuditDocument, 'type'>[] | Error> {
+    try {
+        const docs = await prisma.contractQuestionResponseDocument.findMany()
+        return docs.map((doc) => ({
+            ...doc,
+            questionID: doc.responseID,
         }))
     } catch (err) {
         return err instanceof Error
