@@ -104,9 +104,7 @@ async function isDocumentInS3(
     s3URL: string
 ): Promise<boolean> {
     try {
-        console.info(`Attempting to check ${s3URL}`)
         const { bucket, key } = parseS3URL(s3URL)
-        console.info(`Got back ${bucket} and ${key}`)
         const command = new HeadObjectCommand({
             Bucket: bucket,
             Key: key,
@@ -124,11 +122,8 @@ async function isDocumentInS3(
 function parseS3URL(s3URL: string): { bucket: string; key: string } {
     const url = new URL(s3URL)
     const fullPath = url.pathname.slice(1) // Remove leading '/'
-
-    // Extract the UUID part
-    const uuidPart = fullPath.split('/')[0]
-    // Construct the new key
-    const key = `allusers/${uuidPart}`
+    const uuidPart = fullPath.split('/')[0] // Extract the UUID part
+    const key = `allusers/${uuidPart}` // Construct the key
 
     return {
         bucket: url.hostname,
