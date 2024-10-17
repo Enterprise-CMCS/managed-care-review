@@ -168,14 +168,7 @@ const fetchRateWithQuestionsMockSuccess = ({
 }: {
     rate?: Rate
 }): MockedResponse<FetchRateWithQuestionsQuery> => {
-    let newRate: Rate | undefined
-   if (rate && rate.__typename === 'Rate') {
-        newRate = rate
-    } else {
-        newRate =  undefined
-    }
-
-    const rateData = newRate ? newRate : mockRateSubmittedWithQuestions('rate-123')
+    const rateData = rate ??  mockRateSubmittedWithQuestions('rate-123')
     return {
         request: {
             query: FetchRateWithQuestionsDocument,

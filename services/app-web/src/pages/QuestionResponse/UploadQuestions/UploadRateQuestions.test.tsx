@@ -15,17 +15,21 @@ import {
     fetchCurrentUserMock,
     iterableCmsUsersMockData,
     fetchRateWithQuestionsMockSuccess,
-    mockRateSubmittedWithQuestions
+    mockRateSubmittedWithQuestions,
+    mockValidCMSUser
 } from '../../../testHelpers/apolloMocks'
 import {
     createRateQuestionNetworkFailure,
     createRateQuestionSuccess,
 } from '../../../testHelpers/apolloMocks/questionResponseGQLMock'
-import { SubmissionSideNav } from '../../SubmissionSideNav'
+// import { SubmissionSideNav } from '../../SubmissionSideNav'
 import { Location } from 'react-router-dom'
 import { UploadRateQuestions } from './UploadRateQuestions'
 
 describe('UploadRateQuestions', () => {
+    afterEach(() => {
+        vitest.clearAllMocks()
+    })
     const renderUploadQuestionUI = () => {
         return (
             <Routes>
@@ -41,7 +45,7 @@ describe('UploadRateQuestions', () => {
         ({ userRole, mockUser }) => {
             it('displays file upload for correct cms division', async () => {
                 const division = 'dmco'
-                const rate =   mockRateSubmittedWithQuestions('15')
+                const rate =  mockRateSubmittedWithQuestions('15')
 
                 renderWithProviders(
                     renderUploadQuestionUI(),
@@ -49,20 +53,11 @@ describe('UploadRateQuestions', () => {
                         apolloProvider: {
                             mocks: [
                                 fetchCurrentUserMock({
-                                    user: mockUser(),
+                                    user: mockValidCMSUser(),
                                     statusCode: 200,
                                 }),
                                 fetchRateWithQuestionsMockSuccess({
-                                    rate: {
-                                        ...rate,
-                                        id: '15',
-                                    },
-                                }),
-                                fetchRateWithQuestionsMockSuccess({
-                                    rate: {
-                                        ...rate,
-                                        id: '15',
-                                    },
+                                    rate
                                 }),
                             ],
                         },
@@ -104,14 +99,11 @@ describe('UploadRateQuestions', () => {
                         apolloProvider: {
                             mocks: [
                                 fetchCurrentUserMock({
-                                    user: mockUser(),
+                                    user: mockValidCMSUser(),
                                     statusCode: 200,
                                 }),
                                 fetchRateWithQuestionsMockSuccess({
-                                    rate: {
-                                        ...rate,
-                                        id: '15',
-                                    },
+                                    rate,
                                 }),
                             ],
                         },
@@ -159,7 +151,7 @@ describe('UploadRateQuestions', () => {
                         apolloProvider: {
                             mocks: [
                                 fetchCurrentUserMock({
-                                    user: mockUser(),
+                                    user: mockValidCMSUser(),
                                     statusCode: 200,
                                 }),
                                 fetchRateWithQuestionsMockSuccess({
@@ -230,7 +222,7 @@ describe('UploadRateQuestions', () => {
                         apolloProvider: {
                             mocks: [
                                 fetchCurrentUserMock({
-                                    user: mockUser(),
+                                    user: mockValidCMSUser(),
                                     statusCode: 200,
                                 }),
                                 fetchRateWithQuestionsMockSuccess({
@@ -274,7 +266,7 @@ describe('UploadRateQuestions', () => {
                         apolloProvider: {
                             mocks: [
                                 fetchCurrentUserMock({
-                                    user: mockUser(),
+                                    user: mockValidCMSUser(),
                                     statusCode: 200,
                                 }),
                                 fetchRateWithQuestionsMockSuccess({
@@ -329,7 +321,7 @@ describe('UploadRateQuestions', () => {
                         apolloProvider: {
                             mocks: [
                                 fetchCurrentUserMock({
-                                    user: mockUser(),
+                                    user: mockValidCMSUser(),
                                     statusCode: 200,
                                 }),
                                 fetchRateWithQuestionsMockSuccess({
@@ -396,7 +388,7 @@ describe('UploadRateQuestions', () => {
                         apolloProvider: {
                             mocks: [
                                 fetchCurrentUserMock({
-                                    user: mockUser(),
+                                    user: mockValidCMSUser(),
                                     statusCode: 200,
                                 }),
                                 fetchRateWithQuestionsMockSuccess({
@@ -439,6 +431,7 @@ describe('UploadRateQuestions', () => {
                     screen.getByText("We're having trouble loading this page.")
                 ).toBeDefined()
             })
+
             describe('errors', () => {
                 it('shows generic error if submission is a draft', async () => {
                    const rate = mockRateSubmittedWithQuestions('15')
@@ -448,7 +441,7 @@ describe('UploadRateQuestions', () => {
                             apolloProvider: {
                                 mocks: [
                                     fetchCurrentUserMock({
-                                        user: mockUser(),
+                                        user: mockValidCMSUser(),
                                         statusCode: 200,
                                     }),
                                     fetchRateWithQuestionsMockSuccess({

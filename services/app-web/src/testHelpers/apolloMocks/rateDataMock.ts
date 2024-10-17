@@ -343,11 +343,24 @@ function mockRateSubmittedWithQuestions(
     partial?: Partial<RateRevision>
 ): Rate {
 
-    const rateRev: RateRevision = {
+    const rateRev =  (): RateRevision => {
+        return {
             id: '1234',
-            rateID: '123',
+            rateID: rateID??  '123',
             createdAt: new Date('01/01/2023'),
             updatedAt: new Date('01/01/2023'),
+            __typename: 'RateRevision',
+            unlockInfo: null,
+            submitInfo: {
+                updatedAt: '2024-12-18T16:54:39.173Z',
+                updatedBy: {
+                    email: 'example@state.com',
+                    role: 'STATE_USER',
+                    givenName: 'John',
+                    familyName: 'Vila'
+                },
+                updatedReason: 'contract submit'
+            },
             formData: {
                 rateCertificationName:'rate cert',
                 rateType: 'AMENDMENT',
@@ -386,38 +399,44 @@ function mockRateSubmittedWithQuestions(
                 deprecatedRateProgramIDs: [],
                 certifyingActuaryContacts: [
                     {
+                        id: 'uuid1',
                         actuarialFirm: 'DELOITTE',
                         name: 'Actuary Contact 1',
                         titleRole: 'Test Actuary Contact 1',
                         email: 'actuarycontact1@test.com',
+                        actuarialFirmOther: null
                     },
                 ],
                 addtlActuaryContacts: [
                     {
+                        id: 'uuid2',
                         actuarialFirm: 'DELOITTE',
                         name: 'Actuary Contact 1',
                         titleRole: 'Test Actuary Contact 1',
                         email: 'actuarycontact1@test.com',
+                        actuarialFirmOther: null
                     },
                 ],
                 actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
                 packagesWithSharedRateCerts: [],
             },
             ...partial
-    }
+    }}
 
     return {
         status: 'SUBMITTED',
         __typename: 'Rate',
         createdAt: new Date(),
         updatedAt: new Date(),
-        id: 'test-abc-123',
+        id: rateID?? '123',
         stateCode: 'MN',
         state: mockMNState(),
         stateNumber: 5,
         parentContractID: 'parent-contract-id',
         initiallySubmittedAt: '2024-12-18T16:54:39.173Z',
-        revisions: [rateRev],
+        revisions: [rateRev()],
+        draftRevision: null,
+        withdrawInfo: null,
         packageSubmissions: [{
             cause: 'RATE_SUBMISSION',
             __typename: 'RatePackageSubmission',
@@ -433,6 +452,7 @@ function mockRateSubmittedWithQuestions(
             },
             submittedRevisions: [],
             contractRevisions: [{
+                __typename: 'ContractRevision',
                 contractName: 'MCR-MN-0005-SNBC',
                 createdAt: new Date('01/01/2024'),
                 updatedAt:  '2024-12-18T16:54:39.173Z',
@@ -448,7 +468,7 @@ function mockRateSubmittedWithQuestions(
                     },
                     updatedReason: 'contract submit'
                 },
-                unlockInfo: undefined,
+                unlockInfo: null,
                 formData: {
                     programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
                     populationCovered: 'MEDICAID',
@@ -508,7 +528,7 @@ function mockRateSubmittedWithQuestions(
                     statutoryRegulatoryAttestationDescription: "everything meets regulatory attestation"
                 }
             }],
-            rateRevision: rateRev,
+            rateRevision: rateRev(),
 
         }],
         questions: {
@@ -522,9 +542,7 @@ function mockRateSubmittedWithQuestions(
                             id: 'dmco-question-1-id',
                             rateID,
                             createdAt: new Date('2022-12-15'),
-                            addedBy: mockValidCMSUser({
-                                divisionAssignment: undefined,
-                            }) as CmsUser,
+                            addedBy: mockValidCMSUser(),
                             documents: [
                                 {
                                     s3URL: 's3://bucketname/key/dmco-question-1-document-1',
