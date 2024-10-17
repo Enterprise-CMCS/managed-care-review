@@ -14,6 +14,7 @@ import type {
     CMSUsersUnionType,
     RateQuestionType,
     CreateRateQuestionInputType,
+    AuditDocument,
 } from '../domain-models'
 import { findPrograms, findStatePrograms } from '../postgres'
 import type { InsertUserArgsType } from './user'
@@ -66,6 +67,8 @@ import { updateDraftContractRates } from './contractAndRates/updateDraftContract
 import type { UpdateDraftContractRatesArgsType } from './contractAndRates/updateDraftContractRates'
 import { updateStateAssignedUsers } from './state/updateStateAssignedUsers'
 import { findStateAssignedUsers } from './state/findStateAssignedUsers'
+
+import { findAllDocuments } from './documents'
 
 type Store = {
     findPrograms: (
@@ -185,6 +188,8 @@ type Store = {
     ) => Promise<UnlockedContractType | Error>
 
     unlockRate: (args: UnlockRateArgsType) => Promise<RateType | Error>
+
+    findAllDocuments: () => Promise<AuditDocument[] | Error>
 }
 
 function NewPostgresStore(client: PrismaClient): Store {
@@ -259,6 +264,8 @@ function NewPostgresStore(client: PrismaClient): Store {
         submitRate: (args) => submitRate(client, args),
         unlockContract: (args) => unlockContract(client, args),
         unlockRate: (args) => unlockRate(client, args),
+
+        findAllDocuments: () => findAllDocuments(client),
     }
 }
 
