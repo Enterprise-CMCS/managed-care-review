@@ -14,7 +14,7 @@ import { z } from 'zod'
 import type { Store } from '../../postgres'
 import { contractSchema } from './contractTypes'
 import type { ContractType } from './contractTypes'
-import { contractRevisionSchema } from './revisionTypes'
+import { contractRevisionSchema, rateRevisionSchema } from './revisionTypes'
 import { rateWithoutDraftContractsSchema } from './baseContractRateTypes'
 const updateDraftContractFormDataSchema = contractFormDataSchema.extend({
     contractType: preprocessNulls(contractTypeSchema.optional()),
@@ -121,35 +121,41 @@ const parseContract = (
             }),
             draftRates: z.array(
                 rateWithoutDraftContractsSchema.extend({
-                    formData: rateFormDataSchema.superRefine(
-                        (
-                            {
-                                rateType,
-                                amendmentEffectiveDateEnd,
-                                amendmentEffectiveDateStart,
-                            },
-                            ctx
-                        ) => {
-                            if (rateType === 'AMENDMENT') {
-                                if (!amendmentEffectiveDateEnd) {
-                                    ctx.addIssue({
-                                        code: z.ZodIssueCode.custom,
-                                        message:
-                                            'amendmentEffectiveDateEnd is required if rateType is AMENDMENT',
-                                        path: ['amendmentEffectiveDateEnd'],
-                                    })
-                                }
-                                if (!amendmentEffectiveDateStart) {
-                                    ctx.addIssue({
-                                        code: z.ZodIssueCode.custom,
-                                        message:
-                                            'amendmentEffectiveDateStart is required if rateType is AMENDMENT',
-                                        path: ['amendmentEffectiveDateStart'],
-                                    })
+                    draftRevision: rateRevisionSchema.extend({
+                        //     formData: rateFormDataSchema
+                        // })
+                        formData: rateFormDataSchema.superRefine(
+                            (
+                                {
+                                    rateType,
+                                    amendmentEffectiveDateEnd,
+                                    amendmentEffectiveDateStart,
+                                },
+                                ctx
+                            ) => {
+                                if (rateType === 'AMENDMENT') {
+                                    if (!amendmentEffectiveDateEnd) {
+                                        ctx.addIssue({
+                                            code: z.ZodIssueCode.custom,
+                                            message:
+                                                'amendmentEffectiveDateEnd is required if rateType is AMENDMENT',
+                                            path: ['amendmentEffectiveDateEnd'],
+                                        })
+                                    }
+                                    if (!amendmentEffectiveDateStart) {
+                                        ctx.addIssue({
+                                            code: z.ZodIssueCode.custom,
+                                            message:
+                                                'amendmentEffectiveDateStart is required if rateType is AMENDMENT',
+                                            path: [
+                                                'amendmentEffectiveDateStart',
+                                            ],
+                                        })
+                                    }
                                 }
                             }
-                        }
-                    ),
+                        ),
+                    }),
                 })
             ),
         })

@@ -4,11 +4,7 @@ import type { EmailParameterStore } from '../../parameterStore'
 import type { Store } from '../../postgres'
 import { NotFoundError } from '../../postgres'
 import { logError, logSuccess } from '../../logger'
-import {
-    isStateUser,
-    packageStatus,
-    contractSubmitters,
-} from '../../domain-models'
+import { isStateUser, contractSubmitters } from '../../domain-models'
 
 import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
 import { GraphQLError } from 'graphql'
@@ -19,10 +15,9 @@ import {
 } from '../attributeHelper'
 import type { MutationResolvers, State } from '../../gen/gqlServer'
 import { parseContract } from '../../domain-models/contractAndRates/dataValidatorHelpers'
-import { UpdateInfoType, PackageStatusType } from '../../domain-models'
-import { UpdateInformation } from '../../gen/gqlClient'
-import { UpdateDraftContractRatesArgsType } from '../../postgres/contractAndRates/updateDraftContractRates'
-import { StateCodeType } from '../../common-code/healthPlanFormDataType'
+import type { UpdateInfoType, PackageStatusType } from '../../domain-models'
+import type { UpdateDraftContractRatesArgsType } from '../../postgres/contractAndRates/updateDraftContractRates'
+import type { StateCodeType } from '../../common-code/healthPlanFormDataType'
 import type { Span } from '@opentelemetry/api'
 
 const validateStatusAndUpdateInfo = (
@@ -57,7 +52,7 @@ export function submitContract(
 ): MutationResolvers['submitContract'] {
     return async (parent, { input }, context) => {
         const featureFlags = await launchDarkly.allFlags(context)
-        const readStateAnalystsFromDBFlag = 
+        const readStateAnalystsFromDBFlag =
             featureFlags?.['read-write-state-assignments']
 
         const { user, ctx, tracer } = context
@@ -143,8 +138,13 @@ export function submitContract(
         }
         const initialFormData = contractWithHistory.draftRevision.formData
         const contractRevisionID = contractWithHistory.draftRevision.id
-
-        const parsedContract = parseContract(contractWithHistory, featureFlags)
+        const draftRatesWithoutLinkedRates =
+            contractWithHistory.draftRates?.filter((rate) => {
+                return rate.draftRevision?.formData
+            })
+        const contractToParse = contractWithHistory
+        contractToParse.draftRates = draftRatesWithoutLinkedRates
+        const parsedContract = parseContract(contractToParse, featureFlags)
         if (parsedContract instanceof Error) {
             const errMessage = parsedContract.message
             logError('submitContract', errMessage)
@@ -153,17 +153,19 @@ export function submitContract(
                 message: parsedContract.message,
             })
         }
+        // add all rates (including any linked rates) back in
+        parsedContract.draftRates = contractWithHistory.draftRates
 
         // If this contract is being submitted as CONTRACT_ONLY but still has associations with rates
         // we need to prune those rates at submission time to make the submission clean
         if (
-            contractWithHistory.draftRevision.formData.submissionType ===
+            parsedContract.draftRevision?.formData.submissionType ===
                 'CONTRACT_ONLY' &&
-            contractWithHistory.draftRates &&
-            contractWithHistory.draftRates.length > 0
+            parsedContract.draftRates &&
+            parsedContract.draftRates.length > 0
         ) {
             const rateUpdates: UpdateDraftContractRatesArgsType = {
-                contractID: contractWithHistory.id,
+                contractID: parsedContract.id,
                 rateUpdates: {
                     create: [],
                     update: [],
@@ -173,12 +175,12 @@ export function submitContract(
                 },
             }
 
-            for (const draftRate of contractWithHistory.draftRates) {
+            for (const draftRate of parsedContract.draftRates) {
                 if (draftRate.revisions.length === 0) {
-                    if (draftRate.parentContractID !== contractWithHistory.id) {
+                    if (draftRate.parentContractID !== parsedContract.id) {
                         console.error(
                             'This never submitted rate is not parented to this contract',
-                            contractWithHistory.id,
+                            parsedContract.id,
                             draftRate.id
                         )
                         throw new Error(
@@ -213,20 +215,24 @@ export function submitContract(
                 ...initialFormData,
                 managedCareEntities: initialFormData.managedCareEntities,
                 stateContacts: initialFormData.stateContacts,
-                supportingDocuments: initialFormData.supportingDocuments.map((doc) => {
-                    return {
-                        name: doc.name,
-                        s3URL: doc.s3URL,
-                        sha256: doc.sha256,
+                supportingDocuments: initialFormData.supportingDocuments.map(
+                    (doc) => {
+                        return {
+                            name: doc.name,
+                            s3URL: doc.s3URL,
+                            sha256: doc.sha256,
+                        }
                     }
-                }),
-                contractDocuments: initialFormData.contractDocuments.map((doc) => {
-                    return {
-                        name: doc.name,
-                        s3URL: doc.s3URL,
-                        sha256: doc.sha256,
+                ),
+                contractDocuments: initialFormData.contractDocuments.map(
+                    (doc) => {
+                        return {
+                            name: doc.name,
+                            s3URL: doc.s3URL,
+                            sha256: doc.sha256,
+                        }
                     }
-                }),
+                ),
             },
         })
         if (updateResult instanceof Error) {
@@ -247,7 +253,7 @@ export function submitContract(
             )
         }
         // From this point forward we use updateResult instead of contractWithHistory because it is now old data.
-        
+
         // then submit the contract!
         const submitContractResult = await store.submitContract({
             contractID: updateResult.id,
@@ -315,7 +321,9 @@ export function submitContract(
         // Get submitter email from every contract submitted revision.
         const submitterEmails = contractSubmitters(submitContractResult)
 
-        const statePrograms = store.findStatePrograms(submitContractResult.stateCode)
+        const statePrograms = store.findStatePrograms(
+            submitContractResult.stateCode
+        )
 
         if (statePrograms instanceof Error) {
             logError('findStatePrograms', statePrograms.message)
@@ -330,7 +338,7 @@ export function submitContract(
 
         let cmsContractEmailResult
         let stateContractEmailResult
-        
+
         if (status === 'RESUBMITTED') {
             cmsContractEmailResult = await emailer.sendResubmittedCMSEmail(
                 updateResult,
