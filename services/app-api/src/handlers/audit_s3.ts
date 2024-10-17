@@ -79,7 +79,7 @@ const main: Handler = async (): Promise<APIGatewayProxyResultV2> => {
 
     const success: APIGatewayProxyResultV2 = {
         statusCode: 200,
-        body: JSON.stringify('testing success'),
+        body: JSON.stringify(missingOrErrorDocuments),
         headers: {
             'Access-Control-Allow-Origin': '*',
             'Access-Control-Allow-Credentials': true,
