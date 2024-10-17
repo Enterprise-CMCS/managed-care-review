@@ -71,6 +71,9 @@ const main: Handler = async (): Promise<APIGatewayProxyResultV2> => {
         }
     }
     console.info(
+        `Missing ${missingOrErrorDocuments.length} of ${docResult.length} documents`
+    )
+    console.info(
         `These documents could not be retreived from s3: ${JSON.stringify(missingOrErrorDocuments)}`
     )
 
