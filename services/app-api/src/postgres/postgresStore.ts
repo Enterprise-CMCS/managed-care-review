@@ -14,6 +14,7 @@ import type {
     CMSUsersUnionType,
     RateQuestionType,
     CreateRateQuestionInputType,
+    AuditDocument,
 } from '../domain-models'
 import { findPrograms, findStatePrograms } from '../postgres'
 import type { InsertUserArgsType } from './user'
@@ -188,7 +189,7 @@ type Store = {
 
     unlockRate: (args: UnlockRateArgsType) => Promise<RateType | Error>
 
-    findAllDocuments: () => Promise<void | Error>
+    findAllDocuments: () => Promise<AuditDocument[] | Error>
 }
 
 function NewPostgresStore(client: PrismaClient): Store {
