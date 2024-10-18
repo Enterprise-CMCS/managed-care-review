@@ -27,7 +27,7 @@ import {
 import { SubmissionSideNav } from '../../SubmissionSideNav'
 import { Location } from 'react-router-dom'
 
-describe('UploadRateQuestions', () => {
+describe('UploadContractQuestions', () => {
     describe.each(iterableCmsUsersMockData)(
         '$userRole UploadRateQuestions tests',
         ({ userRole, mockUser }) => {
