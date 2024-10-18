@@ -26,7 +26,7 @@ import {
     isContractWithProvisions,
     isCHIPOnly,
     generateApplicableProvisionsList,
-} from '../../common-code/contractAndRates/contractData'
+} from '../../common-code/contractAndRates/'
 import type { GeneralizedModifiedProvisions } from '../../common-code/contractAndRates/ModifiedProvisions'
 
 const validateStatusAndUpdateInfo = (

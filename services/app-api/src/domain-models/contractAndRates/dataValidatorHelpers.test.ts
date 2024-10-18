@@ -10,6 +10,7 @@ import type { ContractDraftRevisionFormDataInput } from '../../gen/gqlServer'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 import { NewPostgresStore } from '../../postgres'
 import type { ContractType } from './contractTypes'
+import { s3DlUrl } from '../../testHelpers/documentHelpers'
 
 describe('validateContractDraftRevisionInput', () => {
     it('Validates input form data and removes statutoryRegulatoryAttestationDescription', async () => {
@@ -180,8 +181,6 @@ describe('validateContractDraftRevisionInput', () => {
         )
     })
 })
-const s3DlUrl =
-    'https://fake-bucket.s3.amazonaws.com/file.pdf?AWSAccessKeyId=AKIAIOSFODNN7EXAMPLE&Expires=1719564800&Signature=abc123def456ghijk' //pragma: allowlist secret
 
 describe('parseContract', () => {
     it('success if valid form data', async () => {
