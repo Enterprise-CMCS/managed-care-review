@@ -4,8 +4,6 @@ import {
     getSESEmailParams,
     newContractCMSEmail,
     newContractStateEmail,
-    newPackageCMSEmail,
-    newPackageStateEmail,
     unlockContractCMSEmail,
     unlockContractStateEmail,
     unlockPackageCMSEmail,
@@ -17,10 +15,7 @@ import {
     sendQuestionResponseCMSEmail,
     sendQuestionResponseStateEmail,
 } from './'
-import type {
-    LockedHealthPlanFormDataType,
-    UnlockedHealthPlanFormDataType,
-} from '../common-code/healthPlanFormDataType'
+import type { UnlockedHealthPlanFormDataType } from '../common-code/healthPlanFormDataType'
 import type {
     UpdateInfoType,
     ProgramType,
@@ -84,16 +79,6 @@ type Emailer = {
     ) => Promise<void | Error>
     sendStateNewContract: (
         contract: ContractType,
-        submitterEmails: string[],
-        statePrograms: ProgramType[]
-    ) => Promise<void | Error>
-    sendCMSNewPackage: (
-        formData: LockedHealthPlanFormDataType,
-        stateAnalystsEmails: StateAnalystsEmails,
-        statePrograms: ProgramType[]
-    ) => Promise<void | Error>
-    sendStateNewPackage: (
-        formData: LockedHealthPlanFormDataType,
         submitterEmails: string[],
         statePrograms: ProgramType[]
     ) => Promise<void | Error>
@@ -199,40 +184,6 @@ function emailer(
         ) {
             const emailData = await newContractStateEmail(
                 contract,
-                submitterEmails,
-                config,
-                statePrograms
-            )
-            if (emailData instanceof Error) {
-                return emailData
-            } else {
-                return await this.sendEmail(emailData)
-            }
-        },
-        sendCMSNewPackage: async function (
-            formData,
-            stateAnalystsEmails,
-            statePrograms
-        ) {
-            const emailData = await newPackageCMSEmail(
-                formData,
-                config,
-                stateAnalystsEmails,
-                statePrograms
-            )
-            if (emailData instanceof Error) {
-                return emailData
-            } else {
-                return await this.sendEmail(emailData)
-            }
-        },
-        sendStateNewPackage: async function (
-            formData,
-            submitterEmails,
-            statePrograms
-        ) {
-            const emailData = await newPackageStateEmail(
-                formData,
                 submitterEmails,
                 config,
                 statePrograms

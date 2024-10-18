@@ -4,7 +4,7 @@ exports[`renders overall email as expected 1`] = `
 "Managed Care submission: <b>MCR-MN-0004-SNBC</b> was received from <b>MN</b>.
 <br /><br />
 <b>Submission type</b>: Contract action and rate certification<br />
-<b>Contract amendment effective dates</b>: 12/31/2021 to 10/08/2024<br />
+<b>Contract amendment effective dates</b>: 12/31/2021 to 10/18/2024<br />
 <br />
 <b>Rate name</b>: MCR-MN-0003-MSHO-RATE-20210101-20220101-CERTIFICATION-20210102<br />
 <b>Rating period</b>: 01/01/2021 to 01/01/2022<br />
