@@ -189,67 +189,69 @@ export const Settings = (): React.ReactElement => {
     }
 
     return (
-        <GridContainer className={styles.outletContainer}>
-            <div className={styles.verticalNavContainer}>
-                <div className={styles.backLinkContainer}>
-                    <NavLinkWithLogging
-                        to={{
-                            pathname: RoutesRecord.DASHBOARD_SUBMISSIONS,
-                        }}
-                        event_name="back_button"
-                    >
-                        <Icon.ArrowBack />
-                        <span>&nbsp;Back to dashboard</span>
-                    </NavLinkWithLogging>
-                </div>
-                <SideNav
-                    items={[
+        <div className={styles.background}>
+            <GridContainer className={styles.outletContainer}>
+                <div className={styles.verticalNavContainer}>
+                    <div className={styles.backLinkContainer}>
                         <NavLinkWithLogging
-                            to={RoutesRecord.STATE_ASSIGNMENTS}
-                            className={isSelectedLink(
-                                RoutesRecord.STATE_ASSIGNMENTS
-                            )}
+                            to={{
+                                pathname: RoutesRecord.DASHBOARD_SUBMISSIONS,
+                            }}
+                            event_name="back_button"
                         >
-                            State assignments
-                        </NavLinkWithLogging>,
-                        <NavLinkWithLogging
-                            to={RoutesRecord.DIVISION_ASSIGNMENTS}
-                            className={isSelectedLink(
-                                RoutesRecord.DIVISION_ASSIGNMENTS
-                            )}
-                        >
-                            Division assignments
-                        </NavLinkWithLogging>,
-                        <NavLinkWithLogging
-                            to={RoutesRecord.AUTOMATED_EMAILS}
-                            className={isSelectedLink(
-                                RoutesRecord.AUTOMATED_EMAILS
-                            )}
-                        >
-                            Automated emails
-                        </NavLinkWithLogging>,
-                        <NavLinkWithLogging
-                            to={RoutesRecord.SUPPORT_EMAILS}
-                            className={isSelectedLink(
-                                RoutesRecord.SUPPORT_EMAILS
-                            )}
-                        >
-                            Support emails
-                        </NavLinkWithLogging>,
-                    ]}
-                />
-            </div>
-            <Grid className={styles.tableContainer}>
-                {showConfirmationBanner && (
-                    <AssignedStaffUpdateBanner
-                        state={lastUpdatedAnalysts.state}
-                        added={lastUpdatedAnalysts.added}
-                        removed={lastUpdatedAnalysts.removed}
+                            <Icon.ArrowBack />
+                            <span>&nbsp;Back to dashboard</span>
+                        </NavLinkWithLogging>
+                    </div>
+                    <SideNav
+                        items={[
+                            <NavLinkWithLogging
+                                to={RoutesRecord.STATE_ASSIGNMENTS}
+                                className={isSelectedLink(
+                                    RoutesRecord.STATE_ASSIGNMENTS
+                                )}
+                            >
+                                State assignments
+                            </NavLinkWithLogging>,
+                            <NavLinkWithLogging
+                                to={RoutesRecord.DIVISION_ASSIGNMENTS}
+                                className={isSelectedLink(
+                                    RoutesRecord.DIVISION_ASSIGNMENTS
+                                )}
+                            >
+                                Division assignments
+                            </NavLinkWithLogging>,
+                            <NavLinkWithLogging
+                                to={RoutesRecord.AUTOMATED_EMAILS}
+                                className={isSelectedLink(
+                                    RoutesRecord.AUTOMATED_EMAILS
+                                )}
+                            >
+                                Automated emails
+                            </NavLinkWithLogging>,
+                            <NavLinkWithLogging
+                                to={RoutesRecord.SUPPORT_EMAILS}
+                                className={isSelectedLink(
+                                    RoutesRecord.SUPPORT_EMAILS
+                                )}
+                            >
+                                Support emails
+                            </NavLinkWithLogging>,
+                        ]}
                     />
-                )}
-                <Outlet context={context} />
-            </Grid>
-            <TestMonitoring />
-        </GridContainer>
+                </div>
+                <Grid className={styles.tableContainer}>
+                    {showConfirmationBanner && (
+                        <AssignedStaffUpdateBanner
+                            state={lastUpdatedAnalysts.state}
+                            added={lastUpdatedAnalysts.added}
+                            removed={lastUpdatedAnalysts.removed}
+                        />
+                    )}
+                    <Outlet context={context} />
+                </Grid>
+                <TestMonitoring />
+            </GridContainer>
+        </div>
     )
 }

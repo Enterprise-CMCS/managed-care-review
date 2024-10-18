@@ -11,7 +11,7 @@
     padding: 2rem 0;
 }
 
-.questionSection {
+%questionSection {
     margin: uswds.units(2) auto;
     background: custom.$mcr-foundation-white;
     padding: uswds.units(4) uswds.units(4);
@@ -20,12 +20,27 @@
     width: 100%;
     @include uswds.u-radius('md');
 
+    h2 {
+        font-weight: normal;
+    }
+
     h3 {
         display: flex;
         justify-content: space-between;
         align-items: center;
         padding: uswds.units(2) 0;
         @include uswds.u-text('normal');
+    }
+}
+
+.questionSection {
+    @extend %questionSection;
+}
+
+.yourQuestionSection {
+    @extend %questionSection;
+    h2 {
+        font-weight: bold;
     }
 }
 

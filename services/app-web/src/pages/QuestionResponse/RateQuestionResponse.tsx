@@ -4,9 +4,9 @@ import {
     useFetchRateWithQuestionsQuery,
     Division,
 } from '../../gen/gqlClient'
-import { useParams } from 'react-router-dom'
+import { useParams, matchPath, useLocation } from 'react-router-dom'
 import { GridContainer } from '@trussworks/react-uswds'
-import { Loading, SectionHeader } from '../../components'
+import { Loading, NavLinkWithLogging, SectionHeader } from '../../components'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import { hasCMSUserPermissions } from '../../gqlHelpers'
 import { getUserDivision } from './QuestionResponseHelpers'
@@ -17,16 +17,24 @@ import { ApolloError } from '@apollo/client'
 import { handleApolloError } from '../../gqlHelpers/apolloErrors'
 import { Error404 } from '../Errors/Error404Page'
 import { recordJSException } from '../../otelHelpers'
+import { RoutesRecord } from '../../constants'
 
 export const RateQuestionResponse = () => {
-    const { rateID } = useParams() as { rateID: string }
+    const { id } = useParams() as { id: string }
     const { loggedInUser } = useAuth()
+    const { pathname } = useLocation()
+    const hasCMSPermissions = hasCMSUserPermissions(loggedInUser)
     let division: Division | undefined = undefined
+
+    // Check current path, use rateID if we are viewing as state user since path is nested in summary path.
+    const fetchRateID =
+        matchPath(RoutesRecord.SUBMISSIONS_RATE_QUESTIONS_AND_ANSWERS, pathname)
+            ?.params.rateID ?? id
 
     const { data, loading, error } = useFetchRateWithQuestionsQuery({
         variables: {
             input: {
-                rateID,
+                rateID: fetchRateID,
             },
         },
         fetchPolicy: 'network-only',
@@ -56,13 +64,11 @@ export const RateQuestionResponse = () => {
     }
 
     const rate = data?.fetchRate.rate
-    const rateRev = rate?.packageSubmissions?.[0].rateRevision
+    const rateRev = rate?.packageSubmissions?.[0]?.rateRevision
 
     if (rate?.status === 'DRAFT' || !loggedInUser || !rateRev) {
         return <GenericErrorPage />
     }
-
-    const hasCMSPermissions = hasCMSUserPermissions(loggedInUser)
 
     if (hasCMSPermissions) {
         division = getUserDivision(loggedInUser as CmsUser)
@@ -84,18 +90,54 @@ export const RateQuestionResponse = () => {
                         }
                     />
                 )}
-                <SectionHeader
-                    header={`Rate questions: ${rateRev.formData.rateCertificationName}`}
-                    hideBorder
-                />
-                <section key={division} className={styles.questionSection}>
-                    <h2 className={styles.outstandingQuestionsHeader}>
-                        Outstanding questions
-                    </h2>
-                    <div>
-                        <p>No questions have been submitted yet.</p>
-                    </div>
-                </section>
+                {hasCMSPermissions ? (
+                    <>
+                        <section
+                            key={division}
+                            className={styles.yourQuestionSection}
+                        >
+                            <SectionHeader header="Your division's questions">
+                                {hasCMSPermissions && division && (
+                                    <NavLinkWithLogging
+                                        className="usa-button"
+                                        variant="unstyled"
+                                        to={`./`}
+                                    >
+                                        Add questions
+                                    </NavLinkWithLogging>
+                                )}
+                            </SectionHeader>
+                            <div>
+                                <p>No questions have been submitted yet.</p>
+                            </div>
+                        </section>
+                        <section
+                            key={division}
+                            className={styles.questionSection}
+                        >
+                            <SectionHeader header="Other division's questions" />
+                            <div>
+                                <p>No questions have been submitted yet.</p>
+                            </div>
+                        </section>
+                    </>
+                ) : (
+                    <>
+                        <SectionHeader
+                            header={`Rate questions: ${rateRev.formData.rateCertificationName}`}
+                            hideBorder
+                        />
+                        <section
+                            key={division}
+                            className={styles.questionSection}
+                        >
+                            <SectionHeader header="Outstanding questions" />
+                            <div>
+                                <p>No questions have been submitted yet.</p>
+                            </div>
+                        </section>
+                    </>
+                )}
             </GridContainer>
         </div>
     )
