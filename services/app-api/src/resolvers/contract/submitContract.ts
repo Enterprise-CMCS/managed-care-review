@@ -188,7 +188,12 @@ export function submitContract(
 
         const contractToParse = contractWithHistory
         contractToParse.draftRates = draftRatesWithoutLinkedRates
-        const parsedContract = parseContract(contractToParse, featureFlags)
+        const parsedContract = parseContract(
+            contractToParse,
+            contractWithHistory.stateCode,
+            store,
+            featureFlags
+        )
         if (parsedContract instanceof Error) {
             const errMessage = parsedContract.message
             logError('submitContract', errMessage)

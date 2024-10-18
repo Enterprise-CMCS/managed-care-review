@@ -73,6 +73,18 @@ const validatePopulationCovered = (
         }
     })
 
+const validateAttestation = (featureFlags?: FeatureFlagSettings) => {
+    return z.string().superRefine((attestationDescription, ctx) => {
+        if (featureFlags?.['438-attestation'] && !attestationDescription) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message:
+                    'statutoryRegulatoryAttestationDescription is required when  438-attestation feature flag is on',
+            })
+        }
+    })
+}
+
 const validateContractDraftRevisionInput = (
     formData: ContractDraftRevisionFormDataInput,
     stateCode: string,
@@ -103,6 +115,8 @@ const validateContractDraftRevisionInput = (
 
 const parseContract = (
     contract: ContractType,
+    stateCode: string,
+    store: Store,
     featureFlags?: FeatureFlagSettings
 ): ContractType | Error => {
     // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
@@ -112,57 +126,52 @@ const parseContract = (
             draftRevision: contractRevisionSchema.extend({
                 formData: contractFormDataSchema.extend({
                     contractDocuments: z.array(documentSchema).min(1),
-                    statutoryRegulatoryAttestationDescription: z
-                        .string()
-                        .superRefine((attestationDescription, ctx) => {
-                            if (
-                                featureFlags?.['438-attestation'] &&
-                                !attestationDescription
-                            ) {
-                                ctx.addIssue({
-                                    code: z.ZodIssueCode.custom,
-                                    message:
-                                        'statutoryRegulatoryAttestationDescription is required when  438-attestation feature flag is on',
-                                })
-                            }
-                        }),
+                    statutoryRegulatoryAttestationDescription:
+                        validateAttestation(featureFlags),
+                    programIDs: validateProgramIDs(stateCode, store),
                     populationCovered: validatePopulationCovered(formData),
                 }),
             }),
             draftRates: z.array(
                 rateWithoutDraftContractsSchema.extend({
                     draftRevision: rateRevisionSchema.extend({
-                        formData: rateFormDataSchema.superRefine(
-                            (
-                                {
-                                    rateType,
-                                    amendmentEffectiveDateEnd,
-                                    amendmentEffectiveDateStart,
-                                },
-                                ctx
-                            ) => {
-                                if (rateType === 'AMENDMENT') {
-                                    if (!amendmentEffectiveDateEnd) {
-                                        ctx.addIssue({
-                                            code: z.ZodIssueCode.custom,
-                                            message:
-                                                'amendmentEffectiveDateEnd is required if rateType is AMENDMENT',
-                                            path: ['amendmentEffectiveDateEnd'],
-                                        })
-                                    }
-                                    if (!amendmentEffectiveDateStart) {
-                                        ctx.addIssue({
-                                            code: z.ZodIssueCode.custom,
-                                            message:
-                                                'amendmentEffectiveDateStart is required if rateType is AMENDMENT',
-                                            path: [
-                                                'amendmentEffectiveDateStart',
-                                            ],
-                                        })
+                        formData: rateFormDataSchema
+                            .extend({
+                                rateDocuments: z.array(documentSchema).min(1),
+                            })
+                            .superRefine(
+                                (
+                                    {
+                                        rateType,
+                                        amendmentEffectiveDateEnd,
+                                        amendmentEffectiveDateStart,
+                                    },
+                                    ctx
+                                ) => {
+                                    if (rateType === 'AMENDMENT') {
+                                        if (!amendmentEffectiveDateEnd) {
+                                            ctx.addIssue({
+                                                code: z.ZodIssueCode.custom,
+                                                message:
+                                                    'amendmentEffectiveDateEnd is required if rateType is AMENDMENT',
+                                                path: [
+                                                    'amendmentEffectiveDateEnd',
+                                                ],
+                                            })
+                                        }
+                                        if (!amendmentEffectiveDateStart) {
+                                            ctx.addIssue({
+                                                code: z.ZodIssueCode.custom,
+                                                message:
+                                                    'amendmentEffectiveDateStart is required if rateType is AMENDMENT',
+                                                path: [
+                                                    'amendmentEffectiveDateStart',
+                                                ],
+                                            })
+                                        }
                                     }
                                 }
-                            }
-                        ),
+                            ),
                     }),
                 })
             ),
