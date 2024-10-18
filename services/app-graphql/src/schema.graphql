@@ -56,18 +56,6 @@ type Query {
     indexUsers: IndexUsersPayload!
 
     """
-    indexQuestions returns three arrays of Questions for the given HealthPlanPackage, one array
-    for each division that asks questions.
-
-    It can be called by CMS or State Users
-
-    Errors:
-    - ForbiddenError: A State users attempts to request Questions for a HPP not in their state
-    - UserInputError: pkgID not found
-    """
-    indexQuestions(input: IndexQuestionsInput!): IndexQuestionsPayload
-
-    """
     indexRates returns an array of rates with their revisions and related contracts
     Only rates with at least one submitted revision are returned
     indexRates can be called by CMS and admin users
@@ -100,17 +88,6 @@ type Query {
     - NotFoundError: contract for contractID not found in database
     """
     fetchContract(input: FetchContractInput!): FetchContractPayload!
-    """
-    fetchContractWithQuestions returns a single contract, linked to revisions and related rates and questionsList
-    given a contractID
-
-    It can be called by CMS or State users
-
-    Errors:
-    - ForbiddenError: A State user requests a contract that belongs to another state
-    - NotFoundError: contract for contractID not found in database
-    """
-    fetchContractWithQuestions(input: FetchContractWithQuestionsInput!): FetchContractWithQuestionsPayload!
 
     """
     fetchMcReviewSettings returns settings for the MC review app
@@ -374,7 +351,7 @@ type Mutation {
     updateStateAssignmentsByState(input: UpdateStateAssignmentsByStateInput!): UpdateStateAssignmentsByStatePayload!
 
     """
-    createQuestion creates a new Question for the given HealthPlanPackage
+    createContractQuestion creates a new question for the given Contract
     A CMS User can add text to a note field and append a document to their question
     They can also specify a due date, and specify rate IDs that are associated with the question
 
@@ -385,12 +362,12 @@ type Mutation {
         - A non CMSUser called this
         - A CMS user with unassigned division
     - UserInputError
-        - A package cannot be found with the given `pkgID`
-        - The package is in the DRAFT state
+        - A package cannot be found with the given `contractID`
+        - The contract is in the DRAFT state
         - The due date is in the past
         - The rateIDs are not associated with the package
     """
-    createQuestion(input: CreateQuestionInput!): CreateQuestionPayload!
+    createContractQuestion(input: CreateContractQuestionInput!): CreateContractQuestionPayload!
 
     #    """
     #    updateQuestion updates a Question for the given HealthPlanPackage
@@ -408,7 +385,7 @@ type Mutation {
     #    updateQuestion(input: UpdateQuestionInput!): UpdateQuestionPayload!
 
     """
-    createQuestionResponse creates a new QuestionResponse for the given Question
+    createContractQuestionResponse creates a new response for the given question
     A State User can add text to a note field and append a document to their response
 
     This can only be called by a StateUser
@@ -419,9 +396,33 @@ type Mutation {
     - UserInputError
         - A Question cannot be found given `questionID`
     """
-    createQuestionResponse(
+    createContractQuestionResponse(
         input: CreateQuestionResponseInput!
-    ): CreateQuestionResponsePayload!
+    ): CreateContractQuestionResponsePayload!
+
+    """
+    createRateQuestion creates a new Question for the given rate
+    A CMS User can add text to a note field and append a document to their question
+    They can also specify a due date, and specify rate IDs that are associated with the question
+
+    This can only be called by a CMSUser
+
+    Errors:
+    - ForbiddenError:
+    - A non CMSUser called this
+    - A CMS user with unassigned division
+    - UserInputError
+    - A rate cannot be found with the given `rateID`
+    - The rate is in the DRAFT state
+    - The due date is in the past
+    """
+    createRateQuestion(
+        input: CreateRateQuestionInput!
+    ): CreateRateQuestionPayload!
+
+    createRateQuestionResponse(
+        input: CreateQuestionResponseInput!
+    ): CreateRateQuestionResponsePayload!
 
     """
     createAPIKey creates a valid API key for the logged in user, valid for 90 days
@@ -613,28 +614,40 @@ type IndexContractsPayload {
     edges: [ContractEdge!]!
 }
 
-
-input IndexQuestionsInput {
-    "The ID of the package for which to fetch associated questions"
-    contractID: ID!
-}
-
-type IndexQuestionsPayload {
+type IndexContractQuestionsPayload {
     "Questions for a given submission that were asked by DMCO within CMS"
-    DMCOQuestions: QuestionList!
+    DMCOQuestions: ContractQuestionList!
     "Questions for a given submission that were asked by DMCP within CMS"
-    DMCPQuestions: QuestionList!
+    DMCPQuestions: ContractQuestionList!
     "Questions for a given submission that were asked by OACT within CMS"
-    OACTQuestions: QuestionList!
+    OACTQuestions: ContractQuestionList!
 }
 
-type QuestionList {
+type IndexRateQuestionsPayload {
+    "Questions for a given rate that were asked by DMCO within CMS"
+    DMCOQuestions: RateQuestionList!
+    "Questions for a given rate that were asked by DMCP within CMS"
+    DMCPQuestions: RateQuestionList!
+    "Questions for a given rate that were asked by OACT within CMS"
+    OACTQuestions: RateQuestionList!
+}
+
+type ContractQuestionList {
     totalCount: Int
-    edges: [QuestionEdge!]!
+    edges: [ContractQuestionEdge!]!
 }
 
-type QuestionEdge {
-    node: Question!
+type RateQuestionList {
+    totalCount: Int
+    edges: [RateQuestionEdge!]!
+}
+
+type ContractQuestionEdge {
+    node: ContractQuestion!
+}
+
+type RateQuestionEdge {
+    node: RateQuestion!
 }
 
 input DocumentInput {
@@ -646,7 +659,7 @@ input DocumentInput {
     downloadURL: String
 }
 
-input CreateQuestionInput {
+input CreateContractQuestionInput {
     "The ID of the package for which to create a question"
     contractID: ID!
     "A list of documents to attach to the question"
@@ -659,9 +672,25 @@ input CreateQuestionInput {
     rateIDs: [String!]
 }
 
-type CreateQuestionPayload {
+type CreateContractQuestionPayload {
     "The newly created Question"
-    question: Question!
+    question: ContractQuestion!
+}
+
+input CreateRateQuestionInput {
+    "The ID of the rate for which to create a question"
+    rateID: ID!
+    "A list of documents to attach to the question"
+    documents: [DocumentInput!]! # should be Generic Document with sha256
+    "A note to attach to the question"
+    noteText: String
+    "The date the answer to the question is due"
+    dueDate: Date
+}
+
+type CreateRateQuestionPayload {
+    "The newly created rate question"
+    question: RateQuestion!
 }
 
 #input UpdateQuestionInput {
@@ -676,6 +705,9 @@ type CreateQuestionPayload {
 #    question: Question!
 #}
 
+"""
+Generic input type for both Contract and Rate Question.
+"""
 input CreateQuestionResponseInput {
     "The ID of the question for which to create a response"
     questionID: ID!
@@ -685,9 +717,14 @@ input CreateQuestionResponseInput {
     noteText: String
 }
 
-type CreateQuestionResponsePayload {
-    "Question with newly created response"
-    question: Question!
+type CreateContractQuestionResponsePayload {
+    "Contract Question with newly created response"
+    question: ContractQuestion!
+}
+
+type CreateRateQuestionResponsePayload {
+    "Rate Question with newly created response"
+    question: RateQuestion!
 }
 
 type UserEdge {
@@ -976,7 +1013,7 @@ type HealthPlanPackage {
     for the package and contains the full data from when it was submitted
     """
     revisions: [HealthPlanRevisionEdge!]!
-    questions: IndexQuestionsPayload
+    questions: IndexContractQuestionsPayload
 }
 
 type UpdatedBy {
@@ -1059,11 +1096,11 @@ type Document {
 }
 
 """
-Question is a question sent by CMS to the States for a response, associated with a single package.
-CMS may upload one or more documents full of questions to a single Question. States submit a
+ContractQuestion is a question sent by CMS to the States for a response, associated with a single contract.
+CMS may upload one or more documents full of questions to a single ContractQuestion. States submit a
 QuestionResponse with documents that answer the questions posed by CMS.
 """
-type Question {
+type ContractQuestion {
     id: ID!
     contractID: ID!
     createdAt: DateTime!
@@ -1077,10 +1114,29 @@ type Question {
     responses: [QuestionResponse!]!
 }
 
-#"""
-#QuestionResponse is a response by a StateUser to a Question sent by CMS. States may upload one or
-#more documents full of responses to a single QuestionResponse, in addition to a text note.
-#"""
+"""
+RateQuestion is a question sent by CMS to the States for a response, associated with a single rate.
+CMS may upload one or more documents full of questions to a single Question. States submit a
+QuestionResponse with documents that answer the questions posed by CMS.
+"""
+type RateQuestion {
+    id: ID!
+    rateID: ID!
+    createdAt: DateTime!
+    addedBy: CMSUsersUnion!
+    documents: [Document!]!
+    division: Division!
+    #    noteText: String
+    #    dueDate: Date
+    #    rateIDs: [String!]
+    #
+    responses: [QuestionResponse!]!
+}
+
+"""
+QuestionResponse are responses to Rate or Contract questions, the graphql type has no differentiation between responses
+for both questions types.
+"""
 type QuestionResponse {
     id: ID!
     questionID: ID!
@@ -1559,7 +1615,7 @@ type Rate {
     """
     status: HealthPlanPackageStatus!
     "The initial date this rate was submitted at. Is not changed by unlock or resubmission."
-    initiallySubmittedAt: Date
+    initiallySubmittedAt: DateTime
     "The state code (e.g. CA or TN) for the submitting state"
     stateCode: String!
     "Fuller state data for the submitting state"
@@ -1587,6 +1643,12 @@ type Rate {
     was associated with.
     """
     packageSubmissions: [RatePackageSubmission!]
+    """
+    questions field is an array of questions asked about the rate by CMS. Each questions also contains responses
+    to the question submitted by the State. DRAFT rates will not have questions, only rates that have been submitted
+    , unlocked, or resubmitted. The array is in descending order by createdAt.
+    """
+    questions: IndexRateQuestionsPayload
 }
 
 """
@@ -1678,7 +1740,7 @@ type Contract {
     """
     status: HealthPlanPackageStatus!
     "initiallySubmittedAt is the initial date this contract was submitted at. Is not changed by unlock or resubmission."
-    initiallySubmittedAt: Date
+    initiallySubmittedAt: DateTime
     "stateCode is the state code (e.g. CA or TN) for the submitting state"
     stateCode: String!
     "state is fuller state data for the submitting state"
@@ -1705,7 +1767,13 @@ type Contract {
     submission is in the first position in the array.
     """
     packageSubmissions: [ContractPackageSubmission!]!
-    questions: IndexQuestionsPayload
+
+    """
+    questions field is an array of questions asked about the contract by CMS. Each questions also contains responses
+    to the question submitted by the State. DRAFT contracts will not have questions, only contracts that have been submitted
+    , unlocked, or resubmitted. The array is in descending order by createdAt.
+    """
+    questions: IndexContractQuestionsPayload
 }
 
 """
@@ -1788,18 +1856,7 @@ type FetchContractPayload {
     contract: Contract!
 }
 
-type FetchContractWithQuestionsPayload {
-    """
-    A rate that include contract and rate revisions
-    """
-    contract: Contract!
-}
-
 input FetchContractInput {
-    contractID: ID!
-}
-
-input FetchContractWithQuestionsInput {
     contractID: ID!
 }
 

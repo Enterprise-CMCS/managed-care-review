@@ -20,7 +20,7 @@ query fetchContractWithQuestions($input: FetchContractInput!) {
             }
 
             packageSubmissions {
-                ...packageSubmissionsFragmentForFetch
+                ...packageSubmissionsFragmentWithQuestions
             }
 
             questions {
@@ -89,6 +89,48 @@ fragment rateFields on Rate {
     status
     parentContractID
     initiallySubmittedAt
+}
+
+fragment rateFieldsWithQuestions on Rate {
+    id
+    createdAt
+    updatedAt
+    stateCode
+    stateNumber
+    parentContractID
+    state {
+        code
+        name
+        programs {
+            id
+            name
+            fullName
+            isRateProgram
+        }
+    }
+    status
+    parentContractID
+    initiallySubmittedAt
+    questions {
+        DMCOQuestions {
+            edges {
+                ...rateQuestionEdgeFragment
+            }
+            totalCount
+        }
+        DMCPQuestions {
+            edges {
+                ...rateQuestionEdgeFragment
+            }
+            totalCount
+        }
+        OACTQuestions {
+            edges {
+                ...rateQuestionEdgeFragment
+            }
+            totalCount
+        }
+    }
 }
 
 fragment rateRevisionFragmentForFetchContract on RateRevision {
@@ -255,101 +297,35 @@ fragment packageSubmissionsFragmentForFetch on ContractPackageSubmission {
     }
 }
 
+fragment packageSubmissionsFragmentWithQuestions on ContractPackageSubmission {
+    cause
+    submitInfo {
+        ...updateInformationFields
+    }
+
+    submittedRevisions {
+        ...submittableRevisionsFieldsForFetch
+    }
+
+    contractRevision {
+        ...contractRevisionFragmentForFetch
+    }
+    rateRevisions {
+        ...rateRevisionFragmentForFetchContract
+        rate {
+            ...rateFieldsWithQuestions
+            revisions {
+                ...rateRevisionFragmentForFetchContract
+            }
+        }
+    }
+}
+
 fragment submittableRevisionsFieldsForFetch on SubmittableRevision {
     ... on ContractRevision {
         ...contractRevisionFragmentForFetch
     }
     ... on RateRevision {
         ...rateRevisionFragmentForFetchContract
-    }
-}
-
-fragment updateInformationFields on UpdateInformation {
-    updatedAt
-    updatedBy {
-        email
-        role
-        familyName
-        givenName
-    }
-    updatedReason
-}
-
-fragment questionEdgeFragment on QuestionEdge {
-    node {
-        id
-        contractID
-        createdAt
-        addedBy {
-            ... on CMSUser {
-                id
-                email
-                role
-                familyName
-                givenName
-                stateAssignments {
-                    code
-                    name
-                    programs {
-                        id
-                        name
-                        fullName
-                        isRateProgram
-                    }
-                }
-                divisionAssignment
-            }
-            ... on CMSApproverUser {
-                id
-                email
-                role
-                familyName
-                givenName
-                stateAssignments {
-                    code
-                    name
-                    programs {
-                        id
-                        name
-                        fullName
-                        isRateProgram
-                    }
-                }
-                divisionAssignment
-            }
-        }
-        division
-        documents {
-            s3URL
-            name
-            downloadURL
-        }
-        responses {
-            id
-            questionID
-            createdAt
-            addedBy {
-                id
-                role
-                email
-                givenName
-                familyName
-                state {
-                    code
-                    name
-                    programs {
-                        id
-                        name
-                        fullName
-                        isRateProgram
-                    }
-                }
-            }
-            documents {
-                name
-                s3URL
-                downloadURL
-            }
-        }
     }
 }

@@ -1,11 +1,8 @@
 import type { Resolvers } from '../../gen/gqlServer'
 import statePrograms from '../../../../app-web/src/common-code/data/statePrograms.json'
-import type {
-    CMSUserType,
-    CMSApproverUserType,
-} from '../../domain-models/UserType'
+import type { CMSUsersUnionType } from '../../domain-models/UserType'
 
-function getStateAssignments(user: CMSUserType | CMSApproverUserType) {
+function getStateAssignments(user: CMSUsersUnionType) {
     const userStates = user.stateAssignments
     const statesWithPrograms = userStates.map((userState) => {
         const state = statePrograms.states.find(

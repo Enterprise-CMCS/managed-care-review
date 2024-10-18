@@ -1,10 +1,9 @@
-import INDEX_CONTRACTS from '../../../../app-graphql/src/queries/indexContracts.graphql'
+import INDEX_CONTRACTS from '../../../../app-graphql/src/queries/indexContractsForDashboard.graphql'
 import {
     constructTestPostgresServer,
     createTestHealthPlanPackage,
     createAndSubmitTestHealthPlanPackage,
 } from '../../testHelpers/gqlHelpers'
-import { todaysDate } from '../../testHelpers/dateHelpers'
 import type { Contract, ContractEdge } from '../../gen/gqlServer'
 import {
     iterableCmsUsersMockData,
@@ -63,7 +62,9 @@ describe(`indexContracts`, () => {
                 theseSubmissions[0].draftRevision?.formData
                     .submissionDescription
             ).toBe(draftFormData?.submissionDescription)
-            expect(theseSubmissions[1].initiallySubmittedAt).toBe(todaysDate())
+            expect(theseSubmissions[1].initiallySubmittedAt).toEqual(
+                submittedContract.packageSubmissions[0].submitInfo.updatedAt
+            )
             expect(theseSubmissions[1].status).toBe('SUBMITTED')
             expect(
                 theseSubmissions[1].packageSubmissions[0].contractRevision
@@ -179,7 +180,9 @@ describe(`indexContracts`, () => {
             const testSubmission = contracts.filter(
                 (test: Contract) => test.id === createdID
             )[0]
-            expect(testSubmission.initiallySubmittedAt).toBe(todaysDate())
+            expect(testSubmission.initiallySubmittedAt).toEqual(
+                stateSubmission.initiallySubmittedAt
+            )
         })
 
         it('returns no contracts for a different states user', async () => {

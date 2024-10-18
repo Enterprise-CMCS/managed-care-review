@@ -4,16 +4,19 @@ import type { UserType } from '../../domain-models'
 import { NotFoundError } from '../postgresErrors'
 import { parseDomainUsersFromPrismaUsers } from '../user/prismaDomainUser'
 
-async function findStateAssignedUsers( client: PrismaTransactionType, stateCode: string):  Promise<UserType[] | Error> {
+async function findStateAssignedUsers(
+    client: PrismaTransactionType,
+    stateCode: string
+): Promise<UserType[] | Error> {
     const pilotStateCodes = statePrograms.states.map((state) => state.code)
-    if(!pilotStateCodes.includes(stateCode)) {
+    if (!pilotStateCodes.includes(stateCode)) {
         return new Error(`${stateCode} is not a supported state code`)
     }
 
     try {
         const state = await client.state.findFirst({
             where: {
-                stateCode
+                stateCode,
             },
             include: {
                 assignedCMSUsers: {
@@ -34,9 +37,7 @@ async function findStateAssignedUsers( client: PrismaTransactionType, stateCode:
             return new NotFoundError(err)
         }
 
-        const users = parseDomainUsersFromPrismaUsers(
-            state.assignedCMSUsers
-        )
+        const users = parseDomainUsersFromPrismaUsers(state.assignedCMSUsers)
 
         return users
     } catch (err) {
@@ -45,4 +46,4 @@ async function findStateAssignedUsers( client: PrismaTransactionType, stateCode:
     }
 }
 
-export {  findStateAssignedUsers }
+export { findStateAssignedUsers }

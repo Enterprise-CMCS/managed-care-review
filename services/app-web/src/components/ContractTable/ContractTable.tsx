@@ -15,7 +15,6 @@ import { atomWithHash } from 'jotai-location'
 import { HealthPlanPackageStatus, Program, User } from '../../gen/gqlClient'
 import styles from './ContractTable.module.scss'
 import { Table, Tag } from '@trussworks/react-uswds'
-import dayjs from 'dayjs'
 import qs from 'qs'
 import { SubmissionStatusRecord } from '../../constants/healthPlanPackages'
 import {
@@ -30,19 +29,8 @@ import { DoubleColumnGrid } from '../DoubleColumnGrid'
 import { NavLinkWithLogging } from '../TealiumLogging/Link'
 import { useTealium } from '../../hooks'
 import useDeepCompareEffect from 'use-deep-compare-effect'
-
-export type RateInDashboardType = {
-    id: string
-    name: string
-    submittedAt?: string
-    updatedAt: Date
-    status: HealthPlanPackageStatus
-    programs: Program[]
-    rateType?: string
-    ratePeriodStart: Date
-    ratePeriodEnd: Date
-    stateName?: string
-}
+import { getTealiumFiltersChanged } from '../../tealium/tealiumHelpers'
+import { formatCalendarDate } from '../../common-code/dateHelpers'
 
 export type ContractInDashboardType = {
     id: string
@@ -182,10 +170,10 @@ export const ContractTable = ({
     const lastClickedElement = useRef<string | null>(null)
     const [columnFilters, setColumnFilters] = useAtom(columnHash)
     const [prevFilters, setPrevFilters] = useState<{
-        filters: ColumnFiltersState
+        filtersForAnalytics: string
         results?: string
     }>({
-        filters: columnFilters,
+        filtersForAnalytics: '',
     })
     const { logFilterEvent } = useTealium()
 
@@ -285,7 +273,10 @@ export const ContractTable = ({
                 header: 'Submission date',
                 cell: (info) =>
                     info.getValue()
-                        ? dayjs(info.getValue()).format('MM/DD/YYYY')
+                        ? formatCalendarDate(
+                              info.getValue(),
+                              'America/New_York'
+                          )
                         : '',
                 meta: {
                     dataTestID: `${tableConfig.rowIDName}-date`,
@@ -295,7 +286,10 @@ export const ContractTable = ({
                 header: 'Last updated',
                 cell: (info) =>
                     info.getValue()
-                        ? dayjs(info.getValue()).format('MM/DD/YYYY')
+                        ? formatCalendarDate(
+                              info.getValue(),
+                              'America/New_York'
+                          )
                         : '',
                 meta: {
                     dataTestID: `${tableConfig.rowIDName}-last-updated`,
@@ -410,21 +404,22 @@ export const ContractTable = ({
 
     // Handles logging when filters change.
     useDeepCompareEffect(() => {
-        const filterCategories = columnFilters.map((f) => f.id).join(',')
-        const prevFilterCategories = prevFilters.filters
-            .map((f) => f.id)
-            .join(',')
+        const prevFiltersForAnalytics = prevFilters.filtersForAnalytics
+        const filterForAnalytics = getTealiumFiltersChanged(columnFilters)
         // Any changes in results or filters
         if (
-            filterCategories !== prevFilterCategories ||
+            filterForAnalytics !== prevFiltersForAnalytics ||
             prevFilters.results === undefined
         ) {
             // if current filters is one and previous is more than 1, then it was cleared
-            if (columnFilters.length === 0 && prevFilterCategories.length > 0) {
+            if (
+                columnFilters.length === 0 &&
+                prevFiltersForAnalytics.length > 0
+            ) {
                 logFilterEvent({
                     event_name: 'filter_removed',
                     search_result_count: submissionCount,
-                    filter_categories_used: filterCategories,
+                    filter_categories_used: filterForAnalytics,
                 })
                 // If there are filters, then we applied new filters
             } else if (columnFilters.length > 0) {
@@ -434,11 +429,11 @@ export const ContractTable = ({
                     results_count_after_filtering: submissionCount,
                     results_count_prior_to_filtering:
                         prevFilters.results ?? 'No prior count, filter on load',
-                    filter_categories_used: filterCategories,
+                    filter_categories_used: filterForAnalytics,
                 })
             }
             setPrevFilters({
-                filters: columnFilters,
+                filtersForAnalytics: filterForAnalytics,
                 results: submissionCount,
             })
         }

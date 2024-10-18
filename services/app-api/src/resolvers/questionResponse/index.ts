@@ -1,4 +1,5 @@
-export { indexQuestionsResolver } from './indexQuestions'
-export { createQuestionResolver } from './createQuestion'
-export { createQuestionResponseResolver } from './createQuestionResponse'
+export { createContractQuestionResolver } from './createContractQuestion'
+export { createContractQuestionResponseResolver } from './createContractQuestionResponse'
 export { questionResponseDocumentResolver } from './questionResponseDocumentResolver'
+export { createRateQuestionResolver } from './createRateQuestion'
+export { createRateQuestionResponseResolver } from './createRateQuestionResponse'

@@ -7,8 +7,9 @@ import {
 } from '../../../testHelpers/apolloMocks'
 import { screen, waitFor } from '@testing-library/react'
 import React from 'react'
-import { QATable, QuestionData } from './QATable'
+import { QATable } from './QATable'
 import { CmsUser, StateUser } from '../../../gen/gqlClient'
+import { QuestionData } from '../QuestionResponseHelpers'
 
 const stateUser = mockValidUser() as StateUser
 const cmsUser = mockValidCMSUser() as CmsUser
@@ -29,7 +30,7 @@ const testQuestionData = (): QuestionData => ({
             id: 'response-1-id',
             questionID: 'question-1-id',
             addedBy: stateUser,
-            createdAt: new Date('2022-12-24T00:00:00.000Z'),
+            createdAt: new Date('2022-12-24'),
             documents: [
                 {
                     s3URL: 's3://bucketname/key/response-1-document-1',
@@ -66,13 +67,14 @@ describe('QATable', () => {
                     expect(rows).toHaveLength(3)
 
                     //Expect Response to be first on table
+                    // API returns UTC timezone, we display timestamped dates in ET timezone so 1 day before on these tests.
                     expect(rows[1]).toHaveTextContent('response-1-document-1')
-                    expect(rows[1]).toHaveTextContent('12/24/22')
+                    expect(rows[1]).toHaveTextContent('12/23/2022')
                     expect(rows[1]).toHaveTextContent('bob (MN)')
 
                     //Expect Question to be last on table
                     expect(rows[2]).toHaveTextContent('question-1-document-1')
-                    expect(rows[2]).toHaveTextContent('12/23/22')
+                    expect(rows[2]).toHaveTextContent('12/22/2022')
                     expect(rows[2]).toHaveTextContent('You')
                 })
             })
@@ -107,7 +109,8 @@ describe('QATable', () => {
                     const rows = screen.getAllByRole('row')
                     expect(rows).toHaveLength(3)
                     expect(rows[2]).toHaveTextContent('question-1-document-1')
-                    expect(rows[2]).toHaveTextContent('12/23/22')
+                    // API returns UTC timezone, we display timestamped dates in ET timezone so 1 day before on these tests.
+                    expect(rows[2]).toHaveTextContent('12/22/2022')
                     expect(rows[2]).toHaveTextContent(
                         `${cmsUser.givenName} (CMS)`
                     )
@@ -200,7 +203,8 @@ describe('QATable', () => {
                 const rows = screen.getAllByRole('row')
                 expect(rows).toHaveLength(3)
                 expect(rows[2]).toHaveTextContent('question-1-document-1')
-                expect(rows[2]).toHaveTextContent('12/23/22')
+                // API returns UTC timezone, we display timestamped dates in ET timezone so 1 day before on these tests.
+                expect(rows[2]).toHaveTextContent('12/22/2022')
                 expect(rows[2]).toHaveTextContent(`${cmsUser.givenName} (CMS)`)
             })
         })

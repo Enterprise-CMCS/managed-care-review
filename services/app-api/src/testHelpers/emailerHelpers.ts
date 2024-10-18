@@ -8,7 +8,7 @@ import type {
 import type {
     ContractRevisionType,
     ContractType,
-    Question,
+    ContractQuestionType,
     RatePackageSubmissionType,
     RateRevisionType,
     RateType,
@@ -862,9 +862,9 @@ const mockContractAmendmentFormData = (
 }
 
 const mockQuestionAndResponses = (
-    questionData?: Partial<Question>
-): Question => {
-    const question: Question = {
+    questionData?: Partial<ContractQuestionType>
+): ContractQuestionType => {
+    const question: ContractQuestionType = {
         id: `test-question-id-1`,
         contractID: 'contract-id-test',
         createdAt: new Date('01/01/2024'),

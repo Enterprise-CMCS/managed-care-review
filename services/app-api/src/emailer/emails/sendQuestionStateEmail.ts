@@ -2,7 +2,7 @@ import { packageName as generatePackageName } from '../../common-code/healthPlan
 import { formatCalendarDate } from '../../../../app-web/src/common-code/dateHelpers'
 import { pruneDuplicateEmails } from '../formatters'
 import type { EmailConfiguration, EmailData } from '..'
-import type { ProgramType, Question } from '../../domain-models'
+import type { ProgramType, ContractQuestionType } from '../../domain-models'
 import {
     stripHTMLFromTemplate,
     renderTemplate,
@@ -16,7 +16,7 @@ export const sendQuestionStateEmail = async (
     submitterEmails: string[],
     config: EmailConfiguration,
     statePrograms: ProgramType[],
-    currentQuestion: Question
+    currentQuestion: ContractQuestionType
 ): Promise<EmailData | Error> => {
     const stateContactEmails: string[] = []
 
@@ -53,7 +53,10 @@ export const sendQuestionStateEmail = async (
         cmsRequestorEmail: currentQuestion.addedBy.email,
         cmsRequestorName: `${currentQuestion.addedBy.givenName} ${currentQuestion.addedBy.familyName}`,
         cmsRequestorDivision: currentQuestion.addedBy.divisionAssignment,
-        dateAsked: formatCalendarDate(currentQuestion.createdAt),
+        dateAsked: formatCalendarDate(
+            currentQuestion.createdAt,
+            'America/New_York'
+        ),
     }
 
     const result = await renderTemplate<typeof data>(

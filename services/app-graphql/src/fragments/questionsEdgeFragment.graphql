@@ -1,0 +1,49 @@
+fragment questionEdgeFragment on ContractQuestionEdge {
+    node {
+        id
+        contractID
+        createdAt
+        addedBy {
+            ... on CMSUser {
+                ...cmsUserFragment
+            }
+            ... on CMSApproverUser {
+                ...cmsApproverUserFragment
+            }
+        }
+        division
+        documents {
+            s3URL
+            name
+            downloadURL
+        }
+        responses {
+            ...questionResponseFragment
+        }
+    }
+}
+
+fragment rateQuestionEdgeFragment on RateQuestionEdge {
+    node {
+        id
+        rateID
+        createdAt
+        addedBy {
+            ... on CMSUser {
+                ...cmsUserFragment
+            }
+            ... on CMSApproverUser {
+                ...cmsApproverUserFragment
+            }
+        }
+        division
+        documents {
+            s3URL
+            name
+            downloadURL
+        }
+        responses {
+            ...questionResponseFragment
+        }
+    }
+}

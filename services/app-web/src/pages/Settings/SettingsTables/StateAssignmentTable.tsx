@@ -17,20 +17,20 @@ import {
     FilterSelect,
     FilterSelectedOptionsType,
 } from '../../../components/FilterAccordion'
-import { DoubleColumnGrid, LinkWithLogging, Loading } from '../../../components'
+import { DoubleColumnGrid, Loading } from '../../../components'
 import { GridContainer, Table } from '@trussworks/react-uswds'
 
 import styles from '../Settings.module.scss'
 import { pluralize } from '../../../common-code/formatters'
 import { useTealium } from '../../../hooks'
 import useDeepCompareEffect from 'use-deep-compare-effect'
-import { useStringConstants } from '../../../hooks/useStringConstants'
 import { useOutletContext } from 'react-router-dom'
 import { type MCReviewSettingsContextType } from '../Settings'
 import { EditLink, formatUserNamesFromUsers, formatEmailsFromUsers } from '../'
 import { SettingsErrorAlert } from '../SettingsErrorAlert'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '../../../common-code/featureFlags'
+import { getTealiumFiltersChanged } from '../../../tealium/tealiumHelpers'
 
 type AnalystDisplayType = {
     email: string
@@ -102,14 +102,12 @@ const StateAssignmentTable = () => {
     const lastClickedElement = useRef<string | null>(null)
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
     const [prevFilters, setPrevFilters] = useState<{
-        filters: ColumnFiltersState
+        filtersForAnalytics: string
         results?: string
     }>({
-        filters: columnFilters,
+        filtersForAnalytics: '',
     })
     const { logFilterEvent } = useTealium()
-    const stringConstants = useStringConstants()
-    const MAIL_TO_SUPPORT = stringConstants.MAIL_TO_SUPPORT
     const { stateAnalysts: analysts } =
         useOutletContext<MCReviewSettingsContextType>()
 
@@ -118,7 +116,11 @@ const StateAssignmentTable = () => {
             columnHelper.accessor('stateCode', {
                 id: 'stateCode',
                 header: 'State',
-                cell: (info) => <span aria-label={info.row.original.stateName}>{info.getValue()}</span>,
+                cell: (info) => (
+                    <span aria-label={info.row.original.stateName}>
+                        {info.getValue()}
+                    </span>
+                ),
                 filterFn: `arrIncludesSome`,
             }),
             columnHelper.accessor('analysts', {
@@ -228,21 +230,22 @@ const StateAssignmentTable = () => {
 
     // Handles logging when filters change.
     useDeepCompareEffect(() => {
-        const filterCategories = columnFilters.map((f) => f.id).join(',')
-        const prevFilterCategories = prevFilters.filters
-            .map((f) => f.id)
-            .join(',')
+        const prevFiltersForAnalytics = prevFilters.filtersForAnalytics
+        const filterForAnalytics = getTealiumFiltersChanged(columnFilters)
         // Any changes in results or filters
         if (
-            filterCategories !== prevFilterCategories ||
+            filterForAnalytics !== prevFiltersForAnalytics ||
             prevFilters.results === undefined
         ) {
             // if current filters is one and previous is more than 1, then it was cleared
-            if (columnFilters.length === 0 && prevFilterCategories.length > 0) {
+            if (
+                columnFilters.length === 0 &&
+                prevFiltersForAnalytics.length > 0
+            ) {
                 logFilterEvent({
                     event_name: 'filter_removed',
                     search_result_count: rowCount,
-                    filter_categories_used: filterCategories,
+                    filter_categories_used: filterForAnalytics,
                 })
                 // If there are filters, then we applied new filters
             } else if (columnFilters.length > 0) {
@@ -252,11 +255,11 @@ const StateAssignmentTable = () => {
                     results_count_after_filtering: rowCount,
                     results_count_prior_to_filtering:
                         prevFilters.results ?? 'No prior count, filter on load',
-                    filter_categories_used: filterCategories,
+                    filter_categories_used: filterForAnalytics,
                 })
             }
             setPrevFilters({
-                filters: columnFilters,
+                filtersForAnalytics: filterForAnalytics,
                 results: rowCount,
             })
         }
@@ -276,19 +279,8 @@ const StateAssignmentTable = () => {
         <>
             <h2>State assignments</h2>
             <p>
-                Below is a list of the DMCO staff assigned to states. If this
-                list is out of date please contact
-                <span>
-                    <LinkWithLogging
-                        href={`mailto: ${MAIL_TO_SUPPORT}`}
-                        variant="unstyled"
-                        target="_blank"
-                        rel="noreferrer"
-                    >
-                        {' '}
-                        {MAIL_TO_SUPPORT}
-                    </LinkWithLogging>
-                </span>
+                Below is a list of the DMCO staff assigned to states. To edit
+                the assigned staff click on the edit link below.
             </p>
             <FilterAccordion
                 onClearFilters={clearFilters}

@@ -25,8 +25,12 @@ import type {
 import type {
     UpdateInfoType,
     ProgramType,
+<<<<<<< HEAD
     Question,
     ContractType,
+=======
+    ContractQuestionType,
+>>>>>>> 0cb8a3556e6c308701b7947a0a93d6e63741159d
     ContractRevisionType,
     UnlockedContractType,
 } from '../domain-models'
@@ -138,27 +142,27 @@ type Emailer = {
         contract: ContractRevisionType,
         submitterEmails: string[],
         statePrograms: ProgramType[],
-        question: Question
+        question: ContractQuestionType
     ) => Promise<void | Error>
     sendQuestionsCMSEmail: (
         contract: ContractRevisionType,
         stateAnalystsEmails: StateAnalystsEmails,
         statePrograms: ProgramType[],
-        questions: Question[]
+        questions: ContractQuestionType[]
     ) => Promise<void | Error>
     sendQuestionResponseCMSEmail: (
         contractRevision: ContractRevisionType,
         statePrograms: ProgramType[],
         stateAnalystsEmails: StateAnalystsEmails,
-        currentQuestion: Question,
-        allContractQuestions: Question[]
+        currentQuestion: ContractQuestionType,
+        allContractQuestions: ContractQuestionType[]
     ) => Promise<void | Error>
     sendQuestionResponseStateEmail: (
         contractRevision: ContractRevisionType,
         statePrograms: ProgramType[],
         submitterEmails: string[],
-        currentQuestion: Question,
-        allContractQuestions: Question[]
+        currentQuestion: ContractQuestionType,
+        allContractQuestions: ContractQuestionType[]
     ) => Promise<void | Error>
 }
 const localEmailerLogger = (emailData: EmailData) =>

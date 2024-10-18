@@ -66,8 +66,11 @@ export const newContractStateEmail = async (
             formData.contractType === 'AMENDMENT'
                 ? 'Contract amendment effective dates'
                 : 'Contract effective dates',
-        contractDatesStart: formatCalendarDate(formData.contractDateStart),
-        contractDatesEnd: formatCalendarDate(formData.contractDateEnd),
+        contractDatesStart: formatCalendarDate(
+            formData.contractDateStart,
+            'UTC'
+        ),
+        contractDatesEnd: formatCalendarDate(formData.contractDateEnd, 'UTC'),
         rateInfos:
             isContractAndRates &&
             contract.packageSubmissions[0].rateRevisions.map((rate) => ({
@@ -79,15 +82,29 @@ export const newContractStateEmail = async (
                 rateDatesStart:
                     rate.formData.rateType === 'AMENDMENT'
                         ? formatCalendarDate(
+<<<<<<< HEAD:services/app-api/src/emailer/emails/newContractStateEmail.ts
                               rate.formData.amendmentEffectiveDateStart
                           )
                         : formatCalendarDate(rate.formData.rateDateStart),
+=======
+                              rate.rateAmendmentInfo.effectiveDateStart,
+                              'UTC'
+                          )
+                        : formatCalendarDate(rate.rateDateStart, 'UTC'),
+>>>>>>> 0cb8a3556e6c308701b7947a0a93d6e63741159d:services/app-api/src/emailer/emails/newPackageStateEmail.ts
                 rateDatesEnd:
                     rate.formData.rateType === 'AMENDMENT'
                         ? formatCalendarDate(
+<<<<<<< HEAD:services/app-api/src/emailer/emails/newContractStateEmail.ts
                               rate.formData.amendmentEffectiveDateEnd
                           )
                         : formatCalendarDate(rate.formData.rateDateEnd),
+=======
+                              rate.rateAmendmentInfo.effectiveDateEnd,
+                              'UTC'
+                          )
+                        : formatCalendarDate(rate.rateDateEnd, 'UTC'),
+>>>>>>> 0cb8a3556e6c308701b7947a0a93d6e63741159d:services/app-api/src/emailer/emails/newPackageStateEmail.ts
             })),
         submissionURL: contractURL,
     }

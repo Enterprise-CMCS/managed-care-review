@@ -1,13 +1,10 @@
-import CREATE_QUESTION_RESPONSE from 'app-graphql/src/mutations/createQuestionResponse.graphql'
+import CREATE_CONTRACT_QUESTION_RESPONSE from 'app-graphql/src/mutations/createContractQuestionResponse.graphql'
 import {
     constructTestPostgresServer,
-    createAndSubmitTestHealthPlanPackage,
     createTestQuestion,
     createTestQuestionResponse,
-    defaultFloridaProgram,
     updateTestStateAssignments,
 } from '../../testHelpers/gqlHelpers'
-import { base64ToDomain } from '../../common-code/proto/healthPlanFormDataProto'
 import {
     assertAnError,
     assertAnErrorCode,
@@ -18,14 +15,12 @@ import {
     testCMSUser,
 } from '../../testHelpers/userHelpers'
 import { testEmailConfig, testEmailer } from '../../testHelpers/emailerHelpers'
-import { latestFormData } from '../../testHelpers/healthPlanPackageHelpers'
 import { findStatePrograms, NewPostgresStore } from '../../postgres'
-import { packageName } from '../../common-code/healthPlanFormDataType'
 import { getTestStateAnalystsEmails } from '../../testHelpers/parameterStoreHelpers'
 import { testLDService } from '../../testHelpers/launchDarklyHelpers'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 
-describe('createQuestionResponse', () => {
+describe('createContractQuestionResponse', () => {
     const cmsUser = testCMSUser()
     beforeAll(async () => {
         //Inserting a new CMS user, with division assigned, in postgres in order to create the question to user relationship.
@@ -40,13 +35,9 @@ describe('createQuestionResponse', () => {
             },
         })
 
-        const submittedPkg =
-            await createAndSubmitTestHealthPlanPackage(stateServer)
+        const contract = await createAndSubmitTestContract(stateServer)
 
-        const createdQuestion = await createTestQuestion(
-            cmsServer,
-            submittedPkg.id
-        )
+        const createdQuestion = await createTestQuestion(cmsServer, contract.id)
 
         const createResponseResult = await createTestQuestionResponse(
             stateServer,
@@ -80,7 +71,7 @@ describe('createQuestionResponse', () => {
         const fakeID = 'abc-123'
 
         const createResponseResult = await stateServer.executeOperation({
-            query: CREATE_QUESTION_RESPONSE,
+            query: CREATE_CONTRACT_QUESTION_RESPONSE,
             variables: {
                 input: {
                     questionID: fakeID,
@@ -97,7 +88,7 @@ describe('createQuestionResponse', () => {
         expect(createResponseResult).toBeDefined()
         expect(assertAnErrorCode(createResponseResult)).toBe('BAD_USER_INPUT')
         expect(assertAnError(createResponseResult).message).toBe(
-            `Question with ID: ${fakeID} not found to attach response to`
+            `Contract question with ID: ${fakeID} not found to attach response to`
         )
     })
 
@@ -108,15 +99,11 @@ describe('createQuestionResponse', () => {
                 user: cmsUser,
             },
         })
-        const submittedPkg =
-            await createAndSubmitTestHealthPlanPackage(stateServer)
-        const createdQuestion = await createTestQuestion(
-            cmsServer,
-            submittedPkg.id
-        )
+        const contract = await createAndSubmitTestContract(stateServer)
+        const createdQuestion = await createTestQuestion(cmsServer, contract.id)
 
         const createResponseResult = await cmsServer.executeOperation({
-            query: CREATE_QUESTION_RESPONSE,
+            query: CREATE_CONTRACT_QUESTION_RESPONSE,
             variables: {
                 input: {
                     questionID: createdQuestion.question.id,
@@ -153,35 +140,21 @@ describe('createQuestionResponse', () => {
             emailer: mockEmailer,
         })
 
-        const submittedPkg = await createAndSubmitTestHealthPlanPackage(
-            stateServer,
-            { riskBasedContract: true }
-        )
-        const formData = latestFormData(submittedPkg)
+        const contract = await createAndSubmitTestContract(stateServer, 'FL', {
+            riskBasedContract: true,
+        })
 
-        const createdQuestion = await createTestQuestion(cmsServer, formData.id)
+        const createdQuestion = await createTestQuestion(cmsServer, contract.id)
 
         await createTestQuestionResponse(
             stateServer,
             createdQuestion?.question.id
         )
 
-        const statePrograms = findStatePrograms(formData.stateCode)
-        if (statePrograms instanceof Error) {
-            throw new Error(
-                `Unexpected error: No state programs found for stateCode ${formData.stateCode}`
-            )
-        }
-
-        const pkgName = packageName(
-            formData.stateCode,
-            formData.stateNumber,
-            formData.programIDs,
-            statePrograms
-        )
-
+        const contractName =
+            contract.packageSubmissions[0].contractRevision.contractName
         const stateAnalystsEmails = getTestStateAnalystsEmails(
-            formData.stateCode
+            contract.stateCode
         )
         const cmsRecipientEmails = [
             ...stateAnalystsEmails,
@@ -193,17 +166,17 @@ describe('createQuestionResponse', () => {
             5, // New response CMS email notification is the fifth email
             expect.objectContaining({
                 subject: expect.stringContaining(
-                    `[LOCAL] New Responses for ${pkgName}`
+                    `[LOCAL] New Responses for ${contractName}`
                 ),
                 sourceEmail: emailConfig.emailSource,
                 toAddresses: expect.arrayContaining(
                     Array.from(cmsRecipientEmails)
                 ),
                 bodyText: expect.stringContaining(
-                    `The state submitted responses to OACT's questions about ${pkgName}`
+                    `The state submitted responses to OACT's questions about ${contractName}`
                 ),
                 bodyHTML: expect.stringContaining(
-                    `<a href="http://localhost/submissions/${submittedPkg.id}/question-and-answers">View submission Q&A</a>`
+                    `<a href="http://localhost/submissions/${contract.id}/question-and-answers">View submission Q&A</a>`
                 ),
             })
         )
@@ -253,23 +226,13 @@ describe('createQuestionResponse', () => {
         await updateTestStateAssignments(cmsServer, 'FL', assignedUserIDs)
 
         const stateSubmission = await createAndSubmitTestContract(stateServer)
-
         const question = (
             await createTestQuestion(cmsServer, stateSubmission.id)
         ).question
         await createTestQuestionResponse(stateServer, question.id)
 
-        const currentRevision =
-            stateSubmission.packageSubmissions[0].contractRevision
-
-        const programs = [defaultFloridaProgram()]
-        const name = packageName(
-            stateSubmission.stateCode,
-            stateSubmission.stateNumber,
-            currentRevision.formData.programIDs,
-            programs
-        )
-
+        const contractName =
+            stateSubmission.packageSubmissions[0].contractRevision.contractName
         const cmsEmails = [...config.devReviewTeamEmails, ...assignedUserEmails]
 
         // email subject line is correct for CMS email
@@ -281,12 +244,12 @@ describe('createQuestionResponse', () => {
             3,
             expect.objectContaining({
                 subject: expect.stringContaining(
-                    `[LOCAL] New Responses for ${name}`
+                    `[LOCAL] New Responses for ${contractName}`
                 ),
                 sourceEmail: config.emailSource,
                 toAddresses: expect.arrayContaining(Array.from(cmsEmails)),
                 bodyText: expect.stringContaining(
-                    `The state submitted responses to DMCO's questions about ${name}`
+                    `The state submitted responses to DMCO's questions about ${contractName}`
                 ),
                 bodyHTML: expect.stringContaining(
                     `<a href="http://localhost/submissions/${stateSubmission.id}/question-and-answers">View submission Q&A</a>`
@@ -311,41 +274,29 @@ describe('createQuestionResponse', () => {
             emailer: mockEmailer,
         })
 
-        const submittedPkg =
-            await createAndSubmitTestHealthPlanPackage(stateServer)
+        const contract = await createAndSubmitTestContract(stateServer)
 
-        const formData = latestFormData(submittedPkg)
-
-        const createdQuestion = await createTestQuestion(cmsServer, formData.id)
+        const createdQuestion = await createTestQuestion(cmsServer, contract.id)
 
         await createTestQuestionResponse(
             stateServer,
             createdQuestion?.question.id
         )
 
-        const statePrograms = findStatePrograms(formData.stateCode)
+        const statePrograms = findStatePrograms(contract.stateCode)
         if (statePrograms instanceof Error) {
             throw new Error(
-                `Unexpected error: No state programs found for stateCode ${formData.stateCode}`
+                `Unexpected error: No state programs found for stateCode ${contract.stateCode}`
             )
         }
 
-        const pkgName = packageName(
-            formData.stateCode,
-            formData.stateNumber,
-            formData.programIDs,
-            statePrograms
-        )
-        const currentRevision = submittedPkg.revisions[0].node.formDataProto
-
-        const sub = base64ToDomain(currentRevision)
-        if (sub instanceof Error) {
-            throw sub
-        }
-
+        const pkgName =
+            contract.packageSubmissions[0].contractRevision.contractName
+        const formData =
+            contract.packageSubmissions[0].contractRevision.formData
         const stateReceiverEmails = [
             'james@example.com',
-            ...sub.stateContacts.map((contact) => contact.email),
+            ...formData.stateContacts.map((contact) => contact.email),
         ]
 
         expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
@@ -362,7 +313,7 @@ describe('createQuestionResponse', () => {
                     `${oactCMS.divisionAssignment} round 1 response was successfully submitted`
                 ),
                 bodyHTML: expect.stringContaining(
-                    `<a href="http://localhost/submissions/${submittedPkg.id}/question-and-answers">View response</a>`
+                    `<a href="http://localhost/submissions/${contract.id}/question-and-answers">View response</a>`
                 ),
             })
         )

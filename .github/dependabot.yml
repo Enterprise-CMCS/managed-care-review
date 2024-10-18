@@ -40,7 +40,15 @@ updates:
         applies-to: version-updates
         patterns:
           - '@storybook/*'
-      typescript-eslint:
-        applies-to: version-updates
+      npm-minor-patch:
         patterns:
-          - '@typescript-eslint/*'
+          - '*'
+        exclude-patterns:
+          - '@aws-sdk/*'
+          - '@prisma/client'
+          - 'prisma'
+          - '@opentelemetry/*'
+          - '@storybook/*'
+        update-types:
+          - 'minor'
+          - 'patch'

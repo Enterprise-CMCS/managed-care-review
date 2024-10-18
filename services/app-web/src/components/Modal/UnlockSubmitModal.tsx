@@ -20,6 +20,7 @@ import {
     submitMutationWrapperV2,
     unlockMutationWrapperV2,
 } from '../../gqlHelpers/mutationWrappersForUserFriendlyErrors'
+import { useTealium } from '../../hooks'
 
 const RATE_UNLOCK_SUBMIT_TYPES = [
     'SUBMIT_RATE',
@@ -126,6 +127,7 @@ export const UnlockSubmitModal = ({
     modalRef,
     setIsSubmitting,
 }: UnlockSubmitModalProps): React.ReactElement | null => {
+    const { logFormSubmitEvent } = useTealium()
     const [focusErrorsInModal, setFocusErrorsInModal] = useState(true)
     const [modalAlert, setModalAlert] = useState<
         GenericApiErrorProps | undefined
@@ -181,6 +183,13 @@ export const UnlockSubmitModal = ({
 
     const onSubmit = async (unlockSubmitModalInput?: string): Promise<void> => {
         let result
+
+        logFormSubmitEvent({
+            heading: modalValues.modalHeading ?? 'unknown',
+            form_name: modalType.toLowerCase(),
+            event_name: 'form_field_submit',
+            link_type: 'link_other',
+        })
 
         switch (modalType) {
             case 'UNLOCK_RATE':

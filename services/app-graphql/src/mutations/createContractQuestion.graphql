@@ -1,5 +1,5 @@
-mutation createQuestion($input: CreateQuestionInput!) {
-    createQuestion(input: $input) {
+mutation createContractQuestion($input: CreateContractQuestionInput!) {
+    createContractQuestion(input: $input) {
         question {
             id
             contractID

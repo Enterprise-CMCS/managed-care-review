@@ -20,7 +20,7 @@ import { PageActionsContainer } from '../../StateSubmission/PageActions'
 import { useErrorSummary } from '../../../hooks/useErrorSummary'
 import {
     CreateQuestionResponseInput,
-    useCreateQuestionResponseMutation,
+    useCreateContractQuestionResponseMutation,
     Division,
 } from '../../../gen/gqlClient'
 import { usePage } from '../../../contexts/PageContext'
@@ -42,12 +42,13 @@ export const UploadResponse = () => {
 
     // api
     const [createResponse, { loading: apiLoading, error: apiError }] =
-        useCreateQuestionResponseMutation()
+        useCreateContractQuestionResponseMutation()
 
     // page level state
     const [shouldValidate, setShouldValidate] = React.useState(false)
     const { updateHeading } = usePage()
-    const { packageName, pkg } = useOutletContext<SideNavOutletContextType>()
+    const { packageName, contract } =
+        useOutletContext<SideNavOutletContextType>()
     useEffect(() => {
         updateHeading({ customHeading: packageName })
     }, [packageName, updateHeading])
@@ -63,7 +64,7 @@ export const UploadResponse = () => {
     } = useFileUpload(shouldValidate)
     const { setFocusErrorSummaryHeading, errorSummaryHeadingRef } =
         useErrorSummary()
-    if (pkg.status === 'DRAFT') {
+    if (contract.status === 'DRAFT') {
         return <GenericErrorPage />
     }
 

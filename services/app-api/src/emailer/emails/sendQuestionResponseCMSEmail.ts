@@ -2,7 +2,7 @@ import { packageName as generatePackageName } from '../../common-code/healthPlan
 import { formatCalendarDate } from '../../../../app-web/src/common-code/dateHelpers'
 import { pruneDuplicateEmails } from '../formatters'
 import type { EmailConfiguration, EmailData } from '..'
-import type { ProgramType, Question } from '../../domain-models'
+import type { ProgramType, ContractQuestionType } from '../../domain-models'
 import {
     stripHTMLFromTemplate,
     renderTemplate,
@@ -18,8 +18,8 @@ export const sendQuestionResponseCMSEmail = async (
     config: EmailConfiguration,
     statePrograms: ProgramType[],
     stateAnalystsEmails: StateAnalystsEmails,
-    currentQuestion: Question,
-    allContractQuestions: Question[]
+    currentQuestion: ContractQuestionType,
+    allContractQuestions: ContractQuestionType[]
 ): Promise<EmailData | Error> => {
     // currentQuestion is the question the new response belongs to. Responses can be uploaded to any question round.
     const { responses, division } = currentQuestion
@@ -66,7 +66,10 @@ export const sendQuestionResponseCMSEmail = async (
         stateResponseSubmitterEmail: latestResponse.addedBy.email,
         stateResponseSubmitterName: `${latestResponse.addedBy.givenName} ${latestResponse.addedBy.familyName}`,
         questionRound,
-        dateAsked: formatCalendarDate(currentQuestion.createdAt),
+        dateAsked: formatCalendarDate(
+            currentQuestion.createdAt,
+            'America/New_York'
+        ),
     }
 
     const result = await renderTemplate<typeof data>(

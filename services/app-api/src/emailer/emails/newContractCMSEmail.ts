@@ -60,12 +60,17 @@ export const newContractCMSEmail = async (
             contractRev.formData.contractType === 'AMENDMENT'
                 ? 'Contract amendment effective dates'
                 : 'Contract effective dates',
+<<<<<<< HEAD:services/app-api/src/emailer/emails/newContractCMSEmail.ts
         contractDatesStart: formatCalendarDate(
             contractRev.formData.contractDateStart
         ),
         contractDatesEnd: formatCalendarDate(
             contractRev.formData.contractDateEnd
         ),
+=======
+        contractDatesStart: formatCalendarDate(pkg.contractDateStart, 'UTC'),
+        contractDatesEnd: formatCalendarDate(pkg.contractDateEnd, 'UTC'),
+>>>>>>> 0cb8a3556e6c308701b7947a0a93d6e63741159d:services/app-api/src/emailer/emails/newPackageCMSEmail.ts
         rateInfos:
             isContractAndRates &&
             contract.packageSubmissions[0].rateRevisions.map((rate) => ({
@@ -77,15 +82,29 @@ export const newContractCMSEmail = async (
                 rateDatesStart:
                     rate.formData.rateType === 'AMENDMENT'
                         ? formatCalendarDate(
+<<<<<<< HEAD:services/app-api/src/emailer/emails/newContractCMSEmail.ts
                               rate.formData.amendmentEffectiveDateStart
                           )
                         : formatCalendarDate(rate.formData.rateDateStart),
+=======
+                              rate.rateAmendmentInfo.effectiveDateStart,
+                              'UTC'
+                          )
+                        : formatCalendarDate(rate.rateDateStart, 'UTC'),
+>>>>>>> 0cb8a3556e6c308701b7947a0a93d6e63741159d:services/app-api/src/emailer/emails/newPackageCMSEmail.ts
                 rateDatesEnd:
                     rate.formData.rateType === 'AMENDMENT'
                         ? formatCalendarDate(
+<<<<<<< HEAD:services/app-api/src/emailer/emails/newContractCMSEmail.ts
                               rate.formData.amendmentEffectiveDateEnd
                           )
                         : formatCalendarDate(rate.formData.rateDateEnd),
+=======
+                              rate.rateAmendmentInfo.effectiveDateEnd,
+                              'UTC'
+                          )
+                        : formatCalendarDate(rate.rateDateEnd, 'UTC'),
+>>>>>>> 0cb8a3556e6c308701b7947a0a93d6e63741159d:services/app-api/src/emailer/emails/newPackageCMSEmail.ts
             })),
         submissionURL: packageURL,
     }

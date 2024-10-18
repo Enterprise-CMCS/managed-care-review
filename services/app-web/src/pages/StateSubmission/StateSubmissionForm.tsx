@@ -30,13 +30,13 @@ import { SideNavOutletContextType } from '../SubmissionSideNav/SubmissionSideNav
 
 // Can move this AppRoutes on future pass - leaving it here now to make diff clear
 export const StateSubmissionForm = (): React.ReactElement => {
-    const { pkg } = useOutletContext<SideNavOutletContextType>()
+    const { contract } = useOutletContext<SideNavOutletContextType>()
 
-    if (pkg.status === 'RESUBMITTED' || pkg.status === 'SUBMITTED') {
+    if (contract.status === 'RESUBMITTED' || contract.status === 'SUBMITTED') {
         return (
             <Navigate
                 to={generatePath(RoutesRecord.SUBMISSIONS_SUMMARY, {
-                    id: pkg.id,
+                    id: contract.id,
                 })}
             />
         )

@@ -12,7 +12,6 @@ import {
     mockValidStateUser,
 } from '../../testHelpers/apolloMocks'
 import { renderWithProviders } from '../../testHelpers'
-import dayjs from 'dayjs'
 
 describe('Change History', () => {
     it('can render history for initial submission', () => {
@@ -67,13 +66,10 @@ describe('Change History', () => {
     it('has expected text in the accordion titles and content', () => {
         const submittedContract = mockContractPackageSubmittedWithRevisions()
         renderWithProviders(<ChangeHistory contract={submittedContract} />)
+        // API returns UTC timezone, we display timestamped dates in ET timezone so 1 day before on these tests.
         expect(
             screen.getByRole('button', {
-                name: `${dayjs(
-                    submittedContract.packageSubmissions[0].submitInfo.updatedAt
-                )
-                    .tz('America/New_York')
-                    .format('MM/DD/YY h:mma')} ET - Submission`,
+                name: `03/03/2024 11:54am ET - Submission`,
             })
         ).toBeInTheDocument()
         expect(
@@ -138,13 +134,10 @@ describe('Change History', () => {
         })
 
         renderWithProviders(<ChangeHistory contract={submittedContract} />)
+        // API returns UTC timezone, we display timestamped dates in ET timezone so 1 day before on these tests.
         expect(
             screen.getByRole('button', {
-                name: `${dayjs(
-                    submittedContract.packageSubmissions[0].submitInfo.updatedAt
-                )
-                    .tz('America/New_York')
-                    .format('MM/DD/YY h:mma')} ET - Submission`,
+                name: `02/02/2024 12:45pm ET - Submission`,
             })
         ).toBeInTheDocument()
         // Should have 3 change history records
@@ -185,43 +178,12 @@ describe('Change History', () => {
         const submittedContract = mockContractPackageSubmittedWithRevisions()
         renderWithProviders(<ChangeHistory contract={submittedContract} />)
         const accordionRows = screen.getAllByRole('button')
-        expect(accordionRows[0]).toHaveTextContent(
-            `${dayjs(
-                submittedContract.packageSubmissions[0].submitInfo.updatedAt
-            )
-                .tz('America/New_York')
-                .format('MM/DD/YY h:mma')} ET - Submission`
-        )
-        expect(accordionRows[1]).toHaveTextContent(
-            `${dayjs(
-                submittedContract.packageSubmissions[0].contractRevision
-                    .unlockInfo?.updatedAt
-            )
-                .tz('America/New_York')
-                .format('MM/DD/YY h:mma')} ET - Unlock`
-        )
-        expect(accordionRows[2]).toHaveTextContent(
-            `${dayjs(
-                submittedContract.packageSubmissions[1].submitInfo.updatedAt
-            )
-                .tz('America/New_York')
-                .format('MM/DD/YY h:mma')} ET - Submission`
-        )
-        expect(accordionRows[3]).toHaveTextContent(
-            `${dayjs(
-                submittedContract.packageSubmissions[1].contractRevision
-                    .unlockInfo?.updatedAt
-            )
-                .tz('America/New_York')
-                .format('MM/DD/YY h:mma')} ET - Unlock`
-        )
-        expect(accordionRows[4]).toHaveTextContent(
-            `${dayjs(
-                submittedContract.packageSubmissions[2].submitInfo.updatedAt
-            )
-                .tz('America/New_York')
-                .format('MM/DD/YY h:mma')} ET - Submission`
-        )
+        // API returns UTC timezone, we display timestamped dates in ET timezone so 1 day before on these tests.
+        expect(accordionRows[0]).toHaveTextContent('03/03/2024 11:54am ET')
+        expect(accordionRows[1]).toHaveTextContent('03/01/2024 12:54pm ET')
+        expect(accordionRows[2]).toHaveTextContent('02/02/2024 12:45pm ET')
+        expect(accordionRows[3]).toHaveTextContent('01/25/2024 4:13pm ET')
+        expect(accordionRows[4]).toHaveTextContent('01/01/2024 6:14am ET')
     })
     it('has correct href values for previous submission links', () => {
         const submittedContract = mockContractPackageSubmittedWithRevisions()

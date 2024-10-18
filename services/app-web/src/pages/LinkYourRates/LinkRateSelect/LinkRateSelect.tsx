@@ -87,10 +87,17 @@ export const LinkRateSelect = ({
                 rate.state.programs,
                 rateProgramIDs
             ).join(', '),
-            rateDateStart: formatCalendarDate(revision.formData.rateDateStart),
-            rateDateEnd: formatCalendarDate(revision.formData.rateDateEnd),
+            rateDateStart: formatCalendarDate(
+                revision.formData.rateDateStart,
+                'UTC'
+            ),
+            rateDateEnd: formatCalendarDate(
+                revision.formData.rateDateEnd,
+                'UTC'
+            ),
             rateDateCertified: formatCalendarDate(
-                revision.formData.rateDateCertified
+                revision.formData.rateDateCertified,
+                'UTC'
             ),
         }
     })

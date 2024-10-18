@@ -1,6 +1,6 @@
 import {
     FetchRateDocument,
-    FetchRateQuery,
+    FetchRateQuery, FetchRateWithQuestionsDocument,
     IndexRatesDocument,
     IndexRatesForDashboardDocument,
     IndexRatesForDashboardQuery,
@@ -34,6 +34,30 @@ const fetchRateMockSuccess = (
         },
     }
 }
+
+const fetchRateWithQuestionsMockSuccess = (
+    rate?: Partial<Rate>,
+    revision?: Partial<RateRevision>
+): MockedResponse<FetchRateQuery> => {
+    const rateData = rateDataMock(revision, rate)
+
+    return {
+        request: {
+            query: FetchRateWithQuestionsDocument,
+            variables: { input: { rateID: rateData.id } },
+        },
+        result: {
+            data: {
+                fetchRate: {
+                    rate: {
+                        ...rateData,
+                    },
+                },
+            },
+        },
+    }
+}
+
 const fetchDraftRateMockSuccess = (
     rate?: Partial<Rate>,
     revision?: Partial<RateRevision>
@@ -167,5 +191,6 @@ export {
     indexRatesForDashboardMockSuccess,
     indexRatesForDashboardMockFailure,
     indexRatesMockFailure, 
-    fetchDraftRateMockSuccess 
+    fetchDraftRateMockSuccess,
+    fetchRateWithQuestionsMockSuccess
 }

@@ -1,6 +1,5 @@
 import { render, screen } from '@testing-library/react'
 import { SubmissionUnlockedBanner } from './SubmissionUnlockedBanner'
-import { dayjs } from '../../../common-code/dateHelpers'
 import { UpdateInformation } from '../../../gen/gqlClient'
 import {
     mockValidCMSUser,
@@ -11,7 +10,7 @@ describe('SubmissionUnlockBanner', () => {
     const mockUnlockInfo = (
         unlockInfo?: Partial<UpdateInformation>
     ): UpdateInformation => ({
-        updatedAt: new Date(),
+        updatedAt: new Date('2024-10-08'),
         updatedBy: {
             email: 'Loremipsum@email.com',
             role: 'CMS_USER',
@@ -33,14 +32,8 @@ describe('SubmissionUnlockBanner', () => {
         )
         expect(screen.getByRole('alert')).toHaveClass('usa-alert--warning')
         expect(screen.getByText('Loremipsum@email.com')).toBeInTheDocument()
-        expect(
-            screen.getByText(
-                `${dayjs
-                    .utc(unlockInfo.updatedAt)
-                    .tz('America/New_York')
-                    .format('MM/DD/YY h:mma')} ET`
-            )
-        ).toBeInTheDocument()
+        // API returns UTC timezone, we display timestamped dates in ET timezone so 1 day before on these tests.
+        expect(screen.getByText('10/07/2024 8:00pm ET')).toBeInTheDocument()
         expect(
             screen.getByText(
                 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi ut justo non nisl congue efficitur. Praesent porta condimentum imperdiet. Curabitur.'
@@ -58,14 +51,8 @@ describe('SubmissionUnlockBanner', () => {
         )
         expect(screen.getByRole('alert')).toHaveClass('usa-alert--info')
         expect(screen.getByText('Loremipsum@email.com')).toBeInTheDocument()
-        expect(
-            screen.getByText(
-                `${dayjs
-                    .utc(unlockInfo.updatedAt)
-                    .tz('America/New_York')
-                    .format('MM/DD/YY h:mma')} ET`
-            )
-        ).toBeInTheDocument()
+        // API returns UTC timezone, we display timestamped dates in ET timezone so 1 day before on these tests.
+        expect(screen.getByText('10/07/2024 8:00pm ET')).toBeInTheDocument()
         expect(
             screen.getByText(
                 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi ut justo non nisl congue efficitur. Praesent porta condimentum imperdiet. Curabitur.'

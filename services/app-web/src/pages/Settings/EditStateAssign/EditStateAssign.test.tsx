@@ -17,23 +17,26 @@ import { EditStateAssign } from './EditStateAssign'
 
 import { Error404 } from '../../Errors/Error404Page'
 import { User } from '../../../gen/gqlClient'
-import { updateStateAssignmentsMutationMockFailure, updateStateAssignmentsMutationMockSuccess } from '../../../testHelpers/apolloMocks/userGQLMock'
+import {
+    updateStateAssignmentsMutationMockFailure,
+    updateStateAssignmentsMutationMockSuccess,
+} from '../../../testHelpers/apolloMocks/userGQLMock'
 import { Settings } from '../Settings'
 
 // Wrap test component in some top level routes to allow getParams to be tested
 const wrapInRoutes = (children: React.ReactNode) => {
     return (
         <Routes>
-             <Route path={RoutesRecord.MCR_SETTINGS} element={<Settings />}>
-            <Route
-                path={RoutesRecord.STATE_ASSIGNMENTS}
-                element={<div>State AssignmentsTable </div>}
-            />
-            <Route
-                path={RoutesRecord.EDIT_STATE_ASSIGNMENTS}
-                element={children}
-            />
-            <Route path="*" element={<Error404 />} />
+            <Route path={RoutesRecord.MCR_SETTINGS} element={<Settings />}>
+                <Route
+                    path={RoutesRecord.STATE_ASSIGNMENTS}
+                    element={<div>State AssignmentsTable </div>}
+                />
+                <Route
+                    path={RoutesRecord.EDIT_STATE_ASSIGNMENTS}
+                    element={children}
+                />
+                <Route path="*" element={<Error404 />} />
             </Route>
         </Routes>
     )
@@ -149,22 +152,25 @@ describe('EditStateAssign', () => {
 
     it('cancel button moves admin user back to state assignments table', async () => {
         let testLocation: Location // set up location to track URL change
-        const { user } = renderWithProviders(wrapInRoutes(<EditStateAssign />), {
-            apolloProvider: {
-                mocks: [
-                    fetchCurrentUserMock({
-                        user: mockValidAdminUser(),
-                        statusCode: 200,
-                    }),
-                    fetchMcReviewSettingsMock(),
-                    indexUsersQueryMock(),
-                ],
-            },
-            routerProvider: {
-                route: `/mc-review-settings/state-assignments/VA/edit`,
-            },
-            location: (location) => (testLocation = location),
-        })
+        const { user } = renderWithProviders(
+            wrapInRoutes(<EditStateAssign />),
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockValidAdminUser(),
+                            statusCode: 200,
+                        }),
+                        fetchMcReviewSettingsMock(),
+                        indexUsersQueryMock(),
+                    ],
+                },
+                routerProvider: {
+                    route: `/mc-review-settings/state-assignments/VA/edit`,
+                },
+                location: (location) => (testLocation = location),
+            }
+        )
         await screen.findByRole('form')
         await user.click(screen.getByText('Cancel'))
         await waitFor(() => {
@@ -175,21 +181,24 @@ describe('EditStateAssign', () => {
     })
 
     it('expects dropdown to show analyst with CMS or CMSApprover roles assigned to DMCO', async () => {
-        const { user } = renderWithProviders(wrapInRoutes(<EditStateAssign />), {
-            apolloProvider: {
-                mocks: [
-                    fetchCurrentUserMock({
-                        user: mockValidAdminUser(),
-                        statusCode: 200,
-                    }),
-                    fetchMcReviewSettingsMock(),
-                    indexUsersQueryMock(mockUsers),
-                ],
-            },
-            routerProvider: {
-                route: `/mc-review-settings/state-assignments/WV/edit`,
-            },
-        })
+        const { user } = renderWithProviders(
+            wrapInRoutes(<EditStateAssign />),
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockValidAdminUser(),
+                            statusCode: 200,
+                        }),
+                        fetchMcReviewSettingsMock(),
+                        indexUsersQueryMock(mockUsers),
+                    ],
+                },
+                routerProvider: {
+                    route: `/mc-review-settings/state-assignments/WV/edit`,
+                },
+            }
+        )
 
         await waitFor(async () => {
             const dropdown = screen.getByRole('combobox')
@@ -208,21 +217,24 @@ describe('EditStateAssign', () => {
     })
 
     it('shows errors when required fields are not filled in', async () => {
-        const { user } = renderWithProviders(wrapInRoutes(<EditStateAssign />), {
-            apolloProvider: {
-                mocks: [
-                    fetchCurrentUserMock({
-                        user: mockValidAdminUser(),
-                        statusCode: 200,
-                    }),
-                    fetchMcReviewSettingsMock(),
-                    indexUsersQueryMock(mockUsers),
-                ],
-            },
-            routerProvider: {
-                route: `/mc-review-settings/state-assignments/TX/edit`,
-            },
-        })
+        const { user } = renderWithProviders(
+            wrapInRoutes(<EditStateAssign />),
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockValidAdminUser(),
+                            statusCode: 200,
+                        }),
+                        fetchMcReviewSettingsMock(),
+                        indexUsersQueryMock(mockUsers),
+                    ],
+                },
+                routerProvider: {
+                    route: `/mc-review-settings/state-assignments/TX/edit`,
+                },
+            }
+        )
 
         const saveButton = await screen.findByRole('button', {
             name: /Save changes/,
@@ -268,64 +280,75 @@ describe('EditStateAssign', () => {
     })
 
     it('redirects on successful save', async () => {
-        const { user } = renderWithProviders(wrapInRoutes(<EditStateAssign />), {
-            apolloProvider: {
-                mocks: [
-                    fetchCurrentUserMock({
-                        user: mockValidAdminUser(),
-                        statusCode: 200,
-                    }),
-                    fetchMcReviewSettingsMock(),
-                    indexUsersQueryMock(mockUsers),
-                    updateStateAssignmentsMutationMockSuccess('TX', ['7'])
-                ],
-            },
-            routerProvider: {
-                route: `/mc-review-settings/state-assignments/TX/edit`,
-            },
-        })
+        const { user } = renderWithProviders(
+            wrapInRoutes(<EditStateAssign />),
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockValidAdminUser(),
+                            statusCode: 200,
+                        }),
+                        fetchMcReviewSettingsMock(),
+                        indexUsersQueryMock(mockUsers),
+                        updateStateAssignmentsMutationMockSuccess('TX', ['7']),
+                    ],
+                },
+                routerProvider: {
+                    route: `/mc-review-settings/state-assignments/TX/edit`,
+                },
+            }
+        )
 
         const userChooser = await screen.findByRole('combobox')
         await user.click(userChooser)
         const firstUser = await screen.findByText('DMCO CMSUser')
         await user.click(firstUser)
 
-        const saveButton = await screen.findByRole('button', { name: 'Save changes' })
+        const saveButton = await screen.findByRole('button', {
+            name: 'Save changes',
+        })
         await user.click(saveButton)
 
         // check that we successfully call the mutation and redirect back to the dummy state assignments table
-        expect(await screen.findByText('State AssignmentsTable')).toBeInTheDocument()
-
+        expect(
+            await screen.findByText('State AssignmentsTable')
+        ).toBeInTheDocument()
     })
 
     it('displays an error on a failed save', async () => {
-        const { user } = renderWithProviders(wrapInRoutes(<EditStateAssign />), {
-            apolloProvider: {
-                mocks: [
-                    fetchCurrentUserMock({
-                        user: mockValidAdminUser(),
-                        statusCode: 200,
-                    }),
-                    fetchMcReviewSettingsMock(),
-                    indexUsersQueryMock(mockUsers),
-                    updateStateAssignmentsMutationMockFailure('TX', ['7'])
-                ],
-            },
-            routerProvider: {
-                route: `/mc-review-settings/state-assignments/TX/edit`,
-            },
-        })
+        const { user } = renderWithProviders(
+            wrapInRoutes(<EditStateAssign />),
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockValidAdminUser(),
+                            statusCode: 200,
+                        }),
+                        fetchMcReviewSettingsMock(),
+                        indexUsersQueryMock(mockUsers),
+                        updateStateAssignmentsMutationMockFailure('TX', ['7']),
+                    ],
+                },
+                routerProvider: {
+                    route: `/mc-review-settings/state-assignments/TX/edit`,
+                },
+            }
+        )
 
         const userChooser = await screen.findByRole('combobox')
         await user.click(userChooser)
         const firstUser = await screen.findByText('DMCO CMSUser')
         await user.click(firstUser)
 
-        const saveButton = await screen.findByRole('button', { name: 'Save changes' })
+        const saveButton = await screen.findByRole('button', {
+            name: 'Save changes',
+        })
         await user.click(saveButton)
 
-        expect(await screen.findByRole('heading', { name: 'System error' })).toBeInTheDocument()
-
+        expect(
+            await screen.findByRole('heading', { name: 'System error' })
+        ).toBeInTheDocument()
     })
 })
-

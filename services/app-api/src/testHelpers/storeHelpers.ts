@@ -69,13 +69,22 @@ function mockStoreThatErrors(): Store {
         updateCmsUserProperties: async (_ID, _State) => {
             return genericError
         },
-        insertQuestion: async (_ID) => {
+        insertContractQuestion: async (_ID) => {
             return genericError
         },
         findAllQuestionsByContract: async (_pkgID) => {
             return genericError
         },
-        insertQuestionResponse: async (_ID) => {
+        insertContractQuestionResponse: async (_ID) => {
+            return genericError
+        },
+        insertRateQuestion: async (_ID) => {
+            return genericError
+        },
+        insertRateQuestionResponse: async (_ID) => {
+            return genericError
+        },
+        findAllQuestionsByRate: async (_pkgID) => {
             return genericError
         },
         insertDraftContract: async (_ID) => {

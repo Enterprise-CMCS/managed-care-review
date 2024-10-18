@@ -26,9 +26,14 @@ export const SectionHeader = ({
         [styles.summarySectionHeaderBorder]: !hideBorder,
         [styles.hasSubheader]: subHeaderComponent,
     })
+
+    const primaryDivClasses = classNames({
+        [styles.primaryDiv]: !!(editNavigateTo || children),
+    })
+
     return (
         <div className={classes} id={sectionId}>
-            <div className={styles.primaryDiv}>
+            <div className={primaryDivClasses}>
                 <h2 id={headerId}>{header}</h2>
                 {subHeaderComponent}
             </div>
