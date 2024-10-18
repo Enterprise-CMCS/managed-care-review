@@ -19,7 +19,14 @@ import {
     UnlockedContract,
     UpdateStateAssignmentsByStateMutationFn,
     FetchMcReviewSettingsDocument,
-    FetchMcReviewSettingsQuery
+    FetchMcReviewSettingsQuery,
+    CreateRateQuestionMutation,
+    CreateRateQuestionInput,
+    CreateRateQuestionMutationFn,
+    RateQuestion,
+    FetchRateWithQuestionsDocument,
+    IndexRateQuestionsPayload,
+    FetchRateWithQuestionsQuery
 } from '../gen/gqlClient'
 import { ApolloError, GraphQLErrors } from '@apollo/client/errors'
 
@@ -307,7 +314,7 @@ export async function updateStateAssignmentsWrapper(
  * workflow. So, when calling Q&A mutations the Q&A page will not refetch the data. The alternative would be to use
  * cache.evict() to force a refetch, but would then cause the loading UI to show.
  **/
-export const createQuestionWrapper = async (
+export const createContractQuestionWrapper = async (
     createQuestion: CreateContractQuestionMutationFn,
     input: CreateContractQuestionInput
 ): Promise<CreateContractQuestionMutation | GraphQLErrors | Error> => {
@@ -389,6 +396,90 @@ export const createQuestionWrapper = async (
         return error
     }
 }
+
+export const createRateQuestionWrapper = async (
+    createQuestion: CreateRateQuestionMutationFn,
+    input: CreateRateQuestionInput
+): Promise<CreateRateQuestionMutation | GraphQLErrors | Error> => {
+    try {
+        const result = await createQuestion({
+            variables: { input },
+            update(cache, { data }) {
+                if (data) {
+                    const newQuestion = data.createRateQuestion.question as RateQuestion
+                    const result =
+                        cache.readQuery<FetchRateWithQuestionsQuery>(
+                            {
+                                query: FetchRateWithQuestionsDocument,
+                                variables: {
+                                    input: {
+                                        rateID: newQuestion.rateID,
+                                    },
+                                },
+                            }
+                        )
+
+                    const rate = result?.fetchRate.rate
+
+                    if (rate) {
+                        const indexQuestionDivision =
+                            divisionToIndexQuestionDivision(
+                                newQuestion.division
+                            )
+                        const questions = rate.questions as IndexRateQuestionsPayload
+                        const divisionQuestions =
+                            questions[indexQuestionDivision]
+
+                        cache.writeQuery({
+                            query: FetchRateWithQuestionsDocument,
+                            data: {
+                                fetchRate: {
+                                    rate: {
+                                        ...rate,
+                                        questions: {
+                                            ...rate.questions,
+                                            [indexQuestionDivision]: {
+                                                totalCount:
+                                                    divisionQuestions.totalCount
+                                                        ? divisionQuestions.totalCount +
+                                                          1
+                                                        : 1,
+                                                edges: [
+                                                    {
+                                                        __typename:
+                                                            'RateQuestionEdge',
+                                                        node: {
+                                                            ...newQuestion,
+                                                            responses: [],
+                                                        },
+                                                    },
+                                                    ...divisionQuestions.edges,
+                                                ],
+                                            },
+                                        },
+                                    },
+                                },
+                            },
+                        })
+                    }
+                }
+            },
+            onQueryUpdated: () => true,
+        })
+
+        if (result.data?.createRateQuestion) {
+            return result.data
+        } else {
+            recordJSException(
+                `[UNEXPECTED]: Error attempting to add question, no data present but returning 200.`
+            )
+            return new Error(ERROR_MESSAGES.question_error_generic)
+        }
+    } catch (error) {
+        return error
+    }
+}
+
 
 export const createResponseWrapper = async (
     createResponse: CreateContractQuestionResponseMutationFn,

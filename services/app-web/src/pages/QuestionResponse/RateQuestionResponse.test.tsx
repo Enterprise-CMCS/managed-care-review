@@ -1,3 +1,4 @@
+//@eslint-gignore  jest/no-disabled-tests
 import {
     fetchContractWithQuestionsMockSuccess,
     fetchCurrentUserMock,
@@ -21,7 +22,7 @@ describe('RateQuestionResponse', () => {
         <Routes>
             <Route element={<SubmissionSideNav />}>
                 <Route
-                    path={RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS}
+                    path={RoutesRecord.SUBMISSIONS_CONTRACT_QUESTIONS_AND_ANSWERS}
                     element={<QuestionResponse />}
                 />
                 <Route
@@ -62,9 +63,10 @@ describe('RateQuestionResponse', () => {
                             id: '15',
                         },
                     }),
-                    fetchRateWithQuestionsMockSuccess(
-                        { id: secondRateRev.rateID },
-                        secondRateRev
+                    fetchRateWithQuestionsMockSuccess({
+                        rate: { id: secondRateRev.rateID },
+                        rateRev: secondRateRev
+                    }
                     ),
                 ],
             },

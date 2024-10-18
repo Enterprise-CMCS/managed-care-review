@@ -27,7 +27,7 @@ describe('SubmissionSideNav', () => {
             <Routes>
                 <Route element={<SubmissionSideNav />}>
                     <Route
-                        path={RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS}
+                        path={RoutesRecord.SUBMISSIONS_CONTRACT_QUESTIONS_AND_ANSWERS}
                         element={<QuestionResponse />}
                     />
                     <Route
@@ -120,7 +120,7 @@ describe('SubmissionSideNav', () => {
             <Routes>
                 <Route element={<SubmissionSideNav />}>
                     <Route
-                        path={RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS}
+                        path={RoutesRecord.SUBMISSIONS_CONTRACT_QUESTIONS_AND_ANSWERS}
                         element={<QuestionResponse />}
                     />
                     <Route
@@ -218,7 +218,7 @@ describe('SubmissionSideNav', () => {
             <Routes>
                 <Route element={<SubmissionSideNav />}>
                     <Route
-                        path={RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS}
+                        path={RoutesRecord.SUBMISSIONS_CONTRACT_QUESTIONS_AND_ANSWERS}
                         element={<QuestionResponse />}
                     />
                     <Route
@@ -350,7 +350,7 @@ describe('SubmissionSideNav', () => {
             <Routes>
                 <Route element={<SubmissionSideNav />}>
                     <Route
-                        path={RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS}
+                        path={RoutesRecord.SUBMISSIONS_CONTRACT_QUESTIONS_AND_ANSWERS}
                         element={<QuestionResponse />}
                     />
                     <Route
@@ -389,7 +389,7 @@ describe('SubmissionSideNav', () => {
             <Routes>
                 <Route element={<SubmissionSideNav />}>
                     <Route
-                        path={RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS}
+                        path={RoutesRecord.SUBMISSIONS_CONTRACT_QUESTIONS_AND_ANSWERS}
                         element={<QuestionResponse />}
                     />
                     <Route
@@ -436,7 +436,7 @@ describe('SubmissionSideNav', () => {
                     <Route element={<SubmissionSideNav />}>
                         <Route
                             path={
-                                RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS
+                                RoutesRecord.SUBMISSIONS_CONTRACT_QUESTIONS_AND_ANSWERS
                             }
                             element={<QuestionResponse />}
                         />
@@ -476,7 +476,7 @@ describe('SubmissionSideNav', () => {
                     <Route element={<SubmissionSideNav />}>
                         <Route
                             path={
-                                RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS
+                                RoutesRecord.SUBMISSIONS_CONTRACT_QUESTIONS_AND_ANSWERS
                             }
                             element={<QuestionResponse />}
                         />
@@ -518,7 +518,7 @@ describe('SubmissionSideNav', () => {
                     <Route element={<SubmissionSideNav />}>
                         <Route
                             path={
-                                RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS
+                                RoutesRecord.SUBMISSIONS_CONTRACT_QUESTIONS_AND_ANSWERS
                             }
                             element={<QuestionResponse />}
                         />
@@ -569,7 +569,7 @@ describe('SubmissionSideNav', () => {
                     <Route element={<SubmissionSideNav />}>
                         <Route
                             path={
-                                RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS
+                                RoutesRecord.SUBMISSIONS_CONTRACT_QUESTIONS_AND_ANSWERS
                             }
                             element={<QuestionResponse />}
                         />
