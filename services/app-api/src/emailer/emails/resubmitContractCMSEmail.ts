@@ -1,16 +1,18 @@
-import type { LockedHealthPlanFormDataType } from '../../common-code/healthPlanFormDataType'
 import { packageName as generatePackageName } from '../../common-code/healthPlanFormDataType'
 import { formatCalendarDate } from '../../../../app-web/src/common-code/dateHelpers'
 import {
     stripHTMLFromTemplate,
-    generateCMSReviewerEmails,
     generateCMSReviewerEmailsForSubmittedContract,
     renderTemplate,
     findContractPrograms,
 } from '../templateHelpers'
 
 import type { EmailData, EmailConfiguration, StateAnalystsEmails } from '../'
-import type { ProgramType, UpdateInfoType, ContractType } from '../../domain-models'
+import type {
+    ProgramType,
+    UpdateInfoType,
+    ContractType,
+} from '../../domain-models'
 import { submissionSummaryURL } from '../generateURLs'
 
 export const resubmitContractCMSEmail = async (

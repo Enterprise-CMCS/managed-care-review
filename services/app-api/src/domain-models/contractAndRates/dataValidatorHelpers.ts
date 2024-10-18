@@ -112,11 +112,20 @@ const parseContract = (
             draftRevision: contractRevisionSchema.extend({
                 formData: contractFormDataSchema.extend({
                     contractDocuments: z.array(documentSchema).min(1),
-                    statutoryRegulatoryAttestationDescription:
-                        validateStatutoryRegulatoryAttestation(
-                            formData,
-                            featureFlags
-                        ),
+                    statutoryRegulatoryAttestationDescription: z
+                        .string()
+                        .superRefine((attestationDescription, ctx) => {
+                            if (
+                                featureFlags?.['438-attestation'] &&
+                                !attestationDescription
+                            ) {
+                                ctx.addIssue({
+                                    code: z.ZodIssueCode.custom,
+                                    message:
+                                        'statutoryRegulatoryAttestationDescription is required when  438-attestation feature flag is on',
+                                })
+                            }
+                        }),
                     populationCovered: validatePopulationCovered(formData),
                 }),
             }),

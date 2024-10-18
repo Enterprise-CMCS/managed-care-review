@@ -1,7 +1,10 @@
-import type { LockedHealthPlanFormDataType } from '../../common-code/healthPlanFormDataType'
 import { packageName as generatePackageName } from '../../common-code/healthPlanFormDataType'
 import { formatCalendarDate } from '../../../../app-web/src/common-code/dateHelpers'
-import type { UpdateInfoType, ContractType, ProgramType } from '../../domain-models'
+import type {
+    UpdateInfoType,
+    ContractType,
+    ProgramType,
+} from '../../domain-models'
 import {
     renderTemplate,
     stripHTMLFromTemplate,

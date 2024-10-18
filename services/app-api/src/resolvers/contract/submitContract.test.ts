@@ -8,18 +8,19 @@ import {
 } from '../../testHelpers/gqlHelpers'
 import SUBMIT_CONTRACT from '../../../../app-graphql/src/mutations/submitContract.graphql'
 import { testS3Client } from '../../../../app-web/src/testHelpers/s3Helpers'
+import * as awsSESHelpers from '../../testHelpers/awsSESHelpers'
 
-import { testCMSUser } from '../../testHelpers/userHelpers'
-import type {
-    ContractRevision,
-    RateRevision,
-    SubmitContractInput,
-} from '../../gen/gqlServer'
+import {
+    createDBUsersWithFullData,
+    testCMSUser,
+    testStateUser,
+} from '../../testHelpers/userHelpers'
+import type { ContractRevision, RateRevision } from '../../gen/gqlServer'
 import {
     createAndSubmitTestContractWithRate,
     createAndUpdateTestContractWithoutRates,
-    createTestContract,
     fetchTestContract,
+    resubmitTestContract,
     submitTestContract,
     unlockTestContract,
 } from '../../testHelpers/gqlContractHelpers'
@@ -27,7 +28,6 @@ import {
     addLinkedRateToRateInput,
     addLinkedRateToTestContract,
     addNewRateToTestContract,
-    fetchTestRateById,
     updateRatesInputFromDraftContract,
     updateTestDraftRatesOnContract,
 } from '../../testHelpers/gqlRateHelpers'
@@ -36,8 +36,11 @@ import { latestFormData } from '../../testHelpers/healthPlanPackageHelpers'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 import dayjs from 'dayjs'
 import { testEmailConfig, testEmailer } from '../../testHelpers/emailerHelpers'
-import { getTestStateAnalystsEmails } from '../../testHelpers/parameterStoreHelpers'
-import { StateCodeType } from '../../testHelpers'
+import {
+    getTestStateAnalystsEmails,
+    mockEmailParameterStoreError,
+} from '../../testHelpers/parameterStoreHelpers'
+import { NewPostgresStore } from '../../postgres'
 
 describe('submitContract', () => {
     const mockS3 = testS3Client()
@@ -48,15 +51,11 @@ describe('submitContract', () => {
         })
 
         const draft = await createAndUpdateTestContractWithoutRates(stateServer)
-        const updatedDraft = await addNewRateToTestContract(
-            stateServer,
-            draft
-        )
+        const updatedDraft = await addNewRateToTestContract(stateServer, draft)
 
         const draftRates = updatedDraft.draftRates
 
         expect(draftRates).toHaveLength(1)
-
 
         const contract = await submitTestContract(stateServer, draft.id)
         // check contract metadata
@@ -993,7 +992,11 @@ describe('submitContract', () => {
             submittedReason: 'Test cms user calling state user func',
         }
 
-        await submitTestContract(stateServer, input.contractID, input.submittedReason)
+        await submitTestContract(
+            stateServer,
+            input.contractID,
+            input.submittedReason
+        )
         const res = await cmsServer.executeOperation({
             query: SUBMIT_CONTRACT,
             variables: { input },
@@ -1005,7 +1008,7 @@ describe('submitContract', () => {
         )
     })
 
-    describe( 'emails', () => {
+    describe('emails', () => {
         it('sends two emails', async () => {
             const mockEmailer = testEmailer()
 
@@ -1024,12 +1027,16 @@ describe('submitContract', () => {
                 emailer: mockEmailer,
             })
 
-           const submitResult =  await createAndSubmitTestContractWithRate(server)
+            const submitResult =
+                await createAndSubmitTestContractWithRate(server)
 
             const contractName =
-                submitResult?.packageSubmissions[0].contractRevision.contractName
+                submitResult?.packageSubmissions[0].contractRevision
+                    .contractName
 
-            const stateAnalystsEmails = getTestStateAnalystsEmails(submitResult.stateCode)
+            const stateAnalystsEmails = getTestStateAnalystsEmails(
+                submitResult.stateCode
+            )
 
             const cmsEmails = [
                 ...config.devReviewTeamEmails,
@@ -1061,12 +1068,20 @@ describe('submitContract', () => {
                 },
                 emailer: mockEmailer,
             })
-            const submit1 =  await createAndUpdateTestContractWithoutRates(server)
-            await unlockTestContract(cmsServer, submit1.id, 'unlock to resubmit')
-           await submitTestContract(server, submit1.id, 'resubmit')
+            const submit1 =
+                await createAndUpdateTestContractWithoutRates(server)
+            await unlockTestContract(
+                cmsServer,
+                submit1.id,
+                'unlock to resubmit'
+            )
+            await submitTestContract(server, submit1.id, 'resubmit')
 
-            const contractName = submit1.packageSubmissions[0].contractRevision.contractName
-            const stateAnalystsEmails = getTestStateAnalystsEmails(submit1.stateCode)
+            const contractName =
+                submit1.packageSubmissions[0].contractRevision.contractName
+            const stateAnalystsEmails = getTestStateAnalystsEmails(
+                submit1.stateCode
+            )
 
             const cmsEmails = [
                 ...config.devReviewTeamEmails,
@@ -1077,499 +1092,437 @@ describe('submitContract', () => {
             expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
                 5,
                 expect.objectContaining({
-                    subject: expect.stringContaining(`${contractName} was resubmitted`),
+                    subject: expect.stringContaining(
+                        `${contractName} was resubmitted`
+                    ),
                     sourceEmail: config.emailSource,
                     toAddresses: expect.arrayContaining(Array.from(cmsEmails)),
                 })
             )
         })
 
-    //     it('send CMS email to CMS from the database', async () => {
-    //         const ldService = testLDService({
-    //             'read-write-state-assignments': true,
-    //         })
-
-    //         const prismaClient = await sharedTestPrismaClient()
-    //         const postgresStore = NewPostgresStore(prismaClient)
-
-    //         const config = testEmailConfig()
-    //         const mockEmailer = testEmailer(config)
-    //         //mock invoke email submit lambda
-    //         const server = await constructTestPostgresServer({
-    //             store: postgresStore,
-    //             emailer: mockEmailer,
-    //             ldService,
-    //         })
-    //         const cmsServer = await constructTestPostgresServer({
-    //             store: postgresStore,
-    //             context: {
-    //                 user: cmsUser,
-    //             },
-    //             ldService,
-    //         })
-
-    //         // add some users to the db, assign them to the state
-    //         const assignedUsers = [
-    //             testCMSUser({
-    //                 givenName: 'Roku',
-    //                 email: 'roku@example.com',
-    //             }),
-    //             testCMSUser({
-    //                 givenName: 'Izumi',
-    //                 email: 'izumi@example.com',
-    //             }),
-    //         ]
-    //         await createDBUsersWithFullData(assignedUsers)
-
-    //         const assignedUserIDs = assignedUsers.map((u) => u.id)
-    //         const assignedUserEmails = assignedUsers.map((u) => u.email)
-
-    //         await updateTestStateAssignments(cmsServer, 'FL', assignedUserIDs)
-    //         const submit1 =  await createAndUpdateTestContractWithoutRates(server)
-    //         const contractName= submit1.packageSubmissions[0].contractRevision.contractName
-
-    //         const cmsEmails = [...config.devReviewTeamEmails, ...assignedUserEmails]
-
-    //         // email subject line is correct for CMS email
-    //         expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
-    //             expect.objectContaining({
-    //                 subject: expect.stringContaining(
-    //                     `New Managed Care Submission: ${contractName}`
-    //                 ),
-    //                 sourceEmail: config.emailSource,
-    //                 toAddresses: expect.arrayContaining(Array.from(cmsEmails)),
-    //             })
-    //         )
-    //     })
-
-    //     it('does send email when request for state analysts emails fails', async () => {
-    //         const config = testEmailConfig()
-    //         const mockEmailer = testEmailer(config)
-    //         //mock invoke email submit lambda
-    //         const mockEmailParameterStore = mockEmailParameterStoreError()
-    //         const server = await constructTestPostgresServer({
-    //             emailer: mockEmailer,
-    //             emailParameterStore: mockEmailParameterStore,
-    //         })
-    //         const draft = await createAndUpdateTestHealthPlanPackage(server, {})
-    //         const draftID = draft.id
-
-    //         await server.executeOperation({
-    //             query: SUBMIT_HEALTH_PLAN_PACKAGE,
-    //             variables: {
-    //                 input: {
-    //                     pkgID: draftID,
-    //                 },
-    //             },
-    //         })
-
-    //         expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
-    //             expect.objectContaining({
-    //                 toAddresses: expect.arrayContaining(
-    //                     Array.from(config.devReviewTeamEmails)
-    //                 ),
-    //             })
-    //         )
-    //     })
-
-    //     it('does log error when request for state specific analysts emails failed', async () => {
-    //         const mockEmailParameterStore = mockEmailParameterStoreError()
-    //         const consoleErrorSpy = jest.spyOn(console, 'error')
-    //         const error = {
-    //             error: 'No store found',
-    //             message: 'getStateAnalystsEmails failed',
-    //             operation: 'getStateAnalystsEmails',
-    //             status: 'ERROR',
-    //         }
-
-    //         const server = await constructTestPostgresServer({
-    //             emailParameterStore: mockEmailParameterStore,
-    //         })
-    //         const draft = await createAndUpdateTestHealthPlanPackage(server, {})
-    //         const draftID = draft.id
-
-    //         await server.executeOperation({
-    //             query: SUBMIT_HEALTH_PLAN_PACKAGE,
-    //             variables: {
-    //                 input: {
-    //                     pkgID: draftID,
-    //                 },
-    //             },
-    //         })
-
-    //         expect(consoleErrorSpy).toHaveBeenCalledWith(error)
-    //     })
-
-    //     it('send state email to submitter if submission is valid', async () => {
-    //         const mockEmailer = testEmailer()
-    //         const server = await constructTestPostgresServer({
-    //             emailer: mockEmailer,
-    //             context: {
-    //                 user: testStateUser({
-    //                     email: 'notspiderman@example.com',
-    //                 }),
-    //             },
-    //         })
-    //         const draft = await createAndUpdateTestHealthPlanPackage(server, {})
-    //         const draftID = draft.id
-
-    //         const submitResult = await server.executeOperation({
-    //             query: SUBMIT_HEALTH_PLAN_PACKAGE,
-    //             variables: {
-    //                 input: {
-    //                     pkgID: draftID,
-    //                 },
-    //             },
-    //         })
-
-    //         expect(submitResult.errors).toBeUndefined()
-
-    //         const currentRevision =
-    //             submitResult?.data?.submitHealthPlanPackage?.pkg.revisions[0].node
-
-    //         const sub = base64ToDomain(currentRevision.formDataProto)
-    //         if (sub instanceof Error) {
-    //             throw sub
-    //         }
-
-    //         const programs = [defaultFloridaProgram()]
-    //         const name = packageName(
-    //             sub.stateCode,
-    //             sub.stateNumber,
-    //             sub.programIDs,
-    //             programs
-    //         )
-
-    //         expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
-    //             expect.objectContaining({
-    //                 subject: expect.stringContaining(`${name} was sent to CMS`),
-    //                 toAddresses: expect.arrayContaining([
-    //                     'notspiderman@example.com',
-    //                 ]),
-    //             })
-    //         )
-    //     })
-
-    //     it('send CMS email to CMS on valid resubmission', async () => {
-    //         const config = testEmailConfig()
-    //         const mockEmailer = testEmailer(config)
-    //         //mock invoke email submit lambda
-    //         const stateServer = await constructTestPostgresServer({
-    //             emailer: mockEmailer,
-    //         })
-
-    //         const stateSubmission =
-    //             await createAndSubmitTestHealthPlanPackage(stateServer)
-    //         const cmsServer = await constructTestPostgresServer({
-    //             context: {
-    //                 user: cmsUser,
-    //             },
-    //         })
-
-    //         await unlockTestHealthPlanPackage(
-    //             cmsServer,
-    //             stateSubmission.id,
-    //             'Test unlock reason.'
-    //         )
-
-    //         const submitResult = await stateServer.executeOperation({
-    //             query: SUBMIT_HEALTH_PLAN_PACKAGE,
-    //             variables: {
-    //                 input: {
-    //                     pkgID: stateSubmission.id,
-    //                     submittedReason: 'Test resubmitted reason',
-    //                 },
-    //             },
-    //         })
-
-    //         const currentRevision =
-    //             submitResult?.data?.submitHealthPlanPackage?.pkg.revisions[0].node
-
-    //         const sub = base64ToDomain(currentRevision.formDataProto)
-    //         if (sub instanceof Error) {
-    //             throw sub
-    //         }
-
-    //         const programs = [defaultFloridaProgram()]
-    //         const name = packageName(
-    //             sub.stateCode,
-    //             sub.stateNumber,
-    //             sub.programIDs,
-    //             programs
-    //         )
-
-    //         // email subject line is correct for CMS email and contains correct email body text
-    //         expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
-    //             expect.objectContaining({
-    //                 subject: expect.stringContaining(`${name} was resubmitted`),
-    //                 sourceEmail: config.emailSource,
-    //                 bodyText: expect.stringContaining(
-    //                     `The state completed their edits on submission ${name}`
-    //                 ),
-    //                 toAddresses: expect.arrayContaining(
-    //                     Array.from(config.devReviewTeamEmails)
-    //                 ),
-    //             })
-    //         )
-    //     })
-
-    //     it('send state email to state contacts and all submitters on valid resubmission', async () => {
-    //         const config = testEmailConfig()
-    //         const mockEmailer = testEmailer(config)
-    //         //mock invoke email submit lambda
-    //         const stateServer = await constructTestPostgresServer({
-    //             context: {
-    //                 user: testStateUser({
-    //                     email: 'alsonotspiderman@example.com',
-    //                 }),
-    //             },
-    //         })
-
-    //         const stateServerTwo = await constructTestPostgresServer({
-    //             emailer: mockEmailer,
-    //             context: {
-    //                 user: testStateUser({
-    //                     email: 'notspiderman@example.com',
-    //                 }),
-    //             },
-    //         })
-
-    //         const stateSubmission =
-    //             await createAndSubmitTestHealthPlanPackage(stateServer)
-
-    //         const cmsServer = await constructTestPostgresServer({
-    //             context: {
-    //                 user: cmsUser,
-    //             },
-    //         })
-
-    //         await unlockTestHealthPlanPackage(
-    //             cmsServer,
-    //             stateSubmission.id,
-    //             'Test unlock reason.'
-    //         )
-
-    //         const submitResult = await resubmitTestHealthPlanPackage(
-    //             stateServerTwo,
-    //             stateSubmission.id,
-    //             'Test resubmission reason'
-    //         )
-
-    //         const currentRevision = submitResult?.revisions[0].node
-
-    //         const sub = base64ToDomain(currentRevision.formDataProto)
-    //         if (sub instanceof Error) {
-    //             throw sub
-    //         }
-
-    //         const programs = [defaultFloridaProgram()]
-    //         const name = packageName(
-    //             sub.stateCode,
-    //             sub.stateNumber,
-    //             sub.programIDs,
-    //             programs
-    //         )
-
-    //         // email subject line is correct for CMS email and contains correct email body text
-    //         expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
-    //             expect.objectContaining({
-    //                 subject: expect.stringContaining(`${name} was resubmitted`),
-    //                 sourceEmail: config.emailSource,
-    //                 toAddresses: expect.arrayContaining([
-    //                     'alsonotspiderman@example.com',
-    //                     'notspiderman@example.com',
-    //                     sub.stateContacts[0].email,
-    //                 ]),
-    //             })
-    //         )
-    //     })
-
-    //     it('does not send any emails if submission fails', async () => {
-    //         const mockEmailer = testEmailer()
-    //         const server = await constructTestPostgresServer({
-    //             emailer: mockEmailer,
-    //         })
-    //         const draft = await createAndUpdateTestHealthPlanPackage(server, {
-    //             submissionType: 'CONTRACT_AND_RATES',
-    //             rateInfos: [
-    //                 {
-    //                     id: uuidv4(),
-    //                     rateDateStart: new Date(Date.UTC(2025, 5, 1)),
-    //                     rateDateEnd: new Date(Date.UTC(2026, 4, 30)),
-    //                     rateDateCertified: undefined,
-    //                     rateDocuments: [],
-    //                     supportingDocuments: [],
-    //                     actuaryContacts: [],
-    //                     packagesWithSharedRateCerts: [],
-    //                 },
-    //             ],
-    //         })
-    //         const draftID = draft.id
-
-    //         const submitResult = await server.executeOperation({
-    //             query: SUBMIT_HEALTH_PLAN_PACKAGE,
-    //             variables: {
-    //                 input: {
-    //                     pkgID: draftID,
-    //                 },
-    //             },
-    //         })
-
-    //         expect(submitResult.errors).toBeDefined()
-    //         expect(mockEmailer.sendEmail).not.toHaveBeenCalled()
-    //     })
-
-    //     it('errors when SES email has failed.', async () => {
-    //         const mockEmailer = testEmailer()
-
-    //         jest.spyOn(awsSESHelpers, 'testSendSESEmail').mockImplementation(
-    //             async () => {
-    //                 throw new Error('Network error occurred')
-    //             }
-    //         )
-
-    //         //mock invoke email submit lambda
-    //         const server = await constructTestPostgresServer({
-    //             emailer: mockEmailer,
-    //         })
-    //         const draft = await createAndUpdateTestHealthPlanPackage(server, {})
-    //         const draftID = draft.id
-
-    //         const submitResult = await server.executeOperation({
-    //             query: SUBMIT_HEALTH_PLAN_PACKAGE,
-    //             variables: {
-    //                 input: {
-    //                     pkgID: draftID,
-    //                 },
-    //             },
-    //         })
-
-    //         // expect errors from submission
-    //         // expect(submitResult.errors).toBeDefined()
-
-    //         // expect sendEmail to have been called, so we know it did not error earlier
-    //         expect(mockEmailer.sendEmail).toHaveBeenCalled()
-
-    //         jest.resetAllMocks()
-
-    //         // expect correct graphql error.
-    //         expect(submitResult.errors?.[0]).toEqual(
-    //             expect.objectContaining({
-    //                 message: 'Email failed',
-    //                 path: ['submitHealthPlanPackage'],
-    //                 extensions: {
-    //                     code: 'INTERNAL_SERVER_ERROR',
-    //                     cause: 'EMAIL_ERROR',
-    //                     exception: {
-    //                         message: 'Email failed',
-    //                     },
-    //                 },
-    //             })
-    //         )
-    //     })
-    // })
-
-    // describe('Feature flagged 4348 attestation question test', () => {
-    //     const ldService = testLDService({
-    //         '438-attestation': true,
-    //     })
-
-    //     it('errors when contract 4348 attestation question is undefined', async () => {
-    //         const server = await constructTestPostgresServer({
-    //             ldService: ldService,
-    //         })
-
-    //         // setup
-    //         const initialPkg = await createAndUpdateTestHealthPlanPackage(
-    //             server,
-    //             {
-    //                 statutoryRegulatoryAttestation: undefined,
-    //                 statutoryRegulatoryAttestationDescription: undefined,
-    //             }
-    //         )
-    //         const draft = latestFormData(initialPkg)
-    //         const draftID = draft.id
-
-    //         await new Promise((resolve) => setTimeout(resolve, 2000))
-
-    //         // submit
-    //         const submitResult = await server.executeOperation({
-    //             query: SUBMIT_HEALTH_PLAN_PACKAGE,
-    //             variables: {
-    //                 input: {
-    //                     pkgID: draftID,
-    //                 },
-    //             },
-    //         })
-
-    //         expect(submitResult.errors).toBeDefined()
-    //         expect(submitResult.errors?.[0].extensions?.message).toBe(
-    //             'formData is missing required contract fields'
-    //         )
-    //     }, 20000)
-    //     it('errors when contract 4348 attestation question is false without a description', async () => {
-    //         const server = await constructTestPostgresServer({
-    //             ldService: ldService,
-    //         })
-
-    //         // setup
-    //         const initialPkg = await createAndUpdateTestHealthPlanPackage(
-    //             server,
-    //             {
-    //                 statutoryRegulatoryAttestation: false,
-    //                 statutoryRegulatoryAttestationDescription: undefined,
-    //             }
-    //         )
-    //         const draft = latestFormData(initialPkg)
-    //         const draftID = draft.id
-
-    //         await new Promise((resolve) => setTimeout(resolve, 2000))
-
-    //         // submit
-    //         const submitResult = await server.executeOperation({
-    //             query: SUBMIT_HEALTH_PLAN_PACKAGE,
-    //             variables: {
-    //                 input: {
-    //                     pkgID: draftID,
-    //                 },
-    //             },
-    //         })
-
-    //         expect(submitResult.errors).toBeDefined()
-    //         expect(submitResult.errors?.[0].extensions?.message).toBe(
-    //             'formData is missing required contract fields'
-    //         )
-    //     }, 20000)
-    //     it('successfully submits when contract 4348 attestation question is valid', async () => {
-    //         const server = await constructTestPostgresServer({
-    //             ldService: ldService,
-    //         })
-
-    //         // setup
-    //         const initialPkg = await createAndUpdateTestHealthPlanPackage(
-    //             server,
-    //             {
-    //                 statutoryRegulatoryAttestation: false,
-    //                 statutoryRegulatoryAttestationDescription: 'No compliance',
-    //             }
-    //         )
-    //         const draft = latestFormData(initialPkg)
-    //         const draftID = draft.id
-
-    //         await new Promise((resolve) => setTimeout(resolve, 2000))
-
-    //         // submit
-    //         const submitResult = await server.executeOperation({
-    //             query: SUBMIT_HEALTH_PLAN_PACKAGE,
-    //             variables: {
-    //                 input: {
-    //                     pkgID: draftID,
-    //                 },
-    //             },
-    //         })
-
-    //         expect(submitResult.errors).toBeUndefined()
-    //     }, 20000)
-    // }) 
-})
+        it('send CMS email to CMS from the database', async () => {
+            const ldService = testLDService({
+                'read-write-state-assignments': true,
+            })
+
+            const prismaClient = await sharedTestPrismaClient()
+            const postgresStore = NewPostgresStore(prismaClient)
+
+            const config = testEmailConfig()
+            const mockEmailer = testEmailer(config)
+            //mock invoke email submit lambda
+            const server = await constructTestPostgresServer({
+                store: postgresStore,
+                emailer: mockEmailer,
+                ldService,
+            })
+            const cmsServer = await constructTestPostgresServer({
+                store: postgresStore,
+                context: {
+                    user: testCMSUser(),
+                },
+                ldService,
+            })
+
+            // add some users to the db, assign them to the state
+            const assignedUsers = [
+                testCMSUser({
+                    givenName: 'Roku',
+                    email: 'roku@example.com',
+                }),
+                testCMSUser({
+                    givenName: 'Izumi',
+                    email: 'izumi@example.com',
+                }),
+            ]
+            await createDBUsersWithFullData(assignedUsers)
+
+            const assignedUserIDs = assignedUsers.map((u) => u.id)
+            const assignedUserEmails = assignedUsers.map((u) => u.email)
+
+            await updateTestStateAssignments(cmsServer, 'FL', assignedUserIDs)
+            const submit1 = await createAndSubmitTestContractWithRate(server)
+            const contractName =
+                submit1.packageSubmissions[0].contractRevision.contractName
+
+            const cmsEmails = [
+                ...config.devReviewTeamEmails,
+                ...assignedUserEmails,
+            ]
+
+            // email subject line is correct for CMS email
+            expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    subject: expect.stringContaining(
+                        `New Managed Care Submission: ${contractName}`
+                    ),
+                    sourceEmail: config.emailSource,
+                    toAddresses: expect.arrayContaining(Array.from(cmsEmails)),
+                })
+            )
+        })
+
+        it('does send email when request for state analysts emails fails', async () => {
+            const config = testEmailConfig()
+            const mockEmailer = testEmailer(config)
+            //mock invoke email submit lambda
+            const mockEmailParameterStore = mockEmailParameterStoreError()
+            const server = await constructTestPostgresServer({
+                emailer: mockEmailer,
+                emailParameterStore: mockEmailParameterStore,
+            })
+            const draft = await createAndUpdateTestContractWithoutRates(server)
+            const draftID = draft.id
+
+            await server.executeOperation({
+                query: SUBMIT_CONTRACT,
+                variables: {
+                    input: {
+                        contractID: draftID,
+                    },
+                },
+            })
+
+            expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    toAddresses: expect.arrayContaining(
+                        Array.from(config.devReviewTeamEmails)
+                    ),
+                })
+            )
+        })
+
+        it('does log error when request for state specific analysts emails failed', async () => {
+            const mockEmailParameterStore = mockEmailParameterStoreError()
+            const consoleErrorSpy = jest.spyOn(console, 'error')
+            const error = {
+                error: 'No store found',
+                message: 'getStateAnalystsEmails failed',
+                operation: 'getStateAnalystsEmails',
+                status: 'ERROR',
+            }
+
+            const server = await constructTestPostgresServer({
+                emailParameterStore: mockEmailParameterStore,
+            })
+            const draft = await createAndUpdateTestContractWithoutRates(server)
+            const draftID = draft.id
+
+            await server.executeOperation({
+                query: SUBMIT_CONTRACT,
+                variables: {
+                    input: {
+                        contractID: draftID,
+                    },
+                },
+            })
+
+            expect(consoleErrorSpy).toHaveBeenCalledWith(error)
+        })
+
+        it('send state email to submitter if submission is valid', async () => {
+            const mockEmailer = testEmailer()
+            const server = await constructTestPostgresServer({
+                emailer: mockEmailer,
+                context: {
+                    user: testStateUser({
+                        email: 'notspiderman@example.com',
+                    }),
+                },
+            })
+            const draft = await createAndUpdateTestContractWithoutRates(server)
+            const draftID = draft.id
+
+            const submitResult = await server.executeOperation({
+                query: SUBMIT_CONTRACT,
+                variables: {
+                    input: {
+                        contractID: draftID,
+                    },
+                },
+            })
+
+            expect(submitResult.errors).toBeUndefined()
+
+            const currentRevision =
+                submitResult?.data?.submitContract?.contract
+                    .packageSubmissions[0].contractRevision
+
+            const name = currentRevision.contractName
+
+            expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    subject: expect.stringContaining(`${name} was sent to CMS`),
+                    toAddresses: expect.arrayContaining([
+                        'notspiderman@example.com',
+                    ]),
+                })
+            )
+        })
+
+        it('send CMS email to CMS on valid resubmission', async () => {
+            const config = testEmailConfig()
+            const mockEmailer = testEmailer(config)
+            //mock invoke email submit lambda
+            const stateServer = await constructTestPostgresServer({
+                emailer: mockEmailer,
+            })
+
+            const stateSubmission =
+                await createAndSubmitTestContractWithRate(stateServer)
+            const cmsServer = await constructTestPostgresServer({
+                context: {
+                    user: testCMSUser(),
+                },
+            })
+
+            await unlockTestContract(
+                cmsServer,
+                stateSubmission.id,
+                'Test unlock reason.'
+            )
+
+            const submitResult = await stateServer.executeOperation({
+                query: SUBMIT_CONTRACT,
+                variables: {
+                    input: {
+                        contractID: stateSubmission.id,
+                        submittedReason: 'Test resubmitted reason',
+                    },
+                },
+            })
+
+            const currentRevision =
+                submitResult?.data?.submitContract?.contract
+                    .packageSubmissions[0].contractRevision
+
+            const name = currentRevision.contractName
+
+            // email subject line is correct for CMS email and contains correct email body text
+            expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    subject: expect.stringContaining(`${name} was resubmitted`),
+                    sourceEmail: config.emailSource,
+                    bodyText: expect.stringContaining(
+                        `The state completed their edits on submission ${name}`
+                    ),
+                    toAddresses: expect.arrayContaining(
+                        Array.from(config.devReviewTeamEmails)
+                    ),
+                })
+            )
+        })
+
+        it('send state email to state contacts and all submitters on valid resubmission', async () => {
+            const config = testEmailConfig()
+            const mockEmailer = testEmailer(config)
+            //mock invoke email submit lambda
+            const stateServer = await constructTestPostgresServer({
+                context: {
+                    user: testStateUser({
+                        email: 'alsonotspiderman@example.com',
+                    }),
+                },
+            })
+
+            const stateServerTwo = await constructTestPostgresServer({
+                emailer: mockEmailer,
+                context: {
+                    user: testStateUser({
+                        email: 'notspiderman@example.com',
+                    }),
+                },
+            })
+
+            const stateSubmission =
+                await createAndUpdateTestContractWithoutRates(stateServer)
+
+            const cmsServer = await constructTestPostgresServer({
+                context: {
+                    user: testCMSUser(),
+                },
+            })
+
+            await unlockTestContract(
+                cmsServer,
+                stateSubmission.id,
+                'Test unlock reason.'
+            )
+
+            const submitResult = await resubmitTestContract(
+                stateServerTwo,
+                stateSubmission.id,
+                'Test resubmission reason'
+            )
+
+            const currentRevision =
+                submitResult?.packageSubmissions[0].contractRevision
+
+            const name = currentRevision.contractName
+
+            // email subject line is correct for CMS email and contains correct email body text
+            expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    subject: expect.stringContaining(`${name} was resubmitted`),
+                    sourceEmail: config.emailSource,
+                    toAddresses: expect.arrayContaining([
+                        'alsonotspiderman@example.com',
+                        'notspiderman@example.com',
+                        currentRevision.formData.stateContacts[0].email,
+                    ]),
+                })
+            )
+        })
+
+        it('does not send any emails if submission fails', async () => {
+            const mockEmailer = testEmailer()
+            const server = await constructTestPostgresServer({
+                emailer: mockEmailer,
+            })
+            // Invalid contract ID
+            const draftID = '123'
+
+            const submitResult = await server.executeOperation({
+                query: SUBMIT_CONTRACT,
+                variables: {
+                    input: {
+                        contractID: draftID,
+                    },
+                },
+            })
+
+            expect(submitResult.errors).toBeDefined()
+            expect(mockEmailer.sendEmail).not.toHaveBeenCalled()
+        })
+
+        it('errors when SES email has failed.', async () => {
+            const mockEmailer = testEmailer()
+
+            jest.spyOn(awsSESHelpers, 'testSendSESEmail').mockImplementation(
+                async () => {
+                    throw new Error('Network error occurred')
+                }
+            )
+
+            //mock invoke email submit lambda
+            const server = await constructTestPostgresServer({
+                emailer: mockEmailer,
+            })
+            const draft = await createAndUpdateTestContractWithoutRates(server)
+            const draftID = draft.id
+
+            const submitResult = await server.executeOperation({
+                query: SUBMIT_CONTRACT,
+                variables: {
+                    input: {
+                        contractID: draftID,
+                    },
+                },
+            })
+
+            // expect errors from submission
+            // expect(submitResult.errors).toBeDefined()
+
+            // expect sendEmail to have been called, so we know it did not error earlier
+            expect(mockEmailer.sendEmail).toHaveBeenCalled()
+
+            jest.resetAllMocks()
+
+            // expect correct graphql error.
+            expect(submitResult.errors?.[0].message).toBe('Email failed')
+        })
+    })
+
+    describe('Feature flagged 4348 attestation question test', () => {
+        const ldService = testLDService({
+            '438-attestation': true,
+        })
+
+        it('errors when contract 4348 attestation question is undefined', async () => {
+            const server = await constructTestPostgresServer({
+                ldService: ldService,
+            })
+
+            // setup
+            const initialContract =
+                await createAndUpdateTestContractWithoutRates(server, 'FL', {
+                    statutoryRegulatoryAttestationDescription: undefined,
+                    statutoryRegulatoryAttestation: undefined,
+                })
+
+            await new Promise((resolve) => setTimeout(resolve, 2000))
+
+            // submit
+            const submitResult = await server.executeOperation({
+                query: SUBMIT_CONTRACT,
+                variables: {
+                    input: {
+                        contractID: initialContract.id,
+                    },
+                },
+            })
+
+            expect(submitResult.errors).toBeDefined()
+            expect(submitResult.errors?.[0].message).toContain('Required')
+        }, 20000)
+
+        it('errors when contract 4348 attestation question is false without a description', async () => {
+            const server = await constructTestPostgresServer({
+                ldService: ldService,
+            })
+
+            // setup
+            const initialContract =
+                await createAndUpdateTestContractWithoutRates(server, 'FL', {
+                    statutoryRegulatoryAttestationDescription: undefined,
+                    statutoryRegulatoryAttestation: false,
+                })
+
+            await new Promise((resolve) => setTimeout(resolve, 2000))
+
+            // submit
+            const submitResult = await server.executeOperation({
+                query: SUBMIT_CONTRACT,
+                variables: {
+                    input: {
+                        contractID: initialContract.id,
+                    },
+                },
+            })
+
+            expect(submitResult.errors).toBeDefined()
+            expect(submitResult.errors?.[0].extensions?.message).toContain(
+                'Required'
+            )
+        }, 20000)
+
+        it('successfully submits when contract 4348 attestation question is valid', async () => {
+            const server = await constructTestPostgresServer({
+                ldService: ldService,
+            })
+
+            // setup
+            const initialContract =
+                await createAndUpdateTestContractWithoutRates(server, 'FL', {
+                    statutoryRegulatoryAttestationDescription:
+                        'A valid description',
+                    statutoryRegulatoryAttestation: false,
+                })
+
+            await new Promise((resolve) => setTimeout(resolve, 2000))
+
+            // submit
+            const submitResult = await server.executeOperation({
+                query: SUBMIT_CONTRACT,
+                variables: {
+                    input: {
+                        contractID: initialContract.id,
+                    },
+                },
+            })
+
+            expect(submitResult.errors).toBeUndefined()
+        }, 20000)
+    })
 })
