@@ -1,0 +1,1 @@
+export { findAllDocuments } from './findAllDocuments'
