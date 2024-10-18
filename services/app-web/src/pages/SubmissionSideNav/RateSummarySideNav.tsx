@@ -39,7 +39,7 @@ export const RateSummarySideNav = () => {
         skip: Boolean(shouldRedirect), //skip as we are redirecting.
     })
 
-    // If CMS user uses the submission summary rate Q&A link, redirect to the rate summary Q&A page.
+    // If CMS user uses the submission summary rate Q&A url, redirect to the rate summary Q&A page.
     if (shouldRedirect) {
         return (
             <Navigate

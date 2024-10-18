@@ -66,11 +66,11 @@ describe('RateSummarySideNav', () => {
             name: /Rate questions/,
         })
 
-        // Expect submission summary link to exist within sidebar nav
+        // Expect rate summary link to exist within sidebar nav
         expect(summaryLink).toBeInTheDocument()
-        // Expect submission summary link to be currently selected and highlighted
+        // Expect rate summary link to be currently selected and highlighted
         expect(summaryLink).toHaveClass('usa-current')
-        // Expect submission summary link to have correct href url
+        // Expect rate summary link to have correct href url
         expect(summaryLink).toHaveAttribute('href', `/rates/${rate.id}`)
 
         // Expect Q&A link to exist within sidebar nav.
@@ -164,11 +164,11 @@ describe('RateSummarySideNav', () => {
             name: /Rate questions/,
         })
 
-        // Expect submission summary link to exist within sidebar nav
+        // Expect rate summary link to exist within sidebar nav
         expect(summaryLink).toBeInTheDocument()
-        // Expect submission summary link NOT to be currently selected and highlighted
+        // Expect rate summary link NOT to be currently selected and highlighted
         expect(summaryLink).not.toHaveClass('usa-current')
-        // Expect submission summary link to have correct href url
+        // Expect rate summary link to have correct href url
         expect(summaryLink).toHaveAttribute('href', `/rates/${rate.id}`)
 
         // Expect Q&A link to exist within sidebar nav.
