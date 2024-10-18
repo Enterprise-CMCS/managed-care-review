@@ -1,10 +1,16 @@
 import type { APIGatewayProxyResultV2, Handler } from 'aws-lambda'
 import { initTracer, recordException } from '../../../uploads/src/lib/otel'
 import { configurePostgres } from './configuration'
-import { NewPostgresStore } from '../postgres'
+import { NewPostgresStore, NotFoundError } from '../postgres'
+import type { Store } from '../postgres'
 import { HeadObjectCommand, S3Client } from '@aws-sdk/client-s3'
 import type { S3ServiceException } from '@aws-sdk/client-s3'
-import type { AuditDocument } from '../domain-models'
+import type { AuditDocument, ContractType, RateType } from '../domain-models'
+
+type DocumentWithAssociation = AuditDocument & {
+    associatedContract?: ContractType
+    associatedRate?: RateType
+}
 
 const main: Handler = async (): Promise<APIGatewayProxyResultV2> => {
     // setup otel tracing
@@ -71,9 +77,19 @@ const main: Handler = async (): Promise<APIGatewayProxyResultV2> => {
         }
     }
 
+    // dedup
     const uniqueDocuments = deduplicateDocuments(missingOrErrorDocuments)
     console.info(
         `Missing ${uniqueDocuments.length} of ${docResult.length} documents`
+    )
+
+    // get the contract or rate
+    const documentsWithAssociations = await fetchAssociatedData(
+        store,
+        uniqueDocuments
+    )
+    console.info(
+        `found ${documentsWithAssociations.length} documents with associations`
     )
 
     console.info(
@@ -82,7 +98,7 @@ const main: Handler = async (): Promise<APIGatewayProxyResultV2> => {
 
     const success: APIGatewayProxyResultV2 = {
         statusCode: 200,
-        body: JSON.stringify(missingOrErrorDocuments),
+        body: JSON.stringify(documentsWithAssociations),
         headers: {
             'Access-Control-Allow-Origin': '*',
             'Access-Control-Allow-Credentials': true,
@@ -178,6 +194,53 @@ function deduplicateDocuments(documents: AuditDocument[]): AuditDocument[] {
     }
 
     return Array.from(uniqueDocuments.values())
+}
+
+async function fetchAssociatedData(
+    store: Store,
+    documents: AuditDocument[]
+): Promise<DocumentWithAssociation[]> {
+    const results: DocumentWithAssociation[] = []
+
+    for (const doc of documents) {
+        let associatedData: ContractType | RateType | null = null
+
+        if (doc.type === 'contractDoc' && doc.contractRevisionID) {
+            const contractResult = await store.findContractWithHistory(
+                doc.contractRevisionID
+            )
+            if (
+                !(contractResult instanceof Error) &&
+                !(contractResult instanceof NotFoundError)
+            ) {
+                associatedData = contractResult
+            }
+        } else if (doc.type === 'rateDoc' && doc.rateRevisionID) {
+            const rateResult = await store.findRateWithHistory(
+                doc.rateRevisionID
+            )
+            if (
+                !(rateResult instanceof Error) &&
+                !(rateResult instanceof NotFoundError)
+            ) {
+                associatedData = rateResult
+            }
+        }
+
+        results.push({
+            ...doc,
+            associatedContract:
+                doc.type === 'contractDoc'
+                    ? (associatedData as ContractType)
+                    : undefined,
+            associatedRate:
+                doc.type === 'rateDoc'
+                    ? (associatedData as RateType)
+                    : undefined,
+        })
+    }
+
+    return results
 }
 
 module.exports = { main }
