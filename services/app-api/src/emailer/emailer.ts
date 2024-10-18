@@ -10,7 +10,6 @@ import {
     unlockContractStateEmail,
     unlockPackageCMSEmail,
     unlockPackageStateEmail,
-    resubmitPackageStateEmail,
     resubmitContractStateEmail,
     resubmitContractCMSEmail,
     sendQuestionStateEmail,
@@ -25,12 +24,8 @@ import type {
 import type {
     UpdateInfoType,
     ProgramType,
-<<<<<<< HEAD
-    Question,
     ContractType,
-=======
     ContractQuestionType,
->>>>>>> 0cb8a3556e6c308701b7947a0a93d6e63741159d
     ContractRevisionType,
     UnlockedContractType,
 } from '../domain-models'
