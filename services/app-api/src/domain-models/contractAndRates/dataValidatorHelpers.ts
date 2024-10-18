@@ -1,13 +1,21 @@
 import type { FeatureFlagSettings } from '../../common-code/featureFlags'
 import type { ContractDraftRevisionFormDataInput } from '../../gen/gqlServer'
-import { contractFormDataSchema, preprocessNulls } from './formDataTypes'
+import {
+    contractFormDataSchema,
+    preprocessNulls,
+    rateFormDataSchema,
+    documentSchema,
+} from './formDataTypes'
 import {
     contractTypeSchema,
     populationCoveredSchema,
 } from '../../common-code/proto/healthPlanFormDataProto/zodSchemas'
 import { z } from 'zod'
 import type { Store } from '../../postgres'
-
+import { contractSchema } from './contractTypes'
+import type { ContractType } from './contractTypes'
+import { contractRevisionSchema, rateRevisionSchema } from './revisionTypes'
+import { rateWithoutDraftContractsSchema } from './baseContractRateTypes'
 const updateDraftContractFormDataSchema = contractFormDataSchema.extend({
     contractType: preprocessNulls(contractTypeSchema.optional()),
     submissionDescription: preprocessNulls(z.string().optional()),
@@ -65,6 +73,18 @@ const validatePopulationCovered = (
         }
     })
 
+const validateAttestation = (featureFlags?: FeatureFlagSettings) => {
+    return z.string().superRefine((attestationDescription, ctx) => {
+        if (featureFlags?.['438-attestation'] && !attestationDescription) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message:
+                    'statutoryRegulatoryAttestationDescription is required when  438-attestation feature flag is on',
+            })
+        }
+    })
+}
+
 const validateContractDraftRevisionInput = (
     formData: ContractDraftRevisionFormDataInput,
     stateCode: string,
@@ -93,4 +113,82 @@ const validateContractDraftRevisionInput = (
     return parsedData.data
 }
 
-export { validateContractDraftRevisionInput }
+const parseContract = (
+    contract: ContractType,
+    stateCode: string,
+    store: Store,
+    featureFlags?: FeatureFlagSettings
+): ContractType | Error => {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
+    const formData = contract.draftRevision?.formData!
+    const parsedData = contractSchema
+        .extend({
+            draftRevision: contractRevisionSchema.extend({
+                formData: contractFormDataSchema.extend({
+                    contractDocuments: z.array(documentSchema).min(1),
+                    statutoryRegulatoryAttestationDescription:
+                        validateAttestation(featureFlags),
+                    programIDs: validateProgramIDs(stateCode, store),
+                    populationCovered: validatePopulationCovered(formData),
+                }),
+            }),
+            draftRates: z.array(
+                rateWithoutDraftContractsSchema.extend({
+                    draftRevision: rateRevisionSchema.extend({
+                        formData: rateFormDataSchema
+                            .extend({
+                                rateDocuments: z.array(documentSchema).min(1),
+                            })
+                            .superRefine(
+                                (
+                                    {
+                                        rateType,
+                                        amendmentEffectiveDateEnd,
+                                        amendmentEffectiveDateStart,
+                                    },
+                                    ctx
+                                ) => {
+                                    if (rateType === 'AMENDMENT') {
+                                        if (!amendmentEffectiveDateEnd) {
+                                            ctx.addIssue({
+                                                code: z.ZodIssueCode.custom,
+                                                message:
+                                                    'amendmentEffectiveDateEnd is required if rateType is AMENDMENT',
+                                                path: [
+                                                    'amendmentEffectiveDateEnd',
+                                                ],
+                                            })
+                                        }
+                                        if (!amendmentEffectiveDateStart) {
+                                            ctx.addIssue({
+                                                code: z.ZodIssueCode.custom,
+                                                message:
+                                                    'amendmentEffectiveDateStart is required if rateType is AMENDMENT',
+                                                path: [
+                                                    'amendmentEffectiveDateStart',
+                                                ],
+                                            })
+                                        }
+                                    }
+                                }
+                            ),
+                    }),
+                })
+            ),
+        })
+        .safeParse(contract)
+
+    if (parsedData.error) {
+        return parsedData.error
+    }
+
+    if (!parsedData.data) {
+        return new Error(
+            'Error: validateContractDraftRevisionInput returned no data'
+        )
+    }
+
+    return parsedData.data
+}
+
+export { validateContractDraftRevisionInput, parseContract }

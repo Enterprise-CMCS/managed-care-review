@@ -116,7 +116,12 @@ type RateFormDataType = z.infer<typeof rateFormDataSchema>
 type ContractFormEditableType = Partial<ContractFormDataType>
 type RateFormEditableType = Partial<RateFormDataType>
 
-export { contractFormDataSchema, rateFormDataSchema, preprocessNulls }
+export {
+    contractFormDataSchema,
+    rateFormDataSchema,
+    preprocessNulls,
+    documentSchema,
+}
 
 export type {
     ContractFormDataType,

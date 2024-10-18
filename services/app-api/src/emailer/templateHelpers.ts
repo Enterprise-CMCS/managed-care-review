@@ -9,6 +9,7 @@ import type {
 import type { EmailConfiguration, StateAnalystsEmails } from '.'
 import type {
     ContractRevisionType,
+    ContractType,
     ProgramType,
     RateRevisionType,
     UnlockedContractType,
@@ -172,6 +173,68 @@ const generateCMSReviewerEmailsForUnlockedContract = (
     )
     //Remove OACT and DMCP emails from CHIP or State of PR submissions
     if (
+        handleAsCHIPSubmissionForContract(contractRev, rateRevs) ||
+        contractRev.contract.stateCode === 'PR'
+    ) {
+        reviewers = filterChipAndPRSubmissionReviewers(reviewers, config)
+    }
+
+    return pruneDuplicateEmails(reviewers)
+}
+
+/* 
+    Determine reviewers for a given health plan package and state
+    - devReviewTeamEmails added to all emails by default
+    - dmcpSubmissionEmails added in both CONTRACT_ONLY and CONTRACT_AND_RATES
+    - oactEmails added for CONTRACT_AND_RATES
+    - dmco is added to emails via state analysts
+    
+    Return should be wrapped in pruneDuplicate to ensure even if config is added twice, we get unique list of reviewers
+*/
+const generateCMSReviewerEmailsForSubmittedContract = (
+    config: EmailConfiguration,
+    contract: ContractType,
+    stateAnalystsEmails: StateAnalystsEmails
+): string[] | Error => {
+    const contractRev = contract.packageSubmissions[0].contractRevision
+    const contractFormData = contractRev.formData
+    
+    if (
+        contractFormData.submissionType !== 'CONTRACT_AND_RATES' &&
+        contractFormData.submissionType !== 'CONTRACT_ONLY'
+    ) {
+        return new Error(
+            `generateCMSReviewerEmailsForContract does not currently support submission type: ${contractFormData.submissionType}.`
+        )
+    }
+
+    const { oactEmails, dmcpSubmissionEmails } = config
+    let reviewers: string[] = []
+
+    if (contractFormData.submissionType === 'CONTRACT_ONLY') {
+        // Contract submissions reviewer emails
+        reviewers = [
+            ...config.devReviewTeamEmails,
+            ...stateAnalystsEmails,
+            ...dmcpSubmissionEmails,
+        ]
+    } else if (contractFormData.submissionType === 'CONTRACT_AND_RATES') {
+        //Contract and rate submissions reviewer emails.
+        reviewers = [
+            ...config.devReviewTeamEmails,
+            ...stateAnalystsEmails,
+            ...dmcpSubmissionEmails,
+        ]
+
+        if (contractFormData.riskBasedContract) {
+            reviewers = [...reviewers, ...oactEmails]
+        }
+    }
+
+    const rateRevs = contract.packageSubmissions[0].rateRevisions
+    
+    //Remove OACT and DMCP emails from CHIP or State of PR submissions
+    if (rateRevs &&
         handleAsCHIPSubmissionForContract(contractRev, rateRevs) ||
         contractRev.contract.stateCode === 'PR'
     ) {
@@ -360,6 +423,7 @@ export {
     handleAsCHIPSubmission,
     handleAsCHIPSubmissionForContract,
     generateCMSReviewerEmails,
+    generateCMSReviewerEmailsForSubmittedContract,
     generateCMSReviewerEmailsForUnlockedContract,
     renderTemplate,
     SubmissionTypeRecord,

@@ -1,54 +1,58 @@
-import type { LockedHealthPlanFormDataType } from '../../common-code/healthPlanFormDataType'
 import { packageName as generatePackageName } from '../../common-code/healthPlanFormDataType'
 import { formatCalendarDate } from '../../../../app-web/src/common-code/dateHelpers'
 import {
     stripHTMLFromTemplate,
-    generateCMSReviewerEmails,
+    generateCMSReviewerEmailsForSubmittedContract,
     renderTemplate,
-    findPackagePrograms,
+    findContractPrograms,
 } from '../templateHelpers'
 
 import type { EmailData, EmailConfiguration, StateAnalystsEmails } from '../'
-import type { ProgramType, UpdateInfoType } from '../../domain-models'
+import type {
+    ProgramType,
+    UpdateInfoType,
+    ContractType,
+} from '../../domain-models'
 import { submissionSummaryURL } from '../generateURLs'
 
-export const resubmitPackageCMSEmail = async (
-    pkg: LockedHealthPlanFormDataType,
+export const resubmitContractCMSEmail = async (
+    contract: ContractType,
     updateInfo: UpdateInfoType,
     config: EmailConfiguration,
     stateAnalystsEmails: StateAnalystsEmails,
     statePrograms: ProgramType[]
 ): Promise<EmailData | Error> => {
     const isTestEnvironment = config.stage !== 'prod'
-    const reviewerEmails = generateCMSReviewerEmails(
+    const reviewerEmails = generateCMSReviewerEmailsForSubmittedContract(
         config,
-        pkg,
+        contract,
         stateAnalystsEmails
     )
 
     if (reviewerEmails instanceof Error) {
         return reviewerEmails
     }
-
+    const contractRev = contract.packageSubmissions[0].contractRevision
+    const formData = contractRev.formData
     //This checks to make sure all programs contained in submission exists for the state.
-    const packagePrograms = findPackagePrograms(pkg, statePrograms)
+    const packagePrograms = findContractPrograms(contractRev, statePrograms)
 
     if (packagePrograms instanceof Error) {
         return packagePrograms
     }
 
     const packageName = generatePackageName(
-        pkg.stateCode,
-        pkg.stateNumber,
-        pkg.programIDs,
+        contract.stateCode,
+        contract.stateNumber,
+        formData.programIDs,
         packagePrograms
     )
 
     const isContractAndRates =
-        pkg.submissionType === 'CONTRACT_AND_RATES' &&
-        Boolean(pkg.rateInfos.length)
+        formData.submissionType === 'CONTRACT_AND_RATES' &&
+        Boolean(contract.packageSubmissions[0].rateRevisions.length)
 
-    const packageURL = submissionSummaryURL(pkg.id, config.baseUrl)
+    const packageURL = submissionSummaryURL(contract.id, config.baseUrl)
 
     const data = {
         packageName: packageName,
@@ -61,14 +65,14 @@ export const resubmitPackageCMSEmail = async (
         shouldIncludeRates: isContractAndRates,
         rateInfos:
             isContractAndRates &&
-            pkg.rateInfos.map((rate) => ({
-                rateName: rate.rateCertificationName,
+            contract.packageSubmissions[0].rateRevisions.map((rate) => ({
+                rateName: rate.formData.rateCertificationName,
             })),
         submissionURL: packageURL,
     }
 
     const result = await renderTemplate<typeof data>(
-        'resubmitPackageCMSEmail',
+        'resubmitContractCMSEmail',
         data
     )
     if (result instanceof Error) {
