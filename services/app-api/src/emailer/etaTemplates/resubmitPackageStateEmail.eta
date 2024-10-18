@@ -1,5 +1,0 @@
-Submission <%= it.packageName %> was successfully resubmitted<br />
-<br />
-<%~ includeFile('./resubmitPackageSummary', it) %>
-<br />
-If you need to make any further changes, please contact CMS.
