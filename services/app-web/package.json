@@ -130,8 +130,8 @@
     },
     "devDependencies": {
         "@aws-sdk/client-amplify": "^3.672.0",
-        "@aws-sdk/client-s3": "^3.670.0",
-        "@aws-sdk/s3-request-presigner": "^3.670.0",
+        "@aws-sdk/client-s3": "^3.674.0",
+        "@aws-sdk/s3-request-presigner": "^3.674.0",
         "@chromatic-com/storybook": "^1",
         "@esbuild-plugins/node-globals-polyfill": "^0.2.3",
         "@peculiar/webcrypto": "^1.5.0",
