@@ -162,8 +162,7 @@ const devTealiumClient = (isLocal: boolean ): TealiumClientType => {
             if(isLocal){
                 console.info('[Tealium - dev] logPageView')
                 console.info(tagData)
-               }
-
+            }
         }
     }
 }
