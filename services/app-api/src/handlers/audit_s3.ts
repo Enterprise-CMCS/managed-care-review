@@ -70,11 +70,14 @@ const main: Handler = async (): Promise<APIGatewayProxyResultV2> => {
             missingOrErrorDocuments.push(processResult)
         }
     }
+
+    const uniqueDocuments = deduplicateDocuments(missingOrErrorDocuments)
     console.info(
-        `Missing ${missingOrErrorDocuments.length} of ${docResult.length} documents`
+        `Missing ${uniqueDocuments.length} of ${docResult.length} documents`
     )
+
     console.info(
-        `These documents could not be retreived from s3: ${JSON.stringify(missingOrErrorDocuments)}`
+        `These documents could not be retreived from s3: ${JSON.stringify(uniqueDocuments)}`
     )
 
     const success: APIGatewayProxyResultV2 = {
@@ -163,6 +166,18 @@ async function processDocument(
         )
         return doc
     }
+}
+
+function deduplicateDocuments(documents: AuditDocument[]): AuditDocument[] {
+    const uniqueDocuments = new Map<string, AuditDocument>()
+
+    for (const doc of documents) {
+        if (!uniqueDocuments.has(doc.s3URL)) {
+            uniqueDocuments.set(doc.s3URL, doc)
+        }
+    }
+
+    return Array.from(uniqueDocuments.values())
 }
 
 module.exports = { main }
