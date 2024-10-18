@@ -93,7 +93,7 @@ const main: Handler = async (): Promise<APIGatewayProxyResultV2> => {
     )
 
     console.info(
-        `These documents could not be retreived from s3: ${JSON.stringify(uniqueDocuments)}`
+        `These documents could not be retreived from s3: ${JSON.stringify(documentsWithAssociations)}`
     )
 
     const success: APIGatewayProxyResultV2 = {
