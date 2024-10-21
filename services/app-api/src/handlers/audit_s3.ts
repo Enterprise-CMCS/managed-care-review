@@ -216,9 +216,7 @@ async function fetchAssociatedData(
                 associatedData = contractResult
             }
         } else if (doc.type === 'rateDoc' && doc.rateRevisionID) {
-            const rateResult = await store.findRateWithHistory(
-                doc.rateRevisionID
-            )
+            const rateResult = await store.findRateRevision(doc.rateRevisionID)
             if (
                 !(rateResult instanceof Error) &&
                 !(rateResult instanceof NotFoundError)
