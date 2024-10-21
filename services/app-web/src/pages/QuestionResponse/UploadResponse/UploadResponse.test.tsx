@@ -33,7 +33,7 @@ describe('UploadResponse', () => {
             <Routes>
                 <Route element={<SubmissionSideNav />}>
                     <Route
-                        path={RoutesRecord.SUBMISSIONS_UPLOAD_RESPONSE}
+                        path={RoutesRecord.SUBMISSIONS_UPLOAD_CONTRACT_RESPONSE}
                         element={<UploadResponse />}
                     />
                 </Route>
@@ -77,7 +77,7 @@ describe('UploadResponse', () => {
             <Routes>
                 <Route element={<SubmissionSideNav />}>
                     <Route
-                        path={RoutesRecord.SUBMISSIONS_UPLOAD_RESPONSE}
+                        path={RoutesRecord.SUBMISSIONS_UPLOAD_CONTRACT_RESPONSE}
                         element={<UploadResponse />}
                     />
                 </Route>
@@ -129,7 +129,7 @@ describe('UploadResponse', () => {
             <Routes>
                 <Route element={<SubmissionSideNav />}>
                     <Route
-                        path={RoutesRecord.SUBMISSIONS_UPLOAD_RESPONSE}
+                        path={RoutesRecord.SUBMISSIONS_UPLOAD_CONTRACT_RESPONSE}
                         element={<UploadResponse />}
                     />
                 </Route>
@@ -180,7 +180,7 @@ describe('UploadResponse', () => {
             <Routes>
                 <Route element={<SubmissionSideNav />}>
                     <Route
-                        path={RoutesRecord.SUBMISSIONS_UPLOAD_RESPONSE}
+                        path={RoutesRecord.SUBMISSIONS_UPLOAD_CONTRACT_RESPONSE}
                         element={<UploadResponse />}
                     />
                 </Route>
@@ -235,7 +235,7 @@ describe('UploadResponse', () => {
             <Routes>
                 <Route element={<SubmissionSideNav />}>
                     <Route
-                        path={RoutesRecord.SUBMISSIONS_UPLOAD_RESPONSE}
+                        path={RoutesRecord.SUBMISSIONS_UPLOAD_CONTRACT_RESPONSE}
                         element={<UploadResponse />}
                     />
                 </Route>
@@ -301,7 +301,7 @@ describe('UploadResponse', () => {
             <Routes>
                 <Route element={<SubmissionSideNav />}>
                     <Route
-                        path={RoutesRecord.SUBMISSIONS_UPLOAD_RESPONSE}
+                        path={RoutesRecord.SUBMISSIONS_UPLOAD_CONTRACT_RESPONSE}
                         element={<UploadResponse />}
                     />
                 </Route>
@@ -354,7 +354,7 @@ describe('UploadResponse', () => {
                 <Routes>
                     <Route element={<SubmissionSideNav />}>
                         <Route
-                            path={RoutesRecord.SUBMISSIONS_UPLOAD_RESPONSE}
+                            path={RoutesRecord.SUBMISSIONS_UPLOAD_CONTRACT_RESPONSE}
                             element={<UploadResponse />}
                         />
                     </Route>

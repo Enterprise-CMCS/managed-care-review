@@ -5,7 +5,7 @@ import { SubmissionSideNav } from './SubmissionSideNav'
 import { SubmissionSummary } from '../SubmissionSummary'
 import { QuestionResponse } from '../QuestionResponse'
 import { renderWithProviders } from '../../testHelpers'
-import { RoutesRecord } from '../../constants/routes'
+import { RoutesRecord } from '../../constants'
 import {
     fetchContractMockSuccess,
     fetchCurrentUserMock,
@@ -20,50 +20,50 @@ import {
 } from '../../testHelpers/apolloMocks'
 import { RateRevision } from '../../gen/gqlClient'
 
+const CommonRoutes = () => (
+    <Routes>
+        <Route element={<SubmissionSideNav />}>
+            <Route
+                path={RoutesRecord.SUBMISSIONS_CONTRACT_QUESTIONS_AND_ANSWERS}
+                element={<QuestionResponse />}
+            />
+            <Route
+                path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                element={<SubmissionSummary />}
+            />
+        </Route>
+    </Routes>
+)
+
 describe('SubmissionSideNav', () => {
     it('loads sidebar nav with expected links for CMS user', async () => {
         const contract = mockContractPackageSubmitted()
-        renderWithProviders(
-            <Routes>
-                <Route element={<SubmissionSideNav />}>
-                    <Route
-                        path={RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS}
-                        element={<QuestionResponse />}
-                    />
-                    <Route
-                        path={RoutesRecord.SUBMISSIONS_SUMMARY}
-                        element={<SubmissionSummary />}
-                    />
-                </Route>
-            </Routes>,
-            {
-                apolloProvider: {
-                    mocks: [
-                        fetchCurrentUserMock({
-                            user: mockValidCMSUser(),
-                            statusCode: 200,
-                        }),
-                        fetchContractWithQuestionsMockSuccess({
-                            contract: {
-                                ...contract,
-                                id: '15',
-                            },
-                        }),
-                    ],
-                },
-                routerProvider: {
-                    route: '/submissions/15',
-                },
-                featureFlags: {
-                    'qa-by-rates': true,
-                },
-            }
-        )
-
-        // Wait for sidebar nav to exist.
-        await waitFor(() => {
-            expect(screen.queryByTestId('sidenav')).toBeInTheDocument()
+        renderWithProviders(<CommonRoutes />, {
+            apolloProvider: {
+                mocks: [
+                    fetchCurrentUserMock({
+                        user: mockValidCMSUser(),
+                        statusCode: 200,
+                    }),
+                    fetchContractWithQuestionsMockSuccess({
+                        contract: {
+                            ...contract,
+                            id: '15',
+                        },
+                    }),
+                ],
+            },
+            routerProvider: {
+                route: '/submissions/15',
+            },
+            featureFlags: {
+                'qa-by-rates': true,
+            },
         })
+
+        // Wait for sidebar nav and sections to exist. Addresses test flakes to wait for these up front.
+           await screen.findByTestId('sidenav')
+           await screen.findByText(/Contract questions/)
 
         const withinSideNav = within(screen.getByTestId('sidenav'))
 
@@ -116,47 +116,34 @@ describe('SubmissionSideNav', () => {
             },
         }
         contract.packageSubmissions[0].rateRevisions.push(secondRate)
-        renderWithProviders(
-            <Routes>
-                <Route element={<SubmissionSideNav />}>
-                    <Route
-                        path={RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS}
-                        element={<QuestionResponse />}
-                    />
-                    <Route
-                        path={RoutesRecord.SUBMISSIONS_SUMMARY}
-                        element={<SubmissionSummary />}
-                    />
-                </Route>
-            </Routes>,
-            {
-                apolloProvider: {
-                    mocks: [
-                        fetchCurrentUserMock({
-                            user: mockValidStateUser(),
-                            statusCode: 200,
-                        }),
-                        fetchContractWithQuestionsMockSuccess({
-                            contract: {
-                                ...contract,
-                                id: '15',
-                            },
-                        }),
-                    ],
-                },
-                routerProvider: {
-                    route: '/submissions/15',
-                },
-                featureFlags: {
-                    'qa-by-rates': true,
-                },
-            }
-        )
 
-        // Wait for sidebar nav to exist.
-        await waitFor(() => {
-            expect(screen.queryByTestId('sidenav')).toBeInTheDocument()
+        renderWithProviders(<CommonRoutes />, {
+            apolloProvider: {
+                mocks: [
+                    fetchCurrentUserMock({
+                        user: mockValidStateUser(),
+                        statusCode: 200,
+                    }),
+                    fetchContractWithQuestionsMockSuccess({
+                        contract: {
+                            ...contract,
+                            id: '15',
+                        },
+                    }),
+                ],
+            },
+            routerProvider: {
+                route: '/submissions/15',
+            },
+            featureFlags: {
+                'qa-by-rates': true,
+            },
         })
+
+         // Wait for sidebar nav and sections to exist. Addresses test flakes to wait for these up front.
+         await screen.findByTestId('sidenav')
+         await screen.findByText(/Contract questions/)
+         await screen.findAllByText(/Rate questions/)
 
         const withinSideNav = within(screen.getByTestId('sidenav'))
 
@@ -214,58 +201,45 @@ describe('SubmissionSideNav', () => {
     it('sidebar nav links routes to correct pages', async () => {
         let testLocation: Location
         const testContract = mockContractPackageSubmittedWithQuestions('15')
-        renderWithProviders(
-            <Routes>
-                <Route element={<SubmissionSideNav />}>
-                    <Route
-                        path={RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS}
-                        element={<QuestionResponse />}
-                    />
-                    <Route
-                        path={RoutesRecord.SUBMISSIONS_SUMMARY}
-                        element={<SubmissionSummary />}
-                    />
-                </Route>
-            </Routes>,
-            {
-                apolloProvider: {
-                    mocks: [
-                        fetchCurrentUserMock({
-                            user: mockValidCMSUser(),
-                            statusCode: 200,
-                        }),
-                        fetchContractWithQuestionsMockSuccess({
-                            contract: {
-                                ...testContract,
-                                id: '15',
-                            },
-                        }),
-                        fetchContractWithQuestionsMockSuccess({
-                            contract: {
-                                ...testContract,
-                                id: '15',
-                            },
-                        }),
-                        fetchContractMockSuccess({
-                            contract: {
-                                ...testContract,
-                                id: '15',
-                            },
-                        }),
-                        fetchContractMockSuccess({
-                            contract: {
-                                ...testContract,
-                                id: '15',
-                            },
-                        }),
-                    ],
-                },
-                routerProvider: {
-                    route: '/submissions/15',
-                },
-                location: (location) => (testLocation = location),
-            }
-        )
+
+        renderWithProviders(<CommonRoutes />, {
+            apolloProvider: {
+                mocks: [
+                    fetchCurrentUserMock({
+                        user: mockValidCMSUser(),
+                        statusCode: 200,
+                    }),
+                    fetchContractWithQuestionsMockSuccess({
+                        contract: {
+                            ...testContract,
+                            id: '15',
+                        },
+                    }),
+                    fetchContractWithQuestionsMockSuccess({
+                        contract: {
+                            ...testContract,
+                            id: '15',
+                        },
+                    }),
+                    fetchContractMockSuccess({
+                        contract: {
+                            ...testContract,
+                            id: '15',
+                        },
+                    }),
+                    fetchContractMockSuccess({
+                        contract: {
+                            ...testContract,
+                            id: '15',
+                        },
+                    }),
+                ],
+            },
+            routerProvider: {
+                route: '/submissions/15',
+            },
+            location: (location) => (testLocation = location),
+        })
 
         // Wait for sidebar nav to exist.
         await waitFor(() => {
@@ -346,20 +320,64 @@ describe('SubmissionSideNav', () => {
 
     it('renders back to dashboard link for state users', async () => {
         const contract = mockContractPackageSubmitted()
-        renderWithProviders(
-            <Routes>
-                <Route element={<SubmissionSideNav />}>
-                    <Route
-                        path={RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS}
-                        element={<QuestionResponse />}
-                    />
-                    <Route
-                        path={RoutesRecord.SUBMISSIONS_SUMMARY}
-                        element={<SubmissionSummary />}
-                    />
-                </Route>
-            </Routes>,
-            {
+        renderWithProviders(<CommonRoutes />, {
+            apolloProvider: {
+                mocks: [
+                    fetchCurrentUserMock({
+                        statusCode: 200,
+                    }),
+                    fetchContractWithQuestionsMockSuccess({
+                        contract: {
+                            ...contract,
+                            id: '15',
+                        },
+                    }),
+                ],
+            },
+            routerProvider: {
+                route: '/submissions/15',
+            },
+        })
+        expect(
+            await screen.findByRole('link', { name: /Back to state dashboard/ })
+        ).toBeInTheDocument()
+    })
+
+    it('renders back to dashboard link for CMS users', async () => {
+        const contract = mockContractPackageSubmitted()
+        renderWithProviders(<CommonRoutes />, {
+            apolloProvider: {
+                mocks: [
+                    fetchCurrentUserMock({
+                        user: mockValidCMSUser(),
+                        statusCode: 200,
+                    }),
+                    fetchContractWithQuestionsMockSuccess({
+                        contract: {
+                            ...contract,
+                            id: '15',
+                        },
+                    }),
+                ],
+            },
+            routerProvider: {
+                route: '/submissions/15',
+            },
+        })
+
+        expect(
+            await screen.findByRole('link', {
+                name: /Back to dashboard/,
+            })
+        ).toBeInTheDocument()
+    })
+
+    describe('Submission package data display', () => {
+        it('Submission with no revisions shows a generic error', async () => {
+            const contract = mockContractPackageSubmitted()
+            contract.packageSubmissions = []
+
+            renderWithProviders(<CommonRoutes />, {
                 apolloProvider: {
                     mocks: [
                         fetchCurrentUserMock({
@@ -376,29 +394,14 @@ describe('SubmissionSideNav', () => {
                 routerProvider: {
                     route: '/submissions/15',
                 },
-            }
-        )
-        expect(
-            await screen.findByRole('link', { name: /Back to state dashboard/ })
-        ).toBeInTheDocument()
-    })
+            })
 
-    it('renders back to dashboard link for CMS users', async () => {
-        const contract = mockContractPackageSubmitted()
-        renderWithProviders(
-            <Routes>
-                <Route element={<SubmissionSideNav />}>
-                    <Route
-                        path={RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS}
-                        element={<QuestionResponse />}
-                    />
-                    <Route
-                        path={RoutesRecord.SUBMISSIONS_SUMMARY}
-                        element={<SubmissionSummary />}
-                    />
-                </Route>
-            </Routes>,
-            {
+            expect(await screen.findByText('System error')).toBeInTheDocument()
+        })
+
+        it('DRAFT displays an error to a CMS user', async () => {
+            const contract = mockContractPackageDraft()
+            renderWithProviders(<CommonRoutes />, {
                 apolloProvider: {
                     mocks: [
                         fetchCurrentUserMock({
@@ -416,96 +419,7 @@ describe('SubmissionSideNav', () => {
                 routerProvider: {
                     route: '/submissions/15',
                 },
-            }
-        )
-
-        expect(
-            await screen.findByRole('link', {
-                name: /Back to dashboard/,
             })
-        ).toBeInTheDocument()
-    })
-
-    describe('Submission package data display', () => {
-        it('Submission with no revisions shows a generic error', async () => {
-            const contract = mockContractPackageSubmitted()
-            contract.packageSubmissions = []
-
-            renderWithProviders(
-                <Routes>
-                    <Route element={<SubmissionSideNav />}>
-                        <Route
-                            path={
-                                RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS
-                            }
-                            element={<QuestionResponse />}
-                        />
-                        <Route
-                            path={RoutesRecord.SUBMISSIONS_SUMMARY}
-                            element={<SubmissionSummary />}
-                        />
-                    </Route>
-                </Routes>,
-                {
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({
-                                statusCode: 200,
-                            }),
-                            fetchContractWithQuestionsMockSuccess({
-                                contract: {
-                                    ...contract,
-                                    id: '15',
-                                },
-                            }),
-                        ],
-                    },
-                    routerProvider: {
-                        route: '/submissions/15',
-                    },
-                }
-            )
-
-            expect(await screen.findByText('System error')).toBeInTheDocument()
-        })
-
-        it('DRAFT displays an error to a CMS user', async () => {
-            const contract = mockContractPackageDraft()
-            renderWithProviders(
-                <Routes>
-                    <Route element={<SubmissionSideNav />}>
-                        <Route
-                            path={
-                                RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS
-                            }
-                            element={<QuestionResponse />}
-                        />
-                        <Route
-                            path={RoutesRecord.SUBMISSIONS_SUMMARY}
-                            element={<SubmissionSummary />}
-                        />
-                    </Route>
-                </Routes>,
-                {
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({
-                                user: mockValidCMSUser(),
-                                statusCode: 200,
-                            }),
-                            fetchContractWithQuestionsMockSuccess({
-                                contract: {
-                                    ...contract,
-                                    id: '15',
-                                },
-                            }),
-                        ],
-                    },
-                    routerProvider: {
-                        route: '/submissions/15',
-                    },
-                }
-            )
 
             expect(await screen.findByText('System error')).toBeInTheDocument()
         })
@@ -513,48 +427,32 @@ describe('SubmissionSideNav', () => {
         it('shows a generic 404 page when package is not found', async () => {
             const contract = mockContractPackageSubmittedWithQuestions()
 
-            renderWithProviders(
-                <Routes>
-                    <Route element={<SubmissionSideNav />}>
-                        <Route
-                            path={
-                                RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS
-                            }
-                            element={<QuestionResponse />}
-                        />
-                        <Route
-                            path={RoutesRecord.SUBMISSIONS_SUMMARY}
-                            element={<SubmissionSummary />}
-                        />
-                    </Route>
-                </Routes>,
-                {
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchContractWithQuestionsMockSuccess({
-                                contract: {
-                                    ...contract,
-                                },
-                            }),
-                            fetchContractWithQuestionsMockSuccess({
-                                contract: {
-                                    ...contract,
-                                    id: '15',
-                                },
-                            }),
-                            fetchContractWithQuestionsMockFail({
-                                id: '404',
-                                error: {
-                                    code: 'NOT_FOUND',
-                                    cause: 'DB_ERROR',
-                                },
-                            }),
-                        ],
-                    },
-                    routerProvider: { route: '/submissions/404' },
-                }
-            )
+            renderWithProviders(<CommonRoutes />, {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({ statusCode: 200 }),
+                        fetchContractWithQuestionsMockSuccess({
+                            contract: {
+                                ...contract,
+                            },
+                        }),
+                        fetchContractWithQuestionsMockSuccess({
+                            contract: {
+                                ...contract,
+                                id: '15',
+                            },
+                        }),
+                        fetchContractWithQuestionsMockFail({
+                            id: '404',
+                            error: {
+                                code: 'NOT_FOUND',
+                                cause: 'DB_ERROR',
+                            },
+                        }),
+                    ],
+                },
+                routerProvider: { route: '/submissions/404' },
+            })
 
             const notFound = await screen.findByText('404 / Page not found')
             expect(notFound).toBeInTheDocument()
@@ -564,38 +462,22 @@ describe('SubmissionSideNav', () => {
             const testQuestions = mockQuestionsPayload('15')
             const contract = mockContractPackageSubmitted()
             contract.questions = testQuestions
-            renderWithProviders(
-                <Routes>
-                    <Route element={<SubmissionSideNav />}>
-                        <Route
-                            path={
-                                RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS
-                            }
-                            element={<QuestionResponse />}
-                        />
-                        <Route
-                            path={RoutesRecord.SUBMISSIONS_SUMMARY}
-                            element={<SubmissionSummary />}
-                        />
-                    </Route>
-                </Routes>,
-                {
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({ statusCode: 403 }),
-                            fetchContractWithQuestionsMockSuccess({
-                                contract: {
-                                    ...contract,
-                                    id: '15',
-                                },
-                            }),
-                        ],
-                    },
-                    routerProvider: {
-                        route: '/submissions/15/question-and-answers',
-                    },
-                }
-            )
+            renderWithProviders(<CommonRoutes />, {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({ statusCode: 403 }),
+                        fetchContractWithQuestionsMockSuccess({
+                            contract: {
+                                ...contract,
+                                id: '15',
+                            },
+                        }),
+                    ],
+                },
+                routerProvider: {
+                    route: '/submissions/15/question-and-answers',
+                },
+            })
 
             expect(await screen.findByText('System error')).toBeInTheDocument()
         })

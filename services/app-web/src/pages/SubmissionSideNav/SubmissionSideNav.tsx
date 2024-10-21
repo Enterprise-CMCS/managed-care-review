@@ -234,7 +234,7 @@ export const SubmissionSideNav = () => {
                                 <NavLinkWithLogging
                                     to={`/submissions/${id}/question-and-answers`}
                                     className={isSelectedLink(
-                                        'SUBMISSIONS_QUESTIONS_AND_ANSWERS'
+                                        'SUBMISSIONS_CONTRACT_QUESTIONS_AND_ANSWERS'
                                     )}
                                     event_name="navigation_clicked"
                                 >
