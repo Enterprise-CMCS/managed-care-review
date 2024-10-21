@@ -16,10 +16,14 @@ async function findContractRevision(
             },
             include: {
                 contract: {
-                    include: {
-                        revisions: true,
+                    select: {
+                        id: true,
+                        stateCode: true,
+                        stateNumber: true,
                     },
                 },
+                unlockInfo: true,
+                submitInfo: true,
             },
         })
 

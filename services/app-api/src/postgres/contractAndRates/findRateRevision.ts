@@ -20,6 +20,8 @@ async function findRateRevision(
                         revisions: true,
                     },
                 },
+                unlockInfo: true,
+                submitInfo: true,
             },
         })
 
