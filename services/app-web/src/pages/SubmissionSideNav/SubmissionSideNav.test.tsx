@@ -61,10 +61,9 @@ describe('SubmissionSideNav', () => {
             },
         })
 
-        // Wait for sidebar nav to exist.
-        await waitFor(() => {
-            expect(screen.queryByTestId('sidenav')).toBeInTheDocument()
-        })
+        // Wait for sidebar nav and sections to exist. Addresses test flakes to wait for these up front.
+           await screen.findByTestId('sidenav')
+           await screen.findByText(/Contract questions/)
 
         const withinSideNav = within(screen.getByTestId('sidenav'))
 
@@ -141,10 +140,10 @@ describe('SubmissionSideNav', () => {
             },
         })
 
-        // Wait for sidebar nav to exist.
-        await waitFor(() => {
-            expect(screen.queryByTestId('sidenav')).toBeInTheDocument()
-        })
+         // Wait for sidebar nav and sections to exist. Addresses test flakes to wait for these up front.
+         await screen.findByTestId('sidenav')
+         await screen.findByText(/Contract questions/)
+         await screen.findAllByText(/Rate questions/)
 
         const withinSideNav = within(screen.getByTestId('sidenav'))
 
