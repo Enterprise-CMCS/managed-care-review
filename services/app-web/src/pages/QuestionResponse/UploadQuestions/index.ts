@@ -1,1 +1,2 @@
-export { UploadQuestions } from './UploadQuestions'
+export { UploadContractQuestions } from './UploadContractQuestions'
+export { UploadRateQuestions } from './UploadRateQuestions'

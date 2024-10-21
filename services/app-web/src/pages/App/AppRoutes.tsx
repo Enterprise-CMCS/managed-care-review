@@ -34,7 +34,6 @@ import { SubmissionSideNav } from '../SubmissionSideNav'
 import {
     QuestionResponse,
     UploadContractResponse,
-    UploadQuestions,
 } from '../QuestionResponse'
 import { GraphQLExplorer } from '../GraphQLExplorer/GraphQLExplorer'
 import { RateSummary } from '../RateSummary'
@@ -48,6 +47,7 @@ import {
     DivisionAssignmentTable,
 } from '../Settings/SettingsTables'
 import { EditStateAssign } from '../Settings/EditStateAssign/EditStateAssign'
+import { UploadContractQuestions, UploadRateQuestions } from '../QuestionResponse/UploadQuestions'
 import { RateSummarySideNav } from '../SubmissionSideNav/RateSummarySideNav'
 import { RateQuestionResponse } from '../QuestionResponse/RateQuestionResponse'
 
@@ -134,12 +134,12 @@ const StateUserRoutes = ({
                 )}
                 <Route element={<SubmissionSideNav />}>
                     <Route
-                        path={RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS}
+                        path={RoutesRecord.SUBMISSIONS_CONTRACT_QUESTIONS_AND_ANSWERS}
                         element={<QuestionResponse />}
                     />
                     <Route
-                        path={RoutesRecord.SUBMISSIONS_UPLOAD_RESPONSE}
                         element={<UploadContractResponse />}
+                        path={RoutesRecord.SUBMISSIONS_UPLOAD_CONTRACT_RESPONSE}
                     />
 
                     <Route
@@ -217,12 +217,12 @@ const CMSUserRoutes = ({
 
                 <Route element={<SubmissionSideNav />}>
                     <Route
-                        path={RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS}
+                        path={RoutesRecord.SUBMISSIONS_CONTRACT_QUESTIONS_AND_ANSWERS}
                         element={<QuestionResponse />}
                     />
                     <Route
-                        path={RoutesRecord.SUBMISSIONS_UPLOAD_QUESTION}
-                        element={<UploadQuestions />}
+                        path={RoutesRecord.SUBMISSIONS_UPLOAD_CONTRACT_QUESTION}
+                        element={<UploadContractQuestions />}
                     />
                     <Route
                         path={RoutesRecord.SUBMISSIONS_SUMMARY}
@@ -230,6 +230,10 @@ const CMSUserRoutes = ({
                     />
                 </Route>
 
+                <Route
+                    path={RoutesRecord.RATES_SUMMARY}
+                    element={<RateSummary />}
+                />
                 {showQAbyRates ? (
                     <>
                         <Route element={<RateSummarySideNav />}>
@@ -243,6 +247,10 @@ const CMSUserRoutes = ({
                                 }
                                 element={<RateQuestionResponse />}
                             />
+                            <Route
+                                path={RoutesRecord.RATES_UPLOAD_QUESTION }
+                                element={<UploadRateQuestions/>}
+                                />
                             {/*This route will cause the RateSummarySideNav to redirect to rate summary Q&A page*/}
                             <Route
                                 path={
