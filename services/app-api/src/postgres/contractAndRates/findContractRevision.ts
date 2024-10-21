@@ -15,7 +15,11 @@ async function findContractRevision(
                 id: contractRevID,
             },
             include: {
-                contract: true,
+                contract: {
+                    include: {
+                        revisions: true,
+                    },
+                },
             },
         })
 

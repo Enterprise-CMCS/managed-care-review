@@ -12,7 +12,11 @@ async function findRateRevision(
                 id: rateRevisionID,
             },
             include: {
-                rate: true,
+                rate: {
+                    include: {
+                        revisions: true,
+                    },
+                },
             },
         })
 
