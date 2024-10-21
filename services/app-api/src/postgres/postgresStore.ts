@@ -47,6 +47,7 @@ import {
     unlockContract,
     updateDraftContract,
     replaceRateOnContract,
+    findContractRevision,
 } from './contractAndRates'
 import type {
     SubmitContractArgsType,
@@ -190,6 +191,10 @@ type Store = {
     unlockRate: (args: UnlockRateArgsType) => Promise<RateType | Error>
 
     findAllDocuments: () => Promise<AuditDocument[] | Error>
+
+    findContractRevision: (
+        contractRevID: string
+    ) => Promise<ContractType | Error>
 }
 
 function NewPostgresStore(client: PrismaClient): Store {
@@ -266,6 +271,7 @@ function NewPostgresStore(client: PrismaClient): Store {
         unlockRate: (args) => unlockRate(client, args),
 
         findAllDocuments: () => findAllDocuments(client),
+        findContractRevision: (args) => findContractRevision(client, args),
     }
 }
 

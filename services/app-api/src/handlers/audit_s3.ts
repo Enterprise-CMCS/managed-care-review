@@ -1,17 +1,16 @@
 import type { APIGatewayProxyResultV2, Handler } from 'aws-lambda'
 import { initTracer, recordException } from '../../../uploads/src/lib/otel'
 import { configurePostgres } from './configuration'
-import { NewPostgresStore } from '../postgres'
+import { NewPostgresStore, NotFoundError } from '../postgres'
+import type { Store } from '../postgres'
 import { HeadObjectCommand, S3Client } from '@aws-sdk/client-s3'
 import type { S3ServiceException } from '@aws-sdk/client-s3'
-import type { AuditDocument } from '../domain-models'
+import type { AuditDocument, ContractType, RateType } from '../domain-models'
 
-/*
 type DocumentWithAssociation = AuditDocument & {
     associatedContract?: ContractType
     associatedRate?: RateType
 }
-    */
 
 const main: Handler = async (): Promise<APIGatewayProxyResultV2> => {
     // setup otel tracing
@@ -84,13 +83,22 @@ const main: Handler = async (): Promise<APIGatewayProxyResultV2> => {
         `Missing ${uniqueDocuments.length} of ${docResult.length} documents`
     )
 
+    // get the contract or rate
+    const documentsWithAssociations = await fetchAssociatedData(
+        store,
+        uniqueDocuments
+    )
     console.info(
-        `These documents could not be retreived from s3: ${JSON.stringify(uniqueDocuments)}`
+        `found ${documentsWithAssociations.length} documents with associations`
+    )
+
+    console.info(
+        `These documents could not be retreived from s3: ${JSON.stringify(documentsWithAssociations)}`
     )
 
     const success: APIGatewayProxyResultV2 = {
         statusCode: 200,
-        body: JSON.stringify(uniqueDocuments),
+        body: JSON.stringify(documentsWithAssociations),
         headers: {
             'Access-Control-Allow-Origin': '*',
             'Access-Control-Allow-Credentials': true,
@@ -188,7 +196,6 @@ function deduplicateDocuments(documents: AuditDocument[]): AuditDocument[] {
     return Array.from(uniqueDocuments.values())
 }
 
-/*
 async function fetchAssociatedData(
     store: Store,
     documents: AuditDocument[]
@@ -199,7 +206,7 @@ async function fetchAssociatedData(
         let associatedData: ContractType | RateType | null = null
 
         if (doc.type === 'contractDoc' && doc.contractRevisionID) {
-            const contractResult = await store.findContractWithHistory(
+            const contractResult = await store.findContractRevision(
                 doc.contractRevisionID
             )
             if (
@@ -235,6 +242,5 @@ async function fetchAssociatedData(
 
     return results
 }
-    */
 
 module.exports = { main }
