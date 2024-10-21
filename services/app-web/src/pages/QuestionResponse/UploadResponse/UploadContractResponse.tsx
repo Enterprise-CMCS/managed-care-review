@@ -82,7 +82,7 @@ export const UploadContractResponse = () => {
                     { link: `/submissions/${id}`, text: packageName },
                     {
                         text: 'Add response',
-                        link: RoutesRecord.SUBMISSIONS_UPLOAD_RESPONSE,
+                        link: RoutesRecord.SUBMISSIONS_UPLOAD_CONTRACT_RESPONSE,
                     },
                 ]}
             />
@@ -90,7 +90,7 @@ export const UploadContractResponse = () => {
             <UploadResponseForm
             handleSubmit={handleFormSubmit}
             apiLoading={apiLoading}
-            apiError={apiError}
+            apiError={Boolean(apiError)}
             type='contract'
             />
         </GridContainer>
