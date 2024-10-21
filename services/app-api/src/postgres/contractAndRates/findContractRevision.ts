@@ -1,14 +1,14 @@
 import type { PrismaTransactionType } from '../prismaTypes'
 import {
-    contractSchema,
-    type ContractType,
+    contractRevisionSchema,
+    type ContractRevisionType,
 } from '../../domain-models/contractAndRates'
 import { NotFoundError } from '../postgresErrors'
 
 async function findContractRevision(
     client: PrismaTransactionType,
     contractRevID: string
-): Promise<ContractType | Error> {
+): Promise<ContractRevisionType | Error> {
     try {
         const contractRev = await client.contractRevisionTable.findUnique({
             where: {
@@ -31,7 +31,7 @@ async function findContractRevision(
             `DEBUG: got back this contract: ${JSON.stringify(contractRev)}`
         )
 
-        const parseResult = contractSchema.safeParse(contractRev)
+        const parseResult = contractRevisionSchema.safeParse(contractRev)
         if (!parseResult.success) {
             const error = new Error(
                 `Zod parsing error: ${parseResult.error.message}`

@@ -1,11 +1,14 @@
 import type { PrismaTransactionType } from '../prismaTypes'
-import { rateSchema, type RateType } from '../../domain-models/contractAndRates'
+import {
+    rateRevisionSchema,
+    type RateRevisionType,
+} from '../../domain-models/contractAndRates'
 import { NotFoundError } from '../postgresErrors'
 
 async function findRateRevision(
     client: PrismaTransactionType,
     rateRevisionID: string
-): Promise<RateType | Error> {
+): Promise<RateRevisionType | Error> {
     try {
         const rateRevision = await client.rateRevisionTable.findUnique({
             where: {
@@ -25,7 +28,7 @@ async function findRateRevision(
             return new NotFoundError(err)
         }
 
-        const parseResult = rateSchema.safeParse(rateRevision)
+        const parseResult = rateRevisionSchema.safeParse(rateRevision)
         if (!parseResult.success) {
             const error = new Error(
                 `Zod parsing error: ${parseResult.error.message}`
