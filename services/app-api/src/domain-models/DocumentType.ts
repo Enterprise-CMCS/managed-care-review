@@ -1,5 +1,4 @@
 import { z } from 'zod'
-import { contractRevisionSchema, rateRevisionSchema } from './contractAndRates'
 
 const baseDocumentSchema = z.object({
     id: z.string(),
@@ -12,25 +11,21 @@ const baseDocumentSchema = z.object({
 const contractDocumentSchema = baseDocumentSchema.extend({
     contractRevisionID: z.string(),
     sha256: z.string(),
-    contractRevision: contractRevisionSchema.optional(),
 })
 
 const rateDocumentSchema = baseDocumentSchema.extend({
     rateRevisionID: z.string(),
     sha256: z.string(),
-    rateRevision: rateRevisionSchema.optional(),
 })
 
 const contractSupportingDocumentSchema = baseDocumentSchema.extend({
     contractRevisionID: z.string(),
     sha256: z.string(),
-    contractRevision: contractRevisionSchema.optional(),
 })
 
 const rateSupportingDocumentSchema = baseDocumentSchema.extend({
     rateRevisionID: z.string(),
     sha256: z.string(),
-    rateRevision: rateRevisionSchema.optional(),
 })
 
 const contractQuestionDocumentSchema = baseDocumentSchema.extend({

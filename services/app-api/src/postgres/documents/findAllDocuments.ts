@@ -105,15 +105,10 @@ async function getContractDocuments(
     prisma: PrismaClient
 ): Promise<Omit<AuditDocument, 'type'>[] | Error> {
     try {
-        const docs = await prisma.contractDocument.findMany({
-            include: {
-                contractRevision: true,
-            },
-        })
+        const docs = await prisma.contractDocument.findMany()
         return docs.map((doc) => ({
             ...doc,
             contractRevisionID: doc.contractRevisionID,
-            contractRevision: doc.contractRevision,
         }))
     } catch (err) {
         return err instanceof Error
@@ -126,15 +121,10 @@ async function getRateDocuments(
     prisma: PrismaClient
 ): Promise<Omit<AuditDocument, 'type'>[] | Error> {
     try {
-        const docs = await prisma.rateDocument.findMany({
-            include: {
-                rateRevision: true,
-            },
-        })
+        const docs = await prisma.rateDocument.findMany()
         return docs.map((doc) => ({
             ...doc,
             rateRevisionID: doc.rateRevisionID,
-            rateRevision: doc.rateRevision,
         }))
     } catch (err) {
         return err instanceof Error
@@ -147,15 +137,10 @@ async function getContractSupportingDocuments(
     prisma: PrismaClient
 ): Promise<Omit<AuditDocument, 'type'>[] | Error> {
     try {
-        const docs = await prisma.contractSupportingDocument.findMany({
-            include: {
-                contractRevision: true,
-            },
-        })
+        const docs = await prisma.contractSupportingDocument.findMany()
         return docs.map((doc) => ({
             ...doc,
             contractRevisionID: doc.contractRevisionID,
-            contractRevision: doc.contractRevision,
         }))
     } catch (err) {
         return err instanceof Error
@@ -168,15 +153,10 @@ async function getRateSupportingDocuments(
     prisma: PrismaClient
 ): Promise<Omit<AuditDocument, 'type'>[] | Error> {
     try {
-        const docs = await prisma.rateSupportingDocument.findMany({
-            include: {
-                rateRevision: true,
-            },
-        })
+        const docs = await prisma.rateSupportingDocument.findMany()
         return docs.map((doc) => ({
             ...doc,
             rateRevisionID: doc.rateRevisionID,
-            rateRevision: doc.rateRevision,
         }))
     } catch (err) {
         return err instanceof Error
