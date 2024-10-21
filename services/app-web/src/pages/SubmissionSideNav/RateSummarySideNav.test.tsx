@@ -56,7 +56,7 @@ describe('RateSummarySideNav', () => {
 
         // Expect to only have one back to dashboard link.
         expect(
-            await screen.findAllByRole('link', { name: /Back to dashboard/ })
+            await screen.findAllByRole('link', { name: /Go to dashboard/ })
         ).toHaveLength(1)
 
         const summaryLink = withinSideNav.getByRole('link', {
@@ -154,7 +154,7 @@ describe('RateSummarySideNav', () => {
 
         // Expect to only have one back to dashboard link.
         expect(
-            await screen.findAllByRole('link', { name: /Back to dashboard/ })
+            await screen.findAllByRole('link', { name: /Go to dashboard/ })
         ).toHaveLength(1)
 
         const summaryLink = withinSideNav.getByRole('link', {
