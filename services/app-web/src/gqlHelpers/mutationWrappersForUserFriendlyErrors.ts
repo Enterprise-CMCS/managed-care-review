@@ -26,17 +26,23 @@ import {
     RateQuestion,
     FetchRateWithQuestionsDocument,
     IndexRateQuestionsPayload,
-    FetchRateWithQuestionsQuery
+    FetchRateWithQuestionsQuery,
+    CreateRateQuestionResponseMutationFn,
+    CreateRateQuestionResponseMutation
 } from '../gen/gqlClient'
 import { ApolloError, GraphQLErrors } from '@apollo/client/errors'
 
 import { recordJSException } from '../otelHelpers'
 import { handleGQLErrors as handleGQLErrorLogging } from './apolloErrors'
 import { ERROR_MESSAGES } from '../constants/errors'
+
 /*
 Adds user friendly/facing error messages to health plan package mutations.
 - Reminder, we handle graphql requests via apollo client in our web app.
-- Error messages returned here are displayed to user in UnlockSubmitModal > GenericApiBanner.
+
+
+TODO: move out domain specific code to files named after that domain
+e.g. handleApolloErrorsAndAddUserFacingMessages can stay, anything specific to one API should be in a more narrowly scoped file
 */
 
 type MutationType =
@@ -481,7 +487,7 @@ export const createRateQuestionWrapper = async (
 }
 
 
-export const createResponseWrapper = async (
+export const createContractResponseWrapper = async (
     createResponse: CreateContractQuestionResponseMutationFn,
     contractID: string,
     input: CreateQuestionResponseInput,
@@ -560,6 +566,97 @@ export const createResponseWrapper = async (
         })
 
         if (result.data?.createContractQuestionResponse) {
+            return result.data
+        } else {
+            recordJSException(
+                `[UNEXPECTED]: Error attempting to add response, no data present but returning 200.`
+            )
+            return new Error(ERROR_MESSAGES.response_error_generic)
+        }
+    } catch (error) {
+        return error
+    }
+}
+
+export const createRateQuestionResponseWrapper = async (
+    createResponse: CreateRateQuestionResponseMutationFn,
+    rateID: string,
+    input: CreateQuestionResponseInput,
+    division: Division
+): Promise<CreateRateQuestionResponseMutation | GraphQLErrors | Error> => {
+    try {
+        const result = await createResponse({
+            variables: { input },
+            update(cache, { data }) {
+                if (data) {
+                    const newResponse =
+                        data.createRateQuestionResponse.question.responses[0]
+                    const result =
+                        cache.readQuery<FetchRateWithQuestionsQuery>(
+                            {
+                                query: FetchRateWithQuestionsDocument,
+                                variables: {
+                                    input: {
+                                        rateID: rateID,
+                                    },
+                                },
+                            }
+                        )
+                    const rate = result?.fetchRate.rate
+
+                    if (rate) {
+                        const questions = rate.questions as IndexRateQuestionsPayload
+                        const indexQuestionDivision =
+                            divisionToIndexQuestionDivision(division)
+                        const divisionQuestions =
+                            questions[indexQuestionDivision]
+
+                        const updatedRate = {
+                            ...rate,
+                            questions: {
+                                ...rate.questions,
+                                [indexQuestionDivision]: {
+                                    ...divisionQuestions,
+                                    edges: divisionQuestions.edges.map(
+                                        (edge) => {
+                                            if (
+                                                edge.node.id ===
+                                                newResponse.questionID
+                                            ) {
+                                                return {
+                                                    __typename: 'RateQuestionEdge',
+                                                    node: {
+                                                        ...edge.node,
+                                                        responses: [
+                                                            newResponse,
+                                                            ...edge.node
+                                                                .responses,
+                                                        ],
+                                                    },
+                                                }
+                                            }
+                                            return edge
+                                        }
+                                    ),
+                                },
+                            },
+                        }
+
+                        cache.writeQuery({
+                            query: FetchRateWithQuestionsDocument,
+                            data: {
+                                fetchRate: {
+                                    rate: updatedRate,
+                                },
+                            },
+                        })
+                    }
+                }
+            },
+            onQueryUpdated: () => true,
+        })
+
+        if (result.data?.createRateQuestionResponse) {
             return result.data
         } else {
             recordJSException(
