@@ -1725,7 +1725,7 @@ type RatePackageSubmission {
 }
 
 """
-Contact is a single contract submission, holding all the form data for a single contract
+Contract is a single contract submission, holding all the form data for a single contract
 and associated with zero or more Rates
 """
 type Contract {
@@ -1777,7 +1777,7 @@ type Contract {
 }
 
 """
-UnlockedContact is a single unlocked contract, holding all the draft form data for a single contract
+UnlockedContract is a single unlocked contract, holding all the draft form data for a single contract
 and associated with zero or more Rates
 """
 type UnlockedContract {
