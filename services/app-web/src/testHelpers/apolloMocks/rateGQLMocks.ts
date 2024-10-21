@@ -1,6 +1,8 @@
 import {
     FetchRateDocument,
-    FetchRateQuery, FetchRateWithQuestionsDocument,
+    FetchRateQuery,
+    FetchRateWithQuestionsDocument,
+    FetchRateWithQuestionsQuery,
     IndexRatesDocument,
     IndexRatesForDashboardDocument,
     IndexRatesForDashboardQuery,
@@ -9,7 +11,7 @@ import {
     RateRevision,
 } from '../../gen/gqlClient'
 import { MockedResponse } from '@apollo/client/testing'
-import { draftRateDataMock, rateDataMock } from './rateDataMock'
+import { draftRateDataMock, rateDataMock, mockRateSubmittedWithQuestions } from './rateDataMock'
 import { GraphQLError } from 'graphql/index'
 
 const fetchRateMockSuccess = (
@@ -21,29 +23,6 @@ const fetchRateMockSuccess = (
     return {
         request: {
             query: FetchRateDocument,
-            variables: { input: { rateID: rateData.id } },
-        },
-        result: {
-            data: {
-                fetchRate: {
-                    rate: {
-                        ...rateData,
-                    },
-                },
-            },
-        },
-    }
-}
-
-const fetchRateWithQuestionsMockSuccess = (
-    rate?: Partial<Rate>,
-    revision?: Partial<RateRevision>
-): MockedResponse<FetchRateQuery> => {
-    const rateData = rateDataMock(revision, rate)
-
-    return {
-        request: {
-            query: FetchRateWithQuestionsDocument,
             variables: { input: { rateID: rateData.id } },
         },
         result: {
@@ -185,12 +164,36 @@ const indexRatesMockFailure = (): MockedResponse<IndexRatesQuery> => {
     }
 }
 
-export { 
-    fetchRateMockSuccess, 
-    indexRatesMockSuccess, 
+const fetchRateWithQuestionsMockSuccess = ({
+    rate, rateRev
+}: {
+    rate?: Partial<Rate>,
+    rateRev?: Partial<RateRevision>
+}): MockedResponse<FetchRateWithQuestionsQuery> => {
+    const rateID = rate?.id ??  rateRev?.rateID ?? 'rate-123'
+    const rateData =  mockRateSubmittedWithQuestions({ ...rate, id: rateID}, rateRev)
+    return {
+        request: {
+            query: FetchRateWithQuestionsDocument,
+            variables: { input: { rateID: rateData.id } },
+        },
+        result: {
+            data: {
+                fetchRate: {
+                    rate: {
+                        ...rateData,
+                    },
+                },
+            },
+        },
+    }
+}
+export {
+    fetchRateMockSuccess,
+    indexRatesMockSuccess,
     indexRatesForDashboardMockSuccess,
     indexRatesForDashboardMockFailure,
-    indexRatesMockFailure, 
+    indexRatesMockFailure,
     fetchDraftRateMockSuccess,
     fetchRateWithQuestionsMockSuccess
 }

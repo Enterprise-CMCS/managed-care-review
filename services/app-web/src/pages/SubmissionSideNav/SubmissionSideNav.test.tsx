@@ -24,7 +24,7 @@ const CommonRoutes = () => (
     <Routes>
         <Route element={<SubmissionSideNav />}>
             <Route
-                path={RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS}
+                path={RoutesRecord.SUBMISSIONS_CONTRACT_QUESTIONS_AND_ANSWERS}
                 element={<QuestionResponse />}
             />
             <Route
@@ -117,6 +117,7 @@ describe('SubmissionSideNav', () => {
             },
         }
         contract.packageSubmissions[0].rateRevisions.push(secondRate)
+
         renderWithProviders(<CommonRoutes />, {
             apolloProvider: {
                 mocks: [
@@ -201,6 +202,7 @@ describe('SubmissionSideNav', () => {
     it('sidebar nav links routes to correct pages', async () => {
         let testLocation: Location
         const testContract = mockContractPackageSubmittedWithQuestions('15')
+
         renderWithProviders(<CommonRoutes />, {
             apolloProvider: {
                 mocks: [

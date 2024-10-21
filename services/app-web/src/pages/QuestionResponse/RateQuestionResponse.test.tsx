@@ -1,3 +1,4 @@
+//@eslint-gignore  jest/no-disabled-tests
 import {
     fetchContractWithQuestionsMockSuccess,
     fetchCurrentUserMock,
@@ -26,7 +27,7 @@ describe('RateQuestionResponse', () => {
             <Routes>
                 <Route element={<SubmissionSideNav />}>
                     <Route
-                        path={RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS}
+                        path={RoutesRecord.SUBMISSIONS_CONTRACT_QUESTIONS_AND_ANSWERS}
                         element={<QuestionResponse />}
                     />
                     <Route
@@ -69,10 +70,10 @@ describe('RateQuestionResponse', () => {
                                 id: '15',
                             },
                         }),
-                        fetchRateWithQuestionsMockSuccess(
-                            { id: secondRateRev.rateID },
-                            secondRateRev
-                        ),
+                        fetchRateWithQuestionsMockSuccess({
+                            rate: { id: secondRateRev.rateID },
+                            rateRev: secondRateRev
+                        }),
                     ],
                 },
                 routerProvider: {
@@ -173,8 +174,6 @@ describe('RateQuestionResponse', () => {
             </Routes>
         )
         it('renders error page if rate revision does not exist', async () => {
-            const rate = rateDataMock()
-            rate.packageSubmissions = []
 
             renderWithProviders(<CommonCMSRoutes />, {
                 apolloProvider: {
@@ -182,13 +181,11 @@ describe('RateQuestionResponse', () => {
                         fetchCurrentUserMock({
                             user: mockValidCMSUser(),
                             statusCode: 200,
-                        }),
-                        fetchRateMockSuccess(rate),
-                        fetchRateWithQuestionsMockSuccess(rate),
+                        })
                     ],
                 },
                 routerProvider: {
-                    route: `/rates/${rate.id}/question-and-answers`,
+                    route: `/rates/not-real/question-and-answers`,
                 },
                 featureFlags: {
                     'qa-by-rates': true,
@@ -209,7 +206,7 @@ describe('RateQuestionResponse', () => {
                             statusCode: 200,
                         }),
                         fetchRateMockSuccess(rate),
-                        fetchRateWithQuestionsMockSuccess(rate),
+                        fetchRateWithQuestionsMockSuccess({rate}),
                     ],
                 },
                 routerProvider: {
@@ -236,7 +233,7 @@ describe('RateQuestionResponse', () => {
                             statusCode: 200,
                         }),
                         fetchRateMockSuccess(rate),
-                        fetchRateWithQuestionsMockSuccess(rate),
+                        fetchRateWithQuestionsMockSuccess({rate}),
                     ],
                 },
                 routerProvider: {
