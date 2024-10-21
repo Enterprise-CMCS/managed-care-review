@@ -23,11 +23,17 @@ async function findContractRevision(
             const err = `PRISMA ERROR: Cannot find contract revision with id: ${contractRevID}`
             return new NotFoundError(err)
         }
+        console.info(
+            `DEBUG: got back this contract: ${JSON.stringify(contractRev)}`
+        )
 
         const parseResult = contractSchema.safeParse(contractRev)
         if (!parseResult.success) {
             return new Error(`Zod parsing error: ${parseResult.error.message}`)
         }
+        console.info(
+            `DEBUG: got back this from parse: ${JSON.stringify(parseResult.data)}`
+        )
 
         return parseResult.data
     } catch (err) {
