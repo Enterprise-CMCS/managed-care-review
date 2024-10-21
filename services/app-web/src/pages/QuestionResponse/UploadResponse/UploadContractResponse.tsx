@@ -11,7 +11,7 @@ import {
 import { usePage } from '../../../contexts/PageContext'
 import { SideNavOutletContextType } from '../../SubmissionSideNav/SubmissionSideNav'
 import { Breadcrumbs } from '../../../components/Breadcrumbs/Breadcrumbs'
-import { createResponseWrapper } from '../../../gqlHelpers/mutationWrappersForUserFriendlyErrors'
+import { createContractResponseWrapper, createResponseWrapper } from '../../../gqlHelpers/mutationWrappersForUserFriendlyErrors'
 import { RoutesRecord } from '../../../constants'
 import { GenericErrorPage } from '../../Errors/GenericErrorPage'
 import { UploadResponseForm } from './UploadResponseForm'
@@ -57,13 +57,12 @@ export const UploadContractResponse = () => {
             documents: responseDocs,
         }
 
-        const createResult = await createResponseWrapper(
+        const createResult = await createContractResponseWrapper(
             createResponse,
             id as string,
             input,
             division as Division
         )
-
         if (createResult instanceof Error) {
             console.info(createResult.message)
         } else {

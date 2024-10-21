@@ -142,7 +142,7 @@ const UploadResponseForm = ({handleSubmit, apiError, apiLoading, type}: UploadRe
                             animationTimeout={1000}
                             loading={apiLoading}
                         >
-                            Send Response
+                            Send response
                         </ActionButton>
                     </ButtonGroup>
                 </PageActionsContainer>

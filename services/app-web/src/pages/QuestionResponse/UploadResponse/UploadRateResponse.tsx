@@ -4,7 +4,6 @@ import {
 } from '@trussworks/react-uswds'
 import { useNavigate, useParams } from 'react-router-dom'
 import {
-    ContractRevision,
     CreateQuestionResponseInput,
     Division,
     useCreateRateQuestionResponseMutation,
@@ -22,9 +21,10 @@ import { handleAndReturnErrorState } from '../../StateSubmission/ErrorOrLoadingP
 
 export const UploadRateResponse = () => {
     // router context
-    const { division, id, questionID } = useParams<{
+    const { division, id,rateID, questionID } = useParams<{
         division: string
         id: string
+        rateID: string
         questionID: string
     }>()
 
@@ -35,7 +35,7 @@ export const UploadRateResponse = () => {
     const { data: fetchRateData, loading: fetchRateLoading, error: fetchRateError } = useFetchRateWithQuestionsQuery({
         variables: {
             input: {
-                rateID: id || 'not-found',
+                rateID: rateID || 'not-found',
             },
         },
     })
@@ -45,8 +45,8 @@ export const UploadRateResponse = () => {
 
         const rate = fetchRateData?.fetchRate.rate
         const rateName = rate?.packageSubmissions && rate?.packageSubmissions[0].rateRevision.formData.rateCertificationName || ''
-        const parentContractID = rate?.parentContractID
-        const contractName = rate?.packageSubmissions && rate?.packageSubmissions[0].contractRevisions.find( (contractRev) => contractRev.id == parentContractID) || undefined
+        const parentContractID = id
+        const contractName = rate?.packageSubmissions && rate?.packageSubmissions[0].contractRevisions.find( (contractRev) => contractRev.id == parentContractID)?.contractName || undefined
 
 
         // side effects
@@ -86,7 +86,7 @@ export const UploadRateResponse = () => {
 
         const createResult = await createRateQuestionResponseWrapper(
             createResponse,
-            id as string,
+            rateID as string,
             input,
             division as Division
         )
@@ -107,7 +107,7 @@ export const UploadRateResponse = () => {
                         text: 'Dashboard',
                     },
                     { link: `/submissions/${parentContractID}`, text: contractName ?? 'Unknown Contract' },
-                    { link: `/rates/${rate.id}/question-and-answers}`, text: `Rate questions: ${rateName}` },
+                    { link: `/submissions/${parentContractID}/rates/${rate.id}/question-and-answers}`, text: `Rate questions: ${rateName}` },
                     {
                         text: 'Upload response',
                         link: RoutesRecord.SUBMISSIONS_UPLOAD_CONTRACT_RESPONSE,
