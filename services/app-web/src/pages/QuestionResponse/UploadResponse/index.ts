@@ -1,1 +1,2 @@
-export { UploadResponse } from './UploadResponse'
+export { UploadContractResponse } from './UploadContractResponse'
+export { UploadResponseForm } from './UploadResponseForm'

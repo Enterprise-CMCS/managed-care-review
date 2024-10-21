@@ -33,7 +33,7 @@ import { recordJSException } from '../../otelHelpers'
 import { SubmissionSideNav } from '../SubmissionSideNav'
 import {
     QuestionResponse,
-    UploadResponse,
+    UploadContractResponse,
     UploadQuestions,
 } from '../QuestionResponse'
 import { GraphQLExplorer } from '../GraphQLExplorer/GraphQLExplorer'
@@ -139,7 +139,7 @@ const StateUserRoutes = ({
                     />
                     <Route
                         path={RoutesRecord.SUBMISSIONS_UPLOAD_RESPONSE}
-                        element={<UploadResponse />}
+                        element={<UploadContractResponse />}
                     />
 
                     <Route
