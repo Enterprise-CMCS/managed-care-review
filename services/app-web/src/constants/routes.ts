@@ -20,6 +20,7 @@ const ROUTES = [
     'SUPPORT_EMAILS',
     'RATES_SUMMARY',
     'RATES_UPLOAD_QUESTION',
+    'RATES_SUMMARY_QUESTIONS_AND_ANSWERS',
     'RATE_EDIT',
     'REPLACE_RATE',
     'SUBMISSIONS',
@@ -67,6 +68,7 @@ const RoutesRecord: Record<RouteT, string> = {
     AUTOMATED_EMAILS: '/mc-review-settings/automated-emails',
     SUPPORT_EMAILS: '/mc-review-settings/support-emails',
     RATES_SUMMARY: '/rates/:id',
+    RATES_SUMMARY_QUESTIONS_AND_ANSWERS: '/rates/:id/question-and-answers',
     RATE_EDIT: '/rates/:id/edit',
     RATES_UPLOAD_QUESTION:
     '/rates/:id/question-and-answers/:division/upload-questions',
@@ -83,8 +85,8 @@ const RoutesRecord: Record<RouteT, string> = {
     SUBMISSIONS_SUMMARY: '/submissions/:id',
     SUBMISSIONS_MCCRSID: '/submissions/:id/mccrs-record-number',
     SUBMISSIONS_REVISION: '/submissions/:id/revisions/:revisionVersion',
-    SUBMISSIONS_CONTRACT_QUESTIONS_AND_ANSWERS: 'submissions/:id/question-and-answers',
-    SUBMISSIONS_RATE_QUESTIONS_AND_ANSWERS: 'submissions/:id/rate/:rateID/question-and-answers',
+    SUBMISSIONS_CONTRACT_QUESTIONS_AND_ANSWERS: '/submissions/:id/question-and-answers',
+    SUBMISSIONS_RATE_QUESTIONS_AND_ANSWERS: '/submissions/:id/rate/:rateID/question-and-answers',
     SUBMISSIONS_UPLOAD_CONTRACT_QUESTION:
     '/submissions/:id/question-and-answers/:division/upload-questions',
     SUBMISSIONS_UPLOAD_CONTRACT_RESPONSE:
@@ -158,6 +160,7 @@ const PageTitlesRecord: Record<RouteT | 'UNKNOWN_ROUTE', string> = {
     DASHBOARD_RATES: 'Rate review dashboard',
     DASHBOARD_SUBMISSIONS: 'Dashboard',
     RATES_SUMMARY: 'Rate summary',
+    RATES_SUMMARY_QUESTIONS_AND_ANSWERS: 'Q&A',
     RATE_EDIT: 'Edit rate',
     REPLACE_RATE: 'Replace rate',
     RATES_UPLOAD_QUESTION: 'Add rate questions',
