@@ -155,7 +155,7 @@ async function getContractSupportingDocuments(
         return docs.map((doc) => ({
             ...doc,
             contractRevisionID: doc.contractRevisionID,
-            contractRevision: true,
+            contractRevision: doc.contractRevision,
         }))
     } catch (err) {
         return err instanceof Error
@@ -208,7 +208,7 @@ async function getContractQuestionResponseDocument(
         const docs = await prisma.contractQuestionResponseDocument.findMany()
         return docs.map((doc) => ({
             ...doc,
-            questionID: doc.responseID,
+            responseID: doc.responseID,
         }))
     } catch (err) {
         return err instanceof Error
