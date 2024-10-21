@@ -209,6 +209,9 @@ async function fetchAssociatedData(
             const contractResult = await store.findContractRevision(
                 doc.contractRevisionID
             )
+            console.info(
+                `Got back contractResult ${JSON.stringify(contractResult)}`
+            )
             if (
                 !(contractResult instanceof Error) &&
                 !(contractResult instanceof NotFoundError)
@@ -217,6 +220,7 @@ async function fetchAssociatedData(
             }
         } else if (doc.type === 'rateDoc' && doc.rateRevisionID) {
             const rateResult = await store.findRateRevision(doc.rateRevisionID)
+            console.info(`Got back rateResult ${JSON.stringify(rateResult)}`)
             if (
                 !(rateResult instanceof Error) &&
                 !(rateResult instanceof NotFoundError)
