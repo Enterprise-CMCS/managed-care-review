@@ -29,7 +29,11 @@ async function findContractRevision(
 
         const parseResult = contractSchema.safeParse(contractRev)
         if (!parseResult.success) {
-            return new Error(`Zod parsing error: ${parseResult.error.message}`)
+            const error = new Error(
+                `Zod parsing error: ${parseResult.error.message}`
+            )
+            console.error(error)
+            return error
         }
         console.info(
             `DEBUG: got back this from parse: ${JSON.stringify(parseResult.data)}`

@@ -23,7 +23,11 @@ async function findRateRevision(
 
         const parseResult = rateSchema.safeParse(rateRevision)
         if (!parseResult.success) {
-            return new Error(`Zod parsing error: ${parseResult.error.message}`)
+            const error = new Error(
+                `Zod parsing error: ${parseResult.error.message}`
+            )
+            console.error(error)
+            return error
         }
 
         return parseResult.data
