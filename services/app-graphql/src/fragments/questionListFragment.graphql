@@ -1,0 +1,13 @@
+fragment contractQuestionListFragment on ContractQuestionList {
+    totalCount
+    edges {
+        ...contractQuestionEdgeFragment
+    }
+}
+
+fragment rateQuestionListFragment on RateQuestionList {
+    totalCount
+    edges {
+        ...rateQuestionEdgeFragment
+    }
+}

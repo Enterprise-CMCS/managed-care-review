@@ -450,6 +450,11 @@ export const createRateQuestionWrapper = async (
                                                             'RateQuestionEdge',
                                                         node: {
                                                             ...newQuestion,
+                                                            createdAt: new Date(),
+                                                            documents: newQuestion.documents.map(doc => ({
+                                                                ...doc,
+                                                                downloadURL: null,
+                                                            })),
                                                             responses: [],
                                                         },
                                                     },
