@@ -85,6 +85,18 @@
             "code": "AZ"
         },
         {
+            "name": "American Samoa",
+            "programs": [
+                {
+                    "id": "b4775eeb-365f-48e9-bf2e-8c2d0e8dbc70",
+                    "fullName": "MC Review Test Program Plus",
+                    "name": "TPPLUS",
+                    "isRateProgram": false
+                }
+            ],
+            "code": "AS"
+        },
+        {
             "name": "California",
             "programs": [
                 {
