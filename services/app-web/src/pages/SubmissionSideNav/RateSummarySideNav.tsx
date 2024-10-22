@@ -108,7 +108,7 @@ export const RateSummarySideNav = () => {
                                 event_name="back_button"
                             >
                                 <Icon.ArrowBack />
-                                <span>{` Back to dashboard`}</span>
+                                <span>{` Go to dashboard`}</span>
                             </NavLinkWithLogging>
                         </div>
                         <SideNav
