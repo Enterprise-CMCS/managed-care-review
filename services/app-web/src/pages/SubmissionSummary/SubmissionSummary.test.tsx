@@ -395,7 +395,7 @@ describe('SubmissionSummary', () => {
 
                 expect(
                     await screen.findByRole('link', {
-                        name: /Back to dashboard/,
+                        name: /Go to dashboard/,
                     })
                 ).toBeInTheDocument()
             })
@@ -970,7 +970,7 @@ describe('SubmissionSummary', () => {
             ).toBeInTheDocument()
             expect(
                 await screen.findByRole('link', {
-                    name: /Back to state dashboard/,
+                    name: /Go to state dashboard/,
                 })
             ).toBeInTheDocument()
         })
