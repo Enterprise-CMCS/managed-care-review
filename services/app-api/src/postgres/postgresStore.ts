@@ -1,4 +1,9 @@
-import type { PrismaClient, Division } from '@prisma/client'
+import type {
+    PrismaClient,
+    Division,
+    RateRevisionTable,
+    ContractRevisionTable,
+} from '@prisma/client'
 import type { StateCodeType } from '../../../app-web/src/common-code/healthPlanFormDataType'
 import type {
     ProgramType,
@@ -195,9 +200,11 @@ type Store = {
 
     findContractRevision: (
         contractRevID: string
-    ) => Promise<ContractType | Error>
+    ) => Promise<ContractRevisionTable | Error>
 
-    findRateRevision: (rateRevisionID: string) => Promise<RateType | Error>
+    findRateRevision: (
+        rateRevisionID: string
+    ) => Promise<RateRevisionTable | Error>
 }
 
 function NewPostgresStore(client: PrismaClient): Store {

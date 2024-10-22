@@ -5,12 +5,8 @@ import { NewPostgresStore, NotFoundError } from '../postgres'
 import type { Store } from '../postgres'
 import { HeadObjectCommand, S3Client } from '@aws-sdk/client-s3'
 import type { S3ServiceException } from '@aws-sdk/client-s3'
-import type { AuditDocument, ContractType, RateType } from '../domain-models'
-
-type DocumentWithAssociation = AuditDocument & {
-    associatedContract?: ContractType
-    associatedRate?: RateType
-}
+import type { AuditDocument } from '../domain-models'
+import type { ContractRevisionTable, RateRevisionTable } from '@prisma/client'
 
 const main: Handler = async (): Promise<APIGatewayProxyResultV2> => {
     // setup otel tracing
@@ -196,6 +192,11 @@ function deduplicateDocuments(documents: AuditDocument[]): AuditDocument[] {
     return Array.from(uniqueDocuments.values())
 }
 
+type DocumentWithAssociation = AuditDocument & {
+    associatedContract?: ContractRevisionTable
+    associatedRate?: RateRevisionTable
+}
+
 async function fetchAssociatedData(
     store: Store,
     documents: AuditDocument[]
@@ -203,14 +204,12 @@ async function fetchAssociatedData(
     const results: DocumentWithAssociation[] = []
 
     for (const doc of documents) {
-        let associatedData: ContractType | RateType | null = null
+        let associatedData: ContractRevisionTable | RateRevisionTable | null =
+            null
 
         if (doc.type === 'contractDoc' && doc.contractRevisionID) {
             const contractResult = await store.findContractRevision(
                 doc.contractRevisionID
-            )
-            console.info(
-                `Got back contractResult ${JSON.stringify(contractResult)}`
             )
             if (
                 !(contractResult instanceof Error) &&
@@ -220,7 +219,6 @@ async function fetchAssociatedData(
             }
         } else if (doc.type === 'rateDoc' && doc.rateRevisionID) {
             const rateResult = await store.findRateRevision(doc.rateRevisionID)
-            console.info(`Got back rateResult ${JSON.stringify(rateResult)}`)
             if (
                 !(rateResult instanceof Error) &&
                 !(rateResult instanceof NotFoundError)
@@ -233,11 +231,11 @@ async function fetchAssociatedData(
             ...doc,
             associatedContract:
                 doc.type === 'contractDoc'
-                    ? (associatedData as ContractType)
+                    ? (associatedData as ContractRevisionTable)
                     : undefined,
             associatedRate:
                 doc.type === 'rateDoc'
-                    ? (associatedData as RateType)
+                    ? (associatedData as RateRevisionTable)
                     : undefined,
         })
     }
