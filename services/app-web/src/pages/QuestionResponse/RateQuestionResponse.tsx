@@ -18,11 +18,15 @@ import { handleApolloError } from '../../gqlHelpers/apolloErrors'
 import { Error404 } from '../Errors/Error404Page'
 import { recordJSException } from '../../otelHelpers'
 import { RoutesRecord } from '../../constants'
+import { usePage } from '../../contexts/PageContext'
+import { useEffect, useState } from 'react'
 
 export const RateQuestionResponse = () => {
     const { id } = useParams() as { id: string }
     const { loggedInUser } = useAuth()
     const { pathname } = useLocation()
+    const { updateHeading } = usePage()
+    const [rateName, setRateName] = useState<string | undefined>(undefined)
     const hasCMSPermissions = hasCMSUserPermissions(loggedInUser)
     let division: Division | undefined = undefined
 
@@ -39,6 +43,10 @@ export const RateQuestionResponse = () => {
         },
         fetchPolicy: 'network-only',
     })
+
+    useEffect(() => {
+        updateHeading({ customHeading: rateName })
+    }, [rateName, updateHeading])
 
     if (loading) {
         return (
@@ -68,6 +76,13 @@ export const RateQuestionResponse = () => {
 
     if (rate?.status === 'DRAFT' || !loggedInUser || !rateRev) {
         return <GenericErrorPage />
+    }
+
+    if (
+        rateName !== rateRev.formData.rateCertificationName &&
+        rateRev.formData.rateCertificationName
+    ) {
+        setRateName(rateRev.formData.rateCertificationName)
     }
 
     if (hasCMSPermissions) {

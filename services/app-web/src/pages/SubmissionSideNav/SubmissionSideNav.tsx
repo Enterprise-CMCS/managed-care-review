@@ -203,9 +203,9 @@ export const SubmissionSideNav = () => {
                             >
                                 <Icon.ArrowBack />
                                 {loggedInUser?.__typename === 'StateUser' ? (
-                                    <span>&nbsp;Back to state dashboard</span>
+                                    <span>&nbsp;Go to state dashboard</span>
                                 ) : (
-                                    <span>&nbsp;Back to dashboard</span>
+                                    <span>&nbsp;Go to dashboard</span>
                                 )}
                             </NavLinkWithLogging>
                         </div>
