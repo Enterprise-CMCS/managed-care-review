@@ -24,19 +24,12 @@ async function findContractRevision(
             `DEBUG: got back this contract: ${JSON.stringify(contractRev)}`
         )
 
-        const parseResult = contractRevisionSchema.safeParse(contractRev)
-        if (!parseResult.success) {
-            const error = new Error(
-                `Zod parsing error: ${parseResult.error.message}`
-            )
-            console.error(error)
-            return error
-        }
+        const parseResult = contractRevisionSchema.parse(contractRev)
         console.info(
-            `DEBUG: got back this from parse: ${JSON.stringify(parseResult.data)}`
+            `DEBUG: got back this from parse: ${JSON.stringify(parseResult)}`
         )
 
-        return parseResult.data
+        return parseResult
     } catch (err) {
         console.error('PRISMA ERROR', err)
         return err
