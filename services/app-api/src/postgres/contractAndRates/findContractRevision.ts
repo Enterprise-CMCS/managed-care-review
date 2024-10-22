@@ -14,17 +14,6 @@ async function findContractRevision(
             where: {
                 id: contractRevID,
             },
-            include: {
-                contract: {
-                    select: {
-                        id: true,
-                        stateCode: true,
-                        stateNumber: true,
-                    },
-                },
-                unlockInfo: true,
-                submitInfo: true,
-            },
         })
 
         if (!contractRev) {
