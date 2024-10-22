@@ -61,16 +61,15 @@ describe('SubmissionSideNav', () => {
             },
         })
 
-        // Wait for sidebar nav to exist.
-        await waitFor(() => {
-            expect(screen.queryByTestId('sidenav')).toBeInTheDocument()
-        })
+        // Wait for sidebar nav and sections to exist. Addresses test flakes to wait for these up front.
+        await screen.findByTestId('sidenav')
+        await screen.findByText(/Contract questions/)
 
         const withinSideNav = within(screen.getByTestId('sidenav'))
 
         // Expect to only have one back to dashboard link.
         expect(
-            await screen.findAllByRole('link', { name: /Back to dashboard/ })
+            await screen.findAllByRole('link', { name: /Go to dashboard/ })
         ).toHaveLength(1)
 
         const summaryLink = withinSideNav.getByRole('link', {
@@ -141,10 +140,10 @@ describe('SubmissionSideNav', () => {
             },
         })
 
-        // Wait for sidebar nav to exist.
-        await waitFor(() => {
-            expect(screen.queryByTestId('sidenav')).toBeInTheDocument()
-        })
+        // Wait for sidebar nav and sections to exist. Addresses test flakes to wait for these up front.
+        await screen.findByTestId('sidenav')
+        await screen.findByText(/Contract questions/)
+        await screen.findAllByText(/Rate questions/)
 
         const withinSideNav = within(screen.getByTestId('sidenav'))
 
@@ -312,7 +311,7 @@ describe('SubmissionSideNav', () => {
 
         // Navigate to dashboard using back to dashboard link
         await userEvent.click(
-            screen.getByRole('link', { name: /Back to dashboard/ })
+            screen.getByRole('link', { name: /Go to dashboard/ })
         )
         await waitFor(() => {
             expect(testLocation.pathname).toBe(`/dashboard/submissions`)
@@ -340,7 +339,7 @@ describe('SubmissionSideNav', () => {
             },
         })
         expect(
-            await screen.findByRole('link', { name: /Back to state dashboard/ })
+            await screen.findByRole('link', { name: /Go to state dashboard/ })
         ).toBeInTheDocument()
     })
 
@@ -368,7 +367,7 @@ describe('SubmissionSideNav', () => {
 
         expect(
             await screen.findByRole('link', {
-                name: /Back to dashboard/,
+                name: /Go to dashboard/,
             })
         ).toBeInTheDocument()
     })

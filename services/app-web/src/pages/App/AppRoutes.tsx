@@ -135,7 +135,9 @@ const StateUserRoutes = ({
                 )}
                 <Route element={<SubmissionSideNav />}>
                     <Route
-                        path={RoutesRecord.SUBMISSIONS_CONTRACT_QUESTIONS_AND_ANSWERS}
+                        path={
+                            RoutesRecord.SUBMISSIONS_CONTRACT_QUESTIONS_AND_ANSWERS
+                        }
                         element={<QuestionResponse />}
                     />
                     <Route
@@ -226,7 +228,9 @@ const CMSUserRoutes = ({
 
                 <Route element={<SubmissionSideNav />}>
                     <Route
-                        path={RoutesRecord.SUBMISSIONS_CONTRACT_QUESTIONS_AND_ANSWERS}
+                        path={
+                            RoutesRecord.SUBMISSIONS_CONTRACT_QUESTIONS_AND_ANSWERS
+                        }
                         element={<QuestionResponse />}
                     />
                     <Route
@@ -239,10 +243,6 @@ const CMSUserRoutes = ({
                     />
                 </Route>
 
-                <Route
-                    path={RoutesRecord.RATES_SUMMARY}
-                    element={<RateSummary />}
-                />
                 {showQAbyRates ? (
                     <>
                         <Route element={<RateSummarySideNav />}>
@@ -257,9 +257,9 @@ const CMSUserRoutes = ({
                                 element={<RateQuestionResponse />}
                             />
                             <Route
-                                path={RoutesRecord.RATES_UPLOAD_QUESTION }
-                                element={<UploadRateQuestions/>}
-                                />
+                                path={RoutesRecord.RATES_UPLOAD_QUESTION}
+                                element={<UploadRateQuestions />}
+                            />
                             {/*This route will cause the RateSummarySideNav to redirect to rate summary Q&A page*/}
                             <Route
                                 path={
