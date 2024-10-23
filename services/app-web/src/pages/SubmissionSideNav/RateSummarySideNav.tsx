@@ -30,6 +30,11 @@ export const RateSummarySideNav = () => {
         pathname
     )
 
+    const isUploadQuestionPath = matchPath(
+        RoutesRecord.RATES_UPLOAD_QUESTION,
+        pathname
+    )
+
     const { data, loading, error } = useFetchRateQuery({
         variables: {
             input: {
@@ -95,37 +100,39 @@ export const RateSummarySideNav = () => {
             data-testid="rate-summary-side-nav"
         >
             <GridContainer className={styles.container}>
-                <div className={styles.verticalNavContainer}>
-                    <div className={styles.backLinkContainer}>
-                        <NavLinkWithLogging
-                            to={{ pathname: RoutesRecord.DASHBOARD_RATES }}
-                            event_name="back_button"
-                        >
-                            <Icon.ArrowBack />
-                            <span>{` Go to dashboard`}</span>
-                        </NavLinkWithLogging>
+                {!isUploadQuestionPath && (
+                    <div className={styles.verticalNavContainer}>
+                        <div className={styles.backLinkContainer}>
+                            <NavLinkWithLogging
+                                to={{ pathname: RoutesRecord.DASHBOARD_RATES }}
+                                event_name="back_button"
+                            >
+                                <Icon.ArrowBack />
+                                <span>{` Go to dashboard`}</span>
+                            </NavLinkWithLogging>
+                        </div>
+                        <SideNav
+                            items={[
+                                <NavLinkWithLogging
+                                    to={`/rates/${id}`}
+                                    className={isSelectedLink('RATES_SUMMARY')}
+                                    event_name="navigation_clicked"
+                                >
+                                    Rate summary
+                                </NavLinkWithLogging>,
+                                <NavLinkWithLogging
+                                    to={`/rates/${id}/question-and-answers`}
+                                    className={isSelectedLink(
+                                        'RATES_SUMMARY_QUESTIONS_AND_ANSWERS'
+                                    )}
+                                    event_name="navigation_clicked"
+                                >
+                                    Rate questions
+                                </NavLinkWithLogging>,
+                            ]}
+                        />
                     </div>
-                    <SideNav
-                        items={[
-                            <NavLinkWithLogging
-                                to={`/rates/${id}`}
-                                className={isSelectedLink('RATES_SUMMARY')}
-                                event_name="navigation_clicked"
-                            >
-                                Rate summary
-                            </NavLinkWithLogging>,
-                            <NavLinkWithLogging
-                                to={`/rates/${id}/question-and-answers`}
-                                className={isSelectedLink(
-                                    'RATES_SUMMARY_QUESTIONS_AND_ANSWERS'
-                                )}
-                                event_name="navigation_clicked"
-                            >
-                                Rate questions
-                            </NavLinkWithLogging>,
-                        ]}
-                    />
-                </div>
+                )}
                 <Outlet />
             </GridContainer>
         </div>

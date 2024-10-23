@@ -1,7 +1,5 @@
 import React, { useEffect } from 'react'
-import {
-    GridContainer,
-} from '@trussworks/react-uswds'
+import { GridContainer } from '@trussworks/react-uswds'
 import { useNavigate, useOutletContext, useParams } from 'react-router-dom'
 import {
     CreateContractQuestionInput,
@@ -51,7 +49,10 @@ export const UploadContractQuestions = () => {
             documents: questionDocs,
         }
 
-        const createResult = await createContractQuestionWrapper(createQuestion, input)
+        const createResult = await createContractQuestionWrapper(
+            createQuestion,
+            input
+        )
 
         if (createResult instanceof Error) {
             console.info(createResult.message)
@@ -76,7 +77,12 @@ export const UploadContractQuestions = () => {
                 ]}
             />
 
-           <UploadQuestionsForm apiLoading={apiLoading} apiError={Boolean(apiError)} type="contract" handleSubmit={handleFormSubmit}/>
+            <UploadQuestionsForm
+                apiLoading={apiLoading}
+                apiError={Boolean(apiError)}
+                type="contract"
+                handleSubmit={handleFormSubmit}
+            />
         </GridContainer>
     )
 }

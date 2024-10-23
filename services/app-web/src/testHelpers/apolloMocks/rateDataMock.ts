@@ -529,8 +529,10 @@ function mockRateSubmittedWithQuestions(
             rateRevision: rateRev(),
 
         }],
-        questions: {
+        questions: rate.questions ||  {
+            __typename: 'IndexRateQuestionsPayload',
             DMCOQuestions: {
+                __typename: 'RateQuestionList',
                 totalCount: 2,
                 edges: [
                     {
@@ -594,6 +596,7 @@ function mockRateSubmittedWithQuestions(
                 ],
             },
             DMCPQuestions: {
+                __typename: 'RateQuestionList',
                 totalCount: 1,
                 edges: [
                     {
@@ -635,6 +638,7 @@ function mockRateSubmittedWithQuestions(
                 ],
             },
             OACTQuestions: {
+                __typename: 'RateQuestionList',
                 totalCount: 1,
                 edges: [
                     {
@@ -666,6 +670,42 @@ function mockRateSubmittedWithQuestions(
                                         {
                                             s3URL: 's3://bucketname/key/response-to-oact-1-document-1',
                                             name: 'response-to-oact-1-document-1',
+                                            downloadURL: expect.any(String),
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    },
+                    {
+                        __typename: 'RateQuestionEdge' as const,
+                        node: {
+                            __typename: 'RateQuestion' as const,
+                            id: 'oact-question-2-id',
+                            rateID,
+                            createdAt: new Date('2022-12-15'),
+                            addedBy: mockValidCMSUser({
+                                divisionAssignment: 'OACT',
+                            }) as CmsUser,
+                            documents: [
+                                {
+                                    s3URL: 's3://bucketname/key/oact-question-1-document-1',
+                                    name: 'oact-question-2-document-1',
+                                    downloadURL: expect.any(String),
+                                },
+                            ],
+                            division: 'OACT',
+                            responses: [
+                                {
+                                    __typename: 'QuestionResponse' as const,
+                                    id: 'response-to-oact-2-id',
+                                    questionID: 'oact-question-2-id',
+                                    addedBy: mockValidUser() as StateUser,
+                                    createdAt: new Date('2022-12-16'),
+                                    documents: [
+                                        {
+                                            s3URL: 's3://bucketname/key/response-to-oact-1-document-1',
+                                            name: 'response-to-oact-2-document-1',
                                             downloadURL: expect.any(String),
                                         },
                                     ],

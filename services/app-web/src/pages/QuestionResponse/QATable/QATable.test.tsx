@@ -16,7 +16,6 @@ const cmsUser = mockValidCMSUser() as CmsUser
 
 const testQuestionData = (): QuestionData => ({
     id: 'question-1-id',
-    contractID: '15',
     createdAt: new Date('2022-12-23T00:00:00.000Z'),
     addedBy: cmsUser,
     documents: [
@@ -120,7 +119,6 @@ describe('QATable', () => {
             it('renders multiple documents', async () => {
                 const testQuestionDocLinks: QuestionData = {
                     id: 'question-1-id',
-                    contractID: '15',
                     createdAt: new Date('2022-12-23T00:00:00.000Z'),
                     addedBy: cmsUser,
                     documents: [

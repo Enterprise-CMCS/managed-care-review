@@ -171,7 +171,8 @@ const fetchRateWithQuestionsMockSuccess = ({
     rateRev?: Partial<RateRevision>
 }): MockedResponse<FetchRateWithQuestionsQuery> => {
     const rateID = rate?.id ??  rateRev?.rateID ?? 'rate-123'
-    const rateData =  mockRateSubmittedWithQuestions({ ...rate, id: rateID}, rateRev)
+    const rateData =  mockRateSubmittedWithQuestions({ ...rate, id: rateID }, rateRev)
+
     return {
         request: {
             query: FetchRateWithQuestionsDocument,
