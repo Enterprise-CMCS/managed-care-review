@@ -115,7 +115,31 @@ describe('SubmissionSideNav', () => {
                 rateProgramIDs: ['ea16a6c0-5fc6-4df8-adac-c627e76660ab'],
             },
         }
+        const thirdRate: RateRevision = {
+            ...rateRevision,
+            id: 'third-rate-revision',
+            rateID: 'third-rate',
+            formData: {
+                ...rateRevision.formData,
+                rateProgramIDs: [],
+                deprecatedRateProgramIDs: [
+                    '3fd36500-bf2c-47bc-80e8-e7aa417184c5',
+                ],
+            },
+        }
+        const fourthRate: RateRevision = {
+            ...rateRevision,
+            id: 'fourth-rate-revision',
+            rateID: 'fourth-rate',
+            formData: {
+                ...rateRevision.formData,
+                rateProgramIDs: [],
+                deprecatedRateProgramIDs: [],
+            },
+        }
         contract.packageSubmissions[0].rateRevisions.push(secondRate)
+        contract.packageSubmissions[0].rateRevisions.push(thirdRate)
+        contract.packageSubmissions[0].rateRevisions.push(fourthRate)
 
         renderWithProviders(<CommonRoutes />, {
             apolloProvider: {
@@ -195,6 +219,32 @@ describe('SubmissionSideNav', () => {
         expect(rate2Link).toHaveAttribute(
             'href',
             '/submissions/15/rates/second-rate/question-and-answers'
+        )
+
+        const rate3Link = withinSideNav.getByRole('link', {
+            name: /Rate questions: MSHO/,
+        })
+        // Expect third rate link using depreciated rates to exist within sidebar nav.
+        expect(rate3Link).toBeInTheDocument()
+        // Expect second rate link using depreciated rates to not be currently selected
+        expect(rate3Link).not.toHaveClass('usa-current')
+        // Expect second rate link using depreciated rates to have correct href url
+        expect(rate3Link).toHaveAttribute(
+            'href',
+            '/submissions/15/rate/third-rate/question-and-answers'
+        )
+
+        const rate4Link = withinSideNav.getByRole('link', {
+            name: 'Rate questions: Unknown Program(s)',
+        })
+        // Expect fourth rate link falling back to UnknownProgram to exist within sidebar nav.
+        expect(rate4Link).toBeInTheDocument()
+        // Expect fourth rate link falling back to UnknownProgram to not be currently selected
+        expect(rate4Link).not.toHaveClass('usa-current')
+        // Expect fourth rate link falling back to UnknownProgram to have correct href url
+        expect(rate4Link).toHaveAttribute(
+            'href',
+            '/submissions/15/rate/fourth-rate/question-and-answers'
         )
     })
 
