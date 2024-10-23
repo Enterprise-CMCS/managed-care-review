@@ -1,4 +1,9 @@
-import type { PrismaClient, Division } from '@prisma/client'
+import type {
+    PrismaClient,
+    Division,
+    RateRevisionTable,
+    ContractRevisionTable,
+} from '@prisma/client'
 import type { StateCodeType } from '../../../app-web/src/common-code/healthPlanFormDataType'
 import type {
     ProgramType,
@@ -47,6 +52,8 @@ import {
     unlockContract,
     updateDraftContract,
     replaceRateOnContract,
+    findContractRevision,
+    findRateRevision,
 } from './contractAndRates'
 import type {
     SubmitContractArgsType,
@@ -190,6 +197,14 @@ type Store = {
     unlockRate: (args: UnlockRateArgsType) => Promise<RateType | Error>
 
     findAllDocuments: () => Promise<AuditDocument[] | Error>
+
+    findContractRevision: (
+        contractRevID: string
+    ) => Promise<ContractRevisionTable | Error>
+
+    findRateRevision: (
+        rateRevisionID: string
+    ) => Promise<RateRevisionTable | Error>
 }
 
 function NewPostgresStore(client: PrismaClient): Store {
@@ -266,6 +281,8 @@ function NewPostgresStore(client: PrismaClient): Store {
         unlockRate: (args) => unlockRate(client, args),
 
         findAllDocuments: () => findAllDocuments(client),
+        findContractRevision: (args) => findContractRevision(client, args),
+        findRateRevision: (args) => findRateRevision(client, args),
     }
 }
 

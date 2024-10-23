@@ -1,10 +1,12 @@
 import type { APIGatewayProxyResultV2, Handler } from 'aws-lambda'
 import { initTracer, recordException } from '../../../uploads/src/lib/otel'
 import { configurePostgres } from './configuration'
-import { NewPostgresStore } from '../postgres'
+import { NewPostgresStore, NotFoundError } from '../postgres'
+import type { Store } from '../postgres'
 import { HeadObjectCommand, S3Client } from '@aws-sdk/client-s3'
 import type { S3ServiceException } from '@aws-sdk/client-s3'
 import type { AuditDocument } from '../domain-models'
+import type { ContractRevisionTable, RateRevisionTable } from '@prisma/client'
 
 const main: Handler = async (): Promise<APIGatewayProxyResultV2> => {
     // setup otel tracing
@@ -70,16 +72,32 @@ const main: Handler = async (): Promise<APIGatewayProxyResultV2> => {
             missingOrErrorDocuments.push(processResult)
         }
     }
+
+    // dedup
+    const uniqueDocuments = deduplicateDocuments(missingOrErrorDocuments)
     console.info(
-        `Missing ${missingOrErrorDocuments.length} of ${docResult.length} documents`
+        `Missing ${uniqueDocuments.length} of ${docResult.length} documents`
     )
+
+    // get the contract or rate
+    const { results, errors } = await fetchAssociatedData(
+        store,
+        uniqueDocuments
+    )
+    if (errors.length > 0) {
+        console.error(
+            'Errors encountered while fetching associated data:',
+            errors
+        )
+    }
+    console.info(`found ${results.length} documents with associations`)
     console.info(
-        `These documents could not be retreived from s3: ${JSON.stringify(missingOrErrorDocuments)}`
+        `These documents could not be retreived from s3: ${JSON.stringify(results)}`
     )
 
     const success: APIGatewayProxyResultV2 = {
         statusCode: 200,
-        body: JSON.stringify(missingOrErrorDocuments),
+        body: JSON.stringify(results),
         headers: {
             'Access-Control-Allow-Origin': '*',
             'Access-Control-Allow-Credentials': true,
@@ -163,6 +181,94 @@ async function processDocument(
         )
         return doc
     }
+}
+
+function deduplicateDocuments(documents: AuditDocument[]): AuditDocument[] {
+    const uniqueDocuments = new Map<string, AuditDocument>()
+
+    for (const doc of documents) {
+        if (!uniqueDocuments.has(doc.s3URL)) {
+            uniqueDocuments.set(doc.s3URL, doc)
+        }
+    }
+
+    return Array.from(uniqueDocuments.values())
+}
+
+type DocumentWithAssociation = AuditDocument & {
+    associatedContract?: ContractRevisionTable
+    associatedRate?: RateRevisionTable
+}
+
+type FetchError = {
+    documentId: string
+    type: 'contractDoc' | 'rateDoc'
+    error: Error | NotFoundError
+    revisionId: string | null
+}
+
+async function fetchAssociatedData(
+    store: Store,
+    documents: AuditDocument[]
+): Promise<{
+    results: DocumentWithAssociation[]
+    errors: FetchError[]
+}> {
+    const results: DocumentWithAssociation[] = []
+    const errors: FetchError[] = []
+
+    for (const doc of documents) {
+        let associatedData: ContractRevisionTable | RateRevisionTable | null =
+            null
+
+        if (doc.type === 'contractDoc' && doc.contractRevisionID) {
+            const contractResult = await store.findContractRevision(
+                doc.contractRevisionID
+            )
+            if (
+                contractResult instanceof Error ||
+                contractResult instanceof NotFoundError
+            ) {
+                errors.push({
+                    documentId: doc.id,
+                    type: doc.type,
+                    error: contractResult,
+                    revisionId: doc.contractRevisionID,
+                })
+            } else {
+                associatedData = contractResult
+            }
+        } else if (doc.type === 'rateDoc' && doc.rateRevisionID) {
+            const rateResult = await store.findRateRevision(doc.rateRevisionID)
+            if (
+                rateResult instanceof Error ||
+                rateResult instanceof NotFoundError
+            ) {
+                errors.push({
+                    documentId: doc.id,
+                    type: doc.type,
+                    error: rateResult,
+                    revisionId: doc.rateRevisionID,
+                })
+            } else {
+                associatedData = rateResult
+            }
+        }
+
+        results.push({
+            ...doc,
+            associatedContract:
+                doc.type === 'contractDoc'
+                    ? (associatedData as ContractRevisionTable)
+                    : undefined,
+            associatedRate:
+                doc.type === 'rateDoc'
+                    ? (associatedData as RateRevisionTable)
+                    : undefined,
+        })
+    }
+
+    return { results, errors }
 }
 
 module.exports = { main }

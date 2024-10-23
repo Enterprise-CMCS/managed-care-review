@@ -188,7 +188,7 @@ async function getContractQuestionResponseDocument(
         const docs = await prisma.contractQuestionResponseDocument.findMany()
         return docs.map((doc) => ({
             ...doc,
-            questionID: doc.responseID,
+            responseID: doc.responseID,
         }))
     } catch (err) {
         return err instanceof Error
