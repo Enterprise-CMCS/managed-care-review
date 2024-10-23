@@ -33,8 +33,7 @@ import { recordJSException } from '../../otelHelpers'
 import { SubmissionSideNav } from '../SubmissionSideNav'
 import {
     QuestionResponse,
-    UploadResponse,
-    UploadContractQuestions,
+    UploadContractResponse,
 } from '../QuestionResponse'
 import { GraphQLExplorer } from '../GraphQLExplorer/GraphQLExplorer'
 import { RateSummary } from '../RateSummary'
@@ -48,9 +47,10 @@ import {
     DivisionAssignmentTable,
 } from '../Settings/SettingsTables'
 import { EditStateAssign } from '../Settings/EditStateAssign/EditStateAssign'
-import { UploadRateQuestions } from '../QuestionResponse/UploadQuestions'
+import { UploadContractQuestions, UploadRateQuestions } from '../QuestionResponse/UploadQuestions'
 import { RateSummarySideNav } from '../SubmissionSideNav/RateSummarySideNav'
 import { RateQuestionResponse } from '../QuestionResponse/RateQuestionResponse'
+import { UploadRateResponse } from '../QuestionResponse/UploadResponse/UploadRateResponse'
 
 function componentForAuthMode(
     authMode: AuthModeType
@@ -141,8 +141,8 @@ const StateUserRoutes = ({
                         element={<QuestionResponse />}
                     />
                     <Route
+                        element={<UploadContractResponse />}
                         path={RoutesRecord.SUBMISSIONS_UPLOAD_CONTRACT_RESPONSE}
-                        element={<UploadResponse />}
                     />
 
                     <Route
@@ -154,12 +154,20 @@ const StateUserRoutes = ({
                         element={<StateSubmissionForm />}
                     />
                     {showQAbyRates && (
-                        <Route
+                       <>
+                       <Route
                             path={
                                 RoutesRecord.SUBMISSIONS_RATE_QUESTIONS_AND_ANSWERS
                             }
                             element={<RateQuestionResponse />}
                         />
+                        <Route
+                        path={
+                            RoutesRecord.SUBMISSIONS_UPLOAD_RATE_RESPONSE
+                        }
+                        element={<UploadRateResponse />}
+                        />
+                    </>
                     )}
                 </Route>
                 <Route

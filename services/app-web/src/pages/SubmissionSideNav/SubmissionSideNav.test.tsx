@@ -181,7 +181,7 @@ describe('SubmissionSideNav', () => {
         // Expect first rate link to have correct href url
         expect(rate1Link).toHaveAttribute(
             'href',
-            '/submissions/15/rate/123/question-and-answers'
+            '/submissions/15/rates/123/question-and-answers'
         )
 
         const rate2Link = withinSideNav.getByRole('link', {
@@ -194,7 +194,7 @@ describe('SubmissionSideNav', () => {
         // Expect second rate link to have correct href url
         expect(rate2Link).toHaveAttribute(
             'href',
-            '/submissions/15/rate/second-rate/question-and-answers'
+            '/submissions/15/rates/second-rate/question-and-answers'
         )
     })
 

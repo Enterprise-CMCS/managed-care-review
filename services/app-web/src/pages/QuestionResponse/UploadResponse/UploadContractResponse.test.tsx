@@ -1,7 +1,7 @@
 import { screen, waitFor, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { Route, Routes } from 'react-router-dom'
-import { UploadResponse } from './UploadResponse'
+import { UploadContractResponse } from './UploadContractResponse'
 import {
     dragAndDrop,
     renderWithProviders,
@@ -22,7 +22,7 @@ import {
 import { createContractQuestionResponseNetworkFailure } from '../../../testHelpers/apolloMocks/questionResponseGQLMock'
 import { SubmissionSideNav } from '../../SubmissionSideNav'
 
-describe('UploadResponse', () => {
+describe('UploadContractResponse', () => {
     const division = 'testDivision'
     const questionID = 'testQuestion'
 
@@ -34,7 +34,7 @@ describe('UploadResponse', () => {
                 <Route element={<SubmissionSideNav />}>
                     <Route
                         path={RoutesRecord.SUBMISSIONS_UPLOAD_CONTRACT_RESPONSE}
-                        element={<UploadResponse />}
+                        element={<UploadContractResponse />}
                     />
                 </Route>
             </Routes>,
@@ -78,7 +78,7 @@ describe('UploadResponse', () => {
                 <Route element={<SubmissionSideNav />}>
                     <Route
                         path={RoutesRecord.SUBMISSIONS_UPLOAD_CONTRACT_RESPONSE}
-                        element={<UploadResponse />}
+                        element={<UploadContractResponse />}
                     />
                 </Route>
             </Routes>,
@@ -130,7 +130,7 @@ describe('UploadResponse', () => {
                 <Route element={<SubmissionSideNav />}>
                     <Route
                         path={RoutesRecord.SUBMISSIONS_UPLOAD_CONTRACT_RESPONSE}
-                        element={<UploadResponse />}
+                        element={<UploadContractResponse />}
                     />
                 </Route>
             </Routes>,
@@ -181,7 +181,7 @@ describe('UploadResponse', () => {
                 <Route element={<SubmissionSideNav />}>
                     <Route
                         path={RoutesRecord.SUBMISSIONS_UPLOAD_CONTRACT_RESPONSE}
-                        element={<UploadResponse />}
+                        element={<UploadContractResponse />}
                     />
                 </Route>
             </Routes>,
@@ -236,7 +236,7 @@ describe('UploadResponse', () => {
                 <Route element={<SubmissionSideNav />}>
                     <Route
                         path={RoutesRecord.SUBMISSIONS_UPLOAD_CONTRACT_RESPONSE}
-                        element={<UploadResponse />}
+                        element={<UploadContractResponse />}
                     />
                 </Route>
             </Routes>,
@@ -302,7 +302,7 @@ describe('UploadResponse', () => {
                 <Route element={<SubmissionSideNav />}>
                     <Route
                         path={RoutesRecord.SUBMISSIONS_UPLOAD_CONTRACT_RESPONSE}
-                        element={<UploadResponse />}
+                        element={<UploadContractResponse />}
                     />
                 </Route>
             </Routes>,
@@ -355,7 +355,7 @@ describe('UploadResponse', () => {
                     <Route element={<SubmissionSideNav />}>
                         <Route
                             path={RoutesRecord.SUBMISSIONS_UPLOAD_CONTRACT_RESPONSE}
-                            element={<UploadResponse />}
+                            element={<UploadContractResponse />}
                         />
                     </Route>
                 </Routes>,

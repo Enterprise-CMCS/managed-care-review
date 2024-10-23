@@ -8,7 +8,6 @@ import {
 import { useParams, matchPath, useLocation } from 'react-router-dom'
 import { GridContainer } from '@trussworks/react-uswds'
 import {
-    Loading,
     QuestionResponseSubmitBanner,
     SectionHeader,
 } from '../../components'
@@ -18,13 +17,11 @@ import { getUserDivision } from './QuestionResponseHelpers'
 import { UserAccountWarningBanner } from '../../components/Banner'
 import { ContactSupportLink } from '../../components/ErrorAlert/ContactSupportLink'
 import { useAuth } from '../../contexts/AuthContext'
-import { ApolloError } from '@apollo/client'
-import { handleApolloError } from '../../gqlHelpers/apolloErrors'
-import { Error404 } from '../Errors/Error404Page'
-import { recordJSException } from '../../otelHelpers'
 import { RoutesRecord } from '../../constants'
+import { ErrorOrLoadingPage, handleAndReturnErrorState } from '../StateSubmission/ErrorOrLoadingPage'
 import { usePage } from '../../contexts/PageContext'
 import { CMSQuestionResponseTable } from './QATable/CMSQuestionResponseTable'
+import { StateQuestionResponseTable } from './QATable/StateQuestionResponseTable'
 
 export const RateQuestionResponse = () => {
     const { id } = useParams() as { id: string }
@@ -56,28 +53,16 @@ export const RateQuestionResponse = () => {
     }, [rateName, updateHeading])
 
     if (loading) {
-        return (
-            <GridContainer>
-                <Loading />
-            </GridContainer>
-        )
+        return <ErrorOrLoadingPage state="LOADING" />
     }
 
     if (error) {
-        const err = error
-        console.error('Error from API fetch', error)
-        if (err instanceof ApolloError) {
-            handleApolloError(err, true)
-
-            if (err.graphQLErrors[0]?.extensions?.code === 'NOT_FOUND') {
-                return <Error404 />
-            }
-        }
-
-        recordJSException(err)
-        return <GenericErrorPage /> // api failure or protobuf decode failure
+        return (
+            <ErrorOrLoadingPage
+                state={handleAndReturnErrorState(error)}
+            />
+        )
     }
-
     const rate = data?.fetchRate.rate
     const rateRev = rate?.packageSubmissions?.[0]?.rateRevision
 
@@ -131,15 +116,9 @@ export const RateQuestionResponse = () => {
                             header={`Rate questions: ${rateRev.formData.rateCertificationName}`}
                             hideBorder
                         />
-                        <section
-                            key={division}
-                            className={styles.questionSection}
-                        >
-                            <SectionHeader header="Outstanding questions" />
-                            <div>
-                                <p>No questions have been submitted yet.</p>
-                            </div>
-                        </section>
+                        <StateQuestionResponseTable
+                         indexQuestions={rate.questions}
+                        />
                     </>
                 )}
             </GridContainer>
