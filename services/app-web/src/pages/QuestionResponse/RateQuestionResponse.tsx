@@ -21,6 +21,7 @@ import { RoutesRecord } from '../../constants'
 import { ErrorOrLoadingPage, handleAndReturnErrorState } from '../StateSubmission/ErrorOrLoadingPage'
 import { usePage } from '../../contexts/PageContext'
 import { CMSQuestionResponseTable } from './QATable/CMSQuestionResponseTable'
+import { StateQuestionResponseTable } from './QATable/StateQuestionResponseTable'
 
 export const RateQuestionResponse = () => {
     const { id } = useParams() as { id: string }
@@ -115,15 +116,9 @@ export const RateQuestionResponse = () => {
                             header={`Rate questions: ${rateRev.formData.rateCertificationName}`}
                             hideBorder
                         />
-                        <section
-                            key={division}
-                            className={styles.questionSection}
-                        >
-                            <SectionHeader header="Outstanding questions" />
-                            <div>
-                                <p>No questions have been submitted yet.</p>
-                            </div>
-                        </section>
+                        <StateQuestionResponseTable
+                         indexQuestions={rate.questions}
+                        />
                     </>
                 )}
             </GridContainer>

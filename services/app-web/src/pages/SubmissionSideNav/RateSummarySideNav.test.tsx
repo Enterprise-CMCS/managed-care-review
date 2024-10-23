@@ -138,7 +138,7 @@ describe('RateSummarySideNav', () => {
                     ],
                 },
                 routerProvider: {
-                    route: `/submissions/some-contract-id/rate/${rate.id}/question-and-answers`,
+                    route: `/submissions/some-contract-id/rates/${rate.id}/question-and-answers`,
                 },
                 featureFlags: {
                     'qa-by-rates': true,

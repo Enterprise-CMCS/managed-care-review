@@ -55,7 +55,7 @@ export const UploadRateResponse = () => {
     const contractName =
         (rate?.packageSubmissions &&
             rate?.packageSubmissions[0].contractRevisions.find(
-                (contractRev) => contractRev.id == parentContractID
+                (contractRev) => contractRev.contractID == parentContractID
             )?.contractName) ||
         undefined
 
@@ -122,7 +122,7 @@ export const UploadRateResponse = () => {
                         text: contractName ?? 'Unknown Contract',
                     },
                     {
-                        link: `/submissions/${parentContractID}/rates/${rate.id}/question-and-answers}`,
+                        link: `/submissions/${parentContractID}/rates/${rate.id}/question-and-answers`,
                         text: `Rate questions: ${rateName}`,
                     },
                     {

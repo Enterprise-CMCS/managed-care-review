@@ -164,7 +164,7 @@ export const SubmissionSideNav = () => {
                 .join(' ')
             return (
                 <NavLinkWithLogging
-                    to={`/submissions/${id}/rate/${rev.rateID}/question-and-answers`}
+                    to={`/submissions/${id}/rates/${rev.rateID}/question-and-answers`}
                     className={isSelectedRateLink(rev.rateID)}
                     event_name="navigation_clicked"
                 >

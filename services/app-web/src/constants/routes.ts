@@ -90,7 +90,7 @@ const RoutesRecord: Record<RouteT, string> = {
     SUBMISSIONS_CONTRACT_QUESTIONS_AND_ANSWERS:
         '/submissions/:id/question-and-answers',
     SUBMISSIONS_RATE_QUESTIONS_AND_ANSWERS:
-        '/submissions/:id/rate/:rateID/question-and-answers',
+        '/submissions/:id/rates/:rateID/question-and-answers',
     SUBMISSIONS_UPLOAD_CONTRACT_QUESTION:
         '/submissions/:id/question-and-answers/:division/upload-questions',
     SUBMISSIONS_UPLOAD_CONTRACT_RESPONSE:

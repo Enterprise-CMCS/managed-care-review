@@ -79,7 +79,7 @@ describe('RateQuestionResponse', () => {
                     ],
                 },
                 routerProvider: {
-                    route: '/submissions/15/rate/second-rate/question-and-answers',
+                    route: '/submissions/15/rates/second-rate/question-and-answers',
                 },
                 featureFlags: {
                     'qa-by-rates': true,
@@ -117,7 +117,7 @@ describe('RateQuestionResponse', () => {
                     ],
                 },
                 routerProvider: {
-                    route: '/submissions/15/rate/second-rate/question-and-answers',
+                    route: '/submissions/15/rates/second-rate/question-and-answers',
                 },
                 featureFlags: {
                     'qa-by-rates': true,
@@ -147,7 +147,7 @@ describe('RateQuestionResponse', () => {
                     ],
                 },
                 routerProvider: {
-                    route: '/submissions/15/rate/second-rate/question-and-answers',
+                    route: '/submissions/15/rates/second-rate/question-and-answers',
                 },
                 featureFlags: {
                     'qa-by-rates': true,
