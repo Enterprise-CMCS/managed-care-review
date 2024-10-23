@@ -140,7 +140,7 @@ async function ensureAllowlistIP(
     instance: Instance
 ): Promise<undefined | Error> {
     // get my IP address
-    const myIPAddress = await httpRequest('http://ifconfig.me/ip')
+    const myIPAddress = await httpRequest('https://api4.ipify.org')
     if (myIPAddress instanceof Error) {
         return myIPAddress
     }
