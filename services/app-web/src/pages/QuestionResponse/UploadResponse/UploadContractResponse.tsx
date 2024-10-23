@@ -11,7 +11,7 @@ import {
 import { usePage } from '../../../contexts/PageContext'
 import { SideNavOutletContextType } from '../../SubmissionSideNav/SubmissionSideNav'
 import { Breadcrumbs } from '../../../components/Breadcrumbs/Breadcrumbs'
-import { createContractResponseWrapper, createResponseWrapper } from '../../../gqlHelpers/mutationWrappersForUserFriendlyErrors'
+import { createContractResponseWrapper } from '../../../gqlHelpers/mutationWrappersForUserFriendlyErrors'
 import { RoutesRecord } from '../../../constants'
 import { GenericErrorPage } from '../../Errors/GenericErrorPage'
 import { UploadResponseForm } from './UploadResponseForm'
