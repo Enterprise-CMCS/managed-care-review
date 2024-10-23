@@ -25,22 +25,13 @@ query fetchContractWithQuestions($input: FetchContractInput!) {
 
             questions {
                 DMCOQuestions {
-                    edges {
-                        ...questionEdgeFragment
-                    }
-                    totalCount
+                    ...contractQuestionListFragment
                 }
                 DMCPQuestions {
-                    edges {
-                        ...questionEdgeFragment
-                    }
-                    totalCount
+                    ...contractQuestionListFragment
                 }
                 OACTQuestions {
-                    edges {
-                        ...questionEdgeFragment
-                    }
-                    totalCount
+                    ...contractQuestionListFragment
                 }
             }
         }
@@ -113,22 +104,13 @@ fragment rateFieldsWithQuestions on Rate {
     initiallySubmittedAt
     questions {
         DMCOQuestions {
-            edges {
-                ...rateQuestionEdgeFragment
-            }
-            totalCount
+            ...rateQuestionListFragment
         }
         DMCPQuestions {
-            edges {
-                ...rateQuestionEdgeFragment
-            }
-            totalCount
+            ...rateQuestionListFragment
         }
         OACTQuestions {
-            edges {
-                ...rateQuestionEdgeFragment
-            }
-            totalCount
+            ...rateQuestionListFragment
         }
     }
 }

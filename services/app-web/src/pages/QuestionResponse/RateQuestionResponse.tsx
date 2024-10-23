@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import styles from './QuestionResponse.module.scss'
 import {
     CmsUser,
@@ -6,7 +7,10 @@ import {
 } from '../../gen/gqlClient'
 import { useParams, matchPath, useLocation } from 'react-router-dom'
 import { GridContainer } from '@trussworks/react-uswds'
-import { NavLinkWithLogging, SectionHeader } from '../../components'
+import {
+    QuestionResponseSubmitBanner,
+    SectionHeader,
+} from '../../components'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import { hasCMSUserPermissions } from '../../gqlHelpers'
 import { getUserDivision } from './QuestionResponseHelpers'
@@ -16,10 +20,12 @@ import { useAuth } from '../../contexts/AuthContext'
 import { RoutesRecord } from '../../constants'
 import { ErrorOrLoadingPage, handleAndReturnErrorState } from '../StateSubmission/ErrorOrLoadingPage'
 import { usePage } from '../../contexts/PageContext'
-import { useEffect, useState } from 'react'
+import { CMSQuestionResponseTable } from './QATable/CMSQuestionResponseTable'
 
 export const RateQuestionResponse = () => {
     const { id } = useParams() as { id: string }
+    const location = useLocation()
+    const submitType = new URLSearchParams(location.search).get('submit')
     const { loggedInUser } = useAuth()
     const { pathname } = useLocation()
     const { updateHeading } = usePage()
@@ -59,7 +65,12 @@ export const RateQuestionResponse = () => {
     const rate = data?.fetchRate.rate
     const rateRev = rate?.packageSubmissions?.[0]?.rateRevision
 
-    if (rate?.status === 'DRAFT' || !rateRev) {
+    if (
+        rate?.status === 'DRAFT' ||
+        !loggedInUser ||
+        !rateRev ||
+        !rate.questions
+    ) {
         return <GenericErrorPage />
     }
 
@@ -90,37 +101,14 @@ export const RateQuestionResponse = () => {
                         }
                     />
                 )}
+                {submitType && (
+                    <QuestionResponseSubmitBanner submitType={submitType} />
+                )}
                 {hasCMSPermissions ? (
-                    <>
-                        <section
-                            key={division}
-                            className={styles.yourQuestionSection}
-                        >
-                            <SectionHeader header="Your division's questions">
-                                {hasCMSPermissions && division && (
-                                    <NavLinkWithLogging
-                                        className="usa-button"
-                                        variant="unstyled"
-                                        to={`./`}
-                                    >
-                                        Add questions
-                                    </NavLinkWithLogging>
-                                )}
-                            </SectionHeader>
-                            <div>
-                                <p>No questions have been submitted yet.</p>
-                            </div>
-                        </section>
-                        <section
-                            key={division}
-                            className={styles.questionSection}
-                        >
-                            <SectionHeader header="Other division's questions" />
-                            <div>
-                                <p>No questions have been submitted yet.</p>
-                            </div>
-                        </section>
-                    </>
+                    <CMSQuestionResponseTable
+                        indexQuestions={rate.questions}
+                        userDivision={division}
+                    />
                 ) : (
                     <>
                         <SectionHeader

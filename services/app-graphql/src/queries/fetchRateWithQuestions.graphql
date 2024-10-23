@@ -12,19 +12,13 @@ query fetchRateWithQuestions($input: FetchRateInput!) {
             }
             questions {
                 DMCOQuestions {
-                    edges {
-                        ...rateQuestionEdgeFragment
-                    }
+                    ...rateQuestionListFragment
                 }
                 DMCPQuestions {
-                    edges {
-                        ...rateQuestionEdgeFragment
-                    }
+                    ...rateQuestionListFragment
                 }
                 OACTQuestions {
-                    edges {
-                        ...rateQuestionEdgeFragment
-                    }
+                    ...rateQuestionListFragment
                 }
             }
         }

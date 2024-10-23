@@ -1,13 +1,24 @@
-import {CmsUser, ContractQuestionEdge, Document, QuestionResponse, StateUser} from '../../../gen/gqlClient';
+import {
+    CmsUser,
+    ContractQuestionEdge,
+    Document, IndexContractQuestionsPayload, IndexRateQuestionsPayload,
+    QuestionResponse,
+    RateQuestionEdge,
+    StateUser
+} from '../../../gen/gqlClient';
 import { Division } from '../../../gen/gqlClient';
 
 type QuestionData = {
     id: string
-    contractID: string
     createdAt: Date
     addedBy: CmsUser
     documents: Document[]
     responses: QuestionResponse[]
+}
+
+type DivisionQuestionDataType = {
+    division: Division
+    questions: QuestionData[]
 }
 
 type QuestionDocumentWithLink = {
@@ -16,7 +27,7 @@ type QuestionDocumentWithLink = {
     url?: string | null
 }
 
-const extractQuestions = (edges?: ContractQuestionEdge[]): QuestionData[] => {
+const extractQuestions = (edges?: (ContractQuestionEdge | RateQuestionEdge)[]): QuestionData[] => {
     if (!edges) {
         return []
     }
@@ -51,10 +62,11 @@ const getDivisionOrder = (division?: Division): Division[] =>
 export {
     extractQuestions,
     getUserDivision,
-    getDivisionOrder
+    getDivisionOrder,
 }
 
 export type {
     QuestionData,
-    QuestionDocumentWithLink
+    QuestionDocumentWithLink,
+    DivisionQuestionDataType
 }
