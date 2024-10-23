@@ -26,7 +26,7 @@ type UploadResponseFormProps =  {
 
 }
 const UploadResponseForm = ({handleSubmit, apiError, apiLoading, type}: UploadResponseFormProps) => {
-    const { division, id } = useParams<{ division: string; id: string }>()
+    const { division, id, rateID} = useParams<{ division: string; id: string, rateID: string }>()
     const [shouldValidate, setShouldValidate] = React.useState(false)
     const navigate = useNavigate()
         const { handleDeleteFile, handleUploadFile, handleScanFile } = useS3()
@@ -122,10 +122,10 @@ const UploadResponseForm = ({handleSubmit, apiError, apiLoading, type}: UploadRe
                             data-testid="page-actions-left-secondary"
                             disabled={apiLoading}
                             parent_component_type="page body"
-                            link_url={`/submissions/${id}/question-and-answers`}
+                            link_url={`/submissions/${id}/rates/${rateID}question-and-answers`}
                             onClick={() =>
                                 navigate(
-                                    `/submissions/${id}/question-and-answers`
+                                    `/submissions/${id}/rates/${rateID}/question-and-answers`
                                 )
                             }
                         >
@@ -137,7 +137,7 @@ const UploadResponseForm = ({handleSubmit, apiError, apiLoading, type}: UploadRe
                             variant="default"
                             data-testid="page-actions-right-primary"
                             parent_component_type="page body"
-                            link_url={`/submissions/${id}/question-and-answers?submit=reponse`}
+                            link_url={`/submissions/${id}/rates/${rateID}/question-and-answers?submit=reponse`}
                             disabled={showFileUploadError}
                             animationTimeout={1000}
                             loading={apiLoading}

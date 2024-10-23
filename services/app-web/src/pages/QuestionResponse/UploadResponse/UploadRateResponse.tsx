@@ -104,7 +104,7 @@ export const UploadRateResponse = () => {
             console.info(createResult.message)
         } else {
             navigate(
-                `/submissions/${parentContractID}/question-and-answers?submit=response`
+                `/submissions/${parentContractID}/rates/${rateID}/question-and-answers?submit=response`
             )
         }
     }
