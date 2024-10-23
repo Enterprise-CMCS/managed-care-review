@@ -155,7 +155,13 @@ export const SubmissionSideNav = () => {
         }
 
         return rateRevision.map((rev) => {
-            const ratePrograms = rev.formData.rateProgramIDs
+            const useDeprecatedRateProgramIDs =
+                rev.formData.deprecatedRateProgramIDs.length > 0 &&
+                rev.formData.rateProgramIDs.length === 0
+            const ratePrograms = useDeprecatedRateProgramIDs
+                ? rev.formData.deprecatedRateProgramIDs
+                : rev.formData.rateProgramIDs
+            const rateProgramNames = ratePrograms
                 .map(
                     (id) =>
                         programs.find((program) => program.id === id)?.name ||
@@ -169,7 +175,7 @@ export const SubmissionSideNav = () => {
                     event_name="navigation_clicked"
                 >
                     Rate questions: <br />
-                    {ratePrograms}
+                    {rateProgramNames || 'Unknown Program(s)'}
                 </NavLinkWithLogging>
             )
         })
