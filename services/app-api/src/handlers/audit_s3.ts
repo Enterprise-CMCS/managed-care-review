@@ -80,21 +80,24 @@ const main: Handler = async (): Promise<APIGatewayProxyResultV2> => {
     )
 
     // get the contract or rate
-    const documentsWithAssociations = await fetchAssociatedData(
+    const { fetchResults, fetchErrors } = await fetchAssociatedData(
         store,
         uniqueDocuments
     )
+    if (fetchErrors.length > 0) {
+        console.error(
+            'Errors encountered while fetching associated data:',
+            fetchErrors
+        )
+    }
+    console.info(`found ${fetchResults.length} documents with associations`)
     console.info(
-        `found ${documentsWithAssociations.length} documents with associations`
-    )
-
-    console.info(
-        `These documents could not be retreived from s3: ${JSON.stringify(documentsWithAssociations)}`
+        `These documents could not be retreived from s3: ${JSON.stringify(fetchResults)}`
     )
 
     const success: APIGatewayProxyResultV2 = {
         statusCode: 200,
-        body: JSON.stringify(documentsWithAssociations),
+        body: JSON.stringify(fetchResults),
         headers: {
             'Access-Control-Allow-Origin': '*',
             'Access-Control-Allow-Credentials': true,
@@ -197,11 +200,22 @@ type DocumentWithAssociation = AuditDocument & {
     associatedRate?: RateRevisionTable
 }
 
+type FetchError = {
+    documentId: string
+    type: 'contractDoc' | 'rateDoc'
+    error: Error | NotFoundError
+    revisionId: string | null
+}
+
 async function fetchAssociatedData(
     store: Store,
     documents: AuditDocument[]
-): Promise<DocumentWithAssociation[]> {
+): Promise<{
+    fetchResults: DocumentWithAssociation[]
+    fetchErrors: FetchError[]
+}> {
     const results: DocumentWithAssociation[] = []
+    const errors: FetchError[] = []
 
     for (const doc of documents) {
         let associatedData: ContractRevisionTable | RateRevisionTable | null =
@@ -212,17 +226,31 @@ async function fetchAssociatedData(
                 doc.contractRevisionID
             )
             if (
-                !(contractResult instanceof Error) &&
-                !(contractResult instanceof NotFoundError)
+                contractResult instanceof Error ||
+                contractResult instanceof NotFoundError
             ) {
+                errors.push({
+                    documentId: doc.id,
+                    type: doc.type,
+                    error: contractResult,
+                    revisionId: doc.contractRevisionID,
+                })
+            } else {
                 associatedData = contractResult
             }
         } else if (doc.type === 'rateDoc' && doc.rateRevisionID) {
             const rateResult = await store.findRateRevision(doc.rateRevisionID)
             if (
-                !(rateResult instanceof Error) &&
-                !(rateResult instanceof NotFoundError)
+                rateResult instanceof Error ||
+                rateResult instanceof NotFoundError
             ) {
+                errors.push({
+                    documentId: doc.id,
+                    type: doc.type,
+                    error: rateResult,
+                    revisionId: doc.rateRevisionID,
+                })
+            } else {
                 associatedData = rateResult
             }
         }
@@ -240,7 +268,7 @@ async function fetchAssociatedData(
         })
     }
 
-    return results
+    return { results, errors }
 }
 
 module.exports = { main }
