@@ -1,18 +1,21 @@
-import type { LockedHealthPlanFormDataType } from '../../common-code/healthPlanFormDataType'
 import { packageName as generatePackageName } from '../../common-code/healthPlanFormDataType'
 import { formatCalendarDate } from '../../../../app-web/src/common-code/dateHelpers'
-import type { UpdateInfoType, ProgramType } from '../../domain-models'
+import type {
+    UpdateInfoType,
+    ContractType,
+    ProgramType,
+} from '../../domain-models'
 import {
     renderTemplate,
     stripHTMLFromTemplate,
-    findPackagePrograms,
+    findContractPrograms,
 } from '../templateHelpers'
 
 import type { EmailData, EmailConfiguration } from '../'
 import { pruneDuplicateEmails } from '../formatters'
 
-export const resubmitPackageStateEmail = async (
-    formData: LockedHealthPlanFormDataType,
+export const resubmitContractStateEmail = async (
+    contract: ContractType,
     submitterEmails: string[],
     updateInfo: UpdateInfoType,
     config: EmailConfiguration,
@@ -20,6 +23,8 @@ export const resubmitPackageStateEmail = async (
 ): Promise<EmailData | Error> => {
     const isTestEnvironment = config.stage !== 'prod'
     const stateContactEmails: string[] = []
+    const contractRev = contract.packageSubmissions[0].contractRevision
+    const formData = contractRev.formData
     formData.stateContacts.forEach((contact) => {
         if (contact.email) stateContactEmails.push(contact.email)
     })
@@ -30,22 +35,22 @@ export const resubmitPackageStateEmail = async (
     ])
 
     //This checks to make sure all programs contained in submission exists for the state.
-    const packagePrograms = findPackagePrograms(formData, statePrograms)
+    const packagePrograms = findContractPrograms(contractRev, statePrograms)
 
     if (packagePrograms instanceof Error) {
         return packagePrograms
     }
 
     const packageName = generatePackageName(
-        formData.stateCode,
-        formData.stateNumber,
+        contract.stateCode,
+        contract.stateNumber,
         formData.programIDs,
         packagePrograms
     )
 
     const isContractAndRates =
         formData.submissionType === 'CONTRACT_AND_RATES' &&
-        Boolean(formData.rateInfos.length)
+        Boolean(contract.packageSubmissions[0].rateRevisions.length)
 
     const data = {
         packageName,
@@ -58,13 +63,13 @@ export const resubmitPackageStateEmail = async (
         shouldIncludeRates: isContractAndRates,
         rateInfos:
             isContractAndRates &&
-            formData.rateInfos.map((rate) => ({
-                rateName: rate.rateCertificationName,
+            contract.packageSubmissions[0].rateRevisions.map((rate) => ({
+                rateName: rate.formData.rateCertificationName,
             })),
     }
 
     const result = await renderTemplate<typeof data>(
-        'resubmitPackageStateEmail',
+        'resubmitContractStateEmail',
         data
     )
     if (result instanceof Error) {
