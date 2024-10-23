@@ -80,24 +80,24 @@ const main: Handler = async (): Promise<APIGatewayProxyResultV2> => {
     )
 
     // get the contract or rate
-    const { fetchResults, fetchErrors } = await fetchAssociatedData(
+    const { results, errors } = await fetchAssociatedData(
         store,
         uniqueDocuments
     )
-    if (fetchErrors.length > 0) {
+    if (errors.length > 0) {
         console.error(
             'Errors encountered while fetching associated data:',
-            fetchErrors
+            errors
         )
     }
-    console.info(`found ${fetchResults.length} documents with associations`)
+    console.info(`found ${results.length} documents with associations`)
     console.info(
-        `These documents could not be retreived from s3: ${JSON.stringify(fetchResults)}`
+        `These documents could not be retreived from s3: ${JSON.stringify(results)}`
     )
 
     const success: APIGatewayProxyResultV2 = {
         statusCode: 200,
-        body: JSON.stringify(fetchResults),
+        body: JSON.stringify(results),
         headers: {
             'Access-Control-Allow-Origin': '*',
             'Access-Control-Allow-Credentials': true,
@@ -211,8 +211,8 @@ async function fetchAssociatedData(
     store: Store,
     documents: AuditDocument[]
 ): Promise<{
-    fetchResults: DocumentWithAssociation[]
-    fetchErrors: FetchError[]
+    results: DocumentWithAssociation[]
+    errors: FetchError[]
 }> {
     const results: DocumentWithAssociation[] = []
     const errors: FetchError[] = []
