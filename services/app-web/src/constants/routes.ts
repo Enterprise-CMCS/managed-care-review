@@ -41,7 +41,7 @@ const ROUTES = [
     'SUBMISSIONS_RATE_QUESTIONS_AND_ANSWERS',
     'SUBMISSIONS_UPLOAD_CONTRACT_QUESTION',
     'SUBMISSIONS_UPLOAD_CONTRACT_RESPONSE',
-   'SUBMISSIONS_UPLOAD_RATE_RESPONSE'
+    'SUBMISSIONS_UPLOAD_RATE_RESPONSE',
 ] as const // iterable union type
 type RouteT = (typeof ROUTES)[number]
 type RouteTWithUnknown = RouteT | 'UNKNOWN_ROUTE'
@@ -64,7 +64,8 @@ const RoutesRecord: Record<RouteT, string> = {
     SETTINGS: '/settings',
     MCR_SETTINGS: '/mc-review-settings',
     STATE_ASSIGNMENTS: '/mc-review-settings/state-assignments',
-    EDIT_STATE_ASSIGNMENTS: '/mc-review-settings/state-assignments/:stateCode/edit',
+    EDIT_STATE_ASSIGNMENTS:
+        '/mc-review-settings/state-assignments/:stateCode/edit',
     DIVISION_ASSIGNMENTS: '/mc-review-settings/division-assignments',
     AUTOMATED_EMAILS: '/mc-review-settings/automated-emails',
     SUPPORT_EMAILS: '/mc-review-settings/support-emails',
@@ -72,7 +73,7 @@ const RoutesRecord: Record<RouteT, string> = {
     RATES_SUMMARY_QUESTIONS_AND_ANSWERS: '/rates/:id/question-and-answers',
     RATE_EDIT: '/rates/:id/edit',
     RATES_UPLOAD_QUESTION:
-    '/rates/:id/question-and-answers/:division/upload-questions',
+        '/rates/:id/question-and-answers/:division/upload-questions',
     REPLACE_RATE: '/submissions/:id/replace-rate/:rateID',
     SUBMISSIONS: '/submissions',
     SUBMISSIONS_NEW: '/submissions/new',
@@ -86,14 +87,16 @@ const RoutesRecord: Record<RouteT, string> = {
     SUBMISSIONS_SUMMARY: '/submissions/:id',
     SUBMISSIONS_MCCRSID: '/submissions/:id/mccrs-record-number',
     SUBMISSIONS_REVISION: '/submissions/:id/revisions/:revisionVersion',
-    SUBMISSIONS_CONTRACT_QUESTIONS_AND_ANSWERS: '/submissions/:id/question-and-answers',
-    SUBMISSIONS_RATE_QUESTIONS_AND_ANSWERS: '/submissions/:id/rate/:rateID/question-and-answers',
+    SUBMISSIONS_CONTRACT_QUESTIONS_AND_ANSWERS:
+        '/submissions/:id/question-and-answers',
+    SUBMISSIONS_RATE_QUESTIONS_AND_ANSWERS:
+        '/submissions/:id/rate/:rateID/question-and-answers',
     SUBMISSIONS_UPLOAD_CONTRACT_QUESTION:
-    '/submissions/:id/question-and-answers/:division/upload-questions',
+        '/submissions/:id/question-and-answers/:division/upload-questions',
     SUBMISSIONS_UPLOAD_CONTRACT_RESPONSE:
         '/submissions/:id/question-and-answers/:division/:questionID/upload-response',
-    SUBMISSIONS_UPLOAD_RATE_RESPONSE: '/submissions/:id/rates/:rateID/question-and-answers/:division/:questionID/upload-response',
-
+    SUBMISSIONS_UPLOAD_RATE_RESPONSE:
+        '/submissions/:id/rates/:rateID/question-and-answers/:division/:questionID/upload-response',
 }
 
 // Constants for releated descendant routes
@@ -111,13 +114,14 @@ const STATE_SUBMISSION_FORM_ROUTES: RouteTWithUnknown[] = [
     'SUBMISSIONS_REVIEW_SUBMIT',
 ]
 
-const STATE_SUBMISSION_FORM_ROUTES_WITHOUT_SUPPORTING_DOCS: RouteTWithUnknown[] = [
-    'SUBMISSIONS_TYPE',
-    'SUBMISSIONS_CONTRACT_DETAILS',
-    'SUBMISSIONS_RATE_DETAILS',
-    'SUBMISSIONS_CONTACTS',
-    'SUBMISSIONS_REVIEW_SUBMIT',
-]
+const STATE_SUBMISSION_FORM_ROUTES_WITHOUT_SUPPORTING_DOCS: RouteTWithUnknown[] =
+    [
+        'SUBMISSIONS_TYPE',
+        'SUBMISSIONS_CONTRACT_DETAILS',
+        'SUBMISSIONS_RATE_DETAILS',
+        'SUBMISSIONS_CONTACTS',
+        'SUBMISSIONS_REVIEW_SUBMIT',
+    ]
 
 const STATE_SUBMISSION_SUMMARY_ROUTES: RouteTWithUnknown[] = [
     'SUBMISSIONS_SUMMARY',
@@ -137,7 +141,7 @@ const QUESTION_RESPONSE_SHOW_SIDEBAR_ROUTES: RouteTWithUnknown[] = [
 ]
 
 const SETTINGS_HIDE_SIDEBAR_ROUTES: RouteTWithUnknown[] = [
-    'EDIT_STATE_ASSIGNMENTS'
+    'EDIT_STATE_ASSIGNMENTS',
 ]
 
 /*
@@ -215,7 +219,7 @@ export {
     STATE_SUBMISSION_FORM_ROUTES_WITHOUT_SUPPORTING_DOCS,
     STATE_SUBMISSION_SUMMARY_ROUTES,
     QUESTION_RESPONSE_SHOW_SIDEBAR_ROUTES,
-    DASHBOARD_ROUTES
+    DASHBOARD_ROUTES,
 }
 
 export type { RouteT, RouteTWithUnknown }

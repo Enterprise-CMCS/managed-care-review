@@ -24,40 +24,38 @@ import { SubmissionSideNav } from '../../SubmissionSideNav'
 describe('UploadRateResponse', () => {
     const division = 'testDivision'
     const questionID = 'testQuestion'
-    const renderTestUI = () => { return (
-        <Routes>
-
-        <Route
-            path={RoutesRecord.SUBMISSIONS_UPLOAD_RATE_RESPONSE}
-            element={<UploadRateResponse />}
-        />
-        </Routes>)
+    const renderTestUI = () => {
+        return (
+            <Routes>
+                <Route
+                    path={RoutesRecord.SUBMISSIONS_UPLOAD_RATE_RESPONSE}
+                    element={<UploadRateResponse />}
+                />
+            </Routes>
+        )
     }
     it('displays file upload for correct cms division', async () => {
-        const rate = mockRateSubmittedWithQuestions({id: '15'})
-        renderWithProviders(
-            renderTestUI(),
-            {
-                apolloProvider: {
-                    mocks: [
-                        fetchCurrentUserMock({
-                            user: mockValidUser(),
-                            statusCode: 200,
-                        }),
-                        fetchRateWithQuestionsMockSuccess({
-                            rate: {
-                                ...rate,
-                                id: '15',
-                                parentContractID: '25'
-                            },
-                        }),
-                    ],
-                },
-                routerProvider: {
-                    route: `/submissions/25/rates/15/question-and-answers/${division}/${questionID}/upload-response`,
-                },
-            }
-        )
+        const rate = mockRateSubmittedWithQuestions({ id: '15' })
+        renderWithProviders(renderTestUI(), {
+            apolloProvider: {
+                mocks: [
+                    fetchCurrentUserMock({
+                        user: mockValidUser(),
+                        statusCode: 200,
+                    }),
+                    fetchRateWithQuestionsMockSuccess({
+                        rate: {
+                            ...rate,
+                            id: '15',
+                            parentContractID: '25',
+                        },
+                    }),
+                ],
+            },
+            routerProvider: {
+                route: `/submissions/25/rates/15/question-and-answers/${division}/${questionID}/upload-response`,
+            },
+        })
 
         await screen.findByRole('heading', {
             name: /New response/,
@@ -71,30 +69,27 @@ describe('UploadRateResponse', () => {
     })
 
     it('file upload accepts multiple pdf, word, excel documents', async () => {
-        const rate = mockRateSubmittedWithQuestions({id: '15'})
+        const rate = mockRateSubmittedWithQuestions({ id: '15' })
 
-        renderWithProviders(
-            renderTestUI(),
-            {
-                apolloProvider: {
-                    mocks: [
-                        fetchCurrentUserMock({
-                            user: mockValidUser(),
-                            statusCode: 200,
-                        }),
-                        fetchRateWithQuestionsMockSuccess({
-                            rate: {
-                                ...rate,
-                                id: '15',
-                            },
-                        }),
-                    ],
-                },
-                routerProvider: {
-                    route: `/submissions/25/rates/15/question-and-answers/dmco/${questionID}/upload-response`,
-                },
-            }
-        )
+        renderWithProviders(renderTestUI(), {
+            apolloProvider: {
+                mocks: [
+                    fetchCurrentUserMock({
+                        user: mockValidUser(),
+                        statusCode: 200,
+                    }),
+                    fetchRateWithQuestionsMockSuccess({
+                        rate: {
+                            ...rate,
+                            id: '15',
+                        },
+                    }),
+                ],
+            },
+            routerProvider: {
+                route: `/submissions/25/rates/15/question-and-answers/dmco/${questionID}/upload-response`,
+            },
+        })
 
         await screen.findByRole('heading', {
             name: /New response/,
@@ -116,30 +111,27 @@ describe('UploadRateResponse', () => {
     })
 
     it('displays form validation error if attempting to add question with zero files', async () => {
-        const rate = mockRateSubmittedWithQuestions({id: '15'})
+        const rate = mockRateSubmittedWithQuestions({ id: '15' })
 
-        renderWithProviders(
-               renderTestUI(),
-            {
-                apolloProvider: {
-                    mocks: [
-                        fetchCurrentUserMock({
-                            user: mockValidUser(),
-                            statusCode: 200,
-                        }),
-                        fetchRateWithQuestionsMockSuccess({
-                            rate: {
-                                ...rate,
-                                id: '15',
-                            },
-                        }),
-                    ],
-                },
-                routerProvider: {
-                    route: `/submissions/25/rates/15/question-and-answers/dmco/${questionID}/upload-response`,
-                },
-            }
-        )
+        renderWithProviders(renderTestUI(), {
+            apolloProvider: {
+                mocks: [
+                    fetchCurrentUserMock({
+                        user: mockValidUser(),
+                        statusCode: 200,
+                    }),
+                    fetchRateWithQuestionsMockSuccess({
+                        rate: {
+                            ...rate,
+                            id: '15',
+                        },
+                    }),
+                ],
+            },
+            routerProvider: {
+                route: `/submissions/25/rates/15/question-and-answers/dmco/${questionID}/upload-response`,
+            },
+        })
 
         await screen.findByRole('heading', {
             name: /New response/,
@@ -160,30 +152,27 @@ describe('UploadRateResponse', () => {
     })
 
     it('displays file upload alert if attempting to add question with all invalid files', async () => {
-        const rate = mockRateSubmittedWithQuestions({id: '15'})
+        const rate = mockRateSubmittedWithQuestions({ id: '15' })
 
-        renderWithProviders(
-               renderTestUI(),
-            {
-                apolloProvider: {
-                    mocks: [
-                        fetchCurrentUserMock({
-                            user: mockValidUser(),
-                            statusCode: 200,
-                        }),
-                        fetchRateWithQuestionsMockSuccess({
-                            rate: {
-                                ...rate,
-                                id: '15',
-                            },
-                        }),
-                    ],
-                },
-                routerProvider: {
-                    route: `/submissions/25/rates/15/question-and-answers/dmco/${questionID}/upload-response`,
-                },
-            }
-        )
+        renderWithProviders(renderTestUI(), {
+            apolloProvider: {
+                mocks: [
+                    fetchCurrentUserMock({
+                        user: mockValidUser(),
+                        statusCode: 200,
+                    }),
+                    fetchRateWithQuestionsMockSuccess({
+                        rate: {
+                            ...rate,
+                            id: '15',
+                        },
+                    }),
+                ],
+            },
+            routerProvider: {
+                route: `/submissions/25/rates/15/question-and-answers/dmco/${questionID}/upload-response`,
+            },
+        })
         await screen.findByRole('heading', {
             name: /New response/,
             level: 2,
@@ -208,30 +197,27 @@ describe('UploadRateResponse', () => {
     })
 
     it('displays file upload error alert if attempting to add question while a file is still uploading', async () => {
-        const rate = mockRateSubmittedWithQuestions({id: '15'})
+        const rate = mockRateSubmittedWithQuestions({ id: '15' })
 
-        renderWithProviders(
-               renderTestUI(),
-            {
-                apolloProvider: {
-                    mocks: [
-                        fetchCurrentUserMock({
-                            user: mockValidUser(),
-                            statusCode: 200,
-                        }),
-                        fetchRateWithQuestionsMockSuccess({
-                            rate: {
-                                ...rate,
-                                id: '15',
-                            },
-                        }),
-                    ],
-                },
-                routerProvider: {
-                    route: `/submissions/25/rates/15/question-and-answers/dmco/${questionID}/upload-response`,
-                },
-            }
-        )
+        renderWithProviders(renderTestUI(), {
+            apolloProvider: {
+                mocks: [
+                    fetchCurrentUserMock({
+                        user: mockValidUser(),
+                        statusCode: 200,
+                    }),
+                    fetchRateWithQuestionsMockSuccess({
+                        rate: {
+                            ...rate,
+                            id: '15',
+                        },
+                    }),
+                ],
+            },
+            routerProvider: {
+                route: `/submissions/25/rates/15/question-and-answers/dmco/${questionID}/upload-response`,
+            },
+        })
         await screen.findByRole('heading', {
             name: /New response/,
             level: 2,
@@ -267,31 +253,28 @@ describe('UploadRateResponse', () => {
     })
 
     it('displays api error if createContractQuestionResponse fails', async () => {
-        const rate = mockRateSubmittedWithQuestions({id: '15'})
+        const rate = mockRateSubmittedWithQuestions({ id: '15' })
 
-        renderWithProviders(
-               renderTestUI(),
-            {
-                apolloProvider: {
-                    mocks: [
-                        fetchCurrentUserMock({
-                            user: mockValidUser(),
-                            statusCode: 200,
-                        }),
-                        fetchRateWithQuestionsMockSuccess({
-                            rate: {
-                                ...rate,
-                                id: '15',
-                            },
-                        }),
-                        createContractQuestionResponseNetworkFailure(),
-                    ],
-                },
-                routerProvider: {
-                    route: `/submissions/25/rates/15/question-and-answers/dmco/${questionID}/upload-response`,
-                },
-            }
-        )
+        renderWithProviders(renderTestUI(), {
+            apolloProvider: {
+                mocks: [
+                    fetchCurrentUserMock({
+                        user: mockValidUser(),
+                        statusCode: 200,
+                    }),
+                    fetchRateWithQuestionsMockSuccess({
+                        rate: {
+                            ...rate,
+                            id: '15',
+                        },
+                    }),
+                    createContractQuestionResponseNetworkFailure(),
+                ],
+            },
+            routerProvider: {
+                route: `/submissions/25/rates/15/question-and-answers/dmco/${questionID}/upload-response`,
+            },
+        })
         await screen.findByRole('heading', {
             name: /New response/,
             level: 2,
@@ -314,7 +297,10 @@ describe('UploadRateResponse', () => {
     })
     describe('errors', () => {
         it('shows generic error if submission is a draft', async () => {
-            const rate = mockRateSubmittedWithQuestions({id: '15',status:'DRAFT'})
+            const rate = mockRateSubmittedWithQuestions({
+                id: '15',
+                status: 'DRAFT',
+            })
             renderWithProviders(
                 <Routes>
                     <Route element={<SubmissionSideNav />}>

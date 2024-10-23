@@ -1,7 +1,5 @@
 import React, { useEffect } from 'react'
-import {
-    GridContainer,
-} from '@trussworks/react-uswds'
+import { GridContainer } from '@trussworks/react-uswds'
 import { useNavigate, useOutletContext, useParams } from 'react-router-dom'
 import {
     CreateQuestionResponseInput,
@@ -42,7 +40,6 @@ export const UploadContractResponse = () => {
     if (contract.status === 'DRAFT') {
         return <GenericErrorPage />
     }
-
 
     const handleFormSubmit = async (cleaned: FileItemT[]) => {
         const responseDocs = cleaned.map((item) => {
@@ -87,10 +84,10 @@ export const UploadContractResponse = () => {
             />
 
             <UploadResponseForm
-            handleSubmit={handleFormSubmit}
-            apiLoading={apiLoading}
-            apiError={Boolean(apiError)}
-            type='contract'
+                handleSubmit={handleFormSubmit}
+                apiLoading={apiLoading}
+                apiError={Boolean(apiError)}
+                type="contract"
             />
         </GridContainer>
     )

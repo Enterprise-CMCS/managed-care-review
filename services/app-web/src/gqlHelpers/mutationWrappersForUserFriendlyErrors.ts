@@ -28,7 +28,7 @@ import {
     IndexRateQuestionsPayload,
     FetchRateWithQuestionsQuery,
     CreateRateQuestionResponseMutationFn,
-    CreateRateQuestionResponseMutation
+    CreateRateQuestionResponseMutation,
 } from '../gen/gqlClient'
 import { ApolloError, GraphQLErrors } from '@apollo/client/errors'
 
@@ -61,7 +61,6 @@ const divisionToIndexQuestionDivision = (
     division: Division
 ): IndexQuestionDivisions =>
     `${division.toUpperCase()}Questions` as IndexQuestionDivisions
-
 
 export const handleApolloErrorsAndAddUserFacingMessages = (
     apolloError: ApolloError,
@@ -242,13 +241,11 @@ export const submitMutationWrapperV2 = async (
     }
 }
 
-
 export async function updateStateAssignmentsWrapper(
     updateStateAssignments: UpdateStateAssignmentsByStateMutationFn,
     stateCode: string,
-    assignedUserIDs: string[],
+    assignedUserIDs: string[]
 ): Promise<undefined | GraphQLErrors | Error> {
-
     const input = {
         stateCode,
         assignedUsers: assignedUserIDs,
@@ -261,27 +258,35 @@ export async function updateStateAssignmentsWrapper(
             },
             update(cache, { data }) {
                 if (data) {
-                    const stateCode = data.updateStateAssignmentsByState.stateCode
-                    const updatedUsers = data.updateStateAssignmentsByState.assignedUsers
-                    const previousSettings =  cache.readQuery<FetchMcReviewSettingsQuery>(
-                        {
+                    const stateCode =
+                        data.updateStateAssignmentsByState.stateCode
+                    const updatedUsers =
+                        data.updateStateAssignmentsByState.assignedUsers
+                    const previousSettings =
+                        cache.readQuery<FetchMcReviewSettingsQuery>({
                             query: FetchMcReviewSettingsDocument,
-                        }
-                    )
+                        })
 
                     if (previousSettings) {
-                        const cachedAssignments = [...previousSettings.fetchMcReviewSettings.stateAssignments]
-                        const stateIndex = cachedAssignments.findIndex(state => state.stateCode === stateCode)
+                        const cachedAssignments = [
+                            ...previousSettings.fetchMcReviewSettings
+                                .stateAssignments,
+                        ]
+                        const stateIndex = cachedAssignments.findIndex(
+                            (state) => state.stateCode === stateCode
+                        )
                         if (stateIndex === -1) {
                             recordJSException(
                                 `[UNEXPECTED]: Error attempting to update state assignments cache, state not found in cache.`
                             )
-                            return new Error(ERROR_MESSAGES.update_state_assignments_generic)
+                            return new Error(
+                                ERROR_MESSAGES.update_state_assignments_generic
+                            )
                         }
 
                         cachedAssignments[stateIndex] = {
                             ...cachedAssignments[stateIndex],
-                            assignedCMSUsers: updatedUsers
+                            assignedCMSUsers: updatedUsers,
                         }
 
                         cache.writeQuery({
@@ -289,11 +294,10 @@ export async function updateStateAssignmentsWrapper(
                             data: {
                                 fetchMcReviewSettings: {
                                     ...previousSettings.fetchMcReviewSettings,
-                                    stateAssignments: cachedAssignments
-                                    },
+                                    stateAssignments: cachedAssignments,
                                 },
                             },
-                        )
+                        })
                     }
                 }
             },
@@ -329,18 +333,17 @@ export const createContractQuestionWrapper = async (
             variables: { input },
             update(cache, { data }) {
                 if (data) {
-                    const newQuestion = data.createContractQuestion.question as ContractQuestion
+                    const newQuestion = data.createContractQuestion
+                        .question as ContractQuestion
                     const result =
-                        cache.readQuery<FetchContractWithQuestionsQuery>(
-                            {
-                                query: FetchContractWithQuestionsDocument,
-                                variables: {
-                                    input: {
-                                        contractID: newQuestion.contractID,
-                                    },
+                        cache.readQuery<FetchContractWithQuestionsQuery>({
+                            query: FetchContractWithQuestionsDocument,
+                            variables: {
+                                input: {
+                                    contractID: newQuestion.contractID,
                                 },
-                            }
-                        )
+                            },
+                        })
 
                     const contract = result?.fetchContract.contract
 
@@ -349,7 +352,8 @@ export const createContractQuestionWrapper = async (
                             divisionToIndexQuestionDivision(
                                 newQuestion.division
                             )
-                        const questions = contract.questions as IndexContractQuestionsPayload
+                        const questions =
+                            contract.questions as IndexContractQuestionsPayload
                         const divisionQuestions =
                             questions[indexQuestionDivision]
 
@@ -412,18 +416,18 @@ export const createRateQuestionWrapper = async (
             variables: { input },
             update(cache, { data }) {
                 if (data) {
-                    const newQuestion = data.createRateQuestion.question as RateQuestion
-                    const result =
-                        cache.readQuery<FetchRateWithQuestionsQuery>(
-                            {
-                                query: FetchRateWithQuestionsDocument,
-                                variables: {
-                                    input: {
-                                        rateID: newQuestion.rateID,
-                                    },
+                    const newQuestion = data.createRateQuestion
+                        .question as RateQuestion
+                    const result = cache.readQuery<FetchRateWithQuestionsQuery>(
+                        {
+                            query: FetchRateWithQuestionsDocument,
+                            variables: {
+                                input: {
+                                    rateID: newQuestion.rateID,
                                 },
-                            }
-                        )
+                            },
+                        }
+                    )
 
                     const rate = result?.fetchRate.rate
 
@@ -432,7 +436,8 @@ export const createRateQuestionWrapper = async (
                             divisionToIndexQuestionDivision(
                                 newQuestion.division
                             )
-                        const questions = rate.questions as IndexRateQuestionsPayload
+                        const questions =
+                            rate.questions as IndexRateQuestionsPayload
                         const divisionQuestions =
                             questions[indexQuestionDivision]
 
@@ -486,7 +491,6 @@ export const createRateQuestionWrapper = async (
     }
 }
 
-
 export const createContractResponseWrapper = async (
     createResponse: CreateContractQuestionResponseMutationFn,
     contractID: string,
@@ -499,22 +503,22 @@ export const createContractResponseWrapper = async (
             update(cache, { data }) {
                 if (data) {
                     const newResponse =
-                        data.createContractQuestionResponse.question.responses[0]
+                        data.createContractQuestionResponse.question
+                            .responses[0]
                     const result =
-                        cache.readQuery<FetchContractWithQuestionsQuery>(
-                            {
-                                query: FetchContractWithQuestionsDocument,
-                                variables: {
-                                    input: {
-                                        contractID: contractID,
-                                    },
+                        cache.readQuery<FetchContractWithQuestionsQuery>({
+                            query: FetchContractWithQuestionsDocument,
+                            variables: {
+                                input: {
+                                    contractID: contractID,
                                 },
-                            }
-                        )
+                            },
+                        })
                     const contract = result?.fetchContract.contract
 
                     if (contract) {
-                        const questions = contract.questions as IndexContractQuestionsPayload
+                        const questions =
+                            contract.questions as IndexContractQuestionsPayload
                         const indexQuestionDivision =
                             divisionToIndexQuestionDivision(division)
                         const divisionQuestions =
@@ -533,7 +537,8 @@ export const createContractResponseWrapper = async (
                                                 newResponse.questionID
                                             ) {
                                                 return {
-                                                    __typename: 'ContractQuestionEdge',
+                                                    __typename:
+                                                        'ContractQuestionEdge',
                                                     node: {
                                                         ...edge.node,
                                                         responses: [
@@ -591,21 +596,21 @@ export const createRateQuestionResponseWrapper = async (
                 if (data) {
                     const newResponse =
                         data.createRateQuestionResponse.question.responses[0]
-                    const result =
-                        cache.readQuery<FetchRateWithQuestionsQuery>(
-                            {
-                                query: FetchRateWithQuestionsDocument,
-                                variables: {
-                                    input: {
-                                        rateID: rateID,
-                                    },
+                    const result = cache.readQuery<FetchRateWithQuestionsQuery>(
+                        {
+                            query: FetchRateWithQuestionsDocument,
+                            variables: {
+                                input: {
+                                    rateID: rateID,
                                 },
-                            }
-                        )
+                            },
+                        }
+                    )
                     const rate = result?.fetchRate.rate
 
                     if (rate) {
-                        const questions = rate.questions as IndexRateQuestionsPayload
+                        const questions =
+                            rate.questions as IndexRateQuestionsPayload
                         const indexQuestionDivision =
                             divisionToIndexQuestionDivision(division)
                         const divisionQuestions =
@@ -624,7 +629,8 @@ export const createRateQuestionResponseWrapper = async (
                                                 newResponse.questionID
                                             ) {
                                                 return {
-                                                    __typename: 'RateQuestionEdge',
+                                                    __typename:
+                                                        'RateQuestionEdge',
                                                     node: {
                                                         ...edge.node,
                                                         responses: [

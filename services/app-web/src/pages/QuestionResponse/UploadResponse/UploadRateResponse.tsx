@@ -1,7 +1,5 @@
 import React, { useEffect } from 'react'
-import {
-    GridContainer,
-} from '@trussworks/react-uswds'
+import { GridContainer } from '@trussworks/react-uswds'
 import { useNavigate, useParams } from 'react-router-dom'
 import {
     CreateQuestionResponseInput,
@@ -21,7 +19,7 @@ import { handleAndReturnErrorState } from '../../StateSubmission/ErrorOrLoadingP
 
 export const UploadRateResponse = () => {
     // router context
-    const { division, id,rateID, questionID } = useParams<{
+    const { division, id, rateID, questionID } = useParams<{
         division: string
         id: string
         rateID: string
@@ -32,7 +30,11 @@ export const UploadRateResponse = () => {
     const { updateHeading } = usePage()
 
     // api
-    const { data: fetchRateData, loading: fetchRateLoading, error: fetchRateError } = useFetchRateWithQuestionsQuery({
+    const {
+        data: fetchRateData,
+        loading: fetchRateLoading,
+        error: fetchRateError,
+    } = useFetchRateWithQuestionsQuery({
         variables: {
             input: {
                 rateID: rateID || 'not-found',
@@ -43,33 +45,40 @@ export const UploadRateResponse = () => {
     const [createResponse, { loading: apiLoading, error: apiError }] =
         useCreateRateQuestionResponseMutation()
 
-        const rate = fetchRateData?.fetchRate.rate
-        const rateName = rate?.packageSubmissions && rate?.packageSubmissions[0].rateRevision.formData.rateCertificationName || ''
-        const parentContractID = id
-        const contractName = rate?.packageSubmissions && rate?.packageSubmissions[0].contractRevisions.find( (contractRev) => contractRev.id == parentContractID)?.contractName || undefined
+    const rate = fetchRateData?.fetchRate.rate
+    const rateName =
+        (rate?.packageSubmissions &&
+            rate?.packageSubmissions[0].rateRevision.formData
+                .rateCertificationName) ||
+        ''
+    const parentContractID = id
+    const contractName =
+        (rate?.packageSubmissions &&
+            rate?.packageSubmissions[0].contractRevisions.find(
+                (contractRev) => contractRev.id == parentContractID
+            )?.contractName) ||
+        undefined
 
+    // side effects
+    useEffect(() => {
+        updateHeading({ customHeading: `${rateName} Add response` })
+    }, [rateName, updateHeading])
 
-        // side effects
-        useEffect(() => {
-            updateHeading({ customHeading: `${rateName} Add response` })
-        }, [rateName, updateHeading])
+    if (fetchRateLoading) {
+        return <ErrorOrLoadingPage state="LOADING" />
+    }
 
-        if (fetchRateLoading) {
-            return <ErrorOrLoadingPage state="LOADING" />
-        }
+    if (fetchRateError) {
+        return (
+            <ErrorOrLoadingPage
+                state={handleAndReturnErrorState(fetchRateError)}
+            />
+        )
+    }
 
-        if (fetchRateError) {
-            return (
-                <ErrorOrLoadingPage
-                    state={handleAndReturnErrorState(fetchRateError)}
-                />
-            )
-        }
-
-        if (!rate || rate.status === 'DRAFT') {
-            return <GenericErrorPage />
-        }
-
+    if (!rate || rate.status === 'DRAFT') {
+        return <GenericErrorPage />
+    }
 
     const handleFormSubmit = async (cleaned: FileItemT[]) => {
         const responseDocs = cleaned.map((item) => {
@@ -94,7 +103,9 @@ export const UploadRateResponse = () => {
         if (createResult instanceof Error) {
             console.info(createResult.message)
         } else {
-            navigate(`/submissions/${parentContractID}/question-and-answers?submit=response`)
+            navigate(
+                `/submissions/${parentContractID}/question-and-answers?submit=response`
+            )
         }
     }
 
@@ -106,8 +117,14 @@ export const UploadRateResponse = () => {
                         link: RoutesRecord.DASHBOARD_SUBMISSIONS,
                         text: 'Dashboard',
                     },
-                    { link: `/submissions/${parentContractID}`, text: contractName ?? 'Unknown Contract' },
-                    { link: `/submissions/${parentContractID}/rates/${rate.id}/question-and-answers}`, text: `Rate questions: ${rateName}` },
+                    {
+                        link: `/submissions/${parentContractID}`,
+                        text: contractName ?? 'Unknown Contract',
+                    },
+                    {
+                        link: `/submissions/${parentContractID}/rates/${rate.id}/question-and-answers}`,
+                        text: `Rate questions: ${rateName}`,
+                    },
                     {
                         text: 'Upload response',
                         link: RoutesRecord.SUBMISSIONS_UPLOAD_CONTRACT_RESPONSE,
@@ -116,10 +133,10 @@ export const UploadRateResponse = () => {
             />
 
             <UploadResponseForm
-            handleSubmit={handleFormSubmit}
-            apiLoading={apiLoading}
-            apiError={Boolean(apiError)}
-            type='rate'
+                handleSubmit={handleFormSubmit}
+                apiLoading={apiLoading}
+                apiError={Boolean(apiError)}
+                type="rate"
             />
         </GridContainer>
     )
