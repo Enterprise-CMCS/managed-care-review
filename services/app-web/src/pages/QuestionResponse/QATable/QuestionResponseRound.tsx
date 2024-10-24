@@ -1,7 +1,8 @@
 import { RateQuestion, ContractQuestion, User } from '../../../gen/gqlClient'
 import styles from './QATable.module.scss'
-import { LinkWithLogging } from '../../../components'
+import { LinkWithLogging, NavLinkWithLogging } from '../../../components'
 import { formatCalendarDate } from '../../../common-code/dateHelpers'
+import classNames from 'classnames'
 
 type QuestionType =
     | Omit<RateQuestion, 'rateID'>
@@ -23,6 +24,8 @@ export const QuestionResponseRound = ({
     roundTitle: string
     currentUser?: User
 }) => {
+    const isStateUser = currentUser?.__typename === 'StateUser'
+
     // Combines question and response documents and sorts them in desc order.
     const documents = [
         ...question.documents.map((doc) => ({
@@ -59,10 +62,23 @@ export const QuestionResponseRound = ({
         return `${addedBy.givenName}`
     }
 
+    const classes = classNames('usa-button', {
+        'usa-button--outline': question.responses.length > 0,
+    })
+
     return (
-        <div>
+        <div data-testid="questionResponseRound">
             <div className={styles.tableHeader}>
                 <h4>{roundTitle}</h4>
+                {isStateUser && (
+                    <NavLinkWithLogging
+                        className={classes}
+                        variant="unstyled"
+                        to={`./${question.division.toLowerCase()}/${question.id}/upload-response`}
+                    >
+                        Upload response
+                    </NavLinkWithLogging>
+                )}
             </div>
             <table
                 className={`borderTopLinearGradient ${styles.qaDocumentTable}`}
