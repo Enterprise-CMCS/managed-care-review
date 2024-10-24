@@ -23,11 +23,11 @@
     "author": "",
     "license": "ISC",
     "dependencies": {
-        "protobufjs": "^7.3.0",
+        "protobufjs": "^7.4.0",
         "uuid": "^9.0.0"
     },
     "devDependencies": {
-        "lint-staged": "^15.2.7",
-        "protobufjs-cli": "^1.1.2"
+        "lint-staged": "^15.2.10",
+        "protobufjs-cli": "^1.1.3"
     }
 }
