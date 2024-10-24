@@ -53,6 +53,8 @@ Contract {
     Boolean statutoryRegulatoryAttestationDescription
     
     Contact[] stateContacts
+    
+    Question[] questions
 }
 
 Rate {
@@ -82,6 +84,8 @@ Rate {
 
     Contact[] certifyingActuaries
     Contact[] additionalActuaries
+
+    Question[] questions
 }
 
 Document {
@@ -97,10 +101,31 @@ Contact {
     string ActuarialFirm
 }
 
+Question {
+    DateTime createdAt
+    Contact addedBy
+    Enum addedByDivision "DMCO, DMCP, OACT"
+    Document[] questionDocs
+}
+
+QuestionResponse {
+    DateTime createdAt
+    Question question
+    Contact addedBy
+    Document[] responseDocs
+}
+
 Contract }|--|{ Rate : "many to many"
 Contract ||--|{ Document : "one to many"
 Rate ||--|{ Document : "one to many"
 Rate }|--|{ Contact : "certifying actuaries"
 Rate }|--|{ Contact : "additional actuaries"
 Contract }|--|{ Contact : "state contacts"
+Rate ||--|{ Question : "questions"
+Contract ||--|{ Question : "questions"
+Question ||--|{ QuestionResponse : "responses"
+Question ||--|{ Contact : "addedBy"
+Question ||--|{ Document : "questionDocs"
+QuestionResponse ||--|{ Document : "questionDocs"
+QuestionResponse ||--|{ Contact : "addedBy"
 ```
