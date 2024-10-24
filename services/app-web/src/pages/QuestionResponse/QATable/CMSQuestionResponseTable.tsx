@@ -111,7 +111,7 @@ export const CMSQuestionResponseTable = ({
                 className={styles.questionSection}
                 data-testid={'otherDivisionQuestions'}
             >
-                <SectionHeader header="Other division's questions" />
+                <SectionHeader header="Other divisions' questions" />
                 {otherDivisionRounds().length ? (
                     otherDivisionRounds().map((questionRound, index) =>
                         questionRound.map(({ roundTitle, questionData }) => (
