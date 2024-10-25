@@ -23,6 +23,8 @@ export const QuestionResponseRound = ({
     roundTitle: string
     currentUser?: User
 }) => {
+    const isStateUser = currentUser?.__typename === 'StateUser'
+
     // Combines question and response documents and sorts them in desc order.
     const documents = [
         ...question.documents.map((doc) => ({
@@ -51,7 +53,7 @@ export const QuestionResponseRound = ({
             addedBy.__typename === 'CMSUser' ||
             addedBy.__typename === 'CMSApproverUser'
         ) {
-            return `${addedBy.givenName} (CMS)`
+            return `${addedBy.givenName} ${isStateUser ? '(CMS)' : ''}`
         }
         if (addedBy.__typename === 'StateUser') {
             return `${addedBy.givenName} (${addedBy.state.code})`
