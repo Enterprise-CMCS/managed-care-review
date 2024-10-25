@@ -11,8 +11,9 @@ import { AppBody } from './AppBody'
 import { AuthProvider } from '../../contexts/AuthContext'
 import { ErrorBoundaryRoot } from '../Errors/ErrorBoundaryRoot'
 import { PageProvider } from '../../contexts/PageContext'
-import TraceProvider from '../../contexts/TraceContext'
+import { TraceProvider } from '../../contexts/TraceContext'
 import { TealiumProvider } from '../../contexts/TealiumContext'
+import { withTracing } from '../../otelHelpers/tracingHelper'
 
 import { AuthModeType } from '../../common-code/config'
 import { S3Provider } from '../../contexts/S3Context'
@@ -75,4 +76,4 @@ function App({
     )
 }
 
-export default App
+export default withTracing(App)
