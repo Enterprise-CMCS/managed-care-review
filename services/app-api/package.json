@@ -30,7 +30,7 @@
         "@apollo/gateway": "^2.8.5",
         "@aws-sdk/client-amplify": "^3.679.0",
         "@aws-sdk/client-cognito-identity-provider": "^3.679.0",
-        "@aws-sdk/client-lambda": "^3.679.0",
+        "@aws-sdk/client-lambda": "^3.680.0",
         "@aws-sdk/client-rds": "^3.679.0",
         "@aws-sdk/client-s3": "^3.679.0",
         "@aws-sdk/client-secrets-manager": "^3.679.0",
