@@ -11,6 +11,10 @@
     padding: 2rem 0;
 }
 
+.uploadFormContainer {
+    max-width: custom.$mcr-container-standard-width-fixed;
+}
+
 %questionSection {
     margin: uswds.units(2) auto;
     background: custom.$mcr-foundation-white;

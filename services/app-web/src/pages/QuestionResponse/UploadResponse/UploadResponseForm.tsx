@@ -23,9 +23,9 @@ type UploadResponseFormProps =  {
     apiLoading: boolean,
     apiError: boolean,
     type: 'contract' | 'rate'
-
+    round?: number,
 }
-const UploadResponseForm = ({handleSubmit, apiError, apiLoading, type}: UploadResponseFormProps) => {
+const UploadResponseForm = ({handleSubmit, apiError, apiLoading, type, round}: UploadResponseFormProps) => {
     const { division, id, rateID} = useParams<{ division: string; id: string, rateID: string }>()
     const [shouldValidate, setShouldValidate] = React.useState(false)
     const navigate = useNavigate()
@@ -70,9 +70,10 @@ const UploadResponseForm = ({handleSubmit, apiError, apiLoading, type}: UploadRe
             >
                 {apiError && <GenericApiErrorBanner />}
                 <fieldset className="usa-fieldset">
-                    <h2>New response</h2>
-                    <p className="text-bold">{`Questions from ${division?.toUpperCase()}`}</p>
-
+                    <h2>Upload response</h2>
+                    <p className="text-bold">Contract questions</p>
+                    <p>{`Asked by: ${division?.toUpperCase()}`}</p>
+                    <p>{`Round ${round ?? 'unknown'}`}</p>
                     {shouldValidate && (
                         <ErrorSummary
                             errors={

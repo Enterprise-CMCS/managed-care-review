@@ -529,7 +529,7 @@ function mockRateSubmittedWithQuestions(
             rateRevision: rateRev(),
 
         }],
-        questions: rate.questions ||  {
+        questions: rate.questions ??  {
             __typename: 'IndexRateQuestionsPayload',
             DMCOQuestions: {
                 __typename: 'RateQuestionList',

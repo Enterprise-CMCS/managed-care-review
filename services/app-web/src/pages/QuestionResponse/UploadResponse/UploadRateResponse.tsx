@@ -8,6 +8,7 @@ import {
     useFetchRateWithQuestionsQuery,
 } from '../../../gen/gqlClient'
 import { usePage } from '../../../contexts/PageContext'
+import styles from '../QuestionResponse.module.scss'
 import { Breadcrumbs } from '../../../components/Breadcrumbs/Breadcrumbs'
 import { createRateQuestionResponseWrapper } from '../../../gqlHelpers/mutationWrappersForUserFriendlyErrors'
 import { RoutesRecord } from '../../../constants'
@@ -16,6 +17,7 @@ import { UploadResponseForm } from './UploadResponseForm'
 import { FileItemT } from '../../../components'
 import { ErrorOrLoadingPage } from '../../StateSubmission'
 import { handleAndReturnErrorState } from '../../StateSubmission/ErrorOrLoadingPage'
+import { getQuestionRoundForQuestionID } from '../QuestionResponseHelpers/questionResponseHelpers'
 
 export const UploadRateResponse = () => {
     // router context
@@ -76,10 +78,10 @@ export const UploadRateResponse = () => {
         )
     }
 
-    if (!rate || rate.status === 'DRAFT') {
+    if (!rate || rate.status === 'DRAFT' || !questionID || !rate.questions) {
         return <GenericErrorPage />
     }
-
+    const questionRound = getQuestionRoundForQuestionID(rate.questions, division?.toUpperCase() as Division, questionID)
     const handleFormSubmit = async (cleaned: FileItemT[]) => {
         const responseDocs = cleaned.map((item) => {
             return {
@@ -110,8 +112,9 @@ export const UploadRateResponse = () => {
     }
 
     return (
-        <GridContainer>
+        <GridContainer  className={styles.uploadFormContainer}>
             <Breadcrumbs
+                className="usa-breadcrumb--wrap"
                 items={[
                     {
                         link: RoutesRecord.DASHBOARD_SUBMISSIONS,
@@ -137,6 +140,7 @@ export const UploadRateResponse = () => {
                 apiLoading={apiLoading}
                 apiError={Boolean(apiError)}
                 type="rate"
+                round={questionRound}
             />
         </GridContainer>
     )

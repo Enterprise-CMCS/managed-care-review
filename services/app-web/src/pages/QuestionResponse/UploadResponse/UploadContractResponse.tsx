@@ -70,6 +70,7 @@ export const UploadContractResponse = () => {
     return (
         <GridContainer>
             <Breadcrumbs
+                className="usa-breadcrumb--wrap"
                 items={[
                     {
                         link: RoutesRecord.DASHBOARD_SUBMISSIONS,

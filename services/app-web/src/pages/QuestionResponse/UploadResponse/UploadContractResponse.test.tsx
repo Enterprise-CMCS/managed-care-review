@@ -60,7 +60,7 @@ describe('UploadContractResponse', () => {
         )
 
         await screen.findByRole('heading', {
-            name: /New response/,
+            name: /Upload response/,
             level: 2,
         })
         // Expect text to display correct division from url parameters.
@@ -104,7 +104,7 @@ describe('UploadContractResponse', () => {
         )
 
         await screen.findByRole('heading', {
-            name: /New response/,
+            name: /Upload response/,
             level: 2,
         })
         const input = screen.getByLabelText('Upload response')
@@ -156,7 +156,7 @@ describe('UploadContractResponse', () => {
         )
 
         await screen.findByRole('heading', {
-            name: /New response/,
+            name: /Upload response/,
             level: 2,
         })
         const continueButton = screen.getByRole('button', {
@@ -206,7 +206,7 @@ describe('UploadContractResponse', () => {
             }
         )
         await screen.findByRole('heading', {
-            name: /New response/,
+            name: /Upload response/,
             level: 2,
         })
         const continueButton = screen.getByRole('button', {
@@ -261,7 +261,7 @@ describe('UploadContractResponse', () => {
             }
         )
         await screen.findByRole('heading', {
-            name: /New response/,
+            name: /Upload response/,
             level: 2,
         })
         const continueButton = screen.getByRole('button', {
@@ -328,7 +328,7 @@ describe('UploadContractResponse', () => {
             }
         )
         await screen.findByRole('heading', {
-            name: /New response/,
+            name: /Upload response/,
             level: 2,
         })
         const createQuestionButton = screen.getByRole('button', {

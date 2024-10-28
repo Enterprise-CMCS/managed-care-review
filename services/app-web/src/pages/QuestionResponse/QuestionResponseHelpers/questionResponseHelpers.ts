@@ -1,8 +1,10 @@
 import {
     CmsUser,
+    ContractQuestion,
     ContractQuestionEdge,
     Document, IndexContractQuestionsPayload, IndexRateQuestionsPayload,
     QuestionResponse,
+    RateQuestion,
     RateQuestionEdge,
     StateUser
 } from '../../../gen/gqlClient';
@@ -41,6 +43,7 @@ const extractQuestions = (edges?: (ContractQuestionEdge | RateQuestionEdge)[]): 
     }))
 }
 
+
 const getUserDivision = (user: CmsUser): Division | undefined => {
     if (user.divisionAssignment) {
         return user.divisionAssignment
@@ -59,14 +62,28 @@ const getDivisionOrder = (division?: Division): Division[] =>
         return 0
     }) as Division[]
 
+
+const getQuestionRoundForQuestionID = (questions: IndexRateQuestionsPayload, division: 'DMCO' | 'OACT' | 'DMCP', questionID: string): number |
+undefined =>{
+    const questionsEdges =  questions?.[`${division}Questions`].edges
+   const matchingQuestion = questionsEdges.find( (question ) => question.node.id == questionID)
+   if (!matchingQuestion){
+    return undefined
+   } else {
+    return  questionsEdges.indexOf(matchingQuestion) + 1
+   }
+}
+
 export {
     extractQuestions,
     getUserDivision,
     getDivisionOrder,
+    getQuestionRoundForQuestionID
 }
 
 export type {
     QuestionData,
     QuestionDocumentWithLink,
-    DivisionQuestionDataType
+    DivisionQuestionDataType,
+
 }
