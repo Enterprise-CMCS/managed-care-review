@@ -1,7 +1,6 @@
 import { Span, SpanStatusCode } from '@opentelemetry/api'
 import { SemanticAttributes } from '@opentelemetry/semantic-conventions'
 import { useTracing } from '../contexts/TraceContext'
-import React from 'react'
 
 // Get the tracing context outside of React components
 let tracingContext: ReturnType<typeof useTracing> | undefined
@@ -142,25 +141,4 @@ export function recordUserInputException(error: string | Error): void {
         message: typeof error === 'string' ? error : error.message,
     })
     span.end()
-}
-
-export function withTracing<P extends object>(
-    WrappedComponent: React.ComponentType<P>
-) {
-    const WithTracingComponent = (props: P) => {
-        const tracing = useTracing()
-
-        React.useEffect(() => {
-            setGlobalTracingContext(tracing)
-        }, [tracing])
-
-        return React.createElement(WrappedComponent, props)
-    }
-
-    // Preserve the display name for debugging
-    WithTracingComponent.displayName = `WithTracing(${
-        WrappedComponent.displayName || WrappedComponent.name || 'Component'
-    })`
-
-    return WithTracingComponent
 }
