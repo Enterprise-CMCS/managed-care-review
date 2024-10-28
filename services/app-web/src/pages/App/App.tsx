@@ -11,9 +11,9 @@ import { AppBody } from './AppBody'
 import { AuthProvider } from '../../contexts/AuthContext'
 import { ErrorBoundaryRoot } from '../Errors/ErrorBoundaryRoot'
 import { PageProvider } from '../../contexts/PageContext'
-import { TraceProvider } from '../../contexts/TraceContext'
+import { TraceProvider, useTracing } from '../../contexts/TraceContext'
 import { TealiumProvider } from '../../contexts/TealiumContext'
-import { withTracing } from '../../otelHelpers/tracingHelper'
+import { setGlobalTracingContext } from '../../otelHelpers/tracingHelper'
 
 import { AuthModeType } from '../../common-code/config'
 import { S3Provider } from '../../contexts/S3Context'
@@ -22,6 +22,20 @@ import { useScript } from '../../hooks'
 import { generateNRScriptContent } from '../../newRelic'
 import { getEnv } from '../../configHelpers/envHelpers'
 import { getTealiumEnv, tealiumClient, devTealiumClient } from '../../tealium'
+
+interface TracingInitializerProps {
+    children: React.ReactNode
+}
+
+export function TracingInitializer({ children }: TracingInitializerProps) {
+    const tracing = useTracing()
+
+    React.useEffect(() => {
+        setGlobalTracingContext(tracing)
+    }, [tracing])
+
+    return <>{children}</>
+}
 
 export type AppProps = {
     authMode: AuthModeType
@@ -58,22 +72,26 @@ function App({
     return (
         <ErrorBoundary FallbackComponent={ErrorBoundaryRoot}>
             <TraceProvider>
-                <BrowserRouter>
-                    <ApolloProvider client={apolloClient}>
-                        <AuthProvider authMode={authMode}>
-                            <S3Provider client={s3Client}>
-                                <PageProvider>
-                                    <TealiumProvider client={newTealiumClient}>
-                                        <AppBody authMode={authMode} />
-                                    </TealiumProvider>
-                                </PageProvider>
-                            </S3Provider>
-                        </AuthProvider>
-                    </ApolloProvider>
-                </BrowserRouter>
+                <TracingInitializer>
+                    <BrowserRouter>
+                        <ApolloProvider client={apolloClient}>
+                            <AuthProvider authMode={authMode}>
+                                <S3Provider client={s3Client}>
+                                    <PageProvider>
+                                        <TealiumProvider
+                                            client={newTealiumClient}
+                                        >
+                                            <AppBody authMode={authMode} />
+                                        </TealiumProvider>
+                                    </PageProvider>
+                                </S3Provider>
+                            </AuthProvider>
+                        </ApolloProvider>
+                    </BrowserRouter>
+                </TracingInitializer>
             </TraceProvider>
         </ErrorBoundary>
     )
 }
 
-export default withTracing(App)
+export default App
