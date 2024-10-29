@@ -125,8 +125,8 @@ importers:
         specifier: ^3.680.0
         version: 3.680.0
       '@aws-sdk/client-rds':
-        specifier: ^3.679.0
-        version: 3.679.0
+        specifier: ^3.681.0
+        version: 3.681.0
       '@aws-sdk/client-s3':
         specifier: ^3.679.0
         version: 3.679.0
@@ -1323,8 +1323,8 @@ packages:
     resolution: {integrity: sha512-y6fxVYndGS7z2KqHViPCqagBEOsZlxBUYUJZuD6WWTiQrI0Pwe5qG02oKJVaa5OmxE20QLf6bRBWj2rQpeF4IQ==}
     engines: {node: '>=10.0.0'}
 
-  '@aws-sdk/client-rds@3.679.0':
-    resolution: {integrity: sha512-glQ9YS6doosVBdH9MrOztX57zO64Zah0jMICHjhxB8hrE2ueotbbNG5X+04gN1TG3pZJT5pGo8JrcRPSOJURLw==}
+  '@aws-sdk/client-rds@3.681.0':
+    resolution: {integrity: sha512-23HVnotIomgEb+x+eqj2dolkZrVdykVKcGiA101/ohWxgVX1AjwqO1/+YKzT0d+wjUksc7S2LOMrL1Wl6mEDgw==}
     engines: {node: '>=16.0.0'}
 
   '@aws-sdk/client-rekognition@3.6.1':
@@ -5846,8 +5846,8 @@ packages:
   '@types/node@18.19.54':
     resolution: {integrity: sha512-+BRgt0G5gYjTvdLac9sIeE0iZcJxi4Jc4PV5EUzqi+88jmQLr+fRZdv2tCTV7IHKSGxM6SaLoOXQWWUiLUItMw==}
 
-  '@types/node@18.19.59':
-    resolution: {integrity: sha512-vizm2EqwV/7Zay+A6J3tGl9Lhr7CjZe2HmWS988sefiEmsyP9CeXEleho6i4hJk/8UtZAo0bWN4QPZZr83RxvQ==}
+  '@types/node@18.19.60':
+    resolution: {integrity: sha512-cYRj7igVqgxhlHFdBHHpU2SNw3+dN2x0VTZJtLYk6y/ieuGN4XiBgtDjYVktM/yk2y/8pKMileNc6IoEzEJnUw==}
 
   '@types/node@20.14.12':
     resolution: {integrity: sha512-r7wNXakLeSsGT0H1AU863vS2wa5wBOK4bWMjZz2wj+8nBx+m5PeIn0k8AloSLpRuiwdRQZwarZqHE4FNArPuJQ==}
@@ -5864,8 +5864,8 @@ packages:
   '@types/node@20.17.0':
     resolution: {integrity: sha512-a7zRo0f0eLo9K5X9Wp5cAqTUNGzuFLDG2R7C4HY2BhcMAsxgSPuRvAC1ZB6QkuUQXf0YZAgfOX2ZyrBa2n4nHQ==}
 
-  '@types/node@20.17.1':
-    resolution: {integrity: sha512-j2VlPv1NnwPJbaCNv69FO/1z4lId0QmGvpT41YxitRtWlg96g/j8qcv2RKsLKe2F6OJgyXhupN1Xo17b2m139Q==}
+  '@types/node@20.17.2':
+    resolution: {integrity: sha512-OOHK4sjXqkL7yQ7VEEHcf6+0jSvKjWqwnaCtY7AKD/VLEvRHMsxxu7eI8ErnjxHS8VwmekD4PeVCpu4qZEZSxg==}
 
   '@types/node@22.0.2':
     resolution: {integrity: sha512-yPL6DyFwY5PiMVEwymNeqUTKsDczQBJ/5T7W/46RwLU/VH+AA8aT5TZkvBviLKLbbm0hlfftEkGrNzfRk/fofQ==}
@@ -7834,8 +7834,8 @@ packages:
   electron-to-chromium@1.5.1:
     resolution: {integrity: sha512-FKbOCOQ5QRB3VlIbl1LZQefWIYwszlBloaXcY2rbfpu9ioJnNh3TK03YtIDKDo3WKBi8u+YV4+Fn2CkEozgf4w==}
 
-  electron-to-chromium@1.5.47:
-    resolution: {integrity: sha512-zS5Yer0MOYw4rtK2iq43cJagHZ8sXN0jDHDKzB+86gSBSAI4v07S97mcq+Gs2vclAxSh1j7vOAHxSVgduiiuVQ==}
+  electron-to-chromium@1.5.48:
+    resolution: {integrity: sha512-FXULnNK7ACNI9MTMOVAzUGiz/YrK9Kcb0s/JT4aJgsam7Eh6XYe7Y6q95lPq+VdBe1DpT2eTnfXFtnuPGCks4w==}
 
   electron-to-chromium@1.5.5:
     resolution: {integrity: sha512-QR7/A7ZkMS8tZuoftC/jfqNkZLQO779SSW3YuZHP4eXpj3EffGLFcB/Xu9AAZQzLccTiCV+EmUo3ha4mQ9wnlA==}
@@ -14881,7 +14881,7 @@ snapshots:
     transitivePeerDependencies:
       - react-native
 
-  '@aws-sdk/client-rds@3.679.0':
+  '@aws-sdk/client-rds@3.681.0':
     dependencies:
       '@aws-crypto/sha256-browser': 5.2.0
       '@aws-crypto/sha256-js': 5.2.0
@@ -19590,7 +19590,7 @@ snapshots:
     dependencies:
       '@types/istanbul-lib-coverage': 2.0.6
       '@types/istanbul-reports': 3.0.4
-      '@types/node': 20.17.1
+      '@types/node': 20.17.2
       '@types/yargs': 15.0.19
       chalk: 4.1.2
 
@@ -20947,7 +20947,7 @@ snapshots:
 
   '@rnx-kit/chromium-edge-launcher@1.0.0':
     dependencies:
-      '@types/node': 18.19.59
+      '@types/node': 18.19.60
       escape-string-regexp: 4.0.0
       is-wsl: 2.2.0
       lighthouse-logger: 1.4.2
@@ -22137,7 +22137,7 @@ snapshots:
 
   '@types/node-forge@1.3.11':
     dependencies:
-      '@types/node': 20.17.1
+      '@types/node': 20.17.2
 
   '@types/node@10.17.60': {}
 
@@ -22149,7 +22149,7 @@ snapshots:
     dependencies:
       undici-types: 5.26.5
 
-  '@types/node@18.19.59':
+  '@types/node@18.19.60':
     dependencies:
       undici-types: 5.26.5
 
@@ -22173,7 +22173,7 @@ snapshots:
     dependencies:
       undici-types: 6.19.8
 
-  '@types/node@20.17.1':
+  '@types/node@20.17.2':
     dependencies:
       undici-types: 6.19.8
 
@@ -23504,7 +23504,7 @@ snapshots:
   browserslist@4.24.2:
     dependencies:
       caniuse-lite: 1.0.30001673
-      electron-to-chromium: 1.5.47
+      electron-to-chromium: 1.5.48
       node-releases: 2.0.18
       update-browserslist-db: 1.1.1(browserslist@4.24.2)
 
@@ -23811,7 +23811,7 @@ snapshots:
 
   chrome-launcher@0.15.2:
     dependencies:
-      '@types/node': 20.17.1
+      '@types/node': 20.17.2
       escape-string-regexp: 4.0.0
       is-wsl: 2.2.0
       lighthouse-logger: 1.4.2
@@ -24698,7 +24698,7 @@ snapshots:
 
   electron-to-chromium@1.5.1: {}
 
-  electron-to-chromium@1.5.47: {}
+  electron-to-chromium@1.5.48: {}
 
   electron-to-chromium@1.5.5: {}
 
@@ -26981,7 +26981,7 @@ snapshots:
 
   jest-worker@27.5.1:
     dependencies:
-      '@types/node': 20.17.1
+      '@types/node': 20.17.2
       merge-stream: 2.0.0
       supports-color: 8.1.1
 
