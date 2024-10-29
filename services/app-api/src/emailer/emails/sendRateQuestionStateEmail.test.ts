@@ -80,7 +80,7 @@ describe('sendRateQuestionStateEmail', () => {
                             {
                                 name: 'Foo Person',
                                 titleRole: 'Bar Job',
-                                email: 'foo@example.com',
+                                email: 'certifyingActuary@example.com',
                                 actuarialFirm: 'GUIDEHOUSE',
                             },
                         ],
@@ -88,7 +88,7 @@ describe('sendRateQuestionStateEmail', () => {
                             {
                                 name: 'Bar Person',
                                 titleRole: 'Baz Job',
-                                email: 'bar@example.com',
+                                email: 'addtlActuaryContacts@example.com',
                                 actuarialFirm: 'OTHER',
                                 actuarialFirmOther: 'Some Firm',
                             },
@@ -239,6 +239,32 @@ describe('sendRateQuestionStateEmail', () => {
     it('to addresses list includes all state contacts on submission', async () => {
         const template = await sendRateQuestionStateEmail(
             testRate(),
+            testEmailConfig(),
+            currentQuestion()
+        )
+
+        if (template instanceof Error) {
+            throw template
+        }
+
+        expect(template).toEqual(
+            expect.objectContaining({
+                toAddresses: expect.arrayContaining([
+                    'parent-contract-state-contact-1@state.com',
+                    'duplicateContact@state-contact.com',
+                    'second-contract-state-contact-1@state.com',
+                    'certifyingActuary@example.com',
+                    'addtlActuaryContacts@example.com',
+                ]),
+            })
+        )
+    })
+    it('to addresses does not include actuaries when rate communication preference is OACT_TO_STATE', async () => {
+        const rate = testRate()
+        rate.packageSubmissions[0].rateRevision.formData.actuaryCommunicationPreference =
+            'OACT_TO_STATE'
+        const template = await sendRateQuestionStateEmail(
+            rate,
             testEmailConfig(),
             currentQuestion()
         )
