@@ -1,8 +1,6 @@
 import {
     ContractQuestionList,
     Division,
-    IndexContractQuestionsPayload,
-    IndexRateQuestionsPayload,
     RateQuestionList,
 } from '../../../gen/gqlClient'
 import type { QuestionRounds } from './QuestionResponseRound'
@@ -10,10 +8,7 @@ import { QuestionResponseRound } from './QuestionResponseRound'
 import { NavLinkWithLogging, SectionHeader } from '../../../components'
 import styles from '../QuestionResponse.module.scss'
 import { useAuth } from '../../../contexts/AuthContext'
-
-type IndexQuestionType =
-    | IndexContractQuestionsPayload
-    | IndexRateQuestionsPayload
+import { IndexQuestionType } from '../QuestionResponseHelpers'
 
 type CMSQuestionResponseTableProps = {
     indexQuestions: IndexQuestionType
