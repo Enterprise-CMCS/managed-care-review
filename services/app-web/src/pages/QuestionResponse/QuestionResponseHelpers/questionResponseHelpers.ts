@@ -29,6 +29,16 @@ type QuestionDocumentWithLink = {
     url?: string | null
 }
 
+type IndexQuestionType =
+    | IndexContractQuestionsPayload
+    | IndexRateQuestionsPayload
+
+const divisionFullNames = {
+    DMCO: 'Division of Managed Care Operations (DMCO)',
+    DMCP: 'Division of Managed Care Policy (DMCP)',
+    OACT: 'Office of the Actuary (OACT)'
+}
+
 const extractQuestions = (edges?: (ContractQuestionEdge | RateQuestionEdge)[]): QuestionData[] => {
     if (!edges) {
         return []
@@ -78,12 +88,13 @@ export {
     extractQuestions,
     getUserDivision,
     getDivisionOrder,
-    getQuestionRoundForQuestionID
+    getQuestionRoundForQuestionID,
+    divisionFullNames
 }
 
 export type {
     QuestionData,
     QuestionDocumentWithLink,
     DivisionQuestionDataType,
-
+    IndexQuestionType
 }

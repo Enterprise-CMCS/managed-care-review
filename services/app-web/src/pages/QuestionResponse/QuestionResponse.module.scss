@@ -14,6 +14,11 @@
 .uploadFormContainer {
     max-width: custom.$mcr-container-standard-width-fixed;
 }
+.tableHeader {
+    h2 {
+        margin-bottom: 0;
+    }
+}
 
 %questionSection {
     margin: uswds.units(2) auto;
@@ -25,6 +30,7 @@
     @include uswds.u-radius('md');
 
     h2 {
+        margin: 0;
         font-weight: normal;
     }
 
