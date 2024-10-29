@@ -35,7 +35,7 @@ Cypress.Commands.add(
         })
 
         // Check we are on the Add questions page
-        cy.findByRole('heading', { level: 2, name: /New response/ }).should(
+        cy.findByRole('heading', { level: 2, name: /Upload response/ }).should(
             'exist'
         )
 
