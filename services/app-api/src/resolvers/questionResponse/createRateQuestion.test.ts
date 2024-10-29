@@ -13,6 +13,7 @@ import {
     unlockTestContract,
 } from '../../testHelpers/gqlContractHelpers'
 import { assertAnError, assertAnErrorCode, must } from '../../testHelpers'
+import { testEmailConfig, testEmailer } from '../../testHelpers/emailerHelpers'
 
 describe('createRateQuestion', () => {
     const cmsUser = testCMSUser()
@@ -206,6 +207,42 @@ describe('createRateQuestion', () => {
         expect(assertAnErrorCode(rateQuestionRes)).toBe('FORBIDDEN')
         expect(assertAnError(rateQuestionRes).message).toBe(
             `users without an assigned division are not authorized to create a question`
+        )
+    })
+
+    it('send state email to state submitting a question succeeds', async () => {
+        const config = testEmailConfig()
+        const mockEmailer = testEmailer(config)
+
+        const stateServer = await constructTestPostgresServer()
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: cmsUser,
+            },
+            emailer: mockEmailer,
+        })
+        const submittedContractAndRate =
+            await createAndSubmitTestContractWithRate(stateServer)
+        const rateRevision =
+            submittedContractAndRate.packageSubmissions[0].rateRevisions[0]
+        const rateID = rateRevision.rateID
+
+        must(await createTestRateQuestion(cmsServer, rateID))
+
+        expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
+            1,
+            expect.objectContaining({
+                subject: expect.stringContaining(
+                    `[LOCAL] New questions about ${rateRevision.formData.rateCertificationName}`
+                ),
+                sourceEmail: config.emailSource,
+                bodyText: expect.stringContaining(
+                    `CMS asked questions about ${rateRevision.formData.rateCertificationName}`
+                ),
+                bodyHTML: expect.stringContaining(
+                    `http://localhost/submissions/${submittedContractAndRate.id}/rates/${rateID}/question-and-answers`
+                ),
+            })
         )
     })
 })

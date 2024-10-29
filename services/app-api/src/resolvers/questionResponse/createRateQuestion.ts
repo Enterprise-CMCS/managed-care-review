@@ -9,9 +9,11 @@ import {
 import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
 import { NotFoundError } from '../../postgres'
 import { GraphQLError } from 'graphql/index'
+import type { Emailer } from '../../emailer'
 
 export function createRateQuestionResolver(
-    store: Store
+    store: Store,
+    emailer: Emailer
 ): MutationResolvers['createRateQuestion'] {
     return async (_parent, { input }, context) => {
         const { user, ctx, tracer } = context
@@ -94,6 +96,25 @@ export function createRateQuestionResolver(
             logError('createRateQuestion', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new Error(errMessage)
+        }
+
+        const sendRateQuestionStateEmailResult =
+            await emailer.sendRateQuestionStateEmail(rate, questionResult)
+
+        if (sendRateQuestionStateEmailResult instanceof Error) {
+            logError(
+                'sendRateQuestionsStateEmail - state email failed',
+                sendRateQuestionStateEmailResult
+            )
+            setErrorAttributesOnActiveSpan('state email failed', span)
+            const errMessage = `Error sending a state email for 
+                questionID: ${questionResult.id} and rate: ${rate.id}`
+            throw new GraphQLError(errMessage, {
+                extensions: {
+                    code: 'INTERNAL_SERVER_ERROR',
+                    cause: 'EMAIL_ERROR',
+                },
+            })
         }
 
         logSuccess('createRateQuestion')
