@@ -13,6 +13,7 @@ import type {
     RateRevisionType,
     UnlockedContractType,
     ContractQuestionType,
+    RateFormDataType,
 } from '../domain-models'
 import { logError } from '../logger'
 import { pruneDuplicateEmails } from './formatters'
@@ -355,6 +356,28 @@ const getQuestionRound = (
     return questionIndex + 1
 }
 
+const getActuaryContactEmails = (formData: RateFormDataType): string[] => {
+    const actuaryContacts: string[] = []
+
+    if (formData.certifyingActuaryContacts?.length) {
+        formData.certifyingActuaryContacts.forEach((contact) => {
+            if (contact.email) {
+                actuaryContacts.push(contact.email)
+            }
+        })
+    }
+
+    if (formData.addtlActuaryContacts?.length) {
+        formData.addtlActuaryContacts.forEach((contact) => {
+            if (contact.email) {
+                actuaryContacts.push(contact.email)
+            }
+        })
+    }
+
+    return actuaryContacts
+}
+
 export {
     stripHTMLFromTemplate,
     handleAsCHIPSubmission,
@@ -369,4 +392,5 @@ export {
     findContractPrograms,
     filterChipAndPRSubmissionReviewers,
     getQuestionRound,
+    getActuaryContactEmails,
 }
