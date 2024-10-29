@@ -236,7 +236,7 @@ describe('sendRateQuestionStateEmail', () => {
             })
         )
     })
-    it('to addresses list includes all state contacts on submission', async () => {
+    it('to addresses list includes all state contacts on all contracts submitted with rate', async () => {
         const template = await sendRateQuestionStateEmail(
             testRate(),
             testEmailConfig(),
@@ -324,7 +324,7 @@ describe('sendRateQuestionStateEmail', () => {
             })
         )
     })
-    it('includes link to submission', async () => {
+    it('includes link to rate Q&A page', async () => {
         const template = await sendRateQuestionStateEmail(
             testRate(),
             testEmailConfig(),
