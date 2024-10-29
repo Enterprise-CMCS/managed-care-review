@@ -1,14 +1,13 @@
 import { z } from 'zod'
 import {
+    actuarialFirmTypeSchema,
     actuaryCommunicationTypeSchema,
-    actuaryContactSchema,
     contractExecutionStatusSchema,
     contractTypeSchema,
     federalAuthoritySchema,
     populationCoveredSchema,
     rateCapitationTypeSchema,
     rateTypeSchema,
-    stateContactSchema,
     submissionTypeSchema,
 } from '../../common-code/proto/healthPlanFormDataProto/zodSchemas'
 import { statusSchema } from './statusType'
@@ -33,6 +32,21 @@ const packagesWithSharedRateCerts = z.object({
     packageName: z.string(),
     packageId: z.string(),
     packageStatus: statusSchema.optional(),
+})
+
+const stateContactSchema = z.object({
+    name: z.string().optional(),
+    titleRole: z.string().optional(),
+    email: z.string().email().optional().or(z.literal('')),
+})
+
+const actuaryContactSchema = z.object({
+    id: z.string().optional(),
+    name: z.string().optional(),
+    titleRole: z.string().optional(),
+    email: z.string().email().optional().or(z.literal('')),
+    actuarialFirm: actuarialFirmTypeSchema.optional(),
+    actuarialFirmOther: z.string().optional(),
 })
 
 function preprocessNulls<T extends ZodTypeAny>(
@@ -115,6 +129,8 @@ type RateFormDataType = z.infer<typeof rateFormDataSchema>
 
 type ContractFormEditableType = Partial<ContractFormDataType>
 type RateFormEditableType = Partial<RateFormDataType>
+type StateContactType = z.infer<typeof stateContactSchema>
+type ActuaryContactType = z.infer<typeof actuaryContactSchema>
 
 export { contractFormDataSchema, rateFormDataSchema, preprocessNulls }
 
@@ -124,4 +140,6 @@ export type {
     DocumentType,
     RateFormEditableType,
     ContractFormEditableType,
+    StateContactType,
+    ActuaryContactType,
 }
