@@ -11,6 +11,12 @@
     padding: 2rem 0;
 }
 
+.tableHeader {
+    h2 {
+        margin-bottom: 0;
+    }
+}
+
 %questionSection {
     margin: uswds.units(2) auto;
     background: custom.$mcr-foundation-white;
@@ -21,6 +27,7 @@
     @include uswds.u-radius('md');
 
     h2 {
+        margin: 0;
         font-weight: normal;
     }
 
