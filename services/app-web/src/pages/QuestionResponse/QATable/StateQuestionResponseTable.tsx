@@ -8,10 +8,12 @@ import { QuestionResponseRound, QuestionRounds } from './QuestionResponseRound'
 
 type StateQuestionResponseTableProps = {
     indexQuestions: IndexQuestionType
+    rateCertName?: string
 }
 
 export const StateQuestionResponseTable = ({
     indexQuestions,
+    rateCertName,
 }: StateQuestionResponseTableProps) => {
     const { loggedInUser } = useAuth()
     const answeredQuestions: QuestionRounds = []
@@ -50,6 +52,12 @@ export const StateQuestionResponseTable = ({
 
     return (
         <>
+            <div className={styles.tableHeader}>
+                <SectionHeader
+                    header={`Rate questions: ${rateCertName}`}
+                    hideBorder
+                />
+            </div>
             <section
                 className={styles.questionSection}
                 data-testid={'outstandingQuestions'}
