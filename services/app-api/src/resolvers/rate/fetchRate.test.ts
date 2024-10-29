@@ -1,5 +1,7 @@
-import FETCH_RATE from '../../../../app-graphql/src/queries/fetchRate.graphql'
-import FETCH_RATE_WITH_QUESTIONS from '../../../../app-graphql/src/queries/fetchRateWithQuestions.graphql'
+import {
+    FetchRateDocument,
+    FetchRateWithQuestionsDocument,
+} from '../../gen/gqlClient'
 import { testLDService } from '../../testHelpers/launchDarklyHelpers'
 import {
     constructTestPostgresServer,
@@ -166,7 +168,7 @@ describe('fetchRate', () => {
         expect(firstRateID).toBe(resubmittedRate.id) // first rate ID should be unchanged
 
         const result1 = await cmsServer.executeOperation({
-            query: FETCH_RATE,
+            query: FetchRateDocument,
             variables: {
                 input: { rateID: firstRateID },
             },
@@ -223,7 +225,7 @@ describe('fetchRate', () => {
 
         // fetch rate
         const result = await cmsServer.executeOperation({
-            query: FETCH_RATE,
+            query: FetchRateDocument,
             variables: {
                 input,
             },
@@ -269,7 +271,7 @@ describe('fetchRate', () => {
 
         // fetch rate
         const result = await cmsServer.executeOperation({
-            query: FETCH_RATE,
+            query: FetchRateDocument,
             variables: {
                 input,
             },
@@ -519,7 +521,7 @@ describe('fetchRate', () => {
         await createTestRateQuestion(oactServer, rateID)
 
         const result = await server.executeOperation({
-            query: FETCH_RATE_WITH_QUESTIONS,
+            query: FetchRateWithQuestionsDocument,
             variables: {
                 input: {
                     rateID,
@@ -545,7 +547,7 @@ describe('fetchRate', () => {
         // Test newly created dmco question and its order
         await createTestRateQuestion(dmco2Server, rateID)
         const result2 = await server.executeOperation({
-            query: FETCH_RATE_WITH_QUESTIONS,
+            query: FetchRateWithQuestionsDocument,
             variables: {
                 input: {
                     rateID,

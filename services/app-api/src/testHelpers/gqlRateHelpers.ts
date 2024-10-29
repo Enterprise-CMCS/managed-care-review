@@ -1,7 +1,10 @@
-import SUBMIT_RATE from 'app-graphql/src/mutations/submitRate.graphql'
-import FETCH_RATE from 'app-graphql/src/queries/fetchRate.graphql'
-import UNLOCK_RATE from 'app-graphql/src/mutations/unlockRate.graphql'
-import UPDATE_DRAFT_CONTRACT_RATES from 'app-graphql/src/mutations/updateDraftContractRates.graphql'
+import {
+    SubmitRateDocument,
+    FetchRateDocument,
+    FetchRateWithQuestionsDocument,
+    UnlockRateDocument,
+    UpdateDraftContractRatesDocument,
+} from '../gen/gqlClient'
 import { must } from './assertionHelpers'
 import { defaultFloridaRateProgram } from './gqlHelpers'
 import { mockRateFormDataInput } from './rateDataMocks'
@@ -31,7 +34,7 @@ const fetchTestRateById = async (
 ): Promise<Rate> => {
     const input = { rateID }
     const result = await server.executeOperation({
-        query: FETCH_RATE,
+        query: FetchRateDocument,
         variables: { input },
     })
 
@@ -43,6 +46,29 @@ const fetchTestRateById = async (
 
     if (!result.data) {
         throw new Error('fetchTestRateById returned nothing')
+    }
+
+    return result.data.fetchRate.rate
+}
+
+const fetchTestRateWithQuestionsById = async (
+    server: ApolloServer,
+    rateID: string
+): Promise<Rate> => {
+    const input = { rateID }
+    const result = await server.executeOperation({
+        query: FetchRateWithQuestionsDocument,
+        variables: { input },
+    })
+
+    if (result.errors) {
+        throw new Error(
+            `fetchTestRateWithQuestionsById query failed with errors ${result.errors}`
+        )
+    }
+
+    if (!result.data) {
+        throw new Error('fetchTestRateWithQuestionsById returned nothing')
     }
 
     return result.data.fetchRate.rate
@@ -68,7 +94,7 @@ const submitTestRate = async (
     submittedReason: string
 ): Promise<Rate> => {
     const updateResult = await server.executeOperation({
-        query: SUBMIT_RATE,
+        query: SubmitRateDocument,
         variables: {
             input: {
                 rateID,
@@ -97,7 +123,7 @@ const unlockTestRate = async (
     unlockedReason: string
 ) => {
     const updateResult = await server.executeOperation({
-        query: UNLOCK_RATE,
+        query: UnlockRateDocument,
         variables: {
             input: {
                 rateID,
@@ -125,7 +151,7 @@ async function updateTestDraftRatesOnContract(
     input: UpdateDraftContractRatesInput
 ): Promise<Contract> {
     const updateResult = await server.executeOperation({
-        query: UPDATE_DRAFT_CONTRACT_RATES,
+        query: UpdateDraftContractRatesDocument,
         variables: {
             input,
         },
@@ -352,7 +378,7 @@ const createTestDraftRateOnContract = async (
     }
 
     const updateResult = await server.executeOperation({
-        query: UPDATE_DRAFT_CONTRACT_RATES,
+        query: UpdateDraftContractRatesDocument,
         variables: {
             input: {
                 contractID,
@@ -389,7 +415,7 @@ const updateTestDraftRateOnContract = async (
     }
 
     const updateResult = await server.executeOperation({
-        query: UPDATE_DRAFT_CONTRACT_RATES,
+        query: UpdateDraftContractRatesDocument,
         variables: {
             input: {
                 contractID,
@@ -445,4 +471,5 @@ export {
     unlockTestRate,
     updateTestRate,
     formatRateDataForSending,
+    fetchTestRateWithQuestionsById,
 }

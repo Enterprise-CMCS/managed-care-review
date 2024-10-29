@@ -1,5 +1,5 @@
 import { NewPostgresStore } from '../../postgres'
-import UPDATE_CONTRACT_DRAFT_REVISION from 'app-graphql/src/mutations/updateContractDraftRevision.graphql'
+import { UpdateContractDraftRevisionDocument } from '../../gen/gqlClient'
 import {
     mockStoreThatErrors,
     sharedTestPrismaClient,
@@ -160,7 +160,7 @@ describe(`Tests UpdateHealthPlanFormData`, () => {
         })
 
         const updateResult = await cmsUserServer.executeOperation({
-            query: UPDATE_CONTRACT_DRAFT_REVISION,
+            query: UpdateContractDraftRevisionDocument,
             variables: {
                 input: {
                     contractID: draftContract.id,
@@ -200,7 +200,7 @@ describe(`Tests UpdateHealthPlanFormData`, () => {
         })
 
         const updateResult = await otherUserServer.executeOperation({
-            query: UPDATE_CONTRACT_DRAFT_REVISION,
+            query: UpdateContractDraftRevisionDocument,
             variables: {
                 input: {
                     contractID: draftContract.id,
@@ -248,7 +248,7 @@ describe(`Tests UpdateHealthPlanFormData`, () => {
         }
 
         const updateResult = await server.executeOperation({
-            query: UPDATE_CONTRACT_DRAFT_REVISION,
+            query: UpdateContractDraftRevisionDocument,
             variables: {
                 input: {
                     contractID: draftContract.id,
@@ -281,7 +281,7 @@ describe(`Tests UpdateHealthPlanFormData`, () => {
 
         // Now test updating a submitted submission
         const updateResult = await server.executeOperation({
-            query: UPDATE_CONTRACT_DRAFT_REVISION,
+            query: UpdateContractDraftRevisionDocument,
             variables: {
                 input: {
                     contractID,
@@ -316,7 +316,7 @@ describe(`Tests UpdateHealthPlanFormData`, () => {
 
         // Update the draft to have complete data for submission.
         const updateResult = await server.executeOperation({
-            query: UPDATE_CONTRACT_DRAFT_REVISION,
+            query: UpdateContractDraftRevisionDocument,
             variables: {
                 input: {
                     contractID: contractID,
@@ -362,7 +362,7 @@ describe(`Tests UpdateHealthPlanFormData`, () => {
 
         // Update the draft to have complete data for submission.
         const updateResult = await server.executeOperation({
-            query: UPDATE_CONTRACT_DRAFT_REVISION,
+            query: UpdateContractDraftRevisionDocument,
             variables: {
                 input: {
                     contractID: contractID,

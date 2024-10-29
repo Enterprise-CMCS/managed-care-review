@@ -1,5 +1,5 @@
 import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
-import FETCH_EMAIL_SETTINGS from '../../../../app-graphql/src/queries/fetchEmailSettings.graphql'
+import { FetchEmailSettingsDocument } from '../../gen/gqlClient'
 import { testAdminUser, testStateUser } from '../../testHelpers/userHelpers'
 
 describe('fetchEmailSettings', () => {
@@ -15,7 +15,7 @@ describe('fetchEmailSettings', () => {
 
         // make a mock request
         const res = await server.executeOperation({
-            query: FETCH_EMAIL_SETTINGS,
+            query: FetchEmailSettingsDocument,
         })
 
         // confirm that we get what we got
@@ -32,7 +32,7 @@ describe('fetchEmailSettings', () => {
 
         // make a mock request
         const res = await server.executeOperation({
-            query: FETCH_EMAIL_SETTINGS,
+            query: FetchEmailSettingsDocument,
         })
 
         // confirm that we get what we got
@@ -50,7 +50,7 @@ describe('fetchEmailSettings', () => {
 
         // make a mock request
         const res = await server.executeOperation({
-            query: FETCH_EMAIL_SETTINGS,
+            query: FetchEmailSettingsDocument,
         })
 
         if (res.errors === undefined) {

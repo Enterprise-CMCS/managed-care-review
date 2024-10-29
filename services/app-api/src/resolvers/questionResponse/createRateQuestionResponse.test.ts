@@ -49,15 +49,17 @@ describe('createRateQuestionResponse', () => {
                     expect.objectContaining({
                         id: expect.any(String),
                         questionID: questionWithResponse.id,
+                        addedBy: expect.objectContaining({
+                            role: 'STATE_USER',
+                        }),
                         documents: [
                             {
                                 name: 'Test Question Response',
                                 s3URL: 's3://bucketname/key/test1',
+                                downloadURL:
+                                    'https://fakes3.com/key?sekret=deadbeef',
                             },
                         ],
-                        addedBy: expect.objectContaining({
-                            role: 'STATE_USER',
-                        }),
                     }),
                 ]),
             })

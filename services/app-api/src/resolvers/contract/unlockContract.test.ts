@@ -4,7 +4,7 @@ import {
     defaultFloridaRateProgram,
     updateTestStateAssignments,
 } from '../../testHelpers/gqlHelpers'
-import UNLOCK_CONTRACT from '../../../../app-graphql/src/mutations/unlockContract.graphql'
+import { UnlockContractDocument } from '../../gen/gqlClient'
 import { testS3Client } from '../../../../app-web/src/testHelpers/s3Helpers'
 import { expectToBeDefined } from '../../testHelpers/assertionHelpers'
 
@@ -110,7 +110,7 @@ describe('unlockContract', () => {
 
                 // Try to unlock the contract again
                 const unlockResult2 = await cmsServer.executeOperation({
-                    query: UNLOCK_CONTRACT,
+                    query: UnlockContractDocument,
                     variables: {
                         input: {
                             contractID: contract.id,
@@ -136,7 +136,7 @@ describe('unlockContract', () => {
         const contract = await createAndSubmitTestContractWithRate(stateServer)
 
         const unlockResult = await stateServer.executeOperation({
-            query: UNLOCK_CONTRACT,
+            query: UnlockContractDocument,
             variables: {
                 input: {
                     contractID: contract.id,

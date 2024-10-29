@@ -1,4 +1,4 @@
-import CREATE_QUESTION from 'app-graphql/src/mutations/createContractQuestion.graphql'
+import { CreateContractQuestionDocument } from '../../gen/gqlClient'
 import {
     constructTestPostgresServer,
     createTestQuestion,
@@ -150,7 +150,7 @@ describe('createQuestion', () => {
         const draftContract = await createTestContract(stateServer)
 
         const createdQuestion = await cmsServer.executeOperation({
-            query: CREATE_QUESTION,
+            query: CreateContractQuestionDocument,
             variables: {
                 input: {
                     contractID: draftContract.id,
@@ -175,7 +175,7 @@ describe('createQuestion', () => {
         const contract = await createAndSubmitTestContract(stateServer)
 
         const createdQuestion = await stateServer.executeOperation({
-            query: CREATE_QUESTION,
+            query: CreateContractQuestionDocument,
             variables: {
                 input: {
                     contractID: contract.id,
@@ -206,7 +206,7 @@ describe('createQuestion', () => {
         await createAndSubmitTestContract(stateServer)
 
         const createdQuestion = await cmsServer.executeOperation({
-            query: CREATE_QUESTION,
+            query: CreateContractQuestionDocument,
             variables: {
                 input: {
                     contractID: 'invalid-pkg-id',
@@ -241,7 +241,7 @@ describe('createQuestion', () => {
         await createAndSubmitTestContract(stateServer)
 
         const createdQuestion = await cmsServer.executeOperation({
-            query: CREATE_QUESTION,
+            query: CreateContractQuestionDocument,
             variables: {
                 input: {
                     contractID: 'invalid-pkg-id',
@@ -276,7 +276,7 @@ describe('createQuestion', () => {
         await createAndSubmitTestContract(stateServer)
 
         const createdQuestion = await cmsServer.executeOperation({
-            query: CREATE_QUESTION,
+            query: CreateContractQuestionDocument,
             variables: {
                 input: {
                     contractID: 'invalid-pkg-id',
@@ -531,7 +531,7 @@ describe('createQuestion', () => {
         })
 
         const submitResult = await cmsServer.executeOperation({
-            query: CREATE_QUESTION,
+            query: CreateContractQuestionDocument,
             variables: {
                 input: {
                     contractID: '1234',

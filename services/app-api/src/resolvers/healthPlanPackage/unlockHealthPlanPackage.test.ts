@@ -1,5 +1,5 @@
 import type { GraphQLError } from 'graphql'
-import UNLOCK_HEALTH_PLAN_PACKAGE from '../../../../app-graphql/src/mutations/unlockHealthPlanPackage.graphql'
+import { UnlockHealthPlanPackageDocument } from '../../gen/gqlClient'
 import type {
     HealthPlanPackage,
     HealthPlanRevisionEdge,
@@ -56,7 +56,7 @@ describe(`Tests unlockHealthPlanPackage`, () => {
 
         // Unlock
         const unlockResult = await cmsServer.executeOperation({
-            query: UNLOCK_HEALTH_PLAN_PACKAGE,
+            query: UnlockHealthPlanPackageDocument,
             variables: {
                 input: {
                     pkgID: stateSubmission.id,
@@ -120,7 +120,7 @@ describe(`Tests unlockHealthPlanPackage`, () => {
 
         // Unlock
         const unlockResult = await cmsServer.executeOperation({
-            query: UNLOCK_HEALTH_PLAN_PACKAGE,
+            query: UnlockHealthPlanPackageDocument,
             variables: {
                 input: {
                     pkgID: stateSubmission.id,
@@ -192,7 +192,7 @@ describe(`Tests unlockHealthPlanPackage`, () => {
 
         // Unlock
         const unlockedOnce = await cmsServer.executeOperation({
-            query: UNLOCK_HEALTH_PLAN_PACKAGE,
+            query: UnlockHealthPlanPackageDocument,
             variables: {
                 input: {
                     pkgID: submittedOnce.id,
@@ -543,7 +543,7 @@ describe(`Tests unlockHealthPlanPackage`, () => {
 
         // Unlock
         const unlockResult = await stateServer.executeOperation({
-            query: UNLOCK_HEALTH_PLAN_PACKAGE,
+            query: UnlockHealthPlanPackageDocument,
             variables: {
                 input: {
                     pkgID: stateSubmission.id,
@@ -573,7 +573,7 @@ describe(`Tests unlockHealthPlanPackage`, () => {
 
         // Attempt Unlock Draft
         const unlockDraftResult = await cmsServer.executeOperation({
-            query: UNLOCK_HEALTH_PLAN_PACKAGE,
+            query: UnlockHealthPlanPackageDocument,
             variables: {
                 input: {
                     pkgID: stateSubmission.id,
@@ -607,7 +607,7 @@ describe(`Tests unlockHealthPlanPackage`, () => {
 
         // Attempt Unlock Unlocked
         const unlockUnlockedResult = await cmsServer.executeOperation({
-            query: UNLOCK_HEALTH_PLAN_PACKAGE,
+            query: UnlockHealthPlanPackageDocument,
             variables: {
                 input: {
                     pkgID: stateSubmission.id,
@@ -643,7 +643,7 @@ describe(`Tests unlockHealthPlanPackage`, () => {
 
         // Unlock
         const unlockResult = await cmsServer.executeOperation({
-            query: UNLOCK_HEALTH_PLAN_PACKAGE,
+            query: UnlockHealthPlanPackageDocument,
             variables: {
                 input: {
                     pkgID: 'foo-bar',
@@ -671,7 +671,7 @@ describe(`Tests unlockHealthPlanPackage`, () => {
 
         // Unlock
         const unlockResult = await cmsServer.executeOperation({
-            query: UNLOCK_HEALTH_PLAN_PACKAGE,
+            query: UnlockHealthPlanPackageDocument,
             variables: {
                 input: {
                     pkgID: 'foo-bar',
@@ -704,7 +704,7 @@ describe(`Tests unlockHealthPlanPackage`, () => {
 
         // Attempt Unlock Draft
         const unlockedResult = await cmsServer.executeOperation({
-            query: UNLOCK_HEALTH_PLAN_PACKAGE,
+            query: UnlockHealthPlanPackageDocument,
             variables: {
                 input: {
                     pkgID: stateSubmission.id,
@@ -888,7 +888,7 @@ describe(`Tests unlockHealthPlanPackage`, () => {
 
         // Unlock
         await cmsServer.executeOperation({
-            query: UNLOCK_HEALTH_PLAN_PACKAGE,
+            query: UnlockHealthPlanPackageDocument,
             variables: {
                 input: {
                     pkgID: stateSubmission.id,
@@ -928,7 +928,7 @@ describe(`Tests unlockHealthPlanPackage`, () => {
         })
 
         await cmsServer.executeOperation({
-            query: UNLOCK_HEALTH_PLAN_PACKAGE,
+            query: UnlockHealthPlanPackageDocument,
             variables: {
                 input: {
                     pkgID: stateSubmission.id,
