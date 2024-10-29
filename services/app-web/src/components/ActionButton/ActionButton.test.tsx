@@ -3,6 +3,14 @@ import { ActionButton } from './ActionButton'
 import { renderWithProviders } from '../../testHelpers'
 
 describe('ActionButton', () => {
+    beforeEach(() => {
+        vi.useFakeTimers()
+    })
+
+    afterEach(() => {
+        vi.clearAllTimers()
+    })
+
     it('renders without errors', () => {
         renderWithProviders(
             <ActionButton type="button">Test Button</ActionButton>
@@ -81,18 +89,6 @@ describe('ActionButton', () => {
         })
 
         describe('loading animation timing', () => {
-            beforeEach(() => {
-                vi.useFakeTimers()
-            })
-
-            afterAll(() => {
-                vi.clearAllTimers()
-                vi.useRealTimers()
-            })
-
-            afterEach(() => {
-                vi.clearAllTimers()
-            })
             it('renders button with active styles, spinner, and cursor', async () => {
                 renderWithProviders(
                     <ActionButton
