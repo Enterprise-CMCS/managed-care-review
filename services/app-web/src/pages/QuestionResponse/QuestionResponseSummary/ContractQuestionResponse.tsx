@@ -1,33 +1,33 @@
 import { useEffect } from 'react'
 import { GridContainer } from '@trussworks/react-uswds'
-import styles from './QuestionResponse.module.scss'
+import styles from '../QuestionResponse.module.scss'
 
-import { Loading, SectionHeader, NavLinkWithLogging } from '../../components'
+import { Loading, SectionHeader, NavLinkWithLogging } from '../../../components'
 import { useLocation, useOutletContext } from 'react-router-dom'
-import { usePage } from '../../contexts/PageContext'
-import { SideNavOutletContextType } from '../SubmissionSideNav/SubmissionSideNav'
+import { usePage } from '../../../contexts/PageContext'
+import { SideNavOutletContextType } from '../../SubmissionSideNav/SubmissionSideNav'
 import {
     QuestionResponseSubmitBanner,
     UserAccountWarningBanner,
-} from '../../components/Banner'
-import { QuestionData } from './QuestionResponseHelpers'
-import { QATable } from './QATable/QATable'
-import { CmsUser, Division } from '../../gen/gqlClient'
-import { GenericErrorPage } from '../Errors/GenericErrorPage'
-import { hasCMSUserPermissions } from '../../gqlHelpers'
-import { ContactSupportLink } from '../../components/ErrorAlert/ContactSupportLink'
+} from '../../../components/Banner'
+import { QuestionData } from '../QuestionResponseHelpers'
+import { QATable } from '../QATable/QATable'
+import { CmsUser, Division } from '../../../gen/gqlClient'
+import { GenericErrorPage } from '../../Errors/GenericErrorPage'
+import { hasCMSUserPermissions } from '../../../gqlHelpers'
+import { ContactSupportLink } from '../../../components/ErrorAlert/ContactSupportLink'
 import {
     extractQuestions,
     getUserDivision,
     getDivisionOrder,
-} from './QuestionResponseHelpers'
+} from '../QuestionResponseHelpers'
 
 type divisionQuestionDataType = {
     division: Division
     questions: QuestionData[]
 }
 
-export const QuestionResponse = () => {
+export const ContractQuestionResponse = () => {
     // router context
     const location = useLocation()
     const submitType = new URLSearchParams(location.search).get('submit')

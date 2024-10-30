@@ -3,7 +3,7 @@ import { Location, Route, Routes } from 'react-router-dom'
 import userEvent from '@testing-library/user-event'
 import { SubmissionSideNav } from './SubmissionSideNav'
 import { SubmissionSummary } from '../SubmissionSummary'
-import { QuestionResponse } from '../QuestionResponse'
+import { ContractQuestionResponse } from '../QuestionResponse'
 import { renderWithProviders } from '../../testHelpers'
 import { RoutesRecord } from '../../constants'
 import {
@@ -25,7 +25,7 @@ const CommonRoutes = () => (
         <Route element={<SubmissionSideNav />}>
             <Route
                 path={RoutesRecord.SUBMISSIONS_CONTRACT_QUESTIONS_AND_ANSWERS}
-                element={<QuestionResponse />}
+                element={<ContractQuestionResponse />}
             />
             <Route
                 path={RoutesRecord.SUBMISSIONS_SUMMARY}

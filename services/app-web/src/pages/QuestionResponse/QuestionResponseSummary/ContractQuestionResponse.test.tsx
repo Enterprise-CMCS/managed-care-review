@@ -1,9 +1,9 @@
 import { screen, waitFor, within } from '@testing-library/react'
 import { Route, Routes } from 'react-router-dom'
-import { SubmissionSideNav } from '../SubmissionSideNav'
-import { QuestionResponse } from './QuestionResponse'
-import { renderWithProviders } from '../../testHelpers'
-import { RoutesRecord } from '../../constants/routes'
+import { SubmissionSideNav } from '../../SubmissionSideNav'
+import { ContractQuestionResponse as QuestionResponse } from './ContractQuestionResponse'
+import { renderWithProviders } from '../../../testHelpers'
+import { RoutesRecord } from '../../../constants/routes'
 
 import {
     fetchCurrentUserMock,
@@ -12,9 +12,9 @@ import {
     iterableCmsUsersMockData,
     mockContractPackageSubmittedWithQuestions,
     mockContractPackageDraft,
-} from '../../testHelpers/apolloMocks'
-import { IndexContractQuestionsPayload } from '../../gen/gqlClient'
-import { useStringConstants } from '../../hooks/useStringConstants'
+} from '../../../testHelpers/apolloMocks'
+import { IndexContractQuestionsPayload } from '../../../gen/gqlClient'
+import { useStringConstants } from '../../../hooks/useStringConstants'
 
 describe('QuestionResponse', () => {
     describe.each(iterableCmsUsersMockData)(

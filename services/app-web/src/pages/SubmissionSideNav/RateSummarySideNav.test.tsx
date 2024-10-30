@@ -9,7 +9,7 @@ import {
     mockValidCMSUser,
     rateDataMock,
 } from '../../testHelpers/apolloMocks'
-import { RateQuestionResponse } from '../QuestionResponse/RateQuestionResponse'
+import { RateQuestionResponse } from '../QuestionResponse/QuestionResponseSummary/RateQuestionResponse'
 import { screen, waitFor, within } from '@testing-library/react'
 
 const CommonRoutes = () => (

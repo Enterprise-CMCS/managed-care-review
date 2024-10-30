@@ -8,18 +8,18 @@ import {
     mockValidCMSUser,
     mockValidStateUser,
     rateDataMock,
-} from '../../testHelpers/apolloMocks'
-import { IndexRateQuestionsPayload, RateRevision } from '../../gen/gqlClient'
-import { renderWithProviders } from '../../testHelpers'
+} from '../../../testHelpers/apolloMocks'
+import { IndexRateQuestionsPayload, RateRevision } from '../../../gen/gqlClient'
+import { renderWithProviders } from '../../../testHelpers'
 import { Route, Routes } from 'react-router-dom'
-import { SubmissionSideNav } from '../SubmissionSideNav'
-import { RoutesRecord } from '../../constants'
-import { QuestionResponse } from './QuestionResponse'
-import { RateSummary, SubmissionSummary } from '../SubmissionSummary'
+import { SubmissionSideNav } from '../../SubmissionSideNav'
+import { RoutesRecord } from '../../../constants'
+import { ContractQuestionResponse } from './ContractQuestionResponse'
+import { RateSummary, SubmissionSummary } from '../../SubmissionSummary'
 import { RateQuestionResponse } from './RateQuestionResponse'
 import { screen, waitFor, within } from '@testing-library/react'
-import { fetchRateWithQuestionsMockSuccess } from '../../testHelpers/apolloMocks'
-import { RateSummarySideNav } from '../SubmissionSideNav/RateSummarySideNav'
+import { fetchRateWithQuestionsMockSuccess } from '../../../testHelpers/apolloMocks'
+import { RateSummarySideNav } from '../../SubmissionSideNav/RateSummarySideNav'
 
 describe('RateQuestionResponse', () => {
     describe('State user tests', () => {
@@ -30,7 +30,7 @@ describe('RateQuestionResponse', () => {
                         path={
                             RoutesRecord.SUBMISSIONS_CONTRACT_QUESTIONS_AND_ANSWERS
                         }
-                        element={<QuestionResponse />}
+                        element={<ContractQuestionResponse />}
                     />
                     <Route
                         path={RoutesRecord.SUBMISSIONS_SUMMARY}
