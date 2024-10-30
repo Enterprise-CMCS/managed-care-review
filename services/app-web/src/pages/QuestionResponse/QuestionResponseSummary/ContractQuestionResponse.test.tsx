@@ -1,653 +1,549 @@
-import { screen, waitFor, within } from '@testing-library/react'
+//@eslint-gignore  jest/no-disabled-tests
+import {
+    fetchContractWithQuestionsMockSuccess,
+    fetchCurrentUserMock,
+    fetchRateMockSuccess,
+    mockContractPackageDraft,
+     mockContractPackageSubmittedWithQuestions,
+    mockValidCMSUser,
+    mockValidStateUser,
+} from '../../../testHelpers/apolloMocks'
+import { IndexContractQuestionsPayload} from '../../../gen/gqlClient'
+import { renderWithProviders } from '../../../testHelpers'
 import { Route, Routes } from 'react-router-dom'
 import { SubmissionSideNav } from '../../SubmissionSideNav'
-import { ContractQuestionResponse as QuestionResponse } from './ContractQuestionResponse'
-import { renderWithProviders } from '../../../testHelpers'
-import { RoutesRecord } from '../../../constants/routes'
+import { RoutesRecord } from '../../../constants'
+import { ContractQuestionResponse } from './ContractQuestionResponse'
+import { SubmissionSummary } from '../../SubmissionSummary'
+import { screen, waitFor, within } from '@testing-library/react'
 
-import {
-    fetchCurrentUserMock,
-    fetchContractWithQuestionsMockSuccess,
-    mockQuestionsPayload,
-    iterableCmsUsersMockData,
-    mockContractPackageSubmittedWithQuestions,
-    mockContractPackageDraft,
-} from '../../../testHelpers/apolloMocks'
-import { IndexContractQuestionsPayload } from '../../../gen/gqlClient'
-import { useStringConstants } from '../../../hooks/useStringConstants'
-
-describe('QuestionResponse', () => {
-    describe.each(iterableCmsUsersMockData)(
-        '$userRole QuestionResponse tests',
-        ({ userRole, mockUser }) => {
-            it('render error if CMS user does not have division set', async () => {
-                const stringConstants = useStringConstants()
-                const user = mockUser({ divisionAssignment: undefined })
-                const contract = mockContractPackageSubmittedWithQuestions('15')
-                renderWithProviders(
-                    <Routes>
-                        <Route element={<SubmissionSideNav />}>
-                            <Route
-                                path={
-                                    RoutesRecord.SUBMISSIONS_CONTRACT_QUESTIONS_AND_ANSWERS
-                                }
-                                element={<QuestionResponse />}
-                            />
-                        </Route>
-                    </Routes>,
-                    {
-                        apolloProvider: {
-                            mocks: [
-                                fetchCurrentUserMock({ user, statusCode: 200 }),
-                                fetchContractWithQuestionsMockSuccess({
-                                    contract: {
-                                        ...contract,
-                                        id: '15',
-                                        mccrsID: undefined,
-                                    },
-                                }),
-                                fetchContractWithQuestionsMockSuccess({
-                                    contract: {
-                                        ...contract,
-                                        id: '15',
-                                        mccrsID: undefined,
-                                    },
-                                }),
-                            ],
-                        },
-                        routerProvider: {
-                            route: '/submissions/15/question-and-answers',
-                        },
-                    }
-                )
-
-                expect(
-                    await screen.findByRole('heading', {
-                        name: 'Missing division',
-                    })
-                ).toBeInTheDocument()
-                const feedbackLink = screen.getByRole('link', {
-                    name: `email the help desk`,
-                })
-                expect(feedbackLink).toHaveAttribute(
-                    'href',
-                    stringConstants.MAIL_TO_SUPPORT_HREF
-                )
-            })
-            it('renders expected questions correctly with rounds', async () => {
-                const contract = mockContractPackageSubmittedWithQuestions('15')
-
-                renderWithProviders(
-                    <Routes>
-                        <Route element={<SubmissionSideNav />}>
-                            <Route
-                                path={
-                                    RoutesRecord.SUBMISSIONS_CONTRACT_QUESTIONS_AND_ANSWERS
-                                }
-                                element={<QuestionResponse />}
-                            />
-                        </Route>
-                    </Routes>,
-                    {
-                        apolloProvider: {
-                            mocks: [
-                                fetchCurrentUserMock({
-                                    user: mockUser(),
-                                    statusCode: 200,
-                                }),
-                                fetchContractWithQuestionsMockSuccess({
-                                    contract: {
-                                        ...contract,
-                                        id: '15',
-                                    },
-                                }),
-                                fetchContractWithQuestionsMockSuccess({
-                                    contract: {
-                                        ...contract,
-                                        id: '15',
-                                    },
-                                }),
-                            ],
-                        },
-                        routerProvider: {
-                            route: '/submissions/15/question-and-answers',
-                        },
-                    }
-                )
-
-                // wait for sidebar nav and add question link to exist
-                await waitFor(() => {
-                    expect(screen.queryByTestId('sidenav')).toBeInTheDocument()
-                    expect(
-                        screen.queryByRole('link', { name: /Add questions/ })
-                    ).toBeInTheDocument()
-                })
-
-                // Wait for 4 tables (4 questions) to exist
-                await waitFor(() => {
-                    expect(screen.queryAllByRole('table')).toHaveLength(4)
-                })
-
-                // Get division sections
-                const dmcoSection = within(
-                    screen.getByTestId('dmco-qa-section')
-                )
-                const dmcpSection = within(
-                    screen.getByTestId('dmcp-qa-section')
-                )
-                const oactSection = within(
-                    screen.getByTestId('oact-qa-section')
-                )
-
-                // Get all tables in each division section=
-                const dmcoTable1 = dmcoSection.getByTestId(
-                    'dmco-question-1-id-table'
-                )
-                const dmcoTable2 = dmcoSection.getByTestId(
-                    'dmco-question-2-id-table'
-                )
-                const dmcpTable1 = dmcpSection.getByTestId(
-                    'dmcp-question-1-id-table'
-                )
-                const oactTable1 = oactSection.getByTestId(
-                    'oact-question-1-id-table'
-                )
-
-                // Get all Round h4 headers for each division section
-                const dmcoRounds = dmcoSection.queryAllByRole('heading', {
-                    name: /Round [0-9]+$/,
-                    level: 4,
-                })
-                const dmcpRounds = dmcpSection.queryAllByRole('heading', {
-                    name: /Round [0-9]+$/,
-                    level: 4,
-                })
-                const oactRounds = oactSection.queryAllByRole('heading', {
-                    name: /Round [0-9]+$/,
-                    level: 4,
-                })
-
-                // DMCO Questions
-                // expect two tables in dmco section
-                expect(dmcoTable1).toBeInTheDocument()
-                expect(dmcoTable2).toBeInTheDocument()
-
-                //expect two rounds of questions
-                expect(dmcoRounds).toHaveLength(2)
-                // Expect first displayed round to be the latest round
-                expect(dmcoRounds[0]).toHaveTextContent('Round 2')
-                // Expect last displayed round to be the first round
-                expect(dmcoRounds[1]).toHaveTextContent('Round 1')
-                // expect documents to be on respective question tables
-                expect(
-                    within(dmcoTable1).getByText('dmco-question-1-document-1')
-                ).toBeInTheDocument()
-                expect(
-                    within(dmcoTable1).getByText(
-                        'response-to-dmco-1-document-1'
-                    )
-                ).toBeInTheDocument()
-                expect(
-                    within(dmcoTable2).getByText('dmco-question-2-document-1')
-                ).toBeInTheDocument()
-                expect(
-                    within(dmcoTable2).getByText('dmco-question-2-document-2')
-                ).toBeInTheDocument()
-                expect(
-                    within(dmcoTable2).getByText(
-                        'response-to-dmco-2-document-1'
-                    )
-                ).toBeInTheDocument()
-
-                // DMCP Question
-                // expect one table in dmcp section
-                expect(dmcpTable1).toBeInTheDocument()
-                //expect one rounds of questions
-                expect(dmcpRounds).toHaveLength(1)
-                // Expect header to be Round 1
-                expect(dmcpRounds[0]).toHaveTextContent('Round 1')
-                // expect documents to be on respective question tables
-                expect(
-                    within(dmcpTable1).getByText('dmcp-question-1-document-1')
-                ).toBeInTheDocument()
-                expect(
-                    within(dmcpTable1).getByText(
-                        'response-to-dmcp-1-document-1'
-                    )
-                ).toBeInTheDocument()
-
-                // OACT question
-                // expect one table in oact section
-                expect(oactTable1).toBeInTheDocument()
-                //expect one rounds of questions
-                expect(oactRounds).toHaveLength(1)
-                // Expect header to be Round 1
-                expect(oactRounds[0]).toHaveTextContent('Round 1')
-                // expect documents to be on respective question tables
-                expect(
-                    within(oactTable1).getByText('oact-question-1-document-1')
-                ).toBeInTheDocument()
-                expect(
-                    within(oactTable1).getByText(
-                        'response-to-oact-1-document-1'
-                    )
-                ).toBeInTheDocument()
-            })
-            it('renders the CMS users division questions first', async () => {
-                const contract = mockContractPackageSubmittedWithQuestions('15')
-
-                renderWithProviders(
-                    <Routes>
-                        <Route element={<SubmissionSideNav />}>
-                            <Route
-                                path={
-                                    RoutesRecord.SUBMISSIONS_CONTRACT_QUESTIONS_AND_ANSWERS
-                                }
-                                element={<QuestionResponse />}
-                            />
-                        </Route>
-                    </Routes>,
-                    {
-                        apolloProvider: {
-                            mocks: [
-                                fetchCurrentUserMock({
-                                    user: mockUser({
-                                        divisionAssignment: 'OACT',
-                                    }),
-                                    statusCode: 200,
-                                }),
-                                fetchContractWithQuestionsMockSuccess({
-                                    contract: {
-                                        ...contract,
-                                        id: '15',
-                                    },
-                                }),
-                                fetchContractWithQuestionsMockSuccess({
-                                    contract: {
-                                        ...contract,
-                                        id: '15',
-                                    },
-                                }),
-                            ],
-                        },
-                        routerProvider: {
-                            route: '/submissions/15/question-and-answers',
-                        },
-                    }
-                )
-
-                await waitFor(() => {
-                    expect(screen.queryByTestId('sidenav')).toBeInTheDocument()
-                    expect(
-                        screen.queryByRole('link', { name: /Add questions/ })
-                    ).toBeInTheDocument()
-                })
-
-                const qaSections = screen.getAllByTestId(/.*-qa-section/)
-
-                //Expect there to be three qa sections
-                expect(qaSections).toHaveLength(3)
-                expect(qaSections[0]).toHaveTextContent('Asked by OACT')
-                expect(qaSections[1]).toHaveTextContent('Asked by DMCO')
-                expect(qaSections[2]).toHaveTextContent('Asked by DMCP')
-            })
-            it('does not render the divisions question if no question exist', async () => {
-                const mockQuestionWithNoOACT: IndexContractQuestionsPayload = {
-                    ...mockQuestionsPayload('15'),
-                    OACTQuestions: {
-                        totalCount: 0,
-                        edges: [],
-                    },
-                }
-                const contract = mockContractPackageSubmittedWithQuestions('15')
-                contract.questions = mockQuestionWithNoOACT
-
-                renderWithProviders(
-                    <Routes>
-                        <Route element={<SubmissionSideNav />}>
-                            <Route
-                                path={
-                                    RoutesRecord.SUBMISSIONS_CONTRACT_QUESTIONS_AND_ANSWERS
-                                }
-                                element={<QuestionResponse />}
-                            />
-                        </Route>
-                    </Routes>,
-                    {
-                        apolloProvider: {
-                            mocks: [
-                                fetchCurrentUserMock({
-                                    user: mockUser({
-                                        divisionAssignment: 'OACT',
-                                    }),
-                                    statusCode: 200,
-                                }),
-                                fetchContractWithQuestionsMockSuccess({
-                                    contract: {
-                                        ...contract,
-                                        id: '15',
-                                    },
-                                }),
-                                fetchContractWithQuestionsMockSuccess({
-                                    contract: {
-                                        ...contract,
-                                        id: '15',
-                                    },
-                                }),
-                            ],
-                        },
-                        routerProvider: {
-                            route: '/submissions/15/question-and-answers',
-                        },
-                    }
-                )
-
-                await waitFor(() => {
-                    expect(screen.queryByTestId('sidenav')).toBeInTheDocument()
-                    expect(
-                        screen.queryByRole('link', { name: /Add questions/ })
-                    ).toBeInTheDocument()
-                })
-
-                const qaSections = screen.getAllByTestId(/.*-qa-section/)
-
-                //Expect there to be two qa sections
-                expect(qaSections).toHaveLength(2)
-                expect(qaSections[0]).toHaveTextContent('Asked by DMCO')
-                expect(qaSections[1]).toHaveTextContent('Asked by DMCP')
-            })
-            it('renders no questions have been submitted yet text', async () => {
-                const mockQuestionWithNoOACT: IndexContractQuestionsPayload = {
-                    DMCOQuestions: {
-                        totalCount: 0,
-                        edges: [],
-                    },
-                    DMCPQuestions: {
-                        totalCount: 0,
-                        edges: [],
-                    },
-                    OACTQuestions: {
-                        totalCount: 0,
-                        edges: [],
-                    },
-                }
-                const contract = mockContractPackageSubmittedWithQuestions('15')
-                contract.questions = mockQuestionWithNoOACT
-
-                renderWithProviders(
-                    <Routes>
-                        <Route element={<SubmissionSideNav />}>
-                            <Route
-                                path={
-                                    RoutesRecord.SUBMISSIONS_CONTRACT_QUESTIONS_AND_ANSWERS
-                                }
-                                element={<QuestionResponse />}
-                            />
-                        </Route>
-                    </Routes>,
-                    {
-                        apolloProvider: {
-                            mocks: [
-                                fetchCurrentUserMock({
-                                    user: mockUser({
-                                        divisionAssignment: 'OACT',
-                                    }),
-                                    statusCode: 200,
-                                }),
-                                fetchContractWithQuestionsMockSuccess({
-                                    contract: {
-                                        ...contract,
-                                        id: '15',
-                                    },
-                                }),
-                            ],
-                        },
-                        routerProvider: {
-                            route: '/submissions/15/question-and-answers',
-                        },
-                    }
-                )
-
-                await waitFor(() => {
-                    expect(screen.queryByTestId('sidenav')).toBeInTheDocument()
-                    expect(
-                        screen.queryByRole('link', { name: /Add questions/ })
-                    ).toBeInTheDocument()
-                })
-
-                const qaSections = screen.queryByTestId(/.*-qa-section/)
-
-                //Expect there to be no QA sections
-                expect(qaSections).toBeNull()
-
-                // Expect no questions text
-                expect(
-                    screen.getByText('No questions have been submitted yet.')
-                ).toBeInTheDocument()
-            })
-            it('renders with question submit banner after question submitted', async () => {
-                const contract = mockContractPackageSubmittedWithQuestions('15')
-                renderWithProviders(
-                    <Routes>
-                        <Route element={<SubmissionSideNav />}>
-                            <Route
-                                path={
-                                    RoutesRecord.SUBMISSIONS_CONTRACT_QUESTIONS_AND_ANSWERS
-                                }
-                                element={<QuestionResponse />}
-                            />
-                        </Route>
-                    </Routes>,
-                    {
-                        apolloProvider: {
-                            mocks: [
-                                fetchCurrentUserMock({
-                                    user: mockUser(),
-                                    statusCode: 200,
-                                }),
-                                fetchContractWithQuestionsMockSuccess({
-                                    contract: {
-                                        ...contract,
-                                        id: '15',
-                                    },
-                                }),
-                                fetchContractWithQuestionsMockSuccess({
-                                    contract: {
-                                        ...contract,
-                                        id: '15',
-                                    },
-                                }),
-                            ],
-                        },
-                        routerProvider: {
-                            route: '/submissions/15/question-and-answers?submit=question',
-                        },
-                    }
-                )
-
-                await screen.findByTestId('sidenav')
-                expect(screen.getByTestId('alert')).toHaveClass(
-                    'usa-alert--success'
-                )
-                expect(screen.getByText('Questions sent')).toBeInTheDocument()
-            })
-            it('CMS users see add questions link on Q&A page', async () => {
-                const contract = mockContractPackageSubmittedWithQuestions('15')
-
-                renderWithProviders(
-                    <Routes>
-                        <Route element={<SubmissionSideNav />}>
-                            <Route
-                                path={
-                                    RoutesRecord.SUBMISSIONS_CONTRACT_QUESTIONS_AND_ANSWERS
-                                }
-                                element={<QuestionResponse />}
-                            />
-                        </Route>
-                    </Routes>,
-                    {
-                        apolloProvider: {
-                            mocks: [
-                                fetchCurrentUserMock({
-                                    user: mockUser(),
-                                    statusCode: 200,
-                                }),
-                                fetchContractWithQuestionsMockSuccess({
-                                    contract: {
-                                        ...contract,
-                                        id: '15',
-                                    },
-                                }),
-                                fetchContractWithQuestionsMockSuccess({
-                                    contract: {
-                                        ...contract,
-                                        id: '15',
-                                    },
-                                }),
-                            ],
-                        },
-                        routerProvider: {
-                            route: '/submissions/15/question-and-answers',
-                        },
-                    }
-                )
-
-                await waitFor(() => {
-                    expect(screen.queryByTestId('sidenav')).toBeInTheDocument()
-                    expect(
-                        screen.queryByRole('link', { name: /Add questions/ })
-                    ).toBeInTheDocument()
-                })
-            })
-            describe('errors', () => {
-                it('shows generic error if submission is a draft', async () => {
-                    const contract = mockContractPackageDraft()
-                    renderWithProviders(
-                        <Routes>
-                            <Route element={<SubmissionSideNav />}>
-                                <Route
-                                    path={
-                                        RoutesRecord.SUBMISSIONS_CONTRACT_QUESTIONS_AND_ANSWERS
-                                    }
-                                    element={<QuestionResponse />}
-                                />
-                            </Route>
-                        </Routes>,
-                        {
-                            apolloProvider: {
-                                mocks: [
-                                    fetchCurrentUserMock({
-                                        user: mockUser({
-                                            divisionAssignment: 'OACT',
-                                        }),
-                                        statusCode: 200,
-                                    }),
-                                    fetchContractWithQuestionsMockSuccess({
-                                        contract: {
-                                            ...contract,
-                                            id: '15',
-                                        },
-                                    }),
-                                ],
-                            },
-                            routerProvider: {
-                                route: '/submissions/15/question-and-answers',
-                            },
+describe('ContractQuestionResponse', () => {
+    describe('State user tests', () => {
+        const CommonStateRoutes = () => (
+            <Routes>
+                <Route element={<SubmissionSideNav />}>
+                    <Route
+                        path={
+                            RoutesRecord.SUBMISSIONS_CONTRACT_QUESTIONS_AND_ANSWERS
                         }
-                    )
+                        element={<ContractQuestionResponse />}
+                    />
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                        element={<SubmissionSummary />}
+                    />
+                </Route>
+            </Routes>
+        )
+        it('renders contract name', async () => {
+            const contract =  mockContractPackageSubmittedWithQuestions()
 
-                    await waitFor(() => {
-                        expect(
-                            screen.getByText('System error')
-                        ).toBeInTheDocument()
-                    })
-                })
+            renderWithProviders(<CommonStateRoutes />, {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockValidStateUser(),
+                            statusCode: 200,
+                        }),
+                        fetchContractWithQuestionsMockSuccess({
+                            contract: {
+                                ...contract,
+                                id: '15',
+                            },
+                        }),
+                    ],
+                },
+                routerProvider: {
+                    route: '/submissions/15/question-and-answers',
+                },
+                featureFlags: {
+                    'qa-by-rates': true,
+                },
             })
-        }
-    )
 
-    describe('STATE_USER QuestionResponse tests', () => {
-        it('renders with response submit banner after response submitted', async () => {
-            const contract = mockContractPackageSubmittedWithQuestions('15')
+            // Wait for sidebar nav to exist.
+            await waitFor(() => {
+                expect(screen.queryByTestId('sidenav')).toBeInTheDocument()
+            })
 
-            renderWithProviders(
-                <Routes>
-                    <Route element={<SubmissionSideNav />}>
-                        <Route
-                            path={
-                                RoutesRecord.SUBMISSIONS_CONTRACT_QUESTIONS_AND_ANSWERS
-                            }
-                            element={<QuestionResponse />}
-                        />
-                    </Route>
-                </Routes>,
-                {
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({
-                                statusCode: 200,
-                            }),
-                            fetchContractWithQuestionsMockSuccess({
-                                contract: {
-                                    ...contract,
-                                    id: '15',
-                                },
-                            }),
-                        ],
-                    },
-                    routerProvider: {
-                        route: '/submissions/15/question-and-answers?submit=response',
-                    },
-                }
-            )
-
-            await screen.findByTestId('sidenav')
-            expect(screen.getByTestId('alert')).toHaveClass(
-                'usa-alert--success'
-            )
-            expect(screen.getByText('Response sent')).toBeInTheDocument()
+            expect(
+                screen.getByRole('heading', {
+                    name: contract.packageSubmissions[0].contractRevision.contractName,
+                })
+            ).toBeInTheDocument()
         })
 
-        it('State users does not see add questions link on Q&A page', async () => {
-            const contract = mockContractPackageSubmittedWithQuestions('15')
-
+        it('renders questions in correct sections', async () => {
             renderWithProviders(
                 <Routes>
-                    <Route element={<SubmissionSideNav />}>
-                        <Route
-                            path={
-                                RoutesRecord.SUBMISSIONS_CONTRACT_QUESTIONS_AND_ANSWERS
-                            }
-                            element={<QuestionResponse />}
-                        />
-                    </Route>
+                    <Route
+                        path={
+                            RoutesRecord.SUBMISSIONS_RATE_QUESTIONS_AND_ANSWERS
+                        }
+                        element={<ContractQuestionResponse />}
+                    />
                 </Routes>,
                 {
                     apolloProvider: {
                         mocks: [
                             fetchCurrentUserMock({
+                                user: mockValidStateUser(),
                                 statusCode: 200,
                             }),
                             fetchContractWithQuestionsMockSuccess({
                                 contract: {
-                                    ...contract,
-                                    id: '15',
+                                    ... mockContractPackageSubmittedWithQuestions(),
+                                    id: 'test-contract-id',
                                 },
                             }),
                         ],
                     },
                     routerProvider: {
-                        route: '/submissions/15/question-and-answers',
+                        route: '/submissions/test-contract-id/question-and-answers',
+                    },
+                    featureFlags: {
+                        'qa-by-rates': true,
                     },
                 }
             )
 
             await waitFor(() => {
-                expect(screen.queryByTestId('sidenav')).toBeInTheDocument()
                 expect(
-                    screen.queryByRole('link', { name: /Add questions/ })
-                ).not.toBeInTheDocument()
+                    screen.getByRole('heading', {
+                        name: `Outstanding questions`,
+                    })
+                ).toBeInTheDocument()
+                expect(
+                    screen.getByRole('heading', {
+                        name: `Answered questions`,
+                    })
+                ).toBeInTheDocument()
             })
+
+            const outstandingQuestionsSection = within(
+                screen.getByTestId('outstandingQuestions')
+            )
+            const answeredQuestionsSection = within(
+                screen.getByTestId('answeredQuestions')
+            )
+
+            const outstandingRounds =
+                outstandingQuestionsSection.getAllByTestId(
+                    'questionResponseRound'
+                )
+            const answeredRounds = answeredQuestionsSection.getAllByTestId(
+                'questionResponseRound'
+            )
+
+            // expect 1 outstanding round
+            expect(outstandingRounds).toHaveLength(1)
+
+            // expect correct content for round
+            expect(outstandingRounds[0]).toHaveTextContent(
+                'Asked by: Division of Managed Care Operations (DMCO)'
+            )
+            expect(outstandingRounds[0]).toHaveTextContent(
+                'dmco-question-1-document-1'
+            )
+
+            // expect 4 answered rounds
+            expect(answeredRounds).toHaveLength(4)
+
+            // expect rounds in order of latest round to earliest with correct content
+            expect(answeredRounds[0]).toHaveTextContent(
+                'Asked by: Division of Managed Care Operations (DMCO)'
+            )
+            expect(answeredRounds[0]).toHaveTextContent(
+                'dmco-question-2-document-1'
+            )
+            expect(answeredRounds[0]).toHaveTextContent(
+                'dmco-question-2-document-2'
+            )
+            expect(answeredRounds[0]).toHaveTextContent(
+                'response-to-dmco-2-document-1'
+            )
+
+            expect(answeredRounds[1]).toHaveTextContent(
+                'Asked by: Office of the Actuary (OACT)'
+            )
+            expect(answeredRounds[1]).toHaveTextContent(
+                'oact-question-2-document-1'
+            )
+            expect(answeredRounds[1]).toHaveTextContent(
+                'response-to-oact-2-document-1'
+            )
+
+            expect(answeredRounds[2]).toHaveTextContent(
+                'Asked by: Division of Managed Care Policy (DMCP)'
+            )
+            expect(answeredRounds[2]).toHaveTextContent(
+                'dmcp-question-1-document-1'
+            )
+            expect(answeredRounds[2]).toHaveTextContent(
+                'response-to-dmcp-1-document-1'
+            )
+
+            expect(answeredRounds[3]).toHaveTextContent(
+                'Asked by: Office of the Actuary (OACT)'
+            )
+            expect(answeredRounds[3]).toHaveTextContent(
+                'oact-question-1-document-1'
+            )
+            expect(answeredRounds[3]).toHaveTextContent(
+                'response-to-oact-1-document-1'
+            )
+        })
+
+        it('renders error page if contract is in draft', async () => {
+            const contract = mockContractPackageDraft()
+            renderWithProviders(<CommonStateRoutes />, {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockValidStateUser(),
+                            statusCode: 200,
+                        }),
+                        fetchContractWithQuestionsMockSuccess({
+                            contract: {
+                                ...contract,
+                                id: '15',
+                            },
+                        }),
+                    ],
+                },
+                routerProvider: {
+                    route: '/submissions/15/question-and-answers',
+                },
+                featureFlags: {
+                    'qa-by-rates': true,
+                },
+            })
+
+            await waitFor(() => {
+                expect(screen.getByText('System error')).toBeInTheDocument()
+            })
+        })
+
+        it('renders error page if contract revision does not exist', async () => {
+            const draftContract = mockContractPackageDraft()
+            renderWithProviders(<CommonStateRoutes />, {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockValidStateUser(),
+                            statusCode: 200,
+                        }),
+                        fetchContractWithQuestionsMockSuccess({
+                            contract: {
+                                ...draftContract,
+                                id: '15',
+                            },
+                        }),
+                    ],
+                },
+                routerProvider: {
+                    route: '/submissions/15/question-and-answers',
+                },
+                featureFlags: {
+                    'qa-by-rates': true,
+                },
+            })
+
+            await waitFor(() => {
+                expect(screen.getByText('System error')).toBeInTheDocument()
+            })
+        })
+    })
+
+    describe('CMS user tests', () => {
+        const CommonCMSRoutes = () => (
+            <Routes>
+                <Route element={<SubmissionSideNav />}>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                        element={<SubmissionSummary />}
+                    />
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_CONTRACT_QUESTIONS_AND_ANSWERS}
+                        element={<ContractQuestionResponse />}
+                    />
+                </Route>
+            </Routes>
+        )
+        it('renders no questions text', async () => {
+            const indexContractQuestions: IndexContractQuestionsPayload = {
+                __typename: 'IndexContractQuestionsPayload',
+                DMCOQuestions: {
+                    __typename: 'ContractQuestionList',
+                    totalCount: 0,
+                    edges: [],
+                },
+                DMCPQuestions: {
+                    __typename: 'ContractQuestionList',
+                    totalCount: 0,
+                    edges: [],
+                },
+                OACTQuestions: {
+                    __typename: 'ContractQuestionList',
+                    totalCount: 0,
+                    edges: [],
+                },
+            }
+            renderWithProviders(<CommonCMSRoutes />, {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockValidCMSUser(),
+                            statusCode: 200,
+                        }),
+                        fetchRateMockSuccess({
+                            id: 'test-contract-id',
+                        }),
+                        fetchContractWithQuestionsMockSuccess({
+                            contract: {
+                                ... mockContractPackageSubmittedWithQuestions(),
+                                id: 'test-contract-id',
+                                questions: indexContractQuestions,
+                            },
+                        }),
+                    ],
+                },
+                routerProvider: {
+                    route: `/submissions/test-contract-id/question-and-answers`,
+                },
+                featureFlags: {
+                    'qa-by-rates': true,
+                },
+            })
+
+            await waitFor(() => {
+                expect(
+                    screen.getByText("Your division's questions")
+                ).toBeInTheDocument()
+            })
+
+            expect(
+                screen.getAllByText('No questions have been submitted yet.')
+            ).toHaveLength(2)
+        })
+        it('renders questions in correct sections', async () => {
+            renderWithProviders(<CommonCMSRoutes />, {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockValidCMSUser(),
+                            statusCode: 200,
+                        }),
+                        fetchRateMockSuccess({
+                            id: 'test-contract-id',
+                        }),
+                        fetchContractWithQuestionsMockSuccess({
+                            contract: {
+                                ... mockContractPackageSubmittedWithQuestions(),
+                                id: 'test-contract-id',
+                            },
+                        }),
+                    ],
+                },
+                routerProvider: {
+                    route: `/submissions/test-contract-id/question-and-answers`,
+                },
+                featureFlags: {
+                    'qa-by-rates': true,
+                },
+            })
+
+            await waitFor(() => {
+                expect(
+                    screen.getByText("Your division's questions")
+                ).toBeInTheDocument()
+            })
+
+            // expect two DMCO questions in your division's questions section
+            const yourDivisionSection = within(
+                screen.getByTestId('usersDivisionQuestions')
+            )
+            const yourDivisionRounds = yourDivisionSection.getAllByTestId(
+                'questionResponseRound'
+            )
+
+            // expect two rounds of questions for current user
+            expect(yourDivisionRounds).toHaveLength(2)
+
+            // expect the latest to have DMCO question 2 documents
+            expect(yourDivisionRounds[0]).toHaveTextContent('Round 2')
+            expect(yourDivisionRounds[0]).toHaveTextContent(
+                'dmco-question-2-document-1'
+            )
+            expect(yourDivisionRounds[0]).toHaveTextContent(
+                'dmco-question-2-document-2'
+            )
+            expect(yourDivisionRounds[0]).toHaveTextContent(
+                'response-to-dmco-2-document-1'
+            )
+
+            // expect the earliest to have DMCO question 1 documents
+            expect(yourDivisionRounds[1]).toHaveTextContent('Round 1')
+            expect(yourDivisionRounds[1]).toHaveTextContent(
+                'dmco-question-1-document-1'
+            )
+
+            // expect three questions in other division's questions section in correct order
+            const otherDivisionSection = within(
+                screen.getByTestId('otherDivisionQuestions')
+            )
+            const otherDivisionRounds = otherDivisionSection.getAllByTestId(
+                'questionResponseRound'
+            )
+
+            // expect three question rounds
+            expect(otherDivisionRounds).toHaveLength(3)
+
+            // expect latest round to be round 2 with OACT question 2 documents
+            expect(otherDivisionRounds[0]).toHaveTextContent('Round 2')
+            expect(otherDivisionRounds[0]).toHaveTextContent(
+                'oact-question-2-document-1'
+            )
+            expect(otherDivisionRounds[0]).toHaveTextContent(
+                'response-to-oact-2-document-1'
+            )
+
+            // expect next round to be round 1 with DMCP question
+            expect(otherDivisionRounds[1]).toHaveTextContent('Round 1')
+            expect(otherDivisionRounds[1]).toHaveTextContent(
+                'dmcp-question-1-document-1'
+            )
+            expect(otherDivisionRounds[1]).toHaveTextContent(
+                'response-to-dmcp-1-document-1'
+            )
+
+            // expect next round (last round) to also be round 1 with OACT question 1
+            expect(otherDivisionRounds[2]).toHaveTextContent('Round 1')
+            expect(otherDivisionRounds[2]).toHaveTextContent(
+                'oact-question-1-document-1'
+            )
+            expect(otherDivisionRounds[2]).toHaveTextContent(
+                'response-to-oact-1-document-1'
+            )
+        })
+        it('renders with question submit banner after question submitted', async () => {
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_CONTRACT_QUESTIONS_AND_ANSWERS}
+                        element={<ContractQuestionResponse />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                user: mockValidCMSUser(),
+                                statusCode: 200,
+                            }),
+                            fetchContractWithQuestionsMockSuccess({
+                              contract: {        ... mockContractPackageSubmittedWithQuestions(),id: 'test-contract-id'},
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: `/submissions/test-contract-id/question-and-answers?submit=question`,
+                    },
+                    featureFlags: {
+                        'qa-by-rates': true,
+                    },
+                }
+            )
+
+            await waitFor(() => {
+                expect(
+                    screen.getByText("Your division's questions")
+                ).toBeInTheDocument()
+            })
+            expect(screen.getByTestId('alert')).toHaveClass(
+                'usa-alert--success'
+            )
+            expect(screen.getByText('Questions sent')).toBeInTheDocument()
+        })
+        it('renders error page if contract revision does not exist', async () => {
+            renderWithProviders(<CommonCMSRoutes />, {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockValidCMSUser(),
+                            statusCode: 200,
+                        }),
+                    ],
+                },
+                routerProvider: {
+                    route: `/submissions/not-real/question-and-answers`,
+                },
+                featureFlags: {
+                    'qa-by-rates': true,
+                },
+            })
+
+            await waitFor(() => {
+                expect(screen.getByText('System error')).toBeInTheDocument()
+            })
+        })
+        it('renders error page if contract is in draft', async () => {
+            const contract = mockContractPackageDraft()
+            renderWithProviders(<CommonCMSRoutes />, {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockValidCMSUser(),
+                            statusCode: 200,
+                        }),
+                        fetchContractWithQuestionsMockSuccess({ contract }),
+                    ],
+                },
+                routerProvider: {
+                    route: `/submissions/${contract.id}/question-and-answers`,
+                },
+                featureFlags: {
+                    'qa-by-rates': true,
+                },
+            })
+
+            await waitFor(() => {
+                expect(screen.getByText('System error')).toBeInTheDocument()
+            })
+        })
+        it('renders warning banner if CMS user has no assigned division', async () => {
+            const contract = mockContractPackageDraft()
+            renderWithProviders(<CommonCMSRoutes />, {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockValidCMSUser({
+                                divisionAssignment: undefined,
+                            }),
+                            statusCode: 200,
+                        }),
+                        fetchContractWithQuestionsMockSuccess({ contract }),
+                    ],
+                },
+                routerProvider: {
+                    route: `/submissions/${contract.id}/question-and-answers`,
+                },
+                featureFlags: {
+                    'qa-by-rates': true,
+                },
+            })
+
+            await waitFor(() => {
+                expect(screen.queryByTestId('sidenav')).toBeInTheDocument()
+            })
+
+            // Expect missing division text
+            expect(screen.getByText('Missing division')).toBeInTheDocument()
+
+            // Expect add questions button to not exist
+            expect(
+                screen.queryByRole('button', { name: 'Add questions' })
+            ).toBeNull()
         })
     })
 })

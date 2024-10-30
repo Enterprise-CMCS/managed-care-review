@@ -99,7 +99,7 @@ export const RateQuestionResponse = () => {
                 ) : (
                     <StateQuestionResponseTable
                         indexQuestions={rate.questions}
-                        rateCertName={rateCertificationName}
+                        header={`Rate questions: ${rateCertificationName}`}
                     />
                 )}
             </GridContainer>

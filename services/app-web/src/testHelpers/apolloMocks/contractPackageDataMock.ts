@@ -182,7 +182,7 @@ function mockContractPackageDraft(
 ): Contract {
     return {
         __typename: 'Contract',
-        initiallySubmittedAt: undefined,
+        initiallySubmittedAt: null,
         status: 'DRAFT',
         createdAt: new Date('01/01/24'),
         updatedAt: new Date(),
@@ -190,11 +190,11 @@ function mockContractPackageDraft(
         stateCode: 'MN',
         state: mockMNState(),
         stateNumber: 5,
-        mccrsID: undefined,
+        mccrsID: null,
         draftRevision: {
             __typename: 'ContractRevision',
-            submitInfo: undefined,
-            unlockInfo: undefined,
+            submitInfo: null,
+            unlockInfo: null,
             id: '123',
             contractID: 'test-abc-123',
             createdAt: new Date('01/01/2023'),
@@ -297,7 +297,9 @@ function mockContractPackageSubmittedWithQuestions(
         state: mockMNState(),
         stateNumber: 5,
         initiallySubmittedAt: '2024-12-18T16:54:39.173Z',
-        mccrsID: undefined,
+        mccrsID: null,
+        draftRates: [],
+        draftRevision: null,
         packageSubmissions: [{
             cause: 'CONTRACT_SUBMISSION',
             __typename: 'ContractPackageSubmission',
@@ -328,7 +330,7 @@ function mockContractPackageSubmittedWithQuestions(
                     },
                     updatedReason: 'contract submit'
                 },
-                unlockInfo: undefined,
+                unlockInfo: null,
                 formData: {
                     programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
                     populationCovered: 'MEDICAID',
@@ -464,7 +466,7 @@ function mockContractPackageSubmittedWithQuestions(
                             contractID,
                             createdAt: new Date('2022-12-15'),
                             addedBy: mockValidCMSUser({
-                                divisionAssignment: undefined,
+                                divisionAssignment: null,
                             }) as CmsUser,
                             documents: [
                                 {
@@ -624,7 +626,7 @@ function mockContractWithLinkedRateDraft(
 ): Contract {
     return {
         __typename: 'Contract',
-        initiallySubmittedAt: undefined,
+        initiallySubmittedAt: null,
         status: 'DRAFT',
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -632,11 +634,11 @@ function mockContractWithLinkedRateDraft(
         stateCode: 'MN',
         state: mockMNState(),
         stateNumber: 5,
-        mccrsID: undefined,
+        mccrsID: null,
         draftRevision: {
             __typename: 'ContractRevision',
-            submitInfo: undefined,
-            unlockInfo: undefined,
+            submitInfo: null,
+            unlockInfo: null,
             id: '123',
             contractID: 'test-abc-123',
             createdAt: new Date('01/01/2023'),
@@ -772,8 +774,8 @@ function mockContractWithLinkedRateDraft(
                     rateID: 'rate-123',
                     createdAt: new Date(),
                     updatedAt: new Date(),
-                    submitInfo: undefined,
-                    unlockInfo: undefined,
+                    submitInfo: null,
+                    unlockInfo: null,
                     formData: {
                         rateType: 'AMENDMENT',
                         rateCapitationType: 'RATE_CELL',
@@ -833,7 +835,7 @@ function mockContractWithLinkedRateSubmitted(
         stateCode: 'MN',
         state: mockMNState(),
         stateNumber: 5,
-        mccrsID: undefined,
+        mccrsID: null,
         packageSubmissions: [{
             cause: 'CONTRACT_SUBMISSION',
             __typename: 'ContractPackageSubmission',
@@ -864,7 +866,7 @@ function mockContractWithLinkedRateSubmitted(
                     },
                     updatedReason: 'contract submit'
                 },
-                unlockInfo: undefined,
+                unlockInfo: null,
                 formData: {
                     programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
                     populationCovered: 'MEDICAID',
@@ -985,7 +987,9 @@ function mockContractPackageSubmitted(
         stateCode: 'MN',
         state: mockMNState(),
         stateNumber: 5,
-        mccrsID: undefined,
+        mccrsID: null,
+        draftRevision: null,
+        draftRates: [],
         packageSubmissions: [{
             cause: 'CONTRACT_SUBMISSION',
             __typename: 'ContractPackageSubmission',
@@ -1016,7 +1020,7 @@ function mockContractPackageSubmitted(
                     },
                     updatedReason: 'contract submit'
                 },
-                unlockInfo: undefined,
+                unlockInfo: null,
                 formData: {
                     programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
                     populationCovered: 'MEDICAID',
@@ -1082,6 +1086,7 @@ function mockContractPackageSubmitted(
                     rateID: '123',
                     createdAt: new Date('01/01/2023'),
                     updatedAt: new Date('01/01/2023'),
+                    rate: null,
                     formData: {
                         rateCertificationName:'rate cert',
                         rateType: 'AMENDMENT',
@@ -1703,7 +1708,7 @@ function mockContractPackageUnlockedWithUnlockedType(
         draftRevision: {
             __typename: 'ContractRevision',
             contractID: 'test-abc-123',
-            submitInfo: undefined,
+            submitInfo: null,
             unlockInfo: {
                 updatedAt: '2023-01-01T16:54:39.173Z',
                 updatedBy: {
@@ -2123,22 +2128,22 @@ const mockEmptyDraftContractAndRate = (): Contract => mockContractPackageDraft(
     {
         draftRevision: {
             __typename: 'ContractRevision',
-            submitInfo: undefined,
-            unlockInfo: undefined,
+            submitInfo: null,
+            unlockInfo: null,
             id: '123',
             createdAt: new Date(),
             updatedAt: new Date(),
             contractName: 'MCR-0005-alvhalfhdsalfee',
             formData: {
                 programIDs: [],
-                populationCovered: undefined,
+                populationCovered: null,
                 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                 // @ts-ignore
-                submissionType: undefined,
-                riskBasedContract: undefined,
+                submissionType: null,
+                riskBasedContract: null,
                 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                 // @ts-ignore
-                submissionDescription: undefined,
+                submissionDescription: null,
                 supportingDocuments: [
                     {
                         s3URL: 's3://bucketname/key/contractsupporting1',
@@ -2156,8 +2161,8 @@ const mockEmptyDraftContractAndRate = (): Contract => mockContractPackageDraft(
                     },
                 ],
                 stateContacts: [],
-                contractType: undefined,
-                contractExecutionStatus: undefined,
+                contractType: null,
+                contractExecutionStatus: null,
                 contractDocuments: [
                     {
                         s3URL: 's3://bucketname/one-two/one-two.png',
@@ -2167,29 +2172,29 @@ const mockEmptyDraftContractAndRate = (): Contract => mockContractPackageDraft(
                         downloadURL: s3DlUrl,
                     },
                 ],
-                contractDateStart:undefined,
-                contractDateEnd: undefined,
+                contractDateStart:null,
+                contractDateEnd: null,
                 managedCareEntities: [],
                 federalAuthorities: [],
-                inLieuServicesAndSettings: undefined,
-                modifiedBenefitsProvided: undefined,
-                modifiedGeoAreaServed: undefined,
-                modifiedMedicaidBeneficiaries: undefined,
-                modifiedRiskSharingStrategy: undefined,
-                modifiedIncentiveArrangements: undefined,
-                modifiedWitholdAgreements: undefined,
-                modifiedStateDirectedPayments: undefined,
-                modifiedPassThroughPayments: undefined,
-                modifiedPaymentsForMentalDiseaseInstitutions: undefined,
-                modifiedMedicalLossRatioStandards: undefined,
-                modifiedOtherFinancialPaymentIncentive: undefined,
-                modifiedEnrollmentProcess: undefined,
-                modifiedGrevienceAndAppeal: undefined,
-                modifiedNetworkAdequacyStandards: undefined,
-                modifiedLengthOfContract: undefined,
-                modifiedNonRiskPaymentArrangements: undefined,
+                inLieuServicesAndSettings: null,
+                modifiedBenefitsProvided: null,
+                modifiedGeoAreaServed: null,
+                modifiedMedicaidBeneficiaries: null,
+                modifiedRiskSharingStrategy: null,
+                modifiedIncentiveArrangements: null,
+                modifiedWitholdAgreements: null,
+                modifiedStateDirectedPayments: null,
+                modifiedPassThroughPayments: null,
+                modifiedPaymentsForMentalDiseaseInstitutions: null,
+                modifiedMedicalLossRatioStandards: null,
+                modifiedOtherFinancialPaymentIncentive: null,
+                modifiedEnrollmentProcess: null,
+                modifiedGrevienceAndAppeal: null,
+                modifiedNetworkAdequacyStandards: null,
+                modifiedLengthOfContract: null,
+                modifiedNonRiskPaymentArrangements: null,
                 statutoryRegulatoryAttestation: false,
-                statutoryRegulatoryAttestationDescription: undefined
+                statutoryRegulatoryAttestationDescription: null
             }
         },
         draftRates: [
@@ -2209,8 +2214,8 @@ const mockEmptyDraftContractAndRate = (): Contract => mockContractPackageDraft(
                     createdAt: new Date(),
                     updatedAt: new Date(),
                     formData: {
-                        rateType: undefined,
-                        rateCapitationType: undefined,
+                        rateType: null,
+                        rateCapitationType: null,
                         rateDocuments: [
                             {
                                 s3URL: 's3://bucketname/key/rate',
@@ -2236,18 +2241,18 @@ const mockEmptyDraftContractAndRate = (): Contract => mockContractPackageDraft(
                                 downloadURL: s3DlUrl,
                             },
                         ],
-                        rateDateStart: undefined,
-                        rateDateEnd: undefined,
-                        rateDateCertified: undefined,
-                        amendmentEffectiveDateStart: undefined,
-                        amendmentEffectiveDateEnd: undefined,
+                        rateDateStart: null,
+                        rateDateEnd: null,
+                        rateDateCertified: null,
+                        amendmentEffectiveDateStart: null,
+                        amendmentEffectiveDateEnd: null,
                         deprecatedRateProgramIDs: [],
                         rateProgramIDs: [],
                         certifyingActuaryContacts: [
                             {
                                 id: null,
                                 actuarialFirmOther: null,
-                                actuarialFirm: undefined,
+                                actuarialFirm: null,
                                 name: '',
                                 titleRole: '',
                                 email: '',
@@ -2257,13 +2262,13 @@ const mockEmptyDraftContractAndRate = (): Contract => mockContractPackageDraft(
                             {
                                 id: null,
                                 actuarialFirmOther: null,
-                                actuarialFirm: undefined,
+                                actuarialFirm: null,
                                 name: '',
                                 titleRole: '',
                                 email: '',
                             },
                         ],
-                        actuaryCommunicationPreference: undefined,
+                        actuaryCommunicationPreference: null,
                         packagesWithSharedRateCerts: [],
                     }
                 }
