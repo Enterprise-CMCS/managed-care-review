@@ -81,7 +81,8 @@ export const UploadRateResponse = () => {
     if (!rate || rate.status === 'DRAFT' || !questionID || !rate.questions) {
         return <GenericErrorPage />
     }
-    const questionRound = getQuestionRoundForQuestionID(rate.questions, division?.toUpperCase() as Division, questionID)
+    const questionRoundNumber = getQuestionRoundForQuestionID(rate.questions, division?.toUpperCase() as Division, questionID)
+
     const handleFormSubmit = async (cleaned: FileItemT[]) => {
         const responseDocs = cleaned.map((item) => {
             return {
@@ -140,7 +141,7 @@ export const UploadRateResponse = () => {
                 apiLoading={apiLoading}
                 apiError={Boolean(apiError)}
                 type="rate"
-                round={questionRound}
+                round={questionRoundNumber ?? 0}
             />
         </GridContainer>
     )

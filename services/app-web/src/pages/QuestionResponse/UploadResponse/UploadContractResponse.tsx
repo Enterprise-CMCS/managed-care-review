@@ -5,6 +5,7 @@ import {
     CreateQuestionResponseInput,
     useCreateContractQuestionResponseMutation,
     Division,
+    useFetchContractWithQuestionsQuery,
 } from '../../../gen/gqlClient'
 import { usePage } from '../../../contexts/PageContext'
 import { SideNavOutletContextType } from '../../SubmissionSideNav/SubmissionSideNav'
@@ -14,6 +15,9 @@ import { RoutesRecord } from '../../../constants'
 import { GenericErrorPage } from '../../Errors/GenericErrorPage'
 import { UploadResponseForm } from './UploadResponseForm'
 import { FileItemT } from '../../../components'
+import { getQuestionRoundForQuestionID } from '../QuestionResponseHelpers/questionResponseHelpers'
+import { ErrorOrLoadingPage } from '../../StateSubmission'
+import { handleAndReturnErrorState } from '../../StateSubmission/ErrorOrLoadingPage'
 
 export const UploadContractResponse = () => {
     // router context
@@ -24,22 +28,49 @@ export const UploadContractResponse = () => {
     }>()
 
     const navigate = useNavigate()
-
-    // api
-    const [createResponse, { loading: apiLoading, error: apiError }] =
-        useCreateContractQuestionResponseMutation()
-
-    // page level state
     const { updateHeading } = usePage()
-    const { packageName, contract } =
-        useOutletContext<SideNavOutletContextType>()
-    useEffect(() => {
-        updateHeading({ customHeading: packageName })
-    }, [packageName, updateHeading])
+ // api
+ const {
+    data: fetchContractData,
+    loading: fetchContractLoading,
+    error: fetchContractError,
+} = useFetchContractWithQuestionsQuery({
+    variables: {
+        input: {
+            contractID: id|| 'not-found',
+        },
+    },
+})
 
-    if (contract.status === 'DRAFT') {
-        return <GenericErrorPage />
-    }
+const [createResponse, { loading: apiLoading, error: apiError }] =
+    useCreateContractQuestionResponseMutation()
+
+const contract = fetchContractData?.fetchContract.contract
+const contractName =
+    (contract?.packageSubmissions &&
+        contract?.packageSubmissions[0].contractRevision.contractName) ||
+    ''
+
+// side effects
+useEffect(() => {
+    updateHeading({ customHeading: `${contractName} Add response` })
+}, [contractName, updateHeading])
+
+if (fetchContractLoading) {
+    return <ErrorOrLoadingPage state="LOADING" />
+}
+
+if (fetchContractError) {
+    return (
+        <ErrorOrLoadingPage
+            state={handleAndReturnErrorState(fetchContractError)}
+        />
+    )
+}
+
+if (!contract || contract.status === 'DRAFT' || !questionID || !contract.questions) {
+    return <GenericErrorPage />
+}
 
     const handleFormSubmit = async (cleaned: FileItemT[]) => {
         const responseDocs = cleaned.map((item) => {
@@ -66,7 +97,7 @@ export const UploadContractResponse = () => {
             navigate(`/submissions/${id}/question-and-answers?submit=response`)
         }
     }
-
+    const questionRound = getQuestionRoundForQuestionID(contract.questions, division?.toUpperCase() as Division, questionID)
     return (
         <GridContainer>
             <Breadcrumbs
@@ -76,7 +107,7 @@ export const UploadContractResponse = () => {
                         link: RoutesRecord.DASHBOARD_SUBMISSIONS,
                         text: 'Dashboard',
                     },
-                    { link: `/submissions/${id}`, text: packageName },
+                    { link: `/submissions/${id}`, text: contractName },
                     {
                         text: 'Add response',
                         link: RoutesRecord.SUBMISSIONS_UPLOAD_CONTRACT_RESPONSE,
@@ -89,6 +120,7 @@ export const UploadContractResponse = () => {
                 apiLoading={apiLoading}
                 apiError={Boolean(apiError)}
                 type="contract"
+                round={questionRound ?? 0}
             />
         </GridContainer>
     )

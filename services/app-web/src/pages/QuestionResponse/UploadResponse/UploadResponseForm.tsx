@@ -17,13 +17,15 @@ import { useFileUpload } from '../../../hooks/useFileUpload'
 import { ACCEPTED_SUBMISSION_FILE_TYPES, FileItemT } from '../../../components/FileUpload'
 import { PageActionsContainer } from '../../StateSubmission/PageActions'
 import { useErrorSummary } from '../../../hooks/useErrorSummary'
+import { divisionFullNames } from '../QuestionResponseHelpers'
+import { Division } from '../../../gen/gqlClient'
 
 type UploadResponseFormProps =  {
     handleSubmit: (cleaned: FileItemT[]) => Promise<void>,
     apiLoading: boolean,
     apiError: boolean,
     type: 'contract' | 'rate'
-    round?: number,
+    round: number,
 }
 const UploadResponseForm = ({handleSubmit, apiError, apiLoading, type, round}: UploadResponseFormProps) => {
     const { division, id, rateID} = useParams<{ division: string; id: string, rateID: string }>()
@@ -45,6 +47,9 @@ const UploadResponseForm = ({handleSubmit, apiError, apiLoading, type, round}: U
         const fileUploadErrorFocusKey = hasNoFiles
             ? uploadComponentID
             : '#file-items-list'
+
+        const cancelLink =  type === 'contract'? `/submissions/${id}/question-and-answers` : `/submissions/${id}/rates/${rateID}/question-and-answers`
+        const submitLink =  type === 'contract'? `/submissions/${id}/question-and-answers?submit=response` : `/submissions/${id}/rates/${rateID}/question-and-answers?submit=response`
 
         const onSubmit = async(e: React.FormEvent<HTMLFormElement>) => {
                 e.preventDefault()
@@ -71,9 +76,11 @@ const UploadResponseForm = ({handleSubmit, apiError, apiLoading, type, round}: U
                 {apiError && <GenericApiErrorBanner />}
                 <fieldset className="usa-fieldset">
                     <h2>Upload response</h2>
-                    <p className="text-bold">Contract questions</p>
-                    <p>{`Asked by: ${division?.toUpperCase()}`}</p>
-                    <p>{`Round ${round ?? 'unknown'}`}</p>
+                    <div id='formSummary'>
+                        <span className="text-bold">Contract questions</span>
+                        <span>{`Asked by: ${divisionFullNames[division?.toUpperCase() as Division]}`}</span>
+                        <span>{`Round ${round}`}</span>
+                    </div>
                     {shouldValidate && (
                         <ErrorSummary
                             errors={
@@ -123,11 +130,11 @@ const UploadResponseForm = ({handleSubmit, apiError, apiLoading, type, round}: U
                             data-testid="page-actions-left-secondary"
                             disabled={apiLoading}
                             parent_component_type="page body"
-                            link_url={`/submissions/${id}/rates/${rateID}question-and-answers`}
-                            onClick={() =>
+                            link_url={cancelLink}
+                            onClick={() =>{
                                 navigate(
-                                    `/submissions/${id}/rates/${rateID}/question-and-answers`
-                                )
+                                    cancelLink
+                                )}
                             }
                         >
                             Cancel
@@ -138,7 +145,7 @@ const UploadResponseForm = ({handleSubmit, apiError, apiLoading, type, round}: U
                             variant="default"
                             data-testid="page-actions-right-primary"
                             parent_component_type="page body"
-                            link_url={`/submissions/${id}/rates/${rateID}/question-and-answers?submit=reponse`}
+                            link_url={submitLink}
                             disabled={showFileUploadError}
                             animationTimeout={1000}
                             loading={apiLoading}

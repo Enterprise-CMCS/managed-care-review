@@ -70,10 +70,16 @@
 
     h2 {
         margin-top: 0;
+        font-weight: normal
     }
 
     > div[class^='usa-form-group']:not(:first-of-type) {
         margin-top: 2.5rem;
+    }
+
+    [id^='formSummary'] {
+        display: flex;
+        flex-direction: column;
     }
 
     &[class^='usa-form'] {

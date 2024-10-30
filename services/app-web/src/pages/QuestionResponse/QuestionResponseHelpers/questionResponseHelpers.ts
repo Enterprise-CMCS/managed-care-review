@@ -33,6 +33,7 @@ type IndexQuestionType =
     | IndexContractQuestionsPayload
     | IndexRateQuestionsPayload
 
+
 const divisionFullNames = {
     DMCO: 'Division of Managed Care Operations (DMCO)',
     DMCP: 'Division of Managed Care Policy (DMCP)',
@@ -73,16 +74,18 @@ const getDivisionOrder = (division?: Division): Division[] =>
     }) as Division[]
 
 
-const getQuestionRoundForQuestionID = (questions: IndexRateQuestionsPayload, division: 'DMCO' | 'OACT' | 'DMCP', questionID: string): number |
+const getQuestionRoundForQuestionID = (questions: IndexRateQuestionsPayload | IndexContractQuestionsPayload, division: Division, questionID: string): number |
 undefined =>{
     const questionsEdges =  questions?.[`${division}Questions`].edges
    const matchingQuestion = questionsEdges.find( (question ) => question.node.id == questionID)
    if (!matchingQuestion){
     return undefined
    } else {
+    // @ts-expect-error cannot infer wether contract or rate question edge expected
     return  questionsEdges.indexOf(matchingQuestion) + 1
    }
 }
+
 
 export {
     extractQuestions,
