@@ -1,10 +1,8 @@
 import {
     CmsUser,
-    ContractQuestion,
     ContractQuestionEdge,
     Document, IndexContractQuestionsPayload, IndexRateQuestionsPayload,
     QuestionResponse,
-    RateQuestion,
     RateQuestionEdge,
     StateUser
 } from '../../../gen/gqlClient';
@@ -73,17 +71,22 @@ const getDivisionOrder = (division?: Division): Division[] =>
         return 0
     }) as Division[]
 
-
-const getQuestionRoundForQuestionID = (questions: IndexRateQuestionsPayload | IndexContractQuestionsPayload, division: Division, questionID: string): number |
-undefined =>{
+// gets question round for a division to display
+// default to 0 if API response isn't matching up as expected
+const getQuestionRoundForQuestionID = (questions: IndexRateQuestionsPayload | IndexContractQuestionsPayload, division: Division, questionID: string): number =>{
     const questionsEdges =  questions?.[`${division}Questions`].edges
    const matchingQuestion = questionsEdges.find( (question ) => question.node.id == questionID)
    if (!matchingQuestion){
-    return undefined
+    return 0
    } else {
     // @ts-expect-error cannot infer wether contract or rate question edge expected
-    return  questionsEdges.indexOf(matchingQuestion) + 1
+    return questionsEdges.indexOf(matchingQuestion) ? questionsEdges.indexOf(matchingQuestion) + 1 : 0
    }
+}
+
+const  getNextCMSRoundNumber = (questions: IndexRateQuestionsPayload | IndexContractQuestionsPayload, division: Division): number =>{
+    const questionsEdges =  questions?.[`${division}Questions`].edges
+    return questionsEdges.length + 1
 }
 
 
@@ -92,6 +95,7 @@ export {
     getUserDivision,
     getDivisionOrder,
     getQuestionRoundForQuestionID,
+    getNextCMSRoundNumber,
     divisionFullNames
 }
 

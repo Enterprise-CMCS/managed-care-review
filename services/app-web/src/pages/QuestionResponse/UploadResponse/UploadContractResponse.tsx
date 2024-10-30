@@ -120,7 +120,7 @@ if (!contract || contract.status === 'DRAFT' || !questionID || !contract.questio
                 apiLoading={apiLoading}
                 apiError={Boolean(apiError)}
                 type="contract"
-                round={questionRound ?? 0}
+                round={questionRound}
             />
         </GridContainer>
     )

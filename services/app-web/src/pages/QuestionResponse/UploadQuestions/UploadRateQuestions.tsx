@@ -3,6 +3,7 @@ import { GridContainer } from '@trussworks/react-uswds'
 import { useNavigate, useParams } from 'react-router-dom'
 import {
     CreateRateQuestionInput,
+    Division,
     useCreateRateQuestionMutation,
     useFetchRateWithQuestionsQuery,
 } from '../../../gen/gqlClient'
@@ -15,12 +16,13 @@ import { FileItemT } from '../../../components'
 import { ErrorOrLoadingPage } from '../../StateSubmission'
 import { handleAndReturnErrorState } from '../../StateSubmission/ErrorOrLoadingPage'
 import { GenericErrorPage } from '../../Errors/GenericErrorPage'
+import { getNextCMSRoundNumber } from '../QuestionResponseHelpers'
 
 export const UploadRateQuestions = () => {
     // router context
     // eslint-disable-next-line @typescript-eslint/no-use-before-define
     const { updateHeading } = usePage()
-    const { id } = useParams<{ division: string; id: string; rateID: string }>()
+    const { id, division } = useParams<{ division: Division; id: string; rateID: string }>()
     const navigate = useNavigate()
 
     // api
@@ -45,7 +47,6 @@ export const UploadRateQuestions = () => {
             rate?.packageSubmissions[0].rateRevision.formData
                 .rateCertificationName) ||
         ''
-
     // side effects
     useEffect(() => {
         updateHeading({ customHeading: `${rateName} Add questions` })
@@ -63,9 +64,11 @@ export const UploadRateQuestions = () => {
         )
     }
 
-    if (!rate || rate.status === 'DRAFT') {
+    if (!rate || rate.status === 'DRAFT' || !rate.questions || !division) {
         return <GenericErrorPage />
     }
+
+    const nextRoundNumber =  getNextCMSRoundNumber(rate.questions, division)
 
     const handleFormSubmit = async (cleaned: FileItemT[]) => {
         const questionDocs = cleaned.map((item) => {
@@ -113,6 +116,7 @@ export const UploadRateQuestions = () => {
                 apiError={Boolean(apiError)}
                 type="rate"
                 handleSubmit={handleFormSubmit}
+                round={nextRoundNumber}
             />
         </GridContainer>
     )

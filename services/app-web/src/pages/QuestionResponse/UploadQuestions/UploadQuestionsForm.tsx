@@ -26,6 +26,7 @@ type UploadQuestionsFormProps = {
     apiLoading: boolean
     apiError: boolean
     type: 'contract' | 'rate'
+    round: number
 }
 
 const UploadQuestionsForm = ({
@@ -33,6 +34,7 @@ const UploadQuestionsForm = ({
     apiError,
     apiLoading,
     type,
+    round
 }: UploadQuestionsFormProps) => {
     const { division, id } = useParams<{ division: string; id: string }>()
     const [shouldValidate, setShouldValidate] = React.useState(false)
@@ -81,7 +83,7 @@ const UploadQuestionsForm = ({
             {apiError && <GenericApiErrorBanner />}
             <fieldset className="usa-fieldset">
                 <h2>Add questions</h2>
-                <p className="text-bold">{`Questions from ${division?.toUpperCase()}`}</p>
+                <p className="text-bold">{`${division?.toUpperCase()} - Round${round}`}</p>
 
                 {shouldValidate && (
                     <ErrorSummary

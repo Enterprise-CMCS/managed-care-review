@@ -141,7 +141,7 @@ export const UploadRateResponse = () => {
                 apiLoading={apiLoading}
                 apiError={Boolean(apiError)}
                 type="rate"
-                round={questionRoundNumber ?? 0}
+                round={questionRoundNumber}
             />
         </GridContainer>
     )
