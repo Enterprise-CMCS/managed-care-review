@@ -1,6 +1,7 @@
 import {
     constructTestPostgresServer,
     createTestRateQuestion,
+    updateTestStateAssignments,
 } from '../../testHelpers/gqlHelpers'
 import {
     createDBUsersWithFullData,
@@ -14,6 +15,10 @@ import {
 } from '../../testHelpers/gqlContractHelpers'
 import { assertAnError, assertAnErrorCode, must } from '../../testHelpers'
 import { testEmailConfig, testEmailer } from '../../testHelpers/emailerHelpers'
+import { testLDService } from '../../testHelpers/launchDarklyHelpers'
+import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
+import { NewPostgresStore } from '../../postgres'
+import { CreateRateQuestionDocument } from '../../gen/gqlClient'
 
 describe('createRateQuestion', () => {
     const cmsUser = testCMSUser()
@@ -244,5 +249,181 @@ describe('createRateQuestion', () => {
                 ),
             })
         )
+    })
+
+    it('send CMS email to state analysts if question is successfully submitted', async () => {
+        const config = testEmailConfig()
+        const mockEmailer = testEmailer(config)
+
+        const stateServer = await constructTestPostgresServer()
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: cmsUser,
+            },
+            emailer: mockEmailer,
+        })
+        const submittedContractAndRate =
+            await createAndSubmitTestContractWithRate(stateServer)
+        const rateRevision =
+            submittedContractAndRate.packageSubmissions[0].rateRevisions[0]
+        const rateID = rateRevision.rateID
+
+        must(await createTestRateQuestion(cmsServer, rateID))
+
+        expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
+            2,
+            expect.objectContaining({
+                subject: expect.stringContaining(
+                    `[LOCAL] Questions sent for ${rateRevision.formData.rateCertificationName}`
+                ),
+                sourceEmail: config.emailSource,
+                bodyText: expect.stringContaining(
+                    `DMCO sent questions to the state for rate ${rateRevision.formData.rateCertificationName}`
+                ),
+                bodyHTML: expect.stringContaining(
+                    `http://localhost/rates/${rateID}/question-and-answers`
+                ),
+            })
+        )
+    })
+
+    it('send CMS email to state analysts from database', async () => {
+        const ldService = testLDService({
+            'read-write-state-assignments': true,
+        })
+
+        const prismaClient = await sharedTestPrismaClient()
+        const postgresStore = NewPostgresStore(prismaClient)
+        const config = testEmailConfig()
+        const mockEmailer = testEmailer(config)
+
+        const stateServer = await constructTestPostgresServer()
+        const cmsServer = await constructTestPostgresServer({
+            store: postgresStore,
+            context: {
+                user: cmsUser,
+            },
+            ldService,
+            emailer: mockEmailer,
+        })
+
+        const assignedUsers = [
+            testCMSUser({
+                givenName: 'Roku',
+                email: 'roku@example.com',
+            }),
+            testCMSUser({
+                givenName: 'Izumi',
+                email: 'izumi@example.com',
+            }),
+        ]
+
+        await createDBUsersWithFullData(assignedUsers)
+
+        const assignedUserIDs = assignedUsers.map((u) => u.id)
+        const assignedUserEmails = assignedUsers.map((u) => u.email)
+
+        await updateTestStateAssignments(cmsServer, 'FL', assignedUserIDs)
+
+        const submittedContractAndRate =
+            await createAndSubmitTestContractWithRate(stateServer)
+        const rateRevision =
+            submittedContractAndRate.packageSubmissions[0].rateRevisions[0]
+        const rateID = rateRevision.rateID
+
+        must(await createTestRateQuestion(cmsServer, rateID))
+
+        const cmsEmails = [...config.devReviewTeamEmails, ...assignedUserEmails]
+
+        expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
+            2,
+            expect.objectContaining({
+                subject: expect.stringContaining(
+                    `[LOCAL] Questions sent for ${rateRevision.formData.rateCertificationName}`
+                ),
+                sourceEmail: config.emailSource,
+                toAddresses: expect.arrayContaining(Array.from(cmsEmails)),
+                bodyText: expect.stringContaining(
+                    `DMCO sent questions to the state for rate ${rateRevision.formData.rateCertificationName}`
+                ),
+                bodyHTML: expect.stringContaining(
+                    `http://localhost/rates/${rateID}/question-and-answers`
+                ),
+            })
+        )
+    })
+
+    it('send CMS email with correct round number if multiple questions have been asked', async () => {
+        const config = testEmailConfig()
+        const mockEmailer = testEmailer(config)
+
+        const stateServer = await constructTestPostgresServer()
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: cmsUser,
+            },
+            emailer: mockEmailer,
+        })
+
+        const oactServer = await constructTestPostgresServer({
+            context: {
+                user: testCMSUser({
+                    divisionAssignment: 'OACT',
+                }),
+            },
+            emailer: mockEmailer,
+        })
+
+        const submittedContractAndRate =
+            await createAndSubmitTestContractWithRate(stateServer)
+        const rateRevision =
+            submittedContractAndRate.packageSubmissions[0].rateRevisions[0]
+        const rateID = rateRevision.rateID
+
+        // round 1 dmco question
+        must(await createTestRateQuestion(cmsServer, rateID))
+        // round 1 oact question
+        must(await createTestRateQuestion(oactServer, rateID))
+        // round 2 dmco
+        must(await createTestRateQuestion(cmsServer, rateID))
+
+        expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
+            6,
+            expect.objectContaining({
+                subject: expect.stringContaining(
+                    `[LOCAL] Questions sent for ${rateRevision.formData.rateCertificationName}`
+                ),
+                sourceEmail: config.emailSource,
+                bodyText: expect.stringContaining('Round: 2'),
+            })
+        )
+    })
+
+    it('does not send any emails if submission fails', async () => {
+        const mockEmailer = testEmailer()
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: cmsUser,
+            },
+            emailer: mockEmailer,
+        })
+
+        const submitResult = await cmsServer.executeOperation({
+            query: CreateRateQuestionDocument,
+            variables: {
+                input: {
+                    rateID: '1234',
+                    documents: [
+                        {
+                            name: 'Test Question',
+                            s3URL: 's3://bucketname/key/test1',
+                        },
+                    ],
+                },
+            },
+        })
+
+        expect(submitResult.errors).toBeDefined()
+        expect(mockEmailer.sendEmail).not.toHaveBeenCalled()
     })
 })
