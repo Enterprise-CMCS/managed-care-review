@@ -1,5 +1,7 @@
-import UPDATE_DRAFT_CONTRACT_RATES from '../../../../app-graphql/src/mutations/updateDraftContractRates.graphql'
-import FETCH_RATE from 'app-graphql/src/queries/fetchRate.graphql'
+import {
+    UpdateDraftContractRatesDocument,
+    FetchRateDocument,
+} from '../../gen/gqlClient'
 import {
     constructTestPostgresServer,
     createAndSubmitTestHealthPlanPackage,
@@ -25,7 +27,7 @@ describe('updateDraftContractRates', () => {
         })
 
         const result = await stateServer.executeOperation({
-            query: UPDATE_DRAFT_CONTRACT_RATES,
+            query: UpdateDraftContractRatesDocument,
             variables: {
                 input: {
                     contractID: 'foobar',
@@ -63,7 +65,7 @@ describe('updateDraftContractRates', () => {
         })
 
         const result = await otherStateServer.executeOperation({
-            query: UPDATE_DRAFT_CONTRACT_RATES,
+            query: UpdateDraftContractRatesDocument,
             variables: {
                 input: {
                     contractID: draft.id,
@@ -100,7 +102,7 @@ describe('updateDraftContractRates', () => {
         })
 
         const result = await otherStateServer.executeOperation({
-            query: UPDATE_DRAFT_CONTRACT_RATES,
+            query: UpdateDraftContractRatesDocument,
             variables: {
                 input: {
                     contractID: draft.id,
@@ -130,7 +132,7 @@ describe('updateDraftContractRates', () => {
         const draftFD = latestFormData(draft)
 
         const result = await stateServer.executeOperation({
-            query: UPDATE_DRAFT_CONTRACT_RATES,
+            query: UpdateDraftContractRatesDocument,
             variables: {
                 input: {
                     contractID: draft.id,
@@ -159,7 +161,7 @@ describe('updateDraftContractRates', () => {
         const draft = await createTestHealthPlanPackage(stateServer)
 
         const result = await stateServer.executeOperation({
-            query: UPDATE_DRAFT_CONTRACT_RATES,
+            query: UpdateDraftContractRatesDocument,
             variables: {
                 input: {
                     contractID: draft.id,
@@ -219,7 +221,7 @@ describe('updateDraftContractRates', () => {
         const draftFD = latestFormData(draft)
 
         const result = await stateServer.executeOperation({
-            query: UPDATE_DRAFT_CONTRACT_RATES,
+            query: UpdateDraftContractRatesDocument,
             variables: {
                 input: {
                     contractID: draft.id,
@@ -300,7 +302,7 @@ describe('updateDraftContractRates', () => {
         const draftFD = latestFormData(draft)
 
         const result = await stateServer.executeOperation({
-            query: UPDATE_DRAFT_CONTRACT_RATES,
+            query: UpdateDraftContractRatesDocument,
             variables: {
                 input: {
                     contractID: draft.id,
@@ -383,7 +385,7 @@ describe('updateDraftContractRates', () => {
         const rate = draftFD.rateInfos[0]
 
         const result = await stateServer.executeOperation({
-            query: UPDATE_DRAFT_CONTRACT_RATES,
+            query: UpdateDraftContractRatesDocument,
             variables: {
                 input: {
                     contractID: draft.id,
@@ -470,7 +472,7 @@ describe('updateDraftContractRates', () => {
         const draftFD = latestFormData(draft)
 
         const result = await stateServer.executeOperation({
-            query: UPDATE_DRAFT_CONTRACT_RATES,
+            query: UpdateDraftContractRatesDocument,
             variables: {
                 input: {
                     contractID: draft.id,
@@ -551,7 +553,7 @@ describe('updateDraftContractRates', () => {
         const rate = draft2FD.rateInfos[0]
 
         const result = await stateServer.executeOperation({
-            query: UPDATE_DRAFT_CONTRACT_RATES,
+            query: UpdateDraftContractRatesDocument,
             variables: {
                 input: {
                     contractID: draft.id,
@@ -697,7 +699,7 @@ describe('updateDraftContractRates', () => {
         const draftFD = latestFormData(contractDraft)
 
         const result = await stateServer.executeOperation({
-            query: UPDATE_DRAFT_CONTRACT_RATES,
+            query: UpdateDraftContractRatesDocument,
             variables: {
                 input: {
                     contractID: contractDraft.id,
@@ -744,7 +746,7 @@ describe('updateDraftContractRates', () => {
         const draftFD = latestFormData(contractDraft)
 
         const result = await stateServer.executeOperation({
-            query: UPDATE_DRAFT_CONTRACT_RATES,
+            query: UpdateDraftContractRatesDocument,
             variables: {
                 input: {
                     contractID: contractDraft.id,
@@ -775,7 +777,7 @@ describe('updateDraftContractRates', () => {
         const rateID = draftRates[0].id
 
         const updateResult = await stateServer.executeOperation({
-            query: UPDATE_DRAFT_CONTRACT_RATES,
+            query: UpdateDraftContractRatesDocument,
             variables: {
                 input: {
                     contractID: contractDraft.id,
@@ -860,7 +862,7 @@ describe('updateDraftContractRates', () => {
         const draftFD = latestFormData(contractDraft)
 
         const result = await stateServer.executeOperation({
-            query: UPDATE_DRAFT_CONTRACT_RATES,
+            query: UpdateDraftContractRatesDocument,
             variables: {
                 input: {
                     contractID: contractDraft.id,
@@ -913,7 +915,7 @@ describe('updateDraftContractRates', () => {
         const draftFD = latestFormData(contractDraft)
 
         const linkResult = await stateServer.executeOperation({
-            query: UPDATE_DRAFT_CONTRACT_RATES,
+            query: UpdateDraftContractRatesDocument,
             variables: {
                 input: {
                     contractID: contractDraft.id,
@@ -934,7 +936,7 @@ describe('updateDraftContractRates', () => {
             linkResult?.data?.updateDraftContractRates.contract.draftRevision
 
         const result = await stateServer.executeOperation({
-            query: UPDATE_DRAFT_CONTRACT_RATES,
+            query: UpdateDraftContractRatesDocument,
             variables: {
                 input: {
                     contractID: contractDraft.id,
@@ -1024,7 +1026,7 @@ describe('updateDraftContractRates', () => {
         const draftFD = latestFormData(contractDraft)
 
         const linkResult = await stateServer.executeOperation({
-            query: UPDATE_DRAFT_CONTRACT_RATES,
+            query: UpdateDraftContractRatesDocument,
             variables: {
                 input: {
                     contractID: contractDraft.id,
@@ -1053,7 +1055,7 @@ describe('updateDraftContractRates', () => {
         expect(draftRates).toHaveLength(1)
 
         const unlinkResult = await stateServer.executeOperation({
-            query: UPDATE_DRAFT_CONTRACT_RATES,
+            query: UpdateDraftContractRatesDocument,
             variables: {
                 input: {
                     contractID: contractDraft.id,
@@ -1091,7 +1093,7 @@ describe('updateDraftContractRates', () => {
         expect(existingRateResult.id).toBeDefined()
 
         const result = await stateServer.executeOperation({
-            query: UPDATE_DRAFT_CONTRACT_RATES,
+            query: UpdateDraftContractRatesDocument,
             variables: {
                 input: {
                     contractID: draft.id,
@@ -1112,7 +1114,7 @@ describe('updateDraftContractRates', () => {
         expect(draftRates).toHaveLength(0)
 
         const nonexistantRateResult = await stateServer.executeOperation({
-            query: FETCH_RATE,
+            query: FetchRateDocument,
             variables: { input: { rateID: rate.id } },
         })
 

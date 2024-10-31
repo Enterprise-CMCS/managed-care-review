@@ -1,4 +1,4 @@
-import CREATE_CONTRACT_QUESTION_RESPONSE from 'app-graphql/src/mutations/createContractQuestionResponse.graphql'
+import { CreateContractQuestionResponseDocument } from '../../gen/gqlClient'
 import {
     constructTestPostgresServer,
     createTestQuestion,
@@ -71,7 +71,7 @@ describe('createContractQuestionResponse', () => {
         const fakeID = 'abc-123'
 
         const createResponseResult = await stateServer.executeOperation({
-            query: CREATE_CONTRACT_QUESTION_RESPONSE,
+            query: CreateContractQuestionResponseDocument,
             variables: {
                 input: {
                     questionID: fakeID,
@@ -103,7 +103,7 @@ describe('createContractQuestionResponse', () => {
         const createdQuestion = await createTestQuestion(cmsServer, contract.id)
 
         const createResponseResult = await cmsServer.executeOperation({
-            query: CREATE_CONTRACT_QUESTION_RESPONSE,
+            query: CreateContractQuestionResponseDocument,
             variables: {
                 input: {
                     questionID: createdQuestion.question.id,

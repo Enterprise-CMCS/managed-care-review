@@ -138,7 +138,7 @@ export function configureResolvers(
                     emailParameterStore,
                     launchDarkly
                 ),
-            createRateQuestion: createRateQuestionResolver(store),
+            createRateQuestion: createRateQuestionResolver(store, emailer),
             createRateQuestionResponse:
                 createRateQuestionResponseResolver(store),
             createAPIKey: createAPIKeyResolver(jwt),

@@ -25,8 +25,11 @@ import type {
     ContractQuestionType,
     ContractRevisionType,
     UnlockedContractType,
+    RateType,
+    RateQuestionType,
 } from '../domain-models'
 import { SESServiceException } from '@aws-sdk/client-ses'
+import { sendRateQuestionStateEmail } from './emails'
 
 // See more discussion of configuration in docs/Configuration.md
 type EmailConfiguration = {
@@ -145,6 +148,10 @@ type Emailer = {
         submitterEmails: string[],
         currentQuestion: ContractQuestionType,
         allContractQuestions: ContractQuestionType[]
+    ) => Promise<void | Error>
+    sendRateQuestionStateEmail: (
+        rate: RateType,
+        rateQuestion: RateQuestionType
     ) => Promise<void | Error>
 }
 const localEmailerLogger = (emailData: EmailData) =>
@@ -383,6 +390,18 @@ function emailer(
                 statePrograms,
                 allContractQuestions,
                 currentQuestion
+            )
+            if (emailData instanceof Error) {
+                return emailData
+            } else {
+                return await this.sendEmail(emailData)
+            }
+        },
+        sendRateQuestionStateEmail: async function (rate, rateQuestion) {
+            const emailData = await sendRateQuestionStateEmail(
+                rate,
+                config,
+                rateQuestion
             )
             if (emailData instanceof Error) {
                 return emailData

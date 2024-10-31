@@ -7,8 +7,10 @@ import {
 } from '../../testHelpers/userHelpers'
 import { v4 as uuidv4 } from 'uuid'
 import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
-import UPDATE_STATE_ASSIGNMENTS from '../../../../app-graphql/src/mutations/updateStateAssignment.graphql'
-import FETCH_MCREVIEW_SETTINGS from '../../../../app-graphql/src/queries/fetchMcReviewSettings.graphql'
+import {
+    FetchMcReviewSettingsDocument,
+    UpdateStateAssignmentDocument,
+} from '../../gen/gqlClient'
 import { assertAnError, must } from '../../testHelpers'
 
 describe('fetchMcReviewSettings', () => {
@@ -44,7 +46,7 @@ describe('fetchMcReviewSettings', () => {
 
         // Assign states to each CMS user
         const assignedOhioCMSUserResult = await server.executeOperation({
-            query: UPDATE_STATE_ASSIGNMENTS,
+            query: UpdateStateAssignmentDocument,
             variables: {
                 input: {
                     cmsUserID: newCMSUser1.id,
@@ -62,7 +64,7 @@ describe('fetchMcReviewSettings', () => {
             assignedOhioCMSUserResult.data.updateStateAssignment.user
 
         const assignedTexasCMSUserResult = await server.executeOperation({
-            query: UPDATE_STATE_ASSIGNMENTS,
+            query: UpdateStateAssignmentDocument,
             variables: {
                 input: {
                     cmsUserID: newCMSUser2.id,
@@ -80,7 +82,7 @@ describe('fetchMcReviewSettings', () => {
             assignedTexasCMSUserResult.data.updateStateAssignment.user
 
         const assignedFloridaCMSUserResult = await server.executeOperation({
-            query: UPDATE_STATE_ASSIGNMENTS,
+            query: UpdateStateAssignmentDocument,
             variables: {
                 input: {
                     cmsUserID: newCMSUser3.id,
@@ -98,7 +100,7 @@ describe('fetchMcReviewSettings', () => {
             assignedFloridaCMSUserResult.data.updateStateAssignment.user
 
         const mcReviewSettings = await server.executeOperation({
-            query: FETCH_MCREVIEW_SETTINGS,
+            query: FetchMcReviewSettingsDocument,
         })
 
         if (!mcReviewSettings.data?.fetchMcReviewSettings?.stateAssignments) {
@@ -172,7 +174,7 @@ describe('fetchMcReviewSettings', () => {
 
         // make a mock request
         const res = await server.executeOperation({
-            query: FETCH_MCREVIEW_SETTINGS,
+            query: FetchMcReviewSettingsDocument,
         })
 
         // confirm that we get what we got
@@ -193,7 +195,7 @@ describe('fetchMcReviewSettings', () => {
         })
 
         const mcReviewSettings = await server.executeOperation({
-            query: FETCH_MCREVIEW_SETTINGS,
+            query: FetchMcReviewSettingsDocument,
         })
 
         expect(assertAnError(mcReviewSettings).message).toContain(

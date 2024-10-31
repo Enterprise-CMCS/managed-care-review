@@ -1,6 +1,6 @@
 import type { InsertUserArgsType } from '../../postgres'
 import { NewPostgresStore } from '../../postgres'
-import INDEX_USERS from '../../../../app-graphql/src/queries/indexUsers.graphql'
+import { IndexUsersDocument } from '../../gen/gqlClient'
 import { v4 as uuidv4 } from 'uuid'
 import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
@@ -67,7 +67,7 @@ describe('indexUsers', () => {
         }
 
         const updateRes = await server.executeOperation({
-            query: INDEX_USERS,
+            query: IndexUsersDocument,
         })
 
         expect(updateRes.data).toBeDefined()
@@ -98,7 +98,7 @@ describe('indexUsers', () => {
         })
 
         const updateRes = await server.executeOperation({
-            query: INDEX_USERS,
+            query: IndexUsersDocument,
             variables: {
                 input: {
                     cmsUserID: uuidv4(),
@@ -116,7 +116,7 @@ describe('indexUsers', () => {
         const server = await constructTestPostgresServer()
 
         const updateRes = await server.executeOperation({
-            query: INDEX_USERS,
+            query: IndexUsersDocument,
             variables: {
                 input: {
                     cmsUserID: uuidv4(),

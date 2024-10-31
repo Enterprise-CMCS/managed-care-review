@@ -1,4 +1,4 @@
-import INDEX_CONTRACTS from '../../../../app-graphql/src/queries/indexContractsForDashboard.graphql'
+import { IndexContractsForDashboardDocument } from '../../gen/gqlClient'
 import {
     constructTestPostgresServer,
     createTestHealthPlanPackage,
@@ -38,7 +38,7 @@ describe(`indexContracts`, () => {
                     .formData
             // then see if we can get that same contract back from the index
             const result = await stateServer.executeOperation({
-                query: INDEX_CONTRACTS,
+                query: IndexContractsForDashboardDocument,
             })
 
             expect(result.errors).toBeUndefined()
@@ -114,7 +114,7 @@ describe(`indexContracts`, () => {
 
             // index contracts api request
             const result = await stateServer.executeOperation({
-                query: INDEX_CONTRACTS,
+                query: IndexContractsForDashboardDocument,
             })
             const submissionsIndex = result.data?.indexContracts
 
@@ -166,7 +166,7 @@ describe(`indexContracts`, () => {
             })
 
             const result = await otherUserServer.executeOperation({
-                query: INDEX_CONTRACTS,
+                query: IndexContractsForDashboardDocument,
                 variables: { input },
             })
 
@@ -200,7 +200,7 @@ describe(`indexContracts`, () => {
             })
 
             const result = await otherUserServer.executeOperation({
-                query: INDEX_CONTRACTS,
+                query: IndexContractsForDashboardDocument,
             })
 
             expect(result.errors).toBeUndefined()
@@ -232,7 +232,7 @@ describe(`indexContracts`, () => {
 
                 // index contracts api request
                 const result = await cmsServer.executeOperation({
-                    query: INDEX_CONTRACTS,
+                    query: IndexContractsForDashboardDocument,
                 })
                 const submissionsIndex = result.data?.indexContracts
 
@@ -285,7 +285,7 @@ describe(`indexContracts`, () => {
 
                 // index contracts api request
                 const result = await cmsServer.executeOperation({
-                    query: INDEX_CONTRACTS,
+                    query: IndexContractsForDashboardDocument,
                 })
                 const submissionsIndex = result.data?.indexContracts
 
@@ -348,7 +348,7 @@ describe(`indexContracts`, () => {
                 )
 
                 const result = await cmsServer.executeOperation({
-                    query: INDEX_CONTRACTS,
+                    query: IndexContractsForDashboardDocument,
                 })
 
                 expect(result.errors).toBeUndefined()
