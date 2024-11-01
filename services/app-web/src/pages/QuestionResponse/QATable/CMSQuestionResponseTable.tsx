@@ -50,7 +50,8 @@ export const CMSQuestionResponseTable = ({
                 const questionsList: RateQuestionList | ContractQuestionList =
                     value
 
-                //reverse questions to the earliest question first as rounds would be mismatched when looping through two arrays of different lengths
+                // Reverse each division question so that we start at round 1 for each question, otherwise we get
+                // mismatching rounds.
                 Array.from([...questionsList.edges])
                     .reverse()
                     .forEach(({ node }, index) => {
@@ -66,8 +67,16 @@ export const CMSQuestionResponseTable = ({
             }
         })
 
-        // return the rounds to latest questions first
-        return rounds.reverse()
+        // return the round questions sorted to latest questions first and reverse rounds to latest round first
+        return rounds
+            .map((round) =>
+                round.sort(
+                    (a, b) =>
+                        new Date(b.questionData.createdAt).getTime() -
+                        new Date(a.questionData.createdAt).getTime()
+                )
+            )
+            .reverse()
     }
 
     return (
