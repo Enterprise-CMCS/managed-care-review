@@ -14,6 +14,7 @@ import type {
     UnlockedContractType,
     ContractQuestionType,
     RateFormDataType,
+    RateQuestionType,
 } from '../domain-models'
 import { logError } from '../logger'
 import { pruneDuplicateEmails } from './formatters'
@@ -329,8 +330,8 @@ const stripHTMLFromTemplate = (template: string) => {
 }
 
 const getQuestionRound = (
-    allQuestions: ContractQuestionType[],
-    currentQuestion: ContractQuestionType
+    allQuestions: (ContractQuestionType | RateQuestionType)[],
+    currentQuestion: ContractQuestionType | RateQuestionType
 ): number | Error => {
     // Filter out other divisions question and sort by created at in ascending order
     const divisionQuestions = allQuestions
