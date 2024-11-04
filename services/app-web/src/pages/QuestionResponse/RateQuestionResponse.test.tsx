@@ -198,23 +198,23 @@ describe('RateQuestionResponse', () => {
             )
 
             expect(answeredRounds[2]).toHaveTextContent(
-                'Asked by: Division of Managed Care Policy (DMCP)'
+                'Asked by: Office of the Actuary (OACT)'
             )
             expect(answeredRounds[2]).toHaveTextContent(
-                'dmcp-question-1-document-1'
+                'oact-question-1-document-1'
             )
             expect(answeredRounds[2]).toHaveTextContent(
-                'response-to-dmcp-1-document-1'
+                'response-to-oact-1-document-1'
             )
 
             expect(answeredRounds[3]).toHaveTextContent(
-                'Asked by: Office of the Actuary (OACT)'
+                'Asked by: Division of Managed Care Policy (DMCP)'
             )
             expect(answeredRounds[3]).toHaveTextContent(
-                'oact-question-1-document-1'
+                'dmcp-question-1-document-1'
             )
             expect(answeredRounds[3]).toHaveTextContent(
-                'response-to-oact-1-document-1'
+                'response-to-dmcp-1-document-1'
             )
         })
 
@@ -431,22 +431,22 @@ describe('RateQuestionResponse', () => {
                 'response-to-oact-2-document-1'
             )
 
-            // expect next round to be round 1 with DMCP question
+            // expect round 1 with OACT question 1
             expect(otherDivisionRounds[1]).toHaveTextContent('Round 1')
             expect(otherDivisionRounds[1]).toHaveTextContent(
-                'dmcp-question-1-document-1'
-            )
-            expect(otherDivisionRounds[1]).toHaveTextContent(
-                'response-to-dmcp-1-document-1'
-            )
-
-            // expect next round (last round) to also be round 1 with OACT question 1
-            expect(otherDivisionRounds[2]).toHaveTextContent('Round 1')
-            expect(otherDivisionRounds[2]).toHaveTextContent(
                 'oact-question-1-document-1'
             )
-            expect(otherDivisionRounds[2]).toHaveTextContent(
+            expect(otherDivisionRounds[1]).toHaveTextContent(
                 'response-to-oact-1-document-1'
+            )
+
+            // expect last question in round 1 to be DMCP question
+            expect(otherDivisionRounds[2]).toHaveTextContent('Round 1')
+            expect(otherDivisionRounds[2]).toHaveTextContent(
+                'dmcp-question-1-document-1'
+            )
+            expect(otherDivisionRounds[2]).toHaveTextContent(
+                'response-to-dmcp-1-document-1'
             )
         })
         it('renders with question submit banner after question submitted', async () => {
