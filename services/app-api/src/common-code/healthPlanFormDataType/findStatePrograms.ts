@@ -1,5 +1,5 @@
 import statePrograms from '../data/statePrograms.json'
-import { ProgramArgType } from './State'
+import type { ProgramArgType } from './State'
 
 export const findStatePrograms = (stateCode: string): ProgramArgType[] => {
     const programs = statePrograms.states.find(

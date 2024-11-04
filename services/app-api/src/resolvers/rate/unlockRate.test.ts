@@ -1,5 +1,5 @@
 import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
-import UNLOCK_RATE from '../../../../app-graphql/src/mutations/unlockRate.graphql'
+import { UnlockRateDocument } from '../../gen/gqlClient'
 import { iterableCmsUsersMockData } from '../../testHelpers/userHelpers'
 import { expectToBeDefined } from '../../testHelpers/assertionHelpers'
 import { testLDService } from '../../testHelpers/launchDarklyHelpers'
@@ -72,7 +72,7 @@ describe(`unlockRate`, () => {
 
                 // Try to unlock the rate again
                 const unlockResult2 = await cmsServer.executeOperation({
-                    query: UNLOCK_RATE,
+                    query: UnlockRateDocument,
                     variables: {
                         input: {
                             rateID: rate.id,
@@ -100,7 +100,7 @@ describe(`unlockRate`, () => {
 
                 // Unlock the rate
                 const unlockResult = await stateServer.executeOperation({
-                    query: UNLOCK_RATE,
+                    query: UnlockRateDocument,
                     variables: {
                         input: {
                             rateID: rate.id,

@@ -1,4 +1,4 @@
-import FETCH_CONTRACT_WITH_QUESTIONS from '../../../../app-graphql/src/queries/fetchContractWithQuestions.graphql'
+import { FetchContractWithQuestionsDocument } from '../../gen/gqlClient'
 import {
     constructTestPostgresServer,
     createTestQuestion,
@@ -122,7 +122,7 @@ describe('contractResolver', () => {
 
         draft.questions = indexQuestionsResult
         const fetchContractResult = await stateServer.executeOperation({
-            query: FETCH_CONTRACT_WITH_QUESTIONS,
+            query: FetchContractWithQuestionsDocument,
             variables: {
                 input: {
                     contractID: stateSubmission.id,
@@ -225,7 +225,7 @@ describe('contractResolver', () => {
         })
 
         const fetchResult = await stateServerVA.executeOperation({
-            query: FETCH_CONTRACT_WITH_QUESTIONS,
+            query: FetchContractWithQuestionsDocument,
             variables: {
                 input: {
                     contractID: stateSubmission.id,

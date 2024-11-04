@@ -231,7 +231,7 @@ describe('SubmissionSideNav', () => {
         // Expect second rate link using depreciated rates to have correct href url
         expect(rate3Link).toHaveAttribute(
             'href',
-            '/submissions/15/rate/third-rate/question-and-answers'
+            '/submissions/15/rates/third-rate/question-and-answers'
         )
 
         const rate4Link = withinSideNav.getByRole('link', {
@@ -244,7 +244,7 @@ describe('SubmissionSideNav', () => {
         // Expect fourth rate link falling back to UnknownProgram to have correct href url
         expect(rate4Link).toHaveAttribute(
             'href',
-            '/submissions/15/rate/fourth-rate/question-and-answers'
+            '/submissions/15/rates/fourth-rate/question-and-answers'
         )
     })
 

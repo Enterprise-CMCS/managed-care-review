@@ -7,15 +7,17 @@ import {
 } from '../../testHelpers/gqlHelpers'
 import { latestFormData } from '../../testHelpers/healthPlanPackageHelpers'
 import { testStateUser, testCMSUser } from '../../testHelpers/userHelpers'
-import SUBMIT_RATE from '../../../../app-graphql/src/mutations/submitRate.graphql'
-import FETCH_RATE from '../../../../app-graphql/src/queries/fetchRate.graphql'
-import UNLOCK_RATE from '../../../../app-graphql/src/mutations/unlockRate.graphql'
+import {
+    SubmitRateDocument,
+    FetchRateDocument,
+    UnlockRateDocument,
+    SubmitHealthPlanPackageDocument,
+} from '../../gen/gqlClient'
 import {
     clearMetadataFromRateFormData,
     submitTestRate,
     updateTestRate,
 } from '../../testHelpers'
-import SUBMIT_HEALTH_PLAN_PACKAGE from '../../../../app-graphql/src/mutations/submitHealthPlanPackage.graphql'
 import {
     addLinkedRateToTestContract,
     addNewRateToTestContract,
@@ -61,7 +63,7 @@ describe('submitRate', () => {
         const rate = await createSubmitAndUnlockTestRate(stateServer, cmsServer)
 
         const fetchDraftRate = await stateServer.executeOperation({
-            query: FETCH_RATE,
+            query: FetchRateDocument,
             variables: {
                 input: { rateID: rate.id },
             },
@@ -72,7 +74,7 @@ describe('submitRate', () => {
 
         // submitRate with no form data updates
         const result = await stateServer.executeOperation({
-            query: SUBMIT_RATE,
+            query: SubmitRateDocument,
             variables: {
                 input: {
                     rateID: rate.id,
@@ -156,7 +158,7 @@ describe('submitRate', () => {
         const rate = await createSubmitAndUnlockTestRate(stateServer, cmsServer)
 
         const fetchDraftRate = await stateServer.executeOperation({
-            query: FETCH_RATE,
+            query: FetchRateDocument,
             variables: {
                 input: { rateID: rate.id },
             },
@@ -215,7 +217,7 @@ describe('submitRate', () => {
         )
 
         const fetchDraftRate = await stateServer.executeOperation({
-            query: FETCH_RATE,
+            query: FetchRateDocument,
             variables: {
                 input: { rateID: draftRate.id },
             },
@@ -229,7 +231,7 @@ describe('submitRate', () => {
         expect(draftFormData).toBeDefined()
 
         const result = await stateServer.executeOperation({
-            query: SUBMIT_RATE,
+            query: SubmitRateDocument,
             variables: {
                 input: {
                     rateID: draftRate.id,
@@ -400,7 +402,7 @@ describe('submitRate', () => {
 
         // submit contract and rate
         await stateServer.executeOperation({
-            query: SUBMIT_HEALTH_PLAN_PACKAGE,
+            query: SubmitHealthPlanPackageDocument,
             variables: {
                 input: {
                     pkgID: draftContractWithRate.id,
@@ -410,7 +412,7 @@ describe('submitRate', () => {
 
         // fetch newly created rate
         const fetchDraftRate = await stateServer.executeOperation({
-            query: FETCH_RATE,
+            query: FetchRateDocument,
             variables: {
                 input: { rateID },
             },
@@ -422,7 +424,7 @@ describe('submitRate', () => {
 
         // unlocked the rate
         const unlockedRateResult = await cmsServer.executeOperation({
-            query: UNLOCK_RATE,
+            query: UnlockRateDocument,
             variables: {
                 input: {
                     rateID,
@@ -439,7 +441,7 @@ describe('submitRate', () => {
 
         // resubmit rate
         const result = await stateServer.executeOperation({
-            query: SUBMIT_RATE,
+            query: SubmitRateDocument,
             variables: {
                 input: {
                     rateID: rateID,
@@ -484,7 +486,7 @@ describe('submitRate', () => {
         )
 
         const fetchDraftRate = await stateServer.executeOperation({
-            query: FETCH_RATE,
+            query: FetchRateDocument,
             variables: {
                 input: { rateID: draftRate.id },
             },
@@ -503,7 +505,7 @@ describe('submitRate', () => {
         })
 
         const result = await stateServer.executeOperation({
-            query: SUBMIT_RATE,
+            query: SubmitRateDocument,
             variables: {
                 input: {
                     rateID: draftRate.id,

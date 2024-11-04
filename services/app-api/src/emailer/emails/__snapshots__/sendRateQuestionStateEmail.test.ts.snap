@@ -1,0 +1,14 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`sendRateQuestionStateEmail renders overall email for a new rate question as expected 1`] = `
+"CMS asked questions about test-rate-certification-name<br />
+<b>Sent by:</b> Prince Zuko (DMCO) <a href="zuko@example.com">zuko@example.com</a>
+<br />
+<b>Date:</b> 04/22/2024<br />
+<br />
+You must respond to the questions before CMS can continue their review.<br />
+<br />
+<a href="http://localhost/submissions/parent-contract/rates/test-rate/question-and-answers">Open the submission in MC-Review to answer questions</a>
+
+"
+`;

@@ -13,6 +13,8 @@ import type {
     RateRevisionType,
     UnlockedContractType,
     ContractQuestionType,
+    RateFormDataType,
+    RateQuestionType,
 } from '../domain-models'
 import { logError } from '../logger'
 import { pruneDuplicateEmails } from './formatters'
@@ -328,8 +330,8 @@ const stripHTMLFromTemplate = (template: string) => {
 }
 
 const getQuestionRound = (
-    allQuestions: ContractQuestionType[],
-    currentQuestion: ContractQuestionType
+    allQuestions: (ContractQuestionType | RateQuestionType)[],
+    currentQuestion: ContractQuestionType | RateQuestionType
 ): number | Error => {
     // Filter out other divisions question and sort by created at in ascending order
     const divisionQuestions = allQuestions
@@ -355,6 +357,28 @@ const getQuestionRound = (
     return questionIndex + 1
 }
 
+const getActuaryContactEmails = (formData: RateFormDataType): string[] => {
+    const actuaryContacts: string[] = []
+
+    if (formData.certifyingActuaryContacts?.length) {
+        formData.certifyingActuaryContacts.forEach((contact) => {
+            if (contact.email) {
+                actuaryContacts.push(contact.email)
+            }
+        })
+    }
+
+    if (formData.addtlActuaryContacts?.length) {
+        formData.addtlActuaryContacts.forEach((contact) => {
+            if (contact.email) {
+                actuaryContacts.push(contact.email)
+            }
+        })
+    }
+
+    return actuaryContacts
+}
+
 export {
     stripHTMLFromTemplate,
     handleAsCHIPSubmission,
@@ -369,4 +393,5 @@ export {
     findContractPrograms,
     filterChipAndPRSubmissionReviewers,
     getQuestionRound,
+    getActuaryContactEmails,
 }

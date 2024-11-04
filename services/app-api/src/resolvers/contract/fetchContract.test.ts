@@ -3,8 +3,7 @@ import {
     createAndUpdateTestHealthPlanPackage,
     unlockTestHealthPlanPackage,
 } from '../../testHelpers/gqlHelpers'
-
-import FETCH_CONTRACT from '../../../../app-graphql/src/queries/fetchContract.graphql'
+import { FetchContractDocument } from '../../gen/gqlClient'
 import { testCMSUser, testStateUser } from '../../testHelpers/userHelpers'
 import {
     createAndUpdateTestContractWithoutRates,
@@ -52,7 +51,7 @@ describe('fetchContract', () => {
             await createAndUpdateTestHealthPlanPackage(stateServer)
 
         const fetchDraftContractResult = await stateServer.executeOperation({
-            query: FETCH_CONTRACT,
+            query: FetchContractDocument,
             variables: {
                 input: {
                     contractID: stateSubmission.id,
@@ -143,7 +142,7 @@ describe('fetchContract', () => {
         })
 
         const fetchResult = await stateServerVA.executeOperation({
-            query: FETCH_CONTRACT,
+            query: FetchContractDocument,
             variables: {
                 input: {
                     contractID: stateSubmission.id,

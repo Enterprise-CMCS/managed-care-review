@@ -10,8 +10,10 @@ import { v4 as uuidv4 } from 'uuid'
 import type { InsertUserArgsType } from '../../postgres'
 import { NewPostgresStore } from '../../postgres'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
-import UPDATE_STATE_ASSIGNMENTS_BY_STATE from '../../../../app-graphql/src/mutations/updateStateAssignmentsByState.graphql'
-import INDEX_USERS from '../../../../app-graphql/src/queries/indexUsers.graphql'
+import {
+    UpdateStateAssignmentsByStateDocument,
+    IndexUsersDocument,
+} from '../../gen/gqlClient'
 import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
 import type { User, UserEdge } from '../../gen/gqlServer'
 import {
@@ -121,7 +123,7 @@ describe.each(authorizedUserTests)(
             })
 
             const updateRes = await server.executeOperation({
-                query: UPDATE_STATE_ASSIGNMENTS_BY_STATE,
+                query: UpdateStateAssignmentsByStateDocument,
                 variables: {
                     input: {
                         stateCode: 'CA',
@@ -147,7 +149,7 @@ describe.each(authorizedUserTests)(
 
             // change the value and see if it updates
             const updateRes2 = await server.executeOperation({
-                query: UPDATE_STATE_ASSIGNMENTS_BY_STATE,
+                query: UpdateStateAssignmentsByStateDocument,
                 variables: {
                     input: {
                         stateCode: 'CA',
@@ -168,7 +170,7 @@ describe.each(authorizedUserTests)(
             expect(users2).toHaveLength(2)
 
             const updateRes3 = await server.executeOperation({
-                query: UPDATE_STATE_ASSIGNMENTS_BY_STATE,
+                query: UpdateStateAssignmentsByStateDocument,
                 variables: {
                     input: {
                         stateCode: 'NC',
@@ -181,7 +183,7 @@ describe.each(authorizedUserTests)(
             expect(updateRes3.errors).toBeUndefined()
 
             const allUsersQuery = await server.executeOperation({
-                query: INDEX_USERS,
+                query: IndexUsersDocument,
                 variables: {},
             })
 
@@ -274,7 +276,7 @@ describe.each(authorizedUserTests)(
             })
 
             const updateResEmpty = await server.executeOperation({
-                query: UPDATE_STATE_ASSIGNMENTS_BY_STATE,
+                query: UpdateStateAssignmentsByStateDocument,
                 variables: {
                     input: {
                         stateCode: 'CA',
@@ -292,7 +294,7 @@ describe.each(authorizedUserTests)(
             ).toEqual([])
 
             const updateResUndefined = await server.executeOperation({
-                query: UPDATE_STATE_ASSIGNMENTS_BY_STATE,
+                query: UpdateStateAssignmentsByStateDocument,
                 variables: {
                     input: {
                         stateCode: 'CA',
@@ -307,7 +309,7 @@ describe.each(authorizedUserTests)(
             expect(assertAnErrorCode(updateResUndefined)).toBe('BAD_USER_INPUT')
 
             const updateResNull = await server.executeOperation({
-                query: UPDATE_STATE_ASSIGNMENTS_BY_STATE,
+                query: UpdateStateAssignmentsByStateDocument,
                 variables: {
                     input: {
                         stateCode: 'CA',
@@ -339,7 +341,7 @@ describe.each(authorizedUserTests)(
             })
 
             const updateRes = await server.executeOperation({
-                query: UPDATE_STATE_ASSIGNMENTS_BY_STATE,
+                query: UpdateStateAssignmentsByStateDocument,
                 variables: {
                     input: {
                         stateCode: 'XX',
@@ -372,7 +374,7 @@ describe.each(authorizedUserTests)(
             }
 
             const updateRes = await server.executeOperation({
-                query: UPDATE_STATE_ASSIGNMENTS_BY_STATE,
+                query: UpdateStateAssignmentsByStateDocument,
                 variables: {
                     input: {
                         stateCode: 'CA',
@@ -399,7 +401,7 @@ describe.each(authorizedUserTests)(
             })
 
             const updateRes = await server.executeOperation({
-                query: UPDATE_STATE_ASSIGNMENTS_BY_STATE,
+                query: UpdateStateAssignmentsByStateDocument,
                 variables: {
                     input: {
                         stateCode: 'CA',
@@ -431,7 +433,7 @@ describe.each(authorizedUserTests)(
             }
 
             const updateRes = await server.executeOperation({
-                query: UPDATE_STATE_ASSIGNMENTS_BY_STATE,
+                query: UpdateStateAssignmentsByStateDocument,
                 variables: {
                     input: {
                         stateCode: 'CA',
@@ -464,7 +466,7 @@ describe.each(unauthorizedUserTests)(
             })
 
             const updateRes = await server.executeOperation({
-                query: UPDATE_STATE_ASSIGNMENTS_BY_STATE,
+                query: UpdateStateAssignmentsByStateDocument,
                 variables: {
                     input: {
                         stateCode: 'CA',

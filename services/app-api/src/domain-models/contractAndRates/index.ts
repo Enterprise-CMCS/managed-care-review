@@ -30,6 +30,8 @@ export type {
     DocumentType,
     RateFormEditableType,
     ContractFormEditableType,
+    StateContactType,
+    ActuaryContactType,
 } from './formDataTypes'
 
 export type { ContractRevisionType, RateRevisionType } from './revisionTypes'
