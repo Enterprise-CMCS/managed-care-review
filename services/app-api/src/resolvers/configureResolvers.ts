@@ -144,8 +144,12 @@ export function configureResolvers(
                 emailParameterStore,
                 launchDarkly
             ),
-            createRateQuestionResponse:
-                createRateQuestionResponseResolver(store),
+            createRateQuestionResponse: createRateQuestionResponseResolver(
+                store,
+                emailer,
+                emailParameterStore,
+                launchDarkly
+            ),
             createAPIKey: createAPIKeyResolver(jwt),
             unlockRate: unlockRate(store),
             submitRate: submitRate(store, launchDarkly),
