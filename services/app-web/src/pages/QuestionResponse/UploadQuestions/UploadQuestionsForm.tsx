@@ -20,6 +20,9 @@ import {
 } from '../../../components/FileUpload'
 import { PageActionsContainer } from '../../StateSubmission/PageActions'
 import { useErrorSummary } from '../../../hooks/useErrorSummary'
+import { QAUploadFormSummary } from '../QAUploadFormSummary'
+import { Division } from '../../../gen/gqlClient'
+import { divisionFullNames } from '../QuestionResponseHelpers'
 
 type UploadQuestionsFormProps = {
     handleSubmit: (cleaned: FileItemT[]) => Promise<void>
@@ -53,8 +56,7 @@ const UploadQuestionsForm = ({
     const uploadComponentID = `${type}-questions-upload`
     const showFileUploadError = Boolean(shouldValidate && fileUploadError)
     const fileUploadErrorFocusKey = hasNoFiles
-        ? uploadComponentID
-        : '#file-items-list'
+        ? uploadComponentID: '#file-items-list'
 
     const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
@@ -83,8 +85,10 @@ const UploadQuestionsForm = ({
             {apiError && <GenericApiErrorBanner />}
             <fieldset className="usa-fieldset">
                 <h2>Add questions</h2>
-                <p className="text-bold">{`${division?.toUpperCase()} - Round${round}`}</p>
-
+                <div id='formSummary'>
+                    <span>{`Asked by: ${divisionFullNames[division?.toUpperCase() as Division]}`}</span>
+                    <span>Round {round}</span>
+                </div>
                 {shouldValidate && (
                     <ErrorSummary
                         errors={

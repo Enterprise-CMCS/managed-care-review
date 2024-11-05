@@ -8,7 +8,6 @@ import {
     useFetchContractWithQuestionsQuery,
 } from '../../../gen/gqlClient'
 import { usePage } from '../../../contexts/PageContext'
-import { SideNavOutletContextType } from '../../SubmissionSideNav/SubmissionSideNav'
 import { Breadcrumbs } from '../../../components/Breadcrumbs/Breadcrumbs'
 import { createContractResponseWrapper } from '../../../gqlHelpers/mutationWrappersForUserFriendlyErrors'
 import { RoutesRecord } from '../../../constants'

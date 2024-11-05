@@ -17,8 +17,8 @@ import { useFileUpload } from '../../../hooks/useFileUpload'
 import { ACCEPTED_SUBMISSION_FILE_TYPES, FileItemT } from '../../../components/FileUpload'
 import { PageActionsContainer } from '../../StateSubmission/PageActions'
 import { useErrorSummary } from '../../../hooks/useErrorSummary'
-import { divisionFullNames } from '../QuestionResponseHelpers'
 import { Division } from '../../../gen/gqlClient'
+import { QAUploadFormSummary } from '../QAUploadFormSummary'
 
 type UploadResponseFormProps =  {
     handleSubmit: (cleaned: FileItemT[]) => Promise<void>,
@@ -65,6 +65,7 @@ const UploadResponseForm = ({handleSubmit, apiError, apiLoading, type, round}: U
             }
         }
 
+        const isContract = type == 'contract'
     return (
         <UswdsForm
                 className={styles.formContainer}
@@ -76,11 +77,13 @@ const UploadResponseForm = ({handleSubmit, apiError, apiLoading, type, round}: U
                 {apiError && <GenericApiErrorBanner />}
                 <fieldset className="usa-fieldset">
                     <h2>Upload response</h2>
-                    <div id='formSummary'>
-                        <span className="text-bold">Contract questions</span>
-                        <span>{`Asked by: ${divisionFullNames[division?.toUpperCase() as Division]}`}</span>
-                        <span>{`Round ${round}`}</span>
-                    </div>
+                    <QAUploadFormSummary
+                    // Don't pass a round for rates - we don't display rounds to state users on rates
+                        round={isContract? round : undefined}
+                        division={division?.toUpperCase() as Division}
+                        isContract={isContract}
+                     />
+
                     {shouldValidate && (
                         <ErrorSummary
                             errors={

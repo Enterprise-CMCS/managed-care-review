@@ -79,8 +79,8 @@ const getQuestionRoundForQuestionID = (questions: IndexRateQuestionsPayload | In
    if (!matchingQuestion){
     return 0
    } else {
-    // @ts-expect-error cannot infer wether contract or rate question edge expected
-    return questionsEdges.indexOf(matchingQuestion) ? questionsEdges.indexOf(matchingQuestion) + 1 : 0
+        // @ts-expect-error cannot infer wether contract or rate question edge expected
+    return questionsEdges.indexOf(matchingQuestion) !== undefined ? questionsEdges.indexOf(matchingQuestion) + 1 : 0
    }
 }
 
