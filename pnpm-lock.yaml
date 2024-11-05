@@ -243,8 +243,8 @@ importers:
         specifier: ^6.0.2
         version: 6.0.2
       '@types/aws-lambda':
-        specifier: ^8.10.143
-        version: 8.10.143
+        specifier: ^8.10.145
+        version: 8.10.145
       '@types/glob':
         specifier: ^8.0.0
         version: 8.1.0
@@ -5657,8 +5657,8 @@ packages:
   '@types/aria-query@5.0.1':
     resolution: {integrity: sha512-XTIieEY+gvJ39ChLcB4If5zHtPxt3Syj5rgZR+e1ctpmK8NjPf0zFqsz4JpLJT0xla9GFDKjy8Cpu331nrmE1Q==}
 
-  '@types/aws-lambda@8.10.143':
-    resolution: {integrity: sha512-u5vzlcR14ge/4pMTTMDQr3MF0wEe38B2F9o84uC4F43vN5DGTy63npRrB6jQhyt+C0lGv4ZfiRcRkqJoZuPnmg==}
+  '@types/aws-lambda@8.10.145':
+    resolution: {integrity: sha512-dtByW6WiFk5W5Jfgz1VM+YPA21xMXTuSFoLYIDY0L44jDLLflVPtZkYuu3/YxpGcvjzKFBZLU+GyKjR0HOYtyw==}
 
   '@types/babel__core@7.20.5':
     resolution: {integrity: sha512-qoQprZvz5wQFJwMDqeseRXWv3rqMvhgpbXFfVyWhbx9X47POIA6i/+dXefEmZKoAgOaTdaIgNSMqMIU61yRyzA==}
@@ -19906,7 +19906,7 @@ snapshots:
       '@octokit/core': 5.0.2
       '@octokit/oauth-authorization-url': 6.0.2
       '@octokit/oauth-methods': 4.0.1
-      '@types/aws-lambda': 8.10.143
+      '@types/aws-lambda': 8.10.145
       universal-user-agent: 6.0.0
 
   '@octokit/oauth-authorization-url@6.0.2': {}
@@ -21962,7 +21962,7 @@ snapshots:
 
   '@types/aria-query@5.0.1': {}
 
-  '@types/aws-lambda@8.10.143': {}
+  '@types/aws-lambda@8.10.145': {}
 
   '@types/babel__core@7.20.5':
     dependencies:
@@ -22884,7 +22884,7 @@ snapshots:
 
   apollo-server-lambda@3.13.0(encoding@0.1.13)(graphql@16.9.0):
     dependencies:
-      '@types/aws-lambda': 8.10.143
+      '@types/aws-lambda': 8.10.145
       '@vendia/serverless-express': 4.10.1
       apollo-server-core: 3.13.0(encoding@0.1.13)(graphql@16.9.0)
       apollo-server-express: 3.13.0(encoding@0.1.13)(express@4.19.2)(graphql@16.9.0)
