@@ -13,8 +13,8 @@ import type {
     RateRevisionType,
     UnlockedContractType,
     ContractQuestionType,
-    RateFormDataType,
     RateQuestionType,
+    RateType,
 } from '../domain-models'
 import { logError } from '../logger'
 import { pruneDuplicateEmails } from './formatters'
@@ -357,7 +357,8 @@ const getQuestionRound = (
     return questionIndex + 1
 }
 
-const getActuaryContactEmails = (formData: RateFormDataType): string[] => {
+const getActuaryContactEmails = (rate: RateType): string[] => {
+    const formData = rate.packageSubmissions[0].rateRevision.formData
     const actuaryContacts: string[] = []
 
     if (formData.certifyingActuaryContacts?.length) {
@@ -379,6 +380,31 @@ const getActuaryContactEmails = (formData: RateFormDataType): string[] => {
     return actuaryContacts
 }
 
+const getRateSubmitterEmails = (rate: RateType): string[] => {
+    const contractRevisions = rate.packageSubmissions[0].contractRevisions
+    return contractRevisions.reduce((contacts: string[], cr) => {
+        if (cr.submitInfo?.updatedBy.email) {
+            return contacts.concat(cr.submitInfo.updatedBy.email)
+        }
+        return contacts
+    }, [])
+}
+
+const getRateStateContactEmails = (rate: RateType): string[] => {
+    const contractRevisions = rate.packageSubmissions[0].contractRevisions
+    return contractRevisions.reduce((contacts: string[], cr) => {
+        const stateContacts: string[] = []
+        if (cr.formData.stateContacts.length) {
+            cr.formData.stateContacts.forEach((stateContact) => {
+                if (stateContact.email) {
+                    stateContacts.push(stateContact.email)
+                }
+            })
+        }
+        return contacts.concat(stateContacts)
+    }, [])
+}
+
 export {
     stripHTMLFromTemplate,
     handleAsCHIPSubmission,
@@ -394,4 +420,6 @@ export {
     filterChipAndPRSubmissionReviewers,
     getQuestionRound,
     getActuaryContactEmails,
+    getRateSubmitterEmails,
+    getRateStateContactEmails,
 }

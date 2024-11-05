@@ -2,6 +2,8 @@ import type { RateQuestionType, RateType } from '../../domain-models'
 import type { EmailConfiguration, EmailData } from '../emailer'
 import {
     getActuaryContactEmails,
+    getRateStateContactEmails,
+    getRateSubmitterEmails,
     renderTemplate,
     stripHTMLFromTemplate,
 } from '../templateHelpers'
@@ -14,7 +16,6 @@ export const sendRateQuestionStateEmail = async (
     config: EmailConfiguration,
     rateQuestion: RateQuestionType
 ): Promise<EmailData | Error> => {
-    const contractRevisions = rate.packageSubmissions[0].contractRevisions
     const rateFormData = rate.packageSubmissions[0].rateRevision.formData
     const parentContractID = rate.parentContractID
     const shouldIncludeActuaries =
@@ -26,33 +27,10 @@ export const sendRateQuestionStateEmail = async (
         )
     }
 
-    const submitterEmails = contractRevisions.reduce(
-        (contacts: string[], cr) => {
-            if (cr.submitInfo?.updatedBy.email) {
-                return contacts.concat(cr.submitInfo.updatedBy.email)
-            }
-            return contacts
-        },
-        []
-    )
-
-    const stateContactEmails = contractRevisions.reduce(
-        (contacts: string[], cr) => {
-            const stateContacts: string[] = []
-            if (cr.formData.stateContacts.length) {
-                cr.formData.stateContacts.forEach((stateContact) => {
-                    if (stateContact.email) {
-                        stateContacts.push(stateContact.email)
-                    }
-                })
-            }
-            return contacts.concat(stateContacts)
-        },
-        []
-    )
-
+    const submitterEmails = getRateSubmitterEmails(rate)
+    const stateContactEmails = getRateStateContactEmails(rate)
     const actuaryEmails = shouldIncludeActuaries
-        ? getActuaryContactEmails(rateFormData)
+        ? getActuaryContactEmails(rate)
         : []
 
     const toAddresses = pruneDuplicateEmails([
