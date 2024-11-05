@@ -7,9 +7,12 @@ import {
     setSuccessAttributesOnActiveSpan,
 } from '../attributeHelper'
 import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
+import { GraphQLError } from 'graphql/index'
+import type { Emailer } from '../../emailer'
 
 export function createRateQuestionResponseResolver(
-    store: Store
+    store: Store,
+    emailer: Emailer
 ): MutationResolvers['createRateQuestionResponse'] {
     return async (_parent, { input }, context) => {
         const { user, ctx, tracer } = context
@@ -57,6 +60,66 @@ export function createRateQuestionResponseResolver(
             logError('createRateQuestionResponse', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new Error(errMessage)
+        }
+
+        const rate = await store.findRateWithHistory(
+            createResponseResult.rateID
+        )
+
+        if (rate instanceof Error) {
+            if (rate instanceof NotFoundError) {
+                const errMessage = `Rate with id ${createResponseResult.rateID} does not exist`
+                logError('createRateQuestion', errMessage)
+                setErrorAttributesOnActiveSpan(errMessage, span)
+                throw new GraphQLError(errMessage, {
+                    extensions: { code: 'NOT_FOUND' },
+                })
+            }
+
+            const errMessage = `Issue finding a rate. Message: ${rate.message}`
+            logError('createRateQuestion', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+            throw new GraphQLError(errMessage, {
+                extensions: {
+                    code: 'INTERNAL_SERVER_ERROR',
+                    cause: 'DB_ERROR',
+                },
+            })
+        }
+
+        const questions = await store.findAllQuestionsByRate(
+            createResponseResult.rateID
+        )
+
+        if (questions instanceof Error) {
+            const errMessage = `Issue finding all questions associated with the rate: ${rate.id}`
+            logError('createRateQuestion', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+            throw new Error(errMessage)
+        }
+
+        const sendStateEmailResult =
+            await emailer.sendRateQuestionResponseStateEmail(
+                rate,
+                questions,
+                createResponseResult
+            )
+
+        if (sendStateEmailResult instanceof Error) {
+            logError(
+                'sendRateQuestionResponseStateEmail - Send State email',
+                sendStateEmailResult.message
+            )
+            setErrorAttributesOnActiveSpan(
+                `Send State email failed: ${sendStateEmailResult.message}`,
+                span
+            )
+            throw new GraphQLError('Email failed', {
+                extensions: {
+                    code: 'INTERNAL_SERVER_ERROR',
+                    cause: 'EMAIL_ERROR',
+                },
+            })
         }
 
         logSuccess('createRateQuestionResponse')

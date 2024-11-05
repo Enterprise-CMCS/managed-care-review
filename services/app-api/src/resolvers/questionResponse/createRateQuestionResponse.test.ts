@@ -9,6 +9,7 @@ import {
 } from '../../testHelpers/gqlHelpers'
 import { createAndSubmitTestContractWithRate } from '../../testHelpers/gqlContractHelpers'
 import { assertAnError, assertAnErrorCode } from '../../testHelpers'
+import { testEmailConfig, testEmailer } from '../../testHelpers/emailerHelpers'
 
 describe('createRateQuestionResponse', () => {
     const cmsUser = testCMSUser()
@@ -106,6 +107,56 @@ describe('createRateQuestionResponse', () => {
         expect(assertAnErrorCode(questionResponseResult)).toBe('FORBIDDEN')
         expect(assertAnError(questionResponseResult).message).toBe(
             'user not authorized to create a question response'
+        )
+    })
+
+    it('sends State email', async () => {
+        const emailConfig = testEmailConfig()
+        const mockEmailer = testEmailer(emailConfig)
+        const stateServer = await constructTestPostgresServer({
+            emailer: mockEmailer,
+        })
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: cmsUser,
+            },
+            emailer: mockEmailer,
+        })
+        const contractWithRate =
+            await createAndSubmitTestContractWithRate(stateServer)
+        const rateID =
+            contractWithRate.packageSubmissions[0].rateRevisions[0].rateID
+
+        const rateName =
+            contractWithRate.packageSubmissions[0].rateRevisions[0].formData
+                .rateCertificationName
+
+        const rateQuestionResult = await createTestRateQuestion(
+            cmsServer,
+            rateID
+        )
+        const question = rateQuestionResult.data?.createRateQuestion.question
+
+        await createTestRateQuestionResponse(stateServer, question.id)
+
+        expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
+            5, // New response state email notification is the fifth email, if State email is before CMS email.
+            expect.objectContaining({
+                subject: expect.stringContaining(
+                    `[LOCAL] Response submitted to CMS for ${rateName}`
+                ),
+                sourceEmail: emailConfig.emailSource,
+                //TODO: Finish this when Kelsey gets designs done.
+                // toAddresses: expect.arrayContaining(
+                //     Array.from(stateReceiverEmails)
+                // ),
+                // bodyText: expect.stringContaining(
+                //     `${oactCMS.divisionAssignment} round 1 response was successfully submitted`
+                // ),
+                bodyHTML: expect.stringContaining(
+                    `<a href="http://localhost/submissions/${contractWithRate.id}/rates/${rateID}/question-and-answers">View response</a>`
+                ),
+            })
         )
     })
 })
