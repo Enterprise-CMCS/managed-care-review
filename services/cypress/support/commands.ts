@@ -9,8 +9,7 @@ import 'cypress-file-upload'
 import 'cypress-pipe'
 import {aliasMutation, aliasQuery} from '../utils/graphql-test-utils';
 
-
-const LOCAL_STORAGE_MEMORY = {}
+const LOCAL_STORAGE_MEMORY: {} = {}
 
 Cypress.Commands.add('saveLocalStorage', () => {
     Object.keys(localStorage).forEach((key) => {
@@ -39,7 +38,7 @@ Cypress.Commands.add('restoreLocalStorage', () => {
  */
 
 Cypress.Commands.add('safeClick', { prevSubject: 'element' }, ($element) => {
-    const click = ($el) => $el.click()
+    const click = ($el: JQuery) => $el.trigger('click')
     return cy.wrap($element).should('exist').should('be.visible').wait(500).pipe(click)
 })
 
@@ -56,13 +55,16 @@ Cypress.Commands.add('interceptGraphQL', () => {
         aliasQuery(req, 'fetchContract')
         aliasQuery(req, 'fetchMcReviewSettings')
         aliasQuery(req, 'fetchEmailSettings')
+        aliasQuery(req, 'fetchRateWithQuestions')
         aliasMutation(req, 'createHealthPlanPackage')
         aliasMutation(req, 'createContract')
         aliasMutation(req, 'updateHealthPlanFormData')
         aliasMutation(req, 'submitHealthPlanPackage')
         aliasMutation(req, 'updateDivisionAssignment')
         aliasMutation(req, 'createContractQuestion')
+        aliasMutation(req, 'createRateQuestion')
         aliasMutation(req, 'createContractQuestionResponse')
+        aliasMutation(req, 'createRateQuestionResponse')
         aliasMutation(req, 'updateDraftContractRates')
         aliasMutation(req, 'updateContractDraftRevision')
         aliasMutation(req, 'submitContract')

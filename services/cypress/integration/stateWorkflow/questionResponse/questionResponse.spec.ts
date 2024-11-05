@@ -9,7 +9,7 @@ describe('Q&A', () => {
         // Assign Division to CMS user zuko
         cy.apiAssignDivisionToCMSUser(cmsUser(), 'DMCO').then(() => {
             // Create a new submission
-            cy.apiCreateAndSubmitContractOnlySubmission(stateUser()).then(
+            cy.apiCreateAndSubmitContractWithRates(stateUser()).then(
                 (contract) => {
                     // Log in as CMS user and upload question
                     cy.logInAsCMSUser({
@@ -93,6 +93,76 @@ describe('Q&A', () => {
 
                     // No document dates or other fields are undefined
                     cy.findByText('N/A').should('not.exist')
+
+                    // Add rate questions
+                    // Navigate to rate as state user
+                    cy.findByRole('link', { name: /Rate questions: SNBC/}).should('exist').click()
+
+                    // Get the URL to use for CMS user
+                    cy.url().then(rateQAUrl => {
+                        cy.url().should('include', '/rates/')
+
+                        // Log out as State user
+                        cy.logOut()
+
+                        // Log in as CMS user with rate QA url
+                        cy.logInAsCMSUser({
+                            initialURL: rateQAUrl,
+                        })
+
+                        cy.findByRole('heading', { name: /Your division's questions/}).should('exist')
+
+                        // Add new rate question
+                        cy.addQuestion({
+                            documentPath: 'documents/questions_for_rate.pdf',
+                        })
+
+                        // Newly uploaded questions document should exist within your division section
+                        cy.findByTestId('usersDivisionQuestions')
+                            .should('exist')
+                            .within(() => {
+                                // Add timeout to findByText to allow time for generating document urls
+                                cy.findByText('questions_for_rate.pdf', {
+                                    timeout: 5_000,
+                                }).should('exist')
+                            })
+
+                        // Log out as CMS
+                        cy.logOut()
+
+                        // Log in as state user
+                        cy.logInAsStateUser()
+
+                        // View rate QA page
+                        cy.visit(rateQAUrl)
+
+                        // Check that the question exists
+                        cy.findByTestId('outstandingQuestions')
+                            .should('exist')
+                            .within(() => {
+                                // Add timeout to findByText to allow time for generating document urls
+                                cy.findByText('questions_for_rate.pdf', {
+                                    timeout: 5_000,
+                                }).should('exist')
+                            })
+
+                        // Add response to new rate
+                        cy.addResponse({
+                            documentPath:
+                                'documents/response_to_questions_for_rate.pdf',
+                        })
+
+                        // Newly uploaded response document should exist within DMCO section
+                        cy.findByTestId('answeredQuestions')
+                            .should('exist')
+                            .within(() => {
+                                // Add timeout to findByText to allow time for generating document urls
+                                cy.findByText(
+                                    'response_to_questions_for_rate.pdf',
+                                    { timeout: 5_000 }
+                                ).should('exist')
+                            })
+                    })
                 }
             )
         })
