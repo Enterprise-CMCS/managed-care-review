@@ -1,4 +1,4 @@
-import UPDATE_CONTRACT_MUTATION from '../../../../app-graphql/src/mutations/updateContract.graphql'
+import { UpdateContractDocument } from '../../gen/gqlClient'
 import {
     constructTestPostgresServer,
     createAndSubmitTestHealthPlanPackage,
@@ -26,7 +26,7 @@ describe('updateContract', () => {
 
                 // Update
                 const updateResult = await cmsServer.executeOperation({
-                    query: UPDATE_CONTRACT_MUTATION,
+                    query: UpdateContractDocument,
                     variables: {
                         input: {
                             id: stateSubmission.id,
@@ -42,7 +42,7 @@ describe('updateContract', () => {
                 // Remove MCCRSID number
                 const updateResultWithNoMCCRSID =
                     await cmsServer.executeOperation({
-                        query: UPDATE_CONTRACT_MUTATION,
+                        query: UpdateContractDocument,
                         variables: {
                             input: {
                                 id: stateSubmission.id,
@@ -71,7 +71,7 @@ describe('updateContract', () => {
 
                 // Attempt update
                 const updateResult = await cmsServer.executeOperation({
-                    query: UPDATE_CONTRACT_MUTATION,
+                    query: UpdateContractDocument,
                     variables: {
                         input: {
                             id: draftSubmission.id,
@@ -100,7 +100,7 @@ describe('updateContract', () => {
                     await createAndSubmitTestHealthPlanPackage(stateServer)
                 // Update
                 const updateResult = await stateServer.executeOperation({
-                    query: UPDATE_CONTRACT_MUTATION,
+                    query: UpdateContractDocument,
                     variables: {
                         input: {
                             id: stateSubmission.id,

@@ -25,8 +25,12 @@ import type {
     ContractQuestionType,
     ContractRevisionType,
     UnlockedContractType,
+    RateType,
+    RateQuestionType,
 } from '../domain-models'
 import { SESServiceException } from '@aws-sdk/client-ses'
+import { sendRateQuestionStateEmail } from './emails'
+import { sendRateQuestionCMSEmail } from './emails/sendRateQuestionCMSEmail'
 
 // See more discussion of configuration in docs/Configuration.md
 type EmailConfiguration = {
@@ -145,6 +149,16 @@ type Emailer = {
         submitterEmails: string[],
         currentQuestion: ContractQuestionType,
         allContractQuestions: ContractQuestionType[]
+    ) => Promise<void | Error>
+    sendRateQuestionStateEmail: (
+        rate: RateType,
+        rateQuestion: RateQuestionType
+    ) => Promise<void | Error>
+    sendRateQuestionCMSEmail: (
+        rate: RateType,
+        stateAnalystsEmails: StateAnalystsEmails,
+        questions: RateQuestionType[],
+        currentQuestion: RateQuestionType
     ) => Promise<void | Error>
 }
 const localEmailerLogger = (emailData: EmailData) =>
@@ -384,6 +398,38 @@ function emailer(
                 allContractQuestions,
                 currentQuestion
             )
+            if (emailData instanceof Error) {
+                return emailData
+            } else {
+                return await this.sendEmail(emailData)
+            }
+        },
+        sendRateQuestionStateEmail: async function (rate, rateQuestion) {
+            const emailData = await sendRateQuestionStateEmail(
+                rate,
+                config,
+                rateQuestion
+            )
+            if (emailData instanceof Error) {
+                return emailData
+            } else {
+                return await this.sendEmail(emailData)
+            }
+        },
+        sendRateQuestionCMSEmail: async function (
+            rate,
+            stateAnalystsEmails,
+            questions,
+            currentQuestion
+        ) {
+            const emailData = await sendRateQuestionCMSEmail(
+                rate,
+                stateAnalystsEmails,
+                config,
+                questions,
+                currentQuestion
+            )
+
             if (emailData instanceof Error) {
                 return emailData
             } else {

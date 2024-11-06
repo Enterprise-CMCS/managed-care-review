@@ -1,5 +1,5 @@
 import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
-import FETCH_RATE from '../../../../app-graphql/src/queries/fetchRate.graphql'
+import { FetchRateDocument } from '../../gen/gqlClient'
 import { testCMSUser } from '../../testHelpers/userHelpers'
 import { testLDService } from '../../testHelpers/launchDarklyHelpers'
 import { createSubmitAndUnlockTestRate } from '../../testHelpers/gqlRateHelpers'
@@ -38,7 +38,7 @@ describe(`genericDocumentResolver`, () => {
 
         // fetch rate
         const result = await cmsServer.executeOperation({
-            query: FETCH_RATE,
+            query: FetchRateDocument,
             variables: {
                 input,
             },

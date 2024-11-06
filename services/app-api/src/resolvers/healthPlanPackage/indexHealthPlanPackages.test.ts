@@ -1,4 +1,4 @@
-import INDEX_HEALTH_PLAN_PACKAGES from '../../../../app-graphql/src/queries/indexHealthPlanPackages.graphql'
+import { IndexHealthPlanPackagesDocument } from '../../gen/gqlClient'
 import {
     constructTestPostgresServer,
     createTestHealthPlanPackage,
@@ -32,7 +32,7 @@ describe(`indexHealthPlanPackages`, () => {
 
             // then see if we can get that same submission back from the index
             const result = await server.executeOperation({
-                query: INDEX_HEALTH_PLAN_PACKAGES,
+                query: IndexHealthPlanPackagesDocument,
             })
 
             expect(result.errors).toBeUndefined()
@@ -102,7 +102,7 @@ describe(`indexHealthPlanPackages`, () => {
 
             // index submissions api request
             const result = await server.executeOperation({
-                query: INDEX_HEALTH_PLAN_PACKAGES,
+                query: IndexHealthPlanPackagesDocument,
             })
             const submissionsIndex = result.data?.indexHealthPlanPackages
 
@@ -161,7 +161,7 @@ describe(`indexHealthPlanPackages`, () => {
             })
 
             const result = await otherUserServer.executeOperation({
-                query: INDEX_HEALTH_PLAN_PACKAGES,
+                query: IndexHealthPlanPackagesDocument,
                 variables: { input },
             })
 
@@ -193,7 +193,7 @@ describe(`indexHealthPlanPackages`, () => {
             })
 
             const result = await otherUserServer.executeOperation({
-                query: INDEX_HEALTH_PLAN_PACKAGES,
+                query: IndexHealthPlanPackagesDocument,
             })
 
             expect(result.errors).toBeUndefined()
@@ -221,7 +221,7 @@ describe(`indexHealthPlanPackages`, () => {
 
             // index submissions api request
             const result = await cmsServer.executeOperation({
-                query: INDEX_HEALTH_PLAN_PACKAGES,
+                query: IndexHealthPlanPackagesDocument,
             })
             const submissionsIndex = result.data?.indexHealthPlanPackages
 
@@ -274,7 +274,7 @@ describe(`indexHealthPlanPackages`, () => {
 
             // index submissions api request
             const result = await cmsServer.executeOperation({
-                query: INDEX_HEALTH_PLAN_PACKAGES,
+                query: IndexHealthPlanPackagesDocument,
             })
             const submissionsIndex = result.data?.indexHealthPlanPackages
 
@@ -336,7 +336,7 @@ describe(`indexHealthPlanPackages`, () => {
             )
 
             const result = await cmsServer.executeOperation({
-                query: INDEX_HEALTH_PLAN_PACKAGES,
+                query: IndexHealthPlanPackagesDocument,
             })
 
             expect(result.errors).toBeUndefined()

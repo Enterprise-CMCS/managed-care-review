@@ -1,5 +1,5 @@
-import type { CreateHealthPlanPackageInput } from '../../gen/gqlServer'
-import CREATE_HEALTH_PLAN_PACKAGE from '../../../../app-graphql/src/mutations/createHealthPlanPackage.graphql'
+import type { CreateHealthPlanPackageInput } from '../../gen/gqlClient'
+import { CreateHealthPlanPackageDocument } from '../../gen/gqlClient'
 import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
 import { latestFormData } from '../../testHelpers/healthPlanPackageHelpers'
 import { testCMSUser } from '../../testHelpers/userHelpers'
@@ -20,7 +20,7 @@ describe(`Tests CreateHealthPlanPackage`, () => {
             contractType: 'BASE',
         }
         const res = await server.executeOperation({
-            query: CREATE_HEALTH_PLAN_PACKAGE,
+            query: CreateHealthPlanPackageDocument,
             variables: { input },
         })
 
@@ -53,7 +53,7 @@ describe(`Tests CreateHealthPlanPackage`, () => {
             contractType: 'BASE',
         }
         const res = await server.executeOperation({
-            query: CREATE_HEALTH_PLAN_PACKAGE,
+            query: CreateHealthPlanPackageDocument,
             variables: { input },
         })
 
@@ -79,7 +79,7 @@ describe(`Tests CreateHealthPlanPackage`, () => {
             contractType: 'BASE',
         }
         const res = await server.executeOperation({
-            query: CREATE_HEALTH_PLAN_PACKAGE,
+            query: CreateHealthPlanPackageDocument,
             variables: { input },
         })
 

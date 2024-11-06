@@ -1,5 +1,7 @@
-import SUBMIT_HEALTH_PLAN_PACKAGE from '../../../../app-graphql/src/mutations/submitHealthPlanPackage.graphql'
-import FETCH_RATE from '../../../../app-graphql/src/queries/fetchRate.graphql'
+import {
+    SubmitHealthPlanPackageDocument,
+    FetchRateDocument,
+} from '../../gen/gqlClient'
 import {
     constructTestPostgresServer,
     createAndUpdateTestHealthPlanPackage,
@@ -64,7 +66,7 @@ describe(`Tests $testName`, () => {
 
         // submit
         const submitResult = await server.executeOperation({
-            query: SUBMIT_HEALTH_PLAN_PACKAGE,
+            query: SubmitHealthPlanPackageDocument,
             variables: {
                 input: {
                     pkgID: draftID,
@@ -317,7 +319,7 @@ describe(`Tests $testName`, () => {
         const draftID = draft.id
 
         const submitResult = await server.executeOperation({
-            query: SUBMIT_HEALTH_PLAN_PACKAGE,
+            query: SubmitHealthPlanPackageDocument,
             variables: {
                 input: {
                     pkgID: draftID,
@@ -340,7 +342,7 @@ describe(`Tests $testName`, () => {
         const draftID = draft.id
 
         const submitResult = await server.executeOperation({
-            query: SUBMIT_HEALTH_PLAN_PACKAGE,
+            query: SubmitHealthPlanPackageDocument,
             variables: {
                 input: {
                     pkgID: draftID,
@@ -380,7 +382,7 @@ describe(`Tests $testName`, () => {
 
         const draftID = draft.id
         const submitResult = await server.executeOperation({
-            query: SUBMIT_HEALTH_PLAN_PACKAGE,
+            query: SubmitHealthPlanPackageDocument,
             variables: {
                 input: {
                     pkgID: draftID,
@@ -425,7 +427,7 @@ describe(`Tests $testName`, () => {
 
         const draftID = draft.id
         const submitResult = await server.executeOperation({
-            query: SUBMIT_HEALTH_PLAN_PACKAGE,
+            query: SubmitHealthPlanPackageDocument,
             variables: {
                 input: {
                     pkgID: draftID,
@@ -551,7 +553,7 @@ describe(`Tests $testName`, () => {
 
         for (const rate of draftRates) {
             const rateWithHistory = await server.executeOperation({
-                query: FETCH_RATE,
+                query: FetchRateDocument,
                 variables: {
                     input: {
                         rateID: rate.id,
@@ -665,7 +667,7 @@ describe(`Tests $testName`, () => {
         const draftID = draft.id
 
         const submitResult = await server.executeOperation({
-            query: SUBMIT_HEALTH_PLAN_PACKAGE,
+            query: SubmitHealthPlanPackageDocument,
             variables: {
                 input: {
                     pkgID: draftID,
@@ -688,7 +690,7 @@ describe(`Tests $testName`, () => {
         const draftID = draft.id
 
         const submitResult = await server.executeOperation({
-            query: SUBMIT_HEALTH_PLAN_PACKAGE,
+            query: SubmitHealthPlanPackageDocument,
             variables: {
                 input: {
                     pkgID: draftID,
@@ -751,7 +753,7 @@ describe(`Tests $testName`, () => {
         const draftID = draft.id
 
         await server.executeOperation({
-            query: SUBMIT_HEALTH_PLAN_PACKAGE,
+            query: SubmitHealthPlanPackageDocument,
             variables: {
                 input: {
                     pkgID: draftID,
@@ -762,7 +764,7 @@ describe(`Tests $testName`, () => {
         await unlockTestContract(cmsServer, draftID, 'unlock to resubmit')
 
         const submitResult = await server.executeOperation({
-            query: SUBMIT_HEALTH_PLAN_PACKAGE,
+            query: SubmitHealthPlanPackageDocument,
             variables: {
                 input: {
                     pkgID: draftID,
@@ -851,7 +853,7 @@ describe(`Tests $testName`, () => {
         const draftID = draft.id
 
         const submitResult = await server.executeOperation({
-            query: SUBMIT_HEALTH_PLAN_PACKAGE,
+            query: SubmitHealthPlanPackageDocument,
             variables: {
                 input: {
                     pkgID: draftID,
@@ -902,7 +904,7 @@ describe(`Tests $testName`, () => {
         const draftID = draft.id
 
         await server.executeOperation({
-            query: SUBMIT_HEALTH_PLAN_PACKAGE,
+            query: SubmitHealthPlanPackageDocument,
             variables: {
                 input: {
                     pkgID: draftID,
@@ -936,7 +938,7 @@ describe(`Tests $testName`, () => {
         const draftID = draft.id
 
         await server.executeOperation({
-            query: SUBMIT_HEALTH_PLAN_PACKAGE,
+            query: SubmitHealthPlanPackageDocument,
             variables: {
                 input: {
                     pkgID: draftID,
@@ -959,7 +961,7 @@ describe(`Tests $testName`, () => {
         const draftID = draft.id
 
         const submitResult = await server.executeOperation({
-            query: SUBMIT_HEALTH_PLAN_PACKAGE,
+            query: SubmitHealthPlanPackageDocument,
             variables: {
                 input: {
                     pkgID: draftID,
@@ -1011,7 +1013,7 @@ describe(`Tests $testName`, () => {
         const draftID = draft.id
 
         const submitResult = await server.executeOperation({
-            query: SUBMIT_HEALTH_PLAN_PACKAGE,
+            query: SubmitHealthPlanPackageDocument,
             variables: {
                 input: {
                     pkgID: draftID,
@@ -1070,7 +1072,7 @@ describe(`Tests $testName`, () => {
         )
 
         const submitResult = await stateServer.executeOperation({
-            query: SUBMIT_HEALTH_PLAN_PACKAGE,
+            query: SubmitHealthPlanPackageDocument,
             variables: {
                 input: {
                     pkgID: stateSubmission.id,
@@ -1204,7 +1206,7 @@ describe(`Tests $testName`, () => {
         const draftID = draft.id
 
         const submitResult = await server.executeOperation({
-            query: SUBMIT_HEALTH_PLAN_PACKAGE,
+            query: SubmitHealthPlanPackageDocument,
             variables: {
                 input: {
                     pkgID: draftID,
@@ -1233,7 +1235,7 @@ describe(`Tests $testName`, () => {
         const draftID = draft.id
 
         const submitResult = await server.executeOperation({
-            query: SUBMIT_HEALTH_PLAN_PACKAGE,
+            query: SubmitHealthPlanPackageDocument,
             variables: {
                 input: {
                     pkgID: draftID,
@@ -1279,7 +1281,7 @@ describe(`Tests $testName`, () => {
 
         // submit
         const submitResult = await server.executeOperation({
-            query: SUBMIT_HEALTH_PLAN_PACKAGE,
+            query: SubmitHealthPlanPackageDocument,
             variables: {
                 input: {
                     pkgID: draftID,
@@ -1311,7 +1313,7 @@ describe(`Tests $testName`, () => {
 
             // submit
             const submitResult = await server.executeOperation({
-                query: SUBMIT_HEALTH_PLAN_PACKAGE,
+                query: SubmitHealthPlanPackageDocument,
                 variables: {
                     input: {
                         pkgID: draftID,
@@ -1351,7 +1353,7 @@ describe(`Tests $testName`, () => {
 
             // submit
             const submitResult = await server.executeOperation({
-                query: SUBMIT_HEALTH_PLAN_PACKAGE,
+                query: SubmitHealthPlanPackageDocument,
                 variables: {
                     input: {
                         pkgID: draftID,
@@ -1384,7 +1386,7 @@ describe(`Tests $testName`, () => {
 
             // submit
             const submitResult = await server.executeOperation({
-                query: SUBMIT_HEALTH_PLAN_PACKAGE,
+                query: SubmitHealthPlanPackageDocument,
                 variables: {
                     input: {
                         pkgID: draftID,
@@ -1417,7 +1419,7 @@ describe(`Tests $testName`, () => {
 
             // submit
             const submitResult = await server.executeOperation({
-                query: SUBMIT_HEALTH_PLAN_PACKAGE,
+                query: SubmitHealthPlanPackageDocument,
                 variables: {
                     input: {
                         pkgID: draftID,

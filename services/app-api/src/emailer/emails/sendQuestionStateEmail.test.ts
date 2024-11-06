@@ -266,7 +266,7 @@ test('includes information about what to do next', async () => {
     expect(template).toEqual(
         expect.objectContaining({
             bodyText: expect.stringContaining(
-                'You must answer the question before CMS can continue reviewing it'
+                'You must respond to the questions before CMS can continue their review.'
             ),
         })
     )

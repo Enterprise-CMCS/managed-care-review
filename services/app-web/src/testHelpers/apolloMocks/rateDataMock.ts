@@ -581,7 +581,7 @@ function mockRateSubmittedWithQuestions(
                             id: 'dmco-question-1-id',
                             rateID,
                             createdAt: new Date('2022-12-15'),
-                            addedBy: mockValidCMSUser(),
+                            addedBy: mockValidCMSUser() as CmsUser,
                             documents: [
                                 {
                                     s3URL: 's3://bucketname/key/dmco-question-1-document-1',
@@ -647,7 +647,7 @@ function mockRateSubmittedWithQuestions(
                             __typename: 'RateQuestion' as const,
                             id: 'oact-question-2-id',
                             rateID,
-                            createdAt: new Date('2022-12-16'),
+                            createdAt: new Date('2022-12-17'),
                             addedBy: mockValidCMSUser({
                                 divisionAssignment: 'OACT',
                             }) as CmsUser,
@@ -683,7 +683,7 @@ function mockRateSubmittedWithQuestions(
                             __typename: 'RateQuestion' as const,
                             id: 'oact-question-1-id',
                             rateID,
-                            createdAt: new Date('2022-12-15'),
+                            createdAt: new Date('2022-12-16'),
                             addedBy: mockValidCMSUser({
                                 divisionAssignment: 'OACT',
                             }) as CmsUser,

@@ -1,6 +1,6 @@
 import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
 import type { CreateContractInput, Contract } from '../../gen/gqlServer'
-import CREATE_CONTRACT from 'app-graphql/src/mutations/createContract.graphql'
+import { CreateContractDocument } from '../../gen/gqlClient'
 import { testCMSUser } from '../../testHelpers/userHelpers'
 
 describe('createContract', () => {
@@ -19,7 +19,7 @@ describe('createContract', () => {
             contractType: 'BASE',
         }
         const res = await server.executeOperation({
-            query: CREATE_CONTRACT,
+            query: CreateContractDocument,
             variables: { input },
         })
 
@@ -56,7 +56,7 @@ describe('createContract', () => {
             contractType: 'BASE',
         }
         const res = await server.executeOperation({
-            query: CREATE_CONTRACT,
+            query: CreateContractDocument,
             variables: { input },
         })
 
@@ -82,7 +82,7 @@ describe('createContract', () => {
             contractType: 'BASE',
         }
         const res = await server.executeOperation({
-            query: CREATE_CONTRACT,
+            query: CreateContractDocument,
             variables: { input },
         })
 
