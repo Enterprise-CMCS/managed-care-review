@@ -4,7 +4,7 @@ import styles from '../QuestionResponse.module.scss'
 import { useAuth } from '../../../contexts/AuthContext'
 import { divisionFullNames } from '../QuestionResponseHelpers'
 import type { IndexQuestionType } from '../QuestionResponseHelpers'
-import { QuestionResponseRound, QuestionRounds } from './QuestionResponseRound'
+import { QuestionResponseRound, RoundData } from './QuestionResponseRound'
 
 type StateQuestionResponseTableProps = {
     indexQuestions: IndexQuestionType
@@ -16,8 +16,8 @@ export const StateQuestionResponseTable = ({
     rateCertName,
 }: StateQuestionResponseTableProps) => {
     const { loggedInUser } = useAuth()
-    const answeredQuestions: QuestionRounds = []
-    const unansweredQuestions: QuestionRounds = []
+    const answeredQuestions: RoundData[] = []
+    const unansweredQuestions: RoundData[] = []
 
     // Bucket questions
     Object.entries(indexQuestions).forEach(([key, value]) => {
@@ -27,28 +27,32 @@ export const StateQuestionResponseTable = ({
         const questionsList: RateQuestionList | ContractQuestionList = value
 
         // reverse questions to the earliest question first as rounds would be mismatched when looping through two arrays of different lengths
-        Array.from([...questionsList.edges])
-            .reverse()
-            .forEach(({ node }, index) => {
-                if (node.responses.length > 0) {
-                    if (!answeredQuestions[index]) {
-                        answeredQuestions[index] = []
-                    }
-                    answeredQuestions[index].push({
-                        roundTitle: `Asked by: ${divisionFullNames[node.division]}`,
-                        questionData: node,
-                    })
-                } else {
-                    if (!unansweredQuestions[index]) {
-                        unansweredQuestions[index] = []
-                    }
-                    unansweredQuestions[index].push({
-                        roundTitle: `Asked by: ${divisionFullNames[node.division]}`,
-                        questionData: node,
-                    })
-                }
-            })
+        Array.from([...questionsList.edges]).forEach(({ node }, index) => {
+            if (node.responses.length > 0) {
+                answeredQuestions.push({
+                    roundTitle: `Asked by: ${divisionFullNames[node.division]}`,
+                    questionData: node,
+                })
+            } else {
+                unansweredQuestions.push({
+                    roundTitle: `Asked by: ${divisionFullNames[node.division]}`,
+                    questionData: node,
+                })
+            }
+        })
     })
+
+    // Sort each round by latest questions first
+    const sortedAnsweredQuestions = answeredQuestions.sort(
+        (a, b) =>
+            new Date(b.questionData.createdAt).getTime() -
+            new Date(a.questionData.createdAt).getTime()
+    )
+    const sortedUnansweredQuestions = unansweredQuestions.sort(
+        (a, b) =>
+            new Date(b.questionData.createdAt).getTime() -
+            new Date(a.questionData.createdAt).getTime()
+    )
 
     return (
         <>
@@ -63,21 +67,17 @@ export const StateQuestionResponseTable = ({
                 data-testid={'outstandingQuestions'}
             >
                 <SectionHeader header="Outstanding questions" />
-                {unansweredQuestions.length ? (
-                    unansweredQuestions
-                        .reverse()
-                        .map((questionRound) =>
-                            questionRound.map(
-                                ({ roundTitle, questionData }) => (
-                                    <QuestionResponseRound
-                                        key={questionData.id}
-                                        question={questionData}
-                                        roundTitle={roundTitle}
-                                        currentUser={loggedInUser}
-                                    />
-                                )
-                            )
+                {sortedUnansweredQuestions.length ? (
+                    sortedUnansweredQuestions.map(
+                        ({ roundTitle, questionData }) => (
+                            <QuestionResponseRound
+                                key={questionData.id}
+                                question={questionData}
+                                roundTitle={roundTitle}
+                                currentUser={loggedInUser}
+                            />
                         )
+                    )
                 ) : (
                     <p>No questions have been submitted yet.</p>
                 )}
@@ -87,21 +87,17 @@ export const StateQuestionResponseTable = ({
                 data-testid={'answeredQuestions'}
             >
                 <SectionHeader header="Answered questions" />
-                {answeredQuestions.length ? (
-                    answeredQuestions
-                        .reverse()
-                        .map((questionRound) =>
-                            questionRound.map(
-                                ({ roundTitle, questionData }) => (
-                                    <QuestionResponseRound
-                                        key={questionData.id}
-                                        question={questionData}
-                                        roundTitle={roundTitle}
-                                        currentUser={loggedInUser}
-                                    />
-                                )
-                            )
+                {sortedAnsweredQuestions.length ? (
+                    sortedAnsweredQuestions.map(
+                        ({ roundTitle, questionData }) => (
+                            <QuestionResponseRound
+                                key={questionData.id}
+                                question={questionData}
+                                roundTitle={roundTitle}
+                                currentUser={loggedInUser}
+                            />
                         )
+                    )
                 ) : (
                     <p>No questions have been submitted yet.</p>
                 )}
