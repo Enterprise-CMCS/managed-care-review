@@ -83,8 +83,8 @@ export function createRateQuestionResponseResolver(
                 })
             }
 
-            const errMessage = `Issue finding a contract. Message: ${rate.message}`
-            logError('createRateQuestionResponse', errMessage)
+            const errMessage = `Issue finding a rate. Message: ${rate.message}`
+            logError('createRateQuestion', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new GraphQLError(errMessage, {
                 extensions: {
@@ -94,9 +94,11 @@ export function createRateQuestionResponseResolver(
             })
         }
 
-        const allQuestions = await store.findAllQuestionsByRate(rate.id)
+        const questions = await store.findAllQuestionsByRate(
+            createResponseResult.rateID
+        )
 
-        if (allQuestions instanceof Error) {
+        if (questions instanceof Error) {
             const errMessage = `Issue finding all questions associated with the rate: ${rate.id}`
             logError('createRateQuestion', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
@@ -148,7 +150,7 @@ export function createRateQuestionResponseResolver(
             await emailer.sendRateQuestionResponseCMSEmail(
                 rate,
                 stateAnalystsEmails,
-                allQuestions,
+                questions,
                 createResponseResult
             )
 
@@ -161,6 +163,30 @@ export function createRateQuestionResponseResolver(
             const errMessage = `Error sending a CMS email for 
                 responseID: ${createResponseResult.id} and rateID: ${rate.id}`
             throw new GraphQLError(errMessage, {
+                extensions: {
+                    code: 'INTERNAL_SERVER_ERROR',
+                    cause: 'EMAIL_ERROR',
+                },
+            })
+        }
+
+        const sendStateEmailResult =
+            await emailer.sendRateQuestionResponseStateEmail(
+                rate,
+                questions,
+                createResponseResult
+            )
+
+        if (sendStateEmailResult instanceof Error) {
+            logError(
+                'sendRateQuestionResponseStateEmail - Send State email',
+                sendStateEmailResult.message
+            )
+            setErrorAttributesOnActiveSpan(
+                `Send State email failed: ${sendStateEmailResult.message}`,
+                span
+            )
+            throw new GraphQLError('Email failed', {
                 extensions: {
                     code: 'INTERNAL_SERVER_ERROR',
                     cause: 'EMAIL_ERROR',

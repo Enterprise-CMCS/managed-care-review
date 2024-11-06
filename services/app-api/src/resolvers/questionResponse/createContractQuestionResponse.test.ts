@@ -300,7 +300,7 @@ describe('createContractQuestionResponse', () => {
         ]
 
         expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
-            6, // New response CMS email notification is the fifth email
+            6, // New response state email notification is the fifth email
             expect.objectContaining({
                 subject: expect.stringContaining(
                     `[LOCAL] Response submitted to CMS for ${pkgName}`
