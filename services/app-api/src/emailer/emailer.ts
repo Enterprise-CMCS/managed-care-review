@@ -31,6 +31,7 @@ import type {
 import { SESServiceException } from '@aws-sdk/client-ses'
 import { sendRateQuestionStateEmail } from './emails'
 import { sendRateQuestionCMSEmail } from './emails/sendRateQuestionCMSEmail'
+import { sendRateQuestionResponseCMSEmail } from './emails/sendRateQuestionResponseCMSEmail'
 import { sendRateQuestionResponseStateEmail } from './emails/sendRateQuestionResponseStateEmail'
 
 // See more discussion of configuration in docs/Configuration.md
@@ -156,6 +157,12 @@ type Emailer = {
         rateQuestion: RateQuestionType
     ) => Promise<void | Error>
     sendRateQuestionCMSEmail: (
+        rate: RateType,
+        stateAnalystsEmails: StateAnalystsEmails,
+        questions: RateQuestionType[],
+        currentQuestion: RateQuestionType
+    ) => Promise<void | Error>
+    sendRateQuestionResponseCMSEmail: (
         rate: RateType,
         stateAnalystsEmails: StateAnalystsEmails,
         questions: RateQuestionType[],
@@ -429,6 +436,26 @@ function emailer(
             currentQuestion
         ) {
             const emailData = await sendRateQuestionCMSEmail(
+                rate,
+                stateAnalystsEmails,
+                config,
+                questions,
+                currentQuestion
+            )
+
+            if (emailData instanceof Error) {
+                return emailData
+            } else {
+                return await this.sendEmail(emailData)
+            }
+        },
+        sendRateQuestionResponseCMSEmail: async function (
+            rate,
+            stateAnalystsEmails,
+            questions,
+            currentQuestion
+        ) {
+            const emailData = await sendRateQuestionResponseCMSEmail(
                 rate,
                 stateAnalystsEmails,
                 config,
