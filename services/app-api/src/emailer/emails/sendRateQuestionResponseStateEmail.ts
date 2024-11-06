@@ -1,11 +1,14 @@
 import { formatCalendarDate } from '../../../../app-web/src/common-code/dateHelpers'
 import { pruneDuplicateEmails } from '../formatters'
 import type { EmailConfiguration, EmailData } from '..'
-import type { RateQuestionType, RateType} from '../../domain-models'
+import type { RateQuestionType, RateType } from '../../domain-models'
 import {
     stripHTMLFromTemplate,
     renderTemplate,
-    getQuestionRound, getActuaryContactEmails, getRateSubmitterEmails, getRateStateContactEmails,
+    getQuestionRound,
+    getActuaryContactEmails,
+    getRateSubmitterEmails,
+    getRateStateContactEmails,
 } from '../templateHelpers'
 import { rateQuestionResponseURL } from '../generateURLs'
 
@@ -39,10 +42,7 @@ export const sendRateQuestionResponseStateEmail = async (
         ...actuaryEmails,
     ])
 
-    const questionRound = getQuestionRound(
-        questions,
-        currentQuestion
-    )
+    const questionRound = getQuestionRound(questions, currentQuestion)
 
     if (questionRound instanceof Error) {
         return questionRound
@@ -60,7 +60,6 @@ export const sendRateQuestionResponseStateEmail = async (
             currentQuestion.createdAt,
             'America/New_York'
         ),
-        questionRound,
     }
 
     const result = await renderTemplate<typeof data>(
@@ -77,7 +76,7 @@ export const sendRateQuestionResponseStateEmail = async (
             sourceEmail: config.emailSource,
             subject: `${
                 config.stage !== 'prod' ? `[${config.stage}] ` : ''
-            }Response submitted to CMS for ${rateFormData.rateCertificationName}`,
+            }Response to ${division} rate questions was successfully submitted.`,
             bodyText: stripHTMLFromTemplate(result),
             bodyHTML: result,
         }

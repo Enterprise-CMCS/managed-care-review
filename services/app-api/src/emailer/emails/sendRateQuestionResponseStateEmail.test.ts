@@ -2,14 +2,17 @@ import {
     testEmailConfig,
     mockRateQuestionAndResponses,
 } from '../../testHelpers/emailerHelpers'
-import type { RateQuestionType } from '../../domain-models';
-import {sendRateQuestionResponseStateEmail} from './sendRateQuestionResponseStateEmail';
-import type {RateType} from '../../domain-models';
-import { testStateUser} from '../../testHelpers/userHelpers';
-import {defaultFloridaProgram, defaultFloridaRateProgram} from '../../testHelpers/gqlHelpers';
+import type { RateQuestionType } from '../../domain-models'
+import { sendRateQuestionResponseStateEmail } from './sendRateQuestionResponseStateEmail'
+import type { RateType } from '../../domain-models'
+import { testStateUser } from '../../testHelpers/userHelpers'
+import {
+    defaultFloridaProgram,
+    defaultFloridaRateProgram,
+} from '../../testHelpers/gqlHelpers'
 
 describe('sendRateQuestionResponseStateEmail', () => {
-    const rate: RateType = {
+    const testRate = (): RateType => ({
         id: 'test-rate',
         createdAt: new Date('2024-04-12'),
         updatedAt: new Date('2024-04-12'),
@@ -190,29 +193,29 @@ describe('sendRateQuestionResponseStateEmail', () => {
                 edges: [],
             },
         },
-    }
+    })
 
     const currentQuestion = (): RateQuestionType =>
         mockRateQuestionAndResponses({
             id: `test-question-id-4`,
             createdAt: new Date('01/05/2024'),
-            rateID: rate.id,
+            rateID: testRate().id,
             division: 'DMCO',
         })
 
     const questions = (): RateQuestionType[] => [
+        currentQuestion(),
         mockRateQuestionAndResponses({
             id: `test-question-id-1`,
             createdAt: new Date('01/01/2024'),
-            rateID: rate.id,
+            rateID: testRate().id,
             division: 'DMCO',
         }),
-        currentQuestion(),
     ]
 
     test('to addresses list includes submitter emails', async () => {
         const template = await sendRateQuestionResponseStateEmail(
-            rate,
+            testRate(),
             testEmailConfig(),
             questions(),
             currentQuestion()
@@ -226,14 +229,14 @@ describe('sendRateQuestionResponseStateEmail', () => {
             expect.objectContaining({
                 toAddresses: expect.arrayContaining([
                     'parent-contract-submitter@state.com',
-                    'second-contract-submitter@state.com'
+                    'second-contract-submitter@state.com',
                 ]),
             })
         )
     })
     test('to addresses list includes all state contacts on submission', async () => {
         const template = await sendRateQuestionResponseStateEmail(
-            rate,
+            testRate(),
             testEmailConfig(),
             questions(),
             currentQuestion()
@@ -248,7 +251,34 @@ describe('sendRateQuestionResponseStateEmail', () => {
                 toAddresses: expect.arrayContaining([
                     'parent-contract-state-contact-1@state.com',
                     'duplicateContact@state-contact.com',
-                    'second-contract-state-contact-1@state.com'
+                    'second-contract-state-contact-1@state.com',
+                    'certifyingActuary@example.com',
+                    'addtlActuaryContacts@example.com',
+                ]),
+            })
+        )
+    })
+
+    it('to addresses does not include actuaries when rate communication preference is OACT_TO_STATE', async () => {
+        const rate = testRate()
+        rate.packageSubmissions[0].rateRevision.formData.actuaryCommunicationPreference =
+            'OACT_TO_STATE'
+        const template = await sendRateQuestionResponseStateEmail(
+            rate,
+            testEmailConfig(),
+            questions(),
+            currentQuestion()
+        )
+
+        if (template instanceof Error) {
+            throw template
+        }
+
+        expect(template).not.toEqual(
+            expect.objectContaining({
+                toAddresses: expect.arrayContaining([
+                    'certifyingActuary@example.com',
+                    'addtlActuaryContacts@example.com',
                 ]),
             })
         )
@@ -256,7 +286,7 @@ describe('sendRateQuestionResponseStateEmail', () => {
 
     test('to addresses list does not include duplicate state receiver emails on submission', async () => {
         const template = await sendRateQuestionResponseStateEmail(
-            rate,
+            testRate(),
             testEmailConfig(),
             questions(),
             currentQuestion()
@@ -277,7 +307,7 @@ describe('sendRateQuestionResponseStateEmail', () => {
 
     test('includes link to submission', async () => {
         const template = await sendRateQuestionResponseStateEmail(
-            rate,
+            testRate(),
             testEmailConfig(),
             questions(),
             currentQuestion()
@@ -289,9 +319,7 @@ describe('sendRateQuestionResponseStateEmail', () => {
 
         expect(template).toEqual(
             expect.objectContaining({
-                bodyText: expect.stringContaining(
-                    'View response'
-                ),
+                bodyText: expect.stringContaining('View response'),
                 bodyHTML: expect.stringContaining(
                     `http://localhost/submissions/parent-contract/rates/test-rate/question-and-answer`
                 ),
@@ -299,116 +327,77 @@ describe('sendRateQuestionResponseStateEmail', () => {
         )
     })
 
-    //TODO: Finish these tests when we figure out the email template, waiting on Kelsey
-    // test('subject line is correct and clearly states submission was successful', async () => {
-    //     const sub = mockContractRev()
-    //     const defaultStatePrograms = mockMNState().programs
-    //     const name = packageName(
-    //         sub.contract.stateCode,
-    //         sub.contract.stateNumber,
-    //         sub.formData.programIDs,
-    //         defaultStatePrograms
-    //     )
-    //
-    //     const template = await sendQuestionResponseStateEmail(
-    //         sub,
-    //         testEmailConfig(),
-    //         defaultSubmitters,
-    //         defaultStatePrograms,
-    //         questions,
-    //         currentQuestion
-    //     )
-    //
-    //     if (template instanceof Error) {
-    //         throw template
-    //     }
-    //
-    //     expect(template).toEqual(
-    //         expect.objectContaining({
-    //             subject: expect.stringContaining(
-    //                 `Response submitted to CMS for ${name}`
-    //             ),
-    //         })
-    //     )
-    // })
-    //
+    test('subject line is correct and clearly states submission was successful', async () => {
+        const template = await sendRateQuestionResponseStateEmail(
+            testRate(),
+            testEmailConfig(),
+            questions(),
+            currentQuestion()
+        )
 
-    // test('includes information about what to do next', async () => {
-    //     const sub = mockContractRev()
-    //     const defaultStatePrograms = mockMNState().programs
-    //     const template = await sendQuestionResponseStateEmail(
-    //         sub,
-    //         testEmailConfig(),
-    //         defaultSubmitters,
-    //         defaultStatePrograms,
-    //         questions,
-    //         currentQuestion
-    //     )
-    //
-    //     if (template instanceof Error) {
-    //         throw template
-    //     }
-    //
-    //     expect(template).toEqual(
-    //         expect.objectContaining({
-    //             bodyText: expect.stringContaining(
-    //                 'Questions: You may receive additional questions from CMS as they conduct their reviews.'
-    //             ),
-    //         })
-    //     )
-    // })
-    //
-    // test('includes expected data', async () => {
-    //     const sub = mockContractRev()
-    //     const defaultStatePrograms = mockMNState().programs
-    //
-    //     const template = await sendQuestionResponseStateEmail(
-    //         sub,
-    //         testEmailConfig(),
-    //         defaultSubmitters,
-    //         defaultStatePrograms,
-    //         questions,
-    //         currentQuestion
-    //     )
-    //
-    //     if (template instanceof Error) {
-    //         throw template
-    //     }
-    //
-    //     // Includes correct division the response was sent to
-    //     // Includes the correct round number for the response
-    //     expect(template).toEqual(
-    //         expect.objectContaining({
-    //             bodyText: expect.stringContaining(
-    //                 'DMCO round 1 response was successfully submitted'
-    //             ),
-    //         })
-    //     )
-    //     // Includes correct date response was submitted
-    //     expect(template).toEqual(
-    //         expect.objectContaining({
-    //             bodyText: expect.stringContaining('Date: 01/01/2024'),
-    //         })
-    //     )
-    // })
-    //
-    // test('renders overall email for a new response as expected', async () => {
-    //     const sub = mockContractRev()
-    //     const defaultStatePrograms = mockMNState().programs
-    //     const result = await sendQuestionResponseStateEmail(
-    //         sub,
-    //         testEmailConfig(),
-    //         defaultSubmitters,
-    //         defaultStatePrograms,
-    //         questions,
-    //         currentQuestion
-    //     )
-    //
-    //     if (result instanceof Error) {
-    //         console.error(result)
-    //         return
-    //     }
-    //
-    //     expect(result.bodyHTML).toMatchSnapshot()
-    // })
+        if (template instanceof Error) {
+            throw template
+        }
+
+        expect(template).toEqual(
+            expect.objectContaining({
+                subject: expect.stringContaining(
+                    `Response to DMCO rate questions was successfully submitted.`
+                ),
+            })
+        )
+    })
+
+    test('includes expected data', async () => {
+        const template = await sendRateQuestionResponseStateEmail(
+            testRate(),
+            testEmailConfig(),
+            questions(),
+            currentQuestion()
+        )
+
+        if (template instanceof Error) {
+            throw template
+        }
+
+        // Includes correct division the response was sent to
+        // Includes the correct round number for the response
+        expect(template).toEqual(
+            expect.objectContaining({
+                bodyText: expect.stringContaining(
+                    'Response to DMCO rate questions was successfully submitted.'
+                ),
+            })
+        )
+        // Includes correct date response was submitted
+        expect(template).toEqual(
+            expect.objectContaining({
+                bodyText: expect.stringContaining('Date: 01/05/2024'),
+            })
+        )
+
+        // includes information about what to do next
+        expect(template).toEqual(
+            expect.objectContaining({
+                bodyText: expect.stringContaining(
+                    'Questions: You may receive additional questions from CMS as they conduct their reviews.'
+                ),
+            })
+        )
+    })
+
+    test('renders overall email for a new response as expected', async () => {
+        const template = await sendRateQuestionResponseStateEmail(
+            testRate(),
+            testEmailConfig(),
+            questions(),
+            currentQuestion()
+        )
+
+        if (template instanceof Error) {
+            throw template
+        }
+
+        expect(template.bodyHTML).toMatchSnapshot()
+    })
 })

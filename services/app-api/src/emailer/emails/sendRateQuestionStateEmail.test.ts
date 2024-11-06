@@ -273,12 +273,11 @@ describe('sendRateQuestionStateEmail', () => {
             throw template
         }
 
-        expect(template).toEqual(
+        expect(template).not.toEqual(
             expect.objectContaining({
                 toAddresses: expect.arrayContaining([
-                    'parent-contract-state-contact-1@state.com',
-                    'duplicateContact@state-contact.com',
-                    'second-contract-state-contact-1@state.com',
+                    'certifyingActuary@example.com',
+                    'addtlActuaryContacts@example.com',
                 ]),
             })
         )

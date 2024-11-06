@@ -127,10 +127,6 @@ describe('createRateQuestionResponse', () => {
         const rateID =
             contractWithRate.packageSubmissions[0].rateRevisions[0].rateID
 
-        const rateName =
-            contractWithRate.packageSubmissions[0].rateRevisions[0].formData
-                .rateCertificationName
-
         const rateQuestionResult = await createTestRateQuestion(
             cmsServer,
             rateID
@@ -143,16 +139,12 @@ describe('createRateQuestionResponse', () => {
             5, // New response state email notification is the fifth email, if State email is before CMS email.
             expect.objectContaining({
                 subject: expect.stringContaining(
-                    `[LOCAL] Response submitted to CMS for ${rateName}`
+                    `[LOCAL] Response to DMCO rate questions was successfully submitted.`
                 ),
                 sourceEmail: emailConfig.emailSource,
-                //TODO: Finish this when Kelsey gets designs done.
-                // toAddresses: expect.arrayContaining(
-                //     Array.from(stateReceiverEmails)
-                // ),
-                // bodyText: expect.stringContaining(
-                //     `${oactCMS.divisionAssignment} round 1 response was successfully submitted`
-                // ),
+                bodyText: expect.stringContaining(
+                    'Response to DMCO rate questions was successfully submitted.'
+                ),
                 bodyHTML: expect.stringContaining(
                     `<a href="http://localhost/submissions/${contractWithRate.id}/rates/${rateID}/question-and-answers">View response</a>`
                 ),

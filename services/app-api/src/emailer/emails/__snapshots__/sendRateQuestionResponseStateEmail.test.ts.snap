@@ -1,9 +1,11 @@
-Response to <%= it.cmsRequestorDivision %> rate questions was successfully submitted.<br />
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`sendRateQuestionResponseStateEmail renders overall email for a new response as expected 1`] = `
+"Response to DMCO rate questions was successfully submitted.<br />
 <br />
-<b>Date:</b> <%= it.dateAsked %>
+<b>Date:</b> 01/05/2024<br />
 <br />
-<br />
-<a href="<%= it.questionResponseURL %>">View response</a>
+<a href="http://localhost/submissions/parent-contract/rates/test-rate/question-and-answers">View response</a>
 <br />
 <br />
 <b>What comes next:</b><br />
@@ -19,3 +21,5 @@ Response to <%= it.cmsRequestorDivision %> rate questions was successfully submi
     <li>For issues related to MC-Review or all other inquiries, please reach out to MC_Review_HelpDesk@cms.hhs.gov.</li>
 </ul>
 
+"
+`;
