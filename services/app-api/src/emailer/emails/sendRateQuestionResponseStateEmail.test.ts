@@ -1,10 +1,10 @@
 import {
     testEmailConfig,
     mockRateQuestionAndResponses,
+    mockRate,
 } from '../../testHelpers/emailerHelpers'
 import type { RateQuestionType } from '../../domain-models'
 import { sendRateQuestionResponseStateEmail } from './sendRateQuestionResponseStateEmail'
-import type { RateType } from '../../domain-models'
 import { testStateUser } from '../../testHelpers/userHelpers'
 import {
     defaultFloridaProgram,
@@ -12,15 +12,11 @@ import {
 } from '../../testHelpers/gqlHelpers'
 
 describe('sendRateQuestionResponseStateEmail', () => {
-    const testRate = (): RateType => ({
+    const testRate = mockRate({
         id: 'test-rate',
         createdAt: new Date('2024-04-12'),
         updatedAt: new Date('2024-04-12'),
-        status: 'SUBMITTED',
-        stateCode: 'FL',
         parentContractID: 'parent-contract',
-        stateNumber: 2,
-        revisions: [],
         packageSubmissions: [
             {
                 submitInfo: {
@@ -179,27 +175,13 @@ describe('sendRateQuestionResponseStateEmail', () => {
                 ],
             },
         ],
-        questions: {
-            DMCOQuestions: {
-                totalCount: 0,
-                edges: [],
-            },
-            DMCPQuestions: {
-                totalCount: 0,
-                edges: [],
-            },
-            OACTQuestions: {
-                totalCount: 0,
-                edges: [],
-            },
-        },
     })
 
     const currentQuestion = (): RateQuestionType =>
         mockRateQuestionAndResponses({
             id: `test-question-id-4`,
             createdAt: new Date('01/05/2024'),
-            rateID: testRate().id,
+            rateID: testRate.id,
             division: 'DMCO',
         })
 
@@ -208,14 +190,14 @@ describe('sendRateQuestionResponseStateEmail', () => {
         mockRateQuestionAndResponses({
             id: `test-question-id-1`,
             createdAt: new Date('01/01/2024'),
-            rateID: testRate().id,
+            rateID: testRate.id,
             division: 'DMCO',
         }),
     ]
 
     test('to addresses list includes submitter emails', async () => {
         const template = await sendRateQuestionResponseStateEmail(
-            testRate(),
+            testRate,
             testEmailConfig(),
             questions(),
             currentQuestion()
@@ -236,7 +218,7 @@ describe('sendRateQuestionResponseStateEmail', () => {
     })
     test('to addresses list includes all state contacts on submission', async () => {
         const template = await sendRateQuestionResponseStateEmail(
-            testRate(),
+            testRate,
             testEmailConfig(),
             questions(),
             currentQuestion()
@@ -260,7 +242,7 @@ describe('sendRateQuestionResponseStateEmail', () => {
     })
 
     it('to addresses does not include actuaries when rate communication preference is OACT_TO_STATE', async () => {
-        const rate = testRate()
+        const rate = testRate
         rate.packageSubmissions[0].rateRevision.formData.actuaryCommunicationPreference =
             'OACT_TO_STATE'
         const template = await sendRateQuestionResponseStateEmail(
@@ -286,7 +268,7 @@ describe('sendRateQuestionResponseStateEmail', () => {
 
     test('to addresses list does not include duplicate state receiver emails on submission', async () => {
         const template = await sendRateQuestionResponseStateEmail(
-            testRate(),
+            testRate,
             testEmailConfig(),
             questions(),
             currentQuestion()
@@ -307,7 +289,7 @@ describe('sendRateQuestionResponseStateEmail', () => {
 
     test('includes link to submission', async () => {
         const template = await sendRateQuestionResponseStateEmail(
-            testRate(),
+            testRate,
             testEmailConfig(),
             questions(),
             currentQuestion()
@@ -329,7 +311,7 @@ describe('sendRateQuestionResponseStateEmail', () => {
 
     test('subject line is correct and clearly states submission was successful', async () => {
         const template = await sendRateQuestionResponseStateEmail(
-            testRate(),
+            testRate,
             testEmailConfig(),
             questions(),
             currentQuestion()
@@ -350,7 +332,7 @@ describe('sendRateQuestionResponseStateEmail', () => {
 
     test('includes expected data', async () => {
         const template = await sendRateQuestionResponseStateEmail(
-            testRate(),
+            testRate,
             testEmailConfig(),
             questions(),
             currentQuestion()
@@ -388,7 +370,7 @@ describe('sendRateQuestionResponseStateEmail', () => {
 
     test('renders overall email for a new response as expected', async () => {
         const template = await sendRateQuestionResponseStateEmail(
-            testRate(),
+            testRate,
             testEmailConfig(),
             questions(),
             currentQuestion()

@@ -1,43 +1,23 @@
-import { testCMSUser, testStateUser } from '../../testHelpers/userHelpers'
+import { testStateUser } from '../../testHelpers/userHelpers'
 import {
     defaultFloridaProgram,
     defaultFloridaRateProgram,
 } from '../../testHelpers/gqlHelpers'
 
-import type { RateQuestionType, RateType } from '../../domain-models'
+import type { RateQuestionType } from '../../domain-models'
 import { sendRateQuestionStateEmail } from './sendRateQuestionStateEmail'
-import { testEmailConfig } from '../../testHelpers/emailerHelpers'
+import {
+    mockRate,
+    mockRateQuestionAndResponses,
+    testEmailConfig,
+} from '../../testHelpers/emailerHelpers'
 
 describe('sendRateQuestionStateEmail', () => {
-    const dmcoCMSUser = testCMSUser({
-        divisionAssignment: 'DMCO',
-    })
-
-    const currentQuestion = (): RateQuestionType => ({
-        id: 'dmco-rate-question-1',
-        rateID: 'test-rate',
-        createdAt: new Date('2024-04-23'),
-        addedBy: dmcoCMSUser,
-        division: 'DMCO',
-        documents: [
-            {
-                name: 'dmco-rate-question-1',
-                s3URL: 's3://bucketName/key/dmco-rate-question-1-doc',
-                downloadURL: 'https://fake-bucket.s3.amazonaws.com/test',
-            },
-        ],
-        responses: [],
-    })
-
-    const testRate = (): RateType => ({
+    const testRate = mockRate({
         id: 'test-rate',
         createdAt: new Date('2024-04-12'),
         updatedAt: new Date('2024-04-12'),
-        status: 'SUBMITTED',
-        stateCode: 'FL',
         parentContractID: 'parent-contract',
-        stateNumber: 2,
-        revisions: [],
         packageSubmissions: [
             {
                 submitInfo: {
@@ -196,29 +176,27 @@ describe('sendRateQuestionStateEmail', () => {
                 ],
             },
         ],
-        questions: {
-            DMCOQuestions: {
-                totalCount: 1,
-                edges: [
-                    {
-                        node: currentQuestion(),
-                    },
-                ],
-            },
-            DMCPQuestions: {
-                totalCount: 0,
-                edges: [],
-            },
-            OACTQuestions: {
-                totalCount: 0,
-                edges: [],
-            },
-        },
     })
+
+    const currentQuestion = (): RateQuestionType =>
+        mockRateQuestionAndResponses({
+            id: 'dmco-rate-question-1',
+            createdAt: new Date('2024-04-23'),
+            rateID: testRate.id,
+            division: 'DMCO',
+            documents: [
+                {
+                    name: 'dmco-rate-question-1',
+                    s3URL: 's3://bucketName/key/dmco-rate-question-1-doc',
+                    downloadURL: 'https://fake-bucket.s3.amazonaws.com/test',
+                },
+            ],
+            responses: [],
+        })
 
     it('to addresses list includes submitter emails', async () => {
         const template = await sendRateQuestionStateEmail(
-            testRate(),
+            testRate,
             testEmailConfig(),
             currentQuestion()
         )
@@ -238,7 +216,7 @@ describe('sendRateQuestionStateEmail', () => {
     })
     it('to addresses list includes all state contacts on all contracts submitted with rate', async () => {
         const template = await sendRateQuestionStateEmail(
-            testRate(),
+            testRate,
             testEmailConfig(),
             currentQuestion()
         )
@@ -260,7 +238,7 @@ describe('sendRateQuestionStateEmail', () => {
         )
     })
     it('to addresses does not include actuaries when rate communication preference is OACT_TO_STATE', async () => {
-        const rate = testRate()
+        const rate = testRate
         rate.packageSubmissions[0].rateRevision.formData.actuaryCommunicationPreference =
             'OACT_TO_STATE'
         const template = await sendRateQuestionStateEmail(
@@ -284,7 +262,7 @@ describe('sendRateQuestionStateEmail', () => {
     })
     it('to addresses list does not include duplicate emails', async () => {
         const template = await sendRateQuestionStateEmail(
-            testRate(),
+            testRate,
             testEmailConfig(),
             currentQuestion()
         )
@@ -303,7 +281,7 @@ describe('sendRateQuestionStateEmail', () => {
     })
     it('subject line is correct and clearly states submission is complete', async () => {
         const template = await sendRateQuestionStateEmail(
-            testRate(),
+            testRate,
             testEmailConfig(),
             currentQuestion()
         )
@@ -325,7 +303,7 @@ describe('sendRateQuestionStateEmail', () => {
     })
     it('includes link to rate Q&A page', async () => {
         const template = await sendRateQuestionStateEmail(
-            testRate(),
+            testRate,
             testEmailConfig(),
             currentQuestion()
         )
@@ -347,7 +325,7 @@ describe('sendRateQuestionStateEmail', () => {
     })
     it('includes expected data on the CMS analyst who sent the question', async () => {
         const template = await sendRateQuestionStateEmail(
-            testRate(),
+            testRate,
             testEmailConfig(),
             currentQuestion()
         )
@@ -371,7 +349,7 @@ describe('sendRateQuestionStateEmail', () => {
     })
     it('renders overall email for a new rate question as expected', async () => {
         const template = await sendRateQuestionStateEmail(
-            testRate(),
+            testRate,
             testEmailConfig(),
             currentQuestion()
         )
