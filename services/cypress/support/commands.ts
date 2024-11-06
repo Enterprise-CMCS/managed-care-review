@@ -9,7 +9,7 @@ import 'cypress-file-upload'
 import 'cypress-pipe'
 import {aliasMutation, aliasQuery} from '../utils/graphql-test-utils';
 
-const LOCAL_STORAGE_MEMORY: {} = {}
+const LOCAL_STORAGE_MEMORY = {}
 
 Cypress.Commands.add('saveLocalStorage', () => {
     Object.keys(localStorage).forEach((key) => {
