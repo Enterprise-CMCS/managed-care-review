@@ -1,12 +1,12 @@
 import React, { useEffect } from 'react'
-import { GridContainer } from '@trussworks/react-uswds'
-import { useNavigate, useOutletContext, useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import {
     CreateQuestionResponseInput,
     useCreateContractQuestionResponseMutation,
     Division,
     useFetchContractWithQuestionsQuery,
 } from '../../../gen/gqlClient'
+import styles from '../QuestionResponse.module.scss'
 import { usePage } from '../../../contexts/PageContext'
 import { Breadcrumbs } from '../../../components/Breadcrumbs/Breadcrumbs'
 import { createContractResponseWrapper } from '../../../gqlHelpers/mutationWrappersForUserFriendlyErrors'
@@ -14,9 +14,11 @@ import { RoutesRecord } from '../../../constants'
 import { GenericErrorPage } from '../../Errors/GenericErrorPage'
 import { UploadResponseForm } from './UploadResponseForm'
 import { FileItemT } from '../../../components'
-import { getQuestionRoundForQuestionID } from '../QuestionResponseHelpers/questionResponseHelpers'
+import { extractDocumentsFromQuestion, extractQuestions, getQuestionRoundForQuestionID } from '../QuestionResponseHelpers/questionResponseHelpers'
 import { ErrorOrLoadingPage } from '../../StateSubmission'
 import { handleAndReturnErrorState } from '../../StateSubmission/ErrorOrLoadingPage'
+import { QuestionDisplayTable } from '../QATable/QuestionDisplayTable'
+import { useAuth } from '../../../contexts/AuthContext'
 
 export const UploadContractResponse = () => {
     // router context
@@ -28,6 +30,7 @@ export const UploadContractResponse = () => {
 
     const navigate = useNavigate()
     const { updateHeading } = usePage()
+    const {loggedInUser} = useAuth()
  // api
  const {
     data: fetchContractData,
@@ -49,7 +52,6 @@ const contractName =
     (contract?.packageSubmissions &&
         contract?.packageSubmissions[0].contractRevision.contractName) ||
     ''
-
 // side effects
 useEffect(() => {
     updateHeading({ customHeading: `${contractName} Add response` })
@@ -96,9 +98,10 @@ if (!contract || contract.status === 'DRAFT' || !questionID || !contract.questio
             navigate(`/submissions/${id}/question-and-answers?submit=response`)
         }
     }
+    const question = extractQuestions(contract.questions).find( (question) => question.id == questionID)
     const questionRound = getQuestionRoundForQuestionID(contract.questions, division?.toUpperCase() as Division, questionID)
     return (
-        <GridContainer>
+        <div className={styles.uploadFormContainer}>
             <Breadcrumbs
                 className="usa-breadcrumb--wrap"
                 items={[
@@ -113,14 +116,18 @@ if (!contract || contract.status === 'DRAFT' || !questionID || !contract.questio
                     },
                 ]}
             />
-
             <UploadResponseForm
                 handleSubmit={handleFormSubmit}
                 apiLoading={apiLoading}
                 apiError={Boolean(apiError)}
                 type="contract"
                 round={questionRound}
+                questionBeingAsked={question? <QuestionDisplayTable
+                    documents={extractDocumentsFromQuestion(question)}
+                    user={loggedInUser!}
+                    onlyDisplayInitial
+                    />: <p>'Related question unable to display'</p>}
             />
-        </GridContainer>
+        </div>
     )
 }

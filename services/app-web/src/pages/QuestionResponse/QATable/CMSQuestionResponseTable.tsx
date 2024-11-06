@@ -20,6 +20,7 @@ export const CMSQuestionResponseTable = ({
     userDivision,
 }: CMSQuestionResponseTableProps) => {
     const { loggedInUser } = useAuth()
+
     const currentDivisionRounds = (): QuestionRounds => {
         if (!userDivision) {
             return []
@@ -94,7 +95,7 @@ export const CMSQuestionResponseTable = ({
                                 key={questionData.id}
                                 question={questionData}
                                 roundTitle={roundTitle}
-                                currentUser={loggedInUser}
+                                currentUser={loggedInUser!}
                             />
                         ))
                     )
@@ -114,7 +115,7 @@ export const CMSQuestionResponseTable = ({
                                 key={questionData.id}
                                 question={questionData}
                                 roundTitle={roundTitle}
-                                currentUser={loggedInUser}
+                                currentUser={loggedInUser!}
                             />
                         ))
                     )

@@ -1,5 +1,4 @@
 import React, { useEffect } from 'react'
-import { GridContainer } from '@trussworks/react-uswds'
 import { useNavigate, useParams } from 'react-router-dom'
 import {
     CreateQuestionResponseInput,
@@ -17,7 +16,9 @@ import { UploadResponseForm } from './UploadResponseForm'
 import { FileItemT } from '../../../components'
 import { ErrorOrLoadingPage } from '../../StateSubmission'
 import { handleAndReturnErrorState } from '../../StateSubmission/ErrorOrLoadingPage'
-import { getQuestionRoundForQuestionID } from '../QuestionResponseHelpers/questionResponseHelpers'
+import { extractDocumentsFromQuestion, extractQuestions, getQuestionRoundForQuestionID } from '../QuestionResponseHelpers/questionResponseHelpers'
+import { QuestionDisplayTable } from '../QATable/QuestionDisplayTable'
+import { useAuth } from '../../../contexts/AuthContext'
 
 export const UploadRateResponse = () => {
     // router context
@@ -30,6 +31,7 @@ export const UploadRateResponse = () => {
 
     const navigate = useNavigate()
     const { updateHeading } = usePage()
+    const {loggedInUser} = useAuth()
 
     // api
     const {
@@ -111,9 +113,10 @@ export const UploadRateResponse = () => {
             )
         }
     }
+    const question = extractQuestions(rate.questions).find( (question) => question.id == questionID)
 
     return (
-        <GridContainer  className={styles.uploadFormContainer}>
+        <div  className={styles.uploadFormContainer}>
             <Breadcrumbs
                 className="usa-breadcrumb--wrap"
                 items={[
@@ -142,7 +145,12 @@ export const UploadRateResponse = () => {
                 apiError={Boolean(apiError)}
                 type="rate"
                 round={questionRoundNumber}
+                questionBeingAsked={question? <QuestionDisplayTable
+                    documents={extractDocumentsFromQuestion(question)}
+                    user={loggedInUser!}
+                    onlyDisplayInitial
+                    />: <p>'Related question unable to display'</p>}
             />
-        </GridContainer>
+        </div>
     )
 }

@@ -13,6 +13,7 @@
 
 .uploadFormContainer {
     max-width: custom.$mcr-container-standard-width-fixed;
+   background-color: none;
 }
 .tableHeader {
     h2 {
@@ -80,6 +81,7 @@
     [id^='formSummary'] {
         display: flex;
         flex-direction: column;
+       padding-bottom: 25px
     }
 
     &[class^='usa-form'] {

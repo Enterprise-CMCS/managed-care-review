@@ -26,8 +26,9 @@ type UploadResponseFormProps =  {
     apiError: boolean,
     type: 'contract' | 'rate'
     round: number,
+    questionBeingAsked?: JSX.Element // pass in a QuestionDisplayTable with data
 }
-const UploadResponseForm = ({handleSubmit, apiError, apiLoading, type, round}: UploadResponseFormProps) => {
+const UploadResponseForm = ({handleSubmit, apiError, apiLoading, type, round, questionBeingAsked}: UploadResponseFormProps) => {
     const { division, id, rateID} = useParams<{ division: string; id: string, rateID: string }>()
     const [shouldValidate, setShouldValidate] = React.useState(false)
     const navigate = useNavigate()
@@ -83,6 +84,7 @@ const UploadResponseForm = ({handleSubmit, apiError, apiLoading, type, round}: U
                         division={division?.toUpperCase() as Division}
                         isContract={isContract}
                      />
+                     {questionBeingAsked}
 
                     {shouldValidate && (
                         <ErrorSummary

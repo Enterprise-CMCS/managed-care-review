@@ -12,13 +12,15 @@
     flex: 1 0 auto;
     display: flex;
     flex-direction: column;
-    background-color: none;
+    background-color: transparent;
 }
 
 .container {
-    @include custom.default-page-container;
-    padding: 0 !important; // override GridContainer to make sure our sidenav background alwaysmatches the content inside it
+    @include custom.container;
+    padding: 0 !important; // override GridContainer to make sure our sidenav background always matches the content inside it
+    justify-content: center;
 }
+
 
 .verticalNavContainer {
     padding: 2rem;
