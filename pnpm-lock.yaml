@@ -458,8 +458,8 @@ importers:
         specifier: ^24.1.1
         version: 24.1.1
       launchdarkly-react-client-sdk:
-        specifier: ^3.3.2
-        version: 3.3.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^3.6.0
+        version: 3.6.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       path-browserify:
         specifier: ^1.0.1
         version: 1.0.1
@@ -652,7 +652,7 @@ importers:
         version: 1.4.2(@babel/core@7.24.7)(graphql@16.9.0)
       jest-launchdarkly-mock:
         specifier: ^2.1.0
-        version: 2.1.0(launchdarkly-react-client-sdk@3.3.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
+        version: 2.1.0(launchdarkly-react-client-sdk@3.6.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
       lint-staged:
         specifier: ^15.2.7
         version: 15.2.7
@@ -6194,6 +6194,7 @@ packages:
 
   acorn-import-assertions@1.9.0:
     resolution: {integrity: sha512-cmMwop9x+8KFhxvKrKfPYmN6/pKTYYHBqLa0DfvVZcKMJWNyWLnaqND7dx/qn66R7ewM1UX5XMaDVP5wlVTaVA==}
+    deprecated: package has been renamed to acorn-import-attributes
     peerDependencies:
       acorn: ^8
 
@@ -9846,14 +9847,14 @@ packages:
     resolution: {integrity: sha512-VhFjppK7jXlcEKaS7bxdoibB5j01NKyeDR7a8XfssdDGNWCTsbF0/5IExSmPi44eDncPhkoPNxlSZhEZvrbD5w==}
     engines: {node: '>=0.12.0'}
 
-  launchdarkly-js-client-sdk@3.3.0:
-    resolution: {integrity: sha512-Hb+EF/5m43jsKrkXLPrdklX5g+XUJiwJQlVfa4y+ZPEqSnP4w4GrFp+Iv5ftWCcRhhpQuw/rygoNZlL1e1vmgg==}
+  launchdarkly-js-client-sdk@3.5.0:
+    resolution: {integrity: sha512-3dgxC9S8K2ix6qjdArjZGOJPtAytgfQTuE+vWgjWJK7725rpYbuqbHghIFr5B0+WyWyVBYANldjWd1JdtYLwsw==}
 
-  launchdarkly-js-sdk-common@5.2.0:
-    resolution: {integrity: sha512-aLv2ZrUv229RIwLtFhdILu2aJS/fqGSJzTk4L/bCDZA8RuIh7PutI3ui/AJeNnzPzjKzdEQZw6wVhkVc84baog==}
+  launchdarkly-js-sdk-common@5.4.0:
+    resolution: {integrity: sha512-Kb3SDcB6S0HUpFNBZgtEt0YUV/fVkyg+gODfaOCJQ0Y0ApxLKNmmJBZOrPE2qIdzw536u4BqEjtaJdqJWCEElg==}
 
-  launchdarkly-react-client-sdk@3.3.2:
-    resolution: {integrity: sha512-Cusw0aB+L65FceGQQ77IFhKZT+J+NezDtmahhI/LtK/Da2YhlbSmxhInSLdf325e3Umj0+foDIOkFt/OOFmQsQ==}
+  launchdarkly-react-client-sdk@3.6.0:
+    resolution: {integrity: sha512-tGXc7CNngfwElsoLmvpt81NO+v5gH9xuCdIjYSi9BHlL4wk6mpJpuEJn0Kx8Q3D1mnNzAhX3YdJNXc1pk3fXbg==}
     peerDependencies:
       react: ^16.6.3 || ^17.0.0 || ^18.0.0
       react-dom: ^16.8.4 || ^17.0.0 || ^18.0.0
@@ -26779,9 +26780,9 @@ snapshots:
     optionalDependencies:
       fsevents: 2.3.3
 
-  jest-launchdarkly-mock@2.1.0(launchdarkly-react-client-sdk@3.3.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1):
+  jest-launchdarkly-mock@2.1.0(launchdarkly-react-client-sdk@3.6.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1):
     dependencies:
-      launchdarkly-react-client-sdk: 3.3.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      launchdarkly-react-client-sdk: 3.6.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       lodash.camelcase: 4.3.0
       lodash.kebabcase: 4.1.1
       lodash.snakecase: 4.1.1
@@ -27354,21 +27355,21 @@ snapshots:
 
   launchdarkly-eventsource@2.0.3: {}
 
-  launchdarkly-js-client-sdk@3.3.0:
+  launchdarkly-js-client-sdk@3.5.0:
     dependencies:
       escape-string-regexp: 4.0.0
-      launchdarkly-js-sdk-common: 5.2.0
+      launchdarkly-js-sdk-common: 5.4.0
 
-  launchdarkly-js-sdk-common@5.2.0:
+  launchdarkly-js-sdk-common@5.4.0:
     dependencies:
       base64-js: 1.5.1
       fast-deep-equal: 2.0.1
       uuid: 8.3.2
 
-  launchdarkly-react-client-sdk@3.3.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
+  launchdarkly-react-client-sdk@3.6.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
       hoist-non-react-statics: 3.3.2
-      launchdarkly-js-client-sdk: 3.3.0
+      launchdarkly-js-client-sdk: 3.5.0
       lodash.camelcase: 4.3.0
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)

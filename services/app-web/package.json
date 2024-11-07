@@ -104,7 +104,7 @@
         "jotai": "^2.9.3",
         "jotai-location": "^0.5.1",
         "jsdom": "^24.1.1",
-        "launchdarkly-react-client-sdk": "^3.3.2",
+        "launchdarkly-react-client-sdk": "^3.6.0",
         "path-browserify": "^1.0.1",
         "plugin": "^0.3.3",
         "protobufjs": "^7.3.0",
