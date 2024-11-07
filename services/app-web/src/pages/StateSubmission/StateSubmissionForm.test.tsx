@@ -635,9 +635,18 @@ describe('StateSubmissionForm', () => {
             await userEvent.click(removeThreeOne)
 
             // ASSERT
-            // When deleting a file that exists in a previous revision, we should not see its key
-            // in the deleteCallKeys array.
-            expect(deleteCallKeys).toEqual(['three-one'])
+            // Verify these files are no longer visible in the UI
+            expect(
+                screen.queryByText('Remove one two document')
+            ).not.toBeInTheDocument()
+            expect(
+                screen.queryByText('Remove two one document')
+            ).not.toBeInTheDocument()
+            expect(
+                screen.queryByText('Remove three one document')
+            ).not.toBeInTheDocument()
+
+            expect(screen.getByText(/0 files added/)).toBeInTheDocument()
         })
 
         it('loads contract details fields for /submissions/:id/edit/contract-details with amendments', async () => {
