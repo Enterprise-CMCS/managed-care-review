@@ -92,10 +92,6 @@ export const DemoListScanFailure = (): React.ReactElement => {
                 await fakeRequest<S3FileData>(false, resolveData)
                 return
             }}
-            deleteFile={async (_key: string) => {
-                await fakeRequest<S3FileData>(true, resolveData)
-                return
-            }}
             onFileItemsUpdate={() => console.info('Async load complete')}
         />
     )
@@ -112,10 +108,6 @@ export const DemoTableScanFailure = (): React.ReactElement => {
             }
             scanFile={async (_key: string) => {
                 await fakeRequest<S3FileData>(false, resolveData)
-                return
-            }}
-            deleteFile={async (_key: string) => {
-                await fakeRequest<S3FileData>(true, resolveData)
                 return
             }}
             onFileItemsUpdate={() => console.info('Async load complete')}
