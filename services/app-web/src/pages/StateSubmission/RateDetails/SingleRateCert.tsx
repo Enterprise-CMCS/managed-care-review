@@ -121,7 +121,7 @@ const RateDatesErrorMessage = ({
     const validationErrorMessage = hasError
         ? isDateRangeEmpty(startDate, endDate)
             ? 'You must provide a start and an end date'
-            : startDateError ?? endDateError
+            : (startDateError ?? endDateError)
         : null
 
     return (
@@ -140,7 +140,7 @@ export const SingleRateCert = ({
     index = 0,
 }: SingleRateCertProps): React.ReactElement => {
     // page level setup
-    const { handleDeleteFile, handleUploadFile, handleScanFile } = useS3()
+    const { handleUploadFile, handleScanFile } = useS3()
     const key = rateInfo.key
     const displayAsStandaloneRate = multiRatesConfig === undefined
     const fieldNamePrefix = `rateInfos.${index}`
@@ -216,13 +216,6 @@ export const SingleRateCert = ({
                         scanFile={(key) =>
                             handleScanFile(key, 'HEALTH_PLAN_DOCS')
                         }
-                        deleteFile={(key) =>
-                            handleDeleteFile(
-                                key,
-                                'HEALTH_PLAN_DOCS',
-                                previousDocuments
-                            )
-                        }
                         onFileItemsUpdate={({ fileItems }) =>
                             setFieldValue(
                                 `${fieldNamePrefix}.rateDocuments`,
@@ -271,13 +264,6 @@ export const SingleRateCert = ({
                         }
                         scanFile={(key) =>
                             handleScanFile(key, 'HEALTH_PLAN_DOCS')
-                        }
-                        deleteFile={(key) =>
-                            handleDeleteFile(
-                                key,
-                                'HEALTH_PLAN_DOCS',
-                                previousDocuments
-                            )
                         }
                         onFileItemsUpdate={({ fileItems }) =>
                             setFieldValue(

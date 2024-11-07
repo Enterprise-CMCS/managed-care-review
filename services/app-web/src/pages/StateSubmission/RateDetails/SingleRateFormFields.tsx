@@ -79,7 +79,7 @@ const RateDatesErrorMessage = ({
     const validationErrorMessage = hasError
         ? isDateRangeEmpty(startDate, endDate)
             ? 'You must provide a start and an end date'
-            : startDateError ?? endDateError
+            : (startDateError ?? endDateError)
         : null
 
     return (
@@ -105,7 +105,7 @@ export const SingleRateFormFields = ({
     fieldNamePrefix,
 }: SingleRateFormFieldsProps): React.ReactElement => {
     // page level setup
-    const { handleDeleteFile, handleUploadFile, handleScanFile } = useS3()
+    const { handleUploadFile, handleScanFile } = useS3()
     const { errors, setFieldValue } = useFormikContext<RateDetailFormConfig>()
     const [focusNewActuaryContact, setFocusNewActuaryContact] = useState(false)
 
@@ -165,13 +165,6 @@ export const SingleRateFormFields = ({
                         handleUploadFile(file, 'HEALTH_PLAN_DOCS')
                     }
                     scanFile={(key) => handleScanFile(key, 'HEALTH_PLAN_DOCS')}
-                    deleteFile={(key) =>
-                        handleDeleteFile(
-                            key,
-                            'HEALTH_PLAN_DOCS',
-                            previousDocuments
-                        )
-                    }
                     onFileItemsUpdate={({ fileItems }) =>
                         setFieldValue(
                             `${fieldNamePrefix}.rateDocuments`,
@@ -215,13 +208,6 @@ export const SingleRateFormFields = ({
                         handleUploadFile(file, 'HEALTH_PLAN_DOCS')
                     }
                     scanFile={(key) => handleScanFile(key, 'HEALTH_PLAN_DOCS')}
-                    deleteFile={(key) =>
-                        handleDeleteFile(
-                            key,
-                            'HEALTH_PLAN_DOCS',
-                            previousDocuments
-                        )
-                    }
                     onFileItemsUpdate={({ fileItems }) =>
                         setFieldValue(
                             `${fieldNamePrefix}.supportingDocuments`,
