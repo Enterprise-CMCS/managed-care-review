@@ -13,7 +13,6 @@ describe('AuthenticatedRouteWrapper and SessionTimeoutModal', () => {
 
     afterAll(() => {
         vi.runOnlyPendingTimers()
-        vi.useRealTimers()
         vi.clearAllMocks()
     })
 

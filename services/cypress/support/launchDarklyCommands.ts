@@ -97,7 +97,8 @@ Cypress.Commands.add('stubFeatureFlags', () => {
      **/
     cy.interceptFeatureFlags({
         '438-attestation': true,
-        'hide-supporting-docs-page': true
+        'hide-supporting-docs-page': true,
+        'qa-by-rates': true,
     })
 })
 
