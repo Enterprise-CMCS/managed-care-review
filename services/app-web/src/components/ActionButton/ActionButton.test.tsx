@@ -3,6 +3,14 @@ import { ActionButton } from './ActionButton'
 import { renderWithProviders } from '../../testHelpers'
 
 describe('ActionButton', () => {
+    beforeEach(() => {
+        vi.useFakeTimers()
+    })
+
+    afterEach(() => {
+        vi.clearAllTimers()
+    })
+
     it('renders without errors', () => {
         renderWithProviders(
             <ActionButton type="button">Test Button</ActionButton>
@@ -80,51 +88,55 @@ describe('ActionButton', () => {
             ).toBeInTheDocument()
         })
 
-        it('renders button with active styles, spinner, and cursor', async () => {
-            renderWithProviders(
-                <ActionButton
-                    type="button"
-                    onClick={vi.fn()}
-                    loading
-                    animationTimeout={0}
-                >
-                    Test Button Loading
-                </ActionButton>
-            )
-            const loadingButton = screen.getByRole('button', {
-                name: /Loading/,
-            })
-            expect(loadingButton).toHaveClass('usa-button--active')
-
-            expect(loadingButton).toHaveClass('_disabledCursor_b7011e')
-            await waitFor(() => {
-                expect(screen.getByRole('progressbar')).toBeInTheDocument()
-                expect(screen.getByRole('progressbar')).toHaveClass(
-                    ' _ds-c-spinner_d122df'
+        describe('loading animation timing', () => {
+            it('renders button with active styles, spinner, and cursor', async () => {
+                renderWithProviders(
+                    <ActionButton
+                        type="button"
+                        onClick={vi.fn()}
+                        loading
+                        animationTimeout={0}
+                    >
+                        Test Button Loading
+                    </ActionButton>
                 )
+                const loadingButton = screen.getByRole('button', {
+                    name: /Loading/,
+                })
+                expect(loadingButton).toHaveClass('usa-button--active')
+
+                expect(loadingButton).toHaveClass('_disabledCursor_b7011e')
+                await waitFor(() => {
+                    expect(screen.getByRole('progressbar')).toBeInTheDocument()
+                    expect(screen.getByRole('progressbar')).toHaveClass(
+                        ' _ds-c-spinner_d122df'
+                    )
+                })
             })
-        })
 
-        vi.useFakeTimers()
-        it('by default, wait 750 ms before displaying loading spinner', async () => {
-            renderWithProviders(
-                <ActionButton type="button" onClick={vi.fn()} loading>
-                    Test Button Loading
-                </ActionButton>
-            )
+            it('by default, wait 750 ms before displaying loading spinner', async () => {
+                renderWithProviders(
+                    <ActionButton type="button" onClick={vi.fn()} loading>
+                        Test Button Loading
+                    </ActionButton>
+                )
 
-            expect(screen.queryByRole('progressbar')).not.toBeInTheDocument()
-            vi.advanceTimersByTime(749)
-            expect(screen.queryByRole('progressbar')).not.toBeInTheDocument()
-
-            vi.advanceTimersByTime(1)
-            await waitFor(() => {
                 expect(
-                    screen.getByRole('button', { name: 'Loading' })
-                ).toBeInTheDocument()
-                expect(screen.getByRole('progressbar')).toBeInTheDocument()
+                    screen.queryByRole('progressbar')
+                ).not.toBeInTheDocument()
+                vi.advanceTimersByTime(749)
+                expect(
+                    screen.queryByRole('progressbar')
+                ).not.toBeInTheDocument()
+
+                vi.advanceTimersByTime(1)
+                await waitFor(() => {
+                    expect(
+                        screen.getByRole('button', { name: 'Loading' })
+                    ).toBeInTheDocument()
+                    expect(screen.getByRole('progressbar')).toBeInTheDocument()
+                })
             })
-            vi.useRealTimers()
         })
     })
 
