@@ -25,7 +25,11 @@ export const sendRateQuestionCMSEmail = async (
         )
     }
 
-    let receiverEmails = [...stateAnalystsEmails, ...config.devReviewTeamEmails]
+    let receiverEmails = [
+        ...stateAnalystsEmails,
+        ...config.devReviewTeamEmails,
+        ...config.dmcpSubmissionEmails,
+    ]
 
     if (currentQuestion.division === 'DMCP') {
         receiverEmails.push(...config.dmcpReviewEmails)
