@@ -324,7 +324,7 @@ describe('sendRateQuestionResponseStateEmail', () => {
         expect(template).toEqual(
             expect.objectContaining({
                 subject: expect.stringContaining(
-                    `Response to DMCO rate questions was successfully submitted.`
+                    'Response submitted to CMS for test-rate-certification-name'
                 ),
             })
         )
@@ -355,6 +355,15 @@ describe('sendRateQuestionResponseStateEmail', () => {
         expect(template).toEqual(
             expect.objectContaining({
                 bodyText: expect.stringContaining('Date: 01/05/2024'),
+            })
+        )
+
+        // Includes rate certification name
+        expect(template).toEqual(
+            expect.objectContaining({
+                bodyText: expect.stringContaining(
+                    'Rate name: test-rate-certification-name'
+                ),
             })
         )
 

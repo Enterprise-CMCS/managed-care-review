@@ -1,10 +1,9 @@
 Response to <%= it.cmsRequestorDivision %> rate questions was successfully submitted.<br />
 <br />
-<b>Date:</b> <%= it.dateAsked %>
+<b>Date:</b> <%= it.dateAsked %><br />
+<b>Rate name:</b> <%= it.packageName %><br />
 <br />
-<br />
-<a href="<%= it.questionResponseURL %>">View response</a>
-<br />
+<a href="<%= it.questionResponseURL %>">View response</a><br />
 <br />
 <b>What comes next:</b><br />
 <ol>

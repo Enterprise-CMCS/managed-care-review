@@ -76,7 +76,7 @@ export const sendRateQuestionResponseStateEmail = async (
             sourceEmail: config.emailSource,
             subject: `${
                 config.stage !== 'prod' ? `[${config.stage}] ` : ''
-            }Response to ${division} rate questions was successfully submitted.`,
+            }Response submitted to CMS for ${rateFormData.rateCertificationName}`,
             bodyText: stripHTMLFromTemplate(result),
             bodyHTML: result,
         }
