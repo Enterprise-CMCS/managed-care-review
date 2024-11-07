@@ -53,7 +53,6 @@ type SingleRateFormFieldsProps = {
     shouldValidate: boolean
     index: number // defaults to 0
     fieldNamePrefix: string // formik field name prefix - used for looking up values and errors in Formik FieldArray
-    previousDocuments: string[] // this only passed in to ensure S3 deleteFile doesn't remove valid files for previous revision
     autofill?: (rateForm: FormikRateForm) => void // used for multi-rates, when called will FieldArray replace the existing form fields with new data
 }
 
@@ -101,7 +100,6 @@ export const SingleRateFormFields = ({
     rateForm,
     shouldValidate,
     index = 0,
-    previousDocuments,
     fieldNamePrefix,
 }: SingleRateFormFieldsProps): React.ReactElement => {
     // page level setup
