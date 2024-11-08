@@ -48,8 +48,9 @@ model ContractTable {
   draftRates DraftRateJoinTable[]
 
   revisions ContractRevisionTable[]
-
   sharedRateRevisions RateRevisionTable[] @relation(name: "SharedRateRevisions")
+
+  approvalInfos UpdateInfoTable[] @relation(name: "approvalInfos")
 }
 
 model RateTable {
@@ -182,7 +183,7 @@ model UpdateInfoTable {
   unlockedRates      RateRevisionTable[]          @relation("unlockRateInfo")
   withdrawnRates     RateTable[]                  @relation("withdrawRateInfo")
   submissionPackages SubmissionPackageJoinTable[] @relation("submission")
-
+approvedContracts  ContractTable[]                @relation("approvalInfos")
   // these get ALL related contracts + revisions for given update.
   relatedContracts ContractRevisionTable[]
   relatedRates     RateRevisionTable[]

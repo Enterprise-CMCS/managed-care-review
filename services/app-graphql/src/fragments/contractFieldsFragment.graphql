@@ -1,0 +1,32 @@
+fragment contractFieldsFragment on Contract {
+    id
+    status
+    reviewStatus
+    createdAt
+    updatedAt
+    initiallySubmittedAt
+    stateCode
+    mccrsID
+    approvalInfos {
+        updatedAt
+        updatedBy {
+            email
+            role
+            familyName
+            givenName
+        }
+        updatedReason
+    }
+    state {
+        code
+        name
+        programs {
+            id
+            name
+            fullName
+            isRateProgram
+        }
+    }
+
+    stateNumber
+}

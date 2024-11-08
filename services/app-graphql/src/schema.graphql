@@ -977,6 +977,15 @@ enum HealthPlanPackageStatus {
     RESUBMITTED
 }
 
+"""
+This status is used to determine whether the package is currently being edited by a state user
+or if it has been submitted and is being reviewed by CMS users.
+"""
+enum ReviewStatus {
+    UNDER_REVIEW
+    APPROVED
+}
+
 enum UnlockedStatus {
     UNLOCKED
     DRAFT
@@ -1739,6 +1748,8 @@ type Contract {
     SUBMITTED and RESUBMITTED packages cannot be modified
     """
     status: HealthPlanPackageStatus!
+    ""
+    reviewStatus: ReviewStatus
     "initiallySubmittedAt is the initial date this contract was submitted at. Is not changed by unlock or resubmission."
     initiallySubmittedAt: DateTime
     "stateCode is the state code (e.g. CA or TN) for the submitting state"
@@ -1759,6 +1770,9 @@ type Contract {
     On submission they are cemented into a new ContractPackageSubmission
     """
     draftRates: [Rate!]
+
+    "approvalInfos are the who/when/why for this contract being approved in MC-Review"
+    approvalInfos: [UpdateInformation]
 
     """
     packageSubmissions are a snapshot of the contract and its related rates through time
