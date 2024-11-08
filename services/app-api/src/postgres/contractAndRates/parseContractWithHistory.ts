@@ -190,6 +190,7 @@ function contractWithHistoryToDomainModelWithoutRates(
         updatedAt: contract.updatedAt,
         mccrsID: contract.mccrsID || undefined,
         status: getContractRateStatus(contract.revisions),
+        reviewStatus: contract.reviewStatus || 'UNDER_REVIEW',
         stateCode: contract.stateCode,
         stateNumber: contract.stateNumber,
         draftRevision,

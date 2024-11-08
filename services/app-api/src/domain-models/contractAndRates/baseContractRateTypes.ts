@@ -19,7 +19,7 @@ const contractWithoutDraftRatesSchema = z.object({
     createdAt: z.date(),
     updatedAt: z.date(),
     status: statusSchema,
-    reviewStatus: reviewStatusSchema.optional(),
+    reviewStatus: reviewStatusSchema,
     stateCode: z.string(),
     mccrsID: z.string().optional(),
     stateNumber: z.number().min(1),
