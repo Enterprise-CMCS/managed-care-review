@@ -4,7 +4,7 @@ import {
     ratePackageSubmissionSchema,
 } from './packageSubmissions'
 import { contractRevisionSchema, rateRevisionSchema } from './revisionTypes'
-import { statusSchema } from './statusType'
+import { statusSchema, reviewStatusSchema } from './statusType'
 import {
     indexContractQuestionsPayload,
     indexRateQuestionsPayload,
@@ -19,12 +19,13 @@ const contractWithoutDraftRatesSchema = z.object({
     createdAt: z.date(),
     updatedAt: z.date(),
     status: statusSchema,
+    reviewStatus: reviewStatusSchema.optional(),
     stateCode: z.string(),
     mccrsID: z.string().optional(),
     stateNumber: z.number().min(1),
     // If this contract is in a DRAFT or UNLOCKED status, there will be a draftRevision
     draftRevision: contractRevisionSchema.optional(),
-
+    approvalInfos: z.array(updateInfoSchema).optional(),
     // All revisions are submitted and in reverse chronological order
     revisions: z.array(contractRevisionSchema),
 

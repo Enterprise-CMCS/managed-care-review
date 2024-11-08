@@ -982,8 +982,10 @@ This status is used to determine whether the package is currently being edited b
 or if it has been submitted and is being reviewed by CMS users.
 """
 enum ReviewStatus {
+    PRE_REVIEW
     UNDER_REVIEW
     APPROVED
+    WITHDRAWN
 }
 
 enum UnlockedStatus {
@@ -1748,7 +1750,10 @@ type Contract {
     SUBMITTED and RESUBMITTED packages cannot be modified
     """
     status: HealthPlanPackageStatus!
-    ""
+    """
+    Where the contract is in the review submission flow
+    Options are PRE_REVIEW, UNDER_REVIEW, APPROVED, WITHDRAWN
+    """
     reviewStatus: ReviewStatus
     "initiallySubmittedAt is the initial date this contract was submitted at. Is not changed by unlock or resubmission."
     initiallySubmittedAt: DateTime

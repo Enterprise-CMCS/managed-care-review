@@ -7,9 +7,16 @@ const statusSchema = z.union([
     z.literal('RESUBMITTED'),
 ])
 
+const reviewStatusSchema = z.union([
+    z.literal('PRE_REVIEW'),
+    z.literal('UNDER_REVIEW'),
+    z.literal('APPROVED'),
+    z.literal('WITHDRAWN'),
+])
+
 const unlockedContractStatusSchema = z.union([
     z.literal('DRAFT'),
     z.literal('UNLOCKED'),
 ])
 
-export { statusSchema, unlockedContractStatusSchema }
+export { statusSchema, unlockedContractStatusSchema, reviewStatusSchema }
