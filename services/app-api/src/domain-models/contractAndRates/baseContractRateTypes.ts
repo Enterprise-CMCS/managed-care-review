@@ -10,7 +10,7 @@ import {
     indexRateQuestionsPayload,
 } from '../QuestionsType'
 import { updateInfoSchema } from './updateInfoType'
-
+import { contractReviewActionSchema } from './contractReviewActionType'
 // Contract represents the contract specific information in a submission package
 // All that data is contained in revisions, each revision represents the data in a single submission
 // submissions are kept intact here across time
@@ -25,7 +25,7 @@ const contractWithoutDraftRatesSchema = z.object({
     stateNumber: z.number().min(1),
     // If this contract is in a DRAFT or UNLOCKED status, there will be a draftRevision
     draftRevision: contractRevisionSchema.optional(),
-    approvalInfos: z.array(updateInfoSchema).optional(),
+    reviewStatusActions: z.array(contractReviewActionSchema).optional(),
     // All revisions are submitted and in reverse chronological order
     revisions: z.array(contractRevisionSchema),
 

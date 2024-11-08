@@ -982,7 +982,6 @@ This status is used to determine whether the package is currently being edited b
 or if it has been submitted and is being reviewed by CMS users.
 """
 enum ReviewStatus {
-    PRE_REVIEW
     UNDER_REVIEW
     APPROVED
     WITHDRAWN
@@ -991,6 +990,12 @@ enum ReviewStatus {
 enum UnlockedStatus {
     UNLOCKED
     DRAFT
+}
+
+enum ContractActionType {
+    UNDER_REVIEW
+    APPROVAL_NOTICE
+    WITHDRAW
 }
 
 """
@@ -1045,6 +1050,21 @@ type UpdateInformation {
     updatedBy: UpdatedBy!
     "the reason provided by the user when performing the update"
     updatedReason: String!
+}
+
+"""
+ContractReviewStatusActions is used for the review status actions on the contract
+"""
+type ContractReviewStatusActions {
+    "the datetime when the update occured"
+    updatedAt: DateTime!
+    "the email of the user who performed the update"
+    updatedBy: UpdatedBy!
+    "the reason provided by the user when performing the update"
+    updatedReason: String!
+    ""
+    actionType: ContractActionType!
+    contractID: ID!
 }
 
 """
@@ -1752,7 +1772,7 @@ type Contract {
     status: HealthPlanPackageStatus!
     """
     Where the contract is in the review submission flow
-    Options are PRE_REVIEW, UNDER_REVIEW, APPROVED, WITHDRAWN
+    Options are UNDER_REVIEW, APPROVED, WITHDRAWN
     """
     reviewStatus: ReviewStatus
     "initiallySubmittedAt is the initial date this contract was submitted at. Is not changed by unlock or resubmission."
@@ -1776,8 +1796,8 @@ type Contract {
     """
     draftRates: [Rate!]
 
-    "approvalInfos are the who/when/why for this contract being approved in MC-Review"
-    approvalInfos: [UpdateInformation]
+    "reviewStatusActions are the who/when/why for review status changes on this contract"
+    reviewStatusActions: [ContractReviewStatusActions]
 
     """
     packageSubmissions are a snapshot of the contract and its related rates through time

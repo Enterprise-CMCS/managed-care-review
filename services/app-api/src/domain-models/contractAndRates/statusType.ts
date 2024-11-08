@@ -8,7 +8,6 @@ const statusSchema = z.union([
 ])
 
 const reviewStatusSchema = z.union([
-    z.literal('PRE_REVIEW'),
     z.literal('UNDER_REVIEW'),
     z.literal('APPROVED'),
     z.literal('WITHDRAWN'),
