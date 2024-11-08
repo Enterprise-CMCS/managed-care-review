@@ -35,6 +35,7 @@ const fetchContractMockSuccess = ({
     if (contract && contract.__typename === 'UnlockedContract') {
         newContract = {
             ...contract,
+            reviewStatus: 'UNDER_REVIEW',
             __typename: 'Contract',
         }
     } else if (contract && contract.__typename === 'Contract') {
@@ -112,6 +113,7 @@ const fetchContractWithQuestionsMockSuccess = ({
     if (contract && contract.__typename === 'UnlockedContract') {
         newContract = {
             ...contract,
+            reviewStatus: 'UNDER_REVIEW',
             __typename: 'Contract',
         }
     } else if (contract && contract.__typename === 'Contract') {
@@ -417,7 +419,7 @@ const submitContractMockError = ({
 
 const indexContractsMockSuccess = (
     submissions: Contract[] = [
-        { ...mockContractPackageUnlockedWithUnlockedType(), id: 'test-id-123', __typename: 'Contract' },
+        { ...mockContractPackageUnlockedWithUnlockedType(), id: 'test-id-123', __typename: 'Contract', reviewStatus: 'UNDER_REVIEW' },
         { ...mockContractPackageSubmittedWithRevisions(), id: 'test-id-124' },
     ]
 ): MockedResponse<IndexContractsForDashboardQuery> => {

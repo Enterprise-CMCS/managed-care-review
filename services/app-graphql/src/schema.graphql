@@ -1830,11 +1830,7 @@ type UnlockedContract {
     SUBMITTED and RESUBMITTED packages cannot be modified
     """
     status: UnlockedStatus!
-    """
-    Where the contract is in the review submission flow
-    Options are UNDER_REVIEW, APPROVED, WITHDRAWN
-    """
-    reviewStatus: ReviewStatus!
+    
     "initiallySubmittedAt is the initial date this contract was submitted at. Is not changed by unlock or resubmission."
     initiallySubmittedAt: Date
     "stateCode is the state code (e.g. CA or TN) for the submitting state"
