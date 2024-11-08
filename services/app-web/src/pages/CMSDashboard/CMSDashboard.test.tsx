@@ -93,6 +93,7 @@ describe('CMSDashboard', () => {
                     const submitted = mockContractPackageSubmitted()
                     const unlocked: Contract = {
                         ...mockContractPackageUnlockedWithUnlockedType(),
+                        reviewStatus: 'UNDER_REVIEW',
                         __typename: 'Contract',
                     }
                     draft.id = 'test-abc-draft'
@@ -160,6 +161,7 @@ describe('CMSDashboard', () => {
                 it('displays each contract status tag as expected for current revision that is submitted/resubmitted', async () => {
                     const unlocked: Contract = {
                         ...mockContractPackageUnlockedWithUnlockedType(),
+                        reviewStatus: 'UNDER_REVIEW',
                         __typename: 'Contract',
                     }
                     const submitted = mockContractPackageSubmitted()
@@ -199,6 +201,7 @@ describe('CMSDashboard', () => {
                     const mockMN = mockMNState() // this is the state used in apolloMocks
                     const unlocked: Contract = {
                         ...mockContractPackageUnlockedWithUnlockedType(),
+                        reviewStatus: 'UNDER_REVIEW',
                         __typename: 'Contract',
                     }
                     // Set new data on the unlocked form. This would be a state users update and the CMS user should not see this data.
@@ -267,6 +270,7 @@ describe('CMSDashboard', () => {
                 it('should display filters on cms dashboard', async () => {
                     const unlocked: Contract = {
                         ...mockContractPackageUnlockedWithUnlockedType(),
+                        reviewStatus: 'UNDER_REVIEW',
                         __typename: 'Contract',
                     }
                     const submitted = mockContractPackageSubmitted()

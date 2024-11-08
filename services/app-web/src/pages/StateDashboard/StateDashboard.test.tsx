@@ -105,6 +105,7 @@ describe('StateDashboard', () => {
                     updatedAt: new Date('2020-01-01'),
                 },
             }),
+            reviewStatus: 'UNDER_REVIEW',
             __typename: 'Contract',
         }
 
@@ -196,6 +197,7 @@ describe('StateDashboard', () => {
                     updatedAt: new Date('2020-01-01'),
                 },
             }),
+            reviewStatus: 'UNDER_REVIEW',
             __typename: 'Contract',
         }
 
