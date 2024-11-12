@@ -1698,6 +1698,7 @@ function mockContractPackageUnlockedWithUnlockedType(
 ): UnlockedContract {
     return {
         status: 'UNLOCKED',
+        reviewStatus: 'UNDER_REVIEW',
         __typename: 'UnlockedContract',
         createdAt: '2023-01-01T16:54:39.173Z',
         updatedAt: '2024-12-01T16:54:39.173Z',

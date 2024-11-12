@@ -23,6 +23,7 @@ import {
     contractFormDataToDomainModel,
     convertUpdateInfoToDomainModel,
     getContractRateStatus,
+    getContractReviewStatus,
 } from './prismaSharedContractRateHelpers'
 import type { ContractTableWithoutDraftRates } from './prismaSubmittedContractHelpers'
 import type { ContractTableFullPayload } from './prismaFullContractRateHelpers'
@@ -190,7 +191,7 @@ function contractWithHistoryToDomainModelWithoutRates(
         updatedAt: contract.updatedAt,
         mccrsID: contract.mccrsID || undefined,
         status: getContractRateStatus(contract.revisions),
-        reviewStatus: contract.reviewStatus || 'UNDER_REVIEW',
+        reviewStatus: getContractReviewStatus(contract),
         stateCode: contract.stateCode,
         stateNumber: contract.stateNumber,
         draftRevision,

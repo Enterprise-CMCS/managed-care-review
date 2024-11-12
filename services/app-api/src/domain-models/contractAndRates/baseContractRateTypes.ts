@@ -33,6 +33,9 @@ const contractWithoutDraftRatesSchema = z.object({
 
     questions: indexContractQuestionsPayload.optional(),
 })
+type ContractReviewStatusType = z.infer<
+    typeof contractWithoutDraftRatesSchema.shape.reviewStatus
+>
 
 type ContractWithoutDraftRatesType = z.infer<
     typeof contractWithoutDraftRatesSchema
@@ -63,4 +66,8 @@ type RateWithoutDraftContractsType = z.infer<
 
 export { contractWithoutDraftRatesSchema, rateWithoutDraftContractsSchema }
 
-export type { ContractWithoutDraftRatesType, RateWithoutDraftContractsType }
+export type {
+    ContractWithoutDraftRatesType,
+    RateWithoutDraftContractsType,
+    ContractReviewStatusType,
+}

@@ -10,7 +10,6 @@ const statusSchema = z.union([
 const reviewStatusSchema = z.union([
     z.literal('UNDER_REVIEW'),
     z.literal('APPROVED'),
-    z.literal('WITHDRAWN'),
 ])
 
 const unlockedContractStatusSchema = z.union([
