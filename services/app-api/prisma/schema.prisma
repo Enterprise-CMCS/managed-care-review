@@ -167,7 +167,7 @@ model RateRevisionTable {
 
 model ContractActionTable {
   id            String   @id @default(uuid())
-  updatedAt     DateTime
+  updatedAt     DateTime @default(now()) @updatedAt
   updatedByID   String
   updatedBy     User     @relation(fields: [updatedByID], references: [id])
   updatedReason String
