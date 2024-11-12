@@ -1,6 +1,6 @@
 import { formatCalendarDate } from '../../../../app-web/src/common-code/dateHelpers'
 import { pruneDuplicateEmails } from '../formatters'
-import type { EmailConfiguration, EmailData, StateAnalystsEmails } from '..'
+import type { EmailConfiguration, EmailData } from '..'
 import type { RateQuestionType, RateType } from '../../domain-models'
 import {
     stripHTMLFromTemplate,
@@ -8,8 +8,9 @@ import {
     getQuestionRound,
 } from '../templateHelpers'
 import { rateSummaryQuestionResponseURL } from '../generateURLs'
+import type { StateAnalystsEmails } from '..'
 
-export const sendRateQuestionCMSEmail = async (
+export const sendRateQuestionResponseCMSEmail = async (
     rate: RateType,
     stateAnalystsEmails: StateAnalystsEmails,
     config: EmailConfiguration,
@@ -25,13 +26,22 @@ export const sendRateQuestionCMSEmail = async (
         )
     }
 
+    // currentQuestion is the question the new response belongs to. Responses can be uploaded to any question round.
+    const { responses, division } = currentQuestion
+    const latestResponse = responses[0]
+    const questionRound = getQuestionRound(questions, currentQuestion)
+
+    if (questionRound instanceof Error) {
+        return questionRound
+    }
+
     let receiverEmails = [...stateAnalystsEmails, ...config.devReviewTeamEmails]
 
     const ccAddresses = [...config.dmcpSubmissionEmails]
 
-    if (currentQuestion.division === 'DMCP') {
+    if (division === 'DMCP') {
         receiverEmails.push(...config.dmcpReviewEmails)
-    } else if (currentQuestion.division === 'OACT') {
+    } else if (division === 'OACT') {
         receiverEmails.push(...config.oactEmails)
     }
 
@@ -42,27 +52,21 @@ export const sendRateQuestionCMSEmail = async (
         config.baseUrl
     )
 
-    const questionRound = getQuestionRound(questions, currentQuestion)
-
-    if (questionRound instanceof Error) {
-        return questionRound
-    }
-
     const data = {
-        packageName: rateCertName,
+        rateCertName,
         questionResponseURL,
-        cmsRequestorEmail: currentQuestion.addedBy.email,
-        cmsRequestorName: `${currentQuestion.addedBy.givenName} ${currentQuestion.addedBy.familyName}`,
-        cmsRequestorDivision: currentQuestion.division,
+        cmsRequestorDivision: division,
+        stateResponseSubmitterEmail: latestResponse.addedBy.email,
+        stateResponseSubmitterName: `${latestResponse.addedBy.givenName} ${latestResponse.addedBy.familyName}`,
+        questionRound,
         dateAsked: formatCalendarDate(
             currentQuestion.createdAt,
             'America/New_York'
         ),
-        questionRound,
     }
 
     const result = await renderTemplate<typeof data>(
-        'sendRateQuestionCMSEmail',
+        'sendRateQuestionResponseCMSEmail',
         data
     )
 
@@ -76,7 +80,7 @@ export const sendRateQuestionCMSEmail = async (
             sourceEmail: config.emailSource,
             subject: `${
                 config.stage !== 'prod' ? `[${config.stage}] ` : ''
-            }Questions sent for ${rateCertName}`,
+            }New Responses for ${rateCertName}`,
             bodyText: stripHTMLFromTemplate(result),
             bodyHTML: result,
         }

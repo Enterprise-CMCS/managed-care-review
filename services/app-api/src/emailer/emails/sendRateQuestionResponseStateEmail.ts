@@ -1,25 +1,28 @@
-import type { RateQuestionType, RateType } from '../../domain-models'
-import type { EmailConfiguration, EmailData } from '../emailer'
-import {
-    getActuaryContactEmails,
-    getRateStateContactEmails,
-    getRateSubmitterEmails,
-    renderTemplate,
-    stripHTMLFromTemplate,
-} from '../templateHelpers'
-import { formatCalendarDate } from '../../common-code/dateHelpers'
+import { formatCalendarDate } from '../../../../app-web/src/common-code/dateHelpers'
 import { pruneDuplicateEmails } from '../formatters'
+import type { EmailConfiguration, EmailData } from '..'
+import type { RateQuestionType, RateType } from '../../domain-models'
+import {
+    stripHTMLFromTemplate,
+    renderTemplate,
+    getQuestionRound,
+    getActuaryContactEmails,
+    getRateSubmitterEmails,
+    getRateStateContactEmails,
+} from '../templateHelpers'
 import { rateQuestionResponseURL } from '../generateURLs'
 
-export const sendRateQuestionStateEmail = async (
+export const sendRateQuestionResponseStateEmail = async (
     rate: RateType,
     config: EmailConfiguration,
-    rateQuestion: RateQuestionType
+    questions: RateQuestionType[],
+    currentQuestion: RateQuestionType
 ): Promise<EmailData | Error> => {
     const rateFormData = rate.packageSubmissions[0].rateRevision.formData
     const parentContractID = rate.parentContractID
     const shouldIncludeActuaries =
         rateFormData.actuaryCommunicationPreference === 'OACT_TO_ACTUARY'
+    const division = currentQuestion.division
 
     if (!rateFormData.rateCertificationName) {
         return new Error(
@@ -39,29 +42,33 @@ export const sendRateQuestionStateEmail = async (
         ...actuaryEmails,
     ])
 
+    const questionRound = getQuestionRound(questions, currentQuestion)
+
+    if (questionRound instanceof Error) {
+        return questionRound
+    }
+
     const data = {
         packageName: rateFormData.rateCertificationName,
         questionResponseURL: rateQuestionResponseURL(
             parentContractID,
-            rateQuestion.rateID,
+            currentQuestion.rateID,
             config.baseUrl
         ),
-        cmsRequestorEmail: rateQuestion.addedBy.email,
-        cmsRequestorName: `${rateQuestion.addedBy.givenName} ${rateQuestion.addedBy.familyName}`,
-        cmsRequestorDivision: rateQuestion.division,
+        cmsRequestorDivision: division,
         dateAsked: formatCalendarDate(
-            rateQuestion.createdAt,
+            currentQuestion.createdAt,
             'America/New_York'
         ),
     }
 
-    const template = await renderTemplate<typeof data>(
-        'sendQuestionStateEmail',
+    const result = await renderTemplate<typeof data>(
+        'sendRateQuestionResponseStateEmail',
         data
     )
 
-    if (template instanceof Error) {
-        return template
+    if (result instanceof Error) {
+        return result
     } else {
         return {
             toAddresses: toAddresses,
@@ -69,9 +76,9 @@ export const sendRateQuestionStateEmail = async (
             sourceEmail: config.emailSource,
             subject: `${
                 config.stage !== 'prod' ? `[${config.stage}] ` : ''
-            }New questions about ${rateFormData.rateCertificationName}`,
-            bodyText: stripHTMLFromTemplate(template),
-            bodyHTML: template,
+            }Response submitted to CMS for ${rateFormData.rateCertificationName}`,
+            bodyText: stripHTMLFromTemplate(result),
+            bodyHTML: result,
         }
     }
 }

@@ -2,12 +2,12 @@ import {
     mockRateQuestionAndResponses,
     testEmailConfig,
 } from '../../testHelpers/emailerHelpers'
-import { sendRateQuestionCMSEmail } from './sendRateQuestionCMSEmail'
+import { sendRateQuestionResponseCMSEmail } from './sendRateQuestionResponseCMSEmail'
 import { mockRate } from '../../testHelpers/emailerHelpers'
 import { getTestStateAnalystsEmails } from '../../testHelpers/parameterStoreHelpers'
 import type { DivisionType, RateQuestionType } from '../../domain-models'
 
-describe('sendRateQuestionCMSEmail', () => {
+describe('sendRateQuestionResponseCMSEmail', () => {
     const stateAnalysts = getTestStateAnalystsEmails('MN')
 
     const rate = mockRate()
@@ -30,8 +30,8 @@ describe('sendRateQuestionCMSEmail', () => {
         currentQuestion(division),
     ]
 
-    test('to addresses list only includes state analyst when a DMCO user submits a question', async () => {
-        const template = await sendRateQuestionCMSEmail(
+    test('to addresses list only includes state analyst when a state user submits a response to a DMCO question', async () => {
+        const template = await sendRateQuestionResponseCMSEmail(
             rate,
             stateAnalysts,
             testEmailConfig(),
@@ -52,7 +52,6 @@ describe('sendRateQuestionCMSEmail', () => {
             })
         )
 
-        // expect consistent email addresses to be in toAddresses and ccAddresses
         expect(template).toEqual(
             expect.objectContaining({
                 toAddresses: expect.arrayContaining([
@@ -66,8 +65,8 @@ describe('sendRateQuestionCMSEmail', () => {
         )
     })
 
-    test('to addresses list includes state analyst and OACT group emails when an OACT user submits a question', async () => {
-        const template = await sendRateQuestionCMSEmail(
+    test('to addresses list includes state analyst and OACT group emails when a state user submits a response to an OACT question', async () => {
+        const template = await sendRateQuestionResponseCMSEmail(
             rate,
             stateAnalysts,
             testEmailConfig(),
@@ -93,8 +92,8 @@ describe('sendRateQuestionCMSEmail', () => {
         )
     })
 
-    test('to addresses list includes state analyst and DMCP group emails when a DMCP user submits a question', async () => {
-        const template = await sendRateQuestionCMSEmail(
+    test('to addresses list includes state analyst and DMCP group emails when a state user submits a response to a DMCP question', async () => {
+        const template = await sendRateQuestionResponseCMSEmail(
             rate,
             stateAnalysts,
             testEmailConfig(),
@@ -162,7 +161,7 @@ describe('sendRateQuestionCMSEmail', () => {
             }),
         ]
 
-        const template = await sendRateQuestionCMSEmail(
+        const template = await sendRateQuestionResponseCMSEmail(
             rate,
             stateAnalysts,
             testEmailConfig(),
@@ -185,7 +184,7 @@ describe('sendRateQuestionCMSEmail', () => {
         const name =
             rate.packageSubmissions[0].rateRevision.formData
                 .rateCertificationName
-        const template = await sendRateQuestionCMSEmail(
+        const template = await sendRateQuestionResponseCMSEmail(
             rate,
             stateAnalysts,
             testEmailConfig(),
@@ -195,14 +194,14 @@ describe('sendRateQuestionCMSEmail', () => {
 
         expect(template).toEqual(
             expect.objectContaining({
-                subject: expect.stringContaining(`Questions sent for ${name}`),
+                subject: expect.stringContaining(`New Responses for ${name}`),
                 bodyText: expect.stringContaining(`${name}`),
             })
         )
     })
 
     test('includes link to the question response page', async () => {
-        const template = await sendRateQuestionCMSEmail(
+        const template = await sendRateQuestionResponseCMSEmail(
             rate,
             stateAnalysts,
             testEmailConfig(),
@@ -220,8 +219,8 @@ describe('sendRateQuestionCMSEmail', () => {
         )
     })
 
-    test('includes expected data on the CMS analyst who sent the question', async () => {
-        const template = await sendRateQuestionCMSEmail(
+    test('includes expected data on the state user who sent the response', async () => {
+        const template = await sendRateQuestionResponseCMSEmail(
             rate,
             stateAnalysts,
             testEmailConfig(),
@@ -232,19 +231,21 @@ describe('sendRateQuestionCMSEmail', () => {
         expect(template).toEqual(
             expect.objectContaining({
                 bodyText: expect.stringContaining(
-                    'Sent by: Prince Zuko (DMCO)  zuko@example.com (zuko@example.com)'
+                    'Submitted by: James Brown  james@example.com (james@example.com)'
                 ),
             })
         )
         expect(template).toEqual(
             expect.objectContaining({
-                bodyText: expect.stringContaining('Date: 01/05/2024'),
+                bodyText: expect.stringContaining(
+                    'Questions sent on: 01/05/2024'
+                ),
             })
         )
     })
 
-    test('renders overall email for a new question as expected', async () => {
-        const template = await sendRateQuestionCMSEmail(
+    test('renders overall email for a new response as expected', async () => {
+        const template = await sendRateQuestionResponseCMSEmail(
             rate,
             stateAnalysts,
             testEmailConfig(),

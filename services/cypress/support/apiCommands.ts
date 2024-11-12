@@ -142,8 +142,6 @@ const createAndSubmitContractWithRates = async (
     return submission.data.submitContract.contract
 }
 
-
-
 const assignCmsDivision = async (
     apolloClient: ApolloClient<NormalizedCacheObject>,
     cmsUser: CMSUserType,

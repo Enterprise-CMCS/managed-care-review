@@ -19,6 +19,8 @@ export const userLoginData = {
 
 export type CMSUserLoginNames = keyof typeof userLoginData;
 
+const submissionRateQAPattern = /^\/submissions\/[^\/]+\/rates\/[^\/]+\/question-and-answers$/;
+
 Cypress.Commands.add('logInAsStateUser', () => {
     // Set up gql intercept for requests on app load
 
@@ -100,6 +102,8 @@ Cypress.Commands.add(
                     'exist'
                 )
                 cy.findByRole('heading', { name: /rate reviews/ }).should('exist')
+            } else if (initialURL.match(submissionRateQAPattern)) {
+                cy.wait('@fetchRateWithQuestionsQuery', { timeout: 80_000 })
             } else {
                 cy.wait('@indexContractsForDashboardQuery', { timeout: 80_000 })
             }
