@@ -1846,6 +1846,8 @@ type UnlockedContract {
     """
     stateNumber: Int!
     mccrsID: String
+    "reviewStatusActions are the who/when/why for review status changes on this contract"
+    reviewStatusActions: [ContractReviewStatusActions]
 
     "draftRevision is the currently modifiable revision if the rate is DRAFT or UNLOCKED"
     draftRevision: ContractRevision!

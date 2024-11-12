@@ -3,6 +3,7 @@ mutation unlockContract($input: UnlockContractInput!) {
         contract {
             id
             status
+            reviewStatus
             createdAt
             updatedAt
             initiallySubmittedAt
@@ -17,7 +18,18 @@ mutation unlockContract($input: UnlockContractInput!) {
                     isRateProgram
                 }
             }
-
+            reviewStatusActions {
+                updatedAt
+                updatedBy {
+                    email
+                    role
+                    familyName
+                    givenName
+                }
+                updatedReason
+                contractID
+                actionType
+            }
             stateNumber
 
             draftRevision {
