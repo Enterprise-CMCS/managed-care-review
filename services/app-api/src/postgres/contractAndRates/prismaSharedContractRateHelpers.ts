@@ -11,8 +11,8 @@ import type {
 import { findStatePrograms } from '../state'
 import { packageName } from '../../common-code/healthPlanFormDataType'
 import { logError } from '../../logger'
-import type { ContractTableFullPayload } from './prismaFullContractRateHelpers'
 import type { ContractReviewStatusType } from '../../domain-models/contractAndRates/baseContractRateTypes'
+import type { ContractTableWithoutDraftRates } from './prismaSubmittedContractHelpers'
 
 const subincludeUpdateInfo = {
     updatedBy: true,
@@ -89,15 +89,15 @@ function getContractRateStatus(
 
 // -----
 function getContractReviewStatus(
-    contract: ContractTableFullPayload
+    contract: ContractTableWithoutDraftRates
 ): ContractReviewStatusType {
     // need to order actions from latest to earliest
-    const actions = contract.contractReviewStatusActions.sort(
+    const actions = contract.reviewStatusActions.sort(
         (actionA, actionB) =>
             actionB.updatedAt.getTime() - actionA.updatedAt.getTime()
     )
     const latestAction = actions[0]
-    if (latestAction.actionType === 'APPROVAL_NOTICE') {
+    if (latestAction?.actionType === 'APPROVAL_NOTICE') {
         return 'APPROVED'
     }
     return 'UNDER_REVIEW'
