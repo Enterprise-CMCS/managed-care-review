@@ -1,7 +1,8 @@
 export {
-    getTracer,
     recordSpan,
     recordJSException,
     recordJSExceptionWithContext,
     recordUserInputException,
+    useTracing,
+    TraceContext,
 } from './tracingHelper'

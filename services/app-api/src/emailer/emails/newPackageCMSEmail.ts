@@ -60,8 +60,8 @@ export const newPackageCMSEmail = async (
             pkg.contractType === 'AMENDMENT'
                 ? 'Contract amendment effective dates'
                 : 'Contract effective dates',
-        contractDatesStart: formatCalendarDate(pkg.contractDateStart),
-        contractDatesEnd: formatCalendarDate(pkg.contractDateEnd),
+        contractDatesStart: formatCalendarDate(pkg.contractDateStart, 'UTC'),
+        contractDatesEnd: formatCalendarDate(pkg.contractDateEnd, 'UTC'),
         rateInfos:
             isContractAndRates &&
             pkg.rateInfos.map((rate) => ({
@@ -73,15 +73,17 @@ export const newPackageCMSEmail = async (
                 rateDatesStart:
                     rate.rateType === 'AMENDMENT' && rate.rateAmendmentInfo
                         ? formatCalendarDate(
-                              rate.rateAmendmentInfo.effectiveDateStart
+                              rate.rateAmendmentInfo.effectiveDateStart,
+                              'UTC'
                           )
-                        : formatCalendarDate(rate.rateDateStart),
+                        : formatCalendarDate(rate.rateDateStart, 'UTC'),
                 rateDatesEnd:
                     rate.rateType === 'AMENDMENT' && rate.rateAmendmentInfo
                         ? formatCalendarDate(
-                              rate.rateAmendmentInfo.effectiveDateEnd
+                              rate.rateAmendmentInfo.effectiveDateEnd,
+                              'UTC'
                           )
-                        : formatCalendarDate(rate.rateDateEnd),
+                        : formatCalendarDate(rate.rateDateEnd, 'UTC'),
             })),
         submissionURL: packageURL,
     }

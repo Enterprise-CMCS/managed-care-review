@@ -195,7 +195,7 @@ export const RateDetailsSummarySection = ({
         if (!startDate || !endDate) {
             return undefined
         }
-        return `${formatCalendarDate(startDate)} to ${formatCalendarDate(endDate)}`
+        return `${formatCalendarDate(startDate, 'UTC')} to ${formatCalendarDate(endDate, 'UTC')}`
     }
 
     const getRateFormData = (rate: Rate | RateRevision): RateFormData => {
@@ -417,7 +417,8 @@ export const RateDetailsSummarySection = ({
                                                   : explainMissingData
                                           }
                                           children={formatCalendarDate(
-                                              rateFormData.rateDateCertified
+                                              rateFormData.rateDateCertified,
+                                              'UTC'
                                           )}
                                       />
                                       {rateFormData.rateType === 'AMENDMENT' ? (

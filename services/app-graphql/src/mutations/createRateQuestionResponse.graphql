@@ -1,0 +1,27 @@
+mutation createRateQuestionResponse($input: CreateQuestionResponseInput!) {
+    createRateQuestionResponse(input: $input) {
+        question {
+            id
+            rateID
+            createdAt
+            addedBy {
+                ... on CMSUser {
+                    ...cmsUserFragment
+                }
+                ... on CMSApproverUser {
+                    ...cmsApproverUserFragment
+                }
+            }
+            division
+            documents {
+                name
+                s3URL
+            }
+            responses {
+                ... on QuestionResponse {
+                    ...questionResponseFragment
+                }
+            }
+        }
+    }
+}

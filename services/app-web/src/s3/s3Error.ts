@@ -1,5 +1,5 @@
 export const S3ErrorCodes = ['NETWORK_ERROR'] as const
-type S3ErrorCode = typeof S3ErrorCodes[number] // iterable union type
+type S3ErrorCode = (typeof S3ErrorCodes)[number] // iterable union type
 
 export type S3Error = {
     code: S3ErrorCode

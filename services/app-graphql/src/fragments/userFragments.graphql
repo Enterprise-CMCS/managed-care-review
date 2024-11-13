@@ -1,0 +1,79 @@
+fragment cmsUserFragment on CMSUser {
+    id
+    email
+    role
+    familyName
+    givenName
+    stateAssignments {
+        code
+        name
+        programs {
+            id
+            name
+            fullName
+            isRateProgram
+        }
+    }
+    divisionAssignment
+}
+
+fragment cmsApproverUserFragment on CMSApproverUser {
+    id
+    email
+    role
+    familyName
+    givenName
+    stateAssignments {
+        code
+        name
+        programs {
+            id
+            name
+            fullName
+            isRateProgram
+        }
+    }
+    divisionAssignment
+}
+
+fragment stateUserFragment on StateUser {
+    id
+    email
+    role
+    familyName
+    givenName
+    state {
+        code
+        name
+        programs {
+            id
+            name
+            fullName
+            isRateProgram
+        }
+    }
+}
+
+fragment adminUserFragment on AdminUser {
+    id
+    email
+    role
+    familyName
+    givenName
+}
+
+fragment helpdeskUserFragment on HelpdeskUser {
+    id
+    email
+    role
+    familyName
+    givenName
+}
+
+fragment businessUserFragment on BusinessOwnerUser {
+    id
+    email
+    role
+    familyName
+    givenName
+}

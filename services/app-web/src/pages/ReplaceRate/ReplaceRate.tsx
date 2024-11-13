@@ -1,8 +1,4 @@
-import {
-    ButtonGroup,
-    FormGroup,
-    Label,
-} from '@trussworks/react-uswds'
+import { ButtonGroup, FormGroup, Label } from '@trussworks/react-uswds'
 import React, { useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { usePage } from '../../contexts/PageContext'
@@ -155,30 +151,30 @@ export const ReplaceRate = (): React.ReactElement => {
 
     return (
         <FormContainer id="ReplaceRate" className="standaloneForm">
-                {replaceError && <GenericApiErrorBanner />}
-                <Formik
-                    initialValues={formInitialValues}
-                    onSubmit={(values) => onSubmit(values)}
-                    validationSchema={ReplaceRateSchema}
-                >
-                    {({ errors, values, handleSubmit }) => (
-                        <UswdsForm
-                            id="ReplaceRateForm"
-                            aria-label={'Withdraw and replace rate on contract'}
-                            aria-describedby="form-guidance"
-                            onSubmit={(e) => {
-                                setShouldValidate(true)
-                                setFocusErrorSummaryHeading(true)
-                                return handleSubmit(e)
-                            }}
-                        >
-                            {shouldValidate && (
-                                <ErrorSummary
-                                    errors={generateErrorSummaryErrors(errors)}
-                                    headingRef={errorSummaryHeadingRef}
-                                />
-                            )}
-                            <div id="formInnerContainer">
+            {replaceError && <GenericApiErrorBanner />}
+            <Formik
+                initialValues={formInitialValues}
+                onSubmit={(values) => onSubmit(values)}
+                validationSchema={ReplaceRateSchema}
+            >
+                {({ errors, values, handleSubmit }) => (
+                    <UswdsForm
+                        id="ReplaceRateForm"
+                        aria-label={'Withdraw and replace rate on contract'}
+                        aria-describedby="form-guidance"
+                        onSubmit={(e) => {
+                            setShouldValidate(true)
+                            setFocusErrorSummaryHeading(true)
+                            return handleSubmit(e)
+                        }}
+                    >
+                        {shouldValidate && (
+                            <ErrorSummary
+                                errors={generateErrorSummaryErrors(errors)}
+                                headingRef={errorSummaryHeadingRef}
+                            />
+                        )}
+                        <div id="formInnerContainer">
                             <h2>Replace a rate review</h2>
 
                             <DataDetail id="withdrawnRate" label="Current rate">
@@ -219,10 +215,7 @@ export const ReplaceRate = (): React.ReactElement => {
                                     <Label htmlFor={'replacementRateID'}>
                                         Select a replacement rate
                                     </Label>
-                                    <span
-                                    >
-                                        Required
-                                    </span>
+                                    <span>Required</span>
                                     {showFieldErrors(
                                         errors.replacementRateID
                                     ) && (
@@ -248,41 +241,40 @@ export const ReplaceRate = (): React.ReactElement => {
                                     />
                                 </FormGroup>
                             </fieldset>
-                            </div>
+                        </div>
 
                         <PageActionsContainer>
-                                <ButtonGroup type="default">
-                                    <ActionButton
-                                        type="button"
-                                        variant="outline"
-                                        data-testid="page-actions-left-secondary"
-                                        parent_component_type="page body"
-                                        link_url={`/submissions/${id}`}
-                                        onClick={() =>
-                                            navigate(`/submissions/${id}`)
-                                        }
-                                    >
-                                        Cancel
-                                    </ActionButton>
+                            <ButtonGroup type="default">
+                                <ActionButton
+                                    type="button"
+                                    variant="outline"
+                                    data-testid="page-actions-left-secondary"
+                                    parent_component_type="page body"
+                                    link_url={`/submissions/${id}`}
+                                    onClick={() =>
+                                        navigate(`/submissions/${id}`)
+                                    }
+                                >
+                                    Cancel
+                                </ActionButton>
 
-                                    <ActionButton
-                                        type="submit"
-                                        variant="default"
-                                        data-testid="page-actions-right-primary"
-                                        parent_component_type="page body"
-                                        link_url={`/submissions/${id}`}
-                                        animationTimeout={1000}
-                                        loading={replaceLoading}
-                                    >
-                                        Replace rate
-                                    </ActionButton>
-                                </ButtonGroup>
-                            </PageActionsContainer>
-                            </UswdsForm>
-                    )}
-
-                </Formik>
-         </FormContainer>
+                                <ActionButton
+                                    type="submit"
+                                    variant="default"
+                                    data-testid="page-actions-right-primary"
+                                    parent_component_type="page body"
+                                    link_url={`/submissions/${id}`}
+                                    animationTimeout={1000}
+                                    loading={replaceLoading}
+                                >
+                                    Replace rate
+                                </ActionButton>
+                            </ButtonGroup>
+                        </PageActionsContainer>
+                    </UswdsForm>
+                )}
+            </Formik>
+        </FormContainer>
     )
 }
 

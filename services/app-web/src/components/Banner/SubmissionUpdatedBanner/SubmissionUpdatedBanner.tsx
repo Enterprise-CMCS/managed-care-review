@@ -33,7 +33,6 @@ export const SubmissionUpdatedBanner = ({
                 <p className="usa-alert__text">
                     <b>Updated on:&nbsp;</b>
                     {formatBannerDate(updateInfo?.updatedAt)}
-                    &nbsp;ET
                 </p>
                 <ExpandableText>
                     <>

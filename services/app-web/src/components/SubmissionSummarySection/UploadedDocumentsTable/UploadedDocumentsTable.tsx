@@ -12,6 +12,7 @@ import { LinkWithLogging, NavLinkWithLogging } from '../../TealiumLogging'
 import { hasCMSUserPermissions } from '@mc-review/helpers'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '@mc-review/common-code'
+import { formatCalendarDate } from '@mc-review/common-code'
 // This is used to convert from deprecated FE domain types from protos to GQL GenericDocuments by added in a dateAdded
 export const convertFromSubmissionDocumentsToGenericDocuments = (
     deprecatedDocs: SubmissionDocument[],
@@ -34,6 +35,7 @@ export type UploadedDocumentsTableProps = {
     isSupportingDocuments?: boolean // used to calculate empty state and styles around the secondary supporting docs tables - would be nice to remove this in favor of more domain agnostic prop such as 'emptyStateText'
     multipleDocumentsAllowed?: boolean // used to determined if we display validations based on doc list length
     documentCategory?: string // used to determine if we display document category column
+    isLinkedRate?: boolean
 }
 
 export const UploadedDocumentsTable = ({
@@ -46,6 +48,7 @@ export const UploadedDocumentsTable = ({
     isSupportingDocuments = false,
     multipleDocumentsAllowed = true,
     hideDynamicFeedback = false,
+    isLinkedRate = false,
 }: UploadedDocumentsTableProps): React.ReactElement => {
     const initialDocState = documents.map((doc) => ({
         ...doc,
@@ -70,7 +73,8 @@ export const UploadedDocumentsTable = ({
     const canDisplayDateAddedForDocument = (doc: DocumentWithS3Data) => {
         return (
             (doc.dateAdded && previousSubmissionDate) ||
-            (doc.dateAdded && isInitialSubmission)
+            (doc.dateAdded && isInitialSubmission) ||
+            (doc.dateAdded && isLinkedRate)
         )
     }
 
@@ -210,7 +214,10 @@ export const UploadedDocumentsTable = ({
                             )}
                             <td>
                                 {canDisplayDateAddedForDocument(doc) ? (
-                                    dayjs(doc.dateAdded).format('M/D/YY')
+                                    formatCalendarDate(
+                                        doc.dateAdded,
+                                        'America/New_York'
+                                    )
                                 ) : (
                                     <span className="srOnly">N/A</span>
                                 )}

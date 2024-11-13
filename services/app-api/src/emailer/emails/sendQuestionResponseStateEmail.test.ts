@@ -8,7 +8,10 @@ import type {
     ContractRevisionType,
     StateType,
 } from '../../domain-models'
-import type { ContractFormDataType, Question } from '../../domain-models'
+import type {
+    ContractFormDataType,
+    ContractQuestionType,
+} from '../../domain-models'
 import { packageName } from '@mc-review/hpp'
 import { sendQuestionResponseStateEmail } from './index'
 
@@ -17,6 +20,7 @@ const defaultSubmitters = ['submitter1@example.com', 'submitter2@example.com']
 const flState: StateType = {
     stateCode: 'FL',
     name: 'Florida',
+    assignedCMSUsers: [],
 }
 
 const cmsUser: CMSUserType = {
@@ -29,7 +33,7 @@ const cmsUser: CMSUserType = {
     stateAssignments: [flState],
 }
 
-const questions: Question[] = [
+const questions: ContractQuestionType[] = [
     {
         id: '1234',
         contractID: 'contract-id-test',

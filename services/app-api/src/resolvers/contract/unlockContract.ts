@@ -15,12 +15,13 @@ import {
 import type { EmailParameterStore } from '../../parameterStore'
 import { GraphQLError } from 'graphql'
 import type { LDService } from '../../launchDarkly/launchDarkly'
+import type { StateCodeType } from '../../testHelpers'
 
 export function unlockContractResolver(
     store: Store,
     emailer: Emailer,
     emailParameterStore: EmailParameterStore,
-    _launchDarkly: LDService
+    launchDarkly: LDService
 ): MutationResolvers['unlockContract'] {
     return async (_parent, { input }, context) => {
         const { user, ctx, tracer } = context
@@ -29,6 +30,10 @@ export function unlockContractResolver(
 
         const { unlockedReason, contractID } = input
         span?.setAttribute('mcreview.package_id', contractID)
+
+        const featureFlags = await launchDarkly.allFlags(context)
+        const readStateAnalystsFromDBFlag =
+            featureFlags?.['read-write-state-assignments']
 
         // This resolver is only callable by CMS users
         if (!hasCMSPermissions(user)) {
@@ -103,16 +108,47 @@ export function unlockContractResolver(
             })
         }
 
-        // Get state analysts emails from parameter store
-        let stateAnalystsEmails =
-            await emailParameterStore.getStateAnalystsEmails(
-                unlockContractResult.stateCode
-            )
-        //If error, log it and set stateAnalystsEmails to empty string as to not interrupt the emails.
-        if (stateAnalystsEmails instanceof Error) {
-            logError('getStateAnalystsEmails', stateAnalystsEmails.message)
-            setErrorAttributesOnActiveSpan(stateAnalystsEmails.message, span)
-            stateAnalystsEmails = []
+        let stateAnalystsEmails: string[] = []
+        if (readStateAnalystsFromDBFlag) {
+            // not great that state code type isn't being used in ContractType but I'll risk the conversion for now
+            const stateAnalystsEmailsResult =
+                await store.findStateAssignedUsers(
+                    contractResult.stateCode as StateCodeType
+                )
+
+            if (stateAnalystsEmailsResult instanceof Error) {
+                logError(
+                    'getStateAnalystsEmails',
+                    stateAnalystsEmailsResult.message
+                )
+                setErrorAttributesOnActiveSpan(
+                    stateAnalystsEmailsResult.message,
+                    span
+                )
+            } else {
+                stateAnalystsEmails = stateAnalystsEmailsResult.map(
+                    (u) => u.email
+                )
+            }
+        } else {
+            const stateAnalystsEmailsResult =
+                await emailParameterStore.getStateAnalystsEmails(
+                    contractResult.stateCode
+                )
+
+            //If error log it and set stateAnalystsEmails to empty string as to not interrupt the emails.
+            if (stateAnalystsEmailsResult instanceof Error) {
+                logError(
+                    'getStateAnalystsEmails',
+                    stateAnalystsEmailsResult.message
+                )
+                setErrorAttributesOnActiveSpan(
+                    stateAnalystsEmailsResult.message,
+                    span
+                )
+            } else {
+                stateAnalystsEmails = stateAnalystsEmailsResult
+            }
         }
 
         // Get submitter email from every pkg submitted revision.

@@ -176,7 +176,7 @@ describe('ReviewSubmit', () => {
         })
     })
 
-    it('extracts the correct dates from unlocked submission and displays them in tables', async () => {
+    it('extracts the correct document dates from unlocked submission and displays them in tables', async () => {
         const contractMock = fetchContractMockSuccess({
             contract: mockContractPackageUnlockedWithUnlockedType(),
         })
@@ -205,10 +205,11 @@ describe('ReviewSubmit', () => {
         await waitFor(() => {
             const rows = screen.getAllByRole('row')
             expect(rows).toHaveLength(4)
+            // API returns UTC timezone, we display timestamped dates in ET timezone so 1 day before on these tests.
             expect(within(rows[0]).getByText('Date added')).toBeInTheDocument()
-            expect(within(rows[1]).getByText('2/2/23')).toBeInTheDocument()
+            expect(within(rows[1]).getByText('02/01/2023')).toBeInTheDocument()
             expect(within(rows[2]).getByText('Date added')).toBeInTheDocument()
-            expect(within(rows[3]).getByText('3/2/23')).toBeInTheDocument()
+            expect(within(rows[3]).getByText('03/01/2023')).toBeInTheDocument()
         })
     })
 

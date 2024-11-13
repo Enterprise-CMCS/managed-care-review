@@ -7,14 +7,49 @@ import * as tracingHelper from '@mc-review/otel'
 import { expect, vi } from 'vitest'
 
 describe('Error boundary tests', () => {
-    it('react-error-boundary correctly renders ErrorBoundaryRoot', async () => {
-        const ComponentThatThrowsError = () => {
-            throw new Error('react-error-boundary caught the error')
+    let originalError: typeof console.error
+
+    beforeAll(() => {
+        // Store original console.error
+        originalError = console.error
+        // Replace console.error with filtered version
+        console.error = (...args: any[]) => {
+            // Suppress React ErrorBoundary warnings and our test error
+            if (
+                typeof args[0] === 'string' &&
+                (args[0].includes('react-error-boundary caught the error') ||
+                    args[0].includes('The above error occurred in the') ||
+                    args[0].includes(
+                        'React will try to recreate this component tree'
+                    ))
+            ) {
+                return
+            }
+            originalError.call(console, ...args)
         }
-        const recordJSExceptionSpy = vi.spyOn(
-            tracingHelper,
-            'recordJSException'
+    })
+
+    afterAll(() => {
+        console.error = originalError
+    })
+
+    beforeEach(() => {
+        vi.spyOn(tracingHelper, 'recordJSException').mockImplementation(
+            (message) => {
+                return undefined
+            }
         )
+    })
+
+    afterEach(() => {
+        vi.restoreAllMocks()
+    })
+
+    it('react-error-boundary correctly renders ErrorBoundaryRoot', async () => {
+        const expectedError = new Error('react-error-boundary caught the error')
+        const ComponentThatThrowsError = () => {
+            throw expectedError
+        }
 
         renderWithProviders(
             <ErrorBoundary FallbackComponent={ErrorBoundaryRoot}>
@@ -41,8 +76,10 @@ describe('Error boundary tests', () => {
 
         // Expect error to be recorded to otel with the correct error thrown.
         // This verifies that the react-error-boundary component correctly passed in the thrown error it caught.
-        expect(recordJSExceptionSpy).toHaveBeenCalledWith(
-            'Crash in ErrorBoundaryRoot. Error message: Error: react-error-boundary caught the error'
-        )
+        await waitFor(() => {
+            expect(tracingHelper.recordJSException).toHaveBeenCalledWith(
+                'Crash in ErrorBoundaryRoot. Error message: Error: react-error-boundary caught the error'
+            )
+        })
     })
 })

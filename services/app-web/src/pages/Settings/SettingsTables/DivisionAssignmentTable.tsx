@@ -114,12 +114,12 @@ function CMSUserTableWithData({
             columnHelper.accessor('familyName', {
                 id: 'familyName',
                 cell: (info) => info.getValue(),
-                header: 'Family Name',
+                header: 'Last name',
             }),
             columnHelper.accessor('givenName', {
                 id: 'givenName',
                 cell: (info) => info.getValue(),
-                header: 'Given Name',
+                header: 'First name',
             }),
             columnHelper.accessor('email', {
                 id: 'email',
@@ -150,6 +150,7 @@ function CMSUserTableWithData({
         data: cmsUsers,
         filterFns: {
             dateRangeFilter: () => true,
+            analystFilter: () => true,
         },
         columns,
         getCoreRowModel: getCoreRowModel(),

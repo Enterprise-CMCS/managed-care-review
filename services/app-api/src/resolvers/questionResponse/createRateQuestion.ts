@@ -1,0 +1,209 @@
+import type { Store } from '../../postgres'
+import type { MutationResolvers } from '../../gen/gqlServer'
+import { hasCMSPermissions, isValidCmsDivison } from '../../domain-models'
+import { logError, logSuccess } from '../../logger'
+import {
+    setErrorAttributesOnActiveSpan,
+    setSuccessAttributesOnActiveSpan,
+} from '../attributeHelper'
+import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
+import { NotFoundError } from '../../postgres'
+import { GraphQLError } from 'graphql/index'
+import type { Emailer } from '../../emailer'
+import type { LDService } from '../../launchDarkly/launchDarkly'
+import type { StateCodeType } from '../../testHelpers'
+import type { EmailParameterStore } from '../../parameterStore'
+
+export function createRateQuestionResolver(
+    store: Store,
+    emailer: Emailer,
+    emailParameterStore: EmailParameterStore,
+    launchDarkly: LDService
+): MutationResolvers['createRateQuestion'] {
+    return async (_parent, { input }, context) => {
+        const { user, ctx, tracer } = context
+        const span = tracer?.startSpan('createRateQuestion', {}, ctx)
+        const featureFlags = await launchDarkly.allFlags(context)
+        const readStateAnalystsFromDBFlag =
+            featureFlags?.['read-write-state-assignments']
+
+        if (!hasCMSPermissions(user)) {
+            const msg = 'user not authorized to create a question'
+            logError('createRateQuestion', msg)
+            setErrorAttributesOnActiveSpan(msg, span)
+            throw new ForbiddenError(msg)
+        }
+
+        if (
+            !user.divisionAssignment ||
+            (user.divisionAssignment &&
+                !isValidCmsDivison(user.divisionAssignment))
+        ) {
+            const msg =
+                'users without an assigned division are not authorized to create a question'
+            logError('createRateQuestion', msg)
+            setErrorAttributesOnActiveSpan(msg, span)
+            throw new ForbiddenError(msg)
+        }
+
+        if (input.documents.length === 0) {
+            const msg = 'question documents are required'
+            logError('createRateQuestion', msg)
+            setErrorAttributesOnActiveSpan(msg, span)
+            throw new UserInputError(msg)
+        }
+
+        const rate = await store.findRateWithHistory(input.rateID)
+
+        if (rate instanceof Error) {
+            if (rate instanceof NotFoundError) {
+                const errMessage = `Rate with id ${input.rateID} does not exist`
+                logError('createRateQuestion', errMessage)
+                setErrorAttributesOnActiveSpan(errMessage, span)
+                throw new GraphQLError(errMessage, {
+                    extensions: { code: 'NOT_FOUND' },
+                })
+            }
+
+            const errMessage = `Issue finding a rate. Message: ${rate.message}`
+            logError('createRateQuestion', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+            throw new GraphQLError(errMessage, {
+                extensions: {
+                    code: 'INTERNAL_SERVER_ERROR',
+                    cause: 'DB_ERROR',
+                },
+            })
+        }
+
+        // Draft rate will have no submitted revisions
+        if (rate.status === 'DRAFT') {
+            const errMessage = `Issue creating question for rate. Message: Cannot create question for rate in DRAFT status`
+            logError('createRateQuestion', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+            throw new UserInputError(errMessage)
+        }
+
+        const inputFormatted = {
+            ...input,
+            documents: input.documents.map((doc) => {
+                return {
+                    name: doc.name,
+                    s3URL: doc.s3URL,
+                }
+            }),
+        }
+
+        const questionResult = await store.insertRateQuestion(
+            inputFormatted,
+            user
+        )
+
+        if (questionResult instanceof Error) {
+            const errMessage = `Issue creating question for rate. Message: ${questionResult.message}`
+            logError('createRateQuestion', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+            throw new Error(errMessage)
+        }
+
+        const allQuestions = await store.findAllQuestionsByRate(rate.id)
+
+        if (allQuestions instanceof Error) {
+            const errMessage = `Issue finding all questions associated with the rate: ${rate.id}`
+            logError('createRateQuestion', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+            throw new Error(errMessage)
+        }
+
+        let stateAnalystsEmails: string[] = []
+        if (readStateAnalystsFromDBFlag) {
+            // not great that state code type isn't being used in ContractType but I'll risk the conversion for now
+            const stateAnalystsEmailsResult =
+                await store.findStateAssignedUsers(
+                    rate.stateCode as StateCodeType
+                )
+
+            if (stateAnalystsEmailsResult instanceof Error) {
+                logError(
+                    'getStateAnalystsEmails',
+                    stateAnalystsEmailsResult.message
+                )
+                setErrorAttributesOnActiveSpan(
+                    stateAnalystsEmailsResult.message,
+                    span
+                )
+            } else {
+                stateAnalystsEmails = stateAnalystsEmailsResult.map(
+                    (u) => u.email
+                )
+            }
+        } else {
+            const stateAnalystsEmailsResult =
+                await emailParameterStore.getStateAnalystsEmails(rate.stateCode)
+
+            //If error log it and set stateAnalystsEmails to empty string as to not interrupt the emails.
+            if (stateAnalystsEmailsResult instanceof Error) {
+                logError(
+                    'getStateAnalystsEmails',
+                    stateAnalystsEmailsResult.message
+                )
+                setErrorAttributesOnActiveSpan(
+                    stateAnalystsEmailsResult.message,
+                    span
+                )
+            } else {
+                stateAnalystsEmails = stateAnalystsEmailsResult
+            }
+        }
+
+        const sendRateQuestionStateEmailResult =
+            await emailer.sendRateQuestionStateEmail(rate, questionResult)
+
+        if (sendRateQuestionStateEmailResult instanceof Error) {
+            logError(
+                'sendRateQuestionsStateEmail - state email failed',
+                sendRateQuestionStateEmailResult
+            )
+            setErrorAttributesOnActiveSpan('state email failed', span)
+            const errMessage = `Error sending a state email for 
+                questionID: ${questionResult.id} and rate: ${rate.id}`
+            throw new GraphQLError(errMessage, {
+                extensions: {
+                    code: 'INTERNAL_SERVER_ERROR',
+                    cause: 'EMAIL_ERROR',
+                },
+            })
+        }
+
+        const sendRateQuestionCMSEmailResult =
+            await emailer.sendRateQuestionCMSEmail(
+                rate,
+                stateAnalystsEmails,
+                allQuestions,
+                questionResult
+            )
+
+        if (sendRateQuestionCMSEmailResult instanceof Error) {
+            logError(
+                'sendRateQuestionsCMSEmail - CMS email failed',
+                sendRateQuestionCMSEmailResult
+            )
+            setErrorAttributesOnActiveSpan('CMS email failed', span)
+            const errMessage = `Error sending a CMS email for 
+                questionID: ${questionResult.id} and contractID: ${rate.id}`
+            throw new GraphQLError(errMessage, {
+                extensions: {
+                    code: 'INTERNAL_SERVER_ERROR',
+                    cause: 'EMAIL_ERROR',
+                },
+            })
+        }
+
+        logSuccess('createRateQuestion')
+        setSuccessAttributesOnActiveSpan(span)
+
+        return {
+            question: questionResult,
+        }
+    }
+}

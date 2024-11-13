@@ -63,12 +63,15 @@ export type {
 } from './HealthPlanPackageType'
 
 export type {
-    IndexQuestionsPayload,
-    CreateQuestionPayload,
-    CreateQuestionInput,
-    Question,
+    IndexContractQuestionsPayload,
+    CreateContractQuestionPayload,
+    CreateContractQuestionInput,
+    ContractQuestionType,
     Document,
-    QuestionList,
+    ContractQuestionList,
+    RateQuestionType,
+    CreateRateQuestionInputType,
+    IndexRateQuestionsPayload,
 } from './QuestionsType'
 
 export type {
@@ -78,3 +81,6 @@ export type {
 } from './QuestionResponseType'
 
 export type { APIKeyType } from './apiKey'
+
+export type { AuditDocument } from './DocumentType'
+export { auditDocumentSchema } from './DocumentType'

@@ -1,32 +1,48 @@
 import {
-    CreateQuestionMutationFn,
+    CreateContractQuestionMutationFn,
     HealthPlanPackage,
     SubmitHealthPlanPackageMutationFn,
     UnlockHealthPlanPackageMutationFn,
     UnlockContractMutationFn,
-    FetchHealthPlanPackageWithQuestionsQuery,
-    FetchHealthPlanPackageWithQuestionsDocument,
-    IndexQuestionsPayload,
-    CreateQuestionMutation,
-    CreateQuestionResponseMutationFn,
-    CreateQuestionResponseMutation,
-    Question,
+    FetchContractWithQuestionsQuery,
+    FetchContractWithQuestionsDocument,
+    IndexContractQuestionsPayload,
+    CreateContractQuestionMutation,
+    CreateContractQuestionResponseMutationFn,
+    CreateContractQuestionResponseMutation,
+    ContractQuestion,
     Division,
-    CreateQuestionInput,
+    CreateContractQuestionInput,
     CreateQuestionResponseInput,
     SubmitContractMutationFn,
     Contract,
     UnlockedContract,
+    UpdateStateAssignmentsByStateMutationFn,
+    FetchMcReviewSettingsDocument,
+    FetchMcReviewSettingsQuery,
+    CreateRateQuestionMutation,
+    CreateRateQuestionInput,
+    CreateRateQuestionMutationFn,
+    RateQuestion,
+    FetchRateWithQuestionsDocument,
+    IndexRateQuestionsPayload,
+    FetchRateWithQuestionsQuery,
+    CreateRateQuestionResponseMutationFn,
+    CreateRateQuestionResponseMutation,
 } from '../gen/gqlClient'
 import { ApolloError, GraphQLErrors } from '@apollo/client/errors'
 
 import { recordJSException } from '@mc-review/otel'
 import { handleGQLErrors as handleGQLErrorLogging } from './apolloErrors'
 import { ERROR_MESSAGES } from '@mc-review/constants'
+
 /*
 Adds user friendly/facing error messages to health plan package mutations.
 - Reminder, we handle graphql requests via apollo client in our web app.
-- Error messages returned here are displayed to user in UnlockSubmitModal > GenericApiBanner.
+
+
+TODO: move out domain specific code to files named after that domain
+e.g. handleApolloErrorsAndAddUserFacingMessages can stay, anything specific to one API should be in a more narrowly scoped file
 */
 
 type MutationType =
@@ -34,6 +50,7 @@ type MutationType =
     | 'UNLOCK_HEALTH_PLAN_PACKAGE'
     | 'CREATE_QUESTION'
     | 'UNLOCK_RATE'
+    | 'UPDATE_STATE_ASSIGNMENTS_BY_STATE'
 
 type IndexQuestionDivisions =
     | 'DMCOQuestions'
@@ -224,52 +241,130 @@ export const submitMutationWrapperV2 = async (
     }
 }
 
+export async function updateStateAssignmentsWrapper(
+    updateStateAssignments: UpdateStateAssignmentsByStateMutationFn,
+    stateCode: string,
+    assignedUserIDs: string[]
+): Promise<undefined | GraphQLErrors | Error> {
+    const input = {
+        stateCode,
+        assignedUsers: assignedUserIDs,
+    }
+
+    try {
+        const { data } = await updateStateAssignments({
+            variables: {
+                input,
+            },
+            update(cache, { data }) {
+                if (data) {
+                    const stateCode =
+                        data.updateStateAssignmentsByState.stateCode
+                    const updatedUsers =
+                        data.updateStateAssignmentsByState.assignedUsers
+                    const previousSettings =
+                        cache.readQuery<FetchMcReviewSettingsQuery>({
+                            query: FetchMcReviewSettingsDocument,
+                        })
+
+                    if (previousSettings) {
+                        const cachedAssignments = [
+                            ...previousSettings.fetchMcReviewSettings
+                                .stateAssignments,
+                        ]
+                        const stateIndex = cachedAssignments.findIndex(
+                            (state) => state.stateCode === stateCode
+                        )
+                        if (stateIndex === -1) {
+                            recordJSException(
+                                `[UNEXPECTED]: Error attempting to update state assignments cache, state not found in cache.`
+                            )
+                            return new Error(
+                                ERROR_MESSAGES.update_state_assignments_generic
+                            )
+                        }
+
+                        cachedAssignments[stateIndex] = {
+                            ...cachedAssignments[stateIndex],
+                            assignedCMSUsers: updatedUsers,
+                        }
+
+                        cache.writeQuery({
+                            query: FetchMcReviewSettingsDocument,
+                            data: {
+                                fetchMcReviewSettings: {
+                                    ...previousSettings.fetchMcReviewSettings,
+                                    stateAssignments: cachedAssignments,
+                                },
+                            },
+                        })
+                    }
+                }
+            },
+        })
+
+        if (data?.updateStateAssignmentsByState.assignedUsers) {
+            return undefined
+        } else {
+            recordJSException(
+                `[UNEXPECTED]: Error attempting to update state assignments, no data present but returning 200.`
+            )
+            return new Error(ERROR_MESSAGES.update_state_assignments_generic)
+        }
+    } catch (error) {
+        return handleApolloErrorsAndAddUserFacingMessages(
+            error,
+            'UPDATE_STATE_ASSIGNMENTS_BY_STATE'
+        )
+    }
+}
+
 /**
  * Manually updating the cache for Q&A mutations because the Q&A page is in a layout route that is not unmounted during the Q&A
  * workflow. So, when calling Q&A mutations the Q&A page will not refetch the data. The alternative would be to use
  * cache.evict() to force a refetch, but would then cause the loading UI to show.
  **/
-export const createQuestionWrapper = async (
-    createQuestion: CreateQuestionMutationFn,
-    input: CreateQuestionInput
-): Promise<CreateQuestionMutation | GraphQLErrors | Error> => {
+export const createContractQuestionWrapper = async (
+    createQuestion: CreateContractQuestionMutationFn,
+    input: CreateContractQuestionInput
+): Promise<CreateContractQuestionMutation | GraphQLErrors | Error> => {
     try {
         const result = await createQuestion({
             variables: { input },
             update(cache, { data }) {
                 if (data) {
-                    const newQuestion = data.createQuestion.question as Question
+                    const newQuestion = data.createContractQuestion
+                        .question as ContractQuestion
                     const result =
-                        cache.readQuery<FetchHealthPlanPackageWithQuestionsQuery>(
-                            {
-                                query: FetchHealthPlanPackageWithQuestionsDocument,
-                                variables: {
-                                    input: {
-                                        pkgID: newQuestion.contractID,
-                                    },
+                        cache.readQuery<FetchContractWithQuestionsQuery>({
+                            query: FetchContractWithQuestionsDocument,
+                            variables: {
+                                input: {
+                                    contractID: newQuestion.contractID,
                                 },
-                            }
-                        )
+                            },
+                        })
 
-                    const pkg = result?.fetchHealthPlanPackage.pkg
+                    const contract = result?.fetchContract.contract
 
-                    if (pkg) {
+                    if (contract) {
                         const indexQuestionDivision =
                             divisionToIndexQuestionDivision(
                                 newQuestion.division
                             )
-                        const questions = pkg.questions as IndexQuestionsPayload
+                        const questions =
+                            contract.questions as IndexContractQuestionsPayload
                         const divisionQuestions =
                             questions[indexQuestionDivision]
 
                         cache.writeQuery({
-                            query: FetchHealthPlanPackageWithQuestionsDocument,
+                            query: FetchContractWithQuestionsDocument,
                             data: {
-                                fetchHealthPlanPackage: {
-                                    pkg: {
-                                        ...pkg,
+                                fetchContract: {
+                                    contract: {
+                                        ...contract,
                                         questions: {
-                                            ...pkg.questions,
+                                            ...contract.questions,
                                             [indexQuestionDivision]: {
                                                 totalCount:
                                                     divisionQuestions.totalCount
@@ -279,7 +374,7 @@ export const createQuestionWrapper = async (
                                                 edges: [
                                                     {
                                                         __typename:
-                                                            'QuestionEdge',
+                                                            'ContractQuestionEdge',
                                                         node: {
                                                             ...newQuestion,
                                                             responses: [],
@@ -299,7 +394,7 @@ export const createQuestionWrapper = async (
             onQueryUpdated: () => true,
         })
 
-        if (result.data?.createQuestion) {
+        if (result.data?.createContractQuestion) {
             return result.data
         } else {
             recordJSException(
@@ -312,43 +407,137 @@ export const createQuestionWrapper = async (
     }
 }
 
-export const createResponseWrapper = async (
-    createResponse: CreateQuestionResponseMutationFn,
-    pkgID: string,
+export const createRateQuestionWrapper = async (
+    createQuestion: CreateRateQuestionMutationFn,
+    input: CreateRateQuestionInput
+): Promise<CreateRateQuestionMutation | GraphQLErrors | Error> => {
+    try {
+        const result = await createQuestion({
+            variables: { input },
+            update(cache, { data }) {
+                if (data) {
+                    const newQuestion = data.createRateQuestion
+                        .question as RateQuestion
+                    const result = cache.readQuery<FetchRateWithQuestionsQuery>(
+                        {
+                            query: FetchRateWithQuestionsDocument,
+                            variables: {
+                                input: {
+                                    rateID: newQuestion.rateID,
+                                },
+                            },
+                        }
+                    )
+
+                    const rate = result?.fetchRate.rate
+
+                    if (rate) {
+                        const indexQuestionDivision =
+                            divisionToIndexQuestionDivision(
+                                newQuestion.division
+                            )
+                        const questions =
+                            rate.questions as IndexRateQuestionsPayload
+                        const divisionQuestions =
+                            questions[indexQuestionDivision]
+
+                        cache.writeQuery({
+                            query: FetchRateWithQuestionsDocument,
+                            data: {
+                                fetchRate: {
+                                    rate: {
+                                        ...rate,
+                                        questions: {
+                                            ...rate.questions,
+                                            [indexQuestionDivision]: {
+                                                totalCount:
+                                                    divisionQuestions.totalCount
+                                                        ? divisionQuestions.totalCount +
+                                                          1
+                                                        : 1,
+                                                edges: [
+                                                    {
+                                                        __typename:
+                                                            'RateQuestionEdge',
+                                                        node: {
+                                                            ...newQuestion,
+                                                            createdAt:
+                                                                new Date(),
+                                                            documents:
+                                                                newQuestion.documents.map(
+                                                                    (doc) => ({
+                                                                        ...doc,
+                                                                        downloadURL:
+                                                                            null,
+                                                                    })
+                                                                ),
+                                                            responses: [],
+                                                        },
+                                                    },
+                                                    ...divisionQuestions.edges,
+                                                ],
+                                            },
+                                        },
+                                    },
+                                },
+                            },
+                        })
+                    }
+                }
+            },
+            onQueryUpdated: () => true,
+        })
+
+        if (result.data?.createRateQuestion) {
+            return result.data
+        } else {
+            recordJSException(
+                `[UNEXPECTED]: Error attempting to add question, no data present but returning 200.`
+            )
+            return new Error(ERROR_MESSAGES.question_error_generic)
+        }
+    } catch (error) {
+        return error
+    }
+}
+
+export const createContractResponseWrapper = async (
+    createResponse: CreateContractQuestionResponseMutationFn,
+    contractID: string,
     input: CreateQuestionResponseInput,
     division: Division
-): Promise<CreateQuestionResponseMutation | GraphQLErrors | Error> => {
+): Promise<CreateContractQuestionResponseMutation | GraphQLErrors | Error> => {
     try {
         const result = await createResponse({
             variables: { input },
             update(cache, { data }) {
                 if (data) {
                     const newResponse =
-                        data.createQuestionResponse.question.responses[0]
+                        data.createContractQuestionResponse.question
+                            .responses[0]
                     const result =
-                        cache.readQuery<FetchHealthPlanPackageWithQuestionsQuery>(
-                            {
-                                query: FetchHealthPlanPackageWithQuestionsDocument,
-                                variables: {
-                                    input: {
-                                        pkgID: pkgID,
-                                    },
+                        cache.readQuery<FetchContractWithQuestionsQuery>({
+                            query: FetchContractWithQuestionsDocument,
+                            variables: {
+                                input: {
+                                    contractID: contractID,
                                 },
-                            }
-                        )
-                    const pkg = result?.fetchHealthPlanPackage.pkg
+                            },
+                        })
+                    const contract = result?.fetchContract.contract
 
-                    if (pkg) {
-                        const questions = pkg.questions as IndexQuestionsPayload
+                    if (contract) {
+                        const questions =
+                            contract.questions as IndexContractQuestionsPayload
                         const indexQuestionDivision =
                             divisionToIndexQuestionDivision(division)
                         const divisionQuestions =
                             questions[indexQuestionDivision]
 
-                        const updatedPkg = {
-                            ...pkg,
+                        const updatedContract = {
+                            ...contract,
                             questions: {
-                                ...pkg.questions,
+                                ...contract.questions,
                                 [indexQuestionDivision]: {
                                     ...divisionQuestions,
                                     edges: divisionQuestions.edges.map(
@@ -358,7 +547,8 @@ export const createResponseWrapper = async (
                                                 newResponse.questionID
                                             ) {
                                                 return {
-                                                    __typename: 'QuestionEdge',
+                                                    __typename:
+                                                        'ContractQuestionEdge',
                                                     node: {
                                                         ...edge.node,
                                                         responses: [
@@ -377,10 +567,10 @@ export const createResponseWrapper = async (
                         }
 
                         cache.writeQuery({
-                            query: FetchHealthPlanPackageWithQuestionsDocument,
+                            query: FetchContractWithQuestionsDocument,
                             data: {
-                                fetchHealthPlanPackage: {
-                                    pkg: updatedPkg,
+                                fetchContract: {
+                                    contract: updatedContract,
                                 },
                             },
                         })
@@ -390,7 +580,99 @@ export const createResponseWrapper = async (
             onQueryUpdated: () => true,
         })
 
-        if (result.data?.createQuestionResponse) {
+        if (result.data?.createContractQuestionResponse) {
+            return result.data
+        } else {
+            recordJSException(
+                `[UNEXPECTED]: Error attempting to add response, no data present but returning 200.`
+            )
+            return new Error(ERROR_MESSAGES.response_error_generic)
+        }
+    } catch (error) {
+        return error
+    }
+}
+
+export const createRateQuestionResponseWrapper = async (
+    createResponse: CreateRateQuestionResponseMutationFn,
+    rateID: string,
+    input: CreateQuestionResponseInput,
+    division: Division
+): Promise<CreateRateQuestionResponseMutation | GraphQLErrors | Error> => {
+    try {
+        const result = await createResponse({
+            variables: { input },
+            update(cache, { data }) {
+                if (data) {
+                    const newResponse =
+                        data.createRateQuestionResponse.question.responses[0]
+                    const result = cache.readQuery<FetchRateWithQuestionsQuery>(
+                        {
+                            query: FetchRateWithQuestionsDocument,
+                            variables: {
+                                input: {
+                                    rateID: rateID,
+                                },
+                            },
+                        }
+                    )
+                    const rate = result?.fetchRate.rate
+
+                    if (rate) {
+                        const questions =
+                            rate.questions as IndexRateQuestionsPayload
+                        const indexQuestionDivision =
+                            divisionToIndexQuestionDivision(division)
+                        const divisionQuestions =
+                            questions[indexQuestionDivision]
+
+                        const updatedRate = {
+                            ...rate,
+                            questions: {
+                                ...rate.questions,
+                                [indexQuestionDivision]: {
+                                    ...divisionQuestions,
+                                    edges: divisionQuestions.edges.map(
+                                        (edge) => {
+                                            if (
+                                                edge.node.id ===
+                                                newResponse.questionID
+                                            ) {
+                                                return {
+                                                    __typename:
+                                                        'RateQuestionEdge',
+                                                    node: {
+                                                        ...edge.node,
+                                                        responses: [
+                                                            newResponse,
+                                                            ...edge.node
+                                                                .responses,
+                                                        ],
+                                                    },
+                                                }
+                                            }
+                                            return edge
+                                        }
+                                    ),
+                                },
+                            },
+                        }
+
+                        cache.writeQuery({
+                            query: FetchRateWithQuestionsDocument,
+                            data: {
+                                fetchRate: {
+                                    rate: updatedRate,
+                                },
+                            },
+                        })
+                    }
+                }
+            },
+            onQueryUpdated: () => true,
+        })
+
+        if (result.data?.createRateQuestionResponse) {
             return result.data
         } else {
             recordJSException(

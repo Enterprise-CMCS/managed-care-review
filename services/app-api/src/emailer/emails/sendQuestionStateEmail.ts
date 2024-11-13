@@ -2,21 +2,21 @@ import { packageName as generatePackageName } from '@mc-review/hpp'
 import { formatCalendarDate } from '@mc-review/common-code'
 import { pruneDuplicateEmails } from '../formatters'
 import type { EmailConfiguration, EmailData } from '..'
-import type { ProgramType, Question } from '../../domain-models'
+import type { ProgramType, ContractQuestionType } from '../../domain-models'
 import {
     stripHTMLFromTemplate,
     renderTemplate,
     findContractPrograms,
 } from '../templateHelpers'
 import { submissionQuestionResponseURL } from '../generateURLs'
-import type { ContractRevisionType } from '../../domain-models/contractAndRates'
+import type { ContractRevisionType } from '../../domain-models'
 
 export const sendQuestionStateEmail = async (
     contractRev: ContractRevisionType,
     submitterEmails: string[],
     config: EmailConfiguration,
     statePrograms: ProgramType[],
-    currentQuestion: Question
+    currentQuestion: ContractQuestionType
 ): Promise<EmailData | Error> => {
     const stateContactEmails: string[] = []
 
@@ -53,7 +53,10 @@ export const sendQuestionStateEmail = async (
         cmsRequestorEmail: currentQuestion.addedBy.email,
         cmsRequestorName: `${currentQuestion.addedBy.givenName} ${currentQuestion.addedBy.familyName}`,
         cmsRequestorDivision: currentQuestion.addedBy.divisionAssignment,
-        dateAsked: formatCalendarDate(currentQuestion.createdAt),
+        dateAsked: formatCalendarDate(
+            currentQuestion.createdAt,
+            'America/New_York'
+        ),
     }
 
     const result = await renderTemplate<typeof data>(

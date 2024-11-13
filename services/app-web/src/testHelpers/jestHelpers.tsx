@@ -35,6 +35,8 @@ import { tealiumTestClient } from './tealiumHelpers'
 import type { TealiumClientType } from '../tealium'
 
 import { vi } from 'vitest'
+import { TraceProvider } from '../contexts/TraceContext'
+import { TracingInitializer } from '../pages/App/App'
 
 function ldClientMock(featureFlags: FeatureFlagSettings): LDClient {
     return {
@@ -107,22 +109,29 @@ const renderWithProviders = (
 
     const renderResult = render(
         <LDProvider {...ldProviderConfig}>
-            <MockedProvider {...apolloProvider}>
-                <MemoryRouter initialEntries={[route || '']}>
-                    <AuthProvider authMode={'AWS_COGNITO'} {...authProvider}>
-                        <S3Provider client={s3Client}>
-                            {location && (
-                                <WithLocation setLocation={location} />
-                            )}
-                            <PageProvider>
-                                <TealiumProvider client={tealiumClient}>
-                                    {ui}
-                                </TealiumProvider>
-                            </PageProvider>
-                        </S3Provider>
-                    </AuthProvider>
-                </MemoryRouter>
-            </MockedProvider>
+            <TraceProvider>
+                <TracingInitializer>
+                    <MockedProvider {...apolloProvider}>
+                        <MemoryRouter initialEntries={[route || '']}>
+                            <AuthProvider
+                                authMode={'AWS_COGNITO'}
+                                {...authProvider}
+                            >
+                                <S3Provider client={s3Client}>
+                                    {location && (
+                                        <WithLocation setLocation={location} />
+                                    )}
+                                    <PageProvider>
+                                        <TealiumProvider client={tealiumClient}>
+                                            {ui}
+                                        </TealiumProvider>
+                                    </PageProvider>
+                                </S3Provider>
+                            </AuthProvider>
+                        </MemoryRouter>
+                    </MockedProvider>
+                </TracingInitializer>
+            </TraceProvider>
         </LDProvider>
     )
     return {

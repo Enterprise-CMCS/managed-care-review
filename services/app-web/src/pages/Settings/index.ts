@@ -1,1 +1,1 @@
-export {formatEmails, EditLink} from './SettingsCells/SettingsCells'
+export {formatEmails, formatEmailsFromUsers, formatUserNamesFromUsers, formatUserName, EditLink} from './SettingsCells/SettingsCells'

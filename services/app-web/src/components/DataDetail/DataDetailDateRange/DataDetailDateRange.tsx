@@ -11,8 +11,9 @@ export const DataDetailDateRange = ({
 }): React.ReactElement => {
     if (!startDate || !endDate) return <DataDetailMissingField />
     return (
-        <>{`${formatCalendarDate(startDate)} to ${formatCalendarDate(
-            endDate
+        <>{`${formatCalendarDate(startDate, 'UTC')} to ${formatCalendarDate(
+            endDate,
+            'UTC'
         )}`}</>
     )
 }

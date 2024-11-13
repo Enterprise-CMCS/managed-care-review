@@ -1,5 +1,5 @@
 import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
-import UPDATE_DIVISION_ASSIGNMENT from '../../../../app-graphql/src/mutations/updateDivisionAssignment.graphql'
+import { UpdateDivisionAssignmentDocument } from '../../gen/gqlClient'
 import type { InsertUserArgsType } from '../../postgres'
 import { NewPostgresStore } from '../../postgres'
 import { v4 as uuidv4 } from 'uuid'
@@ -43,7 +43,7 @@ describe('updateDivisionAssignment', () => {
 
                 // make the first update to the division assignment
                 const firstUpdateRes = await server.executeOperation({
-                    query: UPDATE_DIVISION_ASSIGNMENT,
+                    query: UpdateDivisionAssignmentDocument,
                     variables: {
                         input: {
                             cmsUserID: cmsUserID,
@@ -69,7 +69,7 @@ describe('updateDivisionAssignment', () => {
 
                 // make the second update to the division assignment
                 const secondUpdateRes = await server.executeOperation({
-                    query: UPDATE_DIVISION_ASSIGNMENT,
+                    query: UpdateDivisionAssignmentDocument,
                     variables: {
                         input: {
                             cmsUserID: cmsUserID,
@@ -128,7 +128,7 @@ describe('updateDivisionAssignment', () => {
                 const cmsUserID = uuidv4()
 
                 const updateRes = await server.executeOperation({
-                    query: UPDATE_DIVISION_ASSIGNMENT,
+                    query: UpdateDivisionAssignmentDocument,
                     variables: {
                         input: {
                             cmsUserID: cmsUserID,
@@ -172,7 +172,7 @@ describe('updateDivisionAssignment', () => {
         }
 
         const updateRes = await server.executeOperation({
-            query: UPDATE_DIVISION_ASSIGNMENT,
+            query: UpdateDivisionAssignmentDocument,
             variables: {
                 input: {
                     cmsUserID: cmsUserID,
@@ -201,7 +201,7 @@ describe('updateDivisionAssignment', () => {
         const cmsUserID = uuidv4()
 
         const updateRes = await server.executeOperation({
-            query: UPDATE_DIVISION_ASSIGNMENT,
+            query: UpdateDivisionAssignmentDocument,
             variables: {
                 input: {
                     cmsUserID: cmsUserID,
@@ -227,7 +227,7 @@ describe('updateDivisionAssignment', () => {
         const cmsUserID = uuidv4()
 
         const updateRes = await server.executeOperation({
-            query: UPDATE_DIVISION_ASSIGNMENT,
+            query: UpdateDivisionAssignmentDocument,
             variables: {
                 input: {
                     cmsUserID: cmsUserID,

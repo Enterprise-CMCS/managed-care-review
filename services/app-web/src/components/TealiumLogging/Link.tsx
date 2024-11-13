@@ -18,22 +18,16 @@ type TealiumDataType = Omit<
 type LinkWithLoggingType = TealiumDataType & DefaultLinkProps
 const LinkWithLogging = (props: LinkWithLoggingType) => {
     const { logInternalLinkEvent } = useTealium()
-    const {
-        parent_component_type,
-        parent_component_heading,
-        href,
-        onClick,
-        children,
-        ...rest
-    } = props
+    const { href, onClick, children, ...rest } = props
     return (
         <Link
             onClick={(e) => {
                 logInternalLinkEvent({
                     text: extractText(children),
                     link_url: href,
-                    parent_component_type,
-                    parent_component_heading,
+                    parent_component_type: props.parent_component_type,
+                    parent_component_heading: props.parent_component_heading,
+                    contact_method: props.contact_method,
                     event_name: props.event_name ?? 'internal_link_clicked',
                 })
                 if (onClick) {
@@ -73,6 +67,7 @@ const NavLinkWithLogging = (props: NavLinkWithLoggingType) => {
                     link_url,
                     parent_component_type,
                     parent_component_heading,
+                    link_type: 'interaction',
                     event_name: props.event_name ?? 'internal_link_clicked',
                 })
             }}

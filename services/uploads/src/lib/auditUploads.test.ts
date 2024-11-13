@@ -29,6 +29,7 @@ describe('auditUploads', () => {
                     'freshclam.conf'
                 ),
                 pathToDefintions: tmpDefsDir,
+                isLocal: true,
             },
             s3Client
         )
@@ -58,7 +59,7 @@ describe('auditUploads', () => {
         const goodSourceFiles = ['dummy.pdf', 'goodList.csv'].map((name) =>
             path.join(testFilesToScanPath, name)
         )
-        const badSourceFiles = ['badDummy.pdf', 'badList.csv'].map((name) =>
+        const badSourceFiles = ['badDummy.pdf', 'badExcel.xls'].map((name) =>
             path.join(testFilesToScanPath, name)
         )
 

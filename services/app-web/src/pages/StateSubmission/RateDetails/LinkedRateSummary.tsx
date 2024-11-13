@@ -27,7 +27,8 @@ export const LinkedRateSummary = ({
                         id="submissionDate"
                         label="Submission date"
                         children={formatCalendarDate(
-                            rateForm.initiallySubmittedAt
+                            rateForm.initiallySubmittedAt,
+                            'America/New_York'
                         )}
                     />
 
@@ -47,8 +48,9 @@ export const LinkedRateSummary = ({
                             rateForm.rateDateStart &&
                             rateForm.rateDateEnd &&
                             `${formatCalendarDate(
-                                rateForm?.rateDateStart
-                            )} to ${formatCalendarDate(rateForm?.rateDateEnd)}`
+                                rateForm?.rateDateStart,
+                                'UTC'
+                            )} to ${formatCalendarDate(rateForm?.rateDateEnd, 'UTC')}`
                         }
                     />
                 </DoubleColumnGrid>
@@ -60,6 +62,7 @@ export const LinkedRateSummary = ({
                 documentCategory="Rate certification"
                 hideDynamicFeedback={true} // linked rates always displayed without validations
                 previousSubmissionDate={null}
+                isLinkedRate
             />
         </SectionCard>
     )

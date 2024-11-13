@@ -44,6 +44,10 @@ const fetchEmailSettings = (): MockedResponse<FetchEmailSettingsQuery> => {
                             ],
                             stateCode: 'OH',
                         },
+                        {
+                            emails: [],
+                            stateCode: 'FL',
+                        },
                     ],
                 },
             },

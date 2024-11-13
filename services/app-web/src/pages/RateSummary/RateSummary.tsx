@@ -12,6 +12,8 @@ import { useAuth } from '../../contexts/AuthContext'
 import { ErrorForbiddenPage } from '../Errors/ErrorForbiddenPage'
 import { Error404 } from '../Errors/Error404Page'
 import { RateWithdrawnBanner } from '../../components/Banner'
+import { useLDClient } from 'launchdarkly-react-client-sdk'
+import { featureFlags } from '../../common-code/featureFlags'
 
 export const RateSummary = (): React.ReactElement => {
     // Page level state
@@ -19,12 +21,13 @@ export const RateSummary = (): React.ReactElement => {
     const { updateHeading } = usePage()
     const navigate = useNavigate()
     const [rateName, setRateName] = useState<string | undefined>(undefined)
-    const { id } = useParams()
-    if (!id) {
-        throw new Error(
-            'PROGRAMMING ERROR: id param not set in state submission form.'
-        )
-    }
+    const { id } = useParams() as { id: string }
+
+    const ldClient = useLDClient()
+    const showQAbyRates: boolean = ldClient?.variation(
+        featureFlags.QA_BY_RATES.flag,
+        featureFlags.QA_BY_RATES.defaultValue
+    )
 
     useEffect(() => {
         updateHeading({ customHeading: rateName })
@@ -78,7 +81,11 @@ export const RateSummary = (): React.ReactElement => {
     }
 
     return (
-        <div className={styles.backgroundFullPage}>
+        <div
+            className={
+                showQAbyRates ? styles.background : styles.backgroundFullPage
+            }
+        >
             <GridContainer
                 data-testid="rate-summary"
                 className={styles.container}
@@ -89,22 +96,24 @@ export const RateSummary = (): React.ReactElement => {
                         className={styles.banner}
                     />
                 )}
+                {!showQAbyRates && (
+                    <div>
+                        <NavLinkWithLogging
+                            //TODO: Will have to remove this conditional once the rate dashboard is made available to state users
+                            to={{
+                                pathname:
+                                    loggedInUser?.__typename === 'StateUser'
+                                        ? RoutesRecord.DASHBOARD
+                                        : RoutesRecord.DASHBOARD_RATES,
+                            }}
+                            event_name="back_button"
+                        >
+                            <Icon.ArrowBack />
+                            <span>&nbsp;Back to dashboard</span>
+                        </NavLinkWithLogging>
+                    </div>
+                )}
 
-                <div>
-                    <NavLinkWithLogging
-                        //TODO: Will have to remove this conditional once the rate dashboard is made available to state users
-                        to={{
-                            pathname:
-                                loggedInUser?.__typename === 'StateUser'
-                                    ? RoutesRecord.DASHBOARD
-                                    : RoutesRecord.DASHBOARD_RATES,
-                        }}
-                        event_name="back_button"
-                    >
-                        <Icon.ArrowBack />
-                        <span>&nbsp;Back to dashboard</span>
-                    </NavLinkWithLogging>
-                </div>
                 <SingleRateSummarySection
                     rate={rate}
                     isSubmitted // can assume isSubmitted because we redirect for unlocked

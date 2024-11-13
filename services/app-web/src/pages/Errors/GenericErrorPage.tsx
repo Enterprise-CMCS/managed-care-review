@@ -16,7 +16,7 @@ export const GenericErrorPage = (): React.ReactElement => {
                         your browser and if you continue to experience an
                         error,&nbsp;
                     </span>
-                    <ContactSupportLink/>
+                    <ContactSupportLink />
                 </p>
             </GridContainer>
         </section>

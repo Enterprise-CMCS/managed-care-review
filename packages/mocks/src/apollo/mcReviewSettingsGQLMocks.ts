@@ -110,6 +110,12 @@ const fetchMcReviewSettingsMock =
                                     },
                                 ],
                             },
+                            {
+                                __typename: 'StateAssignment' as const,
+                                stateCode: 'FL' as const,
+                                name: 'Florida',
+                                assignedCMSUsers: [],
+                            },
                         ],
                     },
                 },

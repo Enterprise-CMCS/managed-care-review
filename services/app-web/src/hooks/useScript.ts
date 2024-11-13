@@ -12,6 +12,7 @@ type CustomScriptParams = {
 const createScript = ({
     id,
     type = 'text/javascript',
+    async = false,
     src = '',
     inlineScriptAsString,
 }: CustomScriptParams): HTMLScriptElement => {
@@ -19,6 +20,7 @@ const createScript = ({
     const script = document.createElement('script')
     script.type = type
     script.id = id
+    script.async = async
     if (inlineScriptAsString) script.textContent = inlineScriptAsString
     if (inlineScriptAsString && src !== '') {
         console.error('programming error: inlineScriptAsString is true but src is still passed in as if this is a third party script. Please correct src (should be empty string)')

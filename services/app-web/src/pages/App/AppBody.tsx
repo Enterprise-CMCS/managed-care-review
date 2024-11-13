@@ -3,12 +3,12 @@ import { GovBanner } from '@trussworks/react-uswds'
 import styles from './AppBody.module.scss'
 import { AppRoutes } from './AppRoutes'
 import { Footer, Header, LinkWithLogging, Loading } from '../../components'
-import { useOTEL } from '../../hooks/useOTEL'
 import { AuthModeType } from '@mc-review/common-code'
 import { useAuth } from '../../contexts/AuthContext'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '@mc-review/common-code'
 import { Landing } from '../Landing/Landing'
+import { usePageTracing } from '../../hooks/usePageTracing'
 
 export function AppBody({
     authMode,
@@ -24,7 +24,7 @@ export function AppBody({
     const ldClient = useLDClient()
 
     // Add logging and metrics
-    useOTEL()
+    usePageTracing('AppBody')
 
     const siteUnderMaintenanceBannerFlag: string = ldClient?.variation(
         featureFlags.SITE_UNDER_MAINTENANCE_BANNER.flag,

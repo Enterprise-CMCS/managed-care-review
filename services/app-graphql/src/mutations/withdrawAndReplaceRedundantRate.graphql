@@ -236,14 +236,3 @@ fragment submittableRevisionsFieldsForReplaceRate on SubmittableRevision {
         ...rateRevisionFragmentForReplaceRate
     }
 }
-
-fragment updateInformationFields on UpdateInformation {
-    updatedAt
-    updatedBy {
-        email
-        role
-        familyName
-        givenName
-    }
-    updatedReason
-}

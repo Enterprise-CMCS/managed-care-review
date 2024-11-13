@@ -1,68 +1,169 @@
-import opentelemetry, { Span } from '@opentelemetry/api'
+import { Attributes, Span, SpanStatusCode, Tracer } from '@opentelemetry/api'
+import { SemanticAttributes } from '@opentelemetry/semantic-conventions'
+import React from 'react'
 
-const serviceNameOTEL = 'app-web-' + process.env.VITE_APP_STAGE_NAME
+// Get the tracing context outside of React components
+let tracingContext: ReturnType<typeof useTracing> | undefined
 
-function getTracer() {
-    return opentelemetry.trace.getTracer(serviceNameOTEL)
+interface TraceContextValue {
+    tracer: Tracer
+    startSpan: (name: string, attributes?: Attributes) => Span
+    withSpan: <T>(
+        name: string,
+        operation: (span: Span) => Promise<T>
+    ) => Promise<T>
+    recordError: (
+        error: Error,
+        context?: { spanName?: string; attributes?: Attributes }
+    ) => void
 }
 
-// Add a span to existing trace or if none, start and end and new span
-// if a callback is passed in, end span after that async action, this could allow the trace to also collect how long the action took
-// based on https://blog.devgenius.io/measuring-react-performance-with-opentelemetry-and-honeycomb-2b20a7920335
-async function recordSpan(
+export function useTracing() {
+    const context = React.useContext(TraceContext)
+    if (!context) {
+        throw new Error('useTracing must be used within a TraceProvider')
+    }
+    return context
+}
+
+export const TraceContext = React.createContext<TraceContextValue | undefined>(
+    undefined
+)
+
+export function setGlobalTracingContext(
+    context: ReturnType<typeof useTracing>
+) {
+    tracingContext = context
+}
+
+function getTracingContext() {
+    if (!tracingContext) {
+        throw new Error(
+            'Tracing context not initialized. Ensure TraceProvider is mounted.'
+        )
+    }
+    return tracingContext
+}
+
+// Bridge functions that maintain the same interface
+export async function recordSpan(
     name: string,
     cb?: () => Promise<void>,
     parentSpan?: Span
 ): Promise<void> {
-    const tracer = getTracer()
-    let span: Span
+    const { startSpan } = getTracingContext()
+
+    const span = startSpan(name, {
+        [SemanticAttributes.CODE_FUNCTION]: name,
+    })
+
     if (parentSpan) {
-        const otelContext = opentelemetry.trace.setSpan(
-            opentelemetry.context.active(),
-            parentSpan
-        )
-        span = tracer.startSpan(name, undefined, otelContext)
-    } else {
-        span = tracer.startSpan(name)
+        // Maintain parent-child relationship if parent span is provided
+        span.setAttribute('parent.span.id', parentSpan.spanContext().spanId)
     }
 
     if (cb) {
         try {
             await cb()
+            span.setStatus({ code: SpanStatusCode.OK })
         } catch (err) {
-            span.recordException(err)
+            if (err instanceof Error) {
+                span.recordException(err)
+                span.setStatus({
+                    code: SpanStatusCode.ERROR,
+                    message: err.message,
+                })
+            }
+            throw err
+        } finally {
+            span.end()
         }
+    } else {
+        span.end()
     }
-
-    span.end()
-
-    return
 }
 
-function recordJSException(error: string | Error): void {
-    const tracer = getTracer()
-    const span = tracer.startSpan('JSException')
-    span.recordException(error)
-    console.error(error)
+export function recordJSException(error: string | Error): void {
+    const { startSpan } = getTracingContext()
+    const span = startSpan('JSException', {
+        [SemanticAttributes.EXCEPTION_TYPE]: 'JSException',
+    })
+
+    if (typeof error === 'string') {
+        span.setAttribute(SemanticAttributes.EXCEPTION_MESSAGE, error)
+        console.error(error)
+    } else {
+        span.recordException(error)
+        span.setAttribute(SemanticAttributes.EXCEPTION_TYPE, error.name)
+        span.setAttribute(SemanticAttributes.EXCEPTION_MESSAGE, error.message)
+        span.setAttribute(
+            SemanticAttributes.EXCEPTION_STACKTRACE,
+            error.stack || ''
+        )
+        console.error(error)
+    }
+
+    span.setStatus({
+        code: SpanStatusCode.ERROR,
+        message: typeof error === 'string' ? error : error.message,
+    })
     span.end()
 }
 
 export function recordJSExceptionWithContext(
     error: string | Error,
     spanName: string
-) {
-    const tracer = getTracer()
-    const span = tracer.startSpan(spanName)
-    span.recordException(error)
-    console.error(error)
-}
+): void {
+    const { startSpan } = getTracingContext()
+    const span = startSpan(spanName, {
+        [SemanticAttributes.EXCEPTION_TYPE]: 'JSException',
+        [SemanticAttributes.CODE_FUNCTION]: spanName,
+    })
 
-function recordUserInputException(error: string | Error): void {
-    const tracer = getTracer()
-    const span = tracer.startSpan('UserInputException')
-    span.recordException(error)
-    console.error(error)
+    if (typeof error === 'string') {
+        span.setAttribute(SemanticAttributes.EXCEPTION_MESSAGE, error)
+        console.error(error)
+    } else {
+        span.recordException(error)
+        span.setAttribute(SemanticAttributes.EXCEPTION_TYPE, error.name)
+        span.setAttribute(SemanticAttributes.EXCEPTION_MESSAGE, error.message)
+        span.setAttribute(
+            SemanticAttributes.EXCEPTION_STACKTRACE,
+            error.stack || ''
+        )
+        console.error(error)
+    }
+
+    span.setStatus({
+        code: SpanStatusCode.ERROR,
+        message: typeof error === 'string' ? error : error.message,
+    })
     span.end()
 }
 
-export { getTracer, recordSpan, recordJSException, recordUserInputException }
+export function recordUserInputException(error: string | Error): void {
+    const { startSpan } = getTracingContext()
+    const span = startSpan('UserInputException', {
+        [SemanticAttributes.EXCEPTION_TYPE]: 'UserInputException',
+    })
+
+    if (typeof error === 'string') {
+        span.setAttribute(SemanticAttributes.EXCEPTION_MESSAGE, error)
+        console.error(error)
+    } else {
+        span.recordException(error)
+        span.setAttribute(SemanticAttributes.EXCEPTION_TYPE, error.name)
+        span.setAttribute(SemanticAttributes.EXCEPTION_MESSAGE, error.message)
+        span.setAttribute(
+            SemanticAttributes.EXCEPTION_STACKTRACE,
+            error.stack || ''
+        )
+        console.error(error)
+    }
+
+    span.setStatus({
+        code: SpanStatusCode.ERROR,
+        message: typeof error === 'string' ? error : error.message,
+    })
+    span.end()
+}

@@ -1,8 +1,13 @@
-import FETCH_CONTRACT from '../../../app-graphql/src/queries/fetchContract.graphql'
-import SUBMIT_CONTRACT from '../../../app-graphql/src/mutations/submitContract.graphql'
-import UNLOCK_CONTRACT from '../../../app-graphql/src/mutations/unlockContract.graphql'
-import UPDATE_DRAFT_CONTRACT_RATES from '../../../app-graphql/src/mutations/updateDraftContractRates.graphql'
-import WITHDRAW_REPLACE_RATE from '../../../app-graphql/src/mutations/withdrawAndReplaceRedundantRate.graphql'
+import {
+    FetchContractDocument,
+    SubmitContractDocument,
+    UnlockContractDocument,
+    UpdateDraftContractRatesDocument,
+    WithdrawAndReplaceRedundantRateDocument,
+    UpdateContractDraftRevisionDocument,
+    CreateContractDocument,
+    FetchContractWithQuestionsDocument,
+} from '../gen/gqlClient'
 
 import { findStatePrograms } from '../postgres'
 
@@ -24,10 +29,8 @@ import type {
 import { latestFormData } from './healthPlanPackageHelpers'
 import type { HealthPlanFormDataType, StateCodeType } from '@mc-review/hpp'
 import { addNewRateToTestContract } from './gqlRateHelpers'
-import UPDATE_CONTRACT_DRAFT_REVISION from 'app-graphql/src/mutations/updateContractDraftRevision.graphql'
 import type { ContractFormDataType } from '../domain-models'
 import type { CreateHealthPlanPackageInput } from '../gen/gqlServer'
-import CREATE_CONTRACT from 'app-graphql/src/mutations/createContract.graphql'
 import { mockGqlContractDraftRevisionFormDataInput } from './gqlContractInputMocks'
 
 const createAndSubmitTestContract = async (
@@ -51,7 +54,7 @@ async function submitTestContract(
     submittedReason?: string
 ): Promise<Contract> {
     const result = await server.executeOperation({
-        query: SUBMIT_CONTRACT,
+        query: SubmitContractDocument,
         variables: {
             input: {
                 contractID: contractID,
@@ -79,7 +82,7 @@ async function unlockTestContract(
     unlockedReason?: string
 ): Promise<UnlockedContract> {
     const result = await server.executeOperation({
-        query: UNLOCK_CONTRACT,
+        query: UnlockContractDocument,
         variables: {
             input: {
                 contractID: contractID,
@@ -134,7 +137,7 @@ async function fetchTestContract(
 ): Promise<Contract> {
     const input = { contractID }
     const result = await server.executeOperation({
-        query: FETCH_CONTRACT,
+        query: FetchContractDocument,
         variables: { input },
     })
 
@@ -146,6 +149,32 @@ async function fetchTestContract(
 
     if (!result.data) {
         throw new Error('fetchTestContract returned nothing')
+    }
+
+    return result.data.fetchContract.contract
+}
+
+const fetchTestContractWithQuestions = async (
+    server: ApolloServer,
+    contractID: string
+): Promise<Contract> => {
+    const result = await server.executeOperation({
+        query: FetchContractWithQuestionsDocument,
+        variables: {
+            input: {
+                contractID: contractID,
+            },
+        },
+    })
+
+    if (result.errors) {
+        throw new Error(
+            `fetchTestContractWithQuestions query failed with errors ${result.errors}`
+        )
+    }
+
+    if (!result.data) {
+        throw new Error('fetchTestContractWithQuestions returned nothing')
     }
 
     return result.data.fetchContract.contract
@@ -163,7 +192,7 @@ async function updateTestContractToReplaceRate(
     const { contractID, withdrawnRateID, replacementRateID, replaceReason } =
         args
     const result = await server.executeOperation({
-        query: WITHDRAW_REPLACE_RATE,
+        query: WithdrawAndReplaceRedundantRateDocument,
         variables: {
             input: {
                 contractID,
@@ -206,7 +235,7 @@ const createTestContract = async (
         ...formData,
     }
     const result = await server.executeOperation({
-        query: CREATE_CONTRACT,
+        query: CreateContractDocument,
         variables: { input },
     })
 
@@ -296,7 +325,7 @@ const linkRateToDraftContract = async (
     linkedRateID: string
 ) => {
     const updatedContract = await server.executeOperation({
-        query: UPDATE_DRAFT_CONTRACT_RATES,
+        query: UpdateDraftContractRatesDocument,
         variables: {
             input: {
                 contractID: contractID,
@@ -317,7 +346,7 @@ const clearRatesOnDraftContract = async (
     contractID: string
 ) => {
     const updatedContract = await server.executeOperation({
-        query: UPDATE_DRAFT_CONTRACT_RATES,
+        query: UpdateDraftContractRatesDocument,
         variables: {
             input: {
                 contractID: contractID,
@@ -335,7 +364,7 @@ const updateRateOnDraftContract = async (
     rateData: Partial<RateFormData>
 ): Promise<ContractType> => {
     const updatedContract = await server.executeOperation({
-        query: UPDATE_DRAFT_CONTRACT_RATES,
+        query: UpdateDraftContractRatesDocument,
         variables: {
             input: {
                 contractID: contractID,
@@ -377,7 +406,7 @@ const updateTestContractDraftRevision = async (
         )
 
     const updateResult = await server.executeOperation({
-        query: UPDATE_CONTRACT_DRAFT_REVISION,
+        query: UpdateContractDraftRevisionDocument,
         variables: {
             input: {
                 contractID: contractID,
@@ -407,6 +436,7 @@ export {
     unlockTestContract,
     createAndSubmitTestContract,
     fetchTestContract,
+    fetchTestContractWithQuestions,
     createAndUpdateTestContractWithoutRates,
     createAndUpdateTestContractWithRate,
     createAndSubmitTestContractWithRate,

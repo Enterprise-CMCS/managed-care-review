@@ -1,5 +1,5 @@
 import path from 'path'
-import { spawnSync } from 'child_process'
+import { spawnSync, SpawnSyncReturns } from 'child_process'
 import { readdir } from 'fs/promises'
 
 import { S3UploadsClient } from '../s3'
@@ -24,6 +24,8 @@ interface ClamAVConfig {
 
     pathToClamdScan: string
     pathToClamdConfig: string
+
+    isLocal: boolean
 }
 
 function NewClamAV(config: Partial<ClamAVConfig>, s3Client: S3UploadsClient) {
@@ -42,7 +44,12 @@ function NewClamAV(config: Partial<ClamAVConfig>, s3Client: S3UploadsClient) {
 
         pathToClamdScan: config.pathToClamdScan || '/opt/bin/clamdscan',
         pathToClamdConfig: config.pathToClamdConfig || '/var/task/clamd.conf',
+        isLocal: config.isLocal || false,
     }
+
+    const avScan: AVScan = fullConfig.isLocal
+        ? new ClamscanLocal(fullConfig)
+        : new ClamdscanLambda(fullConfig)
 
     return {
         downloadAVDefinitions: () =>
@@ -50,9 +57,38 @@ function NewClamAV(config: Partial<ClamAVConfig>, s3Client: S3UploadsClient) {
         uploadAVDefinitions: (workdir: string) =>
             uploadAVDefinitions(fullConfig, s3Client, workdir),
         scanForInfectedFiles: (path: string) =>
-            scanForInfectedFiles(fullConfig, path),
+            scanForInfectedFiles(fullConfig, avScan, path),
         fetchAVDefinitionsWithFreshclam: (workdir: string) =>
             fetchAVDefinitionsWithFreshclam(fullConfig, workdir),
+    }
+}
+interface AVScan {
+    scan(pathToScan: string): SpawnSyncReturns<Buffer>
+}
+
+class ClamscanLocal implements AVScan {
+    constructor(private config: ClamAVConfig) {}
+
+    scan(pathToScan: string): SpawnSyncReturns<Buffer> {
+        return spawnSync(this.config.pathToClamav, [
+            '--stdout',
+            '-v',
+            pathToScan,
+        ])
+    }
+}
+
+class ClamdscanLambda implements AVScan {
+    constructor(private config: ClamAVConfig) {}
+
+    scan(pathToScan: string): SpawnSyncReturns<Buffer> {
+        return spawnSync(this.config.pathToClamdScan, [
+            '--stdout',
+            '-v',
+            `--config-file=${this.config.pathToClamdConfig}`,
+            '--stream',
+            pathToScan,
+        ])
     }
 }
 
@@ -178,19 +214,13 @@ function parseInfectedFiles(clamscanOutput: string): string[] {
  */
 function scanForInfectedFiles(
     config: ClamAVConfig,
+    avscan: AVScan,
     pathToScan: string
 ): string[] | Error {
     try {
         console.info('Executing clamav')
-
         // use clamdscan to connect to our clamavd server
-        const avResult = spawnSync(config.pathToClamdScan, [
-            '--stdout',
-            '-v',
-            `--config-file=${config.pathToClamdConfig}`,
-            '--stream',
-            pathToScan,
-        ])
+        const avResult = avscan.scan(pathToScan)
 
         if (avResult.stderr) {
             console.info('stderror', avResult.stderr.toString())

@@ -1,0 +1,15 @@
+fragment questionResponseFragment on QuestionResponse {
+    id
+    questionID
+    createdAt
+    addedBy {
+        ... on StateUser {
+            ...stateUserFragment
+        }
+    }
+    documents {
+        name
+        s3URL
+        downloadURL
+    }
+}

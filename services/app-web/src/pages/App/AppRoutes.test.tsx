@@ -5,11 +5,11 @@ import { AppRoutes } from './AppRoutes'
 import {
     fetchCurrentUserMock,
     mockValidCMSUser,
-    indexHealthPlanPackagesMockSuccess,
+    indexContractsMockSuccess,
 } from '@mc-review/mocks'
 
-// Routing and routes configuration
-describe('AppRoutes', () => {
+// Routing and routes configuration tested here, best layer for testing behaviors that cross several pages
+describe('AppRoutes and routing configuration', () => {
     Object.defineProperty(window, 'scrollTo', {
         writable: true,
         value: vi.fn(),
@@ -26,7 +26,7 @@ describe('AppRoutes', () => {
                 apolloProvider: {
                     mocks: [
                         fetchCurrentUserMock({ statusCode: 200 }),
-                        indexHealthPlanPackagesMockSuccess(),
+                        indexContractsMockSuccess(),
                     ],
                 },
                 featureFlags: { 'session-expiring-modal': false },
@@ -53,7 +53,7 @@ describe('AppRoutes', () => {
                             statusCode: 200,
                             user: mockValidCMSUser(),
                         }),
-                        indexHealthPlanPackagesMockSuccess(),
+                        indexContractsMockSuccess(),
                     ],
                 },
                 featureFlags: { 'session-expiring-modal': false },

@@ -1,0 +1,231 @@
+import type { MutationResolvers } from '../../gen/gqlServer'
+import { isStateUser, contractSubmitters } from '../../domain-models'
+import { logError, logSuccess } from '../../logger'
+import {
+    setErrorAttributesOnActiveSpan,
+    setSuccessAttributesOnActiveSpan,
+} from '../attributeHelper'
+import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
+import { NotFoundError } from '../../postgres'
+import type { Store } from '../../postgres'
+import { GraphQLError } from 'graphql/index'
+import type { Emailer } from '../../emailer'
+import type { EmailParameterStore } from '../../parameterStore'
+import type { LDService } from '../../launchDarkly/launchDarkly'
+import type { StateCodeType } from '../../common-code/healthPlanFormDataType'
+
+export function createContractQuestionResponseResolver(
+    store: Store,
+    emailer: Emailer,
+    emailParameterStore: EmailParameterStore,
+    launchDarkly: LDService
+): MutationResolvers['createContractQuestionResponse'] {
+    return async (_parent, { input }, context) => {
+        const { user, ctx, tracer } = context
+        const span = tracer?.startSpan(
+            'createContractQuestionResponse',
+            {},
+            ctx
+        )
+
+        const featureFlags = await launchDarkly.allFlags(context)
+        const readStateAnalystsFromDBFlag =
+            featureFlags?.['read-write-state-assignments']
+        if (!isStateUser(user)) {
+            const msg = 'user not authorized to create a question response'
+            logError('createContractQuestionResponse', msg)
+            setErrorAttributesOnActiveSpan(msg, span)
+            throw new ForbiddenError(msg)
+        }
+
+        if (input.documents.length === 0) {
+            const msg = 'question response documents are required'
+            logError('createContractQuestionResponse', msg)
+            setErrorAttributesOnActiveSpan(msg, span)
+            throw new UserInputError(msg)
+        }
+        const docs = input.documents.map((doc) => {
+            return {
+                name: doc.name,
+                s3URL: doc.s3URL,
+                downloadURL: doc.downloadURL ?? undefined,
+            }
+        })
+        const inputFormatted = {
+            ...input,
+            documents: docs,
+        }
+        const createResponseResult = await store.insertContractQuestionResponse(
+            inputFormatted,
+            user
+        )
+
+        if (createResponseResult instanceof Error) {
+            if (createResponseResult instanceof NotFoundError) {
+                const errMessage = `Contract question with ID: ${input.questionID} not found to attach response to`
+                logError('createContractQuestionResponse', errMessage)
+                setErrorAttributesOnActiveSpan(errMessage, span)
+                throw new UserInputError(errMessage)
+            }
+
+            const errMessage = `Issue creating question response for contract question ${input.questionID}. Message: ${createResponseResult.message}`
+            logError('createContractQuestionResponse', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+            throw new Error(errMessage)
+        }
+
+        const questions = await store.findAllQuestionsByContract(
+            createResponseResult.contractID
+        )
+        if (questions instanceof Error) {
+            const errMessage = `Issue finding all questions for contract with ID ${createResponseResult.contractID}. Message: ${questions.message}`
+            logError('createContractQuestionResponse', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+            throw new GraphQLError(errMessage, {
+                extensions: {
+                    code: 'INTERNAL_SERVER_ERROR',
+                    cause: 'DB_ERROR',
+                },
+            })
+        }
+
+        const contract = await store.findContractWithHistory(
+            createResponseResult.contractID
+        )
+        if (contract instanceof Error) {
+            if (contract instanceof NotFoundError) {
+                const errMessage = `Package with id ${createResponseResult.contractID} does not exist`
+                logError('createContractQuestionResponse', errMessage)
+                setErrorAttributesOnActiveSpan(errMessage, span)
+                throw new GraphQLError(errMessage, {
+                    extensions: { code: 'NOT_FOUND' },
+                })
+            }
+
+            const errMessage = `Issue finding a package. Message: ${contract.message}`
+            logError('createContractQuestionResponse', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+            throw new GraphQLError(errMessage, {
+                extensions: {
+                    code: 'INTERNAL_SERVER_ERROR',
+                    cause: 'DB_ERROR',
+                },
+            })
+        }
+
+        const statePrograms = store.findStatePrograms(contract.stateCode)
+        if (statePrograms instanceof Error) {
+            logError('createContractQuestionResponse', statePrograms.message)
+            setErrorAttributesOnActiveSpan(statePrograms.message, span)
+            throw new GraphQLError(statePrograms.message, {
+                extensions: {
+                    code: 'INTERNAL_SERVER_ERROR',
+                    cause: 'DB_ERROR',
+                },
+            })
+        }
+        const submitterEmails = contractSubmitters(contract)
+
+        let stateAnalystsEmails: string[] = []
+        if (readStateAnalystsFromDBFlag) {
+            // not great that state code type isn't being used in ContractType but I'll risk the conversion for now
+            const stateAnalystsEmailsResult =
+                await store.findStateAssignedUsers(
+                    contract.stateCode as StateCodeType
+                )
+
+            if (stateAnalystsEmailsResult instanceof Error) {
+                logError(
+                    'getStateAnalystsEmails',
+                    stateAnalystsEmailsResult.message
+                )
+                setErrorAttributesOnActiveSpan(
+                    stateAnalystsEmailsResult.message,
+                    span
+                )
+            } else {
+                stateAnalystsEmails = stateAnalystsEmailsResult.map(
+                    (u) => u.email
+                )
+            }
+        } else {
+            const stateAnalystsEmailsResult =
+                await emailParameterStore.getStateAnalystsEmails(
+                    contract.stateCode
+                )
+
+            //If error log it and set stateAnalystsEmails to empty string as to not interrupt the emails.
+            if (stateAnalystsEmailsResult instanceof Error) {
+                logError(
+                    'getStateAnalystsEmails',
+                    stateAnalystsEmailsResult.message
+                )
+                setErrorAttributesOnActiveSpan(
+                    stateAnalystsEmailsResult.message,
+                    span
+                )
+            } else {
+                stateAnalystsEmails = stateAnalystsEmailsResult
+            }
+        }
+
+        const sendQuestionResponseCMSEmailResult =
+            await emailer.sendQuestionResponseCMSEmail(
+                contract.revisions[0],
+                statePrograms,
+                stateAnalystsEmails,
+                createResponseResult,
+                questions
+            )
+
+        if (sendQuestionResponseCMSEmailResult instanceof Error) {
+            logError(
+                'sendQuestionResponseCMSEmail - Send CMS email',
+                sendQuestionResponseCMSEmailResult.message
+            )
+            setErrorAttributesOnActiveSpan(
+                `Send CMS email failed: ${sendQuestionResponseCMSEmailResult.message}`,
+                span
+            )
+            throw new GraphQLError('Email failed', {
+                extensions: {
+                    code: 'INTERNAL_SERVER_ERROR',
+                    cause: 'EMAIL_ERROR',
+                },
+            })
+        }
+
+        const sendQuestionResponseStateEmailResult =
+            await emailer.sendQuestionResponseStateEmail(
+                contract.revisions[0],
+                statePrograms,
+                submitterEmails,
+                createResponseResult,
+                questions
+            )
+
+        if (sendQuestionResponseStateEmailResult instanceof Error) {
+            logError(
+                'sendQuestionResponseStateEmail - Send State email',
+                sendQuestionResponseStateEmailResult.message
+            )
+            setErrorAttributesOnActiveSpan(
+                `Send State email failed: ${sendQuestionResponseStateEmailResult.message}`,
+                span
+            )
+            throw new GraphQLError('Email failed', {
+                extensions: {
+                    code: 'INTERNAL_SERVER_ERROR',
+                    cause: 'EMAIL_ERROR',
+                },
+            })
+        }
+
+        logSuccess('createContractQuestionResponse')
+        setSuccessAttributesOnActiveSpan(span)
+
+        return {
+            question: createResponseResult,
+        }
+    }
+}

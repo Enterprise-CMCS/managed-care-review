@@ -12,10 +12,11 @@ import {
     updateHealthPlanFormDataResolver,
 } from './healthPlanPackage'
 import {
-    indexQuestionsResolver,
-    createQuestionResolver,
-    createQuestionResponseResolver,
+    createContractQuestionResolver,
+    createContractQuestionResponseResolver,
     questionResponseDocumentResolver,
+    createRateQuestionResolver,
+    createRateQuestionResponseResolver,
 } from './questionResponse'
 import {
     fetchCurrentUserResolver,
@@ -52,6 +53,7 @@ import { createContract } from './contract/createContract'
 import { updateContractDraftRevision } from './contract/updateContractDraftRevision'
 import { withdrawAndReplaceRedundantRateResolver } from './contract/withdrawAndReplaceRedundantRate'
 import { fetchMcReviewSettings } from './settings'
+import { updateStateAssignmentsByState } from './user/updateStateAssignmentsByState'
 
 export function configureResolvers(
     store: Store,
@@ -70,7 +72,6 @@ export function configureResolvers(
             indexHealthPlanPackages: indexHealthPlanPackagesResolver(store),
             indexContracts: indexContractsResolver(store),
             indexUsers: indexUsersResolver(store),
-            indexQuestions: indexQuestionsResolver(store),
             fetchEmailSettings: fetchEmailSettingsResolver(
                 store,
                 emailer,
@@ -123,15 +124,31 @@ export function configureResolvers(
                 withdrawAndReplaceRedundantRateResolver(store),
             updateDivisionAssignment: updateDivisionAssignment(store),
             updateStateAssignment: updateStateAssignment(store),
-            createQuestion: createQuestionResolver(
+            updateStateAssignmentsByState: updateStateAssignmentsByState(store),
+            createContractQuestion: createContractQuestionResolver(
                 store,
                 emailParameterStore,
-                emailer
+                emailer,
+                launchDarkly
             ),
-            createQuestionResponse: createQuestionResponseResolver(
+            createContractQuestionResponse:
+                createContractQuestionResponseResolver(
+                    store,
+                    emailer,
+                    emailParameterStore,
+                    launchDarkly
+                ),
+            createRateQuestion: createRateQuestionResolver(
                 store,
                 emailer,
-                emailParameterStore
+                emailParameterStore,
+                launchDarkly
+            ),
+            createRateQuestionResponse: createRateQuestionResponseResolver(
+                store,
+                emailer,
+                emailParameterStore,
+                launchDarkly
             ),
             createAPIKey: createAPIKeyResolver(jwt),
             unlockRate: unlockRate(store),
@@ -179,7 +196,7 @@ export function configureResolvers(
         CMSUser: cmsUserResolver,
         CMSApproverUser: cmsApproverUserResolver,
         HealthPlanPackage: healthPlanPackageResolver(store),
-        Rate: rateResolver,
+        Rate: rateResolver(store),
         RateRevision: rateRevisionResolver(store),
         Contract: contractResolver(store),
         UnlockedContract: unlockedContractResolver(),

@@ -1,0 +1,14 @@
+mutation updateStateAssignmentsByState($input: UpdateStateAssignmentsByStateInput!) {
+    updateStateAssignmentsByState(input: $input) {
+        stateCode
+        assignedUsers {
+            __typename
+            ... on CMSUser {
+                ...cmsUserFragment
+            }
+            ... on CMSApproverUser {
+                ...cmsApproverUserFragment
+            }
+        }
+    }
+}

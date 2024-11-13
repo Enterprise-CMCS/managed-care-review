@@ -1,13 +1,14 @@
 /* eslint-disable  @typescript-eslint/no-non-null-assertion */
-
-import UPDATE_DRAFT_CONTRACT_RATES from 'app-graphql/src/mutations/updateDraftContractRates.graphql'
 import {
     constructTestPostgresServer,
     createAndUpdateTestHealthPlanPackage,
     unlockTestHealthPlanPackage,
     updateTestHealthPlanFormData,
 } from '../../testHelpers/gqlHelpers'
-import SUBMIT_CONTRACT from '../../../../app-graphql/src/mutations/submitContract.graphql'
+import {
+    UpdateDraftContractRatesDocument,
+    SubmitContractDocument,
+} from '../../gen/gqlClient'
 import { testS3Client } from '../../../../app-web/src/testHelpers/s3Helpers'
 
 import { testCMSUser } from '../../testHelpers/userHelpers'
@@ -1323,7 +1324,7 @@ describe('submitContract', () => {
             '2000-01-22'
 
         const updateResult = await stateServer.executeOperation({
-            query: UPDATE_DRAFT_CONTRACT_RATES,
+            query: UpdateDraftContractRatesDocument,
             variables: {
                 input: rateUpdateInput,
             },
@@ -1442,7 +1443,7 @@ describe('submitContract', () => {
             '2000-01-22'
 
         const updateResult = await stateServer.executeOperation({
-            query: UPDATE_DRAFT_CONTRACT_RATES,
+            query: UpdateDraftContractRatesDocument,
             variables: {
                 input: rateUpdateInput,
             },
@@ -1472,7 +1473,7 @@ describe('submitContract', () => {
         }
 
         const res = await cmsServer.executeOperation({
-            query: SUBMIT_CONTRACT,
+            query: SubmitContractDocument,
             variables: { input },
         })
 

@@ -1,12 +1,16 @@
 import { ApolloServer } from 'apollo-server-lambda'
-import CREATE_HEALTH_PLAN_PACKAGE from 'app-graphql/src/mutations/createHealthPlanPackage.graphql'
-import SUBMIT_HEALTH_PLAN_PACKAGE from 'app-graphql/src/mutations/submitHealthPlanPackage.graphql'
-import UNLOCK_HEALTH_PLAN_PACKAGE from 'app-graphql/src/mutations/unlockHealthPlanPackage.graphql'
-import FETCH_HEALTH_PLAN_PACKAGE from 'app-graphql/src/queries/fetchHealthPlanPackage.graphql'
-import UPDATE_HEALTH_PLAN_FORM_DATA from 'app-graphql/src/mutations/updateHealthPlanFormData.graphql'
-import CREATE_QUESTION from 'app-graphql/src/mutations/createQuestion.graphql'
-import INDEX_QUESTIONS from 'app-graphql/src/queries/indexQuestions.graphql'
-import CREATE_QUESTION_RESPONSE from 'app-graphql/src/mutations/createQuestionResponse.graphql'
+import {
+    CreateHealthPlanPackageDocument,
+    SubmitHealthPlanPackageDocument,
+    UnlockHealthPlanPackageDocument,
+    FetchHealthPlanPackageDocument,
+    UpdateStateAssignmentsByStateDocument,
+    CreateRateQuestionResponseDocument,
+    UpdateHealthPlanFormDataDocument,
+    CreateRateQuestionDocument,
+    CreateContractQuestionResponseDocument,
+    CreateContractQuestionDocument,
+} from '../gen/gqlClient'
 import typeDefs from 'app-graphql/src/schema.graphql'
 import type {
     HealthPlanFormDataType,
@@ -14,18 +18,19 @@ import type {
     StateCodeType,
 } from '@mc-review/hpp'
 import type {
-    CreateQuestionInput,
+    CreateContractQuestionInput,
     InsertQuestionResponseArgs,
     ProgramType,
+    CreateRateQuestionInputType,
 } from '../domain-models'
 import type { Emailer } from '../emailer'
 import { newLocalEmailer } from '../emailer'
 import type {
     CreateHealthPlanPackageInput,
     HealthPlanPackage,
-    CreateQuestionResponsePayload,
-    CreateQuestionPayload,
-    IndexQuestionsPayload,
+    CreateContractQuestionResponsePayload,
+    CreateContractQuestionPayload,
+    UpdateStateAssignmentsByStatePayload,
 } from '../gen/gqlServer'
 import type { Context } from '../handlers/apollo_gql'
 import type { Store } from '../postgres'
@@ -49,6 +54,7 @@ import type { S3ClientT } from '../s3'
 import { convertRateInfoToRateFormDataInput } from '../domain-models/contractAndRates/convertHPPtoContractWithRates'
 import { createAndUpdateTestContractWithoutRates } from './gqlContractHelpers'
 import { addNewRateToTestContract } from './gqlRateHelpers'
+import type { GraphQLResponse } from 'apollo-server-types'
 
 // Since our programs are checked into source code, we have a program we
 // use as our default
@@ -157,7 +163,7 @@ const createTestHealthPlanPackage = async (
         contractType: 'BASE',
     }
     const result = await server.executeOperation({
-        query: CREATE_HEALTH_PLAN_PACKAGE,
+        query: CreateHealthPlanPackageDocument,
         variables: { input },
     })
     if (result.errors) {
@@ -179,7 +185,7 @@ const updateTestHealthPlanFormData = async (
 ): Promise<HealthPlanPackage> => {
     const updatedB64 = domainToBase64(updatedFormData)
     const updateResult = await server.executeOperation({
-        query: UPDATE_HEALTH_PLAN_FORM_DATA,
+        query: UpdateHealthPlanFormDataDocument,
         variables: {
             input: {
                 pkgID: updatedFormData.id,
@@ -211,7 +217,7 @@ const updateTestHealthPlanPackage = async (
     Object.assign(draft, partialUpdates)
 
     const updateResult = await server.executeOperation({
-        query: UPDATE_HEALTH_PLAN_FORM_DATA,
+        query: UpdateHealthPlanFormDataDocument,
         variables: {
             input: {
                 pkgID: pkgID,
@@ -310,7 +316,7 @@ const submitTestHealthPlanPackage = async (
     pkgID: string
 ) => {
     const updateResult = await server.executeOperation({
-        query: SUBMIT_HEALTH_PLAN_PACKAGE,
+        query: SubmitHealthPlanPackageDocument,
         variables: {
             input: {
                 pkgID,
@@ -338,7 +344,7 @@ const resubmitTestHealthPlanPackage = async (
     submittedReason: string
 ) => {
     const updateResult = await server.executeOperation({
-        query: SUBMIT_HEALTH_PLAN_PACKAGE,
+        query: SubmitHealthPlanPackageDocument,
         variables: {
             input: {
                 pkgID,
@@ -367,7 +373,7 @@ const unlockTestHealthPlanPackage = async (
     unlockedReason: string
 ): Promise<HealthPlanPackage> => {
     const updateResult = await server.executeOperation({
-        query: UNLOCK_HEALTH_PLAN_PACKAGE,
+        query: UnlockHealthPlanPackageDocument,
         variables: {
             input: {
                 pkgID: pkgID,
@@ -396,7 +402,7 @@ const fetchTestHealthPlanPackageById = async (
 ): Promise<HealthPlanPackage> => {
     const input = { pkgID }
     const result = await server.executeOperation({
-        query: FETCH_HEALTH_PLAN_PACKAGE,
+        query: FetchHealthPlanPackageDocument,
         variables: { input },
     })
 
@@ -415,8 +421,8 @@ const fetchTestHealthPlanPackageById = async (
 const createTestQuestion = async (
     server: ApolloServer,
     contractID: string,
-    questionData?: Omit<CreateQuestionInput, 'contractID'>
-): Promise<CreateQuestionPayload> => {
+    questionData?: Omit<CreateContractQuestionInput, 'contractID'>
+): Promise<CreateContractQuestionPayload> => {
     const question = questionData || {
         documents: [
             {
@@ -426,7 +432,7 @@ const createTestQuestion = async (
         ],
     }
     const createdQuestion = await server.executeOperation({
-        query: CREATE_QUESTION,
+        query: CreateContractQuestionDocument,
         variables: {
             input: {
                 contractID,
@@ -444,39 +450,63 @@ const createTestQuestion = async (
         throw new Error('createTestQuestion returned nothing')
     }
 
-    return createdQuestion.data.createQuestion
+    return createdQuestion.data.createContractQuestion
 }
 
-const indexTestQuestions = async (
+const createTestRateQuestion = async (
     server: ApolloServer,
-    contractID: string
-): Promise<IndexQuestionsPayload> => {
-    const indexQuestionsResult = await server.executeOperation({
-        query: INDEX_QUESTIONS,
+    rateID: string,
+    questionData?: Omit<CreateRateQuestionInputType, 'rateID'>
+): Promise<GraphQLResponse> => {
+    const question = questionData || {
+        documents: [
+            {
+                name: 'Test Question',
+                s3URL: 's3://bucketname/key/test1',
+            },
+        ],
+    }
+    return await server.executeOperation({
+        query: CreateRateQuestionDocument,
         variables: {
             input: {
-                contractID,
+                rateID,
+                ...question,
             },
         },
     })
+}
 
-    if (indexQuestionsResult.errors)
-        throw new Error(
-            `indexTestQuestions query failed with errors ${indexQuestionsResult.errors}`
-        )
-
-    if (!indexQuestionsResult.data) {
-        throw new Error('indexTestQuestions returned nothing')
+const createTestRateQuestionResponse = async (
+    server: ApolloServer,
+    questionID: string,
+    responseData?: Omit<InsertQuestionResponseArgs, 'questionID'>
+): Promise<GraphQLResponse> => {
+    const response = responseData || {
+        documents: [
+            {
+                name: 'Test Question Response',
+                s3URL: 's3://bucketname/key/test1',
+            },
+        ],
     }
 
-    return indexQuestionsResult.data.indexQuestions
+    return await server.executeOperation({
+        query: CreateRateQuestionResponseDocument,
+        variables: {
+            input: {
+                ...response,
+                questionID,
+            },
+        },
+    })
 }
 
 const createTestQuestionResponse = async (
     server: ApolloServer,
     questionID: string,
     responseData?: Omit<InsertQuestionResponseArgs, 'questionID'>
-): Promise<CreateQuestionResponsePayload> => {
+): Promise<CreateContractQuestionResponsePayload> => {
     const response = responseData || {
         documents: [
             {
@@ -486,7 +516,7 @@ const createTestQuestionResponse = async (
         ],
     }
     const createdResponse = await server.executeOperation({
-        query: CREATE_QUESTION_RESPONSE,
+        query: CreateContractQuestionResponseDocument,
         variables: {
             input: {
                 ...response,
@@ -504,8 +534,36 @@ const createTestQuestionResponse = async (
         throw new Error('createTestQuestionResponse returned nothing')
     }
 
-    return createdResponse.data.createQuestionResponse
+    return createdResponse.data.createContractQuestionResponse
 }
+
+const updateTestStateAssignments = async (
+    server: ApolloServer,
+    stateCode: string,
+    assignedUserIDs: string[]
+): Promise<UpdateStateAssignmentsByStatePayload> => {
+    const updatedAssignments = await server.executeOperation({
+        query: UpdateStateAssignmentsByStateDocument,
+        variables: {
+            input: {
+                stateCode,
+                assignedUsers: assignedUserIDs,
+            },
+        },
+    })
+
+    if (updatedAssignments.errors)
+        throw new Error(
+            `updateStateAssignmentsByState mutation failed with errors ${updatedAssignments.errors}`
+        )
+
+    if (!updatedAssignments.data) {
+        throw new Error('updateStateAssignmentsByState returned nothing')
+    }
+
+    return updatedAssignments.data.updateStateAssignmentsByState
+}
+
 export {
     constructTestPostgresServer,
     createTestHealthPlanPackage,
@@ -520,7 +578,9 @@ export {
     defaultFloridaProgram,
     defaultFloridaRateProgram,
     createTestQuestion,
-    indexTestQuestions,
     createTestQuestionResponse,
     updateTestHealthPlanPackage,
+    updateTestStateAssignments,
+    createTestRateQuestion,
+    createTestRateQuestionResponse,
 }

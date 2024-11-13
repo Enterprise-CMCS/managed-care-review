@@ -2,7 +2,7 @@ import { packageName as generatePackageName } from '@mc-review/hpp'
 import { formatCalendarDate } from '@mc-review/common-code'
 import { pruneDuplicateEmails } from '../formatters'
 import type { EmailConfiguration, EmailData, StateAnalystsEmails } from '..'
-import type { ProgramType, Question } from '../../domain-models'
+import type { ProgramType, ContractQuestionType } from '../../domain-models'
 import {
     stripHTMLFromTemplate,
     renderTemplate,
@@ -17,7 +17,7 @@ export const sendQuestionCMSEmail = async (
     stateAnalystsEmails: StateAnalystsEmails,
     config: EmailConfiguration,
     statePrograms: ProgramType[],
-    questions: Question[]
+    questions: ContractQuestionType[]
 ): Promise<EmailData | Error> => {
     const newQuestion = questions[questions.length - 1]
     let receiverEmails = [...stateAnalystsEmails, ...config.devReviewTeamEmails]
@@ -60,7 +60,10 @@ export const sendQuestionCMSEmail = async (
         cmsRequestorEmail: newQuestion.addedBy.email,
         cmsRequestorName: `${newQuestion.addedBy.givenName} ${newQuestion.addedBy.familyName}`,
         cmsRequestorDivision: newQuestion.addedBy.divisionAssignment,
-        dateAsked: formatCalendarDate(newQuestion.createdAt),
+        dateAsked: formatCalendarDate(
+            newQuestion.createdAt,
+            'America/New_York'
+        ),
         questionRound,
     }
 

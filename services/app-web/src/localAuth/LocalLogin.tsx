@@ -1,6 +1,5 @@
 import React from 'react'
 import {
-    Alert,
     Card,
     CardHeader,
     CardMedia,
@@ -26,7 +25,8 @@ import azulaAvatar from '../assets/images/azula.png'
 
 import { useAuth } from '../contexts/AuthContext'
 import { LocalUserType } from './LocalUserType'
-import { ButtonWithLogging } from '../components'
+import { ButtonWithLogging, ErrorAlertSignIn } from '../components'
+import { recordJSException } from '../otelHelpers'
 
 const localUsers: LocalUserType[] = [
     {
@@ -113,19 +113,24 @@ const userAvatars: { [key: string]: string } = {
 }
 
 export function LocalLogin(): React.ReactElement {
-    const [showFormAlert, setShowFormAlert] = React.useState(false)
+    const hasSigninError = new URLSearchParams(location.search).get(
+        'signin-error'
+    )
+    const [showFormAlert, setShowFormAlert] = React.useState(
+        hasSigninError ? true : false
+    )
     const navigate = useNavigate()
     const { checkAuth, loginStatus } = useAuth()
 
     async function login(user: LocalUserType) {
         loginLocalUser(user)
+        const result = await checkAuth()
 
-        try {
-            await checkAuth()
-            navigate(RoutesRecord.ROOT)
-        } catch (error) {
+        if (result instanceof Error) {
             setShowFormAlert(true)
-            console.info('Log: Server Error')
+            recordJSException(result)
+        } else {
+            navigate(RoutesRecord.ROOT)
         }
     }
 
@@ -134,11 +139,7 @@ export function LocalLogin(): React.ReactElement {
             <h2>Auth Page</h2>
             <h3>Local Login</h3>
             <div>Login as one of our hard coded users:</div>
-            {showFormAlert && (
-                <Alert headingLevel="h4" type="error">
-                    Something went wrong
-                </Alert>
-            )}
+            {showFormAlert && <ErrorAlertSignIn />}
             <CardGroup>
                 {localUsers.map((user) => {
                     const fromString = {

@@ -1,14 +1,14 @@
-import { aliasMutation } from '../utils/graphql-test-utils';
+import { userLoginData, type CMSUserLoginNames } from './loginCommands';
 
 Cypress.Commands.add('assignDivisionToCMSUser', ({
-    userEmail,
+    cmsUser,
     division
  }: {
-    userEmail: string,
+    cmsUser: CMSUserLoginNames,
     division: 'DMCO' | 'DMCP' | 'OACT'
 }) => {
     // Find the table row for the user
-    cy.findByText(userEmail).parent().then(row => {
+    cy.findByText(userLoginData[cmsUser].email).parent().then(row => {
         // Do all the things inside the row element
         cy.wrap(row).within(() => {
             // Click the combobox

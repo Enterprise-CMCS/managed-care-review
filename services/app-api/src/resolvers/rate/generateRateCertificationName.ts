@@ -7,15 +7,18 @@ const naturalSort = (a: string, b: string): number => {
     return a.localeCompare(b, 'en', { numeric: true })
 }
 
-const formatProgramNamesForDisplay  = (statePrograms: ProgramArgType[],
- rateProgramIDs: string[]): string[] => programNames(statePrograms, rateProgramIDs)
-.sort(naturalSort)
-.map((n) =>
-    n
-        .replace(/\s/g, '-')
-        .replace(/[^a-zA-Z0-9+]/g, '')
-        .toUpperCase()
-)
+const formatProgramNamesForDisplay = (
+    statePrograms: ProgramArgType[],
+    rateProgramIDs: string[]
+): string[] =>
+    programNames(statePrograms, rateProgramIDs)
+        .sort(naturalSort)
+        .map((n) =>
+            n
+                .replace(/\s/g, '-')
+                .replace(/[^a-zA-Z0-9+]/g, '')
+                .toUpperCase()
+        )
 
 const generateRateCertificationName = (
     rateFormData: RateFormEditableType,
@@ -45,7 +48,10 @@ const generateRateCertificationName = (
     const certifiedDate = rateDateCertified
         ? `-${formatRateNameDate(rateDateCertified)}`
         : ''
-    const pNames = formatProgramNamesForDisplay(statePrograms, rateProgramIDs).join('-')
+    const pNames = formatProgramNamesForDisplay(
+        statePrograms,
+        rateProgramIDs
+    ).join('-')
 
     let rateName = `MCR-${stateCode.toUpperCase()}`
 
@@ -73,4 +79,4 @@ const generateRateCertificationName = (
     return rateName
 }
 
-export { generateRateCertificationName, formatProgramNamesForDisplay  }
+export { generateRateCertificationName, formatProgramNamesForDisplay }

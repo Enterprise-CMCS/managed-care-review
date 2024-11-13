@@ -1,10 +1,12 @@
 import {
+    CmsUser,
     Contract,
     ContractPackageSubmission,
     ContractRevision,
     Rate,
     RatePackageSubmission,
     RateRevision,
+    StateUser,
     UpdateInformation,
 } from '../gen/gqlClient'
 import { s3DlUrl } from './documentDataMock'
@@ -12,6 +14,7 @@ import { mockMNState } from './stateMock'
 import { v4 as uuidv4 } from 'uuid'
 import { updateInfoMock } from './updateInfoMocks'
 import { mockContractRevision } from './contractPackageDataMock'
+import { mockValidCMSUser, mockValidUser } from './userGQLMock'
 
 const rateRevisionDataMock = (data?: Partial<RateRevision>): RateRevision => {
     return {
@@ -121,7 +124,7 @@ const draftRateDataMock = (
         parentContractID: 'foo-bar',
         state: mockMNState(),
         status: 'DRAFT',
-        initiallySubmittedAt: '2023-10-16',
+        initiallySubmittedAt: new Date('2023-10-16'),
         draftRevision: {
             ...rateRevisionDataMock({ submitInfo: null, ...draftRevision }),
         },
@@ -188,7 +191,7 @@ const rateDataMock = (
         stateNumber: 10,
         state: mockMNState(),
         status: 'RESUBMITTED',
-        initiallySubmittedAt: '2023-10-16',
+        initiallySubmittedAt: new Date('2023-10-16'),
         draftRevision: null,
         parentContractID: 'foo-bar',
         id: rateID,
@@ -297,7 +300,7 @@ function submittedLinkedRatesScenarioMock(): {
         stateNumber: 10,
         state: mockMNState(),
         status: 'RESUBMITTED',
-        initiallySubmittedAt: '2023-10-16',
+        initiallySubmittedAt: new Date('2023-10-16'),
         draftRevision: null,
         parentContractID: 'c-01',
         id: 'r-01',
@@ -313,6 +316,398 @@ function submittedLinkedRatesScenarioMock(): {
     }
 }
 
+// intended for use with related GQL Moc file.
+function mockRateSubmittedWithQuestions(
+    rate: Partial<Rate> & { id: string },
+    partial?: Partial<RateRevision>
+): Rate {
+    const rateID = rate.id
+    const rateRev = (): RateRevision => {
+        return {
+            id: '1234',
+            rateID: rateID,
+            createdAt: new Date('01/01/2023'),
+            updatedAt: new Date('01/01/2023'),
+            __typename: 'RateRevision',
+            unlockInfo: null,
+            submitInfo: {
+                updatedAt: '2024-12-18T16:54:39.173Z',
+                updatedBy: {
+                    email: 'example@state.com',
+                    role: 'STATE_USER',
+                    givenName: 'John',
+                    familyName: 'Vila',
+                },
+                updatedReason: 'contract submit',
+            },
+            formData: {
+                rateCertificationName: 'rate cert',
+                rateType: 'AMENDMENT',
+                rateCapitationType: 'RATE_CELL',
+                rateDocuments: [
+                    {
+                        s3URL: 's3://bucketname/key/rate',
+                        sha256: 'fakesha',
+                        name: 'rate',
+                        dateAdded: new Date('01/01/2023'),
+                        downloadURL: s3DlUrl,
+                    },
+                ],
+                supportingDocuments: [
+                    {
+                        s3URL: 's3://bucketname/key/rateSupporting1',
+                        sha256: 'fakesha',
+                        name: 'rate supporting 1',
+                        dateAdded: new Date('01/15/2023'),
+                        downloadURL: s3DlUrl,
+                    },
+                    {
+                        s3URL: 's3://bucketname/key/rateSupporting1',
+                        sha256: 'fakesha',
+                        name: 'rate supporting 2',
+                        dateAdded: new Date('01/15/2023'),
+                        downloadURL: s3DlUrl,
+                    },
+                ],
+                rateDateStart: new Date(),
+                rateDateEnd: new Date(),
+                rateDateCertified: new Date(),
+                amendmentEffectiveDateStart: new Date(),
+                amendmentEffectiveDateEnd: new Date(),
+                rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
+                deprecatedRateProgramIDs: [],
+                certifyingActuaryContacts: [
+                    {
+                        id: 'uuid1',
+                        actuarialFirm: 'DELOITTE',
+                        name: 'Actuary Contact 1',
+                        titleRole: 'Test Actuary Contact 1',
+                        email: 'actuarycontact1@test.com',
+                        actuarialFirmOther: null,
+                    },
+                ],
+                addtlActuaryContacts: [
+                    {
+                        id: 'uuid2',
+                        actuarialFirm: 'DELOITTE',
+                        name: 'Actuary Contact 1',
+                        titleRole: 'Test Actuary Contact 1',
+                        email: 'actuarycontact1@test.com',
+                        actuarialFirmOther: null,
+                    },
+                ],
+                actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+                packagesWithSharedRateCerts: [],
+            },
+            ...partial,
+        }
+    }
+
+    return {
+        status: rate.status ?? 'SUBMITTED',
+        __typename: 'Rate',
+        createdAt: rate.createdAt ?? new Date(),
+        updatedAt: rate.updatedAt ?? new Date(),
+        id: rateID,
+        stateCode: rate.stateCode ?? 'MN',
+        state: rate.state ?? mockMNState(),
+        stateNumber: rate.stateNumber ?? 5,
+        parentContractID: rate.parentContractID ?? 'parent-contract-id',
+        initiallySubmittedAt:
+            rate.initiallySubmittedAt ?? '2024-12-18T16:54:39.173Z',
+        revisions: [rateRev()],
+        draftRevision: null,
+        withdrawInfo: null,
+        packageSubmissions: [
+            {
+                cause: 'RATE_SUBMISSION',
+                __typename: 'RatePackageSubmission',
+                submitInfo: {
+                    updatedAt: '2024-12-18T16:54:39.173Z',
+                    updatedBy: {
+                        email: 'example@state.com',
+                        role: 'STATE_USER',
+                        givenName: 'John',
+                        familyName: 'Vila',
+                    },
+                    updatedReason: 'contract submit',
+                },
+                submittedRevisions: [],
+                contractRevisions: [
+                    {
+                        __typename: 'ContractRevision',
+                        contractName: 'MCR-MN-0005-SNBC',
+                        createdAt: new Date('01/01/2024'),
+                        updatedAt: '2024-12-18T16:54:39.173Z',
+                        id: '123',
+                        contractID: 'test-abc-123',
+                        submitInfo: {
+                            updatedAt: new Date(),
+                            updatedBy: {
+                                email: 'example@state.com',
+                                role: 'STATE_USER',
+                                givenName: 'John',
+                                familyName: 'Vila',
+                            },
+                            updatedReason: 'contract submit',
+                        },
+                        unlockInfo: null,
+                        formData: {
+                            programIDs: [
+                                'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
+                            ],
+                            populationCovered: 'MEDICAID',
+                            submissionType: 'CONTRACT_AND_RATES',
+                            riskBasedContract: true,
+                            submissionDescription: 'A real submission',
+                            supportingDocuments: [
+                                {
+                                    s3URL: 's3://bucketname/key/contractsupporting1',
+                                    sha256: 'fakesha',
+                                    name: 'contractSupporting1',
+                                    dateAdded: new Date('01/15/2024'),
+                                    downloadURL: s3DlUrl,
+                                },
+                                {
+                                    s3URL: 's3://bucketname/key/contractSupporting2',
+                                    sha256: 'fakesha',
+                                    name: 'contractSupporting2',
+                                    dateAdded: new Date('01/13/2024'),
+                                    downloadURL: s3DlUrl,
+                                },
+                            ],
+                            stateContacts: [],
+                            contractType: 'AMENDMENT',
+                            contractExecutionStatus: 'EXECUTED',
+                            contractDocuments: [
+                                {
+                                    s3URL: 's3://bucketname/key/contract',
+                                    sha256: 'fakesha',
+                                    name: 'contract',
+                                    dateAdded: new Date('01/01/2024'),
+                                    downloadURL: s3DlUrl,
+                                },
+                            ],
+                            contractDateStart: new Date(),
+                            contractDateEnd: new Date(),
+                            managedCareEntities: ['MCO'],
+                            federalAuthorities: ['STATE_PLAN'],
+                            inLieuServicesAndSettings: true,
+                            modifiedBenefitsProvided: true,
+                            modifiedGeoAreaServed: false,
+                            modifiedMedicaidBeneficiaries: true,
+                            modifiedRiskSharingStrategy: true,
+                            modifiedIncentiveArrangements: false,
+                            modifiedWitholdAgreements: false,
+                            modifiedStateDirectedPayments: true,
+                            modifiedPassThroughPayments: true,
+                            modifiedPaymentsForMentalDiseaseInstitutions: false,
+                            modifiedMedicalLossRatioStandards: true,
+                            modifiedOtherFinancialPaymentIncentive: false,
+                            modifiedEnrollmentProcess: true,
+                            modifiedGrevienceAndAppeal: false,
+                            modifiedNetworkAdequacyStandards: true,
+                            modifiedLengthOfContract: false,
+                            modifiedNonRiskPaymentArrangements: true,
+                            statutoryRegulatoryAttestation: true,
+                            statutoryRegulatoryAttestationDescription:
+                                'everything meets regulatory attestation',
+                        },
+                    },
+                ],
+                rateRevision: rateRev(),
+            },
+        ],
+        questions: rate.questions || {
+            __typename: 'IndexRateQuestionsPayload',
+            DMCOQuestions: {
+                __typename: 'RateQuestionList',
+                totalCount: 2,
+                edges: [
+                    {
+                        __typename: 'RateQuestionEdge' as const,
+                        node: {
+                            __typename: 'RateQuestion' as const,
+                            id: 'dmco-question-2-id',
+                            rateID,
+                            createdAt: new Date('2022-12-18'),
+                            addedBy: mockValidCMSUser() as CmsUser,
+                            documents: [
+                                {
+                                    s3URL: 's3://bucketname/key/dmco-question-2-document-1',
+                                    name: 'dmco-question-2-document-1',
+                                    downloadURL: expect.any(String),
+                                },
+                                {
+                                    s3URL: 's3://bucketname/key/question-2-document-2',
+                                    name: 'dmco-question-2-document-2',
+                                    downloadURL: expect.any(String),
+                                },
+                            ],
+                            division: 'DMCO',
+                            responses: [
+                                {
+                                    __typename: 'QuestionResponse' as const,
+                                    id: 'response-to-dmco-2-id',
+                                    questionID: 'dmco-question-2-id',
+                                    addedBy: mockValidUser() as StateUser,
+                                    createdAt: new Date('2022-12-20'),
+                                    documents: [
+                                        {
+                                            s3URL: 's3://bucketname/key/response-to-dmco-2-document-1',
+                                            name: 'response-to-dmco-2-document-1',
+                                            downloadURL: expect.any(String),
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    },
+                    {
+                        __typename: 'RateQuestionEdge' as const,
+                        node: {
+                            __typename: 'RateQuestion' as const,
+                            id: 'dmco-question-1-id',
+                            rateID,
+                            createdAt: new Date('2022-12-15'),
+                            addedBy: mockValidCMSUser() as CmsUser,
+                            documents: [
+                                {
+                                    s3URL: 's3://bucketname/key/dmco-question-1-document-1',
+                                    name: 'dmco-question-1-document-1',
+                                    downloadURL: expect.any(String),
+                                },
+                            ],
+                            division: 'DMCO',
+                            responses: [],
+                        },
+                    },
+                ],
+            },
+            DMCPQuestions: {
+                __typename: 'RateQuestionList',
+                totalCount: 1,
+                edges: [
+                    {
+                        __typename: 'RateQuestionEdge' as const,
+                        node: {
+                            __typename: 'RateQuestion' as const,
+                            id: 'dmcp-question-1-id',
+                            rateID,
+                            createdAt: new Date('2022-12-15'),
+                            addedBy: mockValidCMSUser({
+                                divisionAssignment: 'DMCP',
+                            }) as CmsUser,
+                            documents: [
+                                {
+                                    s3URL: 's3://bucketname/key/dmcp-question-1-document-1',
+                                    name: 'dmcp-question-1-document-1',
+                                    downloadURL: expect.any(String),
+                                },
+                            ],
+                            division: 'DMCP',
+                            responses: [
+                                {
+                                    __typename: 'QuestionResponse' as const,
+                                    id: 'response-to-dmcp-1-id',
+                                    questionID: 'dmcp-question-1-id',
+                                    addedBy: mockValidUser() as StateUser,
+                                    createdAt: new Date('2022-12-16'),
+                                    documents: [
+                                        {
+                                            s3URL: 's3://bucketname/key/response-to-dmcp-1-document-1',
+                                            name: 'response-to-dmcp-1-document-1',
+                                            downloadURL: expect.any(String),
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    },
+                ],
+            },
+            OACTQuestions: {
+                __typename: 'RateQuestionList',
+                totalCount: 1,
+                edges: [
+                    {
+                        __typename: 'RateQuestionEdge' as const,
+                        node: {
+                            __typename: 'RateQuestion' as const,
+                            id: 'oact-question-2-id',
+                            rateID,
+                            createdAt: new Date('2022-12-17'),
+                            addedBy: mockValidCMSUser({
+                                divisionAssignment: 'OACT',
+                            }) as CmsUser,
+                            documents: [
+                                {
+                                    s3URL: 's3://bucketname/key/oact-question-1-document-1',
+                                    name: 'oact-question-2-document-1',
+                                    downloadURL: expect.any(String),
+                                },
+                            ],
+                            division: 'OACT',
+                            responses: [
+                                {
+                                    __typename: 'QuestionResponse' as const,
+                                    id: 'response-to-oact-2-id',
+                                    questionID: 'oact-question-2-id',
+                                    addedBy: mockValidUser() as StateUser,
+                                    createdAt: new Date('2022-12-16'),
+                                    documents: [
+                                        {
+                                            s3URL: 's3://bucketname/key/response-to-oact-1-document-1',
+                                            name: 'response-to-oact-2-document-1',
+                                            downloadURL: expect.any(String),
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    },
+                    {
+                        __typename: 'RateQuestionEdge' as const,
+                        node: {
+                            __typename: 'RateQuestion' as const,
+                            id: 'oact-question-1-id',
+                            rateID,
+                            createdAt: new Date('2022-12-16'),
+                            addedBy: mockValidCMSUser({
+                                divisionAssignment: 'OACT',
+                            }) as CmsUser,
+                            documents: [
+                                {
+                                    s3URL: 's3://bucketname/key/oact-question-1-document-1',
+                                    name: 'oact-question-1-document-1',
+                                    downloadURL: expect.any(String),
+                                },
+                            ],
+                            division: 'OACT',
+                            responses: [
+                                {
+                                    __typename: 'QuestionResponse' as const,
+                                    id: 'response-to-oact-1-id',
+                                    questionID: 'oact-question-1-id',
+                                    addedBy: mockValidUser() as StateUser,
+                                    createdAt: new Date('2022-12-16'),
+                                    documents: [
+                                        {
+                                            s3URL: 's3://bucketname/key/response-to-oact-1-document-1',
+                                            name: 'response-to-oact-1-document-1',
+                                            downloadURL: expect.any(String),
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    }
+}
+
 export {
     rateDataMock,
     rateRevisionDataMock,
@@ -320,4 +715,5 @@ export {
     rateWithHistoryMock,
     rateUnlockedWithHistoryMock,
     submittedLinkedRatesScenarioMock,
+    mockRateSubmittedWithQuestions,
 }

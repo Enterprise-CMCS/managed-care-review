@@ -10,7 +10,6 @@ import { RateSummary } from './RateSummary'
 import { RoutesRecord } from '@mc-review/constants'
 import { Route, Routes } from 'react-router-dom'
 import { RateEdit } from '../RateEdit/RateEdit'
-import { dayjs } from '@mc-review/common-code'
 import { rateWithHistoryMock } from '@mc-review/mocks'
 
 // Wrap test component in some top level routes to allow getParams to be tested
@@ -96,13 +95,9 @@ describe('RateSummary', () => {
                 expect(
                     screen.getByTestId('rateWithdrawnBanner')
                 ).toHaveTextContent(/Withdrawn by: Administrator/)
+                // API returns UTC timezone, we display timestamped dates in ET timezone so 1 day before on these tests.
                 expect(
-                    screen.getByText(
-                        `${dayjs
-                            .utc(new Date('2024-01-01'))
-                            .tz('America/New_York')
-                            .format('MM/DD/YY h:mma')} ET`
-                    )
+                    screen.getByText('12/31/2023 7:00pm ET')
                 ).toBeInTheDocument()
                 expect(
                     screen.getByText('Admin as withdrawn this rate.')
@@ -253,14 +248,8 @@ describe('RateSummary', () => {
             expect(screen.getByTestId('rateWithdrawnBanner')).toHaveTextContent(
                 /Withdrawn by: Administrator/
             )
-            expect(
-                screen.getByText(
-                    `${dayjs
-                        .utc(new Date('2024-01-01'))
-                        .tz('America/New_York')
-                        .format('MM/DD/YY h:mma')} ET`
-                )
-            ).toBeInTheDocument()
+            // API returns UTC timezone, we display timestamped dates in ET timezone so 1 day before on these tests.
+            expect(screen.getByText('12/31/2023 7:00pm ET')).toBeInTheDocument()
             expect(
                 screen.getByText('Admin as withdrawn this rate.')
             ).toBeInTheDocument()

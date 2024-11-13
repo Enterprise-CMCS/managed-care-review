@@ -62,16 +62,16 @@ $mcr-single-page-width: 40rem; // based on figma - however, 40rem is also media 
 // We should be overriding usa-form max-width across the application, rather than per form page.  Let uswds always take the width of its parent by default
 // From figma seems like like single page page width is 40rem but we have  $mcr-container-standard-width-fixed set to 50rem - look at this in future refactor - cross check with design.
 // Are single page forms supposed to be the same width as the state submission form?  Unclear.
-@mixin standaloneFormPage{
+@mixin standaloneFormPage {
     justify-content: center;
     flex-direction: row;
 
-   form[class^='usa-form']{
+    form[class^='usa-form'] {
         max-width: 100% !important;
         display: flex;
         flex-direction: column;
         width: $mcr-single-page-width;
-   }
+    }
     #formInnerContainer {
         border: 0;
         margin-top: 2rem;
@@ -87,16 +87,16 @@ $mcr-single-page-width: 40rem; // based on figma - however, 40rem is also media 
         > div[class^='usa-form-group']:not(:first-of-type) {
             margin-top: 2.5rem;
         }
-        >fieldset{
-           border: 0;
-           margin: 0;
-           padding:0
+        > fieldset {
+            border: 0;
+            margin: 0;
+            padding: 0;
         }
     }
 }
 
-.standaloneForm{
-    @include standaloneFormPage
+.standaloneForm {
+    @include standaloneFormPage;
 }
 /* ACCESSIBILITY */
 // Re-useable classname for hiding UI visually but still having it be read by screenreaders

@@ -8,7 +8,7 @@ type PoliteErrorMessageProps = {
     id?: string
     className?: string
     formFieldLabel: string
-} & JSX.IntrinsicElements['span']
+} & React.HTMLAttributes<HTMLSpanElement>
 
 export type PoliteErrorMessageRef = React.Ref<HTMLSpanElement> | null
 // This component is almost the same as react-uswds ErrorMessage, but by default polite :).
@@ -26,13 +26,14 @@ export const PoliteErrorMessage = forwardRef(
         ref: PoliteErrorMessageRef
     ): React.ReactElement | null => {
         const { logInlineErrorEvent } = useTealium()
-
         useEffect(() => {
-            logInlineErrorEvent({
-                error_type: 'validation',
-                error_message: extractText(children),
-                form_field_label: formFieldLabel,
-            })
+            if (children) {
+                logInlineErrorEvent({
+                    error_type: 'validation',
+                    error_message: extractText(children),
+                    form_field_label: formFieldLabel,
+                })
+            }
         }, [logInlineErrorEvent, formFieldLabel, children])
 
         if (!children) return null

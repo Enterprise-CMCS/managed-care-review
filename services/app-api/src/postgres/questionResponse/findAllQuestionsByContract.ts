@@ -1,13 +1,16 @@
 import type { PrismaClient } from '@prisma/client'
-import type { Question } from '../../domain-models'
-import { questionPrismaToDomainType, questionInclude } from './questionHelpers'
+import type { ContractQuestionType } from '../../domain-models'
+import {
+    contractQuestionPrismaToDomainType,
+    questionInclude,
+} from './questionHelpers'
 
 export async function findAllQuestionsByContract(
     client: PrismaClient,
     contractID: string
-): Promise<Question[] | Error> {
+): Promise<ContractQuestionType[] | Error> {
     try {
-        const findResult = await client.question.findMany({
+        const findResult = await client.contractQuestion.findMany({
             where: {
                 contractID: contractID,
             },
@@ -17,11 +20,9 @@ export async function findAllQuestionsByContract(
             },
         })
 
-        const questions: Question[] = findResult.map((question) =>
-            questionPrismaToDomainType(question)
+        return findResult.map((question) =>
+            contractQuestionPrismaToDomainType(question)
         )
-
-        return questions
     } catch (e: unknown) {
         if (e instanceof Error) {
             return e

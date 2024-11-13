@@ -1,3 +1,26 @@
+export const userLoginData = {
+    ZUKO: {
+        email: 'zuko@example.com',
+        buttonTestID: 'ZukoButton'
+    },
+    ROKU: {
+        email: 'roku@example.com',
+        buttonTestID: 'RokuButton'
+    },
+    IZUMI: {
+        email: 'izumi@example.com',
+        buttonTestID: 'IzumiButton'
+    },
+    AZULA: {
+        email: 'azula@example.com',
+        buttonTestID: 'AzulaButton'
+    }
+}
+
+export type CMSUserLoginNames = keyof typeof userLoginData;
+
+const submissionRateQAPattern = /^\/submissions\/[^\/]+\/rates\/[^\/]+\/question-and-answers$/;
+
 Cypress.Commands.add('logInAsStateUser', () => {
     // Set up gql intercept for requests on app load
 
@@ -22,7 +45,7 @@ Cypress.Commands.add('logInAsStateUser', () => {
         throw new Error(`Auth mode is not defined or is IDM: ${authMode}`)
     }
     //Wait for both queries to finish.
-    cy.wait(['@fetchCurrentUserQuery', '@indexHealthPlanPackagesQuery'], {
+    cy.wait(['@fetchCurrentUserQuery', '@indexContractsForDashboardQuery'], {
         timeout: 80_000,
     })
     cy.findByTestId('state-dashboard-page', { timeout: 10_000 }).should('exist')
@@ -31,7 +54,10 @@ Cypress.Commands.add('logInAsStateUser', () => {
 
 Cypress.Commands.add(
     'logInAsCMSUser',
-    ({ initialURL } = { initialURL: '/' }) => {
+    (args) => {
+        const cmsUser = args?.cmsUser || 'ZUKO'
+        const initialURL = args?.initialURL || '/'
+
         cy.visit('/auth')
 
         //Add assertion looking for test on the page before findByRole
@@ -42,13 +68,13 @@ Cypress.Commands.add(
         const authMode = Cypress.env('AUTH_MODE')
 
         if (authMode === 'LOCAL') {
-            cy.findByTestId('ZukoButton').click()
+            cy.findByTestId(userLoginData[cmsUser].buttonTestID).click()
         } else if (authMode === 'AWS_COGNITO') {
             const testUsersPassword = Cypress.env('TEST_USERS_PASS')
             if (!testUsersPassword)
                 throw Error('Cannot login test user without a password')
             cy.findByText('Show Login Form').click()
-            cy.findByTestId('loginEmail').type('zuko@example.com')
+            cy.findByTestId('loginEmail').type(userLoginData[cmsUser].email)
             cy.findByTestId('loginPassword').type(testUsersPassword)
             cy.findByRole('button', { name: 'Login' })
                 .click()
@@ -57,7 +83,7 @@ Cypress.Commands.add(
         }
 
         cy.wait('@fetchCurrentUserQuery', { timeout: 20_000 })
-        cy.wait('@indexHealthPlanPackagesQuery', { timeout: 80_000 })
+        cy.wait('@indexContractsForDashboardQuery', { timeout: 80_000 })
         cy.findByTestId('cms-dashboard-page', { timeout: 10_000 }).should(
             'exist'
         )
@@ -67,7 +93,7 @@ Cypress.Commands.add(
             cy.url({ timeout: 20_000 }).should('contain', initialURL)
 
             if (initialURL.includes('submissions/')) {
-                cy.wait('@fetchHealthPlanPackageWithQuestionsQuery', {
+                cy.wait('@fetchContractWithQuestionsQuery', {
                     timeout: 20_000,
                 }) // for cases where CMs user goes to specific submission on login, likely from email link
             } else if (initialURL.includes('rate-reviews')) {
@@ -76,8 +102,10 @@ Cypress.Commands.add(
                     'exist'
                 )
                 cy.findByRole('heading', { name: /rate reviews/ }).should('exist')
+            } else if (initialURL.match(submissionRateQAPattern)) {
+                cy.wait('@fetchRateWithQuestionsQuery', { timeout: 80_000 })
             } else {
-                cy.wait('@indexHealthPlanPackagesQuery', { timeout: 80_000 })
+                cy.wait('@indexContractsForDashboardQuery', { timeout: 80_000 })
             }
         }
     }
@@ -124,7 +152,7 @@ Cypress.Commands.add(
         } else if (initialURL?.includes('submissions')) {
             cy.wait('@fetchHealthPlanPackageQuery', { timeout: 20_000 })
         } else {
-            cy.wait('@indexHealthPlanPackagesQuery', { timeout: 80_000 })
+            cy.wait('@indexContractsForDashboardQuery', { timeout: 80_000 })
             cy.findByTestId('cms-dashboard-page', { timeout: 10_000 }).should(
                 'exist'
             )
@@ -134,6 +162,7 @@ Cypress.Commands.add(
 )
 
 Cypress.Commands.add('logOut', () => {
+    cy.findByRole('button', { name: 'Your account' }).should('exist').click()
     cy.findByRole('button', { name: 'Sign out' }).should('exist').click()
     cy.findByText(
         'Medicaid and CHIP Managed Care Reporting and Review System',

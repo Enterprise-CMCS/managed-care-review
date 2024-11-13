@@ -44,6 +44,8 @@ const cmsApproverUserSchema = baseUserSchema.extend({
     divisionAssignment: divisionType.optional(),
 })
 
+const cmsUsersUnionSchema = z.union([cmsUserSchema, cmsApproverUserSchema])
+
 const adminUserSchema = baseUserSchema.extend({
     role: z.literal(userRolesSchema.enum.ADMIN_USER),
 })
@@ -68,7 +70,7 @@ type CMSUserType = z.infer<typeof cmsUserSchema>
 
 type CMSApproverUserType = z.infer<typeof cmsApproverUserSchema>
 
-type CMSUsersUnionType = CMSUserType | CMSApproverUserType
+type CMSUsersUnionType = z.infer<typeof cmsUsersUnionSchema>
 
 type BaseUserType = z.infer<typeof baseUserSchema>
 
@@ -87,4 +89,10 @@ export type {
     BaseUserType,
 }
 
-export { cmsUserSchema, stateUserSchema, userRolesSchema, baseUserSchema }
+export {
+    cmsUserSchema,
+    stateUserSchema,
+    userRolesSchema,
+    baseUserSchema,
+    cmsUsersUnionSchema,
+}

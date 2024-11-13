@@ -1,5 +1,4 @@
 import { Grid } from '@trussworks/react-uswds'
-import dayjs from 'dayjs'
 import { DataDetail } from '../../../components/DataDetail'
 import { DoubleColumnGrid } from '../../../components/DoubleColumnGrid'
 import { SectionHeader } from '../../../components/SectionHeader'
@@ -19,6 +18,7 @@ import {
 import { booleanAsYesNoUserValue } from '../../../components/Form/FieldYesNo/FieldYesNo'
 import { SectionCard } from '../../../components/SectionCard'
 import styles from '../../../components/SubmissionSummarySection/SubmissionSummarySection.module.scss'
+import { formatCalendarDate } from '../../../common-code/dateHelpers'
 
 export type SubmissionTypeSummarySectionProps = {
     contract: Contract | UnlockedContract
@@ -81,8 +81,9 @@ export const SubmissionTypeSummarySection = ({
                                 label="Submitted"
                                 children={
                                     <span>
-                                        {dayjs(initiallySubmittedAt).format(
-                                            'MM/DD/YY'
+                                        {formatCalendarDate(
+                                            initiallySubmittedAt,
+                                            'America/New_York'
                                         )}
                                     </span>
                                 }

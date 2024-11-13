@@ -60,11 +60,12 @@ export { ExpandableText } from './ExpandableText'
 
 export { ProgramSelect, PackageSelect } from './Select'
 
-export { HealthPlanPackageTable } from './HealthPlanPackageTable'
+export { ContractTable } from './ContractTable'
+
 export type {
-    PackageInDashboardType,
-    PackageTableProps,
-} from './HealthPlanPackageTable'
+    ContractInDashboardType,
+    ContractTableProps,
+} from './ContractTable'
 
 export {
     ErrorAlert,

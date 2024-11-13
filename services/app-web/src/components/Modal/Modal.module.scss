@@ -8,4 +8,16 @@
             margin: 0;
         }
     }
+
+    textarea {
+        max-width: 100%;
+        margin-bottom: 1rem;
+    }
+}
+
+.submitSuccessButton {
+    background: custom.$mcr-success-base;
+    &:hover {
+        background-color: custom.$mcr-success-hover !important;
+    }
 }

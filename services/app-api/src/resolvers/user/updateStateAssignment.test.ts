@@ -10,7 +10,7 @@ import { v4 as uuidv4 } from 'uuid'
 import type { InsertUserArgsType } from '../../postgres'
 import { NewPostgresStore } from '../../postgres'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
-import UPDATE_STATE_ASSIGNMENTS from '../../../../app-graphql/src/mutations/updateStateAssignment.graphql'
+import { UpdateStateAssignmentDocument } from '../../gen/gqlClient'
 import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
 import type { State } from '../../gen/gqlServer'
 import {
@@ -79,7 +79,7 @@ const unauthorizedUserTests = [
 
 describe.each(authorizedUserTests)(
     'updateStateAssignment as $userType tests',
-    ({ mockUser, userType }) => {
+    ({ mockUser }) => {
         // setup a user in the db for us to modify
         const mockTestCMSUser = (): InsertUserArgsType => ({
             userID: uuidv4(),
@@ -114,7 +114,7 @@ describe.each(authorizedUserTests)(
             })
 
             const updateRes = await server.executeOperation({
-                query: UPDATE_STATE_ASSIGNMENTS,
+                query: UpdateStateAssignmentDocument,
                 variables: {
                     input: {
                         cmsUserID: newUser.id,
@@ -138,7 +138,7 @@ describe.each(authorizedUserTests)(
 
             // change the value and see if it updates
             const updateRes2 = await server.executeOperation({
-                query: UPDATE_STATE_ASSIGNMENTS,
+                query: UpdateStateAssignmentDocument,
                 variables: {
                     input: {
                         cmsUserID: newUser.id,
@@ -180,7 +180,7 @@ describe.each(authorizedUserTests)(
             })
 
             const updateResEmpty = await server.executeOperation({
-                query: UPDATE_STATE_ASSIGNMENTS,
+                query: UpdateStateAssignmentDocument,
                 variables: {
                     input: {
                         cmsUserID: newUser.id,
@@ -198,7 +198,7 @@ describe.each(authorizedUserTests)(
             ).toEqual([])
 
             const updateResUndefined = await server.executeOperation({
-                query: UPDATE_STATE_ASSIGNMENTS,
+                query: UpdateStateAssignmentDocument,
                 variables: {
                     input: {
                         cmsUserID: newUser.id,
@@ -208,7 +208,7 @@ describe.each(authorizedUserTests)(
             })
 
             expect(assertAnError(updateResUndefined).message).toContain(
-                'cannot update state assignments with no assignments'
+                'Variable "$input" got invalid value'
             )
             expect(assertAnErrorCode(updateResUndefined)).toBe('BAD_USER_INPUT')
             expect(
@@ -216,7 +216,7 @@ describe.each(authorizedUserTests)(
             ).toBeUndefined()
 
             const updateResNull = await server.executeOperation({
-                query: UPDATE_STATE_ASSIGNMENTS,
+                query: UpdateStateAssignmentDocument,
                 variables: {
                     input: {
                         cmsUserID: newUser.id,
@@ -226,12 +226,12 @@ describe.each(authorizedUserTests)(
             })
 
             expect(assertAnError(updateResNull).message).toContain(
-                'cannot update state assignments with no assignments'
+                'Variable "$input" got invalid value'
             )
             expect(assertAnErrorCode(updateResNull)).toBe('BAD_USER_INPUT')
             expect(
                 assertAnErrorExtensions(updateResNull).argumentValues
-            ).toBeNull()
+            ).toBeUndefined()
         })
         it('returns an error with invalid state codes', async () => {
             const prismaClient = await sharedTestPrismaClient()
@@ -251,7 +251,7 @@ describe.each(authorizedUserTests)(
             })
 
             const updateRes = await server.executeOperation({
-                query: UPDATE_STATE_ASSIGNMENTS,
+                query: UpdateStateAssignmentDocument,
                 variables: {
                     input: {
                         cmsUserID: newUser.id,
@@ -287,7 +287,7 @@ describe.each(authorizedUserTests)(
             }
 
             const updateRes = await server.executeOperation({
-                query: UPDATE_STATE_ASSIGNMENTS,
+                query: UpdateStateAssignmentDocument,
                 variables: {
                     input: {
                         cmsUserID: newStateUser.id,
@@ -312,7 +312,7 @@ describe.each(authorizedUserTests)(
             })
 
             const updateRes = await server.executeOperation({
-                query: UPDATE_STATE_ASSIGNMENTS,
+                query: UpdateStateAssignmentDocument,
                 variables: {
                     input: {
                         cmsUserID: 'not-an-existing-user',
@@ -346,7 +346,7 @@ describe.each(unauthorizedUserTests)(
             const cmsUserID = uuidv4()
 
             const updateRes = await server.executeOperation({
-                query: UPDATE_STATE_ASSIGNMENTS,
+                query: UpdateStateAssignmentDocument,
                 variables: {
                     input: {
                         cmsUserID: cmsUserID,

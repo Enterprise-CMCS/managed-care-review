@@ -1,21 +1,19 @@
 import { GridContainer } from '@trussworks/react-uswds'
 import React from 'react'
 import { useLocation } from 'react-router-dom'
-import { packageName } from '@mc-review/hpp'
 import { useAuth } from '../../contexts/AuthContext'
-import { useIndexHealthPlanPackagesQuery } from '../../gen/gqlClient'
+import { useIndexContractsForDashboardQuery } from '../../gen/gqlClient'
 import styles from './StateDashboard.module.scss'
 import { SubmissionSuccessMessage } from './SubmissionSuccessMessage'
 import { handleApolloError, isLikelyUserAuthError } from '@mc-review/helpers'
 import {
     ErrorAlertSignIn,
-    HealthPlanPackageTable,
-    PackageInDashboardType,
+    ContractTable,
+    ContractInDashboardType,
     Loading,
     GenericApiErrorBanner,
     NavLinkWithLogging,
 } from '../../components'
-import { getCurrentRevisionFromHealthPlanPackage } from '@mc-review/helpers'
 
 /**
  * We only pull a subset of data out of the submission and revisions for display in Dashboard
@@ -26,7 +24,7 @@ export const StateDashboard = (): React.ReactElement => {
     const { loginStatus, loggedInUser } = useAuth()
     const location = useLocation()
 
-    const { loading, data, error } = useIndexHealthPlanPackagesQuery({
+    const { loading, data, error } = useIndexContractsForDashboardQuery({
         fetchPolicy: 'network-only',
     })
 
@@ -60,34 +58,41 @@ export const StateDashboard = (): React.ReactElement => {
     const programs = loggedInUser.state.programs.filter(
         (program) => !program.isRateProgram
     )
-    const submissionRows: PackageInDashboardType[] = []
+    const submissionRows: ContractInDashboardType[] = []
 
-    data?.indexHealthPlanPackages.edges
+    data?.indexContracts.edges
         .map((edge) => edge.node)
         .forEach((sub) => {
-            const currentRevisionDataOrError =
-                getCurrentRevisionFromHealthPlanPackage(sub)
+            if (sub.status === 'SUBMITTED' || sub.status === 'RESUBMITTED') {
+                const currentRevision = sub.packageSubmissions[0]
+                submissionRows.push({
+                    id: sub.id,
+                    name: currentRevision.contractRevision.contractName,
+                    programs: programs.filter((program) => {
+                        return currentRevision.contractRevision.formData.programIDs.includes(
+                            program.id
+                        )
+                    }),
+                    submittedAt: sub.initiallySubmittedAt,
+                    status: sub.status,
+                    updatedAt: currentRevision.contractRevision.updatedAt,
+                })
+            } else {
+                const currentRevision = sub.draftRevision!
 
-            if (currentRevisionDataOrError instanceof Error) {
-                return
+                submissionRows.push({
+                    id: sub.id,
+                    name: currentRevision.contractName,
+                    programs: programs.filter((program) => {
+                        return currentRevision.formData.programIDs.includes(
+                            program.id
+                        )
+                    }),
+                    submittedAt: sub.initiallySubmittedAt,
+                    status: sub.status,
+                    updatedAt: currentRevision.updatedAt,
+                })
             }
-            const [_, currentSubmissionData] = currentRevisionDataOrError
-
-            submissionRows.push({
-                id: sub.id,
-                name: packageName(
-                    currentSubmissionData.stateCode,
-                    currentSubmissionData.stateNumber,
-                    currentSubmissionData.programIDs,
-                    programs
-                ),
-                programs: programs.filter((program) => {
-                    return currentSubmissionData.programIDs.includes(program.id)
-                }),
-                submittedAt: sub.initiallySubmittedAt,
-                status: sub.status,
-                updatedAt: currentSubmissionData.updatedAt,
-            })
         })
 
     const justSubmittedSubmissionName = new URLSearchParams(
@@ -120,7 +125,7 @@ export const StateDashboard = (): React.ReactElement => {
                                     </NavLinkWithLogging>
                                 </div>
                             </div>
-                            <HealthPlanPackageTable
+                            <ContractTable
                                 tableData={submissionRows}
                                 user={loggedInUser}
                             />

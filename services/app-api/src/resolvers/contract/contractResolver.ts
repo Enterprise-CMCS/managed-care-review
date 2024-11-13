@@ -11,7 +11,7 @@ import {
     setErrorAttributesOnActiveSpan,
     setResolverDetailsOnActiveSpan,
 } from '../attributeHelper'
-import type { IndexQuestionsPayload } from '../../domain-models/QuestionsType'
+import { convertToIndexQuestionsPayload } from '../../postgres/questionResponse'
 
 export function contractResolver(store: Store): Resolvers['Contract'] {
     return {
@@ -145,49 +145,7 @@ export function contractResolver(store: Store): Resolvers['Contract'] {
                 })
             }
 
-            const dmcoQuestions = questionsForContract
-                .filter((question) => question.division === 'DMCO')
-                .map((question) => {
-                    return {
-                        node: {
-                            ...question,
-                        },
-                    }
-                })
-            const dmcpQuestions = questionsForContract
-                .filter((question) => question.division === 'DMCP')
-                .map((question) => {
-                    return {
-                        node: {
-                            ...question,
-                        },
-                    }
-                })
-            const oactQuestions = questionsForContract
-                .filter((question) => question.division === 'OACT')
-                .map((question) => {
-                    return {
-                        node: {
-                            ...question,
-                        },
-                    }
-                })
-
-            const questionPayload: IndexQuestionsPayload = {
-                DMCOQuestions: {
-                    totalCount: dmcoQuestions.length,
-                    edges: dmcoQuestions,
-                },
-                DMCPQuestions: {
-                    totalCount: dmcpQuestions.length,
-                    edges: dmcpQuestions,
-                },
-                OACTQuestions: {
-                    totalCount: oactQuestions.length,
-                    edges: oactQuestions,
-                },
-            }
-            return questionPayload
+            return convertToIndexQuestionsPayload(questionsForContract)
         },
     }
 }

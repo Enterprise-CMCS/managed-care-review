@@ -8,35 +8,32 @@ import {
     STATE_SUBMISSION_FORM_ROUTES,
 } from '@mc-review/constants'
 import { getRouteName } from '../../routeHelpers'
-import { useFetchHealthPlanPackageWithQuestionsWrapper } from '@mc-review/helpers'
+import {
+    ContractFormData,
+    ContractPackageSubmission,
+    ContractRevision,
+    useFetchContractWithQuestionsQuery,
+} from '../../gen/gqlClient'
 import { Loading, NavLinkWithLogging } from '../../components'
 import { ApolloError } from '@apollo/client'
 import { handleApolloError } from '@mc-review/helpers'
 import { recordJSException } from '@mc-review/otel'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import { Error404 } from '../Errors/Error404Page'
-import {
-    HealthPlanPackage,
-    HealthPlanRevision,
-    User,
-} from '../../gen/gqlClient'
-import { HealthPlanFormDataType, packageName } from '@mc-review/hpp'
-import {
-    DocumentDateLookupTableType,
-    makeDocumentDateTable,
-} from '@mc-review/helpers'
+import { Contract, User } from '../../gen/gqlClient'
+import { useLDClient } from 'launchdarkly-react-client-sdk'
+import { featureFlags } from '@mc-review/common-code'
 
 export type SideNavOutletContextType = {
-    pkg: HealthPlanPackage
+    contract: Contract
     packageName: string
-    currentRevision: HealthPlanRevision
-    packageData: HealthPlanFormDataType
-    documentDates: DocumentDateLookupTableType
+    currentRevision: ContractPackageSubmission | ContractRevision
+    contractFormData: ContractFormData | undefined
     user: User
 }
 
 export const SubmissionSideNav = () => {
-    const { id } = useParams()
+    const { id, rateID } = useParams()
     if (!id) {
         throw new Error(
             'PROGRAMMING ERROR: id param not set in state submission form.'
@@ -44,8 +41,13 @@ export const SubmissionSideNav = () => {
     }
     const { loggedInUser } = useAuth()
     const { pathname } = useLocation()
-
     const routeName = getRouteName(pathname)
+
+    const ldClient = useLDClient()
+    const showQAbyRates: boolean = ldClient?.variation(
+        featureFlags.QA_BY_RATES.flag,
+        featureFlags.QA_BY_RATES.defaultValue
+    )
 
     const isSelectedLink = (route: string | string[]): string => {
         //We pass an array of the form routes in order to display the sideNav on all of the pages
@@ -56,12 +58,24 @@ export const SubmissionSideNav = () => {
         }
     }
 
-    const { result: fetchResult } =
-        useFetchHealthPlanPackageWithQuestionsWrapper(id)
+    const isSelectedRateLink = (id: string) => {
+        if (routeName === 'SUBMISSIONS_RATE_QUESTIONS_AND_ANSWERS') {
+            return rateID ? (rateID === id ? 'usa-current' : '') : ''
+        }
+    }
 
-    if (fetchResult.status === 'ERROR') {
-        const err = fetchResult.error
-        console.error('Error from API fetch', fetchResult.error)
+    const { data, loading, error } = useFetchContractWithQuestionsQuery({
+        variables: {
+            input: {
+                contractID: id,
+            },
+        },
+        fetchPolicy: 'network-only',
+    })
+
+    if (error) {
+        const err = error
+        console.error('Error from API fetch', error)
         if (err instanceof ApolloError) {
             handleApolloError(err, true)
 
@@ -74,7 +88,7 @@ export const SubmissionSideNav = () => {
         return <GenericErrorPage /> // api failure or protobuf decode failure
     }
 
-    if (fetchResult.status === 'LOADING') {
+    if (loading) {
         return (
             <GridContainer>
                 <Loading />
@@ -82,20 +96,19 @@ export const SubmissionSideNav = () => {
         )
     }
 
-    const { data, revisionsLookup } = fetchResult
-    const pkg = data.fetchHealthPlanPackage.pkg
+    const contract = data?.fetchContract.contract
 
     // Display generic error page if getting logged in user returns undefined.
-    if (!loggedInUser) {
+    if (!loggedInUser || !contract) {
         return <GenericErrorPage />
     }
 
-    const submissionStatus = pkg.status
+    const submissionStatus = contract.status
 
     //The sideNav should not be visible to a state user if the submission is a draft that has never been submitted
     const showSidebar =
         submissionStatus !== 'DRAFT' &&
-        pkg.initiallySubmittedAt !== null &&
+        contract.initiallySubmittedAt !== null &&
         QUESTION_RESPONSE_SHOW_SIDEBAR_ROUTES.includes(routeName)
 
     const isStateUser = loggedInUser?.role === 'STATE_USER'
@@ -108,31 +121,71 @@ export const SubmissionSideNav = () => {
     }
 
     // Current Revision is either the last submitted revision (cms users) or the most recent revision (for state users looking submission form)
-    const edge =
+    const submittedEdge =
+        (submissionStatus === 'SUBMITTED' ||
+            submissionStatus === 'RESUBMITTED') &&
+        contract.packageSubmissions[0]
+    const draftEdge =
         (submissionStatus === 'UNLOCKED' || submissionStatus === 'DRAFT') &&
-        loggedInUser.role === 'STATE_USER'
-            ? pkg.revisions[0]
-            : pkg.revisions.find((rEdge) => rEdge.node.submitInfo)
-    if (!edge) {
-        const errMsg = `Not able to determine current revision for sidebar: ${pkg.id}, programming error.`
+        contract.draftRevision
+    if (!submittedEdge && !draftEdge) {
+        const errMsg = `Not able to determine current revision for sidebar: ${contract.id}, programming error.`
         recordJSException(errMsg)
         return <GenericErrorPage />
     }
-    const currentRevision = edge.node
-    const packageData = revisionsLookup[currentRevision.id].formData
-    const pkgName = packageName(
-        packageData.stateCode,
-        packageData.stateNumber,
-        packageData.programIDs,
-        pkg.state.programs
-    )
-    const documentDates = makeDocumentDateTable(revisionsLookup)
+    const currentRevision = submittedEdge || draftEdge
+    const contractFormData = submittedEdge
+        ? submittedEdge.contractRevision.formData
+        : draftEdge && draftEdge.formData
+    const contractName = submittedEdge
+        ? submittedEdge.contractRevision.contractName
+        : draftEdge && draftEdge.contractName
+    if (!contractName || !contractFormData || !currentRevision) {
+        const errMsg = `Not able to derive data from current revision for sidebar: ${contract.id}, programming error.`
+        recordJSException(errMsg)
+        return <GenericErrorPage />
+    }
+
+    const generateRateLinks = () => {
+        const rateRevision = contract.packageSubmissions[0].rateRevisions
+        const programs = contract.state.programs
+
+        if (submissionStatus === 'DRAFT' || !rateRevision) {
+            return []
+        }
+
+        return rateRevision.map((rev) => {
+            const useDeprecatedRateProgramIDs =
+                rev.formData.deprecatedRateProgramIDs.length > 0 &&
+                rev.formData.rateProgramIDs.length === 0
+            const ratePrograms = useDeprecatedRateProgramIDs
+                ? rev.formData.deprecatedRateProgramIDs
+                : rev.formData.rateProgramIDs
+            const rateProgramNames = ratePrograms
+                .map(
+                    (id) =>
+                        programs.find((program) => program.id === id)?.name ||
+                        'Unknown Program'
+                )
+                .join(' ')
+            return (
+                <NavLinkWithLogging
+                    to={`/submissions/${id}/rates/${rev.rateID}/question-and-answers`}
+                    className={isSelectedRateLink(rev.rateID)}
+                    event_name="navigation_clicked"
+                >
+                    Rate questions: <br />
+                    {rateProgramNames || 'Unknown Program(s)'}
+                </NavLinkWithLogging>
+            )
+        })
+    }
+
     const outletContext: SideNavOutletContextType = {
-        pkg,
-        packageName: pkgName,
+        contract,
+        packageName: contractName,
         currentRevision,
-        packageData,
-        documentDates,
+        contractFormData,
         user: loggedInUser,
     }
 
@@ -156,9 +209,9 @@ export const SubmissionSideNav = () => {
                             >
                                 <Icon.ArrowBack />
                                 {loggedInUser?.__typename === 'StateUser' ? (
-                                    <span>&nbsp;Back to state dashboard</span>
+                                    <span>&nbsp;Go to state dashboard</span>
                                 ) : (
-                                    <span>&nbsp;Back to dashboard</span>
+                                    <span>&nbsp;Go to dashboard</span>
                                 )}
                             </NavLinkWithLogging>
                         </div>
@@ -187,12 +240,15 @@ export const SubmissionSideNav = () => {
                                 <NavLinkWithLogging
                                     to={`/submissions/${id}/question-and-answers`}
                                     className={isSelectedLink(
-                                        'SUBMISSIONS_QUESTIONS_AND_ANSWERS'
+                                        'SUBMISSIONS_CONTRACT_QUESTIONS_AND_ANSWERS'
                                     )}
                                     event_name="navigation_clicked"
                                 >
-                                    Q&A
+                                    Contract questions
                                 </NavLinkWithLogging>,
+                                ...(showQAbyRates && isStateUser
+                                    ? generateRateLinks()
+                                    : []),
                             ]}
                         />
                     </div>

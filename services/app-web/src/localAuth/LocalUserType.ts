@@ -1,5 +1,5 @@
 import { StateType } from '@mc-review/hpp'
-import { Division } from '../pages/QuestionResponse/QATable/QATable'
+import { Division } from '../gen/gqlClient'
 
 type LocalUserType =
     | LocalStateUserType

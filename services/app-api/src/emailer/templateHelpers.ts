@@ -12,10 +12,12 @@ import type {
     ProgramType,
     RateRevisionType,
     UnlockedContractType,
+    ContractQuestionType,
+    RateQuestionType,
+    RateType,
 } from '../domain-models'
 import { logError } from '../logger'
 import { pruneDuplicateEmails } from './formatters'
-import type { Question } from '../domain-models'
 
 // ETA SETUP
 Eta.configure({
@@ -328,8 +330,8 @@ const stripHTMLFromTemplate = (template: string) => {
 }
 
 const getQuestionRound = (
-    allQuestions: Question[],
-    currentQuestion: Question
+    allQuestions: (ContractQuestionType | RateQuestionType)[],
+    currentQuestion: ContractQuestionType | RateQuestionType
 ): number | Error => {
     // Filter out other divisions question and sort by created at in ascending order
     const divisionQuestions = allQuestions
@@ -355,6 +357,54 @@ const getQuestionRound = (
     return questionIndex + 1
 }
 
+const getActuaryContactEmails = (rate: RateType): string[] => {
+    const formData = rate.packageSubmissions[0].rateRevision.formData
+    const actuaryContacts: string[] = []
+
+    if (formData.certifyingActuaryContacts?.length) {
+        formData.certifyingActuaryContacts.forEach((contact) => {
+            if (contact.email) {
+                actuaryContacts.push(contact.email)
+            }
+        })
+    }
+
+    if (formData.addtlActuaryContacts?.length) {
+        formData.addtlActuaryContacts.forEach((contact) => {
+            if (contact.email) {
+                actuaryContacts.push(contact.email)
+            }
+        })
+    }
+
+    return actuaryContacts
+}
+
+const getRateSubmitterEmails = (rate: RateType): string[] => {
+    const contractRevisions = rate.packageSubmissions[0].contractRevisions
+    return contractRevisions.reduce((contacts: string[], cr) => {
+        if (cr.submitInfo?.updatedBy.email) {
+            return contacts.concat(cr.submitInfo.updatedBy.email)
+        }
+        return contacts
+    }, [])
+}
+
+const getRateStateContactEmails = (rate: RateType): string[] => {
+    const contractRevisions = rate.packageSubmissions[0].contractRevisions
+    return contractRevisions.reduce((contacts: string[], cr) => {
+        const stateContacts: string[] = []
+        if (cr.formData.stateContacts.length) {
+            cr.formData.stateContacts.forEach((stateContact) => {
+                if (stateContact.email) {
+                    stateContacts.push(stateContact.email)
+                }
+            })
+        }
+        return contacts.concat(stateContacts)
+    }, [])
+}
+
 export {
     stripHTMLFromTemplate,
     handleAsCHIPSubmission,
@@ -369,4 +419,7 @@ export {
     findContractPrograms,
     filterChipAndPRSubmissionReviewers,
     getQuestionRound,
+    getActuaryContactEmails,
+    getRateSubmitterEmails,
+    getRateStateContactEmails,
 }

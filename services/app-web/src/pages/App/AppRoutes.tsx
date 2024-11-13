@@ -2,7 +2,7 @@ import React, { Fragment, useEffect, useState } from 'react'
 import { useLocation, Navigate } from 'react-router'
 import { Route, Routes } from 'react-router-dom'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
-import { extendSession, idmRedirectURL } from '../../pages/Auth/cognitoAuth'
+import { idmRedirectURL } from '../../pages/Auth/cognitoAuth'
 import { assertNever, AuthModeType } from '@mc-review/common-code'
 import { PageTitlesRecord, RoutesRecord, RouteT } from '@mc-review/constants'
 import { getRouteName } from '../../routeHelpers'
@@ -31,11 +31,7 @@ import { featureFlags } from '@mc-review/common-code'
 import { useLocalStorage } from '../../hooks/useLocalStorage'
 import { recordJSException } from '@mc-review/otel'
 import { SubmissionSideNav } from '../SubmissionSideNav'
-import {
-    QuestionResponse,
-    UploadResponse,
-    UploadQuestions,
-} from '../QuestionResponse'
+import { QuestionResponse, UploadContractResponse } from '../QuestionResponse'
 import { GraphQLExplorer } from '../GraphQLExplorer/GraphQLExplorer'
 import { RateSummary } from '../RateSummary'
 import { ReplaceRate } from '../ReplaceRate/ReplaceRate'
@@ -48,6 +44,13 @@ import {
     DivisionAssignmentTable,
 } from '../Settings/SettingsTables'
 import { EditStateAssign } from '../Settings/EditStateAssign/EditStateAssign'
+import {
+    UploadContractQuestions,
+    UploadRateQuestions,
+} from '../QuestionResponse/UploadQuestions'
+import { RateSummarySideNav } from '../SubmissionSideNav/RateSummarySideNav'
+import { RateQuestionResponse } from '../QuestionResponse/RateQuestionResponse'
+import { UploadRateResponse } from '../QuestionResponse/UploadResponse/UploadRateResponse'
 
 function componentForAuthMode(
     authMode: AuthModeType
@@ -73,8 +76,6 @@ const UniversalRoutes = (
 )
 
 const StateUserRoutes = ({
-    authMode,
-    setAlert,
     stageName,
 }: {
     authMode: AuthModeType
@@ -87,8 +88,14 @@ const StateUserRoutes = ({
         featureFlags.RATE_EDIT_UNLOCK.flag,
         featureFlags.RATE_EDIT_UNLOCK.defaultValue
     )
+
+    const showQAbyRates: boolean = ldClient?.variation(
+        featureFlags.QA_BY_RATES.flag,
+        featureFlags.QA_BY_RATES.defaultValue
+    )
+
     return (
-        <AuthenticatedRouteWrapper setAlert={setAlert} authMode={authMode}>
+        <AuthenticatedRouteWrapper>
             <Routes>
                 <Route
                     path={RoutesRecord.ROOT}
@@ -128,12 +135,14 @@ const StateUserRoutes = ({
                 )}
                 <Route element={<SubmissionSideNav />}>
                     <Route
-                        path={RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS}
+                        path={
+                            RoutesRecord.SUBMISSIONS_CONTRACT_QUESTIONS_AND_ANSWERS
+                        }
                         element={<QuestionResponse />}
                     />
                     <Route
-                        path={RoutesRecord.SUBMISSIONS_UPLOAD_RESPONSE}
-                        element={<UploadResponse />}
+                        element={<UploadContractResponse />}
+                        path={RoutesRecord.SUBMISSIONS_UPLOAD_CONTRACT_RESPONSE}
                     />
 
                     <Route
@@ -144,13 +153,29 @@ const StateUserRoutes = ({
                         path={RoutesRecord.SUBMISSIONS_EDIT_TOP_LEVEL}
                         element={<StateSubmissionForm />}
                     />
+                    {showQAbyRates && (
+                        <>
+                            <Route
+                                path={
+                                    RoutesRecord.SUBMISSIONS_RATE_QUESTIONS_AND_ANSWERS
+                                }
+                                element={<RateQuestionResponse />}
+                            />
+                            <Route
+                                path={
+                                    RoutesRecord.SUBMISSIONS_UPLOAD_RATE_RESPONSE
+                                }
+                                element={<UploadRateResponse />}
+                            />
+                        </>
+                    )}
                 </Route>
                 <Route
                     path={RoutesRecord.SUBMISSIONS_REVISION}
                     element={<SubmissionRevisionSummary />}
                 />
                 {UniversalRoutes}
-                {stageName !== 'prod' && (
+                {isExplorerAllowed(stageName) && (
                     <Route
                         path={RoutesRecord.GRAPHQL_EXPLORER}
                         element={<GraphQLExplorer />}
@@ -164,16 +189,19 @@ const StateUserRoutes = ({
 }
 
 const CMSUserRoutes = ({
-    authMode,
-    setAlert,
     stageName,
 }: {
     authMode: AuthModeType
     setAlert?: React.Dispatch<React.ReactElement>
     stageName?: string
 }): React.ReactElement => {
+    const ldClient = useLDClient()
+    const showQAbyRates: boolean = ldClient?.variation(
+        featureFlags.QA_BY_RATES.flag,
+        featureFlags.QA_BY_RATES.defaultValue
+    )
     return (
-        <AuthenticatedRouteWrapper authMode={authMode} setAlert={setAlert}>
+        <AuthenticatedRouteWrapper>
             <Routes>
                 <Route
                     path={RoutesRecord.ROOT}
@@ -200,12 +228,14 @@ const CMSUserRoutes = ({
 
                 <Route element={<SubmissionSideNav />}>
                     <Route
-                        path={RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS}
+                        path={
+                            RoutesRecord.SUBMISSIONS_CONTRACT_QUESTIONS_AND_ANSWERS
+                        }
                         element={<QuestionResponse />}
                     />
                     <Route
-                        path={RoutesRecord.SUBMISSIONS_UPLOAD_QUESTION}
-                        element={<UploadQuestions />}
+                        path={RoutesRecord.SUBMISSIONS_UPLOAD_CONTRACT_QUESTION}
+                        element={<UploadContractQuestions />}
                     />
                     <Route
                         path={RoutesRecord.SUBMISSIONS_SUMMARY}
@@ -213,10 +243,37 @@ const CMSUserRoutes = ({
                     />
                 </Route>
 
-                <Route
-                    path={RoutesRecord.RATES_SUMMARY}
-                    element={<RateSummary />}
-                />
+                {showQAbyRates ? (
+                    <>
+                        <Route element={<RateSummarySideNav />}>
+                            <Route
+                                path={RoutesRecord.RATES_SUMMARY}
+                                element={<RateSummary />}
+                            />
+                            <Route
+                                path={
+                                    RoutesRecord.RATES_SUMMARY_QUESTIONS_AND_ANSWERS
+                                }
+                                element={<RateQuestionResponse />}
+                            />
+                            <Route
+                                path={RoutesRecord.RATES_UPLOAD_QUESTION}
+                                element={<UploadRateQuestions />}
+                            />
+                            {/*This route will cause the RateSummarySideNav to redirect to rate summary Q&A page*/}
+                            <Route
+                                path={
+                                    RoutesRecord.SUBMISSIONS_RATE_QUESTIONS_AND_ANSWERS
+                                }
+                            />
+                        </Route>
+                    </>
+                ) : (
+                    <Route
+                        path={RoutesRecord.RATES_SUMMARY}
+                        element={<RateSummary />}
+                    />
+                )}
 
                 <Route
                     path={RoutesRecord.SUBMISSIONS_MCCRSID}
@@ -232,16 +289,13 @@ const CMSUserRoutes = ({
                     path={RoutesRecord.SUBMISSIONS_REVISION}
                     element={<SubmissionRevisionSummary />}
                 />
-                {stageName !== 'prod' && (
+                {isExplorerAllowed(stageName) && (
                     <Route
                         path={RoutesRecord.GRAPHQL_EXPLORER}
                         element={<GraphQLExplorer />}
                     />
                 )}
-                <Route
-                    path={RoutesRecord.MCR_SETTINGS}
-                    element={<Settings />}
-                >
+                <Route path={RoutesRecord.MCR_SETTINGS} element={<Settings />}>
                     <Route
                         index
                         element={
@@ -264,11 +318,11 @@ const CMSUserRoutes = ({
                         path={RoutesRecord.SUPPORT_EMAILS}
                         element={<SupportEmailsTable />}
                     />
-                </Route>
-                <Route
+                    <Route
                         path={RoutesRecord.EDIT_STATE_ASSIGNMENTS}
                         element={<EditStateAssign />}
                     />
+                </Route>
                 <Route
                     path={RoutesRecord.SETTINGS}
                     // Until we update the helpdesk documentation for the /mc-review-settings route, we are keeping this
@@ -310,43 +364,17 @@ export const AppRoutes = ({
     authMode: AuthModeType
     setAlert?: React.Dispatch<React.ReactElement>
 }): React.ReactElement => {
-    const {
-        loggedInUser,
-        sessionIsExpiring,
-        updateSessionExpirationState,
-        updateSessionExpirationTime,
-        checkIfSessionsIsAboutToExpire,
-    } = useAuth()
+    const { loggedInUser } = useAuth()
     const { pathname } = useLocation()
-    const ldClient = useLDClient()
     const [redirectPath, setRedirectPath] = useLocalStorage(
         'LOGIN_REDIRECT',
         null
     )
     const stageName = import.meta.env.VITE_APP_STAGE_NAME
-    const showExpirationModal: boolean = ldClient?.variation(
-        featureFlags.SESSION_EXPIRING_MODAL.flag,
-        featureFlags.SESSION_EXPIRING_MODAL.defaultValue
-    )
 
     const route = getRouteName(pathname)
     const { updateHeading } = usePage()
     const [initialPath] = useState(pathname) // this gets written on mount, so we don't call the effect on every path change
-    if (
-        loggedInUser !== undefined &&
-        sessionIsExpiring === false &&
-        showExpirationModal
-    ) {
-        // whenever we load a page, reset the logout timer and refresh the session
-        updateSessionExpirationTime()
-
-        if (authMode !== 'LOCAL') {
-            void extendSession()
-        }
-        updateSessionExpirationState(false)
-        // Every thirty seconds, check if the current time is within `countdownDurationSeconds` of the session expiration time
-        checkIfSessionsIsAboutToExpire()
-    }
 
     // This effect handles our initial redirect on login
     // This way, if you get a link to something and aren't logged in, you get
@@ -424,4 +452,12 @@ export const AppRoutes = ({
             />
         )
     }
+}
+
+const isExplorerAllowed = (stage: string | undefined): boolean => {
+    const RESTRICTED_STAGES = ['val', 'prod']
+    if (stage === undefined) {
+        return false
+    }
+    return !RESTRICTED_STAGES.includes(stage)
 }

@@ -244,7 +244,9 @@ describe('ReplaceRate', () => {
             })
         })
 
-        const comboBox = screen.getByRole('combobox')
+        const comboBox = screen.getAllByRole('combobox', {
+            name: 'linked rate (required)',
+        })[0]
         expect(comboBox).toBeInTheDocument()
 
         await userEvent.click(comboBox)

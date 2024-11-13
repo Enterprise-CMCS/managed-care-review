@@ -93,7 +93,7 @@ describe('State user can view submissions', () => {
            cy.findByText(/You must provide this information/).should('not.exist')
 
             // Link back to dashboard, submission visible in default program
-            cy.findByText('Back to state dashboard').should('exist').click()
+            cy.findByText('Go to state dashboard').should('exist').click()
             cy.findByText('Submissions dashboard').should('exist')
             // check the table of submissions--find a draft row, then the link in the ID column
             cy.get('table')

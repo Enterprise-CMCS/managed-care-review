@@ -7,5 +7,6 @@ declare module '@tanstack/react-table' {
     }
     interface FilterFns {
         dateRangeFilter: FilterFn<unknown>
+        analystFilter: FilterFns<unknown>
     }
 }

@@ -64,7 +64,7 @@ function getConnectionURL(secrets: Secret): string {
         secrets.password
     )}@${secrets.host}:${secrets.port}/${
         secrets.dbname
-    }?schema=public&connection_limit=5&connect_timeout=60&pool_timeout=70`
+    }?schema=public&connection_limit=1&pool_timeout=10&connect_timeout=10&max_connections=1`
 
     return postgresURL
 }

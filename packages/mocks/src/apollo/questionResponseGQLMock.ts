@@ -1,14 +1,17 @@
 import { MockedResponse } from '@apollo/client/testing'
 import {
-    CreateQuestionDocument,
-    CreateQuestionResponseDocument,
-    CreateQuestionInput,
-    CreateQuestionMutation,
+    CreateContractQuestionDocument,
+    CreateContractQuestionResponseDocument,
+    CreateContractQuestionInput,
+    CreateContractQuestionMutation,
     QuestionResponse as QuestionResponseType,
     FetchHealthPlanPackageWithQuestionsDocument,
     FetchHealthPlanPackageWithQuestionsQuery,
     HealthPlanPackage,
-    IndexQuestionsPayload,
+    IndexContractQuestionsPayload,
+    CreateRateQuestionInput,
+    CreateRateQuestionMutation,
+    CreateRateQuestionDocument,
 } from '../gen/gqlClient'
 import { mockValidCMSUser } from './userGQLMock'
 import { mockSubmittedHealthPlanPackage, mockQuestionsPayload } from './'
@@ -17,13 +20,15 @@ import { GraphQLError } from 'graphql'
 type fetchStateHealthPlanPackageWithQuestionsProps = {
     stateSubmission?: HealthPlanPackage | Partial<HealthPlanPackage>
     id: string
-    questions?: IndexQuestionsPayload
+    questions?: IndexContractQuestionsPayload
 }
 
-const createQuestionSuccess = (
-    question?: CreateQuestionInput | Partial<CreateQuestionInput>
-): MockedResponse<CreateQuestionMutation> => {
-    const defaultQuestionInput: CreateQuestionInput = {
+const createContractQuestionSuccess = (
+    question?:
+        | CreateContractQuestionInput
+        | Partial<CreateContractQuestionInput>
+): MockedResponse<CreateContractQuestionMutation> => {
+    const defaultQuestionInput: CreateContractQuestionInput = {
         // dueDate: new Date('11-11-2100'),
         contractID: '123-abc',
         documents: [
@@ -38,12 +43,12 @@ const createQuestionSuccess = (
 
     return {
         request: {
-            query: CreateQuestionDocument,
+            query: CreateContractQuestionDocument,
             variables: { input: testInput },
         },
         result: {
             data: {
-                createQuestion: {
+                createContractQuestion: {
                     question: {
                         id: 'test123',
                         contractID: testInput.contractID,
@@ -58,22 +63,72 @@ const createQuestionSuccess = (
     }
 }
 
-const createQuestionNetworkFailure = (
-    input: CreateQuestionInput
-): MockedResponse<CreateQuestionMutation> => {
+const createContractQuestionNetworkFailure = (
+    input: CreateContractQuestionInput
+): MockedResponse<CreateContractQuestionMutation> => {
     return {
         request: {
-            query: CreateQuestionDocument,
+            query: CreateContractQuestionDocument,
             variables: { input },
         },
         error: new Error('A network error occurred'),
     }
 }
-const createQuestionResponseNetworkFailure = (
-    _question?: QuestionResponseType | Partial<QuestionResponseType>
-): MockedResponse<CreateQuestionMutation> => {
+
+const createRateQuestionSuccess = (
+    question?: CreateRateQuestionInput | Partial<CreateRateQuestionInput>
+): MockedResponse<CreateRateQuestionMutation> => {
+    const defaultQuestionInput: CreateRateQuestionInput = {
+        // dueDate: new Date('11-11-2100'),
+        rateID: '123-abc',
+        documents: [
+            {
+                name: 'Test document',
+                s3URL: 's3://test-document.doc',
+            },
+        ],
+    }
+
+    const testInput = { ...defaultQuestionInput, ...question }
+
     return {
-        request: { query: CreateQuestionResponseDocument },
+        request: {
+            query: CreateRateQuestionDocument,
+            variables: { input: testInput },
+        },
+        result: {
+            data: {
+                createRateQuestion: {
+                    question: {
+                        id: 'test123',
+                        rateID: testInput.rateID,
+                        addedBy: mockValidCMSUser(),
+                        division: 'DMCO',
+                        documents: testInput.documents,
+                    },
+                },
+            },
+        },
+    }
+}
+
+const createRateQuestionNetworkFailure = (
+    input: CreateRateQuestionInput
+): MockedResponse<CreateRateQuestionMutation> => {
+    return {
+        request: {
+            query: CreateRateQuestionDocument,
+            variables: { input },
+        },
+        error: new Error('A network error occurred'),
+    }
+}
+
+const createContractQuestionResponseNetworkFailure = (
+    _question?: QuestionResponseType | Partial<QuestionResponseType>
+): MockedResponse<CreateContractQuestionMutation> => {
+    return {
+        request: { query: CreateContractQuestionResponseDocument },
         error: new Error('A network error occurred'),
     }
 }
@@ -133,9 +188,11 @@ const fetchStateHealthPlanPackageWithQuestionsMockNotFound = ({
 }
 
 export {
-    createQuestionNetworkFailure,
-    createQuestionResponseNetworkFailure,
-    createQuestionSuccess,
+    createContractQuestionNetworkFailure,
+    createContractQuestionResponseNetworkFailure,
+    createContractQuestionSuccess,
     fetchStateHealthPlanPackageWithQuestionsMockSuccess,
     fetchStateHealthPlanPackageWithQuestionsMockNotFound,
+    createRateQuestionNetworkFailure,
+    createRateQuestionSuccess,
 }

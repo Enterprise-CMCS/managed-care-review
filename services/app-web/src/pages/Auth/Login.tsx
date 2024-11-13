@@ -1,17 +1,24 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Form, FormGroup, Label, TextInput } from '@trussworks/react-uswds'
 import { useNavigate } from 'react-router-dom'
 
 import { signIn } from '../Auth/cognitoAuth'
 import { useAuth } from '../../contexts/AuthContext'
-import { ButtonWithLogging, ErrorAlert } from '../../components'
+import { ButtonWithLogging, ErrorAlertSignIn } from '../../components'
+import { recordJSException } from '../../otelHelpers'
+import { RoutesRecord } from '../../constants'
 
 type Props = {
     defaultEmail?: string
 }
 
 export function Login({ defaultEmail }: Props): React.ReactElement {
-    const [showFormAlert, setShowFormAlert] = React.useState(false)
+    const hasSigninError = new URLSearchParams(location.search).get(
+        'signin-error'
+    )
+    const [showFormAlert, setShowFormAlert] = React.useState(
+        hasSigninError ? true : false
+    )
     const [fields, setFields] = useState({
         loginEmail: defaultEmail || '',
         loginPassword: '',
@@ -19,7 +26,11 @@ export function Login({ defaultEmail }: Props): React.ReactElement {
 
     const navigate = useNavigate()
     const { loginStatus, checkAuth } = useAuth()
-    if (loginStatus === 'LOGGED_IN') navigate('/')
+    useEffect(() => {
+        if (loginStatus === 'LOGGED_IN') {
+            navigate(RoutesRecord.ROOT)
+        }
+    }, [loginStatus, navigate])
 
     const onFieldChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const { id, value } = event.target
@@ -34,41 +45,26 @@ export function Login({ defaultEmail }: Props): React.ReactElement {
     async function handleSubmit(event: React.FormEvent) {
         event.preventDefault()
 
-        try {
-            const result = await signIn(fields.loginEmail, fields.loginPassword)
-
-            if (result && 'code' in result) {
-                if (result.code === 'UserNotConfirmedException') {
-                    // the user has not been confirmed, need to display the confirmation UI
-                    console.info(
-                        'you need to confirm your account, enter the code below'
-                    )
-                } else if (result.code === 'NotAuthorizedException') {
-                    // the password is bad
-                    console.info('bad password')
-                } else {
-                    console.info('Unknown error from Amplify: ', result)
-                }
+        const result = await signIn(fields.loginEmail, fields.loginPassword)
+        if (result instanceof Error) {
+            setShowFormAlert(true)
+        } else {
+            // we think we signed in, double check that amplify - API connection agrees
+            const authResult = await checkAuth()
+            if (authResult instanceof Error) {
+                recordJSException(
+                    `Cognito Login Error - unexpected error after succeeding on signIn – ${authResult}`
+                )
                 setShowFormAlert(true)
-                console.info('Error', result.message)
             } else {
-                try {
-                    await checkAuth()
-                } catch (e) {
-                    console.info('UNEXPECTED NOT LOGGED IN AFTER LOGGIN', e)
-                    setShowFormAlert(true)
-                }
-
-                navigate('/')
+                navigate(RoutesRecord.ROOT)
             }
-        } catch (err) {
-            console.info('Unexpected error signing in:', err)
         }
     }
 
     return (
         <Form onSubmit={handleSubmit} name="Login" aria-label="Login Form">
-            {showFormAlert && <ErrorAlert>Something went wrong</ErrorAlert>}
+            {showFormAlert && <ErrorAlertSignIn />}
             <FormGroup>
                 <Label htmlFor="loginEmail">Email</Label>
                 <TextInput

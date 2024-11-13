@@ -349,10 +349,12 @@ async function initializeGQLHandler(): Promise<Handler> {
 
     // Configure Apollo sandbox plugin
     let plugins = []
-    if (stageName === 'prod') {
+    let introspectionAllowed = false // sets if we allow introspection queries
+    if (stageName === 'prod' || stageName === 'val') {
         plugins = [ApolloServerPluginLandingPageDisabled()]
     } else {
         plugins = [ApolloServerPluginLandingPageLocalDefault({ embed: true })]
+        introspectionAllowed = true
     }
 
     // Hard coding this for now, next job is to run this config to this app.
@@ -437,6 +439,7 @@ async function initializeGQLHandler(): Promise<Handler> {
         resolvers,
         context: contextForRequest,
         plugins,
+        introspection: introspectionAllowed,
     })
 
     const handler = server.createHandler({

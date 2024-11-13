@@ -8,12 +8,14 @@ export function SubmissionSuccessMessage({
 }: {
     submissionName: string
 }): React.ReactElement {
+    const heading = submissionName + ' was sent to CMS'
+
     return (
         <div className={styles.alertContainer}>
             <Alert
                 type="success"
                 headingLevel="h4"
-                heading={submissionName + ' was sent to CMS'}
+                heading={heading}
                 validation={true}
             />
         </div>

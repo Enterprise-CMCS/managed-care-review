@@ -121,7 +121,7 @@ describe('Cognito Login', () => {
     it('when login fails, stay on page and display error alert', async () => {
         const loginSpy = vi
             .spyOn(CognitoAuthApi, 'signIn')
-            .mockRejectedValue('Error has occurred')
+            .mockResolvedValue(new Error('Error has occurred'))
 
         let testLocation: Location
 
@@ -148,7 +148,7 @@ describe('Cognito Login', () => {
     it('when login is a failure, button is re-enabled', async () => {
         const loginSpy = vi
             .spyOn(CognitoAuthApi, 'signIn')
-            .mockRejectedValue(null)
+            .mockResolvedValue(new Error('somethign went wrong'))
 
         renderWithProviders(<Login />, {
             apolloProvider: { mocks: [failedAuthMock, failedAuthMock] },

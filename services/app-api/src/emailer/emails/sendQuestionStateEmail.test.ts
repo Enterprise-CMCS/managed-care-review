@@ -8,7 +8,10 @@ import type {
     ContractRevisionType,
     StateType,
 } from '../../domain-models'
-import type { ContractFormDataType, Question } from '../../domain-models'
+import type {
+    ContractFormDataType,
+    ContractQuestionType,
+} from '../../domain-models'
 import { packageName } from '@mc-review/hpp'
 import { sendQuestionStateEmail } from './index'
 
@@ -17,6 +20,7 @@ const defaultSubmitters = ['submitter1@example.com', 'submitter2@example.com']
 const flState: StateType = {
     stateCode: 'FL',
     name: 'Florida',
+    assignedCMSUsers: [],
 }
 
 const cmsUser: CMSUserType = {
@@ -29,7 +33,7 @@ const cmsUser: CMSUserType = {
     stateAssignments: [flState],
 }
 
-const currentQuestion: Question = {
+const currentQuestion: ContractQuestionType = {
     id: '1234',
     contractID: 'contract-id-test',
     createdAt: new Date('01/01/2024'),
@@ -262,7 +266,7 @@ test('includes information about what to do next', async () => {
     expect(template).toEqual(
         expect.objectContaining({
             bodyText: expect.stringContaining(
-                'You must answer the question before CMS can continue reviewing it'
+                'You must respond to the questions before CMS can continue their review.'
             ),
         })
     )

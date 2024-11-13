@@ -1,6 +1,6 @@
 import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
 import { testS3Client } from '../../../../app-web/src/testHelpers/s3Helpers'
-import WITHDRAW_REPLACE_RATE from 'app-graphql/src/mutations/withdrawAndReplaceRedundantRate.graphql'
+import { WithdrawAndReplaceRedundantRateDocument } from '../../gen/gqlClient'
 import { testAdminUser, testCMSUser } from '../../testHelpers/userHelpers'
 import {
     createAndSubmitTestContractWithRate,
@@ -183,7 +183,7 @@ describe('withdrawAndReplaceRedundantRate', () => {
 
         const replaceReason = 'Admin has to do it!'
         const cmsResult = await cmsServer.executeOperation({
-            query: WITHDRAW_REPLACE_RATE,
+            query: WithdrawAndReplaceRedundantRateDocument,
             variables: {
                 input: {
                     contractID,
@@ -195,7 +195,7 @@ describe('withdrawAndReplaceRedundantRate', () => {
         })
 
         const stateResult = await stateServer.executeOperation({
-            query: WITHDRAW_REPLACE_RATE,
+            query: WithdrawAndReplaceRedundantRateDocument,
             variables: {
                 input: {
                     contractID,
@@ -238,7 +238,7 @@ describe('withdrawAndReplaceRedundantRate', () => {
 
         const replaceReason = 'Admin has to do it!'
         const adminResult = await adminServer.executeOperation({
-            query: WITHDRAW_REPLACE_RATE,
+            query: WithdrawAndReplaceRedundantRateDocument,
             variables: {
                 input: {
                     contractID: contract1ThatIsUnlocked.id,
@@ -296,7 +296,7 @@ describe('withdrawAndReplaceRedundantRate', () => {
 
         const replaceReason = 'Try to withdraw already withdrawn rate'
         const withdrawRateResult = await adminServer.executeOperation({
-            query: WITHDRAW_REPLACE_RATE,
+            query: WithdrawAndReplaceRedundantRateDocument,
             variables: {
                 input: {
                     contractID: originalContract.id,
@@ -345,7 +345,7 @@ describe('withdrawAndReplaceRedundantRate', () => {
 
         const replaceReason = 'Try to withdraw a linked rate'
         const withdrawRateResult = await adminServer.executeOperation({
-            query: WITHDRAW_REPLACE_RATE,
+            query: WithdrawAndReplaceRedundantRateDocument,
             variables: {
                 input: {
                     contractID: secondContractWithLinkedRate.id,
@@ -395,7 +395,7 @@ describe('withdrawAndReplaceRedundantRate', () => {
         const replaceReason =
             'Try to withdraw a child rate linked to another submission'
         const withdrawRateResult = await adminServer.executeOperation({
-            query: WITHDRAW_REPLACE_RATE,
+            query: WithdrawAndReplaceRedundantRateDocument,
             variables: {
                 input: {
                     contractID: firstContractRateRevision.id,

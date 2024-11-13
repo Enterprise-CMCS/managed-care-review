@@ -19,6 +19,8 @@ const ROUTES = [
     'AUTOMATED_EMAILS',
     'SUPPORT_EMAILS',
     'RATES_SUMMARY',
+    'RATES_UPLOAD_QUESTION',
+    'RATES_SUMMARY_QUESTIONS_AND_ANSWERS',
     'RATE_EDIT',
     'REPLACE_RATE',
     'SUBMISSIONS',
@@ -33,9 +35,13 @@ const ROUTES = [
     'SUBMISSIONS_REVISION',
     'SUBMISSIONS_SUMMARY',
     'SUBMISSIONS_MCCRSID',
-    'SUBMISSIONS_QUESTIONS_AND_ANSWERS',
-    'SUBMISSIONS_UPLOAD_QUESTION',
-    'SUBMISSIONS_UPLOAD_RESPONSE',
+    'SUBMISSIONS_CONTRACT_QUESTIONS_AND_ANSWERS',
+    'SUBMISSIONS_UPLOAD_CONTRACT_QUESTION',
+    'SUBMISSIONS_UPLOAD_CONTRACT_RESPONSE',
+    'SUBMISSIONS_RATE_QUESTIONS_AND_ANSWERS',
+    'SUBMISSIONS_UPLOAD_CONTRACT_QUESTION',
+    'SUBMISSIONS_UPLOAD_CONTRACT_RESPONSE',
+    'SUBMISSIONS_UPLOAD_RATE_RESPONSE',
 ] as const // iterable union type
 type RouteT = (typeof ROUTES)[number]
 type RouteTWithUnknown = RouteT | 'UNKNOWN_ROUTE'
@@ -64,7 +70,10 @@ const RoutesRecord: Record<RouteT, string> = {
     AUTOMATED_EMAILS: '/mc-review-settings/automated-emails',
     SUPPORT_EMAILS: '/mc-review-settings/support-emails',
     RATES_SUMMARY: '/rates/:id',
+    RATES_SUMMARY_QUESTIONS_AND_ANSWERS: '/rates/:id/question-and-answers',
     RATE_EDIT: '/rates/:id/edit',
+    RATES_UPLOAD_QUESTION:
+        '/rates/:id/question-and-answers/:division/upload-questions',
     REPLACE_RATE: '/submissions/:id/replace-rate/:rateID',
     SUBMISSIONS: '/submissions',
     SUBMISSIONS_NEW: '/submissions/new',
@@ -78,11 +87,16 @@ const RoutesRecord: Record<RouteT, string> = {
     SUBMISSIONS_SUMMARY: '/submissions/:id',
     SUBMISSIONS_MCCRSID: '/submissions/:id/mccrs-record-number',
     SUBMISSIONS_REVISION: '/submissions/:id/revisions/:revisionVersion',
-    SUBMISSIONS_QUESTIONS_AND_ANSWERS: '/submissions/:id/question-and-answers',
-    SUBMISSIONS_UPLOAD_QUESTION:
+    SUBMISSIONS_CONTRACT_QUESTIONS_AND_ANSWERS:
+        '/submissions/:id/question-and-answers',
+    SUBMISSIONS_RATE_QUESTIONS_AND_ANSWERS:
+        '/submissions/:id/rates/:rateID/question-and-answers',
+    SUBMISSIONS_UPLOAD_CONTRACT_QUESTION:
         '/submissions/:id/question-and-answers/:division/upload-questions',
-    SUBMISSIONS_UPLOAD_RESPONSE:
+    SUBMISSIONS_UPLOAD_CONTRACT_RESPONSE:
         '/submissions/:id/question-and-answers/:division/:questionID/upload-response',
+    SUBMISSIONS_UPLOAD_RATE_RESPONSE:
+        '/submissions/:id/rates/:rateID/question-and-answers/:division/:questionID/upload-response',
 }
 
 // Constants for releated descendant routes
@@ -115,7 +129,8 @@ const STATE_SUBMISSION_SUMMARY_ROUTES: RouteTWithUnknown[] = [
 ]
 
 const QUESTION_RESPONSE_SHOW_SIDEBAR_ROUTES: RouteTWithUnknown[] = [
-    'SUBMISSIONS_QUESTIONS_AND_ANSWERS',
+    'SUBMISSIONS_CONTRACT_QUESTIONS_AND_ANSWERS',
+    'SUBMISSIONS_RATE_QUESTIONS_AND_ANSWERS',
     'SUBMISSIONS_SUMMARY',
     'SUBMISSIONS_TYPE',
     'SUBMISSIONS_CONTRACT_DETAILS',
@@ -125,21 +140,9 @@ const QUESTION_RESPONSE_SHOW_SIDEBAR_ROUTES: RouteTWithUnknown[] = [
     'SUBMISSIONS_REVIEW_SUBMIT',
 ]
 
-/*
-    Page headings used in the <header> when user logged in.
-    Dynamic headings, when necessary, are set in page specific parent component.
-    Every route does not need a page heading in the record.
-    It is a design choice what goes here. For example, we do not any headings when logged in user is on the help page.
-    For a quick way to check page headings, look for the h1 of the application in the DOM tree. It is the dark blue row of the header.
-
-*/
-const PageHeadingsRecord: Partial<Record<RouteTWithUnknown, string>> = {
-    ROOT: 'Dashboard',
-    DASHBOARD_SUBMISSIONS: 'Submissions dashboard',
-    DASHBOARD_RATES: 'Rate reviews dashboard',
-    SUBMISSIONS_NEW: 'New submission',
-    MCR_SETTINGS: 'MC-Review settings',
-}
+const SETTINGS_HIDE_SIDEBAR_ROUTES: RouteTWithUnknown[] = [
+    'EDIT_STATE_ASSIGNMENTS',
+]
 
 /*
     Static page titles used in <title>.
@@ -163,8 +166,10 @@ const PageTitlesRecord: Record<RouteT | 'UNKNOWN_ROUTE', string> = {
     DASHBOARD_RATES: 'Rate review dashboard',
     DASHBOARD_SUBMISSIONS: 'Dashboard',
     RATES_SUMMARY: 'Rate summary',
+    RATES_SUMMARY_QUESTIONS_AND_ANSWERS: 'Q&A',
     RATE_EDIT: 'Edit rate',
     REPLACE_RATE: 'Replace rate',
+    RATES_UPLOAD_QUESTION: 'Add rate questions',
     SUBMISSIONS: 'Submissions',
     SUBMISSIONS_NEW: 'New submission',
     SUBMISSIONS_EDIT_TOP_LEVEL: 'Submissions',
@@ -177,10 +182,31 @@ const PageTitlesRecord: Record<RouteT | 'UNKNOWN_ROUTE', string> = {
     SUBMISSIONS_REVIEW_SUBMIT: 'Review and submit',
     SUBMISSIONS_REVISION: 'Submission revision',
     SUBMISSIONS_SUMMARY: 'Submission summary',
-    SUBMISSIONS_QUESTIONS_AND_ANSWERS: 'Q&A',
-    SUBMISSIONS_UPLOAD_QUESTION: 'Add questions',
-    SUBMISSIONS_UPLOAD_RESPONSE: 'Add response',
+    SUBMISSIONS_CONTRACT_QUESTIONS_AND_ANSWERS: 'Q&A',
+    SUBMISSIONS_UPLOAD_CONTRACT_QUESTION: 'Add questions',
+    SUBMISSIONS_UPLOAD_CONTRACT_RESPONSE: 'Add response',
+    SUBMISSIONS_RATE_QUESTIONS_AND_ANSWERS: 'Rate Q&A',
+    SUBMISSIONS_UPLOAD_RATE_RESPONSE: 'Add rate response',
     UNKNOWN_ROUTE: 'Not found',
+}
+
+/*
+    Page headings used in the <header> when user logged in.
+    Dynamic headings, when necessary, are set in page specific parent component.
+    Every route does not need a page heading in the record.
+    It is a design choice what goes here. For example, we do not any headings when logged in user is on the help page.
+    For a quick way to check page headings, look for the h1 of the application in the DOM tree. It is the dark blue row of the header.
+
+*/
+const PageHeadingsRecord: Partial<Record<RouteTWithUnknown, string>> = {
+    ROOT: 'Dashboard',
+    DASHBOARD_SUBMISSIONS: 'Submissions dashboard',
+    DASHBOARD_RATES: 'Rate reviews dashboard',
+    SUBMISSIONS_NEW: 'New submission',
+    MCR_SETTINGS: PageTitlesRecord.MCR_SETTINGS,
+    STATE_ASSIGNMENTS: PageTitlesRecord.MCR_SETTINGS,
+    EDIT_STATE_ASSIGNMENTS: PageTitlesRecord.MCR_SETTINGS,
+    DIVISION_ASSIGNMENTS: PageTitlesRecord.MCR_SETTINGS,
 }
 
 export {
@@ -188,6 +214,7 @@ export {
     PageTitlesRecord,
     RoutesRecord,
     ROUTES,
+    SETTINGS_HIDE_SIDEBAR_ROUTES,
     STATE_SUBMISSION_FORM_ROUTES,
     STATE_SUBMISSION_FORM_ROUTES_WITHOUT_SUPPORTING_DOCS,
     STATE_SUBMISSION_SUMMARY_ROUTES,

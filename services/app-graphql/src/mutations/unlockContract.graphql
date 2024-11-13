@@ -227,14 +227,3 @@ fragment submittableRevisionsFieldsForUnlock on SubmittableRevision {
         ...rateRevisionFragmentForUnlockContract
     }
 }
-
-fragment updateInformationFields on UpdateInformation {
-    updatedAt
-    updatedBy {
-        email
-        role
-        familyName
-        givenName
-    }
-    updatedReason
-}

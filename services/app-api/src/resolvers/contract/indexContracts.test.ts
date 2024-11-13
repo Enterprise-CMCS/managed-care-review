@@ -1,10 +1,9 @@
-import INDEX_CONTRACTS from '../../../../app-graphql/src/queries/indexContracts.graphql'
+import { IndexContractsForDashboardDocument } from '../../gen/gqlClient'
 import {
     constructTestPostgresServer,
     createTestHealthPlanPackage,
     createAndSubmitTestHealthPlanPackage,
 } from '../../testHelpers/gqlHelpers'
-import { todaysDate } from '../../testHelpers/dateHelpers'
 import type { Contract, ContractEdge } from '../../gen/gqlServer'
 import {
     iterableCmsUsersMockData,
@@ -39,7 +38,7 @@ describe(`indexContracts`, () => {
                     .formData
             // then see if we can get that same contract back from the index
             const result = await stateServer.executeOperation({
-                query: INDEX_CONTRACTS,
+                query: IndexContractsForDashboardDocument,
             })
 
             expect(result.errors).toBeUndefined()
@@ -63,7 +62,9 @@ describe(`indexContracts`, () => {
                 theseSubmissions[0].draftRevision?.formData
                     .submissionDescription
             ).toBe(draftFormData?.submissionDescription)
-            expect(theseSubmissions[1].initiallySubmittedAt).toBe(todaysDate())
+            expect(theseSubmissions[1].initiallySubmittedAt).toEqual(
+                submittedContract.packageSubmissions[0].submitInfo.updatedAt
+            )
             expect(theseSubmissions[1].status).toBe('SUBMITTED')
             expect(
                 theseSubmissions[1].packageSubmissions[0].contractRevision
@@ -113,7 +114,7 @@ describe(`indexContracts`, () => {
 
             // index contracts api request
             const result = await stateServer.executeOperation({
-                query: INDEX_CONTRACTS,
+                query: IndexContractsForDashboardDocument,
             })
             const submissionsIndex = result.data?.indexContracts
 
@@ -165,7 +166,7 @@ describe(`indexContracts`, () => {
             })
 
             const result = await otherUserServer.executeOperation({
-                query: INDEX_CONTRACTS,
+                query: IndexContractsForDashboardDocument,
                 variables: { input },
             })
 
@@ -179,7 +180,9 @@ describe(`indexContracts`, () => {
             const testSubmission = contracts.filter(
                 (test: Contract) => test.id === createdID
             )[0]
-            expect(testSubmission.initiallySubmittedAt).toBe(todaysDate())
+            expect(testSubmission.initiallySubmittedAt).toEqual(
+                stateSubmission.initiallySubmittedAt
+            )
         })
 
         it('returns no contracts for a different states user', async () => {
@@ -197,7 +200,7 @@ describe(`indexContracts`, () => {
             })
 
             const result = await otherUserServer.executeOperation({
-                query: INDEX_CONTRACTS,
+                query: IndexContractsForDashboardDocument,
             })
 
             expect(result.errors).toBeUndefined()
@@ -229,7 +232,7 @@ describe(`indexContracts`, () => {
 
                 // index contracts api request
                 const result = await cmsServer.executeOperation({
-                    query: INDEX_CONTRACTS,
+                    query: IndexContractsForDashboardDocument,
                 })
                 const submissionsIndex = result.data?.indexContracts
 
@@ -282,7 +285,7 @@ describe(`indexContracts`, () => {
 
                 // index contracts api request
                 const result = await cmsServer.executeOperation({
-                    query: INDEX_CONTRACTS,
+                    query: IndexContractsForDashboardDocument,
                 })
                 const submissionsIndex = result.data?.indexContracts
 
@@ -345,7 +348,7 @@ describe(`indexContracts`, () => {
                 )
 
                 const result = await cmsServer.executeOperation({
-                    query: INDEX_CONTRACTS,
+                    query: IndexContractsForDashboardDocument,
                 })
 
                 expect(result.errors).toBeUndefined()

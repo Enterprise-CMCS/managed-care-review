@@ -265,24 +265,29 @@ describe('getQuestionRound', () => {
         {
             questions: [
                 mockQuestionAndResponses({
+                    contractID: 'test-contract-id',
                     id: 'target-question',
                     division: 'OACT',
                     createdAt: new Date('03/01/2024'),
                 }),
                 mockQuestionAndResponses({
+                    contractID: 'test-contract-id',
                     division: 'DMCO',
                     createdAt: new Date('03/01/2024'),
                 }),
                 mockQuestionAndResponses({
+                    contractID: 'test-contract-id',
                     division: 'OACT',
                     createdAt: new Date('02/01/2024'),
                 }),
                 mockQuestionAndResponses({
+                    contractID: 'test-contract-id',
                     division: 'OACT',
                     createdAt: new Date('01/01/2024'),
                 }),
             ],
             currentQuestion: mockQuestionAndResponses({
+                contractID: 'test-contract-id',
                 id: 'target-question',
                 division: 'OACT',
                 createdAt: new Date('03/01/2024'),
@@ -293,24 +298,29 @@ describe('getQuestionRound', () => {
         {
             questions: [
                 mockQuestionAndResponses({
+                    contractID: 'test-contract-id',
                     division: 'OACT',
                     createdAt: new Date('03/01/2024'),
                 }),
                 mockQuestionAndResponses({
+                    contractID: 'test-contract-id',
                     division: 'DMCO',
                     createdAt: new Date('03/01/2024'),
                 }),
                 mockQuestionAndResponses({
+                    contractID: 'test-contract-id',
                     id: 'target-question',
                     division: 'OACT',
                     createdAt: new Date('02/01/2024'),
                 }),
                 mockQuestionAndResponses({
+                    contractID: 'test-contract-id',
                     division: 'OACT',
                     createdAt: new Date('01/01/2024'),
                 }),
             ],
             currentQuestion: mockQuestionAndResponses({
+                contractID: 'test-contract-id',
                 id: 'target-question',
                 division: 'OACT',
                 createdAt: new Date('03/01/2024'),
@@ -321,24 +331,29 @@ describe('getQuestionRound', () => {
         {
             questions: [
                 mockQuestionAndResponses({
+                    contractID: 'test-contract-id',
                     division: 'OACT',
                     createdAt: new Date('03/01/2024'),
                 }),
                 mockQuestionAndResponses({
+                    contractID: 'test-contract-id',
                     division: 'DMCO',
                     createdAt: new Date('03/01/2024'),
                 }),
                 mockQuestionAndResponses({
+                    contractID: 'test-contract-id',
                     id: 'target-question',
                     division: 'OACT',
                     createdAt: new Date('02/01/2024'),
                 }),
                 mockQuestionAndResponses({
+                    contractID: 'test-contract-id',
                     division: 'OACT',
                     createdAt: new Date('01/01/2024'),
                 }),
             ],
             currentQuestion: mockQuestionAndResponses({
+                contractID: 'test-contract-id',
                 id: 'not-found-question',
                 division: 'OACT',
                 createdAt: new Date('03/01/2024'),
@@ -352,24 +367,29 @@ describe('getQuestionRound', () => {
         {
             questions: [
                 mockQuestionAndResponses({
+                    contractID: 'test-contract-id',
                     division: 'OACT',
                     createdAt: new Date('03/01/2024'),
                 }),
                 mockQuestionAndResponses({
+                    contractID: 'test-contract-id',
                     division: 'DMCO',
                     createdAt: new Date('03/01/2024'),
                 }),
                 mockQuestionAndResponses({
+                    contractID: 'test-contract-id',
                     id: 'target-question',
                     division: 'OACT',
                     createdAt: new Date('02/01/2024'),
                 }),
                 mockQuestionAndResponses({
+                    contractID: 'test-contract-id',
                     division: 'OACT',
                     createdAt: new Date('01/01/2024'),
                 }),
             ],
             currentQuestion: mockQuestionAndResponses({
+                contractID: 'test-contract-id',
                 id: 'not-found-question',
                 division: 'DMCP',
                 createdAt: new Date('03/01/2024'),

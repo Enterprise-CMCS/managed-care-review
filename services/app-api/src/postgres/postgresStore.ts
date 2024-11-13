@@ -1,17 +1,25 @@
-import type { PrismaClient, Division } from '@prisma/client'
+import type {
+    PrismaClient,
+    Division,
+    RateRevisionTable,
+    ContractRevisionTable,
+} from '@prisma/client'
 import type { StateCodeType } from '@mc-review/hpp'
 import type {
     ProgramType,
     UserType,
     StateUserType,
-    Question,
-    CreateQuestionInput,
+    ContractQuestionType,
+    CreateContractQuestionInput,
     InsertQuestionResponseArgs,
     StateType,
     RateType,
     ContractType,
     UnlockedContractType,
     CMSUsersUnionType,
+    RateQuestionType,
+    CreateRateQuestionInputType,
+    AuditDocument,
 } from '../domain-models'
 import { findPrograms, findStatePrograms } from '../postgres'
 import type { InsertUserArgsType } from './user'
@@ -24,8 +32,11 @@ import {
 } from './user'
 import {
     findAllQuestionsByContract,
-    insertQuestion,
-    insertQuestionResponse,
+    insertContractQuestion,
+    insertContractQuestionResponse,
+    insertRateQuestion,
+    findAllQuestionsByRate,
+    insertRateQuestionResponse,
 } from './questionResponse'
 import { findAllSupportedStates } from './state'
 import {
@@ -41,6 +52,8 @@ import {
     unlockContract,
     updateDraftContract,
     replaceRateOnContract,
+    findContractRevision,
+    findRateRevision,
 } from './contractAndRates'
 import type {
     SubmitContractArgsType,
@@ -59,6 +72,10 @@ import type { UnlockRateArgsType } from './contractAndRates/unlockRate'
 import { findRateWithHistory } from './contractAndRates/findRateWithHistory'
 import { updateDraftContractRates } from './contractAndRates/updateDraftContractRates'
 import type { UpdateDraftContractRatesArgsType } from './contractAndRates/updateDraftContractRates'
+import { updateStateAssignedUsers } from './state/updateStateAssignedUsers'
+import { findStateAssignedUsers } from './state/findStateAssignedUsers'
+
+import { findAllDocuments } from './documents'
 
 type Store = {
     findPrograms: (
@@ -74,10 +91,20 @@ type Store = {
 
     findUser: (id: string) => Promise<UserType | undefined | Error>
 
+    findStateAssignedUsers: (
+        stateCode: StateCodeType
+    ) => Promise<UserType[] | Error>
+
     insertUser: (user: InsertUserArgsType) => Promise<UserType | Error>
 
     insertManyUsers: (
         users: InsertUserArgsType[]
+    ) => Promise<UserType[] | Error>
+
+    updateStateAssignedUsers: (
+        idOfUserPerformingUpdate: string,
+        stateCode: StateCodeType,
+        assignedUserIDs: string[]
     ) => Promise<UserType[] | Error>
 
     updateCmsUserProperties: (
@@ -88,17 +115,33 @@ type Store = {
         description?: string | null
     ) => Promise<CMSUsersUnionType | Error>
 
-    insertQuestion: (
-        questionInput: CreateQuestionInput,
+    insertContractQuestion: (
+        questionInput: CreateContractQuestionInput,
         user: CMSUsersUnionType
-    ) => Promise<Question | Error>
+    ) => Promise<ContractQuestionType | Error>
 
-    findAllQuestionsByContract: (pkgID: string) => Promise<Question[] | Error>
+    findAllQuestionsByContract: (
+        pkgID: string
+    ) => Promise<ContractQuestionType[] | Error>
 
-    insertQuestionResponse: (
+    insertContractQuestionResponse: (
         questionInput: InsertQuestionResponseArgs,
         user: StateUserType
-    ) => Promise<Question | Error>
+    ) => Promise<ContractQuestionType | Error>
+
+    insertRateQuestionResponse: (
+        questionInput: InsertQuestionResponseArgs,
+        user: StateUserType
+    ) => Promise<RateQuestionType | Error>
+
+    insertRateQuestion: (
+        questionInput: CreateRateQuestionInputType,
+        user: CMSUsersUnionType
+    ) => Promise<RateQuestionType | Error>
+
+    findAllQuestionsByRate: (
+        rateID: string
+    ) => Promise<RateQuestionType[] | Error>
 
     insertDraftContract: (
         args: InsertContractArgsType
@@ -152,6 +195,16 @@ type Store = {
     ) => Promise<UnlockedContractType | Error>
 
     unlockRate: (args: UnlockRateArgsType) => Promise<RateType | Error>
+
+    findAllDocuments: () => Promise<AuditDocument[] | Error>
+
+    findContractRevision: (
+        contractRevID: string
+    ) => Promise<ContractRevisionTable | Error>
+
+    findRateRevision: (
+        rateRevisionID: string
+    ) => Promise<RateRevisionTable | Error>
 }
 
 function NewPostgresStore(client: PrismaClient): Store {
@@ -175,15 +228,35 @@ function NewPostgresStore(client: PrismaClient): Store {
                 divisionAssignment,
                 description
             ),
+        updateStateAssignedUsers: (
+            idOfUserPerformingUpdate,
+            stateCode,
+            assignedUserIDs
+        ) =>
+            updateStateAssignedUsers(
+                client,
+                idOfUserPerformingUpdate,
+                stateCode,
+                assignedUserIDs
+            ),
         findStatePrograms: findStatePrograms,
         findAllSupportedStates: () => findAllSupportedStates(client),
         findAllUsers: () => findAllUsers(client),
-        insertQuestion: (questionInput, user) =>
-            insertQuestion(client, questionInput, user),
+        findStateAssignedUsers: (stateCode) =>
+            findStateAssignedUsers(client, stateCode),
+
+        insertContractQuestion: (questionInput, user) =>
+            insertContractQuestion(client, questionInput, user),
         findAllQuestionsByContract: (pkgID) =>
             findAllQuestionsByContract(client, pkgID),
-        insertQuestionResponse: (questionInput, user) =>
-            insertQuestionResponse(client, questionInput, user),
+        insertContractQuestionResponse: (questionInput, user) =>
+            insertContractQuestionResponse(client, questionInput, user),
+        insertRateQuestion: (questionInput, user) =>
+            insertRateQuestion(client, questionInput, user),
+        insertRateQuestionResponse: (questionInput, user) =>
+            insertRateQuestionResponse(client, questionInput, user),
+        findAllQuestionsByRate: (rateID) =>
+            findAllQuestionsByRate(client, rateID),
 
         insertDraftContract: (args) => insertDraftContract(client, args),
         findContractWithHistory: (args) =>
@@ -206,6 +279,10 @@ function NewPostgresStore(client: PrismaClient): Store {
         submitRate: (args) => submitRate(client, args),
         unlockContract: (args) => unlockContract(client, args),
         unlockRate: (args) => unlockRate(client, args),
+
+        findAllDocuments: () => findAllDocuments(client),
+        findContractRevision: (args) => findContractRevision(client, args),
+        findRateRevision: (args) => findRateRevision(client, args),
     }
 }
 

@@ -9,8 +9,17 @@ State {
    String stateCode
 }
 
+User {
+   String givenName
+   String familyName
+   String email
+   Role role
+   String stateCode
+   String id
+}
+
 Question {
-   String pkgID
+   String contractID
    DateTime createdAt
    String addedByUserID
    String noteText
@@ -25,16 +34,26 @@ QuestionDocument {
    String questionID
    String id
 }
-User {
-   String givenName
-   String familyName
-   String email
-   Role role
-   String stateCode
+
+
+RateQuestion {
+   String rateID
+   DateTime createdAt
+   String addedByUserID
+   String noteText
+   DateTime dueDate
+   String[] rateIDs
+   String id
+}
+RateQuestionDocument {
+   String name
+   String s3URL
+   DateTime createdAt
+   String questionID
    String id
 }
 
-QuestionReponse {
+QuestionResponse {
     String questionID
     DateTime createdAt
     String addedByUserID
@@ -51,13 +70,36 @@ QuestionResponseDocument {
    String id
 }
 
+RateQuestionResponse {
+    String questionID
+    DateTime createdAt
+    String addedByUserID
+    String documentID
+    String noteText
+    String id
+}
+
+RateQuestionResponseDocument {
+   String name
+   String s3URL
+   DateTime createdAt
+   String questionResponseID
+   String id
+}
+
 State ||--o{ ContractTable : stateCode
-ContractTable ||--o{ Question : pkgID
+State ||--o{ RateTable : stateCode
+ContractTable ||--o{ Question : contractID
 User  ||--o{  Question : addedByUserID
-User  ||--o{  QuestionReponse : addedByUserID
+User  ||--o{  QuestionResponse : addedByUserID
+User  ||--o{  RateQuestion : addedByUserID
+User  ||--o{  RateQuestionResponse : addedByUserID
 Question  ||--o{  QuestionDocument : questionID
-Question ||--o{ QuestionReponse: questionID
-QuestionReponse ||--o{ QuestionResponseDocument: questionResponseID
+Question ||--o{ QuestionResponse: questionID
+QuestionResponse ||--o{ QuestionResponseDocument: questionResponseID
+RateQuestion  ||--o{  RateQuestionDocument : questionID
+RateQuestion ||--o{ RateQuestionResponse: questionID
+RateQuestionResponse ||--o{ RateQuestionResponseDocument: questionResponseID
 User  }o--o{  State : ""
 
 
@@ -73,7 +115,7 @@ ContractRevisionTable {
    String unlockInfoID
    String submitInfoID
 
-   String name
+   ContractFormData formData
 }
 
 RateTable {
@@ -88,7 +130,7 @@ RateRevisionTable {
    String unlockInfoID
    String submitInfoID
 
-   String name
+   RateFormData formData
 }
 
 RateRevisionsOnContractRevisionsTable {
@@ -111,24 +153,16 @@ UpdateInfoTable {
 
 ContractTable ||--|{ ContractRevisionTable : contract
 ContractTable ||--|{ RateRevisionTable: draftContracts
+RateTable ||--|{ ContractRevisionTable: draftRates
 RateTable ||--|{ RateRevisionTable : rate
 ContractRevisionTable }|--|{ RateRevisionsOnContractRevisionsTable : contractRevisions
-RateTable ||--|{ ContractRevisionTable: draftRates
 RateRevisionTable }|--|{ RateRevisionsOnContractRevisionsTable : rateRevisions
-
+RateRevisionsOnContractRevisionsTable }|--|{ UpdateInfoTable: updateinfo
+RateTable ||--o{ RateQuestion : rateID
 
 ContractRevisionTable ||--|{ UpdateInfoTable: unlock-submit
 RateRevisionTable ||--|{ UpdateInfoTable: unlock-submit
 
 UpdateInfoTable }|--|{ User: updatedBy
-
-User {
-   String givenName
-   String familyName
-   String email
-   Role role
-   String stateCode
-   String id
-}
 
 ```
