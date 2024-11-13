@@ -699,6 +699,11 @@ describe(`Tests $testName`, () => {
             },
         })
 
+        const assignedUserIDs = assignedUsers.map((u) => u.id)
+        const stateAnalystsEmails = assignedUsers.map((u) => u.email)
+
+        await updateTestStateAssignments(cmsServer, 'FL', assignedUserIDs)
+
         const draft = await createAndUpdateTestHealthPlanPackage(server, {})
         const draftID = draft.id
 
@@ -726,11 +731,6 @@ describe(`Tests $testName`, () => {
             sub.programIDs,
             programs
         )
-
-        const assignedUserIDs = assignedUsers.map((u) => u.id)
-        const stateAnalystsEmails = assignedUsers.map((u) => u.email)
-
-        await updateTestStateAssignments(cmsServer, 'FL', assignedUserIDs)
 
         const cmsEmails = [
             ...config.devReviewTeamEmails,
@@ -762,6 +762,11 @@ describe(`Tests $testName`, () => {
             },
             emailer: mockEmailer,
         })
+
+        const assignedUserIDs = assignedUsers.map((u) => u.id)
+        const stateAnalystsEmails = assignedUsers.map((u) => u.email)
+
+        await updateTestStateAssignments(cmsServer, 'FL', assignedUserIDs)
 
         const draft = await createAndUpdateTestHealthPlanPackage(server, {
             submissionType: 'CONTRACT_ONLY',
@@ -805,11 +810,6 @@ describe(`Tests $testName`, () => {
             sub.programIDs,
             programs
         )
-
-        const assignedUserIDs = assignedUsers.map((u) => u.id)
-        const stateAnalystsEmails = assignedUsers.map((u) => u.email)
-
-        await updateTestStateAssignments(cmsServer, 'FL', assignedUserIDs)
 
         const cmsEmails = [
             ...config.devReviewTeamEmails,
