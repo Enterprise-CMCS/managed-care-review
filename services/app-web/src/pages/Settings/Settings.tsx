@@ -14,12 +14,13 @@ import {
     useFetchMcReviewSettingsQuery,
 } from '../../gen/gqlClient'
 import { StateAnalystsInDashboardType } from './SettingsTables/StateAssignmentTable'
-import { PageHeadingsRecord, RoutesRecord } from '../../constants'
-import { usePage } from '../../contexts/PageContext'
 import { ApolloError } from '@apollo/client'
 import { AssignedStaffUpdateBanner } from '../../components/Banner/AssignedStaffUpdateBanner/AssignedStaffUpdateBanner'
 import { useCurrentRoute } from '../../hooks'
-import { SETTINGS_HIDE_SIDEBAR_ROUTES } from '../../constants/routes'
+import {
+    RoutesRecord,
+    SETTINGS_HIDE_SIDEBAR_ROUTES,
+} from '@mc-review/constants'
 
 export const TestMonitoring = (): null => {
     const location = useLocation()

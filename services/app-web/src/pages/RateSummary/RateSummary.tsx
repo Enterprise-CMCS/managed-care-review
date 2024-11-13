@@ -13,7 +13,7 @@ import { ErrorForbiddenPage } from '../Errors/ErrorForbiddenPage'
 import { Error404 } from '../Errors/Error404Page'
 import { RateWithdrawnBanner } from '../../components/Banner'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
-import { featureFlags } from '../../common-code/featureFlags'
+import { featureFlags } from '@mc-review/common-code'
 
 export const RateSummary = (): React.ReactElement => {
     // Page level state

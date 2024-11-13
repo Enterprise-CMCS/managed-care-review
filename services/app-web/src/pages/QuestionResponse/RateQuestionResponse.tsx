@@ -9,12 +9,12 @@ import { useParams, matchPath, useLocation } from 'react-router-dom'
 import { GridContainer } from '@trussworks/react-uswds'
 import { QuestionResponseSubmitBanner } from '../../components'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
-import { hasCMSUserPermissions } from '../../gqlHelpers'
+import { hasCMSUserPermissions } from '@mc-review/helpers'
 import { getUserDivision } from './QuestionResponseHelpers'
 import { UserAccountWarningBanner } from '../../components/Banner'
 import { ContactSupportLink } from '../../components/ErrorAlert/ContactSupportLink'
 import { useAuth } from '../../contexts/AuthContext'
-import { RoutesRecord } from '../../constants'
+import { RoutesRecord } from '@mc-review/constants'
 import {
     ErrorOrLoadingPage,
     handleAndReturnErrorState,

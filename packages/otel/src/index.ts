@@ -5,4 +5,5 @@ export {
     recordUserInputException,
     useTracing,
     TraceContext,
+    setGlobalTracingContext,
 } from './tracingHelper'

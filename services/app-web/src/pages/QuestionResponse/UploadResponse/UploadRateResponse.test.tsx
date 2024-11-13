@@ -10,7 +10,7 @@ import {
     TEST_PNG_FILE,
     TEST_XLS_FILE,
 } from '../../../testHelpers'
-import { RoutesRecord } from '../../../constants/routes'
+import { RoutesRecord } from '../@mc-review/constants/routes'
 import { ACCEPTED_SUBMISSION_FILE_TYPES } from '../../../components/FileUpload'
 import {
     fetchCurrentUserMock,

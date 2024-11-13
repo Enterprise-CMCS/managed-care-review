@@ -1,7 +1,7 @@
 import { RateQuestion, ContractQuestion, User } from '../../../gen/gqlClient'
 import styles from './QATable.module.scss'
 import { LinkWithLogging, NavLinkWithLogging } from '../../../components'
-import { formatCalendarDate } from '../../../common-code/dateHelpers'
+import { formatCalendarDate } from '@mc-review/common-code'
 import classNames from 'classnames'
 
 type QuestionType =

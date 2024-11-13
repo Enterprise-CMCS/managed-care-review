@@ -1,6 +1,6 @@
 import { renderWithProviders } from '../../testHelpers'
 import { Route, Routes } from 'react-router-dom'
-import { RoutesRecord } from '../../constants'
+import { RoutesRecord } from '@mc-review/constants'
 import { RateSummarySideNav } from './RateSummarySideNav'
 import { RateSummary } from '../RateSummary'
 import {

@@ -26,7 +26,7 @@ import azulaAvatar from '../assets/images/azula.png'
 import { useAuth } from '../contexts/AuthContext'
 import { LocalUserType } from './LocalUserType'
 import { ButtonWithLogging, ErrorAlertSignIn } from '../components'
-import { recordJSException } from '../otelHelpers'
+import { recordJSException } from '@mc-review/otel'
 
 const localUsers: LocalUserType[] = [
     {

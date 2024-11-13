@@ -4,7 +4,7 @@ import { User, Division } from '../../../gen/gqlClient'
 import { useDocument } from '../../../hooks/useDocument'
 import useDeepCompareEffect from 'use-deep-compare-effect'
 import { LinkWithLogging, NavLinkWithLogging } from '../../../components'
-import { formatCalendarDate } from '../../../common-code/dateHelpers'
+import { formatCalendarDate } from '@mc-review/common-code'
 import type {
     QuestionDocumentWithLink,
     QuestionData,

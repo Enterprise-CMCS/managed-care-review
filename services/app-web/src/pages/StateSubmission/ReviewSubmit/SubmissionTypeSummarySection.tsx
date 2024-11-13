@@ -18,7 +18,7 @@ import {
 import { booleanAsYesNoUserValue } from '../../../components/Form/FieldYesNo/FieldYesNo'
 import { SectionCard } from '../../../components/SectionCard'
 import styles from '../../../components/SubmissionSummarySection/SubmissionSummarySection.module.scss'
-import { formatCalendarDate } from '../../../common-code/dateHelpers'
+import { formatCalendarDate } from '@mc-review/common-code'
 
 export type SubmissionTypeSummarySectionProps = {
     contract: Contract | UnlockedContract

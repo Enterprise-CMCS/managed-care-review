@@ -24,13 +24,12 @@ import {
     FilterOptionType,
 } from '../FilterAccordion'
 import { InfoTag, TagProps } from '../InfoTag/InfoTag'
-import { pluralize } from '@mc-review/common-code'
+import { pluralize, formatCalendarDate } from '@mc-review/common-code'
 import { DoubleColumnGrid } from '../DoubleColumnGrid'
 import { NavLinkWithLogging } from '../TealiumLogging/Link'
 import { useTealium } from '../../hooks'
 import useDeepCompareEffect from 'use-deep-compare-effect'
 import { getTealiumFiltersChanged } from '../../tealium/tealiumHelpers'
-import { formatCalendarDate } from '../../common-code/dateHelpers'
 
 export type ContractInDashboardType = {
     id: string
