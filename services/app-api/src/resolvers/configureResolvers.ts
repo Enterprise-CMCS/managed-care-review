@@ -107,12 +107,7 @@ export function configureResolvers(
                 emailParameterStore,
                 launchDarkly
             ),
-            unlockContract: unlockContractResolver(
-                store,
-                emailer,
-                emailParameterStore,
-                launchDarkly
-            ),
+            unlockContract: unlockContractResolver(store, emailer),
             createContract: createContract(store),
             updateContract: updateContract(store),
             updateContractDraftRevision: updateContractDraftRevision(
@@ -127,28 +122,14 @@ export function configureResolvers(
             updateStateAssignmentsByState: updateStateAssignmentsByState(store),
             createContractQuestion: createContractQuestionResolver(
                 store,
-                emailParameterStore,
-                emailer,
-                launchDarkly
+                emailer
             ),
             createContractQuestionResponse:
-                createContractQuestionResponseResolver(
-                    store,
-                    emailer,
-                    emailParameterStore,
-                    launchDarkly
-                ),
-            createRateQuestion: createRateQuestionResolver(
-                store,
-                emailer,
-                emailParameterStore,
-                launchDarkly
-            ),
+                createContractQuestionResponseResolver(store, emailer),
+            createRateQuestion: createRateQuestionResolver(store, emailer),
             createRateQuestionResponse: createRateQuestionResponseResolver(
                 store,
-                emailer,
-                emailParameterStore,
-                launchDarkly
+                emailer
             ),
             createAPIKey: createAPIKeyResolver(jwt),
             unlockRate: unlockRate(store),
