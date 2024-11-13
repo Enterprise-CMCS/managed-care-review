@@ -14,7 +14,11 @@ import { RoutesRecord } from '../../../constants'
 import { GenericErrorPage } from '../../Errors/GenericErrorPage'
 import { UploadResponseForm } from './UploadResponseForm'
 import { FileItemT } from '../../../components'
-import { extractDocumentsFromQuestion, extractQuestions, getQuestionRoundForQuestionID } from '../QuestionResponseHelpers/questionResponseHelpers'
+import {
+    extractDocumentsFromQuestion,
+    extractQuestions,
+    getQuestionRoundForQuestionID,
+} from '../QuestionResponseHelpers/questionResponseHelpers'
 import { ErrorOrLoadingPage } from '../../StateSubmission'
 import { handleAndReturnErrorState } from '../../StateSubmission/ErrorOrLoadingPage'
 import { QuestionDisplayTable } from '../QATable/QuestionDisplayTable'
@@ -30,48 +34,53 @@ export const UploadContractResponse = () => {
 
     const navigate = useNavigate()
     const { updateHeading } = usePage()
-    const {loggedInUser} = useAuth()
- // api
- const {
-    data: fetchContractData,
-    loading: fetchContractLoading,
-    error: fetchContractError,
-} = useFetchContractWithQuestionsQuery({
-    variables: {
-        input: {
-            contractID: id|| 'not-found',
+    const { loggedInUser } = useAuth()
+    // api
+    const {
+        data: fetchContractData,
+        loading: fetchContractLoading,
+        error: fetchContractError,
+    } = useFetchContractWithQuestionsQuery({
+        variables: {
+            input: {
+                contractID: id || 'not-found',
+            },
         },
-    },
-})
+    })
 
-const [createResponse, { loading: apiLoading, error: apiError }] =
-    useCreateContractQuestionResponseMutation()
+    const [createResponse, { loading: apiLoading, error: apiError }] =
+        useCreateContractQuestionResponseMutation()
 
-const contract = fetchContractData?.fetchContract.contract
-const contractName =
-    (contract?.packageSubmissions &&
-        contract?.packageSubmissions[0].contractRevision.contractName) ||
-    ''
-// side effects
-useEffect(() => {
-    updateHeading({ customHeading: `${contractName} Add response` })
-}, [contractName, updateHeading])
+    const contract = fetchContractData?.fetchContract.contract
+    const contractName =
+        (contract?.packageSubmissions &&
+            contract?.packageSubmissions[0].contractRevision.contractName) ||
+        ''
+    // side effects
+    useEffect(() => {
+        updateHeading({ customHeading: `${contractName} Add response` })
+    }, [contractName, updateHeading])
 
-if (fetchContractLoading) {
-    return <ErrorOrLoadingPage state="LOADING" />
-}
+    if (fetchContractLoading) {
+        return <ErrorOrLoadingPage state="LOADING" />
+    }
 
-if (fetchContractError) {
-    return (
-        <ErrorOrLoadingPage
-            state={handleAndReturnErrorState(fetchContractError)}
-        />
-    )
-}
+    if (fetchContractError) {
+        return (
+            <ErrorOrLoadingPage
+                state={handleAndReturnErrorState(fetchContractError)}
+            />
+        )
+    }
 
-if (!contract || contract.status === 'DRAFT' || !questionID || !contract.questions) {
-    return <GenericErrorPage />
-}
+    if (
+        !contract ||
+        contract.status === 'DRAFT' ||
+        !questionID ||
+        !contract.questions
+    ) {
+        return <GenericErrorPage />
+    }
 
     const handleFormSubmit = async (cleaned: FileItemT[]) => {
         const responseDocs = cleaned.map((item) => {
@@ -98,8 +107,14 @@ if (!contract || contract.status === 'DRAFT' || !questionID || !contract.questio
             navigate(`/submissions/${id}/question-and-answers?submit=response`)
         }
     }
-    const question = extractQuestions(contract.questions).find( (question) => question.id == questionID)
-    const questionRound = getQuestionRoundForQuestionID(contract.questions, division?.toUpperCase() as Division, questionID)
+    const question = extractQuestions(contract.questions).find(
+        (question) => question.id == questionID
+    )
+    const questionRound = getQuestionRoundForQuestionID(
+        contract.questions,
+        division?.toUpperCase() as Division,
+        questionID
+    )
     return (
         <div className={styles.uploadFormContainer}>
             <Breadcrumbs
@@ -111,7 +126,7 @@ if (!contract || contract.status === 'DRAFT' || !questionID || !contract.questio
                     },
                     { link: `/submissions/${id}`, text: contractName },
                     {
-                        text: 'Add response',
+                        text: 'Upload response',
                         link: RoutesRecord.SUBMISSIONS_UPLOAD_CONTRACT_RESPONSE,
                     },
                 ]}
@@ -122,11 +137,17 @@ if (!contract || contract.status === 'DRAFT' || !questionID || !contract.questio
                 apiError={Boolean(apiError)}
                 type="contract"
                 round={questionRound}
-                questionBeingAsked={question? <QuestionDisplayTable
-                    documents={extractDocumentsFromQuestion(question)}
-                    user={loggedInUser!}
-                    onlyDisplayInitial
-                    />: <p>'Related question unable to display'</p>}
+                questionBeingAsked={
+                    question ? (
+                        <QuestionDisplayTable
+                            documents={extractDocumentsFromQuestion(question)}
+                            user={loggedInUser!}
+                            onlyDisplayInitial
+                        />
+                    ) : (
+                        <p>'Related question unable to display'</p>
+                    )
+                }
             />
         </div>
     )

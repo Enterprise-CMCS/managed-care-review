@@ -13,7 +13,12 @@
 
 .uploadFormContainer {
     max-width: custom.$mcr-container-standard-width-fixed;
-   background-color: none;
+    background-color: none;
+    @include uswds.at-media('tablet') {
+        min-width: 20rem;
+        max-width: 40rem;
+        margin: 0 auto;
+    }
 }
 .tableHeader {
     h2 {
@@ -71,7 +76,7 @@
 
     h2 {
         margin-top: 0;
-        font-weight: normal
+        font-weight: normal;
     }
 
     > div[class^='usa-form-group']:not(:first-of-type) {
@@ -81,16 +86,16 @@
     [id^='formSummary'] {
         display: flex;
         flex-direction: column;
-       padding-bottom: 25px
+        padding-bottom: 25px;
     }
 
     &[class^='usa-form'] {
         min-width: 100%;
         max-width: 100%;
 
-        @include uswds.at-media(tablet) {
-            min-width: 40rem;
-            max-width: 20rem;
+        @include uswds.at-media('tablet') {
+            min-width: 20rem;
+            max-width: 40rem;
             margin: 0 auto;
         }
     }

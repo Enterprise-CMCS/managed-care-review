@@ -14,7 +14,7 @@ export type BreadcrumbsProps = {
 const Crumb = (crumb: BreadcrumbItem) => {
     const { link, text } = crumb
     return (
-        <Breadcrumb>
+        <Breadcrumb className={styles.crumb}>
             <NavLinkWithLogging to={link} end>
                 <span>{text}</span>
             </NavLinkWithLogging>
@@ -24,10 +24,7 @@ const Crumb = (crumb: BreadcrumbItem) => {
 
 const Breadcrumbs = ({ items, className }: BreadcrumbsProps) => {
     if (items.length === 0) return null
-    const classes = classNames(
-        styles.crumbContainer,
-        className
-    )
+    const classes = classNames(styles.crumbContainer, className)
     return (
         <BreadcrumbBar className={classes}>
             {items.map((item, index) => (
