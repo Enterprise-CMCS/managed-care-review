@@ -3,13 +3,12 @@ import { NotFoundError } from '../postgresErrors'
 import type { ContractType } from '../../domain-models/contractAndRates'
 import type { PrismaTransactionType } from '../prismaTypes'
 
-async function approveContractInsideTransaction(
+async function approveContract(
     tx: PrismaTransactionType,
     args: ApproveContractArgsType
 ): Promise<ContractType | Error> {
     const { contractID, updatedByID } = args
     try {
-        // Find the latest contract revision with contractID and with no submitInfo,
         const contract = await tx.contractTable.findFirst({
             where: {
                 id: contractID,
@@ -64,5 +63,5 @@ type ApproveContractArgsType = {
     updatedByID: string
 }
 
-export { approveContractInsideTransaction }
+export { approveContract }
 export type { ApproveContractArgsType }

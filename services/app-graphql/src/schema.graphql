@@ -527,6 +527,23 @@ type Mutation {
     withdrawAndReplaceRedundantRate(
         input: withdrawAndReplaceRedundantRateInput!
     ): withdrawAndReplaceRedundantRatePayload
+
+    """
+    approveContract is a CMS user only action 
+
+    Errors:
+    - ForbiddenError:
+        - A non CMS user called this
+    - UserInputError:
+        - A contract is not in the correct submission status: SUBMITTED
+        - A contract is not in the correct review status: UNDER_REVIEW
+    - INTERNAL_SERVER_ERROR
+        - DB_ERROR
+            - A contract cannot be found by id
+    """
+    approveContract(
+        input: approveContractInput!
+    ): approveContractPayload
 }
 
 input CreateHealthPlanPackageInput {
@@ -584,6 +601,15 @@ input CreateContractInput {
 
 type CreateContractPayload {
     contract: Contract!
+}
+
+type approveContractPayload {
+    contract: Contract!
+}
+
+input approveContractInput {
+    "The ID of the contract to approve"
+    contractID: ID!
 }
 
 input FetchHealthPlanPackageInput {
