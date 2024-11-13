@@ -34,26 +34,30 @@ const featureFlags = {
     },
     QA_BY_RATES: {
         flag: 'qa-by-rates',
-        defaultValue: false
+        defaultValue: false,
+    },
+    SUBMISSION_APPROVALS: {
+        flag: 'submission-approvals',
+        defaultValue: false,
     },
     // PERMANENT FLAGS
     /**
      Enables the modal that alerts the user to an expiring session
-    */
+     */
     SESSION_EXPIRING_MODAL: {
         flag: 'session-expiring-modal',
         defaultValue: true,
     },
     /**
      The number of minutes before the session expires and countdown modal appears
-    */
+     */
     MINUTES_UNTIL_SESSION_EXPIRES: {
         flag: 'session-expiration-minutes',
         defaultValue: 30,
     },
     /**
      Toggles the site maintenance alert on the landing page
-    */
+     */
     SITE_UNDER_MAINTENANCE_BANNER: {
         flag: 'site-under-maintenance-banner',
         defaultValue: 'OFF',

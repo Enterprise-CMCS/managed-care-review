@@ -54,7 +54,13 @@ describe('sendRateQuestionResponseCMSEmail', () => {
 
         expect(template).toEqual(
             expect.objectContaining({
-                toAddresses: expect.arrayContaining([...stateAnalysts]),
+                toAddresses: expect.arrayContaining([
+                    ...stateAnalysts,
+                    ...testEmailConfig().devReviewTeamEmails,
+                ]),
+                ccAddresses: expect.arrayContaining([
+                    ...testEmailConfig().dmcpSubmissionEmails,
+                ]),
             })
         )
     })
@@ -76,7 +82,11 @@ describe('sendRateQuestionResponseCMSEmail', () => {
             expect.objectContaining({
                 toAddresses: expect.arrayContaining([
                     ...stateAnalysts,
+                    ...testEmailConfig().devReviewTeamEmails,
                     ...testEmailConfig().oactEmails,
+                ]),
+                ccAddresses: expect.arrayContaining([
+                    ...testEmailConfig().dmcpSubmissionEmails,
                 ]),
             })
         )
@@ -99,7 +109,11 @@ describe('sendRateQuestionResponseCMSEmail', () => {
             expect.objectContaining({
                 toAddresses: expect.arrayContaining([
                     ...stateAnalysts,
+                    ...testEmailConfig().devReviewTeamEmails,
                     ...testEmailConfig().dmcpReviewEmails,
+                ]),
+                ccAddresses: expect.arrayContaining([
+                    ...testEmailConfig().dmcpSubmissionEmails,
                 ]),
             })
         )
