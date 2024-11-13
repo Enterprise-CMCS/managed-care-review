@@ -30,9 +30,8 @@ import {
 import type { EmailParameterStore } from '../parameterStore'
 import type { LDService } from '../launchDarkly/launchDarkly'
 import type { JWTLib } from '../jwt'
-import { fetchEmailSettingsResolver } from './email/fetchEmailSettings'
-import { indexRatesResolver } from './rate/indexRates'
-import { rateResolver } from './rate/rateResolver'
+import { indexRatesResolver } from './rate'
+import { rateResolver } from './rate'
 import { genericDocumentResolver } from './shared/genericDocumentResolver'
 import { fetchRateResolver } from './rate/fetchRate'
 import { updateContract } from './contract/updateContract'
@@ -40,7 +39,7 @@ import { indexContractsResolver } from './contract/indexContracts'
 import { unlockContractResolver } from './contract/unlockContract'
 import { createAPIKeyResolver } from './APIKey'
 import { unlockRate } from './rate/unlockRate'
-import { submitRate } from './rate/submitRate'
+import { submitRate } from './rate'
 import { updateDraftContractRates } from './contract/updateDraftContractRates'
 import { contractResolver } from './contract/contractResolver'
 import { unlockedContractResolver } from './contract/unlockedContractResolver'
@@ -72,11 +71,6 @@ export function configureResolvers(
             indexHealthPlanPackages: indexHealthPlanPackagesResolver(store),
             indexContracts: indexContractsResolver(store),
             indexUsers: indexUsersResolver(store),
-            fetchEmailSettings: fetchEmailSettingsResolver(
-                store,
-                emailer,
-                emailParameterStore
-            ),
             fetchMcReviewSettings: fetchMcReviewSettings(store, emailer),
             // Rates refactor
             indexRates: indexRatesResolver(store),
