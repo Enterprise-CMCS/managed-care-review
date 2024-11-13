@@ -36,8 +36,8 @@ importers:
   dev_tool:
     dependencies:
       '@aws-sdk/client-cloudfront':
-        specifier: ^3.689.0
-        version: 3.689.0
+        specifier: ^3.690.0
+        version: 3.690.0
       '@aws-sdk/client-ec2':
         specifier: ^3.687.0
         version: 3.687.0
@@ -125,8 +125,8 @@ importers:
         specifier: ^3.689.0
         version: 3.689.0
       '@aws-sdk/client-rds':
-        specifier: ^3.687.0
-        version: 3.687.0
+        specifier: ^3.690.0
+        version: 3.690.0
       '@aws-sdk/client-s3':
         specifier: ^3.689.0
         version: 3.689.0
@@ -1269,8 +1269,8 @@ packages:
     resolution: {integrity: sha512-lpU0034WzrdFRspLbgV8ZG/3FutMWBquvkUOKjPsFgS9FKZ9dlSejZEz4GY6fpvXEwpomBrF1wZtXshrrriuxQ==}
     engines: {node: '>=16.0.0'}
 
-  '@aws-sdk/client-cloudfront@3.689.0':
-    resolution: {integrity: sha512-0GaRHkkjoc06bx0OZKcJgDZoljP6z9+F0g+t094WovpxVj4pg9TJ8rPGCtQ9/ZQqzRCMvWS9CXYkZpfmo+Mbug==}
+  '@aws-sdk/client-cloudfront@3.690.0':
+    resolution: {integrity: sha512-3gI6Ky3zYDkGG5gQdBRZjSup2sOpsfPDiWKe38jYmA7rdIV4Ec0An/DaBtWJ5eZukJREX5rvwbNjQryeyHdUxA==}
     engines: {node: '>=16.0.0'}
 
   '@aws-sdk/client-cloudwatch-logs@3.6.1':
@@ -1329,8 +1329,8 @@ packages:
     resolution: {integrity: sha512-y6fxVYndGS7z2KqHViPCqagBEOsZlxBUYUJZuD6WWTiQrI0Pwe5qG02oKJVaa5OmxE20QLf6bRBWj2rQpeF4IQ==}
     engines: {node: '>=10.0.0'}
 
-  '@aws-sdk/client-rds@3.687.0':
-    resolution: {integrity: sha512-5neJjCsyK2KJGsH54pHCdSWBYkB/G/ABT2fsHIrEm91JxJphCAHKliGpz1IKPcCLP72OuXNFwabPBbALnYcFbQ==}
+  '@aws-sdk/client-rds@3.690.0':
+    resolution: {integrity: sha512-1FQ4X5JoT9Nd/k2ocmZ/v4ex0Pv+cM1vkshNDDn5Y/AE0gZKy+oczagn6FbXwcRncxMfDGLa0JuSjsxWjFxaFw==}
     engines: {node: '>=16.0.0'}
 
   '@aws-sdk/client-rekognition@3.6.1':
@@ -5219,10 +5219,6 @@ packages:
     resolution: {integrity: sha512-hsjtwpIemmCkm3ZV5fd/T0bPIugW1gJXwZ/hpuVubt2hEUApIoUTrf6qIdh9MAWlw0vjMrA1ztJLAwtNaZogvg==}
     engines: {node: '>=16.0.0'}
 
-  '@smithy/querystring-builder@3.0.7':
-    resolution: {integrity: sha512-65RXGZZ20rzqqxTsChdqSpbhA6tdt5IFNgG6o7e1lnPVLCe6TNWQq4rTl4N87hTDD8mV4IxJJnvyE7brbnRkQw==}
-    engines: {node: '>=16.0.0'}
-
   '@smithy/querystring-builder@3.0.8':
     resolution: {integrity: sha512-btYxGVqFUARbUrN6VhL9c3dnSviIwBYD9Rz1jHuN1hgh28Fpv2xjU1HeCeDJX68xctz7r4l1PBnFhGg1WBBPuA==}
     engines: {node: '>=16.0.0'}
@@ -7844,8 +7840,8 @@ packages:
   electron-to-chromium@1.5.5:
     resolution: {integrity: sha512-QR7/A7ZkMS8tZuoftC/jfqNkZLQO779SSW3YuZHP4eXpj3EffGLFcB/Xu9AAZQzLccTiCV+EmUo3ha4mQ9wnlA==}
 
-  electron-to-chromium@1.5.56:
-    resolution: {integrity: sha512-7lXb9dAvimCFdvUMTyucD4mnIndt/xhRKFAlky0CyFogdnNmdPQNoHI23msF/2V4mpTxMzgMdjK4+YRlFlRQZw==}
+  electron-to-chromium@1.5.57:
+    resolution: {integrity: sha512-xS65H/tqgOwUBa5UmOuNSLuslDo7zho0y/lgQw35pnrqiZh7UOWHCeL/Bt6noJATbA6tpQJGCifsFsIRZj1Fqg==}
 
   element-closest@2.0.2:
     resolution: {integrity: sha512-QCqAWP3kwj8Gz9UXncVXQGdrhnWxD8SQBSeZp5pOsyCcQ6RpL738L1/tfuwBiMi6F1fYkxqPnBrFBR4L+f49Cg==}
@@ -14270,7 +14266,7 @@ snapshots:
     transitivePeerDependencies:
       - aws-crt
 
-  '@aws-sdk/client-cloudfront@3.689.0':
+  '@aws-sdk/client-cloudfront@3.690.0':
     dependencies:
       '@aws-crypto/sha256-browser': 5.2.0
       '@aws-crypto/sha256-js': 5.2.0
@@ -14902,7 +14898,7 @@ snapshots:
     transitivePeerDependencies:
       - react-native
 
-  '@aws-sdk/client-rds@3.687.0':
+  '@aws-sdk/client-rds@3.690.0':
     dependencies:
       '@aws-crypto/sha256-browser': 5.2.0
       '@aws-crypto/sha256-js': 5.2.0
@@ -21240,7 +21236,7 @@ snapshots:
   '@smithy/fetch-http-handler@3.2.9':
     dependencies:
       '@smithy/protocol-http': 4.1.5
-      '@smithy/querystring-builder': 3.0.7
+      '@smithy/querystring-builder': 3.0.8
       '@smithy/types': 3.6.0
       '@smithy/util-base64': 3.0.0
       tslib: 2.8.1
@@ -21354,12 +21350,6 @@ snapshots:
   '@smithy/protocol-http@4.1.5':
     dependencies:
       '@smithy/types': 3.6.0
-      tslib: 2.8.1
-
-  '@smithy/querystring-builder@3.0.7':
-    dependencies:
-      '@smithy/types': 3.6.0
-      '@smithy/util-uri-escape': 3.0.0
       tslib: 2.8.1
 
   '@smithy/querystring-builder@3.0.8':
@@ -23543,7 +23533,7 @@ snapshots:
   browserslist@4.24.2:
     dependencies:
       caniuse-lite: 1.0.30001680
-      electron-to-chromium: 1.5.56
+      electron-to-chromium: 1.5.57
       node-releases: 2.0.18
       update-browserslist-db: 1.1.1(browserslist@4.24.2)
 
@@ -24737,7 +24727,7 @@ snapshots:
 
   electron-to-chromium@1.5.5: {}
 
-  electron-to-chromium@1.5.56: {}
+  electron-to-chromium@1.5.57: {}
 
   element-closest@2.0.2: {}
 

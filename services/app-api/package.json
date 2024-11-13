@@ -31,7 +31,7 @@
         "@aws-sdk/client-amplify": "^3.687.0",
         "@aws-sdk/client-cognito-identity-provider": "^3.687.0",
         "@aws-sdk/client-lambda": "^3.689.0",
-        "@aws-sdk/client-rds": "^3.687.0",
+        "@aws-sdk/client-rds": "^3.690.0",
         "@aws-sdk/client-s3": "^3.689.0",
         "@aws-sdk/client-secrets-manager": "^3.687.0",
         "@aws-sdk/client-ses": "^3.687.0",
