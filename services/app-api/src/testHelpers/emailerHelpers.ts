@@ -356,6 +356,7 @@ const mockUnlockedContract = (
         reviewStatus: 'UNDER_REVIEW',
         stateCode: 'MN',
         stateNumber: 4,
+        reviewStatus: 'UNDER_REVIEW',
 
         draftRevision: mockContractRev(),
         draftRates,

@@ -132,6 +132,10 @@ describe('createRateQuestionResponse', () => {
         const rateID =
             contractWithRate.packageSubmissions[0].rateRevisions[0].rateID
 
+        const rateName =
+            contractWithRate.packageSubmissions[0].rateRevisions[0].formData
+                .rateCertificationName
+
         const rateQuestionResult = await createTestRateQuestion(
             cmsServer,
             rateID
@@ -141,10 +145,10 @@ describe('createRateQuestionResponse', () => {
         await createTestRateQuestionResponse(stateServer, question.id)
 
         expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
-            5, // New response state email notification is the fifth email, if State email is before CMS email.
+            6, // New response state email notification is the sixth email, CMS email is sent first
             expect.objectContaining({
                 subject: expect.stringContaining(
-                    `[LOCAL] Response to DMCO rate questions was successfully submitted.`
+                    `[LOCAL] Response submitted to CMS for ${rateName}`
                 ),
                 sourceEmail: emailConfig.emailSource,
                 bodyText: expect.stringContaining(
@@ -179,7 +183,12 @@ describe('createRateQuestionResponse', () => {
             submittedContractAndRate.packageSubmissions[0].rateRevisions[0]
         const rateID = rateRevision.rateID
 
-        must(await createTestRateQuestion(cmsServer, rateID))
+        const rateQuestionResult = must(
+            await createTestRateQuestion(cmsServer, rateID)
+        )
+        const question = rateQuestionResult.data?.createRateQuestion.question
+
+        await createTestRateQuestionResponse(stateServer, question.id)
 
         const rateName = rateRevision.formData.rateCertificationName
         const stateAnalystsEmails = getTestStateAnalystsEmails(
@@ -205,7 +214,7 @@ describe('createRateQuestionResponse', () => {
                     `The state submitted responses to OACT's questions about ${rateName}`
                 ),
                 bodyHTML: expect.stringContaining(
-                    `<a href="http://localhost/submissions/${rateID}/question-and-answers">View submission Q&A</a>`
+                    `<a href="http://localhost/rates/${rateID}/question-and-answers">View rate Q&A</a>`
                 ),
             })
         )
@@ -275,7 +284,7 @@ describe('createRateQuestionResponse', () => {
         // email is sent to the state anaylsts since it
         // was submitted by a DCMO user
         // Mock emailer is called 4 times, twice for submit, twice for response,
-        // first called to send the state email, then to CMS
+        // first called to send the CMS email, then state email,
         expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
             3,
             expect.objectContaining({
@@ -288,7 +297,7 @@ describe('createRateQuestionResponse', () => {
                     `The state submitted responses to DMCO's questions about ${rateName}`
                 ),
                 bodyHTML: expect.stringContaining(
-                    `<a href="http://localhost/submissions/${rateID}/question-and-answers">View submission Q&A</a>`
+                    `<a href="http://localhost/rates/${rateID}/question-and-answers">View rate Q&A</a>`
                 ),
             })
         )

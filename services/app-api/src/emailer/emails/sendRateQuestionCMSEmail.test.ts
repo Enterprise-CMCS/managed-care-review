@@ -43,18 +43,23 @@ describe('sendRateQuestionCMSEmail', () => {
             throw template
         }
 
+        // expected to include address
+        expect(template).toEqual(
+            expect.objectContaining({
+                toAddresses: expect.arrayContaining([
+                    ...stateAnalysts,
+                    ...testEmailConfig().devReviewTeamEmails,
+                ]),
+            })
+        )
+
+        // expected to not include addresses
         expect(template).toEqual(
             expect.not.objectContaining({
                 toAddresses: expect.arrayContaining([
                     ...testEmailConfig().oactEmails,
                     ...testEmailConfig().dmcpReviewEmails,
                 ]),
-            })
-        )
-
-        expect(template).toEqual(
-            expect.objectContaining({
-                toAddresses: expect.arrayContaining([...stateAnalysts]),
             })
         )
     })
@@ -76,6 +81,7 @@ describe('sendRateQuestionCMSEmail', () => {
             expect.objectContaining({
                 toAddresses: expect.arrayContaining([
                     ...stateAnalysts,
+                    ...testEmailConfig().devReviewTeamEmails,
                     ...testEmailConfig().oactEmails,
                 ]),
             })
@@ -99,6 +105,7 @@ describe('sendRateQuestionCMSEmail', () => {
             expect.objectContaining({
                 toAddresses: expect.arrayContaining([
                     ...stateAnalysts,
+                    ...testEmailConfig().devReviewTeamEmails,
                     ...testEmailConfig().dmcpReviewEmails,
                 ]),
             })

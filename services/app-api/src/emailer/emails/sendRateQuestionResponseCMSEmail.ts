@@ -36,11 +36,13 @@ export const sendRateQuestionResponseCMSEmail = async (
     }
 
     let receiverEmails = [...stateAnalystsEmails, ...config.devReviewTeamEmails]
+
     if (division === 'DMCP') {
         receiverEmails.push(...config.dmcpReviewEmails)
     } else if (division === 'OACT') {
         receiverEmails.push(...config.oactEmails)
     }
+
     receiverEmails = pruneDuplicateEmails(receiverEmails)
 
     const questionResponseURL = rateSummaryQuestionResponseURL(
