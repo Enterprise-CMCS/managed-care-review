@@ -1,7 +1,7 @@
 mutation submitContract($input: SubmitContractInput!) {
     submitContract(input: $input) {
         contract {
-            ...contractFields
+            ...contractFieldsFragment
 
             draftRevision {
                 ...contractRevisionFragmentForSubmit
@@ -24,28 +24,6 @@ mutation submitContract($input: SubmitContractInput!) {
             }
         }
     }
-}
-
-
-fragment contractFields on Contract {
-    id
-    status
-    createdAt
-    updatedAt
-    initiallySubmittedAt
-    stateCode
-    state {
-        code
-        name
-        programs {
-            id
-            name
-            fullName
-            isRateProgram
-        }
-    }
-
-    stateNumber
 }
 
 fragment rateFields on Rate {

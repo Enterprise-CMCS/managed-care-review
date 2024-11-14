@@ -1,7 +1,7 @@
 query fetchContract($input: FetchContractInput!) {
     fetchContract(input: $input) {
         contract {
-            ...contractFieldsFetchContract
+            ...contractFieldsFragment
 
             draftRevision {
                 ...contractRevisionFragmentForFetch
@@ -24,28 +24,6 @@ query fetchContract($input: FetchContractInput!) {
             }
         }
     }
-}
-
-fragment contractFieldsFetchContract on Contract {
-    id
-    status
-    createdAt
-    updatedAt
-    initiallySubmittedAt
-    stateCode
-    mccrsID
-    state {
-        code
-        name
-        programs {
-            id
-            name
-            fullName
-            isRateProgram
-        }
-    }
-
-    stateNumber
 }
 
 fragment rateFields on Rate {
