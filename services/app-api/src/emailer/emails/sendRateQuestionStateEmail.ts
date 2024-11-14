@@ -65,6 +65,7 @@ export const sendRateQuestionStateEmail = async (
     } else {
         return {
             toAddresses: toAddresses,
+            ccAddresses: [...config.dmcpSubmissionEmails],
             replyToAddresses: [],
             sourceEmail: config.emailSource,
             subject: `${

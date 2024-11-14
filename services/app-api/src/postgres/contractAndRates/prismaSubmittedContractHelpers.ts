@@ -51,6 +51,7 @@ const includeContractWithoutDraftRates = {
             },
         },
     },
+    reviewStatusActions: {},
 } satisfies Prisma.ContractTableInclude
 
 type ContractTableWithoutDraftRates = Prisma.ContractTableGetPayload<{

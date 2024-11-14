@@ -1,7 +1,7 @@
 mutation createContract($input: CreateContractInput!) {
     createContract(input: $input) {
         contract {
-            ...contractFieldsFetchContract
+            ...contractFieldsFragment
 
             draftRevision {
                 ...contractRevisionFragmentForCreate
@@ -24,28 +24,6 @@ mutation createContract($input: CreateContractInput!) {
             }
         }
     }
-}
-
-fragment contractFieldsFetchContract on Contract {
-    id
-    status
-    createdAt
-    updatedAt
-    initiallySubmittedAt
-    stateCode
-    mccrsID
-    state {
-        code
-        name
-        programs {
-            id
-            name
-            fullName
-            isRateProgram
-        }
-    }
-
-    stateNumber
 }
 
 fragment rateFields on Rate {

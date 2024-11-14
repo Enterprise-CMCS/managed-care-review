@@ -344,6 +344,34 @@ const iterableAdminUsersMockData: {
     },
 ]
 
+const iterableNonCMSUsersMockData: {
+    userRole:
+        | 'HELPDESK_USER'
+        | 'BUSINESSOWNER_USER'
+        | 'ADMIN_USER'
+        | 'STATE_USER'
+    mockUser: <T>(
+        userData?: Partial<T>
+    ) => AdminUser | BusinessOwnerUser | HelpdeskUser | StateUser
+}[] = [
+    {
+        userRole: 'ADMIN_USER',
+        mockUser: mockValidAdminUser,
+    },
+    {
+        userRole: 'BUSINESSOWNER_USER',
+        mockUser: mockValidBusinessOwnerUser,
+    },
+    {
+        userRole: 'HELPDESK_USER',
+        mockUser: mockValidHelpDeskUser,
+    },
+    {
+        userRole: 'STATE_USER',
+        mockUser: mockValidStateUser,
+    },
+]
+
 export {
     fetchCurrentUserMock,
     mockValidStateUser,
@@ -359,4 +387,5 @@ export {
     indexUsersQueryFailMock,
     updateStateAssignmentsMutationMockSuccess,
     updateStateAssignmentsMutationMockFailure,
+    iterableNonCMSUsersMockData,
 }

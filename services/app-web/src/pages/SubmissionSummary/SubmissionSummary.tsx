@@ -1,4 +1,4 @@
-import { GridContainer, Link, ModalRef } from '@trussworks/react-uswds'
+import { Grid, GridContainer, Link, ModalRef } from '@trussworks/react-uswds'
 import React, { useEffect, useRef, useState } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
 import { ContractDetailsSummarySection } from '../StateSubmission/ReviewSubmit/ContractDetailsSummarySection'
@@ -10,6 +10,7 @@ import {
     SubmissionUpdatedBanner,
     DocumentWarningBanner,
     LinkWithLogging,
+    ButtonWithLogging,
 } from '../../components'
 import { Loading } from '../../components'
 import { usePage } from '../../contexts/PageContext'
@@ -25,25 +26,8 @@ import { useRouteParams } from '../../hooks'
 import { getVisibleLatestContractFormData } from '@mc-review/helpers'
 import { generatePath, Navigate } from 'react-router-dom'
 import { hasCMSUserPermissions } from '@mc-review/helpers'
-
-function UnlockModalButton({
-    disabled,
-    modalRef,
-}: {
-    disabled: boolean
-    modalRef: React.RefObject<ModalRef>
-}) {
-    return (
-        <ModalOpenButton
-            modalRef={modalRef}
-            className={styles.submitButton}
-            id="form-submit"
-            disabled={disabled}
-        >
-            Unlock submission
-        </ModalOpenButton>
-    )
-}
+import { useLDClient } from 'launchdarkly-react-client-sdk'
+import { featureFlags } from '@mc-review/common-code'
 
 export const SubmissionSummary = (): React.ReactElement => {
     // Page level state
@@ -56,6 +40,13 @@ export const SubmissionSummary = (): React.ReactElement => {
     const hasCMSPermissions = hasCMSUserPermissions(loggedInUser)
     const isStateUser = loggedInUser?.role === 'STATE_USER'
     const isHelpDeskUser = loggedInUser?.role === 'HELPDESK_USER'
+
+    const ldClient = useLDClient()
+
+    const submissionApprovalFlag = ldClient?.variation(
+        featureFlags.SUBMISSION_APPROVALS.flag,
+        featureFlags.SUBMISSION_APPROVALS.defaultValue
+    )
 
     // API requests
     const {
@@ -168,6 +159,9 @@ export const SubmissionSummary = (): React.ReactElement => {
         : 'Add MC-CRS record number'
     const explainMissingData = (isHelpDeskUser || isStateUser) && !isSubmitted
 
+    // Only show for CMS_USER or CMS_APPROVER_USER users
+    const showSubmissionApproval = submissionApprovalFlag && hasCMSPermissions
+
     return (
         <div className={styles.background}>
             <GridContainer
@@ -191,6 +185,17 @@ export const SubmissionSummary = (): React.ReactElement => {
 
                 {documentError && (
                     <DocumentWarningBanner className={styles.banner} />
+                )}
+
+                {showSubmissionApproval && (
+                    <Grid className={styles.approveWithdrawButtonContainer} row>
+                        <ButtonWithLogging
+                            type={'button'}
+                            disabled={!isSubmitted}
+                        >
+                            Approve submission
+                        </ButtonWithLogging>
+                    </Grid>
                 )}
 
                 <SubmissionTypeSummarySection
@@ -224,12 +229,17 @@ export const SubmissionSummary = (): React.ReactElement => {
                     submissionName={name}
                     headerChildComponent={
                         hasCMSPermissions ? (
-                            <UnlockModalButton
+                            <ModalOpenButton
                                 modalRef={modalRef}
                                 disabled={['DRAFT', 'UNLOCKED'].includes(
                                     contract.status
                                 )}
-                            />
+                                className={styles.submitButton}
+                                id="form-submit"
+                                outline={showSubmissionApproval}
+                            >
+                                Unlock submission
+                            </ModalOpenButton>
                         ) : undefined
                     }
                     statePrograms={statePrograms}
