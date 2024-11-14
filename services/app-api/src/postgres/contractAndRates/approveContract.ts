@@ -24,8 +24,8 @@ async function approveContract(
             return new NotFoundError(err)
         }
 
-        // generate approval notice info and update contract
         const currentDateTime = new Date()
+        // generate approval notice info and update contract
         const approvalNotice = await tx.contractActionTable.create({
             data: {
                 updatedAt: currentDateTime,

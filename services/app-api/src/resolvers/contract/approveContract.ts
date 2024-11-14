@@ -14,6 +14,7 @@ import {
     setSuccessAttributesOnActiveSpan,
 } from '../attributeHelper'
 import { GraphQLError } from 'graphql'
+import { isCMSApproverUser } from '../../domain-models/user'
 
 export function approveContract(
     store: Store
@@ -26,7 +27,7 @@ export function approveContract(
         const { contractID } = input
         span?.setAttribute('mcreview.package_id', contractID)
 
-        if (!isCMSUser(user)) {
+        if (!isCMSUser(user) && !isCMSApproverUser(user)) {
             const message = 'user not authorized to approve a contract'
             logError('approveContract', message)
             setErrorAttributesOnActiveSpan(message, span)
@@ -58,7 +59,10 @@ export function approveContract(
         }
 
         if (
-            contractWithHistory.status !== 'SUBMITTED' ||
+            !(
+                contractWithHistory.status === 'SUBMITTED' ||
+                contractWithHistory.status === 'RESUBMITTED'
+            ) ||
             contractWithHistory.reviewStatus !== 'UNDER_REVIEW'
         ) {
             const errMessage = `Attempted to approve contract with wrong status`

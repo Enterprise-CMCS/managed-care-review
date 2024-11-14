@@ -15,9 +15,9 @@ const contractReviewActionSchema = z.object({
     contractID: z.string(),
 })
 
-type UpdateInfoType = z.infer<typeof contractReviewActionSchema>
+type ContractReviewActionType = z.infer<typeof contractReviewActionSchema>
 type PackageStatusType = z.infer<typeof contractSchema.shape.status>
 
-export type { PackageStatusType, UpdateInfoType }
+export type { PackageStatusType, ContractReviewActionType }
 
 export { contractReviewActionSchema }

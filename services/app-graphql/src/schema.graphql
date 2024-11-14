@@ -542,8 +542,8 @@ type Mutation {
             - A contract cannot be found by id
     """
     approveContract(
-        input: approveContractInput!
-    ): approveContractPayload
+        input: ApproveContractInput!
+    ): ApproveContractPayload
 }
 
 input CreateHealthPlanPackageInput {
@@ -603,11 +603,11 @@ type CreateContractPayload {
     contract: Contract!
 }
 
-type approveContractPayload {
+type ApproveContractPayload {
     contract: Contract!
 }
 
-input approveContractInput {
+input ApproveContractInput {
     "The ID of the contract to approve"
     contractID: ID!
 }
@@ -1083,7 +1083,7 @@ ContractReviewStatusActions is used for the review status actions on the contrac
 type ContractReviewStatusActions {
     "the datetime when the update occured"
     updatedAt: DateTime!
-    "the email of the user who performed the update"
+    "the user who performed the update"
     updatedBy: UpdatedBy!
     "the reason provided by the user when performing the update"
     updatedReason: String!

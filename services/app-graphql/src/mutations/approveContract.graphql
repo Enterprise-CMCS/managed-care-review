@@ -1,4 +1,4 @@
-mutation approveContract($input: approveContractInput!) {
+mutation approveContract($input: ApproveContractInput!) {
     approveContract(input: $input) {
         contract {
             ...contractFieldsFragment
