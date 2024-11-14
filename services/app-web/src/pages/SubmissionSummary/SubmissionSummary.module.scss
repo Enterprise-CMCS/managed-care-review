@@ -45,3 +45,11 @@
 .backLinkContainerNoSideBar {
     padding-bottom: uswds.units(2);
 }
+
+.approveWithdrawButtonContainer {
+    justify-content: end;
+
+    button {
+        margin-right: 0;
+    }
+}

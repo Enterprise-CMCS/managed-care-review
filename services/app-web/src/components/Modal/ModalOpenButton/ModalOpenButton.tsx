@@ -7,7 +7,7 @@ import { useTealium } from '../../../hooks'
 import { usePage } from '../../../contexts/PageContext'
 import { extractText } from '../../TealiumLogging/tealiamLoggingHelpers'
 
-type ModalOpenButtonProps = {
+export type ModalOpenButtonProps = {
     id: string
     modalRef: React.RefObject<ModalRef>
     children: React.ReactNode

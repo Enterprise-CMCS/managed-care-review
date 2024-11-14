@@ -45,7 +45,8 @@ export {
     mockValidCMSApproverUser,
     iterableCmsUsersMockData,
     iterableAdminUsersMockData,
-    mockValidBusinessOwnerUser
+    mockValidBusinessOwnerUser,
+    iterableNonCMSUsersMockData
 } from './userGQLMock'
 
 export {
