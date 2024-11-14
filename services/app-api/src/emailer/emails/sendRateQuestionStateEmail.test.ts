@@ -214,6 +214,25 @@ describe('sendRateQuestionStateEmail', () => {
             })
         )
     })
+    it('includes mmcratesetting in the ccAddress', async () => {
+        const template = await sendRateQuestionStateEmail(
+            testRate,
+            testEmailConfig(),
+            currentQuestion()
+        )
+
+        if (template instanceof Error) {
+            throw template
+        }
+
+        expect(template).toEqual(
+            expect.objectContaining({
+                ccAddresses: expect.arrayContaining([
+                    ...testEmailConfig().dmcpSubmissionEmails,
+                ]),
+            })
+        )
+    })
     it('to addresses list includes all state contacts on all contracts submitted with rate', async () => {
         const template = await sendRateQuestionStateEmail(
             testRate,
