@@ -19,6 +19,6 @@
         "declaration": true,
         "outDir": "./build"
     },
-    "include": ["src/**/*"],
+    "include": ["src/**/*", "src/data/statePrograms.json"],
     "exclude": ["src/gen/**/*"]
 }

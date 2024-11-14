@@ -12,7 +12,7 @@ import { GraphQLError } from 'graphql/index'
 import type { Emailer } from '../../emailer'
 import type { EmailParameterStore } from '../../parameterStore'
 import type { LDService } from '../../launchDarkly/launchDarkly'
-import type { StateCodeType } from '../../common-code/healthPlanFormDataType'
+import type { StateCodeType } from '@mc-review/hpp'
 
 export function createContractQuestionResponseResolver(
     store: Store,

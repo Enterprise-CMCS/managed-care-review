@@ -1,7 +1,7 @@
 import type { Context } from '../../handlers/apollo_gql'
 import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
 import { FetchCurrentUserDocument } from '../../gen/gqlClient'
-import typedStatePrograms from '@mc-review/common-code'
+import { typedStatePrograms } from '@mc-review/hpp'
 import { testStateUser } from '../../testHelpers/userHelpers'
 
 describe('currentUser', () => {

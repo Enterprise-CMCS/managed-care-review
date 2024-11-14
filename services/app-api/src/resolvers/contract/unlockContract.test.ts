@@ -25,7 +25,7 @@ import {
 import { addNewRateToTestContract } from '../../testHelpers/gqlRateHelpers'
 import { testLDService } from '../../testHelpers/launchDarklyHelpers'
 import { testEmailConfig, testEmailer } from '../../testHelpers/emailerHelpers'
-import { packageName } from '../../common-code/healthPlanFormDataType'
+import { packageName } from '@mc-review/hpp'
 import { generateRateCertificationName } from '../rate/generateRateCertificationName'
 import { getTestStateAnalystsEmails } from '../../testHelpers/parameterStoreHelpers'
 import { nullsToUndefined } from '../../domain-models/nullstoUndefined'
