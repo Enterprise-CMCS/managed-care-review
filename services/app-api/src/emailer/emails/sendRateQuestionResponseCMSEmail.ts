@@ -37,8 +37,6 @@ export const sendRateQuestionResponseCMSEmail = async (
 
     let receiverEmails = [...stateAnalystsEmails, ...config.devReviewTeamEmails]
 
-    const ccAddresses = [...config.dmcpSubmissionEmails]
-
     if (division === 'DMCP') {
         receiverEmails.push(...config.dmcpReviewEmails)
     } else if (division === 'OACT') {
@@ -75,7 +73,6 @@ export const sendRateQuestionResponseCMSEmail = async (
     } else {
         return {
             toAddresses: receiverEmails,
-            ccAddresses,
             replyToAddresses: [],
             sourceEmail: config.emailSource,
             subject: `${

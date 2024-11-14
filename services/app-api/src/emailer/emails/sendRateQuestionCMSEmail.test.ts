@@ -43,24 +43,22 @@ describe('sendRateQuestionCMSEmail', () => {
             throw template
         }
 
-        expect(template).toEqual(
-            expect.not.objectContaining({
-                toAddresses: expect.arrayContaining([
-                    ...testEmailConfig().oactEmails,
-                    ...testEmailConfig().dmcpReviewEmails,
-                ]),
-            })
-        )
-
-        // expect consistent email addresses to be in toAddresses and ccAddresses
+        // expected to include address
         expect(template).toEqual(
             expect.objectContaining({
                 toAddresses: expect.arrayContaining([
                     ...stateAnalysts,
                     ...testEmailConfig().devReviewTeamEmails,
                 ]),
-                ccAddresses: expect.arrayContaining([
-                    ...testEmailConfig().dmcpSubmissionEmails,
+            })
+        )
+
+        // expected to not include addresses
+        expect(template).toEqual(
+            expect.not.objectContaining({
+                toAddresses: expect.arrayContaining([
+                    ...testEmailConfig().oactEmails,
+                    ...testEmailConfig().dmcpReviewEmails,
                 ]),
             })
         )
@@ -86,9 +84,6 @@ describe('sendRateQuestionCMSEmail', () => {
                     ...testEmailConfig().devReviewTeamEmails,
                     ...testEmailConfig().oactEmails,
                 ]),
-                ccAddresses: expect.arrayContaining([
-                    ...testEmailConfig().dmcpSubmissionEmails,
-                ]),
             })
         )
     })
@@ -112,9 +107,6 @@ describe('sendRateQuestionCMSEmail', () => {
                     ...stateAnalysts,
                     ...testEmailConfig().devReviewTeamEmails,
                     ...testEmailConfig().dmcpReviewEmails,
-                ]),
-                ccAddresses: expect.arrayContaining([
-                    ...testEmailConfig().dmcpSubmissionEmails,
                 ]),
             })
         )
