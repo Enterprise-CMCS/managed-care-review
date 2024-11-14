@@ -19,7 +19,7 @@ async function approveContract(
         })
 
         if (!contract) {
-            const err = `PRISMA ERROR: Cannot find the current rev to update with contract id: ${contractID}`
+            const err = `PRISMA ERROR: Cannot find contract with id: ${contractID}`
             console.error(err)
             return new NotFoundError(err)
         }
