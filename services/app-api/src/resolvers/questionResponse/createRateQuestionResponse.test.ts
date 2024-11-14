@@ -210,11 +210,9 @@ describe('createRateQuestionResponse', () => {
                 toAddresses: expect.arrayContaining(
                     Array.from(cmsRecipientEmails)
                 ),
-                bodyText: expect.stringContaining(
-                    `The state submitted responses to OACT's questions about ${rateName}`
-                ),
+                bodyText: expect.stringContaining(`This should fail in CI`),
                 bodyHTML: expect.stringContaining(
-                    `<a href="http://localhost/rates/${rateID}/question-and-answers">View rate Q&A</a>`
+                    `<a href="http://localhost/submissions/${rateID}/question-and-answers">View submission Q&A</a>`
                 ),
             })
         )
