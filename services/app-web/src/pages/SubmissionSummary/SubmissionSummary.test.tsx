@@ -1,6 +1,6 @@
 import { screen, waitFor, within } from '@testing-library/react'
 import { Route, Routes } from 'react-router'
-import { RoutesRecord } from '../../constants/routes'
+import { RoutesRecord } from '../../constants'
 import {
     fetchCurrentUserMock,
     fetchContractMockSuccess,
@@ -13,11 +13,11 @@ import {
     mockValidCMSUser,
     iterableNonCMSUsersMockData,
 } from '../../testHelpers/apolloMocks'
-import { renderWithProviders } from '../../testHelpers/jestHelpers'
+import { renderWithProviders } from '../../testHelpers'
 import { SubmissionSummary } from './SubmissionSummary'
 import { SubmissionSideNav } from '../SubmissionSideNav'
-import { testS3Client } from '../../testHelpers/s3Helpers'
-import { mockContractPackageUnlockedWithUnlockedType } from '../../testHelpers/apolloMocks/contractPackageDataMock'
+import { testS3Client } from '../../testHelpers'
+import { mockContractPackageUnlockedWithUnlockedType } from '../../testHelpers/apolloMocks'
 import { ReviewSubmit } from '../StateSubmission/ReviewSubmit'
 import { generatePath, Location } from 'react-router-dom'
 
@@ -1073,12 +1073,12 @@ describe('SubmissionSummary', () => {
 
                 // expect submission approval button to be on the screen
                 expect(
-                    screen.getByRole('button', { name: 'Approve submission' })
+                    screen.queryByTestId('approval-modal-toggle-button')
                 ).toBeInTheDocument()
 
                 // expect submission approval button to not be disabled
                 expect(
-                    screen.getByRole('button', { name: 'Approve submission' })
+                    screen.queryByTestId('approval-modal-toggle-button')
                 ).not.toBeDisabled()
 
                 // expect unlock button to have outline style
@@ -1087,6 +1087,7 @@ describe('SubmissionSummary', () => {
                 ).toHaveClass('usa-button--outline')
             }
         )
+
         it('renders disabled approve submission button on unlocked submission', async () => {
             const unlockedContract =
                 mockContractPackageUnlockedWithUnlockedType({
@@ -1131,14 +1132,14 @@ describe('SubmissionSummary', () => {
                 expect(screen.getByText('MCR-MN-0005-SNBC')).toBeInTheDocument()
             })
 
-            // expect submission approval button to be on the screen
+            // expect submission approval modal toggle button to not exist
             expect(
-                screen.getByRole('button', { name: 'Approve submission' })
+                screen.queryByTestId('approval-modal-toggle-button')
             ).toBeInTheDocument()
 
             // expect submission approval button to be disabled
             expect(
-                screen.getByRole('button', { name: 'Approve submission' })
+                screen.queryByTestId('approval-modal-toggle-button')
             ).toBeDisabled()
 
             // expect unlock button to be disabled
@@ -1192,11 +1193,19 @@ describe('SubmissionSummary', () => {
                     expect(
                         screen.getByText('MCR-MN-0005-SNBC')
                     ).toBeInTheDocument()
+                    expect(
+                        screen.getByText('Submission description')
+                    ).toBeInTheDocument()
                 })
 
-                // expect submission approval button to be on the screen
+                // expect submission approval modal toggle button to not exist
                 expect(
-                    screen.queryByRole('button', { name: 'Approve submission' })
+                    screen.queryByTestId('approval-modal-toggle-button')
+                ).toBeNull()
+
+                // expect submission approval modal submit button to not exist
+                expect(
+                    screen.queryByTestId('approvalModal-modal-submit')
                 ).toBeNull()
             }
         )

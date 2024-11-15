@@ -13,7 +13,7 @@ import {
 } from '../Banner/GenericApiErrorBanner/GenericApiErrorBanner'
 import styles from './Modal.module.scss'
 
-import { ActionButton } from '../ActionButton'
+import { ActionButton, type ActionButtonProps } from '../ActionButton'
 import { ButtonWithLogging } from '../TealiumLogging'
 import { usePage } from '../../contexts/PageContext'
 
@@ -26,7 +26,7 @@ interface ModalComponentProps {
     onCancelText?: string
     className?: string
     modalRef: React.RefObject<ModalRef>
-    submitButtonProps?: JSX.IntrinsicElements['button']
+    submitButtonProps?: Partial<ActionButtonProps>
     isSubmitting?: boolean
     modalAlert?: GenericApiErrorProps
 }
