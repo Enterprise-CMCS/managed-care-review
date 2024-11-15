@@ -5,7 +5,7 @@ import {
     ButtonGroup,
 } from '@trussworks/react-uswds'
 import styles from '../QuestionResponse.module.scss'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { useS3 } from '../../../contexts/S3Context'
 import {
     ActionButton,
@@ -20,7 +20,6 @@ import {
 } from '../../../components/FileUpload'
 import { PageActionsContainer } from '../../StateSubmission/PageActions'
 import { useErrorSummary } from '../../../hooks/useErrorSummary'
-import { QAUploadFormSummary } from '../QAUploadFormSummary'
 import { Division } from '../../../gen/gqlClient'
 import { divisionFullNames } from '../QuestionResponseHelpers'
 
@@ -30,6 +29,8 @@ type UploadQuestionsFormProps = {
     apiError: boolean
     type: 'contract' | 'rate'
     round: number
+    division: Division
+    id: string
 }
 
 const UploadQuestionsForm = ({
@@ -37,9 +38,10 @@ const UploadQuestionsForm = ({
     apiError,
     apiLoading,
     type,
-    round
+    round,
+    division,
+    id,
 }: UploadQuestionsFormProps) => {
-    const { division, id } = useParams<{ division: string; id: string }>()
     const [shouldValidate, setShouldValidate] = React.useState(false)
     const navigate = useNavigate()
     const { handleDeleteFile, handleUploadFile, handleScanFile } = useS3()
@@ -56,7 +58,8 @@ const UploadQuestionsForm = ({
     const uploadComponentID = `${type}-questions-upload`
     const showFileUploadError = Boolean(shouldValidate && fileUploadError)
     const fileUploadErrorFocusKey = hasNoFiles
-        ? uploadComponentID: '#file-items-list'
+        ? uploadComponentID
+        : '#file-items-list'
 
     const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
@@ -85,8 +88,8 @@ const UploadQuestionsForm = ({
             {apiError && <GenericApiErrorBanner />}
             <fieldset className="usa-fieldset">
                 <h2>Add questions</h2>
-                <div id='formSummary'>
-                    <span>{`Asked by: ${divisionFullNames[division?.toUpperCase() as Division]}`}</span>
+                <div id="formSummary">
+                    <span>{`Asked by: ${divisionFullNames[division]}`}</span>
                     <span>Round {round}</span>
                 </div>
                 {shouldValidate && (

@@ -2,7 +2,6 @@ import { useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import {
     CreateQuestionResponseInput,
-    Division,
     useCreateRateQuestionResponseMutation,
     useFetchRateWithQuestionsQuery,
 } from '../../../gen/gqlClient'
@@ -20,9 +19,11 @@ import {
     extractDocumentsFromQuestion,
     extractQuestions,
     getQuestionRoundForQuestionID,
+    isValidCmsDivison,
 } from '../QuestionResponseHelpers/questionResponseHelpers'
 import { QuestionDisplayTable } from '../QATable/QuestionDisplayTable'
 import { useAuth } from '../../../contexts/AuthContext'
+import { Error404 } from '../../Errors/Error404Page'
 
 export const UploadRateResponse = () => {
     // router context
@@ -84,12 +85,23 @@ export const UploadRateResponse = () => {
         )
     }
 
+    // confirm division is valid
+    const realDivision = division?.toUpperCase()
+
+    if (!realDivision || !isValidCmsDivison(realDivision)) {
+        console.error(
+            'Upload Questions called with bogus division in URL: ',
+            division
+        )
+        return <Error404 />
+    }
+
     if (!rate || rate.status === 'DRAFT' || !questionID || !rate.questions) {
         return <GenericErrorPage />
     }
     const questionRoundNumber = getQuestionRoundForQuestionID(
         rate.questions,
-        division?.toUpperCase() as Division,
+        realDivision,
         questionID
     )
 
@@ -110,7 +122,7 @@ export const UploadRateResponse = () => {
             createResponse,
             rateID as string,
             input,
-            division as Division
+            realDivision
         )
 
         if (createResult instanceof Error) {

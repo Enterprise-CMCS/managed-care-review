@@ -73,7 +73,7 @@ describe('UploadRateQuestions', () => {
                     ).toBeInTheDocument()
                     expect(
                         screen.queryByText(
-                            `Questions from ${division.toUpperCase()}`
+                            `Asked by: Division of Managed Care Operations (DMCO)`
                         )
                     ).toBeInTheDocument()
                 })

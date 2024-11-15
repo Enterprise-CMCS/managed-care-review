@@ -1,13 +1,11 @@
-import React, { useEffect } from 'react'
+import { useEffect } from 'react'
 import { GridContainer } from '@trussworks/react-uswds'
-import { useNavigate, useOutletContext, useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import {
     CreateContractQuestionInput,
-    Division,
     useCreateContractQuestionMutation,
     useFetchContractWithQuestionsQuery,
 } from '../../../gen/gqlClient'
-import { SideNavOutletContextType } from '../../SubmissionSideNav/SubmissionSideNav'
 import { usePage } from '../../../contexts/PageContext'
 import { Breadcrumbs } from '../../../components/Breadcrumbs/Breadcrumbs'
 import { createContractQuestionWrapper } from '../../../gqlHelpers/mutationWrappersForUserFriendlyErrors'
@@ -18,12 +16,14 @@ import { FileItemT } from '../../../components'
 import { getNextCMSRoundNumber } from '../QuestionResponseHelpers'
 import { ErrorOrLoadingPage } from '../../StateSubmission'
 import { handleAndReturnErrorState } from '../../StateSubmission/ErrorOrLoadingPage'
+import { isValidCmsDivison } from '../QuestionResponseHelpers/questionResponseHelpers'
+import { Error404 } from '../../Errors/Error404Page'
 
 export const UploadContractQuestions = () => {
     // router context
     // eslint-disable-next-line @typescript-eslint/no-use-before-define
     const { updateHeading } = usePage()
-    const { id, division } = useParams<{ division: Division; id: string;}>()
+    const { id, division } = useParams<{ division: string; id: string }>()
     const navigate = useNavigate()
 
     const {
@@ -63,11 +63,14 @@ export const UploadContractQuestions = () => {
         )
     }
 
-    if (!contract || contract.status === 'DRAFT' || !contract.questions || !division) {
+    if (
+        !contract ||
+        contract.status === 'DRAFT' ||
+        !contract.questions ||
+        !division
+    ) {
         return <GenericErrorPage />
     }
-
-    const nextRoundNumber =  getNextCMSRoundNumber(contract.questions, division)
 
     const handleFormSubmit = async (cleaned: FileItemT[]) => {
         const questionDocs = cleaned.map((item) => {
@@ -94,6 +97,22 @@ export const UploadContractQuestions = () => {
         }
     }
 
+    // confirm division is valid
+    const realDivision = division?.toUpperCase()
+
+    if (!realDivision || !isValidCmsDivison(realDivision)) {
+        console.error(
+            'Upload Questions called with bogus division in URL: ',
+            division
+        )
+        return <Error404 />
+    }
+
+    const nextRoundNumber = getNextCMSRoundNumber(
+        contract.questions,
+        realDivision
+    )
+
     return (
         <GridContainer>
             <Breadcrumbs
@@ -116,6 +135,8 @@ export const UploadContractQuestions = () => {
                 type="contract"
                 handleSubmit={handleFormSubmit}
                 round={nextRoundNumber}
+                division={realDivision}
+                id={contract.id}
             />
         </GridContainer>
     )

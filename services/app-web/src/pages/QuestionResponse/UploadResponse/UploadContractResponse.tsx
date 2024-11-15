@@ -1,9 +1,8 @@
-import React, { useEffect } from 'react'
+import { useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import {
     CreateQuestionResponseInput,
     useCreateContractQuestionResponseMutation,
-    Division,
     useFetchContractWithQuestionsQuery,
 } from '../../../gen/gqlClient'
 import styles from '../QuestionResponse.module.scss'
@@ -18,11 +17,13 @@ import {
     extractDocumentsFromQuestion,
     extractQuestions,
     getQuestionRoundForQuestionID,
+    isValidCmsDivison,
 } from '../QuestionResponseHelpers/questionResponseHelpers'
 import { ErrorOrLoadingPage } from '../../StateSubmission'
 import { handleAndReturnErrorState } from '../../StateSubmission/ErrorOrLoadingPage'
 import { QuestionDisplayTable } from '../QATable/QuestionDisplayTable'
 import { useAuth } from '../../../contexts/AuthContext'
+import { Error404 } from '../../Errors/Error404Page'
 
 export const UploadContractResponse = () => {
     // router context
@@ -54,12 +55,24 @@ export const UploadContractResponse = () => {
     const contract = fetchContractData?.fetchContract.contract
     const contractName =
         (contract?.packageSubmissions &&
+            contract?.packageSubmissions?.length > 0 &&
             contract?.packageSubmissions[0].contractRevision.contractName) ||
         ''
     // side effects
     useEffect(() => {
         updateHeading({ customHeading: `${contractName} Add response` })
     }, [contractName, updateHeading])
+
+    // confirm division is valid
+    const realDivision = division?.toUpperCase()
+
+    if (!realDivision || !isValidCmsDivison(realDivision)) {
+        console.error(
+            'Upload Questions called with bogus division in URL: ',
+            division
+        )
+        return <Error404 />
+    }
 
     if (fetchContractLoading) {
         return <ErrorOrLoadingPage state="LOADING" />
@@ -99,7 +112,7 @@ export const UploadContractResponse = () => {
             createResponse,
             id as string,
             input,
-            division as Division
+            realDivision
         )
         if (createResult instanceof Error) {
             console.info(createResult.message)
@@ -112,7 +125,7 @@ export const UploadContractResponse = () => {
     )
     const questionRound = getQuestionRoundForQuestionID(
         contract.questions,
-        division?.toUpperCase() as Division,
+        realDivision,
         questionID
     )
     return (

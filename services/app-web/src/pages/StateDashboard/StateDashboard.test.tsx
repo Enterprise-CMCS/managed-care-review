@@ -133,13 +133,13 @@ describe('StateDashboard', () => {
         )
 
         const link2 = within(rows[2]).getByRole('link')
-        expect(link2).toHaveAttribute(
+        expect(link2).toHaveAttribute('href', '/submissions/test-abc-submitted')
+
+        const link3 = within(rows[3]).getByRole('link')
+        expect(link3).toHaveAttribute(
             'href',
             '/submissions/test-abc-unlocked/edit/review-and-submit'
         )
-
-        const link3 = within(rows[3]).getByRole('link')
-        expect(link3).toHaveAttribute('href', '/submissions/test-abc-submitted')
     })
 
     it('displays submissions table without rate programs', async () => {

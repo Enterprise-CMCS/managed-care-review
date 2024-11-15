@@ -23,7 +23,7 @@ import { createContractQuestionResponseNetworkFailure } from '../../../testHelpe
 import { SubmissionSideNav } from '../../SubmissionSideNav'
 
 describe('UploadContractResponse', () => {
-    const division = 'testDivision'
+    const division = 'dmcp'
     const questionID = 'testQuestion'
 
     it('displays file upload for correct cms division', async () => {
@@ -44,6 +44,12 @@ describe('UploadContractResponse', () => {
                         fetchCurrentUserMock({
                             user: mockValidUser(),
                             statusCode: 200,
+                        }),
+                        fetchContractWithQuestionsMockSuccess({
+                            contract: {
+                                ...contract,
+                                id: '15',
+                            },
                         }),
                         fetchContractWithQuestionsMockSuccess({
                             contract: {
@@ -88,6 +94,12 @@ describe('UploadContractResponse', () => {
                         fetchCurrentUserMock({
                             user: mockValidUser(),
                             statusCode: 200,
+                        }),
+                        fetchContractWithQuestionsMockSuccess({
+                            contract: {
+                                ...contract,
+                                id: '15',
+                            },
                         }),
                         fetchContractWithQuestionsMockSuccess({
                             contract: {
@@ -147,6 +159,12 @@ describe('UploadContractResponse', () => {
                                 id: '15',
                             },
                         }),
+                        fetchContractWithQuestionsMockSuccess({
+                            contract: {
+                                ...contract,
+                                id: '15',
+                            },
+                        }),
                     ],
                 },
                 routerProvider: {
@@ -191,6 +209,12 @@ describe('UploadContractResponse', () => {
                         fetchCurrentUserMock({
                             user: mockValidUser(),
                             statusCode: 200,
+                        }),
+                        fetchContractWithQuestionsMockSuccess({
+                            contract: {
+                                ...contract,
+                                id: '15',
+                            },
                         }),
                         fetchContractWithQuestionsMockSuccess({
                             contract: {
@@ -246,6 +270,12 @@ describe('UploadContractResponse', () => {
                         fetchCurrentUserMock({
                             user: mockValidUser(),
                             statusCode: 200,
+                        }),
+                        fetchContractWithQuestionsMockSuccess({
+                            contract: {
+                                ...contract,
+                                id: '15',
+                            },
                         }),
                         fetchContractWithQuestionsMockSuccess({
                             contract: {
@@ -319,6 +349,12 @@ describe('UploadContractResponse', () => {
                                 id: '15',
                             },
                         }),
+                        fetchContractWithQuestionsMockSuccess({
+                            contract: {
+                                ...contract,
+                                id: '15',
+                            },
+                        }),
                         createContractQuestionResponseNetworkFailure(),
                     ],
                 },
@@ -354,7 +390,9 @@ describe('UploadContractResponse', () => {
                 <Routes>
                     <Route element={<SubmissionSideNav />}>
                         <Route
-                            path={RoutesRecord.SUBMISSIONS_UPLOAD_CONTRACT_RESPONSE}
+                            path={
+                                RoutesRecord.SUBMISSIONS_UPLOAD_CONTRACT_RESPONSE
+                            }
                             element={<UploadContractResponse />}
                         />
                     </Route>
@@ -365,6 +403,12 @@ describe('UploadContractResponse', () => {
                             fetchCurrentUserMock({
                                 user: mockValidUser(),
                                 statusCode: 200,
+                            }),
+                            fetchContractWithQuestionsMockSuccess({
+                                contract: {
+                                    ...contract,
+                                    id: '15',
+                                },
                             }),
                             fetchContractWithQuestionsMockSuccess({
                                 contract: {

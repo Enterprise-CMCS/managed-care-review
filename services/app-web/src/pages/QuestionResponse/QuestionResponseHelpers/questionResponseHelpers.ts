@@ -108,6 +108,10 @@ const getUserDivision = (user: CmsUser): Division | undefined => {
     return undefined
 }
 
+function isValidCmsDivison(division: string): division is Division {
+    return ['DMCO', 'DMCP', 'OACT'].includes(division)
+}
+
 const getDivisionOrder = (division?: Division): Division[] =>
     ['DMCO', 'DMCP', 'OACT'].sort((a, b) => {
         if (a === division) {
@@ -174,6 +178,7 @@ export {
     divisionFullNames,
     getAddedByName,
     extractDocumentsFromQuestion,
+    isValidCmsDivison,
 }
 
 export type {

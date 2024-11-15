@@ -72,6 +72,12 @@ describe('RateQuestionResponse', () => {
                                 id: '15',
                             },
                         }),
+                        fetchContractWithQuestionsMockSuccess({
+                            contract: {
+                                ...contract,
+                                id: '15',
+                            },
+                        }),
                         fetchRateWithQuestionsMockSuccess({
                             rate: { id: secondRateRev.rateID },
                             rateRev: secondRateRev,
@@ -234,6 +240,12 @@ describe('RateQuestionResponse', () => {
                                 id: '15',
                             },
                         }),
+                        fetchContractWithQuestionsMockSuccess({
+                            contract: {
+                                ...contract,
+                                id: '15',
+                            },
+                        }),
                     ],
                 },
                 routerProvider: {
@@ -257,6 +269,12 @@ describe('RateQuestionResponse', () => {
                         fetchCurrentUserMock({
                             user: mockValidStateUser(),
                             statusCode: 200,
+                        }),
+                        fetchContractWithQuestionsMockSuccess({
+                            contract: {
+                                ...draftContract,
+                                id: '15',
+                            },
                         }),
                         fetchContractWithQuestionsMockSuccess({
                             contract: {
