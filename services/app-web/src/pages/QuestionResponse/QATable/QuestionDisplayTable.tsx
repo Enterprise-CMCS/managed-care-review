@@ -14,7 +14,9 @@ export const QuestionDisplayTable = ({
     user: User
     onlyDisplayInitial: boolean
 }) => {
-    const displayDocuments = onlyDisplayInitial ? [documents[0]] : documents
+    const displayDocuments = onlyDisplayInitial
+        ? [documents[documents.length - 1]]
+        : documents
     return (
         <table className={`borderTopLinearGradient ${styles.qaDocumentTable}`}>
             <thead>

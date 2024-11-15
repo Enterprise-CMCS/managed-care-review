@@ -1,20 +1,16 @@
-import { flatten } from 'cypress/types/lodash'
 import {
     CmsUser,
     CmsUsersUnion,
     ContractQuestion,
-    ContractQuestionEdge,
     Document,
     IndexContractQuestionsPayload,
     IndexRateQuestionsPayload,
     QuestionResponse,
     RateQuestion,
-    RateQuestionEdge,
     StateUser,
     User,
 } from '../../../gen/gqlClient'
 import { Division } from '../../../gen/gqlClient'
-import { a } from 'vitest/dist/suite-IbNSsUWN'
 
 type QuestionData = {
     id: string
@@ -168,7 +164,7 @@ const getNextCMSRoundNumber = (
 }
 
 const getAddedByName = (currentUser: User, addedBy: User) => {
-    const currentIsStateUser = currentUser.role === 'StateUser'
+    const currentIsStateUser = currentUser.__typename === 'StateUser'
 
     if (currentUser?.id === addedBy.id) {
         return 'You'

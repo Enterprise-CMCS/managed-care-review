@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { GridContainer } from '@trussworks/react-uswds'
+import styles from '../QuestionResponse.module.scss'
 import { useNavigate, useParams } from 'react-router-dom'
 import {
     CreateRateQuestionInput,
@@ -114,7 +114,7 @@ export const UploadRateQuestions = () => {
     }
 
     return (
-        <GridContainer>
+        <div className={styles.uploadFormContainer}>
             <Breadcrumbs
                 items={[
                     {
@@ -138,6 +138,6 @@ export const UploadRateQuestions = () => {
                 division={realDivision}
                 id={rate.id}
             />
-        </GridContainer>
+        </div>
     )
 }
