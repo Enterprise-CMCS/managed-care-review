@@ -24,7 +24,7 @@ export function approveContract(
         const span = tracer?.startSpan('approveContract', {}, ctx)
         setResolverDetailsOnActiveSpan('approveContract', user, span)
 
-        const { contractID } = input
+        const { contractID, updatedReason } = input
         span?.setAttribute('mcreview.package_id', contractID)
 
         if (!isCMSUser(user) && !isCMSApproverUser(user)) {
@@ -76,6 +76,7 @@ export function approveContract(
         const approveContractResult = await store.approveContract({
             contractID: contractID,
             updatedByID: user.id,
+            updatedReason: updatedReason || '',
         })
 
         if (approveContractResult instanceof UserInputPostgresError) {

@@ -19,11 +19,7 @@ import { Error404 } from '../Errors/Error404Page'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import styles from './SubmissionSummary.module.scss'
 import { ChangeHistory } from '../../components/ChangeHistory'
-import {
-    ModalOpenButton,
-    UnlockSubmitModal,
-    Modal,
-} from '../../components/Modal'
+import { ModalOpenButton, ActionModal, Modal } from '../../components/Modal'
 import { RoutesRecord } from '../../constants'
 import { useRouteParams } from '../../hooks'
 import { getVisibleLatestContractFormData } from '../../gqlHelpers/contractsAndRates'
@@ -302,9 +298,14 @@ export const SubmissionSummary = (): React.ReactElement => {
 
                 <ChangeHistory contract={contract} />
 
-                <UnlockSubmitModal
+                <ActionModal
                     modalRef={modalRef}
                     modalType="UNLOCK_CONTRACT"
+                    submissionData={contract}
+                />
+                <ActionModal
+                    modalRef={approveModalRef}
+                    modalType="APPROVE_CONTRACT"
                     submissionData={contract}
                 />
             </GridContainer>

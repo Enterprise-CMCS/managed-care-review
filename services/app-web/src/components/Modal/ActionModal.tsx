@@ -8,6 +8,7 @@ import {
     useUnlockContractMutation,
     FetchHealthPlanPackageWithQuestionsDocument,
     FetchContractDocument,
+    useApproveContractMutation,
 } from '../../gen/gqlClient'
 import { useFormik } from 'formik'
 import { usePrevious } from '../../hooks/usePrevious'
@@ -19,6 +20,7 @@ import { ERROR_MESSAGES } from '../../constants/errors'
 import {
     submitMutationWrapperV2,
     unlockMutationWrapperV2,
+    approveMutationWrapper,
 } from '../../gqlHelpers/mutationWrappersForUserFriendlyErrors'
 import { useTealium } from '../../hooks'
 
@@ -31,6 +33,7 @@ const CONTRACT_UNLOCK_SUBMIT_TYPES = [
     'SUBMIT_CONTRACT',
     'RESUBMIT_CONTRACT',
     'UNLOCK_CONTRACT',
+    'APPROVE_CONTRACT',
 ] as const
 
 type RateModalType = (typeof RATE_UNLOCK_SUBMIT_TYPES)[number]
@@ -52,14 +55,14 @@ type ContractModalProps = {
     modalType: ContractModalType
 } & SharedAdditionalProps
 
-type UnlockSubmitModalProps = RateModalProps | ContractModalProps
+type ActionModalProps = RateModalProps | ContractModalProps
 
 type ModalValueType = {
     modalHeading?: string
     onSubmitText?: string
     modalDescription?: string
     inputHint?: string
-    unlockSubmitModalInputValidation?: string
+    actionModalInputValidation?: string
     errorHeading: string
     errorSuggestion?: string
 }
@@ -72,8 +75,7 @@ const modalValueDictionary: { [Property in SharedModalType]: ModalValueType } =
             modalDescription:
                 'Once you submit, this rate will be sent to CMS for review and you will no longer be able to make changes.',
             inputHint: 'Provide summary of all changes made to this rate',
-            unlockSubmitModalInputValidation:
-                'You must provide a summary of changes',
+            actionModalInputValidation: 'You must provide a summary of changes',
             errorHeading: ERROR_MESSAGES.resubmit_error_heading,
         },
         RESUBMIT_CONTRACT: {
@@ -82,15 +84,14 @@ const modalValueDictionary: { [Property in SharedModalType]: ModalValueType } =
             modalDescription:
                 'Once you submit, this contract will be sent to CMS for review and you will no longer be able to make changes.',
             inputHint: 'Provide summary of all changes made to this contract',
-            unlockSubmitModalInputValidation:
-                'You must provide a summary of changes',
+            actionModalInputValidation: 'You must provide a summary of changes',
             errorHeading: ERROR_MESSAGES.resubmit_error_heading,
         },
         UNLOCK_RATE: {
             modalHeading: 'Reason for unlocking rate',
             onSubmitText: 'Unlock',
             inputHint: 'Provide reason for unlocking',
-            unlockSubmitModalInputValidation:
+            actionModalInputValidation:
                 'You must provide a reason for unlocking this rate',
             errorHeading: ERROR_MESSAGES.unlock_error_heading,
         },
@@ -98,7 +99,7 @@ const modalValueDictionary: { [Property in SharedModalType]: ModalValueType } =
             modalHeading: 'Reason for unlocking submission',
             onSubmitText: 'Unlock',
             inputHint: 'Provide reason for unlocking',
-            unlockSubmitModalInputValidation:
+            actionModalInputValidation:
                 'You must provide a reason for unlocking this submission',
             errorHeading: ERROR_MESSAGES.unlock_error_heading,
         },
@@ -118,15 +119,24 @@ const modalValueDictionary: { [Property in SharedModalType]: ModalValueType } =
             errorHeading: ERROR_MESSAGES.submit_error_heading,
             errorSuggestion: ERROR_MESSAGES.submit_error_suggestion,
         },
+        APPROVE_CONTRACT: {
+            modalHeading: 'Are you sure you want to approve this submission?',
+            onSubmitText: 'Approve submission',
+            modalDescription:
+                'Once you approve, the submission status will change from Submitted to Approved.',
+            inputHint: 'Provide an optional note',
+            errorHeading: ERROR_MESSAGES.approve_error_heading,
+            errorSuggestion: ERROR_MESSAGES.approve_error_generic,
+        },
     }
 
-export const UnlockSubmitModal = ({
+export const ActionModal = ({
     submissionData,
     submissionName,
     modalType,
     modalRef,
     setIsSubmitting,
-}: UnlockSubmitModalProps): React.ReactElement | null => {
+}: ActionModalProps): React.ReactElement | null => {
     const { logFormSubmitEvent } = useTealium()
     const [focusErrorsInModal, setFocusErrorsInModal] = useState(true)
     const [modalAlert, setModalAlert] = useState<
@@ -138,7 +148,7 @@ export const UnlockSubmitModal = ({
         modalValueDictionary[modalType as SharedModalType]
 
     const modalFormInitialValues = {
-        unlockSubmitModalInput: '',
+        actionModalInput: '',
     }
 
     const [submitContract, { loading: submitContractLoading }] =
@@ -147,31 +157,46 @@ export const UnlockSubmitModal = ({
     const [unlockContract, { loading: unlockContractLoading, client }] =
         useUnlockContractMutation()
 
+    const [approveContract, { loading: approveContractLoading }] =
+        useApproveContractMutation()
+
     // TODO submitRate and unlockRate should also be set up here - unlock and edit rate epic
     const formik = useFormik({
         initialValues: modalFormInitialValues,
         validationSchema: Yup.object().shape({
-            unlockSubmitModalInput: Yup.string().defined(
-                modalValues.unlockSubmitModalInputValidation
-            ),
+            actionModalInput: Yup.string().when([], {
+                is: () => inputNotRequired,
+                then: Yup.string().defined(
+                    modalValues.actionModalInputValidation
+                ),
+                otherwise: Yup.string().notRequired(),
+            }),
         }),
-        onSubmit: (values) => onSubmit(values.unlockSubmitModalInput),
+        onSubmit: (values) => onSubmit(values.actionModalInput),
     })
 
-    const mutationLoading =
-        modalType === 'UNLOCK_CONTRACT'
-            ? unlockContractLoading
-            : submitContractLoading
+    let mutationLoading
+    switch (modalType) {
+        case 'UNLOCK_CONTRACT':
+            mutationLoading = unlockContractLoading
+            break
+        case 'APPROVE_CONTRACT':
+            mutationLoading = approveContractLoading
+            break
+        default:
+            mutationLoading = submitContractLoading
+    }
 
     const isSubmitting = mutationLoading || formik.isSubmitting
     const includesFormInput =
         modalType === 'UNLOCK_CONTRACT' ||
         modalType === 'RESUBMIT_CONTRACT' ||
         modalType === 'UNLOCK_RATE' ||
-        modalType === 'RESUBMIT_RATE'
+        modalType === 'RESUBMIT_RATE' ||
+        modalType === 'APPROVE_CONTRACT'
 
     const prevSubmitting = usePrevious(isSubmitting)
-
+    const inputNotRequired = modalType !== 'APPROVE_CONTRACT'
     const submitHandler = async () => {
         setFocusErrorsInModal(true)
         if (includesFormInput) {
@@ -181,7 +206,7 @@ export const UnlockSubmitModal = ({
         }
     }
 
-    const onSubmit = async (unlockSubmitModalInput?: string): Promise<void> => {
+    const onSubmit = async (actionModalInput?: string): Promise<void> => {
         let result
 
         logFormSubmitEvent({
@@ -206,22 +231,29 @@ export const UnlockSubmitModal = ({
                 result = await submitMutationWrapperV2(
                     submitContract,
                     submissionData.id,
-                    unlockSubmitModalInput
+                    actionModalInput
                 )
                 break
             case 'RESUBMIT_CONTRACT':
                 result = await submitMutationWrapperV2(
                     submitContract,
                     submissionData.id,
-                    unlockSubmitModalInput
+                    actionModalInput
+                )
+                break
+            case 'APPROVE_CONTRACT':
+                result = await approveMutationWrapper(
+                    approveContract,
+                    submissionData.id,
+                    actionModalInput
                 )
                 break
             case 'UNLOCK_CONTRACT':
-                if (unlockSubmitModalInput) {
+                if (actionModalInput) {
                     result = await unlockMutationWrapperV2(
                         unlockContract,
                         submissionData.id,
-                        unlockSubmitModalInput
+                        actionModalInput
                     )
                 } else {
                     console.info('error has occured with unlocking contract')
@@ -285,9 +317,9 @@ export const UnlockSubmitModal = ({
 
     // Focus submittedReason field in submission modal on Resubmit click when errors exist
     useEffect(() => {
-        if (focusErrorsInModal && formik.errors.unlockSubmitModalInput) {
+        if (focusErrorsInModal && formik.errors.actionModalInput) {
             const fieldElement: HTMLElement | null = document.querySelector(
-                `[name="unlockSubmitModalInput"]`
+                `[name="actionModalInput"]`
             )
             if (fieldElement) {
                 fieldElement.focus()
@@ -323,17 +355,15 @@ export const UnlockSubmitModal = ({
                     {modalValues.modalDescription && (
                         <p>{modalValues.modalDescription}</p>
                     )}
-                    <FormGroup
-                        error={Boolean(formik.errors.unlockSubmitModalInput)}
-                    >
-                        {formik.errors.unlockSubmitModalInput && (
+                    <FormGroup error={Boolean(formik.errors.actionModalInput)}>
+                        {formik.errors.actionModalInput && (
                             <PoliteErrorMessage
                                 formFieldLabel={
                                     modalValues.modalHeading ?? modalType
                                 }
                                 role="alert"
                             >
-                                {formik.errors.unlockSubmitModalInput}
+                                {formik.errors.actionModalInput}
                             </PoliteErrorMessage>
                         )}
                         {modalValues.inputHint && (
@@ -342,14 +372,14 @@ export const UnlockSubmitModal = ({
                             </span>
                         )}
                         <Textarea
-                            id="unlockSubmitModalInput"
-                            name="unlockSubmitModalInput"
-                            data-testid="unlockSubmitModalInput"
+                            id="actionModalInput"
+                            name="actionModalInput"
+                            data-testid="actionModalInput"
                             aria-labelledby="unlock-submit-modal-input-hint"
-                            aria-required
-                            error={!!formik.errors.unlockSubmitModalInput}
+                            aria-required={inputNotRequired}
+                            error={!!formik.errors.actionModalInput}
                             onChange={formik.handleChange}
-                            defaultValue={formik.values.unlockSubmitModalInput}
+                            defaultValue={formik.values.actionModalInput}
                         />
                     </FormGroup>
                 </form>
