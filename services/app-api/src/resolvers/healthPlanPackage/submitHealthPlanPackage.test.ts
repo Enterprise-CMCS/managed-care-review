@@ -1,5 +1,7 @@
-import SUBMIT_HEALTH_PLAN_PACKAGE from '../../../../app-graphql/src/mutations/submitHealthPlanPackage.graphql'
-import FETCH_RATE from '../../../../app-graphql/src/queries/fetchRate.graphql'
+import {
+    SubmitHealthPlanPackageDocument,
+    FetchRateDocument,
+} from '../../gen/gqlClient'
 import {
     constructTestPostgresServer,
     createAndUpdateTestHealthPlanPackage,
@@ -21,10 +23,6 @@ import {
     latestFormData,
     previousFormData,
 } from '../../testHelpers/healthPlanPackageHelpers'
-import {
-    mockEmailParameterStoreError,
-    getTestStateAnalystsEmails,
-} from '../../testHelpers/parameterStoreHelpers'
 import * as awsSESHelpers from '../../testHelpers/awsSESHelpers'
 import {
     createDBUsersWithFullData,
@@ -42,13 +40,23 @@ import {
     unlockTestContract,
 } from '../../testHelpers/gqlContractHelpers'
 import { convertRateInfoToRateFormDataInput } from '../../domain-models/contractAndRates/convertHPPtoContractWithRates'
-import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
-import { NewPostgresStore } from '../../postgres'
 
 describe(`Tests $testName`, () => {
     const cmsUser = testCMSUser()
+    // add some users to the db, assign them to the state
+    const assignedUsers = [
+        testCMSUser({
+            givenName: 'Roku',
+            email: 'roku@example.com',
+        }),
+        testCMSUser({
+            givenName: 'Izumi',
+            email: 'izumi@example.com',
+        }),
+    ]
 
-    afterEach(() => {
+    afterEach(async () => {
+        await createDBUsersWithFullData([...assignedUsers, cmsUser])
         jest.restoreAllMocks()
     })
     it('returns a StateSubmission if complete', async () => {
@@ -64,7 +72,7 @@ describe(`Tests $testName`, () => {
 
         // submit
         const submitResult = await server.executeOperation({
-            query: SUBMIT_HEALTH_PLAN_PACKAGE,
+            query: SubmitHealthPlanPackageDocument,
             variables: {
                 input: {
                     pkgID: draftID,
@@ -317,7 +325,7 @@ describe(`Tests $testName`, () => {
         const draftID = draft.id
 
         const submitResult = await server.executeOperation({
-            query: SUBMIT_HEALTH_PLAN_PACKAGE,
+            query: SubmitHealthPlanPackageDocument,
             variables: {
                 input: {
                     pkgID: draftID,
@@ -340,7 +348,7 @@ describe(`Tests $testName`, () => {
         const draftID = draft.id
 
         const submitResult = await server.executeOperation({
-            query: SUBMIT_HEALTH_PLAN_PACKAGE,
+            query: SubmitHealthPlanPackageDocument,
             variables: {
                 input: {
                     pkgID: draftID,
@@ -380,7 +388,7 @@ describe(`Tests $testName`, () => {
 
         const draftID = draft.id
         const submitResult = await server.executeOperation({
-            query: SUBMIT_HEALTH_PLAN_PACKAGE,
+            query: SubmitHealthPlanPackageDocument,
             variables: {
                 input: {
                     pkgID: draftID,
@@ -425,7 +433,7 @@ describe(`Tests $testName`, () => {
 
         const draftID = draft.id
         const submitResult = await server.executeOperation({
-            query: SUBMIT_HEALTH_PLAN_PACKAGE,
+            query: SubmitHealthPlanPackageDocument,
             variables: {
                 input: {
                     pkgID: draftID,
@@ -551,7 +559,7 @@ describe(`Tests $testName`, () => {
 
         for (const rate of draftRates) {
             const rateWithHistory = await server.executeOperation({
-                query: FETCH_RATE,
+                query: FetchRateDocument,
                 variables: {
                     input: {
                         rateID: rate.id,
@@ -665,7 +673,7 @@ describe(`Tests $testName`, () => {
         const draftID = draft.id
 
         const submitResult = await server.executeOperation({
-            query: SUBMIT_HEALTH_PLAN_PACKAGE,
+            query: SubmitHealthPlanPackageDocument,
             variables: {
                 input: {
                     pkgID: draftID,
@@ -684,11 +692,23 @@ describe(`Tests $testName`, () => {
         const server = await constructTestPostgresServer({
             emailer: mockEmailer,
         })
+
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: cmsUser,
+            },
+        })
+
+        const assignedUserIDs = assignedUsers.map((u) => u.id)
+        const stateAnalystsEmails = assignedUsers.map((u) => u.email)
+
+        await updateTestStateAssignments(cmsServer, 'FL', assignedUserIDs)
+
         const draft = await createAndUpdateTestHealthPlanPackage(server, {})
         const draftID = draft.id
 
         const submitResult = await server.executeOperation({
-            query: SUBMIT_HEALTH_PLAN_PACKAGE,
+            query: SubmitHealthPlanPackageDocument,
             variables: {
                 input: {
                     pkgID: draftID,
@@ -711,7 +731,6 @@ describe(`Tests $testName`, () => {
             sub.programIDs,
             programs
         )
-        const stateAnalystsEmails = getTestStateAnalystsEmails(sub.stateCode)
 
         const cmsEmails = [
             ...config.devReviewTeamEmails,
@@ -744,6 +763,11 @@ describe(`Tests $testName`, () => {
             emailer: mockEmailer,
         })
 
+        const assignedUserIDs = assignedUsers.map((u) => u.id)
+        const stateAnalystsEmails = assignedUsers.map((u) => u.email)
+
+        await updateTestStateAssignments(cmsServer, 'FL', assignedUserIDs)
+
         const draft = await createAndUpdateTestHealthPlanPackage(server, {
             submissionType: 'CONTRACT_ONLY',
             rateInfos: [],
@@ -751,7 +775,7 @@ describe(`Tests $testName`, () => {
         const draftID = draft.id
 
         await server.executeOperation({
-            query: SUBMIT_HEALTH_PLAN_PACKAGE,
+            query: SubmitHealthPlanPackageDocument,
             variables: {
                 input: {
                     pkgID: draftID,
@@ -762,7 +786,7 @@ describe(`Tests $testName`, () => {
         await unlockTestContract(cmsServer, draftID, 'unlock to resubmit')
 
         const submitResult = await server.executeOperation({
-            query: SUBMIT_HEALTH_PLAN_PACKAGE,
+            query: SubmitHealthPlanPackageDocument,
             variables: {
                 input: {
                     pkgID: draftID,
@@ -786,7 +810,6 @@ describe(`Tests $testName`, () => {
             sub.programIDs,
             programs
         )
-        const stateAnalystsEmails = getTestStateAnalystsEmails(sub.stateCode)
 
         const cmsEmails = [
             ...config.devReviewTeamEmails,
@@ -804,149 +827,6 @@ describe(`Tests $testName`, () => {
         )
     })
 
-    it('send CMS email to CMS from the database', async () => {
-        const ldService = testLDService({
-            'read-write-state-assignments': true,
-        })
-
-        const prismaClient = await sharedTestPrismaClient()
-        const postgresStore = NewPostgresStore(prismaClient)
-
-        const config = testEmailConfig()
-        const mockEmailer = testEmailer(config)
-        //mock invoke email submit lambda
-        const server = await constructTestPostgresServer({
-            store: postgresStore,
-            emailer: mockEmailer,
-            ldService,
-        })
-        const cmsServer = await constructTestPostgresServer({
-            store: postgresStore,
-            context: {
-                user: cmsUser,
-            },
-            ldService,
-        })
-
-        // add some users to the db, assign them to the state
-        const assignedUsers = [
-            testCMSUser({
-                givenName: 'Roku',
-                email: 'roku@example.com',
-            }),
-            testCMSUser({
-                givenName: 'Izumi',
-                email: 'izumi@example.com',
-            }),
-        ]
-        await createDBUsersWithFullData(assignedUsers)
-
-        const assignedUserIDs = assignedUsers.map((u) => u.id)
-        const assignedUserEmails = assignedUsers.map((u) => u.email)
-
-        await updateTestStateAssignments(cmsServer, 'FL', assignedUserIDs)
-
-        // submit
-        const draft = await createAndUpdateTestHealthPlanPackage(server, {})
-        const draftID = draft.id
-
-        const submitResult = await server.executeOperation({
-            query: SUBMIT_HEALTH_PLAN_PACKAGE,
-            variables: {
-                input: {
-                    pkgID: draftID,
-                },
-            },
-        })
-
-        const currentRevision =
-            submitResult?.data?.submitHealthPlanPackage?.pkg.revisions[0].node
-
-        const sub = base64ToDomain(currentRevision.formDataProto)
-        if (sub instanceof Error) {
-            throw sub
-        }
-
-        const programs = [defaultFloridaProgram()]
-        const name = packageName(
-            sub.stateCode,
-            sub.stateNumber,
-            sub.programIDs,
-            programs
-        )
-
-        const cmsEmails = [...config.devReviewTeamEmails, ...assignedUserEmails]
-
-        // email subject line is correct for CMS email
-        expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
-            expect.objectContaining({
-                subject: expect.stringContaining(
-                    `New Managed Care Submission: ${name}`
-                ),
-                sourceEmail: config.emailSource,
-                toAddresses: expect.arrayContaining(Array.from(cmsEmails)),
-            })
-        )
-    })
-
-    it('does send email when request for state analysts emails fails', async () => {
-        const config = testEmailConfig()
-        const mockEmailer = testEmailer(config)
-        //mock invoke email submit lambda
-        const mockEmailParameterStore = mockEmailParameterStoreError()
-        const server = await constructTestPostgresServer({
-            emailer: mockEmailer,
-            emailParameterStore: mockEmailParameterStore,
-        })
-        const draft = await createAndUpdateTestHealthPlanPackage(server, {})
-        const draftID = draft.id
-
-        await server.executeOperation({
-            query: SUBMIT_HEALTH_PLAN_PACKAGE,
-            variables: {
-                input: {
-                    pkgID: draftID,
-                },
-            },
-        })
-
-        expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
-            expect.objectContaining({
-                toAddresses: expect.arrayContaining(
-                    Array.from(config.devReviewTeamEmails)
-                ),
-            })
-        )
-    })
-
-    it('does log error when request for state specific analysts emails failed', async () => {
-        const mockEmailParameterStore = mockEmailParameterStoreError()
-        const consoleErrorSpy = jest.spyOn(console, 'error')
-        const error = {
-            error: 'No store found',
-            message: 'getStateAnalystsEmails failed',
-            operation: 'getStateAnalystsEmails',
-            status: 'ERROR',
-        }
-
-        const server = await constructTestPostgresServer({
-            emailParameterStore: mockEmailParameterStore,
-        })
-        const draft = await createAndUpdateTestHealthPlanPackage(server, {})
-        const draftID = draft.id
-
-        await server.executeOperation({
-            query: SUBMIT_HEALTH_PLAN_PACKAGE,
-            variables: {
-                input: {
-                    pkgID: draftID,
-                },
-            },
-        })
-
-        expect(consoleErrorSpy).toHaveBeenCalledWith(error)
-    })
-
     it('send state email to logged in user if submission is valid', async () => {
         const config = testEmailConfig()
         const mockEmailer = testEmailer(config)
@@ -959,7 +839,7 @@ describe(`Tests $testName`, () => {
         const draftID = draft.id
 
         const submitResult = await server.executeOperation({
-            query: SUBMIT_HEALTH_PLAN_PACKAGE,
+            query: SubmitHealthPlanPackageDocument,
             variables: {
                 input: {
                     pkgID: draftID,
@@ -1011,7 +891,7 @@ describe(`Tests $testName`, () => {
         const draftID = draft.id
 
         const submitResult = await server.executeOperation({
-            query: SUBMIT_HEALTH_PLAN_PACKAGE,
+            query: SubmitHealthPlanPackageDocument,
             variables: {
                 input: {
                     pkgID: draftID,
@@ -1070,7 +950,7 @@ describe(`Tests $testName`, () => {
         )
 
         const submitResult = await stateServer.executeOperation({
-            query: SUBMIT_HEALTH_PLAN_PACKAGE,
+            query: SubmitHealthPlanPackageDocument,
             variables: {
                 input: {
                     pkgID: stateSubmission.id,
@@ -1204,7 +1084,7 @@ describe(`Tests $testName`, () => {
         const draftID = draft.id
 
         const submitResult = await server.executeOperation({
-            query: SUBMIT_HEALTH_PLAN_PACKAGE,
+            query: SubmitHealthPlanPackageDocument,
             variables: {
                 input: {
                     pkgID: draftID,
@@ -1233,7 +1113,7 @@ describe(`Tests $testName`, () => {
         const draftID = draft.id
 
         const submitResult = await server.executeOperation({
-            query: SUBMIT_HEALTH_PLAN_PACKAGE,
+            query: SubmitHealthPlanPackageDocument,
             variables: {
                 input: {
                     pkgID: draftID,
@@ -1279,7 +1159,7 @@ describe(`Tests $testName`, () => {
 
         // submit
         const submitResult = await server.executeOperation({
-            query: SUBMIT_HEALTH_PLAN_PACKAGE,
+            query: SubmitHealthPlanPackageDocument,
             variables: {
                 input: {
                     pkgID: draftID,
@@ -1311,7 +1191,7 @@ describe(`Tests $testName`, () => {
 
             // submit
             const submitResult = await server.executeOperation({
-                query: SUBMIT_HEALTH_PLAN_PACKAGE,
+                query: SubmitHealthPlanPackageDocument,
                 variables: {
                     input: {
                         pkgID: draftID,
@@ -1351,7 +1231,7 @@ describe(`Tests $testName`, () => {
 
             // submit
             const submitResult = await server.executeOperation({
-                query: SUBMIT_HEALTH_PLAN_PACKAGE,
+                query: SubmitHealthPlanPackageDocument,
                 variables: {
                     input: {
                         pkgID: draftID,
@@ -1384,7 +1264,7 @@ describe(`Tests $testName`, () => {
 
             // submit
             const submitResult = await server.executeOperation({
-                query: SUBMIT_HEALTH_PLAN_PACKAGE,
+                query: SubmitHealthPlanPackageDocument,
                 variables: {
                     input: {
                         pkgID: draftID,
@@ -1417,7 +1297,7 @@ describe(`Tests $testName`, () => {
 
             // submit
             const submitResult = await server.executeOperation({
-                query: SUBMIT_HEALTH_PLAN_PACKAGE,
+                query: SubmitHealthPlanPackageDocument,
                 variables: {
                     input: {
                         pkgID: draftID,

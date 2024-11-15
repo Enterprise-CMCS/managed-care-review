@@ -13,6 +13,7 @@ import type {
     RateType,
     UnlockedContractType,
     UpdateInfoType,
+    RateQuestionType,
 } from '../domain-models'
 import { SESServiceException } from '@aws-sdk/client-ses'
 import { testSendSESEmail } from './awsSESHelpers'
@@ -300,6 +301,40 @@ const mockRate = (ratePartial?: Partial<RateType>): RateType => {
 
         revisions: [rateRev],
         packageSubmissions: [rateSubmission],
+        questions: {
+            DMCOQuestions: {
+                totalCount: 1,
+                edges: [
+                    {
+                        node: mockRateQuestionAndResponses({
+                            id: 'dmco-rate-question-1',
+                            rateID: 'test-rate-234',
+                            createdAt: new Date('2024-04-23'),
+                            addedBy: testCMSUser({
+                                divisionAssignment: 'DMCO',
+                            }),
+                            division: 'DMCO',
+                            documents: [
+                                {
+                                    name: 'dmco-rate-question-1',
+                                    s3URL: 's3://bucketName/key/dmco-rate-question-1-doc',
+                                    downloadURL:
+                                        'https://fake-bucket.s3.amazonaws.com/test',
+                                },
+                            ],
+                        }),
+                    },
+                ],
+            },
+            DMCPQuestions: {
+                totalCount: 0,
+                edges: [],
+            },
+            OACTQuestions: {
+                totalCount: 0,
+                edges: [],
+            },
+        },
 
         ...ratePartial,
     }
@@ -320,6 +355,7 @@ const mockUnlockedContract = (
         status: 'UNLOCKED',
         stateCode: 'MN',
         stateNumber: 4,
+        reviewStatus: 'UNDER_REVIEW',
 
         draftRevision: mockContractRev(),
         draftRates,
@@ -683,22 +719,42 @@ const mockContractAmendmentFormData = (
     }
 }
 
-const mockQuestionAndResponses = (
-    questionData?: Partial<ContractQuestionType>
-): ContractQuestionType => {
-    const question: ContractQuestionType = {
+const mockCommonQuestionAndResponses = <
+    T extends
+        | (Partial<ContractQuestionType> & { contractID: string })
+        | (Partial<RateQuestionType> & { rateID: string }),
+    R extends ContractQuestionType | RateQuestionType,
+>(
+    questionData?: T
+): R => {
+    const question = {
         id: `test-question-id-1`,
-        contractID: 'contract-id-test',
         createdAt: new Date('01/01/2024'),
         addedBy: testCMSUser(),
         documents: [
             {
                 name: 'Test Question',
                 s3URL: 's3://bucketname/key/test1',
+                downloadURL: 'https://fake-bucket.s3.amazonaws.com/test',
             },
         ],
         division: 'DMCO',
-        responses: [],
+        responses: [
+            {
+                id: 'test-question-response-id-1',
+                questionID: 'test-question-id-1',
+                createdAt: new Date('01/02/2024'),
+                addedBy: testStateUser(),
+                documents: [
+                    {
+                        name: 'Test Question Response',
+                        s3URL: 's3://bucketname/key/test1response',
+                        downloadURL:
+                            'https://fake-bucket.s3.amazonaws.com/test1response',
+                    },
+                ],
+            },
+        ],
         ...questionData,
     }
 
@@ -718,6 +774,7 @@ const mockQuestionAndResponses = (
                 {
                     name: 'Test Question Response',
                     s3URL: 's3://bucketname/key/test1',
+                    downloadURL: 'https://fake-bucket.s3.amazonaws.com/test',
                 },
             ],
         },
@@ -731,8 +788,16 @@ const mockQuestionAndResponses = (
           }))
         : defaultResponses
 
-    return question
+    return question as R
 }
+
+const mockQuestionAndResponses = (
+    question: Partial<ContractQuestionType> & { contractID: string }
+): ContractQuestionType => mockCommonQuestionAndResponses(question)
+
+const mockRateQuestionAndResponses = (
+    question: Partial<RateQuestionType> & { rateID: string }
+): RateQuestionType => mockCommonQuestionAndResponses(question)
 
 export {
     testEmailConfig,
@@ -748,4 +813,6 @@ export {
     mockUnlockedContractOnlyFormData,
     testEmailer,
     mockQuestionAndResponses,
+    mockRateQuestionAndResponses,
+    mockRate,
 }

@@ -1,5 +1,5 @@
 import { GenericErrorPage } from './GenericErrorPage'
-import { recordJSException, recordSpan } from '../../otelHelpers/tracingHelper'
+import { recordJSException } from '../../otelHelpers/tracingHelper'
 import { useEffect } from 'react'
 import { EmptyHeader } from '../../components/Header/EmptyHeader'
 import styles from '../App/AppBody.module.scss'
@@ -18,7 +18,6 @@ function ErrorBoundaryRoot({
 }): React.ReactElement {
     useEffect(() => {
         const logError = async () => {
-            await recordSpan('React: ErrorBoundary')
             recordJSException(
                 `Crash in ErrorBoundaryRoot. Error message: ${error}`
             )

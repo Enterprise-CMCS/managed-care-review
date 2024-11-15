@@ -4,7 +4,7 @@ import {
     defaultFloridaRateProgram,
     updateTestStateAssignments,
 } from '../../testHelpers/gqlHelpers'
-import UNLOCK_CONTRACT from '../../../../app-graphql/src/mutations/unlockContract.graphql'
+import { UnlockContractDocument } from '../../gen/gqlClient'
 import { testS3Client } from '../../../../app-web/src/testHelpers/s3Helpers'
 import { expectToBeDefined } from '../../testHelpers/assertionHelpers'
 
@@ -15,7 +15,6 @@ import {
     testStateUser,
 } from '../../testHelpers/userHelpers'
 import {
-    createAndSubmitTestContract,
     createAndSubmitTestContractWithRate,
     createAndUpdateTestContractWithoutRates,
     createSubmitAndUnlockTestContract,
@@ -23,20 +22,15 @@ import {
     unlockTestContract,
 } from '../../testHelpers/gqlContractHelpers'
 import { addNewRateToTestContract } from '../../testHelpers/gqlRateHelpers'
-import { testLDService } from '../../testHelpers/launchDarklyHelpers'
 import { testEmailConfig, testEmailer } from '../../testHelpers/emailerHelpers'
 import { packageName } from '../../common-code/healthPlanFormDataType'
 import { generateRateCertificationName } from '../rate/generateRateCertificationName'
-import { getTestStateAnalystsEmails } from '../../testHelpers/parameterStoreHelpers'
 import { nullsToUndefined } from '../../domain-models/nullstoUndefined'
 import { NewPostgresStore } from '../../postgres'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 
 describe('unlockContract', () => {
     const mockS3 = testS3Client()
-    const ldService = testLDService({
-        'rate-edit-unlock': true,
-    })
 
     afterEach(() => {
         jest.resetAllMocks()
@@ -53,7 +47,6 @@ describe('unlockContract', () => {
                     context: {
                         user: mockUser(),
                     },
-                    ldService,
                     s3Client: mockS3,
                 })
                 const draft =
@@ -92,14 +85,12 @@ describe('unlockContract', () => {
 
             it('returns status error if rate is actively being edited in draft', async () => {
                 const stateServer = await constructTestPostgresServer({
-                    ldService,
                     s3Client: mockS3,
                 })
                 const cmsServer = await constructTestPostgresServer({
                     context: {
                         user: mockUser(),
                     },
-                    ldService,
                     s3Client: mockS3,
                 })
 
@@ -110,7 +101,7 @@ describe('unlockContract', () => {
 
                 // Try to unlock the contract again
                 const unlockResult2 = await cmsServer.executeOperation({
-                    query: UNLOCK_CONTRACT,
+                    query: UnlockContractDocument,
                     variables: {
                         input: {
                             contractID: contract.id,
@@ -129,14 +120,13 @@ describe('unlockContract', () => {
 
     it('returns unauthorized error for state user', async () => {
         const stateServer = await constructTestPostgresServer({
-            ldService,
             s3Client: mockS3,
         })
 
         const contract = await createAndSubmitTestContractWithRate(stateServer)
 
         const unlockResult = await stateServer.executeOperation({
-            query: UNLOCK_CONTRACT,
+            query: UnlockContractDocument,
             variables: {
                 input: {
                     contractID: contract.id,
@@ -151,135 +141,7 @@ describe('unlockContract', () => {
         )
     })
 
-    it('send email to CMS when unlocking contract only submission succeeds', async () => {
-        const config = testEmailConfig()
-        const mockEmailer = testEmailer(config)
-        //mock invoke email submit lambda
-        const stateServer = await constructTestPostgresServer()
-        const cmsServer = await constructTestPostgresServer({
-            context: {
-                user: testCMSUser(),
-            },
-            emailer: mockEmailer,
-        })
-
-        // First, create a new submitted submission
-        const stateSubmission = await createAndSubmitTestContract(stateServer)
-        // Unlock
-        const unlockResult = await unlockTestContract(
-            cmsServer,
-            stateSubmission.id,
-            'Super duper good reason.'
-        )
-
-        const currentRevision = unlockResult.draftRevision
-
-        const programs = [defaultFloridaProgram()]
-        const name = packageName(
-            unlockResult.stateCode,
-            unlockResult.stateNumber,
-            currentRevision.formData.programIDs,
-            programs
-        )
-        const stateAnalystsEmails = getTestStateAnalystsEmails(
-            unlockResult.stateCode
-        )
-
-        const cmsEmails = [
-            ...config.devReviewTeamEmails,
-            ...stateAnalystsEmails,
-        ]
-
-        // email subject line is correct for CMS email
-        expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
-            1,
-            expect.objectContaining({
-                subject: expect.stringContaining(`${name} was unlocked`),
-                sourceEmail: config.emailSource,
-                toAddresses: expect.arrayContaining(Array.from(cmsEmails)),
-            })
-        )
-    })
-
     it('send email to CMS when unlocking submission succeeds', async () => {
-        const config = testEmailConfig()
-        const mockEmailer = testEmailer(config)
-        //mock invoke email submit lambda
-        const stateServer = await constructTestPostgresServer()
-        const cmsServer = await constructTestPostgresServer({
-            context: {
-                user: testCMSUser(),
-            },
-            emailer: mockEmailer,
-        })
-
-        // First, create a new submitted submission
-        const stateSubmission = await createAndSubmitTestContractWithRate(
-            stateServer,
-            {
-                riskBasedContract: true,
-            }
-        )
-        // Unlock
-        const unlockResult = await unlockTestContract(
-            cmsServer,
-            stateSubmission.id,
-            'Super duper good reason.'
-        )
-
-        const currentRevision = unlockResult.draftRevision
-
-        const programs = [defaultFloridaProgram()]
-        const ratePrograms = [defaultFloridaRateProgram()]
-        const name = packageName(
-            unlockResult.stateCode,
-            unlockResult.stateNumber,
-            currentRevision.formData.programIDs,
-            programs
-        )
-
-        const firstRateFormData =
-            unlockResult.draftRates[0].draftRevision?.formData
-        if (!firstRateFormData) {
-            throw new Error('should have a first rate with form data')
-        }
-
-        const convertedFirstRateFormData = nullsToUndefined(
-            Object.assign({}, firstRateFormData)
-        )
-
-        const rateName = generateRateCertificationName(
-            convertedFirstRateFormData,
-            unlockResult.stateCode,
-            ratePrograms
-        )
-        const stateAnalystsEmails = getTestStateAnalystsEmails(
-            unlockResult.stateCode
-        )
-
-        const cmsEmails = [
-            ...config.devReviewTeamEmails,
-            ...stateAnalystsEmails,
-            ...config.oactEmails,
-        ]
-
-        // email subject line is correct for CMS email
-        expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
-            1,
-            expect.objectContaining({
-                subject: expect.stringContaining(`${name} was unlocked`),
-                sourceEmail: config.emailSource,
-                toAddresses: expect.arrayContaining(Array.from(cmsEmails)),
-                bodyHTML: expect.stringContaining(rateName),
-            })
-        )
-    })
-
-    it('send email to CMS with analysts from db when unlocking submission succeeds', async () => {
-        const ldService = testLDService({
-            'read-write-state-assignments': true,
-        })
-
         const config = testEmailConfig()
         const mockEmailer = testEmailer(config)
         const prismaClient = await sharedTestPrismaClient()
@@ -295,7 +157,6 @@ describe('unlockContract', () => {
             },
             emailer: mockEmailer,
             store: postgresStore,
-            ldService,
         })
 
         // add some users to the db, assign them to the state

@@ -12,11 +12,6 @@ type Query {
     fetchCurrentUser: User!
 
     """
-    fetchEmailSettings returns emailer config and settings
-    """
-    fetchEmailSettings: FetchEmailSettingsPayload!
-
-    """
     fetchHealthPlanPackage returns a specific HealthPlanPackage by id
 
     If a package with the given ID cannot be found, this query returns undefined
@@ -977,9 +972,24 @@ enum HealthPlanPackageStatus {
     RESUBMITTED
 }
 
+"""
+This status is used to determine whether the package is currently being edited by a state user
+or if it has been submitted and is being reviewed by CMS users.
+"""
+enum ReviewStatus {
+    UNDER_REVIEW
+    APPROVED
+}
+
 enum UnlockedStatus {
     UNLOCKED
     DRAFT
+}
+
+enum ContractActionType {
+    UNDER_REVIEW
+    APPROVAL_NOTICE
+    WITHDRAW
 }
 
 """
@@ -1034,6 +1044,21 @@ type UpdateInformation {
     updatedBy: UpdatedBy!
     "the reason provided by the user when performing the update"
     updatedReason: String!
+}
+
+"""
+ContractReviewStatusActions is used for the review status actions on the contract
+"""
+type ContractReviewStatusActions {
+    "the datetime when the update occured"
+    updatedAt: DateTime!
+    "the email of the user who performed the update"
+    updatedBy: UpdatedBy!
+    "the reason provided by the user when performing the update"
+    updatedReason: String!
+    ""
+    actionType: ContractActionType!
+    contractID: ID!
 }
 
 """
@@ -1158,16 +1183,6 @@ type EmailConfiguration {
     cmsReviewHelpEmailAddress: String!
     cmsRateHelpEmailAddress: String!
     helpDeskEmail: String!
-}
-
-type StateAnalystsConfiguration {
-    stateCode: String!
-    emails: [String!]!
-}
-type FetchEmailSettingsPayload {
-    "Email settings"
-    config: EmailConfiguration
-    stateAnalysts: [StateAnalystsConfiguration!]
 }
 
 """
@@ -1739,6 +1754,11 @@ type Contract {
     SUBMITTED and RESUBMITTED packages cannot be modified
     """
     status: HealthPlanPackageStatus!
+    """
+    Where the contract is in the review submission flow
+    Options are UNDER_REVIEW, APPROVED
+    """
+    reviewStatus: ReviewStatus!
     "initiallySubmittedAt is the initial date this contract was submitted at. Is not changed by unlock or resubmission."
     initiallySubmittedAt: DateTime
     "stateCode is the state code (e.g. CA or TN) for the submitting state"
@@ -1759,6 +1779,9 @@ type Contract {
     On submission they are cemented into a new ContractPackageSubmission
     """
     draftRates: [Rate!]
+
+    "reviewStatusActions are the who/when/why for review status changes on this contract"
+    reviewStatusActions: [ContractReviewStatusActions]
 
     """
     packageSubmissions are a snapshot of the contract and its related rates through time
@@ -1791,6 +1814,11 @@ type UnlockedContract {
     SUBMITTED and RESUBMITTED packages cannot be modified
     """
     status: UnlockedStatus!
+     """
+    Where the contract is in the review submission flow
+    Options are UNDER_REVIEW, APPROVED
+    """
+    reviewStatus: ReviewStatus!
     "initiallySubmittedAt is the initial date this contract was submitted at. Is not changed by unlock or resubmission."
     initiallySubmittedAt: Date
     "stateCode is the state code (e.g. CA or TN) for the submitting state"
@@ -1803,6 +1831,8 @@ type UnlockedContract {
     """
     stateNumber: Int!
     mccrsID: String
+    "reviewStatusActions are the who/when/why for review status changes on this contract"
+    reviewStatusActions: [ContractReviewStatusActions]
 
     "draftRevision is the currently modifiable revision if the rate is DRAFT or UNLOCKED"
     draftRevision: ContractRevision!

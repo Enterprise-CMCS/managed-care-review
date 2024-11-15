@@ -1,8 +1,6 @@
 import {
     ContractQuestionList,
     Division,
-    IndexContractQuestionsPayload,
-    IndexRateQuestionsPayload,
     RateQuestionList,
 } from '../../../gen/gqlClient'
 import type { QuestionRounds } from './QuestionResponseRound'
@@ -10,10 +8,7 @@ import { QuestionResponseRound } from './QuestionResponseRound'
 import { NavLinkWithLogging, SectionHeader } from '../../../components'
 import styles from '../QuestionResponse.module.scss'
 import { useAuth } from '../../../contexts/AuthContext'
-
-type IndexQuestionType =
-    | IndexContractQuestionsPayload
-    | IndexRateQuestionsPayload
+import { IndexQuestionType } from '../QuestionResponseHelpers'
 
 type CMSQuestionResponseTableProps = {
     indexQuestions: IndexQuestionType
@@ -25,6 +20,7 @@ export const CMSQuestionResponseTable = ({
     userDivision,
 }: CMSQuestionResponseTableProps) => {
     const { loggedInUser } = useAuth()
+
     const currentDivisionRounds = (): QuestionRounds => {
         if (!userDivision) {
             return []
@@ -33,7 +29,14 @@ export const CMSQuestionResponseTable = ({
         const divisionQuestions = indexQuestions[`${userDivision}Questions`]
         const rounds: QuestionRounds = []
 
-        divisionQuestions.edges.forEach(({ node }, index) => {
+        const sortedQuestions = [...divisionQuestions.edges]
+        sortedQuestions.sort(
+            (a, b) =>
+                new Date(b.node.createdAt).getTime() -
+                new Date(a.node.createdAt).getTime()
+        )
+
+        sortedQuestions.forEach(({ node }, index) => {
             if (!rounds[index]) {
                 rounds[index] = []
             }
@@ -55,9 +58,14 @@ export const CMSQuestionResponseTable = ({
                 const questionsList: RateQuestionList | ContractQuestionList =
                     value
 
-                //reverse questions to the earliest question first as rounds would be mismatched when looping through two arrays of different lengths
+                // Reverse each division question so that we start at round 1 for each question, otherwise we get
+                // mismatching rounds.
                 Array.from([...questionsList.edges])
-                    .reverse()
+                    .sort(
+                        (a, b) =>
+                            new Date(a.node.createdAt).getTime() -
+                            new Date(b.node.createdAt).getTime()
+                    )
                     .forEach(({ node }, index) => {
                         if (!rounds[index]) {
                             rounds[index] = []
@@ -71,8 +79,16 @@ export const CMSQuestionResponseTable = ({
             }
         })
 
-        // return the rounds to latest questions first
-        return rounds.reverse()
+        // return the round questions sorted to latest questions first and reverse rounds to latest round first
+        return rounds
+            .map((round) =>
+                round.sort(
+                    (a, b) =>
+                        new Date(b.questionData.createdAt).getTime() -
+                        new Date(a.questionData.createdAt).getTime()
+                )
+            )
+            .reverse()
     }
 
     return (
@@ -86,7 +102,7 @@ export const CMSQuestionResponseTable = ({
                         <NavLinkWithLogging
                             className="usa-button"
                             variant="unstyled"
-                            to={`./${userDivision}/upload-questions`}
+                            to={`./${userDivision.toLowerCase()}/upload-questions`}
                         >
                             Add questions
                         </NavLinkWithLogging>
@@ -99,7 +115,7 @@ export const CMSQuestionResponseTable = ({
                                 key={questionData.id}
                                 question={questionData}
                                 roundTitle={roundTitle}
-                                currentUser={loggedInUser}
+                                currentUser={loggedInUser!}
                             />
                         ))
                     )
@@ -111,7 +127,7 @@ export const CMSQuestionResponseTable = ({
                 className={styles.questionSection}
                 data-testid={'otherDivisionQuestions'}
             >
-                <SectionHeader header="Other division's questions" />
+                <SectionHeader header="Other divisions' questions" />
                 {otherDivisionRounds().length ? (
                     otherDivisionRounds().map((questionRound, index) =>
                         questionRound.map(({ roundTitle, questionData }) => (
@@ -119,7 +135,7 @@ export const CMSQuestionResponseTable = ({
                                 key={questionData.id}
                                 question={questionData}
                                 roundTitle={roundTitle}
-                                currentUser={loggedInUser}
+                                currentUser={loggedInUser!}
                             />
                         ))
                     )

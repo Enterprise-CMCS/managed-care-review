@@ -1,5 +1,5 @@
 import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
-import CREATE_API_KEY from '../../../../app-graphql/src/mutations/createAPIKey.graphql'
+import { CreateApiKeyDocument } from '../../gen/gqlClient'
 import { newJWTLib } from '../../jwt'
 import { testCMSUser } from '../../testHelpers/userHelpers'
 
@@ -19,7 +19,7 @@ describe('createAPIKey', () => {
         })
 
         const result = await server.executeOperation({
-            query: CREATE_API_KEY,
+            query: CreateApiKeyDocument,
         })
 
         const keyResult = result.data?.createAPIKey

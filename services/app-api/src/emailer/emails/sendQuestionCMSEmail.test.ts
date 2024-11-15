@@ -34,6 +34,7 @@ const cmsUser: CMSUserType = {
 const questions: ContractQuestionType[] = [
     mockQuestionAndResponses({
         id: 'test-question-id-1',
+        contractID: 'contract-id-test',
         addedBy: cmsUser,
         division: 'DMCO',
     }),

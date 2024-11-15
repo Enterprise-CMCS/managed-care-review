@@ -1,4 +1,4 @@
-import CREATE_CONTRACT_QUESTION_RESPONSE from 'app-graphql/src/mutations/createContractQuestionResponse.graphql'
+import { CreateContractQuestionResponseDocument } from '../../gen/gqlClient'
 import {
     constructTestPostgresServer,
     createTestQuestion,
@@ -15,16 +15,24 @@ import {
     testCMSUser,
 } from '../../testHelpers/userHelpers'
 import { testEmailConfig, testEmailer } from '../../testHelpers/emailerHelpers'
-import { findStatePrograms, NewPostgresStore } from '../../postgres'
-import { getTestStateAnalystsEmails } from '../../testHelpers/parameterStoreHelpers'
-import { testLDService } from '../../testHelpers/launchDarklyHelpers'
-import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
+import { findStatePrograms } from '../../postgres'
 
 describe('createContractQuestionResponse', () => {
     const cmsUser = testCMSUser()
+    // add some users to the db, assign them to the state in each test
+    const assignedUsers = [
+        testCMSUser({
+            givenName: 'Roku',
+            email: 'roku@example.com',
+        }),
+        testCMSUser({
+            givenName: 'Izumi',
+            email: 'izumi@example.com',
+        }),
+    ]
     beforeAll(async () => {
         //Inserting a new CMS user, with division assigned, in postgres in order to create the question to user relationship.
-        await createDBUsersWithFullData([cmsUser])
+        await createDBUsersWithFullData([...assignedUsers, cmsUser])
     })
 
     it('returns question response data', async () => {
@@ -71,7 +79,7 @@ describe('createContractQuestionResponse', () => {
         const fakeID = 'abc-123'
 
         const createResponseResult = await stateServer.executeOperation({
-            query: CREATE_CONTRACT_QUESTION_RESPONSE,
+            query: CreateContractQuestionResponseDocument,
             variables: {
                 input: {
                     questionID: fakeID,
@@ -103,7 +111,7 @@ describe('createContractQuestionResponse', () => {
         const createdQuestion = await createTestQuestion(cmsServer, contract.id)
 
         const createResponseResult = await cmsServer.executeOperation({
-            query: CREATE_CONTRACT_QUESTION_RESPONSE,
+            query: CreateContractQuestionResponseDocument,
             variables: {
                 input: {
                     questionID: createdQuestion.question.id,
@@ -140,6 +148,11 @@ describe('createContractQuestionResponse', () => {
             emailer: mockEmailer,
         })
 
+        const assignedUserIDs = assignedUsers.map((u) => u.id)
+        const assignedUserEmails = assignedUsers.map((u) => u.email)
+
+        await updateTestStateAssignments(cmsServer, 'FL', assignedUserIDs)
+
         const contract = await createAndSubmitTestContract(stateServer, 'FL', {
             riskBasedContract: true,
         })
@@ -153,11 +166,9 @@ describe('createContractQuestionResponse', () => {
 
         const contractName =
             contract.packageSubmissions[0].contractRevision.contractName
-        const stateAnalystsEmails = getTestStateAnalystsEmails(
-            contract.stateCode
-        )
+
         const cmsRecipientEmails = [
-            ...stateAnalystsEmails,
+            ...assignedUserEmails,
             ...emailConfig.devReviewTeamEmails,
             ...emailConfig.oactEmails,
         ]
@@ -177,82 +188,6 @@ describe('createContractQuestionResponse', () => {
                 ),
                 bodyHTML: expect.stringContaining(
                     `<a href="http://localhost/submissions/${contract.id}/question-and-answers">View submission Q&A</a>`
-                ),
-            })
-        )
-    })
-
-    it('send CMS email to state analysts from database', async () => {
-        const ldService = testLDService({
-            'read-write-state-assignments': true,
-        })
-
-        const prismaClient = await sharedTestPrismaClient()
-        const postgresStore = NewPostgresStore(prismaClient)
-
-        const config = testEmailConfig()
-        const mockEmailer = testEmailer(config)
-        //mock invoke email submit lambda
-        const stateServer = await constructTestPostgresServer({
-            store: postgresStore,
-            ldService,
-            emailer: mockEmailer,
-        })
-        const cmsServer = await constructTestPostgresServer({
-            store: postgresStore,
-            context: {
-                user: cmsUser,
-            },
-            ldService,
-        })
-
-        // add some users to the db, assign them to the state
-        const assignedUsers = [
-            testCMSUser({
-                givenName: 'Roku',
-                email: 'roku@example.com',
-            }),
-            testCMSUser({
-                givenName: 'Izumi',
-                email: 'izumi@example.com',
-            }),
-        ]
-
-        await createDBUsersWithFullData(assignedUsers)
-
-        const assignedUserIDs = assignedUsers.map((u) => u.id)
-        const assignedUserEmails = assignedUsers.map((u) => u.email)
-
-        await updateTestStateAssignments(cmsServer, 'FL', assignedUserIDs)
-
-        const stateSubmission = await createAndSubmitTestContract(stateServer)
-        const question = (
-            await createTestQuestion(cmsServer, stateSubmission.id)
-        ).question
-        await createTestQuestionResponse(stateServer, question.id)
-
-        const contractName =
-            stateSubmission.packageSubmissions[0].contractRevision.contractName
-        const cmsEmails = [...config.devReviewTeamEmails, ...assignedUserEmails]
-
-        // email subject line is correct for CMS email
-        // email is sent to the state anaylsts since it
-        // was submitted by a DCMO user
-        // Mock emailer is called 4 times, twice for submit, twice for response,
-        // first called to send the state email, then to CMS
-        expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
-            3,
-            expect.objectContaining({
-                subject: expect.stringContaining(
-                    `[LOCAL] New Responses for ${contractName}`
-                ),
-                sourceEmail: config.emailSource,
-                toAddresses: expect.arrayContaining(Array.from(cmsEmails)),
-                bodyText: expect.stringContaining(
-                    `The state submitted responses to DMCO's questions about ${contractName}`
-                ),
-                bodyHTML: expect.stringContaining(
-                    `<a href="http://localhost/submissions/${stateSubmission.id}/question-and-answers">View submission Q&A</a>`
                 ),
             })
         )
@@ -300,7 +235,7 @@ describe('createContractQuestionResponse', () => {
         ]
 
         expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
-            6, // New response CMS email notification is the fifth email
+            6, // New response state email notification is the fifth email
             expect.objectContaining({
                 subject: expect.stringContaining(
                     `[LOCAL] Response submitted to CMS for ${pkgName}`

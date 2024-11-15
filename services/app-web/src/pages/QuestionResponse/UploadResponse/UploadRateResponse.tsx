@@ -1,13 +1,12 @@
-import React, { useEffect } from 'react'
-import { GridContainer } from '@trussworks/react-uswds'
+import { useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import {
     CreateQuestionResponseInput,
-    Division,
     useCreateRateQuestionResponseMutation,
     useFetchRateWithQuestionsQuery,
 } from '../../../gen/gqlClient'
 import { usePage } from '../../../contexts/PageContext'
+import styles from '../QuestionResponse.module.scss'
 import { Breadcrumbs } from '../../../components/Breadcrumbs/Breadcrumbs'
 import { createRateQuestionResponseWrapper } from '../../../gqlHelpers/mutationWrappersForUserFriendlyErrors'
 import { RoutesRecord } from '../../../constants'
@@ -16,6 +15,15 @@ import { UploadResponseForm } from './UploadResponseForm'
 import { FileItemT } from '../../../components'
 import { ErrorOrLoadingPage } from '../../StateSubmission'
 import { handleAndReturnErrorState } from '../../StateSubmission/ErrorOrLoadingPage'
+import {
+    extractDocumentsFromQuestion,
+    extractQuestions,
+    getQuestionRoundForQuestionID,
+    isValidCmsDivison,
+} from '../QuestionResponseHelpers/questionResponseHelpers'
+import { QuestionDisplayTable } from '../QATable/QuestionDisplayTable'
+import { useAuth } from '../../../contexts/AuthContext'
+import { Error404 } from '../../Errors/Error404Page'
 
 export const UploadRateResponse = () => {
     // router context
@@ -28,6 +36,7 @@ export const UploadRateResponse = () => {
 
     const navigate = useNavigate()
     const { updateHeading } = usePage()
+    const { loggedInUser } = useAuth()
 
     // api
     const {
@@ -61,7 +70,7 @@ export const UploadRateResponse = () => {
 
     // side effects
     useEffect(() => {
-        updateHeading({ customHeading: `${rateName} Add response` })
+        updateHeading({ customHeading: `${rateName} Upload response` })
     }, [rateName, updateHeading])
 
     if (fetchRateLoading) {
@@ -76,9 +85,25 @@ export const UploadRateResponse = () => {
         )
     }
 
-    if (!rate || rate.status === 'DRAFT') {
+    // confirm division is valid
+    const realDivision = division?.toUpperCase()
+
+    if (!realDivision || !isValidCmsDivison(realDivision)) {
+        console.error(
+            'Upload Questions called with bogus division in URL: ',
+            division
+        )
+        return <Error404 />
+    }
+
+    if (!rate || rate.status === 'DRAFT' || !questionID || !rate.questions) {
         return <GenericErrorPage />
     }
+    const questionRoundNumber = getQuestionRoundForQuestionID(
+        rate.questions,
+        realDivision,
+        questionID
+    )
 
     const handleFormSubmit = async (cleaned: FileItemT[]) => {
         const responseDocs = cleaned.map((item) => {
@@ -97,7 +122,7 @@ export const UploadRateResponse = () => {
             createResponse,
             rateID as string,
             input,
-            division as Division
+            realDivision
         )
 
         if (createResult instanceof Error) {
@@ -108,10 +133,14 @@ export const UploadRateResponse = () => {
             )
         }
     }
+    const question = extractQuestions(rate.questions).find(
+        (question) => question.id == questionID
+    )
 
     return (
-        <GridContainer>
+        <div className={styles.uploadFormContainer}>
             <Breadcrumbs
+                className="usa-breadcrumb--wrap"
                 items={[
                     {
                         link: RoutesRecord.DASHBOARD_SUBMISSIONS,
@@ -137,7 +166,19 @@ export const UploadRateResponse = () => {
                 apiLoading={apiLoading}
                 apiError={Boolean(apiError)}
                 type="rate"
+                round={questionRoundNumber}
+                questionBeingAsked={
+                    question ? (
+                        <QuestionDisplayTable
+                            documents={extractDocumentsFromQuestion(question)}
+                            user={loggedInUser!}
+                            onlyDisplayInitial
+                        />
+                    ) : (
+                        <p>'Related question unable to display'</p>
+                    )
+                }
             />
-        </GridContainer>
+        </div>
     )
 }

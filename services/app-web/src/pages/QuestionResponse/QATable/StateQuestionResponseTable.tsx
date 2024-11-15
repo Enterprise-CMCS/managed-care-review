@@ -1,71 +1,100 @@
-import {
-    IndexContractQuestionsPayload,
-    IndexRateQuestionsPayload,
-} from '../../../gen/gqlClient'
+import { ContractQuestionList, RateQuestionList } from '../../../gen/gqlClient'
 import { SectionHeader } from '../../../components'
 import styles from '../QuestionResponse.module.scss'
 import { useAuth } from '../../../contexts/AuthContext'
-import { extractQuestions, QuestionData } from '../QuestionResponseHelpers'
-import { QATable } from './QATable'
-
-type Division = 'DMCO' |  'DMCP' | 'OACT'
-type IndexQuestionType =
-    | IndexContractQuestionsPayload
-    | IndexRateQuestionsPayload
+import { divisionFullNames } from '../QuestionResponseHelpers'
+import type { IndexQuestionType } from '../QuestionResponseHelpers'
+import { QuestionResponseRound, RoundData } from './QuestionResponseRound'
 
 type StateQuestionResponseTableProps = {
     indexQuestions: IndexQuestionType
+    header: string
 }
-type QuestionTableDataType = {
-    division: Division // eventually rip out division logic, replace with answered/unanswered
-    questions: QuestionData[]
-}
+
 export const StateQuestionResponseTable = ({
     indexQuestions,
+    header,
 }: StateQuestionResponseTableProps) => {
     const { loggedInUser } = useAuth()
-    const questions: QuestionTableDataType[] = []
-    const divisions: Division[] =   ['DMCO', 'DMCP', 'OACT']
-    divisions.forEach(
-        (division) =>
-            indexQuestions[`${division}Questions`].totalCount &&
-            questions.push({
-                division: division,
-                questions: extractQuestions(
-                    indexQuestions[`${division}Questions`].edges
-                ),
-            })
+    const answeredQuestions: RoundData[] = []
+    const unansweredQuestions: RoundData[] = []
+
+    // Bucket questions
+    Object.entries(indexQuestions).forEach(([key, value]) => {
+        if (key === '__typename') {
+            return
+        }
+        const questionsList: RateQuestionList | ContractQuestionList = value
+
+        // reverse questions to the earliest question first as rounds would be mismatched when looping through two arrays of different lengths
+        Array.from([...questionsList.edges]).forEach(({ node }, index) => {
+            if (node.responses.length > 0) {
+                answeredQuestions.push({
+                    roundTitle: `Asked by: ${divisionFullNames[node.division]}`,
+                    questionData: node,
+                })
+            } else {
+                unansweredQuestions.push({
+                    roundTitle: `Asked by: ${divisionFullNames[node.division]}`,
+                    questionData: node,
+                })
+            }
+        })
+    })
+
+    // Sort each round by latest questions first
+    const sortedAnsweredQuestions = answeredQuestions.sort(
+        (a, b) =>
+            new Date(b.questionData.createdAt).getTime() -
+            new Date(a.questionData.createdAt).getTime()
     )
-const mapQASections = () =>
-    questions.map((divisionQuestions) => (
-        <section
-            key={divisionQuestions.division}
-            className={styles.questionSection}
-            data-testid={`${divisionQuestions.division.toLowerCase()}-qa-section`}
-        >
-            <h4>{`Asked by ${divisionQuestions.division}`}</h4>
-            {divisionQuestions.questions.map((question, index) => (
-                <QATable
-                    key={question.id}
-                    question={question}
-                    division={divisionQuestions.division}
-                    round={divisionQuestions.questions.length - index}
-                    user={loggedInUser!}
-                />
-            ))}
-        </section>
-    ))
+    const sortedUnansweredQuestions = unansweredQuestions.sort(
+        (a, b) =>
+            new Date(b.questionData.createdAt).getTime() -
+            new Date(a.questionData.createdAt).getTime()
+    )
 
     return (
         <>
-
+            <div className={styles.tableHeader}>
+                <SectionHeader header={header} hideBorder />
+            </div>
             <section
                 className={styles.questionSection}
-                data-testid={'questions'}
+                data-testid={'outstandingQuestions'}
             >
-                <SectionHeader header="All questions" />
-                {questions.length ? (
-                  mapQASections()
+                <SectionHeader header="Outstanding questions" />
+                {sortedUnansweredQuestions.length ? (
+                    sortedUnansweredQuestions.map(
+                        ({ roundTitle, questionData }) => (
+                            <QuestionResponseRound
+                                key={questionData.id}
+                                question={questionData}
+                                roundTitle={roundTitle}
+                                currentUser={loggedInUser!}
+                            />
+                        )
+                    )
+                ) : (
+                    <p>No questions have been submitted yet.</p>
+                )}
+            </section>
+            <section
+                className={styles.questionSection}
+                data-testid={'answeredQuestions'}
+            >
+                <SectionHeader header="Answered questions" />
+                {sortedAnsweredQuestions.length ? (
+                    sortedAnsweredQuestions.map(
+                        ({ roundTitle, questionData }) => (
+                            <QuestionResponseRound
+                                key={questionData.id}
+                                question={questionData}
+                                roundTitle={roundTitle}
+                                currentUser={loggedInUser!}
+                            />
+                        )
+                    )
                 ) : (
                     <p>No questions have been submitted yet.</p>
                 )}

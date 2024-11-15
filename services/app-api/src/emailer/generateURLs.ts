@@ -36,8 +36,32 @@ function submissionQuestionResponseURL(id: string, base: string): string {
     return url
 }
 
+function rateQuestionResponseURL(
+    id: string,
+    rateID: string,
+    base: string
+): string {
+    const pattern = RoutesRecord.SUBMISSIONS_RATE_QUESTIONS_AND_ANSWERS
+    const toPath = compile(pattern, { encode: encodeURIComponent })
+    const path = toPath({ id, rateID })
+    const url = new URL(path, base).href
+
+    return url
+}
+
+function rateSummaryQuestionResponseURL(rateID: string, base: string): string {
+    const pattern = RoutesRecord.RATES_SUMMARY_QUESTIONS_AND_ANSWERS
+    const toPath = compile(pattern, { encode: encodeURIComponent })
+    const path = toPath({ id: rateID })
+    const url = new URL(path, base).href
+
+    return url
+}
+
 export {
     reviewAndSubmitURL,
     submissionSummaryURL,
     submissionQuestionResponseURL,
+    rateQuestionResponseURL,
+    rateSummaryQuestionResponseURL,
 }

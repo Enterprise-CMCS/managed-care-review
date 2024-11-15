@@ -45,7 +45,8 @@ export {
     mockValidCMSApproverUser,
     iterableCmsUsersMockData,
     iterableAdminUsersMockData,
-    mockValidBusinessOwnerUser
+    mockValidBusinessOwnerUser,
+    iterableNonCMSUsersMockData
 } from './userGQLMock'
 
 export {
@@ -55,7 +56,6 @@ export {
 } from './questionResponseGQLMock'
 
 export { mockQuestionsPayload } from './questionResponseDataMocks'
-export { fetchEmailSettings } from './emailGQLMock'
 export { mockMNState } from './stateMock'
 
 

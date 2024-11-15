@@ -1,7 +1,6 @@
 export { useCurrentRoute } from './useCurrentRoute'
 export { useFocus } from './useFocus'
 export { useLocalStorage } from './useLocalStorage'
-export { useOTEL } from './useOTEL'
 export { usePrevious } from './usePrevious'
 export { usePreviousSubmission } from './usePreviousSubmission'
 export { useScript } from './useScript'

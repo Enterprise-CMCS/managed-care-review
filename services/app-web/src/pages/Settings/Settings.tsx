@@ -4,16 +4,12 @@ import styles from './Settings.module.scss'
 import { NavLinkWithLogging } from '../../components'
 import { Outlet, useLocation } from 'react-router-dom'
 import { recordJSException } from '../../otelHelpers'
-import { useLDClient } from 'launchdarkly-react-client-sdk'
-import { featureFlags } from '../../common-code/featureFlags'
 import {
     EmailConfiguration,
-    StateAnalystsConfiguration,
     StateAssignment,
-    useFetchEmailSettingsQuery,
     useFetchMcReviewSettingsQuery,
 } from '../../gen/gqlClient'
-import { StateAnalystsInDashboardType } from './SettingsTables/StateAssignmentTable'
+import { StateAnalystsInDashboardType } from './SettingsTables'
 import { RoutesRecord } from '../../constants'
 import { ApolloError } from '@apollo/client'
 import { AssignedStaffUpdateBanner } from '../../components/Banner/AssignedStaffUpdateBanner/AssignedStaffUpdateBanner'
@@ -33,21 +29,6 @@ export const TestMonitoring = (): null => {
         }
     }
     return null
-}
-
-const mapStateAnalystsFromParamStore = (
-    stateAnalysts?: StateAnalystsConfiguration[] | null
-): StateAnalystsInDashboardType[] => {
-    return stateAnalysts
-        ? stateAnalysts.map((sa) => ({
-              analysts: sa.emails.map((email) => {
-                  return { givenName: 'N/A', familyName: 'N/A', email }
-              }), // not given or family names because parameter store cannot guarantee this context
-              stateCode: sa.stateCode,
-              stateName: 'Unknown state',
-              editLink: `/mc-review-settings/state-assignments/${sa.stateCode.toUpperCase()}/edit`,
-          }))
-        : []
 }
 
 export type LastUpdatedAnalystsType = {
@@ -92,39 +73,25 @@ const mapStateAnalystFromDB = (
 }
 
 export const Settings = (): React.ReactElement => {
-    const ldClient = useLDClient()
     const { currentRoute } = useCurrentRoute()
     const { pathname } = useLocation()
     const [lastUpdatedAnalysts, setLastUpdatedAnalysts] =
         useState<LastUpdatedAnalystsType | null>(null)
-    const readWriteStateAssignments = ldClient?.variation(
-        featureFlags.READ_WRITE_STATE_ASSIGNMENTS.flag,
-        featureFlags.READ_WRITE_STATE_ASSIGNMENTS.defaultValue
-    )
 
     // determine if we should display a recent submit success banner
     const submitType = new URLSearchParams(location.search).get('submit')
-    const showAnalystsUpdatedBanner =
-        readWriteStateAssignments && submitType == 'state-assignments'
+    const showAnalystsUpdatedBanner = submitType == 'state-assignments'
 
     const isSelectedLink = (route: string): string => {
         return route.includes(pathname) ? 'usa-current' : ''
     }
 
     const {
-        loading: loadEmailSettings,
-        data: emailSettingsData,
-        error: emailSettingsError,
-    } = useFetchEmailSettingsQuery({
-        skip: readWriteStateAssignments,
-    })
-    const {
-        loading: loadingMcReviewSettings,
-        data: mcrSettingsData,
-        error: mcReviewError,
+        loading,
+        data,
+        error,
         refetch: refetchMcReviewSettings,
     } = useFetchMcReviewSettingsQuery({
-        skip: !readWriteStateAssignments,
         notifyOnNetworkStatusChange: true,
     })
 
@@ -138,33 +105,18 @@ export const Settings = (): React.ReactElement => {
         }
     }, [showAnalystsUpdatedBanner, refetchMcReviewSettings])
 
-    const loadingSettingsData = readWriteStateAssignments
-        ? loadingMcReviewSettings
-        : loadEmailSettings
-    const isSettingsError = readWriteStateAssignments
-        ? mcReviewError
-        : emailSettingsError
+    const emailConfig = data?.fetchMcReviewSettings.emailConfiguration
 
-    const emailConfig =
-        readWriteStateAssignments && mcrSettingsData
-            ? mcrSettingsData.fetchMcReviewSettings.emailConfiguration
-            : emailSettingsData?.fetchEmailSettings.config
-
-    let stateAnalysts: StateAnalystsInDashboardType[] = []
-    stateAnalysts = readWriteStateAssignments
-        ? mapStateAnalystFromDB(
-              mcrSettingsData?.fetchMcReviewSettings.stateAssignments
-          )
-        : mapStateAnalystsFromParamStore(
-              emailSettingsData?.fetchEmailSettings.stateAnalysts
-          )
+    const stateAnalysts: StateAnalystsInDashboardType[] = mapStateAnalystFromDB(
+        data?.fetchMcReviewSettings.stateAssignments
+    )
 
     const context: MCReviewSettingsContextType = {
         emailConfig: {
             data: emailConfig ?? undefined,
-            loading: loadingSettingsData,
+            loading: loading,
             error:
-                isSettingsError || !emailConfig
+                error || !emailConfig
                     ? new Error(
                           'Request succeed but contained no email settings data'
                       )
@@ -172,8 +124,8 @@ export const Settings = (): React.ReactElement => {
         },
         stateAnalysts: {
             data: stateAnalysts,
-            loading: loadingSettingsData,
-            error: isSettingsError,
+            loading: loading,
+            error: error,
             lastUpdated: lastUpdatedAnalysts,
             setLastUpdated: (analysts) => {
                 setLastUpdatedAnalysts(analysts)
@@ -182,7 +134,7 @@ export const Settings = (): React.ReactElement => {
     }
 
     const showConfirmationBanner =
-        showAnalystsUpdatedBanner && lastUpdatedAnalysts && !loadingSettingsData
+        showAnalystsUpdatedBanner && lastUpdatedAnalysts && !loading
 
     if (SETTINGS_HIDE_SIDEBAR_ROUTES.includes(currentRoute)) {
         return <Outlet context={context} />
