@@ -21,9 +21,7 @@ import { recordJSException } from '../../otelHelpers'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import { Error404 } from '../Errors/Error404Page'
 import { Contract, User } from '../../gen/gqlClient'
-import { useLDClient } from 'launchdarkly-react-client-sdk'
-import { featureFlags } from '../../common-code/featureFlags'
-import { isUnlockedOrDraft, shouldUseFormPageStyles} from './helpers'
+import { isUnlockedOrDraft, shouldUseFormPageStyles } from './helpers'
 
 export type SideNavOutletContextType = {
     contract: Contract
@@ -43,12 +41,6 @@ export const SubmissionSideNav = () => {
     const { loggedInUser } = useAuth()
     const { pathname } = useLocation()
     const routeName = getRouteName(pathname)
-
-    const ldClient = useLDClient()
-    const showQAbyRates: boolean = ldClient?.variation(
-        featureFlags.QA_BY_RATES.flag,
-        featureFlags.QA_BY_RATES.defaultValue
-    )
 
     const isSelectedLink = (route: string | string[]): string => {
         //We pass an array of the form routes in order to display the sideNav on all of the pages
@@ -144,11 +136,13 @@ export const SubmissionSideNav = () => {
         return <GenericErrorPage />
     }
 
-
     // All of this logic is to enable conditional styles with sidenabv
     const isEditable = isUnlockedOrDraft(submissionStatus)
-    const isFormPage = shouldUseFormPageStyles(routeName, loggedInUser, isEditable)
-
+    const isFormPage = shouldUseFormPageStyles(
+        routeName,
+        loggedInUser,
+        isEditable
+    )
 
     const generateRateLinks = () => {
         const rateRevision = contract.packageSubmissions[0].rateRevisions
@@ -250,9 +244,7 @@ export const SubmissionSideNav = () => {
                                 >
                                     Contract questions
                                 </NavLinkWithLogging>,
-                                ...(showQAbyRates && isStateUser
-                                    ? generateRateLinks()
-                                    : []),
+                                ...(isStateUser ? generateRateLinks() : []),
                             ]}
                         />
                     </div>

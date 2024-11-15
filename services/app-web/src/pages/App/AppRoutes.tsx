@@ -47,7 +47,10 @@ import {
     DivisionAssignmentTable,
 } from '../Settings/SettingsTables'
 import { EditStateAssign } from '../Settings/EditStateAssign/EditStateAssign'
-import { UploadContractQuestions, UploadRateQuestions } from '../QuestionResponse/UploadQuestions'
+import {
+    UploadContractQuestions,
+    UploadRateQuestions,
+} from '../QuestionResponse/UploadQuestions'
 import { RateSummarySideNav } from '../SubmissionSideNav/RateSummarySideNav'
 import { RateQuestionResponse } from '../QuestionResponse/QuestionResponseSummary/RateQuestionResponse'
 import { UploadRateResponse } from '../QuestionResponse/UploadResponse/UploadRateResponse'
@@ -87,11 +90,6 @@ const StateUserRoutes = ({
     const showRatePages: boolean = ldClient?.variation(
         featureFlags.RATE_EDIT_UNLOCK.flag,
         featureFlags.RATE_EDIT_UNLOCK.defaultValue
-    )
-
-    const showQAbyRates: boolean = ldClient?.variation(
-        featureFlags.QA_BY_RATES.flag,
-        featureFlags.QA_BY_RATES.defaultValue
     )
 
     return (
@@ -153,22 +151,16 @@ const StateUserRoutes = ({
                         path={RoutesRecord.SUBMISSIONS_EDIT_TOP_LEVEL}
                         element={<StateSubmissionForm />}
                     />
-                    {showQAbyRates && (
-                       <>
-                       <Route
-                            path={
-                                RoutesRecord.SUBMISSIONS_RATE_QUESTIONS_AND_ANSWERS
-                            }
-                            element={<RateQuestionResponse />}
-                        />
-                        <Route
+                    <Route
                         path={
-                            RoutesRecord.SUBMISSIONS_UPLOAD_RATE_RESPONSE
+                            RoutesRecord.SUBMISSIONS_RATE_QUESTIONS_AND_ANSWERS
                         }
+                        element={<RateQuestionResponse />}
+                    />
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_UPLOAD_RATE_RESPONSE}
                         element={<UploadRateResponse />}
-                        />
-                    </>
-                    )}
+                    />
                 </Route>
                 <Route
                     path={RoutesRecord.SUBMISSIONS_REVISION}
@@ -195,11 +187,6 @@ const CMSUserRoutes = ({
     setAlert?: React.Dispatch<React.ReactElement>
     stageName?: string
 }): React.ReactElement => {
-    const ldClient = useLDClient()
-    const showQAbyRates: boolean = ldClient?.variation(
-        featureFlags.QA_BY_RATES.flag,
-        featureFlags.QA_BY_RATES.defaultValue
-    )
     return (
         <AuthenticatedRouteWrapper>
             <Routes>
@@ -243,37 +230,26 @@ const CMSUserRoutes = ({
                     />
                 </Route>
 
-                {showQAbyRates ? (
-                    <>
-                        <Route element={<RateSummarySideNav />}>
-                            <Route
-                                path={RoutesRecord.RATES_SUMMARY}
-                                element={<RateSummary />}
-                            />
-                            <Route
-                                path={
-                                    RoutesRecord.RATES_SUMMARY_QUESTIONS_AND_ANSWERS
-                                }
-                                element={<RateQuestionResponse />}
-                            />
-                            <Route
-                                path={RoutesRecord.RATES_UPLOAD_QUESTION}
-                                element={<UploadRateQuestions />}
-                            />
-                            {/*This route will cause the RateSummarySideNav to redirect to rate summary Q&A page*/}
-                            <Route
-                                path={
-                                    RoutesRecord.SUBMISSIONS_RATE_QUESTIONS_AND_ANSWERS
-                                }
-                            />
-                        </Route>
-                    </>
-                ) : (
+                <Route element={<RateSummarySideNav />}>
                     <Route
                         path={RoutesRecord.RATES_SUMMARY}
                         element={<RateSummary />}
                     />
-                )}
+                    <Route
+                        path={RoutesRecord.RATES_SUMMARY_QUESTIONS_AND_ANSWERS}
+                        element={<RateQuestionResponse />}
+                    />
+                    <Route
+                        path={RoutesRecord.RATES_UPLOAD_QUESTION}
+                        element={<UploadRateQuestions />}
+                    />
+                    {/*This route will cause the RateSummarySideNav to redirect to rate summary Q&A page*/}
+                    <Route
+                        path={
+                            RoutesRecord.SUBMISSIONS_RATE_QUESTIONS_AND_ANSWERS
+                        }
+                    />
+                </Route>
 
                 <Route
                     path={RoutesRecord.SUBMISSIONS_MCCRSID}

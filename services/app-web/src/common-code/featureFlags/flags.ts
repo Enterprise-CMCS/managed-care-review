@@ -26,13 +26,6 @@ const featureFlags = {
         defaultValue: false,
     },
     /**
-     * Enables Q&A by rates feature
-     */
-    QA_BY_RATES: {
-        flag: 'qa-by-rates',
-        defaultValue: false
-    },
-    /**
      * Enables submission approvals, withdraws, and reviews features
      */
     SUBMISSION_APPROVALS: {
