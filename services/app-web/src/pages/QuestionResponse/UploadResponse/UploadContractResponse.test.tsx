@@ -178,7 +178,7 @@ describe('UploadContractResponse', () => {
             level: 2,
         })
         const continueButton = screen.getByRole('button', {
-            name: 'Send response',
+            name: 'Submit response',
         })
         expect(continueButton).not.toHaveAttribute('aria-disabled')
 
@@ -234,7 +234,7 @@ describe('UploadContractResponse', () => {
             level: 2,
         })
         const continueButton = screen.getByRole('button', {
-            name: 'Send response',
+            name: 'Submit response',
         })
 
         const targetEl = screen.getByTestId('file-input-droptarget')
@@ -295,7 +295,7 @@ describe('UploadContractResponse', () => {
             level: 2,
         })
         const continueButton = screen.getByRole('button', {
-            name: 'Send response',
+            name: 'Submit response',
         })
         const targetEl = screen.getByTestId('file-input-droptarget')
 
@@ -368,7 +368,7 @@ describe('UploadContractResponse', () => {
             level: 2,
         })
         const createQuestionButton = screen.getByRole('button', {
-            name: 'Send response',
+            name: 'Submit response',
         })
         const input = screen.getByLabelText('Upload response')
 
