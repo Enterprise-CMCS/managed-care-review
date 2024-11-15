@@ -56,7 +56,6 @@ export {
 } from './questionResponseGQLMock'
 
 export { mockQuestionsPayload } from './questionResponseDataMocks'
-export { fetchEmailSettings } from './emailGQLMock'
 export { mockMNState } from './stateMock'
 
 

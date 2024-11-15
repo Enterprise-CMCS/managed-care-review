@@ -16,6 +16,7 @@ import {
     updateTestHealthPlanFormData,
     resubmitTestHealthPlanPackage,
     defaultFloridaRateProgram,
+    updateTestStateAssignments,
 } from '../../testHelpers/gqlHelpers'
 import { latestFormData } from '../../testHelpers/healthPlanPackageHelpers'
 import { mockStoreThatErrors } from '../../testHelpers/storeHelpers'
@@ -26,11 +27,12 @@ import {
     packageName,
 } from '../../common-code/healthPlanFormDataType'
 import type { HealthPlanFormDataType } from '../../common-code/healthPlanFormDataType'
+import { mockEmailParameterStoreError } from '../../testHelpers/parameterStoreHelpers'
 import {
-    getTestStateAnalystsEmails,
-    mockEmailParameterStoreError,
-} from '../../testHelpers/parameterStoreHelpers'
-import { testCMSUser, testStateUser } from '../../testHelpers/userHelpers'
+    createDBUsersWithFullData,
+    testCMSUser,
+    testStateUser,
+} from '../../testHelpers/userHelpers'
 import { fetchTestContract } from '../../testHelpers/gqlContractHelpers'
 import {
     addNewRateToTestContract,
@@ -727,19 +729,34 @@ describe(`Tests unlockHealthPlanPackage`, () => {
         const mockEmailer = testEmailer(config)
         //mock invoke email submit lambda
         const stateServer = await constructTestPostgresServer()
-
-        // First, create a new submitted submission
-        const stateSubmission = await createAndSubmitTestHealthPlanPackage(
-            stateServer,
-            { riskBasedContract: true }
-        )
-
         const cmsServer = await constructTestPostgresServer({
             context: {
                 user: cmsUser,
             },
             emailer: mockEmailer,
         })
+
+        const assignedUsers = [
+            testCMSUser({
+                givenName: 'Roku',
+                email: 'roku@example.com',
+            }),
+            testCMSUser({
+                givenName: 'Izumi',
+                email: 'izumi@example.com',
+            }),
+        ]
+
+        const assignedUserIDs = assignedUsers.map((u) => u.id)
+        const stateAnalystsEmails = assignedUsers.map((u) => u.email)
+        await createDBUsersWithFullData([...assignedUsers, cmsUser])
+        await updateTestStateAssignments(cmsServer, 'FL', assignedUserIDs)
+
+        // First, create a new submitted submission
+        const stateSubmission = await createAndSubmitTestHealthPlanPackage(
+            stateServer,
+            { riskBasedContract: true }
+        )
 
         // Unlock
         const unlockResult = await unlockTestHealthPlanPackage(
@@ -764,7 +781,6 @@ describe(`Tests unlockHealthPlanPackage`, () => {
             programs
         )
         const rateName = generateRateName(sub, sub.rateInfos[0], ratePrograms)
-        const stateAnalystsEmails = getTestStateAnalystsEmails(sub.stateCode)
 
         const cmsEmails = [
             ...config.devReviewTeamEmails,
@@ -904,39 +920,5 @@ describe(`Tests unlockHealthPlanPackage`, () => {
                 ),
             })
         )
-    })
-
-    it('does log error when request for state specific analysts emails failed', async () => {
-        const mockEmailParameterStore = mockEmailParameterStoreError()
-        const consoleErrorSpy = jest.spyOn(console, 'error')
-        const stateServer = await constructTestPostgresServer()
-        const error = {
-            error: 'No store found',
-            message: 'getStateAnalystsEmails failed',
-            operation: 'getStateAnalystsEmails',
-            status: 'ERROR',
-        }
-
-        const stateSubmission =
-            await createAndSubmitTestHealthPlanPackage(stateServer)
-
-        const cmsServer = await constructTestPostgresServer({
-            context: {
-                user: cmsUser,
-            },
-            emailParameterStore: mockEmailParameterStore,
-        })
-
-        await cmsServer.executeOperation({
-            query: UnlockHealthPlanPackageDocument,
-            variables: {
-                input: {
-                    pkgID: stateSubmission.id,
-                    unlockedReason: 'Super duper good reason.',
-                },
-            },
-        })
-
-        expect(consoleErrorSpy).toHaveBeenCalledWith(error)
     })
 })
