@@ -1,12 +1,7 @@
 import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
-import { isCMSUser } from '../../domain-models'
 import type { MutationResolvers } from '../../gen/gqlServer'
 import { logError, logSuccess } from '../../logger'
-import {
-    NotFoundError,
-    UserInputPostgresError,
-    type Store,
-} from '../../postgres'
+import { NotFoundError, type Store } from '../../postgres'
 
 import {
     setErrorAttributesOnActiveSpan,
@@ -14,7 +9,7 @@ import {
     setSuccessAttributesOnActiveSpan,
 } from '../attributeHelper'
 import { GraphQLError } from 'graphql'
-import { isCMSApproverUser } from '../../domain-models/user'
+import { hasCMSPermissions } from '../../domain-models/user'
 
 export function approveContract(
     store: Store
@@ -27,7 +22,7 @@ export function approveContract(
         const { contractID } = input
         span?.setAttribute('mcreview.package_id', contractID)
 
-        if (!isCMSUser(user) && !isCMSApproverUser(user)) {
+        if (!hasCMSPermissions(user)) {
             const message = 'user not authorized to approve a contract'
             logError('approveContract', message)
             setErrorAttributesOnActiveSpan(message, span)
@@ -65,7 +60,7 @@ export function approveContract(
             ) ||
             contractWithHistory.reviewStatus !== 'UNDER_REVIEW'
         ) {
-            const errMessage = `Attempted to approve contract with wrong status`
+            const errMessage = `Attempted to approve contract with wrong status: ${contractWithHistory.status}`
             logError('approveContract', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new UserInputError(errMessage, {
@@ -78,20 +73,16 @@ export function approveContract(
             updatedByID: user.id,
         })
 
-        if (approveContractResult instanceof UserInputPostgresError) {
-            throw new UserInputError(approveContractResult.message)
-        }
-
-        if (approveContractResult instanceof NotFoundError) {
-            throw new GraphQLError(approveContractResult.message, {
-                extensions: {
-                    code: 'NOT_FOUND',
-                    cause: 'DB_ERROR',
-                },
-            })
-        }
-
         if (approveContractResult instanceof Error) {
+            if (approveContractResult instanceof NotFoundError) {
+                throw new GraphQLError(approveContractResult.message, {
+                    extensions: {
+                        code: 'NOT_FOUND',
+                        cause: 'DB_ERROR',
+                    },
+                })
+            }
+
             const errMessage = `Failed to approve contract ID:${contractID}`
             logError('approveContract', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
