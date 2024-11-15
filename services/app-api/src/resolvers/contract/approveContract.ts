@@ -53,14 +53,14 @@ export function approveContract(
             })
         }
 
-        if (
-            !(
-                contractWithHistory.status === 'SUBMITTED' ||
-                contractWithHistory.status === 'RESUBMITTED'
-            ) ||
+        const wrongSubStatus = !(
+            contractWithHistory.status === 'SUBMITTED' ||
+            contractWithHistory.status === 'RESUBMITTED'
+        )
+        const wrongReviewStatus =
             contractWithHistory.reviewStatus !== 'UNDER_REVIEW'
-        ) {
-            const errMessage = `Attempted to approve contract with wrong status: ${contractWithHistory.status}`
+        if (wrongSubStatus || wrongReviewStatus) {
+            const errMessage = `Attempted to approve contract with wrong status: ${wrongSubStatus ? contractWithHistory.status : contractWithHistory.reviewStatus}`
             logError('approveContract', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new UserInputError(errMessage, {
