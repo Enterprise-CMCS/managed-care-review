@@ -146,8 +146,8 @@ importers:
         specifier: ^3.689.0
         version: 3.689.0
       '@launchdarkly/node-server-sdk':
-        specifier: 9.5.4
-        version: 9.5.4
+        specifier: 9.7.2
+        version: 9.7.2
       '@opentelemetry/api':
         specifier: ^1.9.0
         version: 1.9.0
@@ -4068,14 +4068,14 @@ packages:
   '@kwsites/promise-deferred@1.1.1':
     resolution: {integrity: sha512-GaHYm+c0O9MjZRu0ongGBRbinu8gVAMd2UZjji6jVmqKtZluZnptXGWhz1E8j8D2HJ3f/yMxKAUC0b+57wncIw==}
 
-  '@launchdarkly/js-sdk-common@2.8.0':
-    resolution: {integrity: sha512-XLYhB0A0vec1gwbnVNU+rzMd1JxdtMJXSA76y3ASJ6X0cG0qTRKQdFba4n4RwIs0y1bX3rncFHJMhBjrXtyPhA==}
+  '@launchdarkly/js-sdk-common@2.12.0':
+    resolution: {integrity: sha512-HIDxvgo1vksC9hsYy3517sgW0Ql+iW3fgwlq/CEigeBNmaa9/J1Pxo7LrKPzezEA0kaGedmt/DCzVVxVBmxSsQ==}
 
-  '@launchdarkly/js-server-sdk-common@2.6.1':
-    resolution: {integrity: sha512-PcyglkUi/P1fBT3GqwZ/K9MvLj2e5Rw5XLP/gC2qIIHJxIbni8oy8Zon+6bP890DYgZtqqeX6tKhAw/gwOYkhQ==}
+  '@launchdarkly/js-server-sdk-common@2.10.0':
+    resolution: {integrity: sha512-zbqpmEFQW/ZElZnRYX6N4gMZMpviE0F75/IyxcifLAFsjGNouxllpOOPbdtrLiJnJ0ixzt5vbtnem4tbhlYNOw==}
 
-  '@launchdarkly/node-server-sdk@9.5.4':
-    resolution: {integrity: sha512-1cGKlRP9YY4kgoGhw5Lolv1CoGOH5ywBB++4iqy00PTinyIjbX3LeYrlCWFT3gFrVlmTuc2BoXJvo93qFgkGAA==}
+  '@launchdarkly/node-server-sdk@9.7.2':
+    resolution: {integrity: sha512-gcRarEh0yQrlwbWDORwbfTk19M/FtZje60EIo/c4298D/sqJ906MYq0J2MmyklEuIdQx/V4qPK+ss9LCCLpm/Q==}
 
   '@luckycatfactory/esbuild-graphql-loader@3.8.1':
     resolution: {integrity: sha512-ovONIUSW6NAlCpiPMaVw4PpdFoO3Kqi8TGQ2hTtjKTQTdPpSOdekPI1ZRnwciTeUn0yCAQk7M2xdrbIZeTh6pw==}
@@ -19718,16 +19718,16 @@ snapshots:
 
   '@kwsites/promise-deferred@1.1.1': {}
 
-  '@launchdarkly/js-sdk-common@2.8.0': {}
+  '@launchdarkly/js-sdk-common@2.12.0': {}
 
-  '@launchdarkly/js-server-sdk-common@2.6.1':
+  '@launchdarkly/js-server-sdk-common@2.10.0':
     dependencies:
-      '@launchdarkly/js-sdk-common': 2.8.0
+      '@launchdarkly/js-sdk-common': 2.12.0
       semver: 7.5.4
 
-  '@launchdarkly/node-server-sdk@9.5.4':
+  '@launchdarkly/node-server-sdk@9.7.2':
     dependencies:
-      '@launchdarkly/js-server-sdk-common': 2.6.1
+      '@launchdarkly/js-server-sdk-common': 2.10.0
       https-proxy-agent: 5.0.1(supports-color@8.1.1)
       launchdarkly-eventsource: 2.0.3
     transitivePeerDependencies:
