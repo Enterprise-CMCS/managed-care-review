@@ -10,15 +10,15 @@ import {
     TEST_PNG_FILE,
     TEST_XLS_FILE,
 } from '../../../testHelpers'
-import { RoutesRecord } from '../@mc-review/constants/routes'
+import { RoutesRecord } from '@mc-review/constants'
 import { ACCEPTED_SUBMISSION_FILE_TYPES } from '../../../components/FileUpload'
 import {
     fetchCurrentUserMock,
     mockValidUser,
     mockRateSubmittedWithQuestions,
     fetchRateWithQuestionsMockSuccess,
-} from '../../../testHelpers/apolloMocks'
-import { createRateQuestionResponseNetworkFailure } from '../../../testHelpers/apolloMocks/questionResponseGQLMock'
+} from '@mc-review/mocks'
+import { createRateQuestionResponseNetworkFailure } from '@mc-review/mocks'
 import { SubmissionSideNav } from '../../SubmissionSideNav'
 
 describe('UploadRateResponse', () => {

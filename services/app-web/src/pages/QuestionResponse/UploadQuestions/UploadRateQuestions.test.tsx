@@ -9,18 +9,18 @@ import {
     TEST_PNG_FILE,
     TEST_XLS_FILE,
 } from '../../../testHelpers'
-import { RoutesRecord } from '../@mc-review/constants/routes'
+import { RoutesRecord } from '@mc-review/constants'
 import { ACCEPTED_SUBMISSION_FILE_TYPES } from '../../../components/FileUpload'
 import {
     fetchCurrentUserMock,
     iterableCmsUsersMockData,
     fetchRateWithQuestionsMockSuccess,
     mockRateSubmittedWithQuestions,
-} from '../../../testHelpers/apolloMocks'
+} from '@mc-review/mocks'
 import {
     createRateQuestionNetworkFailure,
     createRateQuestionSuccess,
-} from '../../../testHelpers/apolloMocks/questionResponseGQLMock'
+} from '@mc-review/mocks'
 import { Location } from 'react-router-dom'
 import { UploadRateQuestions } from './UploadRateQuestions'
 import { RateQuestionResponse } from '../QuestionResponseSummary/RateQuestionResponse'

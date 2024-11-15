@@ -1,7 +1,7 @@
 import styles from './QATable.module.scss'
 import { User } from '../../../gen/gqlClient'
 import { LinkWithLogging } from '../../../components'
-import { formatCalendarDate } from '../../../common-code/dateHelpers'
+import { formatCalendarDate } from '@mc-review/common-code'
 import { getAddedByName } from '../QuestionResponseHelpers'
 import { QuestionDisplayDocument } from '../QuestionResponseHelpers/questionResponseHelpers'
 

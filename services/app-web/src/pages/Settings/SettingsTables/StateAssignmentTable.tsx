@@ -10,7 +10,7 @@ import {
     getSortedRowModel,
     useReactTable,
 } from '@tanstack/react-table'
-import React, { useMemo, useRef, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import {
     FilterAccordion,
     FilterOptionType,

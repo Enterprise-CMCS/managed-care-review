@@ -8,7 +8,7 @@ import {
     fetchRateMockSuccess,
     mockValidCMSUser,
     rateDataMock,
-} from '../../testHelpers/apolloMocks'
+} from '@mc-review/mocks'
 import { RateQuestionResponse } from '../QuestionResponse/QuestionResponseSummary/RateQuestionResponse'
 import { screen, waitFor, within } from '@testing-library/react'
 

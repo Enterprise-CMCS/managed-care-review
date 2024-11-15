@@ -1,5 +1,5 @@
 import React from 'react'
-import { SubmissionTypeRecord } from '@mc-review/constants'
+import { SubmissionTypeRecord } from '@mc-review/hpp'
 import { useAuth } from '../../../contexts/AuthContext'
 import { useIndexContractsForDashboardQuery } from '../../../gen/gqlClient'
 import { mostRecentDate } from '@mc-review/common-code'
