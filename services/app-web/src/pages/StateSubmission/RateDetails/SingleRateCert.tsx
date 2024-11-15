@@ -135,8 +135,6 @@ export const SingleRateCert = ({
     rateInfo,
     shouldValidate,
     multiRatesConfig,
-    parentSubmissionID,
-    previousDocuments,
     index = 0,
 }: SingleRateCertProps): React.ReactElement => {
     // page level setup
