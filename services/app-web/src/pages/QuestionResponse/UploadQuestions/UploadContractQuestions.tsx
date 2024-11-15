@@ -1,11 +1,11 @@
-import React, { useEffect } from 'react'
-import { GridContainer } from '@trussworks/react-uswds'
-import { useNavigate, useOutletContext, useParams } from 'react-router-dom'
+import { useEffect } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
+import styles from '../QuestionResponse.module.scss'
 import {
     CreateContractQuestionInput,
     useCreateContractQuestionMutation,
+    useFetchContractWithQuestionsQuery,
 } from '../../../gen/gqlClient'
-import { SideNavOutletContextType } from '../../SubmissionSideNav/SubmissionSideNav'
 import { usePage } from '../../../contexts/PageContext'
 import { Breadcrumbs } from '../../../components/Breadcrumbs/Breadcrumbs'
 import { createContractQuestionWrapper } from '@mc-review/helpers'
@@ -13,26 +13,62 @@ import { RoutesRecord } from '@mc-review/constants'
 import { GenericErrorPage } from '../../Errors/GenericErrorPage'
 import { UploadQuestionsForm } from './UploadQuestionsForm'
 import { FileItemT } from '../../../components'
+import { getNextCMSRoundNumber } from '../QuestionResponseHelpers'
+import { ErrorOrLoadingPage } from '../../StateSubmission'
+import { handleAndReturnErrorState } from '../../StateSubmission/ErrorOrLoadingPage'
+import { isValidCmsDivison } from '../QuestionResponseHelpers/questionResponseHelpers'
+import { Error404 } from '../../Errors/Error404Page'
 
 export const UploadContractQuestions = () => {
     // router context
     // eslint-disable-next-line @typescript-eslint/no-use-before-define
-    const { id } = useParams<{ division: string; id: string }>()
+    const { updateHeading } = usePage()
+    const { id, division } = useParams<{ division: string; id: string }>()
     const navigate = useNavigate()
-    const { packageName, contract } =
-        useOutletContext<SideNavOutletContextType>()
 
-    // api
+    const {
+        data: fetchContractData,
+        loading: fetchContractLoading,
+        error: fetchContractError,
+    } = useFetchContractWithQuestionsQuery({
+        variables: {
+            input: {
+                contractID: id || 'not-found',
+            },
+        },
+    })
+
     const [createQuestion, { loading: apiLoading, error: apiError }] =
         useCreateContractQuestionMutation()
 
-    // page level state
-    const { updateHeading } = usePage()
+    const contract = fetchContractData?.fetchContract.contract
+    const contractName =
+        (contract?.packageSubmissions &&
+            contract?.packageSubmissions[0].contractRevision.contractName) ||
+        ''
+    // side effects
     useEffect(() => {
-        updateHeading({ customHeading: `${packageName} Add questions` })
-    }, [packageName, updateHeading])
+        updateHeading({ customHeading: `${contractName} Add questions` })
+    }, [contractName, updateHeading])
 
-    if (contract.status === 'DRAFT') {
+    if (fetchContractLoading) {
+        return <ErrorOrLoadingPage state="LOADING" />
+    }
+
+    if (fetchContractError) {
+        return (
+            <ErrorOrLoadingPage
+                state={handleAndReturnErrorState(fetchContractError)}
+            />
+        )
+    }
+
+    if (
+        !contract ||
+        contract.status === 'DRAFT' ||
+        !contract.questions ||
+        !division
+    ) {
         return <GenericErrorPage />
     }
 
@@ -61,15 +97,31 @@ export const UploadContractQuestions = () => {
         }
     }
 
+    // confirm division is valid
+    const realDivision = division?.toUpperCase()
+
+    if (!realDivision || !isValidCmsDivison(realDivision)) {
+        console.error(
+            'Upload Questions called with bogus division in URL: ',
+            division
+        )
+        return <Error404 />
+    }
+
+    const nextRoundNumber = getNextCMSRoundNumber(
+        contract.questions,
+        realDivision
+    )
+
     return (
-        <GridContainer>
+        <div className={styles.uploadFormContainer}>
             <Breadcrumbs
                 items={[
                     {
                         link: RoutesRecord.DASHBOARD_SUBMISSIONS,
                         text: 'Dashboard',
                     },
-                    { link: `/submissions/${id}`, text: packageName },
+                    { link: `/submissions/${id}`, text: contractName },
                     {
                         text: 'Add questions',
                         link: RoutesRecord.SUBMISSIONS_UPLOAD_CONTRACT_QUESTION,
@@ -82,7 +134,10 @@ export const UploadContractQuestions = () => {
                 apiError={Boolean(apiError)}
                 type="contract"
                 handleSubmit={handleFormSubmit}
+                round={nextRoundNumber}
+                division={realDivision}
+                id={contract.id}
             />
-        </GridContainer>
+        </div>
     )
 }

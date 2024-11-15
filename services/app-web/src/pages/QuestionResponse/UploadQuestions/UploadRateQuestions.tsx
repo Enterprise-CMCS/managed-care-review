@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react'
-import { GridContainer } from '@trussworks/react-uswds'
+import { useEffect } from 'react'
+import styles from '../QuestionResponse.module.scss'
 import { useNavigate, useParams } from 'react-router-dom'
 import {
     CreateRateQuestionInput,
@@ -15,12 +15,19 @@ import { FileItemT } from '../../../components'
 import { ErrorOrLoadingPage } from '../../StateSubmission'
 import { handleAndReturnErrorState } from '../../StateSubmission/ErrorOrLoadingPage'
 import { GenericErrorPage } from '../../Errors/GenericErrorPage'
+import { getNextCMSRoundNumber } from '../QuestionResponseHelpers'
+import { isValidCmsDivison } from '../QuestionResponseHelpers/questionResponseHelpers'
+import { Error404 } from '../../Errors/Error404Page'
 
 export const UploadRateQuestions = () => {
     // router context
     // eslint-disable-next-line @typescript-eslint/no-use-before-define
     const { updateHeading } = usePage()
-    const { id } = useParams<{ division: string; id: string; rateID: string }>()
+    const { id, division } = useParams<{
+        division: string
+        id: string
+        rateID: string
+    }>()
     const navigate = useNavigate()
 
     // api
@@ -45,12 +52,21 @@ export const UploadRateQuestions = () => {
             rate?.packageSubmissions[0].rateRevision.formData
                 .rateCertificationName) ||
         ''
-
     // side effects
     useEffect(() => {
         updateHeading({ customHeading: `${rateName} Add questions` })
     }, [rateName, updateHeading])
 
+    // confirm division is valid
+    const realDivision = division?.toUpperCase()
+
+    if (!realDivision || !isValidCmsDivison(realDivision)) {
+        console.error(
+            'Upload Rate Questions called with bogus division in URL: ',
+            division
+        )
+        return <Error404 />
+    }
     if (fetchRateLoading) {
         return <ErrorOrLoadingPage state="LOADING" />
     }
@@ -63,9 +79,14 @@ export const UploadRateQuestions = () => {
         )
     }
 
-    if (!rate || rate.status === 'DRAFT') {
+    if (!rate || rate.status === 'DRAFT' || !rate.questions) {
+        console.error(
+            'Upload Rate Questions returned a bad rate or had no questions'
+        )
         return <GenericErrorPage />
     }
+
+    const nextRoundNumber = getNextCMSRoundNumber(rate.questions, realDivision)
 
     const handleFormSubmit = async (cleaned: FileItemT[]) => {
         const questionDocs = cleaned.map((item) => {
@@ -93,7 +114,7 @@ export const UploadRateQuestions = () => {
     }
 
     return (
-        <GridContainer>
+        <div className={styles.uploadFormContainer}>
             <Breadcrumbs
                 items={[
                     {
@@ -113,7 +134,10 @@ export const UploadRateQuestions = () => {
                 apiError={Boolean(apiError)}
                 type="rate"
                 handleSubmit={handleFormSubmit}
+                round={nextRoundNumber}
+                division={realDivision}
+                id={rate.id}
             />
-        </GridContainer>
+        </div>
     )
 }

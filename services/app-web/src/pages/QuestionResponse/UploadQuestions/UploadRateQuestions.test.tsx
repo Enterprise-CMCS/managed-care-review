@@ -23,7 +23,7 @@ import {
 } from '../../../testHelpers/apolloMocks/questionResponseGQLMock'
 import { Location } from 'react-router-dom'
 import { UploadRateQuestions } from './UploadRateQuestions'
-import { RateQuestionResponse } from '../RateQuestionResponse'
+import { RateQuestionResponse } from '../QuestionResponseSummary/RateQuestionResponse'
 
 describe('UploadRateQuestions', () => {
     afterEach(() => {
@@ -73,7 +73,7 @@ describe('UploadRateQuestions', () => {
                     ).toBeInTheDocument()
                     expect(
                         screen.queryByText(
-                            `Questions from ${division.toUpperCase()}`
+                            `Asked by: Division of Managed Care Operations (DMCO)`
                         )
                     ).toBeInTheDocument()
                 })

@@ -31,7 +31,10 @@ import { featureFlags } from '@mc-review/common-code'
 import { useLocalStorage } from '../../hooks/useLocalStorage'
 import { recordJSException } from '@mc-review/otel'
 import { SubmissionSideNav } from '../SubmissionSideNav'
-import { QuestionResponse, UploadContractResponse } from '../QuestionResponse'
+import {
+    ContractQuestionResponse,
+    UploadContractResponse,
+} from '../QuestionResponse'
 import { GraphQLExplorer } from '../GraphQLExplorer/GraphQLExplorer'
 import { RateSummary } from '../RateSummary'
 import { ReplaceRate } from '../ReplaceRate/ReplaceRate'
@@ -49,7 +52,7 @@ import {
     UploadRateQuestions,
 } from '../QuestionResponse/UploadQuestions'
 import { RateSummarySideNav } from '../SubmissionSideNav/RateSummarySideNav'
-import { RateQuestionResponse } from '../QuestionResponse/RateQuestionResponse'
+import { RateQuestionResponse } from '../QuestionResponse/QuestionResponseSummary/RateQuestionResponse'
 import { UploadRateResponse } from '../QuestionResponse/UploadResponse/UploadRateResponse'
 
 function componentForAuthMode(
@@ -138,7 +141,7 @@ const StateUserRoutes = ({
                         path={
                             RoutesRecord.SUBMISSIONS_CONTRACT_QUESTIONS_AND_ANSWERS
                         }
-                        element={<QuestionResponse />}
+                        element={<ContractQuestionResponse />}
                     />
                     <Route
                         element={<UploadContractResponse />}
@@ -231,7 +234,7 @@ const CMSUserRoutes = ({
                         path={
                             RoutesRecord.SUBMISSIONS_CONTRACT_QUESTIONS_AND_ANSWERS
                         }
-                        element={<QuestionResponse />}
+                        element={<ContractQuestionResponse />}
                     />
                     <Route
                         path={RoutesRecord.SUBMISSIONS_UPLOAD_CONTRACT_QUESTION}

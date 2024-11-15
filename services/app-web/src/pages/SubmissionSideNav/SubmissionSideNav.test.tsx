@@ -3,7 +3,7 @@ import { Location, Route, Routes } from 'react-router-dom'
 import userEvent from '@testing-library/user-event'
 import { SubmissionSideNav } from './SubmissionSideNav'
 import { SubmissionSummary } from '../SubmissionSummary'
-import { QuestionResponse } from '../QuestionResponse'
+import { ContractQuestionResponse } from '../QuestionResponse'
 import { renderWithProviders } from '../../testHelpers'
 import { RoutesRecord } from '@mc-review/constants'
 import {
@@ -25,7 +25,7 @@ const CommonRoutes = () => (
         <Route element={<SubmissionSideNav />}>
             <Route
                 path={RoutesRecord.SUBMISSIONS_CONTRACT_QUESTIONS_AND_ANSWERS}
-                element={<QuestionResponse />}
+                element={<ContractQuestionResponse />}
             />
             <Route
                 path={RoutesRecord.SUBMISSIONS_SUMMARY}
@@ -324,7 +324,9 @@ describe('SubmissionSideNav', () => {
             )
             expect(screen.queryByTestId('sidenav')).toBeInTheDocument()
             expect(
-                screen.queryByRole('heading', { name: 'Contract questions' })
+                screen.queryByRole('heading', {
+                    name: "Your division's questions",
+                })
             ).toBeInTheDocument()
         })
 
@@ -332,17 +334,6 @@ describe('SubmissionSideNav', () => {
         expect(qaLink).toHaveClass('usa-current')
         // Expect submission summary link to not be highlighted
         expect(summaryLink).not.toHaveClass('usa-current')
-
-        // Expect all three division sections
-        expect(
-            screen.queryByRole('heading', { name: 'Asked by DMCO' })
-        ).toBeInTheDocument()
-        expect(
-            screen.queryByRole('heading', { name: 'Asked by OACT' })
-        ).toBeInTheDocument()
-        expect(
-            screen.queryByRole('heading', { name: 'Asked by DMCP' })
-        ).toBeInTheDocument()
 
         // Navigate back to Submission summary page by link.
         await userEvent.click(summaryLink)

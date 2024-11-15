@@ -739,7 +739,7 @@ describe('RateDetailsSummarySection', () => {
     })
 
     it('does not render supporting rate documents when they do not exist', () => {
-        const draftContract = mockContractPackageSubmitted()
+        const draftContract = mockContractWithLinkedRateDraft()
 
         if (
             draftContract.draftRates &&

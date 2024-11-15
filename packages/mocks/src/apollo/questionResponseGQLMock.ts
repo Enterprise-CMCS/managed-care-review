@@ -12,6 +12,8 @@ import {
     CreateRateQuestionInput,
     CreateRateQuestionMutation,
     CreateRateQuestionDocument,
+    CreateRateQuestionResponseMutation,
+    CreateRateQuestionResponseDocument,
 } from '../gen/gqlClient'
 import { mockValidCMSUser } from './userGQLMock'
 import { mockSubmittedHealthPlanPackage, mockQuestionsPayload } from './'
@@ -133,6 +135,15 @@ const createContractQuestionResponseNetworkFailure = (
     }
 }
 
+const createRateQuestionResponseNetworkFailure = (
+    _question?: QuestionResponseType | Partial<QuestionResponseType>
+): MockedResponse<CreateRateQuestionResponseMutation> => {
+    return {
+        request: { query: CreateRateQuestionResponseDocument },
+        error: new Error('A network error occurred'),
+    }
+}
+
 const fetchStateHealthPlanPackageWithQuestionsMockSuccess = ({
     stateSubmission = mockSubmittedHealthPlanPackage(),
     id,
@@ -194,5 +205,6 @@ export {
     fetchStateHealthPlanPackageWithQuestionsMockSuccess,
     fetchStateHealthPlanPackageWithQuestionsMockNotFound,
     createRateQuestionNetworkFailure,
+    createRateQuestionResponseNetworkFailure,
     createRateQuestionSuccess,
 }

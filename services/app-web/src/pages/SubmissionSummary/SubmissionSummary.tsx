@@ -10,7 +10,6 @@ import {
     SubmissionUpdatedBanner,
     DocumentWarningBanner,
     LinkWithLogging,
-    ButtonWithLogging,
 } from '../../components'
 import { Loading } from '../../components'
 import { usePage } from '../../contexts/PageContext'
@@ -20,7 +19,11 @@ import { Error404 } from '../Errors/Error404Page'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import styles from './SubmissionSummary.module.scss'
 import { ChangeHistory } from '../../components/ChangeHistory'
-import { ModalOpenButton, UnlockSubmitModal } from '../../components/Modal'
+import {
+    ModalOpenButton,
+    UnlockSubmitModal,
+    Modal,
+} from '../../components/Modal'
 import { RoutesRecord } from '@mc-review/constants'
 import { useRouteParams } from '../../hooks'
 import { getVisibleLatestContractFormData } from '@mc-review/helpers'
@@ -33,6 +36,7 @@ export const SubmissionSummary = (): React.ReactElement => {
     // Page level state
     const { updateHeading } = usePage()
     const modalRef = useRef<ModalRef>(null)
+    const approveModalRef = useRef<ModalRef>(null)
     const [documentError, setDocumentError] = useState(false)
     const { loggedInUser } = useAuth()
     const { id } = useRouteParams()
@@ -188,14 +192,36 @@ export const SubmissionSummary = (): React.ReactElement => {
                 )}
 
                 {showSubmissionApproval && (
-                    <Grid className={styles.approveWithdrawButtonContainer} row>
-                        <ButtonWithLogging
-                            type={'button'}
-                            disabled={!isSubmitted}
+                    <>
+                        <Grid
+                            className={styles.approveWithdrawButtonContainer}
+                            row
                         >
-                            Approve submission
-                        </ButtonWithLogging>
-                    </Grid>
+                            <ModalOpenButton
+                                id="approval-modal-toggle-button"
+                                modalRef={approveModalRef}
+                                disabled={!isSubmitted}
+                                data-testid="approval-modal-toggle-button"
+                            >
+                                Approve submission
+                            </ModalOpenButton>
+                        </Grid>
+                        <Modal
+                            id="approvalModal"
+                            modalRef={approveModalRef}
+                            modalHeading="Are you sure you want to approve this submission?"
+                            onSubmitText="Approve submission"
+                            submitButtonProps={{ variant: 'default' }}
+                            className={styles.approvalModal}
+                        >
+                            <div>
+                                <p>
+                                    Once you approve, the submission status will
+                                    change from Submitted to Approved.
+                                </p>
+                            </div>
+                        </Modal>
+                    </>
                 )}
 
                 <SubmissionTypeSummarySection
@@ -248,16 +274,14 @@ export const SubmissionSummary = (): React.ReactElement => {
                     explainMissingData={explainMissingData}
                 />
 
-                {
-                    <ContractDetailsSummarySection
-                        contract={contract}
-                        isCMSUser={hasCMSPermissions}
-                        isStateUser={isStateUser}
-                        submissionName={name}
-                        onDocumentError={handleDocumentDownloadError}
-                        explainMissingData={explainMissingData}
-                    />
-                }
+                <ContractDetailsSummarySection
+                    contract={contract}
+                    isCMSUser={hasCMSPermissions}
+                    isStateUser={isStateUser}
+                    submissionName={name}
+                    onDocumentError={handleDocumentDownloadError}
+                    explainMissingData={explainMissingData}
+                />
 
                 {isContractActionAndRateCertification && (
                     <RateDetailsSummarySection
@@ -270,22 +294,19 @@ export const SubmissionSummary = (): React.ReactElement => {
                     />
                 )}
 
-                {
-                    <ContactsSummarySection
-                        contract={contract}
-                        isStateUser={isStateUser}
-                        explainMissingData={explainMissingData}
-                    />
-                }
+                <ContactsSummarySection
+                    contract={contract}
+                    isStateUser={isStateUser}
+                    explainMissingData={explainMissingData}
+                />
 
-                {<ChangeHistory contract={contract} />}
-                {
-                    <UnlockSubmitModal
-                        modalRef={modalRef}
-                        modalType="UNLOCK_CONTRACT"
-                        submissionData={contract}
-                    />
-                }
+                <ChangeHistory contract={contract} />
+
+                <UnlockSubmitModal
+                    modalRef={modalRef}
+                    modalType="UNLOCK_CONTRACT"
+                    submissionData={contract}
+                />
             </GridContainer>
         </div>
     )

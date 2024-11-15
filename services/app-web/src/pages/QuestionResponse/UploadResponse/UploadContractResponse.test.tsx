@@ -23,7 +23,7 @@ import { createContractQuestionResponseNetworkFailure } from '@mc-review/mocks'
 import { SubmissionSideNav } from '../../SubmissionSideNav'
 
 describe('UploadContractResponse', () => {
-    const division = 'testDivision'
+    const division = 'dmcp'
     const questionID = 'testQuestion'
 
     it('displays file upload for correct cms division', async () => {
@@ -51,6 +51,12 @@ describe('UploadContractResponse', () => {
                                 id: '15',
                             },
                         }),
+                        fetchContractWithQuestionsMockSuccess({
+                            contract: {
+                                ...contract,
+                                id: '15',
+                            },
+                        }),
                     ],
                 },
                 routerProvider: {
@@ -60,7 +66,7 @@ describe('UploadContractResponse', () => {
         )
 
         await screen.findByRole('heading', {
-            name: /New response/,
+            name: /Upload response/,
             level: 2,
         })
         // Expect text to display correct division from url parameters.
@@ -95,6 +101,12 @@ describe('UploadContractResponse', () => {
                                 id: '15',
                             },
                         }),
+                        fetchContractWithQuestionsMockSuccess({
+                            contract: {
+                                ...contract,
+                                id: '15',
+                            },
+                        }),
                     ],
                 },
                 routerProvider: {
@@ -104,7 +116,7 @@ describe('UploadContractResponse', () => {
         )
 
         await screen.findByRole('heading', {
-            name: /New response/,
+            name: /Upload response/,
             level: 2,
         })
         const input = screen.getByLabelText('Upload response')
@@ -147,6 +159,12 @@ describe('UploadContractResponse', () => {
                                 id: '15',
                             },
                         }),
+                        fetchContractWithQuestionsMockSuccess({
+                            contract: {
+                                ...contract,
+                                id: '15',
+                            },
+                        }),
                     ],
                 },
                 routerProvider: {
@@ -156,11 +174,11 @@ describe('UploadContractResponse', () => {
         )
 
         await screen.findByRole('heading', {
-            name: /New response/,
+            name: /Upload response/,
             level: 2,
         })
         const continueButton = screen.getByRole('button', {
-            name: 'Send response',
+            name: 'Submit response',
         })
         expect(continueButton).not.toHaveAttribute('aria-disabled')
 
@@ -198,6 +216,12 @@ describe('UploadContractResponse', () => {
                                 id: '15',
                             },
                         }),
+                        fetchContractWithQuestionsMockSuccess({
+                            contract: {
+                                ...contract,
+                                id: '15',
+                            },
+                        }),
                     ],
                 },
                 routerProvider: {
@@ -206,11 +230,11 @@ describe('UploadContractResponse', () => {
             }
         )
         await screen.findByRole('heading', {
-            name: /New response/,
+            name: /Upload response/,
             level: 2,
         })
         const continueButton = screen.getByRole('button', {
-            name: 'Send response',
+            name: 'Submit response',
         })
 
         const targetEl = screen.getByTestId('file-input-droptarget')
@@ -253,6 +277,12 @@ describe('UploadContractResponse', () => {
                                 id: '15',
                             },
                         }),
+                        fetchContractWithQuestionsMockSuccess({
+                            contract: {
+                                ...contract,
+                                id: '15',
+                            },
+                        }),
                     ],
                 },
                 routerProvider: {
@@ -261,11 +291,11 @@ describe('UploadContractResponse', () => {
             }
         )
         await screen.findByRole('heading', {
-            name: /New response/,
+            name: /Upload response/,
             level: 2,
         })
         const continueButton = screen.getByRole('button', {
-            name: 'Send response',
+            name: 'Submit response',
         })
         const targetEl = screen.getByTestId('file-input-droptarget')
 
@@ -319,6 +349,12 @@ describe('UploadContractResponse', () => {
                                 id: '15',
                             },
                         }),
+                        fetchContractWithQuestionsMockSuccess({
+                            contract: {
+                                ...contract,
+                                id: '15',
+                            },
+                        }),
                         createContractQuestionResponseNetworkFailure(),
                     ],
                 },
@@ -328,11 +364,11 @@ describe('UploadContractResponse', () => {
             }
         )
         await screen.findByRole('heading', {
-            name: /New response/,
+            name: /Upload response/,
             level: 2,
         })
         const createQuestionButton = screen.getByRole('button', {
-            name: 'Send response',
+            name: 'Submit response',
         })
         const input = screen.getByLabelText('Upload response')
 
@@ -367,6 +403,12 @@ describe('UploadContractResponse', () => {
                             fetchCurrentUserMock({
                                 user: mockValidUser(),
                                 statusCode: 200,
+                            }),
+                            fetchContractWithQuestionsMockSuccess({
+                                contract: {
+                                    ...contract,
+                                    id: '15',
+                                },
                             }),
                             fetchContractWithQuestionsMockSuccess({
                                 contract: {

@@ -1,27 +1,26 @@
 import { useEffect, useState } from 'react'
-import styles from './QuestionResponse.module.scss'
+import styles from '../QuestionResponse.module.scss'
 import {
     CmsUser,
     useFetchRateWithQuestionsQuery,
     Division,
-} from '../../gen/gqlClient'
+} from '../../../gen/gqlClient'
 import { useParams, matchPath, useLocation } from 'react-router-dom'
 import { GridContainer } from '@trussworks/react-uswds'
-import { QuestionResponseSubmitBanner } from '../../components'
-import { GenericErrorPage } from '../Errors/GenericErrorPage'
+import { QuestionResponseSubmitBanner } from '../../../components'
+import { GenericErrorPage } from '../../Errors/GenericErrorPage'
 import { hasCMSUserPermissions } from '@mc-review/helpers'
-import { getUserDivision } from './QuestionResponseHelpers'
-import { UserAccountWarningBanner } from '../../components/Banner'
-import { ContactSupportLink } from '../../components/ErrorAlert/ContactSupportLink'
-import { useAuth } from '../../contexts/AuthContext'
+import { getUserDivision } from '../QuestionResponseHelpers'
+import { UserAccountWarningBanner } from '../../../components/Banner'
+import { useAuth } from '../../../contexts/AuthContext'
 import { RoutesRecord } from '@mc-review/constants'
 import {
     ErrorOrLoadingPage,
     handleAndReturnErrorState,
-} from '../StateSubmission/ErrorOrLoadingPage'
-import { usePage } from '../../contexts/PageContext'
-import { CMSQuestionResponseTable } from './QATable/CMSQuestionResponseTable'
-import { StateQuestionResponseTable } from './QATable/StateQuestionResponseTable'
+} from '../../StateSubmission/ErrorOrLoadingPage'
+import { usePage } from '../../../contexts/PageContext'
+import { CMSQuestionResponseTable } from '../QATable/CMSQuestionResponseTable'
+import { StateQuestionResponseTable } from '../QATable/StateQuestionResponseTable'
 
 export const RateQuestionResponse = () => {
     const { id } = useParams() as { id: string }
@@ -84,19 +83,7 @@ export const RateQuestionResponse = () => {
     return (
         <div className={styles.background}>
             <GridContainer className={styles.container}>
-                {hasCMSPermissions && !division && (
-                    <UserAccountWarningBanner
-                        header={'Missing division'}
-                        message={
-                            <span>
-                                You must be assigned to a division in order to
-                                ask questions about a submission. Please&nbsp;
-                                <ContactSupportLink />
-                                &nbsp;to add your division.
-                            </span>
-                        }
-                    />
-                )}
+                {hasCMSPermissions && !division && <UserAccountWarningBanner />}
 
                 {submitType && (
                     <QuestionResponseSubmitBanner submitType={submitType} />
@@ -110,7 +97,7 @@ export const RateQuestionResponse = () => {
                 ) : (
                     <StateQuestionResponseTable
                         indexQuestions={rate.questions}
-                        rateCertName={rateCertificationName}
+                        header={`Rate questions: ${rateCertificationName}`}
                     />
                 )}
             </GridContainer>

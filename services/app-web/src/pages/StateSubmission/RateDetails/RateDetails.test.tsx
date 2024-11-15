@@ -628,6 +628,7 @@ describe('RateDetails', () => {
                                     id: 'test-abc-123',
                                 },
                             }),
+                            indexRatesMockSuccess(),
                             updateDraftContractRatesMockSuccess({
                                 contract: {
                                     id: 'test-abc-123',

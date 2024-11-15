@@ -23,6 +23,7 @@ import { Error404 } from '../Errors/Error404Page'
 import { Contract, User } from '../../gen/gqlClient'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '@mc-review/common-code'
+import { isUnlockedOrDraft, shouldUseFormPageStyles } from './helpers'
 
 export type SideNavOutletContextType = {
     contract: Contract
@@ -112,9 +113,6 @@ export const SubmissionSideNav = () => {
         QUESTION_RESPONSE_SHOW_SIDEBAR_ROUTES.includes(routeName)
 
     const isStateUser = loggedInUser?.role === 'STATE_USER'
-    const isFormPage =
-        (submissionStatus === 'UNLOCKED' || submissionStatus === 'DRAFT') &&
-        isStateUser
     // Only State users can see a draft submission
     if (submissionStatus === 'DRAFT' && !isStateUser) {
         return <GenericErrorPage />
@@ -145,6 +143,14 @@ export const SubmissionSideNav = () => {
         recordJSException(errMsg)
         return <GenericErrorPage />
     }
+
+    // All of this logic is to enable conditional styles with sidenabv
+    const isEditable = isUnlockedOrDraft(submissionStatus)
+    const isFormPage = shouldUseFormPageStyles(
+        routeName,
+        loggedInUser,
+        isEditable
+    )
 
     const generateRateLinks = () => {
         const rateRevision = contract.packageSubmissions[0].rateRevisions
