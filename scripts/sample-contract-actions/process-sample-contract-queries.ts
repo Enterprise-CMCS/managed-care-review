@@ -245,16 +245,16 @@ function parseContract(cq: any, allTables: AllTablesType) {
         const actuary: ContactPersonType[] = rfd.certifyingActuaryContacts.map((c: ContactQueryType) => ({
             rateID: rrev.rateID,
             type: 'RATE_ACTUARY',
-            name: createHash('md5').update(c.name).digest('hex'),
-            email: `${createHash('md5').update(c.email).digest('hex')}@example.com`,
+            name: createHash('sha256').update(c.name).digest('hex'),
+            email: `${createHash('sha256').update(c.email).digest('hex')}@example.com`,
             titleRole: c.titleRole,
         }))
 
         const additionalActuaries: ContactPersonType[] = rfd.addtlActuaryContacts.map((c: ContactQueryType) => ({
             rateID: rrev.rateID,
             type: 'RATE_ADDITIONAL_ACTUARY',
-            name: createHash('md5').update(c.name).digest('hex'),
-            email: `${createHash('md5').update(c.email).digest('hex')}@example.com`,
+            name: createHash('sha256').update(c.name).digest('hex'),
+            email: `${createHash('sha256').update(c.email).digest('hex')}@example.com`,
             titleRole: c.titleRole,
         }))
 
