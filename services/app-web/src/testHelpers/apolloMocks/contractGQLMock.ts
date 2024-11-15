@@ -441,7 +441,7 @@ const indexContractsMockSuccess = (
     }
 }
 
-export { 
+export {
     fetchContractMockSuccess,
     fetchContractMockFail,
     fetchContractWithQuestionsMockSuccess,

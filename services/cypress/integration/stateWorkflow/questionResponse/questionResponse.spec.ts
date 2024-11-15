@@ -30,9 +30,12 @@ describe('Q&A', () => {
                         documentPath: 'documents/questions_for_submission.pdf',
                     })
 
-                    // Newly uploaded questions document should exist within DMCO section
-                    cy.findByTestId('dmco-qa-section')
+                    // Newly uploaded questions document should exist within your section
+                    cy.findByRole('heading', {name: 'Your division\'s questions'})
                         .should('exist')
+                        .parent()
+                        .parent()
+                        .parent()
                         .within(() => {
                             // Add timeout to findByText to allow time for generating document urls
                             cy.findByText('questions_for_submission.pdf', {
@@ -65,8 +68,11 @@ describe('Q&A', () => {
                     }).should('exist')
 
                     // Newly uploaded questions document should exist within DMCO section
-                    cy.findByTestId('dmco-qa-section')
+                    cy.findByRole('heading', {name: 'Outstanding questions'})
                         .should('exist')
+                        .parent()
+                        .parent()
+                        .parent()
                         .within(() => {
                             // Add timeout to findByText to allow time for generating document urls
                             cy.findByText('questions_for_submission.pdf', {
@@ -80,8 +86,11 @@ describe('Q&A', () => {
                     })
 
                     // Newly uploaded response document should exist within DMCO section
-                    cy.findByTestId('dmco-qa-section')
+                    cy.findByRole('heading', {name: 'Answered questions'})
                         .should('exist')
+                        .parent()
+                        .parent()
+                        .parent()
                         .within(() => {
                             // Add timeout to findByText to allow time for generating document urls
                             cy.findByText(

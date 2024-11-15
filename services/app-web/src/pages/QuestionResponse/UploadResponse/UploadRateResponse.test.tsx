@@ -18,11 +18,11 @@ import {
     mockRateSubmittedWithQuestions,
     fetchRateWithQuestionsMockSuccess,
 } from '../../../testHelpers/apolloMocks'
-import { createContractQuestionResponseNetworkFailure } from '../../../testHelpers/apolloMocks/questionResponseGQLMock'
+import { createRateQuestionResponseNetworkFailure } from '../../../testHelpers/apolloMocks/questionResponseGQLMock'
 import { SubmissionSideNav } from '../../SubmissionSideNav'
 
 describe('UploadRateResponse', () => {
-    const division = 'testDivision'
+    const division = 'dmco'
     const questionID = 'testQuestion'
     const renderTestUI = () => {
         return (
@@ -58,7 +58,7 @@ describe('UploadRateResponse', () => {
         })
 
         await screen.findByRole('heading', {
-            name: /New response/,
+            name: /Upload response/,
             level: 2,
         })
         // Expect text to display correct division from url parameters.
@@ -92,7 +92,7 @@ describe('UploadRateResponse', () => {
         })
 
         await screen.findByRole('heading', {
-            name: /New response/,
+            name: /Upload response/,
             level: 2,
         })
         const input = screen.getByLabelText('Upload response')
@@ -134,11 +134,11 @@ describe('UploadRateResponse', () => {
         })
 
         await screen.findByRole('heading', {
-            name: /New response/,
+            name: /Upload response/,
             level: 2,
         })
         const continueButton = screen.getByRole('button', {
-            name: 'Send response',
+            name: 'Submit response',
         })
         expect(continueButton).not.toHaveAttribute('aria-disabled')
 
@@ -174,11 +174,11 @@ describe('UploadRateResponse', () => {
             },
         })
         await screen.findByRole('heading', {
-            name: /New response/,
+            name: /Upload response/,
             level: 2,
         })
         const continueButton = screen.getByRole('button', {
-            name: 'Send response',
+            name: 'Submit response',
         })
 
         const targetEl = screen.getByTestId('file-input-droptarget')
@@ -219,11 +219,11 @@ describe('UploadRateResponse', () => {
             },
         })
         await screen.findByRole('heading', {
-            name: /New response/,
+            name: /Upload response/,
             level: 2,
         })
         const continueButton = screen.getByRole('button', {
-            name: 'Send response',
+            name: 'Submit response',
         })
         const targetEl = screen.getByTestId('file-input-droptarget')
 
@@ -252,7 +252,7 @@ describe('UploadRateResponse', () => {
         ).toHaveLength(2)
     })
 
-    it('displays api error if createContractQuestionResponse fails', async () => {
+    it('displays api error if createRateQuestionResponse fails', async () => {
         const rate = mockRateSubmittedWithQuestions({ id: '15' })
 
         renderWithProviders(renderTestUI(), {
@@ -268,7 +268,10 @@ describe('UploadRateResponse', () => {
                             id: '15',
                         },
                     }),
-                    createContractQuestionResponseNetworkFailure(),
+                    createRateQuestionResponseNetworkFailure({
+                        questionID: questionID,
+                        documents: [],
+                    }),
                 ],
             },
             routerProvider: {
@@ -276,11 +279,11 @@ describe('UploadRateResponse', () => {
             },
         })
         await screen.findByRole('heading', {
-            name: /New response/,
+            name: /Upload response/,
             level: 2,
         })
         const createQuestionButton = screen.getByRole('button', {
-            name: 'Send response',
+            name: 'Submit response',
         })
         const input = screen.getByLabelText('Upload response')
 

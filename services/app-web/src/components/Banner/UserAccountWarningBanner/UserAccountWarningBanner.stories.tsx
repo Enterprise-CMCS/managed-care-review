@@ -4,7 +4,6 @@ import {
     UserAccountWarningBanner,
     AccountWarningBannerProps,
 } from './UserAccountWarningBanner'
-import { useStringConstants } from '../../../hooks/useStringConstants'
 
 export default {
     title: 'Components/Banner/UserAccountWarningBanner',
@@ -12,19 +11,7 @@ export default {
 }
 
 const Template: StoryFn<AccountWarningBannerProps> = ({ header, ...args }) => {
-    const stringConstants = useStringConstants()
-    const MAIL_TO_SUPPORT = stringConstants.MAIL_TO_SUPPORT
-
-    return (
-        <UserAccountWarningBanner
-            {...args}
-            header={header}
-            message={`You must be assigned to a division in order to ask questions about a submission. Contact ${MAIL_TO_SUPPORT} to add your division.`}
-        />
-    )
+    return <UserAccountWarningBanner />
 }
 
 export const Default = Template.bind({})
-Default.args = {
-    header: 'Missing division',
-}

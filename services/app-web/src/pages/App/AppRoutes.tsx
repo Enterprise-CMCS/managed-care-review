@@ -32,7 +32,7 @@ import { useLocalStorage } from '../../hooks/useLocalStorage'
 import { recordJSException } from '../../otelHelpers'
 import { SubmissionSideNav } from '../SubmissionSideNav'
 import {
-    QuestionResponse,
+    ContractQuestionResponse,
     UploadContractResponse,
 } from '../QuestionResponse'
 import { GraphQLExplorer } from '../GraphQLExplorer/GraphQLExplorer'
@@ -47,9 +47,12 @@ import {
     DivisionAssignmentTable,
 } from '../Settings/SettingsTables'
 import { EditStateAssign } from '../Settings/EditStateAssign/EditStateAssign'
-import { UploadContractQuestions, UploadRateQuestions } from '../QuestionResponse/UploadQuestions'
+import {
+    UploadContractQuestions,
+    UploadRateQuestions,
+} from '../QuestionResponse/UploadQuestions'
 import { RateSummarySideNav } from '../SubmissionSideNav/RateSummarySideNav'
-import { RateQuestionResponse } from '../QuestionResponse/RateQuestionResponse'
+import { RateQuestionResponse } from '../QuestionResponse/QuestionResponseSummary/RateQuestionResponse'
 import { UploadRateResponse } from '../QuestionResponse/UploadResponse/UploadRateResponse'
 
 function componentForAuthMode(
@@ -138,7 +141,7 @@ const StateUserRoutes = ({
                         path={
                             RoutesRecord.SUBMISSIONS_CONTRACT_QUESTIONS_AND_ANSWERS
                         }
-                        element={<QuestionResponse />}
+                        element={<ContractQuestionResponse />}
                     />
                     <Route
                         element={<UploadContractResponse />}
@@ -154,20 +157,20 @@ const StateUserRoutes = ({
                         element={<StateSubmissionForm />}
                     />
                     {showQAbyRates && (
-                       <>
-                       <Route
-                            path={
-                                RoutesRecord.SUBMISSIONS_RATE_QUESTIONS_AND_ANSWERS
-                            }
-                            element={<RateQuestionResponse />}
-                        />
-                        <Route
-                        path={
-                            RoutesRecord.SUBMISSIONS_UPLOAD_RATE_RESPONSE
-                        }
-                        element={<UploadRateResponse />}
-                        />
-                    </>
+                        <>
+                            <Route
+                                path={
+                                    RoutesRecord.SUBMISSIONS_RATE_QUESTIONS_AND_ANSWERS
+                                }
+                                element={<RateQuestionResponse />}
+                            />
+                            <Route
+                                path={
+                                    RoutesRecord.SUBMISSIONS_UPLOAD_RATE_RESPONSE
+                                }
+                                element={<UploadRateResponse />}
+                            />
+                        </>
                     )}
                 </Route>
                 <Route
@@ -231,7 +234,7 @@ const CMSUserRoutes = ({
                         path={
                             RoutesRecord.SUBMISSIONS_CONTRACT_QUESTIONS_AND_ANSWERS
                         }
-                        element={<QuestionResponse />}
+                        element={<ContractQuestionResponse />}
                     />
                     <Route
                         path={RoutesRecord.SUBMISSIONS_UPLOAD_CONTRACT_QUESTION}

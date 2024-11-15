@@ -14,140 +14,171 @@ import {
     GenericApiErrorBanner,
 } from '../../../components'
 import { useFileUpload } from '../../../hooks/useFileUpload'
-import { ACCEPTED_SUBMISSION_FILE_TYPES, FileItemT } from '../../../components/FileUpload'
+import {
+    ACCEPTED_SUBMISSION_FILE_TYPES,
+    FileItemT,
+} from '../../../components/FileUpload'
 import { PageActionsContainer } from '../../StateSubmission/PageActions'
 import { useErrorSummary } from '../../../hooks/useErrorSummary'
+import { Division } from '../../../gen/gqlClient'
+import { QAUploadFormSummary } from '../QAUploadFormSummary'
 
-type UploadResponseFormProps =  {
-    handleSubmit: (cleaned: FileItemT[]) => Promise<void>,
-    apiLoading: boolean,
-    apiError: boolean,
+type UploadResponseFormProps = {
+    handleSubmit: (cleaned: FileItemT[]) => Promise<void>
+    apiLoading: boolean
+    apiError: boolean
     type: 'contract' | 'rate'
-
+    round: number
+    questionBeingAsked?: JSX.Element // pass in a QuestionDisplayTable with data
 }
-const UploadResponseForm = ({handleSubmit, apiError, apiLoading, type}: UploadResponseFormProps) => {
-    const { division, id, rateID} = useParams<{ division: string; id: string, rateID: string }>()
+const UploadResponseForm = ({
+    handleSubmit,
+    apiError,
+    apiLoading,
+    type,
+    round,
+    questionBeingAsked,
+}: UploadResponseFormProps) => {
+    const { division, id, rateID } = useParams<{
+        division: string
+        id: string
+        rateID: string
+    }>()
     const [shouldValidate, setShouldValidate] = React.useState(false)
     const navigate = useNavigate()
-        const { handleDeleteFile, handleUploadFile, handleScanFile } = useS3()
-        const {
-            hasValidFiles,
-            hasNoFiles,
-            onFileItemsUpdate,
-            fileUploadError,
-            cleanFileItemsBeforeSave,
-        } = useFileUpload(shouldValidate)
-        const { setFocusErrorSummaryHeading, errorSummaryHeadingRef } =
-            useErrorSummary()
+    const { handleDeleteFile, handleUploadFile, handleScanFile } = useS3()
+    const {
+        hasValidFiles,
+        hasNoFiles,
+        onFileItemsUpdate,
+        fileUploadError,
+        cleanFileItemsBeforeSave,
+    } = useFileUpload(shouldValidate)
+    const { setFocusErrorSummaryHeading, errorSummaryHeadingRef } =
+        useErrorSummary()
 
-        const uploadComponentID = `${type}-response-upload`
-        const showFileUploadError = Boolean(shouldValidate && fileUploadError)
-        const fileUploadErrorFocusKey = hasNoFiles
-            ? uploadComponentID
-            : '#file-items-list'
+    const uploadComponentID = `${type}-response-upload`
+    const showFileUploadError = Boolean(shouldValidate && fileUploadError)
+    const fileUploadErrorFocusKey = hasNoFiles
+        ? uploadComponentID
+        : '#file-items-list'
 
-        const onSubmit = async(e: React.FormEvent<HTMLFormElement>) => {
-                e.preventDefault()
-            // Currently documents validation happens (outside of the yup schema, which only handles the formik form data)
-            // if there are any errors present in the documents list and we are in a validation state (relevant for Save as Draft) force user to clear validations to continue
-            if (!hasValidFiles || hasNoFiles) {
-                setShouldValidate(true)
-                setFocusErrorSummaryHeading(true)
-                return
-            } else {
-                const cleaned = cleanFileItemsBeforeSave()
-                return await handleSubmit(cleaned)
-            }
+    const cancelLink =
+        type === 'contract'
+            ? `/submissions/${id}/question-and-answers`
+            : `/submissions/${id}/rates/${rateID}/question-and-answers`
+    const submitLink =
+        type === 'contract'
+            ? `/submissions/${id}/question-and-answers?submit=response`
+            : `/submissions/${id}/rates/${rateID}/question-and-answers?submit=response`
+
+    const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault()
+        // Currently documents validation happens (outside of the yup schema, which only handles the formik form data)
+        // if there are any errors present in the documents list and we are in a validation state (relevant for Save as Draft) force user to clear validations to continue
+        if (!hasValidFiles || hasNoFiles) {
+            setShouldValidate(true)
+            setFocusErrorSummaryHeading(true)
+            return
+        } else {
+            const cleaned = cleanFileItemsBeforeSave()
+            return await handleSubmit(cleaned)
         }
+    }
 
+    const isContract = type == 'contract'
     return (
         <UswdsForm
-                className={styles.formContainer}
-                id={`${type}AddQuestionsResponseForm`}
-                aria-label="Add Response Form"
-                aria-describedby="form-guidance"
-                onSubmit={onSubmit}
-            >
-                {apiError && <GenericApiErrorBanner />}
-                <fieldset className="usa-fieldset">
-                    <h2>New response</h2>
-                    <p className="text-bold">{`Questions from ${division?.toUpperCase()}`}</p>
+            className={styles.formContainer}
+            id={`${type}AddQuestionsResponseForm`}
+            aria-label="Add Response Form"
+            aria-describedby="form-guidance"
+            onSubmit={onSubmit}
+        >
+            {apiError && <GenericApiErrorBanner />}
+            <fieldset className="usa-fieldset">
+                <h2>Upload response</h2>
+                <QAUploadFormSummary
+                    // Don't pass a round for rates - we don't display rounds to state users on rates
+                    round={isContract ? round : undefined}
+                    division={division?.toUpperCase() as Division}
+                    isContract={isContract}
+                />
+                {questionBeingAsked}
 
-                    {shouldValidate && (
-                        <ErrorSummary
-                            errors={
-                                showFileUploadError && fileUploadError
-                                    ? {
-                                          [fileUploadErrorFocusKey]:
-                                              fileUploadError,
-                                      }
-                                    : {}
-                            }
-                            headingRef={errorSummaryHeadingRef}
-                        />
-                    )}
+                {shouldValidate && (
+                    <ErrorSummary
+                        errors={
+                            showFileUploadError && fileUploadError
+                                ? {
+                                      [fileUploadErrorFocusKey]:
+                                          fileUploadError,
+                                  }
+                                : {}
+                        }
+                        headingRef={errorSummaryHeadingRef}
+                    />
+                )}
 
-                    <FormGroup error={showFileUploadError}>
-                        <FileUpload
-                            id={uploadComponentID}
-                            name={uploadComponentID}
-                            label="Upload response"
-                            aria-required
-                            error={showFileUploadError ? fileUploadError : ''}
-                            hint={
-                                <span>
-                                    This input only accepts PDF, CSV, DOC, DOCX,
-                                    XLS, XLSX, XLSM files.
-                                </span>
-                            }
-                            accept={ACCEPTED_SUBMISSION_FILE_TYPES}
-                            uploadFile={(file) =>
-                                handleUploadFile(file, 'QUESTION_ANSWER_DOCS')
-                            }
-                            scanFile={(key) =>
-                                handleScanFile(key, 'QUESTION_ANSWER_DOCS')
-                            }
-                            deleteFile={(key) =>
-                                handleDeleteFile(key, 'QUESTION_ANSWER_DOCS')
-                            }
-                            onFileItemsUpdate={onFileItemsUpdate}
-                        />
-                    </FormGroup>
-                </fieldset>
-                <PageActionsContainer>
-                    <ButtonGroup type="default">
-                        <ActionButton
-                            type="button"
-                            variant="outline"
-                            data-testid="page-actions-left-secondary"
-                            disabled={apiLoading}
-                            parent_component_type="page body"
-                            link_url={`/submissions/${id}/rates/${rateID}question-and-answers`}
-                            onClick={() =>
-                                navigate(
-                                    `/submissions/${id}/rates/${rateID}/question-and-answers`
-                                )
-                            }
-                        >
-                            Cancel
-                        </ActionButton>
+                <FormGroup error={showFileUploadError}>
+                    <FileUpload
+                        id={uploadComponentID}
+                        name={uploadComponentID}
+                        label="Upload response"
+                        aria-required
+                        error={showFileUploadError ? fileUploadError : ''}
+                        hint={
+                            <span>
+                                This input only accepts PDF, CSV, DOC, DOCX,
+                                XLS, XLSX, XLSM files.
+                            </span>
+                        }
+                        accept={ACCEPTED_SUBMISSION_FILE_TYPES}
+                        uploadFile={(file) =>
+                            handleUploadFile(file, 'QUESTION_ANSWER_DOCS')
+                        }
+                        scanFile={(key) =>
+                            handleScanFile(key, 'QUESTION_ANSWER_DOCS')
+                        }
+                        deleteFile={(key) =>
+                            handleDeleteFile(key, 'QUESTION_ANSWER_DOCS')
+                        }
+                        onFileItemsUpdate={onFileItemsUpdate}
+                    />
+                </FormGroup>
+            </fieldset>
+            <PageActionsContainer>
+                <ButtonGroup type="default">
+                    <ActionButton
+                        type="button"
+                        variant="outline"
+                        data-testid="page-actions-left-secondary"
+                        disabled={apiLoading}
+                        parent_component_type="page body"
+                        link_url={cancelLink}
+                        onClick={() => {
+                            navigate(cancelLink)
+                        }}
+                    >
+                        Cancel
+                    </ActionButton>
 
-                        <ActionButton
-                            type="submit"
-                            variant="default"
-                            data-testid="page-actions-right-primary"
-                            parent_component_type="page body"
-                            link_url={`/submissions/${id}/rates/${rateID}/question-and-answers?submit=reponse`}
-                            disabled={showFileUploadError}
-                            animationTimeout={1000}
-                            loading={apiLoading}
-                        >
-                            Send response
-                        </ActionButton>
-                    </ButtonGroup>
-                </PageActionsContainer>
-            </UswdsForm>
+                    <ActionButton
+                        type="submit"
+                        variant="default"
+                        data-testid="page-actions-right-primary"
+                        parent_component_type="page body"
+                        link_url={submitLink}
+                        disabled={showFileUploadError}
+                        animationTimeout={1000}
+                        loading={apiLoading}
+                    >
+                        Submit response
+                    </ActionButton>
+                </ButtonGroup>
+            </PageActionsContainer>
+        </UswdsForm>
     )
 }
 
-export {UploadResponseForm}
+export { UploadResponseForm }

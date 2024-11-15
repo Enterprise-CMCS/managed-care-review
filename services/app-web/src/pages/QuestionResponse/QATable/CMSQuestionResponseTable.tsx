@@ -20,6 +20,7 @@ export const CMSQuestionResponseTable = ({
     userDivision,
 }: CMSQuestionResponseTableProps) => {
     const { loggedInUser } = useAuth()
+
     const currentDivisionRounds = (): QuestionRounds => {
         if (!userDivision) {
             return []
@@ -28,7 +29,14 @@ export const CMSQuestionResponseTable = ({
         const divisionQuestions = indexQuestions[`${userDivision}Questions`]
         const rounds: QuestionRounds = []
 
-        divisionQuestions.edges.forEach(({ node }, index) => {
+        const sortedQuestions = [...divisionQuestions.edges]
+        sortedQuestions.sort(
+            (a, b) =>
+                new Date(b.node.createdAt).getTime() -
+                new Date(a.node.createdAt).getTime()
+        )
+
+        sortedQuestions.forEach(({ node }, index) => {
             if (!rounds[index]) {
                 rounds[index] = []
             }
@@ -53,7 +61,11 @@ export const CMSQuestionResponseTable = ({
                 // Reverse each division question so that we start at round 1 for each question, otherwise we get
                 // mismatching rounds.
                 Array.from([...questionsList.edges])
-                    .reverse()
+                    .sort(
+                        (a, b) =>
+                            new Date(a.node.createdAt).getTime() -
+                            new Date(b.node.createdAt).getTime()
+                    )
                     .forEach(({ node }, index) => {
                         if (!rounds[index]) {
                             rounds[index] = []
@@ -90,7 +102,7 @@ export const CMSQuestionResponseTable = ({
                         <NavLinkWithLogging
                             className="usa-button"
                             variant="unstyled"
-                            to={`./${userDivision}/upload-questions`}
+                            to={`./${userDivision.toLowerCase()}/upload-questions`}
                         >
                             Add questions
                         </NavLinkWithLogging>
@@ -103,7 +115,7 @@ export const CMSQuestionResponseTable = ({
                                 key={questionData.id}
                                 question={questionData}
                                 roundTitle={roundTitle}
-                                currentUser={loggedInUser}
+                                currentUser={loggedInUser!}
                             />
                         ))
                     )
@@ -123,7 +135,7 @@ export const CMSQuestionResponseTable = ({
                                 key={questionData.id}
                                 question={questionData}
                                 roundTitle={roundTitle}
-                                currentUser={loggedInUser}
+                                currentUser={loggedInUser!}
                             />
                         ))
                     )

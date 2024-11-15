@@ -1,2 +1,2 @@
-export { extractQuestions, getDivisionOrder, getUserDivision, divisionFullNames } from './questionResponseHelpers'
-export type { QuestionData, QuestionDocumentWithLink, DivisionQuestionDataType, IndexQuestionType } from './questionResponseHelpers'
+export { extractQuestions, getDivisionOrder, getUserDivision, divisionFullNames, getNextCMSRoundNumber, getAddedByName, getQuestionRoundForQuestionID } from './questionResponseHelpers'
+export type { QuestionData, QuestionDisplayDocument, QuestionType, QuestionDocumentWithLink, DivisionQuestionDataType, IndexQuestionType } from './questionResponseHelpers'
