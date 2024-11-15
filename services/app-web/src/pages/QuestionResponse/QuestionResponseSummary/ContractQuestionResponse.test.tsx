@@ -4,24 +4,20 @@ import {
     fetchCurrentUserMock,
     fetchRateMockSuccess,
     mockContractPackageDraft,
-    mockContractPackageSubmitted,
+    mockContractPackageSubmittedWithQuestions,
     mockValidCMSUser,
     mockValidStateUser,
-    rateDataMock,
-} from '../../testHelpers/apolloMocks'
-import { IndexRateQuestionsPayload, RateRevision } from '../../gen/gqlClient'
-import { renderWithProviders } from '../../testHelpers'
+} from '../../../testHelpers/apolloMocks'
+import { IndexContractQuestionsPayload } from '../../../gen/gqlClient'
+import { renderWithProviders } from '../../../testHelpers'
 import { Route, Routes } from 'react-router-dom'
-import { SubmissionSideNav } from '../SubmissionSideNav'
-import { RoutesRecord } from '../../constants'
-import { QuestionResponse } from './QuestionResponse'
-import { RateSummary, SubmissionSummary } from '../SubmissionSummary'
-import { RateQuestionResponse } from './RateQuestionResponse'
+import { SubmissionSideNav } from '../../SubmissionSideNav'
+import { RoutesRecord } from '../../../constants'
+import { ContractQuestionResponse } from './ContractQuestionResponse'
+import { SubmissionSummary } from '../../SubmissionSummary'
 import { screen, waitFor, within } from '@testing-library/react'
-import { fetchRateWithQuestionsMockSuccess } from '../../testHelpers/apolloMocks'
-import { RateSummarySideNav } from '../SubmissionSideNav/RateSummarySideNav'
 
-describe('RateQuestionResponse', () => {
+describe('ContractQuestionResponse', () => {
     describe('State user tests', () => {
         const CommonStateRoutes = () => (
             <Routes>
@@ -30,82 +26,24 @@ describe('RateQuestionResponse', () => {
                         path={
                             RoutesRecord.SUBMISSIONS_CONTRACT_QUESTIONS_AND_ANSWERS
                         }
-                        element={<QuestionResponse />}
+                        element={<ContractQuestionResponse />}
                     />
                     <Route
                         path={RoutesRecord.SUBMISSIONS_SUMMARY}
                         element={<SubmissionSummary />}
                     />
-                    <Route
-                        path={
-                            RoutesRecord.SUBMISSIONS_RATE_QUESTIONS_AND_ANSWERS
-                        }
-                        element={<RateQuestionResponse />}
-                    />
                 </Route>
             </Routes>
         )
-        it('renders rate certification name', async () => {
-            const contract = mockContractPackageSubmitted()
-            const rateRevision = contract.packageSubmissions[0].rateRevisions[0]
-            const secondRateRev: RateRevision = {
-                ...rateRevision,
-                id: 'second-rate-revision',
-                rateID: 'second-rate',
-                formData: {
-                    ...rateRevision.formData,
-                    rateProgramIDs: ['ea16a6c0-5fc6-4df8-adac-c627e76660ab'],
-                    rateCertificationName: 'MCR-MN-MSC+',
-                },
-            }
-            contract.packageSubmissions[0].rateRevisions.push(secondRateRev)
-            renderWithProviders(<CommonStateRoutes />, {
-                apolloProvider: {
-                    mocks: [
-                        fetchCurrentUserMock({
-                            user: mockValidStateUser(),
-                            statusCode: 200,
-                        }),
-                        fetchContractWithQuestionsMockSuccess({
-                            contract: {
-                                ...contract,
-                                id: '15',
-                            },
-                        }),
-                        fetchRateWithQuestionsMockSuccess({
-                            rate: { id: secondRateRev.rateID },
-                            rateRev: secondRateRev,
-                        }),
-                    ],
-                },
-                routerProvider: {
-                    route: '/submissions/15/rates/second-rate/question-and-answers',
-                },
-                featureFlags: {
-                    'qa-by-rates': true,
-                },
-            })
-
-            // Wait for sidebar nav to exist.
-            await waitFor(() => {
-                expect(screen.queryByTestId('sidenav')).toBeInTheDocument()
-            })
-
-            expect(
-                screen.getByRole('heading', {
-                    name: `Rate questions: ${secondRateRev.formData.rateCertificationName}`,
-                })
-            ).toBeInTheDocument()
-        })
 
         it('renders questions in correct sections', async () => {
             renderWithProviders(
                 <Routes>
                     <Route
                         path={
-                            RoutesRecord.SUBMISSIONS_RATE_QUESTIONS_AND_ANSWERS
+                            RoutesRecord.SUBMISSIONS_CONTRACT_QUESTIONS_AND_ANSWERS
                         }
-                        element={<RateQuestionResponse />}
+                        element={<ContractQuestionResponse />}
                     />
                 </Routes>,
                 {
@@ -115,15 +53,16 @@ describe('RateQuestionResponse', () => {
                                 user: mockValidStateUser(),
                                 statusCode: 200,
                             }),
-                            fetchRateWithQuestionsMockSuccess({
-                                rate: {
-                                    id: 'test-rate-id',
+                            fetchContractWithQuestionsMockSuccess({
+                                contract: {
+                                    ...mockContractPackageSubmittedWithQuestions(),
+                                    id: 'test-contract-id',
                                 },
                             }),
                         ],
                     },
                     routerProvider: {
-                        route: '/submissions/15/rates/test-rate-id/question-and-answers',
+                        route: '/submissions/test-contract-id/question-and-answers',
                     },
                     featureFlags: {
                         'qa-by-rates': true,
@@ -167,7 +106,10 @@ describe('RateQuestionResponse', () => {
                 'Asked by: Division of Managed Care Operations (DMCO)'
             )
             expect(outstandingRounds[0]).toHaveTextContent(
-                'dmco-question-1-document-1'
+                'dmco-question-2-document-1'
+            )
+            expect(outstandingRounds[0]).toHaveTextContent(
+                'dmco-question-2-document-2'
             )
 
             // expect 4 answered rounds
@@ -175,52 +117,48 @@ describe('RateQuestionResponse', () => {
 
             // expect rounds in order of latest round to earliest with correct content
             expect(answeredRounds[0]).toHaveTextContent(
-                'Asked by: Division of Managed Care Operations (DMCO)'
-            )
-            expect(answeredRounds[0]).toHaveTextContent(
-                'dmco-question-2-document-1'
-            )
-            expect(answeredRounds[0]).toHaveTextContent(
-                'dmco-question-2-document-2'
-            )
-            expect(answeredRounds[0]).toHaveTextContent(
-                'response-to-dmco-2-document-1'
-            )
-
-            expect(answeredRounds[1]).toHaveTextContent(
                 'Asked by: Office of the Actuary (OACT)'
             )
-            expect(answeredRounds[1]).toHaveTextContent(
+            expect(answeredRounds[0]).toHaveTextContent(
                 'oact-question-2-document-1'
             )
-            expect(answeredRounds[1]).toHaveTextContent(
+            expect(answeredRounds[0]).toHaveTextContent(
                 'response-to-oact-2-document-1'
             )
 
+            expect(answeredRounds[1]).toHaveTextContent(
+                'Asked by: Division of Managed Care Operations (DMCO)'
+            )
+            expect(answeredRounds[1]).toHaveTextContent(
+                'dmco-question-1-document-1'
+            )
+            expect(answeredRounds[1]).toHaveTextContent(
+                'response-to-dmco-1-document-1'
+            )
+
             expect(answeredRounds[2]).toHaveTextContent(
-                'Asked by: Office of the Actuary (OACT)'
+                'Asked by: Division of Managed Care Policy (DMCP)'
             )
             expect(answeredRounds[2]).toHaveTextContent(
-                'oact-question-1-document-1'
+                'dmcp-question-1-document-1'
             )
             expect(answeredRounds[2]).toHaveTextContent(
-                'response-to-oact-1-document-1'
+                'response-to-dmcp-1-document-1'
             )
 
             expect(answeredRounds[3]).toHaveTextContent(
-                'Asked by: Division of Managed Care Policy (DMCP)'
+                'Asked by: Office of the Actuary (OACT)'
             )
             expect(answeredRounds[3]).toHaveTextContent(
-                'dmcp-question-1-document-1'
+                'oact-question-1-document-1'
             )
             expect(answeredRounds[3]).toHaveTextContent(
-                'response-to-dmcp-1-document-1'
+                'response-to-oact-1-document-1'
             )
         })
 
-        it('renders error page if rate is in draft', async () => {
-            const contract = mockContractPackageSubmitted()
-            contract.packageSubmissions[0].rateRevisions = []
+        it('renders error page if contract is in draft', async () => {
+            const contract = mockContractPackageDraft()
             renderWithProviders(<CommonStateRoutes />, {
                 apolloProvider: {
                     mocks: [
@@ -234,10 +172,16 @@ describe('RateQuestionResponse', () => {
                                 id: '15',
                             },
                         }),
+                        fetchContractWithQuestionsMockSuccess({
+                            contract: {
+                                ...contract,
+                                id: '15',
+                            },
+                        }),
                     ],
                 },
                 routerProvider: {
-                    route: '/submissions/15/rates/second-rate/question-and-answers',
+                    route: '/submissions/15/question-and-answers',
                 },
                 featureFlags: {
                     'qa-by-rates': true,
@@ -249,7 +193,7 @@ describe('RateQuestionResponse', () => {
             })
         })
 
-        it('renders error page if rate revision does not exist', async () => {
+        it('renders error page if contract revision does not exist', async () => {
             const draftContract = mockContractPackageDraft()
             renderWithProviders(<CommonStateRoutes />, {
                 apolloProvider: {
@@ -264,10 +208,16 @@ describe('RateQuestionResponse', () => {
                                 id: '15',
                             },
                         }),
+                        fetchContractWithQuestionsMockSuccess({
+                            contract: {
+                                ...draftContract,
+                                id: '15',
+                            },
+                        }),
                     ],
                 },
                 routerProvider: {
-                    route: '/submissions/15/rates/second-rate/question-and-answers',
+                    route: '/submissions/15/question-and-answers',
                 },
                 featureFlags: {
                     'qa-by-rates': true,
@@ -283,33 +233,35 @@ describe('RateQuestionResponse', () => {
     describe('CMS user tests', () => {
         const CommonCMSRoutes = () => (
             <Routes>
-                <Route element={<RateSummarySideNav />}>
+                <Route element={<SubmissionSideNav />}>
                     <Route
-                        path={RoutesRecord.RATES_SUMMARY}
-                        element={<RateSummary />}
+                        path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                        element={<SubmissionSummary />}
                     />
                     <Route
-                        path={RoutesRecord.RATES_SUMMARY_QUESTIONS_AND_ANSWERS}
-                        element={<RateQuestionResponse />}
+                        path={
+                            RoutesRecord.SUBMISSIONS_CONTRACT_QUESTIONS_AND_ANSWERS
+                        }
+                        element={<ContractQuestionResponse />}
                     />
                 </Route>
             </Routes>
         )
         it('renders no questions text', async () => {
-            const indexRateQuestions: IndexRateQuestionsPayload = {
-                __typename: 'IndexRateQuestionsPayload',
+            const indexContractQuestions: IndexContractQuestionsPayload = {
+                __typename: 'IndexContractQuestionsPayload',
                 DMCOQuestions: {
-                    __typename: 'RateQuestionList',
+                    __typename: 'ContractQuestionList',
                     totalCount: 0,
                     edges: [],
                 },
                 DMCPQuestions: {
-                    __typename: 'RateQuestionList',
+                    __typename: 'ContractQuestionList',
                     totalCount: 0,
                     edges: [],
                 },
                 OACTQuestions: {
-                    __typename: 'RateQuestionList',
+                    __typename: 'ContractQuestionList',
                     totalCount: 0,
                     edges: [],
                 },
@@ -322,18 +274,26 @@ describe('RateQuestionResponse', () => {
                             statusCode: 200,
                         }),
                         fetchRateMockSuccess({
-                            id: 'test-rate-id',
+                            id: 'test-contract-id',
                         }),
-                        fetchRateWithQuestionsMockSuccess({
-                            rate: {
-                                id: 'test-rate-id',
-                                questions: indexRateQuestions,
+                        fetchContractWithQuestionsMockSuccess({
+                            contract: {
+                                ...mockContractPackageSubmittedWithQuestions(),
+                                id: 'test-contract-id',
+                                questions: indexContractQuestions,
+                            },
+                        }),
+                        fetchContractWithQuestionsMockSuccess({
+                            contract: {
+                                ...mockContractPackageSubmittedWithQuestions(),
+                                id: 'test-contract-id',
+                                questions: indexContractQuestions,
                             },
                         }),
                     ],
                 },
                 routerProvider: {
-                    route: `/rates/test-rate-id/question-and-answers`,
+                    route: `/submissions/test-contract-id/question-and-answers`,
                 },
                 featureFlags: {
                     'qa-by-rates': true,
@@ -359,17 +319,24 @@ describe('RateQuestionResponse', () => {
                             statusCode: 200,
                         }),
                         fetchRateMockSuccess({
-                            id: 'test-rate-id',
+                            id: 'test-contract-id',
                         }),
-                        fetchRateWithQuestionsMockSuccess({
-                            rate: {
-                                id: 'test-rate-id',
+                        fetchContractWithQuestionsMockSuccess({
+                            contract: {
+                                ...mockContractPackageSubmittedWithQuestions(),
+                                id: 'test-contract-id',
+                            },
+                        }),
+                        fetchContractWithQuestionsMockSuccess({
+                            contract: {
+                                ...mockContractPackageSubmittedWithQuestions(),
+                                id: 'test-contract-id',
                             },
                         }),
                     ],
                 },
                 routerProvider: {
-                    route: `/rates/test-rate-id/question-and-answers`,
+                    route: `/submissions/test-contract-id/question-and-answers`,
                 },
                 featureFlags: {
                     'qa-by-rates': true,
@@ -401,14 +368,14 @@ describe('RateQuestionResponse', () => {
             expect(yourDivisionRounds[0]).toHaveTextContent(
                 'dmco-question-2-document-2'
             )
-            expect(yourDivisionRounds[0]).toHaveTextContent(
-                'response-to-dmco-2-document-1'
-            )
 
             // expect the earliest to have DMCO question 1 documents
             expect(yourDivisionRounds[1]).toHaveTextContent('Round 1')
             expect(yourDivisionRounds[1]).toHaveTextContent(
                 'dmco-question-1-document-1'
+            )
+            expect(yourDivisionRounds[1]).toHaveTextContent(
+                'response-to-dmco-1-document-1'
             )
 
             // expect three questions in other division's questions section in correct order
@@ -431,30 +398,32 @@ describe('RateQuestionResponse', () => {
                 'response-to-oact-2-document-1'
             )
 
-            // expect round 1 with OACT question 1
+            // expect next round to be round 1 with DMCP question
             expect(otherDivisionRounds[1]).toHaveTextContent('Round 1')
             expect(otherDivisionRounds[1]).toHaveTextContent(
-                'oact-question-1-document-1'
-            )
-            expect(otherDivisionRounds[1]).toHaveTextContent(
-                'response-to-oact-1-document-1'
-            )
-
-            // expect last question in round 1 to be DMCP question
-            expect(otherDivisionRounds[2]).toHaveTextContent('Round 1')
-            expect(otherDivisionRounds[2]).toHaveTextContent(
                 'dmcp-question-1-document-1'
             )
-            expect(otherDivisionRounds[2]).toHaveTextContent(
+            expect(otherDivisionRounds[1]).toHaveTextContent(
                 'response-to-dmcp-1-document-1'
+            )
+
+            // expect next round (last round) to also be round 1 with OACT question 1
+            expect(otherDivisionRounds[2]).toHaveTextContent('Round 1')
+            expect(otherDivisionRounds[2]).toHaveTextContent(
+                'oact-question-1-document-1'
+            )
+            expect(otherDivisionRounds[2]).toHaveTextContent(
+                'response-to-oact-1-document-1'
             )
         })
         it('renders with question submit banner after question submitted', async () => {
             renderWithProviders(
                 <Routes>
                     <Route
-                        path={RoutesRecord.RATES_SUMMARY_QUESTIONS_AND_ANSWERS}
-                        element={<RateQuestionResponse />}
+                        path={
+                            RoutesRecord.SUBMISSIONS_CONTRACT_QUESTIONS_AND_ANSWERS
+                        }
+                        element={<ContractQuestionResponse />}
                     />
                 </Routes>,
                 {
@@ -464,15 +433,22 @@ describe('RateQuestionResponse', () => {
                                 user: mockValidCMSUser(),
                                 statusCode: 200,
                             }),
-                            fetchRateWithQuestionsMockSuccess({
-                                rate: {
-                                    id: 'test-rate-id',
+                            fetchContractWithQuestionsMockSuccess({
+                                contract: {
+                                    ...mockContractPackageSubmittedWithQuestions(),
+                                    id: 'test-contract-id',
+                                },
+                            }),
+                            fetchContractWithQuestionsMockSuccess({
+                                contract: {
+                                    ...mockContractPackageSubmittedWithQuestions(),
+                                    id: 'test-contract-id',
                                 },
                             }),
                         ],
                     },
                     routerProvider: {
-                        route: `/rates/test-rate-id/question-and-answers?submit=question`,
+                        route: `/submissions/test-contract-id/question-and-answers?submit=question`,
                     },
                     featureFlags: {
                         'qa-by-rates': true,
@@ -490,7 +466,7 @@ describe('RateQuestionResponse', () => {
             )
             expect(screen.getByText('Questions sent')).toBeInTheDocument()
         })
-        it('renders error page if rate revision does not exist', async () => {
+        it('renders error page if contract revision does not exist', async () => {
             renderWithProviders(<CommonCMSRoutes />, {
                 apolloProvider: {
                     mocks: [
@@ -501,7 +477,7 @@ describe('RateQuestionResponse', () => {
                     ],
                 },
                 routerProvider: {
-                    route: `/rates/not-real/question-and-answers`,
+                    route: `/submissions/not-real/question-and-answers`,
                 },
                 featureFlags: {
                     'qa-by-rates': true,
@@ -512,8 +488,8 @@ describe('RateQuestionResponse', () => {
                 expect(screen.getByText('System error')).toBeInTheDocument()
             })
         })
-        it('renders error page if rate is in draft', async () => {
-            const rate = rateDataMock({}, { status: 'DRAFT' })
+        it('renders error page if contract is in draft', async () => {
+            const contract = mockContractPackageDraft()
             renderWithProviders(<CommonCMSRoutes />, {
                 apolloProvider: {
                     mocks: [
@@ -521,12 +497,12 @@ describe('RateQuestionResponse', () => {
                             user: mockValidCMSUser(),
                             statusCode: 200,
                         }),
-                        fetchRateMockSuccess(rate),
-                        fetchRateWithQuestionsMockSuccess({ rate }),
+                        fetchContractWithQuestionsMockSuccess({ contract }),
+                        fetchContractWithQuestionsMockSuccess({ contract }),
                     ],
                 },
                 routerProvider: {
-                    route: `/rates/${rate.id}/question-and-answers`,
+                    route: `/submissions/${contract.id}/question-and-answers`,
                 },
                 featureFlags: {
                     'qa-by-rates': true,
@@ -537,23 +513,23 @@ describe('RateQuestionResponse', () => {
                 expect(screen.getByText('System error')).toBeInTheDocument()
             })
         })
-        it('renders waring banner if CMS user has no assigned division', async () => {
-            const rate = rateDataMock()
+        it('renders warning banner if CMS user has no assigned division', async () => {
+            const contract = mockContractPackageSubmittedWithQuestions()
             renderWithProviders(<CommonCMSRoutes />, {
                 apolloProvider: {
                     mocks: [
                         fetchCurrentUserMock({
                             user: mockValidCMSUser({
-                                divisionAssignment: undefined,
+                                divisionAssignment: null,
                             }),
                             statusCode: 200,
                         }),
-                        fetchRateMockSuccess(rate),
-                        fetchRateWithQuestionsMockSuccess({ rate }),
+                        fetchContractWithQuestionsMockSuccess({ contract }),
+                        fetchContractWithQuestionsMockSuccess({ contract }),
                     ],
                 },
                 routerProvider: {
-                    route: `/rates/${rate.id}/question-and-answers`,
+                    route: `/submissions/${contract.id}/question-and-answers`,
                 },
                 featureFlags: {
                     'qa-by-rates': true,

@@ -8,12 +8,12 @@ import { QuestionResponseRound, RoundData } from './QuestionResponseRound'
 
 type StateQuestionResponseTableProps = {
     indexQuestions: IndexQuestionType
-    rateCertName?: string
+    header: string
 }
 
 export const StateQuestionResponseTable = ({
     indexQuestions,
-    rateCertName,
+    header,
 }: StateQuestionResponseTableProps) => {
     const { loggedInUser } = useAuth()
     const answeredQuestions: RoundData[] = []
@@ -57,10 +57,7 @@ export const StateQuestionResponseTable = ({
     return (
         <>
             <div className={styles.tableHeader}>
-                <SectionHeader
-                    header={`Rate questions: ${rateCertName}`}
-                    hideBorder
-                />
+                <SectionHeader header={header} hideBorder />
             </div>
             <section
                 className={styles.questionSection}
@@ -74,7 +71,7 @@ export const StateQuestionResponseTable = ({
                                 key={questionData.id}
                                 question={questionData}
                                 roundTitle={roundTitle}
-                                currentUser={loggedInUser}
+                                currentUser={loggedInUser!}
                             />
                         )
                     )
@@ -94,7 +91,7 @@ export const StateQuestionResponseTable = ({
                                 key={questionData.id}
                                 question={questionData}
                                 roundTitle={roundTitle}
-                                currentUser={loggedInUser}
+                                currentUser={loggedInUser!}
                             />
                         )
                     )
