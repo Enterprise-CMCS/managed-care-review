@@ -1,19 +1,29 @@
-import React, { useEffect } from 'react'
-import { GridContainer } from '@trussworks/react-uswds'
-import { useNavigate, useOutletContext, useParams } from 'react-router-dom'
+import { useEffect } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
 import {
     CreateQuestionResponseInput,
     useCreateContractQuestionResponseMutation,
-    Division,
+    useFetchContractWithQuestionsQuery,
 } from '../../../gen/gqlClient'
+import styles from '../QuestionResponse.module.scss'
 import { usePage } from '../../../contexts/PageContext'
-import { SideNavOutletContextType } from '../../SubmissionSideNav/SubmissionSideNav'
 import { Breadcrumbs } from '../../../components/Breadcrumbs/Breadcrumbs'
 import { createContractResponseWrapper } from '../../../gqlHelpers/mutationWrappersForUserFriendlyErrors'
 import { RoutesRecord } from '../../../constants'
 import { GenericErrorPage } from '../../Errors/GenericErrorPage'
 import { UploadResponseForm } from './UploadResponseForm'
 import { FileItemT } from '../../../components'
+import {
+    extractDocumentsFromQuestion,
+    extractQuestions,
+    getQuestionRoundForQuestionID,
+    isValidCmsDivison,
+} from '../QuestionResponseHelpers/questionResponseHelpers'
+import { ErrorOrLoadingPage } from '../../StateSubmission'
+import { handleAndReturnErrorState } from '../../StateSubmission/ErrorOrLoadingPage'
+import { QuestionDisplayTable } from '../QATable/QuestionDisplayTable'
+import { useAuth } from '../../../contexts/AuthContext'
+import { Error404 } from '../../Errors/Error404Page'
 
 export const UploadContractResponse = () => {
     // router context
@@ -24,20 +34,64 @@ export const UploadContractResponse = () => {
     }>()
 
     const navigate = useNavigate()
-
+    const { updateHeading } = usePage()
+    const { loggedInUser } = useAuth()
     // api
+    const {
+        data: fetchContractData,
+        loading: fetchContractLoading,
+        error: fetchContractError,
+    } = useFetchContractWithQuestionsQuery({
+        variables: {
+            input: {
+                contractID: id || 'not-found',
+            },
+        },
+    })
+
     const [createResponse, { loading: apiLoading, error: apiError }] =
         useCreateContractQuestionResponseMutation()
 
-    // page level state
-    const { updateHeading } = usePage()
-    const { packageName, contract } =
-        useOutletContext<SideNavOutletContextType>()
+    const contract = fetchContractData?.fetchContract.contract
+    const contractName =
+        (contract?.packageSubmissions &&
+            contract?.packageSubmissions?.length > 0 &&
+            contract?.packageSubmissions[0].contractRevision.contractName) ||
+        ''
+    // side effects
     useEffect(() => {
-        updateHeading({ customHeading: packageName })
-    }, [packageName, updateHeading])
+        updateHeading({ customHeading: `${contractName} Add response` })
+    }, [contractName, updateHeading])
 
-    if (contract.status === 'DRAFT') {
+    // confirm division is valid
+    const realDivision = division?.toUpperCase()
+
+    if (!realDivision || !isValidCmsDivison(realDivision)) {
+        console.error(
+            'Upload Questions called with bogus division in URL: ',
+            division
+        )
+        return <Error404 />
+    }
+
+    if (fetchContractLoading) {
+        return <ErrorOrLoadingPage state="LOADING" />
+    }
+
+    if (fetchContractError) {
+        return (
+            <ErrorOrLoadingPage
+                state={handleAndReturnErrorState(fetchContractError)}
+            />
+        )
+    }
+
+    if (
+        !contract ||
+        contract.status === 'DRAFT' ||
+        !questionID ||
+        !contract.questions
+    ) {
         return <GenericErrorPage />
     }
 
@@ -58,7 +112,7 @@ export const UploadContractResponse = () => {
             createResponse,
             id as string,
             input,
-            division as Division
+            realDivision
         )
         if (createResult instanceof Error) {
             console.info(createResult.message)
@@ -66,29 +120,48 @@ export const UploadContractResponse = () => {
             navigate(`/submissions/${id}/question-and-answers?submit=response`)
         }
     }
-
+    const question = extractQuestions(contract.questions).find(
+        (question) => question.id == questionID
+    )
+    const questionRound = getQuestionRoundForQuestionID(
+        contract.questions,
+        realDivision,
+        questionID
+    )
     return (
-        <GridContainer>
+        <div className={styles.uploadFormContainer}>
             <Breadcrumbs
+                className="usa-breadcrumb--wrap"
                 items={[
                     {
                         link: RoutesRecord.DASHBOARD_SUBMISSIONS,
                         text: 'Dashboard',
                     },
-                    { link: `/submissions/${id}`, text: packageName },
+                    { link: `/submissions/${id}`, text: contractName },
                     {
-                        text: 'Add response',
+                        text: 'Upload response',
                         link: RoutesRecord.SUBMISSIONS_UPLOAD_CONTRACT_RESPONSE,
                     },
                 ]}
             />
-
             <UploadResponseForm
                 handleSubmit={handleFormSubmit}
                 apiLoading={apiLoading}
                 apiError={Boolean(apiError)}
                 type="contract"
+                round={questionRound}
+                questionBeingAsked={
+                    question ? (
+                        <QuestionDisplayTable
+                            documents={extractDocumentsFromQuestion(question)}
+                            user={loggedInUser!}
+                            onlyDisplayInitial
+                        />
+                    ) : (
+                        <p>'Related question unable to display'</p>
+                    )
+                }
             />
-        </GridContainer>
+        </div>
     )
 }

@@ -1,4 +1,4 @@
-import { GridContainer, Link, ModalRef } from '@trussworks/react-uswds'
+import { Grid, GridContainer, Link, ModalRef } from '@trussworks/react-uswds'
 import React, { useEffect, useRef, useState } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
 import { ContractDetailsSummarySection } from '../StateSubmission/ReviewSubmit/ContractDetailsSummarySection'
@@ -19,36 +19,24 @@ import { Error404 } from '../Errors/Error404Page'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import styles from './SubmissionSummary.module.scss'
 import { ChangeHistory } from '../../components/ChangeHistory'
-import { ModalOpenButton, UnlockSubmitModal } from '../../components/Modal'
+import {
+    ModalOpenButton,
+    UnlockSubmitModal,
+    Modal,
+} from '../../components/Modal'
 import { RoutesRecord } from '../../constants'
 import { useRouteParams } from '../../hooks'
 import { getVisibleLatestContractFormData } from '../../gqlHelpers/contractsAndRates'
 import { generatePath, Navigate } from 'react-router-dom'
 import { hasCMSUserPermissions } from '../../gqlHelpers'
-
-function UnlockModalButton({
-    disabled,
-    modalRef,
-}: {
-    disabled: boolean
-    modalRef: React.RefObject<ModalRef>
-}) {
-    return (
-        <ModalOpenButton
-            modalRef={modalRef}
-            className={styles.submitButton}
-            id="form-submit"
-            disabled={disabled}
-        >
-            Unlock submission
-        </ModalOpenButton>
-    )
-}
+import { useLDClient } from 'launchdarkly-react-client-sdk'
+import { featureFlags } from '../../common-code/featureFlags'
 
 export const SubmissionSummary = (): React.ReactElement => {
     // Page level state
     const { updateHeading } = usePage()
     const modalRef = useRef<ModalRef>(null)
+    const approveModalRef = useRef<ModalRef>(null)
     const [documentError, setDocumentError] = useState(false)
     const { loggedInUser } = useAuth()
     const { id } = useRouteParams()
@@ -56,6 +44,13 @@ export const SubmissionSummary = (): React.ReactElement => {
     const hasCMSPermissions = hasCMSUserPermissions(loggedInUser)
     const isStateUser = loggedInUser?.role === 'STATE_USER'
     const isHelpDeskUser = loggedInUser?.role === 'HELPDESK_USER'
+
+    const ldClient = useLDClient()
+
+    const submissionApprovalFlag = ldClient?.variation(
+        featureFlags.SUBMISSION_APPROVALS.flag,
+        featureFlags.SUBMISSION_APPROVALS.defaultValue
+    )
 
     // API requests
     const {
@@ -168,6 +163,9 @@ export const SubmissionSummary = (): React.ReactElement => {
         : 'Add MC-CRS record number'
     const explainMissingData = (isHelpDeskUser || isStateUser) && !isSubmitted
 
+    // Only show for CMS_USER or CMS_APPROVER_USER users
+    const showSubmissionApproval = submissionApprovalFlag && hasCMSPermissions
+
     return (
         <div className={styles.background}>
             <GridContainer
@@ -191,6 +189,39 @@ export const SubmissionSummary = (): React.ReactElement => {
 
                 {documentError && (
                     <DocumentWarningBanner className={styles.banner} />
+                )}
+
+                {showSubmissionApproval && (
+                    <>
+                        <Grid
+                            className={styles.approveWithdrawButtonContainer}
+                            row
+                        >
+                            <ModalOpenButton
+                                id="approval-modal-toggle-button"
+                                modalRef={approveModalRef}
+                                disabled={!isSubmitted}
+                                data-testid="approval-modal-toggle-button"
+                            >
+                                Approve submission
+                            </ModalOpenButton>
+                        </Grid>
+                        <Modal
+                            id="approvalModal"
+                            modalRef={approveModalRef}
+                            modalHeading="Are you sure you want to approve this submission?"
+                            onSubmitText="Approve submission"
+                            submitButtonProps={{ variant: 'default' }}
+                            className={styles.approvalModal}
+                        >
+                            <div>
+                                <p>
+                                    Once you approve, the submission status will
+                                    change from Submitted to Approved.
+                                </p>
+                            </div>
+                        </Modal>
+                    </>
                 )}
 
                 <SubmissionTypeSummarySection
@@ -224,12 +255,17 @@ export const SubmissionSummary = (): React.ReactElement => {
                     submissionName={name}
                     headerChildComponent={
                         hasCMSPermissions ? (
-                            <UnlockModalButton
+                            <ModalOpenButton
                                 modalRef={modalRef}
                                 disabled={['DRAFT', 'UNLOCKED'].includes(
                                     contract.status
                                 )}
-                            />
+                                className={styles.submitButton}
+                                id="form-submit"
+                                outline={showSubmissionApproval}
+                            >
+                                Unlock submission
+                            </ModalOpenButton>
                         ) : undefined
                     }
                     statePrograms={statePrograms}
@@ -238,16 +274,14 @@ export const SubmissionSummary = (): React.ReactElement => {
                     explainMissingData={explainMissingData}
                 />
 
-                {
-                    <ContractDetailsSummarySection
-                        contract={contract}
-                        isCMSUser={hasCMSPermissions}
-                        isStateUser={isStateUser}
-                        submissionName={name}
-                        onDocumentError={handleDocumentDownloadError}
-                        explainMissingData={explainMissingData}
-                    />
-                }
+                <ContractDetailsSummarySection
+                    contract={contract}
+                    isCMSUser={hasCMSPermissions}
+                    isStateUser={isStateUser}
+                    submissionName={name}
+                    onDocumentError={handleDocumentDownloadError}
+                    explainMissingData={explainMissingData}
+                />
 
                 {isContractActionAndRateCertification && (
                     <RateDetailsSummarySection
@@ -260,22 +294,19 @@ export const SubmissionSummary = (): React.ReactElement => {
                     />
                 )}
 
-                {
-                    <ContactsSummarySection
-                        contract={contract}
-                        isStateUser={isStateUser}
-                        explainMissingData={explainMissingData}
-                    />
-                }
+                <ContactsSummarySection
+                    contract={contract}
+                    isStateUser={isStateUser}
+                    explainMissingData={explainMissingData}
+                />
 
-                {<ChangeHistory contract={contract} />}
-                {
-                    <UnlockSubmitModal
-                        modalRef={modalRef}
-                        modalType="UNLOCK_CONTRACT"
-                        submissionData={contract}
-                    />
-                }
+                <ChangeHistory contract={contract} />
+
+                <UnlockSubmitModal
+                    modalRef={modalRef}
+                    modalType="UNLOCK_CONTRACT"
+                    submissionData={contract}
+                />
             </GridContainer>
         </div>
     )

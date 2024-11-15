@@ -355,6 +355,7 @@ const mockUnlockedContract = (
         status: 'UNLOCKED',
         stateCode: 'MN',
         stateNumber: 4,
+        reviewStatus: 'UNDER_REVIEW',
 
         draftRevision: mockContractRev(),
         draftRates,
@@ -738,7 +739,22 @@ const mockCommonQuestionAndResponses = <
             },
         ],
         division: 'DMCO',
-        responses: [],
+        responses: [
+            {
+                id: 'test-question-response-id-1',
+                questionID: 'test-question-id-1',
+                createdAt: new Date('01/02/2024'),
+                addedBy: testStateUser(),
+                documents: [
+                    {
+                        name: 'Test Question Response',
+                        s3URL: 's3://bucketname/key/test1response',
+                        downloadURL:
+                            'https://fake-bucket.s3.amazonaws.com/test1response',
+                    },
+                ],
+            },
+        ],
         ...questionData,
     }
 

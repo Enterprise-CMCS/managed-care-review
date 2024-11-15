@@ -20,18 +20,24 @@ import {
 } from '../../../components/FileUpload'
 import { PageActionsContainer } from '../../StateSubmission/PageActions'
 import { useErrorSummary } from '../../../hooks/useErrorSummary'
+import { Division } from '../../../gen/gqlClient'
+import { QAUploadFormSummary } from '../QAUploadFormSummary'
 
 type UploadResponseFormProps = {
     handleSubmit: (cleaned: FileItemT[]) => Promise<void>
     apiLoading: boolean
     apiError: boolean
     type: 'contract' | 'rate'
+    round: number
+    questionBeingAsked?: JSX.Element // pass in a QuestionDisplayTable with data
 }
 const UploadResponseForm = ({
     handleSubmit,
     apiError,
     apiLoading,
     type,
+    round,
+    questionBeingAsked,
 }: UploadResponseFormProps) => {
     const { division, id, rateID } = useParams<{
         division: string
@@ -57,6 +63,15 @@ const UploadResponseForm = ({
         ? uploadComponentID
         : '#file-items-list'
 
+    const cancelLink =
+        type === 'contract'
+            ? `/submissions/${id}/question-and-answers`
+            : `/submissions/${id}/rates/${rateID}/question-and-answers`
+    const submitLink =
+        type === 'contract'
+            ? `/submissions/${id}/question-and-answers?submit=response`
+            : `/submissions/${id}/rates/${rateID}/question-and-answers?submit=response`
+
     const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
         // Currently documents validation happens (outside of the yup schema, which only handles the formik form data)
@@ -71,6 +86,7 @@ const UploadResponseForm = ({
         }
     }
 
+    const isContract = type == 'contract'
     return (
         <UswdsForm
             className={styles.formContainer}
@@ -81,8 +97,14 @@ const UploadResponseForm = ({
         >
             {apiError && <GenericApiErrorBanner />}
             <fieldset className="usa-fieldset">
-                <h2>New response</h2>
-                <p className="text-bold">{`Questions from ${division?.toUpperCase()}`}</p>
+                <h2>Upload response</h2>
+                <QAUploadFormSummary
+                    // Don't pass a round for rates - we don't display rounds to state users on rates
+                    round={isContract ? round : undefined}
+                    division={division?.toUpperCase() as Division}
+                    isContract={isContract}
+                />
+                {questionBeingAsked}
 
                 {shouldValidate && (
                     <ErrorSummary
@@ -130,12 +152,10 @@ const UploadResponseForm = ({
                         data-testid="page-actions-left-secondary"
                         disabled={apiLoading}
                         parent_component_type="page body"
-                        link_url={`/submissions/${id}/rates/${rateID}question-and-answers`}
-                        onClick={() =>
-                            navigate(
-                                `/submissions/${id}/rates/${rateID}/question-and-answers`
-                            )
-                        }
+                        link_url={cancelLink}
+                        onClick={() => {
+                            navigate(cancelLink)
+                        }}
                     >
                         Cancel
                     </ActionButton>
@@ -145,12 +165,12 @@ const UploadResponseForm = ({
                         variant="default"
                         data-testid="page-actions-right-primary"
                         parent_component_type="page body"
-                        link_url={`/submissions/${id}/rates/${rateID}/question-and-answers?submit=reponse`}
+                        link_url={submitLink}
                         disabled={showFileUploadError}
                         animationTimeout={1000}
                         loading={apiLoading}
                     >
-                        Send response
+                        Submit response
                     </ActionButton>
                 </ButtonGroup>
             </PageActionsContainer>

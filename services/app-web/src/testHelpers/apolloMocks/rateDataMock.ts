@@ -273,6 +273,7 @@ function submittedLinkedRatesScenarioMock(): {
         __typename: 'Contract',
         initiallySubmittedAt: undefined,
         status: 'SUBMITTED',
+        reviewStatus: 'UNDER_REVIEW',
         createdAt: new Date(2024, 1, 1),
         updatedAt: new Date(),
         id: 'c-01',
@@ -290,6 +291,7 @@ function submittedLinkedRatesScenarioMock(): {
         __typename: 'Contract',
         initiallySubmittedAt: undefined,
         status: 'SUBMITTED',
+        reviewStatus: 'UNDER_REVIEW',
         createdAt: new Date(2024, 1, 1),
         updatedAt: new Date(),
         id: 'c-02',
@@ -350,6 +352,7 @@ function mockRateSubmittedWithQuestions(
             __typename: 'RateRevision',
             unlockInfo: null,
             submitInfo: {
+                __typename: 'UpdateInformation',
                 updatedAt: '2024-12-18T16:54:39.173Z',
                 updatedBy: {
                     email: 'example@state.com',
@@ -360,6 +363,7 @@ function mockRateSubmittedWithQuestions(
                 updatedReason: 'contract submit'
             },
             formData: {
+                __typename: 'RateFormData',
                 rateCertificationName:'rate cert',
                 rateType: 'AMENDMENT',
                 rateCapitationType: 'RATE_CELL',
@@ -468,6 +472,7 @@ function mockRateSubmittedWithQuestions(
                 },
                 unlockInfo: null,
                 formData: {
+                    __typename: 'ContractFormData',
                     programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
                     populationCovered: 'MEDICAID',
                     submissionType: 'CONTRACT_AND_RATES',
@@ -529,7 +534,7 @@ function mockRateSubmittedWithQuestions(
             rateRevision: rateRev(),
 
         }],
-        questions: rate.questions ||  {
+        questions: rate.questions ??  {
             __typename: 'IndexRateQuestionsPayload',
             DMCOQuestions: {
                 __typename: 'RateQuestionList',
@@ -558,7 +563,7 @@ function mockRateSubmittedWithQuestions(
                             division: 'DMCO',
                             responses: [
                                 {
-                                    __typename: 'QuestionResponse' as const,
+                                    __typename: 'QuestionResponse',
                                     id: 'response-to-dmco-2-id',
                                     questionID: 'dmco-question-2-id',
                                     addedBy: mockValidUser() as StateUser,
@@ -575,9 +580,9 @@ function mockRateSubmittedWithQuestions(
                         },
                     },
                     {
-                        __typename: 'RateQuestionEdge' as const,
+                        __typename: 'RateQuestionEdge',
                         node: {
-                            __typename: 'RateQuestion' as const,
+                            __typename: 'RateQuestion',
                             id: 'dmco-question-1-id',
                             rateID,
                             createdAt: new Date('2022-12-15'),

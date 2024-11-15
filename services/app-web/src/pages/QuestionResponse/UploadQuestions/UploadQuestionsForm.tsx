@@ -5,7 +5,7 @@ import {
     ButtonGroup,
 } from '@trussworks/react-uswds'
 import styles from '../QuestionResponse.module.scss'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { useS3 } from '../../../contexts/S3Context'
 import {
     ActionButton,
@@ -20,12 +20,17 @@ import {
 } from '../../../components/FileUpload'
 import { PageActionsContainer } from '../../StateSubmission/PageActions'
 import { useErrorSummary } from '../../../hooks/useErrorSummary'
+import { Division } from '../../../gen/gqlClient'
+import { divisionFullNames } from '../QuestionResponseHelpers'
 
 type UploadQuestionsFormProps = {
     handleSubmit: (cleaned: FileItemT[]) => Promise<void>
     apiLoading: boolean
     apiError: boolean
     type: 'contract' | 'rate'
+    round: number
+    division: Division
+    id: string
 }
 
 const UploadQuestionsForm = ({
@@ -33,8 +38,10 @@ const UploadQuestionsForm = ({
     apiError,
     apiLoading,
     type,
+    round,
+    division,
+    id,
 }: UploadQuestionsFormProps) => {
-    const { division, id } = useParams<{ division: string; id: string }>()
     const [shouldValidate, setShouldValidate] = React.useState(false)
     const navigate = useNavigate()
     const { handleUploadFile, handleScanFile } = useS3()
@@ -81,8 +88,10 @@ const UploadQuestionsForm = ({
             {apiError && <GenericApiErrorBanner />}
             <fieldset className="usa-fieldset">
                 <h2>Add questions</h2>
-                <p className="text-bold">{`Questions from ${division?.toUpperCase()}`}</p>
-
+                <div id="formSummary">
+                    <span>{`Asked by: ${divisionFullNames[division]}`}</span>
+                    <span>Round {round}</span>
+                </div>
                 {shouldValidate && (
                     <ErrorSummary
                         errors={

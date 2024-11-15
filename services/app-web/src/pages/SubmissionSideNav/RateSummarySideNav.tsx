@@ -18,6 +18,7 @@ import { recordJSException } from '../../otelHelpers'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import { Loading, NavLinkWithLogging } from '../../components'
 import { RoutesRecord } from '../../constants'
+import { isUnlockedOrDraft, shouldUseFormPageStyles } from './helpers'
 
 export const RateSummarySideNav = () => {
     const { id } = useParams() as { id: string }
@@ -93,10 +94,16 @@ export const RateSummarySideNav = () => {
     if (!loggedInUser || !rate || rate.status === 'DRAFT') {
         return <GenericErrorPage />
     }
+    // All of this logic is to enable conditional styles with sidenabv
+    const isEditable = isUnlockedOrDraft(rate.status)
+    const isFormPage = shouldUseFormPageStyles(routeName, loggedInUser, isEditable)
+
 
     return (
         <div
-            className={styles.backgroundSidebar}
+        className={
+            isFormPage ? styles.backgroundForm : styles.backgroundSidebar
+        }
             data-testid="rate-summary-side-nav"
         >
             <GridContainer className={styles.container}>

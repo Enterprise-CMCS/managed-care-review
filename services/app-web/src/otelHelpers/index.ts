@@ -1,5 +1,4 @@
 export {
-    getTracer,
     recordSpan,
     recordJSException,
     recordJSExceptionWithContext,

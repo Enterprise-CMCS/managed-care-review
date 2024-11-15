@@ -36,6 +36,10 @@ const featureFlags = {
         flag: 'qa-by-rates',
         defaultValue: false
     },
+    SUBMISSION_APPROVALS: {
+        flag: 'submission-approvals',
+        defaultValue: false
+    },
     // PERMANENT FLAGS
     /**
      Enables the modal that alerts the user to an expiring session

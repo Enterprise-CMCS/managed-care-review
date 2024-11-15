@@ -1,4 +1,7 @@
-export { QuestionResponse } from './QuestionResponse'
+export { ContractQuestionResponse } from './QuestionResponseSummary/ContractQuestionResponse'
+export { RateQuestionResponse } from './QuestionResponseSummary/RateQuestionResponse'
 export { UploadContractResponse } from './UploadResponse'
+export { UploadRateResponse } from './UploadResponse'
 export { UploadResponseForm } from './UploadResponse'
 export { UploadContractQuestions } from './UploadQuestions'
+export { UploadRateQuestions } from './UploadQuestions'
