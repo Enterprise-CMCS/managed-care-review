@@ -46,7 +46,7 @@ const UploadResponseForm = ({
     }>()
     const [shouldValidate, setShouldValidate] = React.useState(false)
     const navigate = useNavigate()
-    const { handleDeleteFile, handleUploadFile, handleScanFile } = useS3()
+    const { handleUploadFile, handleScanFile } = useS3()
     const {
         hasValidFiles,
         hasNoFiles,
@@ -139,9 +139,6 @@ const UploadResponseForm = ({
                         }
                         scanFile={(key) =>
                             handleScanFile(key, 'QUESTION_ANSWER_DOCS')
-                        }
-                        deleteFile={(key) =>
-                            handleDeleteFile(key, 'QUESTION_ANSWER_DOCS')
                         }
                         onFileItemsUpdate={onFileItemsUpdate}
                     />

@@ -48,13 +48,12 @@ export const Documents = (): React.ReactElement => {
         draftSubmission,
         interimState,
         updateDraft,
-        previousDocuments,
         showPageErrorMessage,
         unlockInfo,
     } = useHealthPlanPackageForm(id)
 
     // Documents state management
-    const { deleteFile, uploadFile, scanFile, getKey, getS3URL } = useS3()
+    const { uploadFile, scanFile, getKey, getS3URL } = useS3()
     const [fileItems, setFileItems] = useState<FileItemT[]>([])
     const hasValidFiles = fileItems.every(
         (item) => item.status === 'UPLOAD_COMPLETE'
@@ -130,21 +129,6 @@ export const Documents = (): React.ReactElement => {
         fileItems: FileItemT[]
     }) => {
         setFileItems(fileItems)
-    }
-
-    const handleDeleteFile = async (key: string) => {
-        const isSubmittedFile =
-            previousDocuments &&
-            Boolean(
-                previousDocuments.some((previousKey) => previousKey === key)
-            )
-
-        if (!isSubmittedFile) {
-            const result = await deleteFile(key, 'HEALTH_PLAN_DOCS')
-            if (isS3Error(result)) {
-                throw new Error(`Error in S3 key: ${key}`)
-            }
-        }
     }
 
     const handleUploadFile = async (file: File): Promise<S3FileData> => {
@@ -322,7 +306,6 @@ export const Documents = (): React.ReactElement => {
                             initialItems={fileItemsFromDraftSubmission}
                             uploadFile={handleUploadFile}
                             scanFile={handleScanFile}
-                            deleteFile={handleDeleteFile}
                             onFileItemsUpdate={onFileItemsUpdate}
                         />
                     </fieldset>
