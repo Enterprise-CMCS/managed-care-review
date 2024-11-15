@@ -47,7 +47,7 @@ Cypress.Commands.add(
         cy.waitForDocumentsToLoad()
 
         // Submit question
-        cy.findByRole('button', { name: 'Send response' })
+        cy.findByRole('button', { name: 'Submit response' })
             .should('exist')
             .click()
 
