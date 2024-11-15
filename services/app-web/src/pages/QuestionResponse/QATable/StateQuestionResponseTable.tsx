@@ -57,10 +57,7 @@ export const StateQuestionResponseTable = ({
     return (
         <>
             <div className={styles.tableHeader}>
-                <SectionHeader
-                    header={header}
-                    hideBorder
-                />
+                <SectionHeader header={header} hideBorder />
             </div>
             <section
                 className={styles.questionSection}
@@ -74,7 +71,7 @@ export const StateQuestionResponseTable = ({
                                 key={questionData.id}
                                 question={questionData}
                                 roundTitle={roundTitle}
-                                currentUser={loggedInUser}
+                                currentUser={loggedInUser!}
                             />
                         )
                     )
@@ -94,7 +91,7 @@ export const StateQuestionResponseTable = ({
                                 key={questionData.id}
                                 question={questionData}
                                 roundTitle={roundTitle}
-                                currentUser={loggedInUser}
+                                currentUser={loggedInUser!}
                             />
                         )
                     )
