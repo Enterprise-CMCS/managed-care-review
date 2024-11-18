@@ -3,8 +3,10 @@ import styles from './QATable.module.scss'
 import { NavLinkWithLogging } from '../../../components'
 import classNames from 'classnames'
 import { QuestionDisplayTable } from './QuestionDisplayTable'
-import { extractDocumentsFromQuestion, QuestionType } from '../QuestionResponseHelpers/questionResponseHelpers'
-
+import {
+    extractDocumentsFromQuestion,
+    QuestionType,
+} from '../QuestionResponseHelpers/questionResponseHelpers'
 
 export type RoundData = {
     roundTitle: string
@@ -42,10 +44,10 @@ export const QuestionResponseRound = ({
                     </NavLinkWithLogging>
                 )}
             </div>
-          <QuestionDisplayTable
-            documents={extractDocumentsFromQuestion(question)}
-            user={currentUser}
-            onlyDisplayInitial={false}
+            <QuestionDisplayTable
+                documents={extractDocumentsFromQuestion(question)}
+                user={currentUser}
+                onlyDisplayInitial={false}
             />
         </div>
     )

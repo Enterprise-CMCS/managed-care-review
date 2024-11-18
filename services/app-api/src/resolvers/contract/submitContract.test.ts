@@ -9,7 +9,7 @@ import {
     UpdateDraftContractRatesDocument,
     SubmitContractDocument,
 } from '../../gen/gqlClient'
-import { testS3Client } from '../../../../app-web/src/testHelpers/s3Helpers'
+import { testS3Client } from '../../../../app-api/src/testHelpers/s3Helpers'
 
 import { testCMSUser } from '../../testHelpers/userHelpers'
 import type {

@@ -1,0 +1,54 @@
+mutation approveContract($input: ApproveContractInput!) {
+    approveContract(input: $input) {
+        contract {
+            ...contractFieldsFragment
+
+            draftRevision {
+                ...contractRevisionFragment
+            }
+
+            draftRates {
+                ...rateFieldsFragment
+
+                draftRevision {
+                    ...rateRevisionFragment
+                }
+
+                revisions {
+                    ...rateRevisionFragment
+                }
+            }
+
+            packageSubmissions {
+                ...packageSubmissionsFragmentForApprove
+            }
+        }
+    }
+}
+
+
+fragment packageSubmissionsFragmentForApprove on ContractPackageSubmission {
+    cause
+    submitInfo {
+        ...updateInformationFields
+    }
+
+    submittedRevisions {
+        ...submittableRevisionsFieldsFragement
+    }
+
+    contractRevision {
+        ...contractRevisionFragment
+    }
+    rateRevisions {
+        ...rateRevisionFragment
+        rate {
+            ...rateFieldsFragment
+            revisions {
+                ...rateRevisionFragment
+            }
+        }
+    }
+}
+
+

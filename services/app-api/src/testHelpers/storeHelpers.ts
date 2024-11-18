@@ -145,6 +145,9 @@ function mockStoreThatErrors(): Store {
         findRateRevision: async (_ID) => {
             return genericError
         },
+        approveContract: async (_ID) => {
+            return genericError
+        },
     }
 }
 

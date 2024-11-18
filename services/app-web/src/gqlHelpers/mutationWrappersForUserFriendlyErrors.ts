@@ -29,6 +29,7 @@ import {
     FetchRateWithQuestionsQuery,
     CreateRateQuestionResponseMutationFn,
     CreateRateQuestionResponseMutation,
+    ApproveContractMutationFn,
 } from '../gen/gqlClient'
 import { ApolloError, GraphQLErrors } from '@apollo/client/errors'
 
@@ -48,6 +49,7 @@ e.g. handleApolloErrorsAndAddUserFacingMessages can stay, anything specific to o
 type MutationType =
     | 'SUBMIT_HEALTH_PLAN_PACKAGE'
     | 'UNLOCK_HEALTH_PLAN_PACKAGE'
+    | 'APPROVE_SUBMISSION'
     | 'CREATE_QUESTION'
     | 'UNLOCK_RATE'
     | 'UPDATE_STATE_ASSIGNMENTS_BY_STATE'
@@ -66,10 +68,18 @@ export const handleApolloErrorsAndAddUserFacingMessages = (
     apolloError: ApolloError,
     mutation: MutationType
 ) => {
-    let message =
-        mutation === 'SUBMIT_HEALTH_PLAN_PACKAGE'
-            ? ERROR_MESSAGES.submit_error_generic
-            : ERROR_MESSAGES.unlock_error_generic
+    let message 
+    switch (mutation) {
+        case 'SUBMIT_HEALTH_PLAN_PACKAGE':
+            message = ERROR_MESSAGES.submit_error_generic
+            break
+        case 'UNLOCK_HEALTH_PLAN_PACKAGE':
+            message = ERROR_MESSAGES.unlock_error_generic
+            break
+        case 'APPROVE_SUBMISSION':
+            message = ERROR_MESSAGES.approve_error_generic
+            break
+    }
 
     const options = {
         cause: {},
@@ -216,7 +226,7 @@ export const submitMutationWrapperV2 = async (
         Object.assign(input, {
             submittedReason,
         })
-    }
+    } 
 
     try {
         const { data } = await submitContract({
@@ -237,6 +247,41 @@ export const submitMutationWrapperV2 = async (
         return handleApolloErrorsAndAddUserFacingMessages(
             error,
             'SUBMIT_HEALTH_PLAN_PACKAGE'
+        )
+    }
+}
+
+export const approveMutationWrapper = async (
+    approveContract: ApproveContractMutationFn,
+    id: string,
+    updatedReason?: string
+): Promise<Partial<Contract> | GraphQLErrors | Error> => {
+    const input = { contractID: id }
+    if (updatedReason) {
+        Object.assign(input, {
+            updatedReason,
+        })
+    } 
+
+    try {
+        const { data } = await approveContract({
+            variables: {
+                input,
+            },
+        })
+
+        if (data?.approveContract?.contract) {
+            return data.approveContract.contract
+        } else {
+            recordJSException(
+                `[UNEXPECTED]: Error attempting to approve contract, no data present but returning 200.`
+            )
+            return new Error(ERROR_MESSAGES.approve_error_generic)
+        }
+    } catch (error) {
+        return handleApolloErrorsAndAddUserFacingMessages(
+            error,
+            'APPROVE_SUBMISSION'
         )
     }
 }
