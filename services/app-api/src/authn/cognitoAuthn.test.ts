@@ -4,12 +4,6 @@ import { parseAuthProvider, userTypeFromAttributes } from './cognitoAuthn'
 import type { UserType } from '../domain-models'
 
 describe('cognitoAuthn', () => {
-    describe('Intentionally failing test', () => {
-        it('should fail to verify CI catches failures', () => {
-            expect(true).toBe(false)
-        })
-    })
-
     describe('parseAuthProvider', () => {
         it('parses valid and invalid strings', () => {
             type authProviderTest = {
