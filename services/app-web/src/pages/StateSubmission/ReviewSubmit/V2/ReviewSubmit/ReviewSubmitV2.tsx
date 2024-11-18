@@ -9,7 +9,7 @@ import { useRouteParams, useStatePrograms } from '../../../../../hooks'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 
 import { RoutesRecord } from '../../../../../constants'
-import { ActionModal } from '../../../../../components/Modal/ActionModal'
+import { UnlockSubmitModal } from '../../../../../components/Modal/UnlockSubmitModal'
 import { getVisibleLatestContractFormData } from '../../../../../gqlHelpers/contractsAndRates'
 import { useAuth } from '../../../../../contexts/AuthContext'
 import { RateDetailsSummarySection } from '../../RateDetailsSummarySection'
@@ -191,7 +191,7 @@ export const ReviewSubmit = (): React.ReactElement => {
                     </ModalOpenButton>
                 </PageActionsContainer>
 
-                <ActionModal
+                <UnlockSubmitModal
                     submissionData={contract}
                     submissionName={submissionName}
                     modalType={

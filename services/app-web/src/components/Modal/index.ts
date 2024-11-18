@@ -1,3 +1,3 @@
 export { Modal } from './Modal'
-export {ActionModal} from './ActionModal'
+export {UnlockSubmitModal} from './UnlockSubmitModal'
 export {ModalOpenButton} from './ModalOpenButton/ModalOpenButton'

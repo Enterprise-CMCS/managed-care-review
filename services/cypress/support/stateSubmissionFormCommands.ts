@@ -545,7 +545,7 @@ Cypress.Commands.add(
             .should('exist')
             .within(() => {
                 if (resubmission) {
-                    cy.get('#actionModalInput').type(
+                    cy.get('#unlockSubmitModalInput').type(
                         summary || 'Resubmission summary'
                     )
 

@@ -1,4 +1,11 @@
-import { Grid, GridContainer, Link, ModalRef } from '@trussworks/react-uswds'
+import {
+    Grid,
+    GridContainer,
+    Link,
+    ModalRef,
+    FormGroup,
+    Textarea,
+} from '@trussworks/react-uswds'
 import React, { useEffect, useRef, useState } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
 import { ContractDetailsSummarySection } from '../StateSubmission/ReviewSubmit/ContractDetailsSummarySection'
@@ -11,15 +18,26 @@ import {
     DocumentWarningBanner,
     LinkWithLogging,
 } from '../../components'
+import { useFormik } from 'formik'
+import { GenericApiErrorProps } from '../../components/Banner/GenericApiErrorBanner/GenericApiErrorBanner'
 import { Loading } from '../../components'
 import { usePage } from '../../contexts/PageContext'
-import { useFetchContractQuery, UpdateInformation } from '../../gen/gqlClient'
+import { recordJSException } from '../../otelHelpers'
+import {
+    useFetchContractQuery,
+    UpdateInformation,
+    useApproveContractMutation,
+} from '../../gen/gqlClient'
 import { ErrorForbiddenPage } from '../Errors/ErrorForbiddenPage'
 import { Error404 } from '../Errors/Error404Page'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import styles from './SubmissionSummary.module.scss'
 import { ChangeHistory } from '../../components/ChangeHistory'
-import { ModalOpenButton, ActionModal, Modal } from '../../components/Modal'
+import {
+    ModalOpenButton,
+    UnlockSubmitModal,
+    Modal,
+} from '../../components/Modal'
 import { RoutesRecord } from '../../constants'
 import { useRouteParams } from '../../hooks'
 import { getVisibleLatestContractFormData } from '../../gqlHelpers/contractsAndRates'
@@ -36,10 +54,20 @@ export const SubmissionSummary = (): React.ReactElement => {
     const [documentError, setDocumentError] = useState(false)
     const { loggedInUser } = useAuth()
     const { id } = useRouteParams()
-
+    const [approveContract] = useApproveContractMutation()
+    const [modalAlert, setModalAlert] = useState<
+        GenericApiErrorProps | undefined
+    >(undefined)
     const hasCMSPermissions = hasCMSUserPermissions(loggedInUser)
     const isStateUser = loggedInUser?.role === 'STATE_USER'
     const isHelpDeskUser = loggedInUser?.role === 'HELPDESK_USER'
+    const formik = useFormik({
+        initialValues: {
+            approveModalInput: '',
+        },
+        onSubmit: (values) => approveContractAction(values.approveModalInput),
+    })
+    const [isSubmitting, setIsSubmitting] = useState(false) // mock same behavior as formik isSubmitting
 
     const ldClient = useLDClient()
 
@@ -162,6 +190,31 @@ export const SubmissionSummary = (): React.ReactElement => {
     // Only show for CMS_USER or CMS_APPROVER_USER users
     const showSubmissionApproval = submissionApprovalFlag && hasCMSPermissions
 
+    const approveContractAction = async (actionModalInput?: string) => {
+        setIsSubmitting(true)
+        try {
+            await approveContract({
+                variables: {
+                    input: {
+                        contractID: contract.id,
+                        updatedReason: actionModalInput,
+                    },
+                },
+            })
+            approveModalRef.current?.toggleModal(undefined, false)
+        } catch (err) {
+            recordJSException(
+                `RateDetails: Apollo error reported. Error message: Failed to create form data ${err}`
+            )
+            setModalAlert({
+                heading: 'Approve submission error',
+                message: err.message,
+                // When we have generic/unknown errors override any suggestions and display the fallback "please refresh text"
+                validationFail: false,
+            })
+        }
+    }
+
     return (
         <div className={styles.background}>
             <GridContainer
@@ -205,17 +258,37 @@ export const SubmissionSummary = (): React.ReactElement => {
                         <Modal
                             id="approvalModal"
                             modalRef={approveModalRef}
+                            onSubmit={() =>
+                                approveContractAction(
+                                    formik.values.approveModalInput
+                                )
+                            }
                             modalHeading="Are you sure you want to approve this submission?"
                             onSubmitText="Approve submission"
                             submitButtonProps={{ variant: 'default' }}
                             className={styles.approvalModal}
+                            modalAlert={modalAlert}
+                            isSubmitting={isSubmitting}
                         >
-                            <div>
+                            <form>
                                 <p>
                                     Once you approve, the submission status will
                                     change from Submitted to Approved.
                                 </p>
-                            </div>
+                                <FormGroup>
+                                    <Textarea
+                                        id="approveModalInput"
+                                        name="approveModalInput"
+                                        data-testid="approveModalInput"
+                                        aria-required={false}
+                                        error={false}
+                                        onChange={formik.handleChange}
+                                        defaultValue={
+                                            formik.values.approveModalInput
+                                        }
+                                    />
+                                </FormGroup>
+                            </form>
                         </Modal>
                     </>
                 )}
@@ -298,14 +371,9 @@ export const SubmissionSummary = (): React.ReactElement => {
 
                 <ChangeHistory contract={contract} />
 
-                <ActionModal
+                <UnlockSubmitModal
                     modalRef={modalRef}
                     modalType="UNLOCK_CONTRACT"
-                    submissionData={contract}
-                />
-                <ActionModal
-                    modalRef={approveModalRef}
-                    modalType="APPROVE_CONTRACT"
                     submissionData={contract}
                 />
             </GridContainer>

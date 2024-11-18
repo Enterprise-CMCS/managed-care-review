@@ -8,7 +8,7 @@ import {
     mockContractPackageSubmitted,
     unlockHealthPlanPackageMockError,
 } from '../../testHelpers/apolloMocks'
-import { ActionModal } from './ActionModal'
+import { UnlockSubmitModal } from './UnlockSubmitModal'
 import { renderWithProviders } from '../../testHelpers/jestHelpers'
 import { Location } from 'react-router-dom'
 import {
@@ -20,7 +20,7 @@ import {
     unlockContractMockSuccess,
 } from '../../testHelpers/apolloMocks/healthPlanPackageGQLMock'
 
-describe('ActionModal', () => {
+describe('UnlockSubmitModal', () => {
     // mock implementation so we can clear it between tests, otherwise the last tests will count function calls from previous tests.
     const mockSetIsSubmitting = vi.fn().mockImplementation(vi.fn())
     afterEach(() => {
@@ -33,7 +33,7 @@ describe('ActionModal', () => {
             const handleOpen = () =>
                 modalRef.current?.toggleModal(undefined, true)
             renderWithProviders(
-                <ActionModal
+                <UnlockSubmitModal
                     submissionData={mockContractPackageDraft()}
                     submissionName="Test-Submission"
                     modalType="SUBMIT_CONTRACT"
@@ -63,7 +63,7 @@ describe('ActionModal', () => {
             const handleOpen = () =>
                 modalRef.current?.toggleModal(undefined, true)
             renderWithProviders(
-                <ActionModal
+                <UnlockSubmitModal
                     submissionData={mockContractPackageDraft()}
                     submissionName="Test-Submission"
                     modalType="SUBMIT_CONTRACT"
@@ -110,7 +110,7 @@ describe('ActionModal', () => {
             const handleOpen = () =>
                 modalRef.current?.toggleModal(undefined, true)
             renderWithProviders(
-                <ActionModal
+                <UnlockSubmitModal
                     submissionData={mockContractPackageDraft()}
                     submissionName="Test-Submission"
                     modalType="SUBMIT_CONTRACT"
@@ -160,7 +160,7 @@ describe('ActionModal', () => {
             const handleOpen = () =>
                 modalRef.current?.toggleModal(undefined, true)
             renderWithProviders(
-                <ActionModal
+                <UnlockSubmitModal
                     submissionData={mockContractPackageDraft()}
                     submissionName="Test-Submission"
                     modalType="SUBMIT_CONTRACT"
@@ -204,7 +204,7 @@ describe('ActionModal', () => {
             const handleOpen = () =>
                 modalRef.current?.toggleModal(undefined, true)
             renderWithProviders(
-                <ActionModal
+                <UnlockSubmitModal
                     modalRef={modalRef}
                     modalType="UNLOCK_CONTRACT"
                     submissionData={mockContractPackageSubmitted()}
@@ -220,7 +220,9 @@ describe('ActionModal', () => {
             expect(
                 screen.getByText('Provide reason for unlocking')
             ).toBeInTheDocument()
-            expect(screen.getByTestId('actionModalInput')).toBeInTheDocument()
+            expect(
+                screen.getByTestId('unlockSubmitModalInput')
+            ).toBeInTheDocument()
             expect(
                 screen.getByTestId('unlock_contract-modal-submit')
             ).toHaveTextContent('Unlock')
@@ -231,14 +233,14 @@ describe('ActionModal', () => {
             const handleOpen = () =>
                 modalRef.current?.toggleModal(undefined, true)
             renderWithProviders(
-                <ActionModal
+                <UnlockSubmitModal
                     modalRef={modalRef}
                     modalType="UNLOCK_CONTRACT"
                     submissionData={mockContractPackageSubmitted()}
                 />
             )
             await waitFor(() => handleOpen())
-            await screen.findByTestId('actionModalInput')
+            await screen.findByTestId('unlockSubmitModalInput')
 
             const modalSubmit = screen.getByTestId(
                 'unlock_contract-modal-submit'
@@ -261,7 +263,7 @@ describe('ActionModal', () => {
             const handleOpen = () =>
                 modalRef.current?.toggleModal(undefined, true)
             renderWithProviders(
-                <ActionModal
+                <UnlockSubmitModal
                     modalRef={modalRef}
                     modalType="UNLOCK_CONTRACT"
                     submissionData={mockContractPackageSubmitted()}
@@ -271,7 +273,7 @@ describe('ActionModal', () => {
             await waitFor(() => handleOpen())
             screen.getByText('Provide reason for unlocking')
 
-            const textbox = await screen.findByTestId('actionModalInput')
+            const textbox = await screen.findByTestId('unlockSubmitModalInput')
 
             // submit without entering anything
             await userEvent.click(
@@ -295,7 +297,7 @@ describe('ActionModal', () => {
             const handleOpen = () =>
                 modalRef.current?.toggleModal(undefined, true)
             renderWithProviders(
-                <ActionModal
+                <UnlockSubmitModal
                     modalRef={modalRef}
                     modalType="UNLOCK_CONTRACT"
                     submissionData={mockContractPackageSubmitted()}
@@ -318,7 +320,7 @@ describe('ActionModal', () => {
             })
 
             await userEvent.type(
-                screen.getByTestId('actionModalInput'),
+                screen.getByTestId('unlockSubmitModalInput'),
                 'Test unlock summary'
             )
 
@@ -344,7 +346,7 @@ describe('ActionModal', () => {
             const handleOpen = () =>
                 modalRef.current?.toggleModal(undefined, true)
             renderWithProviders(
-                <ActionModal
+                <UnlockSubmitModal
                     modalRef={modalRef}
                     modalType="UNLOCK_CONTRACT"
                     submissionData={mockContractPackageSubmitted()}
@@ -365,7 +367,7 @@ describe('ActionModal', () => {
             await waitFor(() => expect(dialog).toHaveClass('is-visible'))
 
             await userEvent.type(
-                screen.getByTestId('actionModalInput'),
+                screen.getByTestId('unlockSubmitModalInput'),
                 'Test unlock summary'
             )
 
@@ -389,7 +391,7 @@ describe('ActionModal', () => {
             const handleOpen = () =>
                 modalRef.current?.toggleModal(undefined, true)
             renderWithProviders(
-                <ActionModal
+                <UnlockSubmitModal
                     modalRef={modalRef}
                     modalType="UNLOCK_CONTRACT"
                     submissionData={mockContractPackageSubmitted()}
@@ -414,7 +416,7 @@ describe('ActionModal', () => {
             await waitFor(() => expect(dialog).toHaveClass('is-visible'))
 
             await userEvent.type(
-                screen.getByTestId('actionModalInput'),
+                screen.getByTestId('unlockSubmitModalInput'),
                 'Test unlock summary'
             )
 
@@ -437,43 +439,13 @@ describe('ActionModal', () => {
         })
     })
 
-    describe('approve submission modal', () => {
-        it('displays correct modal when approving submission', async () => {
-            const modalRef = createRef<ModalRef>()
-            const handleOpen = () =>
-                modalRef.current?.toggleModal(undefined, true)
-            renderWithProviders(
-                <ActionModal
-                    modalRef={modalRef}
-                    modalType="APPROVE_CONTRACT"
-                    submissionData={mockContractPackageSubmitted()}
-                />
-            )
-            await waitFor(() => handleOpen())
-            const dialog = screen.getByRole('dialog')
-            await waitFor(() => expect(dialog).toHaveClass('is-visible'))
-
-            expect(
-                screen.getByText(
-                    'Are you sure you want to approve this submission?'
-                )
-            ).toBeInTheDocument()
-            expect(
-                screen.getByText(
-                    'Once you approve, the submission status will change from Submitted to Approved.'
-                )
-            ).toBeInTheDocument()
-            expect(screen.getByTestId('actionModalInput')).toBeInTheDocument()
-        })
-    })
-
     describe('resubmit unlocked submission modal', () => {
         it('displays correct modal when submitting unlocked submission', async () => {
             const modalRef = createRef<ModalRef>()
             const handleOpen = () =>
                 modalRef.current?.toggleModal(undefined, true)
             renderWithProviders(
-                <ActionModal
+                <UnlockSubmitModal
                     submissionData={mockContractPackageDraft()}
                     submissionName="Test-Submission"
                     modalType="RESUBMIT_CONTRACT"
@@ -496,7 +468,9 @@ describe('ActionModal', () => {
                     'Provide summary of all changes made to this contract'
                 )
             ).toBeInTheDocument()
-            expect(screen.getByTestId('actionModalInput')).toBeInTheDocument()
+            expect(
+                screen.getByTestId('unlockSubmitModalInput')
+            ).toBeInTheDocument()
             expect(
                 screen.getByTestId('resubmit_contract-modal-submit')
             ).toHaveTextContent('Resubmit')
@@ -506,7 +480,7 @@ describe('ActionModal', () => {
             const handleOpen = () =>
                 modalRef.current?.toggleModal(undefined, true)
             renderWithProviders(
-                <ActionModal
+                <UnlockSubmitModal
                     submissionData={mockContractPackageDraft()}
                     submissionName="Test-Submission"
                     modalType="RESUBMIT_CONTRACT"
@@ -534,7 +508,7 @@ describe('ActionModal', () => {
             const handleOpen = () =>
                 modalRef.current?.toggleModal(undefined, true)
             renderWithProviders(
-                <ActionModal
+                <UnlockSubmitModal
                     submissionData={mockContractPackageDraft()}
                     submissionName="Test-Submission"
                     modalType="RESUBMIT_CONTRACT"
@@ -547,7 +521,7 @@ describe('ActionModal', () => {
             const dialog = screen.getByRole('dialog')
             await waitFor(() => expect(dialog).toHaveClass('is-visible'))
 
-            const textbox = screen.getByTestId('actionModalInput')
+            const textbox = screen.getByTestId('unlockSubmitModalInput')
 
             // submit without entering anything
             await userEvent.click(
@@ -569,7 +543,7 @@ describe('ActionModal', () => {
             const handleOpen = () =>
                 modalRef.current?.toggleModal(undefined, true)
             renderWithProviders(
-                <ActionModal
+                <UnlockSubmitModal
                     modalRef={modalRef}
                     modalType="RESUBMIT_CONTRACT"
                     submissionData={mockContractPackageDraft()}
@@ -589,7 +563,7 @@ describe('ActionModal', () => {
             await waitFor(() => expect(dialog).toHaveClass('is-visible'))
 
             await userEvent.type(
-                screen.getByTestId('actionModalInput'),
+                screen.getByTestId('unlockSubmitModalInput'),
                 'Test unlock resubmit'
             )
 
@@ -613,7 +587,7 @@ describe('ActionModal', () => {
                 modalRef.current?.toggleModal(undefined, true)
 
             renderWithProviders(
-                <ActionModal
+                <UnlockSubmitModal
                     submissionData={mockContractPackageDraft()}
                     submissionName="Test-Submission"
                     modalType="RESUBMIT_CONTRACT"
@@ -642,7 +616,7 @@ describe('ActionModal', () => {
             await waitFor(() => expect(dialog).toHaveClass('is-visible'))
 
             await userEvent.type(
-                screen.getByTestId('actionModalInput'),
+                screen.getByTestId('unlockSubmitModalInput'),
                 'Test submission summary'
             )
 
