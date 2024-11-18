@@ -5,7 +5,6 @@ import { Settings } from './Settings'
 import {
     fetchCurrentUserMock,
     indexUsersQueryMock,
-    fetchEmailSettings,
     iterableAdminUsersMockData,
     iterableCmsUsersMockData,
     fetchMcReviewSettingsMock,
@@ -31,7 +30,6 @@ import {
 } from './SettingsTables'
 import { fetchMcReviewSettingsFailMock } from '../../testHelpers/apolloMocks/mcReviewSettingsGQLMocks'
 import { indexUsersQueryFailMock } from '../../testHelpers/apolloMocks/userGQLMock'
-import { fetchEmailSettingsFailMock } from '../../testHelpers/apolloMocks/emailGQLMock'
 import selectEvent from 'react-select-event'
 
 const combinedAuthorizedUsers: {
@@ -245,7 +243,7 @@ afterEach(() => {
 })
 
 describe.each(combinedAuthorizedUsers)(
-    'Settings tests for $userRole with read-write-state-assignments on',
+    'Settings tests for $userRole',
     ({ userRole, mockUser }) => {
         it('renders settings pages', async () => {
             renderWithProviders(<CommonSettingsRoute />, {
@@ -261,9 +259,6 @@ describe.each(combinedAuthorizedUsers)(
                 },
                 routerProvider: {
                     route: '/mc-review-settings',
-                },
-                featureFlags: {
-                    'read-write-state-assignments': true,
                 },
             })
 
@@ -322,70 +317,6 @@ describe.each(combinedAuthorizedUsers)(
     }
 )
 
-describe.each(combinedAuthorizedUsers)(
-    'Settings tests for $userRole with read-write-state-assignments off',
-    ({ userRole, mockUser }) => {
-        it('renders settings pages', async () => {
-            renderWithProviders(<CommonSettingsRoute />, {
-                apolloProvider: {
-                    mocks: [
-                        indexUsersQueryMock(),
-                        fetchCurrentUserMock({
-                            user: mockUser(),
-                            statusCode: 200,
-                        }),
-                        fetchEmailSettings(),
-                    ],
-                },
-                routerProvider: {
-                    route: '/mc-review-settings',
-                },
-                featureFlags: {
-                    'read-write-state-assignments': false,
-                },
-            })
-
-            expect(await screen.findByTestId('sidenav')).toBeInTheDocument()
-
-            // Check State assignments table
-            const tableAnalysts = await screen.findByRole('table', {
-                name: 'State assignments',
-            })
-            expect(tableAnalysts).toBeInTheDocument()
-            const tableRowsAnalysts =
-                await within(tableAnalysts).findAllByRole('row')
-            expect(tableRowsAnalysts).toHaveLength(4)
-            // Check the table headers
-            expect(
-                within(tableAnalysts).getByRole('columnheader', {
-                    name: 'Assigned DMCO staff',
-                })
-            ).toBeInTheDocument()
-            expect(
-                within(tableAnalysts).getByRole('columnheader', {
-                    name: 'State',
-                })
-            ).toBeInTheDocument()
-
-            // Check the table cells
-            expect(
-                within(tableAnalysts).getByText(
-                    /testMN@example.com, cmsApproverUser1@dmas.mn.gov/
-                )
-            ).toBeInTheDocument()
-            expect(
-                within(tableAnalysts).getByText(
-                    /cmsUser2@dmas.mn.gov, cmsApproverUser2@dmas.mn.go/
-                )
-            ).toBeInTheDocument()
-            expect(within(tableAnalysts).getByText('MN')).toBeInTheDocument()
-            expect(within(tableAnalysts).getByText('OH')).toBeInTheDocument()
-
-            await commonSettingPageTest()
-        })
-    }
-)
-
 describe('Settings page filters tests', () => {
     it('filters analysts based on state and analyst', async () => {
         renderWithProviders(<CommonSettingsRoute />, {
@@ -401,9 +332,6 @@ describe('Settings page filters tests', () => {
             },
             routerProvider: {
                 route: '/mc-review-settings',
-            },
-            featureFlags: {
-                'read-write-state-assignments': true,
             },
         })
 
@@ -545,9 +473,6 @@ describe('Settings page filters tests', () => {
             routerProvider: {
                 route: '/mc-review-settings',
             },
-            featureFlags: {
-                'read-write-state-assignments': true,
-            },
         })
 
         expect(await screen.findByTestId('sidenav')).toBeInTheDocument()
@@ -617,7 +542,7 @@ describe('Settings page filters tests', () => {
 })
 
 describe('Settings page error tests', () => {
-    it('renders error message on all settings pages read-write-state-assignments on', async () => {
+    it('renders error message on all settings pages', async () => {
         renderWithProviders(<CommonSettingsRoute />, {
             apolloProvider: {
                 mocks: [
@@ -631,32 +556,6 @@ describe('Settings page error tests', () => {
             },
             routerProvider: {
                 route: '/mc-review-settings',
-            },
-            featureFlags: {
-                'read-write-state-assignments': true,
-            },
-        })
-
-        expect(await screen.findByTestId('sidenav')).toBeInTheDocument()
-        await commonErrorTests()
-    })
-    it('renders error message on all settings pages with read-write-state-assignments off', async () => {
-        renderWithProviders(<CommonSettingsRoute />, {
-            apolloProvider: {
-                mocks: [
-                    indexUsersQueryFailMock(),
-                    fetchCurrentUserMock({
-                        user: mockValidCMSUser(),
-                        statusCode: 200,
-                    }),
-                    fetchEmailSettingsFailMock(),
-                ],
-            },
-            routerProvider: {
-                route: '/mc-review-settings',
-            },
-            featureFlags: {
-                'read-write-state-assignments': false,
             },
         })
 
@@ -684,9 +583,6 @@ describe('Admin only settings page tests', () => {
             },
             routerProvider: {
                 route: '/mc-review-settings',
-            },
-            featureFlags: {
-                'read-write-state-assignments': true,
             },
         })
 
@@ -745,9 +641,6 @@ describe('Admin only settings page tests', () => {
             },
             routerProvider: {
                 route: '/mc-review-settings',
-            },
-            featureFlags: {
-                'read-write-state-assignments': true,
             },
         })
 

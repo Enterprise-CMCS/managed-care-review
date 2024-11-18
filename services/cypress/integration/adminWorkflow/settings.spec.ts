@@ -5,40 +5,30 @@ describe('Admin user can view application level settings', () => {
     })
 
     it('and filter down state analysts by state code', () => {
-         cy.logInAsAdminUser({initialURL: '/mc-review-settings'})
-          // Table data has both minnesota entries and florida entries
-         cy.findByRole('table').should('exist').should('include.text', 'FL').should('include.text', 'MN')
+        cy.logInAsAdminUser({initialURL: '/mc-review-settings'})
+        // Table data has both minnesota entries and florida entries
+        cy.findByRole('table').should('exist').should('include.text', 'FL').should('include.text', 'MN')
 
-         // save current number of rows so we can filter
-         cy.findByRole('table', {name: 'State assignments'})
-         .find("tr")
-         .then((rows) => {
-           const lengthBeforeFilter = rows.length;
+        // save current number of rows so we can filter
+        cy.findByRole('table', {name: 'State assignments'})
+        .find("tr")
+        .then((rows) => {
+            const lengthBeforeFilter = rows.length;
 
-         //click into emails filters, do nothing, then go over state filter
-         cy.findByRole('button', { name: 'Filters'}).click()
-         cy.findByRole('combobox', {
-            name: 'analysts filter selection', timeout: 2_000
-        }).click({
-            force: true,
-        })
-         cy.findByRole('combobox', {
-            name: 'state filter selection', timeout: 2_000
-        }).click({
-            force: true,
-        })
+            //click into emails filters, do nothing, then go over state filter
+            cy.findByRole('button', { name: 'Filters'}).click()
+            cy.findByRole('combobox', { name: 'analysts filter selection', timeout: 2_000 }).click({ force: true })
+            cy.findByRole('combobox', { name: 'state filter selection', timeout: 2_000 }).click({ force: true })
 
-        cy.findByRole('option', {name: 'MN'}).click()
-        // Table data has minnesota entries but no florida entries
-        cy.findByRole('table').should('exist').should('not.include.text', 'FL').should('include.text', 'MN')
-        // Table data is also less rows long
-        cy.findAllByRole('row').should('have.length.lessThan', lengthBeforeFilter)
+            cy.findByRole('option', {name: 'MN'}).click()
+            // Table data has minnesota entries but no florida entries
+            cy.findByRole('table').should('exist').should('not.include.text', 'FL').should('include.text', 'MN')
+            // Table data is also less rows long
+            cy.findAllByRole('row').should('have.length.lessThan', lengthBeforeFilter)
         });
     })
 
     it('can update state assignment and see in on the state assignment table', () => {
-        cy.interceptFeatureFlags({'read-write-state-assignments': true})
-
         // // make sure cms users are in db first
         cy.logInAsCMSUser({ cmsUser: 'ZUKO', initialURL: '/'})
         cy.logOut()

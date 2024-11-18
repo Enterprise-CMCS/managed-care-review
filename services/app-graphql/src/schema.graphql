@@ -12,11 +12,6 @@ type Query {
     fetchCurrentUser: User!
 
     """
-    fetchEmailSettings returns emailer config and settings
-    """
-    fetchEmailSettings: FetchEmailSettingsPayload!
-
-    """
     fetchHealthPlanPackage returns a specific HealthPlanPackage by id
 
     If a package with the given ID cannot be found, this query returns undefined
@@ -1216,16 +1211,6 @@ type EmailConfiguration {
     cmsReviewHelpEmailAddress: String!
     cmsRateHelpEmailAddress: String!
     helpDeskEmail: String!
-}
-
-type StateAnalystsConfiguration {
-    stateCode: String!
-    emails: [String!]!
-}
-type FetchEmailSettingsPayload {
-    "Email settings"
-    config: EmailConfiguration
-    stateAnalysts: [StateAnalystsConfiguration!]
 }
 
 """
