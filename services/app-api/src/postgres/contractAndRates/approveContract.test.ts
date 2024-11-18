@@ -52,6 +52,7 @@ describe('approveContract', () => {
             await approveContract(client, {
                 contractID: submittedContract.id,
                 updatedByID: cmsUser.id,
+                updatedReason: undefined,
             })
         )
 
