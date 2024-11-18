@@ -16,7 +16,7 @@ import {
     submitTestContract,
     unlockTestContract,
 } from '../../testHelpers/gqlContractHelpers'
-import { testS3Client } from '../../../../app-web/src/testHelpers/s3Helpers'
+import { testS3Client } from '../../../../app-api/src/testHelpers/s3Helpers'
 
 describe(`indexContracts`, () => {
     describe('isStateUser', () => {
