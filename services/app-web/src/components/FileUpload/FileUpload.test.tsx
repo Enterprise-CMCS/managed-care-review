@@ -22,10 +22,14 @@ describe('FileUpload component', () => {
         name: 'Default Input',
         label: 'File input label',
         uploadFile: (_file: File) =>
-            fakeRequest<S3FileData>(true, {
-                key: 'testtest',
-                s3URL: 's3://bucketname/key/fakeS3url',
-            }),
+            fakeRequest<S3FileData>(
+                true,
+                {
+                    key: 'testtest',
+                    s3URL: 's3://bucketname/key/fakeS3url',
+                },
+                50
+            ), // timeout to give vitest time to look for loading text
         scanFile: async (_key: string) => {
             await fakeRequest<S3FileData>(true, {
                 key: 'testtest',
