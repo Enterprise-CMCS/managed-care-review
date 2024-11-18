@@ -18,6 +18,7 @@ import {
     DocumentWarningBanner,
     LinkWithLogging,
 } from '../../components'
+import { useTealium } from '../../hooks'
 import { useFormik } from 'formik'
 import { GenericApiErrorProps } from '../../components/Banner/GenericApiErrorBanner/GenericApiErrorBanner'
 import { Loading } from '../../components'
@@ -58,6 +59,7 @@ export const SubmissionSummary = (): React.ReactElement => {
     const [modalAlert, setModalAlert] = useState<
         GenericApiErrorProps | undefined
     >(undefined)
+    const { logFormSubmitEvent } = useTealium()
     const hasCMSPermissions = hasCMSUserPermissions(loggedInUser)
     const isStateUser = loggedInUser?.role === 'STATE_USER'
     const isHelpDeskUser = loggedInUser?.role === 'HELPDESK_USER'
@@ -191,6 +193,13 @@ export const SubmissionSummary = (): React.ReactElement => {
     const showSubmissionApproval = submissionApprovalFlag && hasCMSPermissions
 
     const approveContractAction = async (actionModalInput?: string) => {
+        logFormSubmitEvent({
+            heading: 'Approve submission',
+            form_name: 'Approve submission',
+            event_name: 'form_field_submit',
+            link_type: 'link_other',
+        })
+
         setIsSubmitting(true)
         try {
             await approveContract({
