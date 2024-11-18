@@ -8,13 +8,9 @@ import {
     createTestRateQuestionResponse,
     updateTestStateAssignments,
 } from '../../testHelpers/gqlHelpers'
-import { NewPostgresStore } from '../../postgres'
 import { createAndSubmitTestContractWithRate } from '../../testHelpers/gqlContractHelpers'
 import { assertAnError, assertAnErrorCode, must } from '../../testHelpers'
 import { testEmailConfig, testEmailer } from '../../testHelpers/emailerHelpers'
-import { getTestStateAnalystsEmails } from '../../testHelpers/parameterStoreHelpers'
-import { testLDService } from '../../testHelpers/launchDarklyHelpers'
-import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 
 describe('createRateQuestionResponse', () => {
     const cmsUser = testCMSUser()
@@ -132,6 +128,10 @@ describe('createRateQuestionResponse', () => {
         const rateID =
             contractWithRate.packageSubmissions[0].rateRevisions[0].rateID
 
+        const rateName =
+            contractWithRate.packageSubmissions[0].rateRevisions[0].formData
+                .rateCertificationName
+
         const rateQuestionResult = await createTestRateQuestion(
             cmsServer,
             rateID
@@ -141,10 +141,10 @@ describe('createRateQuestionResponse', () => {
         await createTestRateQuestionResponse(stateServer, question.id)
 
         expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
-            5, // New response state email notification is the fifth email, if State email is before CMS email.
+            6, // New response state email notification is the sixth email, CMS email is sent first
             expect.objectContaining({
                 subject: expect.stringContaining(
-                    `[LOCAL] Response to DMCO rate questions was successfully submitted.`
+                    `[LOCAL] Response submitted to CMS for ${rateName}`
                 ),
                 sourceEmail: emailConfig.emailSource,
                 bodyText: expect.stringContaining(
@@ -173,68 +173,6 @@ describe('createRateQuestionResponse', () => {
             emailer: mockEmailer,
         })
 
-        const submittedContractAndRate =
-            await createAndSubmitTestContractWithRate(stateServer)
-        const rateRevision =
-            submittedContractAndRate.packageSubmissions[0].rateRevisions[0]
-        const rateID = rateRevision.rateID
-
-        must(await createTestRateQuestion(cmsServer, rateID))
-
-        const rateName = rateRevision.formData.rateCertificationName
-        const stateAnalystsEmails = getTestStateAnalystsEmails(
-            submittedContractAndRate.stateCode
-        )
-        const cmsRecipientEmails = [
-            ...stateAnalystsEmails,
-            ...emailConfig.devReviewTeamEmails,
-            ...emailConfig.oactEmails,
-        ]
-
-        expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
-            5, // New response CMS email notification is the fifth email
-            expect.objectContaining({
-                subject: expect.stringContaining(
-                    `[LOCAL] New Responses for ${rateName}`
-                ),
-                sourceEmail: emailConfig.emailSource,
-                toAddresses: expect.arrayContaining(
-                    Array.from(cmsRecipientEmails)
-                ),
-                bodyText: expect.stringContaining(
-                    `The state submitted responses to OACT's questions about ${rateName}`
-                ),
-                bodyHTML: expect.stringContaining(
-                    `<a href="http://localhost/submissions/${rateID}/question-and-answers">View submission Q&A</a>`
-                ),
-            })
-        )
-    })
-
-    it('send CMS email to state analysts from database', async () => {
-        const ldService = testLDService({
-            'read-write-state-assignments': true,
-        })
-
-        const prismaClient = await sharedTestPrismaClient()
-        const postgresStore = NewPostgresStore(prismaClient)
-
-        const config = testEmailConfig()
-        const mockEmailer = testEmailer(config)
-        //mock invoke email submit lambda
-        const stateServer = await constructTestPostgresServer({
-            store: postgresStore,
-            ldService,
-            emailer: mockEmailer,
-        })
-        const cmsServer = await constructTestPostgresServer({
-            store: postgresStore,
-            context: {
-                user: cmsUser,
-            },
-            ldService,
-        })
-
         // add some users to the db, assign them to the state
         const assignedUsers = [
             testCMSUser({
@@ -253,42 +191,43 @@ describe('createRateQuestionResponse', () => {
         const assignedUserEmails = assignedUsers.map((u) => u.email)
 
         await updateTestStateAssignments(cmsServer, 'FL', assignedUserIDs)
+
         const submittedContractAndRate =
             await createAndSubmitTestContractWithRate(stateServer)
         const rateRevision =
             submittedContractAndRate.packageSubmissions[0].rateRevisions[0]
         const rateID = rateRevision.rateID
 
-        const rateQuestionResult = await createTestRateQuestion(
-            cmsServer,
-            rateID
+        const rateQuestionResult = must(
+            await createTestRateQuestion(cmsServer, rateID)
         )
         const question = rateQuestionResult.data?.createRateQuestion.question
 
-        const rateName = rateRevision.formData.rateCertificationName
-
         await createTestRateQuestionResponse(stateServer, question.id)
 
-        const cmsEmails = [...config.devReviewTeamEmails, ...assignedUserEmails]
+        const rateName = rateRevision.formData.rateCertificationName
 
-        // email subject line is correct for CMS email
-        // email is sent to the state anaylsts since it
-        // was submitted by a DCMO user
-        // Mock emailer is called 4 times, twice for submit, twice for response,
-        // first called to send the state email, then to CMS
+        const cmsRecipientEmails = [
+            ...assignedUserEmails,
+            ...emailConfig.devReviewTeamEmails,
+            ...emailConfig.oactEmails,
+        ]
+
         expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
-            3,
+            5, // New response CMS email notification is the fifth email
             expect.objectContaining({
                 subject: expect.stringContaining(
                     `[LOCAL] New Responses for ${rateName}`
                 ),
-                sourceEmail: config.emailSource,
-                toAddresses: expect.arrayContaining(Array.from(cmsEmails)),
+                sourceEmail: emailConfig.emailSource,
+                toAddresses: expect.arrayContaining(
+                    Array.from(cmsRecipientEmails)
+                ),
                 bodyText: expect.stringContaining(
-                    `The state submitted responses to DMCO's questions about ${rateName}`
+                    `The state submitted responses to OACT's questions about ${rateName}`
                 ),
                 bodyHTML: expect.stringContaining(
-                    `<a href="http://localhost/submissions/${rateID}/question-and-answers">View submission Q&A</a>`
+                    `<a href="http://localhost/rates/${rateID}/question-and-answers">View rate Q&A</a>`
                 ),
             })
         )

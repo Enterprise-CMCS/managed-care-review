@@ -45,3 +45,21 @@
 .backLinkContainerNoSideBar {
     padding-bottom: uswds.units(2);
 }
+
+.approveWithdrawButtonContainer {
+    justify-content: end;
+
+    button {
+        margin-right: 0;
+    }
+}
+
+.approvalModal {
+    max-width: 45rem;
+    vertical-align: top;
+    top: 13rem;
+
+    h2 {
+        font-size: 1.75rem;
+    }
+}

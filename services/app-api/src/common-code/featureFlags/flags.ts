@@ -11,13 +11,6 @@ const featureFlags = {
         defaultValue: false,
     },
     /**
-     * Enables state and CMS rate edit, unlock, resubmit functionality
-     */
-    RATE_EDIT_UNLOCK: {
-        flag: 'rate-edit-unlock',
-        defaultValue: false,
-    },
-    /**
      * When enabled state users will not see a standalone supporting
      * docs page
      */
@@ -25,25 +18,45 @@ const featureFlags = {
         flag: 'hide-supporting-docs-page',
         defaultValue: false,
     },
+    /**
+     * Enables state and CMS rate edit, unlock, resubmit functionality
+     */
+    RATE_EDIT_UNLOCK: {
+        flag: 'rate-edit-unlock',
+        defaultValue: false,
+    },
+    /**
+     * Enables Q&A by rates feature
+     */
+    QA_BY_RATES: {
+        flag: 'qa-by-rates',
+        defaultValue: false,
+    },
+    /**
+     * Enables submission approvals, withdraws, and reviews features
+     */
+    SUBMISSION_APPROVALS: {
+        flag: 'submission-approvals',
+        defaultValue: false,
+    },
     // PERMANENT FLAGS
-
     /**
      Enables the modal that alerts the user to an expiring session
-    */
+     */
     SESSION_EXPIRING_MODAL: {
         flag: 'session-expiring-modal',
         defaultValue: true,
     },
     /**
      The number of minutes before the session expires and countdown modal appears
-    */
+     */
     MINUTES_UNTIL_SESSION_EXPIRES: {
         flag: 'session-expiration-minutes',
         defaultValue: 30,
     },
     /**
      Toggles the site maintenance alert on the landing page
-    */
+     */
     SITE_UNDER_MAINTENANCE_BANNER: {
         flag: 'site-under-maintenance-banner',
         defaultValue: 'OFF',

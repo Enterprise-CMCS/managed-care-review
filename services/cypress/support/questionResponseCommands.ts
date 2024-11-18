@@ -38,7 +38,7 @@ Cypress.Commands.add(
             .click()
 
         // Check we are on the Add questions page
-        cy.findByRole('heading', { level: 2, name: /New response/ }).should(
+        cy.findByRole('heading', { level: 2, name: /Upload response/ }).should(
             'exist'
         )
 
@@ -47,7 +47,7 @@ Cypress.Commands.add(
         cy.waitForDocumentsToLoad()
 
         // Submit question
-        cy.findByRole('button', { name: 'Send response' })
+        cy.findByRole('button', { name: 'Submit response' })
             .should('exist')
             .click()
 

@@ -178,7 +178,6 @@ const RateDetails = ({
     const ratesFromContract = contract?.draftRates
     const initialRequestLoading = fetchContractLoading || fetchRateLoading
     const initialRequestError = fetchContractError || fetchRateError
-    const previousDocuments: string[] = []
 
     // Set up initial rate form values for Formik
     const initialRates: Rate[] = React.useMemo(
@@ -521,9 +520,6 @@ const RateDetails = ({
                                                                         )}
                                                                         shouldValidate={
                                                                             shouldValidate
-                                                                        }
-                                                                        previousDocuments={
-                                                                            previousDocuments
                                                                         }
                                                                     />
                                                                 )}

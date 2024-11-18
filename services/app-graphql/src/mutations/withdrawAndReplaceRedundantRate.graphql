@@ -1,7 +1,7 @@
 mutation withdrawAndReplaceRedundantRate($input: withdrawAndReplaceRedundantRateInput!) {
     withdrawAndReplaceRedundantRate(input: $input) {
         contract {
-            ...contractFieldsForReplaceRate
+            ...contractFieldsFragment
 
             draftRevision {
                 ...contractRevisionFragmentForReplaceRate
@@ -24,28 +24,6 @@ mutation withdrawAndReplaceRedundantRate($input: withdrawAndReplaceRedundantRate
             }
         }
 }
-}
-
-fragment contractFieldsForReplaceRate on Contract {
-    id
-    status
-    createdAt
-    updatedAt
-    initiallySubmittedAt
-    stateCode
-    mccrsID
-    state {
-        code
-        name
-        programs {
-            id
-            name
-            fullName
-            isRateProgram
-        }
-    }
-
-    stateNumber
 }
 
 fragment rateFields on Rate {

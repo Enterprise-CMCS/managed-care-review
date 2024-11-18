@@ -30,9 +30,8 @@ import {
 import type { EmailParameterStore } from '../parameterStore'
 import type { LDService } from '../launchDarkly/launchDarkly'
 import type { JWTLib } from '../jwt'
-import { fetchEmailSettingsResolver } from './email/fetchEmailSettings'
-import { indexRatesResolver } from './rate/indexRates'
-import { rateResolver } from './rate/rateResolver'
+import { indexRatesResolver } from './rate'
+import { rateResolver } from './rate'
 import { genericDocumentResolver } from './shared/genericDocumentResolver'
 import { fetchRateResolver } from './rate/fetchRate'
 import { updateContract } from './contract/updateContract'
@@ -40,7 +39,7 @@ import { indexContractsResolver } from './contract/indexContracts'
 import { unlockContractResolver } from './contract/unlockContract'
 import { createAPIKeyResolver } from './APIKey'
 import { unlockRate } from './rate/unlockRate'
-import { submitRate } from './rate/submitRate'
+import { submitRate } from './rate'
 import { updateDraftContractRates } from './contract/updateDraftContractRates'
 import { contractResolver } from './contract/contractResolver'
 import { unlockedContractResolver } from './contract/unlockedContractResolver'
@@ -52,6 +51,7 @@ import type { S3ClientT } from '../s3'
 import { createContract } from './contract/createContract'
 import { updateContractDraftRevision } from './contract/updateContractDraftRevision'
 import { withdrawAndReplaceRedundantRateResolver } from './contract/withdrawAndReplaceRedundantRate'
+import { approveContract } from './contract/approveContract'
 import { fetchMcReviewSettings } from './settings'
 import { updateStateAssignmentsByState } from './user/updateStateAssignmentsByState'
 
@@ -72,11 +72,6 @@ export function configureResolvers(
             indexHealthPlanPackages: indexHealthPlanPackagesResolver(store),
             indexContracts: indexContractsResolver(store),
             indexUsers: indexUsersResolver(store),
-            fetchEmailSettings: fetchEmailSettingsResolver(
-                store,
-                emailer,
-                emailParameterStore
-            ),
             fetchMcReviewSettings: fetchMcReviewSettings(store, emailer),
             // Rates refactor
             indexRates: indexRatesResolver(store),
@@ -107,12 +102,7 @@ export function configureResolvers(
                 emailParameterStore,
                 launchDarkly
             ),
-            unlockContract: unlockContractResolver(
-                store,
-                emailer,
-                emailParameterStore,
-                launchDarkly
-            ),
+            unlockContract: unlockContractResolver(store, emailer),
             createContract: createContract(store),
             updateContract: updateContract(store),
             updateContractDraftRevision: updateContractDraftRevision(
@@ -122,33 +112,20 @@ export function configureResolvers(
             updateDraftContractRates: updateDraftContractRates(store),
             withdrawAndReplaceRedundantRate:
                 withdrawAndReplaceRedundantRateResolver(store),
+            approveContract: approveContract(store),
             updateDivisionAssignment: updateDivisionAssignment(store),
             updateStateAssignment: updateStateAssignment(store),
             updateStateAssignmentsByState: updateStateAssignmentsByState(store),
             createContractQuestion: createContractQuestionResolver(
                 store,
-                emailParameterStore,
-                emailer,
-                launchDarkly
+                emailer
             ),
             createContractQuestionResponse:
-                createContractQuestionResponseResolver(
-                    store,
-                    emailer,
-                    emailParameterStore,
-                    launchDarkly
-                ),
-            createRateQuestion: createRateQuestionResolver(
-                store,
-                emailer,
-                emailParameterStore,
-                launchDarkly
-            ),
+                createContractQuestionResponseResolver(store, emailer),
+            createRateQuestion: createRateQuestionResolver(store, emailer),
             createRateQuestionResponse: createRateQuestionResponseResolver(
                 store,
-                emailer,
-                emailParameterStore,
-                launchDarkly
+                emailer
             ),
             createAPIKey: createAPIKeyResolver(jwt),
             unlockRate: unlockRate(store),

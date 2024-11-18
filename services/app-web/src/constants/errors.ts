@@ -10,6 +10,8 @@ const ERROR_MESSAGES = {
         'Please provide the required information before submitting.',
     submit_error_generic: 'Error attempting to submit.',
     submit_missing_field: 'Your submission is missing information.',
+    approve_error_generic: 'Error attempting to approve submission.',
+    approve_error_heading: 'Approve submission error',
     unlock_error_heading: 'Unlock error',
     unlock_error_generic: 'Error attempting to unlock.',
     unlock_invalid_package_status:
