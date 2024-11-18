@@ -96,14 +96,17 @@ export const RateSummarySideNav = () => {
     }
     // All of this logic is to enable conditional styles with sidenabv
     const isEditable = isUnlockedOrDraft(rate.status)
-    const isFormPage = shouldUseFormPageStyles(routeName, loggedInUser, isEditable)
-
+    const isFormPage = shouldUseFormPageStyles(
+        routeName,
+        loggedInUser,
+        isEditable
+    )
 
     return (
         <div
-        className={
-            isFormPage ? styles.backgroundForm : styles.backgroundSidebar
-        }
+            className={
+                isFormPage ? styles.backgroundForm : styles.backgroundSidebar
+            }
             data-testid="rate-summary-side-nav"
         >
             <GridContainer className={styles.container}>

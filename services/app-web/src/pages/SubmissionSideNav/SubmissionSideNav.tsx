@@ -23,7 +23,7 @@ import { Error404 } from '../Errors/Error404Page'
 import { Contract, User } from '../../gen/gqlClient'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '../../common-code/featureFlags'
-import { isUnlockedOrDraft, shouldUseFormPageStyles} from './helpers'
+import { isUnlockedOrDraft, shouldUseFormPageStyles } from './helpers'
 
 export type SideNavOutletContextType = {
     contract: Contract
@@ -144,11 +144,13 @@ export const SubmissionSideNav = () => {
         return <GenericErrorPage />
     }
 
-
     // All of this logic is to enable conditional styles with sidenabv
     const isEditable = isUnlockedOrDraft(submissionStatus)
-    const isFormPage = shouldUseFormPageStyles(routeName, loggedInUser, isEditable)
-
+    const isFormPage = shouldUseFormPageStyles(
+        routeName,
+        loggedInUser,
+        isEditable
+    )
 
     const generateRateLinks = () => {
         const rateRevision = contract.packageSubmissions[0].rateRevisions

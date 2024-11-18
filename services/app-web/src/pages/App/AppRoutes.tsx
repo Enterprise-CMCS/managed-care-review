@@ -47,7 +47,10 @@ import {
     DivisionAssignmentTable,
 } from '../Settings/SettingsTables'
 import { EditStateAssign } from '../Settings/EditStateAssign/EditStateAssign'
-import { UploadContractQuestions, UploadRateQuestions } from '../QuestionResponse/UploadQuestions'
+import {
+    UploadContractQuestions,
+    UploadRateQuestions,
+} from '../QuestionResponse/UploadQuestions'
 import { RateSummarySideNav } from '../SubmissionSideNav/RateSummarySideNav'
 import { RateQuestionResponse } from '../QuestionResponse/QuestionResponseSummary/RateQuestionResponse'
 import { UploadRateResponse } from '../QuestionResponse/UploadResponse/UploadRateResponse'
@@ -154,20 +157,20 @@ const StateUserRoutes = ({
                         element={<StateSubmissionForm />}
                     />
                     {showQAbyRates && (
-                       <>
-                       <Route
-                            path={
-                                RoutesRecord.SUBMISSIONS_RATE_QUESTIONS_AND_ANSWERS
-                            }
-                            element={<RateQuestionResponse />}
-                        />
-                        <Route
-                        path={
-                            RoutesRecord.SUBMISSIONS_UPLOAD_RATE_RESPONSE
-                        }
-                        element={<UploadRateResponse />}
-                        />
-                    </>
+                        <>
+                            <Route
+                                path={
+                                    RoutesRecord.SUBMISSIONS_RATE_QUESTIONS_AND_ANSWERS
+                                }
+                                element={<RateQuestionResponse />}
+                            />
+                            <Route
+                                path={
+                                    RoutesRecord.SUBMISSIONS_UPLOAD_RATE_RESPONSE
+                                }
+                                element={<UploadRateResponse />}
+                            />
+                        </>
                     )}
                 </Route>
                 <Route

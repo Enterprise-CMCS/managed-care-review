@@ -83,9 +83,7 @@ export const RateQuestionResponse = () => {
     return (
         <div className={styles.background}>
             <GridContainer className={styles.container}>
-                {hasCMSPermissions && !division && (
-                    <UserAccountWarningBanner />
-                )}
+                {hasCMSPermissions && !division && <UserAccountWarningBanner />}
 
                 {submitType && (
                     <QuestionResponseSubmitBanner submitType={submitType} />

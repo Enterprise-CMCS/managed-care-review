@@ -605,6 +605,8 @@ type ApproveContractPayload {
 input ApproveContractInput {
     "The ID of the contract to approve"
     contractID: ID!
+    "Reason for update"
+    updatedReason: String
 }
 
 input FetchHealthPlanPackageInput {
