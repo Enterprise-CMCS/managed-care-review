@@ -9,7 +9,7 @@ Main application-wide tag to draw attention to key info.
   This is a react-uswds Tag enhanced with CMS styles.
 */
 export type TagProps = {
-    color: 'green' | 'gold' | 'cyan' | 'blue'
+    color: 'green' | 'gold' | 'cyan' | 'blue' | 'light green'
 } & ComponentProps<typeof USWDSTag>
 
 export const InfoTag = ({
@@ -21,6 +21,7 @@ export const InfoTag = ({
         'usa-tag',
         {
             [styles['green']]: color === 'green',
+            [styles['light-green']]: color === 'light green',
             [styles['cyan']]: color === 'cyan',
             [styles['gold']]: color === 'gold',
             [styles['blue']]: color === 'blue',

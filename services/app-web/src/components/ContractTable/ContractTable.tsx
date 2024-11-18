@@ -12,11 +12,19 @@ import {
 } from '@tanstack/react-table'
 import { useAtom } from 'jotai/react'
 import { atomWithHash } from 'jotai-location'
-import { HealthPlanPackageStatus, Program, User } from '../../gen/gqlClient'
+import {
+    HealthPlanPackageStatus,
+    Program,
+    ReviewStatus,
+    User,
+} from '../../gen/gqlClient'
 import styles from './ContractTable.module.scss'
 import { Table, Tag } from '@trussworks/react-uswds'
 import qs from 'qs'
-import { SubmissionStatusRecord } from '../../constants/healthPlanPackages'
+import {
+    SubmissionStatusRecord,
+    SubmissionReviewStatusRecord,
+} from '../../constants/'
 import {
     FilterAccordion,
     FilterSelect,
@@ -37,7 +45,7 @@ export type ContractInDashboardType = {
     name: string
     submittedAt?: string
     updatedAt: Date
-    status: HealthPlanPackageStatus
+    status: HealthPlanPackageStatus | ReviewStatus
     programs: Program[]
     submissionType?: string
     stateName?: string
@@ -49,9 +57,6 @@ export type ContractTableProps = {
     showFilters?: boolean
     caption?: string
 }
-
-const isSubmitted = (status: HealthPlanPackageStatus) =>
-    status === 'SUBMITTED' || status === 'RESUBMITTED'
 
 function submissionURL(
     id: ContractInDashboardType['id'],
@@ -71,17 +76,21 @@ function submissionURL(
 const StatusTag = ({
     status,
 }: {
-    status: HealthPlanPackageStatus
+    status: HealthPlanPackageStatus | ReviewStatus
 }): React.ReactElement => {
     let color: TagProps['color'] = 'gold'
-    if (isSubmitted(status)) {
+    const isSubmittedStatus = status === 'RESUBMITTED' || status === 'SUBMITTED'
+    if (isSubmittedStatus) {
         color = 'green'
     } else if (status === 'UNLOCKED') {
         color = 'blue'
+    } else if (status === 'APPROVED') {
+        color = 'light green'
     }
 
-    const statusText = isSubmitted(status)
-        ? SubmissionStatusRecord.SUBMITTED
+    const isReviewStatus = status === 'APPROVED' || status === 'UNDER_REVIEW'
+    const statusText = isReviewStatus
+        ? SubmissionReviewStatusRecord[status]
         : SubmissionStatusRecord[status]
 
     return <InfoTag color={color}>{statusText}</InfoTag>
