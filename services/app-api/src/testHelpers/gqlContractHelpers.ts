@@ -7,6 +7,7 @@ import {
     UpdateContractDraftRevisionDocument,
     CreateContractDocument,
     FetchContractWithQuestionsDocument,
+    ApproveContractDocument,
 } from '../gen/gqlClient'
 
 import { findStatePrograms } from '../postgres'
@@ -155,6 +156,29 @@ async function fetchTestContract(
     }
 
     return result.data.fetchContract.contract
+}
+
+async function approveTestContract(
+    server: ApolloServer,
+    contractID: string
+): Promise<Contract> {
+    const input = { contractID }
+    const result = await server.executeOperation({
+        query: ApproveContractDocument,
+        variables: { input },
+    })
+
+    if (result.errors) {
+        throw new Error(
+            `approveTestContract mutation failed with errors ${result.errors}`
+        )
+    }
+
+    if (!result.data) {
+        throw new Error('approveTestContract returned nothing')
+    }
+
+    return result.data.approveContract.contract
 }
 
 const fetchTestContractWithQuestions = async (
@@ -438,6 +462,7 @@ export {
     submitTestContract,
     unlockTestContract,
     createAndSubmitTestContract,
+    approveTestContract,
     fetchTestContract,
     fetchTestContractWithQuestions,
     createAndUpdateTestContractWithoutRates,

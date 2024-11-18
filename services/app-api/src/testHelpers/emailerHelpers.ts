@@ -353,9 +353,9 @@ const mockUnlockedContract = (
         createdAt: new Date('01/01/2021'),
         updatedAt: new Date('02/01/2021'),
         status: 'UNLOCKED',
+        reviewStatus: 'UNDER_REVIEW',
         stateCode: 'MN',
         stateNumber: 4,
-        reviewStatus: 'UNDER_REVIEW',
 
         draftRevision: mockContractRev(),
         draftRates,
