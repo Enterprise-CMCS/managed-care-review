@@ -56,9 +56,6 @@ describe('SubmissionSideNav', () => {
             routerProvider: {
                 route: '/submissions/15',
             },
-            featureFlags: {
-                'qa-by-rates': true,
-            },
         })
 
         // Wait for sidebar nav and sections to exist. Addresses test flakes to wait for these up front.
@@ -158,9 +155,6 @@ describe('SubmissionSideNav', () => {
             },
             routerProvider: {
                 route: '/submissions/15',
-            },
-            featureFlags: {
-                'qa-by-rates': true,
             },
         })
 
