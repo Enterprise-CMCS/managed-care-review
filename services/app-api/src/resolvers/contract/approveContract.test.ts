@@ -73,7 +73,7 @@ describe('approveContract', () => {
             'BAD_USER_INPUT'
         )
         expect(approveContractResult.errors[0].message).toBe(
-            'Attempted to approve contract with wrong status'
+            'Attempted to approve contract with wrong status: DRAFT'
         )
     })
 
@@ -115,7 +115,7 @@ describe('approveContract', () => {
             'BAD_USER_INPUT'
         )
         expect(approveContractResult.errors[0].message).toBe(
-            'Attempted to approve contract with wrong status'
+            'Attempted to approve contract with wrong status: UNLOCKED'
         )
     })
 
@@ -160,7 +160,7 @@ describe('approveContract', () => {
             'BAD_USER_INPUT'
         )
         expect(secondApprovalResult.errors[0].message).toBe(
-            'Attempted to approve contract with wrong status'
+            'Attempted to approve contract with wrong status: APPROVED'
         )
     })
 
