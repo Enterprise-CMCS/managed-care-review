@@ -185,6 +185,7 @@ function mockContractPackageDraft(
         __typename: 'Contract',
         initiallySubmittedAt: null,
         status: 'DRAFT',
+        consolidatedStatus: 'DRAFT',
         reviewStatus: 'UNDER_REVIEW',
         createdAt: new Date('01/01/24'),
         updatedAt: new Date(),
@@ -295,6 +296,7 @@ function mockContractPackageSubmittedWithQuestions(
     return {
         status: 'SUBMITTED',
         reviewStatus: 'UNDER_REVIEW',
+        consolidatedStatus: 'SUBMITTED',
         __typename: 'Contract',
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -657,6 +659,7 @@ function mockContractWithLinkedRateDraft(
         initiallySubmittedAt: null,
         status: 'DRAFT',
         reviewStatus: 'UNDER_REVIEW',
+        consolidatedStatus: 'DRAFT',
         createdAt: new Date(),
         updatedAt: new Date(),
         id: 'test-abc-123',
@@ -865,6 +868,7 @@ function mockContractWithLinkedRateSubmitted(
         initiallySubmittedAt: new Date('12/18/2023'),
         status: 'SUBMITTED',
         reviewStatus: 'UNDER_REVIEW',
+        consolidatedStatus: 'SUBMITTED',
         createdAt: new Date('12/1o/2023'),
         updatedAt: new Date('12/17/2023'),
         id: 'test-abc-123',
@@ -1016,6 +1020,7 @@ function mockContractPackageSubmitted(
     return {
         status: 'SUBMITTED',
         reviewStatus: 'UNDER_REVIEW',
+        consolidatedStatus: 'SUBMITTED',
         __typename: 'Contract',
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -1198,6 +1203,7 @@ function mockContractPackageApproved(
     return {
         status: 'SUBMITTED',
         reviewStatus: 'APPROVED',
+        consolidatedStatus: 'SUBMITTED',
         reviewStatusActions: [{
                 updatedAt: new Date('2100-01-01'),
                 updatedBy: {
@@ -1396,6 +1402,7 @@ function mockContractPackageSubmittedWithRevisions(
         __typename: 'Contract',
         status: 'SUBMITTED',
         reviewStatus: 'UNDER_REVIEW',
+        consolidatedStatus: 'SUBMITTED',
         createdAt: new Date(),
         updatedAt: new Date(),
         initiallySubmittedAt: new Date('2024-01-01'),
@@ -1505,6 +1512,7 @@ function mockContractPackageWithDifferentProgramsInRevisions (): Contract {
        "id": "e670adsfdfadsfc",
        "status": "RESUBMITTED",
        "reviewStatus": "UNDER_REVIEW",
+       "consolidatedStatus": 'RESUBMITTED',
        "createdAt": "2024-05-07T19:44:53.732Z",
        "updatedAt": "2024-05-07T19:44:53.732Z",
        "initiallySubmittedAt": "2024-05-07T00:00:00Z",
@@ -1939,6 +1947,7 @@ function mockContractPackageUnlockedWithUnlockedType(
     return {
         status: 'UNLOCKED',
         reviewStatus: 'UNDER_REVIEW',
+        consolidatedStatus: 'UNLOCKED',
         __typename: 'UnlockedContract',
         createdAt: '2023-01-01T16:54:39.173Z',
         updatedAt: '2024-12-01T16:54:39.173Z',

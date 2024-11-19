@@ -7,12 +7,14 @@ import type {
     PackageStatusType,
     UpdateInfoType,
     ContractRevisionType,
+    ConsolidatedContractStatusType,
 } from '../../domain-models/contractAndRates'
 import { findStatePrograms } from '../state'
 import { packageName } from '../../common-code/healthPlanFormDataType'
 import { logError } from '../../logger'
 import type { ContractReviewStatusType } from '../../domain-models/contractAndRates/baseContractRateTypes'
 import type { ContractTableWithoutDraftRates } from './prismaSubmittedContractHelpers'
+import type { HealthPlanPackageStatus, ReviewStatus } from '../../gen/gqlServer'
 
 const subincludeUpdateInfo = {
     updatedBy: true,
@@ -101,6 +103,18 @@ function getContractReviewStatus(
         return 'APPROVED'
     }
     return 'UNDER_REVIEW'
+}
+
+// -----
+function getConsolidatedStatus(
+    status: HealthPlanPackageStatus,
+    reviewStatus: ReviewStatus
+): ConsolidatedContractStatusType {
+    if (reviewStatus !== 'UNDER_REVIEW') {
+        return reviewStatus
+    } else {
+        return status
+    }
 }
 
 // ------
@@ -414,6 +428,7 @@ export type {
 }
 
 export {
+    getConsolidatedStatus,
     includeUpdateInfo,
     includeContractFormData,
     includeRateFormData,
