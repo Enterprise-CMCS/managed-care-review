@@ -70,7 +70,7 @@ describe('CMS user', () => {
                 .and('contain.text', 'zuko@example.com')
                 .and('contain.text', 'Unlock submission reason.')
                 .contains(
-                    /Unlocked on: (0?[1-9]|[12][0-9]|3[01])\/[0-9]+\/[0-9]+\s[0-9]+:[0-9]+[a-zA-Z]+ ET/i
+                    /Unlocked on: (0?[1-9]|[12][0-9]|3[01])\/[0-9]+\/[0-9]+\s[0-9]+:[0-9]+[a-zA-Z]+ PT/i
                 )
                 .should('exist')
 
@@ -113,7 +113,7 @@ describe('CMS user', () => {
                     .and('contain.text', 'zuko@example.com')
                     .and('contain.text', 'Unlock submission reason.')
                     .contains(
-                        /Unlocked on: (0?[1-9]|[12][0-9]|3[01])\/[0-9]+\/[0-9]+\s[0-9]+:[0-9]+[a-zA-Z]+ ET+/i
+                        /Unlocked on: (0?[1-9]|[12][0-9]|3[01])\/[0-9]+\/[0-9]+\s[0-9]+:[0-9]+[a-zA-Z]+ PT+/i
                     )
                     .should('exist')
 
@@ -169,7 +169,7 @@ describe('CMS user', () => {
                 cy.findByTestId('revision-version')
                     .should('exist')
                     .contains(
-                        /(0?[1-9]|[12][0-9]|3[01])\/[0-9]+\/[0-9]+\s[0-9]+:[0-9]+[a-zA-Z]+ ET version/i
+                        /(0?[1-9]|[12][0-9]|3[01])\/[0-9]+\/[0-9]+\s[0-9]+:[0-9]+[a-zA-Z]+ PT version/i
                     )
                 //Previous submission banner should exist and able to click link to go back to current submission
                 cy.findByTestId('previous-submission-banner').should('exist')
@@ -297,7 +297,7 @@ describe('CMS user', () => {
                     .and('contain.text', 'zuko@example.com')
                     .and('contain.text', 'Unlock submission reason.')
                     .contains(
-                        /Unlocked on: (0?[1-9]|[12][0-9]|3[01])\/[0-9]+\/[0-9]+\s[0-9]+:[0-9]+[a-zA-Z]+ ET/i
+                        /Unlocked on: (0?[1-9]|[12][0-9]|3[01])\/[0-9]+\/[0-9]+\s[0-9]+:[0-9]+[a-zA-Z]+ PT/i
                     )
                     .should('exist')
 
@@ -340,7 +340,7 @@ describe('CMS user', () => {
                         .and('contain.text', 'zuko@example.com')
                         .and('contain.text', 'Unlock submission reason.')
                         .contains(
-                            /Unlocked on: (0?[1-9]|[12][0-9]|3[01])\/[0-9]+\/[0-9]+\s[0-9]+:[0-9]+[a-zA-Z]+ ET+/i
+                            /Unlocked on: (0?[1-9]|[12][0-9]|3[01])\/[0-9]+\/[0-9]+\s[0-9]+:[0-9]+[a-zA-Z]+ PT+/i
                         )
                         .should('exist')
 
@@ -397,7 +397,7 @@ describe('CMS user', () => {
                     cy.findByTestId('revision-version')
                         .should('exist')
                         .contains(
-                            /(0?[1-9]|[12][0-9]|3[01])\/[0-9]+\/[0-9]+\s[0-9]+:[0-9]+[a-zA-Z]+ ET version/i
+                            /(0?[1-9]|[12][0-9]|3[01])\/[0-9]+\/[0-9]+\s[0-9]+:[0-9]+[a-zA-Z]+ PT version/i
                         )
                     //Previous submission banner should exist and able to click link to go back to current submission
                     cy.findByTestId('previous-submission-banner').should('exist')

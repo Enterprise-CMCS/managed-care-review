@@ -21,12 +21,12 @@ function formatCalendarDate(date: Date | undefined | string, timeZone: 'UTC' | '
  * be only used for display and not saving. We have decided to show these types of dates in "America/New_York" in the app
  * @param date date to be formatted
  */
-function formatToEasternTime(date: Date | undefined | string): string {
+function formatToPacificTime(date: Date | undefined | string): string {
     if (!date || !dayjs(date).isValid()) {
         return ''
     }
-    const formattedDate = dayjs(date).tz('America/New_York').format('MM/DD/YYYY h:mma')
-    return `${formattedDate} ET`
+    const formattedDate = dayjs(date).tz('America/Los_Angeles').format('MM/DD/YYYY h:mma')
+    return `${formattedDate} PT`
 }
 
 function formatRateNameDate(date: Date | undefined): string {
@@ -36,4 +36,4 @@ function formatRateNameDate(date: Date | undefined): string {
     return dayjs(date).tz('UTC').format('YYYYMMDD')
 }
 
-export { formatCalendarDate, formatRateNameDate, formatToEasternTime }
+export { formatCalendarDate, formatRateNameDate, formatToPacificTime }

@@ -72,7 +72,7 @@ describe('SubmissionSummary', () => {
                     expect(
                         screen.getByTestId('unlockedBanner')
                     ).toHaveTextContent(
-                        /on: (0?[1-9]|[12][0-9]|3[01])\/[0-9]+\/[0-9]+\s[0-9]+:[0-9]+[a-zA-Z]+ ET/i
+                        /on: (0?[1-9]|[12][0-9]|3[01])\/[0-9]+\/[0-9]+\s[0-9]+:[0-9]+[a-zA-Z]+ PT/i
                     )
                     expect(
                         screen.getByTestId('unlockedBanner')
@@ -600,7 +600,7 @@ describe('SubmissionSummary', () => {
                         expect(
                             within(rows[0]).getByText('Date added')
                         ).toBeInTheDocument()
-                        // API returns UTC timezone, we display timestamped dates in ET timezone so 1 day before on these tests.
+                        // API returns UTC timezone, we display timestamped dates in PT timezone so 1 day before on these tests.
                         expect(
                             within(rows[1]).getByText('12/31/2023')
                         ).toBeInTheDocument()
@@ -716,7 +716,7 @@ describe('SubmissionSummary', () => {
                     expect(
                         await screen.findByTestId('unlockedBanner')
                     ).toHaveTextContent(
-                        /Unlocked on: (0?[1-9]|[12][0-9]|3[01])\/[0-9]+\/[0-9]+\s[0-9]+:[0-9]+[a-zA-Z]+ ET/i
+                        /Unlocked on: (0?[1-9]|[12][0-9]|3[01])\/[0-9]+\/[0-9]+\s[0-9]+:[0-9]+[a-zA-Z]+ PT/i
                     )
                     expect(
                         await screen.findByTestId('unlockedBanner')
@@ -819,7 +819,7 @@ describe('SubmissionSummary', () => {
             expect(
                 await screen.findByTestId('updatedSubmissionBanner')
             ).toHaveTextContent(
-                /Updated on: (0?[1-9]|[12][0-9]|3[01])\/[0-9]+\/[0-9]+\s[0-9]+:[0-9]+[a-zA-Z]+ ET/i
+                /Updated on: (0?[1-9]|[12][0-9]|3[01])\/[0-9]+\/[0-9]+\s[0-9]+:[0-9]+[a-zA-Z]+ PT/i
             )
             expect(
                 await screen.findByTestId('updatedSubmissionBanner')

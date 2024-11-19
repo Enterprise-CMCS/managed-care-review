@@ -52,7 +52,7 @@ describe('SubmissionRevisionSummary', () => {
                         name: 'Contract details',
                     })
                 ).toBeInTheDocument()
-                const submissionVersion = `02/16/2024 10:22pm ET version`
+                const submissionVersion = `02/16/2024 7:22pm PT version`
                 expect(
                     await screen.findByText(submissionVersion)
                 ).toBeInTheDocument()
@@ -158,7 +158,7 @@ describe('SubmissionRevisionSummary', () => {
                         name: 'MCR-MN-0005-SNBC',
                     })
                 ).toBeInTheDocument()
-                // API returns UTC timezone, we display timestamped dates in ET timezone so 1 day before on these tests.
+                // API returns UTC timezone, we display timestamped dates in PT timezone so 1 day before on these tests.
                 expect(
                     await screen.findByLabelText('Submitted')
                 ).toHaveTextContent('12/31/2023')
