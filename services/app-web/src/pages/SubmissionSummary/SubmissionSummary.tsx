@@ -46,6 +46,7 @@ import { generatePath, Navigate } from 'react-router-dom'
 import { hasCMSUserPermissions } from '../../gqlHelpers'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '../../common-code/featureFlags'
+import { SubmissionApprovedBanner } from '../../components/Banner'
 
 export const SubmissionSummary = (): React.ReactElement => {
     // Page level state
@@ -189,12 +190,18 @@ export const SubmissionSummary = (): React.ReactElement => {
         : 'Add MC-CRS record number'
     const explainMissingData = (isHelpDeskUser || isStateUser) && !isSubmitted
 
+    const latestContractAction = contract.reviewStatusActions?.[0]
+
     // Only show for CMS_USER or CMS_APPROVER_USER users
     // and if the submission isn't approved
     const showSubmissionApproval =
         submissionApprovalFlag &&
         hasCMSPermissions &&
         contract.reviewStatus !== 'APPROVED'
+    const showApprovalBanner =
+        submissionApprovalFlag &&
+        contract.reviewStatus === 'APPROVED' &&
+        latestContractAction
 
     const approveContractAction = async (actionModalInput?: string) => {
         logFormSubmitEvent({
@@ -228,26 +235,43 @@ export const SubmissionSummary = (): React.ReactElement => {
         }
     }
 
+    const renderStatusAlerts = () => {
+        if (showApprovalBanner) {
+            return (
+                <SubmissionApprovedBanner
+                    updatedBy={latestContractAction.updatedBy}
+                    updatedAt={latestContractAction.updatedAt}
+                />
+            )
+        }
+
+        if (submissionStatus === 'UNLOCKED' && updateInfo) {
+            return (
+                <SubmissionUnlockedBanner
+                    className={styles.banner}
+                    loggedInUser={loggedInUser}
+                    unlockedInfo={updateInfo}
+                />
+            )
+        }
+
+        if (submissionStatus === 'RESUBMITTED' && updateInfo) {
+            return (
+                <SubmissionUpdatedBanner
+                    className={styles.banner}
+                    updateInfo={updateInfo}
+                />
+            )
+        }
+    }
+
     return (
         <div className={styles.background}>
             <GridContainer
                 data-testid="submission-summary"
                 className={styles.container}
             >
-                {submissionStatus === 'UNLOCKED' && updateInfo && (
-                    <SubmissionUnlockedBanner
-                        className={styles.banner}
-                        loggedInUser={loggedInUser}
-                        unlockedInfo={updateInfo}
-                    />
-                )}
-
-                {submissionStatus === 'RESUBMITTED' && updateInfo && (
-                    <SubmissionUpdatedBanner
-                        className={styles.banner}
-                        updateInfo={updateInfo}
-                    />
-                )}
+                {renderStatusAlerts()}
 
                 {documentError && (
                     <DocumentWarningBanner className={styles.banner} />
