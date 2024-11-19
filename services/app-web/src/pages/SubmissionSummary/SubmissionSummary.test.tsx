@@ -1194,6 +1194,11 @@ describe('SubmissionSummary', () => {
             expect(
                 screen.queryByTestId('approval-modal-toggle-button')
             ).not.toBeInTheDocument()
+
+            // expect unlock button to be disabled
+            expect(
+                screen.getByRole('button', { name: 'Unlock submission' })
+            ).toBeDisabled()
         })
 
         it.each(iterableNonCMSUsersMockData)(

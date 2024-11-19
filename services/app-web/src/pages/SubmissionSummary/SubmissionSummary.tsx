@@ -190,7 +190,11 @@ export const SubmissionSummary = (): React.ReactElement => {
     const explainMissingData = (isHelpDeskUser || isStateUser) && !isSubmitted
 
     // Only show for CMS_USER or CMS_APPROVER_USER users
-    const showSubmissionApproval = submissionApprovalFlag && hasCMSPermissions
+    // and if the submission isn't approved
+    const showSubmissionApproval =
+        submissionApprovalFlag &&
+        hasCMSPermissions &&
+        contract.reviewStatus !== 'APPROVED'
 
     const approveContractAction = async (actionModalInput?: string) => {
         logFormSubmitEvent({
@@ -249,64 +253,61 @@ export const SubmissionSummary = (): React.ReactElement => {
                     <DocumentWarningBanner className={styles.banner} />
                 )}
 
-                {showSubmissionApproval &&
-                    contract.reviewStatus !== 'APPROVED' && (
-                        <>
-                            <Grid
-                                className={
-                                    styles.approveWithdrawButtonContainer
-                                }
-                                row
-                            >
-                                <ModalOpenButton
-                                    id="approval-modal-toggle-button"
-                                    modalRef={approveModalRef}
-                                    disabled={!isSubmitted}
-                                    data-testid="approval-modal-toggle-button"
-                                >
-                                    Approve submission
-                                </ModalOpenButton>
-                            </Grid>
-                            <Modal
-                                id="approvalModal"
+                {showSubmissionApproval && (
+                    <>
+                        <Grid
+                            className={styles.approveWithdrawButtonContainer}
+                            row
+                        >
+                            <ModalOpenButton
+                                id="approval-modal-toggle-button"
                                 modalRef={approveModalRef}
-                                onSubmit={() =>
-                                    approveContractAction(
-                                        formik.values.approveModalInput
-                                    )
-                                }
-                                modalHeading="Are you sure you want to approve this submission?"
-                                onSubmitText="Approve submission"
-                                submitButtonProps={{ variant: 'default' }}
-                                className={styles.approvalModal}
-                                modalAlert={modalAlert}
-                                isSubmitting={isSubmitting}
+                                disabled={!isSubmitted}
+                                data-testid="approval-modal-toggle-button"
                             >
-                                <form>
-                                    <p>
-                                        Once you approve, the submission status
-                                        will change from Submitted to Approved.
-                                    </p>
-                                    <p className="margin-bottom-0">
-                                        Provide an optional note
-                                    </p>
-                                    <FormGroup>
-                                        <Textarea
-                                            id="approveModalInput"
-                                            name="approveModalInput"
-                                            data-testid="approveModalInput"
-                                            aria-required={false}
-                                            error={false}
-                                            onChange={formik.handleChange}
-                                            defaultValue={
-                                                formik.values.approveModalInput
-                                            }
-                                        />
-                                    </FormGroup>
-                                </form>
-                            </Modal>
-                        </>
-                    )}
+                                Approve submission
+                            </ModalOpenButton>
+                        </Grid>
+                        <Modal
+                            id="approvalModal"
+                            modalRef={approveModalRef}
+                            onSubmit={() =>
+                                approveContractAction(
+                                    formik.values.approveModalInput
+                                )
+                            }
+                            modalHeading="Are you sure you want to approve this submission?"
+                            onSubmitText="Approve submission"
+                            submitButtonProps={{ variant: 'default' }}
+                            className={styles.approvalModal}
+                            modalAlert={modalAlert}
+                            isSubmitting={isSubmitting}
+                        >
+                            <form>
+                                <p>
+                                    Once you approve, the submission status will
+                                    change from Submitted to Approved.
+                                </p>
+                                <p className="margin-bottom-0">
+                                    Provide an optional note
+                                </p>
+                                <FormGroup>
+                                    <Textarea
+                                        id="approveModalInput"
+                                        name="approveModalInput"
+                                        data-testid="approveModalInput"
+                                        aria-required={false}
+                                        error={false}
+                                        onChange={formik.handleChange}
+                                        defaultValue={
+                                            formik.values.approveModalInput
+                                        }
+                                    />
+                                </FormGroup>
+                            </form>
+                        </Modal>
+                    </>
+                )}
 
                 <SubmissionTypeSummarySection
                     subHeaderComponent={
@@ -341,9 +342,11 @@ export const SubmissionSummary = (): React.ReactElement => {
                         hasCMSPermissions ? (
                             <ModalOpenButton
                                 modalRef={modalRef}
-                                disabled={['DRAFT', 'UNLOCKED'].includes(
-                                    contract.status
-                                )}
+                                disabled={
+                                    ['DRAFT', 'UNLOCKED'].includes(
+                                        contract.status
+                                    ) || contract.reviewStatus === 'APPROVED'
+                                }
                                 className={styles.submitButton}
                                 id="form-submit"
                                 outline={showSubmissionApproval}
