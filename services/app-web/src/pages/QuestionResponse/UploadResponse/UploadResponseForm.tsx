@@ -129,8 +129,11 @@ const UploadResponseForm = ({
                         error={showFileUploadError ? fileUploadError : ''}
                         hint={
                             <span>
-                                This input only accepts PDF, CSV, DOC, DOCX,
-                                XLS, XLSX, XLSM files.
+                                You must submit the response in a DOC or DOCX
+                                format.
+                                <br />
+                                Appendices to the responses can be in PDF, CSV,
+                                DOC, DOCX, XLS, XLSX files.
                             </span>
                         }
                         accept={ACCEPTED_SUBMISSION_FILE_TYPES}
