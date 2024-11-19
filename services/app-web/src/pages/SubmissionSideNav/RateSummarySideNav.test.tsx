@@ -43,9 +43,6 @@ describe('RateSummarySideNav', () => {
             routerProvider: {
                 route: `/rates/${rate.id}`,
             },
-            featureFlags: {
-                'qa-by-rates': true,
-            },
         })
 
         await waitFor(() => {
@@ -98,9 +95,6 @@ describe('RateSummarySideNav', () => {
             routerProvider: {
                 route: `/rates/${rate.id}`,
             },
-            featureFlags: {
-                'qa-by-rates': true,
-            },
         })
 
         await waitFor(() => {
@@ -139,9 +133,6 @@ describe('RateSummarySideNav', () => {
                 },
                 routerProvider: {
                     route: `/submissions/some-contract-id/rates/${rate.id}/question-and-answers`,
-                },
-                featureFlags: {
-                    'qa-by-rates': true,
                 },
             }
         )
