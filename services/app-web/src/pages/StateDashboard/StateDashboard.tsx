@@ -105,7 +105,6 @@ export const StateDashboard = (): React.ReactElement => {
                     submittedAt: sub.initiallySubmittedAt,
                     status: sub.status,
                     updatedAt: currentRevision.updatedAt,
-                    // updatedAt: subReviewActions ? subReviewActions.updatedAt : currentRevision.updatedAt,
                 })
             }
         })
