@@ -89,9 +89,11 @@ const StatusTag = ({
     }
 
     const isReviewStatus = status === 'APPROVED' || status === 'UNDER_REVIEW'
-    const statusText = isReviewStatus
-        ? SubmissionReviewStatusRecord[status]
-        : SubmissionStatusRecord[status]
+    const statusText = isSubmittedStatus
+        ? SubmissionStatusRecord['SUBMITTED']
+        : isReviewStatus
+          ? SubmissionReviewStatusRecord[status]
+          : SubmissionStatusRecord[status]
 
     return <InfoTag color={color}>{statusText}</InfoTag>
 }
