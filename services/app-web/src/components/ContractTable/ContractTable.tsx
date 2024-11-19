@@ -12,12 +12,7 @@ import {
 } from '@tanstack/react-table'
 import { useAtom } from 'jotai/react'
 import { atomWithHash } from 'jotai-location'
-import {
-    HealthPlanPackageStatus,
-    Program,
-    ReviewStatus,
-    User,
-} from '../../gen/gqlClient'
+import { ConsolidatedContractStatus, Program, User } from '../../gen/gqlClient'
 import styles from './ContractTable.module.scss'
 import { Table, Tag } from '@trussworks/react-uswds'
 import qs from 'qs'
@@ -45,7 +40,7 @@ export type ContractInDashboardType = {
     name: string
     submittedAt?: string
     updatedAt: Date
-    status: HealthPlanPackageStatus | ReviewStatus
+    status: ConsolidatedContractStatus
     programs: Program[]
     submissionType?: string
     stateName?: string
@@ -75,17 +70,17 @@ function submissionURL(
 
 const StatusTag = ({
     status,
+    notStateUser,
 }: {
-    status: HealthPlanPackageStatus | ReviewStatus
+    status: ConsolidatedContractStatus
+    notStateUser: boolean
 }): React.ReactElement => {
     let color: TagProps['color'] = 'gold'
     const isSubmittedStatus = status === 'RESUBMITTED' || status === 'SUBMITTED'
     if (isSubmittedStatus) {
-        color = 'green'
-    } else if (status === 'UNLOCKED') {
-        color = 'blue'
+        color = notStateUser ? 'gold' : 'gray'
     } else if (status === 'APPROVED') {
-        color = 'light green'
+        color = 'green'
     }
 
     const isReviewStatus = status === 'APPROVED' || status === 'UNDER_REVIEW'
@@ -308,7 +303,12 @@ export const ContractTable = ({
             }),
             columnHelper.accessor('status', {
                 header: 'Status',
-                cell: (info) => <StatusTag status={info.getValue()} />,
+                cell: (info) => (
+                    <StatusTag
+                        status={info.getValue()}
+                        notStateUser={isNotStateUser}
+                    />
+                ),
                 meta: {
                     dataTestID: `${tableConfig.rowIDName}-status`,
                 },
