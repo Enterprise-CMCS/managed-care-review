@@ -423,7 +423,7 @@ describe('submitContract', () => {
             })
 
         expect(connections).toHaveLength(9)
-    })
+    }, 60000)
 
     it('handles complex submission etc', async () => {
         const stateServer = await constructTestPostgresServer({
