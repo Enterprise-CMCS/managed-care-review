@@ -22,6 +22,7 @@ import { ReviewSubmit } from '../StateSubmission/ReviewSubmit'
 import { generatePath, Location } from 'react-router-dom'
 import { approveContractMockSuccess } from '../../testHelpers/apolloMocks/approveContractMocks'
 import { dayjs } from '../../common-code/dateHelpers'
+import { Contract } from '../../gen/gqlClient'
 
 describe('SubmissionSummary', () => {
     describe.each(iterableCmsUsersMockData)(
@@ -1379,7 +1380,7 @@ describe('SubmissionSummary', () => {
 
     describe.each(iterableNonCMSUsersMockData)(
         '$userRole submission approval tests',
-        ({ mockUser, userRole }) => {
+        ({ mockUser }) => {
             it(`does not render approve submission button`, async () => {
                 const contract =
                     mockContractPackageSubmittedWithQuestions('test-abc-123')
