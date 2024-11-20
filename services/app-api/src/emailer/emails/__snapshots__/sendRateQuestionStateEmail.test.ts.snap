@@ -6,7 +6,7 @@ exports[`sendRateQuestionStateEmail renders overall email for a new rate questio
 <br />
 <b>Date:</b> 04/22/2024<br />
 <br />
-You must respond to the questions before CMS can continue their review.<br />
+You must respond to the questions before CMS can continue their review. Responses should be submitted in DOC or DOCX format.<br />
 <br />
 <a href="http://localhost/submissions/parent-contract/rates/test-rate/question-and-answers">Open the submission in MC-Review to answer questions</a>
 

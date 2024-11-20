@@ -87,9 +87,6 @@ describe('RateQuestionResponse', () => {
                 routerProvider: {
                     route: '/submissions/15/rates/second-rate/question-and-answers',
                 },
-                featureFlags: {
-                    'qa-by-rates': true,
-                },
             })
 
             // Wait for sidebar nav to exist.
@@ -130,9 +127,6 @@ describe('RateQuestionResponse', () => {
                     },
                     routerProvider: {
                         route: '/submissions/15/rates/test-rate-id/question-and-answers',
-                    },
-                    featureFlags: {
-                        'qa-by-rates': true,
                     },
                 }
             )
@@ -251,9 +245,6 @@ describe('RateQuestionResponse', () => {
                 routerProvider: {
                     route: '/submissions/15/rates/second-rate/question-and-answers',
                 },
-                featureFlags: {
-                    'qa-by-rates': true,
-                },
             })
 
             await waitFor(() => {
@@ -286,9 +277,6 @@ describe('RateQuestionResponse', () => {
                 },
                 routerProvider: {
                     route: '/submissions/15/rates/second-rate/question-and-answers',
-                },
-                featureFlags: {
-                    'qa-by-rates': true,
                 },
             })
 
@@ -353,9 +341,6 @@ describe('RateQuestionResponse', () => {
                 routerProvider: {
                     route: `/rates/test-rate-id/question-and-answers`,
                 },
-                featureFlags: {
-                    'qa-by-rates': true,
-                },
             })
 
             await waitFor(() => {
@@ -388,9 +373,6 @@ describe('RateQuestionResponse', () => {
                 },
                 routerProvider: {
                     route: `/rates/test-rate-id/question-and-answers`,
-                },
-                featureFlags: {
-                    'qa-by-rates': true,
                 },
             })
 
@@ -492,9 +474,6 @@ describe('RateQuestionResponse', () => {
                     routerProvider: {
                         route: `/rates/test-rate-id/question-and-answers?submit=question`,
                     },
-                    featureFlags: {
-                        'qa-by-rates': true,
-                    },
                 }
             )
 
@@ -521,9 +500,6 @@ describe('RateQuestionResponse', () => {
                 routerProvider: {
                     route: `/rates/not-real/question-and-answers`,
                 },
-                featureFlags: {
-                    'qa-by-rates': true,
-                },
             })
 
             await waitFor(() => {
@@ -545,9 +521,6 @@ describe('RateQuestionResponse', () => {
                 },
                 routerProvider: {
                     route: `/rates/${rate.id}/question-and-answers`,
-                },
-                featureFlags: {
-                    'qa-by-rates': true,
                 },
             })
 
@@ -572,9 +545,6 @@ describe('RateQuestionResponse', () => {
                 },
                 routerProvider: {
                     route: `/rates/${rate.id}/question-and-answers`,
-                },
-                featureFlags: {
-                    'qa-by-rates': true,
                 },
             })
 

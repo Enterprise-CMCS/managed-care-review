@@ -73,13 +73,6 @@ function newAmplifyS3Client(bucketConfig: S3BucketConfigType): S3ClientT {
             }
         },
 
-        deleteFile: async (
-            filename: string,
-            bucket: BucketShortName
-        ): Promise<void | S3Error> => {
-            console.info(`deleteFile requested for ${filename} in ${bucket}`)
-            return
-        },
         /*  
             Poll for scanning completion
             - We start polling after 3s, which is the estimated time it takes scanning to start to resolve.

@@ -46,7 +46,7 @@ const UploadResponseForm = ({
     }>()
     const [shouldValidate, setShouldValidate] = React.useState(false)
     const navigate = useNavigate()
-    const { handleDeleteFile, handleUploadFile, handleScanFile } = useS3()
+    const { handleUploadFile, handleScanFile } = useS3()
     const {
         hasValidFiles,
         hasNoFiles,
@@ -129,8 +129,11 @@ const UploadResponseForm = ({
                         error={showFileUploadError ? fileUploadError : ''}
                         hint={
                             <span>
-                                This input only accepts PDF, CSV, DOC, DOCX,
-                                XLS, XLSX, XLSM files.
+                                You must submit the response in a DOC or DOCX
+                                format.
+                                <br />
+                                Appendices to the responses can be in PDF, CSV,
+                                DOC, DOCX, XLS, XLSX files.
                             </span>
                         }
                         accept={ACCEPTED_SUBMISSION_FILE_TYPES}
@@ -139,9 +142,6 @@ const UploadResponseForm = ({
                         }
                         scanFile={(key) =>
                             handleScanFile(key, 'QUESTION_ANSWER_DOCS')
-                        }
-                        deleteFile={(key) =>
-                            handleDeleteFile(key, 'QUESTION_ANSWER_DOCS')
                         }
                         onFileItemsUpdate={onFileItemsUpdate}
                     />

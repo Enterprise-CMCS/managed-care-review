@@ -5,7 +5,7 @@ import {
     updateTestStateAssignments,
 } from '../../testHelpers/gqlHelpers'
 import { UnlockContractDocument } from '../../gen/gqlClient'
-import { testS3Client } from '../../../../app-web/src/testHelpers/s3Helpers'
+import { testS3Client } from '../../../../app-api/src/testHelpers/s3Helpers'
 import { expectToBeDefined } from '../../testHelpers/assertionHelpers'
 
 import {

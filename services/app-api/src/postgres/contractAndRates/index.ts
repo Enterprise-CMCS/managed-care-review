@@ -2,6 +2,7 @@ export type { InsertContractArgsType } from './insertContract'
 export type { UpdateContractArgsType } from './updateDraftContractWithRates'
 export type { ContractOrErrorArrayType } from './findAllContractsWithHistoryByState'
 export type { RateOrErrorArrayType } from './findAllRatesWithHistoryBySubmitInfo'
+export type { ApproveContractArgsType } from './approveContract'
 
 export type { UpdateMCCRSIDFormArgsType } from './updateMCCRSID'
 export type { SubmitContractArgsType } from './submitContract'
@@ -14,6 +15,7 @@ export {
     unlockContractInsideTransaction,
 } from './unlockContract'
 export { insertDraftContract } from './insertContract'
+export { approveContract } from './approveContract'
 export { findContractWithHistory } from './findContractWithHistory'
 export { updateDraftContractFormData as updateDraftContractWithRates } from './updateDraftContractWithRates'
 export { updateMCCRSID } from './updateMCCRSID'
