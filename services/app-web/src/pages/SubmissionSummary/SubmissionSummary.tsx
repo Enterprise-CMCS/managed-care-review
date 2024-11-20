@@ -190,7 +190,11 @@ export const SubmissionSummary = (): React.ReactElement => {
     const explainMissingData = (isHelpDeskUser || isStateUser) && !isSubmitted
 
     // Only show for CMS_USER or CMS_APPROVER_USER users
-    const showSubmissionApproval = submissionApprovalFlag && hasCMSPermissions
+    // and if the submission isn't approved
+    const showSubmissionApproval =
+        submissionApprovalFlag &&
+        hasCMSPermissions &&
+        contract.reviewStatus !== 'APPROVED'
 
     const approveContractAction = async (actionModalInput?: string) => {
         logFormSubmitEvent({
@@ -284,6 +288,9 @@ export const SubmissionSummary = (): React.ReactElement => {
                                     Once you approve, the submission status will
                                     change from Submitted to Approved.
                                 </p>
+                                <p className="margin-bottom-0">
+                                    Provide an optional note
+                                </p>
                                 <FormGroup>
                                     <Textarea
                                         id="approveModalInput"
@@ -335,9 +342,11 @@ export const SubmissionSummary = (): React.ReactElement => {
                         hasCMSPermissions ? (
                             <ModalOpenButton
                                 modalRef={modalRef}
-                                disabled={['DRAFT', 'UNLOCKED'].includes(
-                                    contract.status
-                                )}
+                                disabled={
+                                    ['DRAFT', 'UNLOCKED'].includes(
+                                        contract.status
+                                    ) || contract.reviewStatus === 'APPROVED'
+                                }
                                 className={styles.submitButton}
                                 id="form-submit"
                                 outline={showSubmissionApproval}

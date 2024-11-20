@@ -1148,6 +1148,59 @@ describe('SubmissionSummary', () => {
             ).toBeDisabled()
         })
 
+        it('does not render an approve submission button for an approved submission', async () => {
+            const contract =
+                mockContractPackageSubmittedWithQuestions('test-abc-123')
+            contract.reviewStatus = 'APPROVED'
+            renderWithProviders(
+                <Routes>
+                    <Route element={<SubmissionSideNav />}>
+                        <Route
+                            path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                            element={<SubmissionSummary />}
+                        />
+                    </Route>
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                user: mockValidCMSUser(),
+                                statusCode: 200,
+                            }),
+                            fetchContractWithQuestionsMockSuccess({
+                                contract: contract,
+                            }),
+                            fetchContractMockSuccess({
+                                contract: contract,
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/test-abc-123',
+                    },
+                    featureFlags: {
+                        'submission-approvals': true,
+                    },
+                }
+            )
+            await waitFor(() => {
+                expect(
+                    screen.getByTestId('submission-side-nav')
+                ).toBeInTheDocument()
+            })
+
+            // expect submission approval modal toggle button to not exist
+            expect(
+                screen.queryByTestId('approval-modal-toggle-button')
+            ).not.toBeInTheDocument()
+
+            // expect unlock button to be disabled
+            expect(
+                screen.getByRole('button', { name: 'Unlock submission' })
+            ).toBeDisabled()
+        })
+
         it.each(iterableNonCMSUsersMockData)(
             'does not render approve submission button for $userRole',
             async ({ mockUser }) => {
