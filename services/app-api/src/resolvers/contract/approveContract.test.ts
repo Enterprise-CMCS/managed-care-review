@@ -36,7 +36,7 @@ describe('approveContract', () => {
         )
         expect(approvedContract.reviewStatusActions![0]?.updatedReason).toBe('')
         expect(approvedContract.reviewStatusActions![0]?.actionType).toBe(
-            'APPROVAL_NOTICE'
+            'MARK_AS_APPROVED'
         )
         expect(approvedContract.reviewStatus).toBe('APPROVED')
     })

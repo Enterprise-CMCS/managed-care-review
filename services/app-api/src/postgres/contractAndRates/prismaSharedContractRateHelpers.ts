@@ -7,12 +7,14 @@ import type {
     PackageStatusType,
     UpdateInfoType,
     ContractRevisionType,
+    ConsolidatedContractStatusType,
 } from '../../domain-models/contractAndRates'
 import { findStatePrograms } from '../state'
 import { packageName } from '../../common-code/healthPlanFormDataType'
 import { logError } from '../../logger'
 import type { ContractReviewStatusType } from '../../domain-models/contractAndRates/baseContractRateTypes'
 import type { ContractTableWithoutDraftRates } from './prismaSubmittedContractHelpers'
+import type { HealthPlanPackageStatus, ReviewStatus } from '../../gen/gqlServer'
 
 const subincludeUpdateInfo = {
     updatedBy: true,
@@ -97,10 +99,26 @@ function getContractReviewStatus(
             actionB.updatedAt.getTime() - actionA.updatedAt.getTime()
     )
     const latestAction = actions[0]
-    if (latestAction?.actionType === 'APPROVAL_NOTICE') {
+    if (latestAction?.actionType === 'MARK_AS_APPROVED') {
         return 'APPROVED'
     }
     return 'UNDER_REVIEW'
+}
+
+// -----
+function getConsolidatedStatus(
+    status: HealthPlanPackageStatus,
+    reviewStatus: ReviewStatus
+): ConsolidatedContractStatusType {
+    // UNDER_REVIEW is the default reviewStatus for a submission.
+    // In the system, status only takes precedence for the consolidatedStatusField
+    // if the reviewStatus hasn't been changed (i.e it's still set as UNDER_REVIEW).
+    // However, if reviewStatus has been changed then reviewStatus takes precedence for the consolidatedStatus
+    if (reviewStatus !== 'UNDER_REVIEW') {
+        return reviewStatus
+    } else {
+        return status
+    }
 }
 
 // ------
@@ -414,6 +432,7 @@ export type {
 }
 
 export {
+    getConsolidatedStatus,
     includeUpdateInfo,
     includeContractFormData,
     includeRateFormData,
