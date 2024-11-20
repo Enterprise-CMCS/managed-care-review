@@ -15,7 +15,7 @@ import { mockContractPackageWithDifferentProgramsInRevisions } from '../../testH
 describe('SubmissionRevisionSummary', () => {
     describe.each(iterableCmsUsersMockData)(
         '$userRole SubmissionRevisionSummary tests',
-        ({ userRole, mockUser }) => {
+        ({ mockUser }) => {
             it('renders correctly without errors', async () => {
                 renderWithProviders(
                     <Routes>
@@ -105,7 +105,7 @@ describe('SubmissionRevisionSummary', () => {
                                 mockContractPackageSubmittedWithRevisions()
                                     .packageSubmissions[1]?.contractRevision
                                     ?.formData.contractDocuments[0].dateAdded,
-                                'America/New_York'
+                                'America/Los_Angeles'
                             )
                         )
                     ).toBeInTheDocument()

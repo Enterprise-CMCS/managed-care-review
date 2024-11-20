@@ -20,11 +20,12 @@ import { testS3Client } from '../../testHelpers'
 import { mockContractPackageUnlockedWithUnlockedType } from '../../testHelpers/apolloMocks'
 import { ReviewSubmit } from '../StateSubmission/ReviewSubmit'
 import { generatePath, Location } from 'react-router-dom'
+import { dayjs } from '../../common-code/dateHelpers'
 
 describe('SubmissionSummary', () => {
     describe.each(iterableCmsUsersMockData)(
         '$userRole SubmissionSummary tests',
-        ({ userRole, mockUser }) => {
+        ({ mockUser }) => {
             it('renders submission unlocked banner for CMS user', async () => {
                 const contract = mockContractPackageUnlockedWithUnlockedType()
 
@@ -557,6 +558,58 @@ describe('SubmissionSummary', () => {
                             name: 'Unlock submission',
                         })
                     ).toBeInTheDocument()
+                })
+
+                it('renders the submission date correctly taking into account pacific time', async () => {
+                    // an early morning ET submission date that will listed as initially submitted the day before
+                    // 02/03/2025 2:01am ET
+                    const earlyMorningET = dayjs()
+                        .tz('America/New_York')
+                        .year(2025)
+                        .month(1)
+                        .date(3)
+                        .hour(2)
+                        .minute(1)
+                    const ptDateFormatted = '02/02/2025'
+
+                    const contract =
+                        mockContractPackageUnlockedWithUnlockedType()
+                    contract.id = 'test-abc-123'
+                    contract.initiallySubmittedAt = earlyMorningET.toDate()
+
+                    renderWithProviders(
+                        <Routes>
+                            <Route element={<SubmissionSideNav />}>
+                                <Route
+                                    path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                                    element={<SubmissionSummary />}
+                                />
+                            </Route>
+                        </Routes>,
+                        {
+                            apolloProvider: {
+                                mocks: [
+                                    fetchCurrentUserMock({
+                                        user: mockUser(),
+                                        statusCode: 200,
+                                    }),
+                                    fetchContractWithQuestionsMockSuccess({
+                                        contract,
+                                    }),
+                                    fetchContractMockSuccess({
+                                        contract,
+                                    }),
+                                ],
+                            },
+                            routerProvider: {
+                                route: '/submissions/test-abc-123',
+                            },
+                        }
+                    )
+
+                    expect(
+                        await screen.findByLabelText('Submitted')
+                    ).toHaveTextContent(ptDateFormatted)
                 })
 
                 it('extracts the correct document dates from the submission and displays them in tables', async () => {

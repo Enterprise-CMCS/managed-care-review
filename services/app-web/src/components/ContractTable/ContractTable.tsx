@@ -275,7 +275,7 @@ export const ContractTable = ({
                     info.getValue()
                         ? formatCalendarDate(
                               info.getValue(),
-                              'America/New_York'
+                              'America/Los_Angeles'
                           )
                         : '',
                 meta: {
@@ -288,7 +288,7 @@ export const ContractTable = ({
                     info.getValue()
                         ? formatCalendarDate(
                               info.getValue(),
-                              'America/New_York'
+                              'America/Los_Angeles'
                           )
                         : '',
                 meta: {

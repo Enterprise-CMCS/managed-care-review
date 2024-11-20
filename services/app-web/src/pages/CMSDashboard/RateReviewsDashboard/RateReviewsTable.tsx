@@ -298,10 +298,7 @@ export const RateReviewsTable = ({
                 header: 'Rate period start date',
                 cell: (info) =>
                     info.getValue()
-                        ? formatCalendarDate(
-                              info.getValue(),
-                              'America/New_York'
-                          )
+                        ? formatCalendarDate(info.getValue(), 'UTC')
                         : '',
                 meta: {
                     dataTestID: `${tableConfig.rowIDName}-date`,
@@ -313,10 +310,7 @@ export const RateReviewsTable = ({
                 header: 'Rate period end date',
                 cell: (info) =>
                     info.getValue()
-                        ? formatCalendarDate(
-                              info.getValue(),
-                              'America/New_York'
-                          )
+                        ? formatCalendarDate(info.getValue(), 'UTC')
                         : '',
                 meta: {
                     dataTestID: `${tableConfig.rowIDName}-date`,
@@ -328,7 +322,7 @@ export const RateReviewsTable = ({
                     info.getValue()
                         ? formatCalendarDate(
                               info.getValue(),
-                              'America/New_York'
+                              'America/Los_Angeles'
                           )
                         : '',
                 meta: {

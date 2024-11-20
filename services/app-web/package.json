@@ -98,7 +98,7 @@
         "aws-amplify": "^5.0.10",
         "axios": "^1.7.4",
         "babel-plugin-istanbul": "^6.1.1",
-        "dayjs": "^1.10.5",
+        "dayjs": "^1.11.12",
         "formik": "^2.4.6",
         "graphql": "^16.9.0",
         "jotai": "^2.9.3",

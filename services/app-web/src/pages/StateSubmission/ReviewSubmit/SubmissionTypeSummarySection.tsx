@@ -83,7 +83,7 @@ export const SubmissionTypeSummarySection = ({
                                     <span>
                                         {formatCalendarDate(
                                             initiallySubmittedAt,
-                                            'America/New_York'
+                                            'America/Los_Angeles'
                                         )}
                                     </span>
                                 }

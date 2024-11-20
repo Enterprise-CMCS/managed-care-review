@@ -62,7 +62,7 @@ export const sendQuestionCMSEmail = async (
         cmsRequestorDivision: newQuestion.addedBy.divisionAssignment,
         dateAsked: formatCalendarDate(
             newQuestion.createdAt,
-            'America/New_York'
+            'America/Los_Angeles'
         ),
         questionRound,
     }

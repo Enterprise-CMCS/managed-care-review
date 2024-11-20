@@ -46,7 +46,7 @@ export const QuestionDisplayTable = ({
                         <td>
                             {formatCalendarDate(
                                 doc.createdAt,
-                                'America/New_York'
+                                'America/Los_Angeles'
                             )}
                         </td>
                         <td>{getAddedByName(user, doc.addedBy)}</td>
