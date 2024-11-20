@@ -241,6 +241,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                 <SubmissionApprovedBanner
                     updatedBy={latestContractAction.updatedBy}
                     updatedAt={latestContractAction.updatedAt}
+                    note={latestContractAction.updatedReason}
                 />
             )
         }
