@@ -77,16 +77,16 @@ const StatusTag = ({
 }): React.ReactElement => {
     let color: TagProps['color'] = 'gold'
     const isSubmittedStatus = status === 'RESUBMITTED' || status === 'SUBMITTED'
+    const isApproved = status === 'APPROVED'
     if (isSubmittedStatus) {
         color = notStateUser ? 'gold' : 'gray'
-    } else if (status === 'APPROVED') {
+    } else if (isApproved) {
         color = 'green'
     }
 
-    const isReviewStatus = status === 'APPROVED' || status === 'UNDER_REVIEW'
     const statusText = isSubmittedStatus
         ? SubmissionStatusRecord['SUBMITTED']
-        : isReviewStatus
+        : isApproved
           ? SubmissionReviewStatusRecord[status]
           : SubmissionStatusRecord[status]
 
