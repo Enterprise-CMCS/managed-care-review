@@ -86,6 +86,21 @@ const UploadResponseForm = ({
         }
     }
 
+    const fileUploadHint =
+        type === 'contract' ? (
+            <span>
+                This input only accepts PDF, CSV, DOC, DOCX, XLS, XLSX, XLSM
+                files.
+            </span>
+        ) : (
+            <span>
+                You must submit the response in a DOC or DOCX format.
+                <br />
+                Appendices to the responses can be in PDF, CSV, DOC, DOCX, XLS,
+                XLSX files.
+            </span>
+        )
+
     const isContract = type == 'contract'
     return (
         <UswdsForm
@@ -127,12 +142,7 @@ const UploadResponseForm = ({
                         label="Upload response"
                         aria-required
                         error={showFileUploadError ? fileUploadError : ''}
-                        hint={
-                            <span>
-                                This input only accepts PDF, CSV, DOC, DOCX,
-                                XLS, XLSX, XLSM files.
-                            </span>
-                        }
+                        hint={fileUploadHint}
                         accept={ACCEPTED_SUBMISSION_FILE_TYPES}
                         uploadFile={(file) =>
                             handleUploadFile(file, 'QUESTION_ANSWER_DOCS')

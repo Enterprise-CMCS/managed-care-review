@@ -31,10 +31,14 @@ describe('FileUpload component', () => {
                 50
             ), // timeout to give vitest time to look for loading text
         scanFile: async (_key: string) => {
-            await fakeRequest<S3FileData>(true, {
-                key: 'testtest',
-                s3URL: 's3://bucketname/key/fakeS3url',
-            })
+            await fakeRequest<S3FileData>(
+                true,
+                {
+                    key: 'testtest',
+                    s3URL: 's3://bucketname/key/fakeS3url',
+                },
+                50
+            ) // timeout to give vitest time to look for loading state
             return
         },
         onFileItemsUpdate: () => {

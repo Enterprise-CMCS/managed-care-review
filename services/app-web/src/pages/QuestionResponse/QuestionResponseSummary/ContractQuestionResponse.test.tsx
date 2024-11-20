@@ -64,9 +64,6 @@ describe('ContractQuestionResponse', () => {
                     routerProvider: {
                         route: '/submissions/test-contract-id/question-and-answers',
                     },
-                    featureFlags: {
-                        'qa-by-rates': true,
-                    },
                 }
             )
 
@@ -183,9 +180,6 @@ describe('ContractQuestionResponse', () => {
                 routerProvider: {
                     route: '/submissions/15/question-and-answers',
                 },
-                featureFlags: {
-                    'qa-by-rates': true,
-                },
             })
 
             await waitFor(() => {
@@ -218,9 +212,6 @@ describe('ContractQuestionResponse', () => {
                 },
                 routerProvider: {
                     route: '/submissions/15/question-and-answers',
-                },
-                featureFlags: {
-                    'qa-by-rates': true,
                 },
             })
 
@@ -295,9 +286,6 @@ describe('ContractQuestionResponse', () => {
                 routerProvider: {
                     route: `/submissions/test-contract-id/question-and-answers`,
                 },
-                featureFlags: {
-                    'qa-by-rates': true,
-                },
             })
 
             await waitFor(() => {
@@ -337,9 +325,6 @@ describe('ContractQuestionResponse', () => {
                 },
                 routerProvider: {
                     route: `/submissions/test-contract-id/question-and-answers`,
-                },
-                featureFlags: {
-                    'qa-by-rates': true,
                 },
             })
 
@@ -450,9 +435,6 @@ describe('ContractQuestionResponse', () => {
                     routerProvider: {
                         route: `/submissions/test-contract-id/question-and-answers?submit=question`,
                     },
-                    featureFlags: {
-                        'qa-by-rates': true,
-                    },
                 }
             )
 
@@ -479,9 +461,6 @@ describe('ContractQuestionResponse', () => {
                 routerProvider: {
                     route: `/submissions/not-real/question-and-answers`,
                 },
-                featureFlags: {
-                    'qa-by-rates': true,
-                },
             })
 
             await waitFor(() => {
@@ -503,9 +482,6 @@ describe('ContractQuestionResponse', () => {
                 },
                 routerProvider: {
                     route: `/submissions/${contract.id}/question-and-answers`,
-                },
-                featureFlags: {
-                    'qa-by-rates': true,
                 },
             })
 
@@ -530,9 +506,6 @@ describe('ContractQuestionResponse', () => {
                 },
                 routerProvider: {
                     route: `/submissions/${contract.id}/question-and-answers`,
-                },
-                featureFlags: {
-                    'qa-by-rates': true,
                 },
             })
 
