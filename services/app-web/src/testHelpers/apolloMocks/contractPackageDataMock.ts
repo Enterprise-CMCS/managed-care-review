@@ -185,6 +185,7 @@ function mockContractPackageDraft(
         __typename: 'Contract',
         initiallySubmittedAt: null,
         status: 'DRAFT',
+        consolidatedStatus: 'DRAFT',
         reviewStatus: 'UNDER_REVIEW',
         createdAt: new Date('01/01/24'),
         updatedAt: new Date(),
@@ -295,6 +296,7 @@ function mockContractPackageSubmittedWithQuestions(
     return {
         status: 'SUBMITTED',
         reviewStatus: 'UNDER_REVIEW',
+        consolidatedStatus: 'SUBMITTED',
         __typename: 'Contract',
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -657,6 +659,7 @@ function mockContractWithLinkedRateDraft(
         initiallySubmittedAt: null,
         status: 'DRAFT',
         reviewStatus: 'UNDER_REVIEW',
+        consolidatedStatus: 'DRAFT',
         createdAt: new Date(),
         updatedAt: new Date(),
         id: 'test-abc-123',
@@ -865,6 +868,7 @@ function mockContractWithLinkedRateSubmitted(
         initiallySubmittedAt: new Date('12/18/2023'),
         status: 'SUBMITTED',
         reviewStatus: 'UNDER_REVIEW',
+        consolidatedStatus: 'SUBMITTED',
         createdAt: new Date('12/1o/2023'),
         updatedAt: new Date('12/17/2023'),
         id: 'test-abc-123',
@@ -1016,6 +1020,205 @@ function mockContractPackageSubmitted(
     return {
         status: 'SUBMITTED',
         reviewStatus: 'UNDER_REVIEW',
+        consolidatedStatus: 'SUBMITTED',
+        __typename: 'Contract',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        initiallySubmittedAt: new Date('2024-11-27'),
+        id: 'test-abc-123',
+        stateCode: 'MN',
+        state: mockMNState(),
+        stateNumber: 5,
+        mccrsID: null,
+        draftRevision: null,
+        draftRates: [],
+        packageSubmissions: [{
+            cause: 'CONTRACT_SUBMISSION',
+            __typename: 'ContractPackageSubmission',
+            submitInfo: {
+                __typename: 'UpdateInformation',
+                updatedAt: '2024-12-18T16:54:39.173Z',
+                updatedBy: {
+                    email: 'example@state.com',
+                    role: 'STATE_USER',
+                    givenName: 'John',
+                    familyName: 'Vila'
+                },
+                updatedReason: 'contract submit'
+            },
+            submittedRevisions: [],
+            contractRevision: {
+                __typename: 'ContractRevision',
+                contractName: 'MCR-MN-0005-SNBC',
+                createdAt: new Date('01/01/2024'),
+                updatedAt:  '2024-12-18T16:54:39.173Z',
+                id: '123',
+                contractID: 'test-abc-123',
+                submitInfo: {
+                    __typename: 'UpdateInformation',
+                    updatedAt: new Date(),
+                    updatedBy: {
+                        email: 'example@state.com',
+                        role: 'STATE_USER',
+                        givenName: 'John',
+                        familyName: 'Vila'
+                    },
+                    updatedReason: 'contract submit'
+                },
+                unlockInfo: null,
+                formData: {
+                    __typename: 'ContractFormData',
+                    programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
+                    populationCovered: 'MEDICAID',
+                    submissionType: 'CONTRACT_AND_RATES',
+                    riskBasedContract: true,
+                    submissionDescription: 'A real submission',
+                    supportingDocuments: [
+                        {
+                            s3URL: 's3://bucketname/key/contractsupporting1',
+                            sha256: 'fakesha',
+                            name: 'contractSupporting1',
+                            dateAdded: new Date('01/15/2024'),
+                            downloadURL: s3DlUrl
+                        },
+                        {
+                            s3URL: 's3://bucketname/key/contractSupporting2',
+                            sha256: 'fakesha',
+                            name: 'contractSupporting2',
+                            dateAdded: new Date('01/13/2024'),
+                            downloadURL: s3DlUrl
+                        },
+                    ],
+                    stateContacts: [],
+                    contractType: 'AMENDMENT',
+                    contractExecutionStatus: 'EXECUTED',
+                    contractDocuments: [
+                        {
+                            s3URL: 's3://bucketname/key/contract',
+                            sha256: 'fakesha',
+                            name: 'contract',
+                            dateAdded: new Date('01/01/2024'),
+                            downloadURL: s3DlUrl
+                        },
+                    ],
+                    contractDateStart: new Date(),
+                    contractDateEnd: new Date(),
+                    managedCareEntities: ['MCO'],
+                    federalAuthorities: ['STATE_PLAN'],
+                    inLieuServicesAndSettings: true,
+                    modifiedBenefitsProvided: true,
+                    modifiedGeoAreaServed: false,
+                    modifiedMedicaidBeneficiaries: true,
+                    modifiedRiskSharingStrategy: true,
+                    modifiedIncentiveArrangements: false,
+                    modifiedWitholdAgreements: false,
+                    modifiedStateDirectedPayments: true,
+                    modifiedPassThroughPayments: true,
+                    modifiedPaymentsForMentalDiseaseInstitutions: false,
+                    modifiedMedicalLossRatioStandards: true,
+                    modifiedOtherFinancialPaymentIncentive: false,
+                    modifiedEnrollmentProcess: true,
+                    modifiedGrevienceAndAppeal: false,
+                    modifiedNetworkAdequacyStandards: true,
+                    modifiedLengthOfContract: false,
+                    modifiedNonRiskPaymentArrangements: true,
+                    statutoryRegulatoryAttestation: true,
+                    statutoryRegulatoryAttestationDescription: "everything meets regulatory attestation"
+                }
+            },
+            rateRevisions: [
+                {
+                    __typename: 'RateRevision',
+                    id: '1234',
+                    rateID: '123',
+                    createdAt: new Date('01/01/2023'),
+                    updatedAt: new Date('01/01/2023'),
+                    rate: null,
+                    formData: {
+                        __typename: 'RateFormData',
+                        rateCertificationName:'rate cert',
+                        rateType: 'AMENDMENT',
+                        rateCapitationType: 'RATE_CELL',
+                        rateDocuments: [
+                            {
+                                s3URL: 's3://bucketname/key/rate',
+                                sha256: 'fakesha',
+                                name: 'rate',
+                                dateAdded: new Date('01/01/2023'),
+                                downloadURL: s3DlUrl
+                            },
+                        ],
+                        supportingDocuments: [
+                            {
+                                s3URL: 's3://bucketname/key/rateSupporting1',
+                                sha256: 'fakesha',
+                                name: 'rate supporting 1',
+                                dateAdded: new Date('01/15/2023'),
+                                downloadURL: s3DlUrl
+                            },
+                            {
+                                s3URL: 's3://bucketname/key/rateSupporting1',
+                                sha256: 'fakesha',
+                                name: 'rate supporting 2',
+                                dateAdded: new Date('01/15/2023'),
+                                downloadURL: s3DlUrl
+                            },
+                        ],
+                        rateDateStart: new Date(),
+                        rateDateEnd: new Date(),
+                        rateDateCertified: new Date(),
+                        amendmentEffectiveDateStart: new Date(),
+                        amendmentEffectiveDateEnd: new Date(),
+                        rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
+                        deprecatedRateProgramIDs: [],
+                        certifyingActuaryContacts: [
+                            {
+                                actuarialFirm: 'DELOITTE',
+                                name: 'Actuary Contact 1',
+                                titleRole: 'Test Actuary Contact 1',
+                                email: 'actuarycontact1@test.com',
+                            },
+                        ],
+                        addtlActuaryContacts: [
+                            {
+                                actuarialFirm: 'DELOITTE',
+                                name: 'Actuary Contact 1',
+                                titleRole: 'Test Actuary Contact 1',
+                                email: 'actuarycontact1@test.com',
+                            },
+                        ],
+                        actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+                        packagesWithSharedRateCerts: []
+                    }
+                },
+            ],
+        }],
+        ...partial,
+    }
+}
+
+function mockContractPackageApproved(
+    partial?: Partial<Contract>
+): Contract {
+    return {
+        status: 'SUBMITTED',
+        reviewStatus: 'APPROVED',
+        consolidatedStatus: 'SUBMITTED',
+        reviewStatusActions: [{
+                updatedAt: new Date('2100-01-01'),
+                updatedBy: {
+                    email: "zuko@example.com",
+                    role: "CMS_USER",
+                    familyName: "Hotman",
+                    givenName: "Zuko",
+                    __typename: "UpdatedBy"
+                },
+                updatedReason: "all required documents sent",
+                contractID: "test-abc-123",
+                actionType: "MARK_AS_APPROVED",
+                __typename: "ContractReviewStatusActions"
+        }],
+
         __typename: 'Contract',
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -1199,6 +1402,7 @@ function mockContractPackageSubmittedWithRevisions(
         __typename: 'Contract',
         status: 'SUBMITTED',
         reviewStatus: 'UNDER_REVIEW',
+        consolidatedStatus: 'SUBMITTED',
         createdAt: new Date(),
         updatedAt: new Date(),
         initiallySubmittedAt: new Date('2024-01-01'),
@@ -1308,6 +1512,7 @@ function mockContractPackageWithDifferentProgramsInRevisions (): Contract {
        "id": "e670adsfdfadsfc",
        "status": "RESUBMITTED",
        "reviewStatus": "UNDER_REVIEW",
+       "consolidatedStatus": 'RESUBMITTED',
        "createdAt": "2024-05-07T19:44:53.732Z",
        "updatedAt": "2024-05-07T19:44:53.732Z",
        "initiallySubmittedAt": "2024-05-07T00:00:00Z",
@@ -1742,6 +1947,7 @@ function mockContractPackageUnlockedWithUnlockedType(
     return {
         status: 'UNLOCKED',
         reviewStatus: 'UNDER_REVIEW',
+        consolidatedStatus: 'UNLOCKED',
         __typename: 'UnlockedContract',
         createdAt: '2023-01-01T16:54:39.173Z',
         updatedAt: '2024-12-01T16:54:39.173Z',
@@ -2335,5 +2541,6 @@ export {
     mockEmptyDraftContractAndRate,
     mockContractPackageUnlockedWithUnlockedType,
     mockRateRevision,
-    mockContractPackageSubmittedWithQuestions
+    mockContractPackageSubmittedWithQuestions,
+    mockContractPackageApproved,
 }

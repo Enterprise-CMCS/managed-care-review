@@ -2,6 +2,7 @@ fragment contractFieldsFragment on Contract {
     id
     status
     reviewStatus
+    consolidatedStatus
     createdAt
     updatedAt
     initiallySubmittedAt

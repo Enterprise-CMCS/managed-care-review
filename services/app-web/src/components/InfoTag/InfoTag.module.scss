@@ -5,6 +5,16 @@
     @include uswds.u-bg('green-cool-50');
 }
 
+.gray {
+    @include uswds.u-bg('gray-cool-10');
+    color: custom.$mcr-foundation-ink;
+}
+
+.light-green {
+    @include uswds.u-bg('green-cool-20v');
+    color: custom.$mcr-foundation-ink;
+}
+
 .gold {
     @include uswds.u-bg('gold-20v');
     color: custom.$mcr-foundation-ink;

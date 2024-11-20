@@ -4,7 +4,11 @@ import {
     ratePackageSubmissionSchema,
 } from './packageSubmissions'
 import { contractRevisionSchema, rateRevisionSchema } from './revisionTypes'
-import { statusSchema, reviewStatusSchema } from './statusType'
+import {
+    statusSchema,
+    reviewStatusSchema,
+    consolidatedContractStatusSchema,
+} from './statusType'
 import {
     indexContractQuestionsPayload,
     indexRateQuestionsPayload,
@@ -20,6 +24,7 @@ const contractWithoutDraftRatesSchema = z.object({
     updatedAt: z.date(),
     status: statusSchema,
     reviewStatus: reviewStatusSchema,
+    consolidatedStatus: consolidatedContractStatusSchema,
     stateCode: z.string(),
     mccrsID: z.string().optional(),
     stateNumber: z.number().min(1),
