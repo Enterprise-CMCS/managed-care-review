@@ -12,11 +12,14 @@ import {
 } from '@tanstack/react-table'
 import { useAtom } from 'jotai/react'
 import { atomWithHash } from 'jotai-location'
-import { HealthPlanPackageStatus, Program, User } from '../../gen/gqlClient'
+import { ConsolidatedContractStatus, Program, User } from '../../gen/gqlClient'
 import styles from './ContractTable.module.scss'
 import { Table, Tag } from '@trussworks/react-uswds'
 import qs from 'qs'
-import { SubmissionStatusRecord } from '../../constants/healthPlanPackages'
+import {
+    SubmissionStatusRecord,
+    SubmissionReviewStatusRecord,
+} from '../../constants/'
 import {
     FilterAccordion,
     FilterSelect,
@@ -37,7 +40,7 @@ export type ContractInDashboardType = {
     name: string
     submittedAt?: string
     updatedAt: Date
-    status: HealthPlanPackageStatus
+    status: ConsolidatedContractStatus
     programs: Program[]
     submissionType?: string
     stateName?: string
@@ -49,9 +52,6 @@ export type ContractTableProps = {
     showFilters?: boolean
     caption?: string
 }
-
-const isSubmitted = (status: HealthPlanPackageStatus) =>
-    status === 'SUBMITTED' || status === 'RESUBMITTED'
 
 function submissionURL(
     id: ContractInDashboardType['id'],
@@ -70,19 +70,25 @@ function submissionURL(
 
 const StatusTag = ({
     status,
+    notStateUser,
 }: {
-    status: HealthPlanPackageStatus
+    status: ConsolidatedContractStatus
+    notStateUser: boolean
 }): React.ReactElement => {
     let color: TagProps['color'] = 'gold'
-    if (isSubmitted(status)) {
+    const isSubmittedStatus = status === 'RESUBMITTED' || status === 'SUBMITTED'
+    const isApproved = status === 'APPROVED'
+    if (isSubmittedStatus) {
+        color = notStateUser ? 'gold' : 'gray'
+    } else if (isApproved) {
         color = 'green'
-    } else if (status === 'UNLOCKED') {
-        color = 'blue'
     }
 
-    const statusText = isSubmitted(status)
-        ? SubmissionStatusRecord.SUBMITTED
-        : SubmissionStatusRecord[status]
+    const statusText = isSubmittedStatus
+        ? SubmissionStatusRecord['SUBMITTED']
+        : isApproved
+          ? SubmissionReviewStatusRecord[status]
+          : SubmissionStatusRecord[status]
 
     return <InfoTag color={color}>{statusText}</InfoTag>
 }
@@ -297,7 +303,12 @@ export const ContractTable = ({
             }),
             columnHelper.accessor('status', {
                 header: 'Status',
-                cell: (info) => <StatusTag status={info.getValue()} />,
+                cell: (info) => (
+                    <StatusTag
+                        status={info.getValue()}
+                        notStateUser={isNotStateUser}
+                    />
+                ),
                 meta: {
                     dataTestID: `${tableConfig.rowIDName}-status`,
                 },

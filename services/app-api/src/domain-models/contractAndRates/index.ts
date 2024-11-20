@@ -12,7 +12,7 @@ export { contractFormDataSchema, rateFormDataSchema } from './formDataTypes'
 export { contractRevisionSchema, rateRevisionSchema } from './revisionTypes'
 
 export { statusSchema } from './statusType'
-
+export type { ConsolidatedContractStatusType } from './statusType'
 export {
     convertContractWithRatesRevtoHPPRev,
     convertContractWithRatesToUnlockedHPP,
