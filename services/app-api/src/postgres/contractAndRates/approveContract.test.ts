@@ -52,13 +52,14 @@ describe('approveContract', () => {
             await approveContract(client, {
                 contractID: submittedContract.id,
                 updatedByID: cmsUser.id,
+                updatedReason: 'approve',
             })
         )
 
         expect(approvedContract).toBeDefined()
         expect(approvedContract.reviewStatus).toBe('APPROVED')
         expect(approvedContract.reviewStatusActions![0].actionType).toBe(
-            'APPROVAL_NOTICE'
+            'APPROVAL_AS_APPROVED'
         )
     })
 })

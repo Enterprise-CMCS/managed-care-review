@@ -99,7 +99,7 @@ function getContractReviewStatus(
             actionB.updatedAt.getTime() - actionA.updatedAt.getTime()
     )
     const latestAction = actions[0]
-    if (latestAction?.actionType === 'APPROVAL_NOTICE') {
+    if (latestAction?.actionType === 'MARK_AS_APPROVED') {
         return 'APPROVED'
     }
     return 'UNDER_REVIEW'

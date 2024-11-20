@@ -1215,7 +1215,7 @@ function mockContractPackageApproved(
                 },
                 updatedReason: "all required documents sent",
                 contractID: "test-abc-123",
-                actionType: "APPROVAL_NOTICE",
+                actionType: "MARK_AS_APPROVED",
                 __typename: "ContractReviewStatusActions"
         }],
 

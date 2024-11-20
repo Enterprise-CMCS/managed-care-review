@@ -1029,7 +1029,7 @@ enum UnlockedStatus {
 
 enum ContractActionType {
     UNDER_REVIEW
-    APPROVAL_NOTICE
+    MARK_AS_APPROVED
     WITHDRAW
 }
 
