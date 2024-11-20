@@ -22,7 +22,7 @@ const approveContractMockSuccess = (params: {
                 reviewStatusActions: [
                     {
                         __typename: 'ContractReviewStatusActions',
-                        actionType: 'APPROVAL_NOTICE',
+                        actionType: 'MARK_AS_APPROVED',
                         contractID: contractID,
                         updatedAt: new Date(),
                         updatedBy: {

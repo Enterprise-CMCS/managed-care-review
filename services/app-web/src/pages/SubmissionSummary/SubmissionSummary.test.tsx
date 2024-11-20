@@ -1217,7 +1217,7 @@ describe('SubmissionSummary', () => {
                     reviewStatus: 'APPROVED',
                     reviewStatusActions: [
                         {
-                            actionType: 'APPROVAL_NOTICE',
+                            actionType: 'MARK_AS_APPROVED',
                             contractID: 'test-abc-123',
                             updatedAt: new Date(),
                             updatedBy: {
@@ -1395,7 +1395,7 @@ describe('SubmissionSummary', () => {
                         reviewStatus: 'APPROVED',
                         reviewStatusActions: [
                             {
-                                actionType: 'APPROVAL_NOTICE',
+                                actionType: 'MARK_AS_APPROVED',
                                 contractID: 'test-abc-123',
                                 updatedAt: new Date(),
                                 updatedBy: {
