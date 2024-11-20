@@ -17,7 +17,7 @@ function formatCalendarDate(date: Date | undefined | string, timeZone: 'UTC' | '
 
 /**
  * We store calendar dates in UTC for consistency. This formats a date time into 'MM/DD/YYYY h:mma timezone'.
- * "America/Los_Angeles" (ET) is usually for displaying app generated timestamps, where timezones are important. This should
+ * "America/Los_Angeles" (PT) is usually for displaying app generated timestamps, where timezones are important. This should
  * be only used for display and not saving. We have decided to show these types of dates in "America/Los_Angeles" in the app
  * @param date date to be formatted
  */
