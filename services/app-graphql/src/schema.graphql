@@ -1018,7 +1018,6 @@ enum ConsolidatedContractStatus {
     SUBMITTED
     UNLOCKED
     RESUBMITTED
-    UNDER_REVIEW
     APPROVED
 }
 

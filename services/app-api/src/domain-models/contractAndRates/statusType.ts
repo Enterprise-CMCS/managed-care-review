@@ -17,7 +17,6 @@ const consolidatedContractStatusSchema = z.union([
     z.literal('DRAFT'),
     z.literal('UNLOCKED'),
     z.literal('RESUBMITTED'),
-    z.literal('UNDER_REVIEW'),
     z.literal('APPROVED'),
 ])
 
