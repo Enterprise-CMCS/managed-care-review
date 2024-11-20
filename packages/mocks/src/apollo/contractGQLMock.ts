@@ -433,7 +433,6 @@ const indexContractsMockSuccess = (
             ...mockContractPackageUnlockedWithUnlockedType(),
             id: 'test-id-123',
             __typename: 'Contract',
-            reviewStatus: 'UNDER_REVIEW',
         },
         { ...mockContractPackageSubmittedWithRevisions(), id: 'test-id-124' },
     ]

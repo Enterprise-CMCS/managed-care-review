@@ -63,6 +63,15 @@ export const StateDashboard = (): React.ReactElement => {
     data?.indexContracts.edges
         .map((edge) => edge.node)
         .forEach((sub) => {
+            // When a sub.reviewStatus has been moved out of 'UNDER_REVIEW'
+            // have the reviewStatus supersede the sub.status
+            const status =
+                sub.reviewStatus !== 'UNDER_REVIEW'
+                    ? sub.reviewStatus
+                    : sub.status
+            const subReviewActions =
+                sub.reviewStatusActions && sub.reviewStatusActions[0]
+
             if (sub.status === 'SUBMITTED' || sub.status === 'RESUBMITTED') {
                 const currentRevision = sub.packageSubmissions[0]
                 submissionRows.push({
@@ -74,8 +83,10 @@ export const StateDashboard = (): React.ReactElement => {
                         )
                     }),
                     submittedAt: sub.initiallySubmittedAt,
-                    status: sub.status,
-                    updatedAt: currentRevision.contractRevision.updatedAt,
+                    status: status,
+                    updatedAt: subReviewActions
+                        ? subReviewActions.updatedAt
+                        : currentRevision.contractRevision.updatedAt,
                 })
             } else {
                 const currentRevision = sub.draftRevision!

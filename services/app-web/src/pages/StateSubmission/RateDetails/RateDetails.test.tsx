@@ -396,7 +396,7 @@ describe('RateDetails', () => {
                 const rateCertsAfterAddAnother = rateCertifications(screen)
                 expect(rateCertsAfterAddAnother).toHaveLength(2)
             })
-        })
+        }, 10000)
 
         it('display rest of the form when linked rates question is answered with NO', async () => {
             const { user } = renderWithProviders(

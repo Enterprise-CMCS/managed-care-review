@@ -164,13 +164,8 @@ export const ContractDetails = ({
     const { loggedInUser } = useAuth()
     const { currentRoute } = useCurrentRoute()
     const { id } = useRouteParams()
-    const {
-        draftSubmission,
-        interimState,
-        updateDraft,
-        previousDocuments,
-        showPageErrorMessage,
-    } = useContractForm(id)
+    const { draftSubmission, interimState, updateDraft, showPageErrorMessage } =
+        useContractForm(id)
 
     const contract438Attestation = ldClient?.variation(
         featureFlags.CONTRACT_438_ATTESTATION.flag,
@@ -183,8 +178,7 @@ export const ContractDetails = ({
     )
 
     // Contract documents state management
-    const { getKey, handleDeleteFile, handleUploadFile, handleScanFile } =
-        useS3()
+    const { getKey, handleUploadFile, handleScanFile } = useS3()
     if (interimState || !draftSubmission)
         return <ErrorOrLoadingPage state={interimState || 'GENERIC_ERROR'} />
 
@@ -674,13 +668,6 @@ export const ContractDetails = ({
                                                     'HEALTH_PLAN_DOCS'
                                                 )
                                             }
-                                            deleteFile={(key) =>
-                                                handleDeleteFile(
-                                                    key,
-                                                    'HEALTH_PLAN_DOCS',
-                                                    previousDocuments
-                                                )
-                                            }
                                             onFileItemsUpdate={({
                                                 fileItems,
                                             }) =>
@@ -755,13 +742,6 @@ export const ContractDetails = ({
                                                     handleScanFile(
                                                         key,
                                                         'HEALTH_PLAN_DOCS'
-                                                    )
-                                                }
-                                                deleteFile={(key) =>
-                                                    handleDeleteFile(
-                                                        key,
-                                                        'HEALTH_PLAN_DOCS',
-                                                        previousDocuments
                                                     )
                                                 }
                                                 onFileItemsUpdate={({

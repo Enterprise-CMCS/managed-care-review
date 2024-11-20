@@ -22,22 +22,23 @@ describe('FileUpload component', () => {
         name: 'Default Input',
         label: 'File input label',
         uploadFile: (_file: File) =>
-            fakeRequest<S3FileData>(true, {
-                key: 'testtest',
-                s3URL: 's3://bucketname/key/fakeS3url',
-            }),
-        deleteFile: async (_key: string) => {
-            await fakeRequest<S3FileData>(true, {
-                key: 'testtest',
-                s3URL: 's3://bucketname/key/fakeS3url',
-            })
-            return
-        },
+            fakeRequest<S3FileData>(
+                true,
+                {
+                    key: 'testtest',
+                    s3URL: 's3://bucketname/key/fakeS3url',
+                },
+                50
+            ), // timeout to give vitest time to look for loading text
         scanFile: async (_key: string) => {
-            await fakeRequest<S3FileData>(true, {
-                key: 'testtest',
-                s3URL: 's3://bucketname/key/fakeS3url',
-            })
+            await fakeRequest<S3FileData>(
+                true,
+                {
+                    key: 'testtest',
+                    s3URL: 's3://bucketname/key/fakeS3url',
+                },
+                50
+            ) // timeout to give vitest time to look for loading state
             return
         },
         onFileItemsUpdate: () => {
@@ -203,7 +204,6 @@ describe('FileUpload component', () => {
             uploadFile: vi
                 .fn()
                 .mockResolvedValue({ key: '12313', s3Url: 's3:/12313' }),
-            deleteFile: vi.fn().mockResolvedValue(undefined),
             scanFile: vi.fn().mockResolvedValue(undefined),
             onFileItemsUpdate: vi.fn().mockResolvedValue(undefined),
             accept: '.pdf,.txt',
@@ -217,11 +217,10 @@ describe('FileUpload component', () => {
             expect(props.uploadFile).toHaveBeenCalled()
             expect(props.scanFile).toHaveBeenCalled()
             expect(props.onFileItemsUpdate).toHaveBeenCalled()
-            expect(props.deleteFile).not.toHaveBeenCalled()
         })
     })
 
-    it('calls uploadFile, scanFile, deleteFile when file scanning fails', async () => {
+    it('calls uploadFile, scanFile', async () => {
         const props: FileUploadProps = {
             id: 'Default',
             name: 'Default Input',
@@ -229,7 +228,6 @@ describe('FileUpload component', () => {
             uploadFile: vi
                 .fn()
                 .mockResolvedValue({ key: '12313', s3Url: 's3:/12313' }),
-            deleteFile: vi.fn().mockResolvedValue(undefined),
             scanFile: vi.fn().mockRejectedValue(new Error('failed')),
             onFileItemsUpdate: vi.fn().mockResolvedValue(undefined),
             accept: '.pdf,.txt',
@@ -242,7 +240,6 @@ describe('FileUpload component', () => {
         await waitFor(() => {
             expect(props.uploadFile).toHaveBeenCalled()
             expect(props.scanFile).toHaveBeenCalled()
-            expect(props.deleteFile).toHaveBeenCalled()
             expect(props.onFileItemsUpdate).toHaveBeenCalled()
         })
     })
@@ -255,7 +252,6 @@ describe('FileUpload component', () => {
             uploadFile: vi
                 .fn()
                 .mockResolvedValue({ key: '12313', s3Url: 's3:/12313' }),
-            deleteFile: vi.fn().mockResolvedValue(undefined),
             scanFile: vi.fn().mockRejectedValue(new Error('failed')),
             onFileItemsUpdate: vi.fn().mockResolvedValue(undefined),
             accept: '.pdf,.txt',

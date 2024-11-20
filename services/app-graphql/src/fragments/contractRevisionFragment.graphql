@@ -1,0 +1,87 @@
+fragment contractRevisionFragment on ContractRevision {
+    id
+    createdAt
+    updatedAt
+    contractID
+    contractName
+
+    submitInfo {
+        updatedAt
+        updatedBy {
+            email
+            role
+            familyName
+            givenName
+        }
+        updatedReason
+    }
+
+    unlockInfo {
+        updatedAt
+        updatedBy {
+            email
+            role
+            familyName
+            givenName
+        }
+        updatedReason
+    }
+
+    formData {
+        programIDs
+        populationCovered
+        submissionType
+
+        riskBasedContract
+        submissionDescription
+
+        stateContacts {
+            name
+            titleRole
+            email
+        }
+
+        supportingDocuments {
+            name
+            s3URL
+            sha256
+            dateAdded
+            downloadURL
+        }
+
+        contractType
+        contractExecutionStatus
+        contractDocuments {
+            name
+            s3URL
+            sha256
+            dateAdded
+            downloadURL
+        }
+
+        contractDateStart
+        contractDateEnd
+        managedCareEntities
+        federalAuthorities
+        inLieuServicesAndSettings
+        modifiedBenefitsProvided
+        modifiedGeoAreaServed
+        modifiedMedicaidBeneficiaries
+        modifiedRiskSharingStrategy
+        modifiedIncentiveArrangements
+        modifiedWitholdAgreements
+        modifiedStateDirectedPayments
+        modifiedPassThroughPayments
+        modifiedPaymentsForMentalDiseaseInstitutions
+        modifiedMedicaidBeneficiaries
+        modifiedMedicalLossRatioStandards
+        modifiedOtherFinancialPaymentIncentive
+        modifiedEnrollmentProcess
+        modifiedGrevienceAndAppeal
+        modifiedNetworkAdequacyStandards
+        modifiedLengthOfContract
+        modifiedNonRiskPaymentArrangements
+        statutoryRegulatoryAttestation
+        statutoryRegulatoryAttestationDescription
+    }
+}

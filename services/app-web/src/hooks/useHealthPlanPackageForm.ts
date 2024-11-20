@@ -14,10 +14,7 @@ import { domainToBase64 } from '@mc-review/hpp'
 import { recordJSException } from '@mc-review/otel'
 import { handleApolloError } from '@mc-review/helpers'
 import { ApolloError } from '@apollo/client'
-import {
-    makeDocumentDateTable,
-    makeDocumentS3KeyLookup,
-} from '@mc-review/helpers'
+import { makeDocumentDateTable } from '@mc-review/helpers'
 import { DocumentDateLookupTableType } from '@mc-review/helpers'
 import type { InterimState } from '../pages/StateSubmission/ErrorOrLoadingPage'
 
@@ -25,7 +22,6 @@ type UseHealthPlanPackageForm = {
     draftSubmission?: UnlockedHealthPlanFormDataType
     unlockInfo?: UpdateInformation
     showPageErrorMessage: string | boolean
-    previousDocuments?: string[]
     updateDraft: (
         input: UnlockedHealthPlanFormDataType
     ) => Promise<HealthPlanPackage | Error>
@@ -45,7 +41,6 @@ const useHealthPlanPackageForm = (
 ): UseHealthPlanPackageForm => {
     // Set up defaults for the return value for hook
     let interimState: UseHealthPlanPackageForm['interimState'] = undefined // enum to determine what Interim UI should override form page
-    let previousDocuments: UseHealthPlanPackageForm['previousDocuments'] = [] // used for document upload tables
     let draftSubmission: UseHealthPlanPackageForm['draftSubmission'] = undefined // form data from current package revision, used to load form
     let unlockInfo: UseHealthPlanPackageForm['unlockInfo'] = undefined
     let documentDateLookupTable = undefined
@@ -202,8 +197,6 @@ const useHealthPlanPackageForm = (
     const formDataFromLatestRevision =
         revisionsLookup[latestRevision.id].formData
     const documentDates = makeDocumentDateTable(revisionsLookup)
-    const documentLists = makeDocumentS3KeyLookup(revisionsLookup)
-    previousDocuments = documentLists.previousDocuments
 
     // if we've gotten back a submitted revision, it can't be edited
     if (formDataFromLatestRevision.status !== 'DRAFT') {
@@ -228,7 +221,6 @@ const useHealthPlanPackageForm = (
     return {
         draftSubmission,
         unlockInfo,
-        previousDocuments,
         documentDateLookupTable,
         updateDraft,
         createDraft,

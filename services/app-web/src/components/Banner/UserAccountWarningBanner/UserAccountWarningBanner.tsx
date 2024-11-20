@@ -11,12 +11,14 @@ export type AccountWarningBannerProps = {
 }
 
 const MissingDivisionMessage = () => {
-    return (<span>
-    You must be assigned to a division in order to
-    ask questions about a submission. Please&nbsp;
-    <ContactSupportLink />
-    &nbsp;to add your division.
-</span>)
+    return (
+        <span>
+            You must be assigned to a division in order to ask questions about a
+            submission. Please&nbsp;
+            <ContactSupportLink />
+            &nbsp;to add your division.
+        </span>
+    )
 }
 
 // By default this is the missing division account warning

@@ -10,22 +10,15 @@ import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
 import { NotFoundError } from '../../postgres'
 import { GraphQLError } from 'graphql/index'
 import type { Emailer } from '../../emailer'
-import type { LDService } from '../../launchDarkly/launchDarkly'
 import type { StateCodeType } from '../../testHelpers'
-import type { EmailParameterStore } from '../../parameterStore'
 
 export function createRateQuestionResolver(
     store: Store,
-    emailer: Emailer,
-    emailParameterStore: EmailParameterStore,
-    launchDarkly: LDService
+    emailer: Emailer
 ): MutationResolvers['createRateQuestion'] {
     return async (_parent, { input }, context) => {
         const { user, ctx, tracer } = context
         const span = tracer?.startSpan('createRateQuestion', {}, ctx)
-        const featureFlags = await launchDarkly.allFlags(context)
-        const readStateAnalystsFromDBFlag =
-            featureFlags?.['read-write-state-assignments']
 
         if (!hasCMSPermissions(user)) {
             const msg = 'user not authorized to create a question'
@@ -116,44 +109,23 @@ export function createRateQuestionResolver(
         }
 
         let stateAnalystsEmails: string[] = []
-        if (readStateAnalystsFromDBFlag) {
-            // not great that state code type isn't being used in ContractType but I'll risk the conversion for now
-            const stateAnalystsEmailsResult =
-                await store.findStateAssignedUsers(
-                    rate.stateCode as StateCodeType
-                )
 
-            if (stateAnalystsEmailsResult instanceof Error) {
-                logError(
-                    'getStateAnalystsEmails',
-                    stateAnalystsEmailsResult.message
-                )
-                setErrorAttributesOnActiveSpan(
-                    stateAnalystsEmailsResult.message,
-                    span
-                )
-            } else {
-                stateAnalystsEmails = stateAnalystsEmailsResult.map(
-                    (u) => u.email
-                )
-            }
+        // not great that state code type isn't being used in ContractType but I'll risk the conversion for now
+        const stateAnalystsEmailsResult = await store.findStateAssignedUsers(
+            rate.stateCode as StateCodeType
+        )
+
+        if (stateAnalystsEmailsResult instanceof Error) {
+            logError(
+                'getStateAnalystsEmails',
+                stateAnalystsEmailsResult.message
+            )
+            setErrorAttributesOnActiveSpan(
+                stateAnalystsEmailsResult.message,
+                span
+            )
         } else {
-            const stateAnalystsEmailsResult =
-                await emailParameterStore.getStateAnalystsEmails(rate.stateCode)
-
-            //If error log it and set stateAnalystsEmails to empty string as to not interrupt the emails.
-            if (stateAnalystsEmailsResult instanceof Error) {
-                logError(
-                    'getStateAnalystsEmails',
-                    stateAnalystsEmailsResult.message
-                )
-                setErrorAttributesOnActiveSpan(
-                    stateAnalystsEmailsResult.message,
-                    span
-                )
-            } else {
-                stateAnalystsEmails = stateAnalystsEmailsResult
-            }
+            stateAnalystsEmails = stateAnalystsEmailsResult.map((u) => u.email)
         }
 
         const sendRateQuestionStateEmailResult =

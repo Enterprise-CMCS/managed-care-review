@@ -199,9 +199,6 @@ export function submitHealthPlanPackageResolver(
 ): MutationResolvers['submitHealthPlanPackage'] {
     return async (_parent, { input }, context) => {
         const featureFlags = await launchDarkly.allFlags(context)
-        const readStateAnalystsFromDBFlag =
-            featureFlags?.['read-write-state-assignments']
-
         const { user, ctx, tracer } = context
         const span = tracer?.startSpan('submitHealthPlanPackage', {}, ctx)
         setResolverDetailsOnActiveSpan('submitHealthPlanPackage', user, span)
@@ -498,46 +495,22 @@ export function submitHealthPlanPackageResolver(
         const status = packageStatus(updatedPackage)
 
         let stateAnalystsEmails: string[] = []
-        if (readStateAnalystsFromDBFlag) {
-            // not great that state code type isn't being used in ContractType but I'll risk the conversion for now
-            const stateAnalystsEmailsResult =
-                await store.findStateAssignedUsers(
-                    updatedPackage.stateCode as StateCodeType
-                )
+        // not great that state code type isn't being used in ContractType but I'll risk the conversion for now
+        const stateAnalystsEmailsResult = await store.findStateAssignedUsers(
+            updatedPackage.stateCode as StateCodeType
+        )
 
-            if (stateAnalystsEmailsResult instanceof Error) {
-                logError(
-                    'getStateAnalystsEmails',
-                    stateAnalystsEmailsResult.message
-                )
-                setErrorAttributesOnActiveSpan(
-                    stateAnalystsEmailsResult.message,
-                    span
-                )
-            } else {
-                stateAnalystsEmails = stateAnalystsEmailsResult.map(
-                    (u) => u.email
-                )
-            }
+        if (stateAnalystsEmailsResult instanceof Error) {
+            logError(
+                'getStateAnalystsEmails',
+                stateAnalystsEmailsResult.message
+            )
+            setErrorAttributesOnActiveSpan(
+                stateAnalystsEmailsResult.message,
+                span
+            )
         } else {
-            const stateAnalystsEmailsResult =
-                await emailParameterStore.getStateAnalystsEmails(
-                    updatedPackage.stateCode
-                )
-
-            //If error log it and set stateAnalystsEmails to empty string as to not interrupt the emails.
-            if (stateAnalystsEmailsResult instanceof Error) {
-                logError(
-                    'getStateAnalystsEmails',
-                    stateAnalystsEmailsResult.message
-                )
-                setErrorAttributesOnActiveSpan(
-                    stateAnalystsEmailsResult.message,
-                    span
-                )
-            } else {
-                stateAnalystsEmails = stateAnalystsEmailsResult
-            }
+            stateAnalystsEmails = stateAnalystsEmailsResult.map((u) => u.email)
         }
 
         // Get submitter email from every pkg submitted revision.

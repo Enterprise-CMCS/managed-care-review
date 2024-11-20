@@ -53,7 +53,6 @@ type SingleRateFormFieldsProps = {
     shouldValidate: boolean
     index: number // defaults to 0
     fieldNamePrefix: string // formik field name prefix - used for looking up values and errors in Formik FieldArray
-    previousDocuments: string[] // this only passed in to ensure S3 deleteFile doesn't remove valid files for previous revision
     autofill?: (rateForm: FormikRateForm) => void // used for multi-rates, when called will FieldArray replace the existing form fields with new data
 }
 
@@ -79,7 +78,7 @@ const RateDatesErrorMessage = ({
     const validationErrorMessage = hasError
         ? isDateRangeEmpty(startDate, endDate)
             ? 'You must provide a start and an end date'
-            : startDateError ?? endDateError
+            : (startDateError ?? endDateError)
         : null
 
     return (
@@ -101,11 +100,10 @@ export const SingleRateFormFields = ({
     rateForm,
     shouldValidate,
     index = 0,
-    previousDocuments,
     fieldNamePrefix,
 }: SingleRateFormFieldsProps): React.ReactElement => {
     // page level setup
-    const { handleDeleteFile, handleUploadFile, handleScanFile } = useS3()
+    const { handleUploadFile, handleScanFile } = useS3()
     const { errors, setFieldValue } = useFormikContext<RateDetailFormConfig>()
     const [focusNewActuaryContact, setFocusNewActuaryContact] = useState(false)
 
@@ -165,13 +163,6 @@ export const SingleRateFormFields = ({
                         handleUploadFile(file, 'HEALTH_PLAN_DOCS')
                     }
                     scanFile={(key) => handleScanFile(key, 'HEALTH_PLAN_DOCS')}
-                    deleteFile={(key) =>
-                        handleDeleteFile(
-                            key,
-                            'HEALTH_PLAN_DOCS',
-                            previousDocuments
-                        )
-                    }
                     onFileItemsUpdate={({ fileItems }) =>
                         setFieldValue(
                             `${fieldNamePrefix}.rateDocuments`,
@@ -215,13 +206,6 @@ export const SingleRateFormFields = ({
                         handleUploadFile(file, 'HEALTH_PLAN_DOCS')
                     }
                     scanFile={(key) => handleScanFile(key, 'HEALTH_PLAN_DOCS')}
-                    deleteFile={(key) =>
-                        handleDeleteFile(
-                            key,
-                            'HEALTH_PLAN_DOCS',
-                            previousDocuments
-                        )
-                    }
                     onFileItemsUpdate={({ fileItems }) =>
                         setFieldValue(
                             `${fieldNamePrefix}.supportingDocuments`,

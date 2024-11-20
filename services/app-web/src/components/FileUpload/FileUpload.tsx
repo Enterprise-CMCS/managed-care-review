@@ -35,7 +35,6 @@ export type FileUploadProps = {
     allowMultipleUploads?: boolean
     uploadFile: (file: File) => Promise<S3FileData>
     scanFile?: (key: string) => Promise<void | Error> // optional function to be called after uploading (used for scanning)
-    deleteFile: (key: string) => Promise<void>
     onFileItemsUpdate: ({ fileItems }: { fileItems: FileItemT[] }) => void
 } & JSX.IntrinsicElements['input']
 
@@ -56,7 +55,6 @@ export const FileUpload = ({
     isLabelVisible = true,
     uploadFile,
     scanFile,
-    deleteFile,
     onFileItemsUpdate,
     allowMultipleUploads = true,
     ...inputProps
@@ -157,10 +155,6 @@ export const FileUpload = ({
     }
 
     const deleteItem = (deletedItem: FileItemT) => {
-        const key = fileItems.find((item) => item.id === deletedItem.id)?.key
-        if (key !== undefined)
-            deleteFile(key).catch(() => console.info('Error deleting from s3'))
-
         setFileItems((prevItems) => {
             return refreshItems(prevItems, deletedItem)
         })
@@ -250,14 +244,6 @@ export const FileUpload = ({
                                     }
                                 })
                             })
-                            // immediately delete this bad file
-                            deleteFile(data.key).catch(() => {
-                                const error = new Error(
-                                    'Error deleting from s3'
-                                )
-                                recordJSException(error)
-                                console.info(error)
-                            })
                         }
                     }
                 })
@@ -314,16 +300,9 @@ export const FileUpload = ({
 
     const addFilesAndUpdateList = (files: File[]) => {
         const items = generateFileItems(files) // UI data objects -  used to track file upload state in a list below the input
-        !allowMultipleUploads &&
-            fileItems.forEach((fileItem) => {
-                if (fileItem.key !== undefined)
-                    deleteFile(fileItem.key).catch(() =>
-                        console.info('Error deleting from s3')
-                    )
-                setFileItems((prevItems) => {
-                    return refreshItems(prevItems, fileItem)
-                })
-            })
+        if (!allowMultipleUploads) {
+            setFileItems([])
+        }
         setFileItems((array) => [...array, ...items])
         asyncS3Upload(files)
 

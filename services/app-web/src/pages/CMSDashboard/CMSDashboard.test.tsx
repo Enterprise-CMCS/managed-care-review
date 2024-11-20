@@ -8,6 +8,7 @@ import {
     mockContractPackageUnlockedWithUnlockedType,
     mockContractPackageDraft,
     mockContractPackageSubmitted,
+    mockContractPackageApproved,
 } from '@mc-review/mocks'
 import { renderWithProviders } from '../../testHelpers/jestHelpers'
 import { CMSDashboard, RateReviewsDashboard, SubmissionsDashboard } from './'
@@ -157,16 +158,18 @@ describe('CMSDashboard', () => {
                     )
                 })
 
-                it('displays each contract status tag as expected for current revision that is submitted/resubmitted', async () => {
+                it('displays each contract status tag as expected for current revision that is submitted/resubmitted/approved', async () => {
                     const unlocked: Contract = {
                         ...mockContractPackageUnlockedWithUnlockedType(),
                         __typename: 'Contract',
                     }
                     const submitted = mockContractPackageSubmitted()
+                    const approved = mockContractPackageApproved()
+                    approved.id = 'test-abc-approved'
                     submitted.id = 'test-abc-submitted'
                     unlocked.id = 'test-abc-unlocked'
 
-                    const submissions = [unlocked, submitted]
+                    const submissions = [unlocked, submitted, approved]
                     renderWithProviders(<CMSDashboardNestedRoutes />, {
                         apolloProvider: {
                             mocks: [
@@ -193,6 +196,13 @@ describe('CMSDashboard', () => {
                     const tag2 =
                         within(submittedRow).getByTestId('submission-status')
                     expect(tag2).toHaveTextContent('Submitted')
+
+                    const approvedRow = await screen.findByTestId(
+                        `row-${approved.id}`
+                    )
+                    const tag3 =
+                        within(approvedRow).getByTestId('submission-status')
+                    expect(tag3).toHaveTextContent('Approved')
                 })
 
                 it('displays name, type, programs and last update based on previously submitted revision for UNLOCKED package', async () => {

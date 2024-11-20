@@ -26,16 +26,8 @@ const featureFlags = {
         defaultValue: false,
     },
     /**
-     * Allows CMS and Admin users to read and write state assignments
+     * Enables submission approvals, withdraws, and reviews features
      */
-    READ_WRITE_STATE_ASSIGNMENTS: {
-        flag: 'read-write-state-assignments',
-        defaultValue: false,
-    },
-    QA_BY_RATES: {
-        flag: 'qa-by-rates',
-        defaultValue: false,
-    },
     SUBMISSION_APPROVALS: {
         flag: 'submission-approvals',
         defaultValue: false,
@@ -43,21 +35,21 @@ const featureFlags = {
     // PERMANENT FLAGS
     /**
      Enables the modal that alerts the user to an expiring session
-     */
+    */
     SESSION_EXPIRING_MODAL: {
         flag: 'session-expiring-modal',
         defaultValue: true,
     },
     /**
      The number of minutes before the session expires and countdown modal appears
-     */
+    */
     MINUTES_UNTIL_SESSION_EXPIRES: {
         flag: 'session-expiration-minutes',
         defaultValue: 30,
     },
     /**
      Toggles the site maintenance alert on the landing page
-     */
+    */
     SITE_UNDER_MAINTENANCE_BANNER: {
         flag: 'site-under-maintenance-banner',
         defaultValue: 'OFF',

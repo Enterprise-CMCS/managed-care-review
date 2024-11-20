@@ -149,33 +149,6 @@ describe('RateSummary', () => {
                     expect(error).toHaveBeenCalled()
                 })
             })
-
-            it('renders back to dashboard link for CMS users', async () => {
-                renderWithProviders(wrapInRoutes(<RateSummary />), {
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({
-                                user: mockUser(),
-                                statusCode: 200,
-                            }),
-                            fetchRateMockSuccess({ id: '7a' }),
-                        ],
-                    },
-                    routerProvider: {
-                        route: '/rates/7a',
-                    },
-                })
-
-                const backLink = await screen.findByRole('link', {
-                    name: /Back to dashboard/,
-                })
-                expect(backLink).toBeInTheDocument()
-
-                expect(backLink).toHaveAttribute(
-                    'href',
-                    '/dashboard/rate-reviews'
-                )
-            })
         }
     )
 

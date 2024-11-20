@@ -11,10 +11,7 @@ export default {
 }
 
 const Template: StoryFn<AccountWarningBannerProps> = ({ header, ...args }) => {
-
-    return (
-        <UserAccountWarningBanner />
-    )
+    return <UserAccountWarningBanner />
 }
 
 export const Default = Template.bind({})

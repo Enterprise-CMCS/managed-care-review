@@ -26,10 +26,8 @@ import { useTealium } from '../../../hooks'
 import useDeepCompareEffect from 'use-deep-compare-effect'
 import { useOutletContext } from 'react-router-dom'
 import { type MCReviewSettingsContextType } from '../Settings'
-import { EditLink, formatUserNamesFromUsers, formatEmailsFromUsers } from '../'
+import { EditLink, formatUserNamesFromUsers } from '../'
 import { SettingsErrorAlert } from '../SettingsErrorAlert'
-import { useLDClient } from 'launchdarkly-react-client-sdk'
-import { featureFlags } from '@mc-review/common-code'
 import { getTealiumFiltersChanged } from '../../../tealium/tealiumHelpers'
 
 type AnalystDisplayType = {
@@ -93,12 +91,6 @@ const analystFilter: FilterFn<AnalystDisplayType[]> = (
 }
 
 const StateAssignmentTable = () => {
-    const ldClient = useLDClient()
-    const readWriteStateAssignments = ldClient?.variation(
-        featureFlags.READ_WRITE_STATE_ASSIGNMENTS.flag,
-        featureFlags.READ_WRITE_STATE_ASSIGNMENTS.defaultValue
-    )
-
     const lastClickedElement = useRef<string | null>(null)
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
     const [prevFilters, setPrevFilters] = useState<{
@@ -126,10 +118,7 @@ const StateAssignmentTable = () => {
             columnHelper.accessor('analysts', {
                 id: 'analysts',
                 header: 'Assigned DMCO staff',
-                cell: (info) =>
-                    readWriteStateAssignments
-                        ? formatUserNamesFromUsers(info.getValue())
-                        : formatEmailsFromUsers(info.getValue()),
+                cell: (info) => formatUserNamesFromUsers(info.getValue()),
                 filterFn: 'analystFilter',
             }),
             columnHelper.accessor('editLink', {
@@ -144,7 +133,7 @@ const StateAssignmentTable = () => {
                 ),
             }),
         ],
-        [readWriteStateAssignments]
+        []
     )
 
     const reactTable = useReactTable({
@@ -160,11 +149,6 @@ const StateAssignmentTable = () => {
         columns: tableColumns,
         state: {
             columnFilters,
-        },
-        initialState: {
-            columnVisibility: {
-                editLink: readWriteStateAssignments,
-            },
         },
         onColumnFiltersChange: setColumnFilters,
         getFacetedUniqueValues: getFacetedUniqueValues(),
@@ -217,9 +201,7 @@ const StateAssignmentTable = () => {
 
         const options: FilterOptionType[] = uniqueAnalysts.map((analyst) => ({
             value: analyst.email,
-            label: readWriteStateAssignments
-                ? formatUserNamesFromUsers([analyst])
-                : formatEmailsFromUsers([analyst]),
+            label: formatUserNamesFromUsers([analyst]),
         }))
 
         return options.concat({

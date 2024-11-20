@@ -78,7 +78,6 @@ module.exports = defineConfig({
         runMode: 1,
         openMode: 0,
     },
-    videoUploadOnPasses: false,
     experimentalMemoryManagement: true,
     numTestsKeptInMemory: 20,
 })

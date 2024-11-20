@@ -28,11 +28,17 @@ const SubmissionsDashboard = (): React.ReactElement => {
             />
         )
     }
-
     const submissionRows: ContractInDashboardType[] = []
     data?.indexContracts.edges
         .map((edge) => edge.node)
         .forEach((sub) => {
+            // When a sub.reviewStatus has been moved out of 'UNDER_REVIEW'
+            // have the reviewStatus supersede the sub.status
+            const status =
+                sub.reviewStatus !== 'UNDER_REVIEW'
+                    ? sub.reviewStatus
+                    : sub.status
+
             // Errors - data handling
             if (sub.status === 'DRAFT') {
                 recordJSException(
@@ -54,9 +60,13 @@ const SubmissionsDashboard = (): React.ReactElement => {
 
             // Set package display data
             let displayRateFormData = currentFormData
+            const subReviewActions =
+                sub.reviewStatusActions && sub.reviewStatusActions[0]
+
             let lastUpdated = mostRecentDate([
                 currentRevision?.submitInfo?.updatedAt,
                 currentRevision?.unlockInfo?.updatedAt,
+                subReviewActions?.updatedAt,
             ])
 
             if (sub.status === 'UNLOCKED') {
@@ -73,7 +83,6 @@ const SubmissionsDashboard = (): React.ReactElement => {
                         `indexContractsQuery: Error finding submit and unlock dates of an unlocked submission. ID: ${sub.id}`
                     )
                 }
-
                 // reset package display data since unlock submissions rely on previous revision data
                 displayRateFormData = previousFormData
                 lastUpdated = mostRecentDate([
@@ -81,6 +90,7 @@ const SubmissionsDashboard = (): React.ReactElement => {
                     currentRevision?.unlockInfo?.updatedAt,
                     previousRevision?.submitInfo?.updatedAt,
                     previousRevision?.unlockInfo?.updatedAt,
+                    subReviewActions?.updatedAt,
                 ])
             }
 
@@ -99,7 +109,7 @@ const SubmissionsDashboard = (): React.ReactElement => {
                     displayRateFormData.programIDs.includes(program.id)
                 ),
                 submittedAt: sub.initiallySubmittedAt,
-                status: sub.status,
+                status: status,
                 updatedAt: lastUpdated,
                 submissionType:
                     SubmissionTypeRecord[displayRateFormData.submissionType],

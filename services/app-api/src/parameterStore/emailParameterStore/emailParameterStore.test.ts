@@ -1,5 +1,4 @@
 import {
-    getStateAnalystsEmails,
     getSourceEmail,
     getOACTEmails,
     getCmsReviewHelpEmail,
@@ -76,39 +75,6 @@ describe('emailParameterStore', () => {
             expect(result).toEqual(
                 new Error(
                     'Parameter store /configuration/email/reviewTeamAddresses value of Type String is not supported'
-                )
-            )
-        })
-    })
-    describe('getStateAnalystEmails', () => {
-        it('returns state analysts emails as array of strings', async () => {
-            const spy = jest.spyOn(ParameterStore, 'getParameter')
-            spy.mockResolvedValue({
-                value: '"FL Analyst 1" <testFLStateAnalyst1@email.com>, "FL Analyst 2" <testFLStateAnalyst2@email.com>',
-                type: 'StringList',
-            })
-            const result = await getStateAnalystsEmails('FL')
-            expect(result).toStrictEqual([
-                '"FL Analyst 1" <testFLStateAnalyst1@email.com>',
-                '"FL Analyst 2" <testFLStateAnalyst2@email.com>',
-            ])
-        })
-        it('returns error when fetching store value fails', async () => {
-            const spy = jest.spyOn(ParameterStore, 'getParameter')
-            spy.mockResolvedValue(new Error('No store found'))
-            const result = await getStateAnalystsEmails('FL')
-            expect(result).toBeInstanceOf(Error)
-        })
-        it('returns error when Type of parameter store value is incompatible', async () => {
-            const spy = jest.spyOn(ParameterStore, 'getParameter')
-            spy.mockResolvedValue({
-                value: '"FL Analyst 1" <testFLStateAnalyst1@email.com>, "FL Analyst 2" <testFLStateAnalyst2@email.com>',
-                type: 'String',
-            })
-            const result = await getStateAnalystsEmails('FL')
-            expect(result).toEqual(
-                new Error(
-                    'Parameter store /configuration/FL/stateanalysts/email value of Type String is not supported'
                 )
             )
         })

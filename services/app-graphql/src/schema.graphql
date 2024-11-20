@@ -12,11 +12,6 @@ type Query {
     fetchCurrentUser: User!
 
     """
-    fetchEmailSettings returns emailer config and settings
-    """
-    fetchEmailSettings: FetchEmailSettingsPayload!
-
-    """
     fetchHealthPlanPackage returns a specific HealthPlanPackage by id
 
     If a package with the given ID cannot be found, this query returns undefined
@@ -527,6 +522,23 @@ type Mutation {
     withdrawAndReplaceRedundantRate(
         input: withdrawAndReplaceRedundantRateInput!
     ): withdrawAndReplaceRedundantRatePayload
+
+    """
+    approveContract is a CMS user only action 
+
+    Errors:
+    - ForbiddenError:
+        - A non CMS/CMS Approver user called this
+    - UserInputError:
+        - A contract is not in the correct submission status: SUBMITTED or RESUBMITTED
+        - A contract is not in the correct review status: UNDER_REVIEW
+    - INTERNAL_SERVER_ERROR
+        - DB_ERROR
+            - A contract cannot be found by id
+    """
+    approveContract(
+        input: ApproveContractInput!
+    ): ApproveContractPayload
 }
 
 input CreateHealthPlanPackageInput {
@@ -584,6 +596,17 @@ input CreateContractInput {
 
 type CreateContractPayload {
     contract: Contract!
+}
+
+type ApproveContractPayload {
+    contract: Contract!
+}
+
+input ApproveContractInput {
+    "The ID of the contract to approve"
+    contractID: ID!
+    "Reason for update"
+    updatedReason: String
 }
 
 input FetchHealthPlanPackageInput {
@@ -986,6 +1009,18 @@ enum ReviewStatus {
     APPROVED
 }
 
+"""
+This status has been synthesized to reflect if the status or review status
+should be used
+"""
+enum ConsolidatedContractStatus {
+    DRAFT
+    SUBMITTED
+    UNLOCKED
+    RESUBMITTED
+    APPROVED
+}
+
 enum UnlockedStatus {
     UNLOCKED
     DRAFT
@@ -993,7 +1028,7 @@ enum UnlockedStatus {
 
 enum ContractActionType {
     UNDER_REVIEW
-    APPROVAL_NOTICE
+    MARK_AS_APPROVED
     WITHDRAW
 }
 
@@ -1057,7 +1092,7 @@ ContractReviewStatusActions is used for the review status actions on the contrac
 type ContractReviewStatusActions {
     "the datetime when the update occured"
     updatedAt: DateTime!
-    "the email of the user who performed the update"
+    "the user who performed the update"
     updatedBy: UpdatedBy!
     "the reason provided by the user when performing the update"
     updatedReason: String!
@@ -1188,16 +1223,6 @@ type EmailConfiguration {
     cmsReviewHelpEmailAddress: String!
     cmsRateHelpEmailAddress: String!
     helpDeskEmail: String!
-}
-
-type StateAnalystsConfiguration {
-    stateCode: String!
-    emails: [String!]!
-}
-type FetchEmailSettingsPayload {
-    "Email settings"
-    config: EmailConfiguration
-    stateAnalysts: [StateAnalystsConfiguration!]
 }
 
 """
@@ -1774,6 +1799,12 @@ type Contract {
     Options are UNDER_REVIEW, APPROVED
     """
     reviewStatus: ReviewStatus!
+    """
+    Synthesized field that represents if a contract's status or
+    reviewStatus should take precedence 
+    Options are DRAFT, SUBMITTED, RESUBMITTED UNLOCKED, UNDER_REVIEW, APPROVED
+    """
+    consolidatedStatus: ConsolidatedContractStatus!
     "initiallySubmittedAt is the initial date this contract was submitted at. Is not changed by unlock or resubmission."
     initiallySubmittedAt: DateTime
     "stateCode is the state code (e.g. CA or TN) for the submitting state"
@@ -1834,6 +1865,12 @@ type UnlockedContract {
     Options are UNDER_REVIEW, APPROVED
     """
     reviewStatus: ReviewStatus!
+    """
+    Synthesized field that represents if a contract's status or
+    reviewStatus should take precedence 
+    Options are DRAFT, SUBMITTED, RESUBMITTED UNLOCKED, UNDER_REVIEW, APPROVED
+    """
+    consolidatedStatus: ConsolidatedContractStatus!
     "initiallySubmittedAt is the initial date this contract was submitted at. Is not changed by unlock or resubmission."
     initiallySubmittedAt: Date
     "stateCode is the state code (e.g. CA or TN) for the submitting state"

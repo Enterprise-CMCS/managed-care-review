@@ -15,9 +15,6 @@ import {
 } from '../../testHelpers/gqlContractHelpers'
 import { assertAnError, assertAnErrorCode, must } from '../../testHelpers'
 import { testEmailConfig, testEmailer } from '../../testHelpers/emailerHelpers'
-import { testLDService } from '../../testHelpers/launchDarklyHelpers'
-import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
-import { NewPostgresStore } from '../../postgres'
 import { CreateRateQuestionDocument } from '../../gen/gqlClient'
 
 describe('createRateQuestion', () => {
@@ -260,50 +257,6 @@ describe('createRateQuestion', () => {
             context: {
                 user: cmsUser,
             },
-            emailer: mockEmailer,
-        })
-        const submittedContractAndRate =
-            await createAndSubmitTestContractWithRate(stateServer)
-        const rateRevision =
-            submittedContractAndRate.packageSubmissions[0].rateRevisions[0]
-        const rateID = rateRevision.rateID
-
-        must(await createTestRateQuestion(cmsServer, rateID))
-
-        expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
-            2,
-            expect.objectContaining({
-                subject: expect.stringContaining(
-                    `[LOCAL] Questions sent for ${rateRevision.formData.rateCertificationName}`
-                ),
-                sourceEmail: config.emailSource,
-                bodyText: expect.stringContaining(
-                    `DMCO sent questions to the state for rate ${rateRevision.formData.rateCertificationName}`
-                ),
-                bodyHTML: expect.stringContaining(
-                    `http://localhost/rates/${rateID}/question-and-answers`
-                ),
-            })
-        )
-    })
-
-    it('send CMS email to state analysts from database', async () => {
-        const ldService = testLDService({
-            'read-write-state-assignments': true,
-        })
-
-        const prismaClient = await sharedTestPrismaClient()
-        const postgresStore = NewPostgresStore(prismaClient)
-        const config = testEmailConfig()
-        const mockEmailer = testEmailer(config)
-
-        const stateServer = await constructTestPostgresServer()
-        const cmsServer = await constructTestPostgresServer({
-            store: postgresStore,
-            context: {
-                user: cmsUser,
-            },
-            ldService,
             emailer: mockEmailer,
         })
 

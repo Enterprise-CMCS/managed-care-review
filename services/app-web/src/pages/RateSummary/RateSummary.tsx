@@ -12,8 +12,6 @@ import { useAuth } from '../../contexts/AuthContext'
 import { ErrorForbiddenPage } from '../Errors/ErrorForbiddenPage'
 import { Error404 } from '../Errors/Error404Page'
 import { RateWithdrawnBanner } from '../../components/Banner'
-import { useLDClient } from 'launchdarkly-react-client-sdk'
-import { featureFlags } from '@mc-review/common-code'
 
 export const RateSummary = (): React.ReactElement => {
     // Page level state
@@ -23,15 +21,11 @@ export const RateSummary = (): React.ReactElement => {
     const [rateName, setRateName] = useState<string | undefined>(undefined)
     const { id } = useParams() as { id: string }
 
-    const ldClient = useLDClient()
-    const showQAbyRates: boolean = ldClient?.variation(
-        featureFlags.QA_BY_RATES.flag,
-        featureFlags.QA_BY_RATES.defaultValue
-    )
-
     useEffect(() => {
         updateHeading({ customHeading: rateName })
     }, [rateName, updateHeading])
+
+    const isStateUser = loggedInUser?.role === 'STATE_USER'
 
     const { data, loading, error } = useFetchRateQuery({
         variables: {
@@ -81,11 +75,7 @@ export const RateSummary = (): React.ReactElement => {
     }
 
     return (
-        <div
-            className={
-                showQAbyRates ? styles.background : styles.backgroundFullPage
-            }
-        >
+        <div className={styles.background}>
             <GridContainer
                 data-testid="rate-summary"
                 className={styles.container}
@@ -96,15 +86,12 @@ export const RateSummary = (): React.ReactElement => {
                         className={styles.banner}
                     />
                 )}
-                {!showQAbyRates && (
+                {isStateUser && (
+                    // state user does not see the RateSummarySideNav which has its own back button.
                     <div>
                         <NavLinkWithLogging
-                            //TODO: Will have to remove this conditional once the rate dashboard is made available to state users
                             to={{
-                                pathname:
-                                    loggedInUser?.__typename === 'StateUser'
-                                        ? RoutesRecord.DASHBOARD
-                                        : RoutesRecord.DASHBOARD_RATES,
+                                pathname: RoutesRecord.DASHBOARD,
                             }}
                             event_name="back_button"
                         >

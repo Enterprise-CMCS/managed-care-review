@@ -1,7 +1,4 @@
-import type { StateCodeType } from '@mc-review/hpp'
 import {
-    getStateAnalystsEmails,
-    getStateAnalystsEmailsLocal,
     getDevReviewTeamEmails,
     getDevReviewTeamEmailsLocal,
     getCmsReviewHelpEmail,
@@ -18,18 +15,11 @@ import {
     getDMCOEmailsLocal,
     getSourceEmailLocal,
     getSourceEmail,
-    getStateAnalystsSettings,
-    getStateAnalystsSettingsLocal,
     getHelpDeskEmail,
     getHelpDeskEmailLocal,
 } from './'
-import type { StateAnalystsWithState } from './stateAnalystsEmails/getStateAnalystsSettings'
 
 export type EmailParameterStore = {
-    getStateAnalystsSettings: (
-        stateCodes: StateCodeType[]
-    ) => Promise<StateAnalystsWithState | Error>
-    getStateAnalystsEmails: (stateCode: string) => Promise<string[] | Error>
     getDevReviewTeamEmails: () => Promise<string[] | Error>
     getCmsReviewHelpEmail: () => Promise<string | Error>
     getCmsRateHelpEmail: () => Promise<string | Error>
@@ -43,8 +33,6 @@ export type EmailParameterStore = {
 
 function newLocalEmailParameterStore(): EmailParameterStore {
     return {
-        getStateAnalystsSettings: getStateAnalystsSettingsLocal,
-        getStateAnalystsEmails: getStateAnalystsEmailsLocal,
         getDevReviewTeamEmails: getDevReviewTeamEmailsLocal,
         getCmsReviewHelpEmail: getCmsReviewHelpEmailLocal,
         getCmsRateHelpEmail: getCmsRateHelpEmailLocal,
@@ -59,8 +47,6 @@ function newLocalEmailParameterStore(): EmailParameterStore {
 
 function newAWSEmailParameterStore(): EmailParameterStore {
     return {
-        getStateAnalystsSettings: getStateAnalystsSettings,
-        getStateAnalystsEmails: getStateAnalystsEmails,
         getDevReviewTeamEmails: getDevReviewTeamEmails,
         getCmsReviewHelpEmail: getCmsReviewHelpEmail,
         getCmsRateHelpEmail: getCmsRateHelpEmail,

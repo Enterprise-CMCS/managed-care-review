@@ -5,7 +5,6 @@ export * from './userGQLMock'
 export * from './questionResponseGQLMock'
 
 export * from './questionResponseDataMocks'
-export * from './emailGQLMock'
 export * from './stateMock'
 
 export * from './updateUserMock'

@@ -10,15 +10,11 @@ import { NotFoundError } from '../../postgres'
 import type { Store } from '../../postgres'
 import { GraphQLError } from 'graphql/index'
 import type { Emailer } from '../../emailer'
-import type { EmailParameterStore } from '../../parameterStore'
-import type { LDService } from '../../launchDarkly/launchDarkly'
 import type { StateCodeType } from '@mc-review/hpp'
 
 export function createContractQuestionResponseResolver(
     store: Store,
-    emailer: Emailer,
-    emailParameterStore: EmailParameterStore,
-    launchDarkly: LDService
+    emailer: Emailer
 ): MutationResolvers['createContractQuestionResponse'] {
     return async (_parent, { input }, context) => {
         const { user, ctx, tracer } = context
@@ -28,9 +24,6 @@ export function createContractQuestionResponseResolver(
             ctx
         )
 
-        const featureFlags = await launchDarkly.allFlags(context)
-        const readStateAnalystsFromDBFlag =
-            featureFlags?.['read-write-state-assignments']
         if (!isStateUser(user)) {
             const msg = 'user not authorized to create a question response'
             logError('createContractQuestionResponse', msg)
@@ -127,46 +120,22 @@ export function createContractQuestionResponseResolver(
         const submitterEmails = contractSubmitters(contract)
 
         let stateAnalystsEmails: string[] = []
-        if (readStateAnalystsFromDBFlag) {
-            // not great that state code type isn't being used in ContractType but I'll risk the conversion for now
-            const stateAnalystsEmailsResult =
-                await store.findStateAssignedUsers(
-                    contract.stateCode as StateCodeType
-                )
+        // not great that state code type isn't being used in ContractType but I'll risk the conversion for now
+        const stateAnalystsEmailsResult = await store.findStateAssignedUsers(
+            contract.stateCode as StateCodeType
+        )
 
-            if (stateAnalystsEmailsResult instanceof Error) {
-                logError(
-                    'getStateAnalystsEmails',
-                    stateAnalystsEmailsResult.message
-                )
-                setErrorAttributesOnActiveSpan(
-                    stateAnalystsEmailsResult.message,
-                    span
-                )
-            } else {
-                stateAnalystsEmails = stateAnalystsEmailsResult.map(
-                    (u) => u.email
-                )
-            }
+        if (stateAnalystsEmailsResult instanceof Error) {
+            logError(
+                'getStateAnalystsEmails',
+                stateAnalystsEmailsResult.message
+            )
+            setErrorAttributesOnActiveSpan(
+                stateAnalystsEmailsResult.message,
+                span
+            )
         } else {
-            const stateAnalystsEmailsResult =
-                await emailParameterStore.getStateAnalystsEmails(
-                    contract.stateCode
-                )
-
-            //If error log it and set stateAnalystsEmails to empty string as to not interrupt the emails.
-            if (stateAnalystsEmailsResult instanceof Error) {
-                logError(
-                    'getStateAnalystsEmails',
-                    stateAnalystsEmailsResult.message
-                )
-                setErrorAttributesOnActiveSpan(
-                    stateAnalystsEmailsResult.message,
-                    span
-                )
-            } else {
-                stateAnalystsEmails = stateAnalystsEmailsResult
-            }
+            stateAnalystsEmails = stateAnalystsEmailsResult.map((u) => u.email)
         }
 
         const sendQuestionResponseCMSEmailResult =
