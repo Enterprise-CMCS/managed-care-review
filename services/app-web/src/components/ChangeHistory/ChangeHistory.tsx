@@ -122,7 +122,7 @@ export const ChangeHistory = ({
     const revisedItems: AccordionItemProps[] = revisionHistory.map(
         (r, index) => {
             const isInitialSubmission = r.updatedReason === 'Initial submission'
-            const isSubsequentSubmission =
+            const isSubsequentSubmissionOrUnlock =
                 r.kind === 'submit' || r.kind === 'unlock'
             const isApprovalAction = r.kind === 'approve'
             // We want to know if this contract has multiple submissions. To have multiple submissions, there must be minimum
@@ -150,7 +150,7 @@ export const ChangeHistory = ({
                         )}
                     </div>
                 )
-            } else if (isSubsequentSubmission) {
+            } else if (isSubsequentSubmissionOrUnlock) {
                 const isSubmit = r.kind === 'submit'
                 title = isSubmit ? 'Submission' : 'Unlock'
                 content = (
@@ -171,7 +171,7 @@ export const ChangeHistory = ({
                             </span>
                             <span>{r.updatedReason}</span>
                         </div>
-                        {isSubsequentSubmission &&
+                        {isSubsequentSubmissionOrUnlock &&
                             r.kind === 'submit' &&
                             r.revisionVersion && (
                                 <LinkWithLogging
