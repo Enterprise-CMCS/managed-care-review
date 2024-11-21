@@ -93,6 +93,24 @@ const submissions: ContractInDashboardType[] = [
         submissionType: 'Contract action and rate certification',
         stateName: 'Puerto Rico',
     },
+    {
+        id: '99b1a676-45d8-49fe-ac76-6xv2537dax44',
+        name: 'MCR-PR-0099-PMAP',
+        programs: [
+            {
+                __typename: 'Program',
+                id: 'd95394e5-44d1-45df-8151-1cc1ee66f100',
+                name: 'PMAP',
+                fullName: 'Prepaid Medical Assistance Program',
+                isRateProgram: false,
+            },
+        ],
+        submittedAt: '2022-10-05',
+        status: 'APPROVED',
+        updatedAt: new Date('2022-10-05T17:45:05.562Z'),
+        submissionType: 'Contract action and rate certification',
+        stateName: 'Texas',
+    },
 ]
 
 const mockCMSUser = (): User => ({
@@ -175,9 +193,9 @@ describe('ContractTable for CMS User (with filters)', () => {
         const rows = await screen.findAllByRole('row')
         expect(screen.getByRole('table')).toBeInTheDocument()
         //Expect 5 rows. 4 data rows and 1 header row
-        expect(rows).toHaveLength(5)
+        expect(rows).toHaveLength(6)
         expect(
-            screen.getByText('Displaying 4 of 4 submissions')
+            screen.getByText('Displaying 5 of 5 submissions')
         ).toBeInTheDocument()
     })
 
@@ -217,7 +235,7 @@ describe('ContractTable for CMS User (with filters)', () => {
         expect(within(columnNames).getByText(/Programs/)).toBeTruthy()
         expect(within(columnNames).getByText(/Submission date/)).toBeTruthy()
         expect(within(columnNames).getByText(/Status/)).toBeTruthy()
-        expect(submissionsInTable).toHaveLength(4)
+        expect(submissionsInTable).toHaveLength(5)
     })
 
     it('displays submissions table sorted by that revisions last updated column', async () => {
@@ -244,6 +262,9 @@ describe('ContractTable for CMS User (with filters)', () => {
         ).toHaveTextContent('10/05/2022')
         expect(
             within(rows[4]).getByTestId('submission-last-updated')
+        ).toHaveTextContent('10/05/2022')
+        expect(
+            within(rows[5]).getByTestId('submission-last-updated')
         ).toHaveTextContent('9/05/2022')
     })
 
@@ -404,7 +425,7 @@ describe('ContractTable for CMS User (with filters)', () => {
         expect(rows).toHaveLength(2)
         expect(rows[1]).toHaveTextContent('Ohio') // row[0] is the header
         expect(
-            screen.getByText('Displaying 1 of 4 submissions')
+            screen.getByText('Displaying 1 of 5 submissions')
         ).toBeInTheDocument()
     })
 
@@ -508,6 +529,104 @@ describe('ContractTable for CMS User (with filters)', () => {
         expect(global.window.location.href).toContain(
             '#filters=stateName%3DMinnesota%26submissionType%3DContract+action+and+rate+certification'
         )
+    })
+
+    it('can filter table by submission status', async () => {
+        renderWithProviders(
+            <ContractTable
+                tableData={submissions}
+                user={mockCMSUser()}
+                showFilters
+            />,
+            {
+                apolloProvider: apolloProviderWithCMSUser(),
+            }
+        )
+
+        const statusFilter = screen.getByTestId('status-filter')
+        const accordionButton = screen.getByTestId(
+            'accordionButton_filterAccordionItems'
+        )
+        await waitFor(async () => {
+            //Expect filter accordion and state filter to exist
+            expect(screen.queryByTestId('accordion')).toBeInTheDocument()
+            //Expand filter accordion
+            await userEvent.click(accordionButton)
+        })
+
+        //Look for state filter
+        const statusCombobox = within(statusFilter).getByRole('combobox')
+        expect(statusCombobox).toBeInTheDocument()
+
+        //Open combobox
+        selectEvent.openMenu(statusCombobox)
+        //Expect combobox options to exist
+        const comboboxOptions = () =>
+            screen.getByTestId('status-filter-options')
+        expect(comboboxOptions()).toBeInTheDocument()
+
+        await waitFor(async () => {
+            //Expected options are present
+            expect(
+                within(comboboxOptions()).getByText('SUBMITTED')
+            ).toBeInTheDocument()
+            expect(
+                within(comboboxOptions()).getByText('UNLOCKED')
+            ).toBeInTheDocument()
+            expect(
+                within(comboboxOptions()).getByText('APPROVED')
+            ).toBeInTheDocument()
+            await selectEvent.select(comboboxOptions(), 'APPROVED')
+        })
+
+        //Expect Texas,o to show on table
+        const rows = await screen.findAllByRole('row')
+        expect(rows).toHaveLength(2)
+        expect(rows[1]).toHaveTextContent('Texas') // row[0] is the header
+        expect(
+            screen.getByText('Displaying 1 of 5 submissions')
+        ).toBeInTheDocument()
+
+        // Add UNLOCK to filter
+        selectEvent.openMenu(statusCombobox)
+        await waitFor(async () => {
+            //Expected options are present
+            expect(
+                within(comboboxOptions()).getByText('UNLOCKED')
+            ).toBeInTheDocument()
+            await selectEvent.select(comboboxOptions(), 'UNLOCKED')
+        })
+
+        //Expect Minnesota and Texas to show on table
+        const rowsAgain = await screen.findAllByRole('row')
+        expect(rowsAgain).toHaveLength(3)
+        expect(rowsAgain[1]).toHaveTextContent('Texas')
+        expect(rowsAgain[2]).toHaveTextContent('Minnesota')
+        expect(
+            screen.getByText('Displaying 2 of 5 submissions')
+        ).toBeInTheDocument()
+
+        // Add SUBMIITED to filters
+        selectEvent.openMenu(statusCombobox)
+        await waitFor(async () => {
+            //Expected options are present
+            expect(
+                within(comboboxOptions()).getByText('SUBMITTED')
+            ).toBeInTheDocument()
+            await selectEvent.select(comboboxOptions(), 'SUBMITTED')
+        })
+
+        //Expect Minnesota and Texas to show on table
+        const rowsAgainAgain = await screen.findAllByRole('row')
+        expect(rowsAgainAgain).toHaveLength(6)
+        expect(rowsAgainAgain[1]).toHaveTextContent('Florida')
+        expect(rowsAgainAgain[2]).toHaveTextContent('Ohio')
+        expect(rowsAgainAgain[3]).toHaveTextContent('Puerto Rico')
+        expect(rowsAgainAgain[4]).toHaveTextContent('Texas')
+        expect(rowsAgainAgain[5]).toHaveTextContent('Minnesota')
+        expect(
+            screen.getByText('Displaying 5 of 5 submissions')
+        ).toBeInTheDocument()
     })
 
     it('should clear all filters when clear filter button is clicked', async () => {
@@ -660,7 +779,7 @@ describe('ContractTable for CMS User (with filters)', () => {
         expect(rows).toHaveLength(1)
         expect(screen.getByText('No results found')).toBeInTheDocument()
         expect(
-            screen.getByText('Displaying 0 of 4 submissions')
+            screen.getByText('Displaying 0 of 5 submissions')
         ).toBeInTheDocument()
     })
 
@@ -809,7 +928,7 @@ describe('ContractTable state user tests', () => {
         expect(within(columnNames).getByText(/Programs/)).toBeTruthy()
         expect(within(columnNames).getByText(/Submission date/)).toBeTruthy()
         expect(within(columnNames).getByText(/Status/)).toBeTruthy()
-        expect(submissionsInTable).toHaveLength(4)
+        expect(submissionsInTable).toHaveLength(5)
     })
 
     it('has correct submission links for state users', async () => {

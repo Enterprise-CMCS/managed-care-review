@@ -302,6 +302,7 @@ export const ContractTable = ({
                 },
             }),
             columnHelper.accessor('status', {
+                id: 'status',
                 header: 'Status',
                 cell: (info) => (
                     <StatusTag
@@ -312,6 +313,7 @@ export const ContractTable = ({
                 meta: {
                     dataTestID: `${tableConfig.rowIDName}-status`,
                 },
+                filterFn: `arrIncludesSome`,
             }),
         ],
         [isNotStateUser, tableConfig.rowIDName]
@@ -348,6 +350,9 @@ export const ContractTable = ({
     ) as Column<ContractInDashboardType>
     const submissionTypeColumn = reactTable.getColumn(
         'submissionType'
+    ) as Column<ContractInDashboardType>
+    const statusColumn = reactTable.getColumn(
+        'status'
     ) as Column<ContractInDashboardType>
 
     // Filter options based on table data instead of static list of options.
@@ -388,7 +393,6 @@ export const ContractTable = ({
     const clearFilters = () => {
         lastClickedElement.current = 'clearFiltersButton'
         setTableCaption(null)
-
         setColumnFilters([])
     }
 
@@ -489,6 +493,35 @@ export const ContractTable = ({
                                             submissionTypeColumn,
                                             selectedOptions,
                                             'submissionType'
+                                        )
+                                    }
+                                />
+                                <FilterSelect
+                                    value={getSelectedFiltersFromUrl(
+                                        columnFilters,
+                                        'status'
+                                    )}
+                                    name="status"
+                                    label="Status"
+                                    filterOptions={[
+                                        {
+                                            label: 'SUBMITTED',
+                                            value: 'SUBMITTED',
+                                        },
+                                        {
+                                            label: 'UNLOCKED',
+                                            value: 'UNLOCKED',
+                                        },
+                                        {
+                                            label: 'APPROVED',
+                                            value: 'APPROVED',
+                                        },
+                                    ]}
+                                    onChange={(selectedOptions) =>
+                                        updateFilters(
+                                            statusColumn,
+                                            selectedOptions,
+                                            'status'
                                         )
                                     }
                                 />
