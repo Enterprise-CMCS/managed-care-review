@@ -511,6 +511,10 @@ export const ContractTable = ({
                                     label="Status"
                                     filterOptions={[
                                         {
+                                            label: 'Approved',
+                                            value: 'APPROVED',
+                                        },
+                                        {
                                             label: 'Submitted',
                                             value: 'SUBMITTED',
                                         },
@@ -521,10 +525,6 @@ export const ContractTable = ({
                                         {
                                             label: 'Withdrawn',
                                             value: 'WITHDRAWN',
-                                        },
-                                        {
-                                            label: 'Approved',
-                                            value: 'APPROVED',
                                         },
                                     ]}
                                     onChange={(selectedOptions) =>
