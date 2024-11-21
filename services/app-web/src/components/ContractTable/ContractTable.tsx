@@ -34,6 +34,7 @@ import { useTealium } from '../../hooks'
 import useDeepCompareEffect from 'use-deep-compare-effect'
 import { getTealiumFiltersChanged } from '../../tealium/tealiumHelpers'
 import { formatCalendarDate } from '../../common-code/dateHelpers'
+import { titleCaseString } from '../../common-code/formatters/titleCase'
 
 export type ContractInDashboardType = {
     id: string
@@ -159,7 +160,10 @@ const getSelectedFiltersFromUrl = (
     })
     const filterValues = valuesFromUrl
         .filter((item) => item.id === id)
-        .map((item) => ({ value: item.value, label: item.value }))
+        .map((item) => ({
+            value: item.value,
+            label: titleCaseString(item.value),
+        }))
     return filterValues as FilterOptionType[]
 }
 
@@ -496,6 +500,8 @@ export const ContractTable = ({
                                         )
                                     }
                                 />
+                            </DoubleColumnGrid>
+                            <DoubleColumnGrid>
                                 <FilterSelect
                                     value={getSelectedFiltersFromUrl(
                                         columnFilters,
@@ -505,19 +511,19 @@ export const ContractTable = ({
                                     label="Status"
                                     filterOptions={[
                                         {
-                                            label: 'SUBMITTED',
+                                            label: 'Submitted',
                                             value: 'SUBMITTED',
                                         },
                                         {
-                                            label: 'UNLOCKED',
+                                            label: 'Unlocked',
                                             value: 'UNLOCKED',
                                         },
                                         {
-                                            label: 'WITHDRAWN',
+                                            label: 'Withdrawn',
                                             value: 'WITHDRAWN',
                                         },
                                         {
-                                            label: 'APPROVED',
+                                            label: 'Approved',
                                             value: 'APPROVED',
                                         },
                                     ]}

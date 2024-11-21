@@ -568,15 +568,15 @@ describe('ContractTable for CMS User (with filters)', () => {
         await waitFor(async () => {
             //Expected options are present
             expect(
-                within(comboboxOptions()).getByText('SUBMITTED')
+                within(comboboxOptions()).getByText('Submitted')
             ).toBeInTheDocument()
             expect(
-                within(comboboxOptions()).getByText('UNLOCKED')
+                within(comboboxOptions()).getByText('Unlocked')
             ).toBeInTheDocument()
             expect(
-                within(comboboxOptions()).getByText('APPROVED')
+                within(comboboxOptions()).getByText('Approved')
             ).toBeInTheDocument()
-            await selectEvent.select(comboboxOptions(), 'APPROVED')
+            await selectEvent.select(comboboxOptions(), 'Approved')
         })
 
         //Expect Texas,o to show on table
@@ -592,9 +592,9 @@ describe('ContractTable for CMS User (with filters)', () => {
         await waitFor(async () => {
             //Expected options are present
             expect(
-                within(comboboxOptions()).getByText('UNLOCKED')
+                within(comboboxOptions()).getByText('Unlocked')
             ).toBeInTheDocument()
-            await selectEvent.select(comboboxOptions(), 'UNLOCKED')
+            await selectEvent.select(comboboxOptions(), 'Unlocked')
         })
 
         //Expect Minnesota and Texas to show on table
@@ -611,9 +611,9 @@ describe('ContractTable for CMS User (with filters)', () => {
         await waitFor(async () => {
             //Expected options are present
             expect(
-                within(comboboxOptions()).getByText('SUBMITTED')
+                within(comboboxOptions()).getByText('Submitted')
             ).toBeInTheDocument()
-            await selectEvent.select(comboboxOptions(), 'SUBMITTED')
+            await selectEvent.select(comboboxOptions(), 'Submitted')
         })
 
         //Expect Minnesota and Texas to show on table
