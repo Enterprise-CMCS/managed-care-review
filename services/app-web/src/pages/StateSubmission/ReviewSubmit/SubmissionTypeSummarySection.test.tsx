@@ -87,7 +87,7 @@ describe('SubmissionTypeSummarySection', () => {
         expect(
             screen.queryByText(/You must provide this information/)
         ).toBeNull()
-        // API returns UTC timezone, we display timestamped dates in ET timezone so 1 day before on these tests.
+        // API returns UTC timezone, we display timestamped dates in PT timezone so 1 day before on these tests.
         expect(screen.getByLabelText('Submitted')).toHaveTextContent(
             '11/26/2024'
         )

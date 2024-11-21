@@ -28,7 +28,7 @@ export const LinkedRateSummary = ({
                         label="Submission date"
                         children={formatCalendarDate(
                             rateForm.initiallySubmittedAt,
-                            'America/New_York'
+                            'America/Los_Angeles'
                         )}
                     />
 

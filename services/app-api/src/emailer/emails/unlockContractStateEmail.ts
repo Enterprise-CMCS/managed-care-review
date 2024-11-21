@@ -66,7 +66,7 @@ export const unlockContractStateEmail = async (
         unlockedBy: updateInfo.updatedBy.email,
         unlockedOn: formatCalendarDate(
             updateInfo.updatedAt,
-            'America/New_York'
+            'America/Los_Angeles'
         ),
         unlockedReason: updateInfo.updatedReason,
         shouldIncludeRates:

@@ -95,9 +95,9 @@ describe('RateSummary', () => {
                 expect(
                     screen.getByTestId('rateWithdrawnBanner')
                 ).toHaveTextContent(/Withdrawn by: Administrator/)
-                // API returns UTC timezone, we display timestamped dates in ET timezone so 1 day before on these tests.
+                // API returns UTC timezone, we display timestamped dates in PT timezone so 1 day before on these tests.
                 expect(
-                    screen.getByText('12/31/2023 7:00pm ET')
+                    screen.getByText('12/31/2023 4:00pm PT')
                 ).toBeInTheDocument()
                 expect(
                     screen.getByText('Admin as withdrawn this rate.')
@@ -221,8 +221,8 @@ describe('RateSummary', () => {
             expect(screen.getByTestId('rateWithdrawnBanner')).toHaveTextContent(
                 /Withdrawn by: Administrator/
             )
-            // API returns UTC timezone, we display timestamped dates in ET timezone so 1 day before on these tests.
-            expect(screen.getByText('12/31/2023 7:00pm ET')).toBeInTheDocument()
+            // API returns UTC timezone, we display timestamped dates in PT timezone so 1 day before on these tests.
+            expect(screen.getByText('12/31/2023 4:00pm PT')).toBeInTheDocument()
             expect(
                 screen.getByText('Admin as withdrawn this rate.')
             ).toBeInTheDocument()

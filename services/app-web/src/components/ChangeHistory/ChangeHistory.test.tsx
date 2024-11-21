@@ -66,10 +66,10 @@ describe('Change History', () => {
     it('has expected text in the accordion titles and content', () => {
         const submittedContract = mockContractPackageSubmittedWithRevisions()
         renderWithProviders(<ChangeHistory contract={submittedContract} />)
-        // API returns UTC timezone, we display timestamped dates in ET timezone so 1 day before on these tests.
+        // API returns UTC timezone, we display timestamped dates in PT timezone so 1 day before on these tests.
         expect(
             screen.getByRole('button', {
-                name: `03/03/2024 11:54am ET - Submission`,
+                name: `03/03/2024 8:54am PT - Submission`,
             })
         ).toBeInTheDocument()
         expect(
@@ -134,10 +134,10 @@ describe('Change History', () => {
         })
 
         renderWithProviders(<ChangeHistory contract={submittedContract} />)
-        // API returns UTC timezone, we display timestamped dates in ET timezone so 1 day before on these tests.
+        // API returns UTC timezone, we display timestamped dates in PT timezone so 1 day before on these tests.
         expect(
             screen.getByRole('button', {
-                name: `02/02/2024 12:45pm ET - Submission`,
+                name: `02/02/2024 9:45am PT - Submission`,
             })
         ).toBeInTheDocument()
         // Should have 3 change history records
@@ -178,12 +178,12 @@ describe('Change History', () => {
         const submittedContract = mockContractPackageSubmittedWithRevisions()
         renderWithProviders(<ChangeHistory contract={submittedContract} />)
         const accordionRows = screen.getAllByRole('button')
-        // API returns UTC timezone, we display timestamped dates in ET timezone so 1 day before on these tests.
-        expect(accordionRows[0]).toHaveTextContent('03/03/2024 11:54am ET')
-        expect(accordionRows[1]).toHaveTextContent('03/01/2024 12:54pm ET')
-        expect(accordionRows[2]).toHaveTextContent('02/02/2024 12:45pm ET')
-        expect(accordionRows[3]).toHaveTextContent('01/25/2024 4:13pm ET')
-        expect(accordionRows[4]).toHaveTextContent('01/01/2024 6:14am ET')
+        // API returns UTC timezone, we display timestamped dates in PT timezone so 1 day before on these tests.
+        expect(accordionRows[0]).toHaveTextContent('03/03/2024 8:54am PT')
+        expect(accordionRows[1]).toHaveTextContent('03/01/2024 9:54am PT')
+        expect(accordionRows[2]).toHaveTextContent('02/02/2024 9:45am PT')
+        expect(accordionRows[3]).toHaveTextContent('01/25/2024 1:13pm PT')
+        expect(accordionRows[4]).toHaveTextContent('01/01/2024 3:14am PT')
     })
     it('has correct href values for previous submission links', () => {
         const submittedContract = mockContractPackageSubmittedWithRevisions()

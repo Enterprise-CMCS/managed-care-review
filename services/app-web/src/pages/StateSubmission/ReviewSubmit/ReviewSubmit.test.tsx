@@ -205,7 +205,7 @@ describe('ReviewSubmit', () => {
         await waitFor(() => {
             const rows = screen.getAllByRole('row')
             expect(rows).toHaveLength(4)
-            // API returns UTC timezone, we display timestamped dates in ET timezone so 1 day before on these tests.
+            // API returns UTC timezone, we display timestamped dates in PT timezone so 1 day before on these tests.
             expect(within(rows[0]).getByText('Date added')).toBeInTheDocument()
             expect(within(rows[1]).getByText('02/01/2023')).toBeInTheDocument()
             expect(within(rows[2]).getByText('Date added')).toBeInTheDocument()

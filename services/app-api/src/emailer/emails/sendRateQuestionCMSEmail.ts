@@ -54,7 +54,7 @@ export const sendRateQuestionCMSEmail = async (
         cmsRequestorDivision: currentQuestion.division,
         dateAsked: formatCalendarDate(
             currentQuestion.createdAt,
-            'America/New_York'
+            'America/Los_Angeles'
         ),
         questionRound,
     }

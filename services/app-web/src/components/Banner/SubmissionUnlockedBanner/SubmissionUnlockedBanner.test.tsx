@@ -1,6 +1,5 @@
 import { render, screen } from '@testing-library/react'
 import { SubmissionUnlockedBanner } from './SubmissionUnlockedBanner'
-import { dayjs } from '@mc-review/common-code'
 import { UpdateInformation } from '../../../gen/gqlClient'
 import { mockValidCMSUser, mockValidStateUser } from '@mc-review/mocks'
 
@@ -30,8 +29,8 @@ describe('SubmissionUnlockBanner', () => {
         )
         expect(screen.getByRole('alert')).toHaveClass('usa-alert--warning')
         expect(screen.getByText('Loremipsum@email.com')).toBeInTheDocument()
-        // API returns UTC timezone, we display timestamped dates in ET timezone so 1 day before on these tests.
-        expect(screen.getByText('10/07/2024 8:00pm ET')).toBeInTheDocument()
+        // API returns UTC timezone, we display timestamped dates in PT timezone so 1 day before on these tests.
+        expect(screen.getByText('10/07/2024 5:00pm PT')).toBeInTheDocument()
         expect(
             screen.getByText(
                 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi ut justo non nisl congue efficitur. Praesent porta condimentum imperdiet. Curabitur.'
@@ -49,8 +48,8 @@ describe('SubmissionUnlockBanner', () => {
         )
         expect(screen.getByRole('alert')).toHaveClass('usa-alert--info')
         expect(screen.getByText('Loremipsum@email.com')).toBeInTheDocument()
-        // API returns UTC timezone, we display timestamped dates in ET timezone so 1 day before on these tests.
-        expect(screen.getByText('10/07/2024 8:00pm ET')).toBeInTheDocument()
+        // API returns UTC timezone, we display timestamped dates in PT timezone so 1 day before on these tests.
+        expect(screen.getByText('10/07/2024 5:00pm PT')).toBeInTheDocument()
         expect(
             screen.getByText(
                 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi ut justo non nisl congue efficitur. Praesent porta condimentum imperdiet. Curabitur.'

@@ -49,7 +49,7 @@ export const unlockPackageCMSEmail = async (
         unlockedBy: updateInfo.updatedBy.email,
         unlockedOn: formatCalendarDate(
             updateInfo.updatedAt,
-            'America/New_York'
+            'America/Los_Angeles'
         ),
         unlockedReason: updateInfo.updatedReason,
         shouldIncludeRates: pkg.submissionType === 'CONTRACT_AND_RATES',

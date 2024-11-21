@@ -51,7 +51,7 @@ export const sendRateQuestionStateEmail = async (
         cmsRequestorDivision: rateQuestion.division,
         dateAsked: formatCalendarDate(
             rateQuestion.createdAt,
-            'America/New_York'
+            'America/Los_Angeles'
         ),
     }
 

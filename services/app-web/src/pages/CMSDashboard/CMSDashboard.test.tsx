@@ -270,7 +270,7 @@ describe('CMSDashboard', () => {
                     const lastUpdated = within(unlockedRow).getByTestId(
                         'submission-last-updated'
                     )
-                    // API returns UTC timezone, we display timestamped dates in ET timezone so 1 day before on these tests.
+                    // API returns UTC timezone, we display timestamped dates in PT timezone so 1 day before on these tests.
                     expect(lastUpdated).toHaveTextContent('01/21/2100')
                 })
 

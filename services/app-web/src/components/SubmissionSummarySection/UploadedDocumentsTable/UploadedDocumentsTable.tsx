@@ -216,7 +216,7 @@ export const UploadedDocumentsTable = ({
                                 {canDisplayDateAddedForDocument(doc) ? (
                                     formatCalendarDate(
                                         doc.dateAdded,
-                                        'America/New_York'
+                                        'America/Los_Angeles'
                                     )
                                 ) : (
                                     <span className="srOnly">N/A</span>

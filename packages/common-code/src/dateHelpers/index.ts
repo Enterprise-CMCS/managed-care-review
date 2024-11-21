@@ -1,8 +1,7 @@
-export * from './gqlDate'
 export {
     formatCalendarDate,
     formatRateNameDate,
-    formatToEasternTime,
+    formatToPacificTime,
 } from './calendarDate'
 export { formatGQLDate } from './gqlDate'
 export { mostRecentDate, isDate } from './mostRecentDate'
