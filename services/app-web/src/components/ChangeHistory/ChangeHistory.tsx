@@ -7,6 +7,9 @@ import {
     UpdateInformation,
     Contract,
     UnlockedContract,
+    ContractReviewStatusActions,
+    ContractPackageSubmission,
+    ContractRevision,
 } from '../../gen/gqlClient'
 import styles from './ChangeHistory.module.scss'
 import { LinkWithLogging } from '../TealiumLogging/Link'
@@ -19,7 +22,7 @@ type ChangeHistoryProps = {
 }
 
 type flatRevisions = UpdateInformation & {
-    kind: 'submit' | 'unlock'
+    kind: 'submit' | 'unlock' | 'approve' | 'withdraw'
     revisionVersion: string | undefined
 }
 
@@ -29,19 +32,28 @@ export const ChangeHistory = ({
     const { logAccordionEvent } = useTealium()
     const flattenedRevisions = (): flatRevisions[] => {
         const result: flatRevisions[] = []
-
         const contractSubmissions = contract.packageSubmissions.filter(
             (submission) => {
                 return submission.cause === 'CONTRACT_SUBMISSION'
             }
         )
-
+        const reviewActions = contract.reviewStatusActions?.filter(
+            (action) => action !== undefined && action !== null
+        )
         //Reverse revisions to order from earliest to latest revision. This is to correctly set version for each
         // contract & recontract.
-        const reversedRevisions = [
-            ...contractSubmissions,
-            contract.draftRevision,
-        ].reverse()
+        let reversedRevisions: (
+            | ContractPackageSubmission
+            | ContractRevision
+            | ContractReviewStatusActions
+            | undefined
+            | null
+        )[] = [...contractSubmissions, contract.draftRevision]
+        if (reviewActions) {
+            reversedRevisions = reversedRevisions.concat(...reviewActions)
+        }
+        reversedRevisions.reverse()
+
         let submitsIdx = 1
         reversedRevisions.forEach(
             (r, index) => {
@@ -82,6 +94,20 @@ export const ChangeHistory = ({
                         result.push(newUnlock)
                     }
                 }
+                if (r?.__typename === 'ContractReviewStatusActions') {
+                    let actionKind: flatRevisions['kind'] = 'approve'
+                    switch (r.actionType) {
+                        case 'WITHDRAW':
+                            actionKind = 'withdraw'
+                            break
+                    }
+                    const newAction: flatRevisions = {} as flatRevisions
+                    newAction.updatedAt = r.updatedAt
+                    newAction.updatedBy = r.updatedBy
+                    newAction.updatedReason = r.updatedReason
+                    newAction.kind = actionKind
+                    result.push(newAction)
+                }
             },
             (submitsIdx = 1)
         )
@@ -93,27 +119,21 @@ export const ChangeHistory = ({
     }
 
     const revisionHistory = flattenedRevisions()
-
     const revisedItems: AccordionItemProps[] = revisionHistory.map(
         (r, index) => {
             const isInitialSubmission = r.updatedReason === 'Initial submission'
-            const isSubsequentSubmission = r.kind === 'submit'
-
+            const isSubsequentSubmission =
+                r.kind === 'submit' || r.kind === 'unlock'
+            const isApprovalAction = r.kind === 'approve'
             // We want to know if this contract has multiple submissions. To have multiple submissions, there must be minimum
             // more than the initial contract revision.
             const hasSubsequentSubmissions = revisionHistory.length > 1
 
-            return {
-                title: (
-                    <div>
-                        {`${formatToPacificTime(r.updatedAt)} - ${isSubsequentSubmission ? 'Submission' : 'Unlock'}`}
-                    </div>
-                ),
-                // Display this code if this is the initial contract. We only want to display the link of the initial contract
-                // only if there has been subsequent contracts. We do not want to display a link if the package initial
-                // contract was unlocked, but has not been resubmitted yet.
-                headingLevel: 'h4',
-                content: isInitialSubmission ? (
+            let content
+            let title
+            if (isInitialSubmission) {
+                title = 'Submission'
+                content = (
                     <div data-testid={`change-history-record`}>
                         <span className={styles.tag}>Submitted by:</span>
                         <span>
@@ -129,13 +149,15 @@ export const ChangeHistory = ({
                             </LinkWithLogging>
                         )}
                     </div>
-                ) : (
+                )
+            } else if (isSubsequentSubmission) {
+                const isSubmit = r.kind === 'submit'
+                title = isSubmit ? 'Submission' : 'Unlock'
+                content = (
                     <div data-testid={`change-history-record`}>
                         <div>
                             <span className={styles.tag}>
-                                {isSubsequentSubmission
-                                    ? 'Submitted by: '
-                                    : 'Unlocked by: '}
+                                {isSubmit ? 'Submitted by: ' : 'Unlocked by: '}
                             </span>
                             <span>
                                 {`${getUpdatedByDisplayName(r.updatedBy)} `}
@@ -143,22 +165,66 @@ export const ChangeHistory = ({
                         </div>
                         <div>
                             <span className={styles.tag}>
-                                {isSubsequentSubmission
+                                {isSubmit
                                     ? 'Changes made: '
                                     : 'Reason for unlock: '}
                             </span>
                             <span>{r.updatedReason}</span>
                         </div>
-                        {isSubsequentSubmission && r.revisionVersion && (
-                            <LinkWithLogging
-                                href={`/submissions/${contract.id}/revisions/${r.revisionVersion}`}
-                                data-testid={`revision-link-${r.revisionVersion}`}
-                            >
-                                View past submission version
-                            </LinkWithLogging>
+                        {isSubsequentSubmission &&
+                            r.kind === 'submit' &&
+                            r.revisionVersion && (
+                                <LinkWithLogging
+                                    href={`/submissions/${contract.id}/revisions/${r.revisionVersion}`}
+                                    data-testid={`revision-link-${r.revisionVersion}`}
+                                >
+                                    View past submission version
+                                </LinkWithLogging>
+                            )}
+                    </div>
+                )
+            } else if (isApprovalAction) {
+                title = 'Status Update'
+                content = (
+                    <div data-testid={`change-history-record`}>
+                        <div>
+                            <span className={styles.tag}>{`Status: `}</span>
+                            <span>Approved</span>
+                        </div>
+                        <div>
+                            <span className={styles.tag}>Updated by:</span>
+                            <span>
+                                {` ${getUpdatedByDisplayName(r.updatedBy)} `}
+                            </span>
+                        </div>
+                        <div>
+                            <span className={styles.tag}>Updated on:</span>
+                            <span>
+                                {` ${formatToPacificTime(r.updatedAt)} `}
+                            </span>
+                        </div>
+                        {r.updatedReason && (
+                            <div>
+                                <span className={styles.tag}>
+                                    {`Optional note: `}
+                                </span>
+                                <span>{r.updatedReason}</span>
+                            </div>
                         )}
                     </div>
+                )
+            }
+            return {
+                title: (
+                    <div>
+                        {`${formatToPacificTime(r.updatedAt)} - ${title}`}
+                    </div>
                 ),
+                // Display this code if this is the initial contract. We only want to display the link of the initial contract
+                // only if there has been subsequent contracts. We do not want to display a link if the package initial
+                // contract was unlocked, but has not been resubmitted yet.
+                headingLevel: 'h4',
+                content,
                 expanded: false,
                 handleToggle: () => {
                     logAccordionEvent({

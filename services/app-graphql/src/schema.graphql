@@ -1827,7 +1827,7 @@ type Contract {
     draftRates: [Rate!]
 
     "reviewStatusActions are the who/when/why for review status changes on this contract"
-    reviewStatusActions: [ContractReviewStatusActions]
+    reviewStatusActions: [ContractReviewStatusActions!]
 
     """
     packageSubmissions are a snapshot of the contract and its related rates through time

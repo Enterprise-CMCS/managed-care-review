@@ -28,6 +28,7 @@ import {
 } from './prismaSharedContractRateHelpers'
 import type { ContractTableWithoutDraftRates } from './prismaSubmittedContractHelpers'
 import type { ContractTableFullPayload } from './prismaFullContractRateHelpers'
+import type { ContractReviewActionType } from '../../domain-models/contractAndRates/contractReviewActionType'
 
 // This function might be generally useful later on. It takes an array of objects
 // that can be errors and either returns the first error, or returns the list but with
@@ -103,7 +104,8 @@ function contractWithHistoryToDomainModelWithoutRates(
 
     let draftRevision: ContractRevisionType | undefined = undefined
     const submittedRevisions: ContractRevisionType[] = []
-
+    const reviewStatusActions: ContractReviewActionType[] =
+        contract.reviewStatusActions ?? []
     for (const contractRev of contractRevisions) {
         // If we have a draft revision
         // We set the draft revision aside, format it properly
@@ -198,7 +200,7 @@ function contractWithHistoryToDomainModelWithoutRates(
         status,
         reviewStatus,
         consolidatedStatus,
-        reviewStatusActions: contract.reviewStatusActions,
+        reviewStatusActions: reviewStatusActions.reverse(),
         stateCode: contract.stateCode,
         stateNumber: contract.stateNumber,
         draftRevision,
