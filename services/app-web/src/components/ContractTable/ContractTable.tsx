@@ -513,6 +513,10 @@ export const ContractTable = ({
                                             value: 'UNLOCKED',
                                         },
                                         {
+                                            label: 'WITHDRAWN',
+                                            value: 'WITHDRAWN',
+                                        },
+                                        {
                                             label: 'APPROVED',
                                             value: 'APPROVED',
                                         },
