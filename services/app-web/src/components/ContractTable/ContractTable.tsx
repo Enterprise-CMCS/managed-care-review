@@ -16,10 +16,8 @@ import { ConsolidatedContractStatus, Program, User } from '../../gen/gqlClient'
 import styles from './ContractTable.module.scss'
 import { Table, Tag } from '@trussworks/react-uswds'
 import qs from 'qs'
-import {
-    SubmissionStatusRecord,
-    SubmissionReviewStatusRecord,
-} from '@mc-review/hpp'
+import { SubmissionStatusRecord } from '@mc-review/hpp'
+import { SubmissionReviewStatusRecord } from '@mc-review/constants'
 import {
     FilterAccordion,
     FilterSelect,

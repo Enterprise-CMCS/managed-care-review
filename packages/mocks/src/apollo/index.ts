@@ -20,3 +20,5 @@ export * from './rateGQLMocks'
 
 export * from './replaceRateGQLMocks'
 export * from './mcReviewSettingsGQLMocks'
+
+export * from './approveContractMocks'

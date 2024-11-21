@@ -20,7 +20,7 @@ import { testS3Client } from '../../testHelpers'
 import { mockContractPackageUnlockedWithUnlockedType } from '@mc-review/mocks'
 import { ReviewSubmit } from '../StateSubmission/ReviewSubmit'
 import { generatePath, Location } from 'react-router-dom'
-import { approveContractMockSuccess } from '../../testHelpers/apolloMocks/approveContractMocks'
+import { approveContractMockSuccess } from '@mc-review/mocks'
 import { Contract } from '../../gen/gqlClient'
 
 describe('SubmissionSummary', () => {
