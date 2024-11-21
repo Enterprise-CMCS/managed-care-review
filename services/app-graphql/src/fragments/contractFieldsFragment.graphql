@@ -9,7 +9,16 @@ fragment contractFieldsFragment on Contract {
     stateCode
     mccrsID
     reviewStatusActions {
-        ...reviewActions
+        updatedAt
+        updatedBy {
+            email
+            role
+            familyName
+            givenName
+        }
+        updatedReason
+        contractID
+        actionType
     }
     state {
         code
@@ -23,17 +32,4 @@ fragment contractFieldsFragment on Contract {
     }
 
     stateNumber
-}
-
-fragment reviewActions on ContractReviewStatusActions {
-updatedAt
-        updatedBy {
-            email
-            role
-            familyName
-            givenName
-        }
-        updatedReason
-        contractID
-        actionType
 }

@@ -105,7 +105,7 @@ function contractWithHistoryToDomainModelWithoutRates(
     let draftRevision: ContractRevisionType | undefined = undefined
     const submittedRevisions: ContractRevisionType[] = []
     const reviewStatusActions: ContractReviewActionType[] =
-        contract.reviewStatusActions ?? []
+        contract.reviewStatusActions
     for (const contractRev of contractRevisions) {
         // If we have a draft revision
         // We set the draft revision aside, format it properly
