@@ -1,11 +1,11 @@
-import http from 'node:http'
+import https from 'node:https'
 import fs from 'node:fs'
 
 // httpRequest wraps node's http request in a promise.
 // Right now this only supports getting a URL, but could be extended to cover the whole api
-async function httpRequest(url: string): Promise<string | Error> {
+async function httpsRequest(url: string): Promise<string | Error> {
     return new Promise(function (resolve, _reject) {
-        const req = http.request(url, function (res) {
+        const req = https.request(url, function (res) {
             // reject on bad status
             if (
                 !res.statusCode ||
@@ -53,4 +53,4 @@ function fileExists(path: string): boolean | Error {
     }
 }
 
-export { httpRequest, fileExists }
+export { httpsRequest, fileExists }

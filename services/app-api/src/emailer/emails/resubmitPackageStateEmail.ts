@@ -52,7 +52,7 @@ export const resubmitPackageStateEmail = async (
         resubmittedBy: updateInfo.updatedBy.email,
         resubmittedOn: formatCalendarDate(
             updateInfo.updatedAt,
-            'America/New_York'
+            'America/Los_Angeles'
         ),
         resubmissionReason: updateInfo.updatedReason,
         shouldIncludeRates: isContractAndRates,

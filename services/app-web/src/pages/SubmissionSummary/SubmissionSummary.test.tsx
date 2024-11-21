@@ -21,12 +21,13 @@ import { mockContractPackageUnlockedWithUnlockedType } from '../../testHelpers/a
 import { ReviewSubmit } from '../StateSubmission/ReviewSubmit'
 import { generatePath, Location } from 'react-router-dom'
 import { approveContractMockSuccess } from '../../testHelpers/apolloMocks/approveContractMocks'
+import { dayjs } from '../../common-code/dateHelpers'
 import { Contract } from '../../gen/gqlClient'
 
 describe('SubmissionSummary', () => {
     describe.each(iterableCmsUsersMockData)(
         '$userRole SubmissionSummary tests',
-        ({ userRole, mockUser }) => {
+        ({ mockUser }) => {
             it('renders submission unlocked banner for CMS user', async () => {
                 const contract = mockContractPackageUnlockedWithUnlockedType()
 
@@ -74,7 +75,7 @@ describe('SubmissionSummary', () => {
                     expect(
                         screen.getByTestId('unlockedBanner')
                     ).toHaveTextContent(
-                        /on: (0?[1-9]|[12][0-9]|3[01])\/[0-9]+\/[0-9]+\s[0-9]+:[0-9]+[a-zA-Z]+ ET/i
+                        /on: (0?[1-9]|[12][0-9]|3[01])\/[0-9]+\/[0-9]+\s[0-9]+:[0-9]+[a-zA-Z]+ PT/i
                     )
                     expect(
                         screen.getByTestId('unlockedBanner')
@@ -561,6 +562,58 @@ describe('SubmissionSummary', () => {
                     ).toBeInTheDocument()
                 })
 
+                it('renders the submission date correctly taking into account pacific time', async () => {
+                    // an early morning ET submission date that will listed as initially submitted the day before
+                    // 02/03/2025 2:01am ET
+                    const earlyMorningET = dayjs()
+                        .tz('America/New_York')
+                        .year(2025)
+                        .month(1)
+                        .date(3)
+                        .hour(2)
+                        .minute(1)
+                    const ptDateFormatted = '02/02/2025'
+
+                    const contract =
+                        mockContractPackageUnlockedWithUnlockedType()
+                    contract.id = 'test-abc-123'
+                    contract.initiallySubmittedAt = earlyMorningET.toDate()
+
+                    renderWithProviders(
+                        <Routes>
+                            <Route element={<SubmissionSideNav />}>
+                                <Route
+                                    path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                                    element={<SubmissionSummary />}
+                                />
+                            </Route>
+                        </Routes>,
+                        {
+                            apolloProvider: {
+                                mocks: [
+                                    fetchCurrentUserMock({
+                                        user: mockUser(),
+                                        statusCode: 200,
+                                    }),
+                                    fetchContractWithQuestionsMockSuccess({
+                                        contract,
+                                    }),
+                                    fetchContractMockSuccess({
+                                        contract,
+                                    }),
+                                ],
+                            },
+                            routerProvider: {
+                                route: '/submissions/test-abc-123',
+                            },
+                        }
+                    )
+
+                    expect(
+                        await screen.findByLabelText('Submitted')
+                    ).toHaveTextContent(ptDateFormatted)
+                })
+
                 it('extracts the correct document dates from the submission and displays them in tables', async () => {
                     renderWithProviders(
                         <Routes>
@@ -602,7 +655,7 @@ describe('SubmissionSummary', () => {
                         expect(
                             within(rows[0]).getByText('Date added')
                         ).toBeInTheDocument()
-                        // API returns UTC timezone, we display timestamped dates in ET timezone so 1 day before on these tests.
+                        // API returns UTC timezone, we display timestamped dates in PT timezone so 1 day before on these tests.
                         expect(
                             within(rows[1]).getByText('12/31/2023')
                         ).toBeInTheDocument()
@@ -718,7 +771,7 @@ describe('SubmissionSummary', () => {
                     expect(
                         await screen.findByTestId('unlockedBanner')
                     ).toHaveTextContent(
-                        /Unlocked on: (0?[1-9]|[12][0-9]|3[01])\/[0-9]+\/[0-9]+\s[0-9]+:[0-9]+[a-zA-Z]+ ET/i
+                        /Unlocked on: (0?[1-9]|[12][0-9]|3[01])\/[0-9]+\/[0-9]+\s[0-9]+:[0-9]+[a-zA-Z]+ PT/i
                     )
                     expect(
                         await screen.findByTestId('unlockedBanner')
@@ -821,7 +874,7 @@ describe('SubmissionSummary', () => {
             expect(
                 await screen.findByTestId('updatedSubmissionBanner')
             ).toHaveTextContent(
-                /Updated on: (0?[1-9]|[12][0-9]|3[01])\/[0-9]+\/[0-9]+\s[0-9]+:[0-9]+[a-zA-Z]+ ET/i
+                /Updated on: (0?[1-9]|[12][0-9]|3[01])\/[0-9]+\/[0-9]+\s[0-9]+:[0-9]+[a-zA-Z]+ PT/i
             )
             expect(
                 await screen.findByTestId('updatedSubmissionBanner')
@@ -1327,7 +1380,7 @@ describe('SubmissionSummary', () => {
 
     describe.each(iterableNonCMSUsersMockData)(
         '$userRole submission approval tests',
-        ({ mockUser, userRole }) => {
+        ({ mockUser }) => {
             it(`does not render approve submission button`, async () => {
                 const contract =
                     mockContractPackageSubmittedWithQuestions('test-abc-123')

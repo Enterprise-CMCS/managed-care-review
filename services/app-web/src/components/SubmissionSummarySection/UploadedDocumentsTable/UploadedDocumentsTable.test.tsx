@@ -142,7 +142,7 @@ describe('UploadedDocumentsTable', () => {
         await waitFor(() => {
             const rows = screen.getAllByRole('row')
             expect(rows).toHaveLength(4)
-            // API returns UTC timezone, we display timestamped dates in ET timezone so 1 day before on these tests.
+            // API returns UTC timezone, we display timestamped dates in PT timezone so 1 day before on these tests.
             expect(rows[0]).toHaveTextContent('Date added')
             expect(rows[1]).toHaveTextContent('03/24/2022')
             expect(rows[2]).toHaveTextContent('03/25/2022')
@@ -194,7 +194,7 @@ describe('UploadedDocumentsTable', () => {
         await waitFor(() => {
             const rows = screen.getAllByRole('row')
             expect(rows).toHaveLength(4)
-            // API returns UTC timezone, we display timestamped dates in ET timezone so 1 day before on these tests.
+            // API returns UTC timezone, we display timestamped dates in PT timezone so 1 day before on these tests.
             expect(rows[0]).toHaveTextContent('Date added')
             expect(rows[1]).toHaveTextContent('03/24/2022')
             expect(rows[2]).toHaveTextContent('03/25/2022')
