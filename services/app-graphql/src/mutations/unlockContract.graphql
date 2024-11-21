@@ -4,6 +4,7 @@ mutation unlockContract($input: UnlockContractInput!) {
             id
             status
             reviewStatus
+            consolidatedStatus
             createdAt
             updatedAt
             initiallySubmittedAt

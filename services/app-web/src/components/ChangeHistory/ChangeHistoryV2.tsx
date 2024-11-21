@@ -12,7 +12,7 @@ import styles from './ChangeHistory.module.scss'
 import { LinkWithLogging } from '../TealiumLogging/Link'
 import { getUpdatedByDisplayName } from '../../gqlHelpers/userHelpers'
 import { useTealium } from '../../hooks'
-import { formatToEasternTime } from '../../common-code/dateHelpers'
+import { formatToPacificTime } from '../../common-code/dateHelpers'
 
 type ChangeHistoryProps = {
     contract: Contract | UnlockedContract
@@ -106,7 +106,7 @@ export const ChangeHistory = ({
             return {
                 title: (
                     <div>
-                        {`${formatToEasternTime(r.updatedAt)} - ${isSubsequentSubmission ? 'Submission' : 'Unlock'}`}
+                        {`${formatToPacificTime(r.updatedAt)} - ${isSubsequentSubmission ? 'Submission' : 'Unlock'}`}
                     </div>
                 ),
                 // Display this code if this is the initial contract. We only want to display the link of the initial contract

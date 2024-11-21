@@ -552,7 +552,6 @@ type unlockContractMockSuccessProps = {
 const transformUnlockedContractToContract = (contract: UnlockedContract): Contract => {
     return {
         ...contract,
-        reviewStatus: 'UNDER_REVIEW',
         __typename: 'Contract',
     }
 }

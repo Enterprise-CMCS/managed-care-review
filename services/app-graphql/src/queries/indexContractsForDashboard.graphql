@@ -3,24 +3,7 @@ query indexContractsForDashboard {
         totalCount
         edges {
             node {
-                id
-                status
-                createdAt
-                updatedAt
-                initiallySubmittedAt
-                stateCode
-                mccrsID
-                stateNumber
-                state {
-                    code
-                    name
-                    programs {
-                        id
-                        name
-                        fullName
-                        isRateProgram
-                    }
-                }
+                ...contractFieldsFragment
 
                 draftRevision {
                     id

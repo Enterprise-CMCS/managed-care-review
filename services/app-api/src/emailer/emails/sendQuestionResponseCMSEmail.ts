@@ -68,7 +68,7 @@ export const sendQuestionResponseCMSEmail = async (
         questionRound,
         dateAsked: formatCalendarDate(
             currentQuestion.createdAt,
-            'America/New_York'
+            'America/Los_Angeles'
         ),
     }
 
