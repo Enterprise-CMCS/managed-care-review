@@ -274,7 +274,7 @@ export const SubmissionSummary = (): React.ReactElement => {
             >
                 {renderStatusAlerts()}
 
-                {documentError && (
+                {!documentError && (
                     <DocumentWarningBanner className={styles.banner} />
                 )}
 
