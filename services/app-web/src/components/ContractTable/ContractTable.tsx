@@ -34,6 +34,7 @@ import { useTealium } from '../../hooks'
 import useDeepCompareEffect from 'use-deep-compare-effect'
 import { getTealiumFiltersChanged } from '../../tealium/tealiumHelpers'
 import { formatCalendarDate } from '../../common-code/dateHelpers'
+import { titleCaseString } from '../../common-code/formatters/titleCase'
 
 export type ContractInDashboardType = {
     id: string
@@ -104,6 +105,25 @@ const submissionTypeOptions = [
     },
 ]
 
+const submissionStatusOptions = [
+    {
+        label: 'Approved',
+        value: 'APPROVED',
+    },
+    {
+        label: 'Submitted',
+        value: 'SUBMITTED',
+    },
+    {
+        label: 'Unlocked',
+        value: 'UNLOCKED',
+    },
+    {
+        label: 'Withdrawn',
+        value: 'WITHDRAWN',
+    },
+]
+
 /* To keep the memoization from being refreshed every time, this needs to be
     created outside the render function */
 const columnHelper = createColumnHelper<ContractInDashboardType>()
@@ -159,7 +179,10 @@ const getSelectedFiltersFromUrl = (
     })
     const filterValues = valuesFromUrl
         .filter((item) => item.id === id)
-        .map((item) => ({ value: item.value, label: item.value }))
+        .map((item) => ({
+            value: item.value,
+            label: titleCaseString(item.value),
+        }))
     return filterValues as FilterOptionType[]
 }
 
@@ -302,6 +325,7 @@ export const ContractTable = ({
                 },
             }),
             columnHelper.accessor('status', {
+                id: 'status',
                 header: 'Status',
                 cell: (info) => (
                     <StatusTag
@@ -312,6 +336,7 @@ export const ContractTable = ({
                 meta: {
                     dataTestID: `${tableConfig.rowIDName}-status`,
                 },
+                filterFn: `arrIncludesSome`,
             }),
         ],
         [isNotStateUser, tableConfig.rowIDName]
@@ -348,6 +373,9 @@ export const ContractTable = ({
     ) as Column<ContractInDashboardType>
     const submissionTypeColumn = reactTable.getColumn(
         'submissionType'
+    ) as Column<ContractInDashboardType>
+    const statusColumn = reactTable.getColumn(
+        'status'
     ) as Column<ContractInDashboardType>
 
     // Filter options based on table data instead of static list of options.
@@ -388,7 +416,6 @@ export const ContractTable = ({
     const clearFilters = () => {
         lastClickedElement.current = 'clearFiltersButton'
         setTableCaption(null)
-
         setColumnFilters([])
     }
 
@@ -489,6 +516,24 @@ export const ContractTable = ({
                                             submissionTypeColumn,
                                             selectedOptions,
                                             'submissionType'
+                                        )
+                                    }
+                                />
+                            </DoubleColumnGrid>
+                            <DoubleColumnGrid>
+                                <FilterSelect
+                                    value={getSelectedFiltersFromUrl(
+                                        columnFilters,
+                                        'status'
+                                    )}
+                                    name="status"
+                                    label="Status"
+                                    filterOptions={submissionStatusOptions}
+                                    onChange={(selectedOptions) =>
+                                        updateFilters(
+                                            statusColumn,
+                                            selectedOptions,
+                                            'status'
                                         )
                                     }
                                 />

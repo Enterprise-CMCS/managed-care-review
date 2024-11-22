@@ -17,4 +17,9 @@
         background: custom.$mcr-gray-lightest;
         overflow: visible;
     }
+
+    [class*='grid-row'] {
+        margin-top: 0.75rem;
+        margin-bottom: 0.75rem;
+    }
 }
