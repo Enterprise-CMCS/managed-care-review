@@ -59,7 +59,7 @@ describe('approveContract', () => {
         expect(approvedContract).toBeDefined()
         expect(approvedContract.reviewStatus).toBe('APPROVED')
         expect(approvedContract.reviewStatusActions![0].actionType).toBe(
-            'APPROVAL_AS_APPROVED'
+            'MARK_AS_APPROVED'
         )
     })
 })

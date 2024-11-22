@@ -77,12 +77,20 @@ const StatusTag = ({
     notStateUser: boolean
 }): React.ReactElement => {
     let color: TagProps['color'] = 'gold'
+    let emphasize = false
     const isSubmittedStatus = status === 'RESUBMITTED' || status === 'SUBMITTED'
     const isApproved = status === 'APPROVED'
+    const isUnlocked = status === 'UNLOCKED'
+    const isDraft = status === 'DRAFT'
     if (isSubmittedStatus) {
         color = notStateUser ? 'gold' : 'gray'
+        emphasize = notStateUser
     } else if (isApproved) {
         color = 'green'
+    } else if (isUnlocked) {
+        emphasize = true
+    } else if (isDraft) {
+        emphasize = !notStateUser
     }
 
     const statusText = isSubmittedStatus
@@ -91,7 +99,11 @@ const StatusTag = ({
           ? SubmissionReviewStatusRecord[status]
           : SubmissionStatusRecord[status]
 
-    return <InfoTag color={color}>{statusText}</InfoTag>
+    return (
+        <InfoTag color={color} emphasize={emphasize}>
+            {statusText}
+        </InfoTag>
+    )
 }
 
 const submissionTypeOptions = [

@@ -4,7 +4,7 @@ exports[`renders overall email as expected 1`] = `
 "Submission MCR-MN-0004-SNBC was unlocked by CMS<br />
 <br />
 <b>Unlocked by:</b> josh@example.com<br />
-<b>Unlocked on:</b> 02/01/2022<br />
+<b>Unlocked on:</b> 01/31/2022<br />
 <b>Reason for unlock:</b> Adding rate certification.<br />
 <b>Rate name</b>: Rate Cert Name<br />
 <br />

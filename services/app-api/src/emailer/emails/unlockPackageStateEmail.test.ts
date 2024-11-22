@@ -107,7 +107,7 @@ test('includes expected data summary for a contract and rates submission unlock 
     )
     expect(template).toEqual(
         expect.objectContaining({
-            bodyText: expect.stringMatching(/Unlocked on: 02/),
+            bodyText: expect.stringMatching(/Unlocked on: 01/),
         })
     )
     expect(template).toEqual(
@@ -256,7 +256,7 @@ test('includes expected data summary for a multi-rate contract and rates submiss
     )
     expect(template).toEqual(
         expect.objectContaining({
-            bodyText: expect.stringMatching(/Unlocked on: 02/),
+            bodyText: expect.stringMatching(/Unlocked on: 01/),
         })
     )
     expect(template).toEqual(
