@@ -103,12 +103,16 @@ jobs:
         run: pnpm build:packages
 
       - name: Web Unit Tests
+        id: web-unit-tests
         env:
           NODE_OPTIONS: --max_old_space_size=6000
           VITE_APP_AUTH_MODE: AWS_COGNITO
           DATABASE_URL: postgresql://postgres:shhhsecret@localhost:5432/postgres?schema=public&connection_limit=5 #pragma: allowlist secret
         working-directory: services/app-web
-        run: pnpm test:coverage
+        run: |
+          set -e
+          pnpm test:coverage
+          exit $?
 
       - name: upload app web gen directory
         uses: actions/upload-artifact@v4
@@ -127,13 +131,6 @@ jobs:
         with:
           name: unit-test-coverage
           path: ./services/app-web/coverage/coverage-final.json
-
-      - name: List directory structure
-        run: |
-          echo "Current directory:"
-          pwd
-          echo "Directory structure:"
-          ls -R
 
       - name: publish code coverage
         uses: paambaati/codeclimate-action@v9.0.0
@@ -189,6 +186,7 @@ jobs:
         run: pnpm build:packages
 
       - name: API Unit Tests
+        id: api-unit-tests
         env:
           stage: ${steps.stage-name.outputs.stage-name-for-branch}
           NODE_OPTIONS: --max_old_space_size=6000
@@ -196,7 +194,10 @@ jobs:
           VITE_APP_AUTH_MODE: AWS_COGNITO
           DATABASE_URL: postgresql://postgres:shhhsecret@localhost:5432/postgres?schema=public&connection_limit=5 #pragma: allowlist secret
         working-directory: services/app-api
-        run: pnpm test:coverage-ci
+        run: |
+          set -e
+          pnpm test:coverage-ci
+          exit $?
 
       - name: upload api test coverage
         uses: actions/upload-artifact@v4

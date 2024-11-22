@@ -4,7 +4,10 @@
 .green {
     @include uswds.u-bg('green-cool-50');
 }
-
+.emphasize {
+    font-weight: bold;
+    border: 1px solid black;
+}
 .gray {
     @include uswds.u-bg('gray-cool-10');
     color: custom.$mcr-foundation-ink;

@@ -110,7 +110,7 @@ describe('with rates', () => {
         )
         expect(template).toEqual(
             expect.objectContaining({
-                bodyText: expect.stringMatching(/Updated on: 02\/01\/2022/),
+                bodyText: expect.stringMatching(/Updated on: 01\/31\/2022/),
             })
         )
         expect(template).toEqual(

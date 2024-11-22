@@ -31,6 +31,7 @@ import { NavLinkWithLogging } from '../TealiumLogging/Link'
 import { useTealium } from '../../hooks'
 import useDeepCompareEffect from 'use-deep-compare-effect'
 import { getTealiumFiltersChanged } from '../../tealium/tealiumHelpers'
+import { titleCaseString } from '@mc-review/common-code'
 
 export type ContractInDashboardType = {
     id: string
@@ -73,12 +74,20 @@ const StatusTag = ({
     notStateUser: boolean
 }): React.ReactElement => {
     let color: TagProps['color'] = 'gold'
+    let emphasize = false
     const isSubmittedStatus = status === 'RESUBMITTED' || status === 'SUBMITTED'
     const isApproved = status === 'APPROVED'
+    const isUnlocked = status === 'UNLOCKED'
+    const isDraft = status === 'DRAFT'
     if (isSubmittedStatus) {
         color = notStateUser ? 'gold' : 'gray'
+        emphasize = notStateUser
     } else if (isApproved) {
         color = 'green'
+    } else if (isUnlocked) {
+        emphasize = true
+    } else if (isDraft) {
+        emphasize = !notStateUser
     }
 
     const statusText = isSubmittedStatus
@@ -87,7 +96,11 @@ const StatusTag = ({
           ? SubmissionReviewStatusRecord[status]
           : SubmissionStatusRecord[status]
 
-    return <InfoTag color={color}>{statusText}</InfoTag>
+    return (
+        <InfoTag color={color} emphasize={emphasize}>
+            {statusText}
+        </InfoTag>
+    )
 }
 
 const submissionTypeOptions = [
@@ -98,6 +111,25 @@ const submissionTypeOptions = [
     {
         label: 'Contract action and rate certification',
         value: 'Contract action and rate certification',
+    },
+]
+
+const submissionStatusOptions = [
+    {
+        label: 'Approved',
+        value: 'APPROVED',
+    },
+    {
+        label: 'Submitted',
+        value: 'SUBMITTED',
+    },
+    {
+        label: 'Unlocked',
+        value: 'UNLOCKED',
+    },
+    {
+        label: 'Withdrawn',
+        value: 'WITHDRAWN',
     },
 ]
 
@@ -156,7 +188,10 @@ const getSelectedFiltersFromUrl = (
     })
     const filterValues = valuesFromUrl
         .filter((item) => item.id === id)
-        .map((item) => ({ value: item.value, label: item.value }))
+        .map((item) => ({
+            value: item.value,
+            label: titleCaseString(item.value),
+        }))
     return filterValues as FilterOptionType[]
 }
 
@@ -299,6 +334,7 @@ export const ContractTable = ({
                 },
             }),
             columnHelper.accessor('status', {
+                id: 'status',
                 header: 'Status',
                 cell: (info) => (
                     <StatusTag
@@ -309,6 +345,7 @@ export const ContractTable = ({
                 meta: {
                     dataTestID: `${tableConfig.rowIDName}-status`,
                 },
+                filterFn: `arrIncludesSome`,
             }),
         ],
         [isNotStateUser, tableConfig.rowIDName]
@@ -345,6 +382,9 @@ export const ContractTable = ({
     ) as Column<ContractInDashboardType>
     const submissionTypeColumn = reactTable.getColumn(
         'submissionType'
+    ) as Column<ContractInDashboardType>
+    const statusColumn = reactTable.getColumn(
+        'status'
     ) as Column<ContractInDashboardType>
 
     // Filter options based on table data instead of static list of options.
@@ -385,7 +425,6 @@ export const ContractTable = ({
     const clearFilters = () => {
         lastClickedElement.current = 'clearFiltersButton'
         setTableCaption(null)
-
         setColumnFilters([])
     }
 
@@ -486,6 +525,24 @@ export const ContractTable = ({
                                             submissionTypeColumn,
                                             selectedOptions,
                                             'submissionType'
+                                        )
+                                    }
+                                />
+                            </DoubleColumnGrid>
+                            <DoubleColumnGrid>
+                                <FilterSelect
+                                    value={getSelectedFiltersFromUrl(
+                                        columnFilters,
+                                        'status'
+                                    )}
+                                    name="status"
+                                    label="Status"
+                                    filterOptions={submissionStatusOptions}
+                                    onChange={(selectedOptions) =>
+                                        updateFilters(
+                                            statusColumn,
+                                            selectedOptions,
+                                            'status'
                                         )
                                     }
                                 />
