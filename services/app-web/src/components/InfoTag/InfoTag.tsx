@@ -10,7 +10,7 @@ Main application-wide tag to draw attention to key info.
 */
 export type TagProps = {
     color: 'green' | 'gold' | 'cyan' | 'blue' | 'light green' | 'gray'
-    emphasize: boolean
+    emphasize?: boolean
 } & ComponentProps<typeof USWDSTag>
 
 export const InfoTag = ({
