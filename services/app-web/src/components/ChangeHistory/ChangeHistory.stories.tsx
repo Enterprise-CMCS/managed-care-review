@@ -1,5 +1,5 @@
 import { mockContractPackageSubmitted } from '../../testHelpers/apolloMocks'
-import { ChangeHistory } from './ChangeHistoryV2'
+import { ChangeHistory } from './ChangeHistory'
 
 export default {
     title: 'Components/ChangeHistory',
