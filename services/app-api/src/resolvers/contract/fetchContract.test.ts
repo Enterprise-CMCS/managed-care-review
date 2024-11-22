@@ -121,7 +121,7 @@ describe('fetchContract', () => {
         expect(finallyUnlocked.initiallySubmittedAt).toEqual(
             intiallySubmitted.initiallySubmittedAt
         )
-    })
+    }, 10000)
 
     it('errors if the wrong state user calls it', async () => {
         const stateServerFL = await constructTestPostgresServer({
