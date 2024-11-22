@@ -11,6 +11,9 @@ export const Default = (): React.ReactElement => (
             <InfoTag color="gold">DRAFT</InfoTag>
             <InfoTag color="blue">UNLOCKED</InfoTag>
             <InfoTag color="green">SUBMITTED</InfoTag>
+            <InfoTag color="green" emphasize>
+                SUBMITTED
+            </InfoTag>
         </div>
         <br /> <br />
         <div>

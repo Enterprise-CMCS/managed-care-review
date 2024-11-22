@@ -1,6 +1,6 @@
 import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { ChangeHistory } from './ChangeHistoryV2'
+import { ChangeHistory } from './ChangeHistory'
 import {
     fetchCurrentUserMock,
     mockContractPackageSubmitted,
@@ -10,8 +10,10 @@ import {
     mockRateRevision,
     mockValidCMSUser,
     mockValidStateUser,
+    mockContractPackageApproved,
 } from '../../testHelpers/apolloMocks'
 import { renderWithProviders } from '../../testHelpers'
+import { formatToPacificTime } from '../../common-code/dateHelpers'
 
 describe('Change History', () => {
     it('can render history for initial submission', () => {
@@ -77,6 +79,23 @@ describe('Change History', () => {
                 submittedContract.packageSubmissions[0].submitInfo.updatedReason
             )
         ).toBeInTheDocument()
+    })
+
+    it('has expected text in the accordion titles and content for approval', () => {
+        const approvedContract = mockContractPackageApproved()
+        renderWithProviders(<ChangeHistory contract={approvedContract} />)
+        const approveAction = approvedContract.reviewStatusActions![0]
+        const updatedAt = approveAction.updatedAt
+        // API returns UTC timezone, we display timestamped dates in PT timezone so 1 day before on these tests.
+        expect(
+            screen.getByRole('button', {
+                name: `${formatToPacificTime(updatedAt)} - Status Update`,
+            })
+        ).toBeInTheDocument()
+        expect(
+            screen.getByText(approveAction.updatedReason)
+        ).toBeInTheDocument()
+        expect(screen.getByText('Approved')).toBeInTheDocument()
     })
 
     it('has expected text in the accordion titles and content for ADMIN events', () => {

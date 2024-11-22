@@ -19,11 +19,11 @@ const QuestionResponseSubmitBanner = ({
         ? 'Your questions were sent to the state.'
         : 'Your response was submitted to CMS.'
     return (
-        <div className={styles.bannerBodyText}>
-            <Alert type="success" headingLevel="h4" heading={heading}>
-                {message}
-            </Alert>
-        </div>
+        <Alert type="success" headingLevel="h4" heading={heading}>
+            <div className={styles.bannerBodyText}>
+                <p>{message}</p>
+            </div>
+        </Alert>
     )
 }
 

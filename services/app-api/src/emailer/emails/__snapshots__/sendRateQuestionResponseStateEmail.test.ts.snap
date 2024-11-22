@@ -3,7 +3,7 @@
 exports[`sendRateQuestionResponseStateEmail renders overall email for a new response as expected 1`] = `
 "Response to DMCO rate questions was successfully submitted.<br />
 <br />
-<b>Date:</b> 01/05/2024<br />
+<b>Date:</b> 01/04/2024<br />
 <b>Rate name:</b> test-rate-certification-name<br />
 <br />
 <a href="http://localhost/submissions/parent-contract/rates/test-rate/question-and-answers">View response</a><br />
