@@ -1,4 +1,4 @@
-import type { IndexQuestionsPayload } from './QuestionsType'
+import type { IndexContractQuestionsPayload } from './QuestionsType'
 import type { UpdateInfoType } from './contractAndRates'
 
 type HealthPlanPackageStatusType =
@@ -12,7 +12,7 @@ type HealthPlanPackageType = {
     stateCode: string
     mccrsID?: string
     revisions: HealthPlanRevisionType[]
-    questions?: IndexQuestionsPayload
+    questions?: IndexContractQuestionsPayload
 }
 
 type HealthPlanRevisionType = {
