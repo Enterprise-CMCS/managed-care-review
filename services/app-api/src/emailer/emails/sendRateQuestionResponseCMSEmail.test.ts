@@ -229,7 +229,7 @@ describe('sendRateQuestionResponseCMSEmail', () => {
         expect(template).toEqual(
             expect.objectContaining({
                 bodyText: expect.stringContaining(
-                    'Questions sent on: 01/05/2024'
+                    'Questions sent on: 01/04/2024'
                 ),
             })
         )
