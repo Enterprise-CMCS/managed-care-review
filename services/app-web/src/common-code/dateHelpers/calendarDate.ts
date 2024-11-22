@@ -5,10 +5,10 @@ import { dayjs } from './dayjs'
  * @param date date to be formatted
  * @param timeZone Timezone formatted date should be in.
  * "UTC" is usually for displaying user inputted calendar dates like contract start/end dates.
- * "America/New_York" is usually for displaying app generated timestamps, where timezones are important. This should be
- * only used for display and not saving. We have decided to show these types of dates in "America/New_York" in the app.
+ * "America/Los_Angeles" is usually for displaying app generated timestamps, where timezones are important. This should be
+ * only used for display and not saving. We have decided to show these types of dates in "America/Los_Angeles" in the app.
  */
-function formatCalendarDate(date: Date | undefined | string, timeZone: 'UTC' | 'America/New_York'): string {
+function formatCalendarDate(date: Date | undefined | string, timeZone: 'UTC' | 'America/Los_Angeles'): string {
     if (!date || !dayjs(date).isValid()) {
         return ''
     }
@@ -17,16 +17,16 @@ function formatCalendarDate(date: Date | undefined | string, timeZone: 'UTC' | '
 
 /**
  * We store calendar dates in UTC for consistency. This formats a date time into 'MM/DD/YYYY h:mma timezone'.
- * "America/New_York" (ET) is usually for displaying app generated timestamps, where timezones are important. This should
- * be only used for display and not saving. We have decided to show these types of dates in "America/New_York" in the app
+ * "America/Los_Angeles" (PT) is usually for displaying app generated timestamps, where timezones are important. This should
+ * be only used for display and not saving. We have decided to show these types of dates in "America/Los_Angeles" in the app
  * @param date date to be formatted
  */
-function formatToEasternTime(date: Date | undefined | string): string {
+function formatToPacificTime(date: Date | undefined | string): string {
     if (!date || !dayjs(date).isValid()) {
         return ''
     }
-    const formattedDate = dayjs(date).tz('America/New_York').format('MM/DD/YYYY h:mma')
-    return `${formattedDate} ET`
+    const formattedDate = dayjs(date).tz('America/Los_Angeles').format('MM/DD/YYYY h:mma')
+    return `${formattedDate} PT`
 }
 
 function formatRateNameDate(date: Date | undefined): string {
@@ -36,4 +36,4 @@ function formatRateNameDate(date: Date | undefined): string {
     return dayjs(date).tz('UTC').format('YYYYMMDD')
 }
 
-export { formatCalendarDate, formatRateNameDate, formatToEasternTime }
+export { formatCalendarDate, formatRateNameDate, formatToPacificTime }

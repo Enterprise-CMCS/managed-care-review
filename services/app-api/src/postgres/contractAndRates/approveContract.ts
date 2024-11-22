@@ -30,7 +30,7 @@ async function approveContractInsideTransaction(
             data: {
                 updatedByID: updatedByID,
                 updatedReason: updatedReason || '',
-                actionType: 'APPROVAL_NOTICE',
+                actionType: 'MARK_AS_APPROVED',
                 contractID: contractID,
             },
         })

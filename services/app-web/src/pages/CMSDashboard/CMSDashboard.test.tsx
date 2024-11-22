@@ -8,6 +8,7 @@ import {
     mockContractPackageUnlockedWithUnlockedType,
     mockContractPackageDraft,
     mockContractPackageSubmitted,
+    mockContractPackageApproved,
 } from '../../testHelpers/apolloMocks'
 import { renderWithProviders } from '../../testHelpers/jestHelpers'
 import { CMSDashboard, RateReviewsDashboard, SubmissionsDashboard } from './'
@@ -157,16 +158,18 @@ describe('CMSDashboard', () => {
                     )
                 })
 
-                it('displays each contract status tag as expected for current revision that is submitted/resubmitted', async () => {
+                it('displays each contract status tag as expected for current revision that is submitted/resubmitted/approved', async () => {
                     const unlocked: Contract = {
                         ...mockContractPackageUnlockedWithUnlockedType(),
                         __typename: 'Contract',
                     }
                     const submitted = mockContractPackageSubmitted()
+                    const approved = mockContractPackageApproved()
+                    approved.id = 'test-abc-approved'
                     submitted.id = 'test-abc-submitted'
                     unlocked.id = 'test-abc-unlocked'
 
-                    const submissions = [unlocked, submitted]
+                    const submissions = [unlocked, submitted, approved]
                     renderWithProviders(<CMSDashboardNestedRoutes />, {
                         apolloProvider: {
                             mocks: [
@@ -193,6 +196,13 @@ describe('CMSDashboard', () => {
                     const tag2 =
                         within(submittedRow).getByTestId('submission-status')
                     expect(tag2).toHaveTextContent('Submitted')
+
+                    const approvedRow = await screen.findByTestId(
+                        `row-${approved.id}`
+                    )
+                    const tag3 =
+                        within(approvedRow).getByTestId('submission-status')
+                    expect(tag3).toHaveTextContent('Approved')
                 })
 
                 it('displays name, type, programs and last update based on previously submitted revision for UNLOCKED package', async () => {
@@ -260,7 +270,7 @@ describe('CMSDashboard', () => {
                     const lastUpdated = within(unlockedRow).getByTestId(
                         'submission-last-updated'
                     )
-                    // API returns UTC timezone, we display timestamped dates in ET timezone so 1 day before on these tests.
+                    // API returns UTC timezone, we display timestamped dates in PT timezone so 1 day before on these tests.
                     expect(lastUpdated).toHaveTextContent('01/21/2100')
                 })
 

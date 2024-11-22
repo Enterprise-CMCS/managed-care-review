@@ -10,7 +10,7 @@ import {
 import { NodeSSH } from 'node-ssh'
 import os from 'node:os'
 import { retry } from './retry.js'
-import { fileExists, httpRequest } from './nodeWrappers.js'
+import { fileExists, httpsRequest } from './nodeWrappers.js'
 import { Instance } from '@aws-sdk/client-ec2'
 
 function stageForEnv(env: string): string {
@@ -140,7 +140,7 @@ async function ensureAllowlistIP(
     instance: Instance
 ): Promise<undefined | Error> {
     // get my IP address
-    const myIPAddress = await httpRequest('https://api4.ipify.org')
+    const myIPAddress = await httpsRequest('https://api4.ipify.org')
     if (myIPAddress instanceof Error) {
         return myIPAddress
     }
