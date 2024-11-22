@@ -105,6 +105,25 @@ const submissionTypeOptions = [
     },
 ]
 
+const submissionStatusOptions = [
+    {
+        label: 'Approved',
+        value: 'APPROVED',
+    },
+    {
+        label: 'Submitted',
+        value: 'SUBMITTED',
+    },
+    {
+        label: 'Unlocked',
+        value: 'UNLOCKED',
+    },
+    {
+        label: 'Withdrawn',
+        value: 'WITHDRAWN',
+    },
+]
+
 /* To keep the memoization from being refreshed every time, this needs to be
     created outside the render function */
 const columnHelper = createColumnHelper<ContractInDashboardType>()
@@ -509,24 +528,7 @@ export const ContractTable = ({
                                     )}
                                     name="status"
                                     label="Status"
-                                    filterOptions={[
-                                        {
-                                            label: 'Approved',
-                                            value: 'APPROVED',
-                                        },
-                                        {
-                                            label: 'Submitted',
-                                            value: 'SUBMITTED',
-                                        },
-                                        {
-                                            label: 'Unlocked',
-                                            value: 'UNLOCKED',
-                                        },
-                                        {
-                                            label: 'Withdrawn',
-                                            value: 'WITHDRAWN',
-                                        },
-                                    ]}
+                                    filterOptions={submissionStatusOptions}
                                     onChange={(selectedOptions) =>
                                         updateFilters(
                                             statusColumn,
