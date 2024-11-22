@@ -76,6 +76,7 @@ export const ContractQuestionResponse = () => {
                     <CMSQuestionResponseTable
                         indexQuestions={contract.questions}
                         userDivision={division}
+                        contractStatus={contract.consolidatedStatus}
                     />
                 ) : (
                     <StateQuestionResponseTable
