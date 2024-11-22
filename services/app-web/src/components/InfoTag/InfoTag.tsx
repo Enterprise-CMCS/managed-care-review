@@ -28,8 +28,8 @@ export const InfoTag = ({
             [styles['gold']]: color === 'gold',
             [styles['blue']]: color === 'blue',
             [styles['gray']]: color === 'gray',
-            [styles['emphasize']]: emphasize,
         },
+        styles['emphasize'] ? emphasize : undefined,
         className
     )
     return (
