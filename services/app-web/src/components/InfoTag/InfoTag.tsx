@@ -10,10 +10,12 @@ Main application-wide tag to draw attention to key info.
 */
 export type TagProps = {
     color: 'green' | 'gold' | 'cyan' | 'blue' | 'light green' | 'gray'
+    emphasize: boolean
 } & ComponentProps<typeof USWDSTag>
 
 export const InfoTag = ({
     color,
+    emphasize,
     className,
     children,
 }: TagProps): React.ReactElement | null => {
@@ -26,8 +28,8 @@ export const InfoTag = ({
             [styles['gold']]: color === 'gold',
             [styles['blue']]: color === 'blue',
             [styles['gray']]: color === 'gray',
+            [styles['emphasize']]: emphasize,
         },
-
         className
     )
     return (
