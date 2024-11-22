@@ -4,6 +4,7 @@ import { Alert } from '@trussworks/react-uswds'
 import classnames from 'classnames'
 import { useTealium } from '../../../hooks'
 import { ContactSupportLink } from '../../ErrorAlert/ContactSupportLink'
+import styles from '../Banner.module.scss'
 
 export const DocumentWarningBanner = ({
     className,
@@ -29,11 +30,15 @@ export const DocumentWarningBanner = ({
             data-testid="warning-alert"
             className={classnames(className, 'usa-alert__text')}
         >
-            <span>
-                Some documents aren’t available right now. Refresh the page to
-                try again. If you still see this message,&nbsp;
-            </span>
-            <ContactSupportLink />
+            <div className={styles.bannerBodyText}>
+                <p className="usa-alert__text">
+                    <span>
+                        Some documents aren’t available right now. Refresh the
+                        page to try again. If you still see this message,&nbsp;
+                    </span>
+                    <ContactSupportLink />
+                </p>
+            </div>
         </Alert>
     )
 }
