@@ -77,6 +77,25 @@ function genericContractResolver<
             }
             return state
         },
+        dateContractDocsExecuted(parent: ParentType) {
+            let dateFirstSubmitted: Date | undefined
+            for (const sub of parent.packageSubmissions) {
+                if (
+                    sub.contractRevision.formData.contractExecutionStatus ===
+                    'EXECUTED'
+                ) {
+                    dateFirstSubmitted =
+                        sub.contractRevision.submitInfo?.updatedAt
+                } else {
+                    if (dateFirstSubmitted) {
+                        return dateFirstSubmitted
+                    } else {
+                        return null
+                    }
+                }
+            }
+            return null
+        },
         packageSubmissions(parent: ParentType) {
             const gqlSubs: ContractPackageSubmissionWithCauseType[] = []
             for (let i = 0; i < parent.packageSubmissions.length; i++) {

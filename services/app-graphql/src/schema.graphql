@@ -1818,7 +1818,11 @@ type Contract {
     This value is used to generate the contractName
     """
     stateNumber: Int!
+    "mccrsID is the four digit id in MC-CRS that corresponds to this Contract, if set"
     mccrsID: String
+
+    "dateContractDocsExecuted is the first date, if any in which the revisions were submitted with all contract docs executed. Null otherwise."
+    dateContractDocsExecuted: DateTime
 
     "draftRevision is the currently modifiable revision if the rate is DRAFT or UNLOCKED"
     draftRevision: ContractRevision
@@ -1886,7 +1890,12 @@ type UnlockedContract {
     This value is used to generate the contractName
     """
     stateNumber: Int!
+    "mccrsID is the four digit id in MC-CRS that corresponds to this Contract, if set"
     mccrsID: String
+
+    "dateContractDocsExecuted is the first date, if any in which the revisions were submitted with all contract docs executed. Null otherwise."
+    dateContractDocsExecuted: DateTime
+
     "reviewStatusActions are the who/when/why for review status changes on this contract"
     reviewStatusActions: [ContractReviewStatusActions]
 
