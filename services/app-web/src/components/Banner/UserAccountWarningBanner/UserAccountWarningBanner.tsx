@@ -37,11 +37,9 @@ const UserAccountWarningBanner = ({
         })
     }, [logAlertImpressionEvent, message])
     return (
-        <div className={styles.bannerBodyText}>
-            <Alert type="warning" headingLevel="h4" heading={header}>
-                {message}
-            </Alert>
-        </div>
+        <Alert type="warning" headingLevel="h4" heading={header}>
+            <div className={styles.bannerBodyText}>{message}</div>
+        </Alert>
     )
 }
 

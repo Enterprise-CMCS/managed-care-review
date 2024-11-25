@@ -83,7 +83,7 @@ describe('SingleRateSummarySection', () => {
                 name: 'Rate amendment effective dates',
             })
         ).toBeInTheDocument()
-        // API returns UTC timezone, we display timestamped dates in ET timezone so 1 day before on these tests.
+        // API returns UTC timezone, we display timestamped dates in PT timezone so 1 day before on these tests.
         expect(
             screen.getByRole('definition', {
                 name: 'Rate submission date',

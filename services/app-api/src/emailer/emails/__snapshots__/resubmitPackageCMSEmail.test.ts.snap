@@ -4,7 +4,7 @@ exports[`renders overall email as expected 1`] = `
 "The state completed their edits on submission MCR-MN-0003-SNBC<br />
 <br />
 <b>Submitted by:</b> bob@example.com<br />
-<b>Updated on:</b> 02/01/2022<br />
+<b>Updated on:</b> 01/31/2022<br />
 <b>Changes made:</b> Added more contract details.<br />
 <b>Rate names</b>:
 <ul style="margin-top: 0px;">

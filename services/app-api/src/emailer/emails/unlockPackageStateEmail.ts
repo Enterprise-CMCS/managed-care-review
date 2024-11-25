@@ -54,7 +54,7 @@ export const unlockPackageStateEmail = async (
         unlockedBy: updateInfo.updatedBy.email,
         unlockedOn: formatCalendarDate(
             updateInfo.updatedAt,
-            'America/New_York'
+            'America/Los_Angeles'
         ),
         unlockedReason: updateInfo.updatedReason,
         shouldIncludeRates: formData.submissionType === 'CONTRACT_AND_RATES',

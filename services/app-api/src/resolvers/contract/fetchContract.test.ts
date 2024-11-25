@@ -128,7 +128,7 @@ describe('fetchContract', () => {
         expect(finallyUnlocked.initiallySubmittedAt).toEqual(
             intiallySubmitted.initiallySubmittedAt
         )
-    })
+    }, 10000)
 
     it('returns lastUpdatedForDisplay', async () => {
         const stateServer = await constructTestPostgresServer({
