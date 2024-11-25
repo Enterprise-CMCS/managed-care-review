@@ -6,10 +6,14 @@ import {
 import { FetchContractDocument } from '../../gen/gqlClient'
 import { testCMSUser, testStateUser } from '../../testHelpers/userHelpers'
 import {
+    approveTestContract,
     createAndUpdateTestContractWithoutRates,
     createAndUpdateTestContractWithRate,
+    createTestContract,
     fetchTestContract,
     submitTestContract,
+    unlockTestContract,
+    updateTestContractDraftRevision,
 } from '../../testHelpers/gqlContractHelpers'
 import { addNewRateToTestContract } from '../../testHelpers/gqlRateHelpers'
 import { testS3Client } from '../../testHelpers'
@@ -121,6 +125,73 @@ describe('fetchContract', () => {
         expect(finallyUnlocked.initiallySubmittedAt).toEqual(
             intiallySubmitted.initiallySubmittedAt
         )
+    })
+
+    it('returns lastUpdatedForDisplay', async () => {
+        const stateServer = await constructTestPostgresServer({
+            s3Client: mockS3,
+        })
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: testCMSUser(),
+            },
+            s3Client: mockS3,
+        })
+
+        const draftA0 = await createTestContract(stateServer)
+        const AID = draftA0.id
+
+        const lastDate: Date = new Date(1900, 1, 1)
+
+        const initialCreatedDate = draftA0.lastUpdatedForDisplay
+        expect(initialCreatedDate.getTime()).not.toEqual(lastDate.getTime())
+
+        const draftA1 = await updateTestContractDraftRevision(stateServer, AID)
+        const updatedDraftDate = draftA1.lastUpdatedForDisplay
+        expect(updatedDraftDate.getTime()).not.toEqual(
+            initialCreatedDate.getTime()
+        )
+
+        const intiallySubmitted = await submitTestContract(stateServer, AID)
+        const intiallySubmittedDate = intiallySubmitted.lastUpdatedForDisplay
+        expect(intiallySubmittedDate.getTime()).not.toEqual(
+            updatedDraftDate.getTime()
+        )
+        expect(intiallySubmittedDate.getTime()).not.toEqual(
+            initialCreatedDate.getTime()
+        )
+
+        const unlocked = await unlockTestContract(cmsServer, AID, 'Unlock A.3')
+        const unlockedDate = unlocked.lastUpdatedForDisplay
+        expect(unlockedDate.getTime()).not.toEqual(
+            intiallySubmittedDate.getTime()
+        )
+
+        const draftA2 = await updateTestContractDraftRevision(stateServer, AID)
+        const unlockUpdateDate = draftA2.lastUpdatedForDisplay
+        expect(unlockUpdateDate.getTime()).toEqual(unlockedDate.getTime())
+
+        const secondSubmitted = await submitTestContract(
+            stateServer,
+            AID,
+            'submit after unlock'
+        )
+        const secondSubmitDate = secondSubmitted.lastUpdatedForDisplay
+        expect(secondSubmitDate.getTime()).not.toEqual(
+            unlockUpdateDate.getTime()
+        )
+
+        const approved = await approveTestContract(cmsServer, AID)
+        const approvedDate = approved.lastUpdatedForDisplay
+        expect(approvedDate.getTime()).not.toEqual(secondSubmitDate.getTime())
+
+        const secondUnlock = await unlockTestContract(
+            cmsServer,
+            AID,
+            'Unlock A.4'
+        )
+        const secondUnlockDate = secondUnlock.lastUpdatedForDisplay
+        expect(secondUnlockDate.getTime()).not.toEqual(approvedDate.getTime())
     })
 
     it('errors if the wrong state user calls it', async () => {

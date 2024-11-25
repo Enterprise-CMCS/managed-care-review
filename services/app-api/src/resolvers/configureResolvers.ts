@@ -41,8 +41,10 @@ import { createAPIKeyResolver } from './APIKey'
 import { unlockRate } from './rate/unlockRate'
 import { submitRate } from './rate'
 import { updateDraftContractRates } from './contract/updateDraftContractRates'
-import { contractResolver } from './contract/contractResolver'
-import { unlockedContractResolver } from './contract/unlockedContractResolver'
+import {
+    contractResolver,
+    unlockedContractResolver,
+} from './contract/contractResolver'
 import { contractRevisionResolver } from './contract/contractRevisionResolver'
 import { fetchContractResolver } from './contract/fetchContract'
 import { submitContract } from './contract/submitContract'
@@ -176,7 +178,7 @@ export function configureResolvers(
         Rate: rateResolver(store),
         RateRevision: rateRevisionResolver(store),
         Contract: contractResolver(store),
-        UnlockedContract: unlockedContractResolver(),
+        UnlockedContract: unlockedContractResolver(store),
         ContractRevision: contractRevisionResolver(store),
         GenericDocument: genericDocumentResolver(s3Client),
         Document: questionResponseDocumentResolver(s3Client),

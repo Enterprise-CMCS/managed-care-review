@@ -8,6 +8,7 @@ mutation unlockContract($input: UnlockContractInput!) {
             createdAt
             updatedAt
             initiallySubmittedAt
+            lastUpdatedForDisplay
             stateCode
             state {
                 code

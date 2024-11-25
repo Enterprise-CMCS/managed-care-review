@@ -6,6 +6,7 @@ fragment contractFieldsFragment on Contract {
     createdAt
     updatedAt
     initiallySubmittedAt
+    lastUpdatedForDisplay
     stateCode
     mccrsID
     reviewStatusActions {

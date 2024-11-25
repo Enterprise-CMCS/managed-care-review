@@ -1807,6 +1807,8 @@ type Contract {
     consolidatedStatus: ConsolidatedContractStatus!
     "initiallySubmittedAt is the initial date this contract was submitted at. Is not changed by unlock or resubmission."
     initiallySubmittedAt: DateTime
+    "lastUpdatedForDisplay is the last time this contract was officially updated. When it's a draft it will be the last updatedAt date. Afterwards it will be the most recent submit or unlock or review action date."
+    lastUpdatedForDisplay: DateTime!
     "stateCode is the state code (e.g. CA or TN) for the submitting state"
     stateCode: String!
     "state is fuller state data for the submitting state"
@@ -1873,6 +1875,8 @@ type UnlockedContract {
     consolidatedStatus: ConsolidatedContractStatus!
     "initiallySubmittedAt is the initial date this contract was submitted at. Is not changed by unlock or resubmission."
     initiallySubmittedAt: Date
+    "lastUpdatedForDisplay is the last time this contract was officially updated. When it's a draft it will be the last updatedAt date. Afterwards it will be the most recent submit or unlock or review action date."
+    lastUpdatedForDisplay: DateTime!
     "stateCode is the state code (e.g. CA or TN) for the submitting state"
     stateCode: String!
     "state is fuller state data for the submitting state"
@@ -1901,6 +1905,13 @@ type UnlockedContract {
     submission is in the first position in the array.
     """
     packageSubmissions: [ContractPackageSubmission!]!
+
+    """
+    questions field is an array of questions asked about the contract by CMS. Each questions also contains responses
+    to the question submitted by the State. DRAFT contracts will not have questions, only contracts that have been submitted
+    , unlocked, or resubmitted. The array is in descending order by createdAt.
+    """
+    questions: IndexContractQuestionsPayload
 }
 
 type RateEdge {

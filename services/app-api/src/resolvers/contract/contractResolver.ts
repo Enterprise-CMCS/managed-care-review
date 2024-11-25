@@ -3,7 +3,9 @@ import type { Resolvers, SubmissionReason } from '../../gen/gqlServer'
 import { GraphQLError } from 'graphql'
 import type {
     ContractPackageSubmissionWithCauseType,
+    ContractType,
     RateRevisionType,
+    UnlockedContractType,
 } from '../../domain-models'
 import type { Store } from '../../postgres'
 import { NotFoundError } from '../../postgres'
@@ -12,10 +14,41 @@ import {
     setResolverDetailsOnActiveSpan,
 } from '../attributeHelper'
 import { convertToIndexQuestionsPayload } from '../../postgres/questionResponse'
+import type { Context } from '../../handlers/apollo_gql'
 
-export function contractResolver(store: Store): Resolvers['Contract'] {
+// this is probably a little delicate type-wise. But seems worth it not to be duplicating the same resolver in two places.
+function genericContractResolver<
+    ParentType extends ContractType | UnlockedContractType,
+>(store: Store) {
     return {
-        initiallySubmittedAt(parent) {
+        lastUpdatedForDisplay(parent: ParentType) {
+            // These dates are mechanical, draft vs. submit vs. unlock, whatever is latest is latest
+            const contractUpdated = parent.updatedAt
+            const draftUpdated = parent.draftRevision?.updatedAt
+
+            const lastSubmitted =
+                parent.packageSubmissions.length > 0
+                    ? parent.packageSubmissions[0].contractRevision.submitInfo
+                          ?.updatedAt
+                    : undefined
+            const lastUnlocked = parent.draftRevision?.unlockInfo?.updatedAt
+            const submitStatusDate =
+                lastUnlocked || lastSubmitted || draftUpdated || contractUpdated
+
+            // With review actions, we compare if the review action has happened more recently or not than the latest submit action
+            if (
+                parent.reviewStatusActions &&
+                parent.reviewStatusActions.length > 0
+            ) {
+                const latestAction = parent.reviewStatusActions[0].updatedAt
+                if (latestAction && latestAction > submitStatusDate) {
+                    return latestAction
+                }
+            }
+
+            return submitStatusDate
+        },
+        initiallySubmittedAt(parent: ParentType) {
             if (parent.packageSubmissions.length > 0) {
                 const firstSubmission =
                     parent.packageSubmissions[
@@ -26,7 +59,7 @@ export function contractResolver(store: Store): Resolvers['Contract'] {
 
             return null
         },
-        state(parent) {
+        state(parent: ParentType) {
             const packageState = parent.stateCode
             const state = statePrograms.states.find(
                 (st) => st.code === packageState
@@ -44,7 +77,7 @@ export function contractResolver(store: Store): Resolvers['Contract'] {
             }
             return state
         },
-        packageSubmissions(parent) {
+        packageSubmissions(parent: ParentType) {
             const gqlSubs: ContractPackageSubmissionWithCauseType[] = []
             for (let i = 0; i < parent.packageSubmissions.length; i++) {
                 const thisSub = parent.packageSubmissions[i]
@@ -106,7 +139,8 @@ export function contractResolver(store: Store): Resolvers['Contract'] {
 
             return gqlSubs
         },
-        questions: async (parent, _args, context) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        questions: async (parent: ParentType, _args: any, context: Context) => {
             const { user, ctx, tracer } = context
             // add a span to OTEL
             const span = tracer?.startSpan(
@@ -148,4 +182,14 @@ export function contractResolver(store: Store): Resolvers['Contract'] {
             return convertToIndexQuestionsPayload(questionsForContract)
         },
     }
+}
+
+export function unlockedContractResolver(
+    store: Store
+): Resolvers['UnlockedContract'] {
+    return genericContractResolver(store)
+}
+
+export function contractResolver(store: Store): Resolvers['Contract'] {
+    return genericContractResolver(store)
 }
