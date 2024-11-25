@@ -29,7 +29,7 @@ describe(`Tests UpdateHealthPlanFormData`, () => {
     }
 
     afterEach(() => {
-        jest.resetAllMocks()
+        vi.resetAllMocks()
     })
 
     it('updates valid scalar fields in the formData', async () => {

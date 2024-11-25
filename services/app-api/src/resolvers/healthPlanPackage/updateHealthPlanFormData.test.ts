@@ -32,7 +32,7 @@ describe(`Tests UpdateHealthPlanFormData`, () => {
     const cmsUser = testCMSUser()
 
     beforeEach(() => {
-        jest.resetAllMocks()
+        vi.resetAllMocks()
     })
 
     it('updates valid scalar fields in the formData', async () => {

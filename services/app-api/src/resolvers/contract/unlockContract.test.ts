@@ -33,7 +33,7 @@ describe('unlockContract', () => {
     const mockS3 = testS3Client()
 
     afterEach(() => {
-        jest.resetAllMocks()
+        vi.resetAllMocks()
     })
 
     describe.each(iterableCmsUsersMockData)(

@@ -78,7 +78,7 @@ const sendTestEmails = async (emailData: EmailData): Promise<void | Error> => {
 
 function testEmailer(customConfig?: EmailConfiguration): Emailer {
     const config = customConfig || testEmailConfig()
-    return emailer(config, jest.fn(sendTestEmails))
+    return emailer(config, vi.fn(sendTestEmails))
 }
 
 type State = {

@@ -57,7 +57,7 @@ describe(`Tests $testName`, () => {
 
     afterEach(async () => {
         await createDBUsersWithFullData([...assignedUsers, cmsUser])
-        jest.restoreAllMocks()
+        vi.resetAllMocks()
     })
     it('returns a StateSubmission if complete', async () => {
         const server = await constructTestPostgresServer()
@@ -1099,7 +1099,7 @@ describe(`Tests $testName`, () => {
     it('errors when SES email has failed.', async () => {
         const mockEmailer = testEmailer()
 
-        jest.spyOn(awsSESHelpers, 'testSendSESEmail').mockImplementation(
+        vi.spyOn(awsSESHelpers, 'testSendSESEmail').mockImplementation(
             async () => {
                 throw new Error('Network error occurred')
             }
@@ -1127,7 +1127,7 @@ describe(`Tests $testName`, () => {
         // expect sendEmail to have been called, so we know it did not error earlier
         expect(mockEmailer.sendEmail).toHaveBeenCalled()
 
-        jest.resetAllMocks()
+        vi.resetAllMocks()
 
         // expect correct graphql error.
         expect(submitResult.errors?.[0]).toEqual(
