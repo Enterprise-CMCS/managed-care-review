@@ -271,7 +271,7 @@ describe('fetchContract', () => {
         expect(thirdSubmitted.dateContractDocsExecuted).toBeNull()
     })
 
-    it('returns mcreviewURL', async () => {
+    it('returns webURL', async () => {
         const stateServer = await constructTestPostgresServer({
             s3Client: mockS3,
         })
@@ -280,7 +280,7 @@ describe('fetchContract', () => {
 
         const expectedURL = `https://localhost:3000/submissions/${AID}`
 
-        expect(draftA0.mcreviewURL).toBe(expectedURL)
+        expect(draftA0.webURL).toBe(expectedURL)
     })
 
     it('errors if the wrong state user calls it', async () => {

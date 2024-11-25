@@ -8,7 +8,7 @@ mutation unlockContract($input: UnlockContractInput!) {
             createdAt
             updatedAt
             initiallySubmittedAt
-            mcreviewURL
+            webURL
             lastUpdatedForDisplay
             dateContractDocsExecuted
             stateCode

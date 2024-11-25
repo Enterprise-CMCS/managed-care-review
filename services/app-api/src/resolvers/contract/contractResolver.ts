@@ -97,7 +97,7 @@ function genericContractResolver<
             }
             return null
         },
-        mcreviewURL(parent: ParentType) {
+        webURL(parent: ParentType) {
             const urlPath = path.join('/submissions/', parent.id)
             const fullURL = new URL(urlPath, applicationEndpoint).href
             return fullURL

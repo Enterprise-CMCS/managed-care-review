@@ -5,7 +5,7 @@ fragment contractFieldsFragment on Contract {
     consolidatedStatus
     createdAt
     updatedAt
-    mcreviewURL
+    webURL
     initiallySubmittedAt
     lastUpdatedForDisplay
     dateContractDocsExecuted
