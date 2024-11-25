@@ -1,4 +1,8 @@
-import { ContractQuestionList, RateQuestionList } from '../../../gen/gqlClient'
+import {
+    ConsolidatedContractStatus,
+    ContractQuestionList,
+    RateQuestionList,
+} from '../../../gen/gqlClient'
 import { SectionHeader } from '../../../components'
 import styles from '../QuestionResponse.module.scss'
 import { useAuth } from '../../../contexts/AuthContext'
@@ -9,11 +13,13 @@ import { QuestionResponseRound, RoundData } from './QuestionResponseRound'
 type StateQuestionResponseTableProps = {
     indexQuestions: IndexQuestionType
     header: string
+    contractStatus?: ConsolidatedContractStatus
 }
 
 export const StateQuestionResponseTable = ({
     indexQuestions,
     header,
+    contractStatus,
 }: StateQuestionResponseTableProps) => {
     const { loggedInUser } = useAuth()
     const answeredQuestions: RoundData[] = []
@@ -72,6 +78,7 @@ export const StateQuestionResponseTable = ({
                                 question={questionData}
                                 roundTitle={roundTitle}
                                 currentUser={loggedInUser!}
+                                contractStatus={contractStatus}
                             />
                         )
                     )
@@ -92,6 +99,7 @@ export const StateQuestionResponseTable = ({
                                 question={questionData}
                                 roundTitle={roundTitle}
                                 currentUser={loggedInUser!}
+                                contractStatus={contractStatus}
                             />
                         )
                     )

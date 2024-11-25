@@ -81,6 +81,7 @@ export {
     mockRateRevision,
     mockContractPackageSubmittedWithQuestions,
     mockContractPackageApproved,
+    mockContractPackageApprovedWithQuestions,
 } from './contractPackageDataMock'
 export { rateDataMock, mockRateSubmittedWithQuestions } from './rateDataMock'
 export {

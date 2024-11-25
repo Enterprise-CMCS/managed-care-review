@@ -1,4 +1,4 @@
-import { User } from '../../../gen/gqlClient'
+import { ConsolidatedContractStatus, User } from '../../../gen/gqlClient'
 import styles from './QATable.module.scss'
 import { NavLinkWithLogging } from '../../../components'
 import classNames from 'classnames'
@@ -19,13 +19,15 @@ export const QuestionResponseRound = ({
     question,
     roundTitle,
     currentUser,
+    contractStatus,
 }: {
     question: QuestionType
     roundTitle: string
     currentUser: User
+    contractStatus?: ConsolidatedContractStatus
 }) => {
     const isStateUser = currentUser?.__typename === 'StateUser'
-
+    const isApprovedContract = contractStatus === 'APPROVED'
     const classes = classNames('usa-button', {
         'usa-button--outline': question.responses.length > 0,
     })
@@ -34,7 +36,7 @@ export const QuestionResponseRound = ({
         <div data-testid="questionResponseRound">
             <div className={styles.tableHeader}>
                 <h4>{roundTitle}</h4>
-                {isStateUser && (
+                {isStateUser && !isApprovedContract && (
                     <NavLinkWithLogging
                         className={classes}
                         variant="unstyled"

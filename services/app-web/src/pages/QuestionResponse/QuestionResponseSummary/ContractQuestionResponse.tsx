@@ -81,6 +81,7 @@ export const ContractQuestionResponse = () => {
                 ) : (
                     <StateQuestionResponseTable
                         indexQuestions={contract.questions}
+                        contractStatus={contract.consolidatedStatus}
                         header="Contract questions"
                     />
                 )}
