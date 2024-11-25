@@ -1821,6 +1821,9 @@ type Contract {
     "mccrsID is the four digit id in MC-CRS that corresponds to this Contract, if set"
     mccrsID: String
 
+    "mcreviewURL is a url that will open the MC Review web app to this Contract"
+    mcreviewURL: String
+
     "dateContractDocsExecuted is the first date, if any in which the revisions were submitted with all contract docs executed. Null otherwise."
     dateContractDocsExecuted: DateTime
 
@@ -1892,6 +1895,9 @@ type UnlockedContract {
     stateNumber: Int!
     "mccrsID is the four digit id in MC-CRS that corresponds to this Contract, if set"
     mccrsID: String
+
+    "mcreviewURL is a url that will open the MC Review web app to this Contract"
+    mcreviewURL: String
 
     "dateContractDocsExecuted is the first date, if any in which the revisions were submitted with all contract docs executed. Null otherwise."
     dateContractDocsExecuted: DateTime

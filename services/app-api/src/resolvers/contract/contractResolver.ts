@@ -7,6 +7,7 @@ import type {
     RateRevisionType,
     UnlockedContractType,
 } from '../../domain-models'
+import path from 'path'
 import type { Store } from '../../postgres'
 import { NotFoundError } from '../../postgres'
 import {
@@ -19,7 +20,7 @@ import type { Context } from '../../handlers/apollo_gql'
 // this is probably a little delicate type-wise. But seems worth it not to be duplicating the same resolver in two places.
 function genericContractResolver<
     ParentType extends ContractType | UnlockedContractType,
->(store: Store) {
+>(store: Store, applicationEndpoint: string) {
     return {
         lastUpdatedForDisplay(parent: ParentType) {
             // These dates are mechanical, draft vs. submit vs. unlock, whatever is latest is latest
@@ -95,6 +96,11 @@ function genericContractResolver<
                 }
             }
             return null
+        },
+        mcreviewURL(parent: ParentType) {
+            const urlPath = path.join('/submissions/', parent.id)
+            const fullURL = new URL(urlPath, applicationEndpoint).href
+            return fullURL
         },
         packageSubmissions(parent: ParentType) {
             const gqlSubs: ContractPackageSubmissionWithCauseType[] = []
@@ -204,11 +210,15 @@ function genericContractResolver<
 }
 
 export function unlockedContractResolver(
-    store: Store
+    store: Store,
+    applicationEndpoint: string
 ): Resolvers['UnlockedContract'] {
-    return genericContractResolver(store)
+    return genericContractResolver(store, applicationEndpoint)
 }
 
-export function contractResolver(store: Store): Resolvers['Contract'] {
-    return genericContractResolver(store)
+export function contractResolver(
+    store: Store,
+    applicationEndpoint: string
+): Resolvers['Contract'] {
+    return genericContractResolver(store, applicationEndpoint)
 }

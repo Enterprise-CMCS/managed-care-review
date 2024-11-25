@@ -63,7 +63,8 @@ export function configureResolvers(
     emailParameterStore: EmailParameterStore,
     launchDarkly: LDService,
     jwt: JWTLib,
-    s3Client: S3ClientT
+    s3Client: S3ClientT,
+    applicationEndpoint: string
 ): Resolvers {
     const resolvers: Resolvers = {
         Date: GraphQLDate,
@@ -177,8 +178,8 @@ export function configureResolvers(
         HealthPlanPackage: healthPlanPackageResolver(store),
         Rate: rateResolver(store),
         RateRevision: rateRevisionResolver(store),
-        Contract: contractResolver(store),
-        UnlockedContract: unlockedContractResolver(store),
+        Contract: contractResolver(store, applicationEndpoint),
+        UnlockedContract: unlockedContractResolver(store, applicationEndpoint),
         ContractRevision: contractRevisionResolver(store),
         GenericDocument: genericDocumentResolver(s3Client),
         Document: questionResponseDocumentResolver(s3Client),
