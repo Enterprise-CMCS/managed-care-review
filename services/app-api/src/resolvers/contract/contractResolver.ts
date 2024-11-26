@@ -79,23 +79,19 @@ function genericContractResolver<
             return state
         },
         dateContractDocsExecuted(parent: ParentType) {
-            let dateFirstSubmitted: Date | undefined
+            let dateFirstSubmitted: Date | null = null
             for (const sub of parent.packageSubmissions) {
                 if (
                     sub.contractRevision.formData.contractExecutionStatus ===
                     'EXECUTED'
                 ) {
                     dateFirstSubmitted =
-                        sub.contractRevision.submitInfo?.updatedAt
+                        sub.contractRevision.submitInfo?.updatedAt || null
                 } else {
-                    if (dateFirstSubmitted) {
-                        return dateFirstSubmitted
-                    } else {
-                        return null
-                    }
+                    return dateFirstSubmitted
                 }
             }
-            return null
+            return dateFirstSubmitted
         },
         webURL(parent: ParentType) {
             const urlPath = path.join('/submissions/', parent.id)

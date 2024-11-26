@@ -157,6 +157,7 @@ describe('fetchContract', () => {
 
         const intiallySubmitted = await submitTestContract(stateServer, AID)
         const intiallySubmittedDate = intiallySubmitted.lastUpdatedForDisplay
+        expect(intiallySubmittedDate).not.toBeNull()
         expect(intiallySubmittedDate.getTime()).not.toEqual(
             updatedDraftDate.getTime()
         )
@@ -269,6 +270,30 @@ describe('fetchContract', () => {
             'submit removing the execution'
         )
         expect(thirdSubmitted.dateContractDocsExecuted).toBeNull()
+    })
+
+    it('returns dateContractDocsExecuted for initially executed', async () => {
+        const stateServer = await constructTestPostgresServer({
+            s3Client: mockS3,
+        })
+
+        const draftA0 = await createTestContract(stateServer)
+        const AID = draftA0.id
+
+        expect(draftA0.dateContractDocsExecuted).toBeNull()
+
+        const draft1FD = mockGqlContractDraftRevisionFormDataInput()
+        draft1FD.contractExecutionStatus = 'EXECUTED'
+        const draftA1 = await updateTestContractDraftRevision(
+            stateServer,
+            AID,
+            draftA0.draftRevision?.updatedAt,
+            draft1FD
+        )
+        expect(draftA1.dateContractDocsExecuted).toBeNull()
+
+        const intiallySubmitted = await submitTestContract(stateServer, AID)
+        expect(intiallySubmitted.dateContractDocsExecuted).not.toBeNull()
     })
 
     it('returns webURL', async () => {
