@@ -3,14 +3,15 @@ import { renderWithProviders, testS3Client } from '../../testHelpers'
 import {
     fetchCurrentUserMock,
     fetchRateMockSuccess,
+    fetchContractMockSuccess,
     iterableCmsUsersMockData,
     mockValidStateUser,
+    mockContractPackageSubmitted,
 } from '../../testHelpers/apolloMocks'
 import { RateSummary } from './RateSummary'
 import { RoutesRecord } from '../../constants'
 import { Route, Routes } from 'react-router-dom'
 import { RateEdit } from '../RateEdit/RateEdit'
-import { rateWithHistoryMock } from '../../testHelpers/apolloMocks/rateDataMock'
 
 // Wrap test component in some top level routes to allow getParams to be tested
 const wrapInRoutes = (children: React.ReactNode) => {
@@ -25,7 +26,10 @@ describe('RateSummary', () => {
     describe.each(iterableCmsUsersMockData)(
         'Viewing RateSummary as a $userRole',
         ({ userRole, mockUser }) => {
+            const contract = mockContractPackageSubmitted()
+
             it('renders without errors', async () => {
+                const contract = mockContractPackageSubmitted()
                 renderWithProviders(wrapInRoutes(<RateSummary />), {
                     apolloProvider: {
                         mocks: [
@@ -33,7 +37,12 @@ describe('RateSummary', () => {
                                 user: mockUser(),
                                 statusCode: 200,
                             }),
-                            fetchRateMockSuccess({ id: '7a' }),
+                            fetchContractMockSuccess({ contract }),
+                            fetchRateMockSuccess({
+                                id: '7a',
+                                parentContractID: contract.id,
+                            }),
+                            fetchContractMockSuccess({ contract }),
                         ],
                     },
                     routerProvider: {
@@ -56,8 +65,10 @@ describe('RateSummary', () => {
                                 user: mockUser(),
                                 statusCode: 200,
                             }),
+                            fetchContractMockSuccess({ contract }),
                             fetchRateMockSuccess({
                                 id: '1337',
+                                parentContractID: contract.id,
                                 withdrawInfo: {
                                     __typename: 'UpdateInformation',
                                     updatedAt: new Date('2024-01-01'),
@@ -127,7 +138,11 @@ describe('RateSummary', () => {
                                 user: mockUser(),
                                 statusCode: 200,
                             }),
-                            fetchRateMockSuccess({ id: '7a' }),
+                            fetchRateMockSuccess({
+                                id: '7a',
+                                parentContractID: contract.id,
+                            }),
+                            fetchContractMockSuccess({ contract }),
                         ],
                     },
                     routerProvider: {
@@ -153,7 +168,11 @@ describe('RateSummary', () => {
     )
 
     describe('Viewing RateSummary as a State user', () => {
+        const contract = mockContractPackageSubmitted()
+
         it('renders SingleRateSummarySection component without errors for locked rate', async () => {
+            const rate = rateWithHistoryMock()
+            rate.parentContractID = contract.id
             renderWithProviders(wrapInRoutes(<RateSummary />), {
                 apolloProvider: {
                     mocks: [
@@ -161,7 +180,8 @@ describe('RateSummary', () => {
                             user: mockValidStateUser(),
                             statusCode: 200,
                         }),
-                        fetchRateMockSuccess(rateWithHistoryMock()),
+                        fetchRateMockSuccess(rate),
+                        fetchContractMockSuccess({ contract }),
                     ],
                 },
                 routerProvider: {
@@ -187,8 +207,10 @@ describe('RateSummary', () => {
                             user: mockValidStateUser(),
                             statusCode: 200,
                         }),
+                        fetchContractMockSuccess({ contract }),
                         fetchRateMockSuccess({
                             id: '1337',
+                            parentContractID: contract.id,
                             withdrawInfo: {
                                 __typename: 'UpdateInformation',
                                 updatedAt: new Date('2024-01-01'),
@@ -249,8 +271,10 @@ describe('RateSummary', () => {
                             }),
                             fetchRateMockSuccess({
                                 id: '1337',
+                                parentContractID: contract.id,
                                 status: 'UNLOCKED',
                             }),
+                            fetchContractMockSuccess({ contract }),
                         ],
                     },
                     routerProvider: {
@@ -281,7 +305,11 @@ describe('RateSummary', () => {
                             user: mockValidStateUser(),
                             statusCode: 200,
                         }),
-                        fetchRateMockSuccess({ id: '1337' }),
+                        fetchRateMockSuccess({
+                            id: '1337',
+                            parentContractID: contract.id,
+                        }),
+                        fetchContractMockSuccess({ contract }),
                     ],
                 },
                 //purposefully attaching invalid id to url here
@@ -302,7 +330,11 @@ describe('RateSummary', () => {
                             user: mockValidStateUser(),
                             statusCode: 200,
                         }),
-                        fetchRateMockSuccess({ id: '7a' }),
+                        fetchRateMockSuccess({
+                            id: '7a',
+                            parentContractID: contract.id,
+                        }),
+                        fetchContractMockSuccess({ contract }),
                     ],
                 },
                 routerProvider: {
