@@ -1563,6 +1563,10 @@ type RateFormData {
     """
     rateProgramIDs: [String!]!
     """
+    consolidatedRateProgramIDs An array of IDs representing state programs. Deprecated if that's all that exists, or the current ones if they exist.
+    """
+    consolidatedRateProgramIDs: [String!]!
+    """
     Represents the name of the rate.
     This value is auto generated based on rate, package and state program details
     """
@@ -1675,6 +1679,9 @@ type Rate {
     stateCode: String!
     "Fuller state data for the submitting state"
     state: State!
+    "webURL is a URL that will open the MC Review web app to this Rate"
+    webURL: String!
+
     """
     A unique auto-incrementing number generated for this rate
     This value is used to generate the rateName
@@ -1822,7 +1829,7 @@ type Contract {
     mccrsID: String
 
     "webURL is a url that will open the MC Review web app to this Contract"
-    webURL: String
+    webURL: String!
 
     "dateContractDocsExecuted is the first date, if any in which the revisions were submitted with all contract docs executed. Null otherwise."
     dateContractDocsExecuted: DateTime
@@ -1897,7 +1904,7 @@ type UnlockedContract {
     mccrsID: String
 
     "webURL is a url that will open the MC Review web app to this Contract"
-    webURL: String
+    webURL: String!
 
     "dateContractDocsExecuted is the first date, if any in which the revisions were submitted with all contract docs executed. Null otherwise."
     dateContractDocsExecuted: DateTime

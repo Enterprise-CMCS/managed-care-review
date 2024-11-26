@@ -56,6 +56,7 @@ import { withdrawAndReplaceRedundantRateResolver } from './contract/withdrawAndR
 import { approveContract } from './contract/approveContract'
 import { fetchMcReviewSettings } from './settings'
 import { updateStateAssignmentsByState } from './user/updateStateAssignmentsByState'
+import { rateFormDataResolver } from './rate/rateFormDataResolver'
 
 export function configureResolvers(
     store: Store,
@@ -176,8 +177,9 @@ export function configureResolvers(
         CMSUser: cmsUserResolver,
         CMSApproverUser: cmsApproverUserResolver,
         HealthPlanPackage: healthPlanPackageResolver(store),
-        Rate: rateResolver(store),
+        Rate: rateResolver(store, applicationEndpoint),
         RateRevision: rateRevisionResolver(store),
+        RateFormData: rateFormDataResolver(),
         Contract: contractResolver(store, applicationEndpoint),
         UnlockedContract: unlockedContractResolver(store, applicationEndpoint),
         ContractRevision: contractRevisionResolver(store),
