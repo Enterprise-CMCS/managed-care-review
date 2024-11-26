@@ -217,7 +217,6 @@ export const ContractTable = ({
         filtersForAnalytics: '',
     })
     const { logFilterEvent } = useTealium()
-
     /* we store the last clicked element in a ref so that when the url is updated and the page rerenders
         we can focus that element.  this useEffect (with no dependency array) will run once on each render.
         Note that the React-y way to do this is to use forwardRef, but the clearFilters button is deeply nested
@@ -348,6 +347,7 @@ export const ContractTable = ({
                 meta: {
                     dataTestID: `${tableConfig.rowIDName}-status`,
                 },
+                filterFn: `arrIncludesSome`,
             }),
         ],
         [isNotStateUser, tableConfig.rowIDName]
@@ -361,17 +361,6 @@ export const ContractTable = ({
         filterFns: {
             dateRangeFilter: () => true,
             analystFilter: () => true,
-        },
-        initialState: {
-            columnFilters: [
-                {
-                    id: 'status',
-                    value: 'APPROVED',
-                },
-            ],
-            // columnVisibility: {
-            //     status: false //hide the id column by default
-            //   },
         },
         getCoreRowModel: getCoreRowModel(),
         state: {
@@ -441,13 +430,26 @@ export const ContractTable = ({
         setColumnFilters([])
     }
 
-    // useEffect(() => {
-    //     updateFilters(
-    //             statusColumn,
-    //             [submissionStatusOptions[0]],
-    //             'status'
-    //         )
-    // })
+    useEffect(() => {
+        // if on root route
+        if (location.hash === '') {
+            updateFilters(
+                statusColumn,
+                [
+                    {
+                        label: 'Submitted',
+                        value: 'SUBMITTED',
+                    },
+                    {
+                        label: 'Unlocked',
+                        value: 'UNLOCKED',
+                    },
+                ],
+                'status'
+            )
+        }
+        // setColumnFilters([])
+    })
 
     //Store caption element in state in order for screen readers to read dynamic captions.
     useEffect(() => {
