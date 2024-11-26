@@ -348,7 +348,6 @@ export const ContractTable = ({
                 meta: {
                     dataTestID: `${tableConfig.rowIDName}-status`,
                 },
-                filterFn: `arrIncludesSome`,
             }),
         ],
         [isNotStateUser, tableConfig.rowIDName]
@@ -362,6 +361,17 @@ export const ContractTable = ({
         filterFns: {
             dateRangeFilter: () => true,
             analystFilter: () => true,
+        },
+        initialState: {
+            columnFilters: [
+                {
+                    id: 'status',
+                    value: 'APPROVED',
+                },
+            ],
+            // columnVisibility: {
+            //     status: false //hide the id column by default
+            //   },
         },
         getCoreRowModel: getCoreRowModel(),
         state: {
@@ -430,6 +440,14 @@ export const ContractTable = ({
         setTableCaption(null)
         setColumnFilters([])
     }
+
+    // useEffect(() => {
+    //     updateFilters(
+    //             statusColumn,
+    //             [submissionStatusOptions[0]],
+    //             'status'
+    //         )
+    // })
 
     //Store caption element in state in order for screen readers to read dynamic captions.
     useEffect(() => {
@@ -541,6 +559,7 @@ export const ContractTable = ({
                                     name="status"
                                     label="Status"
                                     filterOptions={submissionStatusOptions}
+                                    defaultValue={submissionStatusOptions[0]}
                                     onChange={(selectedOptions) =>
                                         updateFilters(
                                             statusColumn,
