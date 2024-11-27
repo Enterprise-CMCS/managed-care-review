@@ -41,8 +41,10 @@ import { createAPIKeyResolver } from './APIKey'
 import { unlockRate } from './rate/unlockRate'
 import { submitRate } from './rate'
 import { updateDraftContractRates } from './contract/updateDraftContractRates'
-import { contractResolver } from './contract/contractResolver'
-import { unlockedContractResolver } from './contract/unlockedContractResolver'
+import {
+    contractResolver,
+    unlockedContractResolver,
+} from './contract/contractResolver'
 import { contractRevisionResolver } from './contract/contractRevisionResolver'
 import { fetchContractResolver } from './contract/fetchContract'
 import { submitContract } from './contract/submitContract'
@@ -54,6 +56,7 @@ import { withdrawAndReplaceRedundantRateResolver } from './contract/withdrawAndR
 import { approveContract } from './contract/approveContract'
 import { fetchMcReviewSettings } from './settings'
 import { updateStateAssignmentsByState } from './user/updateStateAssignmentsByState'
+import { rateFormDataResolver } from './rate/rateFormDataResolver'
 
 export function configureResolvers(
     store: Store,
@@ -61,7 +64,8 @@ export function configureResolvers(
     emailParameterStore: EmailParameterStore,
     launchDarkly: LDService,
     jwt: JWTLib,
-    s3Client: S3ClientT
+    s3Client: S3ClientT,
+    applicationEndpoint: string
 ): Resolvers {
     const resolvers: Resolvers = {
         Date: GraphQLDate,
@@ -173,10 +177,11 @@ export function configureResolvers(
         CMSUser: cmsUserResolver,
         CMSApproverUser: cmsApproverUserResolver,
         HealthPlanPackage: healthPlanPackageResolver(store),
-        Rate: rateResolver(store),
+        Rate: rateResolver(store, applicationEndpoint),
         RateRevision: rateRevisionResolver(store),
-        Contract: contractResolver(store),
-        UnlockedContract: unlockedContractResolver(),
+        RateFormData: rateFormDataResolver(),
+        Contract: contractResolver(store, applicationEndpoint),
+        UnlockedContract: unlockedContractResolver(store, applicationEndpoint),
         ContractRevision: contractRevisionResolver(store),
         GenericDocument: genericDocumentResolver(s3Client),
         Document: questionResponseDocumentResolver(s3Client),

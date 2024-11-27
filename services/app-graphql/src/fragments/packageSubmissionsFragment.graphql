@@ -1,0 +1,23 @@
+fragment packageSubmissionsFragment on ContractPackageSubmission {
+    cause
+    submitInfo {
+        ...updateInformationFields
+    }
+
+    submittedRevisions {
+        ...submittableRevisionsFieldsFragement
+    }
+
+    contractRevision {
+        ...contractRevisionFragment
+    }
+    rateRevisions {
+        ...rateRevisionFragment
+        rate {
+            ...rateFieldsFragment
+            revisions {
+                ...rateRevisionFragment
+            }
+        }
+    }
+}
