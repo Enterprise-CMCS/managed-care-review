@@ -164,6 +164,9 @@ function mockRateRevision(
             amendmentEffectiveDateEnd: new Date(),
             deprecatedRateProgramIDs: [],
             rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
+            consolidatedRateProgramIDs: [
+                'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
+            ],
             certifyingActuaryContacts: [
                 {
                     id: null,
@@ -198,9 +201,11 @@ function mockContractPackageDraft(partial?: Partial<Contract>): Contract {
         initiallySubmittedAt: null,
         status: 'DRAFT',
         consolidatedStatus: 'DRAFT',
+        webURL: 'https://testmcreview.example/submissions/123',
         reviewStatus: 'UNDER_REVIEW',
         createdAt: new Date('01/01/24'),
         updatedAt: new Date(),
+        lastUpdatedForDisplay: new Date(),
         id: 'test-abc-123',
         stateCode: 'MN',
         state: mockMNState(),
@@ -222,6 +227,7 @@ function mockContractPackageDraft(partial?: Partial<Contract>): Contract {
             {
                 __typename: 'Rate',
                 id: '123',
+                webURL: 'https://testmcreview.example/rate/123',
                 createdAt: new Date(),
                 updatedAt: new Date(),
                 status: 'DRAFT',
@@ -271,6 +277,9 @@ function mockContractPackageDraft(partial?: Partial<Contract>): Contract {
                         rateProgramIDs: [
                             'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
                         ],
+                        consolidatedRateProgramIDs: [
+                            'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
+                        ],
                         certifyingActuaryContacts: [
                             {
                                 id: null,
@@ -314,7 +323,9 @@ function mockContractPackageSubmittedWithQuestions(
         __typename: 'Contract',
         createdAt: new Date(),
         updatedAt: new Date(),
+        lastUpdatedForDisplay: new Date(),
         id: 'test-abc-123',
+        webURL: 'https://testmcreview.example/submissions/test-abc-123',
         stateCode: 'MN',
         state: mockMNState(),
         stateNumber: 5,
@@ -455,6 +466,9 @@ function mockContractPackageSubmittedWithQuestions(
                             amendmentEffectiveDateStart: new Date(),
                             amendmentEffectiveDateEnd: new Date(),
                             rateProgramIDs: [
+                                'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
+                            ],
+                            consolidatedRateProgramIDs: [
                                 'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
                             ],
                             deprecatedRateProgramIDs: [],
@@ -680,7 +694,9 @@ function mockContractWithLinkedRateDraft(
         consolidatedStatus: 'DRAFT',
         createdAt: new Date(),
         updatedAt: new Date(),
+        lastUpdatedForDisplay: new Date(),
         id: 'test-abc-123',
+        webURL: 'https://testmcreview.example/submissions/test-abc-123',
         stateCode: 'MN',
         state: mockMNState(),
         stateNumber: 5,
@@ -750,6 +766,7 @@ function mockContractWithLinkedRateDraft(
             {
                 __typename: 'Rate',
                 id: 'rate-123',
+                webURL: 'https://testmcreview.example/rates/rate-123',
                 createdAt: new Date(),
                 updatedAt: new Date(),
                 status: 'UNLOCKED',
@@ -805,6 +822,9 @@ function mockContractWithLinkedRateDraft(
                         rateProgramIDs: [
                             'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
                         ],
+                        consolidatedRateProgramIDs: [
+                            'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
+                        ],
                         deprecatedRateProgramIDs: [],
                         certifyingActuaryContacts: [
                             {
@@ -856,6 +876,9 @@ function mockContractWithLinkedRateDraft(
                             rateProgramIDs: [
                                 'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
                             ],
+                            consolidatedRateProgramIDs: [
+                                'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
+                            ],
                             deprecatedRateProgramIDs: [],
                             certifyingActuaryContacts: [
                                 {
@@ -896,7 +919,9 @@ function mockContractWithLinkedRateSubmitted(
         consolidatedStatus: 'SUBMITTED',
         createdAt: new Date('12/1o/2023'),
         updatedAt: new Date('12/17/2023'),
+        lastUpdatedForDisplay: new Date('12/17/2023'),
         id: 'test-abc-123',
+        webURL: 'https://testmcreview.example/submissions/test-abc-123',
         stateCode: 'MN',
         state: mockMNState(),
         stateNumber: 5,
@@ -1016,6 +1041,9 @@ function mockContractWithLinkedRateSubmitted(
                             rateProgramIDs: [
                                 'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
                             ],
+                            consolidatedRateProgramIDs: [
+                                'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
+                            ],
                             deprecatedRateProgramIDs: [],
                             certifyingActuaryContacts: [
                                 {
@@ -1052,6 +1080,8 @@ function mockContractPackageSubmitted(partial?: Partial<Contract>): Contract {
         __typename: 'Contract',
         createdAt: new Date(),
         updatedAt: new Date(),
+        lastUpdatedForDisplay: new Date(),
+        webURL: 'https://testmcreview.example/submissions/test-abc-123',
         initiallySubmittedAt: new Date('2024-11-27'),
         id: 'test-abc-123',
         stateCode: 'MN',
@@ -1200,6 +1230,9 @@ function mockContractPackageSubmitted(partial?: Partial<Contract>): Contract {
                             amendmentEffectiveDateStart: new Date(),
                             amendmentEffectiveDateEnd: new Date(),
                             rateProgramIDs: [
+                                'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
+                            ],
+                            consolidatedRateProgramIDs: [
                                 'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
                             ],
                             deprecatedRateProgramIDs: [],
@@ -1255,6 +1288,8 @@ function mockContractPackageApproved(partial?: Partial<Contract>): Contract {
         __typename: 'Contract',
         createdAt: new Date(),
         updatedAt: new Date(),
+        lastUpdatedForDisplay: new Date(),
+        webURL: 'https://testmcreview.example/submissions/test-abc-123',
         initiallySubmittedAt: new Date('2024-11-27'),
         id: 'test-abc-123',
         stateCode: 'MN',
@@ -1405,6 +1440,9 @@ function mockContractPackageApproved(partial?: Partial<Contract>): Contract {
                             rateProgramIDs: [
                                 'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
                             ],
+                            consolidatedRateProgramIDs: [
+                                'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
+                            ],
                             deprecatedRateProgramIDs: [],
                             certifyingActuaryContacts: [
                                 {
@@ -1443,9 +1481,11 @@ function mockContractPackageSubmittedWithRevisions(
         consolidatedStatus: 'SUBMITTED',
         createdAt: new Date(),
         updatedAt: new Date(),
+        lastUpdatedForDisplay: new Date(),
         initiallySubmittedAt: new Date('2024-01-01'),
         mccrsID: null,
         id: 'test-abc-123',
+        webURL: 'https://testmcreview.example/submissions/test-abc-123',
         stateCode: 'MN',
         state: mockMNState(),
         stateNumber: 5,
@@ -1544,6 +1584,8 @@ function mockContractPackageWithDifferentProgramsInRevisions(): Contract {
         consolidatedStatus: 'RESUBMITTED',
         createdAt: '2024-05-07T19:44:53.732Z',
         updatedAt: '2024-05-07T19:44:53.732Z',
+        lastUpdatedForDisplay: '2024-05-07T19:44:53.732Z',
+        webURL: 'https://testmcreview.example/submissions/e670adsfdfadsfc',
         initiallySubmittedAt: '2024-05-07T00:00:00Z',
         stateCode: 'FL',
         mccrsID: null,
@@ -1962,8 +2004,10 @@ function mockContractPackageUnlockedWithUnlockedType(
         __typename: 'UnlockedContract',
         createdAt: '2023-01-01T16:54:39.173Z',
         updatedAt: '2024-12-01T16:54:39.173Z',
+        lastUpdatedForDisplay: '2024-12-01T16:54:39.173Z',
         initiallySubmittedAt: new Date('2023-01-01'),
         id: 'test-abc-123',
+        webURL: 'https://testmcreview.example/submissions/test-abc-123',
         stateCode: 'MN',
         state: mockMNState(),
         stateNumber: 5,
@@ -2043,6 +2087,7 @@ function mockContractPackageUnlockedWithUnlockedType(
             {
                 __typename: 'Rate',
                 id: 'unlocked-rate-123',
+                webURL: 'https://testmcreview.example/rates/unlocked-rate-123',
                 createdAt: new Date(),
                 updatedAt: new Date(),
                 status: 'SUBMITTED',
@@ -2087,6 +2132,9 @@ function mockContractPackageUnlockedWithUnlockedType(
                         amendmentEffectiveDateStart: new Date(),
                         amendmentEffectiveDateEnd: new Date(),
                         rateProgramIDs: [
+                            'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
+                        ],
+                        consolidatedRateProgramIDs: [
                             'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
                         ],
                         deprecatedRateProgramIDs: [
@@ -2300,6 +2348,9 @@ function mockContractPackageUnlockedWithUnlockedType(
                             rateProgramIDs: [
                                 'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
                             ],
+                            consolidatedRateProgramIDs: [
+                                'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
+                            ],
                             deprecatedRateProgramIDs: [
                                 'ea16a6c0-5fc6-4df8-adac-c627e76660ab',
                             ],
@@ -2482,6 +2533,7 @@ const mockEmptyDraftContractAndRate = (): Contract =>
         draftRates: [
             {
                 id: '123',
+                webURL: 'https://testmcreview.example/rates/123',
                 createdAt: new Date(),
                 updatedAt: new Date(),
                 status: 'DRAFT',
@@ -2530,6 +2582,7 @@ const mockEmptyDraftContractAndRate = (): Contract =>
                         amendmentEffectiveDateEnd: null,
                         deprecatedRateProgramIDs: [],
                         rateProgramIDs: [],
+                        consolidatedRateProgramIDs: [],
                         certifyingActuaryContacts: [
                             {
                                 id: null,

@@ -63,6 +63,9 @@ const rateRevisionDataMock = (data?: Partial<RateRevision>): RateRevision => {
             amendmentEffectiveDateStart: '2024-03-01',
             amendmentEffectiveDateEnd: '2025-03-01',
             rateProgramIDs: ['d95394e5-44d1-45df-8151-1cc1ee66f100'],
+            consolidatedRateProgramIDs: [
+                'd95394e5-44d1-45df-8151-1cc1ee66f100',
+            ],
             deprecatedRateProgramIDs: [],
             rateCertificationName:
                 'MCR-MN-0003-PMAP-RATE-20240301-20250301-AMENDMENT-20240301',
@@ -122,6 +125,7 @@ const draftRateDataMock = (
         stateCode: 'MN',
         stateNumber: 10,
         parentContractID: 'foo-bar',
+        webURL: 'https://testmcreview.example/rateID',
         state: mockMNState(),
         status: 'DRAFT',
         initiallySubmittedAt: new Date('2023-10-16'),
@@ -272,6 +276,8 @@ function submittedLinkedRatesScenarioMock(): {
         reviewStatus: 'UNDER_REVIEW',
         createdAt: new Date(2024, 1, 1),
         updatedAt: new Date(),
+        lastUpdatedForDisplay: new Date(),
+        webURL: 'https://testmcreview.example/submission/c-01',
         id: 'c-01',
         stateCode: 'MN',
         state: mockMNState(),
@@ -288,6 +294,8 @@ function submittedLinkedRatesScenarioMock(): {
         reviewStatus: 'UNDER_REVIEW',
         createdAt: new Date(2024, 1, 1),
         updatedAt: new Date(),
+        lastUpdatedForDisplay: new Date(),
+        webURL: 'https://testmcreview.example/submission/c-02',
         id: 'c-02',
         stateCode: 'MN',
         state: mockMNState(),
@@ -305,6 +313,7 @@ function submittedLinkedRatesScenarioMock(): {
         state: mockMNState(),
         status: 'RESUBMITTED',
         initiallySubmittedAt: new Date('2023-10-16'),
+        webURL: 'https://testmcreview.example/rate/r-01',
         draftRevision: null,
         parentContractID: 'c-01',
         id: 'r-01',
@@ -381,6 +390,9 @@ function mockRateSubmittedWithQuestions(
                 amendmentEffectiveDateStart: new Date(),
                 amendmentEffectiveDateEnd: new Date(),
                 rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
+                consolidatedRateProgramIDs: [
+                    'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
+                ],
                 deprecatedRateProgramIDs: [],
                 certifyingActuaryContacts: [
                     {
@@ -415,6 +427,7 @@ function mockRateSubmittedWithQuestions(
         createdAt: rate.createdAt ?? new Date(),
         updatedAt: rate.updatedAt ?? new Date(),
         id: rateID,
+        webURL: `https://testmcreview.example/rate/${rateID}`,
         stateCode: rate.stateCode ?? 'MN',
         state: rate.state ?? mockMNState(),
         stateNumber: rate.stateNumber ?? 5,

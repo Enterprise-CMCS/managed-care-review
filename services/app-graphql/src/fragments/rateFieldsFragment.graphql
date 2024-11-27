@@ -1,5 +1,6 @@
 fragment rateFieldsFragment on Rate {
     id
+    webURL
     createdAt
     updatedAt
     stateCode
@@ -14,6 +15,9 @@ fragment rateFieldsFragment on Rate {
             fullName
             isRateProgram
         }
+    }
+    withdrawInfo {
+        ...updateInformationFields
     }
     status
     parentContractID

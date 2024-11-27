@@ -1563,6 +1563,10 @@ type RateFormData {
     """
     rateProgramIDs: [String!]!
     """
+    consolidatedRateProgramIDs An array of IDs representing state programs. Deprecated if that's all that exists, or the current ones if they exist.
+    """
+    consolidatedRateProgramIDs: [String!]!
+    """
     Represents the name of the rate.
     This value is auto generated based on rate, package and state program details
     """
@@ -1675,6 +1679,9 @@ type Rate {
     stateCode: String!
     "Fuller state data for the submitting state"
     state: State!
+    "webURL is a URL that will open the MC Review web app to this Rate"
+    webURL: String!
+
     """
     A unique auto-incrementing number generated for this rate
     This value is used to generate the rateName
@@ -1807,6 +1814,8 @@ type Contract {
     consolidatedStatus: ConsolidatedContractStatus!
     "initiallySubmittedAt is the initial date this contract was submitted at. Is not changed by unlock or resubmission."
     initiallySubmittedAt: DateTime
+    "lastUpdatedForDisplay is the last time this contract was officially updated. When it's a draft it will be the last updatedAt date. Afterwards it will be the most recent submit or unlock or review action date."
+    lastUpdatedForDisplay: DateTime!
     "stateCode is the state code (e.g. CA or TN) for the submitting state"
     stateCode: String!
     "state is fuller state data for the submitting state"
@@ -1816,7 +1825,14 @@ type Contract {
     This value is used to generate the contractName
     """
     stateNumber: Int!
+    "mccrsID is the four digit id in MC-CRS that corresponds to this Contract, if set"
     mccrsID: String
+
+    "webURL is a url that will open the MC Review web app to this Contract"
+    webURL: String!
+
+    "dateContractDocsExecuted is the first date, if any in which the revisions were submitted with all contract docs executed. Null otherwise."
+    dateContractDocsExecuted: DateTime
 
     "draftRevision is the currently modifiable revision if the rate is DRAFT or UNLOCKED"
     draftRevision: ContractRevision
@@ -1873,6 +1889,8 @@ type UnlockedContract {
     consolidatedStatus: ConsolidatedContractStatus!
     "initiallySubmittedAt is the initial date this contract was submitted at. Is not changed by unlock or resubmission."
     initiallySubmittedAt: Date
+    "lastUpdatedForDisplay is the last time this contract was officially updated. When it's a draft it will be the last updatedAt date. Afterwards it will be the most recent submit or unlock or review action date."
+    lastUpdatedForDisplay: DateTime!
     "stateCode is the state code (e.g. CA or TN) for the submitting state"
     stateCode: String!
     "state is fuller state data for the submitting state"
@@ -1882,7 +1900,15 @@ type UnlockedContract {
     This value is used to generate the contractName
     """
     stateNumber: Int!
+    "mccrsID is the four digit id in MC-CRS that corresponds to this Contract, if set"
     mccrsID: String
+
+    "webURL is a url that will open the MC Review web app to this Contract"
+    webURL: String!
+
+    "dateContractDocsExecuted is the first date, if any in which the revisions were submitted with all contract docs executed. Null otherwise."
+    dateContractDocsExecuted: DateTime
+
     "reviewStatusActions are the who/when/why for review status changes on this contract"
     reviewStatusActions: [ContractReviewStatusActions!]
 
@@ -1901,6 +1927,13 @@ type UnlockedContract {
     submission is in the first position in the array.
     """
     packageSubmissions: [ContractPackageSubmission!]!
+
+    """
+    questions field is an array of questions asked about the contract by CMS. Each questions also contains responses
+    to the question submitted by the State. DRAFT contracts will not have questions, only contracts that have been submitted
+    , unlocked, or resubmitted. The array is in descending order by createdAt.
+    """
+    questions: IndexContractQuestionsPayload
 }
 
 type RateEdge {

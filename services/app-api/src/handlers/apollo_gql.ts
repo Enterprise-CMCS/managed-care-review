@@ -423,7 +423,8 @@ async function initializeGQLHandler(): Promise<Handler> {
         emailParameterStore,
         launchDarkly,
         jwtLib,
-        s3Client
+        s3Client,
+        applicationEndpoint
     )
 
     const userFetcher =

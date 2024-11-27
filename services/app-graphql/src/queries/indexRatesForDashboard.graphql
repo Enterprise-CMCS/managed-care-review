@@ -4,6 +4,7 @@ query indexRatesForDashboard($input: IndexRatesInput) {
         edges {
             node {
                 id
+                webURL
                 createdAt
                 updatedAt
                 stateCode
@@ -46,6 +47,7 @@ query indexRatesForDashboard($input: IndexRatesInput) {
                         amendmentEffectiveDateEnd,
                         rateProgramIDs,
                         deprecatedRateProgramIDs,
+                        consolidatedRateProgramIDs
                         rateCertificationName,
                         certifyingActuaryContacts {
                             name
@@ -91,6 +93,7 @@ query indexRatesForDashboard($input: IndexRatesInput) {
                         amendmentEffectiveDateEnd,
                         rateProgramIDs,
                         deprecatedRateProgramIDs,
+                        consolidatedRateProgramIDs,
                         rateCertificationName,
                         certifyingActuaryContacts {
                             name
