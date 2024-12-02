@@ -448,7 +448,6 @@ export const ContractTable = ({
                 'status'
             )
         }
-        // setColumnFilters([])
     })
 
     //Store caption element in state in order for screen readers to read dynamic captions.
@@ -561,7 +560,6 @@ export const ContractTable = ({
                                     name="status"
                                     label="Status"
                                     filterOptions={submissionStatusOptions}
-                                    defaultValue={submissionStatusOptions[0]}
                                     onChange={(selectedOptions) =>
                                         updateFilters(
                                             statusColumn,

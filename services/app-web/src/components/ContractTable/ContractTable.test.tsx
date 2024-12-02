@@ -201,6 +201,25 @@ describe('ContractTable for CMS User (with filters)', () => {
         ).toBeInTheDocument()
     })
 
+    it('Filter out approved submission', async () => {
+        window.location.assign('#filters=status%3DSUBMITTED%2CUNLOCKED')
+
+        renderWithProviders(
+            <ContractTable
+                tableData={submissions}
+                user={mockCMSUser()}
+                showFilters
+            />,
+            {
+                apolloProvider: apolloProviderWithStateUser(),
+            }
+        )
+        const rows = await screen.findAllByRole('row')
+        expect(screen.getByRole('table')).toBeInTheDocument()
+        expect(rows).toHaveLength(5)
+        expect(screen.queryByText('Approved')).not.toBeInTheDocument()
+    })
+
     it('displays no submission text when no submitted packages exist', async () => {
         renderWithProviders(
             <ContractTable tableData={[]} user={mockCMSUser()} showFilters />,
