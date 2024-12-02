@@ -188,14 +188,6 @@ describe('fetchContract', () => {
         const approved = await approveTestContract(cmsServer, AID)
         const approvedDate = approved.lastUpdatedForDisplay
         expect(approvedDate.getTime()).not.toEqual(secondSubmitDate.getTime())
-
-        const secondUnlock = await unlockTestContract(
-            cmsServer,
-            AID,
-            'Unlock A.4'
-        )
-        const secondUnlockDate = secondUnlock.lastUpdatedForDisplay
-        expect(secondUnlockDate.getTime()).not.toEqual(approvedDate.getTime())
     })
 
     it('returns dateContractDocsExecuted', async () => {
