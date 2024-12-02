@@ -52,12 +52,11 @@ export function approveContract(
                 },
             })
         }
-
-        const wrongStatus = !(
-            contractWithHistory.consolidatedStatus === 'SUBMITTED' ||
-            contractWithHistory.consolidatedStatus === 'RESUBMITTED'
+        const allowedStatus = ['SUBMITTED', 'RESUBMITTED'].includes(
+            contractWithHistory.consolidatedStatus
         )
-        if (wrongStatus) {
+
+        if (!allowedStatus) {
             const errMessage = `Attempted to approve contract with wrong status: ${contractWithHistory.consolidatedStatus}`
             logError('approveContract', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
