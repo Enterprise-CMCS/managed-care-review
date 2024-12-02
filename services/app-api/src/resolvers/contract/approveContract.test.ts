@@ -119,7 +119,7 @@ describe('approveContract', () => {
         )
     })
 
-    it('errors if contract review status is not UNDER_REVIEW', async () => {
+    it('errors if contract review status is APPROVED', async () => {
         const stateServer = await constructTestPostgresServer({
             s3Client: mockS3,
         })

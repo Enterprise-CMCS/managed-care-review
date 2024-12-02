@@ -46,7 +46,7 @@ These four env vars configure cognito auth from the browser. They are ignored if
 
 ### `VITE_APP_APPLICATION_ENDPOINT`
 
-Read by app-web
+Read by app-web and app-api
 
 valid values: A URL where a running app-web can be reached
 

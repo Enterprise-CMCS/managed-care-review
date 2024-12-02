@@ -7,6 +7,7 @@ import {
     mockContractPackageSubmittedWithQuestions,
     mockValidCMSUser,
     mockValidStateUser,
+    mockContractPackageApprovedWithQuestions,
 } from '../../../testHelpers/apolloMocks'
 import { IndexContractQuestionsPayload } from '../../../gen/gqlClient'
 import { renderWithProviders } from '../../../testHelpers'
@@ -152,6 +153,64 @@ describe('ContractQuestionResponse', () => {
             expect(answeredRounds[3]).toHaveTextContent(
                 'response-to-oact-1-document-1'
             )
+
+            const addResponse = screen.getAllByRole('link', {
+                name: 'Upload response',
+            })
+            expect(addResponse).toHaveLength(5)
+        })
+
+        it('does not render the Upload response button for an approved contract', async () => {
+            const approvedContract = mockContractPackageSubmittedWithQuestions()
+            approvedContract.consolidatedStatus = 'APPROVED'
+            approvedContract.reviewStatus = 'APPROVED'
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={
+                            RoutesRecord.SUBMISSIONS_CONTRACT_QUESTIONS_AND_ANSWERS
+                        }
+                        element={<ContractQuestionResponse />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                user: mockValidStateUser(),
+                                statusCode: 200,
+                            }),
+                            fetchContractWithQuestionsMockSuccess({
+                                contract: {
+                                    ...mockContractPackageApprovedWithQuestions(),
+                                    id: 'test-abc-123',
+                                },
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/test-abc-123/question-and-answers',
+                    },
+                }
+            )
+
+            await waitFor(() => {
+                expect(
+                    screen.getByRole('heading', {
+                        name: `Outstanding questions`,
+                    })
+                ).toBeInTheDocument()
+                expect(
+                    screen.getByRole('heading', {
+                        name: `Answered questions`,
+                    })
+                ).toBeInTheDocument()
+            })
+
+            const addResponse = screen.queryByRole('link', {
+                name: 'Upload response',
+            })
+            expect(addResponse).not.toBeInTheDocument()
         })
 
         it('renders error page if contract is in draft', async () => {
@@ -400,7 +459,57 @@ describe('ContractQuestionResponse', () => {
             expect(otherDivisionRounds[2]).toHaveTextContent(
                 'response-to-oact-1-document-1'
             )
+
+            // ability to add questions should exist for non approved contracts
+            const addQuestion = await screen.findByRole('link', {
+                name: 'Add questions',
+            })
+            expect(addQuestion).toBeInTheDocument()
         })
+
+        it('does not render an Add questions button for an approved contract', async () => {
+            renderWithProviders(<CommonCMSRoutes />, {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockValidCMSUser(),
+                            statusCode: 200,
+                        }),
+                        fetchRateMockSuccess({
+                            id: 'test-contract-id',
+                        }),
+                        fetchContractWithQuestionsMockSuccess({
+                            contract: {
+                                ...mockContractPackageApprovedWithQuestions(),
+                                id: 'test-abc-123',
+                            },
+                        }),
+                        fetchContractWithQuestionsMockSuccess({
+                            contract: {
+                                ...mockContractPackageApprovedWithQuestions(),
+                                id: 'test-abc-123',
+                            },
+                        }),
+                    ],
+                },
+                routerProvider: {
+                    route: `/submissions/test-abc-123/question-and-answers`,
+                },
+            })
+
+            await waitFor(() => {
+                expect(
+                    screen.getByText("Your division's questions")
+                ).toBeInTheDocument()
+            })
+
+            // ability to add questions should not exist for approved contracts
+            const addQuestion = await screen.queryByRole('link', {
+                name: 'Add questions',
+            })
+            expect(addQuestion).not.toBeInTheDocument()
+        })
+
         it('renders with question submit banner after question submitted', async () => {
             renderWithProviders(
                 <Routes>

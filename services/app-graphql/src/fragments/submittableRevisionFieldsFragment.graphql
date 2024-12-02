@@ -121,6 +121,7 @@ fragment submittableRevisionsFieldsFragement on SubmittableRevision {
             amendmentEffectiveDateEnd
             rateProgramIDs
             deprecatedRateProgramIDs
+            consolidatedRateProgramIDs
             rateCertificationName
             certifyingActuaryContacts {
                 id

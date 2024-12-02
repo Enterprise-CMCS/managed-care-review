@@ -118,7 +118,8 @@ const constructTestPostgresServer = async (opts?: {
         parameterStore,
         ldService,
         jwt,
-        s3
+        s3,
+        'https://localhost:3000'
     )
 
     return new ApolloServer({

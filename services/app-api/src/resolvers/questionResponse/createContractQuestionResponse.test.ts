@@ -6,6 +6,7 @@ import {
     updateTestStateAssignments,
 } from '../../testHelpers/gqlHelpers'
 import {
+    approveTestContract,
     assertAnError,
     assertAnErrorCode,
     createAndSubmitTestContract,
@@ -97,6 +98,39 @@ describe('createContractQuestionResponse', () => {
         expect(assertAnErrorCode(createResponseResult)).toBe('BAD_USER_INPUT')
         expect(assertAnError(createResponseResult).message).toBe(
             `Contract question with ID: ${fakeID} not found to attach response to`
+        )
+    })
+
+    it('returns an error when attempting to create response for a contract that has been approved', async () => {
+        const stateServer = await constructTestPostgresServer()
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: cmsUser,
+            },
+        })
+        const contract = await createAndSubmitTestContract(stateServer)
+        const createdQuestion = await createTestQuestion(cmsServer, contract.id)
+        await approveTestContract(cmsServer, contract.id)
+
+        const createResponseResult = await stateServer.executeOperation({
+            query: CreateContractQuestionResponseDocument,
+            variables: {
+                input: {
+                    questionID: createdQuestion.question.id,
+                    documents: [
+                        {
+                            name: 'Test Question',
+                            s3URL: 's3://bucketname/key/test1',
+                        },
+                    ],
+                },
+            },
+        })
+
+        expect(createResponseResult).toBeDefined()
+        expect(assertAnErrorCode(createResponseResult)).toBe('BAD_USER_INPUT')
+        expect(assertAnError(createResponseResult).message).toBe(
+            `Issue creating response for contract. Message: Cannot create response for contract in APPROVED status`
         )
     })
 

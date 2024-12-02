@@ -33,6 +33,7 @@ fragment rateRevisionFragment on RateRevision {
         amendmentEffectiveDateEnd
         rateProgramIDs
         deprecatedRateProgramIDs
+        consolidatedRateProgramIDs
         rateCertificationName
         certifyingActuaryContacts {
             id

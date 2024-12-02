@@ -66,6 +66,40 @@ export function unlockRate(store: Store): MutationResolvers['unlockRate'] {
             })
         }
 
+        const contractResult = await store.findContractWithHistory(
+            rate.parentContractID
+        )
+        if (contractResult instanceof Error) {
+            if (contractResult instanceof NotFoundError) {
+                const errMessage = `A contract must exist that is associated with the rate: ${rate.id}`
+                logError('unlockRate', errMessage)
+                setErrorAttributesOnActiveSpan(errMessage, span)
+                throw new UserInputError(errMessage, {
+                    argumentName: 'rateID',
+                })
+            }
+
+            const errMessage = `Issue finding a contract. Message: ${contractResult.message}`
+            logError('unlockRate', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+            throw new GraphQLError(errMessage, {
+                extensions: {
+                    code: 'INTERNAL_SERVER_ERROR',
+                    cause: 'DB_ERROR',
+                },
+            })
+        }
+
+        if (contractResult.consolidatedStatus === 'APPROVED') {
+            const errMessage = `Attempted to unlock a rate that is associated with a contract with wrong status: ${contractResult.consolidatedStatus}`
+            logError('unlockRate', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+            throw new UserInputError(errMessage, {
+                argumentName: 'rateID',
+                cause: 'INVALID_PACKAGE_STATUS',
+            })
+        }
+
         const unlockRateResult = await store.unlockRate({
             rateID: rate.id,
             unlockReason: unlockedReason,

@@ -6,13 +6,20 @@ import {
 import { FetchContractDocument } from '../../gen/gqlClient'
 import { testCMSUser, testStateUser } from '../../testHelpers/userHelpers'
 import {
+    approveTestContract,
     createAndUpdateTestContractWithoutRates,
     createAndUpdateTestContractWithRate,
+    createTestContract,
     fetchTestContract,
     submitTestContract,
+    unlockTestContract,
+    updateTestContractDraftRevision,
 } from '../../testHelpers/gqlContractHelpers'
 import { addNewRateToTestContract } from '../../testHelpers/gqlRateHelpers'
-import { testS3Client } from '../../testHelpers'
+import {
+    mockGqlContractDraftRevisionFormDataInput,
+    testS3Client,
+} from '../../testHelpers'
 
 describe('fetchContract', () => {
     const mockS3 = testS3Client()
@@ -122,6 +129,176 @@ describe('fetchContract', () => {
             intiallySubmitted.initiallySubmittedAt
         )
     }, 10000)
+
+    it('returns lastUpdatedForDisplay', async () => {
+        const stateServer = await constructTestPostgresServer({
+            s3Client: mockS3,
+        })
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: testCMSUser(),
+            },
+            s3Client: mockS3,
+        })
+
+        const draftA0 = await createTestContract(stateServer)
+        const AID = draftA0.id
+
+        const lastDate: Date = new Date(1900, 1, 1)
+
+        const initialCreatedDate = draftA0.lastUpdatedForDisplay
+        expect(initialCreatedDate.getTime()).not.toEqual(lastDate.getTime())
+
+        const draftA1 = await updateTestContractDraftRevision(stateServer, AID)
+        const updatedDraftDate = draftA1.lastUpdatedForDisplay
+        expect(updatedDraftDate.getTime()).not.toEqual(
+            initialCreatedDate.getTime()
+        )
+
+        const intiallySubmitted = await submitTestContract(stateServer, AID)
+        const intiallySubmittedDate = intiallySubmitted.lastUpdatedForDisplay
+        expect(intiallySubmittedDate).not.toBeNull()
+        expect(intiallySubmittedDate.getTime()).not.toEqual(
+            updatedDraftDate.getTime()
+        )
+        expect(intiallySubmittedDate.getTime()).not.toEqual(
+            initialCreatedDate.getTime()
+        )
+
+        const unlocked = await unlockTestContract(cmsServer, AID, 'Unlock A.3')
+        const unlockedDate = unlocked.lastUpdatedForDisplay
+        expect(unlockedDate.getTime()).not.toEqual(
+            intiallySubmittedDate.getTime()
+        )
+
+        const draftA2 = await updateTestContractDraftRevision(stateServer, AID)
+        const unlockUpdateDate = draftA2.lastUpdatedForDisplay
+        expect(unlockUpdateDate.getTime()).toEqual(unlockedDate.getTime())
+
+        const secondSubmitted = await submitTestContract(
+            stateServer,
+            AID,
+            'submit after unlock'
+        )
+        const secondSubmitDate = secondSubmitted.lastUpdatedForDisplay
+        expect(secondSubmitDate.getTime()).not.toEqual(
+            unlockUpdateDate.getTime()
+        )
+
+        const approved = await approveTestContract(cmsServer, AID)
+        const approvedDate = approved.lastUpdatedForDisplay
+        expect(approvedDate.getTime()).not.toEqual(secondSubmitDate.getTime())
+    })
+
+    it('returns dateContractDocsExecuted', async () => {
+        const stateServer = await constructTestPostgresServer({
+            s3Client: mockS3,
+        })
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: testCMSUser(),
+            },
+            s3Client: mockS3,
+        })
+
+        const draftA0 = await createTestContract(stateServer)
+        const AID = draftA0.id
+
+        expect(draftA0.dateContractDocsExecuted).toBeNull()
+
+        const draft1FD = mockGqlContractDraftRevisionFormDataInput()
+        draft1FD.contractExecutionStatus = 'UNEXECUTED'
+        const draftA1 = await updateTestContractDraftRevision(
+            stateServer,
+            AID,
+            draftA0.draftRevision?.updatedAt,
+            draft1FD
+        )
+        expect(draftA1.dateContractDocsExecuted).toBeNull()
+
+        const intiallySubmitted = await submitTestContract(stateServer, AID)
+        expect(intiallySubmitted.dateContractDocsExecuted).toBeNull()
+
+        const unlocked = await unlockTestContract(cmsServer, AID, 'Unlock A.3')
+        expect(unlocked.dateContractDocsExecuted).toBeNull()
+
+        const draft2FD = mockGqlContractDraftRevisionFormDataInput()
+        draft2FD.contractExecutionStatus = 'EXECUTED'
+        const draftA2 = await updateTestContractDraftRevision(
+            stateServer,
+            AID,
+            unlocked.draftRevision.updatedAt,
+            draft2FD
+        )
+        expect(draftA2.dateContractDocsExecuted).toBeNull()
+
+        const secondSubmitted = await submitTestContract(
+            stateServer,
+            AID,
+            'submit after unlock'
+        )
+        expect(secondSubmitted.dateContractDocsExecuted).not.toBeNull()
+
+        const secondUnlock = await unlockTestContract(
+            cmsServer,
+            AID,
+            'Unlock A.4'
+        )
+        expect(secondUnlock.dateContractDocsExecuted).not.toBeNull()
+
+        const draft3FD = mockGqlContractDraftRevisionFormDataInput()
+        draft3FD.contractExecutionStatus = 'UNEXECUTED'
+        const draftA3 = await updateTestContractDraftRevision(
+            stateServer,
+            AID,
+            secondUnlock.draftRevision.updatedAt,
+            draft3FD
+        )
+        expect(draftA3.dateContractDocsExecuted).not.toBeNull()
+
+        const thirdSubmitted = await submitTestContract(
+            stateServer,
+            AID,
+            'submit removing the execution'
+        )
+        expect(thirdSubmitted.dateContractDocsExecuted).toBeNull()
+    })
+
+    it('returns dateContractDocsExecuted for initially executed', async () => {
+        const stateServer = await constructTestPostgresServer({
+            s3Client: mockS3,
+        })
+
+        const draftA0 = await createTestContract(stateServer)
+        const AID = draftA0.id
+
+        expect(draftA0.dateContractDocsExecuted).toBeNull()
+
+        const draft1FD = mockGqlContractDraftRevisionFormDataInput()
+        draft1FD.contractExecutionStatus = 'EXECUTED'
+        const draftA1 = await updateTestContractDraftRevision(
+            stateServer,
+            AID,
+            draftA0.draftRevision?.updatedAt,
+            draft1FD
+        )
+        expect(draftA1.dateContractDocsExecuted).toBeNull()
+
+        const intiallySubmitted = await submitTestContract(stateServer, AID)
+        expect(intiallySubmitted.dateContractDocsExecuted).not.toBeNull()
+    })
+
+    it('returns webURL', async () => {
+        const stateServer = await constructTestPostgresServer({
+            s3Client: mockS3,
+        })
+        const draftA0 = await createTestContract(stateServer)
+        const AID = draftA0.id
+
+        const expectedURL = `https://localhost:3000/submissions/${AID}`
+
+        expect(draftA0.webURL).toBe(expectedURL)
+    })
 
     it('errors if the wrong state user calls it', async () => {
         const stateServerFL = await constructTestPostgresServer({
