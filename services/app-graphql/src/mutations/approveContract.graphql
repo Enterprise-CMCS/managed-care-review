@@ -20,35 +20,8 @@ mutation approveContract($input: ApproveContractInput!) {
             }
 
             packageSubmissions {
-                ...packageSubmissionsFragmentForApprove
+                ...packageSubmissionsFragment
             }
         }
     }
 }
-
-
-fragment packageSubmissionsFragmentForApprove on ContractPackageSubmission {
-    cause
-    submitInfo {
-        ...updateInformationFields
-    }
-
-    submittedRevisions {
-        ...submittableRevisionsFieldsFragement
-    }
-
-    contractRevision {
-        ...contractRevisionFragment
-    }
-    rateRevisions {
-        ...rateRevisionFragment
-        rate {
-            ...rateFieldsFragment
-            revisions {
-                ...rateRevisionFragment
-            }
-        }
-    }
-}
-
-

@@ -40,6 +40,7 @@ function convertRateInfoToRateFormData(
             rateDocuments,
             supportingDocuments,
             rateProgramIDs,
+            consolidatedRateProgramIDs: rateProgramIDs,
             certifyingActuaryContacts: [rateInfo.actuaryContacts[0]],
             deprecatedRateProgramIDs: [], //ignore this deprecated field
             packagesWithSharedRateCerts: [], // ignore this depårecated field
@@ -181,6 +182,7 @@ const convertUnlockedHPPToContractAndRates = (
                 rateDocuments,
                 supportingDocuments,
                 rateProgramIDs,
+                consolidatedRateProgramIDs: rateProgramIDs,
                 certifyingActuaryContacts: [rateInfo.actuaryContacts[0]],
                 deprecatedRateProgramIDs: [], //ignore this deprecated field
                 packagesWithSharedRateCerts: [], // ignore this depårecated field

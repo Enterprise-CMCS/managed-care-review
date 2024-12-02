@@ -1,180 +1,27 @@
 mutation updateDraftContractRates($input: UpdateDraftContractRatesInput!) {
     updateDraftContractRates(input: $input) {
-
         contract {
-            id
-            createdAt
-            updatedAt
-
-            status
-            initiallySubmittedAt
-            stateCode
-
-            stateNumber
+            ...contractFieldsFragment
 
             draftRevision {
-                id
-                createdAt
-                updatedAt
-
-                unlockInfo {
-                    ...updateInformationFields
-                }
-
-                formData {
-                    programIDs
-                    populationCovered
-                    submissionType
-                    submissionDescription
-
-                    contractType
-                    riskBasedContract
-                    stateContacts {
-                        name
-                        titleRole
-                        email
-                    }
-                    contractDocuments {
-                        name
-                        s3URL
-                        sha256
-                        dateAdded
-                        downloadURL
-                    }
-                    supportingDocuments {
-                        name
-                        s3URL
-                        sha256
-                        dateAdded
-                        downloadURL
-                    }
-                    contractExecutionStatus
-                    contractDateStart
-                    contractDateEnd
-                    managedCareEntities
-                    federalAuthorities
-
-                    inLieuServicesAndSettings
-                    modifiedNonRiskPaymentArrangements
-                }
+                ...contractRevisionFragment
             }
 
             draftRates {
-                id
-                createdAt
-                updatedAt
-                parentContractID
-                status
+                ...rateFieldsFragment
 
                 draftRevision {
-                    id
-                    createdAt
-                    updatedAt
-                    unlockInfo {
-                        ...updateInformationFields
-                    }
-
-                    formData {
-                        rateType
-                        rateCapitationType
-                        rateDateStart
-                        rateDateEnd
-                        rateCertificationName
-                        rateDateCertified
-                        amendmentEffectiveDateStart
-                        amendmentEffectiveDateEnd
-                        rateProgramIDs
-                        deprecatedRateProgramIDs
-                        rateCertificationName
-                        actuaryCommunicationPreference
-                        certifyingActuaryContacts {
-                            name
-                            email
-                            titleRole
-                            actuarialFirm
-                            actuarialFirmOther
-                        }
-                        addtlActuaryContacts {
-                            name
-                            email
-                            titleRole
-                            actuarialFirm
-                            actuarialFirmOther
-                        }
-                        rateDocuments {
-                            name
-                            s3URL
-                            sha256
-                            dateAdded
-                            downloadURL
-                        }
-                        supportingDocuments {
-                            name
-                            s3URL
-                            sha256
-                            dateAdded
-                            downloadURL
-                        }
-                        packagesWithSharedRateCerts {
-                            packageName
-                            packageId
-                            packageStatus
-                        }
-                    }
+                    ...rateRevisionFragment
                 }
 
                 revisions {
-                    id
-                    createdAt
-                    updatedAt
-                    unlockInfo {
-                        ...updateInformationFields
-                    }
-
-                    formData {
-                        rateType
-                        rateCapitationType
-                        rateDateStart
-                        rateDateEnd
-                        rateDateCertified
-                        amendmentEffectiveDateStart
-                        amendmentEffectiveDateEnd
-                        rateProgramIDs
-                        deprecatedRateProgramIDs
-                        rateCertificationName
-                        actuaryCommunicationPreference
-                        certifyingActuaryContacts {
-                            name
-                            email
-                            titleRole
-                            actuarialFirm
-                        }
-                        addtlActuaryContacts {
-                            name
-                            email
-                            titleRole
-                            actuarialFirm
-                        }
-                        rateDocuments {
-                            name
-                            s3URL
-                            sha256
-                            dateAdded
-                            downloadURL
-                        }
-                        supportingDocuments {
-                            name
-                            s3URL
-                            sha256
-                            dateAdded
-                            downloadURL
-                        }
-                    }
+                    ...rateRevisionFragment
                 }
-
             }
 
+            packageSubmissions {
+                ...packageSubmissionsFragment
+            }
         }
-
     }
 }

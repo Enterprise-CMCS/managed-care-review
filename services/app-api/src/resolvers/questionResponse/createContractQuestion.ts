@@ -72,9 +72,13 @@ export function createContractQuestionResolver(
             })
         }
 
-        // Return error if package status is DRAFT, contract will have no submitted revisions
-        if (contractResult.revisions.length === 0) {
-            const errMessage = `Issue creating question for health plan package. Message: Cannot create question for health plan package in DRAFT status`
+        // Return error if contract status is DRAFT, contract will have no submitted revisions
+        // Return error if contract has been approved
+        if (
+            contractResult.revisions.length === 0 ||
+            contractResult.consolidatedStatus === 'APPROVED'
+        ) {
+            const errMessage = `Issue creating question for contract. Message: Cannot create question for contract in ${contractResult.consolidatedStatus} status`
             logError('createContractQuestion', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new UserInputError(errMessage)

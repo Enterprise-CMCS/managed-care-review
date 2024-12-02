@@ -59,8 +59,8 @@ const stateContactsInput = (contacts: StateContact[]): StateContactInput[] => {
 const useContractForm = (contractID?: string): UseContractForm => {
     // Set up defaults for the return value for hook
     let interimState: UseContractForm['interimState'] = undefined // enum to determine what Interim UI should override form page
-    let previousDocuments: UseContractForm['previousDocuments'] = [] // used for document upload tables
     let draftSubmission: UseContractForm['draftSubmission'] = undefined // form data from current package revision, used to load form
+    const previousDocuments: UseContractForm['previousDocuments'] = [] // used for document upload tables
     const [showPageErrorMessage, setShowPageErrorMessage] = useState<boolean | string>(false) // string is a custom error message, defaults to generic of true
     const { updateHeading } = usePage()
     const [pkgNameForHeading, setPkgNameForHeading] = useState<string | undefined>(undefined)
@@ -202,7 +202,7 @@ const useContractForm = (contractID?: string): UseContractForm => {
         
         const rates:Rate[] = []
         const packageSubmissions:ContractPackageSubmission[] = []
-        const unlockedContract:UnlockedContract = {
+        const unlockedContract: UnlockedContract = {
             ...contract,
             id: contract!.id,
             createdAt: contract.createdAt,

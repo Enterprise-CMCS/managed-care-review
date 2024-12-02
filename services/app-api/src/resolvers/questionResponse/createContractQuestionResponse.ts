@@ -106,6 +106,14 @@ export function createContractQuestionResponseResolver(
             })
         }
 
+        // Return error if contract has been approved
+        if (contract.consolidatedStatus === 'APPROVED') {
+            const errMessage = `Issue creating response for contract. Message: Cannot create response for contract in ${contract.consolidatedStatus} status`
+            logError('createContractQuestionResponse', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+            throw new UserInputError(errMessage)
+        }
+
         const statePrograms = store.findStatePrograms(contract.stateCode)
         if (statePrograms instanceof Error) {
             logError('createContractQuestionResponse', statePrograms.message)

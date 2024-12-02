@@ -1,4 +1,4 @@
-fragment contractFieldsFragment on Contract {
+fragment unlockedContractFieldsFragment on UnlockedContract {
     id
     status
     reviewStatus

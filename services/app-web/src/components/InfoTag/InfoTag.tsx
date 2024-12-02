@@ -15,7 +15,7 @@ export type TagProps = {
 
 export const InfoTag = ({
     color,
-    emphasize,
+    emphasize = false,
     className,
     children,
 }: TagProps): React.ReactElement | null => {
@@ -29,7 +29,7 @@ export const InfoTag = ({
             [styles['blue']]: color === 'blue',
             [styles['gray']]: color === 'gray',
         },
-        styles['emphasize'] ? emphasize : undefined,
+        emphasize ? styles['emphasize'] : undefined,
         className
     )
     return (

@@ -19,6 +19,7 @@ import {
     createAndUpdateTestContractWithoutRates,
     createSubmitAndUnlockTestContract,
     submitTestContract,
+    approveTestContract,
     unlockTestContract,
 } from '../../testHelpers/gqlContractHelpers'
 import { addNewRateToTestContract } from '../../testHelpers/gqlRateHelpers'
@@ -83,7 +84,7 @@ describe('unlockContract', () => {
                 ).toBe('test unlock')
             })
 
-            it('returns status error if rate is actively being edited in draft', async () => {
+            it('returns status error if contract is actively being edited in draft', async () => {
                 const stateServer = await constructTestPostgresServer({
                     s3Client: mockS3,
                 })
@@ -112,6 +113,43 @@ describe('unlockContract', () => {
 
                 expectToBeDefined(unlockResult2.errors)
                 expect(unlockResult2.errors[0].message).toBe(
+                    'Attempted to unlock contract with wrong status'
+                )
+            })
+
+            it('returns status error if contract has been approved', async () => {
+                const stateServer = await constructTestPostgresServer({
+                    s3Client: mockS3,
+                })
+                const cmsServer = await constructTestPostgresServer({
+                    context: {
+                        user: mockUser(),
+                    },
+                    s3Client: mockS3,
+                })
+                const draft =
+                    await createAndUpdateTestContractWithoutRates(stateServer)
+                const contract = await submitTestContract(stateServer, draft.id)
+
+                // approve contract
+                const approvedContract = await approveTestContract(
+                    cmsServer,
+                    contract.id
+                )
+
+                // Try to unlock the contract
+                const unlockResult = await cmsServer.executeOperation({
+                    query: UnlockContractDocument,
+                    variables: {
+                        input: {
+                            contractID: approvedContract.id,
+                            unlockedReason: 'Super duper good reason.',
+                        },
+                    },
+                })
+
+                expectToBeDefined(unlockResult.errors)
+                expect(unlockResult.errors[0].message).toBe(
                     'Attempted to unlock contract with wrong status'
                 )
             })
