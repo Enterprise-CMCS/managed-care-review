@@ -432,7 +432,7 @@ export const ContractTable = ({
 
     useEffect(() => {
         // if on root route
-        if (location.hash === '') {
+        if (location.hash === '' && showFilters) {
             updateFilters(
                 statusColumn,
                 [

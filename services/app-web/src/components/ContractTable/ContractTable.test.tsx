@@ -159,11 +159,13 @@ const apolloProviderWithCMSUser = () => ({
 
 describe('ContractTable for CMS User (with filters)', () => {
     beforeEach(() => {
-        window.location.assign('#')
+        // post implementation of creating default status filter for CMS users
+        // #filters= is the default hash to use no filters
+        window.location.assign('#filters=')
         vi.clearAllMocks()
     })
 
-    it.skip('renders table and caption if passed in', async () => {
+    it('renders table and caption if passed in', async () => {
         renderWithProviders(
             <ContractTable
                 tableData={submissions}
@@ -179,7 +181,7 @@ describe('ContractTable for CMS User (with filters)', () => {
         expect(screen.getByText('Table 1')).toBeInTheDocument()
     })
 
-    it.skip('renders table with expected number of submissions', async () => {
+    it('renders table with expected number of submissions', async () => {
         renderWithProviders(
             <ContractTable
                 tableData={submissions}
@@ -199,7 +201,7 @@ describe('ContractTable for CMS User (with filters)', () => {
         ).toBeInTheDocument()
     })
 
-    it.skip('displays no submission text when no submitted packages exist', async () => {
+    it('displays no submission text when no submitted packages exist', async () => {
         renderWithProviders(
             <ContractTable tableData={[]} user={mockCMSUser()} showFilters />,
             {
@@ -215,7 +217,7 @@ describe('ContractTable for CMS User (with filters)', () => {
         })
     })
 
-    it.skip('displays submissions table with expected headers for cms users', async () => {
+    it('displays submissions table with expected headers for cms users', async () => {
         renderWithProviders(
             <ContractTable
                 tableData={submissions}
@@ -238,7 +240,7 @@ describe('ContractTable for CMS User (with filters)', () => {
         expect(submissionsInTable).toHaveLength(5)
     })
 
-    it.skip('displays submissions table sorted by that revisions last updated column', async () => {
+    it('displays submissions table sorted by that revisions last updated column', async () => {
         renderWithProviders(
             <ContractTable
                 tableData={submissions}
@@ -268,7 +270,7 @@ describe('ContractTable for CMS User (with filters)', () => {
         ).toHaveTextContent('9/05/2022')
     })
 
-    it.skip('has correct submission links for cms users', async () => {
+    it('has correct submission links for cms users', async () => {
         const stateSubmissions: ContractInDashboardType[] = [
             {
                 ...submissions[0],
@@ -295,7 +297,7 @@ describe('ContractTable for CMS User (with filters)', () => {
         )
     })
 
-    it.skip('displays the expected program tags for current revision that is submitted/resubmitted', async () => {
+    it('displays the expected program tags for current revision that is submitted/resubmitted', async () => {
         renderWithProviders(
             <ContractTable tableData={submissions} user={mockCMSUser()} />,
             {
@@ -325,7 +327,7 @@ describe('ContractTable for CMS User (with filters)', () => {
         expect(tags4[0]).toHaveTextContent(submissions[3].programs[0].name)
     })
 
-    it.skip('should display filters on dashboard page when showFilters is true', async () => {
+    it('should display filters on dashboard page when showFilters is true', async () => {
         renderWithProviders(
             <ContractTable
                 tableData={submissions}
@@ -352,7 +354,7 @@ describe('ContractTable for CMS User (with filters)', () => {
         })
     })
 
-    it.skip('should not display filters on dashboard page when showFilters is false', async () => {
+    it('should not display filters on dashboard page when showFilters is false', async () => {
         renderWithProviders(
             <ContractTable tableData={submissions} user={mockCMSUser()} />,
             {
@@ -369,7 +371,7 @@ describe('ContractTable for CMS User (with filters)', () => {
         })
     })
 
-    it.skip('can filter table by submission state', async () => {
+    it('can filter table by submission state', async () => {
         renderWithProviders(
             <ContractTable
                 tableData={submissions}
@@ -429,7 +431,7 @@ describe('ContractTable for CMS User (with filters)', () => {
         ).toBeInTheDocument()
     })
 
-    it.skip('can filter by state and submission type', async () => {
+    it('can filter by state and submission type', async () => {
         const stateSubmissions: ContractInDashboardType[] = [
             {
                 ...submissions[0],
@@ -531,7 +533,7 @@ describe('ContractTable for CMS User (with filters)', () => {
         )
     })
 
-    it.skip('can filter table by submission status', async () => {
+    it('can filter table by submission status', async () => {
         renderWithProviders(
             <ContractTable
                 tableData={submissions}
@@ -629,7 +631,7 @@ describe('ContractTable for CMS User (with filters)', () => {
         ).toBeInTheDocument()
     })
 
-    it.skip('should clear all filters when clear filter button is clicked', async () => {
+    it('should clear all filters when clear filter button is clicked', async () => {
         const stateSubmissions: ContractInDashboardType[] = [
             {
                 ...submissions[0],
@@ -717,7 +719,7 @@ describe('ContractTable for CMS User (with filters)', () => {
         expect(global.window.location.href).not.toContain('submissionType')
     })
 
-    it.skip('displays no results found when filters return no results', async () => {
+    it('displays no results found when filters return no results', async () => {
         renderWithProviders(
             <ContractTable
                 tableData={submissions}
@@ -783,7 +785,7 @@ describe('ContractTable for CMS User (with filters)', () => {
         ).toBeInTheDocument()
     })
 
-    it.skip('displays the total filters applied', async () => {
+    it('displays the total filters applied', async () => {
         const stateSubmissions: ContractInDashboardType[] = [
             {
                 ...submissions[0],
@@ -910,7 +912,7 @@ describe('ContractTable state user tests', () => {
         window.location.assign('#')
     })
 
-    it.skip('does not display State and Submission type columns for state users', async () => {
+    it('does not display State and Submission type columns for state users', async () => {
         renderWithProviders(
             <ContractTable tableData={submissions} user={mockStateUser()} />,
             {
@@ -945,14 +947,13 @@ describe('ContractTable state user tests', () => {
                 updatedAt: new Date('12/04/2022'),
                 status: 'SUBMITTED',
             },
-            // {
-            //     ...submissions[2],
-            //     id: 'draft-submission',
-            //     updatedAt: new Date('12/03/2022'),
-            //     status: 'DRAFT',
-            // },
+            {
+                ...submissions[2],
+                id: 'draft-submission',
+                updatedAt: new Date('12/03/2022'),
+                status: 'DRAFT',
+            },
         ]
-        let testLocation: Location
 
         renderWithProviders(
             <ContractTable
@@ -961,10 +962,7 @@ describe('ContractTable state user tests', () => {
             />,
             {
                 apolloProvider: apolloProviderWithStateUser(),
-                routerProvider: {
-                    route: `/dashboard/submissions`,
-                },
-            },
+            }
         )
 
         const rows = await screen.findAllByRole('row')
@@ -978,9 +976,9 @@ describe('ContractTable state user tests', () => {
             'href',
             `/submissions/submitted-submission`
         )
-        // expect(submissionLink(3)).toHaveAttribute(
-        //     'href',
-        //     `/submissions/draft-submission/edit/type`
-        // )
+        expect(submissionLink(3)).toHaveAttribute(
+            'href',
+            `/submissions/draft-submission/edit/type`
+        )
     })
 })
