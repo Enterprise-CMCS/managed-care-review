@@ -59,7 +59,10 @@ export function unlockContractResolver(
             })
         }
 
-        if (contractResult.draftRevision) {
+        if (
+            contractResult.draftRevision ||
+            contractResult.consolidatedStatus === 'APPROVED'
+        ) {
             const errMessage = `Attempted to unlock contract with wrong status`
             logError('unlockContract', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)

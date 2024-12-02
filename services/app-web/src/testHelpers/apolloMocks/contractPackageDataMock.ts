@@ -1217,12 +1217,14 @@ function mockContractPackageSubmitted(
 }
 
 function mockContractPackageApproved(
-    partial?: Partial<Contract>
+    partial?: Partial<Contract>,
+    contractId?: string,
 ): Contract {
+    const contractID = contractId || 'test-abc-123'
     return {
         status: 'SUBMITTED',
         reviewStatus: 'APPROVED',
-        consolidatedStatus: 'SUBMITTED',
+        consolidatedStatus: 'APPROVED',
         reviewStatusActions: [{
                 updatedAt: new Date('2100-01-01'),
                 updatedBy: {
@@ -1233,18 +1235,17 @@ function mockContractPackageApproved(
                     __typename: "UpdatedBy"
                 },
                 updatedReason: "all required documents sent",
-                contractID: "test-abc-123",
+                contractID,
                 actionType: "MARK_AS_APPROVED",
                 __typename: "ContractReviewStatusActions"
         }],
-
         __typename: 'Contract',
         createdAt: new Date(),
         updatedAt: new Date(),
         lastUpdatedForDisplay: new Date(),
         webURL: 'https://testmcreview.example/submissions/test-abc-123',
         initiallySubmittedAt: new Date('2024-11-27'),
-        id: 'test-abc-123',
+        id: contractID,
         stateCode: 'MN',
         state: mockMNState(),
         stateNumber: 5,
@@ -1272,7 +1273,7 @@ function mockContractPackageApproved(
                 createdAt: new Date('01/01/2024'),
                 updatedAt:  '2024-12-18T16:54:39.173Z',
                 id: '123',
-                contractID: 'test-abc-123',
+                contractID,
                 submitInfo: {
                     __typename: 'UpdateInformation',
                     updatedAt: new Date(),
@@ -1413,6 +1414,392 @@ function mockContractPackageApproved(
                 },
             ],
         }],
+        ...partial,
+    }
+}
+
+function mockContractPackageApprovedWithQuestions(
+    partial?: Partial<Contract>,
+    contractId?: string
+): Contract {
+    const contractID = contractId || 'test-abc-123'
+
+    return {
+        status: 'SUBMITTED',
+        reviewStatus: 'APPROVED',
+        consolidatedStatus: 'APPROVED',
+        reviewStatusActions: [{
+                updatedAt: new Date('2100-01-01'),
+                updatedBy: {
+                    email: "zuko@example.com",
+                    role: "CMS_USER",
+                    familyName: "Hotman",
+                    givenName: "Zuko",
+                    __typename: "UpdatedBy"
+                },
+                updatedReason: "all required documents sent",
+                contractID,
+                actionType: "MARK_AS_APPROVED",
+                __typename: "ContractReviewStatusActions"
+        }],
+        __typename: 'Contract',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        initiallySubmittedAt: new Date('2024-11-27'),
+        id: contractID,
+        stateCode: 'MN',
+        state: mockMNState(),
+        stateNumber: 5,
+        mccrsID: null,
+        draftRevision: null,
+        draftRates: [],
+        packageSubmissions: [{
+            cause: 'CONTRACT_SUBMISSION',
+            __typename: 'ContractPackageSubmission',
+            submitInfo: {
+                __typename: 'UpdateInformation',
+                updatedAt: '2024-12-18T16:54:39.173Z',
+                updatedBy: {
+                    email: 'example@state.com',
+                    role: 'STATE_USER',
+                    givenName: 'John',
+                    familyName: 'Vila'
+                },
+                updatedReason: 'contract submit'
+            },
+            submittedRevisions: [],
+            contractRevision: {
+                __typename: 'ContractRevision',
+                contractName: 'MCR-MN-0005-SNBC',
+                createdAt: new Date('01/01/2024'),
+                updatedAt:  '2024-12-18T16:54:39.173Z',
+                id: '123',
+                contractID,
+                submitInfo: {
+                    __typename: 'UpdateInformation',
+                    updatedAt: new Date(),
+                    updatedBy: {
+                        email: 'example@state.com',
+                        role: 'STATE_USER',
+                        givenName: 'John',
+                        familyName: 'Vila'
+                    },
+                    updatedReason: 'contract submit'
+                },
+                unlockInfo: null,
+                formData: {
+                    __typename: 'ContractFormData',
+                    programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
+                    populationCovered: 'MEDICAID',
+                    submissionType: 'CONTRACT_AND_RATES',
+                    riskBasedContract: true,
+                    submissionDescription: 'A real submission',
+                    supportingDocuments: [
+                        {
+                            s3URL: 's3://bucketname/key/contractsupporting1',
+                            sha256: 'fakesha',
+                            name: 'contractSupporting1',
+                            dateAdded: new Date('01/15/2024'),
+                            downloadURL: s3DlUrl
+                        },
+                        {
+                            s3URL: 's3://bucketname/key/contractSupporting2',
+                            sha256: 'fakesha',
+                            name: 'contractSupporting2',
+                            dateAdded: new Date('01/13/2024'),
+                            downloadURL: s3DlUrl
+                        },
+                    ],
+                    stateContacts: [],
+                    contractType: 'AMENDMENT',
+                    contractExecutionStatus: 'EXECUTED',
+                    contractDocuments: [
+                        {
+                            s3URL: 's3://bucketname/key/contract',
+                            sha256: 'fakesha',
+                            name: 'contract',
+                            dateAdded: new Date('01/01/2024'),
+                            downloadURL: s3DlUrl
+                        },
+                    ],
+                    contractDateStart: new Date(),
+                    contractDateEnd: new Date(),
+                    managedCareEntities: ['MCO'],
+                    federalAuthorities: ['STATE_PLAN'],
+                    inLieuServicesAndSettings: true,
+                    modifiedBenefitsProvided: true,
+                    modifiedGeoAreaServed: false,
+                    modifiedMedicaidBeneficiaries: true,
+                    modifiedRiskSharingStrategy: true,
+                    modifiedIncentiveArrangements: false,
+                    modifiedWitholdAgreements: false,
+                    modifiedStateDirectedPayments: true,
+                    modifiedPassThroughPayments: true,
+                    modifiedPaymentsForMentalDiseaseInstitutions: false,
+                    modifiedMedicalLossRatioStandards: true,
+                    modifiedOtherFinancialPaymentIncentive: false,
+                    modifiedEnrollmentProcess: true,
+                    modifiedGrevienceAndAppeal: false,
+                    modifiedNetworkAdequacyStandards: true,
+                    modifiedLengthOfContract: false,
+                    modifiedNonRiskPaymentArrangements: true,
+                    statutoryRegulatoryAttestation: true,
+                    statutoryRegulatoryAttestationDescription: "everything meets regulatory attestation"
+                }
+            },
+            rateRevisions: [
+                {
+                    __typename: 'RateRevision',
+                    id: '1234',
+                    rateID: '123',
+                    createdAt: new Date('01/01/2023'),
+                    updatedAt: new Date('01/01/2023'),
+                    rate: null,
+                    formData: {
+                        __typename: 'RateFormData',
+                        rateCertificationName:'rate cert',
+                        rateType: 'AMENDMENT',
+                        rateCapitationType: 'RATE_CELL',
+                        rateDocuments: [
+                            {
+                                s3URL: 's3://bucketname/key/rate',
+                                sha256: 'fakesha',
+                                name: 'rate',
+                                dateAdded: new Date('01/01/2023'),
+                                downloadURL: s3DlUrl
+                            },
+                        ],
+                        supportingDocuments: [
+                            {
+                                s3URL: 's3://bucketname/key/rateSupporting1',
+                                sha256: 'fakesha',
+                                name: 'rate supporting 1',
+                                dateAdded: new Date('01/15/2023'),
+                                downloadURL: s3DlUrl
+                            },
+                            {
+                                s3URL: 's3://bucketname/key/rateSupporting1',
+                                sha256: 'fakesha',
+                                name: 'rate supporting 2',
+                                dateAdded: new Date('01/15/2023'),
+                                downloadURL: s3DlUrl
+                            },
+                        ],
+                        rateDateStart: new Date(),
+                        rateDateEnd: new Date(),
+                        rateDateCertified: new Date(),
+                        amendmentEffectiveDateStart: new Date(),
+                        amendmentEffectiveDateEnd: new Date(),
+                        rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
+                        deprecatedRateProgramIDs: [],
+                        certifyingActuaryContacts: [
+                            {
+                                actuarialFirm: 'DELOITTE',
+                                name: 'Actuary Contact 1',
+                                titleRole: 'Test Actuary Contact 1',
+                                email: 'actuarycontact1@test.com',
+                            },
+                        ],
+                        addtlActuaryContacts: [
+                            {
+                                actuarialFirm: 'DELOITTE',
+                                name: 'Actuary Contact 1',
+                                titleRole: 'Test Actuary Contact 1',
+                                email: 'actuarycontact1@test.com',
+                            },
+                        ],
+                        actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+                        packagesWithSharedRateCerts: []
+                    }
+                },
+            ],
+        }],
+        questions: {
+            DMCOQuestions: {
+                totalCount: 2,
+                edges: [
+                    {
+                        __typename: 'ContractQuestionEdge' as const,
+                        node: {
+                            __typename: 'ContractQuestion' as const,
+                            id: 'dmco-question-1-id',
+                            contractID,
+                            createdAt: new Date('2022-12-16'),
+                            addedBy: mockValidCMSUser({
+                                divisionAssignment: null,
+                            }) as CmsUser,
+                            documents: [
+                                {
+                                    s3URL: 's3://bucketname/key/dmco-question-1-document-1',
+                                    name: 'dmco-question-1-document-1',
+                                    downloadURL: expect.any(String),
+                                },
+                            ],
+                            division: 'DMCO',
+                            responses: [
+                                {
+                                    __typename: 'QuestionResponse' as const,
+                                    id: 'response-to-dmco-1-id',
+                                    questionID: 'dmco-question-1-id',
+                                    addedBy: mockValidUser() as StateUser,
+                                    createdAt: new Date('2022-12-16'),
+                                    documents: [
+                                        {
+                                            s3URL: 's3://bucketname/key/response-to-dmco-1-document-1',
+                                            name: 'response-to-dmco-1-document-1',
+                                            downloadURL: expect.any(String),
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    },
+                    {
+                        __typename: 'ContractQuestionEdge' as const,
+                        node: {
+                            __typename: 'ContractQuestion' as const,
+                            id: 'dmco-question-2-id',
+                            contractID,
+                            createdAt: new Date('2022-12-18'),
+                            addedBy: mockValidCMSUser() as CmsUser,
+                            documents: [
+                                {
+                                    s3URL: 's3://bucketname/key/dmco-question-2-document-1',
+                                    name: 'dmco-question-2-document-1',
+                                    downloadURL: expect.any(String),
+                                },
+                                {
+                                    s3URL: 's3://bucketname/key/question-2-document-2',
+                                    name: 'dmco-question-2-document-2',
+                                    downloadURL: expect.any(String),
+                                },
+                            ],
+                            division: 'DMCO',
+                            responses: [
+                            ],
+                        },
+                    },
+                ],
+            },
+            DMCPQuestions: {
+                totalCount: 1,
+                edges: [
+                    {
+                        __typename: 'ContractQuestionEdge' as const,
+                        node: {
+                            __typename: 'ContractQuestion' as const,
+                            id: 'dmcp-question-1-id',
+                            contractID,
+                            createdAt: new Date('2022-12-15'),
+                            addedBy: mockValidCMSUser({
+                                divisionAssignment: 'DMCP',
+                            }) as CmsUser,
+                            documents: [
+                                {
+                                    s3URL: 's3://bucketname/key/dmcp-question-1-document-1',
+                                    name: 'dmcp-question-1-document-1',
+                                    downloadURL: expect.any(String),
+                                },
+                            ],
+                            division: 'DMCP',
+                            responses: [
+                                {
+                                    __typename: 'QuestionResponse' as const,
+                                    id: 'response-to-dmcp-1-id',
+                                    questionID: 'dmcp-question-1-id',
+                                    addedBy: mockValidUser() as StateUser,
+                                    createdAt: new Date('2022-12-16'),
+                                    documents: [
+                                        {
+                                            s3URL: 's3://bucketname/key/response-to-dmcp-1-document-1',
+                                            name: 'response-to-dmcp-1-document-1',
+                                            downloadURL: expect.any(String),
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    },
+                ],
+            },
+            OACTQuestions: {
+                totalCount: 2,
+                edges: [
+                    {
+                        __typename: 'ContractQuestionEdge' as const,
+                        node: {
+                            __typename: 'ContractQuestion' as const,
+                            id: 'oact-question-1-id',
+                            contractID,
+                            createdAt: new Date('2022-12-14'),
+                            addedBy: mockValidCMSUser({
+                                divisionAssignment: 'OACT',
+                            }) as CmsUser,
+                            documents: [
+                                {
+                                    s3URL: 's3://bucketname/key/oact-question-1-document-1',
+                                    name: 'oact-question-1-document-1',
+                                    downloadURL: expect.any(String),
+                                },
+                            ],
+                            division: 'OACT',
+                            responses: [
+                                {
+                                    __typename: 'QuestionResponse' as const,
+                                    id: 'response-to-oact-1-id',
+                                    questionID: 'oact-question-1-id',
+                                    addedBy: mockValidUser() as StateUser,
+                                    createdAt: new Date('2022-12-17'),
+                                    documents: [
+                                        {
+                                            s3URL: 's3://bucketname/key/response-to-oact-1-document-1',
+                                            name: 'response-to-oact-1-document-1',
+                                            downloadURL: expect.any(String),
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    },
+                    {
+                        __typename: 'ContractQuestionEdge' as const,
+                        node: {
+                            __typename: 'ContractQuestion' as const,
+                            id: 'oact-question-2-id',
+                            contractID:'test-abc-123',
+                            createdAt: new Date('2022-12-17'),
+                            addedBy: mockValidCMSUser({
+                                divisionAssignment: 'OACT',
+                            }) as CmsUser,
+                            documents: [
+                                {
+                                    s3URL: 's3://bucketname/key/oact-question-1-document-1',
+                                    name: 'oact-question-2-document-1',
+                                    downloadURL: expect.any(String),
+                                },
+                            ],
+                            division: 'OACT',
+                            responses: [
+                                {
+                                    __typename: 'QuestionResponse' as const,
+                                    id: 'response-to-oact-2-id',
+                                    questionID: 'oact-question-2-id',
+                                    addedBy: mockValidUser() as StateUser,
+                                    createdAt: new Date('2022-12-16'),
+                                    documents: [
+                                        {
+                                            s3URL: 's3://bucketname/key/response-to-oact-1-document-1',
+                                            name: 'response-to-oact-2-document-1',
+                                            downloadURL: expect.any(String),
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
         ...partial,
     }
 }
@@ -2576,4 +2963,5 @@ export {
     mockRateRevision,
     mockContractPackageSubmittedWithQuestions,
     mockContractPackageApproved,
+    mockContractPackageApprovedWithQuestions,
 }

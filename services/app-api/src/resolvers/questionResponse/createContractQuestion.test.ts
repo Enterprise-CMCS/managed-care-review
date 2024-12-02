@@ -18,6 +18,7 @@ import {
 } from '../../testHelpers/userHelpers'
 import { testEmailConfig, testEmailer } from '../../testHelpers/emailerHelpers'
 import {
+    approveTestContract,
     submitTestContract,
     unlockTestContract,
 } from '../../testHelpers/gqlContractHelpers'
@@ -173,7 +174,42 @@ describe('createQuestion', () => {
         expect(createdQuestion.errors).toBeDefined()
         expect(assertAnErrorCode(createdQuestion)).toBe('BAD_USER_INPUT')
         expect(assertAnError(createdQuestion).message).toBe(
-            'Issue creating question for health plan package. Message: Cannot create question for health plan package in DRAFT status'
+            'Issue creating question for contract. Message: Cannot create question for contract in DRAFT status'
+        )
+    })
+    it('returns an error if contract has been approved', async () => {
+        const stateServer = await constructTestPostgresServer()
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: cmsUser,
+            },
+        })
+
+        const contract = await createAndSubmitTestContract(stateServer)
+        // approve contract
+        const approvedContract = await approveTestContract(
+            cmsServer,
+            contract.id
+        )
+        const createdQuestion = await cmsServer.executeOperation({
+            query: CreateContractQuestionDocument,
+            variables: {
+                input: {
+                    contractID: approvedContract.id,
+                    documents: [
+                        {
+                            name: 'Test Question',
+                            s3URL: 's3://bucketname/key/test1',
+                        },
+                    ],
+                },
+            },
+        })
+
+        expect(createdQuestion.errors).toBeDefined()
+        expect(assertAnErrorCode(createdQuestion)).toBe('BAD_USER_INPUT')
+        expect(assertAnError(createdQuestion).message).toBe(
+            'Issue creating question for contract. Message: Cannot create question for contract in APPROVED status'
         )
     })
     it('returns an error if a state user attempts to create a question for a package', async () => {

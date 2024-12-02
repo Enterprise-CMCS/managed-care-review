@@ -5,6 +5,7 @@ import { DataDetail, DataDetailContactField } from '../../DataDetail'
 import { formatCalendarDate } from '../../../common-code/dateHelpers'
 import {
     ActuaryContact,
+    ConsolidatedContractStatus,
     ContractRevision,
     Program,
     Rate,
@@ -94,14 +95,16 @@ export const SingleRateSummarySection = ({
     rate,
     isSubmitted,
     statePrograms,
+    parentContractStatus,
 }: {
     rate: Rate
     isSubmitted: boolean
     statePrograms: Program[]
+    parentContractStatus: ConsolidatedContractStatus
 }): React.ReactElement | null => {
     const { loggedInUser } = useAuth()
     const navigate = useNavigate()
-
+    const parentContractIsApproved = parentContractStatus === 'APPROVED'
     const latestSubmission = rate.packageSubmissions?.[0]
     if (!latestSubmission) {
         // This is unusual and ugly, we try not to throw ever, but we can't early return here.
@@ -246,14 +249,16 @@ export const SingleRateSummarySection = ({
                         'Unknown rate name'
                     }
                 >
-                    {isCMSUser && showRateUnlock && (
-                        <UnlockRateButton
-                            disabled={isUnlocked || unlockLoading}
-                            onClick={handleUnlockRate}
-                        >
-                            Unlock rate
-                        </UnlockRateButton>
-                    )}
+                    {isCMSUser &&
+                        showRateUnlock &&
+                        !parentContractIsApproved && (
+                            <UnlockRateButton
+                                disabled={isUnlocked || unlockLoading}
+                                onClick={handleUnlockRate}
+                            >
+                                Unlock rate
+                            </UnlockRateButton>
+                        )}
                     {/* This second option is an interim state for unlock rate button (when linked rates is turned on but unlock and edit rate is not available yet). Remove when rate unlock is permanently on. */}
                     {isCMSUser && !showRateUnlock && (
                         <UnlockRateButton
