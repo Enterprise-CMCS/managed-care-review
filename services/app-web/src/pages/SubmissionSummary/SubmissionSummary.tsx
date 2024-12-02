@@ -364,7 +364,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                     contract={contract}
                     submissionName={name}
                     headerChildComponent={
-                        hasCMSPermissions ? (
+                        hasCMSPermissions && !showApprovalBanner ? (
                             <ModalOpenButton
                                 modalRef={modalRef}
                                 disabled={

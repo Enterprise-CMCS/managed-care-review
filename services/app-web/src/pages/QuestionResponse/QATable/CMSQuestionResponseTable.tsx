@@ -1,4 +1,5 @@
 import {
+    ConsolidatedContractStatus,
     ContractQuestionList,
     Division,
     RateQuestionList,
@@ -12,15 +13,17 @@ import { IndexQuestionType } from '../QuestionResponseHelpers'
 
 type CMSQuestionResponseTableProps = {
     indexQuestions: IndexQuestionType
+    contractStatus?: ConsolidatedContractStatus
     userDivision?: Division
 }
 
 export const CMSQuestionResponseTable = ({
     indexQuestions,
+    contractStatus,
     userDivision,
 }: CMSQuestionResponseTableProps) => {
     const { loggedInUser } = useAuth()
-
+    const isApprovedContract = contractStatus === 'APPROVED'
     const currentDivisionRounds = (): QuestionRounds => {
         if (!userDivision) {
             return []
@@ -98,7 +101,7 @@ export const CMSQuestionResponseTable = ({
                 data-testid={'usersDivisionQuestions'}
             >
                 <SectionHeader header="Your division's questions">
-                    {userDivision && (
+                    {userDivision && !isApprovedContract && (
                         <NavLinkWithLogging
                             className="usa-button"
                             variant="unstyled"

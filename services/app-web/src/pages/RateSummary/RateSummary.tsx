@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Loading, NavLinkWithLogging } from '../../components'
 import { usePage } from '../../contexts/PageContext'
-import { useFetchRateQuery } from '../../gen/gqlClient'
+import { useFetchRateQuery, useFetchContractQuery } from '../../gen/gqlClient'
 import styles from '../SubmissionSummary/SubmissionSummary.module.scss'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import { RoutesRecord } from '@mc-review/constants'
@@ -36,6 +36,17 @@ export const RateSummary = (): React.ReactElement => {
     })
 
     const rate = data?.fetchRate.rate
+    const {
+        data: fetchContractData,
+        loading: loadingContract,
+        error: fetchContractError,
+    } = useFetchContractQuery({
+        variables: {
+            input: {
+                contractID: rate?.parentContractID ?? 'unknown-contract',
+            },
+        },
+    })
     const currentRateRev = rate?.revisions[0]
     const withdrawInfo = rate?.withdrawInfo
 
@@ -74,6 +85,35 @@ export const RateSummary = (): React.ReactElement => {
         setRateName(currentRateRev.formData.rateCertificationName)
     }
 
+    const contract = fetchContractData?.fetchContract.contract
+
+    if (loadingContract) {
+        return (
+            <GridContainer>
+                <Loading />
+            </GridContainer>
+        )
+    } else if (fetchContractError || !contract) {
+        //error handling for a state user that tries to access contracts for a different state
+        if (
+            fetchContractError?.graphQLErrors[0]?.extensions?.code ===
+            'FORBIDDEN'
+        ) {
+            return (
+                <ErrorForbiddenPage
+                    errorMsg={fetchContractError.graphQLErrors[0].message}
+                />
+            )
+        } else if (
+            fetchContractError?.graphQLErrors[0]?.extensions?.code ===
+            'NOT_FOUND'
+        ) {
+            return <Error404 />
+        } else {
+            return <GenericErrorPage />
+        }
+    }
+
     return (
         <div className={styles.background}>
             <GridContainer
@@ -105,6 +145,7 @@ export const RateSummary = (): React.ReactElement => {
                     rate={rate}
                     isSubmitted // can assume isSubmitted because we redirect for unlocked
                     statePrograms={rate.state.programs}
+                    parentContractStatus={contract?.consolidatedStatus}
                 />
             </GridContainer>
         </div>

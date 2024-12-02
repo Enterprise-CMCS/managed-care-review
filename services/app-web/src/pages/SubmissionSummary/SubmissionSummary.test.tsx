@@ -12,6 +12,7 @@ import {
     iterableCmsUsersMockData,
     mockValidCMSUser,
     iterableNonCMSUsersMockData,
+    mockContractPackageApproved,
 } from '@mc-review/mocks'
 import { renderWithProviders } from '../../testHelpers'
 import { SubmissionSummary } from './SubmissionSummary'
@@ -1377,6 +1378,55 @@ describe('SubmissionSummary', () => {
             })
         }
     )
+
+    it('does not render the unlock submission button for an approved contract', async () => {
+        const contract = mockContractPackageApproved()
+
+        renderWithProviders(
+            <Routes>
+                <Route element={<SubmissionSideNav />}>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                        element={<SubmissionSummary />}
+                    />
+                </Route>
+            </Routes>,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockValidCMSUser(),
+                            statusCode: 200,
+                        }),
+                        fetchContractWithQuestionsMockSuccess({
+                            contract,
+                        }),
+                        fetchContractMockSuccess({
+                            contract,
+                        }),
+                    ],
+                },
+                routerProvider: {
+                    route: '/submissions/test-abc-123',
+                },
+                featureFlags: {
+                    'submission-approvals': true,
+                },
+            }
+        )
+
+        await waitFor(() => {
+            expect(
+                screen.getByTestId('submission-side-nav')
+            ).toBeInTheDocument()
+            expect(screen.getByText('MCR-MN-0005-SNBC')).toBeInTheDocument()
+        })
+
+        const unlockBtn = screen.queryByRole('button', {
+            name: 'Unlock submission',
+        })
+        expect(unlockBtn).not.toBeInTheDocument()
+    })
 
     describe.each(iterableNonCMSUsersMockData)(
         '$userRole submission approval tests',

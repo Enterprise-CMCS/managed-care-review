@@ -1263,11 +1263,15 @@ function mockContractPackageSubmitted(partial?: Partial<Contract>): Contract {
     }
 }
 
-function mockContractPackageApproved(partial?: Partial<Contract>): Contract {
+function mockContractPackageApproved(
+    partial?: Partial<Contract>,
+    contractId?: string
+): Contract {
+    const contractID = contractId || 'test-abc-123'
     return {
         status: 'SUBMITTED',
         reviewStatus: 'APPROVED',
-        consolidatedStatus: 'SUBMITTED',
+        consolidatedStatus: 'APPROVED',
         reviewStatusActions: [
             {
                 updatedAt: new Date('2100-01-01'),
@@ -1279,19 +1283,18 @@ function mockContractPackageApproved(partial?: Partial<Contract>): Contract {
                     __typename: 'UpdatedBy',
                 },
                 updatedReason: 'all required documents sent',
-                contractID: 'test-abc-123',
+                contractID,
                 actionType: 'MARK_AS_APPROVED',
                 __typename: 'ContractReviewStatusActions',
             },
         ],
-
         __typename: 'Contract',
         createdAt: new Date(),
         updatedAt: new Date(),
         lastUpdatedForDisplay: new Date(),
         webURL: 'https://testmcreview.example/submissions/test-abc-123',
         initiallySubmittedAt: new Date('2024-11-27'),
-        id: 'test-abc-123',
+        id: contractID,
         stateCode: 'MN',
         state: mockMNState(),
         stateNumber: 5,
@@ -1320,7 +1323,7 @@ function mockContractPackageApproved(partial?: Partial<Contract>): Contract {
                     createdAt: new Date('01/01/2024'),
                     updatedAt: '2024-12-18T16:54:39.173Z',
                     id: '123',
-                    contractID: 'test-abc-123',
+                    contractID,
                     submitInfo: {
                         __typename: 'UpdateInformation',
                         updatedAt: new Date(),
@@ -1467,6 +1470,203 @@ function mockContractPackageApproved(partial?: Partial<Contract>): Contract {
                 ],
             },
         ],
+        ...partial,
+    }
+}
+
+function mockContractPackageApprovedWithQuestions(
+    partial?: Partial<Contract>,
+    contractId?: string
+): Contract {
+    const contractID = contractId || 'test-abc-123'
+
+    return {
+        ...mockContractPackageApproved(),
+        questions: {
+            DMCOQuestions: {
+                totalCount: 2,
+                edges: [
+                    {
+                        __typename: 'ContractQuestionEdge' as const,
+                        node: {
+                            __typename: 'ContractQuestion' as const,
+                            id: 'dmco-question-1-id',
+                            contractID,
+                            createdAt: new Date('2022-12-16'),
+                            addedBy: mockValidCMSUser({
+                                divisionAssignment: null,
+                            }) as CmsUser,
+                            documents: [
+                                {
+                                    s3URL: 's3://bucketname/key/dmco-question-1-document-1',
+                                    name: 'dmco-question-1-document-1',
+                                    downloadURL: expect.any(String),
+                                },
+                            ],
+                            division: 'DMCO',
+                            responses: [
+                                {
+                                    __typename: 'QuestionResponse' as const,
+                                    id: 'response-to-dmco-1-id',
+                                    questionID: 'dmco-question-1-id',
+                                    addedBy: mockValidUser() as StateUser,
+                                    createdAt: new Date('2022-12-16'),
+                                    documents: [
+                                        {
+                                            s3URL: 's3://bucketname/key/response-to-dmco-1-document-1',
+                                            name: 'response-to-dmco-1-document-1',
+                                            downloadURL: expect.any(String),
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    },
+                    {
+                        __typename: 'ContractQuestionEdge' as const,
+                        node: {
+                            __typename: 'ContractQuestion' as const,
+                            id: 'dmco-question-2-id',
+                            contractID,
+                            createdAt: new Date('2022-12-18'),
+                            addedBy: mockValidCMSUser() as CmsUser,
+                            documents: [
+                                {
+                                    s3URL: 's3://bucketname/key/dmco-question-2-document-1',
+                                    name: 'dmco-question-2-document-1',
+                                    downloadURL: expect.any(String),
+                                },
+                                {
+                                    s3URL: 's3://bucketname/key/question-2-document-2',
+                                    name: 'dmco-question-2-document-2',
+                                    downloadURL: expect.any(String),
+                                },
+                            ],
+                            division: 'DMCO',
+                            responses: [],
+                        },
+                    },
+                ],
+            },
+            DMCPQuestions: {
+                totalCount: 1,
+                edges: [
+                    {
+                        __typename: 'ContractQuestionEdge' as const,
+                        node: {
+                            __typename: 'ContractQuestion' as const,
+                            id: 'dmcp-question-1-id',
+                            contractID,
+                            createdAt: new Date('2022-12-15'),
+                            addedBy: mockValidCMSUser({
+                                divisionAssignment: 'DMCP',
+                            }) as CmsUser,
+                            documents: [
+                                {
+                                    s3URL: 's3://bucketname/key/dmcp-question-1-document-1',
+                                    name: 'dmcp-question-1-document-1',
+                                    downloadURL: expect.any(String),
+                                },
+                            ],
+                            division: 'DMCP',
+                            responses: [
+                                {
+                                    __typename: 'QuestionResponse' as const,
+                                    id: 'response-to-dmcp-1-id',
+                                    questionID: 'dmcp-question-1-id',
+                                    addedBy: mockValidUser() as StateUser,
+                                    createdAt: new Date('2022-12-16'),
+                                    documents: [
+                                        {
+                                            s3URL: 's3://bucketname/key/response-to-dmcp-1-document-1',
+                                            name: 'response-to-dmcp-1-document-1',
+                                            downloadURL: expect.any(String),
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    },
+                ],
+            },
+            OACTQuestions: {
+                totalCount: 2,
+                edges: [
+                    {
+                        __typename: 'ContractQuestionEdge' as const,
+                        node: {
+                            __typename: 'ContractQuestion' as const,
+                            id: 'oact-question-1-id',
+                            contractID,
+                            createdAt: new Date('2022-12-14'),
+                            addedBy: mockValidCMSUser({
+                                divisionAssignment: 'OACT',
+                            }) as CmsUser,
+                            documents: [
+                                {
+                                    s3URL: 's3://bucketname/key/oact-question-1-document-1',
+                                    name: 'oact-question-1-document-1',
+                                    downloadURL: expect.any(String),
+                                },
+                            ],
+                            division: 'OACT',
+                            responses: [
+                                {
+                                    __typename: 'QuestionResponse' as const,
+                                    id: 'response-to-oact-1-id',
+                                    questionID: 'oact-question-1-id',
+                                    addedBy: mockValidUser() as StateUser,
+                                    createdAt: new Date('2022-12-17'),
+                                    documents: [
+                                        {
+                                            s3URL: 's3://bucketname/key/response-to-oact-1-document-1',
+                                            name: 'response-to-oact-1-document-1',
+                                            downloadURL: expect.any(String),
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    },
+                    {
+                        __typename: 'ContractQuestionEdge' as const,
+                        node: {
+                            __typename: 'ContractQuestion' as const,
+                            id: 'oact-question-2-id',
+                            contractID: 'test-abc-123',
+                            createdAt: new Date('2022-12-17'),
+                            addedBy: mockValidCMSUser({
+                                divisionAssignment: 'OACT',
+                            }) as CmsUser,
+                            documents: [
+                                {
+                                    s3URL: 's3://bucketname/key/oact-question-1-document-1',
+                                    name: 'oact-question-2-document-1',
+                                    downloadURL: expect.any(String),
+                                },
+                            ],
+                            division: 'OACT',
+                            responses: [
+                                {
+                                    __typename: 'QuestionResponse' as const,
+                                    id: 'response-to-oact-2-id',
+                                    questionID: 'oact-question-2-id',
+                                    addedBy: mockValidUser() as StateUser,
+                                    createdAt: new Date('2022-12-16'),
+                                    documents: [
+                                        {
+                                            s3URL: 's3://bucketname/key/response-to-oact-1-document-1',
+                                            name: 'response-to-oact-2-document-1',
+                                            downloadURL: expect.any(String),
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
         ...partial,
     }
 }
@@ -2625,4 +2825,5 @@ export {
     mockRateRevision,
     mockContractPackageSubmittedWithQuestions,
     mockContractPackageApproved,
+    mockContractPackageApprovedWithQuestions,
 }
