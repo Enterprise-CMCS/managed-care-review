@@ -290,7 +290,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                                 disabled={!isSubmitted}
                                 data-testid="approval-modal-toggle-button"
                             >
-                                Approve submission
+                                Release to state
                             </ModalOpenButton>
                         </Grid>
                         <Modal
@@ -301,8 +301,8 @@ export const SubmissionSummary = (): React.ReactElement => {
                                     formik.values.approveModalInput
                                 )
                             }
-                            modalHeading="Are you sure you want to approve this submission?"
-                            onSubmitText="Approve submission"
+                            modalHeading="Are you sure you want to mark this submission as Released to the state?"
+                            onSubmitText="Release to state"
                             submitButtonProps={{ variant: 'default' }}
                             className={styles.approvalModal}
                             modalAlert={modalAlert}
@@ -310,8 +310,12 @@ export const SubmissionSummary = (): React.ReactElement => {
                         >
                             <form>
                                 <p>
-                                    Once you approve, the submission status will
-                                    change from Submitted to Approved.
+                                    Once you select Released to state, the
+                                    status will change from Submitted to
+                                    Approved on the dashboard. This submission
+                                    should only be marked as released after the
+                                    approval letter has been released to the
+                                    state.
                                 </p>
                                 <p className="margin-bottom-0">
                                     Provide an optional note
