@@ -52,6 +52,10 @@ export const RateQuestionResponse = () => {
     })
 
     const rate = data?.fetchRate.rate
+    useEffect(() => {
+        updateHeading({ customHeading: rateName })
+    }, [rateName, updateHeading])
+
     const {
         data: fetchContractData,
         loading: loadingContract,
@@ -63,10 +67,6 @@ export const RateQuestionResponse = () => {
             },
         },
     })
-
-    useEffect(() => {
-        updateHeading({ customHeading: rateName })
-    }, [rateName, updateHeading])
 
     if (loading) {
         return <ErrorOrLoadingPage state="LOADING" />

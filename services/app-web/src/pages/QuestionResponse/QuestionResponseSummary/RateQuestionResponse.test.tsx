@@ -3,6 +3,7 @@ import {
     fetchContractWithQuestionsMockSuccess,
     fetchCurrentUserMock,
     fetchRateMockSuccess,
+    fetchContractMockSuccess,
     mockContractPackageDraft,
     mockContractPackageSubmitted,
     mockValidCMSUser,
@@ -66,32 +67,38 @@ describe('RateQuestionResponse', () => {
                             user: mockValidStateUser(),
                             statusCode: 200,
                         }),
-                        fetchContractWithQuestionsMockSuccess({
-                            contract: {
-                                ...contract,
-                                id: '15',
-                            },
-                        }),
-                        fetchContractWithQuestionsMockSuccess({
-                            contract: {
-                                ...contract,
-                                id: '15',
-                            },
-                        }),
+                        fetchContractWithQuestionsMockSuccess({}),
+                        fetchContractWithQuestionsMockSuccess({}),
                         fetchRateWithQuestionsMockSuccess({
-                            rate: { id: secondRateRev.rateID },
+                            rate: {
+                                id: secondRateRev.rateID,
+                                parentContractID: contract.id,
+                            },
                             rateRev: secondRateRev,
                         }),
+                        fetchRateWithQuestionsMockSuccess({
+                            rate: {
+                                id: secondRateRev.rateID,
+                                parentContractID: contract.id,
+                            },
+                            rateRev: secondRateRev,
+                        }),
+                        fetchContractMockSuccess({}),
                     ],
                 },
                 routerProvider: {
-                    route: '/submissions/15/rates/second-rate/question-and-answers',
+                    route: '/submissions/test-abc-123/rates/second-rate/question-and-answers',
                 },
             })
 
             // Wait for sidebar nav to exist.
             await waitFor(() => {
                 expect(screen.queryByTestId('sidenav')).toBeInTheDocument()
+                expect(
+                    screen.queryByRole('heading', {
+                        name: `Outstanding questions`,
+                    })
+                ).toBeInTheDocument()
             })
 
             expect(
@@ -102,6 +109,7 @@ describe('RateQuestionResponse', () => {
         })
 
         it('renders questions in correct sections', async () => {
+            const contract = mockContractPackageSubmitted()
             renderWithProviders(
                 <Routes>
                     <Route
@@ -121,8 +129,10 @@ describe('RateQuestionResponse', () => {
                             fetchRateWithQuestionsMockSuccess({
                                 rate: {
                                     id: 'test-rate-id',
+                                    parentContractID: contract.id,
                                 },
                             }),
+                            fetchContractMockSuccess({}),
                         ],
                     },
                     routerProvider: {
@@ -234,6 +244,7 @@ describe('RateQuestionResponse', () => {
                                 id: '15',
                             },
                         }),
+                        fetchContractMockSuccess({}),
                         fetchContractWithQuestionsMockSuccess({
                             contract: {
                                 ...contract,
@@ -273,6 +284,7 @@ describe('RateQuestionResponse', () => {
                                 id: '15',
                             },
                         }),
+                        fetchContractMockSuccess({}),
                     ],
                 },
                 routerProvider: {
@@ -302,6 +314,7 @@ describe('RateQuestionResponse', () => {
             </Routes>
         )
         it('renders no questions text', async () => {
+            const contract = mockContractPackageSubmitted()
             const indexRateQuestions: IndexRateQuestionsPayload = {
                 __typename: 'IndexRateQuestionsPayload',
                 DMCOQuestions: {
@@ -334,8 +347,10 @@ describe('RateQuestionResponse', () => {
                             rate: {
                                 id: 'test-rate-id',
                                 questions: indexRateQuestions,
+                                parentContractID: contract.id,
                             },
                         }),
+                        fetchContractMockSuccess({}),
                     ],
                 },
                 routerProvider: {
@@ -354,6 +369,7 @@ describe('RateQuestionResponse', () => {
             ).toHaveLength(2)
         })
         it('renders questions in correct sections', async () => {
+            const contract = mockContractPackageSubmitted()
             renderWithProviders(<CommonCMSRoutes />, {
                 apolloProvider: {
                     mocks: [
@@ -363,12 +379,15 @@ describe('RateQuestionResponse', () => {
                         }),
                         fetchRateMockSuccess({
                             id: 'test-rate-id',
+                            parentContractID: contract.id,
                         }),
                         fetchRateWithQuestionsMockSuccess({
                             rate: {
                                 id: 'test-rate-id',
+                                parentContractID: contract.id,
                             },
                         }),
+                        fetchContractMockSuccess({}),
                     ],
                 },
                 routerProvider: {
@@ -450,6 +469,7 @@ describe('RateQuestionResponse', () => {
             )
         })
         it('renders with question submit banner after question submitted', async () => {
+            const contract = mockContractPackageSubmitted()
             renderWithProviders(
                 <Routes>
                     <Route
@@ -467,8 +487,10 @@ describe('RateQuestionResponse', () => {
                             fetchRateWithQuestionsMockSuccess({
                                 rate: {
                                     id: 'test-rate-id',
+                                    parentContractID: contract.id,
                                 },
                             }),
+                            fetchContractMockSuccess({}),
                         ],
                     },
                     routerProvider: {
@@ -495,6 +517,7 @@ describe('RateQuestionResponse', () => {
                             user: mockValidCMSUser(),
                             statusCode: 200,
                         }),
+                        fetchContractMockSuccess({}),
                     ],
                 },
                 routerProvider: {
@@ -507,7 +530,15 @@ describe('RateQuestionResponse', () => {
             })
         })
         it('renders error page if rate is in draft', async () => {
-            const rate = rateDataMock({}, { status: 'DRAFT' })
+            const contract = mockContractPackageSubmitted()
+
+            const rate = rateDataMock(
+                {},
+                {
+                    status: 'DRAFT',
+                    parentContractID: contract.id,
+                }
+            )
             renderWithProviders(<CommonCMSRoutes />, {
                 apolloProvider: {
                     mocks: [
@@ -517,6 +548,7 @@ describe('RateQuestionResponse', () => {
                         }),
                         fetchRateMockSuccess(rate),
                         fetchRateWithQuestionsMockSuccess({ rate }),
+                        fetchContractMockSuccess({}),
                     ],
                 },
                 routerProvider: {
@@ -528,8 +560,9 @@ describe('RateQuestionResponse', () => {
                 expect(screen.getByText('System error')).toBeInTheDocument()
             })
         })
-        it('renders waring banner if CMS user has no assigned division', async () => {
-            const rate = rateDataMock()
+        it('renders warning banner if CMS user has no assigned division', async () => {
+            const contract = mockContractPackageSubmitted()
+            const rate = rateDataMock({}, { parentContractID: contract.id })
             renderWithProviders(<CommonCMSRoutes />, {
                 apolloProvider: {
                     mocks: [
@@ -541,6 +574,7 @@ describe('RateQuestionResponse', () => {
                         }),
                         fetchRateMockSuccess(rate),
                         fetchRateWithQuestionsMockSuccess({ rate }),
+                        fetchContractMockSuccess({}),
                     ],
                 },
                 routerProvider: {
@@ -550,6 +584,9 @@ describe('RateQuestionResponse', () => {
 
             await waitFor(() => {
                 expect(screen.queryByTestId('sidenav')).toBeInTheDocument()
+                expect(
+                    screen.queryByText(`Your division's questions`)
+                ).toBeInTheDocument()
             })
 
             // Expect missing division text

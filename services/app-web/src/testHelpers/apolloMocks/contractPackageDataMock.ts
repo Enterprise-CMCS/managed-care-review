@@ -1031,7 +1031,7 @@ function mockContractWithLinkedRateSubmitted(
 }
 
 function mockContractPackageSubmitted(
-    partial?: Partial<Contract>
+    partial?: Partial<Contract>,
 ): Contract {
     return {
         status: 'SUBMITTED',
