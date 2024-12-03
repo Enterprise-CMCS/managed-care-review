@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useLayoutEffect, useState } from 'react'
 import { Fieldset, Form as UswdsForm } from '@trussworks/react-uswds'
 import { FieldArray, FieldArrayRenderProps, Formik, FormikErrors } from 'formik'
 import { generatePath, useNavigate } from 'react-router-dom'
@@ -163,6 +163,11 @@ const RateDetails = ({
             newRateNameRef.current = null
         }
     }, [focusNewRate])
+
+    useLayoutEffect(() => {
+        console.info('Do something' + focusNewRate)
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
 
     const pageHeading = displayAsStandaloneRate
         ? fetchRateData?.fetchRate.rate.draftRevision?.formData

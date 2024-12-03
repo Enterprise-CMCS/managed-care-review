@@ -290,7 +290,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                                 disabled={!isSubmitted}
                                 data-testid="approval-modal-toggle-button"
                             >
-                                Release to state
+                                Released to state
                             </ModalOpenButton>
                         </Grid>
                         <Modal
@@ -302,7 +302,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                                 )
                             }
                             modalHeading="Are you sure you want to mark this submission as Released to the state?"
-                            onSubmitText="Release to state"
+                            onSubmitText="Released to state"
                             submitButtonProps={{ variant: 'default' }}
                             className={styles.approvalModal}
                             modalAlert={modalAlert}
