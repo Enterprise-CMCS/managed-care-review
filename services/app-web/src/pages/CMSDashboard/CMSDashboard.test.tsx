@@ -168,6 +168,9 @@ describe('CMSDashboard', () => {
                     approved.id = 'test-abc-approved'
                     submitted.id = 'test-abc-submitted'
                     unlocked.id = 'test-abc-unlocked'
+                    // post implementation of creating default status filter for CMS users
+                    // #filters= is the default hash to use no filters
+                    window.location.assign('#filters=')
 
                     const submissions = [unlocked, submitted, approved]
                     renderWithProviders(<CMSDashboardNestedRoutes />, {

@@ -214,7 +214,6 @@ export const ContractTable = ({
         filtersForAnalytics: '',
     })
     const { logFilterEvent } = useTealium()
-
     /* we store the last clicked element in a ref so that when the url is updated and the page rerenders
         we can focus that element.  this useEffect (with no dependency array) will run once on each render.
         Note that the React-y way to do this is to use forwardRef, but the clearFilters button is deeply nested
@@ -427,6 +426,26 @@ export const ContractTable = ({
         setTableCaption(null)
         setColumnFilters([])
     }
+
+    useEffect(() => {
+        // if on root route
+        if (location.hash === '' && showFilters) {
+            updateFilters(
+                statusColumn,
+                [
+                    {
+                        label: 'Submitted',
+                        value: 'SUBMITTED',
+                    },
+                    {
+                        label: 'Unlocked',
+                        value: 'UNLOCKED',
+                    },
+                ],
+                'status'
+            )
+        }
+    }, [showFilters, statusColumn])
 
     //Store caption element in state in order for screen readers to read dynamic captions.
     useEffect(() => {

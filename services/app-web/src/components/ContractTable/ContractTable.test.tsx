@@ -159,7 +159,9 @@ const apolloProviderWithCMSUser = () => ({
 
 describe('ContractTable for CMS User (with filters)', () => {
     beforeEach(() => {
-        window.location.assign('#')
+        // post implementation of creating default status filter for CMS users
+        // #filters= is the default hash to use no filters
+        window.location.assign('#filters=')
         vi.clearAllMocks()
     })
 
@@ -197,6 +199,25 @@ describe('ContractTable for CMS User (with filters)', () => {
         expect(
             screen.getByText('Displaying 5 of 5 submissions')
         ).toBeInTheDocument()
+    })
+
+    it('Filter out approved submission', async () => {
+        window.location.assign('#filters=status%3DSUBMITTED%2CUNLOCKED')
+
+        renderWithProviders(
+            <ContractTable
+                tableData={submissions}
+                user={mockCMSUser()}
+                showFilters
+            />,
+            {
+                apolloProvider: apolloProviderWithStateUser(),
+            }
+        )
+        const rows = await screen.findAllByRole('row')
+        expect(screen.getByRole('table')).toBeInTheDocument()
+        expect(rows).toHaveLength(5)
+        expect(screen.queryByText('Approved')).not.toBeInTheDocument()
     })
 
     it('displays no submission text when no submitted packages exist', async () => {
@@ -952,6 +973,7 @@ describe('ContractTable state user tests', () => {
                 status: 'DRAFT',
             },
         ]
+
         renderWithProviders(
             <ContractTable
                 tableData={stateSubmissions}
