@@ -196,7 +196,7 @@ jobs:
         working-directory: services/app-api
         run: |
           set -e
-          pnpm test:coverage-ci
+          pnpm test:coverage
           exit $?
 
       - name: upload api test coverage
