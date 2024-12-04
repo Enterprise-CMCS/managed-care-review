@@ -62,4 +62,15 @@
     h2 {
         font-size: 1.75rem;
     }
+    [class^='usa-date-picker__wrapper'],
+    [class^='usa-input'] {
+        max-width: 100%;
+    }
+    [class^='usa-input'] {
+        margin-bottom: .5rem;
+    }
+
+    [class^='usa-button-group__item']:first-of-type {
+        margin-right: 1rem;
+    }
 }

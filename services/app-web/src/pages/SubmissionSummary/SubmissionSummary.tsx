@@ -5,7 +5,9 @@ import {
     ModalRef,
     FormGroup,
     Textarea,
+    DatePicker,
 } from '@trussworks/react-uswds'
+import { formatUserInputDate } from '../../formHelpers'
 import React, { useEffect, useRef, useState } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
 import { ContractDetailsSummarySection } from '../StateSubmission/ReviewSubmit/ContractDetailsSummarySection'
@@ -19,7 +21,7 @@ import {
     LinkWithLogging,
 } from '../../components'
 import { useTealium } from '../../hooks'
-import { useFormik } from 'formik'
+import { useFormik, Formik} from 'formik'
 import { GenericApiErrorProps } from '../../components/Banner/GenericApiErrorBanner/GenericApiErrorBanner'
 import { Loading } from '../../components'
 import { usePage } from '../../contexts/PageContext'
@@ -66,9 +68,9 @@ export const SubmissionSummary = (): React.ReactElement => {
     const isHelpDeskUser = loggedInUser?.role === 'HELPDESK_USER'
     const formik = useFormik({
         initialValues: {
-            approveModalInput: '',
+            dateApprovalReleasedToState: '10/10/10',
         },
-        onSubmit: (values) => approveContractAction(values.approveModalInput),
+        onSubmit: (values) => approveContractAction(values.dateApprovalReleasedToState),
     })
     const [isSubmitting, setIsSubmitting] = useState(false) // mock same behavior as formik isSubmitting
 
@@ -204,6 +206,7 @@ export const SubmissionSummary = (): React.ReactElement => {
         latestContractAction
 
     const approveContractAction = async (actionModalInput?: string) => {
+        console.log(actionModalInput, 'actionmodal input')
         logFormSubmitEvent({
             heading: 'Approve submission',
             form_name: 'Approve submission',
@@ -217,7 +220,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                 variables: {
                     input: {
                         contractID: contract.id,
-                        updatedReason: actionModalInput,
+                        dateApprovalReleasedToState: actionModalInput,
                     },
                 },
             })
@@ -241,7 +244,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                 <SubmissionApprovedBanner
                     updatedBy={latestContractAction.updatedBy}
                     updatedAt={latestContractAction.updatedAt}
-                    note={latestContractAction.updatedReason}
+                    note={latestContractAction.dateApprovalReleasedToState}
                 />
             )
         }
@@ -296,10 +299,13 @@ export const SubmissionSummary = (): React.ReactElement => {
                         <Modal
                             id="approvalModal"
                             modalRef={approveModalRef}
-                            onSubmit={() =>
-                                approveContractAction(
-                                    formik.values.approveModalInput
+                            onSubmit={() => {
+                                console.log(formik.values, 'date')
+                                return approveContractAction(
+                                    formik.values.dateApprovalReleasedToState
                                 )
+
+                            }
                             }
                             modalHeading="Are you sure you want to mark this submission as Released to the state?"
                             onSubmitText="Release to state"
@@ -308,7 +314,25 @@ export const SubmissionSummary = (): React.ReactElement => {
                             modalAlert={modalAlert}
                             isSubmitting={isSubmitting}
                         >
-                            <form>
+                            {/* <Formik
+                                initialValues={approvalModalInitialValues}
+                                onSubmit={(values) => {
+                                    console.log(values.dateApprovalReleasedToState, 'date')
+                                    return approveContractAction(
+                                        values.dateApprovalReleasedToState
+                                    )
+                                }}
+                            >
+                                {({
+                                    values,
+                                    errors,
+                                    handleSubmit,
+                                    setSubmitting,
+                                    isSubmitting,
+                                    setFieldValue
+                                }) => (
+                                    <> */}
+                                    <form>
                                 <p>
                                     Once you select Released to state, the
                                     status will change from Submitted to
@@ -317,23 +341,26 @@ export const SubmissionSummary = (): React.ReactElement => {
                                     approval letter has been released to the
                                     state.
                                 </p>
-                                <p className="margin-bottom-0">
-                                    Provide an optional note
+                                <p className="margin-bottom-0 text-bold">
+                                    Date released to state
                                 </p>
+                                <p className="margin-top-0 margin-bottom-0 usa-hint">Required</p>
+                                <p className="margin-top-0 margin-bottom-0 usa-hint">mm/dd/yyyy</p>
                                 <FormGroup>
-                                    <Textarea
-                                        id="approveModalInput"
-                                        name="approveModalInput"
-                                        data-testid="approveModalInput"
-                                        aria-required={false}
-                                        error={false}
-                                        onChange={formik.handleChange}
-                                        defaultValue={
-                                            formik.values.approveModalInput
-                                        }
-                                    />
+                                <DatePicker
+                                    aria-required
+                                    aria-describedby="dateApprovalReleasedToState"
+                                    id="dateApprovalReleasedToState"
+                                    name="dateApprovalReleasedToState"
+                                    onChange={() => {
+                                        return formik.handleChange
+                                    }}
+                                />
                                 </FormGroup>
                             </form>
+                            {/* </> */}
+                                {/* )}
+                            </Formik> */}
                         </Modal>
                     </>
                 )}

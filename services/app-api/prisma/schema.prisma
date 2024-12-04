@@ -172,6 +172,7 @@ model ContractActionTable {
   updatedBy     User     @relation(fields: [updatedByID], references: [id])
   updatedReason String
   actionType    ContractActionType
+  dateApprovalReleasedToState DateTime
   contractID    String  
   contract      ContractTable  @relation(fields: [contractID], references: [id])
 }
