@@ -66,8 +66,9 @@
     [class^='usa-input'] {
         max-width: 100%;
     }
-    [class^='usa-input'] {
-        margin-bottom: .5rem;
+    [class^='usa-input'],
+    [class^='usa-date-picker__button'] {
+        margin-bottom: 0.5rem;
     }
 
     [class^='usa-button-group__item']:first-of-type {

@@ -4,7 +4,6 @@ import {
     Link,
     ModalRef,
     FormGroup,
-    Textarea,
     DatePicker,
 } from '@trussworks/react-uswds'
 import { formatUserInputDate } from '../../formHelpers'
@@ -21,7 +20,7 @@ import {
     LinkWithLogging,
 } from '../../components'
 import { useTealium } from '../../hooks'
-import { useFormik, Formik} from 'formik'
+import { Formik } from 'formik'
 import { GenericApiErrorProps } from '../../components/Banner/GenericApiErrorBanner/GenericApiErrorBanner'
 import { Loading } from '../../components'
 import { usePage } from '../../contexts/PageContext'
@@ -66,12 +65,7 @@ export const SubmissionSummary = (): React.ReactElement => {
     const hasCMSPermissions = hasCMSUserPermissions(loggedInUser)
     const isStateUser = loggedInUser?.role === 'STATE_USER'
     const isHelpDeskUser = loggedInUser?.role === 'HELPDESK_USER'
-    const formik = useFormik({
-        initialValues: {
-            dateApprovalReleasedToState: '10/10/10',
-        },
-        onSubmit: (values) => approveContractAction(values.dateApprovalReleasedToState),
-    })
+
     const [isSubmitting, setIsSubmitting] = useState(false) // mock same behavior as formik isSubmitting
 
     const ldClient = useLDClient()
@@ -138,6 +132,9 @@ export const SubmissionSummary = (): React.ReactElement => {
         submissionStatus === 'SUBMITTED' || submissionStatus === 'RESUBMITTED'
     const statePrograms = contract.state.programs
 
+    const approvalModalInitialValues = {
+        dateApprovalReleasedToState: '',
+    }
     if (!isSubmitted && isStateUser) {
         if (submissionStatus === 'DRAFT') {
             return (
@@ -206,7 +203,6 @@ export const SubmissionSummary = (): React.ReactElement => {
         latestContractAction
 
     const approveContractAction = async (actionModalInput?: string) => {
-        console.log(actionModalInput, 'actionmodal input')
         logFormSubmitEvent({
             heading: 'Approve submission',
             form_name: 'Approve submission',
@@ -244,7 +240,9 @@ export const SubmissionSummary = (): React.ReactElement => {
                 <SubmissionApprovedBanner
                     updatedBy={latestContractAction.updatedBy}
                     updatedAt={latestContractAction.updatedAt}
-                    note={latestContractAction.dateApprovalReleasedToState}
+                    dateReleasedToState={
+                        latestContractAction.dateApprovalReleasedToState
+                    }
                 />
             )
         }
@@ -296,72 +294,74 @@ export const SubmissionSummary = (): React.ReactElement => {
                                 Release to state
                             </ModalOpenButton>
                         </Grid>
-                        <Modal
-                            id="approvalModal"
-                            modalRef={approveModalRef}
-                            onSubmit={() => {
-                                console.log(formik.values, 'date')
+                        <Formik
+                            initialValues={approvalModalInitialValues}
+                            onSubmit={(values) => {
                                 return approveContractAction(
-                                    formik.values.dateApprovalReleasedToState
+                                    values.dateApprovalReleasedToState
                                 )
-
-                            }
-                            }
-                            modalHeading="Are you sure you want to mark this submission as Released to the state?"
-                            onSubmitText="Release to state"
-                            submitButtonProps={{ variant: 'default' }}
-                            className={styles.approvalModal}
-                            modalAlert={modalAlert}
-                            isSubmitting={isSubmitting}
+                            }}
                         >
-                            {/* <Formik
-                                initialValues={approvalModalInitialValues}
-                                onSubmit={(values) => {
-                                    console.log(values.dateApprovalReleasedToState, 'date')
-                                    return approveContractAction(
-                                        values.dateApprovalReleasedToState
-                                    )
-                                }}
-                            >
-                                {({
-                                    values,
-                                    errors,
-                                    handleSubmit,
-                                    setSubmitting,
-                                    isSubmitting,
-                                    setFieldValue
-                                }) => (
-                                    <> */}
-                                    <form>
-                                <p>
-                                    Once you select Released to state, the
-                                    status will change from Submitted to
-                                    Approved on the dashboard. This submission
-                                    should only be marked as released after the
-                                    approval letter has been released to the
-                                    state.
-                                </p>
-                                <p className="margin-bottom-0 text-bold">
-                                    Date released to state
-                                </p>
-                                <p className="margin-top-0 margin-bottom-0 usa-hint">Required</p>
-                                <p className="margin-top-0 margin-bottom-0 usa-hint">mm/dd/yyyy</p>
-                                <FormGroup>
-                                <DatePicker
-                                    aria-required
-                                    aria-describedby="dateApprovalReleasedToState"
-                                    id="dateApprovalReleasedToState"
-                                    name="dateApprovalReleasedToState"
-                                    onChange={() => {
-                                        return formik.handleChange
-                                    }}
-                                />
-                                </FormGroup>
-                            </form>
-                            {/* </> */}
-                                {/* )}
-                            </Formik> */}
-                        </Modal>
+                            {({ values, setFieldValue }) => (
+                                <>
+                                    <Modal
+                                        id="approvalModal"
+                                        modalRef={approveModalRef}
+                                        onSubmit={() => {
+                                            return approveContractAction(
+                                                values.dateApprovalReleasedToState
+                                            )
+                                        }}
+                                        modalHeading="Are you sure you want to mark this submission as Released to the state?"
+                                        onSubmitText="Release to state"
+                                        submitButtonProps={{
+                                            variant: 'default',
+                                        }}
+                                        className={styles.approvalModal}
+                                        modalAlert={modalAlert}
+                                        isSubmitting={isSubmitting}
+                                    >
+                                        <form>
+                                            <p>
+                                                Once you select Released to
+                                                state, the status will change
+                                                from Submitted to Approved on
+                                                the dashboard. This submission
+                                                should only be marked as
+                                                released after the approval
+                                                letter has been released to the
+                                                state.
+                                            </p>
+                                            <p className="margin-bottom-0 text-bold">
+                                                Date released to state
+                                            </p>
+                                            <p className="margin-top-0 margin-bottom-0 usa-hint">
+                                                Required
+                                            </p>
+                                            <p className="margin-top-0 margin-bottom-0 usa-hint">
+                                                mm/dd/yyyy
+                                            </p>
+                                            <FormGroup>
+                                                <DatePicker
+                                                    aria-required
+                                                    aria-describedby="dateApprovalReleasedToState"
+                                                    id="dateApprovalReleasedToState"
+                                                    name="dateApprovalReleasedToState"
+                                                    onChange={(val) =>
+                                                        setFieldValue(
+                                                            'dateApprovalReleasedToState',
+                                                            formatUserInputDate(
+                                                                val
+                                                            )
+                                                        )
+                                                    }
+                                                />
+                                            </FormGroup>
+                                        </form>
+                                    </Modal>
+                                </>
+                            )}
+                        </Formik>
                     </>
                 )}
 

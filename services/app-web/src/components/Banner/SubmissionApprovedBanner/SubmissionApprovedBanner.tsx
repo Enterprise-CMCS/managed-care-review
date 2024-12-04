@@ -9,14 +9,14 @@ import { ExpandableText } from '../../ExpandableText'
 export type ApprovalProps = {
     updatedBy: UpdatedBy
     updatedAt: Date
-    note?: string
+    dateReleasedToState?: string
 }
 
 export const SubmissionApprovedBanner = ({
     className,
     updatedAt,
     updatedBy,
-    note,
+    dateReleasedToState,
 }: ApprovalProps & React.HTMLAttributes<HTMLDivElement>) => {
     return (
         <Alert
@@ -40,10 +40,10 @@ export const SubmissionApprovedBanner = ({
                     <b>Updated on:&nbsp;</b>
                     {formatBannerDate(updatedAt)}
                 </p>
-                {note && (
+                {dateReleasedToState && (
                     <ExpandableText>
-                        <b>Optional note:&nbsp;</b>
-                        {note}
+                        <b>Date released to state:&nbsp;</b>
+                        {formatBannerDate(dateReleasedToState)}
                     </ExpandableText>
                 )}
             </div>

@@ -29,9 +29,10 @@ async function approveContractInsideTransaction(
         const approvalNotice = await tx.contractActionTable.create({
             data: {
                 updatedByID: updatedByID,
-                dateApprovalReleasedToState,
+                dateApprovalReleasedToState: dateApprovalReleasedToState,
                 actionType: 'MARK_AS_APPROVED',
                 contractID: contractID,
+                updatedReason: '',
             },
         })
 
@@ -56,7 +57,7 @@ async function approveContractInsideTransaction(
 type ApproveContractArgsType = {
     contractID: string
     updatedByID: string
-    dateApprovalReleasedToState: Date | undefined
+    dateApprovalReleasedToState: string | Date
 }
 
 async function approveContract(
