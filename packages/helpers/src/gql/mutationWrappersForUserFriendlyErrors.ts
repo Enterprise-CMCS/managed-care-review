@@ -68,7 +68,7 @@ export const handleApolloErrorsAndAddUserFacingMessages = (
     apolloError: ApolloError,
     mutation: MutationType
 ) => {
-    let message 
+    let message
     switch (mutation) {
         case 'SUBMIT_HEALTH_PLAN_PACKAGE':
             message = ERROR_MESSAGES.submit_error_generic
@@ -114,7 +114,7 @@ export const handleApolloErrorsAndAddUserFacingMessages = (
         })
     }
 
-    return new Error(message)
+    return new Error(message, options)
 }
 
 export const unlockMutationWrapper = async (
@@ -226,7 +226,7 @@ export const submitMutationWrapperV2 = async (
         Object.assign(input, {
             submittedReason,
         })
-    } 
+    }
 
     try {
         const { data } = await submitContract({
@@ -261,7 +261,7 @@ export const approveMutationWrapper = async (
         Object.assign(input, {
             updatedReason,
         })
-    } 
+    }
 
     try {
         const { data } = await approveContract({
