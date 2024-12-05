@@ -46,6 +46,10 @@ runs:
       shell: bash
       run: PRISMA_CLI_BINARY_TARGETS=rhel-openssl-3.0.x pnpm install --frozen-lockfile
 
+    - name: Build packages
+      shell: bash
+      run: pnpm build:packages
+
     - name: Set PATH for project binaries
       shell: bash
       run: |
