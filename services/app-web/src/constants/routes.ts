@@ -42,6 +42,7 @@ const ROUTES = [
     'SUBMISSIONS_UPLOAD_CONTRACT_QUESTION',
     'SUBMISSIONS_UPLOAD_CONTRACT_RESPONSE',
     'SUBMISSIONS_UPLOAD_RATE_RESPONSE',
+    'SUBMISSIONS_RELEASED_TO_STATE'
 ] as const // iterable union type
 type RouteT = (typeof ROUTES)[number]
 type RouteTWithUnknown = RouteT | 'UNKNOWN_ROUTE'
@@ -97,6 +98,7 @@ const RoutesRecord: Record<RouteT, string> = {
         '/submissions/:id/question-and-answers/:division/:questionID/upload-response',
     SUBMISSIONS_UPLOAD_RATE_RESPONSE:
         '/submissions/:id/rates/:rateID/question-and-answers/:division/:questionID/upload-response',
+    SUBMISSIONS_RELEASED_TO_STATE: '/submissions/:id/released-to-state'
 }
 
 // Constants for releated descendant routes
@@ -148,11 +150,11 @@ const QUESTION_RESPONSE_FORM_ROUTES: RouteTWithUnknown[]  = [
     'SUBMISSIONS_UPLOAD_RATE_RESPONSE',
 ]
 
-
 // Collect CMS review or workflow related forms
 const CMS_WORKFLOW_FORM_ROUTES: RouteTWithUnknown[]  = [
     'SUBMISSIONS_MCCRSID',
-    'REPLACE_RATE'
+    'REPLACE_RATE',
+    'SUBMISSIONS_RELEASED_TO_STATE'
 ]
 
 const SETTINGS_HIDE_SIDEBAR_ROUTES: RouteTWithUnknown[] = [
@@ -202,6 +204,7 @@ const PageTitlesRecord: Record<RouteT | 'UNKNOWN_ROUTE', string> = {
     SUBMISSIONS_UPLOAD_CONTRACT_RESPONSE: 'Add response',
     SUBMISSIONS_RATE_QUESTIONS_AND_ANSWERS: 'Rate Q&A',
     SUBMISSIONS_UPLOAD_RATE_RESPONSE: 'Add rate response',
+    SUBMISSIONS_RELEASED_TO_STATE: 'Released to state',
     UNKNOWN_ROUTE: 'Not found',
 }
 

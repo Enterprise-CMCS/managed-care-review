@@ -21,9 +21,7 @@ import { testS3Client } from '../../testHelpers'
 import { mockContractPackageUnlockedWithUnlockedType } from '../../testHelpers/apolloMocks'
 import { ReviewSubmit } from '../StateSubmission/ReviewSubmit'
 import { generatePath, Location } from 'react-router-dom'
-import { approveContractMockSuccess } from '../../testHelpers/apolloMocks/approveContractMocks'
 import { dayjs } from '../../common-code/dateHelpers'
-import { Contract } from '../../gen/gqlClient'
 
 describe('SubmissionSummary', () => {
     describe.each(iterableCmsUsersMockData)(
@@ -1082,7 +1080,7 @@ describe('SubmissionSummary', () => {
     describe.each(iterableCmsUsersMockData)(
         '$userRole submission approval tests',
         ({ mockUser }) => {
-            it('renders approve submission button', async () => {
+            it('renders released to state button', async () => {
                 const contract =
                     mockContractPackageSubmittedWithQuestions('test-abc-123')
                 renderWithProviders(
@@ -1127,22 +1125,17 @@ describe('SubmissionSummary', () => {
                     ).toBeInTheDocument()
                 })
 
-                // expect submission approval button to be on the screen
+                // expect submission released to state button to be on the screen
                 expect(
-                    screen.queryByTestId('approval-modal-toggle-button')
+                    screen.queryByRole('link', { name: 'Released to state' })
                 ).toBeInTheDocument()
-
-                // expect submission approval button to not be disabled
-                expect(
-                    screen.queryByTestId('approval-modal-toggle-button')
-                ).not.toBeDisabled()
 
                 // expect unlock button to have outline style
                 expect(
                     screen.getByRole('button', { name: 'Unlock submission' })
                 ).toHaveClass('usa-button--outline')
             })
-            it('renders disabled approve submission button on unlocked submission', async () => {
+            it('does not render released to state link on unlocked submission', async () => {
                 const unlockedContract =
                     mockContractPackageUnlockedWithUnlockedType({
                         id: 'test-abc-123',
@@ -1188,15 +1181,10 @@ describe('SubmissionSummary', () => {
                     ).toBeInTheDocument()
                 })
 
-                // expect submission approval modal toggle button to not exist
+                // expect released to state link to not exist
                 expect(
-                    screen.queryByTestId('approval-modal-toggle-button')
-                ).toBeInTheDocument()
-
-                // expect submission approval button to be disabled
-                expect(
-                    screen.queryByTestId('approval-modal-toggle-button')
-                ).toBeDisabled()
+                    screen.queryByRole('link', { name: 'Released to state' })
+                ).not.toBeInTheDocument()
 
                 // expect unlock button to be disabled
                 expect(
@@ -1204,10 +1192,11 @@ describe('SubmissionSummary', () => {
                 ).toBeDisabled()
             })
 
-            it('does not render an approve submission button for an approved submission', async () => {
+            it('does not render released to state button for an approved submission', async () => {
                 const contract =
                     mockContractPackageSubmittedWithQuestions('test-abc-123')
                 contract.reviewStatus = 'APPROVED'
+                contract.consolidatedStatus = 'APPROVED'
                 renderWithProviders(
                     <Routes>
                         <Route element={<SubmissionSideNav />}>
@@ -1246,10 +1235,10 @@ describe('SubmissionSummary', () => {
                     ).toBeInTheDocument()
                 })
 
-                // expect submission approval modal toggle button to not exist
+                // expect submission released to state link to not exist
                 expect(
-                    screen.queryByTestId('approval-modal-toggle-button')
-                ).not.toBeInTheDocument()
+                    screen.queryByRole('link', { name: 'Released to state' })
+                ).toBeNull()
 
                 // expect unlock button to be disabled
                 expect(
@@ -1257,34 +1246,30 @@ describe('SubmissionSummary', () => {
                 ).toBeDisabled()
             })
 
-            it('renders approval banner on submit approval', async () => {
+            it('renders approval banner on approved submission', async () => {
                 const contract = mockContractPackageSubmittedWithQuestions(
                     'test-abc-123',
                     {
                         status: 'RESUBMITTED',
+                        reviewStatus: 'APPROVED',
+                        consolidatedStatus: 'APPROVED',
+                        reviewStatusActions: [
+                            {
+                                actionType: 'MARK_AS_APPROVED',
+                                contractID: 'test-abc-123',
+                                updatedAt: new Date(),
+                                updatedBy: {
+                                    email: 'cmsapprover@example.com',
+                                    familyName: 'Smith',
+                                    givenName: 'John',
+                                    role: 'CMS_APPROVER_USER',
+                                },
+                                updatedReason: 'Some approval reason',
+                            },
+                        ],
                     }
                 )
-
-                const approvedContract: Contract = {
-                    ...contract,
-                    status: 'RESUBMITTED',
-                    reviewStatus: 'APPROVED',
-                    reviewStatusActions: [
-                        {
-                            actionType: 'MARK_AS_APPROVED',
-                            contractID: 'test-abc-123',
-                            updatedAt: new Date(),
-                            updatedBy: {
-                                email: 'cmsapprover@example.com',
-                                familyName: 'Smith',
-                                givenName: 'John',
-                                role: 'CMS_APPROVER_USER',
-                            },
-                            updatedReason: 'Some approval reason',
-                        },
-                    ],
-                }
-                const { user } = renderWithProviders(
+                renderWithProviders(
                     <Routes>
                         <Route element={<SubmissionSideNav />}>
                             <Route
@@ -1306,17 +1291,6 @@ describe('SubmissionSummary', () => {
                                 fetchContractMockSuccess({
                                     contract,
                                 }),
-                                approveContractMockSuccess({
-                                    contractID: 'test-abc-123',
-                                    contractData: approvedContract,
-                                    updatedReason: 'Some approval reason',
-                                }),
-                                fetchContractWithQuestionsMockSuccess({
-                                    contract: approvedContract,
-                                }),
-                                fetchContractMockSuccess({
-                                    contract: approvedContract,
-                                }),
                             ],
                         },
                         routerProvider: {
@@ -1335,45 +1309,10 @@ describe('SubmissionSummary', () => {
                     expect(
                         screen.getByText('MCR-MN-0005-SNBC')
                     ).toBeInTheDocument()
-                })
-
-                const approveSubmissionBtn = screen.getByTestId(
-                    'approval-modal-toggle-button'
-                )
-
-                // expect button to exist
-                expect(approveSubmissionBtn).toBeInTheDocument()
-                // click approve submission
-                await user.click(approveSubmissionBtn)
-
-                // input a reason
-                const approvalReasonInput =
-                    screen.getByTestId('approveModalInput')
-                expect(approvalReasonInput).toBeInTheDocument()
-                await user.type(approvalReasonInput, 'Some approval reason')
-
-                // submit approval
-                const submitApprovalBtn = screen.getByTestId(
-                    'approvalModal-modal-submit'
-                )
-                expect(submitApprovalBtn).toBeInTheDocument()
-                await user.click(submitApprovalBtn)
-
-                await waitFor(() => {
-                    // expect submission approval button to not be on the screen
-                    expect(
-                        screen.queryByTestId('approval-modal-toggle-button')
-                    ).toBeNull()
-
                     // expect submission approval banner to be on screen
                     expect(
                         screen.getByTestId('submissionApprovedBanner')
                     ).toBeInTheDocument()
-
-                    // expect submission updated banner to not be on screen.
-                    expect(
-                        screen.queryByTestId('updatedSubmissionBanner')
-                    ).toBeNull()
                 })
             })
         }
@@ -1381,7 +1320,6 @@ describe('SubmissionSummary', () => {
 
     it('does not render the unlock submission button for an approved contract', async () => {
         const contract = mockContractPackageApproved()
-
         renderWithProviders(
             <Routes>
                 <Route element={<SubmissionSideNav />}>
@@ -1431,7 +1369,7 @@ describe('SubmissionSummary', () => {
     describe.each(iterableNonCMSUsersMockData)(
         '$userRole submission approval tests',
         ({ mockUser }) => {
-            it(`does not render approve submission button`, async () => {
+            it(`does not render released to state button`, async () => {
                 const contract =
                     mockContractPackageSubmittedWithQuestions('test-abc-123')
                 renderWithProviders(
@@ -1479,14 +1417,9 @@ describe('SubmissionSummary', () => {
                     ).toBeInTheDocument()
                 })
 
-                // expect submission approval modal toggle button to not exist
+                // expect submission released to state button to not exist
                 expect(
-                    screen.queryByTestId('approval-modal-toggle-button')
-                ).toBeNull()
-
-                // expect submission approval modal submit button to not exist
-                expect(
-                    screen.queryByTestId('approvalModal-modal-submit')
+                    screen.queryByRole('link', { name: 'Released to state' })
                 ).toBeNull()
             })
 
@@ -1496,6 +1429,7 @@ describe('SubmissionSummary', () => {
                     {
                         status: 'RESUBMITTED',
                         reviewStatus: 'APPROVED',
+                        consolidatedStatus: 'APPROVED',
                         reviewStatusActions: [
                             {
                                 actionType: 'MARK_AS_APPROVED',
@@ -1554,11 +1488,6 @@ describe('SubmissionSummary', () => {
                         screen.getByText('MCR-MN-0005-SNBC')
                     ).toBeInTheDocument()
                 })
-
-                // expect submission approval button to not be on the screen
-                expect(
-                    screen.queryByTestId('approval-modal-toggle-button')
-                ).toBeNull()
 
                 // expect submission approval banner to be on screen
                 expect(
