@@ -32,6 +32,13 @@ const featureFlags = {
         flag: 'submission-approvals',
         defaultValue: false,
     },
+    /**
+     * Enables withdraw rate features
+     */
+    WITHDRAW_RATE: {
+        flag: 'withdraw-rate',
+        defaultValue: false,
+    },
     // PERMANENT FLAGS
     /**
      Enables the modal that alerts the user to an expiring session
