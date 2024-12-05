@@ -10,7 +10,7 @@ import {
     getSortedRowModel,
     useReactTable,
 } from '@tanstack/react-table'
-import React, { useMemo, useRef, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import {
     FilterAccordion,
     FilterOptionType,
@@ -21,7 +21,7 @@ import { DoubleColumnGrid, Loading } from '../../../components'
 import { GridContainer, Table } from '@trussworks/react-uswds'
 
 import styles from '../Settings.module.scss'
-import { pluralize } from '../../../common-code/formatters'
+import { pluralize } from '@mc-review/common-code'
 import { useTealium } from '../../../hooks'
 import useDeepCompareEffect from 'use-deep-compare-effect'
 import { useOutletContext } from 'react-router-dom'

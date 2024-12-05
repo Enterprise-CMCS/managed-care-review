@@ -9,7 +9,7 @@ import { formatDate, parseDateString } from './_DatePicker/utils'
 import { DEFAULT_EXTERNAL_DATE_FORMAT } from './_DatePicker/constants'
 import classnames from 'classnames'
 import { formatUserInputDate } from '../../../formHelpers'
-import { dayjs } from '../../../common-code/dateHelpers/dayjs'
+import { dayjs } from '@mc-review/common-code'
 import { PoliteErrorMessage } from '../../PoliteErrorMessage'
 import styles from './FilterDateRange.module.scss'
 

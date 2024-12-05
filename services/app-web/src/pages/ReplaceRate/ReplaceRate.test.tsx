@@ -9,8 +9,8 @@ import {
     indexRatesMockSuccess,
     withdrawAndReplaceRedundantRateMock,
     rateDataMock,
-} from '../../testHelpers/apolloMocks'
-import { RoutesRecord } from '../../constants'
+} from '@mc-review/mocks'
+import { RoutesRecord } from '@mc-review/constants'
 import { Location, Route, Routes } from 'react-router-dom'
 import { ReplaceRate } from './ReplaceRate'
 import userEvent from '@testing-library/user-event'

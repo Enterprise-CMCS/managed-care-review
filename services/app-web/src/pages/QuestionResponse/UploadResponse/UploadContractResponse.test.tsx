@@ -10,7 +10,7 @@ import {
     TEST_PNG_FILE,
     TEST_XLS_FILE,
 } from '../../../testHelpers'
-import { RoutesRecord } from '../../../constants/routes'
+import { RoutesRecord } from '@mc-review/constants'
 import { ACCEPTED_SUBMISSION_FILE_TYPES } from '../../../components/FileUpload'
 import {
     fetchCurrentUserMock,
@@ -18,8 +18,8 @@ import {
     mockContractPackageDraft,
     mockContractPackageSubmittedWithQuestions,
     fetchContractWithQuestionsMockSuccess,
-} from '../../../testHelpers/apolloMocks'
-import { createContractQuestionResponseNetworkFailure } from '../../../testHelpers/apolloMocks/questionResponseGQLMock'
+} from '@mc-review/mocks'
+import { createContractQuestionResponseNetworkFailure } from '@mc-review/mocks'
 import { SubmissionSideNav } from '../../SubmissionSideNav'
 
 describe('UploadContractResponse', () => {

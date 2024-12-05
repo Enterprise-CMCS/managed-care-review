@@ -7,7 +7,7 @@ import {
 import { Formik, FormikErrors } from 'formik'
 import { FieldTextInput } from '../../components/Form'
 import { MccrsIdFormSchema } from './MccrsIdSchema'
-import { recordJSException } from '../../otelHelpers/tracingHelper'
+import { recordJSException } from '@mc-review/otel'
 import { useNavigate, useParams } from 'react-router-dom'
 import { GenericApiErrorBanner } from '../../components/Banner/GenericApiErrorBanner/GenericApiErrorBanner'
 import { ActionButton } from '../../components/ActionButton'
@@ -15,17 +15,17 @@ import { usePage } from '../../contexts/PageContext'
 import { Loading } from '../../components'
 import { useAuth } from '../../contexts/AuthContext'
 import { Breadcrumbs } from '../../components/Breadcrumbs/Breadcrumbs'
-import { RoutesRecord } from '../../constants'
+import { RoutesRecord } from '@mc-review/constants'
 import { ApolloError } from '@apollo/client'
-import { handleApolloError } from '../../gqlHelpers/apolloErrors'
+import { handleApolloError } from '@mc-review/helpers'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import { Error404 } from '../Errors/Error404Page'
 import {
     HealthPlanPackage,
     useUpdateContractMutation,
 } from '../../gen/gqlClient'
-import { useFetchHealthPlanPackageWithQuestionsWrapper } from '../../gqlHelpers'
-import { packageName } from '../../common-code/healthPlanFormDataType'
+import { useFetchHealthPlanPackageWithQuestionsWrapper } from '@mc-review/helpers'
+import { packageName } from '@mc-review/hpp'
 import styles from './MccrsId.module.scss'
 
 export interface MccrsIdFormValues {

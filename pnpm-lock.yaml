@@ -70,6 +70,170 @@ importers:
         specifier: ^4.4.4
         version: 4.9.5
 
+  packages/common-code:
+    dependencies:
+      '@apollo/client':
+        specifier: 3.8.8
+        version: 3.8.8(graphql-ws@5.14.3(graphql@16.9.0))(graphql@16.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(subscriptions-transport-ws@0.11.0(graphql@16.9.0))
+      '@mc-review/constants':
+        specifier: workspace:*
+        version: link:../constants
+      '@mc-review/helpers':
+        specifier: workspace:*
+        version: link:../helpers
+      '@mc-review/hpp':
+        specifier: workspace:*
+        version: link:../hpp
+      dayjs:
+        specifier: ^1.10.5
+        version: 1.11.12
+      typescript:
+        specifier: ^4.9.5
+        version: 4.9.5
+      url-parse:
+        specifier: ^1.5.10
+        version: 1.5.10
+      zod:
+        specifier: ^3.10.1
+        version: 3.23.8
+    devDependencies:
+      '@types/jest':
+        specifier: ^29.5.6
+        version: 29.5.14
+      '@types/node':
+        specifier: ^20.14.12
+        version: 20.17.6
+      '@types/url-parse':
+        specifier: ^1.4.3
+        version: 1.4.11
+
+  packages/constants:
+    dependencies:
+      '@apollo/client':
+        specifier: 3.8.8
+        version: 3.8.8(graphql-ws@5.14.3(graphql@16.9.0))(graphql@16.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(subscriptions-transport-ws@0.11.0(graphql@16.9.0))
+      typescript:
+        specifier: 4.9.5
+        version: 4.9.5
+
+  packages/helpers:
+    dependencies:
+      '@apollo/client':
+        specifier: 3.8.8
+        version: 3.8.8(graphql-ws@5.14.3(graphql@16.9.0))(graphql@16.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(subscriptions-transport-ws@0.11.0(graphql@16.9.0))
+      '@mc-review/constants':
+        specifier: workspace:*
+        version: link:../constants
+      '@mc-review/hpp':
+        specifier: workspace:*
+        version: link:../hpp
+      '@mc-review/mocks':
+        specifier: workspace:*
+        version: link:../mocks
+      '@mc-review/otel':
+        specifier: workspace:*
+        version: link:../otel
+      typescript:
+        specifier: 4.9.5
+        version: 4.9.5
+      url-parse:
+        specifier: ^1.5.10
+        version: 1.5.10
+    devDependencies:
+      '@types/jest':
+        specifier: ^29.5.6
+        version: 29.5.14
+      '@types/node':
+        specifier: ^20.14.12
+        version: 20.17.6
+      '@types/url-parse':
+        specifier: ^1.4.3
+        version: 1.4.11
+
+  packages/hpp:
+    dependencies:
+      '@apollo/client':
+        specifier: 3.8.8
+        version: 3.8.8(graphql-ws@5.14.3(graphql@16.9.0))(graphql@16.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(subscriptions-transport-ws@0.11.0(graphql@16.9.0))
+      dayjs:
+        specifier: ^1.10.5
+        version: 1.11.12
+      typescript:
+        specifier: ^4.9.5
+        version: 4.9.5
+      zod:
+        specifier: ^3.11.6
+        version: 3.23.8
+    devDependencies:
+      '@mc-review/constants':
+        specifier: workspace:*
+        version: link:../constants
+      '@types/jest':
+        specifier: ^29.5.6
+        version: 29.5.14
+      '@types/node':
+        specifier: ^20.14.12
+        version: 20.17.6
+      protobufjs:
+        specifier: ^7.3.0
+        version: 7.3.2
+      vite-plugin-node-polyfills:
+        specifier: ^0.22.0
+        version: 0.22.0(rollup@4.18.0)(vite@5.2.14(@types/node@20.17.6)(sass@1.77.2)(terser@5.36.0))
+
+  packages/mocks:
+    dependencies:
+      '@apollo/client':
+        specifier: 3.8.8
+        version: 3.8.8(graphql-ws@5.14.3(graphql@16.9.0))(graphql@16.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(subscriptions-transport-ws@0.11.0(graphql@16.9.0))
+      '@mc-review/hpp':
+        specifier: workspace:*
+        version: link:../hpp
+      dayjs:
+        specifier: ^1.10.5
+        version: 1.11.12
+      graphql:
+        specifier: ^16.9.0
+        version: 16.9.0
+      typescript:
+        specifier: 4.9.5
+        version: 4.9.5
+      uuid:
+        specifier: ^9.0.0
+        version: 9.0.1
+    devDependencies:
+      '@types/jest':
+        specifier: ^29.5.6
+        version: 29.5.14
+      '@types/node':
+        specifier: ^20.14.12
+        version: 20.17.6
+      '@types/uuid':
+        specifier: ^9.0.0
+        version: 9.0.8
+
+  packages/otel:
+    dependencies:
+      '@opentelemetry/api':
+        specifier: ^1.6.0
+        version: 1.9.0
+      '@opentelemetry/semantic-conventions':
+        specifier: ^1.27.0
+        version: 1.27.0
+      react:
+        specifier: ^18.2.0
+        version: 18.3.1
+    devDependencies:
+      '@types/node':
+        specifier: ^20.14.12
+        version: 20.17.6
+      '@types/react':
+        specifier: ^18.0.14
+        version: 18.3.3
+      typescript:
+        specifier: 4.9.5
+        version: 4.9.5
+
   scripts:
     dependencies:
       '@aws-sdk/client-cloudformation':
@@ -154,6 +318,18 @@ importers:
       '@launchdarkly/node-server-sdk':
         specifier: 9.7.2
         version: 9.7.2
+      '@mc-review/common-code':
+        specifier: workspace:*
+        version: link:../../packages/common-code
+      '@mc-review/constants':
+        specifier: workspace:*
+        version: link:../../packages/constants
+      '@mc-review/helpers':
+        specifier: workspace:*
+        version: link:../../packages/helpers
+      '@mc-review/hpp':
+        specifier: workspace:*
+        version: link:../../packages/hpp
       '@opentelemetry/api':
         specifier: ^1.9.0
         version: 1.9.0
@@ -272,6 +448,9 @@ importers:
       '@typescript-eslint/parser':
         specifier: ^6.5.0
         version: 6.21.0(eslint@8.57.0)(typescript@4.9.5)
+      '@vitest/coverage-v8':
+        specifier: ^2.1.5
+        version: 2.1.5(vitest@2.1.5(@types/node@20.17.6)(@vitest/ui@2.1.5)(jsdom@24.1.1)(sass@1.77.2)(terser@5.36.0))
       eslint:
         specifier: ^8.3.0
         version: 8.57.0
@@ -329,6 +508,9 @@ importers:
       typescript:
         specifier: 4.9.5
         version: 4.9.5
+      vitest:
+        specifier: ^2.1.5
+        version: 2.1.5(@types/node@20.17.6)(@vitest/ui@2.1.5)(jsdom@24.1.1)(sass@1.77.2)(terser@5.36.0)
 
   services/app-graphql:
     dependencies:
@@ -388,6 +570,24 @@ importers:
       '@cypress/instrument-cra':
         specifier: ^1.4.0
         version: 1.4.0
+      '@mc-review/common-code':
+        specifier: workspace:*
+        version: link:../../packages/common-code
+      '@mc-review/constants':
+        specifier: workspace:*
+        version: link:../../packages/constants
+      '@mc-review/helpers':
+        specifier: workspace:*
+        version: link:../../packages/helpers
+      '@mc-review/hpp':
+        specifier: workspace:*
+        version: link:../../packages/hpp
+      '@mc-review/mocks':
+        specifier: workspace:*
+        version: link:../../packages/mocks
+      '@mc-review/otel':
+        specifier: workspace:*
+        version: link:../../packages/otel
       '@opentelemetry/api':
         specifier: ^1.9.0
         version: 1.9.0
@@ -545,9 +745,6 @@ importers:
       '@chromatic-com/storybook':
         specifier: ^1
         version: 1.5.0(react@18.3.1)
-      '@esbuild-plugins/node-globals-polyfill':
-        specifier: ^0.2.3
-        version: 0.2.3(esbuild@0.20.2)
       '@peculiar/webcrypto':
         specifier: ^1.5.0
         version: 1.5.0
@@ -622,7 +819,7 @@ importers:
         version: 6.21.0(eslint@8.57.0)(typescript@4.9.5)
       '@vitest/coverage-v8':
         specifier: ^2.1.5
-        version: 2.1.5(vitest@2.1.5)
+        version: 2.1.5(vitest@2.1.5(@types/node@20.14.12)(@vitest/ui@2.1.5)(jsdom@24.1.1)(sass@1.77.2)(terser@5.36.0))
       '@vitest/ui':
         specifier: ^2.1.5
         version: 2.1.5(vitest@2.1.5)
@@ -710,6 +907,12 @@ importers:
       '@apollo/client':
         specifier: 3.8.8
         version: 3.8.8(graphql-ws@5.14.3(graphql@16.9.0))(graphql@16.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(subscriptions-transport-ws@0.11.0(graphql@16.9.0))
+      '@mc-review/common-code':
+        specifier: workspace:*
+        version: link:../../packages/common-code
+      '@mc-review/hpp':
+        specifier: workspace:*
+        version: link:../../packages/hpp
       aws-amplify:
         specifier: ^5.0.10
         version: 5.3.10(encoding@0.1.13)(react-native@0.74.3(@babel/core@7.24.7)(@babel/preset-env@7.24.8(@babel/core@7.24.7))(@types/react@18.3.3)(encoding@0.1.13)(react@18.3.1))
@@ -3283,11 +3486,6 @@ packages:
     peerDependencies:
       serverless: 3.x
       typescript: 4.x
-
-  '@esbuild-plugins/node-globals-polyfill@0.2.3':
-    resolution: {integrity: sha512-r3MIryXDeXDOZh7ih1l/yE9ZLORCd5e8vWg02azWRGj5SPTuoh69A2AIyn0Z31V/kHBfZ4HgWJ+OK3GTTwLmnw==}
-    peerDependencies:
-      esbuild: '*'
 
   '@esbuild/aix-ppc64@0.20.2':
     resolution: {integrity: sha512-D+EBOJHXdNZcLJRBkhENNG8Wji2kgc9AZ9KiPr1JuZjsNtyHzrsfLRrY0tk2H2aoFu6RANO1y1iPPUCDYWkb5g==}
@@ -14564,7 +14762,7 @@ snapshots:
     dependencies:
       '@aws-crypto/sha256-browser': 5.2.0
       '@aws-crypto/sha256-js': 5.2.0
-      '@aws-sdk/client-sso-oidc': 3.609.0(@aws-sdk/client-sts@3.609.0)
+      '@aws-sdk/client-sso-oidc': 3.609.0(@aws-sdk/client-sts@3.699.0)
       '@aws-sdk/client-sts': 3.609.0
       '@aws-sdk/core': 3.609.0
       '@aws-sdk/credential-provider-node': 3.609.0(@aws-sdk/client-sso-oidc@3.609.0(@aws-sdk/client-sts@3.609.0))(@aws-sdk/client-sts@3.699.0)
@@ -14646,7 +14844,7 @@ snapshots:
     dependencies:
       '@aws-crypto/sha256-browser': 5.2.0
       '@aws-crypto/sha256-js': 5.2.0
-      '@aws-sdk/client-sso-oidc': 3.609.0(@aws-sdk/client-sts@3.699.0)
+      '@aws-sdk/client-sso-oidc': 3.609.0(@aws-sdk/client-sts@3.609.0)
       '@aws-sdk/client-sts': 3.609.0
       '@aws-sdk/core': 3.609.0
       '@aws-sdk/credential-provider-node': 3.609.0(@aws-sdk/client-sso-oidc@3.609.0(@aws-sdk/client-sts@3.609.0))(@aws-sdk/client-sts@3.699.0)
@@ -18495,10 +18693,6 @@ snapshots:
       serverless: 3.39.0(encoding@0.1.13)
       typescript: 5.5.4
 
-  '@esbuild-plugins/node-globals-polyfill@0.2.3(esbuild@0.20.2)':
-    dependencies:
-      esbuild: 0.20.2
-
   '@esbuild/aix-ppc64@0.20.2':
     optional: true
 
@@ -19654,7 +19848,7 @@ snapshots:
       '@jest/schemas': 29.6.3
       '@types/istanbul-lib-coverage': 2.0.4
       '@types/istanbul-reports': 3.0.1
-      '@types/node': 20.16.5
+      '@types/node': 20.17.6
       '@types/yargs': 17.0.33
       chalk: 4.1.2
 
@@ -19673,7 +19867,7 @@ snapshots:
   '@jridgewell/gen-mapping@0.3.5':
     dependencies:
       '@jridgewell/set-array': 1.2.1
-      '@jridgewell/sourcemap-codec': 1.4.15
+      '@jridgewell/sourcemap-codec': 1.5.0
       '@jridgewell/trace-mapping': 0.3.25
 
   '@jridgewell/resolve-uri@3.1.2': {}
@@ -19692,12 +19886,12 @@ snapshots:
   '@jridgewell/trace-mapping@0.3.25':
     dependencies:
       '@jridgewell/resolve-uri': 3.1.2
-      '@jridgewell/sourcemap-codec': 1.4.15
+      '@jridgewell/sourcemap-codec': 1.5.0
 
   '@jridgewell/trace-mapping@0.3.9':
     dependencies:
       '@jridgewell/resolve-uri': 3.1.2
-      '@jridgewell/sourcemap-codec': 1.4.15
+      '@jridgewell/sourcemap-codec': 1.5.0
 
   '@jsdoc/salty@0.2.8':
     dependencies:
@@ -21693,7 +21887,7 @@ snapshots:
       express: 4.19.2
       find-cache-dir: 3.3.2
       fs-extra: 11.2.0
-      magic-string: 0.30.10
+      magic-string: 0.30.13
       storybook: 8.2.9(@babel/preset-env@7.24.8(@babel/core@7.24.7))
       ts-dedent: 2.2.0
       vite: 5.2.14(@types/node@20.14.12)(sass@1.77.2)(terser@5.36.0)
@@ -21815,7 +22009,7 @@ snapshots:
       '@storybook/theming': 8.2.9(storybook@8.2.9(@babel/preset-env@7.24.8(@babel/core@7.24.7)))
       '@types/escodegen': 0.0.6
       '@types/estree': 0.0.51
-      '@types/node': 18.19.50
+      '@types/node': 18.19.64
       acorn: 7.4.1
       acorn-jsx: 5.3.2(acorn@7.4.1)
       acorn-walk: 7.2.0
@@ -22121,7 +22315,7 @@ snapshots:
   '@types/glob@8.1.0':
     dependencies:
       '@types/minimatch': 5.1.2
-      '@types/node': 20.16.5
+      '@types/node': 20.17.6
 
   '@types/graceful-fs@4.1.6':
     dependencies:
@@ -22177,7 +22371,7 @@ snapshots:
 
   '@types/jsonwebtoken@9.0.6':
     dependencies:
-      '@types/node': 20.16.5
+      '@types/node': 20.17.6
 
   '@types/keyv@3.1.4':
     dependencies:
@@ -22505,7 +22699,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@vitest/coverage-v8@2.1.5(vitest@2.1.5)':
+  '@vitest/coverage-v8@2.1.5(vitest@2.1.5(@types/node@20.14.12)(@vitest/ui@2.1.5)(jsdom@24.1.1)(sass@1.77.2)(terser@5.36.0))':
     dependencies:
       '@ampproject/remapping': 2.3.0
       '@bcoe/v8-coverage': 0.2.3
@@ -22520,6 +22714,24 @@ snapshots:
       test-exclude: 7.0.1
       tinyrainbow: 1.2.0
       vitest: 2.1.5(@types/node@20.14.12)(@vitest/ui@2.1.5)(jsdom@24.1.1)(sass@1.77.2)(terser@5.36.0)
+    transitivePeerDependencies:
+      - supports-color
+
+  '@vitest/coverage-v8@2.1.5(vitest@2.1.5(@types/node@20.17.6)(@vitest/ui@2.1.5)(jsdom@24.1.1)(sass@1.77.2)(terser@5.36.0))':
+    dependencies:
+      '@ampproject/remapping': 2.3.0
+      '@bcoe/v8-coverage': 0.2.3
+      debug: 4.3.7(supports-color@8.1.1)
+      istanbul-lib-coverage: 3.2.2
+      istanbul-lib-report: 3.0.1
+      istanbul-lib-source-maps: 5.0.6
+      istanbul-reports: 3.1.7
+      magic-string: 0.30.13
+      magicast: 0.3.5
+      std-env: 3.8.0
+      test-exclude: 7.0.1
+      tinyrainbow: 1.2.0
+      vitest: 2.1.5(@types/node@20.17.6)(@vitest/ui@2.1.5)(jsdom@24.1.1)(sass@1.77.2)(terser@5.36.0)
     transitivePeerDependencies:
       - supports-color
 
@@ -22545,6 +22757,14 @@ snapshots:
       magic-string: 0.30.13
     optionalDependencies:
       vite: 5.2.14(@types/node@20.16.5)(sass@1.77.2)(terser@5.36.0)
+
+  '@vitest/mocker@2.1.5(vite@5.2.14(@types/node@20.17.6)(sass@1.77.2)(terser@5.36.0))':
+    dependencies:
+      '@vitest/spy': 2.1.5
+      estree-walker: 3.0.3
+      magic-string: 0.30.13
+    optionalDependencies:
+      vite: 5.2.14(@types/node@20.17.6)(sass@1.77.2)(terser@5.36.0)
 
   '@vitest/pretty-format@2.1.5':
     dependencies:
@@ -22574,7 +22794,7 @@ snapshots:
       sirv: 3.0.0
       tinyglobby: 0.2.10
       tinyrainbow: 1.2.0
-      vitest: 2.1.5(@types/node@20.14.12)(@vitest/ui@2.1.5)(jsdom@24.1.1)(sass@1.77.2)(terser@5.36.0)
+      vitest: 2.1.5(@types/node@20.17.6)(@vitest/ui@2.1.5)(jsdom@24.1.1)(sass@1.77.2)(terser@5.36.0)
 
   '@vitest/utils@2.1.5':
     dependencies:
@@ -27819,7 +28039,7 @@ snapshots:
 
   magic-string@0.27.0:
     dependencies:
-      '@jridgewell/sourcemap-codec': 1.4.15
+      '@jridgewell/sourcemap-codec': 1.5.0
 
   magic-string@0.30.10:
     dependencies:
@@ -29084,7 +29304,7 @@ snapshots:
       '@protobufjs/path': 1.1.2
       '@protobufjs/pool': 1.1.0
       '@protobufjs/utf8': 1.1.0
-      '@types/node': 20.16.5
+      '@types/node': 20.17.6
       long: 5.2.1
 
   proxy-addr@2.0.7:
@@ -31370,6 +31590,23 @@ snapshots:
       - supports-color
       - terser
 
+  vite-node@2.1.5(@types/node@20.17.6)(sass@1.77.2)(terser@5.36.0):
+    dependencies:
+      cac: 6.7.14
+      debug: 4.3.7(supports-color@8.1.1)
+      es-module-lexer: 1.5.4
+      pathe: 1.1.2
+      vite: 5.2.14(@types/node@20.17.6)(sass@1.77.2)(terser@5.36.0)
+    transitivePeerDependencies:
+      - '@types/node'
+      - less
+      - lightningcss
+      - sass
+      - stylus
+      - sugarss
+      - supports-color
+      - terser
+
   vite-plugin-graphql-loader@4.0.4:
     dependencies:
       graphql: 16.9.0
@@ -31381,6 +31618,14 @@ snapshots:
       '@rollup/plugin-inject': 5.0.5(rollup@4.18.0)
       node-stdlib-browser: 1.2.0
       vite: 5.2.14(@types/node@20.14.12)(sass@1.77.2)(terser@5.36.0)
+    transitivePeerDependencies:
+      - rollup
+
+  vite-plugin-node-polyfills@0.22.0(rollup@4.18.0)(vite@5.2.14(@types/node@20.17.6)(sass@1.77.2)(terser@5.36.0)):
+    dependencies:
+      '@rollup/plugin-inject': 5.0.5(rollup@4.18.0)
+      node-stdlib-browser: 1.2.0
+      vite: 5.2.14(@types/node@20.17.6)(sass@1.77.2)(terser@5.36.0)
     transitivePeerDependencies:
       - rollup
 
@@ -31424,6 +31669,17 @@ snapshots:
       rollup: 4.18.0
     optionalDependencies:
       '@types/node': 20.16.5
+      fsevents: 2.3.3
+      sass: 1.77.2
+      terser: 5.36.0
+
+  vite@5.2.14(@types/node@20.17.6)(sass@1.77.2)(terser@5.36.0):
+    dependencies:
+      esbuild: 0.20.2
+      postcss: 8.4.38
+      rollup: 4.18.0
+    optionalDependencies:
+      '@types/node': 20.17.6
       fsevents: 2.3.3
       sass: 1.77.2
       terser: 5.36.0
@@ -31488,6 +31744,42 @@ snapshots:
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@types/node': 20.16.5
+      '@vitest/ui': 2.1.5(vitest@2.1.5)
+      jsdom: 24.1.1
+    transitivePeerDependencies:
+      - less
+      - lightningcss
+      - msw
+      - sass
+      - stylus
+      - sugarss
+      - supports-color
+      - terser
+
+  vitest@2.1.5(@types/node@20.17.6)(@vitest/ui@2.1.5)(jsdom@24.1.1)(sass@1.77.2)(terser@5.36.0):
+    dependencies:
+      '@vitest/expect': 2.1.5
+      '@vitest/mocker': 2.1.5(vite@5.2.14(@types/node@20.17.6)(sass@1.77.2)(terser@5.36.0))
+      '@vitest/pretty-format': 2.1.5
+      '@vitest/runner': 2.1.5
+      '@vitest/snapshot': 2.1.5
+      '@vitest/spy': 2.1.5
+      '@vitest/utils': 2.1.5
+      chai: 5.1.2
+      debug: 4.3.7(supports-color@8.1.1)
+      expect-type: 1.1.0
+      magic-string: 0.30.13
+      pathe: 1.1.2
+      std-env: 3.8.0
+      tinybench: 2.9.0
+      tinyexec: 0.3.1
+      tinypool: 1.0.2
+      tinyrainbow: 1.2.0
+      vite: 5.2.14(@types/node@20.17.6)(sass@1.77.2)(terser@5.36.0)
+      vite-node: 2.1.5(@types/node@20.17.6)(sass@1.77.2)(terser@5.36.0)
+      why-is-node-running: 2.3.0
+    optionalDependencies:
+      '@types/node': 20.17.6
       '@vitest/ui': 2.1.5(vitest@2.1.5)
       jsdom: 24.1.1
     transitivePeerDependencies:

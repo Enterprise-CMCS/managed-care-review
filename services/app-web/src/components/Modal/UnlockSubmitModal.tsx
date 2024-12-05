@@ -15,11 +15,11 @@ import { Modal } from './Modal'
 import { PoliteErrorMessage } from '../PoliteErrorMessage'
 import * as Yup from 'yup'
 import { GenericApiErrorProps } from '../Banner/GenericApiErrorBanner/GenericApiErrorBanner'
-import { ERROR_MESSAGES } from '../../constants/errors'
+import { ERROR_MESSAGES } from '@mc-review/constants'
 import {
     submitMutationWrapperV2,
     unlockMutationWrapperV2,
-} from '../../gqlHelpers/mutationWrappersForUserFriendlyErrors'
+} from '@mc-review/helpers'
 import { useTealium } from '../../hooks'
 
 const RATE_UNLOCK_SUBMIT_TYPES = [

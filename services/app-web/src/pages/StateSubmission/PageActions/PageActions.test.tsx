@@ -2,7 +2,7 @@ import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { PageActions } from './'
 import { renderWithProviders } from '../../../testHelpers/jestHelpers'
-import { fetchCurrentUserMock } from '../../../testHelpers/apolloMocks'
+import { fetchCurrentUserMock } from '@mc-review/mocks'
 
 describe('PageActions', () => {
     describe('generic page behavior', () => {

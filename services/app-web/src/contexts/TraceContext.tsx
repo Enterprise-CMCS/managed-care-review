@@ -23,23 +23,7 @@ import {
     SemanticAttributes,
 } from '@opentelemetry/semantic-conventions'
 import React from 'react'
-
-interface TraceContextValue {
-    tracer: Tracer
-    startSpan: (name: string, attributes?: Attributes) => Span
-    withSpan: <T>(
-        name: string,
-        operation: (span: Span) => Promise<T>
-    ) => Promise<T>
-    recordError: (
-        error: Error,
-        context?: { spanName?: string; attributes?: Attributes }
-    ) => void
-}
-
-const TraceContext = React.createContext<TraceContextValue | undefined>(
-    undefined
-)
+import { useTracing, TraceContext } from '@mc-review/otel'
 
 let tracerInstance: Tracer | undefined
 
@@ -187,14 +171,6 @@ export function TraceProvider({ children }: { children: React.ReactNode }) {
     return (
         <TraceContext.Provider value={value}>{children}</TraceContext.Provider>
     )
-}
-
-export function useTracing() {
-    const context = React.useContext(TraceContext)
-    if (!context) {
-        throw new Error('useTracing must be used within a TraceProvider')
-    }
-    return context
 }
 
 function getErrorAttributes(error: Error): Attributes {

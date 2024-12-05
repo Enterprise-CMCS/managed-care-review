@@ -7,7 +7,7 @@ import { insertDraftContract } from './insertContract'
 
 describe('updateContract', () => {
     afterEach(() => {
-        jest.clearAllMocks()
+        vi.clearAllMocks()
     })
 
     it('updates contract correctly', async () => {

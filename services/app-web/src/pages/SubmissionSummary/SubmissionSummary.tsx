@@ -23,7 +23,7 @@ import { useFormik } from 'formik'
 import { GenericApiErrorProps } from '../../components/Banner/GenericApiErrorBanner/GenericApiErrorBanner'
 import { Loading } from '../../components'
 import { usePage } from '../../contexts/PageContext'
-import { recordJSException } from '../../otelHelpers'
+import { recordJSException } from '@mc-review/otel'
 import {
     useFetchContractQuery,
     UpdateInformation,
@@ -39,13 +39,13 @@ import {
     UnlockSubmitModal,
     Modal,
 } from '../../components/Modal'
-import { RoutesRecord } from '../../constants'
+import { RoutesRecord } from '@mc-review/constants'
 import { useRouteParams } from '../../hooks'
-import { getVisibleLatestContractFormData } from '../../gqlHelpers/contractsAndRates'
+import { getVisibleLatestContractFormData } from '@mc-review/helpers'
 import { generatePath, Navigate } from 'react-router-dom'
-import { hasCMSUserPermissions } from '../../gqlHelpers'
+import { hasCMSUserPermissions } from '@mc-review/helpers'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
-import { featureFlags } from '../../common-code/featureFlags'
+import { featureFlags } from '@mc-review/common-code'
 import { SubmissionApprovedBanner } from '../../components/Banner'
 
 export const SubmissionSummary = (): React.ReactElement => {

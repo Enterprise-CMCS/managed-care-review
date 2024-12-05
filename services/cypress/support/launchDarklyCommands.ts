@@ -6,7 +6,7 @@ import {
     featureFlags,
     FlagValue,
     featureFlagKeys,
-} from '../../app-web/src/common-code/featureFlags/flags'
+} from '@mc-review/common-code'
 
 /**
  * interceptFeatureFlags sets the flag to what is passed into it and sets other flags to default values.
@@ -41,16 +41,14 @@ Cypress.Commands.add(
             JSON.stringify(featureFlagObject)
         )
 
-        const clientSDKMatchers = Cypress.env('AUTH_MODE') === 'LOCAL' ?
-            { method: 'GET', pathname: /^\/ld-clientsdk(\/.*)?$/ } :
-            { method: 'GET', hostname: /\.*clientsdk\.launchdarkly\.us/ }
+        const clientSDKMatchers =
+            Cypress.env('AUTH_MODE') === 'LOCAL'
+                ? { method: 'GET', pathname: /^\/ld-clientsdk(\/.*)?$/ }
+                : { method: 'GET', hostname: /\.*clientsdk\.launchdarkly\.us/ }
 
         // Intercepts LD request and returns with our own feature flags and values.
         return cy
-            .intercept(
-                clientSDKMatchers,
-                { body: featureFlagObject }
-            )
+            .intercept(clientSDKMatchers, { body: featureFlagObject })
             .as('LDApp')
     }
 )
@@ -58,9 +56,10 @@ Cypress.Commands.add(
 // Intercepting feature flag api calls and returns some response. This should stop the app from calling making requests to LD.
 Cypress.Commands.add('stubFeatureFlags', () => {
     // ignore api calls to events endpoint
-    const eventMatchers = Cypress.env('AUTH_MODE') === 'LOCAL' ?
-        { method: 'POST', pathname: /^\/ld-events(\/.*)?$/ } :
-        { method: 'POST', hostname: /\.*events\.launchdarkly\.us/ }
+    const eventMatchers =
+        Cypress.env('AUTH_MODE') === 'LOCAL'
+            ? { method: 'POST', pathname: /^\/ld-events(\/.*)?$/ }
+            : { method: 'POST', hostname: /\.*events\.launchdarkly\.us/ }
 
     cy.intercept(
         eventMatchers,
@@ -73,9 +72,10 @@ Cypress.Commands.add('stubFeatureFlags', () => {
         }
     ).as('LDEvents')
 
-    const clientStreamMatchers = Cypress.env('AUTH_MODE') === 'LOCAL' ?
-        { method: 'GET', pathname: /^\/ld-clientstream(\/.*)?$/ } :
-        { method: 'GET', hostname: /\.*clientstream\.launchdarkly\.us/ }
+    const clientStreamMatchers =
+        Cypress.env('AUTH_MODE') === 'LOCAL'
+            ? { method: 'GET', pathname: /^\/ld-clientstream(\/.*)?$/ }
+            : { method: 'GET', hostname: /\.*clientstream\.launchdarkly\.us/ }
 
     // turn off push updates from LaunchDarkly (EventSource)
     cy.intercept(

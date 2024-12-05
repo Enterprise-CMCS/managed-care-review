@@ -1,6 +1,6 @@
 import { screen, waitFor, within } from '@testing-library/react'
 import { Route, Routes } from 'react-router'
-import { RoutesRecord } from '../../constants'
+import { RoutesRecord } from '@mc-review/constants'
 import {
     fetchCurrentUserMock,
     fetchContractMockSuccess,
@@ -13,16 +13,16 @@ import {
     mockValidCMSUser,
     iterableNonCMSUsersMockData,
     mockContractPackageApproved,
-} from '../../testHelpers/apolloMocks'
+} from '@mc-review/mocks'
 import { renderWithProviders } from '../../testHelpers'
 import { SubmissionSummary } from './SubmissionSummary'
 import { SubmissionSideNav } from '../SubmissionSideNav'
 import { testS3Client } from '../../testHelpers'
-import { mockContractPackageUnlockedWithUnlockedType } from '../../testHelpers/apolloMocks'
+import { mockContractPackageUnlockedWithUnlockedType } from '@mc-review/mocks'
 import { ReviewSubmit } from '../StateSubmission/ReviewSubmit'
 import { generatePath, Location } from 'react-router-dom'
-import { approveContractMockSuccess } from '../../testHelpers/apolloMocks/approveContractMocks'
-import { dayjs } from '../../common-code/dateHelpers'
+import { approveContractMockSuccess } from '@mc-review/mocks'
+import { dayjs } from '@mc-review/common-code'
 import { Contract } from '../../gen/gqlClient'
 
 describe('SubmissionSummary', () => {

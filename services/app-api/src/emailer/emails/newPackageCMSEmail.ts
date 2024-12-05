@@ -1,6 +1,6 @@
-import type { LockedHealthPlanFormDataType } from '../../common-code/healthPlanFormDataType'
-import { packageName as generatePackageName } from '../../common-code/healthPlanFormDataType'
-import { formatCalendarDate } from '../../../../app-web/src/common-code/dateHelpers'
+import type { LockedHealthPlanFormDataType } from '@mc-review/hpp'
+import { packageName as generatePackageName } from '@mc-review/hpp'
+import { formatCalendarDate } from '@mc-review/common-code'
 import type { EmailConfiguration, EmailData, StateAnalystsEmails } from '..'
 import {
     stripHTMLFromTemplate,

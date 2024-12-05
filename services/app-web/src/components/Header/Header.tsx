@@ -1,7 +1,7 @@
 import { Grid, GridContainer } from '@trussworks/react-uswds'
 import React from 'react'
 import { NavLink } from 'react-router-dom'
-import { AuthModeType } from '../../common-code/config'
+import { AuthModeType } from '@mc-review/common-code'
 import { useCurrentRoute } from '../../hooks/useCurrentRoute'
 import { useAuth } from '../../contexts/AuthContext'
 import { usePage } from '../../contexts/PageContext'

@@ -10,7 +10,7 @@ import type {
     ConsolidatedContractStatusType,
 } from '../../domain-models/contractAndRates'
 import { findStatePrograms } from '../state'
-import { packageName } from '../../common-code/healthPlanFormDataType'
+import { packageName } from '@mc-review/hpp'
 import { logError } from '../../logger'
 import type { ContractReviewStatusType } from '../../domain-models/contractAndRates/baseContractRateTypes'
 import type { ContractTableWithoutDraftRates } from './prismaSubmittedContractHelpers'

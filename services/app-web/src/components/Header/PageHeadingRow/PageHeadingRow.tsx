@@ -17,7 +17,7 @@ import {
 import {
     hasAdminUserPermissions,
     hasCMSUserPermissions,
-} from '../../../gqlHelpers'
+} from '@mc-review/helpers'
 
 const CMSUserRow = ({
     heading,

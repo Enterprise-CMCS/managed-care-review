@@ -1,4 +1,15 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`sendRateQuestionCMSEmail > renders overall email for a new question as expected 1`] = `
+"DMCO sent questions to the state for rate Rate Cert Name<br />
+<b>Sent by:</b> Prince Zuko (DMCO) <a href="zuko@example.com">zuko@example.com</a>
+<br />
+<b>Round:</b> 2<br />
+<b>Date:</b> 01/04/2024<br />
+<br />
+<a href="http://localhost/rates/test-rate-234/question-and-answers">View rate Q&A</a>
+"
+`;
 
 exports[`sendRateQuestionCMSEmail renders overall email for a new question as expected 1`] = `
 "DMCO sent questions to the state for rate Rate Cert Name<br />

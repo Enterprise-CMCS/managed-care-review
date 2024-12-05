@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`renders overall CMS email for a new state response as expected 1`] = `
 "The state submitted responses to OACT's questions about MCR-MN-0003-SNBC<br />

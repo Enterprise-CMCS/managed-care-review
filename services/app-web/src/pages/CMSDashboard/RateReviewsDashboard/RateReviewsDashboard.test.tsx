@@ -6,7 +6,7 @@ import {
     indexRatesForDashboardMockFailure,
     iterableCmsUsersMockData,
     rateDataMock,
-} from '../../../testHelpers/apolloMocks'
+} from '@mc-review/mocks'
 import { screen, waitFor } from '@testing-library/react'
 import { Rate } from '../../../gen/gqlClient'
 

@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { SemanticAttributes } from '@opentelemetry/semantic-conventions'
 import { useAuth } from '../contexts/AuthContext'
 import { useCurrentRoute } from './useCurrentRoute'
-import { useTracing } from '../contexts/TraceContext'
+import { useTracing } from '@mc-review/otel'
 
 export const usePageTracing = (pageName?: string): void => {
     const { currentRoute } = useCurrentRoute()

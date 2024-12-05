@@ -21,12 +21,9 @@ import {
 import { latestFormData } from '../../testHelpers/healthPlanPackageHelpers'
 import { mockStoreThatErrors } from '../../testHelpers/storeHelpers'
 import { testEmailConfig, testEmailer } from '../../testHelpers/emailerHelpers'
-import { base64ToDomain } from '../../common-code/proto/healthPlanFormDataProto'
-import {
-    generateRateName,
-    packageName,
-} from '../../common-code/healthPlanFormDataType'
-import type { HealthPlanFormDataType } from '../../common-code/healthPlanFormDataType'
+import { base64ToDomain } from '@mc-review/hpp'
+import { generateRateName, packageName } from '@mc-review/hpp'
+import type { HealthPlanFormDataType } from '@mc-review/hpp'
 import { mockEmailParameterStoreError } from '../../testHelpers/parameterStoreHelpers'
 import {
     createDBUsersWithFullData,

@@ -8,12 +8,12 @@ import {
     mockValidCMSUser,
     mockValidStateUser,
     mockContractPackageApprovedWithQuestions,
-} from '../../../testHelpers/apolloMocks'
+} from '@mc-review/mocks'
 import { IndexContractQuestionsPayload } from '../../../gen/gqlClient'
 import { renderWithProviders } from '../../../testHelpers'
 import { Route, Routes } from 'react-router-dom'
 import { SubmissionSideNav } from '../../SubmissionSideNav'
-import { RoutesRecord } from '../../../constants'
+import { RoutesRecord } from '@mc-review/constants'
 import { ContractQuestionResponse } from './ContractQuestionResponse'
 import { SubmissionSummary } from '../../SubmissionSummary'
 import { screen, waitFor, within } from '@testing-library/react'

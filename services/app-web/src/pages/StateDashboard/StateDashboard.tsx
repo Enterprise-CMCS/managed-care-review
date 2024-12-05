@@ -5,10 +5,7 @@ import { useAuth } from '../../contexts/AuthContext'
 import { useIndexContractsForDashboardQuery } from '../../gen/gqlClient'
 import styles from './StateDashboard.module.scss'
 import { SubmissionSuccessMessage } from './SubmissionSuccessMessage'
-import {
-    handleApolloError,
-    isLikelyUserAuthError,
-} from '../../gqlHelpers/apolloErrors'
+import { handleApolloError, isLikelyUserAuthError } from '@mc-review/helpers'
 import {
     ErrorAlertSignIn,
     ContractTable,

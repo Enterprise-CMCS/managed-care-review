@@ -5,7 +5,7 @@ import {
     fetchCurrentUserMock,
     mockValidCMSUser,
     mockValidStateUser,
-} from '../../../testHelpers/apolloMocks'
+} from '@mc-review/mocks'
 import type { GenericDocument } from '../../../gen/gqlClient'
 
 describe('UploadedDocumentsTable', () => {
