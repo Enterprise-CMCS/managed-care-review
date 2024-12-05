@@ -98,6 +98,10 @@ jobs:
       - name: Generate Code
         run: pnpm -r generate
 
+      - name: Build packages
+        shell: bash
+        run: pnpm build:packages
+
       - name: Web Unit Tests
         id: web-unit-tests
         env:
@@ -487,6 +491,13 @@ jobs:
         with:
           name: cypress-gen
           path: ./services/cypress/gen
+
+      - name: Generate Code
+        run: pnpm -r generate
+
+      - name: Build packages
+        shell: bash
+        run: pnpm build:packages
 
       - name: Cypress -- Chrome
         id: cypress
