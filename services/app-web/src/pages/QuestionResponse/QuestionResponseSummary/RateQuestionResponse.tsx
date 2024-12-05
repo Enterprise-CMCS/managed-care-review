@@ -47,7 +47,6 @@ export const RateQuestionResponse = () => {
         fetchPolicy: 'network-only',
     })
 
-    const rate = data?.fetchRate.rate
     useEffect(() => {
         updateHeading({ customHeading: rateName })
     }, [rateName, updateHeading])
@@ -59,7 +58,7 @@ export const RateQuestionResponse = () => {
     if (error) {
         return <ErrorOrLoadingPage state={handleAndReturnErrorState(error)} />
     }
-
+    const rate = data?.fetchRate.rate
     const rateRev = rate?.packageSubmissions?.[0]?.rateRevision
     const rateCertificationName =
         rateRev?.formData.rateCertificationName ?? undefined
