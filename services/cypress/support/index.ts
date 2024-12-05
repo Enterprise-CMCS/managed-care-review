@@ -24,14 +24,14 @@ import './e2e'
 import {
     FeatureFlagLDConstant,
     FeatureFlagSettings,
-} from '../../app-web/src/common-code/featureFlags'
+} from '@mc-review/common-code'
 import './apiCommands'
 import './accessibilityCommands'
-import { Contract, HealthPlanPackage } from '../gen/gqlClient';
-import { CMSUserType, DivisionType } from '../utils/apollo-test-utils';
-import { StateUserType } from '../../app-api/src/domain-models';
-import { UnlockedHealthPlanFormDataType } from '../../app-web/src/common-code/healthPlanFormDataType'
-import { CMSUserLoginNames } from './loginCommands';
+import { Contract, HealthPlanPackage } from '../gen/gqlClient'
+import { CMSUserType, DivisionType } from '../utils/apollo-test-utils'
+import { StateUserType } from '../../app-api/src/domain-models'
+import { UnlockedHealthPlanFormDataType } from '@mc-review/hpp'
+import { CMSUserLoginNames } from './loginCommands'
 
 type FormButtonKey =
     | 'CONTINUE_FROM_START_NEW'
@@ -47,7 +47,10 @@ declare global {
 
             // login commands
             logInAsStateUser(): void
-            logInAsCMSUser(args?: { initialURL?: string, cmsUser?: CMSUserLoginNames }): void
+            logInAsCMSUser(args?: {
+                initialURL?: string
+                cmsUser?: CMSUserLoginNames
+            }): void
             logInAsAdminUser(args?: { initialURL: string }): void
             logOut(): void
 
@@ -69,7 +72,11 @@ declare global {
             fillOutAdditionalActuaryContact(): void
             fillOutSupportingDocuments(): void
             verifyDocumentsHaveNoErrors(): void
-            submitStateSubmissionForm( args?: {success?: boolean, resubmission?: boolean, summary?: string}): void
+            submitStateSubmissionForm(args?: {
+                success?: boolean
+                resubmission?: boolean
+                summary?: string
+            }): void
 
             // submission review commands
             unlockSubmission(unlockReason?: string): void
@@ -113,12 +120,26 @@ declare global {
             }): void
 
             // Direct API commands
-            apiCreateAndSubmitContractOnlySubmission(stateUser: StateUserType): Cypress.Chainable<Contract>
-            apiCreateAndSubmitContractWithRates(stateUser: StateUserType): Cypress.Chainable<Contract>
-            apiDeprecatedCreateSubmitHPP(stateUser: StateUserType, formData?: Partial<UnlockedHealthPlanFormDataType>): Cypress.Chainable<HealthPlanPackage>
-            apiCreateAndSubmitBaseContract(stateUser: StateUserType): Cypress.Chainable<Contract>
-            apiAssignDivisionToCMSUser(cmsUser: CMSUserType, division: DivisionType): Cypress.Chainable<void>
-            apiCreateAndSubmitContractWithRates(stateUser: StateUserType): Cypress.Chainable<Contract>
+            apiCreateAndSubmitContractOnlySubmission(
+                stateUser: StateUserType
+            ): Cypress.Chainable<Contract>
+            apiCreateAndSubmitContractWithRates(
+                stateUser: StateUserType
+            ): Cypress.Chainable<Contract>
+            apiDeprecatedCreateSubmitHPP(
+                stateUser: StateUserType,
+                formData?: Partial<UnlockedHealthPlanFormDataType>
+            ): Cypress.Chainable<HealthPlanPackage>
+            apiCreateAndSubmitBaseContract(
+                stateUser: StateUserType
+            ): Cypress.Chainable<Contract>
+            apiAssignDivisionToCMSUser(
+                cmsUser: CMSUserType,
+                division: DivisionType
+            ): Cypress.Chainable<void>
+            apiCreateAndSubmitContractWithRates(
+                stateUser: StateUserType
+            ): Cypress.Chainable<Contract>
 
             // GraphQL intercept commands
             interceptGraphQL(): void
