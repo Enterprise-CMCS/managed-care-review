@@ -4,7 +4,6 @@ import {
     CmsUser,
     useFetchRateWithQuestionsQuery,
     Division,
-    useFetchContractQuery,
 } from '../../../gen/gqlClient'
 import { useParams, matchPath, useLocation } from 'react-router-dom'
 import { GridContainer } from '@trussworks/react-uswds'
@@ -22,9 +21,6 @@ import {
 import { usePage } from '../../../contexts/PageContext'
 import { CMSQuestionResponseTable } from '../QATable/CMSQuestionResponseTable'
 import { StateQuestionResponseTable } from '../QATable/StateQuestionResponseTable'
-import { ErrorForbiddenPage } from '../../Errors/ErrorForbiddenPage'
-import { Error404 } from '../../Errors/Error404Page'
-import { Loading } from '../../../components'
 
 export const RateQuestionResponse = () => {
     const { id } = useParams() as { id: string }
@@ -56,18 +52,6 @@ export const RateQuestionResponse = () => {
         updateHeading({ customHeading: rateName })
     }, [rateName, updateHeading])
 
-    const {
-        data: fetchContractData,
-        loading: loadingContract,
-        error: fetchContractError,
-    } = useFetchContractQuery({
-        variables: {
-            input: {
-                contractID: rate?.parentContractID ?? 'unknown-contract',
-            },
-        },
-    })
-
     if (loading) {
         return <ErrorOrLoadingPage state="LOADING" />
     }
@@ -87,35 +71,6 @@ export const RateQuestionResponse = () => {
         !rate.questions
     ) {
         return <GenericErrorPage />
-    }
-
-    const contract = fetchContractData?.fetchContract.contract
-
-    if (loadingContract) {
-        return (
-            <GridContainer>
-                <Loading />
-            </GridContainer>
-        )
-    } else if (fetchContractError || !contract) {
-        //error handling for a state user that tries to access contracts for a different state
-        if (
-            fetchContractError?.graphQLErrors[0]?.extensions?.code ===
-            'FORBIDDEN'
-        ) {
-            return (
-                <ErrorForbiddenPage
-                    errorMsg={fetchContractError.graphQLErrors[0].message}
-                />
-            )
-        } else if (
-            fetchContractError?.graphQLErrors[0]?.extensions?.code ===
-            'NOT_FOUND'
-        ) {
-            return <Error404 />
-        } else {
-            return <GenericErrorPage />
-        }
     }
 
     if (rateCertificationName && rateName !== rateCertificationName) {
@@ -139,13 +94,11 @@ export const RateQuestionResponse = () => {
                     <CMSQuestionResponseTable
                         indexQuestions={rate.questions}
                         userDivision={division}
-                        contractStatus={contract.consolidatedStatus}
                     />
                 ) : (
                     <StateQuestionResponseTable
                         indexQuestions={rate.questions}
                         header={`Rate questions: ${rateCertificationName}`}
-                        contractStatus={contract.consolidatedStatus}
                     />
                 )}
             </GridContainer>
