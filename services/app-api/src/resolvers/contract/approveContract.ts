@@ -19,7 +19,7 @@ export function approveContract(
         const span = tracer?.startSpan('approveContract', {}, ctx)
         setResolverDetailsOnActiveSpan('approveContract', user, span)
 
-        const { contractID, updatedReason } = input
+        const { contractID, dateApprovalReleasedToState } = input
         span?.setAttribute('mcreview.package_id', contractID)
 
         if (!hasCMSPermissions(user)) {
@@ -68,7 +68,7 @@ export function approveContract(
         const approveContractResult = await store.approveContract({
             contractID: contractID,
             updatedByID: user.id,
-            updatedReason: updatedReason || '',
+            dateApprovalReleasedToState: dateApprovalReleasedToState,
         })
 
         if (approveContractResult instanceof Error) {

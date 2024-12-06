@@ -10,7 +10,8 @@ const contractReviewActionTypeSchema = z.union([
 const contractReviewActionSchema = z.object({
     updatedAt: z.date(),
     updatedBy: baseUserSchema.omit({ id: true }),
-    updatedReason: z.string(),
+    updatedReason: z.string().optional(),
+    dateApprovalReleasedToState: z.date().optional(),
     actionType: contractReviewActionTypeSchema,
     contractID: z.string(),
 })
