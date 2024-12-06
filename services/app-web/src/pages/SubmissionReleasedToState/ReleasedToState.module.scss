@@ -36,6 +36,19 @@
         padding-bottom: 25px;
     }
 
+    [class^='usa-date-picker__wrapper'],
+    [class^='usa-input'] {
+        max-width: 100%;
+    }
+
+    [class^='usa-input'],
+    [class^='usa-date-picker__button'] {
+        margin-bottom: 0.5rem;
+    }
+
+    [class^='usa-hint'] {
+        margin-top: 0.25rem;
+    }
     &[class^='usa-form'] {
         min-width: 100%;
         max-width: 100%;
