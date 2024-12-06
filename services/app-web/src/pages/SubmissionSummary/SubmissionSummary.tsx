@@ -5,6 +5,7 @@ import {
     ModalRef,
     FormGroup,
     DatePicker,
+    Label,
 } from '@trussworks/react-uswds'
 import { formatUserInputDate } from '../../formHelpers'
 import React, { useEffect, useRef, useState } from 'react'
@@ -18,9 +19,10 @@ import {
     SubmissionUpdatedBanner,
     DocumentWarningBanner,
     LinkWithLogging,
+    PoliteErrorMessage,
 } from '../../components'
 import { useTealium } from '../../hooks'
-import { Formik } from 'formik'
+import { Formik, FormikErrors } from 'formik'
 import { GenericApiErrorProps } from '../../components/Banner/GenericApiErrorBanner/GenericApiErrorBanner'
 import { Loading } from '../../components'
 import { usePage } from '../../contexts/PageContext'
@@ -48,7 +50,20 @@ import { hasCMSUserPermissions } from '../../gqlHelpers'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '../../common-code/featureFlags'
 import { SubmissionApprovedBanner } from '../../components/Banner'
+// import { SubmissionSummarySchema } from './SubmissionSummarySchema'
+import * as Yup from 'yup'
 
+export interface SubmissionSummaryFormValues {
+    dateApprovalReleasedToState: string
+}
+type FormError =
+    FormikErrors<SubmissionSummaryFormValues>[keyof FormikErrors<SubmissionSummaryFormValues>]
+
+const SubmissionSummarySchema = Yup.object().shape({
+    dateApprovalReleasedToState: Yup.string().required(
+        'You must select a date'
+    ),
+})
 export const SubmissionSummary = (): React.ReactElement => {
     // Page level state
     const { updateHeading } = usePage()
@@ -61,6 +76,9 @@ export const SubmissionSummary = (): React.ReactElement => {
     const [modalAlert, setModalAlert] = useState<
         GenericApiErrorProps | undefined
     >(undefined)
+    const [shouldValidate, setShouldValidate] = useState(false)
+    const showFieldErrors = (error?: FormError) =>
+    shouldValidate && Boolean(error)
     const { logFormSubmitEvent } = useTealium()
     const hasCMSPermissions = hasCMSUserPermissions(loggedInUser)
     const isStateUser = loggedInUser?.role === 'STATE_USER'
@@ -135,6 +153,7 @@ export const SubmissionSummary = (): React.ReactElement => {
     const approvalModalInitialValues = {
         dateApprovalReleasedToState: '',
     }
+
     if (!isSubmitted && isStateUser) {
         if (submissionStatus === 'DRAFT') {
             return (
@@ -209,28 +228,32 @@ export const SubmissionSummary = (): React.ReactElement => {
             event_name: 'form_field_submit',
             link_type: 'link_other',
         })
+        setShouldValidate(true)
 
-        setIsSubmitting(true)
-        try {
-            await approveContract({
-                variables: {
-                    input: {
-                        contractID: contract.id,
-                        dateApprovalReleasedToState: actionModalInput,
+        if (actionModalInput !== '') {
+            setIsSubmitting(true)
+            try {
+                await approveContract({
+                    variables: {
+                        input: {
+                            contractID: contract.id,
+                            dateApprovalReleasedToState: actionModalInput,
+                        },
                     },
-                },
-            })
-            approveModalRef.current?.toggleModal(undefined, false)
-        } catch (err) {
-            recordJSException(
-                `RateDetails: Apollo error reported. Error message: Failed to create form data ${err}`
-            )
-            setModalAlert({
-                heading: 'Approve submission error',
-                message: err.message,
-                // When we have generic/unknown errors override any suggestions and display the fallback "please refresh text"
-                validationFail: false,
-            })
+                })
+                approveModalRef.current?.toggleModal(undefined, false)
+            }catch (err) {
+                recordJSException(
+                    `SubmissionSummary: Apollo error reported. Error message: Failed to create form data ${err}`
+                )
+                setModalAlert({
+                    heading: 'Approve submission error',
+                    message: err.message,
+                    // When we have generic/unknown errors override any suggestions and display the fallback "please refresh text"
+                    validationFail: false,
+                })
+            }
+
         }
     }
 
@@ -295,14 +318,17 @@ export const SubmissionSummary = (): React.ReactElement => {
                             </ModalOpenButton>
                         </Grid>
                         <Formik
-                            initialValues={approvalModalInitialValues}
+                            initialValues={{
+                                dateApprovalReleasedToState: ''
+                            }}
                             onSubmit={(values) => {
                                 return approveContractAction(
                                     values.dateApprovalReleasedToState
                                 )
                             }}
+                            validationSchema={SubmissionSummarySchema}
                         >
-                            {({ values, setFieldValue }) => (
+                            {({ values, setFieldValue, errors }) => (
                                 <>
                                     <Modal
                                         id="approvalModal"
@@ -332,16 +358,23 @@ export const SubmissionSummary = (): React.ReactElement => {
                                                 letter has been released to the
                                                 state.
                                             </p>
-                                            <p className="margin-bottom-0 text-bold">
+                                            <Label htmlFor="dateReleasedToState" className="margin-bottom-0 text-bold">
                                                 Date released to state
-                                            </p>
+                                            </Label>
                                             <p className="margin-top-0 margin-bottom-0 usa-hint">
                                                 Required
                                             </p>
                                             <p className="margin-top-0 margin-bottom-0 usa-hint">
                                                 mm/dd/yyyy
                                             </p>
-                                            <FormGroup>
+                                            <FormGroup error={true}>
+                                                {/* {showFieldErrors(
+                                                errors.dateApprovalReleasedToState
+                                            ) && ( */}
+                                                <span>kkkk
+                                                    {errors.dateApprovalReleasedToState}
+                                                </span>
+                                            
                                                 <DatePicker
                                                     aria-required
                                                     aria-describedby="dateApprovalReleasedToState"

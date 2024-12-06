@@ -2,7 +2,7 @@ import { Alert } from '@trussworks/react-uswds'
 import React from 'react'
 import styles from '../Banner.module.scss'
 import { getUpdatedByDisplayName } from '../../../gqlHelpers'
-import { formatBannerDate } from '../../../common-code/dateHelpers'
+import { formatBannerDate, formatCalendarDate } from '../../../common-code/dateHelpers'
 import { UpdatedBy } from '../../../gen/gqlClient'
 import { ExpandableText } from '../../ExpandableText'
 
@@ -43,7 +43,7 @@ export const SubmissionApprovedBanner = ({
                 {dateReleasedToState && (
                     <ExpandableText>
                         <b>Date released to state:&nbsp;</b>
-                        {formatBannerDate(dateReleasedToState)}
+                        {formatCalendarDate(dateReleasedToState, 'UTC')}
                     </ExpandableText>
                 )}
             </div>
