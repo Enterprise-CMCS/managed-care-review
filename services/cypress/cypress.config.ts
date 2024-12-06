@@ -8,7 +8,10 @@ module.exports = defineConfig({
     e2e: {
         baseUrl: 'http://127.0.0.1:3000',
         supportFile: 'support/index.ts',
-        includePaths: ['../../packages/hpp/build/**/*.js'],
+        includePaths: [
+            '../../packages/hpp/build/**/*.js',
+            '../../packages/common-code/build/**/*.js',
+        ],
         nodeModules: true,
         fixturesFolder: 'fixtures',
         specPattern: 'integration/**/*.spec.ts',

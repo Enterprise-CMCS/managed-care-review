@@ -74,7 +74,7 @@ describe('insertContract', () => {
         )
     })
     it('returns an error when invalid state code is provided', async () => {
-        vi.spyOn(console, 'error').mockImplementation()
+        vi.spyOn(console, 'error').mockImplementation(() => {})
         const client = await sharedTestPrismaClient()
 
         const draftContractData = mockInsertContractArgs({

@@ -333,7 +333,7 @@ describe('updateDraftContractWithRates postgres', () => {
     })
 
     it('returns an error when invalid form data for contract type provided', async () => {
-        vi.spyOn(console, 'error').mockImplementation()
+        vi.spyOn(console, 'error').mockImplementation(() => {})
 
         const client = await sharedTestPrismaClient()
         const draftContractInsert = mockInsertContractArgs({})
@@ -354,7 +354,7 @@ describe('updateDraftContractWithRates postgres', () => {
     })
 
     it('returns an error when invalid contract ID provided', async () => {
-        vi.spyOn(console, 'error').mockImplementation()
+        vi.spyOn(console, 'error').mockImplementation(() => {})
 
         const client = await sharedTestPrismaClient()
 
