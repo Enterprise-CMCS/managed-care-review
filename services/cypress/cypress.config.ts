@@ -25,6 +25,8 @@ module.exports = defineConfig({
                     define: {
                         global: 'window',
                     },
+                    platform: 'node',
+                    inject: ['node_modules/buffer/'],
                 })
             )
             require('@cypress/code-coverage/task')(on, config)
