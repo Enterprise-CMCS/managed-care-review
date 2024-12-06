@@ -27,6 +27,11 @@ module.exports = defineConfig({
                     },
                     platform: 'node',
                     inject: ['node_modules/buffer/'],
+                    bundle: true,
+                    loader: {
+                        '.js': 'js',
+                        '.ts': 'ts',
+                    },
                 })
             )
             require('@cypress/code-coverage/task')(on, config)
