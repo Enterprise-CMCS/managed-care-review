@@ -8,6 +8,8 @@ module.exports = defineConfig({
     e2e: {
         baseUrl: 'http://127.0.0.1:3000',
         supportFile: 'support/index.ts',
+        includePaths: ['../../packages/hpp/build/**/*.js'],
+        nodeModules: true,
         fixturesFolder: 'fixtures',
         specPattern: 'integration/**/*.spec.ts',
         screenshotsFolder: 'screenshots',
@@ -67,7 +69,7 @@ module.exports = defineConfig({
                     console.table(message)
 
                     return null
-                }
+                },
             })
             return newConfig
         },
