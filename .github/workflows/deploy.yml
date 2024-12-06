@@ -492,6 +492,11 @@ jobs:
           name: cypress-gen
           path: ./services/cypress/gen
 
+      - name: Install linux deps
+        run: |
+          apt-get update
+          apt-get install -y rsync
+
       - name: Generate Code
         run: pnpm -r generate
 
