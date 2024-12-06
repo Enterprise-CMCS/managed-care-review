@@ -3,8 +3,8 @@ import styles from './ReleasedToState.module.scss'
 import {
     ActionButton,
     Breadcrumbs,
-    FieldTextarea,
     GenericApiErrorBanner,
+    PoliteErrorMessage,
 } from '../../components'
 import { RoutesRecord } from '../../constants'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -15,27 +15,43 @@ import {
 import { ErrorOrLoadingPage } from '../StateSubmission'
 import { handleAndReturnErrorState } from '../StateSubmission/ErrorOrLoadingPage'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
-import { ButtonGroup, Form } from '@trussworks/react-uswds'
+import {
+    ButtonGroup,
+    DatePicker,
+    Form,
+    FormGroup,
+    Label,
+} from '@trussworks/react-uswds'
 import { PageActionsContainer } from '../StateSubmission/PageActions'
-import { Formik } from 'formik'
+import { Formik, FormikErrors } from 'formik'
 import { usePage } from '../../contexts/PageContext'
 import { recordJSException } from '../../otelHelpers'
 import { useTealium } from '../../hooks'
 import * as Yup from 'yup'
+import { formatUserInputDate } from '../../formHelpers'
 
 type ReleasedToStateValues = {
-    optionalNote?: string
+    dateApprovalReleasedToState: string
 }
 
 const ReleaseToStateSchema = Yup.object().shape({
-    optionalNote: Yup.string().optional(),
+    dateApprovalReleasedToState: Yup.string().required(
+        'You must select a date'
+    ),
 })
+
+type FormError =
+    FormikErrors<ReleasedToStateValues>[keyof FormikErrors<ReleasedToStateValues>]
 
 const ReleasedToState = () => {
     const { id } = useParams<{ id: string }>()
     const { updateHeading } = usePage()
     const { logFormSubmitEvent } = useTealium()
     const navigate = useNavigate()
+    const [shouldValidate, setShouldValidate] = React.useState(true)
+
+    const showFieldErrors = (error?: FormError) =>
+        shouldValidate && Boolean(error)
 
     const [approveContract, { error: approveError, loading: approveLoading }] =
         useApproveContractMutation()
@@ -52,7 +68,7 @@ const ReleasedToState = () => {
     })
 
     const formInitialValues: ReleasedToStateValues = {
-        optionalNote: '',
+        dateApprovalReleasedToState: '',
     }
 
     const contract = fetchContractData?.fetchContract.contract
@@ -89,13 +105,14 @@ const ReleasedToState = () => {
             event_name: 'form_field_submit',
             link_type: 'link_other',
         })
-
+        setShouldValidate(true)
         try {
             await approveContract({
                 variables: {
                     input: {
                         contractID: contract.id,
-                        updatedReason: values.optionalNote,
+                        dateApprovalReleasedToState:
+                            values.dateApprovalReleasedToState,
                     },
                 },
             })
@@ -128,13 +145,14 @@ const ReleasedToState = () => {
                 onSubmit={(values) => approveContractAction(values)}
                 validationSchema={ReleaseToStateSchema}
             >
-                {({ handleSubmit }) => (
+                {({ handleSubmit, errors, setFieldValue }) => (
                     <Form
                         id="ReleasedToStateForm"
                         className={styles.formContainer}
                         aria-label="Mark this submission as Released to the state?"
                         aria-describedby="form-guidance"
                         onSubmit={(e) => {
+                            setShouldValidate(true)
                             return handleSubmit(e)
                         }}
                     >
@@ -151,14 +169,38 @@ const ReleasedToState = () => {
                                 as released after the approval letter has been
                                 released to the state.
                             </p>
-                            <FieldTextarea
-                                label="Provide an optional note"
-                                id="optionalNote"
-                                name="optionalNote"
-                                data-testid="optionalNote"
-                                aria-describedby="optionalNoteHelp"
-                                showError={false}
-                            />
+                            <Label
+                                htmlFor="dateReleasedToState"
+                                className="margin-bottom-0 text-bold"
+                            >
+                                Date released to state
+                            </Label>
+                            <p className="margin-bottom-0 usa-hint">Required</p>
+                            <p className="margin-bottom-0 usa-hint">
+                                mm/dd/yyyy
+                            </p>
+                            <FormGroup
+                                error={showFieldErrors(
+                                    errors.dateApprovalReleasedToState
+                                )}
+                                className="margin-top-0"
+                            >
+                                <PoliteErrorMessage formFieldLabel="Date released to state">
+                                    {errors.dateApprovalReleasedToState}
+                                </PoliteErrorMessage>
+                                <DatePicker
+                                    aria-required
+                                    aria-describedby="dateApprovalReleasedToState"
+                                    id="dateApprovalReleasedToState"
+                                    name="dateApprovalReleasedToState"
+                                    onChange={(val) =>
+                                        setFieldValue(
+                                            'dateApprovalReleasedToState',
+                                            formatUserInputDate(val)
+                                        )
+                                    }
+                                />
+                            </FormGroup>
                         </fieldset>
                         <PageActionsContainer>
                             <ButtonGroup type="default">

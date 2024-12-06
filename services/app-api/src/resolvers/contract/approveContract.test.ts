@@ -60,6 +60,7 @@ describe('approveContract', () => {
             variables: {
                 input: {
                     contractID: draftContract.id,
+                    dateApprovalReleasedToState: '2024-12-12',
                 },
             },
         })
@@ -102,6 +103,7 @@ describe('approveContract', () => {
             variables: {
                 input: {
                     contractID: unlockedContract.id,
+                    dateApprovalReleasedToState: '2024-12-12',
                 },
             },
         })
@@ -138,6 +140,7 @@ describe('approveContract', () => {
             variables: {
                 input: {
                     contractID: contract.id,
+                    dateApprovalReleasedToState: '2024-12-12',
                 },
             },
         })
@@ -147,6 +150,7 @@ describe('approveContract', () => {
             variables: {
                 input: {
                     contractID: contract.id,
+                    dateApprovalReleasedToState: '2024-12-12',
                 },
             },
         })
@@ -176,6 +180,7 @@ describe('approveContract', () => {
             variables: {
                 input: {
                     contractID: contract.id,
+                    dateApprovalReleasedToState: '2024-12-12',
                 },
             },
         })
