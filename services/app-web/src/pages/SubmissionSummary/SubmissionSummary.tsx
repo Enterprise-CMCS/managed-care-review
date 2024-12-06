@@ -1,13 +1,4 @@
-import {
-    Grid,
-    GridContainer,
-    Link,
-    ModalRef,
-    FormGroup,
-    DatePicker,
-    Label,
-} from '@trussworks/react-uswds'
-import { formatUserInputDate } from '../../formHelpers'
+import { Grid, GridContainer, Link, ModalRef } from '@trussworks/react-uswds'
 import React, { useEffect, useRef, useState } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
 import { ContractDetailsSummarySection } from '../StateSubmission/ReviewSubmit/ContractDetailsSummarySection'
@@ -19,29 +10,17 @@ import {
     SubmissionUpdatedBanner,
     DocumentWarningBanner,
     LinkWithLogging,
-    PoliteErrorMessage,
+    NavLinkWithLogging,
 } from '../../components'
-import { useTealium } from '../../hooks'
-import { Formik, FormikErrors } from 'formik'
-import { GenericApiErrorProps } from '../../components/Banner/GenericApiErrorBanner/GenericApiErrorBanner'
 import { Loading } from '../../components'
 import { usePage } from '../../contexts/PageContext'
-import { recordJSException } from '../../otelHelpers'
-import {
-    useFetchContractQuery,
-    UpdateInformation,
-    useApproveContractMutation,
-} from '../../gen/gqlClient'
+import { useFetchContractQuery, UpdateInformation } from '../../gen/gqlClient'
 import { ErrorForbiddenPage } from '../Errors/ErrorForbiddenPage'
 import { Error404 } from '../Errors/Error404Page'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import styles from './SubmissionSummary.module.scss'
 import { ChangeHistory } from '../../components/ChangeHistory'
-import {
-    ModalOpenButton,
-    UnlockSubmitModal,
-    Modal,
-} from '../../components/Modal'
+import { ModalOpenButton, UnlockSubmitModal } from '../../components/Modal'
 import { RoutesRecord } from '../../constants'
 import { useRouteParams } from '../../hooks'
 import { getVisibleLatestContractFormData } from '../../gqlHelpers/contractsAndRates'
@@ -50,42 +29,21 @@ import { hasCMSUserPermissions } from '../../gqlHelpers'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '../../common-code/featureFlags'
 import { SubmissionApprovedBanner } from '../../components/Banner'
-// import { SubmissionSummarySchema } from './SubmissionSummarySchema'
-import * as Yup from 'yup'
 
 export interface SubmissionSummaryFormValues {
     dateApprovalReleasedToState: string
 }
-type FormError =
-    FormikErrors<SubmissionSummaryFormValues>[keyof FormikErrors<SubmissionSummaryFormValues>]
 
-const SubmissionSummarySchema = Yup.object().shape({
-    dateApprovalReleasedToState: Yup.string().required(
-        'You must select a date'
-    ),
-})
 export const SubmissionSummary = (): React.ReactElement => {
     // Page level state
     const { updateHeading } = usePage()
     const modalRef = useRef<ModalRef>(null)
-    const approveModalRef = useRef<ModalRef>(null)
     const [documentError, setDocumentError] = useState(false)
     const { loggedInUser } = useAuth()
     const { id } = useRouteParams()
-    const [approveContract] = useApproveContractMutation()
-    const [modalAlert, setModalAlert] = useState<
-        GenericApiErrorProps | undefined
-    >(undefined)
-    const [shouldValidate, setShouldValidate] = useState(false)
-    const showFieldErrors = (error?: FormError) =>
-    shouldValidate && Boolean(error)
-    const { logFormSubmitEvent } = useTealium()
     const hasCMSPermissions = hasCMSUserPermissions(loggedInUser)
     const isStateUser = loggedInUser?.role === 'STATE_USER'
     const isHelpDeskUser = loggedInUser?.role === 'HELPDESK_USER'
-
-    const [isSubmitting, setIsSubmitting] = useState(false) // mock same behavior as formik isSubmitting
-
     const ldClient = useLDClient()
 
     const submissionApprovalFlag = ldClient?.variation(
@@ -106,16 +64,19 @@ export const SubmissionSummary = (): React.ReactElement => {
         },
         fetchPolicy: 'network-only',
     })
+
     const contract = fetchContractData?.fetchContract.contract
     const name =
         contract && contract?.packageSubmissions.length > 0
             ? contract.packageSubmissions[0].contractRevision.contractName
             : ''
+
     useEffect(() => {
         updateHeading({
             customHeading: name,
         })
     }, [name, updateHeading])
+
     if (fetchContractLoading) {
         return (
             <GridContainer>
@@ -150,10 +111,6 @@ export const SubmissionSummary = (): React.ReactElement => {
         submissionStatus === 'SUBMITTED' || submissionStatus === 'RESUBMITTED'
     const statePrograms = contract.state.programs
 
-    const approvalModalInitialValues = {
-        dateApprovalReleasedToState: '',
-    }
-
     if (!isSubmitted && isStateUser) {
         if (submissionStatus === 'DRAFT') {
             return (
@@ -176,6 +133,7 @@ export const SubmissionSummary = (): React.ReactElement => {
         contract,
         isStateUser
     )
+
     if (
         !contractFormData ||
         !statePrograms ||
@@ -215,47 +173,11 @@ export const SubmissionSummary = (): React.ReactElement => {
     const showSubmissionApproval =
         submissionApprovalFlag &&
         hasCMSPermissions &&
-        contract.reviewStatus !== 'APPROVED'
+        !['APPROVED', 'UNLOCKED'].includes(contract.consolidatedStatus)
     const showApprovalBanner =
         submissionApprovalFlag &&
         contract.reviewStatus === 'APPROVED' &&
         latestContractAction
-
-    const approveContractAction = async (actionModalInput?: string) => {
-        logFormSubmitEvent({
-            heading: 'Approve submission',
-            form_name: 'Approve submission',
-            event_name: 'form_field_submit',
-            link_type: 'link_other',
-        })
-        setShouldValidate(true)
-
-        if (actionModalInput !== '') {
-            setIsSubmitting(true)
-            try {
-                await approveContract({
-                    variables: {
-                        input: {
-                            contractID: contract.id,
-                            dateApprovalReleasedToState: actionModalInput,
-                        },
-                    },
-                })
-                approveModalRef.current?.toggleModal(undefined, false)
-            }catch (err) {
-                recordJSException(
-                    `SubmissionSummary: Apollo error reported. Error message: Failed to create form data ${err}`
-                )
-                setModalAlert({
-                    heading: 'Approve submission error',
-                    message: err.message,
-                    // When we have generic/unknown errors override any suggestions and display the fallback "please refresh text"
-                    validationFail: false,
-                })
-            }
-
-        }
-    }
 
     const renderStatusAlerts = () => {
         if (showApprovalBanner) {
@@ -303,99 +225,15 @@ export const SubmissionSummary = (): React.ReactElement => {
                 )}
 
                 {showSubmissionApproval && (
-                    <>
-                        <Grid
-                            className={styles.approveWithdrawButtonContainer}
-                            row
+                    <Grid className={styles.releaseToStateContainer} row>
+                        <NavLinkWithLogging
+                            className="usa-button"
+                            variant="unstyled"
+                            to={'./released-to-state'}
                         >
-                            <ModalOpenButton
-                                id="approval-modal-toggle-button"
-                                modalRef={approveModalRef}
-                                disabled={!isSubmitted}
-                                data-testid="approval-modal-toggle-button"
-                            >
-                                Release to state
-                            </ModalOpenButton>
-                        </Grid>
-                        <Formik
-                            initialValues={{
-                                dateApprovalReleasedToState: ''
-                            }}
-                            onSubmit={(values) => {
-                                return approveContractAction(
-                                    values.dateApprovalReleasedToState
-                                )
-                            }}
-                            validationSchema={SubmissionSummarySchema}
-                        >
-                            {({ values, setFieldValue, errors }) => (
-                                <>
-                                    <Modal
-                                        id="approvalModal"
-                                        modalRef={approveModalRef}
-                                        onSubmit={() => {
-                                            return approveContractAction(
-                                                values.dateApprovalReleasedToState
-                                            )
-                                        }}
-                                        modalHeading="Are you sure you want to mark this submission as Released to the state?"
-                                        onSubmitText="Release to state"
-                                        submitButtonProps={{
-                                            variant: 'default',
-                                        }}
-                                        className={styles.approvalModal}
-                                        modalAlert={modalAlert}
-                                        isSubmitting={isSubmitting}
-                                    >
-                                        <form>
-                                            <p>
-                                                Once you select Released to
-                                                state, the status will change
-                                                from Submitted to Approved on
-                                                the dashboard. This submission
-                                                should only be marked as
-                                                released after the approval
-                                                letter has been released to the
-                                                state.
-                                            </p>
-                                            <Label htmlFor="dateReleasedToState" className="margin-bottom-0 text-bold">
-                                                Date released to state
-                                            </Label>
-                                            <p className="margin-top-0 margin-bottom-0 usa-hint">
-                                                Required
-                                            </p>
-                                            <p className="margin-top-0 margin-bottom-0 usa-hint">
-                                                mm/dd/yyyy
-                                            </p>
-                                            <FormGroup error={true}>
-                                                {/* {showFieldErrors(
-                                                errors.dateApprovalReleasedToState
-                                            ) && ( */}
-                                                <span>kkkk
-                                                    {errors.dateApprovalReleasedToState}
-                                                </span>
-                                            
-                                                <DatePicker
-                                                    aria-required
-                                                    aria-describedby="dateApprovalReleasedToState"
-                                                    id="dateApprovalReleasedToState"
-                                                    name="dateApprovalReleasedToState"
-                                                    onChange={(val) =>
-                                                        setFieldValue(
-                                                            'dateApprovalReleasedToState',
-                                                            formatUserInputDate(
-                                                                val
-                                                            )
-                                                        )
-                                                    }
-                                                />
-                                            </FormGroup>
-                                        </form>
-                                    </Modal>
-                                </>
-                            )}
-                        </Formik>
-                    </>
+                            Released to state
+                        </NavLinkWithLogging>
+                    </Grid>
                 )}
 
                 <SubmissionTypeSummarySection
