@@ -5,7 +5,7 @@
     "types": "build/index.d.ts",
     "scripts": {
         "build": "tsc && pnpm copy-gen-code",
-        "copy-gen-code": "rsync -av --exclude='*.ts' src/gen/ build/gen/"
+        "copy-gen-code": "mkdir -p build/gen && cp -r src/gen/* build/gen/ && find build/gen -name '*.ts' -delete"
     },
     "dependencies": {
         "@apollo/client": "3.8.8",
