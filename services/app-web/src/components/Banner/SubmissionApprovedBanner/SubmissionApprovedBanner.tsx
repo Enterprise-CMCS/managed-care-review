@@ -2,14 +2,17 @@ import { Alert } from '@trussworks/react-uswds'
 import React from 'react'
 import styles from '../Banner.module.scss'
 import { getUpdatedByDisplayName } from '../../../gqlHelpers'
-import { formatBannerDate, formatCalendarDate } from '../../../common-code/dateHelpers'
+import {
+    formatBannerDate,
+    formatCalendarDate,
+} from '../../../common-code/dateHelpers'
 import { UpdatedBy } from '../../../gen/gqlClient'
 import { ExpandableText } from '../../ExpandableText'
 
 export type ApprovalProps = {
     updatedBy: UpdatedBy
     updatedAt: Date
-    dateReleasedToState?: string
+    dateReleasedToState: string
 }
 
 export const SubmissionApprovedBanner = ({
