@@ -39,8 +39,6 @@ import { configureResolvers } from '../resolvers'
 import { latestFormData } from './healthPlanPackageHelpers'
 import { sharedTestPrismaClient } from './storeHelpers'
 import { domainToBase64 } from '../common-code/proto/healthPlanFormDataProto'
-import type { EmailParameterStore } from '../parameterStore'
-import { newLocalEmailParameterStore } from '../parameterStore'
 import { testLDService } from './launchDarklyHelpers'
 import type { LDService } from '../launchDarkly/launchDarkly'
 import { insertUserToLocalAurora } from '../authn'
@@ -86,7 +84,6 @@ const constructTestPostgresServer = async (opts?: {
     context?: Context
     emailer?: Emailer
     store?: Store
-    emailParameterStore?: EmailParameterStore
     ldService?: LDService
     jwt?: JWTLib
     s3Client?: S3ClientT
@@ -94,8 +91,6 @@ const constructTestPostgresServer = async (opts?: {
     // set defaults
     const context = opts?.context || defaultContext()
     const emailer = opts?.emailer || constructTestEmailer()
-    const parameterStore =
-        opts?.emailParameterStore || newLocalEmailParameterStore()
     const ldService = opts?.ldService || testLDService()
 
     const prismaClient = await sharedTestPrismaClient()
@@ -115,7 +110,6 @@ const constructTestPostgresServer = async (opts?: {
     const postgresResolvers = configureResolvers(
         postgresStore,
         emailer,
-        parameterStore,
         ldService,
         jwt,
         s3,

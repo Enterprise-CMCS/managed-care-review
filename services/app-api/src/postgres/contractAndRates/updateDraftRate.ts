@@ -60,7 +60,7 @@ async function updateDraftRate(
             for (const link of existingLinks.filter(
                 (l) => l.contractID === contractID
             )) {
-                if (rateID === args.rateID) {
+                if (link.rateID === args.rateID) {
                     ratePosition = link.ratePosition
                     break
                 }

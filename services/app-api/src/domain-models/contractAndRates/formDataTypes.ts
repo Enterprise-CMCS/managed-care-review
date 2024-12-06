@@ -132,7 +132,12 @@ type RateFormEditableType = Partial<RateFormDataType>
 type StateContactType = z.infer<typeof stateContactSchema>
 type ActuaryContactType = z.infer<typeof actuaryContactSchema>
 
-export { contractFormDataSchema, rateFormDataSchema, preprocessNulls }
+export {
+    contractFormDataSchema,
+    rateFormDataSchema,
+    preprocessNulls,
+    documentSchema,
+}
 
 export type {
     ContractFormDataType,
