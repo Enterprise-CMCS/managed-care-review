@@ -29,7 +29,9 @@ module.exports = defineConfig({
                         global: 'window',
                     },
                     platform: 'node',
-                    inject: ['node_modules/buffer/'],
+                    nodeModulesPath: path.join(__dirname, 'node_modules'),
+                    resolveExtensions: ['.ts', '.js', '.json'],
+                    mainFields: ['module', 'main'],
                     bundle: true,
                     loader: {
                         '.js': 'js',
