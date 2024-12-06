@@ -12,12 +12,12 @@ describe('jwtLib', () => {
 
         const token = jwt.createValidJWT(userID)
 
+        const higherDate = new Date(Date.now() + 1005)
+        const lowerDate = new Date(Date.now() + 995)
+
         const decodedID = jwt.userIDFromToken(token.key)
 
         expect(decodedID).toBe(userID)
-
-        const higherDate = new Date(Date.now() + 1005)
-        const lowerDate = new Date(Date.now() + 995)
 
         expect(token.expiresAt.getTime()).toBeLessThan(higherDate.getTime())
         expect(token.expiresAt.getTime()).toBeGreaterThan(lowerDate.getTime())

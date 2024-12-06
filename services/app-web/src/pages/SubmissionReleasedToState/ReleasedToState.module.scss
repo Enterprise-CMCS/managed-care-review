@@ -1,0 +1,49 @@
+@use '../../styles/custom.scss' as custom;
+@use '../../styles/uswdsImports.scss' as uswds;
+
+.uploadFormContainer {
+    max-width: custom.$mcr-container-standard-width-fixed;
+    background-color: none;
+    @include uswds.at-media('tablet') {
+        min-width: 20rem;
+        max-width: 40rem;
+        margin: 0 auto;
+    }
+}
+
+.formContainer {
+    > [class^='usa-fieldset'] {
+        padding: uswds.units(4);
+        margin-bottom: uswds.units(2);
+        margin-top: uswds.units(2);
+        background: custom.$mcr-foundation-white;
+        border: 1px solid custom.$mcr-gray-lighter;
+        @include uswds.u-radius('md');
+    }
+
+    h2 {
+        margin-top: 0;
+        font-weight: bold;
+    }
+
+    > div[class^='usa-form-group']:not(:first-of-type) {
+        margin-top: 2.5rem;
+    }
+
+    [id^='formSummary'] {
+        display: flex;
+        flex-direction: column;
+        padding-bottom: 25px;
+    }
+
+    &[class^='usa-form'] {
+        min-width: 100%;
+        max-width: 100%;
+
+        @include uswds.at-media('tablet') {
+            min-width: 20rem;
+            max-width: 40rem;
+            margin: 0 auto;
+        }
+    }
+}

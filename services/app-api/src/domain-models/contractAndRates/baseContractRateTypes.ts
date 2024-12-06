@@ -6,7 +6,7 @@ import {
 import { contractRevisionSchema, rateRevisionSchema } from './revisionTypes'
 import {
     statusSchema,
-    reviewStatusSchema,
+    contractReviewStatusSchema,
     consolidatedContractStatusSchema,
 } from './statusType'
 import {
@@ -15,6 +15,7 @@ import {
 } from '../QuestionsType'
 import { updateInfoSchema } from './updateInfoType'
 import { contractReviewActionSchema } from './contractReviewActionType'
+
 // Contract represents the contract specific information in a submission package
 // All that data is contained in revisions, each revision represents the data in a single submission
 // submissions are kept intact here across time
@@ -23,7 +24,7 @@ const contractWithoutDraftRatesSchema = z.object({
     createdAt: z.date(),
     updatedAt: z.date(),
     status: statusSchema,
-    reviewStatus: reviewStatusSchema,
+    reviewStatus: contractReviewStatusSchema,
     consolidatedStatus: consolidatedContractStatusSchema,
     stateCode: z.string(),
     mccrsID: z.string().optional(),
@@ -38,6 +39,7 @@ const contractWithoutDraftRatesSchema = z.object({
 
     questions: indexContractQuestionsPayload.optional(),
 })
+
 type ContractReviewStatusType = z.infer<
     typeof contractWithoutDraftRatesSchema.shape.reviewStatus
 >

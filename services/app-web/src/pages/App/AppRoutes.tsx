@@ -54,6 +54,7 @@ import {
 import { RateSummarySideNav } from '../SubmissionSideNav/RateSummarySideNav'
 import { RateQuestionResponse } from '../QuestionResponse/QuestionResponseSummary/RateQuestionResponse'
 import { UploadRateResponse } from '../QuestionResponse/UploadResponse/UploadRateResponse'
+import { ReleasedToState } from '../SubmissionReleasedToState/ReleasedToState'
 
 function componentForAuthMode(
     authMode: AuthModeType
@@ -187,6 +188,13 @@ const CMSUserRoutes = ({
     setAlert?: React.Dispatch<React.ReactElement>
     stageName?: string
 }): React.ReactElement => {
+    // feature flag
+    const ldClient = useLDClient()
+    const showApprovals: boolean = ldClient?.variation(
+        featureFlags.SUBMISSION_APPROVALS.flag,
+        featureFlags.SUBMISSION_APPROVALS.defaultValue
+    )
+
     return (
         <AuthenticatedRouteWrapper>
             <Routes>
@@ -260,6 +268,13 @@ const CMSUserRoutes = ({
                     path={RoutesRecord.REPLACE_RATE}
                     element={<ReplaceRate />}
                 />
+
+                {showApprovals && (
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_RELEASED_TO_STATE}
+                        element={<ReleasedToState />}
+                    />
+                )}
 
                 <Route
                     path={RoutesRecord.SUBMISSIONS_REVISION}
