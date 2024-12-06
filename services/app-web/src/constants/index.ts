@@ -17,6 +17,9 @@ export {
 } from './healthPlanPackages'
 
 export {
+    SubmissionReviewStatusRecord   
+} from './contract'
+export {
     PageHeadingsRecord,
     PageTitlesRecord,
     RoutesRecord,

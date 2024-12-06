@@ -44,11 +44,10 @@ model ContractTable {
   stateNumber Int
 
   questions ContractQuestion[]
-
+  reviewStatusActions ContractActionTable[]
   draftRates DraftRateJoinTable[]
 
   revisions ContractRevisionTable[]
-
   sharedRateRevisions RateRevisionTable[] @relation(name: "SharedRateRevisions")
 }
 
@@ -166,6 +165,17 @@ model RateRevisionTable {
   contractsWithSharedRateRevision ContractTable[]          @relation(name: "SharedRateRevisions")
 }
 
+model ContractActionTable {
+  id            String   @id @default(uuid())
+  updatedAt     DateTime @default(now()) @updatedAt
+  updatedByID   String
+  updatedBy     User     @relation(fields: [updatedByID], references: [id])
+  updatedReason String
+  actionType    ContractActionType
+  contractID    String  
+  contract      ContractTable  @relation(fields: [contractID], references: [id])
+}
+
 model UpdateInfoTable {
   id            String   @id @default(uuid())
   updatedAt     DateTime
@@ -182,7 +192,6 @@ model UpdateInfoTable {
   unlockedRates      RateRevisionTable[]          @relation("unlockRateInfo")
   withdrawnRates     RateTable[]                  @relation("withdrawRateInfo")
   submissionPackages SubmissionPackageJoinTable[] @relation("submission")
-
   // these get ALL related contracts + revisions for given update.
   relatedContracts ContractRevisionTable[]
   relatedRates     RateRevisionTable[]
@@ -319,6 +328,7 @@ model User {
   audits                UserAudit[]
   updatedByAuditEntries UserAudit[]                @relation("UpdatedBy")
   updateInfos           UpdateInfoTable[]
+  contractReviewStatusActions   ContractActionTable[]
 }
 
 model UserAudit {
@@ -435,6 +445,11 @@ enum Role {
   HELPDESK_USER
   BUSINESSOWNER_USER
   CMS_APPROVER_USER
+}
+
+enum ContractActionType {
+  UNDER_REVIEW
+  MARK_AS_APPROVED
 }
 
 enum AuditAction {

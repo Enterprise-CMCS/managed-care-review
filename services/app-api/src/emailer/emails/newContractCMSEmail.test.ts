@@ -1111,7 +1111,7 @@ test('renders overall email as expected', async () => {
     const sub: ContractType = mockContract()
     sub.packageSubmissions[0].contractRevision.formData.contractDateStart =
         new Date('2021-01-01')
-    sub.packageSubmissions[0].contractRevision.formData.contractDateStart =
+    sub.packageSubmissions[0].contractRevision.formData.contractDateEnd =
         new Date('2021-12-31')
     sub.packageSubmissions[0].rateRevisions = [
         {

@@ -21,8 +21,7 @@ import { recordJSException } from '../../otelHelpers'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import { Error404 } from '../Errors/Error404Page'
 import { Contract, User } from '../../gen/gqlClient'
-import { useLDClient } from 'launchdarkly-react-client-sdk'
-import { featureFlags } from '../../common-code/featureFlags'
+import { isUnlockedOrDraft, shouldUseFormPageStyles } from './helpers'
 
 export type SideNavOutletContextType = {
     contract: Contract
@@ -42,12 +41,6 @@ export const SubmissionSideNav = () => {
     const { loggedInUser } = useAuth()
     const { pathname } = useLocation()
     const routeName = getRouteName(pathname)
-
-    const ldClient = useLDClient()
-    const showQAbyRates: boolean = ldClient?.variation(
-        featureFlags.QA_BY_RATES.flag,
-        featureFlags.QA_BY_RATES.defaultValue
-    )
 
     const isSelectedLink = (route: string | string[]): string => {
         //We pass an array of the form routes in order to display the sideNav on all of the pages
@@ -112,9 +105,6 @@ export const SubmissionSideNav = () => {
         QUESTION_RESPONSE_SHOW_SIDEBAR_ROUTES.includes(routeName)
 
     const isStateUser = loggedInUser?.role === 'STATE_USER'
-    const isFormPage =
-        (submissionStatus === 'UNLOCKED' || submissionStatus === 'DRAFT') &&
-        isStateUser
     // Only State users can see a draft submission
     if (submissionStatus === 'DRAFT' && !isStateUser) {
         return <GenericErrorPage />
@@ -146,6 +136,14 @@ export const SubmissionSideNav = () => {
         return <GenericErrorPage />
     }
 
+    // All of this logic is to enable conditional styles with sidenabv
+    const isEditable = isUnlockedOrDraft(submissionStatus)
+    const isFormPage = shouldUseFormPageStyles(
+        routeName,
+        loggedInUser,
+        isEditable
+    )
+
     const generateRateLinks = () => {
         const rateRevision = contract.packageSubmissions[0].rateRevisions
         const programs = contract.state.programs
@@ -155,7 +153,13 @@ export const SubmissionSideNav = () => {
         }
 
         return rateRevision.map((rev) => {
-            const ratePrograms = rev.formData.rateProgramIDs
+            const useDeprecatedRateProgramIDs =
+                rev.formData.deprecatedRateProgramIDs.length > 0 &&
+                rev.formData.rateProgramIDs.length === 0
+            const ratePrograms = useDeprecatedRateProgramIDs
+                ? rev.formData.deprecatedRateProgramIDs
+                : rev.formData.rateProgramIDs
+            const rateProgramNames = ratePrograms
                 .map(
                     (id) =>
                         programs.find((program) => program.id === id)?.name ||
@@ -164,12 +168,12 @@ export const SubmissionSideNav = () => {
                 .join(' ')
             return (
                 <NavLinkWithLogging
-                    to={`/submissions/${id}/rate/${rev.rateID}/question-and-answers`}
+                    to={`/submissions/${id}/rates/${rev.rateID}/question-and-answers`}
                     className={isSelectedRateLink(rev.rateID)}
                     event_name="navigation_clicked"
                 >
                     Rate questions: <br />
-                    {ratePrograms}
+                    {rateProgramNames || 'Unknown Program(s)'}
                 </NavLinkWithLogging>
             )
         })
@@ -203,9 +207,9 @@ export const SubmissionSideNav = () => {
                             >
                                 <Icon.ArrowBack />
                                 {loggedInUser?.__typename === 'StateUser' ? (
-                                    <span>&nbsp;Back to state dashboard</span>
+                                    <span>&nbsp;Go to state dashboard</span>
                                 ) : (
-                                    <span>&nbsp;Back to dashboard</span>
+                                    <span>&nbsp;Go to dashboard</span>
                                 )}
                             </NavLinkWithLogging>
                         </div>
@@ -234,15 +238,13 @@ export const SubmissionSideNav = () => {
                                 <NavLinkWithLogging
                                     to={`/submissions/${id}/question-and-answers`}
                                     className={isSelectedLink(
-                                        'SUBMISSIONS_QUESTIONS_AND_ANSWERS'
+                                        'SUBMISSIONS_CONTRACT_QUESTIONS_AND_ANSWERS'
                                     )}
                                     event_name="navigation_clicked"
                                 >
                                     Contract questions
                                 </NavLinkWithLogging>,
-                                ...(showQAbyRates && isStateUser
-                                    ? generateRateLinks()
-                                    : []),
+                                ...(isStateUser ? generateRateLinks() : []),
                             ]}
                         />
                     </div>

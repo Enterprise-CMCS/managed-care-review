@@ -18,7 +18,6 @@ import {
 } from '../../common-code/healthPlanFormDataType/healthPlanFormData'
 import type { UpdateInfoType } from '../../domain-models'
 import { isStateUser } from '../../domain-models'
-import type { Emailer } from '../../emailer'
 import type { MutationResolvers, State } from '../../gen/gqlServer'
 import { logError, logSuccess } from '../../logger'
 import type { Store } from '../../postgres'
@@ -28,7 +27,6 @@ import {
     setErrorAttributesOnActiveSpan,
     setSuccessAttributesOnActiveSpan,
 } from '../attributeHelper'
-import type { EmailParameterStore } from '../../parameterStore'
 import { GraphQLError } from 'graphql'
 
 import type {
@@ -194,8 +192,8 @@ export function parseAndSubmit(
 //
 export function submitHealthPlanPackageResolver(
     store: Store,
-    emailer: Emailer,
-    emailParameterStore: EmailParameterStore,
+    // emailer: Emailer,
+    // emailParameterStore: EmailParameterStore,
     launchDarkly: LDService
 ): MutationResolvers['submitHealthPlanPackage'] {
     return async (_parent, { input }, context) => {
@@ -489,21 +487,7 @@ export function submitHealthPlanPackageResolver(
             })
         }
 
-        // set variables used across feature flag boundary
         const updatedPackage = maybeSubmittedPkg
-
-        const statePrograms = store.findStatePrograms(updatedPackage.stateCode)
-
-        if (statePrograms instanceof Error) {
-            logError('findStatePrograms', statePrograms.message)
-            setErrorAttributesOnActiveSpan(statePrograms.message, span)
-            throw new GraphQLError(statePrograms.message, {
-                extensions: {
-                    code: 'INTERNAL_SERVER_ERROR',
-                    cause: 'DB_ERROR',
-                },
-            })
-        }
 
         logSuccess('submitHealthPlanPackage')
         setSuccessAttributesOnActiveSpan(span)

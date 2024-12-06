@@ -1,0 +1,27 @@
+mutation approveContract($input: ApproveContractInput!) {
+    approveContract(input: $input) {
+        contract {
+            ...contractFieldsFragment
+
+            draftRevision {
+                ...contractRevisionFragment
+            }
+
+            draftRates {
+                ...rateFieldsFragment
+
+                draftRevision {
+                    ...rateRevisionFragment
+                }
+
+                revisions {
+                    ...rateRevisionFragment
+                }
+            }
+
+            packageSubmissions {
+                ...packageSubmissionsFragment
+            }
+        }
+    }
+}

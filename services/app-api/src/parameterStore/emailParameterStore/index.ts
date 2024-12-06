@@ -1,10 +1,4 @@
 export {
-    getStateAnalystsEmails,
-    getStateAnalystsEmailsLocal,
-    getStateAnalystsSettings,
-    getStateAnalystsSettingsLocal,
-} from './stateAnalystsEmails'
-export {
     getDevReviewTeamEmails,
     getDevReviewTeamEmailsLocal,
 } from './reviewSharedEmails/getDevReviewTeamEmails'

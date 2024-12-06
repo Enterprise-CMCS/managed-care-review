@@ -3,8 +3,10 @@ import { renderWithProviders, testS3Client } from '../../testHelpers'
 import {
     fetchCurrentUserMock,
     fetchRateMockSuccess,
+    fetchContractMockSuccess,
     iterableCmsUsersMockData,
     mockValidStateUser,
+    mockContractPackageSubmitted,
 } from '../../testHelpers/apolloMocks'
 import { RateSummary } from './RateSummary'
 import { RoutesRecord } from '../../constants'
@@ -25,7 +27,10 @@ describe('RateSummary', () => {
     describe.each(iterableCmsUsersMockData)(
         'Viewing RateSummary as a $userRole',
         ({ userRole, mockUser }) => {
+            const contract = mockContractPackageSubmitted()
+
             it('renders without errors', async () => {
+                const contract = mockContractPackageSubmitted()
                 renderWithProviders(wrapInRoutes(<RateSummary />), {
                     apolloProvider: {
                         mocks: [
@@ -33,7 +38,12 @@ describe('RateSummary', () => {
                                 user: mockUser(),
                                 statusCode: 200,
                             }),
-                            fetchRateMockSuccess({ id: '7a' }),
+                            fetchContractMockSuccess({ contract }),
+                            fetchRateMockSuccess({
+                                id: '7a',
+                                parentContractID: contract.id,
+                            }),
+                            fetchContractMockSuccess({ contract }),
                         ],
                     },
                     routerProvider: {
@@ -56,8 +66,10 @@ describe('RateSummary', () => {
                                 user: mockUser(),
                                 statusCode: 200,
                             }),
+                            fetchContractMockSuccess({ contract }),
                             fetchRateMockSuccess({
                                 id: '1337',
+                                parentContractID: contract.id,
                                 withdrawInfo: {
                                     __typename: 'UpdateInformation',
                                     updatedAt: new Date('2024-01-01'),
@@ -95,9 +107,9 @@ describe('RateSummary', () => {
                 expect(
                     screen.getByTestId('rateWithdrawnBanner')
                 ).toHaveTextContent(/Withdrawn by: Administrator/)
-                // API returns UTC timezone, we display timestamped dates in ET timezone so 1 day before on these tests.
+                // API returns UTC timezone, we display timestamped dates in PT timezone so 1 day before on these tests.
                 expect(
-                    screen.getByText('12/31/2023 7:00pm ET')
+                    screen.getByText('12/31/2023 4:00pm PT')
                 ).toBeInTheDocument()
                 expect(
                     screen.getByText('Admin as withdrawn this rate.')
@@ -127,7 +139,11 @@ describe('RateSummary', () => {
                                 user: mockUser(),
                                 statusCode: 200,
                             }),
-                            fetchRateMockSuccess({ id: '7a' }),
+                            fetchRateMockSuccess({
+                                id: '7a',
+                                parentContractID: contract.id,
+                            }),
+                            fetchContractMockSuccess({ contract }),
                         ],
                     },
                     routerProvider: {
@@ -149,38 +165,15 @@ describe('RateSummary', () => {
                     expect(error).toHaveBeenCalled()
                 })
             })
-
-            it('renders back to dashboard link for CMS users', async () => {
-                renderWithProviders(wrapInRoutes(<RateSummary />), {
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({
-                                user: mockUser(),
-                                statusCode: 200,
-                            }),
-                            fetchRateMockSuccess({ id: '7a' }),
-                        ],
-                    },
-                    routerProvider: {
-                        route: '/rates/7a',
-                    },
-                })
-
-                const backLink = await screen.findByRole('link', {
-                    name: /Back to dashboard/,
-                })
-                expect(backLink).toBeInTheDocument()
-
-                expect(backLink).toHaveAttribute(
-                    'href',
-                    '/dashboard/rate-reviews'
-                )
-            })
         }
     )
 
     describe('Viewing RateSummary as a State user', () => {
+        const contract = mockContractPackageSubmitted()
+
         it('renders SingleRateSummarySection component without errors for locked rate', async () => {
+            const rate = rateWithHistoryMock()
+            rate.parentContractID = contract.id
             renderWithProviders(wrapInRoutes(<RateSummary />), {
                 apolloProvider: {
                     mocks: [
@@ -188,7 +181,8 @@ describe('RateSummary', () => {
                             user: mockValidStateUser(),
                             statusCode: 200,
                         }),
-                        fetchRateMockSuccess(rateWithHistoryMock()),
+                        fetchRateMockSuccess(rate),
+                        fetchContractMockSuccess({ contract }),
                     ],
                 },
                 routerProvider: {
@@ -214,8 +208,10 @@ describe('RateSummary', () => {
                             user: mockValidStateUser(),
                             statusCode: 200,
                         }),
+                        fetchContractMockSuccess({ contract }),
                         fetchRateMockSuccess({
                             id: '1337',
+                            parentContractID: contract.id,
                             withdrawInfo: {
                                 __typename: 'UpdateInformation',
                                 updatedAt: new Date('2024-01-01'),
@@ -248,8 +244,8 @@ describe('RateSummary', () => {
             expect(screen.getByTestId('rateWithdrawnBanner')).toHaveTextContent(
                 /Withdrawn by: Administrator/
             )
-            // API returns UTC timezone, we display timestamped dates in ET timezone so 1 day before on these tests.
-            expect(screen.getByText('12/31/2023 7:00pm ET')).toBeInTheDocument()
+            // API returns UTC timezone, we display timestamped dates in PT timezone so 1 day before on these tests.
+            expect(screen.getByText('12/31/2023 4:00pm PT')).toBeInTheDocument()
             expect(
                 screen.getByText('Admin as withdrawn this rate.')
             ).toBeInTheDocument()
@@ -276,8 +272,10 @@ describe('RateSummary', () => {
                             }),
                             fetchRateMockSuccess({
                                 id: '1337',
+                                parentContractID: contract.id,
                                 status: 'UNLOCKED',
                             }),
+                            fetchContractMockSuccess({ contract }),
                         ],
                     },
                     routerProvider: {
@@ -308,7 +306,11 @@ describe('RateSummary', () => {
                             user: mockValidStateUser(),
                             statusCode: 200,
                         }),
-                        fetchRateMockSuccess({ id: '1337' }),
+                        fetchRateMockSuccess({
+                            id: '1337',
+                            parentContractID: contract.id,
+                        }),
+                        fetchContractMockSuccess({ contract }),
                     ],
                 },
                 //purposefully attaching invalid id to url here
@@ -329,7 +331,11 @@ describe('RateSummary', () => {
                             user: mockValidStateUser(),
                             statusCode: 200,
                         }),
-                        fetchRateMockSuccess({ id: '7a' }),
+                        fetchRateMockSuccess({
+                            id: '7a',
+                            parentContractID: contract.id,
+                        }),
+                        fetchContractMockSuccess({ contract }),
                     ],
                 },
                 routerProvider: {

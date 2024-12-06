@@ -80,7 +80,7 @@ describe('CMS user can view rate reviews', () => {
 
             // Go back to dashboard and check both rates in the table
             // check the dashboard has the columns we expect
-            cy.findByText('Back to dashboard').should('exist').click()
+            cy.findByText('Go to dashboard').should('exist').click()
             cy.url({ timeout: 10_000 }).should('contain', 'rate-reviews')
             cy.findByText('Rate reviews').should('exist')
             cy.get('thead')

@@ -1,14 +1,16 @@
 import { ApolloServer } from 'apollo-server-lambda'
-import CREATE_HEALTH_PLAN_PACKAGE from 'app-graphql/src/mutations/createHealthPlanPackage.graphql'
-import SUBMIT_HEALTH_PLAN_PACKAGE from 'app-graphql/src/mutations/submitHealthPlanPackage.graphql'
-import UNLOCK_HEALTH_PLAN_PACKAGE from 'app-graphql/src/mutations/unlockHealthPlanPackage.graphql'
-import FETCH_HEALTH_PLAN_PACKAGE from 'app-graphql/src/queries/fetchHealthPlanPackage.graphql'
-import UPDATE_HEALTH_PLAN_FORM_DATA from 'app-graphql/src/mutations/updateHealthPlanFormData.graphql'
-import CREATE_CONTRACT_QUESTION from 'app-graphql/src/mutations/createContractQuestion.graphql'
-import CREATE_CONTRACT_QUESTION_RESPONSE from 'app-graphql/src/mutations/createContractQuestionResponse.graphql'
-import UPDATE_STATE_ASSIGNMENTS_BY_STATE from 'app-graphql/src/mutations/updateStateAssignmentsByState.graphql'
-import CREATE_RATE_QUESTION from 'app-graphql/src/mutations/createRateQuestion.graphql'
-import CREATE_RATE_QUESTION_RESPONSE from 'app-graphql/src/mutations/createRateQuestionResponse.graphql'
+import {
+    CreateHealthPlanPackageDocument,
+    SubmitHealthPlanPackageDocument,
+    UnlockHealthPlanPackageDocument,
+    FetchHealthPlanPackageDocument,
+    UpdateStateAssignmentsByStateDocument,
+    CreateRateQuestionResponseDocument,
+    UpdateHealthPlanFormDataDocument,
+    CreateRateQuestionDocument,
+    CreateContractQuestionResponseDocument,
+    CreateContractQuestionDocument,
+} from '../gen/gqlClient'
 import typeDefs from 'app-graphql/src/schema.graphql'
 import type {
     HealthPlanFormDataType,
@@ -37,8 +39,6 @@ import { configureResolvers } from '../resolvers'
 import { latestFormData } from './healthPlanPackageHelpers'
 import { sharedTestPrismaClient } from './storeHelpers'
 import { domainToBase64 } from '../common-code/proto/healthPlanFormDataProto'
-import type { EmailParameterStore } from '../parameterStore'
-import { newLocalEmailParameterStore } from '../parameterStore'
 import { testLDService } from './launchDarklyHelpers'
 import type { LDService } from '../launchDarkly/launchDarkly'
 import { insertUserToLocalAurora } from '../authn'
@@ -84,7 +84,6 @@ const constructTestPostgresServer = async (opts?: {
     context?: Context
     emailer?: Emailer
     store?: Store
-    emailParameterStore?: EmailParameterStore
     ldService?: LDService
     jwt?: JWTLib
     s3Client?: S3ClientT
@@ -92,8 +91,6 @@ const constructTestPostgresServer = async (opts?: {
     // set defaults
     const context = opts?.context || defaultContext()
     const emailer = opts?.emailer || constructTestEmailer()
-    const parameterStore =
-        opts?.emailParameterStore || newLocalEmailParameterStore()
     const ldService = opts?.ldService || testLDService()
 
     const prismaClient = await sharedTestPrismaClient()
@@ -113,10 +110,10 @@ const constructTestPostgresServer = async (opts?: {
     const postgresResolvers = configureResolvers(
         postgresStore,
         emailer,
-        parameterStore,
         ldService,
         jwt,
-        s3
+        s3,
+        'https://localhost:3000'
     )
 
     return new ApolloServer({
@@ -161,7 +158,7 @@ const createTestHealthPlanPackage = async (
         contractType: 'BASE',
     }
     const result = await server.executeOperation({
-        query: CREATE_HEALTH_PLAN_PACKAGE,
+        query: CreateHealthPlanPackageDocument,
         variables: { input },
     })
     if (result.errors) {
@@ -183,7 +180,7 @@ const updateTestHealthPlanFormData = async (
 ): Promise<HealthPlanPackage> => {
     const updatedB64 = domainToBase64(updatedFormData)
     const updateResult = await server.executeOperation({
-        query: UPDATE_HEALTH_PLAN_FORM_DATA,
+        query: UpdateHealthPlanFormDataDocument,
         variables: {
             input: {
                 pkgID: updatedFormData.id,
@@ -215,7 +212,7 @@ const updateTestHealthPlanPackage = async (
     Object.assign(draft, partialUpdates)
 
     const updateResult = await server.executeOperation({
-        query: UPDATE_HEALTH_PLAN_FORM_DATA,
+        query: UpdateHealthPlanFormDataDocument,
         variables: {
             input: {
                 pkgID: pkgID,
@@ -314,7 +311,7 @@ const submitTestHealthPlanPackage = async (
     pkgID: string
 ) => {
     const updateResult = await server.executeOperation({
-        query: SUBMIT_HEALTH_PLAN_PACKAGE,
+        query: SubmitHealthPlanPackageDocument,
         variables: {
             input: {
                 pkgID,
@@ -342,7 +339,7 @@ const resubmitTestHealthPlanPackage = async (
     submittedReason: string
 ) => {
     const updateResult = await server.executeOperation({
-        query: SUBMIT_HEALTH_PLAN_PACKAGE,
+        query: SubmitHealthPlanPackageDocument,
         variables: {
             input: {
                 pkgID,
@@ -371,7 +368,7 @@ const unlockTestHealthPlanPackage = async (
     unlockedReason: string
 ): Promise<HealthPlanPackage> => {
     const updateResult = await server.executeOperation({
-        query: UNLOCK_HEALTH_PLAN_PACKAGE,
+        query: UnlockHealthPlanPackageDocument,
         variables: {
             input: {
                 pkgID: pkgID,
@@ -400,7 +397,7 @@ const fetchTestHealthPlanPackageById = async (
 ): Promise<HealthPlanPackage> => {
     const input = { pkgID }
     const result = await server.executeOperation({
-        query: FETCH_HEALTH_PLAN_PACKAGE,
+        query: FetchHealthPlanPackageDocument,
         variables: { input },
     })
 
@@ -430,7 +427,7 @@ const createTestQuestion = async (
         ],
     }
     const createdQuestion = await server.executeOperation({
-        query: CREATE_CONTRACT_QUESTION,
+        query: CreateContractQuestionDocument,
         variables: {
             input: {
                 contractID,
@@ -465,7 +462,7 @@ const createTestRateQuestion = async (
         ],
     }
     return await server.executeOperation({
-        query: CREATE_RATE_QUESTION,
+        query: CreateRateQuestionDocument,
         variables: {
             input: {
                 rateID,
@@ -490,7 +487,7 @@ const createTestRateQuestionResponse = async (
     }
 
     return await server.executeOperation({
-        query: CREATE_RATE_QUESTION_RESPONSE,
+        query: CreateRateQuestionResponseDocument,
         variables: {
             input: {
                 ...response,
@@ -514,7 +511,7 @@ const createTestQuestionResponse = async (
         ],
     }
     const createdResponse = await server.executeOperation({
-        query: CREATE_CONTRACT_QUESTION_RESPONSE,
+        query: CreateContractQuestionResponseDocument,
         variables: {
             input: {
                 ...response,
@@ -541,7 +538,7 @@ const updateTestStateAssignments = async (
     assignedUserIDs: string[]
 ): Promise<UpdateStateAssignmentsByStatePayload> => {
     const updatedAssignments = await server.executeOperation({
-        query: UPDATE_STATE_ASSIGNMENTS_BY_STATE,
+        query: UpdateStateAssignmentsByStateDocument,
         variables: {
             input: {
                 stateCode,

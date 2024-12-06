@@ -1,7 +1,6 @@
 import type { Context } from '../../handlers/apollo_gql'
-
 import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
-import FETCH_CURRENT_USER from '../../../../app-graphql/src/queries/fetchCurrentUser.graphql'
+import { FetchCurrentUserDocument } from '../../gen/gqlClient'
 import statePrograms from '../../../../app-web/src/common-code/data/statePrograms.json'
 import { testStateUser } from '../../testHelpers/userHelpers'
 
@@ -10,7 +9,9 @@ describe('currentUser', () => {
         const server = await constructTestPostgresServer()
 
         // make a mock request
-        const res = await server.executeOperation({ query: FETCH_CURRENT_USER })
+        const res = await server.executeOperation({
+            query: FetchCurrentUserDocument,
+        })
 
         // confirm that we get what we got
         expect(res.errors).toBeUndefined()
@@ -39,7 +40,9 @@ describe('currentUser', () => {
         })
 
         // make a mock request
-        const res = await server.executeOperation({ query: FETCH_CURRENT_USER })
+        const res = await server.executeOperation({
+            query: FetchCurrentUserDocument,
+        })
 
         // confirm that we get what we got
         expect(res.errors).toBeUndefined()

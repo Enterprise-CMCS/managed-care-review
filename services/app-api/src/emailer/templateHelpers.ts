@@ -14,6 +14,8 @@ import type {
     RateRevisionType,
     UnlockedContractType,
     ContractQuestionType,
+    RateQuestionType,
+    RateType,
 } from '../domain-models'
 import { logError } from '../logger'
 import { pruneDuplicateEmails } from './formatters'
@@ -198,7 +200,7 @@ const generateCMSReviewerEmailsForSubmittedContract = (
 ): string[] | Error => {
     const contractRev = contract.packageSubmissions[0].contractRevision
     const contractFormData = contractRev.formData
-    
+
     if (
         contractFormData.submissionType !== 'CONTRACT_AND_RATES' &&
         contractFormData.submissionType !== 'CONTRACT_ONLY'
@@ -232,10 +234,11 @@ const generateCMSReviewerEmailsForSubmittedContract = (
     }
 
     const rateRevs = contract.packageSubmissions[0].rateRevisions
-    
+
     //Remove OACT and DMCP emails from CHIP or State of PR submissions
-    if (rateRevs &&
-        handleAsCHIPSubmissionForContract(contractRev, rateRevs) ||
+    if (
+        (rateRevs &&
+            handleAsCHIPSubmissionForContract(contractRev, rateRevs)) ||
         contractRev.contract.stateCode === 'PR'
     ) {
         reviewers = filterChipAndPRSubmissionReviewers(reviewers, config)
@@ -391,8 +394,8 @@ const stripHTMLFromTemplate = (template: string) => {
 }
 
 const getQuestionRound = (
-    allQuestions: ContractQuestionType[],
-    currentQuestion: ContractQuestionType
+    allQuestions: (ContractQuestionType | RateQuestionType)[],
+    currentQuestion: ContractQuestionType | RateQuestionType
 ): number | Error => {
     // Filter out other divisions question and sort by created at in ascending order
     const divisionQuestions = allQuestions
@@ -418,6 +421,54 @@ const getQuestionRound = (
     return questionIndex + 1
 }
 
+const getActuaryContactEmails = (rate: RateType): string[] => {
+    const formData = rate.packageSubmissions[0].rateRevision.formData
+    const actuaryContacts: string[] = []
+
+    if (formData.certifyingActuaryContacts?.length) {
+        formData.certifyingActuaryContacts.forEach((contact) => {
+            if (contact.email) {
+                actuaryContacts.push(contact.email)
+            }
+        })
+    }
+
+    if (formData.addtlActuaryContacts?.length) {
+        formData.addtlActuaryContacts.forEach((contact) => {
+            if (contact.email) {
+                actuaryContacts.push(contact.email)
+            }
+        })
+    }
+
+    return actuaryContacts
+}
+
+const getRateSubmitterEmails = (rate: RateType): string[] => {
+    const contractRevisions = rate.packageSubmissions[0].contractRevisions
+    return contractRevisions.reduce((contacts: string[], cr) => {
+        if (cr.submitInfo?.updatedBy.email) {
+            return contacts.concat(cr.submitInfo.updatedBy.email)
+        }
+        return contacts
+    }, [])
+}
+
+const getRateStateContactEmails = (rate: RateType): string[] => {
+    const contractRevisions = rate.packageSubmissions[0].contractRevisions
+    return contractRevisions.reduce((contacts: string[], cr) => {
+        const stateContacts: string[] = []
+        if (cr.formData.stateContacts.length) {
+            cr.formData.stateContacts.forEach((stateContact) => {
+                if (stateContact.email) {
+                    stateContacts.push(stateContact.email)
+                }
+            })
+        }
+        return contacts.concat(stateContacts)
+    }, [])
+}
+
 export {
     stripHTMLFromTemplate,
     handleAsCHIPSubmission,
@@ -433,4 +484,7 @@ export {
     findContractPrograms,
     filterChipAndPRSubmissionReviewers,
     getQuestionRound,
+    getActuaryContactEmails,
+    getRateSubmitterEmails,
+    getRateStateContactEmails,
 }

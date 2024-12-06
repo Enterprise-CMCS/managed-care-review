@@ -1,6 +1,7 @@
 import React from 'react'
 import { Alert } from '@trussworks/react-uswds'
 import { LinkWithLogging } from '../../TealiumLogging/Link'
+import styles from '../Banner.module.scss'
 
 export type UnlockedProps = {
     link: string
@@ -18,18 +19,22 @@ export const PreviousSubmissionBanner = ({
             data-testid="previousSubmissionBanner"
             validation={true}
         >
-            <p
-                className="usa-alert__text"
-                data-testid="previous-submission-banner"
-            >
-                <span>This is a past version of this submission.&nbsp;</span>
-                <LinkWithLogging
-                    href={link}
-                    data-testid="currentSubmissionLink"
+            <div className={styles.bannerBodyText}>
+                <p
+                    className="usa-alert__text"
+                    data-testid="previous-submission-banner"
                 >
-                    View most recent version of this submission
-                </LinkWithLogging>
-            </p>
+                    <span>
+                        This is a past version of this submission.&nbsp;
+                    </span>
+                    <LinkWithLogging
+                        href={link}
+                        data-testid="currentSubmissionLink"
+                    >
+                        View most recent version of this submission
+                    </LinkWithLogging>
+                </p>
+            </div>
         </Alert>
     )
 }

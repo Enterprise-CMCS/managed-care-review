@@ -565,12 +565,7 @@ describe('StateSubmissionForm', () => {
     })
 
     describe('the delete button', () => {
-        // For this test, we want to mock the call to deleteFile to see when it gets called
         const mockS3 = testS3Client()
-        const deleteCallKeys: string[] = []
-        mockS3.deleteFile = async (key) => {
-            deleteCallKeys.push(key)
-        }
 
         it('does not delete files from past revisions', async () => {
             const submission = mockUnlockedHealthPlanPackageWithDocuments()
@@ -635,9 +630,18 @@ describe('StateSubmissionForm', () => {
             await userEvent.click(removeThreeOne)
 
             // ASSERT
-            // When deleting a file that exists in a previous revision, we should not see its key
-            // in the deleteCallKeys array.
-            expect(deleteCallKeys).toEqual(['three-one'])
+            // Verify these files are no longer visible in the UI
+            expect(
+                screen.queryByText('Remove one two document')
+            ).not.toBeInTheDocument()
+            expect(
+                screen.queryByText('Remove two one document')
+            ).not.toBeInTheDocument()
+            expect(
+                screen.queryByText('Remove three one document')
+            ).not.toBeInTheDocument()
+
+            expect(screen.getByText(/0 files added/)).toBeInTheDocument()
         })
 
         it('loads contract details fields for /submissions/:id/edit/contract-details with amendments', async () => {

@@ -194,6 +194,8 @@ describe('parseContract', () => {
             id: '28b00852-00e3-467c-9311-519e60d43283',
             stateCode: 'FL',
             stateNumber: 5,
+            reviewStatus: 'UNDER_REVIEW',
+            consolidatedStatus: 'DRAFT',
             mccrsID: undefined,
             revisions: [],
             draftRevision: {
@@ -355,6 +357,8 @@ describe('parseContract', () => {
             stateCode: 'MN',
             stateNumber: 5,
             mccrsID: undefined,
+            reviewStatus: 'UNDER_REVIEW',
+            consolidatedStatus: 'DRAFT',
             revisions: [],
             draftRevision: {
                 id: '12345',

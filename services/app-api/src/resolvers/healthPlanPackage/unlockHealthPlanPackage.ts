@@ -17,16 +17,13 @@ import {
     setResolverDetailsOnActiveSpan,
     setSuccessAttributesOnActiveSpan,
 } from '../attributeHelper'
-import type { EmailParameterStore } from '../../parameterStore'
 import { GraphQLError } from 'graphql'
-import type { LDService } from '../../launchDarkly/launchDarkly'
+import type { StateCodeType } from '../../common-code/healthPlanFormDataType'
 
 // unlockHealthPlanPackageResolver is a state machine transition for HealthPlanPackage
 export function unlockHealthPlanPackageResolver(
     store: Store,
-    emailer: Emailer,
-    emailParameterStore: EmailParameterStore,
-    launchDarkly: LDService
+    emailer: Emailer
 ): MutationResolvers['unlockHealthPlanPackage'] {
     return async (_parent, { input }, context) => {
         const { user, ctx, tracer } = context
@@ -154,11 +151,25 @@ export function unlockHealthPlanPackageResolver(
 
         const draftformData: UnlockedHealthPlanFormDataType = formDataResult
 
-        // Get state analysts emails from parameter store
-        let stateAnalystsEmails =
-            await emailParameterStore.getStateAnalystsEmails(
-                draftformData.stateCode
+        let stateAnalystsEmails: string[] = []
+        // not great that state code type isn't being used in ContractType but I'll risk the conversion for now
+        const stateAnalystsEmailsResult = await store.findStateAssignedUsers(
+            unlockContractResult.stateCode as StateCodeType
+        )
+
+        if (stateAnalystsEmailsResult instanceof Error) {
+            logError(
+                'getStateAnalystsEmails',
+                stateAnalystsEmailsResult.message
             )
+            setErrorAttributesOnActiveSpan(
+                stateAnalystsEmailsResult.message,
+                span
+            )
+        } else {
+            stateAnalystsEmails = stateAnalystsEmailsResult.map((u) => u.email)
+        }
+
         //If error, log it and set stateAnalystsEmails to empty string as to not interrupt the emails.
         if (stateAnalystsEmails instanceof Error) {
             logError('getStateAnalystsEmails', stateAnalystsEmails.message)

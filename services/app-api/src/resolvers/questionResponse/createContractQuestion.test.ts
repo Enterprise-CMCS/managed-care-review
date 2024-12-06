@@ -1,10 +1,9 @@
-import CREATE_QUESTION from 'app-graphql/src/mutations/createContractQuestion.graphql'
+import { CreateContractQuestionDocument } from '../../gen/gqlClient'
 import {
     constructTestPostgresServer,
     createTestQuestion,
     updateTestStateAssignments,
 } from '../../testHelpers/gqlHelpers'
-import { getTestStateAnalystsEmails } from '../../testHelpers/parameterStoreHelpers'
 import {
     assertAnError,
     assertAnErrorCode,
@@ -18,19 +17,27 @@ import {
     testCMSUser,
 } from '../../testHelpers/userHelpers'
 import { testEmailConfig, testEmailer } from '../../testHelpers/emailerHelpers'
-import { testLDService } from '../../testHelpers/launchDarklyHelpers'
-import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
-import { NewPostgresStore } from '../../postgres'
 import {
+    approveTestContract,
     submitTestContract,
     unlockTestContract,
 } from '../../testHelpers/gqlContractHelpers'
 
 describe('createQuestion', () => {
     const cmsUser = testCMSUser()
+    const assignedUsers = [
+        testCMSUser({
+            givenName: 'Roku',
+            email: 'roku@example.com',
+        }),
+        testCMSUser({
+            givenName: 'Izumi',
+            email: 'izumi@example.com',
+        }),
+    ]
     beforeAll(async () => {
         //Inserting a new CMS user, with division assigned, in postgres in order to create the question to user relationship.
-        await createDBUsersWithFullData([cmsUser])
+        await createDBUsersWithFullData([...assignedUsers, cmsUser])
     })
 
     it('returns question data after creation', async () => {
@@ -150,7 +157,7 @@ describe('createQuestion', () => {
         const draftContract = await createTestContract(stateServer)
 
         const createdQuestion = await cmsServer.executeOperation({
-            query: CREATE_QUESTION,
+            query: CreateContractQuestionDocument,
             variables: {
                 input: {
                     contractID: draftContract.id,
@@ -167,7 +174,42 @@ describe('createQuestion', () => {
         expect(createdQuestion.errors).toBeDefined()
         expect(assertAnErrorCode(createdQuestion)).toBe('BAD_USER_INPUT')
         expect(assertAnError(createdQuestion).message).toBe(
-            'Issue creating question for health plan package. Message: Cannot create question for health plan package in DRAFT status'
+            'Issue creating question for contract. Message: Cannot create question for contract in DRAFT status'
+        )
+    })
+    it('returns an error if contract has been approved', async () => {
+        const stateServer = await constructTestPostgresServer()
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: cmsUser,
+            },
+        })
+
+        const contract = await createAndSubmitTestContract(stateServer)
+        // approve contract
+        const approvedContract = await approveTestContract(
+            cmsServer,
+            contract.id
+        )
+        const createdQuestion = await cmsServer.executeOperation({
+            query: CreateContractQuestionDocument,
+            variables: {
+                input: {
+                    contractID: approvedContract.id,
+                    documents: [
+                        {
+                            name: 'Test Question',
+                            s3URL: 's3://bucketname/key/test1',
+                        },
+                    ],
+                },
+            },
+        })
+
+        expect(createdQuestion.errors).toBeDefined()
+        expect(assertAnErrorCode(createdQuestion)).toBe('BAD_USER_INPUT')
+        expect(assertAnError(createdQuestion).message).toBe(
+            'Issue creating question for contract. Message: Cannot create question for contract in APPROVED status'
         )
     })
     it('returns an error if a state user attempts to create a question for a package', async () => {
@@ -175,7 +217,7 @@ describe('createQuestion', () => {
         const contract = await createAndSubmitTestContract(stateServer)
 
         const createdQuestion = await stateServer.executeOperation({
-            query: CREATE_QUESTION,
+            query: CreateContractQuestionDocument,
             variables: {
                 input: {
                     contractID: contract.id,
@@ -206,7 +248,7 @@ describe('createQuestion', () => {
         await createAndSubmitTestContract(stateServer)
 
         const createdQuestion = await cmsServer.executeOperation({
-            query: CREATE_QUESTION,
+            query: CreateContractQuestionDocument,
             variables: {
                 input: {
                     contractID: 'invalid-pkg-id',
@@ -241,7 +283,7 @@ describe('createQuestion', () => {
         await createAndSubmitTestContract(stateServer)
 
         const createdQuestion = await cmsServer.executeOperation({
-            query: CREATE_QUESTION,
+            query: CreateContractQuestionDocument,
             variables: {
                 input: {
                     contractID: 'invalid-pkg-id',
@@ -276,7 +318,7 @@ describe('createQuestion', () => {
         await createAndSubmitTestContract(stateServer)
 
         const createdQuestion = await cmsServer.executeOperation({
-            query: CREATE_QUESTION,
+            query: CreateContractQuestionDocument,
             variables: {
                 input: {
                     contractID: 'invalid-pkg-id',
@@ -363,84 +405,11 @@ describe('createQuestion', () => {
         const contractName =
             contract.packageSubmissions[0].contractRevision.contractName
 
-        const stateAnalystsEmails = getTestStateAnalystsEmails(
-            contract.stateCode
-        )
-
-        const cmsEmails = [
-            ...config.devReviewTeamEmails,
-            ...stateAnalystsEmails,
-        ]
-
-        // email subject line is correct for CMS email
-        // email is sent to the state anaylsts since it
-        // was submitted by a DCMO user
-        // Mock emailer is called 2 times,
-        // first called to send the state email, then to CMS
-        expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
-            2,
-            expect.objectContaining({
-                subject: expect.stringContaining(
-                    `[LOCAL] Questions sent for ${contractName}`
-                ),
-                sourceEmail: config.emailSource,
-                toAddresses: expect.arrayContaining(Array.from(cmsEmails)),
-                bodyText: expect.stringContaining(
-                    `DMCO sent questions to the state for submission ${contractName}`
-                ),
-                bodyHTML: expect.stringContaining(
-                    `http://localhost/submissions/${contract.id}/question-and-answers`
-                ),
-            })
-        )
-    })
-
-    it('send CMS email to state analysts from database', async () => {
-        const ldService = testLDService({
-            'read-write-state-assignments': true,
-        })
-
-        const prismaClient = await sharedTestPrismaClient()
-        const postgresStore = NewPostgresStore(prismaClient)
-
-        const config = testEmailConfig()
-        const mockEmailer = testEmailer(config)
-        //mock invoke email submit lambda
-        const stateServer = await constructTestPostgresServer()
-        const cmsServer = await constructTestPostgresServer({
-            store: postgresStore,
-            context: {
-                user: cmsUser,
-            },
-            ldService,
-            emailer: mockEmailer,
-        })
-
-        // add some users to the db, assign them to the state
-        const assignedUsers = [
-            testCMSUser({
-                givenName: 'Roku',
-                email: 'roku@example.com',
-            }),
-            testCMSUser({
-                givenName: 'Izumi',
-                email: 'izumi@example.com',
-            }),
-        ]
-
-        await createDBUsersWithFullData(assignedUsers)
-
+        // Assign state analysts
         const assignedUserIDs = assignedUsers.map((u) => u.id)
         const assignedUserEmails = assignedUsers.map((u) => u.email)
 
         await updateTestStateAssignments(cmsServer, 'FL', assignedUserIDs)
-
-        const stateSubmission = await createAndSubmitTestContract(stateServer)
-
-        await createTestQuestion(cmsServer, stateSubmission.id)
-
-        const contractName =
-            stateSubmission.packageSubmissions[0].contractRevision.contractName
 
         const cmsEmails = [...config.devReviewTeamEmails, ...assignedUserEmails]
 
@@ -461,7 +430,7 @@ describe('createQuestion', () => {
                     `DMCO sent questions to the state for submission ${contractName}`
                 ),
                 bodyHTML: expect.stringContaining(
-                    `http://localhost/submissions/${stateSubmission.id}/question-and-answers`
+                    `http://localhost/submissions/${contract.id}/question-and-answers`
                 ),
             })
         )
@@ -494,14 +463,13 @@ describe('createQuestion', () => {
         const contractName =
             stateSubmission.packageSubmissions[0].contractRevision.contractName
 
-        const stateAnalystsEmails = getTestStateAnalystsEmails(
-            stateSubmission.stateCode
-        )
+        // Assign state analysts
+        const assignedUserIDs = assignedUsers.map((u) => u.id)
+        const assignedUserEmails = assignedUsers.map((u) => u.email)
 
-        const cmsEmails = [
-            ...config.devReviewTeamEmails,
-            ...stateAnalystsEmails,
-        ]
+        await updateTestStateAssignments(cmsServer, 'FL', assignedUserIDs)
+
+        const cmsEmails = [...config.devReviewTeamEmails, ...assignedUserEmails]
 
         // email subject line is correct for CMS email
         // email is sent to the state anaylsts since it
@@ -531,7 +499,7 @@ describe('createQuestion', () => {
         })
 
         const submitResult = await cmsServer.executeOperation({
-            query: CREATE_QUESTION,
+            query: CreateContractQuestionDocument,
             variables: {
                 input: {
                     contractID: '1234',

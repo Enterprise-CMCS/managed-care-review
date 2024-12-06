@@ -6,6 +6,7 @@ import type {
     RatePackageSubmissionWithCauseType,
     RateType,
 } from '../../domain-models'
+import path from 'path'
 import {
     setErrorAttributesOnActiveSpan,
     setResolverDetailsOnActiveSpan,
@@ -21,10 +22,18 @@ function initialSubmitDate(rate: RateType): Date | undefined {
     return firstSubmittedRev?.submitInfo?.updatedAt
 }
 
-export function rateResolver(store: Store): Resolvers['Rate'] {
+export function rateResolver(
+    store: Store,
+    applicationEndpoint: string
+): Resolvers['Rate'] {
     return {
         initiallySubmittedAt(parent) {
             return initialSubmitDate(parent) || null
+        },
+        webURL(parent) {
+            const urlPath = path.join('/rates/', parent.id)
+            const fullURL = new URL(urlPath, applicationEndpoint).href
+            return fullURL
         },
         state(parent) {
             const packageState = parent.stateCode

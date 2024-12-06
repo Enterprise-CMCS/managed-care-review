@@ -149,6 +149,7 @@ function mockRateRevision(name?: string, partial?: Partial<RateRevision>): RateR
             amendmentEffectiveDateEnd: new Date(),
             deprecatedRateProgramIDs: [],
             rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
+            consolidatedRateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
             certifyingActuaryContacts: [
                 {
                     id: null,
@@ -171,7 +172,8 @@ function mockRateRevision(name?: string, partial?: Partial<RateRevision>): RateR
             ],
             actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
             packagesWithSharedRateCerts: []
-        }
+        },
+        ...partial
     }
 }
 
@@ -182,19 +184,23 @@ function mockContractPackageDraft(
 ): Contract {
     return {
         __typename: 'Contract',
-        initiallySubmittedAt: undefined,
+        initiallySubmittedAt: null,
         status: 'DRAFT',
+        consolidatedStatus: 'DRAFT',
+        webURL: 'https://testmcreview.example/submissions/123',
+        reviewStatus: 'UNDER_REVIEW',
         createdAt: new Date('01/01/24'),
         updatedAt: new Date(),
+        lastUpdatedForDisplay: new Date(),
         id: 'test-abc-123',
         stateCode: 'MN',
         state: mockMNState(),
         stateNumber: 5,
-        mccrsID: undefined,
+        mccrsID: null,
         draftRevision: {
             __typename: 'ContractRevision',
-            submitInfo: undefined,
-            unlockInfo: undefined,
+            submitInfo: null,
+            unlockInfo: null,
             id: '123',
             contractID: 'test-abc-123',
             createdAt: new Date('01/01/2023'),
@@ -205,7 +211,9 @@ function mockContractPackageDraft(
 
         draftRates: partial?.draftRates ??[
             {
+                __typename: 'Rate',
                 id: '123',
+                webURL: 'https://testmcreview.example/rate/123',
                 createdAt: new Date(),
                 updatedAt: new Date(),
                 status: 'DRAFT',
@@ -215,11 +223,13 @@ function mockContractPackageDraft(
                 stateNumber: 5,
                 parentContractID: 'test-abc-123',
                 draftRevision: {
+                    __typename: 'RateRevision',
                     id: '123',
                     rateID: '456',
                     createdAt: new Date(),
                     updatedAt: new Date(),
                     formData: {
+                        __typename: 'RateFormData',
                         rateType: 'AMENDMENT',
                         rateCapitationType: 'RATE_CELL',
                         rateDocuments: [
@@ -251,6 +261,7 @@ function mockContractPackageDraft(
                         amendmentEffectiveDateEnd: new Date(),
                         deprecatedRateProgramIDs: [],
                         rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
+                        consolidatedRateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
                         certifyingActuaryContacts: [
                             {
                                 id: null,
@@ -289,15 +300,21 @@ function mockContractPackageSubmittedWithQuestions(
     const contractID = contractId || '11'
     return {
         status: 'SUBMITTED',
+        reviewStatus: 'UNDER_REVIEW',
+        consolidatedStatus: 'SUBMITTED',
         __typename: 'Contract',
         createdAt: new Date(),
         updatedAt: new Date(),
+        lastUpdatedForDisplay: new Date(),
         id: 'test-abc-123',
+        webURL: 'https://testmcreview.example/submissions/test-abc-123',
         stateCode: 'MN',
         state: mockMNState(),
         stateNumber: 5,
         initiallySubmittedAt: '2024-12-18T16:54:39.173Z',
-        mccrsID: undefined,
+        mccrsID: null,
+        draftRates: [],
+        draftRevision: null,
         packageSubmissions: [{
             cause: 'CONTRACT_SUBMISSION',
             __typename: 'ContractPackageSubmission',
@@ -328,7 +345,7 @@ function mockContractPackageSubmittedWithQuestions(
                     },
                     updatedReason: 'contract submit'
                 },
-                unlockInfo: undefined,
+                unlockInfo: null,
                 formData: {
                     programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
                     populationCovered: 'MEDICAID',
@@ -429,6 +446,7 @@ function mockContractPackageSubmittedWithQuestions(
                         amendmentEffectiveDateStart: new Date(),
                         amendmentEffectiveDateEnd: new Date(),
                         rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
+                        consolidatedRateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
                         deprecatedRateProgramIDs: [],
                         certifyingActuaryContacts: [
                             {
@@ -462,9 +480,9 @@ function mockContractPackageSubmittedWithQuestions(
                             __typename: 'ContractQuestion' as const,
                             id: 'dmco-question-1-id',
                             contractID,
-                            createdAt: new Date('2022-12-15'),
+                            createdAt: new Date('2022-12-16'),
                             addedBy: mockValidCMSUser({
-                                divisionAssignment: undefined,
+                                divisionAssignment: null,
                             }) as CmsUser,
                             documents: [
                                 {
@@ -514,20 +532,6 @@ function mockContractPackageSubmittedWithQuestions(
                             ],
                             division: 'DMCO',
                             responses: [
-                                {
-                                    __typename: 'QuestionResponse' as const,
-                                    id: 'response-to-dmco-2-id',
-                                    questionID: 'dmco-question-2-id',
-                                    addedBy: mockValidUser() as StateUser,
-                                    createdAt: new Date('2022-12-20'),
-                                    documents: [
-                                        {
-                                            s3URL: 's3://bucketname/key/response-to-dmco-2-document-1',
-                                            name: 'response-to-dmco-2-document-1',
-                                            downloadURL: expect.any(String),
-                                        },
-                                    ],
-                                },
                             ],
                         },
                     },
@@ -575,7 +579,7 @@ function mockContractPackageSubmittedWithQuestions(
                 ],
             },
             OACTQuestions: {
-                totalCount: 1,
+                totalCount: 2,
                 edges: [
                     {
                         __typename: 'ContractQuestionEdge' as const,
@@ -583,7 +587,7 @@ function mockContractPackageSubmittedWithQuestions(
                             __typename: 'ContractQuestion' as const,
                             id: 'oact-question-1-id',
                             contractID,
-                            createdAt: new Date('2022-12-15'),
+                            createdAt: new Date('2022-12-14'),
                             addedBy: mockValidCMSUser({
                                 divisionAssignment: 'OACT',
                             }) as CmsUser,
@@ -601,11 +605,47 @@ function mockContractPackageSubmittedWithQuestions(
                                     id: 'response-to-oact-1-id',
                                     questionID: 'oact-question-1-id',
                                     addedBy: mockValidUser() as StateUser,
-                                    createdAt: new Date('2022-12-16'),
+                                    createdAt: new Date('2022-12-17'),
                                     documents: [
                                         {
                                             s3URL: 's3://bucketname/key/response-to-oact-1-document-1',
                                             name: 'response-to-oact-1-document-1',
+                                            downloadURL: expect.any(String),
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    },
+                    {
+                        __typename: 'ContractQuestionEdge' as const,
+                        node: {
+                            __typename: 'ContractQuestion' as const,
+                            id: 'oact-question-2-id',
+                            contractID,
+                            createdAt: new Date('2022-12-17'),
+                            addedBy: mockValidCMSUser({
+                                divisionAssignment: 'OACT',
+                            }) as CmsUser,
+                            documents: [
+                                {
+                                    s3URL: 's3://bucketname/key/oact-question-1-document-1',
+                                    name: 'oact-question-2-document-1',
+                                    downloadURL: expect.any(String),
+                                },
+                            ],
+                            division: 'OACT',
+                            responses: [
+                                {
+                                    __typename: 'QuestionResponse' as const,
+                                    id: 'response-to-oact-2-id',
+                                    questionID: 'oact-question-2-id',
+                                    addedBy: mockValidUser() as StateUser,
+                                    createdAt: new Date('2022-12-16'),
+                                    documents: [
+                                        {
+                                            s3URL: 's3://bucketname/key/response-to-oact-1-document-1',
+                                            name: 'response-to-oact-2-document-1',
                                             downloadURL: expect.any(String),
                                         },
                                     ],
@@ -624,19 +664,23 @@ function mockContractWithLinkedRateDraft(
 ): Contract {
     return {
         __typename: 'Contract',
-        initiallySubmittedAt: undefined,
+        initiallySubmittedAt: null,
         status: 'DRAFT',
+        reviewStatus: 'UNDER_REVIEW',
+        consolidatedStatus: 'DRAFT',
         createdAt: new Date(),
         updatedAt: new Date(),
+        lastUpdatedForDisplay: new Date(),
         id: 'test-abc-123',
+        webURL: 'https://testmcreview.example/submissions/test-abc-123',
         stateCode: 'MN',
         state: mockMNState(),
         stateNumber: 5,
-        mccrsID: undefined,
+        mccrsID: null,
         draftRevision: {
             __typename: 'ContractRevision',
-            submitInfo: undefined,
-            unlockInfo: undefined,
+            submitInfo: null,
+            unlockInfo: null,
             id: '123',
             contractID: 'test-abc-123',
             createdAt: new Date('01/01/2023'),
@@ -695,7 +739,9 @@ function mockContractWithLinkedRateDraft(
         draftRates: [
             // a linked, unlocked, rate.
             {
+                __typename: 'Rate',
                 id: 'rate-123',
+                webURL: 'https://testmcreview.example/rates/rate-123',
                 createdAt: new Date(),
                 updatedAt: new Date(),
                 status: 'UNLOCKED',
@@ -704,6 +750,7 @@ function mockContractWithLinkedRateDraft(
                 stateNumber: 5,
                 parentContractID: 'some-other-contract-id',
                 draftRevision: {
+                    __typename: 'RateRevision',
                     id: '123',
                     rateID: 'rate-123',
                     createdAt: new Date(),
@@ -719,6 +766,7 @@ function mockContractWithLinkedRateDraft(
                         updatedReason: 'contract submit'
                     },
                     unlockInfo: {
+                        __typename: 'UpdateInformation',
                         updatedAt: new Date('12/19/2023'),
                         updatedBy: {
                             email: 'example@cms.com',
@@ -729,6 +777,7 @@ function mockContractWithLinkedRateDraft(
                         updatedReason: 'rate unlock maybe'
                     },
                     formData: {
+                        __typename: 'RateFormData',
                         rateType: 'AMENDMENT',
                         rateCapitationType: 'RATE_CELL',
                         rateDocuments: [
@@ -746,6 +795,7 @@ function mockContractWithLinkedRateDraft(
                         amendmentEffectiveDateStart: new Date(),
                         amendmentEffectiveDateEnd: new Date(),
                         rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
+                        consolidatedRateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
                         deprecatedRateProgramIDs: [],
                         certifyingActuaryContacts: [
                             {
@@ -768,13 +818,15 @@ function mockContractWithLinkedRateDraft(
                     }
                 },
                 revisions: [{
+                    __typename: 'RateRevision',
                     id: '456',
                     rateID: 'rate-123',
                     createdAt: new Date(),
                     updatedAt: new Date(),
-                    submitInfo: undefined,
-                    unlockInfo: undefined,
+                    submitInfo: null,
+                    unlockInfo: null,
                     formData: {
+                        __typename: 'RateFormData',
                         rateType: 'AMENDMENT',
                         rateCapitationType: 'RATE_CELL',
                         rateDocuments: [
@@ -792,6 +844,7 @@ function mockContractWithLinkedRateDraft(
                         amendmentEffectiveDateStart: new Date(),
                         amendmentEffectiveDateEnd: new Date(),
                         rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
+                        consolidatedRateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
                         deprecatedRateProgramIDs: [],
                         certifyingActuaryContacts: [
                             {
@@ -827,13 +880,17 @@ function mockContractWithLinkedRateSubmitted(
         __typename: 'Contract',
         initiallySubmittedAt: new Date('12/18/2023'),
         status: 'SUBMITTED',
+        reviewStatus: 'UNDER_REVIEW',
+        consolidatedStatus: 'SUBMITTED',
         createdAt: new Date('12/1o/2023'),
         updatedAt: new Date('12/17/2023'),
+        lastUpdatedForDisplay: new Date('12/17/2023'),
         id: 'test-abc-123',
+        webURL: 'https://testmcreview.example/submissions/test-abc-123',
         stateCode: 'MN',
         state: mockMNState(),
         stateNumber: 5,
-        mccrsID: undefined,
+        mccrsID: null,
         packageSubmissions: [{
             cause: 'CONTRACT_SUBMISSION',
             __typename: 'ContractPackageSubmission',
@@ -864,7 +921,7 @@ function mockContractWithLinkedRateSubmitted(
                     },
                     updatedReason: 'contract submit'
                 },
-                unlockInfo: undefined,
+                unlockInfo: null,
                 formData: {
                     programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
                     populationCovered: 'MEDICAID',
@@ -945,6 +1002,7 @@ function mockContractWithLinkedRateSubmitted(
                     amendmentEffectiveDateStart: new Date(),
                     amendmentEffectiveDateEnd: new Date(),
                     rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
+                    consolidatedRateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
                     deprecatedRateProgramIDs: [],
                     certifyingActuaryContacts: [
                         {
@@ -977,19 +1035,26 @@ function mockContractPackageSubmitted(
 ): Contract {
     return {
         status: 'SUBMITTED',
+        reviewStatus: 'UNDER_REVIEW',
+        consolidatedStatus: 'SUBMITTED',
         __typename: 'Contract',
         createdAt: new Date(),
         updatedAt: new Date(),
+        lastUpdatedForDisplay: new Date(),
+        webURL: 'https://testmcreview.example/submissions/test-abc-123',
         initiallySubmittedAt: new Date('2024-11-27'),
         id: 'test-abc-123',
         stateCode: 'MN',
         state: mockMNState(),
         stateNumber: 5,
-        mccrsID: undefined,
+        mccrsID: null,
+        draftRevision: null,
+        draftRates: [],
         packageSubmissions: [{
             cause: 'CONTRACT_SUBMISSION',
             __typename: 'ContractPackageSubmission',
             submitInfo: {
+                __typename: 'UpdateInformation',
                 updatedAt: '2024-12-18T16:54:39.173Z',
                 updatedBy: {
                     email: 'example@state.com',
@@ -1001,12 +1066,14 @@ function mockContractPackageSubmitted(
             },
             submittedRevisions: [],
             contractRevision: {
+                __typename: 'ContractRevision',
                 contractName: 'MCR-MN-0005-SNBC',
                 createdAt: new Date('01/01/2024'),
                 updatedAt:  '2024-12-18T16:54:39.173Z',
                 id: '123',
                 contractID: 'test-abc-123',
                 submitInfo: {
+                    __typename: 'UpdateInformation',
                     updatedAt: new Date(),
                     updatedBy: {
                         email: 'example@state.com',
@@ -1016,8 +1083,9 @@ function mockContractPackageSubmitted(
                     },
                     updatedReason: 'contract submit'
                 },
-                unlockInfo: undefined,
+                unlockInfo: null,
                 formData: {
+                    __typename: 'ContractFormData',
                     programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
                     populationCovered: 'MEDICAID',
                     submissionType: 'CONTRACT_AND_RATES',
@@ -1078,11 +1146,14 @@ function mockContractPackageSubmitted(
             },
             rateRevisions: [
                 {
+                    __typename: 'RateRevision',
                     id: '1234',
                     rateID: '123',
                     createdAt: new Date('01/01/2023'),
                     updatedAt: new Date('01/01/2023'),
+                    rate: null,
                     formData: {
+                        __typename: 'RateFormData',
                         rateCertificationName:'rate cert',
                         rateType: 'AMENDMENT',
                         rateCapitationType: 'RATE_CELL',
@@ -1117,6 +1188,7 @@ function mockContractPackageSubmitted(
                         amendmentEffectiveDateStart: new Date(),
                         amendmentEffectiveDateEnd: new Date(),
                         rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
+                        consolidatedRateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
                         deprecatedRateProgramIDs: [],
                         certifyingActuaryContacts: [
                             {
@@ -1144,17 +1216,421 @@ function mockContractPackageSubmitted(
     }
 }
 
+function mockContractPackageApproved(
+    partial?: Partial<Contract>,
+    contractId?: string,
+): Contract {
+    const contractID = contractId || 'test-abc-123'
+    return {
+        status: 'SUBMITTED',
+        reviewStatus: 'APPROVED',
+        consolidatedStatus: 'APPROVED',
+        reviewStatusActions: [{
+                updatedAt: new Date('2100-01-01'),
+                updatedBy: {
+                    email: "zuko@example.com",
+                    role: "CMS_USER",
+                    familyName: "Hotman",
+                    givenName: "Zuko",
+                    __typename: "UpdatedBy"
+                },
+                updatedReason: "all required documents sent",
+                contractID,
+                actionType: "MARK_AS_APPROVED",
+                __typename: "ContractReviewStatusActions"
+        }],
+        __typename: 'Contract',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        lastUpdatedForDisplay: new Date(),
+        webURL: 'https://testmcreview.example/submissions/test-abc-123',
+        initiallySubmittedAt: new Date('2024-11-27'),
+        id: contractID,
+        stateCode: 'MN',
+        state: mockMNState(),
+        stateNumber: 5,
+        mccrsID: null,
+        draftRevision: null,
+        draftRates: [],
+        packageSubmissions: [{
+            cause: 'CONTRACT_SUBMISSION',
+            __typename: 'ContractPackageSubmission',
+            submitInfo: {
+                __typename: 'UpdateInformation',
+                updatedAt: '2024-12-18T16:54:39.173Z',
+                updatedBy: {
+                    email: 'example@state.com',
+                    role: 'STATE_USER',
+                    givenName: 'John',
+                    familyName: 'Vila'
+                },
+                updatedReason: 'contract submit'
+            },
+            submittedRevisions: [],
+            contractRevision: {
+                __typename: 'ContractRevision',
+                contractName: 'MCR-MN-0005-SNBC',
+                createdAt: new Date('01/01/2024'),
+                updatedAt:  '2024-12-18T16:54:39.173Z',
+                id: '123',
+                contractID,
+                submitInfo: {
+                    __typename: 'UpdateInformation',
+                    updatedAt: new Date(),
+                    updatedBy: {
+                        email: 'example@state.com',
+                        role: 'STATE_USER',
+                        givenName: 'John',
+                        familyName: 'Vila'
+                    },
+                    updatedReason: 'contract submit'
+                },
+                unlockInfo: null,
+                formData: {
+                    __typename: 'ContractFormData',
+                    programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
+                    populationCovered: 'MEDICAID',
+                    submissionType: 'CONTRACT_AND_RATES',
+                    riskBasedContract: true,
+                    submissionDescription: 'A real submission',
+                    supportingDocuments: [
+                        {
+                            s3URL: 's3://bucketname/key/contractsupporting1',
+                            sha256: 'fakesha',
+                            name: 'contractSupporting1',
+                            dateAdded: new Date('01/15/2024'),
+                            downloadURL: s3DlUrl
+                        },
+                        {
+                            s3URL: 's3://bucketname/key/contractSupporting2',
+                            sha256: 'fakesha',
+                            name: 'contractSupporting2',
+                            dateAdded: new Date('01/13/2024'),
+                            downloadURL: s3DlUrl
+                        },
+                    ],
+                    stateContacts: [],
+                    contractType: 'AMENDMENT',
+                    contractExecutionStatus: 'EXECUTED',
+                    contractDocuments: [
+                        {
+                            s3URL: 's3://bucketname/key/contract',
+                            sha256: 'fakesha',
+                            name: 'contract',
+                            dateAdded: new Date('01/01/2024'),
+                            downloadURL: s3DlUrl
+                        },
+                    ],
+                    contractDateStart: new Date(),
+                    contractDateEnd: new Date(),
+                    managedCareEntities: ['MCO'],
+                    federalAuthorities: ['STATE_PLAN'],
+                    inLieuServicesAndSettings: true,
+                    modifiedBenefitsProvided: true,
+                    modifiedGeoAreaServed: false,
+                    modifiedMedicaidBeneficiaries: true,
+                    modifiedRiskSharingStrategy: true,
+                    modifiedIncentiveArrangements: false,
+                    modifiedWitholdAgreements: false,
+                    modifiedStateDirectedPayments: true,
+                    modifiedPassThroughPayments: true,
+                    modifiedPaymentsForMentalDiseaseInstitutions: false,
+                    modifiedMedicalLossRatioStandards: true,
+                    modifiedOtherFinancialPaymentIncentive: false,
+                    modifiedEnrollmentProcess: true,
+                    modifiedGrevienceAndAppeal: false,
+                    modifiedNetworkAdequacyStandards: true,
+                    modifiedLengthOfContract: false,
+                    modifiedNonRiskPaymentArrangements: true,
+                    statutoryRegulatoryAttestation: true,
+                    statutoryRegulatoryAttestationDescription: "everything meets regulatory attestation"
+                }
+            },
+            rateRevisions: [
+                {
+                    __typename: 'RateRevision',
+                    id: '1234',
+                    rateID: '123',
+                    createdAt: new Date('01/01/2023'),
+                    updatedAt: new Date('01/01/2023'),
+                    rate: null,
+                    formData: {
+                        __typename: 'RateFormData',
+                        rateCertificationName:'rate cert',
+                        rateType: 'AMENDMENT',
+                        rateCapitationType: 'RATE_CELL',
+                        rateDocuments: [
+                            {
+                                s3URL: 's3://bucketname/key/rate',
+                                sha256: 'fakesha',
+                                name: 'rate',
+                                dateAdded: new Date('01/01/2023'),
+                                downloadURL: s3DlUrl
+                            },
+                        ],
+                        supportingDocuments: [
+                            {
+                                s3URL: 's3://bucketname/key/rateSupporting1',
+                                sha256: 'fakesha',
+                                name: 'rate supporting 1',
+                                dateAdded: new Date('01/15/2023'),
+                                downloadURL: s3DlUrl
+                            },
+                            {
+                                s3URL: 's3://bucketname/key/rateSupporting1',
+                                sha256: 'fakesha',
+                                name: 'rate supporting 2',
+                                dateAdded: new Date('01/15/2023'),
+                                downloadURL: s3DlUrl
+                            },
+                        ],
+                        rateDateStart: new Date(),
+                        rateDateEnd: new Date(),
+                        rateDateCertified: new Date(),
+                        amendmentEffectiveDateStart: new Date(),
+                        amendmentEffectiveDateEnd: new Date(),
+                        rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
+                        consolidatedRateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
+                        deprecatedRateProgramIDs: [],
+                        certifyingActuaryContacts: [
+                            {
+                                actuarialFirm: 'DELOITTE',
+                                name: 'Actuary Contact 1',
+                                titleRole: 'Test Actuary Contact 1',
+                                email: 'actuarycontact1@test.com',
+                            },
+                        ],
+                        addtlActuaryContacts: [
+                            {
+                                actuarialFirm: 'DELOITTE',
+                                name: 'Actuary Contact 1',
+                                titleRole: 'Test Actuary Contact 1',
+                                email: 'actuarycontact1@test.com',
+                            },
+                        ],
+                        actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+                        packagesWithSharedRateCerts: []
+                    }
+                },
+            ],
+        }],
+        ...partial,
+    }
+}
+
+function mockContractPackageApprovedWithQuestions(
+    partial?: Partial<Contract>,
+    contractId?: string
+): Contract {
+    const contractID = contractId || 'test-abc-123'
+
+    return {
+        ...mockContractPackageApproved(),
+        questions: {
+            DMCOQuestions: {
+                totalCount: 2,
+                edges: [
+                    {
+                        __typename: 'ContractQuestionEdge' as const,
+                        node: {
+                            __typename: 'ContractQuestion' as const,
+                            id: 'dmco-question-1-id',
+                            contractID,
+                            createdAt: new Date('2022-12-16'),
+                            addedBy: mockValidCMSUser({
+                                divisionAssignment: null,
+                            }) as CmsUser,
+                            documents: [
+                                {
+                                    s3URL: 's3://bucketname/key/dmco-question-1-document-1',
+                                    name: 'dmco-question-1-document-1',
+                                    downloadURL: expect.any(String),
+                                },
+                            ],
+                            division: 'DMCO',
+                            responses: [
+                                {
+                                    __typename: 'QuestionResponse' as const,
+                                    id: 'response-to-dmco-1-id',
+                                    questionID: 'dmco-question-1-id',
+                                    addedBy: mockValidUser() as StateUser,
+                                    createdAt: new Date('2022-12-16'),
+                                    documents: [
+                                        {
+                                            s3URL: 's3://bucketname/key/response-to-dmco-1-document-1',
+                                            name: 'response-to-dmco-1-document-1',
+                                            downloadURL: expect.any(String),
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    },
+                    {
+                        __typename: 'ContractQuestionEdge' as const,
+                        node: {
+                            __typename: 'ContractQuestion' as const,
+                            id: 'dmco-question-2-id',
+                            contractID,
+                            createdAt: new Date('2022-12-18'),
+                            addedBy: mockValidCMSUser() as CmsUser,
+                            documents: [
+                                {
+                                    s3URL: 's3://bucketname/key/dmco-question-2-document-1',
+                                    name: 'dmco-question-2-document-1',
+                                    downloadURL: expect.any(String),
+                                },
+                                {
+                                    s3URL: 's3://bucketname/key/question-2-document-2',
+                                    name: 'dmco-question-2-document-2',
+                                    downloadURL: expect.any(String),
+                                },
+                            ],
+                            division: 'DMCO',
+                            responses: [
+                            ],
+                        },
+                    },
+                ],
+            },
+            DMCPQuestions: {
+                totalCount: 1,
+                edges: [
+                    {
+                        __typename: 'ContractQuestionEdge' as const,
+                        node: {
+                            __typename: 'ContractQuestion' as const,
+                            id: 'dmcp-question-1-id',
+                            contractID,
+                            createdAt: new Date('2022-12-15'),
+                            addedBy: mockValidCMSUser({
+                                divisionAssignment: 'DMCP',
+                            }) as CmsUser,
+                            documents: [
+                                {
+                                    s3URL: 's3://bucketname/key/dmcp-question-1-document-1',
+                                    name: 'dmcp-question-1-document-1',
+                                    downloadURL: expect.any(String),
+                                },
+                            ],
+                            division: 'DMCP',
+                            responses: [
+                                {
+                                    __typename: 'QuestionResponse' as const,
+                                    id: 'response-to-dmcp-1-id',
+                                    questionID: 'dmcp-question-1-id',
+                                    addedBy: mockValidUser() as StateUser,
+                                    createdAt: new Date('2022-12-16'),
+                                    documents: [
+                                        {
+                                            s3URL: 's3://bucketname/key/response-to-dmcp-1-document-1',
+                                            name: 'response-to-dmcp-1-document-1',
+                                            downloadURL: expect.any(String),
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    },
+                ],
+            },
+            OACTQuestions: {
+                totalCount: 2,
+                edges: [
+                    {
+                        __typename: 'ContractQuestionEdge' as const,
+                        node: {
+                            __typename: 'ContractQuestion' as const,
+                            id: 'oact-question-1-id',
+                            contractID,
+                            createdAt: new Date('2022-12-14'),
+                            addedBy: mockValidCMSUser({
+                                divisionAssignment: 'OACT',
+                            }) as CmsUser,
+                            documents: [
+                                {
+                                    s3URL: 's3://bucketname/key/oact-question-1-document-1',
+                                    name: 'oact-question-1-document-1',
+                                    downloadURL: expect.any(String),
+                                },
+                            ],
+                            division: 'OACT',
+                            responses: [
+                                {
+                                    __typename: 'QuestionResponse' as const,
+                                    id: 'response-to-oact-1-id',
+                                    questionID: 'oact-question-1-id',
+                                    addedBy: mockValidUser() as StateUser,
+                                    createdAt: new Date('2022-12-17'),
+                                    documents: [
+                                        {
+                                            s3URL: 's3://bucketname/key/response-to-oact-1-document-1',
+                                            name: 'response-to-oact-1-document-1',
+                                            downloadURL: expect.any(String),
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    },
+                    {
+                        __typename: 'ContractQuestionEdge' as const,
+                        node: {
+                            __typename: 'ContractQuestion' as const,
+                            id: 'oact-question-2-id',
+                            contractID:'test-abc-123',
+                            createdAt: new Date('2022-12-17'),
+                            addedBy: mockValidCMSUser({
+                                divisionAssignment: 'OACT',
+                            }) as CmsUser,
+                            documents: [
+                                {
+                                    s3URL: 's3://bucketname/key/oact-question-1-document-1',
+                                    name: 'oact-question-2-document-1',
+                                    downloadURL: expect.any(String),
+                                },
+                            ],
+                            division: 'OACT',
+                            responses: [
+                                {
+                                    __typename: 'QuestionResponse' as const,
+                                    id: 'response-to-oact-2-id',
+                                    questionID: 'oact-question-2-id',
+                                    addedBy: mockValidUser() as StateUser,
+                                    createdAt: new Date('2022-12-16'),
+                                    documents: [
+                                        {
+                                            s3URL: 's3://bucketname/key/response-to-oact-1-document-1',
+                                            name: 'response-to-oact-2-document-1',
+                                            downloadURL: expect.any(String),
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+        ...partial,
+    }
+}
+
 function mockContractPackageSubmittedWithRevisions(
     partial?: Partial<Contract>
 ): Contract {
     return {
         __typename: 'Contract',
         status: 'SUBMITTED',
+        reviewStatus: 'UNDER_REVIEW',
+        consolidatedStatus: 'SUBMITTED',
         createdAt: new Date(),
         updatedAt: new Date(),
+        lastUpdatedForDisplay: new Date(),
         initiallySubmittedAt: new Date('2024-01-01'),
         mccrsID: null,
         id: 'test-abc-123',
+        webURL: 'https://testmcreview.example/submissions/test-abc-123',
         stateCode: 'MN',
         state: mockMNState(),
         stateNumber: 5,
@@ -1258,8 +1734,12 @@ function mockContractPackageWithDifferentProgramsInRevisions (): Contract {
    return {
        "id": "e670adsfdfadsfc",
        "status": "RESUBMITTED",
+       "reviewStatus": "UNDER_REVIEW",
+       "consolidatedStatus": 'RESUBMITTED',
        "createdAt": "2024-05-07T19:44:53.732Z",
        "updatedAt": "2024-05-07T19:44:53.732Z",
+       "lastUpdatedForDisplay": "2024-05-07T19:44:53.732Z",
+       "webURL": 'https://testmcreview.example/submissions/e670adsfdfadsfc',
        "initiallySubmittedAt": "2024-05-07T00:00:00Z",
        "stateCode": "FL",
        "mccrsID": null,
@@ -1691,11 +2171,15 @@ function mockContractPackageUnlockedWithUnlockedType(
 ): UnlockedContract {
     return {
         status: 'UNLOCKED',
+        reviewStatus: 'UNDER_REVIEW',
+        consolidatedStatus: 'UNLOCKED',
         __typename: 'UnlockedContract',
         createdAt: '2023-01-01T16:54:39.173Z',
         updatedAt: '2024-12-01T16:54:39.173Z',
+        lastUpdatedForDisplay: '2024-12-01T16:54:39.173Z',
         initiallySubmittedAt: new Date('2023-01-01'),
         id: 'test-abc-123',
+        webURL: 'https://testmcreview.example/submissions/test-abc-123',
         stateCode: 'MN',
         state: mockMNState(),
         stateNumber: 5,
@@ -1703,9 +2187,10 @@ function mockContractPackageUnlockedWithUnlockedType(
         draftRevision: {
             __typename: 'ContractRevision',
             contractID: 'test-abc-123',
-            submitInfo: undefined,
+            submitInfo: null,
             unlockInfo: {
-                updatedAt: '2023-01-01T16:54:39.173Z',
+                __typename: 'UpdateInformation',
+                updatedAt: '2023-01-05T16:54:39.173Z',
                 updatedBy: {
                     email: 'cms@example.com',
                     role: 'STATE_USER',
@@ -1714,11 +2199,12 @@ function mockContractPackageUnlockedWithUnlockedType(
                 },
                 updatedReason: 'unlocked for a test',
             },
-            id: '123',
+            id: 'unlocked-123',
             createdAt: new Date(),
             updatedAt: new Date(),
             contractName: 'MCR-MN-0005-SNBC',
             formData: {
+                __typename: 'ContractFormData',
                 programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
                 populationCovered: 'MEDICAID',
                 submissionType: 'CONTRACT_AND_RATES',
@@ -1770,7 +2256,9 @@ function mockContractPackageUnlockedWithUnlockedType(
 
         draftRates: [
             {
-                id: '123',
+                __typename: 'Rate',
+                id: 'unlocked-rate-123',
+                webURL: 'https://testmcreview.example/rates/unlocked-rate-123',
                 createdAt: new Date(),
                 updatedAt: new Date(),
                 status: 'SUBMITTED',
@@ -1780,11 +2268,13 @@ function mockContractPackageUnlockedWithUnlockedType(
                 stateNumber: 5,
                 parentContractID: 'test-abc-123',
                 draftRevision: {
-                    id: '123',
+                    __typename: 'RateRevision',
+                    id: 'unlocked-rr-123',
                     rateID: '456',
                     createdAt: new Date(),
                     updatedAt: new Date(),
                     unlockInfo: {
+                        __typename: 'UpdateInformation',
                         updatedAt: new Date(),
                         updatedBy: {
                             email: 'cms@example.com',
@@ -1795,6 +2285,7 @@ function mockContractPackageUnlockedWithUnlockedType(
                         updatedReason: 'unlocked for a test',
                     },
                     formData: {
+                        __typename: 'RateFormData',
                         rateType: 'AMENDMENT',
                         rateCapitationType: 'RATE_CELL',
                         rateDocuments: [
@@ -1812,6 +2303,7 @@ function mockContractPackageUnlockedWithUnlockedType(
                         amendmentEffectiveDateStart: new Date(),
                         amendmentEffectiveDateEnd: new Date(),
                         rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
+                        consolidatedRateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
                         deprecatedRateProgramIDs: ['d95394e5-44d1-45df-8151-1cc1ee66f10'],
                         certifyingActuaryContacts: [
                             {
@@ -1837,8 +2329,10 @@ function mockContractPackageUnlockedWithUnlockedType(
             },
         ],
         packageSubmissions: [{
+            __typename: 'ContractPackageSubmission',
             cause: 'CONTRACT_SUBMISSION',
             submitInfo: {
+                __typename: 'UpdateInformation',
                 updatedAt:  '2023-01-01T16:54:39.173Z',
                 updatedBy: {
                     email: 'example@state.com',
@@ -1850,11 +2344,13 @@ function mockContractPackageUnlockedWithUnlockedType(
             },
             submittedRevisions: [
                 {
+                    __typename: 'ContractRevision',
                     contractName: 'MCR-MN-0005-SNBC',
                     createdAt: new Date('01/01/2024'),
                     updatedAt:  '2023-01-01T16:54:39.173Z',
                     contractID: 'test-abc-123',
                     submitInfo: {
+                        __typename: 'UpdateInformation',
                         updatedAt: '2023-01-01T16:54:39.173Z',
                         updatedBy: {
                             email: 'example@state.com',
@@ -1864,18 +2360,10 @@ function mockContractPackageUnlockedWithUnlockedType(
                         },
                         updatedReason: 'initial submission'
                     },
-                    unlockInfo: {
-                        updatedAt: '2023-01-01T16:54:39.173Z',
-                        updatedBy: {
-                                email: 'example@state.com',
-                                role: 'STATE_USER',
-                                givenName: 'John',
-                                familyName: 'Vila'
-                            },
-                        updatedReason: 'unlocked for a test'
-                    },
-                    id: '123',
+                    unlockInfo: null,
+                    id: 'unlocked-2234',
                     formData: {
+                        __typename: 'ContractFormData',
                         programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
                         populationCovered: 'MEDICAID',
                         submissionType: 'CONTRACT_AND_RATES',
@@ -1920,11 +2408,13 @@ function mockContractPackageUnlockedWithUnlockedType(
                 }
             ],
             contractRevision: {
+                __typename: 'ContractRevision',
                 contractID: 'test-abc-123',
                 contractName: 'MCR-MN-0005-SNBC',
                 createdAt: new Date('01/01/2024'),
                 updatedAt: '2024-01-01T18:54:39.173Z',
                 submitInfo: {
+                    __typename: 'UpdateInformation',
                     updatedAt: '2024-01-01T18:54:39.173Z',
                     updatedBy: {
                         email: 'example@state.com',
@@ -1934,18 +2424,10 @@ function mockContractPackageUnlockedWithUnlockedType(
                     },
                     updatedReason: 'initial submission'
                 },
-                unlockInfo: {
-                    updatedAt: '2024-02-01T16:54:39.173Z',
-                    updatedBy: {
-                        email: 'example@state.com',
-                        role: 'STATE_USER',
-                        givenName: 'John',
-                        familyName: 'Vila'
-                    },
-                    updatedReason: 'unlocked'
-                },
-                id: '123',
+                unlockInfo: null,
+                id: 'unlocked-2234',
                 formData: {
+                    __typename: 'ContractFormData',
                     programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
                     populationCovered: 'MEDICAID',
                     submissionType: 'CONTRACT_AND_RATES',
@@ -1990,11 +2472,13 @@ function mockContractPackageUnlockedWithUnlockedType(
             },
             rateRevisions: [
                 {
-                    id: '1234',
+                    __typename: 'RateRevision',
+                    id: 'unlocked-rr-1234',
                     rateID: '456',
                     createdAt: new Date('01/01/2023'),
                     updatedAt: new Date('01/01/2023'),
                     submitInfo: {
+                        __typename: 'UpdateInformation',
                         updatedAt: new Date('01/01/2024'),
                         updatedBy: {
                             email: 'example@state.com',
@@ -2005,6 +2489,7 @@ function mockContractPackageUnlockedWithUnlockedType(
                         updatedReason: 'initial submission'
                     },
                     formData: {
+                        __typename: 'RateFormData',
                         rateType: 'AMENDMENT',
                         rateCapitationType: 'RATE_CELL',
                         rateDocuments: [
@@ -2022,6 +2507,7 @@ function mockContractPackageUnlockedWithUnlockedType(
                         amendmentEffectiveDateStart: new Date(),
                         amendmentEffectiveDateEnd: new Date(),
                         rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
+                        consolidatedRateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
                         deprecatedRateProgramIDs: ['ea16a6c0-5fc6-4df8-adac-c627e76660ab'],
                         certifyingActuaryContacts: [
                             {
@@ -2053,6 +2539,7 @@ function mockContractPackageUnlockedWithUnlockedType(
 }
 function mockContractFormData( partial?: Partial<ContractFormData>): ContractFormData {
     return {
+        __typename: 'ContractFormData',
         programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
         populationCovered: 'MEDICAID',
         submissionType: 'CONTRACT_AND_RATES',
@@ -2123,22 +2610,22 @@ const mockEmptyDraftContractAndRate = (): Contract => mockContractPackageDraft(
     {
         draftRevision: {
             __typename: 'ContractRevision',
-            submitInfo: undefined,
-            unlockInfo: undefined,
+            submitInfo: null,
+            unlockInfo: null,
             id: '123',
             createdAt: new Date(),
             updatedAt: new Date(),
             contractName: 'MCR-0005-alvhalfhdsalfee',
             formData: {
                 programIDs: [],
-                populationCovered: undefined,
+                populationCovered: null,
                 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                 // @ts-ignore
-                submissionType: undefined,
-                riskBasedContract: undefined,
+                submissionType: null,
+                riskBasedContract: null,
                 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                 // @ts-ignore
-                submissionDescription: undefined,
+                submissionDescription: null,
                 supportingDocuments: [
                     {
                         s3URL: 's3://bucketname/key/contractsupporting1',
@@ -2156,8 +2643,8 @@ const mockEmptyDraftContractAndRate = (): Contract => mockContractPackageDraft(
                     },
                 ],
                 stateContacts: [],
-                contractType: undefined,
-                contractExecutionStatus: undefined,
+                contractType: null,
+                contractExecutionStatus: null,
                 contractDocuments: [
                     {
                         s3URL: 's3://bucketname/one-two/one-two.png',
@@ -2167,34 +2654,35 @@ const mockEmptyDraftContractAndRate = (): Contract => mockContractPackageDraft(
                         downloadURL: s3DlUrl,
                     },
                 ],
-                contractDateStart:undefined,
-                contractDateEnd: undefined,
+                contractDateStart:null,
+                contractDateEnd: null,
                 managedCareEntities: [],
                 federalAuthorities: [],
-                inLieuServicesAndSettings: undefined,
-                modifiedBenefitsProvided: undefined,
-                modifiedGeoAreaServed: undefined,
-                modifiedMedicaidBeneficiaries: undefined,
-                modifiedRiskSharingStrategy: undefined,
-                modifiedIncentiveArrangements: undefined,
-                modifiedWitholdAgreements: undefined,
-                modifiedStateDirectedPayments: undefined,
-                modifiedPassThroughPayments: undefined,
-                modifiedPaymentsForMentalDiseaseInstitutions: undefined,
-                modifiedMedicalLossRatioStandards: undefined,
-                modifiedOtherFinancialPaymentIncentive: undefined,
-                modifiedEnrollmentProcess: undefined,
-                modifiedGrevienceAndAppeal: undefined,
-                modifiedNetworkAdequacyStandards: undefined,
-                modifiedLengthOfContract: undefined,
-                modifiedNonRiskPaymentArrangements: undefined,
+                inLieuServicesAndSettings: null,
+                modifiedBenefitsProvided: null,
+                modifiedGeoAreaServed: null,
+                modifiedMedicaidBeneficiaries: null,
+                modifiedRiskSharingStrategy: null,
+                modifiedIncentiveArrangements: null,
+                modifiedWitholdAgreements: null,
+                modifiedStateDirectedPayments: null,
+                modifiedPassThroughPayments: null,
+                modifiedPaymentsForMentalDiseaseInstitutions: null,
+                modifiedMedicalLossRatioStandards: null,
+                modifiedOtherFinancialPaymentIncentive: null,
+                modifiedEnrollmentProcess: null,
+                modifiedGrevienceAndAppeal: null,
+                modifiedNetworkAdequacyStandards: null,
+                modifiedLengthOfContract: null,
+                modifiedNonRiskPaymentArrangements: null,
                 statutoryRegulatoryAttestation: false,
-                statutoryRegulatoryAttestationDescription: undefined
+                statutoryRegulatoryAttestationDescription: null
             }
         },
         draftRates: [
             {
                 id: '123',
+                webURL: 'https://testmcreview.example/rates/123',
                 createdAt: new Date(),
                 updatedAt: new Date(),
                 status: 'DRAFT',
@@ -2209,8 +2697,8 @@ const mockEmptyDraftContractAndRate = (): Contract => mockContractPackageDraft(
                     createdAt: new Date(),
                     updatedAt: new Date(),
                     formData: {
-                        rateType: undefined,
-                        rateCapitationType: undefined,
+                        rateType: null,
+                        rateCapitationType: null,
                         rateDocuments: [
                             {
                                 s3URL: 's3://bucketname/key/rate',
@@ -2236,18 +2724,19 @@ const mockEmptyDraftContractAndRate = (): Contract => mockContractPackageDraft(
                                 downloadURL: s3DlUrl,
                             },
                         ],
-                        rateDateStart: undefined,
-                        rateDateEnd: undefined,
-                        rateDateCertified: undefined,
-                        amendmentEffectiveDateStart: undefined,
-                        amendmentEffectiveDateEnd: undefined,
+                        rateDateStart: null,
+                        rateDateEnd: null,
+                        rateDateCertified: null,
+                        amendmentEffectiveDateStart: null,
+                        amendmentEffectiveDateEnd: null,
                         deprecatedRateProgramIDs: [],
                         rateProgramIDs: [],
+                        consolidatedRateProgramIDs: [],
                         certifyingActuaryContacts: [
                             {
                                 id: null,
                                 actuarialFirmOther: null,
-                                actuarialFirm: undefined,
+                                actuarialFirm: null,
                                 name: '',
                                 titleRole: '',
                                 email: '',
@@ -2257,13 +2746,13 @@ const mockEmptyDraftContractAndRate = (): Contract => mockContractPackageDraft(
                             {
                                 id: null,
                                 actuarialFirmOther: null,
-                                actuarialFirm: undefined,
+                                actuarialFirm: null,
                                 name: '',
                                 titleRole: '',
                                 email: '',
                             },
                         ],
-                        actuaryCommunicationPreference: undefined,
+                        actuaryCommunicationPreference: null,
                         packagesWithSharedRateCerts: [],
                     }
                 }
@@ -2284,5 +2773,7 @@ export {
     mockEmptyDraftContractAndRate,
     mockContractPackageUnlockedWithUnlockedType,
     mockRateRevision,
-    mockContractPackageSubmittedWithQuestions
+    mockContractPackageSubmittedWithQuestions,
+    mockContractPackageApproved,
+    mockContractPackageApprovedWithQuestions,
 }

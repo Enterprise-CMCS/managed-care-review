@@ -31,22 +31,13 @@ query fetchHealthPlanPackageWithQuestions($input: FetchHealthPlanPackageInput!) 
             }
             questions {
                 DMCOQuestions {
-                    edges {
-                        ...questionEdgeFragment
-                    }
-                    totalCount
+                    ...contractQuestionListFragment
                 }
                 DMCPQuestions {
-                    edges {
-                        ...questionEdgeFragment
-                    }
-                    totalCount
+                    ...contractQuestionListFragment
                 }
                 OACTQuestions {
-                    edges {
-                        ...questionEdgeFragment
-                    }
-                    totalCount
+                    ...contractQuestionListFragment
                 }
             }
         }

@@ -12,11 +12,14 @@ import {
 } from '@tanstack/react-table'
 import { useAtom } from 'jotai/react'
 import { atomWithHash } from 'jotai-location'
-import { HealthPlanPackageStatus, Program, User } from '../../gen/gqlClient'
+import { ConsolidatedContractStatus, Program, User } from '../../gen/gqlClient'
 import styles from './ContractTable.module.scss'
 import { Table, Tag } from '@trussworks/react-uswds'
 import qs from 'qs'
-import { SubmissionStatusRecord } from '../../constants/healthPlanPackages'
+import {
+    SubmissionStatusRecord,
+    SubmissionReviewStatusRecord,
+} from '../../constants/'
 import {
     FilterAccordion,
     FilterSelect,
@@ -31,13 +34,14 @@ import { useTealium } from '../../hooks'
 import useDeepCompareEffect from 'use-deep-compare-effect'
 import { getTealiumFiltersChanged } from '../../tealium/tealiumHelpers'
 import { formatCalendarDate } from '../../common-code/dateHelpers'
+import { titleCaseString } from '../../common-code/formatters/titleCase'
 
 export type ContractInDashboardType = {
     id: string
     name: string
     submittedAt?: string
     updatedAt: Date
-    status: HealthPlanPackageStatus
+    status: ConsolidatedContractStatus
     programs: Program[]
     submissionType?: string
     stateName?: string
@@ -49,9 +53,6 @@ export type ContractTableProps = {
     showFilters?: boolean
     caption?: string
 }
-
-const isSubmitted = (status: HealthPlanPackageStatus) =>
-    status === 'SUBMITTED' || status === 'RESUBMITTED'
 
 function submissionURL(
     id: ContractInDashboardType['id'],
@@ -70,21 +71,39 @@ function submissionURL(
 
 const StatusTag = ({
     status,
+    notStateUser,
 }: {
-    status: HealthPlanPackageStatus
+    status: ConsolidatedContractStatus
+    notStateUser: boolean
 }): React.ReactElement => {
     let color: TagProps['color'] = 'gold'
-    if (isSubmitted(status)) {
+    let emphasize = false
+    const isSubmittedStatus = status === 'RESUBMITTED' || status === 'SUBMITTED'
+    const isApproved = status === 'APPROVED'
+    const isUnlocked = status === 'UNLOCKED'
+    const isDraft = status === 'DRAFT'
+    if (isSubmittedStatus) {
+        color = notStateUser ? 'gold' : 'gray'
+        emphasize = notStateUser
+    } else if (isApproved) {
         color = 'green'
-    } else if (status === 'UNLOCKED') {
-        color = 'blue'
+    } else if (isUnlocked) {
+        emphasize = true
+    } else if (isDraft) {
+        emphasize = !notStateUser
     }
 
-    const statusText = isSubmitted(status)
-        ? SubmissionStatusRecord.SUBMITTED
-        : SubmissionStatusRecord[status]
+    const statusText = isSubmittedStatus
+        ? SubmissionStatusRecord['SUBMITTED']
+        : isApproved
+          ? SubmissionReviewStatusRecord[status]
+          : SubmissionStatusRecord[status]
 
-    return <InfoTag color={color}>{statusText}</InfoTag>
+    return (
+        <InfoTag color={color} emphasize={emphasize}>
+            {statusText}
+        </InfoTag>
+    )
 }
 
 const submissionTypeOptions = [
@@ -95,6 +114,25 @@ const submissionTypeOptions = [
     {
         label: 'Contract action and rate certification',
         value: 'Contract action and rate certification',
+    },
+]
+
+const submissionStatusOptions = [
+    {
+        label: 'Approved',
+        value: 'APPROVED',
+    },
+    {
+        label: 'Submitted',
+        value: 'SUBMITTED',
+    },
+    {
+        label: 'Unlocked',
+        value: 'UNLOCKED',
+    },
+    {
+        label: 'Withdrawn',
+        value: 'WITHDRAWN',
     },
 ]
 
@@ -153,7 +191,10 @@ const getSelectedFiltersFromUrl = (
     })
     const filterValues = valuesFromUrl
         .filter((item) => item.id === id)
-        .map((item) => ({ value: item.value, label: item.value }))
+        .map((item) => ({
+            value: item.value,
+            label: titleCaseString(item.value),
+        }))
     return filterValues as FilterOptionType[]
 }
 
@@ -176,7 +217,6 @@ export const ContractTable = ({
         filtersForAnalytics: '',
     })
     const { logFilterEvent } = useTealium()
-
     /* we store the last clicked element in a ref so that when the url is updated and the page rerenders
         we can focus that element.  this useEffect (with no dependency array) will run once on each render.
         Note that the React-y way to do this is to use forwardRef, but the clearFilters button is deeply nested
@@ -275,7 +315,7 @@ export const ContractTable = ({
                     info.getValue()
                         ? formatCalendarDate(
                               info.getValue(),
-                              'America/New_York'
+                              'America/Los_Angeles'
                           )
                         : '',
                 meta: {
@@ -288,7 +328,7 @@ export const ContractTable = ({
                     info.getValue()
                         ? formatCalendarDate(
                               info.getValue(),
-                              'America/New_York'
+                              'America/Los_Angeles'
                           )
                         : '',
                 meta: {
@@ -296,11 +336,18 @@ export const ContractTable = ({
                 },
             }),
             columnHelper.accessor('status', {
+                id: 'status',
                 header: 'Status',
-                cell: (info) => <StatusTag status={info.getValue()} />,
+                cell: (info) => (
+                    <StatusTag
+                        status={info.getValue()}
+                        notStateUser={isNotStateUser}
+                    />
+                ),
                 meta: {
                     dataTestID: `${tableConfig.rowIDName}-status`,
                 },
+                filterFn: `arrIncludesSome`,
             }),
         ],
         [isNotStateUser, tableConfig.rowIDName]
@@ -337,6 +384,9 @@ export const ContractTable = ({
     ) as Column<ContractInDashboardType>
     const submissionTypeColumn = reactTable.getColumn(
         'submissionType'
+    ) as Column<ContractInDashboardType>
+    const statusColumn = reactTable.getColumn(
+        'status'
     ) as Column<ContractInDashboardType>
 
     // Filter options based on table data instead of static list of options.
@@ -377,9 +427,28 @@ export const ContractTable = ({
     const clearFilters = () => {
         lastClickedElement.current = 'clearFiltersButton'
         setTableCaption(null)
-
         setColumnFilters([])
     }
+
+    useEffect(() => {
+        // if on root route
+        if (location.hash === '' && showFilters) {
+            updateFilters(
+                statusColumn,
+                [
+                    {
+                        label: 'Submitted',
+                        value: 'SUBMITTED',
+                    },
+                    {
+                        label: 'Unlocked',
+                        value: 'UNLOCKED',
+                    },
+                ],
+                'status'
+            )
+        }
+    }, [showFilters, statusColumn])
 
     //Store caption element in state in order for screen readers to read dynamic captions.
     useEffect(() => {
@@ -478,6 +547,24 @@ export const ContractTable = ({
                                             submissionTypeColumn,
                                             selectedOptions,
                                             'submissionType'
+                                        )
+                                    }
+                                />
+                            </DoubleColumnGrid>
+                            <DoubleColumnGrid>
+                                <FilterSelect
+                                    value={getSelectedFiltersFromUrl(
+                                        columnFilters,
+                                        'status'
+                                    )}
+                                    name="status"
+                                    label="Status"
+                                    filterOptions={submissionStatusOptions}
+                                    onChange={(selectedOptions) =>
+                                        updateFilters(
+                                            statusColumn,
+                                            selectedOptions,
+                                            'status'
                                         )
                                     }
                                 />

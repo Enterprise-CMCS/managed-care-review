@@ -1,6 +1,5 @@
 import type { Emailer } from '../../emailer'
 import type { LDService } from '../../launchDarkly/launchDarkly'
-import type { EmailParameterStore } from '../../parameterStore'
 import type { Store } from '../../postgres'
 import { NotFoundError } from '../../postgres'
 import { logError, logSuccess } from '../../logger'
@@ -56,13 +55,10 @@ const validateStatusAndUpdateInfo = (
 export function submitContract(
     store: Store,
     emailer: Emailer,
-    emailParameterStore: EmailParameterStore,
     launchDarkly: LDService
 ): MutationResolvers['submitContract'] {
-    return async (parent, { input }, context) => {
+    return async (_parent, { input }, context) => {
         const featureFlags = await launchDarkly.allFlags(context)
-        const readStateAnalystsFromDBFlag =
-            featureFlags?.['read-write-state-assignments']
 
         const { user, ctx, tracer } = context
         const span = tracer?.startSpan('submitContract', {}, ctx)
@@ -325,46 +321,22 @@ export function submitContract(
         const status = submitContractResult.status
 
         let stateAnalystsEmails: string[] = []
-        if (readStateAnalystsFromDBFlag) {
-            // not great that state code type isn't being used in ContractType but I'll risk the conversion for now
-            const stateAnalystsEmailsResult =
-                await store.findStateAssignedUsers(
-                    submitContractResult.stateCode as StateCodeType
-                )
+        // not great that state code type isn't being used in ContractType but I'll risk the conversion for now
+        const stateAnalystsEmailsResult = await store.findStateAssignedUsers(
+            submitContractResult.stateCode as StateCodeType
+        )
 
-            if (stateAnalystsEmailsResult instanceof Error) {
-                logError(
-                    'getStateAnalystsEmails',
-                    stateAnalystsEmailsResult.message
-                )
-                setErrorAttributesOnActiveSpan(
-                    stateAnalystsEmailsResult.message,
-                    span
-                )
-            } else {
-                stateAnalystsEmails = stateAnalystsEmailsResult.map(
-                    (u) => u.email
-                )
-            }
+        if (stateAnalystsEmailsResult instanceof Error) {
+            logError(
+                'getStateAnalystsEmails',
+                stateAnalystsEmailsResult.message
+            )
+            setErrorAttributesOnActiveSpan(
+                stateAnalystsEmailsResult.message,
+                span
+            )
         } else {
-            const stateAnalystsEmailsResult =
-                await emailParameterStore.getStateAnalystsEmails(
-                    submitContractResult.stateCode
-                )
-
-            //If error log it and set stateAnalystsEmails to empty string as to not interrupt the emails.
-            if (stateAnalystsEmailsResult instanceof Error) {
-                logError(
-                    'getStateAnalystsEmails',
-                    stateAnalystsEmailsResult.message
-                )
-                setErrorAttributesOnActiveSpan(
-                    stateAnalystsEmailsResult.message,
-                    span
-                )
-            } else {
-                stateAnalystsEmails = stateAnalystsEmailsResult
-            }
+            stateAnalystsEmails = stateAnalystsEmailsResult.map((u) => u.email)
         }
 
         // Get submitter email from every contract submitted revision.

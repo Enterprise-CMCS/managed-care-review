@@ -1,4 +1,4 @@
-import FETCH_HEALTH_PLAN_PACKAGE from '../../../../app-graphql/src/queries/fetchHealthPlanPackage.graphql'
+import { FetchHealthPlanPackageDocument } from '../../gen/gqlClient'
 import { base64ToDomain } from '../../common-code/proto/healthPlanFormDataProto'
 import { todaysDate } from '../../testHelpers/dateHelpers'
 import {
@@ -30,7 +30,7 @@ describe(`fetchHealthPlanPackage`, () => {
         }
 
         const result = await server.executeOperation({
-            query: FETCH_HEALTH_PLAN_PACKAGE,
+            query: FetchHealthPlanPackageDocument,
             variables: { input },
         })
 
@@ -75,7 +75,7 @@ describe(`fetchHealthPlanPackage`, () => {
         }
 
         const result = await server.executeOperation({
-            query: FETCH_HEALTH_PLAN_PACKAGE,
+            query: FetchHealthPlanPackageDocument,
             variables: { input },
         })
 
@@ -119,7 +119,7 @@ describe(`fetchHealthPlanPackage`, () => {
         }
 
         const result = await server.executeOperation({
-            query: FETCH_HEALTH_PLAN_PACKAGE,
+            query: FetchHealthPlanPackageDocument,
             variables: { input },
         })
 
@@ -150,7 +150,7 @@ describe(`fetchHealthPlanPackage`, () => {
         }
 
         const draftResult = await server.executeOperation({
-            query: FETCH_HEALTH_PLAN_PACKAGE,
+            query: FetchHealthPlanPackageDocument,
             variables: { input: fetchInput },
         })
 
@@ -171,7 +171,7 @@ describe(`fetchHealthPlanPackage`, () => {
         )
 
         const unlockResult = await server.executeOperation({
-            query: FETCH_HEALTH_PLAN_PACKAGE,
+            query: FetchHealthPlanPackageDocument,
             variables: { input: fetchInput },
         })
 
@@ -192,7 +192,7 @@ describe(`fetchHealthPlanPackage`, () => {
         )
 
         const resubmitResult = await server.executeOperation({
-            query: FETCH_HEALTH_PLAN_PACKAGE,
+            query: FetchHealthPlanPackageDocument,
             variables: { input: fetchInput },
         })
 
@@ -228,7 +228,7 @@ describe(`fetchHealthPlanPackage`, () => {
         })
 
         const result = await otherUserServer.executeOperation({
-            query: FETCH_HEALTH_PLAN_PACKAGE,
+            query: FetchHealthPlanPackageDocument,
             variables: { input },
         })
 
@@ -263,7 +263,7 @@ describe(`fetchHealthPlanPackage`, () => {
         })
 
         const result = await otherUserServer.executeOperation({
-            query: FETCH_HEALTH_PLAN_PACKAGE,
+            query: FetchHealthPlanPackageDocument,
             variables: { input },
         })
 
@@ -299,7 +299,7 @@ describe(`fetchHealthPlanPackage`, () => {
         }
 
         const result = await cmsServer.executeOperation({
-            query: FETCH_HEALTH_PLAN_PACKAGE,
+            query: FetchHealthPlanPackageDocument,
             variables: { input },
         })
 
@@ -362,7 +362,7 @@ describe(`fetchHealthPlanPackage`, () => {
         }
 
         const result = await cmsServer.executeOperation({
-            query: FETCH_HEALTH_PLAN_PACKAGE,
+            query: FetchHealthPlanPackageDocument,
             variables: { input },
         })
 
@@ -396,7 +396,7 @@ describe(`fetchHealthPlanPackage`, () => {
         }
 
         const result = await server.executeOperation({
-            query: FETCH_HEALTH_PLAN_PACKAGE,
+            query: FetchHealthPlanPackageDocument,
             variables: { input },
         })
 

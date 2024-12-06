@@ -417,7 +417,7 @@ const submitContractMockError = ({
 
 const indexContractsMockSuccess = (
     submissions: Contract[] = [
-        { ...mockContractPackageUnlockedWithUnlockedType(), id: 'test-id-123', __typename: 'Contract' },
+        { ...mockContractPackageUnlockedWithUnlockedType(), id: 'test-id-123', __typename: 'Contract'},
         { ...mockContractPackageSubmittedWithRevisions(), id: 'test-id-124' },
     ]
 ): MockedResponse<IndexContractsForDashboardQuery> => {
@@ -441,7 +441,7 @@ const indexContractsMockSuccess = (
     }
 }
 
-export { 
+export {
     fetchContractMockSuccess,
     fetchContractMockFail,
     fetchContractWithQuestionsMockSuccess,

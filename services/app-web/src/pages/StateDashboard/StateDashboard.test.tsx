@@ -7,6 +7,7 @@ import {
     mockContractPackageUnlockedWithUnlockedType,
     mockContractPackageDraft,
     mockContractPackageSubmitted,
+    mockContractPackageApproved,
 } from '../../testHelpers/apolloMocks'
 import { renderWithProviders } from '../../testHelpers/jestHelpers'
 import { Contract } from '../../gen/gqlClient'
@@ -140,6 +141,88 @@ describe('StateDashboard', () => {
 
         const link3 = within(rows[3]).getByRole('link')
         expect(link3).toHaveAttribute('href', '/submissions/test-abc-submitted')
+    })
+
+    it('displays the review status tag when it has been set', async () => {
+        const mockUser = {
+            __typename: 'StateUser' as const,
+            state: {
+                name: 'Minnesota',
+                code: 'MN',
+                programs: [
+                    {
+                        id: 'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
+                        fullName: 'Special Needs Basic Care',
+                        name: 'SNBC',
+                        isRateProgram: false,
+                    },
+                    {
+                        id: 'd95394e5-44d1-45df-8151-1cc1ee66f100',
+                        fullName: 'Prepaid Medical Assistance Program',
+                        name: 'PMAP',
+                        isRateProgram: false,
+                    },
+                    {
+                        id: 'ea16a6c0-5fc6-4df8-adac-c627e76660ab',
+                        fullName: 'Minnesota Senior Care Plus ',
+                        name: 'MSC+',
+                        isRateProgram: false,
+                    },
+                    {
+                        id: '3fd36500-bf2c-47bc-80e8-e7aa417184c5',
+                        fullName: 'Minnesota Senior Health Options',
+                        name: 'MSHO',
+                        isRateProgram: false,
+                    },
+                ],
+            },
+            role: 'State User',
+            email: 'bob@dmas.mn.gov',
+        }
+
+        const approved = mockContractPackageApproved()
+        const submitted = mockContractPackageSubmitted()
+        submitted.packageSubmissions[0].contractRevision.updatedAt = new Date(
+            '1991-01-01'
+        )
+
+        const unlockedType = mockContractPackageUnlockedWithUnlockedType()
+        const unlocked: Contract = {
+            ...mockContractPackageUnlockedWithUnlockedType({
+                draftRevision: {
+                    ...unlockedType.draftRevision,
+                    updatedAt: new Date('2020-01-01'),
+                },
+            }),
+            __typename: 'Contract',
+        }
+
+        approved.id = 'test-abc-approved'
+        submitted.id = 'test-abc-submitted'
+        unlocked.id = 'test-abc-unlocked'
+
+        const submissions = [approved, submitted, unlocked]
+
+        renderWithProviders(<StateDashboard />, {
+            apolloProvider: {
+                mocks: [
+                    fetchCurrentUserMock({ statusCode: 200, user: mockUser }),
+                    indexContractsMockSuccess(submissions),
+                ],
+            },
+        })
+
+        // we want to check that there's a table with three submissions, sorted by `updatedAt`.
+        const rows = await screen.findAllByRole('row')
+
+        const row1 = within(rows[1]).getByTestId('submission-status')
+        expect(row1).toHaveTextContent('Approved')
+
+        const row2 = within(rows[2]).getByTestId('submission-status')
+        expect(row2).toHaveTextContent('Unlocked')
+
+        const row3 = within(rows[3]).getByTestId('submission-status')
+        expect(row3).toHaveTextContent('Submitted')
     })
 
     it('displays submissions table without rate programs', async () => {

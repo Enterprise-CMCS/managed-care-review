@@ -11,23 +11,16 @@ import type { Store } from '../../postgres'
 import { GraphQLError } from 'graphql'
 import { isValidCmsDivison } from '../../domain-models'
 import type { Emailer } from '../../emailer'
-import type { EmailParameterStore } from '../../parameterStore'
-import type { LDService } from '../../launchDarkly/launchDarkly'
 import type { StateCodeType } from '../../testHelpers'
 
 export function createContractQuestionResolver(
     store: Store,
-    emailParameterStore: EmailParameterStore,
-    emailer: Emailer,
-    launchDarkly: LDService
+    emailer: Emailer
 ): MutationResolvers['createContractQuestion'] {
     return async (_parent, { input }, context) => {
         const { user, ctx, tracer } = context
         const span = tracer?.startSpan('createContractQuestion', {}, ctx)
 
-        const featureFlags = await launchDarkly.allFlags(context)
-        const readStateAnalystsFromDBFlag =
-            featureFlags?.['read-write-state-assignments']
         if (!hasCMSPermissions(user)) {
             const msg = 'user not authorized to create a question'
             logError('createContractQuestion', msg)
@@ -79,9 +72,13 @@ export function createContractQuestionResolver(
             })
         }
 
-        // Return error if package status is DRAFT, contract will have no submitted revisions
-        if (contractResult.revisions.length === 0) {
-            const errMessage = `Issue creating question for health plan package. Message: Cannot create question for health plan package in DRAFT status`
+        // Return error if contract status is DRAFT, contract will have no submitted revisions
+        // Return error if contract has been approved
+        if (
+            contractResult.revisions.length === 0 ||
+            contractResult.consolidatedStatus === 'APPROVED'
+        ) {
+            const errMessage = `Issue creating question for contract. Message: Cannot create question for contract in ${contractResult.consolidatedStatus} status`
             logError('createContractQuestion', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new UserInputError(errMessage)
@@ -159,46 +156,22 @@ export function createContractQuestionResolver(
         }
 
         let stateAnalystsEmails: string[] = []
-        if (readStateAnalystsFromDBFlag) {
-            // not great that state code type isn't being used in ContractType but I'll risk the conversion for now
-            const stateAnalystsEmailsResult =
-                await store.findStateAssignedUsers(
-                    contractResult.stateCode as StateCodeType
-                )
+        // not great that state code type isn't being used in ContractType but I'll risk the conversion for now
+        const stateAnalystsEmailsResult = await store.findStateAssignedUsers(
+            contractResult.stateCode as StateCodeType
+        )
 
-            if (stateAnalystsEmailsResult instanceof Error) {
-                logError(
-                    'getStateAnalystsEmails',
-                    stateAnalystsEmailsResult.message
-                )
-                setErrorAttributesOnActiveSpan(
-                    stateAnalystsEmailsResult.message,
-                    span
-                )
-            } else {
-                stateAnalystsEmails = stateAnalystsEmailsResult.map(
-                    (u) => u.email
-                )
-            }
+        if (stateAnalystsEmailsResult instanceof Error) {
+            logError(
+                'getStateAnalystsEmails',
+                stateAnalystsEmailsResult.message
+            )
+            setErrorAttributesOnActiveSpan(
+                stateAnalystsEmailsResult.message,
+                span
+            )
         } else {
-            const stateAnalystsEmailsResult =
-                await emailParameterStore.getStateAnalystsEmails(
-                    contractResult.stateCode
-                )
-
-            //If error log it and set stateAnalystsEmails to empty string as to not interrupt the emails.
-            if (stateAnalystsEmailsResult instanceof Error) {
-                logError(
-                    'getStateAnalystsEmails',
-                    stateAnalystsEmailsResult.message
-                )
-                setErrorAttributesOnActiveSpan(
-                    stateAnalystsEmailsResult.message,
-                    span
-                )
-            } else {
-                stateAnalystsEmails = stateAnalystsEmailsResult
-            }
+            stateAnalystsEmails = stateAnalystsEmailsResult.map((u) => u.email)
         }
 
         const sendQuestionsCMSEmailResult = await emailer.sendQuestionsCMSEmail(

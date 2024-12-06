@@ -36,6 +36,10 @@ function isCMSUser(user: UserType): user is CMSUserType {
     return user.role === 'CMS_USER'
 }
 
+function isCMSApproverUser(user: UserType): user is CMSUserType {
+    return user.role === 'CMS_APPROVER_USER'
+}
+
 function isAdminUser(user: UserType): user is AdminUserType {
     return user.role === 'ADMIN_USER'
 }
@@ -106,6 +110,7 @@ function hasAdminPermissions(
 export {
     isUser,
     isCMSUser,
+    isCMSApproverUser,
     isStateUser,
     isAdminUser,
     toDomainUser,

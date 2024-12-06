@@ -45,7 +45,8 @@ export {
     mockValidCMSApproverUser,
     iterableCmsUsersMockData,
     iterableAdminUsersMockData,
-    mockValidBusinessOwnerUser
+    mockValidBusinessOwnerUser,
+    iterableNonCMSUsersMockData
 } from './userGQLMock'
 
 export {
@@ -55,13 +56,12 @@ export {
 } from './questionResponseGQLMock'
 
 export { mockQuestionsPayload } from './questionResponseDataMocks'
-export { fetchEmailSettings } from './emailGQLMock'
 export { mockMNState } from './stateMock'
 
 
 
 export { updateDivisionMockError, updateDivisionMockSuccess } from './updateUserMock'
-export { fetchRateMockSuccess } from './rateGQLMocks'
+export { fetchRateMockSuccess,   fetchRateWithQuestionsMockSuccess } from './rateGQLMocks'
 
 export {
     createAPIKeySuccess,
@@ -80,9 +80,11 @@ export {
     mockContractRevision,
     mockRateRevision,
     mockContractPackageSubmittedWithQuestions,
+    mockContractPackageApproved,
+    mockContractPackageApprovedWithQuestions,
 } from './contractPackageDataMock'
-export { rateDataMock } from './rateDataMock'
-export { 
+export { rateDataMock, mockRateSubmittedWithQuestions } from './rateDataMock'
+export {
     fetchContractMockSuccess,
     fetchContractMockFail,
     fetchContractWithQuestionsMockSuccess,
@@ -94,9 +96,9 @@ export {
     createContractMockSuccess,
     indexContractsMockSuccess
 } from './contractGQLMock'
-export { 
-    indexRatesMockSuccess, 
-    indexRatesForDashboardMockSuccess, 
+export {
+    indexRatesMockSuccess,
+    indexRatesForDashboardMockSuccess,
     indexRatesMockFailure,
     indexRatesForDashboardMockFailure,
 } from './rateGQLMocks'

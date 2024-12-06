@@ -29,6 +29,7 @@ describe('RateDetailsSummarySection', () => {
         return [
             {
                 id: '1234',
+                webURL: 'https://testmcreview.example/rates/1234',
                 createdAt: new Date('01/01/2021'),
                 updatedAt: new Date('01/01/2021'),
                 status: 'DRAFT',
@@ -63,6 +64,9 @@ describe('RateDetailsSummarySection', () => {
                             'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
                         ],
                         deprecatedRateProgramIDs: [],
+                        consolidatedRateProgramIDs: [
+                            'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
+                        ],
                         certifyingActuaryContacts: [
                             {
                                 actuarialFirm: 'DELOITTE',
@@ -86,6 +90,7 @@ describe('RateDetailsSummarySection', () => {
             },
             {
                 id: '5678',
+                webURL: 'https://testmcreview.example/rates/5678',
                 createdAt: new Date('01/01/2021'),
                 updatedAt: new Date('01/01/2021'),
                 status: 'DRAFT',
@@ -120,6 +125,9 @@ describe('RateDetailsSummarySection', () => {
                             'd95394e5-44d1-45df-8151-1cc1ee66f100',
                         ],
                         deprecatedRateProgramIDs: [],
+                        consolidatedRateProgramIDs: [
+                            'd95394e5-44d1-45df-8151-1cc1ee66f100',
+                        ],
                         certifyingActuaryContacts: [
                             {
                                 actuarialFirm: 'DELOITTE',
@@ -739,7 +747,7 @@ describe('RateDetailsSummarySection', () => {
     })
 
     it('does not render supporting rate documents when they do not exist', () => {
-        const draftContract = mockContractPackageSubmitted()
+        const draftContract = mockContractWithLinkedRateDraft()
 
         if (
             draftContract.draftRates &&

@@ -3,7 +3,7 @@ CMS asked questions about <%= it.packageName %><br />
 <br />
 <b>Date:</b> <%= it.dateAsked %><br />
 <br />
-You must answer the question before CMS can continue reviewing it.<br />
+You must respond to the questions before CMS can continue their review. Responses should be submitted in DOC or DOCX format.<br />
 <br />
 <a href="<%= it.questionResponseURL %>">Open the submission in MC-Review to answer questions</a>
 

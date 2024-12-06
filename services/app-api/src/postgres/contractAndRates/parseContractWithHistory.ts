@@ -12,6 +12,7 @@ import {
 } from './parseRateWithHistory'
 import type { ContractRevisionTableWithFormData } from './prismaSharedContractRateHelpers'
 import {
+    getConsolidatedStatus,
     setDateAddedForContractRevisions,
     setDateAddedForRateRevisions,
 } from './prismaSharedContractRateHelpers'
@@ -23,9 +24,11 @@ import {
     contractFormDataToDomainModel,
     convertUpdateInfoToDomainModel,
     getContractRateStatus,
+    getContractReviewStatus,
 } from './prismaSharedContractRateHelpers'
 import type { ContractTableWithoutDraftRates } from './prismaSubmittedContractHelpers'
 import type { ContractTableFullPayload } from './prismaFullContractRateHelpers'
+import type { ContractReviewActionType } from '../../domain-models/contractAndRates/contractReviewActionType'
 
 // This function might be generally useful later on. It takes an array of objects
 // that can be errors and either returns the first error, or returns the list but with
@@ -101,7 +104,8 @@ function contractWithHistoryToDomainModelWithoutRates(
 
     let draftRevision: ContractRevisionType | undefined = undefined
     const submittedRevisions: ContractRevisionType[] = []
-
+    const reviewStatusActions: ContractReviewActionType[] =
+        contract.reviewStatusActions
     for (const contractRev of contractRevisions) {
         // If we have a draft revision
         // We set the draft revision aside, format it properly
@@ -184,12 +188,19 @@ function contractWithHistoryToDomainModelWithoutRates(
         setDateAddedForRateRevisions(rrevs)
     }
 
+    const status = getContractRateStatus(contract.revisions)
+    const reviewStatus = getContractReviewStatus(contract)
+    const consolidatedStatus = getConsolidatedStatus(status, reviewStatus)
+
     return {
         id: contract.id,
         createdAt: contract.createdAt,
         updatedAt: contract.updatedAt,
         mccrsID: contract.mccrsID || undefined,
-        status: getContractRateStatus(contract.revisions),
+        status,
+        reviewStatus,
+        consolidatedStatus,
+        reviewStatusActions: reviewStatusActions.reverse(),
         stateCode: contract.stateCode,
         stateNumber: contract.stateNumber,
         draftRevision,

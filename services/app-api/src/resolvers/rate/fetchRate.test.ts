@@ -1,5 +1,8 @@
-import FETCH_RATE from '../../../../app-graphql/src/queries/fetchRate.graphql'
-import FETCH_RATE_WITH_QUESTIONS from '../../../../app-graphql/src/queries/fetchRateWithQuestions.graphql'
+import {
+    FetchRateDocument,
+    FetchRateWithQuestionsDocument,
+} from '../../gen/gqlClient'
+import type { RateFormDataInput } from '../../gen/gqlClient'
 import { testLDService } from '../../testHelpers/launchDarklyHelpers'
 import {
     constructTestPostgresServer,
@@ -20,6 +23,7 @@ import {
     createSubmitAndUnlockTestRate,
     fetchTestRateById,
     updateRatesInputFromDraftContract,
+    updateTestDraftRateOnContract,
     updateTestDraftRatesOnContract,
 } from '../../testHelpers/gqlRateHelpers'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
@@ -28,9 +32,10 @@ import {
     createAndUpdateTestContractWithoutRates,
     fetchTestContract,
     submitTestContract,
+    unlockTestContract,
 } from '../../testHelpers/gqlContractHelpers'
 import { latestFormData } from '../../testHelpers/healthPlanPackageHelpers'
-import { testS3Client } from '../../../../app-web/src/testHelpers/s3Helpers'
+import { testS3Client } from '../../../../app-api/src/testHelpers/s3Helpers'
 import dayjs from 'dayjs'
 
 describe('fetchRate', () => {
@@ -166,7 +171,7 @@ describe('fetchRate', () => {
         expect(firstRateID).toBe(resubmittedRate.id) // first rate ID should be unchanged
 
         const result1 = await cmsServer.executeOperation({
-            query: FETCH_RATE,
+            query: FetchRateDocument,
             variables: {
                 input: { rateID: firstRateID },
             },
@@ -197,6 +202,135 @@ describe('fetchRate', () => {
         )
     })
 
+    it('returns correct consolidated rateProgramIDs', async () => {
+        const dbClient = await sharedTestPrismaClient()
+        const cmsUser = testCMSUser()
+        const server = await constructTestPostgresServer({
+            ldService,
+            s3Client: mockS3,
+        })
+
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: cmsUser,
+            },
+            ldService,
+            s3Client: mockS3,
+        })
+
+        // First, create new rate
+        const submittedInitial =
+            await createAndSubmitTestContractWithRate(server)
+
+        const rrev = submittedInitial.packageSubmissions[0].rateRevisions[0]
+        const rateID = rrev.rateID
+        const fakeProgramIDs = [uuidv4(), uuidv4()]
+
+        // manually change it to have deprecated rate program IDs in the db since we can't
+        // submit something that has them now.
+        await dbClient.rateRevisionTable.update({
+            where: {
+                id: rrev.id,
+            },
+            data: {
+                rateProgramIDs: [],
+                deprecatedRateProgramIDs: fakeProgramIDs,
+            },
+        })
+
+        const fetchedDeprecated = await fetchTestRateById(cmsServer, rateID)
+        const fetchedRev = fetchedDeprecated.packageSubmissions![0].rateRevision
+
+        expect(fetchedRev.formData.rateProgramIDs).toHaveLength(0)
+        expect(fetchedRev.formData.deprecatedRateProgramIDs).toStrictEqual(
+            fakeProgramIDs
+        )
+        expect(fetchedRev.formData.consolidatedRateProgramIDs).toStrictEqual(
+            fakeProgramIDs
+        )
+
+        // unlock and set non-deprecated IDs
+        const unlocked = await unlockTestContract(
+            cmsServer,
+            submittedInitial.id,
+            'unlock to fix deprecated IDs'
+        )
+
+        const realRateProgramIDs = [defaultFloridaRateProgram().id]
+
+        const updatedRateInfo: RateFormDataInput = {
+            rateType: 'NEW' as const,
+            rateDateStart: '2025-05-01',
+            rateDateEnd: '2026-04-30',
+            rateDateCertified: '2025-03-15',
+            rateDocuments: [
+                {
+                    name: 'rateDocument.pdf',
+                    s3URL: 's3://bucketname/key/test1',
+                    sha256: 'fakesha',
+                },
+            ],
+            supportingDocuments: [],
+            rateProgramIDs: realRateProgramIDs,
+            deprecatedRateProgramIDs: [],
+            certifyingActuaryContacts: [
+                {
+                    name: 'test name',
+                    titleRole: 'test title',
+                    email: 'email@example.com',
+                    actuarialFirm: 'MERCER' as const,
+                    actuarialFirmOther: '',
+                },
+            ],
+            actuaryCommunicationPreference: 'OACT_TO_ACTUARY' as const,
+        }
+
+        await updateTestDraftRateOnContract(
+            server,
+            submittedInitial.id,
+            unlocked.draftRates[0].draftRevision?.updatedAt,
+            rateID,
+            updatedRateInfo
+        )
+        await submitTestContract(
+            server,
+            submittedInitial.id,
+            'resubmit with new rateIDs'
+        )
+
+        const fetchedResolved = await fetchTestRateById(cmsServer, rateID)
+        const fetchedResolvedRev =
+            fetchedResolved.packageSubmissions![0].rateRevision
+
+        expect(
+            fetchedResolvedRev.formData.deprecatedRateProgramIDs
+        ).toHaveLength(0)
+        expect(fetchedResolvedRev.formData.rateProgramIDs).toStrictEqual(
+            realRateProgramIDs
+        )
+        expect(
+            fetchedResolvedRev.formData.consolidatedRateProgramIDs
+        ).toStrictEqual(realRateProgramIDs)
+    })
+
+    it('returns webURL', async () => {
+        const server = await constructTestPostgresServer({
+            ldService,
+            s3Client: mockS3,
+        })
+
+        // First, create new rate
+        const submittedInitial =
+            await createAndSubmitTestContractWithRate(server)
+
+        const rrev = submittedInitial.packageSubmissions[0].rateRevisions[0]
+        const fetchedRate = await fetchTestRateById(server, rrev.rateID)
+
+        expect(fetchedRate.webURL).toBe(
+            `https://localhost:3000/rates/${rrev.rateID}`
+        )
+    })
+
     it('returns the right revisions as a rate is unlocked', async () => {
         const cmsUser = testCMSUser()
         const server = await constructTestPostgresServer({
@@ -223,7 +357,7 @@ describe('fetchRate', () => {
 
         // fetch rate
         const result = await cmsServer.executeOperation({
-            query: FETCH_RATE,
+            query: FetchRateDocument,
             variables: {
                 input,
             },
@@ -269,7 +403,7 @@ describe('fetchRate', () => {
 
         // fetch rate
         const result = await cmsServer.executeOperation({
-            query: FETCH_RATE,
+            query: FetchRateDocument,
             variables: {
                 input,
             },
@@ -519,7 +653,7 @@ describe('fetchRate', () => {
         await createTestRateQuestion(oactServer, rateID)
 
         const result = await server.executeOperation({
-            query: FETCH_RATE_WITH_QUESTIONS,
+            query: FetchRateWithQuestionsDocument,
             variables: {
                 input: {
                     rateID,
@@ -545,7 +679,7 @@ describe('fetchRate', () => {
         // Test newly created dmco question and its order
         await createTestRateQuestion(dmco2Server, rateID)
         const result2 = await server.executeOperation({
-            query: FETCH_RATE_WITH_QUESTIONS,
+            query: FetchRateWithQuestionsDocument,
             variables: {
                 input: {
                     rateID,

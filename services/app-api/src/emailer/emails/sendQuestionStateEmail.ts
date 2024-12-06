@@ -1,5 +1,5 @@
 import { packageName as generatePackageName } from '../../common-code/healthPlanFormDataType'
-import { formatCalendarDate } from '../../../../app-web/src/common-code/dateHelpers'
+import { formatCalendarDate } from '../../common-code/dateHelpers/calendarDate'
 import { pruneDuplicateEmails } from '../formatters'
 import type { EmailConfiguration, EmailData } from '..'
 import type { ProgramType, ContractQuestionType } from '../../domain-models'
@@ -9,7 +9,7 @@ import {
     findContractPrograms,
 } from '../templateHelpers'
 import { submissionQuestionResponseURL } from '../generateURLs'
-import type { ContractRevisionType } from '../../domain-models/contractAndRates'
+import type { ContractRevisionType } from '../../domain-models'
 
 export const sendQuestionStateEmail = async (
     contractRev: ContractRevisionType,
@@ -55,7 +55,7 @@ export const sendQuestionStateEmail = async (
         cmsRequestorDivision: currentQuestion.addedBy.divisionAssignment,
         dateAsked: formatCalendarDate(
             currentQuestion.createdAt,
-            'America/New_York'
+            'America/Los_Angeles'
         ),
     }
 

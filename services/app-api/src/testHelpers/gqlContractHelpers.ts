@@ -1,8 +1,14 @@
-import FETCH_CONTRACT from '../../../app-graphql/src/queries/fetchContract.graphql'
-import SUBMIT_CONTRACT from '../../../app-graphql/src/mutations/submitContract.graphql'
-import UNLOCK_CONTRACT from '../../../app-graphql/src/mutations/unlockContract.graphql'
-import UPDATE_DRAFT_CONTRACT_RATES from '../../../app-graphql/src/mutations/updateDraftContractRates.graphql'
-import WITHDRAW_REPLACE_RATE from '../../../app-graphql/src/mutations/withdrawAndReplaceRedundantRate.graphql'
+import {
+    FetchContractDocument,
+    SubmitContractDocument,
+    UnlockContractDocument,
+    UpdateDraftContractRatesDocument,
+    WithdrawAndReplaceRedundantRateDocument,
+    UpdateContractDraftRevisionDocument,
+    CreateContractDocument,
+    FetchContractWithQuestionsDocument,
+    ApproveContractDocument,
+} from '../gen/gqlClient'
 
 import { findStatePrograms } from '../postgres'
 
@@ -27,12 +33,9 @@ import type {
     StateCodeType,
 } from '../common-code/healthPlanFormDataType'
 import { addNewRateToTestContract } from './gqlRateHelpers'
-import UPDATE_CONTRACT_DRAFT_REVISION from 'app-graphql/src/mutations/updateContractDraftRevision.graphql'
 import type { ContractFormDataType } from '../domain-models'
 import type { CreateHealthPlanPackageInput } from '../gen/gqlServer'
-import CREATE_CONTRACT from 'app-graphql/src/mutations/createContract.graphql'
 import { mockGqlContractDraftRevisionFormDataInput } from './gqlContractInputMocks'
-import FETCH_CONTRACT_WITH_QUESTIONS from '../../../app-graphql/src/queries/fetchContractWithQuestions.graphql'
 
 const createAndSubmitTestContract = async (
     server: ApolloServer,
@@ -55,7 +58,7 @@ async function submitTestContract(
     submittedReason?: string
 ): Promise<Contract> {
     const result = await server.executeOperation({
-        query: SUBMIT_CONTRACT,
+        query: SubmitContractDocument,
         variables: {
             input: {
                 contractID: contractID,
@@ -83,7 +86,7 @@ async function resubmitTestContract(
     submittedReason?: string
 ): Promise<Contract> {
     const updateResult = await server.executeOperation({
-        query: SUBMIT_CONTRACT,
+        query: SubmitContractDocument,
         variables: {
             input: {
                 contractID,
@@ -111,7 +114,7 @@ async function unlockTestContract(
     unlockedReason?: string
 ): Promise<UnlockedContract> {
     const result = await server.executeOperation({
-        query: UNLOCK_CONTRACT,
+        query: UnlockContractDocument,
         variables: {
             input: {
                 contractID: contractID,
@@ -166,7 +169,7 @@ async function fetchTestContract(
 ): Promise<Contract> {
     const input = { contractID }
     const result = await server.executeOperation({
-        query: FETCH_CONTRACT,
+        query: FetchContractDocument,
         variables: { input },
     })
 
@@ -183,12 +186,35 @@ async function fetchTestContract(
     return result.data.fetchContract.contract
 }
 
+async function approveTestContract(
+    server: ApolloServer,
+    contractID: string
+): Promise<Contract> {
+    const input = { contractID }
+    const result = await server.executeOperation({
+        query: ApproveContractDocument,
+        variables: { input },
+    })
+
+    if (result.errors) {
+        throw new Error(
+            `approveTestContract mutation failed with errors ${result.errors}`
+        )
+    }
+
+    if (!result.data) {
+        throw new Error('approveTestContract returned nothing')
+    }
+
+    return result.data.approveContract.contract
+}
+
 const fetchTestContractWithQuestions = async (
     server: ApolloServer,
     contractID: string
 ): Promise<Contract> => {
     const result = await server.executeOperation({
-        query: FETCH_CONTRACT_WITH_QUESTIONS,
+        query: FetchContractWithQuestionsDocument,
         variables: {
             input: {
                 contractID: contractID,
@@ -221,7 +247,7 @@ async function updateTestContractToReplaceRate(
     const { contractID, withdrawnRateID, replacementRateID, replaceReason } =
         args
     const result = await server.executeOperation({
-        query: WITHDRAW_REPLACE_RATE,
+        query: WithdrawAndReplaceRedundantRateDocument,
         variables: {
             input: {
                 contractID,
@@ -264,7 +290,7 @@ const createTestContract = async (
         ...formData,
     }
     const result = await server.executeOperation({
-        query: CREATE_CONTRACT,
+        query: CreateContractDocument,
         variables: { input },
     })
 
@@ -354,7 +380,7 @@ const linkRateToDraftContract = async (
     linkedRateID: string
 ) => {
     const updatedContract = await server.executeOperation({
-        query: UPDATE_DRAFT_CONTRACT_RATES,
+        query: UpdateDraftContractRatesDocument,
         variables: {
             input: {
                 contractID: contractID,
@@ -375,7 +401,7 @@ const clearRatesOnDraftContract = async (
     contractID: string
 ) => {
     const updatedContract = await server.executeOperation({
-        query: UPDATE_DRAFT_CONTRACT_RATES,
+        query: UpdateDraftContractRatesDocument,
         variables: {
             input: {
                 contractID: contractID,
@@ -393,7 +419,7 @@ const updateRateOnDraftContract = async (
     rateData: Partial<RateFormData>
 ): Promise<ContractType> => {
     const updatedContract = await server.executeOperation({
-        query: UPDATE_DRAFT_CONTRACT_RATES,
+        query: UpdateDraftContractRatesDocument,
         variables: {
             input: {
                 contractID: contractID,
@@ -435,7 +461,7 @@ const updateTestContractDraftRevision = async (
         )
 
     const updateResult = await server.executeOperation({
-        query: UPDATE_CONTRACT_DRAFT_REVISION,
+        query: UpdateContractDraftRevisionDocument,
         variables: {
             input: {
                 contractID: contractID,
@@ -464,6 +490,7 @@ export {
     submitTestContract,
     unlockTestContract,
     createAndSubmitTestContract,
+    approveTestContract,
     fetchTestContract,
     fetchTestContractWithQuestions,
     createAndUpdateTestContractWithoutRates,

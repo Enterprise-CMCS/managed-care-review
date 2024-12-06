@@ -1,7 +1,7 @@
 import { v4 as uuidv4 } from 'uuid'
 import { findStatePrograms, NewPostgresStore } from '../../postgres'
 import { submitContract } from '../../postgres/contractAndRates/submitContract'
-import UPDATE_HEALTH_PLAN_FORM_DATA from '../../../../app-graphql/src/mutations/updateHealthPlanFormData.graphql'
+import { UpdateHealthPlanFormDataDocument } from '../../gen/gqlClient'
 import { domainToBase64 } from '../../common-code/proto/healthPlanFormDataProto'
 import { packageName } from '../../common-code/healthPlanFormDataType'
 import {
@@ -86,7 +86,7 @@ describe(`Tests UpdateHealthPlanFormData`, () => {
         const updatedB64 = domainToBase64(formData)
 
         const updateResult = await server.executeOperation({
-            query: UPDATE_HEALTH_PLAN_FORM_DATA,
+            query: UpdateHealthPlanFormDataDocument,
             variables: {
                 input: {
                     pkgID: createdDraft.id,
@@ -541,7 +541,7 @@ describe(`Tests UpdateHealthPlanFormData`, () => {
 
         // update the DB contract
         const updateResult = await server.executeOperation({
-            query: UPDATE_HEALTH_PLAN_FORM_DATA,
+            query: UpdateHealthPlanFormDataDocument,
             variables: {
                 input: {
                     pkgID: createdDraft.id,
@@ -587,7 +587,7 @@ describe(`Tests UpdateHealthPlanFormData`, () => {
         const updatedB64 = domainToBase64(formData)
 
         const updateResult = await server.executeOperation({
-            query: UPDATE_HEALTH_PLAN_FORM_DATA,
+            query: UpdateHealthPlanFormDataDocument,
             variables: {
                 input: {
                     pkgID: createdDraft.id,
@@ -634,7 +634,7 @@ describe(`Tests UpdateHealthPlanFormData`, () => {
         })
 
         const updateResult = await cmsUserServer.executeOperation({
-            query: UPDATE_HEALTH_PLAN_FORM_DATA,
+            query: UpdateHealthPlanFormDataDocument,
             variables: {
                 input: {
                     pkgID: createdDraft.id,
@@ -673,7 +673,7 @@ describe(`Tests UpdateHealthPlanFormData`, () => {
         })
 
         const updateResult = await otherUserServer.executeOperation({
-            query: UPDATE_HEALTH_PLAN_FORM_DATA,
+            query: UpdateHealthPlanFormDataDocument,
             variables: {
                 input: {
                     pkgID: createdDraft.id,
@@ -701,7 +701,7 @@ describe(`Tests UpdateHealthPlanFormData`, () => {
         const formData = 'not-valid-proto'
 
         const updateResult = await server.executeOperation({
-            query: UPDATE_HEALTH_PLAN_FORM_DATA,
+            query: UpdateHealthPlanFormDataDocument,
             variables: {
                 input: {
                     pkgID: createdDraft.id,
@@ -731,7 +731,7 @@ describe(`Tests UpdateHealthPlanFormData`, () => {
         const formData = domainToBase64(stateSubmission)
 
         const updateResult = await server.executeOperation({
-            query: UPDATE_HEALTH_PLAN_FORM_DATA,
+            query: UpdateHealthPlanFormDataDocument,
             variables: {
                 input: {
                     pkgID: createdDraft.id,
@@ -781,7 +781,7 @@ describe(`Tests UpdateHealthPlanFormData`, () => {
         const b64 = domainToBase64(draft)
 
         const updateResult = await server.executeOperation({
-            query: UPDATE_HEALTH_PLAN_FORM_DATA,
+            query: UpdateHealthPlanFormDataDocument,
             variables: {
                 input: {
                     pkgID: createdSubmitted.id,
@@ -813,7 +813,7 @@ describe(`Tests UpdateHealthPlanFormData`, () => {
         const b64 = domainToBase64(formData)
 
         const updateResult = await server.executeOperation({
-            query: UPDATE_HEALTH_PLAN_FORM_DATA,
+            query: UpdateHealthPlanFormDataDocument,
             variables: {
                 input: {
                     pkgID: createdDraft.id,
@@ -849,7 +849,7 @@ describe(`Tests UpdateHealthPlanFormData`, () => {
         const b64 = domainToBase64(formData)
 
         const updateResult = await server.executeOperation({
-            query: UPDATE_HEALTH_PLAN_FORM_DATA,
+            query: UpdateHealthPlanFormDataDocument,
             variables: {
                 input: {
                     pkgID: createdDraft.id,
@@ -895,7 +895,7 @@ describe(`Tests UpdateHealthPlanFormData`, () => {
         const updatedB64 = domainToBase64(formData)
 
         const updateResult = await server.executeOperation({
-            query: UPDATE_HEALTH_PLAN_FORM_DATA,
+            query: UpdateHealthPlanFormDataDocument,
             variables: {
                 input: {
                     pkgID: createdDraft.id,

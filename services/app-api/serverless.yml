@@ -240,6 +240,17 @@ functions:
     layers:
       - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-18-1:4
 
+  auditFiles:
+    handler: src/handlers/audit_s3.main
+    timeout: 60
+    vpc:
+      securityGroupIds:
+        - ${self:custom.sgId}
+      subnetIds: ${self:custom.privateSubnets}
+    layers:
+      - !Ref PrismaClientEngineLambdaLayer
+      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-18-1:4
+
 resources:
   Resources:
     ApiGwWebAclAssociation:

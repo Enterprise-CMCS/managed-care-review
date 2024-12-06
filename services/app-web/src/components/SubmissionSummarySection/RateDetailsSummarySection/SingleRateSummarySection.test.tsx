@@ -27,6 +27,7 @@ describe('SingleRateSummarySection', () => {
                 rate={rateData}
                 isSubmitted={true}
                 statePrograms={rateData.state.programs}
+                parentContractStatus="SUBMITTED"
             />,
             {
                 apolloProvider: {
@@ -83,7 +84,7 @@ describe('SingleRateSummarySection', () => {
                 name: 'Rate amendment effective dates',
             })
         ).toBeInTheDocument()
-        // API returns UTC timezone, we display timestamped dates in ET timezone so 1 day before on these tests.
+        // API returns UTC timezone, we display timestamped dates in PT timezone so 1 day before on these tests.
         expect(
             screen.getByRole('definition', {
                 name: 'Rate submission date',
@@ -131,6 +132,7 @@ describe('SingleRateSummarySection', () => {
                 rate={rateData}
                 isSubmitted={true}
                 statePrograms={rateData.state.programs}
+                parentContractStatus="SUBMITTED"
             />,
             {
                 apolloProvider: {
@@ -234,6 +236,7 @@ describe('SingleRateSummarySection', () => {
                 rate={rateData}
                 isSubmitted={true}
                 statePrograms={rateData.state.programs}
+                parentContractStatus="SUBMITTED"
             />,
             {
                 apolloProvider: {
@@ -283,6 +286,7 @@ describe('SingleRateSummarySection', () => {
                     rate={rateData}
                     isSubmitted={false}
                     statePrograms={rateData.state.programs}
+                    parentContractStatus="SUBMITTED"
                 />,
                 {
                     apolloProvider: {
@@ -321,6 +325,7 @@ describe('SingleRateSummarySection', () => {
                                 rate={rateData}
                                 isSubmitted={false}
                                 statePrograms={rateData.state.programs}
+                                parentContractStatus="SUBMITTED"
                             />
                         }
                     />
@@ -365,6 +370,7 @@ describe('SingleRateSummarySection', () => {
                     rate={rateData}
                     isSubmitted={false}
                     statePrograms={rateData.state.programs}
+                    parentContractStatus="SUBMITTED"
                 />,
                 {
                     apolloProvider: {
@@ -394,6 +400,7 @@ describe('SingleRateSummarySection', () => {
                     rate={rateData}
                     isSubmitted={false}
                     statePrograms={rateData.state.programs}
+                    parentContractStatus="SUBMITTED"
                 />,
                 {
                     apolloProvider: {
@@ -452,6 +459,7 @@ describe('SingleRateSummarySection', () => {
                     rate={rateData}
                     isSubmitted={false}
                     statePrograms={rateData.state.programs}
+                    parentContractStatus="SUBMITTED"
                 />,
                 {
                     apolloProvider: {
@@ -497,6 +505,7 @@ describe('SingleRateSummarySection', () => {
                     rate={rateData}
                     isSubmitted={false}
                     statePrograms={rateData.state.programs}
+                    parentContractStatus="SUBMITTED"
                 />,
                 {
                     apolloProvider: {
@@ -580,6 +589,7 @@ describe('SingleRateSummarySection', () => {
                     rate={rateData}
                     isSubmitted={false}
                     statePrograms={rateData.state.programs}
+                    parentContractStatus="SUBMITTED"
                 />,
                 {
                     apolloProvider: {
@@ -615,6 +625,7 @@ describe('SingleRateSummarySection', () => {
                     rate={rateData}
                     isSubmitted={true}
                     statePrograms={rateData.state.programs}
+                    parentContractStatus="SUBMITTED"
                 />,
                 {
                     apolloProvider: {
@@ -640,6 +651,42 @@ describe('SingleRateSummarySection', () => {
             expect(
                 screen.queryAllByText(/You must provide this information/)
             ).toHaveLength(0)
+        })
+
+        it('should not display unlock rate button if parent contract has been approved', async () => {
+            const rateData = mockEmptyRateData()
+            rateData.status = 'SUBMITTED'
+            renderWithProviders(
+                <SingleRateSummarySection
+                    rate={rateData}
+                    isSubmitted={true}
+                    statePrograms={rateData.state.programs}
+                    parentContractStatus="APPROVED"
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                statusCode: 200,
+                                user: mockValidHelpDeskUser(),
+                            }),
+                        ],
+                    },
+                    featureFlags: { 'rate-edit-unlock': true },
+                }
+            )
+
+            // Wait for all the documents to be in the table
+            await screen.findByText(
+                rateData.revisions[0].formData.rateDocuments[0].name
+            )
+            await screen.findByRole('link', {
+                name: 'Download all rate documents',
+            })
+
+            expect(
+                screen.queryByRole('link', { name: 'Unlock rate' })
+            ).not.toBeInTheDocument()
         })
     })
 })

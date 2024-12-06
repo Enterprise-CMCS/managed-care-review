@@ -1,0 +1,25 @@
+fragment rateFieldsFragment on Rate {
+    id
+    webURL
+    createdAt
+    updatedAt
+    stateCode
+    stateNumber
+    parentContractID
+    state {
+        code
+        name
+        programs {
+            id
+            name
+            fullName
+            isRateProgram
+        }
+    }
+    withdrawInfo {
+        ...updateInformationFields
+    }
+    status
+    parentContractID
+    initiallySubmittedAt
+}

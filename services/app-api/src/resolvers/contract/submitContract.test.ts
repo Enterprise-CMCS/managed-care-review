@@ -6,8 +6,8 @@ import {
     updateTestHealthPlanFormData,
     updateTestStateAssignments,
 } from '../../testHelpers/gqlHelpers'
-import SUBMIT_CONTRACT from '../../../../app-graphql/src/mutations/submitContract.graphql'
-import { testS3Client } from '../../../../app-web/src/testHelpers/s3Helpers'
+import { SubmitContractDocument } from '../../gen/gqlClient'
+import { testS3Client } from '../../../src/testHelpers/s3Helpers'
 import * as awsSESHelpers from '../../testHelpers/awsSESHelpers'
 
 import {
@@ -17,8 +17,10 @@ import {
 } from '../../testHelpers/userHelpers'
 import type { ContractRevision, RateRevision } from '../../gen/gqlServer'
 import {
+    createAndSubmitTestContract,
     createAndSubmitTestContractWithRate,
     createAndUpdateTestContractWithoutRates,
+    createSubmitAndUnlockTestContract,
     fetchTestContract,
     resubmitTestContract,
     submitTestContract,
@@ -36,10 +38,6 @@ import { latestFormData } from '../../testHelpers/healthPlanPackageHelpers'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 import dayjs from 'dayjs'
 import { testEmailConfig, testEmailer } from '../../testHelpers/emailerHelpers'
-import {
-    getTestStateAnalystsEmails,
-    mockEmailParameterStoreError,
-} from '../../testHelpers/parameterStoreHelpers'
 import { NewPostgresStore } from '../../postgres'
 
 describe('submitContract', () => {
@@ -60,9 +58,12 @@ describe('submitContract', () => {
         const contract = await submitTestContract(stateServer, draft.id)
         // check contract metadata
         const today = new Date()
-        const expectedDate = today.toISOString().split('T')[0]
+        // const expectedDate = today.toISOString().split('T')[0]
         expect(contract.draftRevision).toBeNull()
-        expect(contract.initiallySubmittedAt).toEqual(expectedDate)
+        expect(contract.initiallySubmittedAt).toBeDefined()
+        expect(
+            Math.abs(contract.initiallySubmittedAt.getTime() - today.getTime())
+        ).toBeLessThan(1000)
         expect(contract.packageSubmissions).toHaveLength(1)
         expect(contract.status).toBe('SUBMITTED')
 
@@ -76,6 +77,11 @@ describe('submitContract', () => {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         const draftFormData = updatedDraft.draftRevision!.formData
         const submittedFormData = sub.contractRevision.formData
+
+        // after submit, the documents have a "date added" that doesn't exist pre-submit
+        expect(submittedFormData.contractDocuments[0].dateAdded).toBeTruthy()
+        submittedFormData.contractDocuments[0].dateAdded = null
+
         expect(submittedFormData).toEqual(draftFormData)
     })
 
@@ -987,18 +993,18 @@ describe('submitContract', () => {
             s3Client: mockS3,
         })
 
+        const contract = await createSubmitAndUnlockTestContract(
+            stateServer,
+            cmsServer
+        )
+
         const input = {
-            contractID: 'fake-id-12345',
+            contractID: contract.id,
             submittedReason: 'Test cms user calling state user func',
         }
 
-        await submitTestContract(
-            stateServer,
-            input.contractID,
-            input.submittedReason
-        )
         const res = await cmsServer.executeOperation({
-            query: SUBMIT_CONTRACT,
+            query: SubmitContractDocument,
             variables: { input },
         })
 
@@ -1026,6 +1032,27 @@ describe('submitContract', () => {
             const server = await constructTestPostgresServer({
                 emailer: mockEmailer,
             })
+            const cmsServer = await constructTestPostgresServer({
+                context: {
+                    user: testCMSUser(),
+                },
+            })
+
+            const assignedUsers = [
+                testCMSUser({
+                    givenName: 'Roku',
+                    email: 'roku@example.com',
+                }),
+                testCMSUser({
+                    givenName: 'Izumi',
+                    email: 'izumi@example.com',
+                }),
+            ]
+
+            const assignedUserIDs = assignedUsers.map((u) => u.id)
+            const stateAnalystsEmails = assignedUsers.map((u) => u.email)
+            await createDBUsersWithFullData(assignedUsers)
+            await updateTestStateAssignments(cmsServer, 'FL', assignedUserIDs)
 
             const submitResult =
                 await createAndSubmitTestContractWithRate(server)
@@ -1033,10 +1060,6 @@ describe('submitContract', () => {
             const contractName =
                 submitResult?.packageSubmissions[0].contractRevision
                     .contractName
-
-            const stateAnalystsEmails = getTestStateAnalystsEmails(
-                submitResult.stateCode
-            )
 
             const cmsEmails = [
                 ...config.devReviewTeamEmails,
@@ -1068,20 +1091,34 @@ describe('submitContract', () => {
                 },
                 emailer: mockEmailer,
             })
-            const submit1 =
-                await createAndUpdateTestContractWithoutRates(server)
-            await unlockTestContract(
-                cmsServer,
-                submit1.id,
-                'unlock to resubmit'
+
+            const assignedUsers = [
+                testCMSUser({
+                    givenName: 'Roku',
+                    email: 'roku@example.com',
+                }),
+                testCMSUser({
+                    givenName: 'Izumi',
+                    email: 'izumi@example.com',
+                }),
+            ]
+
+            const assignedUserIDs = assignedUsers.map((u) => u.id)
+            const stateAnalystsEmails = assignedUsers.map((u) => u.email)
+            await createDBUsersWithFullData(assignedUsers)
+            await updateTestStateAssignments(cmsServer, 'FL', assignedUserIDs)
+
+            const draft1 = await createAndUpdateTestContractWithoutRates(server)
+            await submitTestContract(server, draft1.id)
+            await unlockTestContract(cmsServer, draft1.id, 'unlock to resubmit')
+            const submit1 = await submitTestContract(
+                server,
+                draft1.id,
+                'resubmit'
             )
-            await submitTestContract(server, submit1.id, 'resubmit')
 
             const contractName =
                 submit1.packageSubmissions[0].contractRevision.contractName
-            const stateAnalystsEmails = getTestStateAnalystsEmails(
-                submit1.stateCode
-            )
 
             const cmsEmails = [
                 ...config.devReviewTeamEmails,
@@ -1102,10 +1139,6 @@ describe('submitContract', () => {
         })
 
         it('send CMS email to CMS from the database', async () => {
-            const ldService = testLDService({
-                'read-write-state-assignments': true,
-            })
-
             const prismaClient = await sharedTestPrismaClient()
             const postgresStore = NewPostgresStore(prismaClient)
 
@@ -1115,14 +1148,12 @@ describe('submitContract', () => {
             const server = await constructTestPostgresServer({
                 store: postgresStore,
                 emailer: mockEmailer,
-                ldService,
             })
             const cmsServer = await constructTestPostgresServer({
                 store: postgresStore,
                 context: {
                     user: testCMSUser(),
                 },
-                ldService,
             })
 
             // add some users to the db, assign them to the state
@@ -1167,16 +1198,14 @@ describe('submitContract', () => {
             const config = testEmailConfig()
             const mockEmailer = testEmailer(config)
             //mock invoke email submit lambda
-            const mockEmailParameterStore = mockEmailParameterStoreError()
             const server = await constructTestPostgresServer({
                 emailer: mockEmailer,
-                emailParameterStore: mockEmailParameterStore,
             })
             const draft = await createAndUpdateTestContractWithoutRates(server)
             const draftID = draft.id
 
             await server.executeOperation({
-                query: SUBMIT_CONTRACT,
+                query: SubmitContractDocument,
                 variables: {
                     input: {
                         contractID: draftID,
@@ -1194,23 +1223,27 @@ describe('submitContract', () => {
         })
 
         it('does log error when request for state specific analysts emails failed', async () => {
-            const mockEmailParameterStore = mockEmailParameterStoreError()
             const consoleErrorSpy = jest.spyOn(console, 'error')
             const error = {
-                error: 'No store found',
+                error: 'error finding state users',
                 message: 'getStateAnalystsEmails failed',
                 operation: 'getStateAnalystsEmails',
                 status: 'ERROR',
             }
 
+            const brokenStore = NewPostgresStore(await sharedTestPrismaClient())
+            brokenStore.findStateAssignedUsers = async () => {
+                return new Error('error finding state users')
+            }
+
             const server = await constructTestPostgresServer({
-                emailParameterStore: mockEmailParameterStore,
+                store: brokenStore,
             })
             const draft = await createAndUpdateTestContractWithoutRates(server)
             const draftID = draft.id
 
             await server.executeOperation({
-                query: SUBMIT_CONTRACT,
+                query: SubmitContractDocument,
                 variables: {
                     input: {
                         contractID: draftID,
@@ -1235,7 +1268,7 @@ describe('submitContract', () => {
             const draftID = draft.id
 
             const submitResult = await server.executeOperation({
-                query: SUBMIT_CONTRACT,
+                query: SubmitContractDocument,
                 variables: {
                     input: {
                         contractID: draftID,
@@ -1284,7 +1317,7 @@ describe('submitContract', () => {
             )
 
             const submitResult = await stateServer.executeOperation({
-                query: SUBMIT_CONTRACT,
+                query: SubmitContractDocument,
                 variables: {
                     input: {
                         contractID: stateSubmission.id,
@@ -1336,7 +1369,7 @@ describe('submitContract', () => {
             })
 
             const stateSubmission =
-                await createAndUpdateTestContractWithoutRates(stateServer)
+                await createAndSubmitTestContract(stateServer)
 
             const cmsServer = await constructTestPostgresServer({
                 context: {
@@ -1384,7 +1417,7 @@ describe('submitContract', () => {
             const draftID = '123'
 
             const submitResult = await server.executeOperation({
-                query: SUBMIT_CONTRACT,
+                query: SubmitContractDocument,
                 variables: {
                     input: {
                         contractID: draftID,
@@ -1413,7 +1446,7 @@ describe('submitContract', () => {
             const draftID = draft.id
 
             const submitResult = await server.executeOperation({
-                query: SUBMIT_CONTRACT,
+                query: SubmitContractDocument,
                 variables: {
                     input: {
                         contractID: draftID,
@@ -1455,7 +1488,7 @@ describe('submitContract', () => {
 
             // submit
             const submitResult = await server.executeOperation({
-                query: SUBMIT_CONTRACT,
+                query: SubmitContractDocument,
                 variables: {
                     input: {
                         contractID: initialContract.id,
@@ -1483,7 +1516,7 @@ describe('submitContract', () => {
 
             // submit
             const submitResult = await server.executeOperation({
-                query: SUBMIT_CONTRACT,
+                query: SubmitContractDocument,
                 variables: {
                     input: {
                         contractID: initialContract.id,
@@ -1514,7 +1547,7 @@ describe('submitContract', () => {
 
             // submit
             const submitResult = await server.executeOperation({
-                query: SUBMIT_CONTRACT,
+                query: SubmitContractDocument,
                 variables: {
                     input: {
                         contractID: initialContract.id,

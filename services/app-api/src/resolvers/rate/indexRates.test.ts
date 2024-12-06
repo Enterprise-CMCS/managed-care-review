@@ -1,6 +1,5 @@
 import { testLDService } from '../../testHelpers/launchDarklyHelpers'
-
-import INDEX_RATES from '../../../../app-graphql/src/queries/indexRates.graphql'
+import { IndexRatesDocument } from '../../gen/gqlClient'
 import {
     constructTestPostgresServer,
     createAndUpdateTestHealthPlanPackage,
@@ -15,7 +14,7 @@ import {
     submitTestContract,
     createAndUpdateTestContractWithRate,
 } from '../../testHelpers/gqlContractHelpers'
-import { testS3Client } from '../../../../app-web/src/testHelpers/s3Helpers'
+import { testS3Client } from '../../../../app-api/src/testHelpers/s3Helpers'
 
 describe('indexRates', () => {
     describe.each(iterableCmsUsersMockData)(
@@ -53,7 +52,7 @@ describe('indexRates', () => {
 
                 // index rates
                 const result = await cmsServer.executeOperation({
-                    query: INDEX_RATES,
+                    query: IndexRatesDocument,
                 })
 
                 expect(result.data).toBeDefined()
@@ -98,7 +97,7 @@ describe('indexRates', () => {
 
                 // index rates
                 const result = await cmsServer.executeOperation({
-                    query: INDEX_RATES,
+                    query: IndexRatesDocument,
                 })
 
                 const ratesIndex = result.data?.indexRates
@@ -163,7 +162,7 @@ describe('indexRates', () => {
 
                 // index rates
                 const result = await cmsServer.executeOperation({
-                    query: INDEX_RATES,
+                    query: IndexRatesDocument,
                 })
 
                 const ratesIndex = result.data?.indexRates

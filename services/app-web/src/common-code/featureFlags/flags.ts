@@ -26,14 +26,10 @@ const featureFlags = {
         defaultValue: false,
     },
     /**
-     * Allows CMS and Admin users to read and write state assignments
+     * Enables submission approvals, withdraws, and reviews features
      */
-    READ_WRITE_STATE_ASSIGNMENTS: {
-        flag: 'read-write-state-assignments',
-        defaultValue: false
-    },
-    QA_BY_RATES: {
-        flag: 'qa-by-rates',
+    SUBMISSION_APPROVALS: {
+        flag: 'submission-approvals',
         defaultValue: false
     },
     // PERMANENT FLAGS

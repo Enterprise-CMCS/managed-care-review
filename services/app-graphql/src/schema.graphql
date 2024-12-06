@@ -12,11 +12,6 @@ type Query {
     fetchCurrentUser: User!
 
     """
-    fetchEmailSettings returns emailer config and settings
-    """
-    fetchEmailSettings: FetchEmailSettingsPayload!
-
-    """
     fetchHealthPlanPackage returns a specific HealthPlanPackage by id
 
     If a package with the given ID cannot be found, this query returns undefined
@@ -527,6 +522,23 @@ type Mutation {
     withdrawAndReplaceRedundantRate(
         input: withdrawAndReplaceRedundantRateInput!
     ): withdrawAndReplaceRedundantRatePayload
+
+    """
+    approveContract is a CMS user only action 
+
+    Errors:
+    - ForbiddenError:
+        - A non CMS/CMS Approver user called this
+    - UserInputError:
+        - A contract is not in the correct submission status: SUBMITTED or RESUBMITTED
+        - A contract is not in the correct review status: UNDER_REVIEW
+    - INTERNAL_SERVER_ERROR
+        - DB_ERROR
+            - A contract cannot be found by id
+    """
+    approveContract(
+        input: ApproveContractInput!
+    ): ApproveContractPayload
 }
 
 input CreateHealthPlanPackageInput {
@@ -584,6 +596,17 @@ input CreateContractInput {
 
 type CreateContractPayload {
     contract: Contract!
+}
+
+type ApproveContractPayload {
+    contract: Contract!
+}
+
+input ApproveContractInput {
+    "The ID of the contract to approve"
+    contractID: ID!
+    "Reason for update"
+    updatedReason: String
 }
 
 input FetchHealthPlanPackageInput {
@@ -977,9 +1000,36 @@ enum HealthPlanPackageStatus {
     RESUBMITTED
 }
 
+"""
+This status is used to determine whether the package is currently being edited by a state user
+or if it has been submitted and is being reviewed by CMS users.
+"""
+enum ReviewStatus {
+    UNDER_REVIEW
+    APPROVED
+}
+
+"""
+This status has been synthesized to reflect if the status or review status
+should be used
+"""
+enum ConsolidatedContractStatus {
+    DRAFT
+    SUBMITTED
+    UNLOCKED
+    RESUBMITTED
+    APPROVED
+}
+
 enum UnlockedStatus {
     UNLOCKED
     DRAFT
+}
+
+enum ContractActionType {
+    UNDER_REVIEW
+    MARK_AS_APPROVED
+    WITHDRAW
 }
 
 """
@@ -1034,6 +1084,21 @@ type UpdateInformation {
     updatedBy: UpdatedBy!
     "the reason provided by the user when performing the update"
     updatedReason: String!
+}
+
+"""
+ContractReviewStatusActions is used for the review status actions on the contract
+"""
+type ContractReviewStatusActions {
+    "the datetime when the update occured"
+    updatedAt: DateTime!
+    "the user who performed the update"
+    updatedBy: UpdatedBy!
+    "the reason provided by the user when performing the update"
+    updatedReason: String!
+    ""
+    actionType: ContractActionType!
+    contractID: ID!
 }
 
 """
@@ -1158,16 +1223,6 @@ type EmailConfiguration {
     cmsReviewHelpEmailAddress: String!
     cmsRateHelpEmailAddress: String!
     helpDeskEmail: String!
-}
-
-type StateAnalystsConfiguration {
-    stateCode: String!
-    emails: [String!]!
-}
-type FetchEmailSettingsPayload {
-    "Email settings"
-    config: EmailConfiguration
-    stateAnalysts: [StateAnalystsConfiguration!]
 }
 
 """
@@ -1508,6 +1563,10 @@ type RateFormData {
     """
     rateProgramIDs: [String!]!
     """
+    consolidatedRateProgramIDs An array of IDs representing state programs. Deprecated if that's all that exists, or the current ones if they exist.
+    """
+    consolidatedRateProgramIDs: [String!]!
+    """
     Represents the name of the rate.
     This value is auto generated based on rate, package and state program details
     """
@@ -1620,6 +1679,9 @@ type Rate {
     stateCode: String!
     "Fuller state data for the submitting state"
     state: State!
+    "webURL is a URL that will open the MC Review web app to this Rate"
+    webURL: String!
+
     """
     A unique auto-incrementing number generated for this rate
     This value is used to generate the rateName
@@ -1725,7 +1787,7 @@ type RatePackageSubmission {
 }
 
 """
-Contact is a single contract submission, holding all the form data for a single contract
+Contract is a single contract submission, holding all the form data for a single contract
 and associated with zero or more Rates
 """
 type Contract {
@@ -1739,8 +1801,21 @@ type Contract {
     SUBMITTED and RESUBMITTED packages cannot be modified
     """
     status: HealthPlanPackageStatus!
+    """
+    Where the contract is in the review submission flow
+    Options are UNDER_REVIEW, APPROVED
+    """
+    reviewStatus: ReviewStatus!
+    """
+    Synthesized field that represents if a contract's status or
+    reviewStatus should take precedence 
+    Options are DRAFT, SUBMITTED, RESUBMITTED UNLOCKED, UNDER_REVIEW, APPROVED
+    """
+    consolidatedStatus: ConsolidatedContractStatus!
     "initiallySubmittedAt is the initial date this contract was submitted at. Is not changed by unlock or resubmission."
     initiallySubmittedAt: DateTime
+    "lastUpdatedForDisplay is the last time this contract was officially updated. When it's a draft it will be the last updatedAt date. Afterwards it will be the most recent submit or unlock or review action date."
+    lastUpdatedForDisplay: DateTime!
     "stateCode is the state code (e.g. CA or TN) for the submitting state"
     stateCode: String!
     "state is fuller state data for the submitting state"
@@ -1750,7 +1825,14 @@ type Contract {
     This value is used to generate the contractName
     """
     stateNumber: Int!
+    "mccrsID is the four digit id in MC-CRS that corresponds to this Contract, if set"
     mccrsID: String
+
+    "webURL is a url that will open the MC Review web app to this Contract"
+    webURL: String!
+
+    "dateContractDocsExecuted is the first date, if any in which the revisions were submitted with all contract docs executed. Null otherwise."
+    dateContractDocsExecuted: DateTime
 
     "draftRevision is the currently modifiable revision if the rate is DRAFT or UNLOCKED"
     draftRevision: ContractRevision
@@ -1759,6 +1841,9 @@ type Contract {
     On submission they are cemented into a new ContractPackageSubmission
     """
     draftRates: [Rate!]
+
+    "reviewStatusActions are the who/when/why for review status changes on this contract"
+    reviewStatusActions: [ContractReviewStatusActions!]
 
     """
     packageSubmissions are a snapshot of the contract and its related rates through time
@@ -1777,7 +1862,7 @@ type Contract {
 }
 
 """
-UnlockedContact is a single unlocked contract, holding all the draft form data for a single contract
+UnlockedContract is a single unlocked contract, holding all the draft form data for a single contract
 and associated with zero or more Rates
 """
 type UnlockedContract {
@@ -1791,8 +1876,21 @@ type UnlockedContract {
     SUBMITTED and RESUBMITTED packages cannot be modified
     """
     status: UnlockedStatus!
+     """
+    Where the contract is in the review submission flow
+    Options are UNDER_REVIEW, APPROVED
+    """
+    reviewStatus: ReviewStatus!
+    """
+    Synthesized field that represents if a contract's status or
+    reviewStatus should take precedence 
+    Options are DRAFT, SUBMITTED, RESUBMITTED UNLOCKED, UNDER_REVIEW, APPROVED
+    """
+    consolidatedStatus: ConsolidatedContractStatus!
     "initiallySubmittedAt is the initial date this contract was submitted at. Is not changed by unlock or resubmission."
     initiallySubmittedAt: Date
+    "lastUpdatedForDisplay is the last time this contract was officially updated. When it's a draft it will be the last updatedAt date. Afterwards it will be the most recent submit or unlock or review action date."
+    lastUpdatedForDisplay: DateTime!
     "stateCode is the state code (e.g. CA or TN) for the submitting state"
     stateCode: String!
     "state is fuller state data for the submitting state"
@@ -1802,7 +1900,17 @@ type UnlockedContract {
     This value is used to generate the contractName
     """
     stateNumber: Int!
+    "mccrsID is the four digit id in MC-CRS that corresponds to this Contract, if set"
     mccrsID: String
+
+    "webURL is a url that will open the MC Review web app to this Contract"
+    webURL: String!
+
+    "dateContractDocsExecuted is the first date, if any in which the revisions were submitted with all contract docs executed. Null otherwise."
+    dateContractDocsExecuted: DateTime
+
+    "reviewStatusActions are the who/when/why for review status changes on this contract"
+    reviewStatusActions: [ContractReviewStatusActions!]
 
     "draftRevision is the currently modifiable revision if the rate is DRAFT or UNLOCKED"
     draftRevision: ContractRevision!
@@ -1819,6 +1927,13 @@ type UnlockedContract {
     submission is in the first position in the array.
     """
     packageSubmissions: [ContractPackageSubmission!]!
+
+    """
+    questions field is an array of questions asked about the contract by CMS. Each questions also contains responses
+    to the question submitted by the State. DRAFT contracts will not have questions, only contracts that have been submitted
+    , unlocked, or resubmitted. The array is in descending order by createdAt.
+    """
+    questions: IndexContractQuestionsPayload
 }
 
 type RateEdge {

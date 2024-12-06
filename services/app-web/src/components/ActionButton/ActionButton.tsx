@@ -11,7 +11,7 @@ Main application-wide action button.
   This is a react-uswds Button enhanced with accessible support for disabled, loading, and styled as link buttons.
   Most props are passed through, so to understand this component well, reference react-uswds and uswds docs.
 */
-type ActionButtonProps = {
+export type ActionButtonProps = {
     variant?: 'default' | 'secondary' | 'outline' | 'linkStyle' | 'success'
     loading?: boolean
     animationTimeout?: number // used for loading animation

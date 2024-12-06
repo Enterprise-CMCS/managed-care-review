@@ -1,4 +1,4 @@
-fragment questionEdgeFragment on ContractQuestionEdge {
+fragment contractQuestionEdgeFragment on ContractQuestionEdge {
     node {
         id
         contractID
