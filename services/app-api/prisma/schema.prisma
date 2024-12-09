@@ -172,7 +172,7 @@ model ContractActionTable {
   updatedBy     User     @relation(fields: [updatedByID], references: [id])
   updatedReason String
   actionType    ContractActionType
-  dateApprovalReleasedToState DateTime @db.Date @default(now())
+  dateApprovalReleasedToState DateTime? @db.Date 
   contractID    String  
   contract      ContractTable  @relation(fields: [contractID], references: [id])
 }

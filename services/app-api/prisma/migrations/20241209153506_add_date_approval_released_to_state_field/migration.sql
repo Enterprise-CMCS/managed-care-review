@@ -1,3 +1,0 @@
-BEGIN;
-ALTER TABLE "ContractActionTable" ADD COLUMN     "dateApprovalReleasedToState" DATE NOT NULL DEFAULT CURRENT_TIMESTAMP;
-COMMIT;
