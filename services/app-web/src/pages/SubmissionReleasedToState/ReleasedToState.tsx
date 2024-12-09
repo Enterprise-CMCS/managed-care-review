@@ -34,10 +34,11 @@ type ReleasedToStateValues = {
     dateApprovalReleasedToState: string
 }
 
+const today = new Date()
 const ReleaseToStateSchema = Yup.object().shape({
-    dateApprovalReleasedToState: Yup.string().required(
-        'You must select a date'
-    ),
+    dateApprovalReleasedToState: Yup.date()
+        .required('You must select a date')
+        .max(today, 'You must enter a valid date'),
 })
 
 type FormError =
@@ -49,7 +50,6 @@ const ReleasedToState = () => {
     const { logFormSubmitEvent } = useTealium()
     const navigate = useNavigate()
     const [shouldValidate, setShouldValidate] = React.useState(true)
-    const today = new Date()
 
     const showFieldErrors = (error?: FormError) =>
         shouldValidate && Boolean(error)
