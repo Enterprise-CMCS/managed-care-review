@@ -43,12 +43,12 @@ model ContractTable {
   state       State   @relation(fields: [stateCode], references: [stateCode])
   stateNumber Int
 
-  questions ContractQuestion[]
+  questions           ContractQuestion[]
   reviewStatusActions ContractActionTable[]
-  draftRates DraftRateJoinTable[]
+  draftRates          DraftRateJoinTable[]
 
-  revisions ContractRevisionTable[]
-  sharedRateRevisions RateRevisionTable[] @relation(name: "SharedRateRevisions")
+  revisions           ContractRevisionTable[]
+  sharedRateRevisions RateRevisionTable[]     @relation(name: "SharedRateRevisions")
 }
 
 model RateTable {
@@ -63,9 +63,9 @@ model RateTable {
   withdrawInfoID String?
   withdrawInfo   UpdateInfoTable? @relation("withdrawRateInfo", fields: [withdrawInfoID], references: [id])
 
-  questions RateQuestion[]
-
-  draftContracts DraftRateJoinTable[]
+  questions           RateQuestion[]
+  reviewStatusActions RateActionTable[]
+  draftContracts      DraftRateJoinTable[]
 
   revisions RateRevisionTable[]
 }
@@ -166,15 +166,26 @@ model RateRevisionTable {
 }
 
 model ContractActionTable {
-  id            String   @id @default(uuid())
-  updatedAt     DateTime @default(now()) @updatedAt
+  id            String             @id @default(uuid())
+  updatedAt     DateTime           @default(now()) @updatedAt
   updatedByID   String
-  updatedBy     User     @relation(fields: [updatedByID], references: [id])
+  updatedBy     User               @relation(fields: [updatedByID], references: [id])
   updatedReason String
   actionType    ContractActionType
   dateApprovalReleasedToState DateTime? @db.Date 
   contractID    String  
   contract      ContractTable  @relation(fields: [contractID], references: [id])
+}
+
+model RateActionTable {
+  id            String         @id @default(uuid())
+  updatedAt     DateTime       @updatedAt
+  updatedByID   String
+  updatedBy     User           @relation(fields: [updatedByID], references: [id])
+  updatedReason String
+  actionType    RateActionType
+  rateID        String
+  rate          RateTable      @relation(fields: [rateID], references: [id])
 }
 
 model UpdateInfoTable {
@@ -194,8 +205,8 @@ model UpdateInfoTable {
   withdrawnRates     RateTable[]                  @relation("withdrawRateInfo")
   submissionPackages SubmissionPackageJoinTable[] @relation("submission")
   // these get ALL related contracts + revisions for given update.
-  relatedContracts ContractRevisionTable[]
-  relatedRates     RateRevisionTable[]
+  relatedContracts   ContractRevisionTable[]
+  relatedRates       RateRevisionTable[]
 }
 
 // SubmissionPackageJoinTable records the set of related rate and contracts for a given submission.
@@ -312,24 +323,25 @@ model StateProgram {
 }
 
 model User {
-  id                    String                     @id @default(uuid())
-  createdAt             DateTime                   @default(now())
-  updatedAt             DateTime                   @default(now()) @updatedAt
-  givenName             String
-  familyName            String
-  email                 String
-  role                  Role
-  divisionAssignment    Division?
-  stateCode             String?
-  stateAssignments      State[]                    @relation("StateToAssignedCMSUser")
-  questions             ContractQuestion[]
-  rateQuestions         RateQuestion[]
-  responses             ContractQuestionResponse[]
-  rateResponses         RateQuestionResponse[]
-  audits                UserAudit[]
-  updatedByAuditEntries UserAudit[]                @relation("UpdatedBy")
-  updateInfos           UpdateInfoTable[]
-  contractReviewStatusActions   ContractActionTable[]
+  id                          String                     @id @default(uuid())
+  createdAt                   DateTime                   @default(now())
+  updatedAt                   DateTime                   @default(now()) @updatedAt
+  givenName                   String
+  familyName                  String
+  email                       String
+  role                        Role
+  divisionAssignment          Division?
+  stateCode                   String?
+  stateAssignments            State[]                    @relation("StateToAssignedCMSUser")
+  questions                   ContractQuestion[]
+  rateQuestions               RateQuestion[]
+  responses                   ContractQuestionResponse[]
+  rateResponses               RateQuestionResponse[]
+  audits                      UserAudit[]
+  updatedByAuditEntries       UserAudit[]                @relation("UpdatedBy")
+  updateInfos                 UpdateInfoTable[]
+  contractReviewStatusActions ContractActionTable[]
+  RateActionTable             RateActionTable[]
 }
 
 model UserAudit {
@@ -451,6 +463,11 @@ enum Role {
 enum ContractActionType {
   UNDER_REVIEW
   MARK_AS_APPROVED
+}
+
+enum RateActionType {
+  UNDER_REVIEW
+  WITHDRAW
 }
 
 enum AuditAction {
