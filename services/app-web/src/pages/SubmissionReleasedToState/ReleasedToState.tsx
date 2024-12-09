@@ -49,6 +49,7 @@ const ReleasedToState = () => {
     const { logFormSubmitEvent } = useTealium()
     const navigate = useNavigate()
     const [shouldValidate, setShouldValidate] = React.useState(true)
+    const today = new Date()
 
     const showFieldErrors = (error?: FormError) =>
         shouldValidate && Boolean(error)
@@ -123,7 +124,7 @@ const ReleasedToState = () => {
             )
         }
     }
-    const today = new Date()
+
     return (
         <div className={styles.uploadFormContainer}>
             <Breadcrumbs
