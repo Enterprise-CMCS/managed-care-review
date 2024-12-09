@@ -45,8 +45,8 @@ importers:
         specifier: ^3.699.0
         version: 3.699.0
       axios:
-        specifier: ^1.7.8
-        version: 1.7.8
+        specifier: ^1.7.9
+        version: 1.7.9
       node-ssh:
         specifier: ^13.1.0
         version: 13.2.0
@@ -197,8 +197,8 @@ importers:
         specifier: ^7.0.1
         version: 7.0.1
       axios:
-        specifier: ^1.7.8
-        version: 1.7.8
+        specifier: ^1.7.9
+        version: 1.7.9
       dayjs:
         specifier: ^1.10.5
         version: 1.11.12
@@ -440,8 +440,8 @@ importers:
         specifier: ^5.0.10
         version: 5.3.10(encoding@0.1.13)(react-native@0.74.3(@babel/core@7.24.7)(@babel/preset-env@7.24.8(@babel/core@7.24.7))(@types/react@18.3.3)(encoding@0.1.13)(react@18.3.1))
       axios:
-        specifier: ^1.7.8
-        version: 1.7.8
+        specifier: ^1.7.9
+        version: 1.7.9
       babel-plugin-istanbul:
         specifier: ^6.1.1
         version: 6.1.1
@@ -714,8 +714,8 @@ importers:
         specifier: ^5.0.10
         version: 5.3.10(encoding@0.1.13)(react-native@0.74.3(@babel/core@7.24.7)(@babel/preset-env@7.24.8(@babel/core@7.24.7))(@types/react@18.3.3)(encoding@0.1.13)(react@18.3.1))
       axios:
-        specifier: ^1.7.8
-        version: 1.7.8
+        specifier: ^1.7.9
+        version: 1.7.9
       cypress-file-upload:
         specifier: ^5.0.8
         version: 5.0.8(cypress@13.13.2)
@@ -6643,8 +6643,8 @@ packages:
   axios@0.26.0:
     resolution: {integrity: sha512-lKoGLMYtHvFrPVt3r+RBMp9nh34N0M8zEfCWqdWZx6phynIEhQqAdydpyBAAG211zlhX9Rgu08cOamy6XjE5Og==}
 
-  axios@1.7.8:
-    resolution: {integrity: sha512-Uu0wb7KNqK2t5K+YQyVCLM76prD5sRFjKHbJYCP1J7JFGEQ6nN7HWn9+04LAeiJ3ji54lgS/gZCH1oxyrf1SPw==}
+  axios@1.7.9:
+    resolution: {integrity: sha512-LhLcE7Hbiryz8oMDdDptSrWowmB4Bl6RCt6sIJKpRB4XtVf0iEgewX3au/pJqm+Py1kCASkb/FFKjxQaLtxJvw==}
 
   axobject-query@3.2.1:
     resolution: {integrity: sha512-jsyHu61e6N4Vbz/v18DHwWYKK0bSWLqn47eeDSKPB7m8tqMHF9YJ+mhIk2lVteyZrY8tnSj/jHOv4YiTCuCJgg==}
@@ -21217,7 +21217,7 @@ snapshots:
     dependencies:
       adm-zip: 0.5.9
       archiver: 5.3.1
-      axios: 1.7.8
+      axios: 1.7.9
       fast-glob: 3.3.2
       https-proxy-agent: 5.0.1(supports-color@8.1.1)
       ignore: 5.3.1
@@ -23323,7 +23323,7 @@ snapshots:
     transitivePeerDependencies:
       - debug
 
-  axios@1.7.8:
+  axios@1.7.9:
     dependencies:
       follow-redirects: 1.15.6
       form-data: 4.0.0
