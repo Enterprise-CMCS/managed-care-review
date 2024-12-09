@@ -1,5 +1,5 @@
+import { STATE_SUBMISSION_SUMMARY_ROUTES } from '@mc-review/constants'
 import {
-    STATE_SUBMISSION_SUMMARY_ROUTES,
     CMS_WORKFLOW_FORM_ROUTES,
     QUESTION_RESPONSE_FORM_ROUTES,
     RouteTWithUnknown,

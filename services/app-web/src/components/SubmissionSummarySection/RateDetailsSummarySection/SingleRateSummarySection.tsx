@@ -250,20 +250,26 @@ export const SingleRateSummarySection = ({
                         'Unknown rate name'
                     }
                 >
-                    {isCMSUser &&
-                        showRateUnlock &&
-                        !parentContractIsApproved && (
-                            <UnlockRateButton
-                                disabled={isUnlocked || unlockLoading}
-                                onClick={handleUnlockRate}
-                            >
-                                Unlock rate
-                            </UnlockRateButton>
-                        )}
+                    {isCMSUser && showRateUnlock && (
+                        <UnlockRateButton
+                            disabled={
+                                isUnlocked ||
+                                unlockLoading ||
+                                parentContractIsApproved
+                            }
+                            onClick={handleUnlockRate}
+                        >
+                            Unlock rate
+                        </UnlockRateButton>
+                    )}
                     {/* This second option is an interim state for unlock rate button (when linked rates is turned on but unlock and edit rate is not available yet). Remove when rate unlock is permanently on. */}
                     {isCMSUser && !showRateUnlock && (
                         <UnlockRateButton
-                            disabled={isUnlocked || unlockLoading}
+                            disabled={
+                                isUnlocked ||
+                                unlockLoading ||
+                                parentContractIsApproved
+                            }
                             onClick={() => {
                                 navigate(
                                     `/submissions/${parentContractSubmissionID}`

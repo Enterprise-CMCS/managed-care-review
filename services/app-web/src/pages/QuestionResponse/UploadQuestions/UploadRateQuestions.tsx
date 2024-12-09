@@ -116,6 +116,7 @@ export const UploadRateQuestions = () => {
     return (
         <div className={styles.uploadFormContainer}>
             <Breadcrumbs
+                className="usa-breadcrumb--wrap"
                 items={[
                     {
                         link: RoutesRecord.DASHBOARD_SUBMISSIONS,

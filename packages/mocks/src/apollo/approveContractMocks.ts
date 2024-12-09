@@ -5,6 +5,13 @@ import {
     Contract,
 } from '../gen/gqlClient'
 import { mockContractPackageSubmittedWithQuestions } from './contractPackageDataMock'
+import { ApolloError } from '@apollo/client'
+import { GraphQLError } from 'graphql/index'
+import {
+    GRAPHQL_ERROR_CAUSE_MESSAGES,
+    GraphQLErrorCauseTypes,
+    GraphQLErrorCodeTypes,
+} from './apolloErrorCodeMocks'
 
 const approveContractMockSuccess = (
     params: {
@@ -20,8 +27,8 @@ const approveContractMockSuccess = (
     } = params
     const contract = mockContractPackageSubmittedWithQuestions(contractID, {
         __typename: 'Contract',
-        status: 'RESUBMITTED',
         reviewStatus: 'APPROVED',
+        consolidatedStatus: 'APPROVED',
         reviewStatusActions: [
             {
                 __typename: 'ContractReviewStatusActions',
@@ -61,4 +68,43 @@ const approveContractMockSuccess = (
     }
 }
 
-export { approveContractMockSuccess }
+const approveContractMockFailure = ({
+    error,
+}: {
+    error?: {
+        code: GraphQLErrorCodeTypes
+        cause: GraphQLErrorCauseTypes
+    }
+}): MockedResponse<ApproveContractMutation> => {
+    const graphQLError = new GraphQLError(
+        error
+            ? GRAPHQL_ERROR_CAUSE_MESSAGES[error.cause]
+            : 'Error attempting to mark submission as released to state',
+        {
+            extensions: {
+                code: error?.code,
+                cause: error?.cause,
+            },
+        }
+    )
+    return {
+        request: {
+            query: ApproveContractDocument,
+            variables: {
+                input: {
+                    contractID: 'test-abc-123',
+                    updatedReason: 'Released to state',
+                },
+            },
+        },
+        error: new ApolloError({
+            graphQLErrors: [graphQLError],
+        }),
+        result: {
+            data: null,
+            errors: [graphQLError],
+        },
+    }
+}
+
+export { approveContractMockSuccess, approveContractMockFailure }

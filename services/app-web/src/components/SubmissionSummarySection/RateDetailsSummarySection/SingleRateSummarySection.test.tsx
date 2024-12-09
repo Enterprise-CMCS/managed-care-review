@@ -363,6 +363,49 @@ describe('SingleRateSummarySection', () => {
             })
         })
 
+        it('does not render unlock button when linked rates on but standalone rate edit and unlock is still disabled if the associated contract is approved', async () => {
+            const rateData = rateWithHistoryMock()
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                        element={<div>Summary page placeholder</div>}
+                    />
+                    <Route
+                        path={`/rates/${rateData.id}`}
+                        element={
+                            <SingleRateSummarySection
+                                rate={rateData}
+                                isSubmitted={false}
+                                statePrograms={rateData.state.programs}
+                                parentContractStatus="APPROVED"
+                            />
+                        }
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                statusCode: 200,
+                                user: mockValidCMSUser(),
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: `/rates/${rateData.id}`,
+                    },
+                    featureFlags: {
+                        'rate-edit-unlock': false,
+                    },
+                }
+            )
+            const unlockRateBtn = await screen.queryByRole('button', {
+                name: 'Unlock rate',
+            })
+            expect(unlockRateBtn).not.toBeInTheDocument()
+        })
+
         it('disables the unlock button for CMS users when rate already unlocked', async () => {
             const rateData = rateUnlockedWithHistoryMock()
             renderWithProviders(
