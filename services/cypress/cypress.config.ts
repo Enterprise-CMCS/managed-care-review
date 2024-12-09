@@ -29,13 +29,17 @@ module.exports = defineConfig({
                         global: 'window',
                     },
                     platform: 'node',
-                    nodeModulesPath: path.join(__dirname, 'node_modules'),
-                    resolveExtensions: ['.ts', '.js', '.json'],
-                    mainFields: ['module', 'main'],
                     bundle: true,
                     loader: {
                         '.js': 'js',
                         '.ts': 'ts',
+                    },
+                    resolve: {
+                        preserveSymlinks: true,
+                        modules: [
+                            path.resolve(__dirname, 'node_modules'),
+                            'node_modules',
+                        ],
                     },
                 })
             )
