@@ -34,7 +34,9 @@ describe('approveContract', () => {
         expect(approvedContract.reviewStatusActions![0]?.contractID).toBe(
             approvedContract.id
         )
-        expect(approvedContract.reviewStatusActions![0]?.updatedReason).toBe('')
+        expect(
+            approvedContract.reviewStatusActions![0]?.updatedReason
+        ).toBeNull()
         expect(approvedContract.reviewStatusActions![0]?.actionType).toBe(
             'MARK_AS_APPROVED'
         )
@@ -60,6 +62,7 @@ describe('approveContract', () => {
             variables: {
                 input: {
                     contractID: draftContract.id,
+                    dateApprovalReleasedToState: '2024-12-12',
                 },
             },
         })
@@ -102,6 +105,7 @@ describe('approveContract', () => {
             variables: {
                 input: {
                     contractID: unlockedContract.id,
+                    dateApprovalReleasedToState: '2024-12-12',
                 },
             },
         })
@@ -138,6 +142,7 @@ describe('approveContract', () => {
             variables: {
                 input: {
                     contractID: contract.id,
+                    dateApprovalReleasedToState: '2024-11-11',
                 },
             },
         })
@@ -147,6 +152,7 @@ describe('approveContract', () => {
             variables: {
                 input: {
                     contractID: contract.id,
+                    dateApprovalReleasedToState: '2024-12-12',
                 },
             },
         })
@@ -164,6 +170,41 @@ describe('approveContract', () => {
         )
     })
 
+    it('errors if date approval released is a future date', async () => {
+        const cmsServer = await constructTestPostgresServer({
+            s3Client: mockS3,
+            context: {
+                user: testCMSUser(),
+            },
+        })
+
+        const stateServer = await constructTestPostgresServer({
+            s3Client: mockS3,
+        })
+
+        const contract = await createAndSubmitTestContract(stateServer)
+        const approveContractResult = await cmsServer.executeOperation({
+            query: ApproveContractDocument,
+            variables: {
+                input: {
+                    contractID: contract.id,
+                    dateApprovalReleasedToState: '3009-11-11',
+                },
+            },
+        })
+        expect(approveContractResult.errors).toBeDefined()
+        if (approveContractResult.errors === undefined) {
+            throw new Error('type narrow')
+        }
+
+        expect(approveContractResult.errors[0].extensions?.code).toBe(
+            'BAD_USER_INPUT'
+        )
+        expect(approveContractResult.errors[0].message).toContain(
+            'Attempted to approve contract with invalid approval release date'
+        )
+    })
+
     it('errors if a non CMS/CMS Approver user calls it', async () => {
         const stateServer = await constructTestPostgresServer({
             s3Client: mockS3,
@@ -176,6 +217,7 @@ describe('approveContract', () => {
             variables: {
                 input: {
                     contractID: contract.id,
+                    dateApprovalReleasedToState: '2024-12-12',
                 },
             },
         })

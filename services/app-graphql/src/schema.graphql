@@ -605,8 +605,8 @@ type ApproveContractPayload {
 input ApproveContractInput {
     "The ID of the contract to approve"
     contractID: ID!
-    "Reason for update"
-    updatedReason: String
+    "Manually entered date for when the approval was released to the state"
+    dateApprovalReleasedToState: Date!
 }
 
 input FetchHealthPlanPackageInput {
@@ -1029,7 +1029,6 @@ enum UnlockedStatus {
 enum ContractActionType {
     UNDER_REVIEW
     MARK_AS_APPROVED
-    WITHDRAW
 }
 
 """
@@ -1066,13 +1065,6 @@ type HealthPlanPackage {
     questions: IndexContractQuestionsPayload
 }
 
-type UpdatedBy {
-    role: String!
-    email: String!
-    givenName: String!
-    familyName: String!
-}
-
 """
 UpdateInformation is used for the unlockInfo and the submitInfo on HealthPlanRevision.
 It tracks who, when, and why the submission or unlock was performed.
@@ -1095,9 +1087,11 @@ type ContractReviewStatusActions {
     "the user who performed the update"
     updatedBy: UpdatedBy!
     "the reason provided by the user when performing the update"
-    updatedReason: String!
-    ""
+    updatedReason: String
+    "the type of review action performed on the contract: APPROVED, WITHDRAWN"
     actionType: ContractActionType!
+    "Manual time entered by CMS to represent when an approval released to state"
+    dateApprovalReleasedToState: DateTime
     contractID: ID!
 }
 
@@ -1143,6 +1137,15 @@ enum PopulationCoveredType {
 enum SubmissionType {
     CONTRACT_ONLY
     CONTRACT_AND_RATES
+}
+
+enum UserRole {
+    STATE_USER
+    CMS_USER
+    CMS_APPROVER_USER
+    ADMIN_USER
+    HELPDESK_USER
+    BUSINESSOWNER_USER
 }
 
 enum ContractType {

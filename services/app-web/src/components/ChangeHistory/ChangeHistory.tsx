@@ -191,7 +191,6 @@ export const ChangeHistory = ({
                     const newAction: flatRevisions = {} as flatRevisions
                     newAction.updatedAt = r.updatedAt
                     newAction.updatedBy = r.updatedBy
-                    newAction.updatedReason = r.updatedReason
                     newAction.kind = actionKind
                     result.push(newAction)
                 }
