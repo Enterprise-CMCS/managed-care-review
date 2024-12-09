@@ -1029,7 +1029,6 @@ enum UnlockedStatus {
 enum ContractActionType {
     UNDER_REVIEW
     MARK_AS_APPROVED
-    WITHDRAW
 }
 
 """
@@ -1064,13 +1063,6 @@ type HealthPlanPackage {
     """
     revisions: [HealthPlanRevisionEdge!]!
     questions: IndexContractQuestionsPayload
-}
-
-type UpdatedBy {
-    role: String!
-    email: String!
-    givenName: String!
-    familyName: String!
 }
 
 """
@@ -1145,6 +1137,15 @@ enum PopulationCoveredType {
 enum SubmissionType {
     CONTRACT_ONLY
     CONTRACT_AND_RATES
+}
+
+enum UserRole {
+    STATE_USER
+    CMS_USER
+    CMS_APPROVER_USER
+    ADMIN_USER
+    HELPDESK_USER
+    BUSINESSOWNER_USER
 }
 
 enum ContractType {

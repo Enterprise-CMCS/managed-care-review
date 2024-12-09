@@ -34,7 +34,9 @@ describe('approveContract', () => {
         expect(approvedContract.reviewStatusActions![0]?.contractID).toBe(
             approvedContract.id
         )
-        expect(approvedContract.reviewStatusActions![0]?.updatedReason).toBe('')
+        expect(
+            approvedContract.reviewStatusActions![0]?.updatedReason
+        ).toBeNull()
         expect(approvedContract.reviewStatusActions![0]?.actionType).toBe(
             'MARK_AS_APPROVED'
         )

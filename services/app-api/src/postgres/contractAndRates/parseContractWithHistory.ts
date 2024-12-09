@@ -101,11 +101,29 @@ function contractWithHistoryToDomainModelWithoutRates(
     // then iterate through each of its rates, constructing a history of any rates that changed
     // between contract revision updates
     const contractRevisions = contract.revisions
-
+    const contractActions = contract.reviewStatusActions
     let draftRevision: ContractRevisionType | undefined = undefined
     const submittedRevisions: ContractRevisionType[] = []
-    const reviewStatusActions: ContractReviewActionType[] = 
-        contract.reviewStatusActions
+    const reviewStatusActions: ContractReviewActionType[] = []
+
+    for (const action of contractActions) {
+        const contractAction = {
+            dateApprovalReleasedToState:
+                action.dateApprovalReleasedToState ?? undefined,
+            actionType: action.actionType,
+            contractID: action.contractID,
+            updatedAt: action.updatedAt,
+            updatedBy: {
+                email: action.updatedBy.email,
+                familyName: action.updatedBy.familyName,
+                givenName: action.updatedBy.givenName,
+                role: action.updatedBy.role,
+            },
+            updatedReason: action.updatedReason ?? undefined,
+        }
+        reviewStatusActions.push(contractAction)
+    }
+
     for (const contractRev of contractRevisions) {
         // If we have a draft revision
         // We set the draft revision aside, format it properly

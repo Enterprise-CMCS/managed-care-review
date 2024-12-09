@@ -32,7 +32,6 @@ async function approveContractInsideTransaction(
                 dateApprovalReleasedToState: dateApprovalReleasedToState,
                 actionType: 'MARK_AS_APPROVED',
                 contractID: contractID,
-                updatedReason: '',
             },
         })
 

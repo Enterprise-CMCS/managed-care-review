@@ -166,15 +166,15 @@ model RateRevisionTable {
 }
 
 model ContractActionTable {
-  id            String             @id @default(uuid())
-  updatedAt     DateTime           @default(now()) @updatedAt
-  updatedByID   String
-  updatedBy     User               @relation(fields: [updatedByID], references: [id])
-  updatedReason String
-  actionType    ContractActionType
-  dateApprovalReleasedToState DateTime? @db.Date 
-  contractID    String  
-  contract      ContractTable  @relation(fields: [contractID], references: [id])
+  id                           String             @id @default(uuid())
+  updatedAt                    DateTime           @default(now()) @updatedAt
+  updatedByID                  String
+  updatedBy                    User               @relation(fields: [updatedByID], references: [id])
+  updatedReason                String?
+  actionType                   ContractActionType
+  dateApprovalReleasedToState  DateTime?          @db.Date 
+  contractID                   String  
+  contract                     ContractTable      @relation(fields: [contractID], references: [id])
 }
 
 model RateActionTable {
