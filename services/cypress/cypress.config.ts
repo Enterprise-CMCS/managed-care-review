@@ -67,7 +67,7 @@ module.exports = defineConfig({
                     console.table(message)
 
                     return null
-                }
+                },
             })
             return newConfig
         },

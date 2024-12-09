@@ -1,15 +1,15 @@
 import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { Route, Routes } from 'react-router'
-import { RoutesRecord } from '../../constants/routes'
+import { RoutesRecord } from '@mc-review/constants'
 import {
     fetchCurrentUserMock,
     fetchStateHealthPlanPackageWithQuestionsMockSuccess,
     iterableCmsUsersMockData,
-} from '../../testHelpers/apolloMocks'
+} from '@mc-review/mocks'
 import { renderWithProviders } from '../../testHelpers/jestHelpers'
 import { MccrsId } from './MccrsId'
-import { mockSubmittedHealthPlanPackage } from '../../testHelpers/apolloMocks'
+import { mockSubmittedHealthPlanPackage } from '@mc-review/mocks'
 
 describe('MCCRSID', () => {
     afterEach(() => {

@@ -5,7 +5,7 @@ import {
     getQuestionRound,
     handleAsCHIPSubmission,
 } from './templateHelpers'
-import type { UnlockedHealthPlanFormDataType } from '../common-code/healthPlanFormDataType'
+import type { UnlockedHealthPlanFormDataType } from '@mc-review/hpp'
 import {
     mockUnlockedContractAndRatesFormData,
     mockUnlockedContractOnlyFormData,

@@ -9,14 +9,14 @@ import {
     mockValidCMSUser,
     mockValidHelpDeskUser,
     mockValidStateUser,
-} from '../../../testHelpers/apolloMocks'
+} from '@mc-review/mocks'
 import { screen, waitFor, within } from '@testing-library/react'
 import { type Location, Route, Routes } from 'react-router-dom'
-import { RoutesRecord } from '../../../constants'
+import { RoutesRecord } from '@mc-review/constants'
 import {
     rateUnlockedWithHistoryMock,
     rateWithHistoryMock,
-} from '../../../testHelpers/apolloMocks/rateDataMock'
+} from '@mc-review/mocks'
 
 describe('SingleRateSummarySection', () => {
     it('can render rate details without errors', async () => {

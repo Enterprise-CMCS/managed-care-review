@@ -4,7 +4,7 @@ import { GridContainer } from '@trussworks/react-uswds'
 import { Loading } from '../../components'
 import { ErrorInvalidSubmissionStatus } from '../Errors/ErrorInvalidSubmissionStatusPage'
 import { Error404 } from '../Errors/Error404Page'
-import { handleApolloError } from '../../gqlHelpers/apolloErrors'
+import { handleApolloError } from '@mc-review/helpers'
 import { ApolloError } from '@apollo/client'
 import { ErrorForbiddenPage } from '../Errors/ErrorForbiddenPage'
 

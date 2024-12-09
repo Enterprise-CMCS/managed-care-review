@@ -8,17 +8,17 @@ import {
     mockValidCMSUser,
     mockValidStateUser,
     rateDataMock,
-} from '../../../testHelpers/apolloMocks'
+} from '@mc-review/mocks'
 import { IndexRateQuestionsPayload, RateRevision } from '../../../gen/gqlClient'
 import { renderWithProviders } from '../../../testHelpers'
 import { Route, Routes } from 'react-router-dom'
 import { SubmissionSideNav } from '../../SubmissionSideNav'
-import { RoutesRecord } from '../../../constants'
+import { RoutesRecord } from '@mc-review/constants'
 import { ContractQuestionResponse } from './ContractQuestionResponse'
 import { RateSummary, SubmissionSummary } from '../../SubmissionSummary'
 import { RateQuestionResponse } from './RateQuestionResponse'
 import { screen, waitFor, within } from '@testing-library/react'
-import { fetchRateWithQuestionsMockSuccess } from '../../../testHelpers/apolloMocks'
+import { fetchRateWithQuestionsMockSuccess } from '@mc-review/mocks'
 import { RateSummarySideNav } from '../../SubmissionSideNav/RateSummarySideNav'
 
 describe('RateQuestionResponse', () => {

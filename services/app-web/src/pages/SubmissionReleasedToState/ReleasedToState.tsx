@@ -6,7 +6,7 @@ import {
     FieldTextarea,
     GenericApiErrorBanner,
 } from '../../components'
-import { RoutesRecord } from '../../constants'
+import { RoutesRecord } from '@mc-review/constants'
 import { useNavigate, useParams } from 'react-router-dom'
 import {
     useApproveContractMutation,
@@ -19,7 +19,7 @@ import { ButtonGroup, Form } from '@trussworks/react-uswds'
 import { PageActionsContainer } from '../StateSubmission/PageActions'
 import { Formik } from 'formik'
 import { usePage } from '../../contexts/PageContext'
-import { recordJSException } from '../../otelHelpers'
+import { recordJSException } from '@mc-review/otel'
 import { useTealium } from '../../hooks'
 import * as Yup from 'yup'
 

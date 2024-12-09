@@ -7,7 +7,7 @@ import { approveContract } from './approveContract'
 
 describe('approveContract', () => {
     afterEach(() => {
-        jest.clearAllMocks()
+        vi.clearAllMocks()
     })
 
     it('approves contract correctly', async () => {

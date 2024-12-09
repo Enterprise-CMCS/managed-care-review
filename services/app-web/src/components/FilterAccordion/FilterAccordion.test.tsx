@@ -3,7 +3,7 @@ import { FilterAccordion } from './FilterAccordion'
 import { FilterSelect } from './FilterSelect/FilterSelect'
 import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { fetchCurrentUserMock } from '../../testHelpers/apolloMocks'
+import { fetchCurrentUserMock } from '@mc-review/mocks'
 import React from 'react'
 
 describe('FilterAccordion', () => {

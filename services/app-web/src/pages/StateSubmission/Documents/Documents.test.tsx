@@ -10,10 +10,7 @@ import {
     TEST_PNG_FILE,
     dragAndDrop,
 } from '../../../testHelpers/jestHelpers'
-import {
-    fetchCurrentUserMock,
-    mockDraft,
-} from '../../../testHelpers/apolloMocks'
+import { fetchCurrentUserMock, mockDraft } from '@mc-review/mocks'
 import { Documents } from './Documents'
 import { ACCEPTED_SUBMISSION_FILE_TYPES } from '../../../components/FileUpload'
 import * as useRouteParams from '../../../hooks/useRouteParams'

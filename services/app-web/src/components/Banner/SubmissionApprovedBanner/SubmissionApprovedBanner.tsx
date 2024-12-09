@@ -1,8 +1,8 @@
 import { Alert } from '@trussworks/react-uswds'
 import React from 'react'
 import styles from '../Banner.module.scss'
-import { getUpdatedByDisplayName } from '../../../gqlHelpers'
-import { formatBannerDate } from '../../../common-code/dateHelpers'
+import { getUpdatedByDisplayName } from '@mc-review/helpers'
+import { formatBannerDate } from '@mc-review/common-code'
 import { UpdatedBy } from '../../../gen/gqlClient'
 import { ExpandableText } from '../../ExpandableText'
 

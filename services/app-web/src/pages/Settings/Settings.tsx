@@ -3,18 +3,18 @@ import { Grid, GridContainer, Icon, SideNav } from '@trussworks/react-uswds'
 import styles from './Settings.module.scss'
 import { NavLinkWithLogging } from '../../components'
 import { Outlet, useLocation } from 'react-router-dom'
-import { recordJSException } from '../../otelHelpers'
+import { recordJSException } from '@mc-review/otel'
 import {
     EmailConfiguration,
     StateAssignment,
     useFetchMcReviewSettingsQuery,
 } from '../../gen/gqlClient'
 import { StateAnalystsInDashboardType } from './SettingsTables'
-import { RoutesRecord } from '../../constants'
+import { RoutesRecord } from '@mc-review/constants'
 import { ApolloError } from '@apollo/client'
 import { AssignedStaffUpdateBanner } from '../../components/Banner/AssignedStaffUpdateBanner/AssignedStaffUpdateBanner'
 import { useCurrentRoute } from '../../hooks'
-import { SETTINGS_HIDE_SIDEBAR_ROUTES } from '../../constants/routes'
+import { SETTINGS_HIDE_SIDEBAR_ROUTES } from '@mc-review/constants'
 
 export const TestMonitoring = (): null => {
     const location = useLocation()

@@ -1,5 +1,3 @@
-import {getRules} from 'axe-core'
-
 function terminalLog(violations: Record<string, any>[]) {
     console.log(violations)
     cy.task(
@@ -14,20 +12,26 @@ function terminalLog(violations: Record<string, any>[]) {
             id,
             impact,
             description,
-            nodes: nodes.length
+            nodes: nodes.length,
         })
     )
 
     cy.task('table', violationData)
 }
 
-Cypress.Commands.add(
-    'checkA11yWithWcag22aa',
-    () => {
-        cy.checkA11y('', {
+Cypress.Commands.add('checkA11yWithWcag22aa', () => {
+    cy.checkA11y(
+        '',
+        {
             runOnly: {
                 type: 'tags',
-                values: ['wcag2a','wcag2aa', 'wcag21a', 'wcag21aa','wcag22aa']
+                values: [
+                    'wcag2a',
+                    'wcag2aa',
+                    'wcag21a',
+                    'wcag21aa',
+                    'wcag22aa',
+                ],
             },
             rules: {
                 // Rule skipped. It can be removed from config when https://jiraent.cms.gov/browse/MCR-4421 has been
@@ -35,9 +39,10 @@ Cypress.Commands.add(
                 'aria-allowed-attr': { enabled: false },
                 // Both of these rules are skipped. They can be removed from config when
                 // https://jiraent.cms.gov/browse/MCR-4420 has been completed
-                'dlitem': { enabled: false },
-                'definition-list': { enabled: false }
-            }
-        }, terminalLog)
-    }
-)
+                dlitem: { enabled: false },
+                'definition-list': { enabled: false },
+            },
+        },
+        terminalLog
+    )
+})

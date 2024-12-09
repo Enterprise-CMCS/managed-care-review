@@ -6,7 +6,7 @@ import {
     fetchCurrentUserMock,
     mockValidCMSUser,
     indexContractsMockSuccess,
-} from '../../testHelpers/apolloMocks'
+} from '@mc-review/mocks'
 
 // Routing and routes configuration tested here, best layer for testing behaviors that cross several pages
 describe('AppRoutes and routing configuration', () => {

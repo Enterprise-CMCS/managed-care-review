@@ -17,15 +17,9 @@ import {
     PoliteErrorMessage,
     ReactRouterLinkWithLogging,
 } from '../../../components'
-import { isContractWithProvisions } from '../../../common-code/ContractType'
-import {
-    PopulationCoveredRecord,
-    SubmissionTypeRecord,
-} from '../../../constants/healthPlanPackages'
-import {
-    ContractType,
-    PopulationCoveredType,
-} from '../../../common-code/healthPlanFormDataType'
+import { isContractWithProvisions } from '@mc-review/common-code'
+import { PopulationCoveredRecord, SubmissionTypeRecord } from '@mc-review/hpp'
+import { ContractType, PopulationCoveredType } from '@mc-review/hpp'
 import {
     SubmissionType as SubmissionTypeT,
     CreateContractInput,
@@ -48,7 +42,7 @@ import {
     RoutesRecord,
     STATE_SUBMISSION_FORM_ROUTES,
     STATE_SUBMISSION_FORM_ROUTES_WITHOUT_SUPPORTING_DOCS,
-} from '../../../constants'
+} from '@mc-review/constants'
 import { FormContainer } from '../../../components/FormContainer/FormContainer'
 import { useCurrentRoute } from '../../../hooks'
 import { ErrorOrLoadingPage } from '../ErrorOrLoadingPage'
@@ -58,7 +52,7 @@ import { PageBannerAlerts } from '../PageBannerAlerts'
 import { useErrorSummary } from '../../../hooks/useErrorSummary'
 import { useContractForm } from '../../../hooks/useContractForm'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
-import { featureFlags } from '../../../common-code/featureFlags'
+import { featureFlags } from '@mc-review/common-code'
 
 export interface SubmissionTypeFormValues {
     populationCovered?: PopulationCoveredType

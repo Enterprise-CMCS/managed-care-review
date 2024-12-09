@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`renders overall email for a new question as expected 1`] = `
 "CMS asked questions about MCR-MN-0003-SNBC<br />

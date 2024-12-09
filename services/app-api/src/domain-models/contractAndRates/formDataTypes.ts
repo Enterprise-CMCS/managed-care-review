@@ -9,7 +9,7 @@ import {
     rateCapitationTypeSchema,
     rateTypeSchema,
     submissionTypeSchema,
-} from '../../common-code/proto/healthPlanFormDataProto/zodSchemas'
+} from '@mc-review/hpp'
 import { statusSchema } from './statusType'
 import type { RawCreateParams, ZodTypeAny } from 'zod/lib/types'
 

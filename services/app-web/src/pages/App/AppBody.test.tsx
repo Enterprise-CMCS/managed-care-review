@@ -8,7 +8,7 @@ import { AppBody } from './AppBody'
 import {
     fetchCurrentUserMock,
     indexHealthPlanPackagesMockSuccess,
-} from '../../testHelpers/apolloMocks'
+} from '@mc-review/mocks'
 import { beforeEach } from 'vitest'
 
 // Looking for routing tests? Check AppRoutes.test.tsx

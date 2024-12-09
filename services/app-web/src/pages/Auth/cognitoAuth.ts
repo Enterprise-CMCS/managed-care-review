@@ -1,7 +1,7 @@
 import { CognitoUser } from 'amazon-cognito-identity-js'
 import { Auth as AmplifyAuth } from 'aws-amplify'
 import { StateUser } from '../../gen/gqlClient'
-import { recordJSException } from '../../otelHelpers'
+import { recordJSException } from '@mc-review/otel'
 
 type newUser = {
     username: string
@@ -52,11 +52,9 @@ export function idmRedirectURL(): string {
     return url
 }
 
-async function signUp(
-    user: newUser
-): Promise<CognitoUser | Error> {
-  try {
-    const response = await AmplifyAuth.signUp({
+async function signUp(user: newUser): Promise<CognitoUser | Error> {
+    try {
+        const response = await AmplifyAuth.signUp({
             username: user.username,
             password: user.password,
             attributes: {
@@ -90,26 +88,25 @@ async function confirmSignUp(
         await AmplifyAuth.confirmSignUp(email, code)
         return null
     } catch (response) {
-        if (isAmplifyError(response) && (response.code === 'ExpiredCodeException')) {
-            console.info(
-                'Your code is expired, amplify will send another one.'
-            )
-    }
-    recordJSException(response)
-    return response
+        if (
+            isAmplifyError(response) &&
+            response.code === 'ExpiredCodeException'
+        ) {
+            console.info('Your code is expired, amplify will send another one.')
+        }
+        recordJSException(response)
+        return response
     }
 }
 
-async function resendSignUp(
-    email: string
-): Promise<null | Error> {
-   try {
-    await AmplifyAuth.resendSignUp(email)
-    return null
-   } catch (response ) {
-    recordJSException(response)
-    return response
-   }
+async function resendSignUp(email: string): Promise<null | Error> {
+    try {
+        await AmplifyAuth.resendSignUp(email)
+        return null
+    } catch (response) {
+        recordJSException(response)
+        return response
+    }
 }
 
 async function signIn(
@@ -120,34 +117,41 @@ async function signIn(
         const response = await AmplifyAuth.signIn(email, password)
         return response.user
     } catch (response) {
-        if(isAmplifyError(response)) {
+        if (isAmplifyError(response)) {
             if (response.code === 'UserNotConfirmedException') {
                 recordJSException(
                     `AmplifyError ${response.code} – you need to confirm your account, enter the code below`
                 )
             } else if (response.code === 'NotAuthorizedException') {
-                recordJSException(`AmplifyError ${response.code} – this is probably a bad password`)
+                recordJSException(
+                    `AmplifyError ${response.code} – this is probably a bad password`
+                )
             } else if (response.code === 'UserNotFoundException') {
-                recordJSException(`AmplifyError ${response.code} – user does not exist`)
+                recordJSException(
+                    `AmplifyError ${response.code} – user does not exist`
+                )
             } else {
-                recordJSException(`UNEXPECTED AmplifyError ${response.code} – ${response.message}`)
+                recordJSException(
+                    `UNEXPECTED AmplifyError ${response.code} – ${response.message}`
+                )
             }
         } else {
-            recordJSException(`UNEXPECTED SIGNIN ERROR – 'didnt even get an amplify error back from login`)
+            recordJSException(
+                `UNEXPECTED SIGNIN ERROR – 'didnt even get an amplify error back from login`
+            )
         }
         return response
     }
 }
 
 async function signOut(): Promise<null | Error> {
-   try {
-    await AmplifyAuth.signOut()
-    return null
+    try {
+        await AmplifyAuth.signOut()
+        return null
     } catch (response) {
-            recordJSException( response)
-           return response
+        recordJSException(response)
+        return response
     }
-
 }
 
 async function extendSession(): Promise<null | Error> {
@@ -158,19 +162,8 @@ async function extendSession(): Promise<null | Error> {
         recordJSException(response)
         return response
     }
-
 }
 
-export {
-    extendSession,
-    confirmSignUp,
-    resendSignUp,
-    signIn,
-    signUp,
-    signOut,
-}
+export { extendSession, confirmSignUp, resendSignUp, signIn, signUp, signOut }
 
-export type {
-    AmplifyError,
-    AmplifyErrorCodes
-}
+export type { AmplifyError, AmplifyErrorCodes }

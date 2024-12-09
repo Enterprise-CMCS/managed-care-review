@@ -8,7 +8,7 @@ import {
     mockContractPackageDraft,
     mockContractPackageSubmitted,
     mockContractPackageApproved,
-} from '../../testHelpers/apolloMocks'
+} from '@mc-review/mocks'
 import { renderWithProviders } from '../../testHelpers/jestHelpers'
 import { Contract } from '../../gen/gqlClient'
 

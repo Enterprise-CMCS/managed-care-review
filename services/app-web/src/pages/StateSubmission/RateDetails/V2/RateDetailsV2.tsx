@@ -24,7 +24,7 @@ import {
     RoutesRecord,
     STATE_SUBMISSION_FORM_ROUTES,
     STATE_SUBMISSION_FORM_ROUTES_WITHOUT_SUPPORTING_DOCS,
-} from '../../../../constants'
+} from '@mc-review/constants'
 import {
     HealthPlanPackageStatus,
     Rate,
@@ -43,9 +43,9 @@ import {
     ErrorOrLoadingPage,
     handleAndReturnErrorState,
 } from '../../ErrorOrLoadingPage'
-import { featureFlags } from '../../../../common-code/featureFlags'
+import { featureFlags } from '@mc-review/common-code'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
-import { recordJSException } from '../../../../otelHelpers'
+import { recordJSException } from '@mc-review/otel'
 import {
     convertGQLRateToRateForm,
     convertRateFormToGQLRateFormData,

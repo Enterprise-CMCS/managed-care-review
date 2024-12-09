@@ -5,7 +5,7 @@ import { SubmissionSideNav } from './SubmissionSideNav'
 import { SubmissionSummary } from '../SubmissionSummary'
 import { ContractQuestionResponse } from '../QuestionResponse'
 import { renderWithProviders } from '../../testHelpers'
-import { RoutesRecord } from '../../constants'
+import { RoutesRecord } from '@mc-review/constants'
 import {
     fetchContractMockSuccess,
     fetchCurrentUserMock,
@@ -17,7 +17,7 @@ import {
     fetchContractWithQuestionsMockFail,
     mockContractPackageDraft,
     mockValidStateUser,
-} from '../../testHelpers/apolloMocks'
+} from '@mc-review/mocks'
 import { RateRevision } from '../../gen/gqlClient'
 
 const CommonRoutes = () => (

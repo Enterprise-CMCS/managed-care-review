@@ -11,7 +11,7 @@ import {
     mockValidAdminUser,
     updateDivisionMockSuccess,
     mockValidCMSUser,
-} from '../../testHelpers/apolloMocks'
+} from '@mc-review/mocks'
 import { renderWithProviders } from '../../testHelpers'
 import {
     AdminUser,
@@ -21,15 +21,15 @@ import {
     HelpdeskUser,
 } from '../../gen/gqlClient'
 import { userEvent } from '@testing-library/user-event'
-import { RoutesRecord } from '../../constants'
+import { RoutesRecord } from '@mc-review/constants'
 import {
     StateAssignmentTable,
     DivisionAssignmentTable,
     SupportEmailsTable,
     AutomatedEmailsTable,
 } from './SettingsTables'
-import { fetchMcReviewSettingsFailMock } from '../../testHelpers/apolloMocks/mcReviewSettingsGQLMocks'
-import { indexUsersQueryFailMock } from '../../testHelpers/apolloMocks/userGQLMock'
+import { fetchMcReviewSettingsFailMock } from '@mc-review/mocks'
+import { indexUsersQueryFailMock } from '@mc-review/mocks'
 import selectEvent from 'react-select-event'
 
 const combinedAuthorizedUsers: {

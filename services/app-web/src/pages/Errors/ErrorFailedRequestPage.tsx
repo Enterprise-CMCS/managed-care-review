@@ -4,10 +4,7 @@ import styles from './Errors.module.scss'
 import { PageHeading } from '../../components/PageHeading'
 import { GridContainer } from '@trussworks/react-uswds'
 import { ApolloError } from '@apollo/client'
-import {
-    handleApolloError,
-    isLikelyUserAuthError,
-} from '../../gqlHelpers/apolloErrors'
+import { handleApolloError, isLikelyUserAuthError } from '@mc-review/helpers'
 import { ErrorAlertFailedRequest, ErrorAlertSignIn } from '../../components'
 import { useAuth } from '../../contexts/AuthContext'
 

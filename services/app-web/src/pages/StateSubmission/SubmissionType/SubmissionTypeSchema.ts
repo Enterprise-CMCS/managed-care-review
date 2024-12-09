@@ -1,5 +1,5 @@
 import * as Yup from 'yup'
-import { FeatureFlagSettings } from '../../../common-code/featureFlags'
+import { FeatureFlagSettings } from '@mc-review/common-code'
 import { validateDateFormat } from '../../../formHelpers'
 
 Yup.addMethod(Yup.date, 'validateDateFormat', validateDateFormat)

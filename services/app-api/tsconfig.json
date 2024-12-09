@@ -4,6 +4,7 @@
         "module": "ESNext",
         "lib": ["ES2021", "DOM"],
         "target": "ES2021",
+        "types": ["vitest/globals"],
         "moduleResolution": "node",
         "baseUrl": "/",
         "experimentalDecorators": true,
@@ -15,5 +16,5 @@
         "resolveJsonModule": true,
         "jsx": "react"
     },
-    "include": ["src", "jest.config.ts"]
+    "include": ["src", "vitest.config.ts", "jest.config.ts"]
 }

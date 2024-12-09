@@ -1,4 +1,4 @@
-import statePrograms from '../../../../app-web/src/common-code/data/statePrograms.json'
+import { typedStatePrograms } from '@mc-review/hpp'
 import type { PrismaTransactionType } from '../prismaTypes'
 import type { UserType } from '../../domain-models'
 import { NotFoundError } from '../postgresErrors'
@@ -8,7 +8,7 @@ async function findStateAssignedUsers(
     client: PrismaTransactionType,
     stateCode: string
 ): Promise<UserType[] | Error> {
-    const pilotStateCodes = statePrograms.states.map((state) => state.code)
+    const pilotStateCodes = typedStatePrograms.states.map((state) => state.code)
     if (!pilotStateCodes.includes(stateCode)) {
         return new Error(`${stateCode} is not a supported state code`)
     }
