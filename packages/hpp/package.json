@@ -17,7 +17,11 @@
         "@mc-review/constants": "workspace:*",
         "@types/jest": "^29.5.6",
         "@types/node": "^20.14.12",
+        "buffer": "^6.0.3",
         "protobufjs": "^7.3.0",
         "vite-plugin-node-polyfills": "^0.22.0"
+    },
+    "browser": {
+        "buffer": "buffer/"
     }
 }
