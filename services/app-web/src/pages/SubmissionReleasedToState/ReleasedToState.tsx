@@ -123,7 +123,7 @@ const ReleasedToState = () => {
             )
         }
     }
-
+    const today = new Date()
     return (
         <div className={styles.uploadFormContainer}>
             <Breadcrumbs
@@ -170,13 +170,15 @@ const ReleasedToState = () => {
                                 released to the state.
                             </p>
                             <Label
-                                htmlFor="dateReleasedToState"
+                                htmlFor="dateApprovalReleasedToState"
                                 className="margin-bottom-0 text-bold"
                             >
                                 Date released to state
                             </Label>
-                            <p className="margin-bottom-0 usa-hint">Required</p>
-                            <p className="margin-bottom-0 usa-hint">
+                            <p className="margin-bottom-0 margin-top-05 usa-hint">
+                                Required
+                            </p>
+                            <p className="margin-bottom-0 margin-top-05 usa-hint">
                                 mm/dd/yyyy
                             </p>
                             <FormGroup
@@ -193,6 +195,9 @@ const ReleasedToState = () => {
                                     aria-describedby="dateApprovalReleasedToState"
                                     id="dateApprovalReleasedToState"
                                     name="dateApprovalReleasedToState"
+                                    maxDate={formatUserInputDate(
+                                        today.toString()
+                                    )}
                                     onChange={(val) =>
                                         setFieldValue(
                                             'dateApprovalReleasedToState',
