@@ -19,6 +19,7 @@ fragment contractFieldsFragment on Contract {
             familyName
             givenName
         }
+        dateApprovalReleasedToState
         updatedReason
         contractID
         actionType

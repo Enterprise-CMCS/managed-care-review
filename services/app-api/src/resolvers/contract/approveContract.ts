@@ -19,7 +19,7 @@ export function approveContract(
         const span = tracer?.startSpan('approveContract', {}, ctx)
         setResolverDetailsOnActiveSpan('approveContract', user, span)
 
-        const { contractID, updatedReason } = input
+        const { contractID, dateApprovalReleasedToState } = input
         span?.setAttribute('mcreview.package_id', contractID)
 
         if (!hasCMSPermissions(user)) {
@@ -65,14 +65,28 @@ export function approveContract(
                 cause: 'INVALID_PACKAGE_STATUS',
             })
         }
+        const today = new Date()
+        const dateApprovalReleasedToStateAsDate = new Date(
+            dateApprovalReleasedToState
+        )
+
+        if (dateApprovalReleasedToStateAsDate > today) {
+            const errMessage = `Attempted to approve contract with invalid approval release date: ${dateApprovalReleasedToState}`
+            logError('approveContract', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+            throw new UserInputError(errMessage, {
+                cause: 'INVALID_APPROVAL_RELEASE_DATE',
+            })
+        }
         const approveContractResult = await store.approveContract({
             contractID: contractID,
             updatedByID: user.id,
-            updatedReason: updatedReason || '',
+            dateApprovalReleasedToState: dateApprovalReleasedToState,
         })
 
         if (approveContractResult instanceof Error) {
             if (approveContractResult instanceof NotFoundError) {
+                logError('approveContract', approveContractResult.message)
                 throw new GraphQLError(approveContractResult.message, {
                     extensions: {
                         code: 'NOT_FOUND',
