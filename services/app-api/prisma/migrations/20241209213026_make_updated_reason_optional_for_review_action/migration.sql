@@ -1,3 +1,0 @@
-BEGIN;
-ALTER TABLE "ContractActionTable" ALTER COLUMN "updatedReason" DROP NOT NULL;
-COMMIT;
