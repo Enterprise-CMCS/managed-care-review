@@ -420,7 +420,6 @@ async function initializeGQLHandler(): Promise<Handler> {
     const resolvers = configureResolvers(
         store,
         emailer,
-        emailParameterStore,
         launchDarkly,
         jwtLib,
         s3Client,
