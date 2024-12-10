@@ -1146,15 +1146,6 @@ enum SubmissionType {
     CONTRACT_AND_RATES
 }
 
-enum UserRole {
-    STATE_USER
-    CMS_USER
-    CMS_APPROVER_USER
-    ADMIN_USER
-    HELPDESK_USER
-    BUSINESSOWNER_USER
-}
-
 enum ContractType {
     BASE
     AMENDMENT
