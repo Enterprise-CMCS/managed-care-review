@@ -6,6 +6,7 @@ import {
     contractWithoutDraftRatesSchema,
     rateWithoutDraftContractsSchema,
 } from './baseContractRateTypes'
+import { contractPackageSubmissionSchema } from './packageSubmissions'
 
 const contractSchema = contractWithoutDraftRatesSchema.extend({
     draftRates: z.array(rateWithoutDraftContractsSchema).optional(),
@@ -22,6 +23,11 @@ const draftContractSchema = contractSchema.extend({
     status: z.literal('DRAFT'),
     draftRevision: contractRevisionSchema,
     revisions: z.array(contractRevisionSchema).min(1),
+})
+
+const submittedContractSchema = contractSchema.extend({
+    status: z.literal('SUBMITTED'),
+    packageSubmissions: z.array(contractPackageSubmissionSchema).min(1),
 })
 
 type ContractType = z.infer<typeof contractSchema>

@@ -27,7 +27,6 @@ import {
     packageName,
 } from '../../common-code/healthPlanFormDataType'
 import type { HealthPlanFormDataType } from '../../common-code/healthPlanFormDataType'
-import { mockEmailParameterStoreError } from '../../testHelpers/parameterStoreHelpers'
 import {
     createDBUsersWithFullData,
     testCMSUser,
@@ -887,7 +886,6 @@ describe(`Tests unlockHealthPlanPackage`, () => {
         const config = testEmailConfig()
         const mockEmailer = testEmailer(config)
         //mock invoke email submit lambda
-        const mockEmailParameterStore = mockEmailParameterStoreError()
         const stateServer = await constructTestPostgresServer()
 
         // First, create a new submitted submission
@@ -899,7 +897,6 @@ describe(`Tests unlockHealthPlanPackage`, () => {
                 user: cmsUser,
             },
             emailer: mockEmailer,
-            emailParameterStore: mockEmailParameterStore,
         })
 
         // Unlock

@@ -8,9 +8,6 @@ export const testS3Client: () => S3ClientT = () => {
         uploadFile: async (file: File): Promise<string> => {
             return `fakeS3Key${fakeKeyID++}-${file.name}`
         },
-        deleteFile: async (filename: string): Promise<void> => {
-            return
-        },
         scanFile: async (filename: string): Promise<void> => {
             return
         },

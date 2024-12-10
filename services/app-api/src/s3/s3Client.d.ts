@@ -6,10 +6,6 @@ export type S3ClientT = {
         file: File,
         bucket: BucketShortName
     ) => Promise<string | S3Error>
-    deleteFile: (
-        key: string,
-        bucket: BucketShortName
-    ) => Promise<void | S3Error>
     scanFile: (key: string, bucket: BucketShortName) => Promise<void | S3Error>
     getKey: (S3URL: string) => string | null
     getURL: (key: string, bucket: BucketShortName) => Promise<string>
