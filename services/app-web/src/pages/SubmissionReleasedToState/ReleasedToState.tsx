@@ -170,24 +170,24 @@ const ReleasedToState = () => {
                                 as released after the approval letter has been
                                 released to the state.
                             </p>
-                            <Label
-                                htmlFor="dateApprovalReleasedToState"
-                                className="margin-bottom-0 text-bold"
-                            >
-                                Date released to state
-                            </Label>
-                            <p className="margin-bottom-0 margin-top-05 usa-hint">
-                                Required
-                            </p>
-                            <p className="margin-bottom-0 margin-top-05 usa-hint">
-                                mm/dd/yyyy
-                            </p>
                             <FormGroup
                                 error={showFieldErrors(
                                     errors.dateApprovalReleasedToState
                                 )}
                                 className="margin-top-0"
                             >
+                                <Label
+                                    htmlFor="dateApprovalReleasedToState"
+                                    className="margin-bottom-0 text-bold"
+                                >
+                                    Date released to state
+                                </Label>
+                                <p className="margin-bottom-0 margin-top-05 usa-hint">
+                                    Required
+                                </p>
+                                <p className="margin-bottom-0 margin-top-05 usa-hint">
+                                    mm/dd/yyyy
+                                </p>
                                 <PoliteErrorMessage formFieldLabel="Date released to state">
                                     {errors.dateApprovalReleasedToState}
                                 </PoliteErrorMessage>
