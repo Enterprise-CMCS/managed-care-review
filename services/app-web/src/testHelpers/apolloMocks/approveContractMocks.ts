@@ -4,16 +4,17 @@ import {mockContractPackageSubmittedWithQuestions} from './contractPackageDataMo
 import {ApolloError} from '@apollo/client';
 import {GraphQLError} from 'graphql/index';
 import {GRAPHQL_ERROR_CAUSE_MESSAGES, GraphQLErrorCauseTypes, GraphQLErrorCodeTypes} from './apolloErrorCodeMocks';
+import { formatUserInputDate } from '../../formHelpers';
 
 const approveContractMockSuccess = (params: {
     contractID?: string,
     contractData?: Partial<Contract>,
-    updatedReason?: string
+    dateApprovalReleasedToState?: string
 } = {}): MockedResponse<ApproveContractMutation> => {
     const {
         contractID= 'test-abc-123',
         contractData,
-        updatedReason = 'Approve contract'
+        dateApprovalReleasedToState = '10/10/2024'
     } = params
     const contract =
         mockContractPackageSubmittedWithQuestions(
@@ -27,6 +28,7 @@ const approveContractMockSuccess = (params: {
                         __typename: 'ContractReviewStatusActions',
                         actionType: 'MARK_AS_APPROVED',
                         contractID: contractID,
+                        dateApprovalReleasedToState,
                         updatedAt: new Date(),
                         updatedBy: {
                             __typename: 'UpdatedBy',
@@ -48,7 +50,7 @@ const approveContractMockSuccess = (params: {
             variables: {
                 input: {
                     contractID: 'test-abc-123',
-                    updatedReason: updatedReason
+                    dateApprovalReleasedToState
                 }
             }
         },
@@ -87,7 +89,7 @@ const approveContractMockFailure = ({
             variables: {
                 input: {
                     contractID: 'test-abc-123',
-                    updatedReason: 'Released to state'
+                    dateApprovalReleasedToState: formatUserInputDate('12/12/2024')
                 }
             }
         },
