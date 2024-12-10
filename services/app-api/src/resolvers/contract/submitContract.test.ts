@@ -2,6 +2,7 @@
 import {
     constructTestPostgresServer,
     createAndUpdateTestHealthPlanPackage,
+    defaultFloridaProgram,
     unlockTestHealthPlanPackage,
     updateTestHealthPlanFormData,
     updateTestStateAssignments,
@@ -21,10 +22,12 @@ import {
     createAndSubmitTestContractWithRate,
     createAndUpdateTestContractWithoutRates,
     createSubmitAndUnlockTestContract,
+    createTestContract,
     fetchTestContract,
     resubmitTestContract,
     submitTestContract,
     unlockTestContract,
+    updateTestContractDraftRevision,
 } from '../../testHelpers/gqlContractHelpers'
 import {
     addLinkedRateToRateInput,
@@ -1014,6 +1017,46 @@ describe('submitContract', () => {
         )
     })
 
+    it('returns an error if it is incomplete', async () => {
+        const stateServer = await constructTestPostgresServer()
+
+        const contract = await createTestContract(stateServer)
+
+        await updateTestContractDraftRevision(
+            stateServer,
+            contract.id,
+            contract.draftRevision?.updatedAt,
+            {
+                contractDocuments: [
+                    {
+                        name: 'testdoc',
+                        s3URL: 's3://bucketname/key/contractDocument1.pdf',
+                        sha256: 'fakesha14',
+                    },
+                ],
+                programIDs: [defaultFloridaProgram().id],
+                submissionType: 'CONTRACT_ONLY',
+                statutoryRegulatoryAttestationDescription: 'this is required',
+
+                stateContacts: [],
+                supportingDocuments: [],
+                managedCareEntities: [],
+                federalAuthorities: [],
+            }
+        )
+
+        const res = await stateServer.executeOperation({
+            query: SubmitContractDocument,
+            variables: {
+                input: {
+                    contractID: contract.id,
+                },
+            },
+        })
+
+        expect(res.errors).toBeDefined()
+    })
+
     describe('emails', () => {
         it('sends two emails', async () => {
             const mockEmailer = testEmailer()
@@ -1497,7 +1540,7 @@ describe('submitContract', () => {
             })
 
             expect(submitResult.errors).toBeDefined()
-            expect(submitResult.errors?.[0].message).toContain('Required')
+            expect(submitResult.errors?.[0].message).toContain('required')
         }, 20000)
 
         it('errors when contract 4348 attestation question is false without a description', async () => {

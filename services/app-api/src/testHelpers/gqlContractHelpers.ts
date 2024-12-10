@@ -362,6 +362,15 @@ const createAndUpdateTestContractWithoutRates = async (
             modifiedPassThroughPayments: true,
             modifiedPaymentsForMentalDiseaseInstitutions: true,
             modifiedNonRiskPaymentArrangements: true,
+            modifiedBenefitsProvided: false,
+            modifiedGeoAreaServed: false,
+            modifiedMedicaidBeneficiaries: false,
+            modifiedMedicalLossRatioStandards: false,
+            modifiedOtherFinancialPaymentIncentive: false,
+            modifiedEnrollmentProcess: false,
+            modifiedGrevienceAndAppeal: false,
+            modifiedNetworkAdequacyStandards: false,
+            modifiedLengthOfContract: false,
         },
     }
     draft.statutoryRegulatoryAttestation = false

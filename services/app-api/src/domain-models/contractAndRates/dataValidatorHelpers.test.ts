@@ -11,6 +11,10 @@ import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 import { NewPostgresStore } from '../../postgres'
 import type { ContractType } from './contractTypes'
 import { s3DlUrl } from '../../testHelpers/documentHelpers'
+import {
+    defaultFloridaProgram,
+    defaultFloridaRateProgram,
+} from '../../testHelpers/gqlHelpers'
 
 describe('validateContractDraftRevisionInput', () => {
     it('Validates input form data and removes statutoryRegulatoryAttestationDescription', async () => {
@@ -52,6 +56,7 @@ describe('validateContractDraftRevisionInput', () => {
 
         expect(validatedFormData).toEqual(expectedResult)
     })
+
     it('converts fields that are null to undefined', async () => {
         const prismaClient = await sharedTestPrismaClient()
         const postgresStore = NewPostgresStore(prismaClient)
@@ -210,7 +215,7 @@ describe('parseContract', () => {
                 createdAt: new Date(11 / 27 / 2023),
                 updatedAt: new Date(11 / 27 / 2023),
                 formData: {
-                    programIDs: ['83d0e9d9-6592-439a-b46c-3235e8192fa0'],
+                    programIDs: [defaultFloridaProgram().id],
                     populationCovered: 'MEDICAID',
                     submissionType: 'CONTRACT_AND_RATES',
                     riskBasedContract: true,
@@ -231,7 +236,13 @@ describe('parseContract', () => {
                             downloadURL: s3DlUrl,
                         },
                     ],
-                    stateContacts: [],
+                    stateContacts: [
+                        {
+                            name: 'Someone',
+                            email: 'someone@example.com',
+                            titleRole: 'sometitle',
+                        },
+                    ],
                     contractType: 'AMENDMENT',
                     contractExecutionStatus: 'EXECUTED',
                     contractDocuments: [
@@ -289,6 +300,7 @@ describe('parseContract', () => {
                         formData: {
                             rateType: 'AMENDMENT',
                             rateCapitationType: 'RATE_CELL',
+                            rateCertificationName: 'fake-name',
                             rateDocuments: [
                                 {
                                     s3URL: 's3://bucketname/key/contractsupporting1',
@@ -304,9 +316,7 @@ describe('parseContract', () => {
                             rateDateCertified: new Date(),
                             amendmentEffectiveDateStart: new Date('1/1/2023'),
                             amendmentEffectiveDateEnd: new Date('1/1/2024'),
-                            rateProgramIDs: [
-                                'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
-                            ],
+                            rateProgramIDs: [defaultFloridaRateProgram().id],
                             deprecatedRateProgramIDs: [],
                             certifyingActuaryContacts: [
                                 {
@@ -353,7 +363,7 @@ describe('parseContract', () => {
             status: 'DRAFT',
             createdAt: new Date(),
             updatedAt: new Date(),
-            id: 'test-abc-123',
+            id: '6ab1b4c0-f9d2-4567-958a-3123e98328e1',
             stateCode: 'MN',
             stateNumber: 5,
             mccrsID: undefined,
@@ -361,11 +371,11 @@ describe('parseContract', () => {
             consolidatedStatus: 'DRAFT',
             revisions: [],
             draftRevision: {
-                id: '12345',
+                id: '6ab1b4c0-f9d2-4567-958a-3123e98328e2',
                 submitInfo: undefined,
                 unlockInfo: undefined,
                 contract: {
-                    id: '123',
+                    id: '6ab1b4c0-f9d2-4567-958a-3123e98328e1',
                     stateCode: 'MN',
                     stateNumber: 4,
                 },
@@ -424,17 +434,17 @@ describe('parseContract', () => {
             },
             draftRates: [
                 {
-                    id: 'rate-123',
+                    id: '6ab1b4c0-f9d2-4567-958a-3123e98328e3',
                     createdAt: new Date(),
                     updatedAt: new Date(),
                     status: 'DRAFT',
                     stateCode: 'FL',
                     stateNumber: 5,
-                    parentContractID: 'some-other-contract-id',
+                    parentContractID: '6ab1b4c0-f9d2-4567-958a-3123e98328e8',
                     packageSubmissions: [],
                     draftRevision: {
-                        id: '123',
-                        rateID: 'rate-123',
+                        id: '6ab1b4c0-f9d2-4567-958a-3123e98328e4',
+                        rateID: '6ab1b4c0-f9d2-4567-958a-3123e98328e6',
                         createdAt: new Date(),
                         updatedAt: new Date(),
                         submitInfo: undefined,
@@ -442,16 +452,23 @@ describe('parseContract', () => {
                         formData: {
                             rateType: 'AMENDMENT',
                             rateCapitationType: 'RATE_CELL',
-                            rateDocuments: [],
+                            rateCertificationName: 'fake-rate-name',
+                            rateDocuments: [
+                                {
+                                    s3URL: 'foobar//foobar',
+                                    sha256: 'shafake',
+                                    name: 'rate doc',
+                                },
+                            ],
                             supportingDocuments: [],
                             rateDateStart: new Date('2020-02-02'),
                             rateDateEnd: new Date('2021-02-02'),
                             rateDateCertified: new Date(),
+                            // amendmentEffectiveDateStart: new Date('2020-02-05'),
+                            // amendmentEffectiveDateEnd: new Date('2020-02-04'),
                             amendmentEffectiveDateStart: undefined,
                             amendmentEffectiveDateEnd: undefined,
-                            rateProgramIDs: [
-                                'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
-                            ],
+                            rateProgramIDs: ['fakerateprogramid'],
                             deprecatedRateProgramIDs: [],
                             certifyingActuaryContacts: [
                                 {
@@ -473,57 +490,7 @@ describe('parseContract', () => {
                             packagesWithSharedRateCerts: [],
                         },
                     },
-                    revisions: [
-                        {
-                            id: '456',
-                            rateID: 'rate-123',
-                            createdAt: new Date(),
-                            updatedAt: new Date(),
-                            submitInfo: undefined,
-                            unlockInfo: undefined,
-                            formData: {
-                                rateType: 'AMENDMENT',
-                                rateCapitationType: 'RATE_CELL',
-                                rateDocuments: [
-                                    {
-                                        s3URL: 's3://bucketname/key/rate',
-                                        sha256: 'fakesha',
-                                        name: 'rate',
-                                        dateAdded: new Date(),
-                                    },
-                                ],
-                                supportingDocuments: [],
-                                rateDateStart: new Date('2020-01-01'),
-                                rateDateEnd: new Date('2021-01-01'),
-                                rateDateCertified: new Date(),
-                                amendmentEffectiveDateStart: new Date(),
-                                amendmentEffectiveDateEnd: new Date(),
-                                rateProgramIDs: [
-                                    'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
-                                ],
-                                deprecatedRateProgramIDs: [],
-                                certifyingActuaryContacts: [
-                                    {
-                                        actuarialFirm: 'DELOITTE',
-                                        name: 'Actuary Contact 1',
-                                        titleRole: 'Test Actuary Contact 1',
-                                        email: 'actuarycontact1@test.com',
-                                    },
-                                ],
-                                addtlActuaryContacts: [
-                                    {
-                                        actuarialFirm: 'DELOITTE',
-                                        name: 'Actuary Contact 1',
-                                        titleRole: 'Test Actuary Contact 1',
-                                        email: 'additionalactuarycontact1@test.com',
-                                    },
-                                ],
-                                actuaryCommunicationPreference:
-                                    'OACT_TO_ACTUARY',
-                                packagesWithSharedRateCerts: [],
-                            },
-                        },
-                    ],
+                    revisions: [],
                 },
             ],
             packageSubmissions: [],
@@ -543,19 +510,16 @@ describe('parseContract', () => {
         }
 
         expect(parsedContract.message).toContain(
-            `populationCoveredSchema of CHIP cannot be submissionType of CONTRACT_AND_RATES`
-        )
-        // expect(parsedContract.message).toContain(
-        //         `statutoryRegulatoryAttestationDescription is required when  438-attestation feature flag is on`
-        //     )
-        expect(parsedContract.message).toContain(
-            `Program(s) in [fake-id] are not valid FL programs`
+            `cannot submit rates with CHIP only populationCovered`
         )
         expect(parsedContract.message).toContain(
-            `amendmentEffectiveDateStart is required if rateType is AMENDMENT`
+            `statutoryRegulatoryAttestationDescription is required when  438-attestation feature flag is on`
         )
         expect(parsedContract.message).toContain(
-            `amendmentEffectiveDateEnd is required if rateType is AMENDMENT`
+            `Program(s) in [fake-id,fakerateprogramid] are not valid FL programs`
+        )
+        expect(parsedContract.message).toContain(
+            `only submit amendment related fields for an AMENDMENT`
         )
         expect(parsedContract.message).toContain(
             `Array must contain at least 1 element(s)`

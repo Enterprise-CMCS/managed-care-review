@@ -1,21 +1,15 @@
 import type { FeatureFlagSettings } from '../../common-code/featureFlags'
 import type { ContractDraftRevisionFormDataInput } from '../../gen/gqlServer'
-import {
-    contractFormDataSchema,
-    preprocessNulls,
-    rateFormDataSchema,
-    documentSchema,
-} from './formDataTypes'
+import { contractFormDataSchema, preprocessNulls } from './formDataTypes'
 import {
     contractTypeSchema,
     populationCoveredSchema,
 } from '../../common-code/proto/healthPlanFormDataProto/zodSchemas'
 import { z } from 'zod'
 import type { Store } from '../../postgres'
-import { contractSchema } from './contractTypes'
+import { submittableContractSchema } from './contractTypes'
 import type { ContractType } from './contractTypes'
-import { contractRevisionSchema, rateRevisionSchema } from './revisionTypes'
-import { rateWithoutDraftContractsSchema } from './baseContractRateTypes'
+
 const updateDraftContractFormDataSchema = contractFormDataSchema.extend({
     contractType: preprocessNulls(contractTypeSchema.optional()),
     submissionDescription: preprocessNulls(z.string().optional()),
@@ -33,7 +27,7 @@ const validateStatutoryRegulatoryAttestation = (
         z
             .string()
             .optional()
-            .transform((val, ctx) => {
+            .transform((val) => {
                 if (featureFlags?.['438-attestation']) {
                     // Clear out existing statutoryRegulatoryAttestationDescription if statutoryRegulatoryAttestation is true
                     if (formData.statutoryRegulatoryAttestation && val) {
@@ -73,18 +67,6 @@ const validatePopulationCovered = (
         }
     })
 
-const validateAttestation = (featureFlags?: FeatureFlagSettings) => {
-    return z.string().superRefine((attestationDescription, ctx) => {
-        if (featureFlags?.['438-attestation'] && !attestationDescription) {
-            ctx.addIssue({
-                code: z.ZodIssueCode.custom,
-                message:
-                    'statutoryRegulatoryAttestationDescription is required when  438-attestation feature flag is on',
-            })
-        }
-    })
-}
-
 const validateContractDraftRevisionInput = (
     formData: ContractDraftRevisionFormDataInput,
     stateCode: string,
@@ -119,64 +101,64 @@ const parseContract = (
     store: Store,
     featureFlags?: FeatureFlagSettings
 ): ContractType | Error => {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
-    const formData = contract.draftRevision?.formData!
-    const parsedData = contractSchema
-        .extend({
-            draftRevision: contractRevisionSchema.extend({
-                formData: contractFormDataSchema.extend({
-                    contractDocuments: z.array(documentSchema).min(1),
-                    statutoryRegulatoryAttestationDescription:
-                        validateAttestation(featureFlags),
-                    programIDs: validateProgramIDs(stateCode, store),
-                    populationCovered: validatePopulationCovered(formData),
-                }),
-            }),
-            draftRates: z.array(
-                rateWithoutDraftContractsSchema.extend({
-                    draftRevision: rateRevisionSchema.extend({
-                        formData: rateFormDataSchema
-                            .extend({
-                                rateDocuments: z.array(documentSchema).min(1),
-                            })
-                            .superRefine(
-                                (
-                                    {
-                                        rateType,
-                                        amendmentEffectiveDateEnd,
-                                        amendmentEffectiveDateStart,
-                                    },
-                                    ctx
-                                ) => {
-                                    if (rateType === 'AMENDMENT') {
-                                        if (!amendmentEffectiveDateEnd) {
-                                            ctx.addIssue({
-                                                code: z.ZodIssueCode.custom,
-                                                message:
-                                                    'amendmentEffectiveDateEnd is required if rateType is AMENDMENT',
-                                                path: [
-                                                    'amendmentEffectiveDateEnd',
-                                                ],
-                                            })
-                                        }
-                                        if (!amendmentEffectiveDateStart) {
-                                            ctx.addIssue({
-                                                code: z.ZodIssueCode.custom,
-                                                message:
-                                                    'amendmentEffectiveDateStart is required if rateType is AMENDMENT',
-                                                path: [
-                                                    'amendmentEffectiveDateStart',
-                                                ],
-                                            })
-                                        }
-                                    }
-                                }
-                            ),
-                    }),
+    const contractParser = featureFlags?.['438-attestation']
+        ? submittableContractSchema.superRefine((contract, ctx) => {
+              // since we have different validations based on a feature flag, we add them as a refinement here.
+              // once 438 attestation ships this refinement should be moved to the submittableContractSchema
+              // and statutoryRegulatoryAttestation should be made non-optional.
+
+              const formData = contract.draftRevision.formData
+              if (formData.statutoryRegulatoryAttestation === undefined) {
+                  ctx.addIssue({
+                      code: z.ZodIssueCode.custom,
+                      message:
+                          'statutoryRegulatoryAttestationDescription is required when  438-attestation feature flag is on',
+                  })
+              }
+
+              if (
+                  (formData.statutoryRegulatoryAttestation === false &&
+                      !formData.statutoryRegulatoryAttestationDescription) ||
+                  (formData.statutoryRegulatoryAttestationDescription &&
+                      formData.statutoryRegulatoryAttestationDescription
+                          .length === 0)
+              ) {
+                  ctx.addIssue({
+                      code: z.ZodIssueCode.custom,
+                      message:
+                          'statutoryRegulatoryAttestationDescription is Required if statutoryRegulatoryAttestation is false',
+                  })
+              }
+          })
+        : submittableContractSchema
+
+    // since validating programs requires looking in the DB, and once we move programs into the db that
+    // validation will be performed there instead. I'm just adding this check as a refinement instead of trying
+    // to make it part of the core zod parsing.
+    const contractWithProgramsParser = contractParser.superRefine(
+        (contract, ctx) => {
+            const contractProgramsIDs = new Set(
+                contract.draftRevision.formData.programIDs
+            )
+            const allProgramIDs = contract.draftRates.reduce((acc, rate) => {
+                const rateFormData = rate.draftRevision.formData
+                const rateProgramIDs = rateFormData.rateProgramIDs.concat(
+                    rateFormData.deprecatedRateProgramIDs
+                )
+                return new Set([...acc, ...rateProgramIDs])
+            }, contractProgramsIDs)
+
+            const findResult = store.findPrograms(stateCode, [...allProgramIDs])
+            if (findResult instanceof Error) {
+                ctx.addIssue({
+                    code: z.ZodIssueCode.custom,
+                    message: findResult.message,
                 })
-            ),
-        })
-        .safeParse(contract)
+            }
+        }
+    )
+
+    const parsedData = contractWithProgramsParser.safeParse(contract)
 
     if (parsedData.error) {
         return parsedData.error

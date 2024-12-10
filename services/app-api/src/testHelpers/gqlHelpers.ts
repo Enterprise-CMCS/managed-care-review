@@ -254,6 +254,8 @@ const createAndUpdateTestHealthPlanPackage = async (
                 rateType: 'NEW' as const,
                 rateDateStart: '2025-05-01',
                 rateDateEnd: '2026-04-30',
+                amendmentEffectiveDateStart: undefined,
+                amendmentEffectiveDateEnd: undefined,
                 rateDateCertified: '2025-03-15',
                 rateDocuments: [
                     {
