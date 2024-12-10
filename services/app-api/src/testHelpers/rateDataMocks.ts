@@ -39,6 +39,7 @@ const mockDraftRate = (
     draftContracts: [],
     withdrawInfoID: null,
     withdrawInfo: null,
+    reviewStatusActions: [],
     revisions: rate?.revisions ?? [
         mockRateRevision(
             rate,

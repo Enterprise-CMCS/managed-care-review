@@ -12,9 +12,18 @@ import type {
 import { findStatePrograms } from '../state'
 import { packageName } from '../../common-code/healthPlanFormDataType'
 import { logError } from '../../logger'
-import type { ContractReviewStatusType } from '../../domain-models/contractAndRates/baseContractRateTypes'
+import type {
+    ContractReviewStatusType,
+    RateReviewStatusType,
+} from '../../domain-models/contractAndRates/baseContractRateTypes'
 import type { ContractTableWithoutDraftRates } from './prismaSubmittedContractHelpers'
-import type { HealthPlanPackageStatus, ReviewStatus } from '../../gen/gqlServer'
+import type {
+    HealthPlanPackageStatus,
+    ContractReviewStatus,
+    RateReviewStatus,
+} from '../../gen/gqlServer'
+import type { RateTableWithoutDraftContractsPayload } from './prismaSubmittedRateHelpers'
+import type { ConsolidatedRateStatusType } from '../../domain-models/contractAndRates/statusType'
 
 const subincludeUpdateInfo = {
     updatedBy: true,
@@ -105,10 +114,25 @@ function getContractReviewStatus(
     return 'UNDER_REVIEW'
 }
 
+function getRateReviewStatus(
+    rate: RateTableWithoutDraftContractsPayload
+): RateReviewStatusType {
+    // need to order actions from latest to earliest
+    const actions = rate.reviewStatusActions.sort(
+        (actionA, actionB) =>
+            actionB.updatedAt.getTime() - actionA.updatedAt.getTime()
+    )
+    const latestAction = actions[0]
+    if (latestAction?.actionType === 'WITHDRAW') {
+        return 'WITHDRAWN'
+    }
+    return 'UNDER_REVIEW'
+}
+
 // -----
-function getConsolidatedStatus(
+function getConsolidatedContractStatus(
     status: HealthPlanPackageStatus,
-    reviewStatus: ReviewStatus
+    reviewStatus: ContractReviewStatus
 ): ConsolidatedContractStatusType {
     // UNDER_REVIEW is the default reviewStatus for a submission.
     // In the system, status only takes precedence for the consolidatedStatusField
@@ -121,6 +145,20 @@ function getConsolidatedStatus(
     }
 }
 
+function getConsolidatedRateStatus(
+    status: HealthPlanPackageStatus,
+    reviewStatus: RateReviewStatus
+): ConsolidatedRateStatusType {
+    // UNDER_REVIEW is the default reviewStatus for a rate.
+    // In the system, status only takes precedence for the consolidatedStatusField
+    // if the reviewStatus hasn't been changed (i.e it's still set as UNDER_REVIEW).
+    // However, if reviewStatus has been changed then reviewStatus takes precedence for the consolidatedStatus
+    if (reviewStatus !== 'UNDER_REVIEW') {
+        return reviewStatus
+    } else {
+        return status
+    }
+}
 // ------
 
 const includeRateFormData = {
@@ -432,7 +470,8 @@ export type {
 }
 
 export {
-    getConsolidatedStatus,
+    getConsolidatedContractStatus,
+    getConsolidatedRateStatus,
     includeUpdateInfo,
     includeContractFormData,
     includeRateFormData,
@@ -446,4 +485,5 @@ export {
     unsortedRatesRevisionsToDomainModel,
     setDateAddedForContractRevisions,
     setDateAddedForRateRevisions,
+    getRateReviewStatus,
 }
