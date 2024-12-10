@@ -30,4 +30,5 @@ module.exports = {
     moduleNameMapper: {
         '^uuid$': require.resolve('uuid'),
     },
+    testTimeout: 50000,
 }

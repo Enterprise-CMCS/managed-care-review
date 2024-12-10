@@ -23,7 +23,7 @@ export { findAllContractsWithHistoryByState } from './findAllContractsWithHistor
 export { findAllContractsWithHistoryBySubmitInfo } from './findAllContractsWithHistoryBySubmitInfo'
 export { findAllRatesWithHistoryBySubmitInfo } from './findAllRatesWithHistoryBySubmitInfo'
 export { replaceRateOnContract } from './replaceRateOnContract'
-export { withdrawRateInsideTransaction } from './withdrawRate'
+export { withdrawRedundantRateInsideTransaction } from './withdrawRedundantRate'
 export { updateDraftContract } from './updateDraftContract'
 export type { FindAllRatesWithHistoryBySubmitType } from './findAllRatesWithHistoryBySubmitInfo'
 export { findContractRevision } from './findContractRevision'

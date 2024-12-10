@@ -57,6 +57,7 @@ import { approveContract } from './contract/approveContract'
 import { fetchMcReviewSettings } from './settings'
 import { updateStateAssignmentsByState } from './user/updateStateAssignmentsByState'
 import { rateFormDataResolver } from './rate/rateFormDataResolver'
+import { withdrawRate } from './rate/withdrawRate'
 
 export function configureResolvers(
     store: Store,
@@ -117,6 +118,7 @@ export function configureResolvers(
             withdrawAndReplaceRedundantRate:
                 withdrawAndReplaceRedundantRateResolver(store),
             approveContract: approveContract(store),
+            withdrawRate: withdrawRate(store),
             updateDivisionAssignment: updateDivisionAssignment(store),
             updateStateAssignment: updateStateAssignment(store),
             updateStateAssignmentsByState: updateStateAssignmentsByState(store),

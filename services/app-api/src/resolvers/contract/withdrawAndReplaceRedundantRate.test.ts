@@ -15,9 +15,9 @@ import { type ApolloServer } from 'apollo-server-lambda'
 import { fetchTestRateById, must } from '../../testHelpers'
 import { type ContractRevision } from '../../gen/gqlServer'
 import { type HealthPlanFormDataType } from '../../common-code/healthPlanFormDataType'
-import { withdrawRateInsideTransaction } from '../../postgres/contractAndRates'
+import { withdrawRedundantRateInsideTransaction } from '../../postgres/contractAndRates'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
-import type { WithdrawDateArgsType } from '../../postgres/contractAndRates/withdrawRate'
+import type { WithdrawDateArgsType } from '../../postgres/contractAndRates/withdrawRedundantRate'
 
 // Setup function for testing withdraw and replace rate
 // returns a the target contractID and ids for the child rate to be withdrawn and the replacement
@@ -262,7 +262,7 @@ describe('withdrawAndReplaceRedundantRate', () => {
             const client = await sharedTestPrismaClient()
 
             return must(
-                await withdrawRateInsideTransaction(client, {
+                await withdrawRedundantRateInsideTransaction(client, {
                     rateID,
                     withdrawnByUserID,
                     withdrawReason,

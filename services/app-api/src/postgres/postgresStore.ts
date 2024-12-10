@@ -78,6 +78,8 @@ import { updateStateAssignedUsers } from './state/updateStateAssignedUsers'
 import { findStateAssignedUsers } from './state/findStateAssignedUsers'
 
 import { findAllDocuments } from './documents'
+import type { WithdrawRateArgsType } from './contractAndRates/withdrawRate'
+import { withdrawRate } from './contractAndRates/withdrawRate'
 
 type Store = {
     findPrograms: (
@@ -152,6 +154,8 @@ type Store = {
     approveContract: (
         args: ApproveContractArgsType
     ) => Promise<ContractType | Error>
+
+    withdrawRate: (args: WithdrawRateArgsType) => Promise<RateType | Error>
 
     findContractWithHistory: (
         contractID: string
@@ -266,6 +270,7 @@ function NewPostgresStore(client: PrismaClient): Store {
 
         insertDraftContract: (args) => insertDraftContract(client, args),
         approveContract: (args) => approveContract(client, args),
+        withdrawRate: (args) => withdrawRate(client, args),
         findContractWithHistory: (args) =>
             findContractWithHistory(client, args),
         findRateWithHistory: (args) => findRateWithHistory(client, args),
