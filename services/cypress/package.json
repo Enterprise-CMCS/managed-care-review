@@ -57,9 +57,9 @@
         "@mc-review/common-code": "workspace:*",
         "@mc-review/hpp": "workspace:*",
         "aws-amplify": "^5.0.10",
-        "axios": "^1.7.8",
         "cypress-file-upload": "^5.0.8",
         "cypress-pipe": "^2.0.0",
+        "axios": "^1.7.9",
         "graphql": "^16.9.0"
     }
 }

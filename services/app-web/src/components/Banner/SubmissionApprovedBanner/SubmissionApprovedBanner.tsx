@@ -2,21 +2,21 @@ import { Alert } from '@trussworks/react-uswds'
 import React from 'react'
 import styles from '../Banner.module.scss'
 import { getUpdatedByDisplayName } from '@mc-review/helpers'
-import { formatBannerDate } from '@mc-review/common-code'
+import { formatBannerDate, formatCalendarDate } from '@mc-review/common-code'
 import { UpdatedBy } from '../../../gen/gqlClient'
 import { ExpandableText } from '../../ExpandableText'
 
 export type ApprovalProps = {
     updatedBy: UpdatedBy
     updatedAt: Date
-    note?: string
+    dateReleasedToState: string
 }
 
 export const SubmissionApprovedBanner = ({
     className,
     updatedAt,
     updatedBy,
-    note,
+    dateReleasedToState,
 }: ApprovalProps & React.HTMLAttributes<HTMLDivElement>) => {
     return (
         <Alert
@@ -40,10 +40,10 @@ export const SubmissionApprovedBanner = ({
                     <b>Updated on:&nbsp;</b>
                     {formatBannerDate(updatedAt)}
                 </p>
-                {note && (
+                {dateReleasedToState && (
                     <ExpandableText>
-                        <b>Optional note:&nbsp;</b>
-                        {note}
+                        <b>Date released to state:&nbsp;</b>
+                        {formatCalendarDate(dateReleasedToState, 'UTC')}
                     </ExpandableText>
                 )}
             </div>

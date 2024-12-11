@@ -605,8 +605,8 @@ type ApproveContractPayload {
 input ApproveContractInput {
     "The ID of the contract to approve"
     contractID: ID!
-    "Reason for update"
-    updatedReason: String
+    "Manually entered date for when the approval was released to the state"
+    dateApprovalReleasedToState: Date!
 }
 
 input FetchHealthPlanPackageInput {
@@ -1029,7 +1029,6 @@ enum UnlockedStatus {
 enum ContractActionType {
     UNDER_REVIEW
     MARK_AS_APPROVED
-    WITHDRAW
 }
 
 """
@@ -1095,9 +1094,11 @@ type ContractReviewStatusActions {
     "the user who performed the update"
     updatedBy: UpdatedBy!
     "the reason provided by the user when performing the update"
-    updatedReason: String!
-    ""
+    updatedReason: String
+    "the type of review action performed on the contract: APPROVED, WITHDRAWN"
     actionType: ContractActionType!
+    "Manual time entered by CMS to represent when an approval released to state"
+    dateApprovalReleasedToState: DateTime
     contractID: ID!
 }
 

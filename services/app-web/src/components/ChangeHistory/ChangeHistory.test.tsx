@@ -92,9 +92,6 @@ describe('Change History', () => {
                 name: `${formatToPacificTime(updatedAt)} - Status Update`,
             })
         ).toBeInTheDocument()
-        expect(
-            screen.getByText(approveAction.updatedReason)
-        ).toBeInTheDocument()
         expect(screen.getByText('Approved')).toBeInTheDocument()
     })
 

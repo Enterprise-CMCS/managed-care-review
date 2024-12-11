@@ -182,16 +182,11 @@ export const ChangeHistory = ({
                     }
                 }
                 if (r?.__typename === 'ContractReviewStatusActions') {
-                    let actionKind: flatRevisions['kind'] = 'approve'
-                    switch (r.actionType) {
-                        case 'WITHDRAW':
-                            actionKind = 'withdraw'
-                            break
-                    }
+                    const actionKind: flatRevisions['kind'] = 'approve'
+
                     const newAction: flatRevisions = {} as flatRevisions
                     newAction.updatedAt = r.updatedAt
                     newAction.updatedBy = r.updatedBy
-                    newAction.updatedReason = r.updatedReason
                     newAction.kind = actionKind
                     result.push(newAction)
                 }

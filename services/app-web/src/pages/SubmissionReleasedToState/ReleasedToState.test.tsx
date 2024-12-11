@@ -17,6 +17,7 @@ import {
 } from '@mc-review/mocks'
 import { Contract } from '../../gen/gqlClient'
 import { waitFor, screen } from '@testing-library/react'
+import { formatUserInputDate } from '../../formHelpers'
 
 describe('ReleasedToState', () => {
     it('can submit to mark submission as released to state', async () => {
@@ -39,6 +40,8 @@ describe('ReleasedToState', () => {
                 {
                     actionType: 'MARK_AS_APPROVED',
                     contractID: 'test-abc-123',
+                    dateApprovalReleasedToState:
+                        formatUserInputDate('11/11/2024'),
                     updatedAt: new Date(),
                     updatedBy: {
                         email: 'cmsapprover@example.com',
@@ -79,7 +82,8 @@ describe('ReleasedToState', () => {
                         approveContractMockSuccess({
                             contractID: 'test-abc-123',
                             contractData: approvedContract,
-                            updatedReason: 'Released to state',
+                            dateApprovalReleasedToState:
+                                formatUserInputDate('11/11/2024'),
                         }),
                         fetchCurrentUserMock({
                             user: mockValidCMSUser(),
@@ -116,9 +120,8 @@ describe('ReleasedToState', () => {
             ).toBeInTheDocument()
         })
 
-        const textInput = screen.getByTestId('optionalNote')
-        await user.type(textInput, 'Released to state')
-
+        const dateInput = screen.getByTestId('date-picker-external-input')
+        await user.type(dateInput, '11/11/2024')
         const releaseButton = screen.getByRole('button', {
             name: 'Released to state',
         })
@@ -189,8 +192,8 @@ describe('ReleasedToState', () => {
             ).toBeInTheDocument()
         })
 
-        const textInput = screen.getByTestId('optionalNote')
-        await user.type(textInput, 'Released to state')
+        const dateInput = screen.getByTestId('date-picker-external-input')
+        await user.type(dateInput, '11/11/2024')
 
         const releaseButton = screen.getByRole('button', {
             name: 'Released to state',
@@ -199,6 +202,149 @@ describe('ReleasedToState', () => {
 
         await waitFor(() => {
             expect(screen.getByTestId('error-alert')).toBeInTheDocument()
+        })
+    })
+
+    it('renders form validation error when required date release field is missing', async () => {
+        const contract = mockContractPackageSubmittedWithQuestions(
+            'test-abc-123',
+            {
+                status: 'RESUBMITTED',
+                reviewStatus: 'UNDER_REVIEW',
+                consolidatedStatus: 'RESUBMITTED',
+                reviewStatusActions: [],
+            }
+        )
+        const { user } = renderWithProviders(
+            <Routes>
+                <Route element={<SubmissionSideNav />}>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                        element={<SubmissionSummary />}
+                    />
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_RELEASED_TO_STATE}
+                        element={<ReleasedToState />}
+                    />
+                </Route>
+            </Routes>,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockValidCMSUser(),
+                            statusCode: 200,
+                        }),
+                        fetchContractWithQuestionsMockSuccess({
+                            contract,
+                        }),
+                        fetchContractMockSuccess({
+                            contract,
+                        }),
+                    ],
+                },
+                routerProvider: {
+                    route: '/submissions/test-abc-123/released-to-state',
+                },
+                featureFlags: {
+                    'submission-approvals': true,
+                },
+            }
+        )
+
+        await waitFor(() => {
+            expect(
+                screen.getByText(
+                    'Are you sure you want to mark this submission as Released to the state?'
+                )
+            ).toBeInTheDocument()
+            expect(
+                screen.getByRole('button', { name: 'Released to state' })
+            ).toBeInTheDocument()
+        })
+
+        const releaseButton = screen.getByRole('button', {
+            name: 'Released to state',
+        })
+        await user.click(releaseButton)
+
+        await waitFor(() => {
+            expect(
+                screen.getByText('You must select a date')
+            ).toBeInTheDocument()
+        })
+    })
+
+    it('renders form validation error when required date release field is a future date', async () => {
+        const contract = mockContractPackageSubmittedWithQuestions(
+            'test-abc-123',
+            {
+                status: 'RESUBMITTED',
+                reviewStatus: 'UNDER_REVIEW',
+                consolidatedStatus: 'RESUBMITTED',
+                reviewStatusActions: [],
+            }
+        )
+        const { user } = renderWithProviders(
+            <Routes>
+                <Route element={<SubmissionSideNav />}>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                        element={<SubmissionSummary />}
+                    />
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_RELEASED_TO_STATE}
+                        element={<ReleasedToState />}
+                    />
+                </Route>
+            </Routes>,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockValidCMSUser(),
+                            statusCode: 200,
+                        }),
+                        fetchContractWithQuestionsMockSuccess({
+                            contract,
+                        }),
+                        fetchContractMockSuccess({
+                            contract,
+                        }),
+                    ],
+                },
+                routerProvider: {
+                    route: '/submissions/test-abc-123/released-to-state',
+                },
+                featureFlags: {
+                    'submission-approvals': true,
+                },
+            }
+        )
+
+        await waitFor(() => {
+            expect(
+                screen.getByText(
+                    'Are you sure you want to mark this submission as Released to the state?'
+                )
+            ).toBeInTheDocument()
+            expect(
+                screen.getByRole('button', { name: 'Released to state' })
+            ).toBeInTheDocument()
+        })
+
+        const dateInput = screen.getByTestId('date-picker-external-input')
+        await user.type(dateInput, '11/11/3009')
+
+        const releaseButton = screen.getByRole('button', {
+            name: 'Released to state',
+        })
+        await user.click(releaseButton)
+
+        await waitFor(() => {
+            expect(
+                screen.getByText('You must enter a valid date')
+            ).toBeInTheDocument()
         })
     })
 })

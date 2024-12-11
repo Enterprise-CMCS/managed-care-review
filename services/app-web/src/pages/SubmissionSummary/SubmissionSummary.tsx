@@ -30,6 +30,10 @@ import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '@mc-review/common-code'
 import { SubmissionApprovedBanner } from '../../components/Banner'
 
+export interface SubmissionSummaryFormValues {
+    dateApprovalReleasedToState: string
+}
+
 export const SubmissionSummary = (): React.ReactElement => {
     // Page level state
     const { updateHeading } = usePage()
@@ -181,7 +185,9 @@ export const SubmissionSummary = (): React.ReactElement => {
                 <SubmissionApprovedBanner
                     updatedBy={latestContractAction.updatedBy}
                     updatedAt={latestContractAction.updatedAt}
-                    note={latestContractAction.updatedReason}
+                    dateReleasedToState={
+                        latestContractAction.dateApprovalReleasedToState
+                    }
                 />
             )
         }
