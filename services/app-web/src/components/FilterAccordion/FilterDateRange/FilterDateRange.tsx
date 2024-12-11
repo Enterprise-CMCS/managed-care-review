@@ -8,8 +8,8 @@ import {
 import { formatDate, parseDateString } from './_DatePicker/utils'
 import { DEFAULT_EXTERNAL_DATE_FORMAT } from './_DatePicker/constants'
 import classnames from 'classnames'
-import { formatUserInputDate } from '../../../formHelpers'
-import { dayjs } from '@mc-review/common-code'
+import { formatUserInputDate } from '@mc-review/dates'
+import { dayjs } from '@mc-review/dates'
 import { PoliteErrorMessage } from '../../PoliteErrorMessage'
 import styles from './FilterDateRange.module.scss'
 

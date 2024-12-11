@@ -27,6 +27,7 @@
     "dependencies": {
         "@mc-review/common-code": "workspace:*",
         "@mc-review/constants": "workspace:*",
+        "@mc-review/dates": "workspace:*",
         "@mc-review/hpp": "workspace:*",
         "@mc-review/helpers": "workspace:*",
         "@apollo/client": "3.8.8",
@@ -57,7 +58,6 @@
         "apollo-server-types": "^3.8.0",
         "archiver": "^7.0.1",
         "axios": "^1.7.9",
-        "dayjs": "^1.10.5",
         "eta": "^2.0.0",
         "graphql": "^16.9.0",
         "graphql-scalars": "^1.11.1",

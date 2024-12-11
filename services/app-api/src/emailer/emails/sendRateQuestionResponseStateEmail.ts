@@ -1,4 +1,4 @@
-import { formatCalendarDate } from '@mc-review/common-code'
+import { formatCalendarDate } from '@mc-review/dates'
 import { pruneDuplicateEmails } from '../formatters'
 import type { EmailConfiguration, EmailData } from '..'
 import type { RateQuestionType, RateType } from '../../domain-models'

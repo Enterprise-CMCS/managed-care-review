@@ -13,7 +13,7 @@ import {
     mockContractPackageApproved,
 } from '@mc-review/mocks'
 import { renderWithProviders } from '../../testHelpers'
-import { formatToPacificTime } from '@mc-review/common-code'
+import { formatToPacificTime } from '@mc-review/dates'
 
 describe('Change History', () => {
     it('can render history for initial submission', () => {

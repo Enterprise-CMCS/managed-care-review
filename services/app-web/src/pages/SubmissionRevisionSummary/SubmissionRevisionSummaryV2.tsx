@@ -7,7 +7,7 @@ import { ContactsSummarySection } from '../StateSubmission/ReviewSubmit/Contacts
 import { RateDetailsSummarySection } from '../StateSubmission/ReviewSubmit/RateDetailsSummarySection'
 import { SubmissionTypeSummarySection } from '../StateSubmission/ReviewSubmit/SubmissionTypeSummarySection'
 import { usePage } from '../../contexts/PageContext'
-import { formatToPacificTime } from '@mc-review/common-code'
+import { formatToPacificTime } from '@mc-review/dates'
 import styles from './SubmissionRevisionSummary.module.scss'
 import { PreviousSubmissionBanner } from '../../components'
 import { useFetchContractQuery } from '../../gen/gqlClient'

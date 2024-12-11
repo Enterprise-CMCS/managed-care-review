@@ -1,4 +1,4 @@
-import { dayjs } from '@mc-review/common-code'
+import { dayjs } from '@mc-review/dates'
 import { SubmissionDocument, ActuaryContact } from '@mc-review/hpp'
 import { FileItemT } from '../components'
 import {
@@ -221,7 +221,6 @@ const formatYesNoForProto = (
 export {
     formatForApi,
     formatForForm,
-    formatUserInputDate,
     formatYesNoForProto,
     formatFormDateForDomain,
     formatDocumentsForDomain,

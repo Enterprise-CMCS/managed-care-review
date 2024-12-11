@@ -7,7 +7,7 @@ import type {
     RateFormData,
     RateFormDataInput,
 } from '../../gen/gqlServer'
-import dayjs from 'dayjs'
+import { dayjs } from '@mc-review/dates'
 
 // interim solution -this file was made to deal with test helpers that may expect contract rates when we only have HPP coming from another test helper
 

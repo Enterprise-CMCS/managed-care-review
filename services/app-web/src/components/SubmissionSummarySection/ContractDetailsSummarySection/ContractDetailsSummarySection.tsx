@@ -8,7 +8,7 @@ import {
     ManagedCareEntityRecord,
 } from '@mc-review/hpp'
 import { useS3 } from '../../../contexts/S3Context'
-import { formatCalendarDate } from '@mc-review/common-code'
+import { formatCalendarDate } from '@mc-review/dates'
 import { DoubleColumnGrid } from '../../DoubleColumnGrid'
 import { DownloadButton } from '../../DownloadButton'
 import { usePreviousSubmission } from '../../../hooks/usePreviousSubmission'

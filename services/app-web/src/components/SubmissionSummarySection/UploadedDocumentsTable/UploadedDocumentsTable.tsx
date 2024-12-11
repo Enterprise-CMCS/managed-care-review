@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { dayjs } from '@mc-review/common-code'
+import { dayjs } from '@mc-review/dates'
 import styles from './UploadedDocumentsTable.module.scss'
 import { SharedRateCertDisplay, SubmissionDocument } from '@mc-review/hpp'
 import { DocumentTag } from './DocumentTag'
@@ -12,7 +12,7 @@ import { LinkWithLogging, NavLinkWithLogging } from '../../TealiumLogging'
 import { hasCMSUserPermissions } from '@mc-review/helpers'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '@mc-review/common-code'
-import { formatCalendarDate } from '@mc-review/common-code'
+import { formatCalendarDate } from '@mc-review/dates'
 // This is used to convert from deprecated FE domain types from protos to GQL GenericDocuments by added in a dateAdded
 export const convertFromSubmissionDocumentsToGenericDocuments = (
     deprecatedDocs: SubmissionDocument[],

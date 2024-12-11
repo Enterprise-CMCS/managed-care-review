@@ -1,7 +1,7 @@
 import React from 'react'
 import { useAuth } from '../../../contexts/AuthContext'
 import { useIndexRatesForDashboardQuery } from '../../../gen/gqlClient'
-import { mostRecentDate } from '@mc-review/common-code'
+import { mostRecentDate } from '@mc-review/dates'
 import styles from '../../StateDashboard/StateDashboard.module.scss'
 import { recordJSException } from '@mc-review/otel'
 import { Loading } from '../../../components'

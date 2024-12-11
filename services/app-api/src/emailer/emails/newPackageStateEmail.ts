@@ -1,6 +1,6 @@
 import type { LockedHealthPlanFormDataType } from '@mc-review/hpp'
 import { packageName as generatePackageName } from '@mc-review/hpp'
-import { formatCalendarDate } from '@mc-review/common-code'
+import { formatCalendarDate } from '@mc-review/dates'
 import { formatEmailAddresses, pruneDuplicateEmails } from '../formatters'
 import type { EmailConfiguration, EmailData } from '..'
 import type { ProgramType } from '../../domain-models'

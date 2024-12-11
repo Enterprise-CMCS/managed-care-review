@@ -1,4 +1,4 @@
-import { formatCalendarDate } from '@mc-review/common-code'
+import { formatCalendarDate } from '@mc-review/dates'
 import {
     DataDetail,
     DoubleColumnGrid,

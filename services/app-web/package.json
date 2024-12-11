@@ -81,6 +81,7 @@
         "@cypress/instrument-cra": "^1.4.0",
         "@mc-review/common-code": "workspace:*",
         "@mc-review/constants": "workspace:*",
+        "@mc-review/dates": "workspace:*",
         "@mc-review/helpers": "workspace:*",
         "@mc-review/hpp": "workspace:*",
         "@mc-review/mocks": "workspace:*",

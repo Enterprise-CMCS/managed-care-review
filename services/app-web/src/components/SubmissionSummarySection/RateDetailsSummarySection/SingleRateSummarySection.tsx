@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import styles from '../SubmissionSummarySection.module.scss'
 import { DoubleColumnGrid } from '../../DoubleColumnGrid'
 import { DataDetail, DataDetailContactField } from '../../DataDetail'
-import { formatCalendarDate } from '@mc-review/common-code'
+import { formatCalendarDate } from '@mc-review/dates'
 import {
     ActuaryContact,
     ConsolidatedContractStatus,

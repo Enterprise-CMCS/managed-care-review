@@ -34,7 +34,7 @@ import { Loading, NavLinkWithLogging } from '../../../components'
 import { useTealium } from '../../../hooks'
 import useDeepCompareEffect from 'use-deep-compare-effect'
 import { getTealiumFiltersChanged } from '../../../tealium/tealiumHelpers'
-import { formatCalendarDate } from '@mc-review/common-code'
+import { formatCalendarDate } from '@mc-review/dates'
 
 type RatingPeriodFilterType = [string, string] | []
 

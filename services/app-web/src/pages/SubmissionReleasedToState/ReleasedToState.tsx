@@ -28,7 +28,7 @@ import { usePage } from '../../contexts/PageContext'
 import { recordJSException } from '@mc-review/otel'
 import { useTealium } from '../../hooks'
 import * as Yup from 'yup'
-import { formatUserInputDate } from '../../formHelpers'
+import { formatUserInputDate } from '@mc-review/dates'
 
 type ReleasedToStateValues = {
     dateApprovalReleasedToState: string

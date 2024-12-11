@@ -1,5 +1,5 @@
 import { packageName as generatePackageName } from '@mc-review/hpp'
-import { formatCalendarDate } from '@mc-review/common-code'
+import { formatCalendarDate } from '@mc-review/dates'
 import {
     renderTemplate,
     stripHTMLFromTemplate,

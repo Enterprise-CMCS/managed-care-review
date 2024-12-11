@@ -21,7 +21,7 @@ import { testS3Client } from '../../testHelpers'
 import { mockContractPackageUnlockedWithUnlockedType } from '@mc-review/mocks'
 import { ReviewSubmit } from '../StateSubmission/ReviewSubmit'
 import { generatePath, Location } from 'react-router-dom'
-import { dayjs } from '@mc-review/common-code'
+import { dayjs } from '@mc-review/dates'
 
 describe('SubmissionSummary', () => {
     describe.each(iterableCmsUsersMockData)(

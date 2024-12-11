@@ -9,7 +9,7 @@ import Select, {
 import styles from '../../../components/Select/Select.module.scss'
 import { IndexRatesInput, useIndexRatesQuery } from '../../../gen/gqlClient'
 import { programNames } from '@mc-review/hpp'
-import { formatCalendarDate } from '@mc-review/common-code'
+import { formatCalendarDate } from '@mc-review/dates'
 import {
     FormikRateForm,
     convertGQLRateToRateForm,

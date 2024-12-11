@@ -1,5 +1,5 @@
 import * as Yup from 'yup'
-import { dayjs } from '@mc-review/common-code'
+import { dayjs } from '@mc-review/dates'
 import { FeatureFlagSettings } from '@mc-review/common-code'
 import { validateDateFormat } from '../../../formHelpers'
 import {

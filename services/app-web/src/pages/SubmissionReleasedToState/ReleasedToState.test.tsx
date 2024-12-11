@@ -17,7 +17,7 @@ import {
 } from '@mc-review/mocks'
 import { Contract } from '../../gen/gqlClient'
 import { waitFor, screen } from '@testing-library/react'
-import { formatUserInputDate } from '../../formHelpers'
+import { formatUserInputDate } from '@mc-review/dates'
 
 describe('ReleasedToState', () => {
     it('can submit to mark submission as released to state', async () => {

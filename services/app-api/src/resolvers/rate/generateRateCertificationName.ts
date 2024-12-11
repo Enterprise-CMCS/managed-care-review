@@ -1,4 +1,4 @@
-import { formatRateNameDate } from '@mc-review/common-code'
+import { formatRateNameDate } from '@mc-review/dates'
 import { programNames } from '@mc-review/hpp'
 import type { ProgramArgType } from '@mc-review/hpp'
 import type { RateFormEditableType } from '../../domain-models/contractAndRates'

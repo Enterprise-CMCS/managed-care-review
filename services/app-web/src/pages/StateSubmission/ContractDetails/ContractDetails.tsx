@@ -26,11 +26,8 @@ import {
     ReactRouterLinkWithLogging,
     FormNotificationContainer,
 } from '../../../components'
-import {
-    formatForForm,
-    formatUserInputDate,
-    isDateRangeEmpty,
-} from '../../../formHelpers'
+import { formatForForm, isDateRangeEmpty } from '../../../formHelpers'
+import { formatUserInputDate } from '@mc-review/dates'
 import { useS3 } from '../../../contexts/S3Context'
 
 import { ContractDetailsFormSchema } from './ContractDetailsSchema'

@@ -9,7 +9,7 @@ import {
 } from '@mc-review/mocks'
 import { renderWithProviders } from '../../testHelpers/jestHelpers'
 import { SubmissionRevisionSummary } from './SubmissionRevisionSummaryV2'
-import { formatCalendarDate } from '@mc-review/common-code'
+import { formatCalendarDate } from '@mc-review/dates'
 import { mockContractPackageWithDifferentProgramsInRevisions } from '@mc-review/mocks'
 
 describe('SubmissionRevisionSummary', () => {

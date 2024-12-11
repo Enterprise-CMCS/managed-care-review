@@ -4,7 +4,7 @@ import { Alert } from '@trussworks/react-uswds'
 import { ExpandableText } from '../../ExpandableText'
 import { UpdateInformation, User } from '../../../gen/gqlClient'
 import { getUpdatedByDisplayName } from '@mc-review/helpers'
-import { formatBannerDate } from '@mc-review/common-code'
+import { formatBannerDate } from '@mc-review/dates'
 
 export type UpdatedProps = {
     loggedInUser?: User

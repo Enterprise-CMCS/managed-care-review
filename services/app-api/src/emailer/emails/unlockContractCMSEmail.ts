@@ -1,4 +1,4 @@
-import { formatCalendarDate } from '@mc-review/common-code'
+import { formatCalendarDate } from '@mc-review/dates'
 import type { UnlockedContractType } from '../../domain-models'
 import { packageName as generatePackageName } from '@mc-review/hpp'
 

@@ -1,4 +1,4 @@
-import { formatCalendarDate } from '@mc-review/common-code'
+import { formatCalendarDate } from '@mc-review/dates'
 import { DataDetailMissingField } from '../DataDetailMissingField'
 
 // Intended for use as children passed to DataDetail
