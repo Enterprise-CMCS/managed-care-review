@@ -1,6 +1,6 @@
-import { ReviewStatus } from "../gen/gqlClient";
+import { ContractReviewStatus } from "../gen/gqlClient";
 
-const SubmissionReviewStatusRecord: Record<ReviewStatus, string> = {
+const SubmissionReviewStatusRecord: Record<ContractReviewStatus, string> = {
     APPROVED: 'Approved',
     UNDER_REVIEW: 'Under review'
 }
