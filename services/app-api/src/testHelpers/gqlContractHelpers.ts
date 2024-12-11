@@ -160,9 +160,14 @@ async function fetchTestContract(
 
 async function approveTestContract(
     server: ApolloServer,
-    contractID: string
+    contractID: string,
+    dateApprovalReleasedToState?: string
 ): Promise<Contract> {
-    const input = { contractID }
+    const input = {
+        contractID,
+        dateApprovalReleasedToState:
+            dateApprovalReleasedToState || '2024-11-11',
+    }
     const result = await server.executeOperation({
         query: ApproveContractDocument,
         variables: { input },
