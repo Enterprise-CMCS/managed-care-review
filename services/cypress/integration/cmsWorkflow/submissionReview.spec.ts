@@ -104,6 +104,7 @@ describe('CMS user can view submission', () => {
         cy.interceptFeatureFlags({
             'submission-approvals': true,
             '438-attestation': true,
+            'hide-supporting-docs-page': true
         })
         // state user adds a new package
         cy.logInAsStateUser()
@@ -163,7 +164,7 @@ describe('CMS user can view submission', () => {
             cy.findByTestId('submission-summary').should('exist')
 
             cy.findByRole('link', {name: 'Released to state'}).should('exist').click()
-            cy.findByTestId('date-picker-external-input').type('12/12/2024')
+            cy.findByTestId('date-picker-external-input').type('11/11/2024')
             cy.findByRole('button', {name: 'Released to state'}).should('exist').click()
             cy.findByTestId('submissionApprovedBanner').should('exist')
         })
