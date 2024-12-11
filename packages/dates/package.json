@@ -1,5 +1,5 @@
 {
-    "name": "@mc-review/common-code",
+    "name": "@mc-review/dates",
     "version": "1.0.0",
     "description": "",
     "main": "build/index.js",
@@ -7,13 +7,8 @@
         "build": "tsc"
     },
     "dependencies": {
-        "@apollo/client": "3.8.8",
-        "@mc-review/constants": "workspace:*",
-        "@mc-review/helpers": "workspace:*",
-        "@mc-review/hpp": "workspace:*",
-        "typescript": "^4.9.5",
-        "url-parse": "^1.5.10",
-        "zod": "^3.10.1"
+        "dayjs": "^1.10.5",
+        "typescript": "4.9.5"
     },
     "devDependencies": {
         "@types/jest": "^29.5.6",

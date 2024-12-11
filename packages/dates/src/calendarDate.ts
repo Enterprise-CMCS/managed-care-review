@@ -41,4 +41,16 @@ function formatRateNameDate(date: Date | undefined): string {
     return dayjs(date).tz('UTC').format('YYYYMMDD')
 }
 
-export { formatCalendarDate, formatRateNameDate, formatToPacificTime }
+const formatUserInputDate = (initialValue?: string): string | undefined => {
+    const dayjsValue = dayjs(initialValue)
+    return initialValue && dayjsValue.isValid()
+        ? dayjs(initialValue).format('YYYY-MM-DD')
+        : initialValue // preserve undefined to show validations later
+}
+
+export {
+    formatCalendarDate,
+    formatRateNameDate,
+    formatToPacificTime,
+    formatUserInputDate,
+}

@@ -8,12 +8,6 @@ import {
 import { S3ClientT } from '../s3'
 import { v4 as uuidv4 } from 'uuid'
 
-const formatUserInputDate = (initialValue?: string): string | undefined => {
-    const dayjsValue = dayjs(initialValue)
-    return initialValue && dayjsValue.isValid()
-        ? dayjs(initialValue).format('YYYY-MM-DD')
-        : initialValue // preserve undefined to show validations later
-}
 // Convert form fields to pass data to api. GQL handles null for empty fields.
 const formatForApi = (attribute: string): string | null => {
     if (attribute === '') {
@@ -122,7 +116,7 @@ const formatDocumentsForGQL = (fileItems: FileItemT[]): GenericDocument[] => {
                 name: fileItem.name,
                 s3URL: fileItem.s3URL,
                 sha256: fileItem.sha256,
-                dateAdded: fileItem.dateAdded ?? undefined
+                dateAdded: fileItem.dateAdded ?? undefined,
             })
         }
         return cleanedFileItems
@@ -151,7 +145,7 @@ const formatDocumentsForForm = ({
                     s3URL: undefined,
                     sha256: doc.sha256,
                     status: 'UPLOAD_ERROR',
-                    dateAdded: doc.dateAdded
+                    dateAdded: doc.dateAdded,
                 }
             }
             return {
@@ -161,7 +155,7 @@ const formatDocumentsForForm = ({
                 s3URL: doc.s3URL,
                 sha256: doc.sha256,
                 status: 'UPLOAD_COMPLETE',
-                dateAdded: doc.dateAdded
+                dateAdded: doc.dateAdded,
             }
         }) || []
     )

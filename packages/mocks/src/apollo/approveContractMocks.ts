@@ -12,7 +12,7 @@ import {
     GraphQLErrorCauseTypes,
     GraphQLErrorCodeTypes,
 } from './apolloErrorCodeMocks'
-import { formatUserInputDate } from '../../formHelpers'
+import { formatUserInputDate } from '@mc-review/dates'
 
 const approveContractMockSuccess = (
     params: {
