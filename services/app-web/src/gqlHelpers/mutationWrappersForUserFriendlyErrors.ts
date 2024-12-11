@@ -254,14 +254,12 @@ export const submitMutationWrapperV2 = async (
 export const approveMutationWrapper = async (
     approveContract: ApproveContractMutationFn,
     id: string,
-    updatedReason?: string
+    dateApprovalReleasedToState: string
 ): Promise<Partial<Contract> | GraphQLErrors | Error> => {
-    const input = { contractID: id }
-    if (updatedReason) {
-        Object.assign(input, {
-            updatedReason,
-        })
-    } 
+    const input = { 
+        contractID: id,
+        dateApprovalReleasedToState 
+    }
 
     try {
         const { data } = await approveContract({
