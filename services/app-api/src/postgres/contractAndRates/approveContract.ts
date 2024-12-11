@@ -57,7 +57,7 @@ async function approveContractInsideTransaction(
 type ApproveContractArgsType = {
     contractID: string
     updatedByID: string
-    dateApprovalReleasedToState: string | Date
+    dateApprovalReleasedToState: Date
 }
 
 async function approveContract(

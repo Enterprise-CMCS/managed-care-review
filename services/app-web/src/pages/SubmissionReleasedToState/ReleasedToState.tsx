@@ -34,10 +34,11 @@ type ReleasedToStateValues = {
     dateApprovalReleasedToState: string
 }
 
+const today = new Date()
 const ReleaseToStateSchema = Yup.object().shape({
-    dateApprovalReleasedToState: Yup.string().required(
-        'You must select a date'
-    ),
+    dateApprovalReleasedToState: Yup.date()
+        .required('You must select a date')
+        .max(today, 'You must enter a valid date'),
 })
 
 type FormError =
@@ -169,22 +170,24 @@ const ReleasedToState = () => {
                                 as released after the approval letter has been
                                 released to the state.
                             </p>
-                            <Label
-                                htmlFor="dateReleasedToState"
-                                className="margin-bottom-0 text-bold"
-                            >
-                                Date released to state
-                            </Label>
-                            <p className="margin-bottom-0 usa-hint">Required</p>
-                            <p className="margin-bottom-0 usa-hint">
-                                mm/dd/yyyy
-                            </p>
                             <FormGroup
                                 error={showFieldErrors(
                                     errors.dateApprovalReleasedToState
                                 )}
                                 className="margin-top-0"
                             >
+                                <Label
+                                    htmlFor="dateApprovalReleasedToState"
+                                    className="margin-bottom-0 text-bold"
+                                >
+                                    Date released to state
+                                </Label>
+                                <p className="margin-bottom-0 margin-top-05 usa-hint">
+                                    Required
+                                </p>
+                                <p className="margin-bottom-0 margin-top-05 usa-hint">
+                                    mm/dd/yyyy
+                                </p>
                                 <PoliteErrorMessage formFieldLabel="Date released to state">
                                     {errors.dateApprovalReleasedToState}
                                 </PoliteErrorMessage>
@@ -193,6 +196,9 @@ const ReleasedToState = () => {
                                     aria-describedby="dateApprovalReleasedToState"
                                     id="dateApprovalReleasedToState"
                                     name="dateApprovalReleasedToState"
+                                    maxDate={formatUserInputDate(
+                                        today.toString()
+                                    )}
                                     onChange={(val) =>
                                         setFieldValue(
                                             'dateApprovalReleasedToState',
