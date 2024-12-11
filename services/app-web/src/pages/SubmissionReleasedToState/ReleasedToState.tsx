@@ -37,6 +37,10 @@ type ReleasedToStateValues = {
 const today = new Date()
 const ReleaseToStateSchema = Yup.object().shape({
     dateApprovalReleasedToState: Yup.date()
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore-next-line
+        .validateDateFormat('YYYY-MM-DD', true)
+        .typeError('Date must be in MM/DD/YYYY format')
         .required('You must select a date')
         .max(today, 'You must enter a valid date'),
 })
