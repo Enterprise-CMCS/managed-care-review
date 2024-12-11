@@ -101,6 +101,9 @@ describe('CMS user can view submission', () => {
     })
 
     it('and can approve a submission via releasing it to the state', () => {
+        cy.interceptFeatureFlags({
+            'submission-approvals': true,
+        })
         // state user adds a new package
         cy.logInAsStateUser()
         cy.startNewContractAndRatesSubmission()
