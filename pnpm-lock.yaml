@@ -184,6 +184,9 @@ importers:
       '@mc-review/constants':
         specifier: workspace:*
         version: link:../constants
+      '@mc-review/dates':
+        specifier: workspace:*
+        version: link:../dates
       '@types/jest':
         specifier: ^29.5.6
         version: 29.5.14
@@ -14499,7 +14502,7 @@ snapshots:
     dependencies:
       '@aws-crypto/sha256-browser': 5.2.0
       '@aws-crypto/sha256-js': 5.2.0
-      '@aws-sdk/client-sso-oidc': 3.609.0(@aws-sdk/client-sts@3.699.0)
+      '@aws-sdk/client-sso-oidc': 3.609.0(@aws-sdk/client-sts@3.609.0)
       '@aws-sdk/client-sts': 3.609.0
       '@aws-sdk/core': 3.609.0
       '@aws-sdk/credential-provider-node': 3.609.0(@aws-sdk/client-sso-oidc@3.609.0(@aws-sdk/client-sts@3.609.0))(@aws-sdk/client-sts@3.699.0)
@@ -14814,7 +14817,7 @@ snapshots:
     dependencies:
       '@aws-crypto/sha256-browser': 5.2.0
       '@aws-crypto/sha256-js': 5.2.0
-      '@aws-sdk/client-sso-oidc': 3.609.0(@aws-sdk/client-sts@3.609.0)
+      '@aws-sdk/client-sso-oidc': 3.609.0(@aws-sdk/client-sts@3.699.0)
       '@aws-sdk/client-sts': 3.609.0
       '@aws-sdk/core': 3.609.0
       '@aws-sdk/credential-provider-node': 3.609.0(@aws-sdk/client-sso-oidc@3.609.0(@aws-sdk/client-sts@3.609.0))(@aws-sdk/client-sts@3.699.0)

@@ -97,6 +97,7 @@ export default defineConfig(() => ({
             '@mc-review/hpp': path.resolve(__dirname, '../../packages/hpp'),
             '@mc-review/mocks': path.resolve(__dirname, '../../packages/mocks'),
             '@mc-review/otel': path.resolve(__dirname, '../../packages/otel'),
+            '@mc-review/dates': path.resolve(__dirname, '../../packages/dates'),
         },
     },
     css: {

@@ -4,7 +4,7 @@
     Mock different health plan form data that match frontend types.
 */
 
-import dayjs from 'dayjs'
+import { dayjs } from '@mc-review/dates'
 import {
     basicLockedHealthPlanFormData,
     basicHealthPlanFormData,

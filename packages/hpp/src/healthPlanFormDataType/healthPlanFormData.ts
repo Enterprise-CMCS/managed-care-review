@@ -10,7 +10,7 @@ import {
     GeneralizedModifiedProvisions,
 } from './ModifiedProvisions'
 import { generateApplicableProvisionsList } from '../healthPlanSubmissionHelpers/provisions'
-import dayjs from 'dayjs'
+import { dayjs } from '@mc-review/dates'
 import type { LockedHealthPlanFormDataType } from './LockedHealthPlanFormDataType'
 import type { HealthPlanFormDataType } from './HealthPlanFormDataType'
 import type { ProgramArgType } from '.'
