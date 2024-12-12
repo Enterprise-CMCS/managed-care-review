@@ -406,13 +406,14 @@ describe('ReleasedToState', () => {
             ).toBeInTheDocument()
         })
 
-        const dateInput = screen.getByTestId('date-picker-external-input')
-        await user.type(dateInput, 'pinepple')
-
         const releaseButton = screen.getByRole('button', {
             name: 'Released to state',
         })
         await user.click(releaseButton)
+        // date validation with custom message is triggered only after
+        // validation triggered on submit with empty field
+        const dateInput = screen.getByTestId('date-picker-external-input')
+        await user.type(dateInput, 'pinepple')
 
         await waitFor(() => {
             expect(
