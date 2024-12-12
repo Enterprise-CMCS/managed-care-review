@@ -15,15 +15,15 @@ import {
 } from '../../../gen/gqlClient'
 
 import styles from '../Settings.module.scss'
-import { handleApolloError } from '../../../gqlHelpers/apolloErrors'
-import { updateDivisionAssignment } from '../../../gqlHelpers/updateDivisionAssignment'
+import { handleApolloError } from '@mc-review/helpers'
+import { updateDivisionAssignment } from '@mc-review/helpers'
 import { ApolloError } from '@apollo/client'
 import { useTealium } from '../../../hooks'
 import { useAuth } from '../../../contexts/AuthContext'
-import { hasAdminUserPermissions } from '../../../gqlHelpers'
+import { hasAdminUserPermissions } from '@mc-review/helpers'
 import { LinkWithLogging, Loading } from '../../../components'
 import { useStringConstants } from '../../../hooks/useStringConstants'
-import { wrapApolloResult } from '../../../gqlHelpers/apolloQueryWrapper'
+import { wrapApolloResult } from '@mc-review/helpers'
 import { SettingsErrorAlert } from '../SettingsErrorAlert'
 
 type DivisionSelectOptions = {

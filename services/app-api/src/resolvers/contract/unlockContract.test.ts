@@ -24,7 +24,7 @@ import {
 } from '../../testHelpers/gqlContractHelpers'
 import { addNewRateToTestContract } from '../../testHelpers/gqlRateHelpers'
 import { testEmailConfig, testEmailer } from '../../testHelpers/emailerHelpers'
-import { packageName } from '../../common-code/healthPlanFormDataType'
+import { packageName } from '@mc-review/hpp'
 import { generateRateCertificationName } from '../rate/generateRateCertificationName'
 import { nullsToUndefined } from '../../domain-models/nullstoUndefined'
 import { NewPostgresStore } from '../../postgres'
@@ -34,7 +34,7 @@ describe('unlockContract', () => {
     const mockS3 = testS3Client()
 
     afterEach(() => {
-        jest.resetAllMocks()
+        vi.resetAllMocks()
     })
 
     describe.each(iterableCmsUsersMockData)(

@@ -1,5 +1,5 @@
-import { StateType } from '../common-code/healthPlanFormDataType'
-import { Division } from '../gen/gqlClient';
+import { StateType } from '@mc-review/hpp'
+import { Division } from '../gen/gqlClient'
 
 type LocalUserType =
     | LocalStateUserType

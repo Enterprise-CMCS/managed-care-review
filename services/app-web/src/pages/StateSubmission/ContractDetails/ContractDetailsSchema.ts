@@ -4,24 +4,21 @@ import { validateDateFormat } from '../../../formHelpers'
 import {
     isCHIPProvision,
     GeneralizedProvisionType,
-    UnlockedHealthPlanFormDataType,
     federalAuthorityKeysForCHIP,
-} from '../../../common-code/healthPlanFormDataType'
+} from '@mc-review/hpp'
 import {
     isBaseContract,
     isCHIPOnly,
     isContractAmendment,
     isContractWithProvisions,
-} from '../../../common-code/ContractType'
+} from '@mc-review/common-code'
 import {
     isMedicaidAmendmentProvision,
     isMedicaidBaseProvision,
-} from '../../../common-code/healthPlanFormDataType/ModifiedProvisions'
-import { FeatureFlagSettings } from '../../../common-code/featureFlags'
-import { Contract, UnlockedContract } from '../../../gen/gqlClient'
-import {
-    validateFileItemsList,
-} from '../../../formHelpers/validators'
+} from '@mc-review/hpp'
+import { FeatureFlagSettings } from '@mc-review/common-code'
+import { UnlockedContract } from '../../../gen/gqlClient'
+import { validateFileItemsList } from '../../../formHelpers/validators'
 
 Yup.addMethod(Yup.date, 'validateDateFormat', validateDateFormat)
 

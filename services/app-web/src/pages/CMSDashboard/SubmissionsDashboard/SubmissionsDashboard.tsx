@@ -1,10 +1,10 @@
 import React from 'react'
-import { SubmissionTypeRecord } from '../../../constants/healthPlanPackages'
+import { SubmissionTypeRecord } from '@mc-review/hpp'
 import { useAuth } from '../../../contexts/AuthContext'
 import { useIndexContractsForDashboardQuery } from '../../../gen/gqlClient'
-import { mostRecentDate } from '../../../common-code/dateHelpers'
+import { mostRecentDate } from '@mc-review/dates'
 import styles from '../../StateDashboard/StateDashboard.module.scss'
-import { recordJSException } from '../../../otelHelpers/tracingHelper'
+import { recordJSException } from '@mc-review/otel'
 import {
     Loading,
     ContractTable,

@@ -1,5 +1,5 @@
 import React from 'react'
-import { dayjs } from '../../common-code/dateHelpers/dayjs'
+import { dayjs } from '@mc-review/dates'
 import { SectionHeader } from '../SectionHeader'
 import { Accordion } from '@trussworks/react-uswds'
 import type { AccordionItemProps } from '@trussworks/react-uswds/lib/components/Accordion/Accordion'
@@ -13,9 +13,9 @@ import {
 } from '../../gen/gqlClient'
 import styles from './ChangeHistory.module.scss'
 import { LinkWithLogging } from '../TealiumLogging/Link'
-import { getUpdatedByDisplayName } from '../../gqlHelpers/userHelpers'
+import { getUpdatedByDisplayName } from '@mc-review/helpers'
 import { useTealium } from '../../hooks'
-import { formatToPacificTime } from '../../common-code/dateHelpers'
+import { formatToPacificTime } from '@mc-review/dates'
 
 type ChangeHistoryProps = {
     contract: Contract | UnlockedContract

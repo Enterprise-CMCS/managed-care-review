@@ -4,7 +4,7 @@ import {
     SubmissionTypeSummarySectionProps,
     SubmissionTypeSummarySection,
 } from './SubmissionTypeSummarySection'
-import { mockContractAndRatesDraft } from '../../../testHelpers/apolloMocks'
+import { mockContractAndRatesDraft } from '@mc-review/mocks'
 
 export default {
     title: 'Components/SubmissionSummary/SubmissionTypeSummarySection',

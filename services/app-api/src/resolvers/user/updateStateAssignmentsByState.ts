@@ -8,7 +8,7 @@ import {
 import { logError } from '../../logger'
 import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
 import { hasAdminPermissions, hasCMSPermissions } from '../../domain-models'
-import { isValidStateCode } from '../../common-code/healthPlanFormDataType'
+import { isValidStateCode } from '@mc-review/hpp'
 import { NotFoundError } from '../../postgres'
 import { GraphQLError } from 'graphql/index'
 

@@ -6,15 +6,14 @@
     "license": "MIT",
     "scripts": {
         "precommit": "lint-staged",
-        "test": "jest --watch",
-        "test:once": "jest --runInBand --ci",
-        "test:coverage": "jest --coverage --watchAll=false",
-        "test:coverage-ci": "jest --ci --coverage --watchAll=false",
+        "test": "vitest --watch",
+        "test:once": "vitest --runInBand --ci",
+        "test:coverage": "vitest --coverage",
         "lint": "tsc --noEmit && eslint . --max-warnings=0",
         "generate": "pnpm prisma generate",
         "prisma:reset": "pnpm prisma migrate reset --force",
         "build": "tsc --noEmit",
-        "start": "npx serverless offline start --stage local --region us-east-1 --httpPort 3030 --host 127.0.0.1"
+        "start": "pnpm serverless offline start --stage local --region us-east-1 --httpPort 3030 --host 127.0.0.1"
     },
     "lint-staged": {
         "*.{js,ts}": [
@@ -26,6 +25,11 @@
         ]
     },
     "dependencies": {
+        "@mc-review/common-code": "workspace:*",
+        "@mc-review/constants": "workspace:*",
+        "@mc-review/dates": "workspace:*",
+        "@mc-review/hpp": "workspace:*",
+        "@mc-review/helpers": "workspace:*",
         "@apollo/client": "3.8.8",
         "@apollo/gateway": "^2.8.5",
         "@aws-sdk/client-amplify": "^3.699.0",
@@ -54,7 +58,6 @@
         "apollo-server-types": "^3.8.0",
         "archiver": "^7.0.1",
         "axios": "^1.7.9",
-        "dayjs": "^1.10.5",
         "eta": "^2.0.0",
         "graphql": "^16.9.0",
         "graphql-scalars": "^1.11.1",
@@ -80,6 +83,7 @@
         "@types/uuid": "^9.0.0",
         "@typescript-eslint/eslint-plugin": "^6.21.0",
         "@typescript-eslint/parser": "^6.5.0",
+        "@vitest/coverage-v8": "^2.1.5",
         "eslint": "^8.3.0",
         "eslint-config-prettier": "^9.1.0",
         "eslint-plugin-jest": "^27.0.1",
@@ -98,6 +102,7 @@
         "serverless-stack-termination-protection": "^2.0.2",
         "ts-jest": "^29.2.5",
         "ts-node": "^10.9.2",
-        "typescript": "4.9.5"
+        "typescript": "4.9.5",
+        "vitest": "^2.1.5"
     }
 }

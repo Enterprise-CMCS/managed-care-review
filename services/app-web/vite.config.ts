@@ -11,6 +11,7 @@ import path from 'path'
 export default defineConfig(() => ({
     base: '/',
     plugins: [
+        nodePolyfills(),
         react(),
         svgr({
             svgrOptions: {
@@ -21,7 +22,6 @@ export default defineConfig(() => ({
             },
             include: '**/*.svg',
         }),
-        nodePolyfills(),
         graphqlLoader(),
     ],
     server: {
@@ -77,11 +77,27 @@ export default defineConfig(() => ({
         sourcemap: true,
     },
     optimizeDeps: {
-        include: ['protobufjs/minimal'],
+        include: ['protobufjs/minimal', 'buffer'],
     },
     resolve: {
         alias: {
             '~uswds': path.resolve(__dirname, './node_modules/uswds'),
+            '@mc-review/common-code': path.resolve(
+                __dirname,
+                '../../packages/common-code'
+            ),
+            '@mc-review/constants': path.resolve(
+                __dirname,
+                '../../packages/constants'
+            ),
+            '@mc-review/helpers': path.resolve(
+                __dirname,
+                '../../packages/helpers'
+            ),
+            '@mc-review/hpp': path.resolve(__dirname, '../../packages/hpp'),
+            '@mc-review/mocks': path.resolve(__dirname, '../../packages/mocks'),
+            '@mc-review/otel': path.resolve(__dirname, '../../packages/otel'),
+            '@mc-review/dates': path.resolve(__dirname, '../../packages/dates'),
         },
     },
     css: {
