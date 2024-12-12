@@ -2,6 +2,7 @@ import { GridContainer, Icon } from '@trussworks/react-uswds'
 import React, { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import {
+    ButtonWithLogging,
     DoubleColumnGrid,
     Loading,
     NavLinkWithLogging,
@@ -232,14 +233,17 @@ export const RateSummary = (): React.ReactElement => {
                                     Unlock rate
                                 </UnlockRateButton>
                             )}
-                            {showWithdrawRate && !isUnlocked && (
-                                <NavLinkWithLogging
+                            {showWithdrawRate && (
+                                <ButtonWithLogging
+                                    disabled={isUnlocked}
                                     className="usa-button usa-button--outline"
-                                    variant="unstyled"
-                                    to="./"
+                                    type="button"
+                                    onClick={() => navigate('./')}
+                                    link_url={'./'}
+                                    outline
                                 >
                                     Withdraw rate
-                                </NavLinkWithLogging>
+                                </ButtonWithLogging>
                             )}
                         </DoubleColumnGrid>
                     </SectionCard>

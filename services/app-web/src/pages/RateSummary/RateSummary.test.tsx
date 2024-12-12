@@ -200,7 +200,7 @@ describe('RateSummary', () => {
 
                 await waitFor(() => {
                     expect(
-                        screen.queryByRole('link', { name: 'Withdraw rate' })
+                        screen.queryByRole('button', { name: 'Withdraw rate' })
                     ).toBeInTheDocument()
                     expect(
                         screen.queryByRole('button', { name: 'Unlock rate' })
@@ -406,7 +406,7 @@ describe('RateSummary', () => {
                 })
 
                 expect(
-                    screen.queryByRole('link', { name: 'Withdraw rate' })
+                    screen.queryByRole('button', { name: 'Withdraw rate' })
                 ).not.toBeInTheDocument()
             })
         }
@@ -640,7 +640,7 @@ describe('RateSummary', () => {
                 ).not.toBeInTheDocument()
 
                 expect(
-                    screen.queryByRole('link', { name: 'Withdraw rate' })
+                    screen.queryByRole('button', { name: 'Withdraw rate' })
                 ).not.toBeInTheDocument()
 
                 expect(
