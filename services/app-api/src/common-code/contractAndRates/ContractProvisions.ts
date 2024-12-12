@@ -2,7 +2,7 @@ import {
     ModifiedProvisionsAmendmentRecord,
     ModifiedProvisionsBaseContractRecord,
     ModifiedProvisionsCHIPRecord,
-} from '../../constants/modifiedProvisions'
+} from '@mc-review/hpp'
 import {
     type CHIPProvisionType,
     type MedicaidBaseProvisionType,

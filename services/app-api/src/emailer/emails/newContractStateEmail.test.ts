@@ -3,7 +3,7 @@ import {
     mockContract,
     mockMNState,
 } from '../../testHelpers/emailerHelpers'
-import { packageName } from '../../common-code/healthPlanFormDataType'
+import { packageName } from '@mc-review/hpp'
 import { newContractStateEmail } from './index'
 import { formatEmailAddresses } from '../formatters'
 import type { ContractType, RateFormDataType } from '../../domain-models'

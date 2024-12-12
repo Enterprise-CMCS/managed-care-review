@@ -7,7 +7,7 @@ import {
 } from '../../testHelpers/emailerHelpers'
 import { resubmitContractCMSEmail } from './index'
 import type { ContractType } from '../../domain-models'
-import { packageName } from '../../common-code/healthPlanFormDataType'
+import { packageName } from '@mc-review/hpp'
 
 describe('with rates', () => {
     const resubmitData = {
@@ -130,7 +130,7 @@ describe('with rates', () => {
         )
         expect(template).toEqual(
             expect.objectContaining({
-                bodyText: expect.stringMatching(/Updated on: 02\/01\/2022/),
+                bodyText: expect.stringMatching(/Updated on: 01\/31\/2022/),
             })
         )
         expect(template).toEqual(

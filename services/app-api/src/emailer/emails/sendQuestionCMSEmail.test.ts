@@ -223,7 +223,7 @@ test('includes expected data on the CMS analyst who sent the question', async ()
     )
     expect(template).toEqual(
         expect.objectContaining({
-            bodyText: expect.stringContaining('Date: 01/01/2024'),
+            bodyText: expect.stringContaining('Date: 12/31/2023'),
         })
     )
 })

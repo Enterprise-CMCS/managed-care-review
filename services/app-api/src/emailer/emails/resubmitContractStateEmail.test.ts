@@ -4,7 +4,7 @@ import {
     mockMNState,
 } from '../../testHelpers/emailerHelpers'
 import { resubmitContractStateEmail } from './index'
-import { packageName } from '../../common-code/healthPlanFormDataType'
+import { packageName } from '@mc-review/hpp'
 import type { ContractType } from '../../domain-models'
 
 const resubmitData = {
@@ -74,7 +74,7 @@ test('includes expected data summary for a contract and rates resubmission State
     )
     expect(template).toEqual(
         expect.objectContaining({
-            bodyText: expect.stringMatching(/Updated on: 02\/01\/2022/),
+            bodyText: expect.stringMatching(/Updated on: 01\/31\/2022/),
         })
     )
     expect(template).toEqual(
@@ -250,7 +250,7 @@ test('includes expected data summary for a multi-rate contract and rates resubmi
     )
     expect(template).toEqual(
         expect.objectContaining({
-            bodyText: expect.stringMatching(/Updated on: 02\/01\/2022/),
+            bodyText: expect.stringMatching(/Updated on: 01\/31\/2022/),
         })
     )
     expect(template).toEqual(

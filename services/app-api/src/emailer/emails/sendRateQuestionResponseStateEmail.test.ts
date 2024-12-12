@@ -354,7 +354,7 @@ describe('sendRateQuestionResponseStateEmail', () => {
         // Includes correct date response was submitted
         expect(template).toEqual(
             expect.objectContaining({
-                bodyText: expect.stringContaining('Date: 01/05/2024'),
+                bodyText: expect.stringContaining('Date: 01/04/2024'),
             })
         )
 

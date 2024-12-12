@@ -73,7 +73,7 @@ describe('unlockPackageCMSEmail', () => {
 
         expect(template).toEqual(
             expect.objectContaining({
-                bodyText: expect.stringMatching(/Unlocked on: 01/),
+                bodyText: expect.stringMatching(/Unlocked on: 12/),
             })
         )
 
@@ -273,7 +273,7 @@ describe('unlockPackageCMSEmail', () => {
 
         expect(template).toEqual(
             expect.objectContaining({
-                bodyText: expect.stringMatching(/Unlocked on: 01/),
+                bodyText: expect.stringMatching(/Unlocked on: 12/),
             })
         )
 

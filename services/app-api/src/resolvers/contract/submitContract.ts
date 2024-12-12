@@ -7,7 +7,7 @@ import { isStateUser, contractSubmitters } from '../../domain-models'
 import {
     type CHIPFederalAuthority,
     federalAuthorityKeysForCHIP,
-} from '../../common-code/healthPlanFormDataType'
+} from '@mc-review/hpp'
 import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
 import { GraphQLError } from 'graphql'
 import {
@@ -19,7 +19,7 @@ import type { MutationResolvers, State } from '../../gen/gqlServer'
 import { parseContract } from '../../domain-models/contractAndRates/dataValidatorHelpers'
 import type { UpdateInfoType, PackageStatusType } from '../../domain-models'
 import type { UpdateDraftContractRatesArgsType } from '../../postgres/contractAndRates/updateDraftContractRates'
-import type { StateCodeType } from '../../common-code/healthPlanFormDataType'
+import type { StateCodeType } from '@mc-review/hpp'
 import type { Span } from '@opentelemetry/api'
 import {
     isContractWithProvisions,
