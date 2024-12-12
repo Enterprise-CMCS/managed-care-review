@@ -4,7 +4,7 @@ exports[`sendRateQuestionResponseCMSEmail renders overall email for a new respon
 "The state submitted responses to DMCO's questions about Rate Cert Name<br />
 <b>Submitted by:</b> James Brown <a href="james@example.com">james@example.com</a><br />
 <b>Round:</b> 2<br />
-<b>Questions sent on:</b> 01/05/2024<br />
+<b>Questions sent on:</b> 01/04/2024<br />
 <br />
 <a href="http://localhost/rates/test-rate-234/question-and-answers">View rate Q&A</a>
 "
