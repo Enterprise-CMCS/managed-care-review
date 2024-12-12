@@ -68,6 +68,10 @@ jobs:
           pnpm generate
           npx prisma migrate reset --force
 
+      - name: Build packages
+        shell: bash
+        run: pnpm build:packages
+
       - name: API Unit Tests
         env:
           VITE_APP_AUTH_MODE: IDM
