@@ -1,7 +1,4 @@
-import {
-    renderWithProviders,
-    userClickByRole,
-} from '../../../testHelpers/jestHelpers'
+import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import { SingleRateSummarySection } from './SingleRateSummarySection'
 import {
     fetchCurrentUserMock,
@@ -10,13 +7,8 @@ import {
     mockValidHelpDeskUser,
     mockValidStateUser,
 } from '../../../testHelpers/apolloMocks'
-import { screen, waitFor, within } from '@testing-library/react'
-import { type Location, Route, Routes } from 'react-router-dom'
-import { RoutesRecord } from '../../../constants'
-import {
-    rateUnlockedWithHistoryMock,
-    rateWithHistoryMock,
-} from '../../../testHelpers/apolloMocks/rateDataMock'
+import { screen, within } from '@testing-library/react'
+import { rateWithHistoryMock } from '../../../testHelpers/apolloMocks/rateDataMock'
 
 describe('SingleRateSummarySection', () => {
     it('can render rate details without errors', async () => {
@@ -27,7 +19,6 @@ describe('SingleRateSummarySection', () => {
                 rate={rateData}
                 isSubmitted={true}
                 statePrograms={rateData.state.programs}
-                parentContractStatus="SUBMITTED"
             />,
             {
                 apolloProvider: {
@@ -37,9 +28,6 @@ describe('SingleRateSummarySection', () => {
                             user: mockValidCMSUser(),
                         }),
                     ],
-                },
-                featureFlags: {
-                    'rate-edit-unlock': true,
                 },
             }
         )
@@ -132,7 +120,6 @@ describe('SingleRateSummarySection', () => {
                 rate={rateData}
                 isSubmitted={true}
                 statePrograms={rateData.state.programs}
-                parentContractStatus="SUBMITTED"
             />,
             {
                 apolloProvider: {
@@ -143,7 +130,6 @@ describe('SingleRateSummarySection', () => {
                         }),
                     ],
                 },
-                featureFlags: { 'rate-edit-unlock': true },
             }
         )
 
@@ -236,7 +222,6 @@ describe('SingleRateSummarySection', () => {
                 rate={rateData}
                 isSubmitted={true}
                 statePrograms={rateData.state.programs}
-                parentContractStatus="SUBMITTED"
             />,
             {
                 apolloProvider: {
@@ -246,9 +231,6 @@ describe('SingleRateSummarySection', () => {
                             user: mockValidCMSUser(),
                         }),
                     ],
-                },
-                featureFlags: {
-                    'rate-edit-unlock': true,
                 },
             }
         )
@@ -276,199 +258,6 @@ describe('SingleRateSummarySection', () => {
             'href',
             `/submissions/${parentContractRev.contractID}`
         )
-    })
-
-    describe('Unlock rate', () => {
-        it('renders the unlock button to CMS users when rate edit and unlock is enabled', async () => {
-            const rateData = rateWithHistoryMock()
-            renderWithProviders(
-                <SingleRateSummarySection
-                    rate={rateData}
-                    isSubmitted={false}
-                    statePrograms={rateData.state.programs}
-                    parentContractStatus="SUBMITTED"
-                />,
-                {
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({
-                                statusCode: 200,
-                                user: mockValidCMSUser(),
-                            }),
-                        ],
-                    },
-                    featureFlags: { 'rate-edit-unlock': true },
-                }
-            )
-
-            await screen.findByRole('button', {
-                name: 'Unlock rate',
-            })
-
-            expect(screen.getByText('Unlock rate')).toBeDefined()
-        })
-
-        it('renders unlock button that redirects to contract submission page when linked rates on but standalone rate edit and unlock is still disabled', async () => {
-            let testLocation: Location // set up location to track URL changes
-
-            const rateData = rateWithHistoryMock()
-            renderWithProviders(
-                <Routes>
-                    <Route
-                        path={RoutesRecord.SUBMISSIONS_SUMMARY}
-                        element={<div>Summary page placeholder</div>}
-                    />
-                    <Route
-                        path={`/rates/${rateData.id}`}
-                        element={
-                            <SingleRateSummarySection
-                                rate={rateData}
-                                isSubmitted={false}
-                                statePrograms={rateData.state.programs}
-                                parentContractStatus="SUBMITTED"
-                            />
-                        }
-                    />
-                </Routes>,
-                {
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({
-                                statusCode: 200,
-                                user: mockValidCMSUser(),
-                            }),
-                        ],
-                    },
-                    routerProvider: {
-                        route: `/rates/${rateData.id}`,
-                    },
-                    featureFlags: {
-                        'rate-edit-unlock': false,
-                    },
-                    location: (location) => (testLocation = location),
-                }
-            )
-            await screen.findByRole('button', {
-                name: 'Unlock rate',
-            })
-
-            await userClickByRole(screen, 'button', {
-                name: 'Unlock rate',
-            })
-            await waitFor(() => {
-                const parentContractSubmissionID = rateData.parentContractID
-                expect(testLocation.pathname).toBe(
-                    `/submissions/${parentContractSubmissionID}`
-                )
-            })
-        })
-
-        it('does not render unlock button when linked rates on but standalone rate edit and unlock is still disabled if the associated contract is approved', async () => {
-            const rateData = rateWithHistoryMock()
-            renderWithProviders(
-                <Routes>
-                    <Route
-                        path={RoutesRecord.SUBMISSIONS_SUMMARY}
-                        element={<div>Summary page placeholder</div>}
-                    />
-                    <Route
-                        path={`/rates/${rateData.id}`}
-                        element={
-                            <SingleRateSummarySection
-                                rate={rateData}
-                                isSubmitted={false}
-                                statePrograms={rateData.state.programs}
-                                parentContractStatus="APPROVED"
-                            />
-                        }
-                    />
-                </Routes>,
-                {
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({
-                                statusCode: 200,
-                                user: mockValidCMSUser(),
-                            }),
-                        ],
-                    },
-                    routerProvider: {
-                        route: `/rates/${rateData.id}`,
-                    },
-                    featureFlags: {
-                        'rate-edit-unlock': false,
-                    },
-                }
-            )
-            const unlockRateBtn = await screen.queryByRole('button', {
-                name: 'Unlock rate',
-            })
-            expect(unlockRateBtn).not.toBeInTheDocument()
-        })
-
-        it('disables the unlock button for CMS users when rate already unlocked', async () => {
-            const rateData = rateUnlockedWithHistoryMock()
-            renderWithProviders(
-                <SingleRateSummarySection
-                    rate={rateData}
-                    isSubmitted={false}
-                    statePrograms={rateData.state.programs}
-                    parentContractStatus="SUBMITTED"
-                />,
-                {
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({
-                                statusCode: 200,
-                                user: mockValidCMSUser(),
-                            }),
-                        ],
-                    },
-                    featureFlags: { 'rate-edit-unlock': true },
-                }
-            )
-            await waitFor(() => {
-                expect(
-                    screen.getByRole('button', {
-                        name: 'Unlock rate',
-                    })
-                ).toHaveAttribute('aria-disabled', 'true')
-            })
-        })
-
-        it('does not render the unlock button to state users', async () => {
-            const rateData = rateWithHistoryMock()
-            renderWithProviders(
-                <SingleRateSummarySection
-                    rate={rateData}
-                    isSubmitted={false}
-                    statePrograms={rateData.state.programs}
-                    parentContractStatus="SUBMITTED"
-                />,
-                {
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({
-                                statusCode: 200,
-                                user: mockValidStateUser(),
-                            }),
-                        ],
-                    },
-                    featureFlags: { 'rate-edit-unlock': true },
-                }
-            )
-            // ensure page fully loaded
-            await screen.findByRole('link', {
-                name: 'Download all rate documents',
-            })
-
-            // no unlock rate button present
-            expect(
-                screen.queryByRole('button', {
-                    name: 'Unlock rate',
-                })
-            ).toBeNull()
-        })
     })
 
     describe('Missing data error notifications', () => {
@@ -502,7 +291,6 @@ describe('SingleRateSummarySection', () => {
                     rate={rateData}
                     isSubmitted={false}
                     statePrograms={rateData.state.programs}
-                    parentContractStatus="SUBMITTED"
                 />,
                 {
                     apolloProvider: {
@@ -513,7 +301,6 @@ describe('SingleRateSummarySection', () => {
                             }),
                         ],
                     },
-                    featureFlags: { 'rate-edit-unlock': true },
                 }
             )
 
@@ -548,7 +335,6 @@ describe('SingleRateSummarySection', () => {
                     rate={rateData}
                     isSubmitted={false}
                     statePrograms={rateData.state.programs}
-                    parentContractStatus="SUBMITTED"
                 />,
                 {
                     apolloProvider: {
@@ -559,7 +345,6 @@ describe('SingleRateSummarySection', () => {
                             }),
                         ],
                     },
-                    featureFlags: { 'rate-edit-unlock': true },
                 }
             )
 
@@ -632,7 +417,6 @@ describe('SingleRateSummarySection', () => {
                     rate={rateData}
                     isSubmitted={false}
                     statePrograms={rateData.state.programs}
-                    parentContractStatus="SUBMITTED"
                 />,
                 {
                     apolloProvider: {
@@ -643,7 +427,6 @@ describe('SingleRateSummarySection', () => {
                             }),
                         ],
                     },
-                    featureFlags: { 'rate-edit-unlock': true },
                 }
             )
 
@@ -668,7 +451,6 @@ describe('SingleRateSummarySection', () => {
                     rate={rateData}
                     isSubmitted={true}
                     statePrograms={rateData.state.programs}
-                    parentContractStatus="SUBMITTED"
                 />,
                 {
                     apolloProvider: {
@@ -679,7 +461,6 @@ describe('SingleRateSummarySection', () => {
                             }),
                         ],
                     },
-                    featureFlags: { 'rate-edit-unlock': true },
                 }
             )
 
@@ -694,42 +475,6 @@ describe('SingleRateSummarySection', () => {
             expect(
                 screen.queryAllByText(/You must provide this information/)
             ).toHaveLength(0)
-        })
-
-        it('should not display unlock rate button if parent contract has been approved', async () => {
-            const rateData = mockEmptyRateData()
-            rateData.status = 'SUBMITTED'
-            renderWithProviders(
-                <SingleRateSummarySection
-                    rate={rateData}
-                    isSubmitted={true}
-                    statePrograms={rateData.state.programs}
-                    parentContractStatus="APPROVED"
-                />,
-                {
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({
-                                statusCode: 200,
-                                user: mockValidHelpDeskUser(),
-                            }),
-                        ],
-                    },
-                    featureFlags: { 'rate-edit-unlock': true },
-                }
-            )
-
-            // Wait for all the documents to be in the table
-            await screen.findByText(
-                rateData.revisions[0].formData.rateDocuments[0].name
-            )
-            await screen.findByRole('link', {
-                name: 'Download all rate documents',
-            })
-
-            expect(
-                screen.queryByRole('link', { name: 'Unlock rate' })
-            ).not.toBeInTheDocument()
         })
     })
 })

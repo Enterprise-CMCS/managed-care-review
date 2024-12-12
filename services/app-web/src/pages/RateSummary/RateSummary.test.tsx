@@ -1,5 +1,9 @@
 import { screen, waitFor } from '@testing-library/react'
-import { renderWithProviders, testS3Client } from '../../testHelpers'
+import {
+    renderWithProviders,
+    testS3Client,
+    userClickByRole,
+} from '../../testHelpers'
 import {
     fetchCurrentUserMock,
     fetchRateMockSuccess,
@@ -7,12 +11,17 @@ import {
     iterableCmsUsersMockData,
     mockValidStateUser,
     mockContractPackageSubmitted,
+    rateDataMock,
+    iterableNonCMSUsersMockData,
 } from '../../testHelpers/apolloMocks'
 import { RateSummary } from './RateSummary'
 import { RoutesRecord } from '../../constants'
-import { Route, Routes } from 'react-router-dom'
+import { Location, Route, Routes } from 'react-router-dom'
 import { RateEdit } from '../RateEdit/RateEdit'
-import { rateWithHistoryMock } from '../../testHelpers/apolloMocks/rateDataMock'
+import {
+    rateUnlockedWithHistoryMock,
+    rateWithHistoryMock,
+} from '../../testHelpers/apolloMocks/rateDataMock'
 
 // Wrap test component in some top level routes to allow getParams to be tested
 const wrapInRoutes = (children: React.ReactNode) => {
@@ -30,7 +39,6 @@ describe('RateSummary', () => {
             const contract = mockContractPackageSubmitted()
 
             it('renders without errors', async () => {
-                const contract = mockContractPackageSubmitted()
                 renderWithProviders(wrapInRoutes(<RateSummary />), {
                     apolloProvider: {
                         mocks: [
@@ -164,6 +172,242 @@ describe('RateSummary', () => {
                     ).toHaveTextContent('Document download unavailable')
                     expect(error).toHaveBeenCalled()
                 })
+            })
+
+            it('renders unlock and withdraw buttons', async () => {
+                renderWithProviders(wrapInRoutes(<RateSummary />), {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                user: mockUser(),
+                                statusCode: 200,
+                            }),
+                            fetchRateMockSuccess({
+                                id: '7a',
+                                parentContractID: contract.id,
+                            }),
+                            fetchContractMockSuccess({ contract }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/rates/7a',
+                    },
+                    featureFlags: {
+                        'rate-edit-unlock': true,
+                        'withdraw-rate': true,
+                    },
+                })
+
+                await waitFor(() => {
+                    expect(
+                        screen.queryByRole('link', { name: 'Withdraw rate' })
+                    ).toBeInTheDocument()
+                    expect(
+                        screen.queryByRole('button', { name: 'Unlock rate' })
+                    ).toBeInTheDocument()
+                })
+            })
+
+            it('renders unlock button that redirects to contract submission page when linked rates on but standalone rate edit and unlock is still disabled', async () => {
+                let testLocation: Location // set up location to track URL changes
+                const rateData = rateWithHistoryMock()
+                rateData.parentContractID = contract.id
+
+                renderWithProviders(
+                    <Routes>
+                        <Route
+                            path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                            element={<div>Summary page placeholder</div>}
+                        />
+                        <Route
+                            path={RoutesRecord.RATES_SUMMARY}
+                            element={<RateSummary />}
+                        />
+                    </Routes>,
+                    {
+                        apolloProvider: {
+                            mocks: [
+                                fetchCurrentUserMock({
+                                    user: mockUser(),
+                                    statusCode: 200,
+                                }),
+                                fetchRateMockSuccess({
+                                    ...rateData,
+                                    id: '7a',
+                                }),
+                                fetchContractMockSuccess({ contract }),
+                            ],
+                        },
+                        routerProvider: {
+                            route: '/rates/7a',
+                        },
+                        location: (location) => (testLocation = location),
+                    }
+                )
+
+                await waitFor(() => {
+                    expect(
+                        screen.queryByRole('button', { name: 'Unlock rate' })
+                    ).toBeInTheDocument()
+                })
+
+                await userClickByRole(screen, 'button', {
+                    name: 'Unlock rate',
+                })
+                await waitFor(() => {
+                    const parentContractSubmissionID = rateData.parentContractID
+                    expect(testLocation.pathname).toBe(
+                        `/submissions/${parentContractSubmissionID}`
+                    )
+                })
+            })
+
+            it('does not render unlock button when linked rates on but standalone rate edit and unlock is still disabled if the associated contract is approved', async () => {
+                const rateData = rateWithHistoryMock()
+                rateData.parentContractID = contract.id
+
+                renderWithProviders(wrapInRoutes(<RateSummary />), {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                user: mockUser(),
+                                statusCode: 200,
+                            }),
+                            fetchRateMockSuccess({
+                                ...rateData,
+                                id: '7a',
+                            }),
+                            fetchContractMockSuccess({ contract }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/rates/7a',
+                    },
+                })
+
+                const unlockRateBtn = await screen.queryByRole('button', {
+                    name: 'Unlock rate',
+                })
+                expect(unlockRateBtn).not.toBeInTheDocument()
+            })
+            it('disables the unlock button for CMS users when rate already unlocked', async () => {
+                const rateData = rateUnlockedWithHistoryMock()
+                renderWithProviders(wrapInRoutes(<RateSummary />), {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                user: mockUser(),
+                                statusCode: 200,
+                            }),
+                            fetchRateMockSuccess({
+                                ...rateData,
+                                id: '7a',
+                                parentContractID: contract.id,
+                            }),
+                            fetchContractMockSuccess({ contract }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/rates/7a',
+                    },
+                    featureFlags: {
+                        'rate-edit-unlock': true,
+                        'withdraw-rate': true,
+                    },
+                })
+
+                await waitFor(() => {
+                    expect(
+                        screen.getByRole('button', {
+                            name: 'Unlock rate',
+                        })
+                    ).toHaveAttribute('aria-disabled', 'true')
+                })
+            })
+            it('should not display unlock rate button if parent contract has been approved', async () => {
+                const rate = rateDataMock()
+
+                renderWithProviders(wrapInRoutes(<RateSummary />), {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                user: mockUser(),
+                                statusCode: 200,
+                            }),
+                            fetchRateMockSuccess({
+                                ...rate,
+                                id: '7a',
+                                parentContractID: contract.id,
+                                status: 'SUBMITTED',
+                            }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    ...contract,
+                                    reviewStatus: 'APPROVED',
+                                    consolidatedStatus: 'APPROVED',
+                                },
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/rates/7a',
+                    },
+                    featureFlags: { 'rate-edit-unlock': true },
+                })
+
+                // Wait for all the documents to be in the table
+                await screen.findByText(
+                    rate.revisions[0].formData.rateDocuments[0].name
+                )
+                await screen.findByRole('link', {
+                    name: 'Download all rate documents',
+                })
+
+                expect(
+                    screen.queryByRole('link', { name: 'Unlock rate' })
+                ).not.toBeInTheDocument()
+            })
+
+            it('should not display withdraw rate button if rate is unlocked', async () => {
+                const rate = rateDataMock()
+
+                renderWithProviders(wrapInRoutes(<RateSummary />), {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                user: mockUser(),
+                                statusCode: 200,
+                            }),
+                            fetchRateMockSuccess({
+                                ...rate,
+                                id: '7a',
+                                parentContractID: contract.id,
+                                status: 'UNLOCKED',
+                            }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    ...contract,
+                                },
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/rates/7a',
+                    },
+                    featureFlags: { 'rate-edit-unlock': true },
+                })
+
+                // Wait for all the documents to be in the table
+                await screen.findByText(
+                    rate.revisions[0].formData.rateDocuments[0].name
+                )
+                await screen.findByRole('link', {
+                    name: 'Download all rate documents',
+                })
+
+                expect(
+                    screen.queryByRole('link', { name: 'Withdraw rate' })
+                ).not.toBeInTheDocument()
             })
         }
     )
@@ -351,5 +595,58 @@ describe('RateSummary', () => {
 
             expect(backLink).toHaveAttribute('href', '/dashboard')
         })
+
+        it.each(iterableNonCMSUsersMockData)(
+            'does not render actions section with buttons to $userRole',
+            async ({ mockUser }) => {
+                const rate = rateDataMock()
+
+                renderWithProviders(wrapInRoutes(<RateSummary />), {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                user: mockUser(),
+                                statusCode: 200,
+                            }),
+                            fetchRateMockSuccess({
+                                ...rate,
+                                id: '7a',
+                                parentContractID: contract.id,
+                                status: 'SUBMITTED',
+                            }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    ...contract,
+                                },
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/rates/7a',
+                    },
+                    featureFlags: {
+                        'rate-edit-unlock': true,
+                        'withdraw-rate': true,
+                    },
+                })
+
+                // Wait for rate name to be on screen
+                await screen.findByText(
+                    rate.revisions[0].formData.rateDocuments[0].name
+                )
+
+                expect(
+                    screen.queryByRole('heading', { name: 'Actions' })
+                ).not.toBeInTheDocument()
+
+                expect(
+                    screen.queryByRole('link', { name: 'Withdraw rate' })
+                ).not.toBeInTheDocument()
+
+                expect(
+                    screen.queryByRole('link', { name: 'Unlock rate' })
+                ).not.toBeInTheDocument()
+            }
+        )
     })
 })
