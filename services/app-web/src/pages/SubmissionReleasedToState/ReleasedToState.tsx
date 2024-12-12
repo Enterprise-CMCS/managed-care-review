@@ -28,21 +28,24 @@ import { usePage } from '../../contexts/PageContext'
 import { recordJSException } from '../../otelHelpers'
 import { useTealium } from '../../hooks'
 import * as Yup from 'yup'
-import { formatUserInputDate } from '../../formHelpers'
+import { formatUserInputDate, validateDateFormat } from '../../formHelpers'
 
 type ReleasedToStateValues = {
     dateApprovalReleasedToState: string
 }
 
 const today = new Date()
+Yup.addMethod(Yup.date, 'validateDateFormat', validateDateFormat)
+
 const ReleaseToStateSchema = Yup.object().shape({
     dateApprovalReleasedToState: Yup.date()
+        // .required('You must select a date')
+        .max(today.toString(), 'You must enter a valid date')
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore-next-line
         .validateDateFormat('YYYY-MM-DD', true)
         .typeError('Date must be in MM/DD/YYYY format')
-        .required('You must select a date')
-        .max(today, 'You must enter a valid date'),
+        .defined('You must enter a start date'),
 })
 
 type FormError =
@@ -53,9 +56,9 @@ const ReleasedToState = () => {
     const { updateHeading } = usePage()
     const { logFormSubmitEvent } = useTealium()
     const navigate = useNavigate()
-    const [shouldValidate, setShouldValidate] = React.useState(true)
+    const [shouldValidate, setShouldValidate] = React.useState(false)
 
-    const showFieldErrors = (error?: FormError) =>
+    const showFieldErrors = (error?: FormError): boolean | undefined =>
         shouldValidate && Boolean(error)
 
     const [approveContract, { error: approveError, loading: approveLoading }] =
@@ -110,7 +113,6 @@ const ReleasedToState = () => {
             event_name: 'form_field_submit',
             link_type: 'link_other',
         })
-        setShouldValidate(true)
         try {
             await approveContract({
                 variables: {
@@ -192,17 +194,18 @@ const ReleasedToState = () => {
                                 <p className="margin-bottom-0 margin-top-05 usa-hint">
                                     mm/dd/yyyy
                                 </p>
-                                <PoliteErrorMessage formFieldLabel="Date released to state">
-                                    {errors.dateApprovalReleasedToState}
-                                </PoliteErrorMessage>
+                                {showFieldErrors(
+                                    errors.dateApprovalReleasedToState
+                                ) && (
+                                    <PoliteErrorMessage formFieldLabel="Date released to state">
+                                        {errors.dateApprovalReleasedToState}
+                                    </PoliteErrorMessage>
+                                )}
                                 <DatePicker
                                     aria-required
                                     aria-describedby="dateApprovalReleasedToState"
                                     id="dateApprovalReleasedToState"
                                     name="dateApprovalReleasedToState"
-                                    maxDate={formatUserInputDate(
-                                        today.toString()
-                                    )}
                                     onChange={(val) =>
                                         setFieldValue(
                                             'dateApprovalReleasedToState',
@@ -229,6 +232,9 @@ const ReleasedToState = () => {
                                 <ActionButton
                                     type="submit"
                                     variant="default"
+                                    disabled={showFieldErrors(
+                                        errors.dateApprovalReleasedToState
+                                    )}
                                     data-testid="page-actions-right-primary"
                                     parent_component_type="page body"
                                     link_url={`/submissions/${id}`}
