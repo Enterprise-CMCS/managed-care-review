@@ -1,6 +1,6 @@
 import { screen, waitFor, within } from '@testing-library/react'
 import { Route, Routes } from 'react-router'
-import { RoutesRecord } from '../../constants'
+import { RoutesRecord } from '@mc-review/constants'
 import {
     fetchCurrentUserMock,
     fetchContractMockSuccess,
@@ -13,15 +13,15 @@ import {
     mockValidCMSUser,
     iterableNonCMSUsersMockData,
     mockContractPackageApproved,
-} from '../../testHelpers/apolloMocks'
+} from '@mc-review/mocks'
 import { renderWithProviders } from '../../testHelpers'
 import { SubmissionSummary } from './SubmissionSummary'
 import { SubmissionSideNav } from '../SubmissionSideNav'
 import { testS3Client } from '../../testHelpers'
-import { mockContractPackageUnlockedWithUnlockedType } from '../../testHelpers/apolloMocks'
+import { mockContractPackageUnlockedWithUnlockedType } from '@mc-review/mocks'
 import { ReviewSubmit } from '../StateSubmission/ReviewSubmit'
 import { generatePath, Location } from 'react-router-dom'
-import { dayjs } from '../../common-code/dateHelpers'
+import { dayjs } from '@mc-review/dates'
 
 describe('SubmissionSummary', () => {
     describe.each(iterableCmsUsersMockData)(

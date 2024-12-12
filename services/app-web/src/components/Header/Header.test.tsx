@@ -5,7 +5,7 @@ import {
     fetchCurrentUserMock,
     iterableAdminUsersMockData,
     iterableCmsUsersMockData,
-} from '../../testHelpers/apolloMocks'
+} from '@mc-review/mocks'
 import { Header } from './Header'
 
 describe('Header', () => {

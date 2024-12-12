@@ -1,7 +1,7 @@
 import { screen, waitFor } from '@testing-library/react'
 
 import { Route, Routes } from 'react-router-dom'
-import { RoutesRecord } from '../../../constants'
+import { RoutesRecord } from '@mc-review/constants'
 import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import { Contacts } from './'
 import userEvent from '@testing-library/user-event'
@@ -9,7 +9,7 @@ import {
     fetchCurrentUserMock,
     fetchContractMockSuccess,
     mockContractPackageUnlockedWithUnlockedType,
-} from '../../../testHelpers/apolloMocks'
+} from '@mc-review/mocks'
 
 describe('Contacts', () => {
     it('renders without errors', async () => {

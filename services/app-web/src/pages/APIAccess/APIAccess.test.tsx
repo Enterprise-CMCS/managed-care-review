@@ -1,13 +1,13 @@
 import { screen } from '@testing-library/react'
 import { Route, Routes } from 'react-router-dom'
-import { RoutesRecord } from '../../constants'
+import { RoutesRecord } from '@mc-review/constants'
 import { renderWithProviders } from '../../testHelpers'
 import {
     createAPIKeySuccess,
     fetchCurrentUserMock,
     createAPIKeyNetworkError,
     iterableCmsUsersMockData,
-} from '../../testHelpers/apolloMocks'
+} from '@mc-review/mocks'
 import { APIAccess } from './APIAccess'
 
 describe('APIAccess', () => {

@@ -7,11 +7,7 @@ import {
     Label,
 } from '@trussworks/react-uswds'
 import classnames from 'classnames'
-import {
-    ActuaryContact,
-    RateCapitationType,
-    RateType,
-} from '../../../common-code/healthPlanFormDataType'
+import { ActuaryContact, RateCapitationType, RateType } from '@mc-review/hpp'
 import {
     ButtonWithLogging,
     FieldRadio,
@@ -24,7 +20,8 @@ import {
 } from '../../../components'
 
 import styles from '../StateSubmissionForm.module.scss'
-import { formatUserInputDate, isDateRangeEmpty } from '../../../formHelpers'
+import { isDateRangeEmpty } from '../../../formHelpers'
+import { formatUserInputDate } from '@mc-review/dates'
 import {
     ACCEPTED_RATE_SUPPORTING_DOCS_FILE_TYPES,
     ACCEPTED_RATE_CERTIFICATION_FILE_TYPES,
@@ -38,10 +35,7 @@ import {
     getIn,
     useFormikContext,
 } from 'formik'
-import {
-    ActuaryCommunicationType,
-    SharedRateCertDisplay,
-} from '../../../common-code/healthPlanFormDataType/UnlockedHealthPlanFormDataType'
+import { ActuaryCommunicationType, SharedRateCertDisplay } from '@mc-review/hpp'
 import { ActuaryContactFields } from '../Contacts'
 import { useFocus } from '../../../hooks'
 

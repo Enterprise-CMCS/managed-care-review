@@ -1,4 +1,4 @@
-import statePrograms from '../../../../app-web/src/common-code/data/statePrograms.json'
+import { typedStatePrograms } from '@mc-review/hpp'
 import type { Resolvers, SubmissionReason } from '../../gen/gqlServer'
 import { GraphQLError } from 'graphql'
 import type {
@@ -62,7 +62,7 @@ function genericContractResolver<
         },
         state(parent: ParentType) {
             const packageState = parent.stateCode
-            const state = statePrograms.states.find(
+            const state = typedStatePrograms.states.find(
                 (st) => st.code === packageState
             )
 

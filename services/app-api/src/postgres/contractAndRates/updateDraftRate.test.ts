@@ -14,7 +14,7 @@ import { insertDraftContract } from './insertContract'
 
 describe('updateDraftRate', () => {
     afterEach(() => {
-        jest.clearAllMocks()
+        vi.clearAllMocks()
     })
 
     it('updates drafts correctly', async () => {
@@ -280,7 +280,7 @@ describe('updateDraftRate', () => {
     })
 
     it('returns an error when invalid form data for rate type provided', async () => {
-        jest.spyOn(console, 'error').mockImplementation()
+        vi.spyOn(console, 'error').mockImplementation(() => {})
         const client = await sharedTestPrismaClient()
         const draftContractData = mockInsertContractArgs({
             submissionDescription: 'one contract',
@@ -309,7 +309,7 @@ describe('updateDraftRate', () => {
     })
 
     it('returns an error when invalid rate ID provided', async () => {
-        jest.spyOn(console, 'error').mockImplementation()
+        vi.spyOn(console, 'error').mockImplementation(() => {})
         const client = await sharedTestPrismaClient()
 
         const draftRate = await updateDraftRate(client, {

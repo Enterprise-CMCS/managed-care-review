@@ -6,7 +6,7 @@ import {
 } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 
-import { parseKey } from '../common-code/s3URLEncoding'
+import { parseKey } from '@mc-review/helpers'
 import { BucketShortName, S3BucketConfigType } from './s3Amplify'
 import { S3ClientT } from './s3Client'
 import type { S3Error } from './s3Error'

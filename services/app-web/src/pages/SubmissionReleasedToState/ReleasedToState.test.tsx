@@ -5,19 +5,19 @@ import {
     fetchCurrentUserMock,
     mockContractPackageSubmittedWithQuestions,
     mockValidCMSUser,
-} from '../../testHelpers/apolloMocks'
+} from '@mc-review/mocks'
 import { Route, Routes } from 'react-router'
 import { SubmissionSideNav } from '../SubmissionSideNav'
-import { RoutesRecord } from '../../constants'
+import { RoutesRecord } from '@mc-review/constants'
 import { SubmissionSummary } from '../SubmissionSummary'
 import { ReleasedToState } from './ReleasedToState'
 import {
     approveContractMockFailure,
     approveContractMockSuccess,
-} from '../../testHelpers/apolloMocks/approveContractMocks'
+} from '@mc-review/mocks'
 import { Contract } from '../../gen/gqlClient'
 import { waitFor, screen } from '@testing-library/react'
-import { formatUserInputDate } from '../../formHelpers'
+import { formatUserInputDate } from '@mc-review/dates'
 
 describe('ReleasedToState', () => {
     it('can submit to mark submission as released to state', async () => {
@@ -344,6 +344,80 @@ describe('ReleasedToState', () => {
         await waitFor(() => {
             expect(
                 screen.getByText('You must enter a valid date')
+            ).toBeInTheDocument()
+        })
+    })
+
+    it('renders form validation error when required date release field is not in dd/mm/yyyy format', async () => {
+        const contract = mockContractPackageSubmittedWithQuestions(
+            'test-abc-123',
+            {
+                status: 'RESUBMITTED',
+                reviewStatus: 'UNDER_REVIEW',
+                consolidatedStatus: 'RESUBMITTED',
+                reviewStatusActions: [],
+            }
+        )
+        const { user } = renderWithProviders(
+            <Routes>
+                <Route element={<SubmissionSideNav />}>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                        element={<SubmissionSummary />}
+                    />
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_RELEASED_TO_STATE}
+                        element={<ReleasedToState />}
+                    />
+                </Route>
+            </Routes>,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockValidCMSUser(),
+                            statusCode: 200,
+                        }),
+                        fetchContractWithQuestionsMockSuccess({
+                            contract,
+                        }),
+                        fetchContractMockSuccess({
+                            contract,
+                        }),
+                    ],
+                },
+                routerProvider: {
+                    route: '/submissions/test-abc-123/released-to-state',
+                },
+                featureFlags: {
+                    'submission-approvals': true,
+                },
+            }
+        )
+
+        await waitFor(() => {
+            expect(
+                screen.getByText(
+                    'Are you sure you want to mark this submission as Released to the state?'
+                )
+            ).toBeInTheDocument()
+            expect(
+                screen.getByRole('button', { name: 'Released to state' })
+            ).toBeInTheDocument()
+        })
+
+        const releaseButton = screen.getByRole('button', {
+            name: 'Released to state',
+        })
+        await user.click(releaseButton)
+        // date validation with custom message is triggered only after
+        // validation triggered on submit with empty field
+        const dateInput = screen.getByTestId('date-picker-external-input')
+        await user.type(dateInput, 'pinepple')
+
+        await waitFor(() => {
+            expect(
+                screen.getByText('Date must be in MM/DD/YYYY format')
             ).toBeInTheDocument()
         })
     })

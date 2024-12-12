@@ -3,7 +3,7 @@ import { renderWithProviders } from '../../testHelpers/jestHelpers'
 import { AuthenticatedRouteWrapper } from './AuthenticatedRouteWrapper'
 import { createMocks } from 'react-idle-timer'
 import * as CognitoAuthApi from '../Auth/cognitoAuth'
-import { dayjs } from '../../common-code/dateHelpers'
+import { dayjs } from '@mc-review/dates'
 
 describe('AuthenticatedRouteWrapper and SessionTimeoutModal', () => {
     beforeAll(() => {

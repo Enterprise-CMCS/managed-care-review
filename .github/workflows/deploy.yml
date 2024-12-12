@@ -95,12 +95,12 @@ jobs:
       - name: Setup env
         uses: ./.github/actions/setup_env
 
-      - name: Generate GraphQL
-        run: pnpm -r gqlgen
+      - name: Generate Code
+        run: pnpm -r generate
 
-      - name: Generate Protos
-        working-directory: services/app-proto
-        run: pnpm generate
+      - name: Build packages
+        shell: bash
+        run: pnpm build:packages
 
       - name: Web Unit Tests
         id: web-unit-tests
@@ -168,12 +168,8 @@ jobs:
       - name: Setup env
         uses: ./.github/actions/setup_env
 
-      - name: Generate GraphQL
-        run: pnpm -r gqlgen
-
-      - name: Generate Protos
-        working-directory: services/app-proto
-        run: pnpm generate
+      - name: Generate code
+        run: pnpm -r generate
 
       - name: Generate Prisma
         env:
@@ -184,6 +180,10 @@ jobs:
         run: |
           pnpm generate
           npx prisma migrate reset --force
+
+      - name: Build packages
+        shell: bash
+        run: pnpm build:packages
 
       - name: API Unit Tests
         id: api-unit-tests
@@ -196,7 +196,7 @@ jobs:
         working-directory: services/app-api
         run: |
           set -e
-          pnpm test:coverage-ci
+          pnpm test:coverage
           exit $?
 
       - name: upload api test coverage
@@ -299,7 +299,7 @@ jobs:
       needs.api-unit-tests.result == 'success' &&
       needs.build-prisma-client-lambda-layer.result == 'success' &&
       needs.begin-deployment.result == 'success'
-    uses: Enterprise-CMCS/managed-care-review/.github/workflows/deploy-app-to-env.yml@main
+    uses: Enterprise-CMCS/managed-care-review/.github/workflows/deploy-app-to-env.yml@mt-common-code
     with:
       environment: dev
       stage_name: ${{ needs.begin-deployment.outputs.stage-name }}
@@ -491,6 +491,13 @@ jobs:
         with:
           name: cypress-gen
           path: ./services/cypress/gen
+
+      - name: Generate Code
+        run: pnpm -r generate
+
+      - name: Build packages
+        shell: bash
+        run: pnpm build:packages
 
       - name: Cypress -- Chrome
         id: cypress

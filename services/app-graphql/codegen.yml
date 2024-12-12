@@ -40,7 +40,62 @@ generates:
       - 'typescript-react-apollo'
     config:
       enumsAsTypes: true
+  ../../packages/common-code/src/gen/gqlClient.tsx:
+    documents:
+      - src/fragments/*.graphql
+      - src/queries/*.graphql
+      - src/mutations/*.graphql
+    plugins:
+      - 'typescript'
+      - 'typescript-operations'
+      - 'typescript-react-apollo'
+    config:
+      enumsAsTypes: true
+  ../../packages/helpers/src/gen/gqlClient.tsx:
+    documents:
+      - src/fragments/*.graphql
+      - src/queries/*.graphql
+      - src/mutations/*.graphql
+    plugins:
+      - 'typescript'
+      - 'typescript-operations'
+      - 'typescript-react-apollo'
+    config:
+      enumsAsTypes: true
+  ../../packages/constants/src/gen/gqlClient.tsx:
+    documents:
+      - src/fragments/*.graphql
+      - src/queries/*.graphql
+      - src/mutations/*.graphql
+    plugins:
+      - 'typescript'
+      - 'typescript-operations'
+      - 'typescript-react-apollo'
+    config:
+      enumsAsTypes: true
+  ../../packages/hpp/src/gen/gqlClient.tsx:
+    documents:
+      - src/fragments/*.graphql
+      - src/queries/*.graphql
+      - src/mutations/*.graphql
+    plugins:
+      - 'typescript'
+      - 'typescript-operations'
+      - 'typescript-react-apollo'
+    config:
+      enumsAsTypes: true
   ../cypress/gen/gqlClient.ts:
+    documents:
+      - src/fragments/*.graphql
+      - src/queries/*.graphql
+      - src/mutations/*.graphql
+    plugins:
+      - 'typescript'
+      - 'typescript-operations'
+      - 'typescript-react-apollo'
+    config:
+      enumsAsTypes: true
+  ../../packages/mocks/src/gen/gqlClient.tsx:
     documents:
       - src/fragments/*.graphql
       - src/queries/*.graphql
