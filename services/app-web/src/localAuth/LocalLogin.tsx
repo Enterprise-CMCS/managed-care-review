@@ -9,7 +9,7 @@ import {
     GridContainer,
 } from '@trussworks/react-uswds'
 import { useNavigate } from 'react-router-dom'
-import { RoutesRecord } from '../constants/routes'
+import { RoutesRecord } from '@mc-review/constants'
 import { loginLocalUser } from '.'
 import styles from './LocalLogin.module.scss'
 
@@ -26,7 +26,7 @@ import azulaAvatar from '../assets/images/azula.png'
 import { useAuth } from '../contexts/AuthContext'
 import { LocalUserType } from './LocalUserType'
 import { ButtonWithLogging, ErrorAlertSignIn } from '../components'
-import { recordJSException } from '../otelHelpers'
+import { recordJSException } from '@mc-review/otel'
 
 const localUsers: LocalUserType[] = [
     {

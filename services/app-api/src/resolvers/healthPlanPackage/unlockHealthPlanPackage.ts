@@ -1,6 +1,6 @@
 import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
-import type { UnlockedHealthPlanFormDataType } from '../../common-code/healthPlanFormDataType'
-import { toDomain } from '../../common-code/proto/healthPlanFormDataProto'
+import type { UnlockedHealthPlanFormDataType } from '@mc-review/hpp'
+import { toDomain } from '@mc-review/hpp'
 import type { UpdateInfoType, ContractType } from '../../domain-models'
 import {
     convertContractWithRatesToUnlockedHPP,
@@ -18,7 +18,7 @@ import {
     setSuccessAttributesOnActiveSpan,
 } from '../attributeHelper'
 import { GraphQLError } from 'graphql'
-import type { StateCodeType } from '../../common-code/healthPlanFormDataType'
+import type { StateCodeType } from '@mc-review/hpp'
 
 // unlockHealthPlanPackageResolver is a state machine transition for HealthPlanPackage
 export function unlockHealthPlanPackageResolver(

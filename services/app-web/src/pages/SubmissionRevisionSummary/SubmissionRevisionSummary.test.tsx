@@ -1,16 +1,16 @@
 import { screen, waitFor, within } from '@testing-library/react'
 import { Route, Routes } from 'react-router'
-import { RoutesRecord } from '../../constants/routes'
+import { RoutesRecord } from '@mc-review/constants'
 import {
     fetchCurrentUserMock,
     fetchContractMockSuccess,
     mockContractPackageSubmittedWithRevisions,
     iterableCmsUsersMockData,
-} from '../../testHelpers/apolloMocks'
+} from '@mc-review/mocks'
 import { renderWithProviders } from '../../testHelpers/jestHelpers'
 import { SubmissionRevisionSummary } from './SubmissionRevisionSummaryV2'
-import { formatCalendarDate } from '../../common-code/dateHelpers'
-import { mockContractPackageWithDifferentProgramsInRevisions } from '../../testHelpers/apolloMocks/contractPackageDataMock'
+import { formatCalendarDate } from '@mc-review/dates'
+import { mockContractPackageWithDifferentProgramsInRevisions } from '@mc-review/mocks'
 
 describe('SubmissionRevisionSummary', () => {
     describe.each(iterableCmsUsersMockData)(

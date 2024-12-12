@@ -14,7 +14,7 @@ import {
     useFetchContractWithQuestionsQuery,
 } from '../../../gen/gqlClient'
 import { GenericErrorPage } from '../../Errors/GenericErrorPage'
-import { hasCMSUserPermissions } from '../../../gqlHelpers'
+import { hasCMSUserPermissions } from '@mc-review/helpers'
 import { getUserDivision } from '../QuestionResponseHelpers'
 import { CMSQuestionResponseTable } from '../QATable/CMSQuestionResponseTable'
 import { StateQuestionResponseTable } from '../QATable/StateQuestionResponseTable'

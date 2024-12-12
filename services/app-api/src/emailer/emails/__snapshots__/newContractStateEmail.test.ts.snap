@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`renders overall email for a new package with a rate amendment as expected 1`] = `
 "MCR-MN-0004-SNBC was successfully submitted.

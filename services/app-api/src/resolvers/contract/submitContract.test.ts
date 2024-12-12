@@ -39,9 +39,9 @@ import {
 import { testLDService } from '../../testHelpers/launchDarklyHelpers'
 import { latestFormData } from '../../testHelpers/healthPlanPackageHelpers'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
-import dayjs from 'dayjs'
 import { testEmailConfig, testEmailer } from '../../testHelpers/emailerHelpers'
 import { NewPostgresStore } from '../../postgres'
+import { dayjs } from '@mc-review/dates'
 
 describe('submitContract', () => {
     const mockS3 = testS3Client()

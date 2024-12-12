@@ -7,7 +7,7 @@ import {
     mockUnlockedContract,
 } from '../../testHelpers/emailerHelpers'
 import { unlockContractCMSEmail } from './index'
-import { packageName } from '../../common-code/healthPlanFormDataType'
+import { packageName } from '@mc-review/hpp'
 const unlockData = {
     updatedBy: {
         email: 'leslie@example.com',

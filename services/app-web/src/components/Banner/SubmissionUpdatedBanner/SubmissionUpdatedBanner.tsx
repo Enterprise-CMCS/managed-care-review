@@ -3,8 +3,8 @@ import styles from '../Banner.module.scss'
 import { Alert } from '@trussworks/react-uswds'
 import { ExpandableText } from '../../ExpandableText'
 import { UpdateInformation, User } from '../../../gen/gqlClient'
-import { getUpdatedByDisplayName } from '../../../gqlHelpers/userHelpers'
-import { formatBannerDate } from '../../../common-code/dateHelpers'
+import { getUpdatedByDisplayName } from '@mc-review/helpers'
+import { formatBannerDate } from '@mc-review/dates'
 
 export type UpdatedProps = {
     loggedInUser?: User

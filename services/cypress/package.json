@@ -44,6 +44,7 @@
         "@cypress/code-coverage": "^3.10.0",
         "@testing-library/cypress": "^10.0.1",
         "axe-core": "^4.10.0",
+        "buffer": "^6.0.3",
         "c8": "^10.1.2",
         "cypress": "^13.13.2",
         "cypress-axe": "^1.5.0",
@@ -53,10 +54,12 @@
     },
     "dependencies": {
         "@apollo/client": "3.8.8",
+        "@mc-review/common-code": "workspace:*",
+        "@mc-review/hpp": "workspace:*",
+        "aws-amplify": "^5.0.10",
         "cypress-file-upload": "^5.0.8",
         "cypress-pipe": "^2.0.0",
-        "aws-amplify": "^5.0.10",
-        "axios": "^1.7.4",
+        "axios": "^1.7.9",
         "graphql": "^16.9.0"
     }
 }

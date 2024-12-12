@@ -2,7 +2,7 @@ import React from 'react'
 import styles from '../Banner.module.scss'
 import { Alert } from '@trussworks/react-uswds'
 import { LastUpdatedAnalystsType } from '../../../pages/Settings/Settings'
-import { recordJSException } from '../../../otelHelpers'
+import { recordJSException } from '@mc-review/otel'
 
 export const AssignedStaffUpdateBanner = ({
     className,

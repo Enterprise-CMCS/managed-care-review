@@ -1,11 +1,4 @@
-import {
-    Grid,
-    GridContainer,
-    Link,
-    ModalRef,
-    FormGroup,
-    Textarea,
-} from '@trussworks/react-uswds'
+import { Grid, GridContainer, Link, ModalRef } from '@trussworks/react-uswds'
 import React, { useEffect, useRef, useState } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
 import { ContractDetailsSummarySection } from '../StateSubmission/ReviewSubmit/ContractDetailsSummarySection'
@@ -17,61 +10,40 @@ import {
     SubmissionUpdatedBanner,
     DocumentWarningBanner,
     LinkWithLogging,
+    NavLinkWithLogging,
 } from '../../components'
-import { useTealium } from '../../hooks'
-import { useFormik } from 'formik'
-import { GenericApiErrorProps } from '../../components/Banner/GenericApiErrorBanner/GenericApiErrorBanner'
 import { Loading } from '../../components'
 import { usePage } from '../../contexts/PageContext'
-import { recordJSException } from '../../otelHelpers'
-import {
-    useFetchContractQuery,
-    UpdateInformation,
-    useApproveContractMutation,
-} from '../../gen/gqlClient'
+import { useFetchContractQuery, UpdateInformation } from '../../gen/gqlClient'
 import { ErrorForbiddenPage } from '../Errors/ErrorForbiddenPage'
 import { Error404 } from '../Errors/Error404Page'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import styles from './SubmissionSummary.module.scss'
 import { ChangeHistory } from '../../components/ChangeHistory'
-import {
-    ModalOpenButton,
-    UnlockSubmitModal,
-    Modal,
-} from '../../components/Modal'
-import { RoutesRecord } from '../../constants'
+import { ModalOpenButton, UnlockSubmitModal } from '../../components/Modal'
+import { RoutesRecord } from '@mc-review/constants'
 import { useRouteParams } from '../../hooks'
-import { getVisibleLatestContractFormData } from '../../gqlHelpers/contractsAndRates'
+import { getVisibleLatestContractFormData } from '@mc-review/helpers'
 import { generatePath, Navigate } from 'react-router-dom'
-import { hasCMSUserPermissions } from '../../gqlHelpers'
+import { hasCMSUserPermissions } from '@mc-review/helpers'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
-import { featureFlags } from '../../common-code/featureFlags'
+import { featureFlags } from '@mc-review/common-code'
 import { SubmissionApprovedBanner } from '../../components/Banner'
+
+export interface SubmissionSummaryFormValues {
+    dateApprovalReleasedToState: string
+}
 
 export const SubmissionSummary = (): React.ReactElement => {
     // Page level state
     const { updateHeading } = usePage()
     const modalRef = useRef<ModalRef>(null)
-    const approveModalRef = useRef<ModalRef>(null)
     const [documentError, setDocumentError] = useState(false)
     const { loggedInUser } = useAuth()
     const { id } = useRouteParams()
-    const [approveContract] = useApproveContractMutation()
-    const [modalAlert, setModalAlert] = useState<
-        GenericApiErrorProps | undefined
-    >(undefined)
-    const { logFormSubmitEvent } = useTealium()
     const hasCMSPermissions = hasCMSUserPermissions(loggedInUser)
     const isStateUser = loggedInUser?.role === 'STATE_USER'
     const isHelpDeskUser = loggedInUser?.role === 'HELPDESK_USER'
-    const formik = useFormik({
-        initialValues: {
-            approveModalInput: '',
-        },
-        onSubmit: (values) => approveContractAction(values.approveModalInput),
-    })
-    const [isSubmitting, setIsSubmitting] = useState(false) // mock same behavior as formik isSubmitting
-
     const ldClient = useLDClient()
 
     const submissionApprovalFlag = ldClient?.variation(
@@ -92,16 +64,19 @@ export const SubmissionSummary = (): React.ReactElement => {
         },
         fetchPolicy: 'network-only',
     })
+
     const contract = fetchContractData?.fetchContract.contract
     const name =
         contract && contract?.packageSubmissions.length > 0
             ? contract.packageSubmissions[0].contractRevision.contractName
             : ''
+
     useEffect(() => {
         updateHeading({
             customHeading: name,
         })
     }, [name, updateHeading])
+
     if (fetchContractLoading) {
         return (
             <GridContainer>
@@ -158,6 +133,7 @@ export const SubmissionSummary = (): React.ReactElement => {
         contract,
         isStateUser
     )
+
     if (
         !contractFormData ||
         !statePrograms ||
@@ -197,43 +173,11 @@ export const SubmissionSummary = (): React.ReactElement => {
     const showSubmissionApproval =
         submissionApprovalFlag &&
         hasCMSPermissions &&
-        contract.reviewStatus !== 'APPROVED'
+        !['APPROVED', 'UNLOCKED'].includes(contract.consolidatedStatus)
     const showApprovalBanner =
         submissionApprovalFlag &&
         contract.reviewStatus === 'APPROVED' &&
         latestContractAction
-
-    const approveContractAction = async (actionModalInput?: string) => {
-        logFormSubmitEvent({
-            heading: 'Approve submission',
-            form_name: 'Approve submission',
-            event_name: 'form_field_submit',
-            link_type: 'link_other',
-        })
-
-        setIsSubmitting(true)
-        try {
-            await approveContract({
-                variables: {
-                    input: {
-                        contractID: contract.id,
-                        updatedReason: actionModalInput,
-                    },
-                },
-            })
-            approveModalRef.current?.toggleModal(undefined, false)
-        } catch (err) {
-            recordJSException(
-                `RateDetails: Apollo error reported. Error message: Failed to create form data ${err}`
-            )
-            setModalAlert({
-                heading: 'Approve submission error',
-                message: err.message,
-                // When we have generic/unknown errors override any suggestions and display the fallback "please refresh text"
-                validationFail: false,
-            })
-        }
-    }
 
     const renderStatusAlerts = () => {
         if (showApprovalBanner) {
@@ -241,7 +185,9 @@ export const SubmissionSummary = (): React.ReactElement => {
                 <SubmissionApprovedBanner
                     updatedBy={latestContractAction.updatedBy}
                     updatedAt={latestContractAction.updatedAt}
-                    note={latestContractAction.updatedReason}
+                    dateReleasedToState={
+                        latestContractAction.dateApprovalReleasedToState
+                    }
                 />
             )
         }
@@ -279,63 +225,15 @@ export const SubmissionSummary = (): React.ReactElement => {
                 )}
 
                 {showSubmissionApproval && (
-                    <>
-                        <Grid
-                            className={styles.approveWithdrawButtonContainer}
-                            row
+                    <Grid className={styles.releaseToStateContainer} row>
+                        <NavLinkWithLogging
+                            className="usa-button"
+                            variant="unstyled"
+                            to={'./released-to-state'}
                         >
-                            <ModalOpenButton
-                                id="approval-modal-toggle-button"
-                                modalRef={approveModalRef}
-                                disabled={!isSubmitted}
-                                data-testid="approval-modal-toggle-button"
-                            >
-                                Release to state
-                            </ModalOpenButton>
-                        </Grid>
-                        <Modal
-                            id="approvalModal"
-                            modalRef={approveModalRef}
-                            onSubmit={() =>
-                                approveContractAction(
-                                    formik.values.approveModalInput
-                                )
-                            }
-                            modalHeading="Are you sure you want to mark this submission as Released to the state?"
-                            onSubmitText="Release to state"
-                            submitButtonProps={{ variant: 'default' }}
-                            className={styles.approvalModal}
-                            modalAlert={modalAlert}
-                            isSubmitting={isSubmitting}
-                        >
-                            <form>
-                                <p>
-                                    Once you select Released to state, the
-                                    status will change from Submitted to
-                                    Approved on the dashboard. This submission
-                                    should only be marked as released after the
-                                    approval letter has been released to the
-                                    state.
-                                </p>
-                                <p className="margin-bottom-0">
-                                    Provide an optional note
-                                </p>
-                                <FormGroup>
-                                    <Textarea
-                                        id="approveModalInput"
-                                        name="approveModalInput"
-                                        data-testid="approveModalInput"
-                                        aria-required={false}
-                                        error={false}
-                                        onChange={formik.handleChange}
-                                        defaultValue={
-                                            formik.values.approveModalInput
-                                        }
-                                    />
-                                </FormGroup>
-                            </form>
-                        </Modal>
-                    </>
+                            Released to state
+                        </NavLinkWithLogging>
+                    </Grid>
                 )}
 
                 <SubmissionTypeSummarySection

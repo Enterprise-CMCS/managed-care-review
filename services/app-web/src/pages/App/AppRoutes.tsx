@@ -3,8 +3,8 @@ import { useLocation, Navigate } from 'react-router'
 import { Route, Routes } from 'react-router-dom'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { idmRedirectURL } from '../../pages/Auth/cognitoAuth'
-import { assertNever, AuthModeType } from '../../common-code/config'
-import { PageTitlesRecord, RoutesRecord, RouteT } from '../../constants/routes'
+import { assertNever, AuthModeType } from '@mc-review/common-code'
+import { PageTitlesRecord, RoutesRecord, RouteT } from '@mc-review/constants'
 import { getRouteName } from '../../routeHelpers'
 import { useAuth } from '../../contexts/AuthContext'
 import { usePage } from '../../contexts/PageContext'
@@ -27,9 +27,9 @@ import { NewStateSubmissionForm, StateSubmissionForm } from '../StateSubmission'
 import { SubmissionSummary } from '../SubmissionSummary'
 import { SubmissionRevisionSummary } from '../SubmissionRevisionSummary'
 import { useScrollToPageTop } from '../../hooks/useScrollToPageTop'
-import { featureFlags } from '../../common-code/featureFlags'
+import { featureFlags } from '@mc-review/common-code'
 import { useLocalStorage } from '../../hooks/useLocalStorage'
-import { recordJSException } from '../../otelHelpers'
+import { recordJSException } from '@mc-review/otel'
 import { SubmissionSideNav } from '../SubmissionSideNav'
 import {
     ContractQuestionResponse,
@@ -54,6 +54,7 @@ import {
 import { RateSummarySideNav } from '../SubmissionSideNav/RateSummarySideNav'
 import { RateQuestionResponse } from '../QuestionResponse/QuestionResponseSummary/RateQuestionResponse'
 import { UploadRateResponse } from '../QuestionResponse/UploadResponse/UploadRateResponse'
+import { ReleasedToState } from '../SubmissionReleasedToState/ReleasedToState'
 
 function componentForAuthMode(
     authMode: AuthModeType
@@ -187,6 +188,13 @@ const CMSUserRoutes = ({
     setAlert?: React.Dispatch<React.ReactElement>
     stageName?: string
 }): React.ReactElement => {
+    // feature flag
+    const ldClient = useLDClient()
+    const showApprovals: boolean = ldClient?.variation(
+        featureFlags.SUBMISSION_APPROVALS.flag,
+        featureFlags.SUBMISSION_APPROVALS.defaultValue
+    )
+
     return (
         <AuthenticatedRouteWrapper>
             <Routes>
@@ -260,6 +268,13 @@ const CMSUserRoutes = ({
                     path={RoutesRecord.REPLACE_RATE}
                     element={<ReplaceRate />}
                 />
+
+                {showApprovals && (
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_RELEASED_TO_STATE}
+                        element={<ReleasedToState />}
+                    />
+                )}
 
                 <Route
                     path={RoutesRecord.SUBMISSIONS_REVISION}

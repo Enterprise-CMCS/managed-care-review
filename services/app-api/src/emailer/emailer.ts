@@ -15,7 +15,7 @@ import {
     sendQuestionResponseCMSEmail,
     sendQuestionResponseStateEmail,
 } from './'
-import type { UnlockedHealthPlanFormDataType } from '../common-code/healthPlanFormDataType'
+import type { UnlockedHealthPlanFormDataType } from '@mc-review/hpp'
 import type {
     UpdateInfoType,
     ProgramType,

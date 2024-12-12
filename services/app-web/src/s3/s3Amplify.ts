@@ -1,9 +1,12 @@
-import { parseKey } from '../common-code/s3URLEncoding'
+import { parseKey } from '@mc-review/helpers'
 import { Storage, API } from 'aws-amplify'
 import { v4 as uuidv4 } from 'uuid'
 import type { S3ClientT } from './s3Client'
 import type { S3Error } from './s3Error'
-import { recordJSException, recordJSExceptionWithContext } from '../otelHelpers'
+import {
+    recordJSException,
+    recordJSExceptionWithContext,
+} from '@mc-review/otel'
 
 // TYPES AND TYPE GUARDS
 type s3PutError = {

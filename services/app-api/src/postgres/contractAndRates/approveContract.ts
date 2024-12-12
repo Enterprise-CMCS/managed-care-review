@@ -8,7 +8,7 @@ async function approveContractInsideTransaction(
     tx: PrismaTransactionType,
     args: ApproveContractArgsType
 ): Promise<ContractType | Error> {
-    const { contractID, updatedByID, updatedReason } = args
+    const { contractID, updatedByID, dateApprovalReleasedToState } = args
     try {
         const contract = await tx.contractTable.findFirst({
             where: {
@@ -29,7 +29,7 @@ async function approveContractInsideTransaction(
         const approvalNotice = await tx.contractActionTable.create({
             data: {
                 updatedByID: updatedByID,
-                updatedReason: updatedReason || '',
+                dateApprovalReleasedToState: dateApprovalReleasedToState,
                 actionType: 'MARK_AS_APPROVED',
                 contractID: contractID,
             },
@@ -56,7 +56,7 @@ async function approveContractInsideTransaction(
 type ApproveContractArgsType = {
     contractID: string
     updatedByID: string
-    updatedReason: string | undefined
+    dateApprovalReleasedToState: Date
 }
 
 async function approveContract(

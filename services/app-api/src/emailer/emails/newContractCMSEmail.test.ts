@@ -7,9 +7,9 @@ import {
     mockMNState,
     mockMSState,
 } from '../../testHelpers/emailerHelpers'
-import type { ContractType, RateFormDataType } from '../../domain-models'
-import { packageName } from '../../common-code/healthPlanFormDataType'
 import { newContractCMSEmail } from './index'
+import type { ContractType, RateFormDataType } from '../../domain-models'
+import { packageName } from '@mc-review/hpp'
 
 test('to addresses list includes review team email addresses', async () => {
     const sub = mockContract()

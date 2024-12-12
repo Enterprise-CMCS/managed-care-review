@@ -9,7 +9,7 @@ import { isStateUser } from '../../domain-models'
 import { logError, logSuccess } from '../../logger'
 import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
 import type { State } from '../../gen/gqlServer'
-import { pluralize } from '../../../../app-web/src/common-code/formatters'
+import { pluralize } from '@mc-review/common-code'
 import type { InsertContractArgsType } from '../../postgres'
 import { GraphQLError } from 'graphql/index'
 

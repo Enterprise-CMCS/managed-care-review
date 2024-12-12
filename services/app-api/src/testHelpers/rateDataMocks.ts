@@ -4,7 +4,7 @@ import type {
     RateTableFullPayload,
     RateRevisionTableWithContracts,
 } from '../postgres/contractAndRates/prismaFullContractRateHelpers'
-import type { StateCodeType } from '../common-code/healthPlanFormDataType'
+import type { StateCodeType } from '@mc-review/hpp'
 import { findStatePrograms } from '../postgres'
 import { must } from './assertionHelpers'
 import type { RateFormDataInput } from '../gen/gqlServer'

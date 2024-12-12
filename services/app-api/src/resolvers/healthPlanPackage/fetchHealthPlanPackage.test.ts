@@ -1,5 +1,5 @@
 import { FetchHealthPlanPackageDocument } from '../../gen/gqlClient'
-import { base64ToDomain } from '../../common-code/proto/healthPlanFormDataProto'
+import { base64ToDomain } from '@mc-review/hpp'
 import { todaysDate } from '../../testHelpers/dateHelpers'
 import {
     constructTestPostgresServer,

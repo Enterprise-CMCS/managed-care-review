@@ -7,30 +7,43 @@ const statusSchema = z.union([
     z.literal('RESUBMITTED'),
 ])
 
-const reviewStatusSchema = z.union([
+const contractReviewStatusSchema = z.union([
     z.literal('UNDER_REVIEW'),
     z.literal('APPROVED'),
 ])
 
+const rateReviewStatusSchema = z.union([
+    z.literal('UNDER_REVIEW'),
+    z.literal('WITHDRAWN'),
+])
+
 const consolidatedContractStatusSchema = z.union([
-    z.literal('SUBMITTED'),
-    z.literal('DRAFT'),
-    z.literal('UNLOCKED'),
-    z.literal('RESUBMITTED'),
+    ...statusSchema.options,
     z.literal('APPROVED'),
+])
+
+const consolidatedRateStatusSchema = z.union([
+    ...statusSchema.options,
+    z.literal('WITHDRAWN'),
 ])
 
 const unlockedContractStatusSchema = z.union([
     z.literal('DRAFT'),
     z.literal('UNLOCKED'),
 ])
+
 type ConsolidatedContractStatusType = z.infer<
     typeof consolidatedContractStatusSchema
 >
-export type { ConsolidatedContractStatusType }
+
+type ConsolidatedRateStatusType = z.infer<typeof consolidatedRateStatusSchema>
+
+export type { ConsolidatedContractStatusType, ConsolidatedRateStatusType }
 export {
     statusSchema,
     unlockedContractStatusSchema,
-    reviewStatusSchema,
+    contractReviewStatusSchema,
     consolidatedContractStatusSchema,
+    consolidatedRateStatusSchema,
+    rateReviewStatusSchema,
 }

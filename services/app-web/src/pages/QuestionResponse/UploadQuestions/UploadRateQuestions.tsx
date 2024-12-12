@@ -8,8 +8,8 @@ import {
 } from '../../../gen/gqlClient'
 import { usePage } from '../../../contexts/PageContext'
 import { Breadcrumbs } from '../../../components/Breadcrumbs/Breadcrumbs'
-import { createRateQuestionWrapper } from '../../../gqlHelpers/mutationWrappersForUserFriendlyErrors'
-import { RoutesRecord } from '../../../constants'
+import { createRateQuestionWrapper } from '@mc-review/helpers'
+import { RoutesRecord } from '@mc-review/constants'
 import { UploadQuestionsForm } from './UploadQuestionsForm'
 import { FileItemT } from '../../../components'
 import { ErrorOrLoadingPage } from '../../StateSubmission'
@@ -116,6 +116,7 @@ export const UploadRateQuestions = () => {
     return (
         <div className={styles.uploadFormContainer}>
             <Breadcrumbs
+                className="usa-breadcrumb--wrap"
                 items={[
                     {
                         link: RoutesRecord.DASHBOARD_SUBMISSIONS,

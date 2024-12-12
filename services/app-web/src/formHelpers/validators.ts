@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import dayjs from 'dayjs'
+import { dayjs } from '@mc-review/dates'
 import * as Yup from 'yup'
 import {
     hasAtLeastOneFile,
@@ -75,8 +75,10 @@ const validateFileItemsListSingleUpload = ({
     required: boolean
 }) => {
     return Yup.mixed()
-        .test('is-not-empty', 'You must upload a rate certification', (value) =>
-            required ? hasAtLeastOneFile(value) : true
+        .test(
+            'is-not-empty',
+            'You must upload a rate certification',
+            (value) => (required ? hasAtLeastOneFile(value) : true)
         )
         .test(
             'is-not-loading',

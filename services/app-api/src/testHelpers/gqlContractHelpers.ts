@@ -28,10 +28,7 @@ import type {
     UnlockedContract,
 } from '../gen/gqlServer'
 import { latestFormData } from './healthPlanPackageHelpers'
-import type {
-    HealthPlanFormDataType,
-    StateCodeType,
-} from '../common-code/healthPlanFormDataType'
+import type { HealthPlanFormDataType, StateCodeType } from '@mc-review/hpp'
 import { addNewRateToTestContract } from './gqlRateHelpers'
 import type { ContractFormDataType } from '../domain-models'
 import type { CreateHealthPlanPackageInput } from '../gen/gqlServer'
@@ -188,9 +185,14 @@ async function fetchTestContract(
 
 async function approveTestContract(
     server: ApolloServer,
-    contractID: string
+    contractID: string,
+    dateApprovalReleasedToState?: string
 ): Promise<Contract> {
-    const input = { contractID }
+    const input = {
+        contractID,
+        dateApprovalReleasedToState:
+            dateApprovalReleasedToState || '2024-11-11',
+    }
     const result = await server.executeOperation({
         query: ApproveContractDocument,
         variables: { input },

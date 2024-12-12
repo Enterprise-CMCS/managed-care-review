@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`renders overall email as expected 1`] = `
 "Managed Care submission: <b>MCR-MN-0004-SNBC</b> was received from <b>MN</b>.

@@ -1,5 +1,5 @@
 import type { S3ClientT } from '../s3'
-import { parseKey } from '../common-code/s3URLEncoding'
+import { parseKey } from '@mc-review/helpers'
 
 export const testS3Client: () => S3ClientT = () => {
     let fakeKeyID = 0

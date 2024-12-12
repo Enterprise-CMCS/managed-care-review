@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import styles from '../SubmissionSummarySection.module.scss'
 import { DoubleColumnGrid } from '../../DoubleColumnGrid'
 import { DataDetail, DataDetailContactField } from '../../DataDetail'
-import { formatCalendarDate } from '../../../common-code/dateHelpers'
+import { formatCalendarDate } from '@mc-review/dates'
 import {
     ActuaryContact,
     ConsolidatedContractStatus,
@@ -18,19 +18,20 @@ import { renderDownloadButton } from './RateDetailsSummarySection'
 import { DocumentWarningBanner } from '../../Banner'
 import { useS3 } from '../../../contexts/S3Context'
 import useDeepCompareEffect from 'use-deep-compare-effect'
-import { recordJSException } from '../../../otelHelpers'
+import { recordJSException } from '@mc-review/otel'
 import { Grid } from '@trussworks/react-uswds'
 import { useNavigate } from 'react-router-dom'
 import { UploadedDocumentsTableProps } from '../UploadedDocumentsTable/UploadedDocumentsTable'
 import { useAuth } from '../../../contexts/AuthContext'
 import { SectionCard } from '../../SectionCard'
 import { UnlockRateButton } from './UnlockRateButton'
-import { ActuaryCommunicationRecord, ERROR_MESSAGES } from '../../../constants'
-import { handleApolloErrorsAndAddUserFacingMessages } from '../../../gqlHelpers/mutationWrappersForUserFriendlyErrors'
+import { ActuaryCommunicationRecord } from '@mc-review/hpp'
+import { ERROR_MESSAGES } from '@mc-review/constants'
+import { handleApolloErrorsAndAddUserFacingMessages } from '@mc-review/helpers'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
-import { featureFlags } from '../../../common-code/featureFlags'
+import { featureFlags } from '@mc-review/common-code'
 import { NavLinkWithLogging } from '../../TealiumLogging'
-import { hasCMSUserPermissions } from '../../../gqlHelpers'
+import { hasCMSUserPermissions } from '@mc-review/helpers'
 
 const rateCapitationType = (formData: RateFormData) =>
     formData.rateCapitationType
@@ -249,20 +250,26 @@ export const SingleRateSummarySection = ({
                         'Unknown rate name'
                     }
                 >
-                    {isCMSUser &&
-                        showRateUnlock &&
-                        !parentContractIsApproved && (
-                            <UnlockRateButton
-                                disabled={isUnlocked || unlockLoading}
-                                onClick={handleUnlockRate}
-                            >
-                                Unlock rate
-                            </UnlockRateButton>
-                        )}
+                    {isCMSUser && showRateUnlock && (
+                        <UnlockRateButton
+                            disabled={
+                                isUnlocked ||
+                                unlockLoading ||
+                                parentContractIsApproved
+                            }
+                            onClick={handleUnlockRate}
+                        >
+                            Unlock rate
+                        </UnlockRateButton>
+                    )}
                     {/* This second option is an interim state for unlock rate button (when linked rates is turned on but unlock and edit rate is not available yet). Remove when rate unlock is permanently on. */}
                     {isCMSUser && !showRateUnlock && (
                         <UnlockRateButton
-                            disabled={isUnlocked || unlockLoading}
+                            disabled={
+                                isUnlocked ||
+                                unlockLoading ||
+                                parentContractIsApproved
+                            }
                             onClick={() => {
                                 navigate(
                                     `/submissions/${parentContractSubmissionID}`
