@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import * as ld from 'launchdarkly-js-client-sdk'
-import { AuthModeType } from '../common-code/config'
+import { AuthModeType } from '@mc-review/common-code'
 import { extendSession } from '../pages/Auth/cognitoAuth'
 import {
     FetchCurrentUserQuery,
@@ -10,8 +10,8 @@ import {
 } from '../gen/gqlClient'
 import { logoutLocalUser } from '../localAuth'
 import { signOut as cognitoSignOut } from '../pages/Auth/cognitoAuth'
-import { recordJSException } from '../otelHelpers/tracingHelper'
-import { handleApolloError } from '../gqlHelpers/apolloErrors'
+import { recordJSException } from '@mc-review/otel'
+import { handleApolloError } from '@mc-review/helpers'
 import { ApolloQueryResult } from '@apollo/client'
 
 // Constants and types

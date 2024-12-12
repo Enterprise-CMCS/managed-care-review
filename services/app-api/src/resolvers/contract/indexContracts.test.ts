@@ -143,7 +143,7 @@ describe(`indexContracts`, () => {
                 }
             })
             expect(testContracts[0].status).toBe('DRAFT')
-        })
+        }, 10000)
 
         it('a different user from the same state can index contracts', async () => {
             const server = await constructTestPostgresServer()

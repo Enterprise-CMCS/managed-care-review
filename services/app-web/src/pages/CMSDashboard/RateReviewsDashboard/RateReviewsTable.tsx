@@ -27,14 +27,14 @@ import {
     FilterOptionType,
     FilterDateRange,
 } from '../../../components/FilterAccordion'
-import { pluralize } from '../../../common-code/formatters'
+import { pluralize } from '@mc-review/common-code'
 import { DoubleColumnGrid } from '../../../components'
 import { FilterDateRangeRef } from '../../../components/FilterAccordion/FilterDateRange/FilterDateRange'
 import { Loading, NavLinkWithLogging } from '../../../components'
 import { useTealium } from '../../../hooks'
 import useDeepCompareEffect from 'use-deep-compare-effect'
 import { getTealiumFiltersChanged } from '../../../tealium/tealiumHelpers'
-import { formatCalendarDate } from '../../../common-code/dateHelpers'
+import { formatCalendarDate } from '@mc-review/dates'
 
 type RatingPeriodFilterType = [string, string] | []
 

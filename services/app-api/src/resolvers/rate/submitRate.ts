@@ -11,7 +11,7 @@ import { NotFoundError } from '../../postgres'
 import { GraphQLError } from 'graphql/index'
 import type { LDService } from '../../launchDarkly/launchDarkly'
 import { generateRateCertificationName } from './generateRateCertificationName'
-import { findStatePrograms } from '../../common-code/healthPlanFormDataType/findStatePrograms'
+import { findStatePrograms } from '@mc-review/hpp'
 import { nullsToUndefined } from '../../domain-models/nullstoUndefined'
 
 /*

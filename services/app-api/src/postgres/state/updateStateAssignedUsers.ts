@@ -1,6 +1,6 @@
 import { AuditAction } from '@prisma/client'
 import type { PrismaClient } from '@prisma/client'
-import type { StateCodeType } from '../../common-code/healthPlanFormDataType'
+import type { StateCodeType } from '@mc-review/hpp'
 import type { UserType } from '../../domain-models'
 import { NotFoundError, UserInputPostgresError } from '../postgresErrors'
 import type { PrismaTransactionType } from '../prismaTypes'

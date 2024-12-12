@@ -2,12 +2,12 @@ import { v4 as uuidv4 } from 'uuid'
 import { findStatePrograms, NewPostgresStore } from '../../postgres'
 import { submitContract } from '../../postgres/contractAndRates/submitContract'
 import { UpdateHealthPlanFormDataDocument } from '../../gen/gqlClient'
-import { domainToBase64 } from '../../common-code/proto/healthPlanFormDataProto'
-import { packageName } from '../../common-code/healthPlanFormDataType'
+import { domainToBase64 } from '@mc-review/hpp'
+import { packageName } from '@mc-review/hpp'
 import {
     basicLockedHealthPlanFormData,
     basicHealthPlanFormData,
-} from '../../common-code/healthPlanFormDataMocks'
+} from '@mc-review/hpp'
 import { latestFormData } from '../../testHelpers/healthPlanPackageHelpers'
 import {
     mockStoreThatErrors,
@@ -32,7 +32,7 @@ describe(`Tests UpdateHealthPlanFormData`, () => {
     const cmsUser = testCMSUser()
 
     beforeEach(() => {
-        jest.resetAllMocks()
+        vi.resetAllMocks()
     })
 
     it('updates valid scalar fields in the formData', async () => {

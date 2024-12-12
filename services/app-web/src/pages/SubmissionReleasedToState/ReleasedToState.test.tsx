@@ -5,19 +5,19 @@ import {
     fetchCurrentUserMock,
     mockContractPackageSubmittedWithQuestions,
     mockValidCMSUser,
-} from '../../testHelpers/apolloMocks'
+} from '@mc-review/mocks'
 import { Route, Routes } from 'react-router'
 import { SubmissionSideNav } from '../SubmissionSideNav'
-import { RoutesRecord } from '../../constants'
+import { RoutesRecord } from '@mc-review/constants'
 import { SubmissionSummary } from '../SubmissionSummary'
 import { ReleasedToState } from './ReleasedToState'
 import {
     approveContractMockFailure,
     approveContractMockSuccess,
-} from '../../testHelpers/apolloMocks/approveContractMocks'
+} from '@mc-review/mocks'
 import { Contract } from '../../gen/gqlClient'
 import { waitFor, screen } from '@testing-library/react'
-import { formatUserInputDate } from '../../formHelpers'
+import { formatUserInputDate } from '@mc-review/dates'
 
 describe('ReleasedToState', () => {
     it('can submit to mark submission as released to state', async () => {

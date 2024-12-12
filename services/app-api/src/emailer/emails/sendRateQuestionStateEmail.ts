@@ -7,7 +7,7 @@ import {
     renderTemplate,
     stripHTMLFromTemplate,
 } from '../templateHelpers'
-import { formatCalendarDate } from '../../common-code/dateHelpers'
+import { formatCalendarDate } from '@mc-review/dates'
 import { pruneDuplicateEmails } from '../formatters'
 import { rateQuestionResponseURL } from '../generateURLs'
 

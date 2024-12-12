@@ -1,5 +1,5 @@
-import { useState, useEffect} from 'react'
-import { usePage } from "../contexts/PageContext"
+import { useState, useEffect } from 'react'
+import { usePage } from '../contexts/PageContext'
 import {
     CreateContractInput,
     useFetchContractQuery,
@@ -13,18 +13,15 @@ import {
     StateContact,
     UnlockedContract,
     UpdateContractDraftRevisionInput,
-    ContractPackageSubmission
+    ContractPackageSubmission,
 } from '../gen/gqlClient'
-import {
-    wrapApolloResult,
-} from '../gqlHelpers/apolloQueryWrapper'
-import { recordJSException } from '../otelHelpers'
-import { handleApolloError } from '../gqlHelpers/apolloErrors'
+import { wrapApolloResult } from '@mc-review/helpers'
+import { recordJSException } from '@mc-review/otel'
+import { handleApolloError } from '@mc-review/helpers'
 import { ApolloError } from '@apollo/client'
 import type { InterimState } from '../pages/StateSubmission/ErrorOrLoadingPage'
 
-
-type  UseContractForm = {
+type UseContractForm = {
     draftSubmission?: UnlockedContract
     showPageErrorMessage: string | boolean
     previousDocuments?: string[]
@@ -32,16 +29,18 @@ type  UseContractForm = {
         input: UpdateContractDraftRevisionInput
     ) => Promise<Contract | Error>
     createDraft: (input: CreateContractInput) => Promise<Contract | Error>
-    interimState?:  InterimState
+    interimState?: InterimState
 }
 
-const documentsInput = (documents: GenericDocument[]): GenericDocumentInput[] => {
+const documentsInput = (
+    documents: GenericDocument[]
+): GenericDocumentInput[] => {
     return documents.map((doc) => {
         return {
             downloadURL: doc.downloadURL,
             name: doc.name,
             s3URL: doc.s3URL,
-            sha256: doc.sha256
+            sha256: doc.sha256,
         }
     })
 }
@@ -61,9 +60,13 @@ const useContractForm = (contractID?: string): UseContractForm => {
     let interimState: UseContractForm['interimState'] = undefined // enum to determine what Interim UI should override form page
     let draftSubmission: UseContractForm['draftSubmission'] = undefined // form data from current package revision, used to load form
     const previousDocuments: UseContractForm['previousDocuments'] = [] // used for document upload tables
-    const [showPageErrorMessage, setShowPageErrorMessage] = useState<boolean | string>(false) // string is a custom error message, defaults to generic of true
+    const [showPageErrorMessage, setShowPageErrorMessage] = useState<
+        boolean | string
+    >(false) // string is a custom error message, defaults to generic of true
     const { updateHeading } = usePage()
-    const [pkgNameForHeading, setPkgNameForHeading] = useState<string | undefined>(undefined)
+    const [pkgNameForHeading, setPkgNameForHeading] = useState<
+        string | undefined
+    >(undefined)
 
     useEffect(() => {
         updateHeading({ customHeading: pkgNameForHeading })
@@ -71,11 +74,18 @@ const useContractForm = (contractID?: string): UseContractForm => {
 
     const [createFormData] = useCreateContractMutation()
 
-    const createDraft: UseContractForm['createDraft']  = async (
+    const createDraft: UseContractForm['createDraft'] = async (
         input: CreateContractInput
     ): Promise<Contract | Error> => {
         setShowPageErrorMessage(false)
-        const { populationCovered, programIDs, riskBasedContract, submissionType, submissionDescription, contractType } = input
+        const {
+            populationCovered,
+            programIDs,
+            riskBasedContract,
+            submissionType,
+            submissionDescription,
+            contractType,
+        } = input
         try {
             const createResult = await createFormData({
                 variables: {
@@ -86,8 +96,9 @@ const useContractForm = (contractID?: string): UseContractForm => {
                         submissionType,
                         submissionDescription,
                         contractType,
+                    },
                 },
-            }})
+            })
             const createdSubmission: Contract | undefined =
                 createResult?.data?.createContract.contract
 
@@ -110,17 +121,33 @@ const useContractForm = (contractID?: string): UseContractForm => {
     }
     const [updateFormData] = useUpdateContractDraftRevisionMutation()
 
-    const updateDraft: UseContractForm['updateDraft']  = async (
+    const updateDraft: UseContractForm['updateDraft'] = async (
         input: UpdateContractDraftRevisionInput
     ): Promise<Contract | Error> => {
-
         setShowPageErrorMessage(false)
-        if (input.formData.contractDocuments && input.formData.contractDocuments.length > 0) {
-            input.formData.contractDocuments = documentsInput(input.formData.contractDocuments)
-        } if (input.formData.supportingDocuments && input.formData.supportingDocuments.length > 0) {
-            input.formData.supportingDocuments = documentsInput(input.formData.supportingDocuments)
-        } if (input.formData.stateContacts && input.formData.stateContacts.length > 0) {
-            input.formData.stateContacts = stateContactsInput(input.formData.stateContacts)
+        if (
+            input.formData.contractDocuments &&
+            input.formData.contractDocuments.length > 0
+        ) {
+            input.formData.contractDocuments = documentsInput(
+                input.formData.contractDocuments
+            )
+        }
+        if (
+            input.formData.supportingDocuments &&
+            input.formData.supportingDocuments.length > 0
+        ) {
+            input.formData.supportingDocuments = documentsInput(
+                input.formData.supportingDocuments
+            )
+        }
+        if (
+            input.formData.stateContacts &&
+            input.formData.stateContacts.length > 0
+        ) {
+            input.formData.stateContacts = stateContactsInput(
+                input.formData.stateContacts
+            )
         }
 
         try {
@@ -129,7 +156,7 @@ const useContractForm = (contractID?: string): UseContractForm => {
                     input: {
                         contractID: contractID ?? 'new-draft',
                         lastSeenUpdatedAt: input.lastSeenUpdatedAt,
-                        formData: input.formData
+                        formData: input.formData,
                     },
                 },
             })
@@ -151,57 +178,79 @@ const useContractForm = (contractID?: string): UseContractForm => {
             return new Error(serverError)
         }
     }
-    const results = wrapApolloResult(useFetchContractQuery({
-        variables: {
-            input: {
-                contractID: contractID ?? 'new-draft'
-            }
-        },
-        skip: !contractID
-    }))
+    const results = wrapApolloResult(
+        useFetchContractQuery({
+            variables: {
+                input: {
+                    contractID: contractID ?? 'new-draft',
+                },
+            },
+            skip: !contractID,
+        })
+    )
 
     const result = results.result
 
     if (result.status === 'LOADING') {
         interimState = 'LOADING'
-        return {interimState, createDraft, updateDraft, showPageErrorMessage }
+        return { interimState, createDraft, updateDraft, showPageErrorMessage }
     }
-    
+
     // apolloQueryWrapper returns an error if query has been skipped
     // because it's intended for query to be skipped when no contract id is passed
     // do not trip skipped as an error
     if (result.status === 'ERROR' && result.error.name !== 'SKIPPED') {
         const err = result.error
-        if (err instanceof ApolloError){
+        if (err instanceof ApolloError) {
             handleApolloError(err, true)
             if (err.graphQLErrors[0]?.extensions?.code === 'NOT_FOUND') {
-                    interimState = 'NOT_FOUND'
-                    return {interimState, createDraft, updateDraft,  showPageErrorMessage }
+                interimState = 'NOT_FOUND'
+                return {
+                    interimState,
+                    createDraft,
+                    updateDraft,
+                    showPageErrorMessage,
+                }
             }
         }
         if (err.name !== 'SKIPPED') {
             recordJSException(err)
             interimState = 'GENERIC_ERROR'
-            return { interimState, createDraft, updateDraft,  showPageErrorMessage}
+            return {
+                interimState,
+                createDraft,
+                updateDraft,
+                showPageErrorMessage,
+            }
         }
-        
-        return {interimState, createDraft, updateDraft, showPageErrorMessage}
+
+        return { interimState, createDraft, updateDraft, showPageErrorMessage }
     }
 
     if (result.status === 'SUCCESS') {
         const contract = result?.data?.fetchContract.contract
 
-        
-        if (!contract || !contract.draftRevision || !contract.draftRevision.formData || contract?.status === 'RESUBMITTED' || contract?.status === 'SUBMITTED') {
-            return {interimState, createDraft, updateDraft, showPageErrorMessage }
+        if (
+            !contract ||
+            !contract.draftRevision ||
+            !contract.draftRevision.formData ||
+            contract?.status === 'RESUBMITTED' ||
+            contract?.status === 'SUBMITTED'
+        ) {
+            return {
+                interimState,
+                createDraft,
+                updateDraft,
+                showPageErrorMessage,
+            }
         }
         const submissionName = contract.draftRevision?.contractName
         if (pkgNameForHeading !== submissionName) {
             setPkgNameForHeading(submissionName)
         }
-        
-        const rates:Rate[] = []
-        const packageSubmissions:ContractPackageSubmission[] = []
+
+        const rates: Rate[] = []
+        const packageSubmissions: ContractPackageSubmission[] = []
         const unlockedContract: UnlockedContract = {
             ...contract,
             id: contract!.id,
@@ -219,19 +268,33 @@ const useContractForm = (contractID?: string): UseContractForm => {
                 __typename: 'ContractRevision',
                 formData: {
                     ...contract.draftRevision.formData,
-                    __typename: 'ContractFormData'
-                }
+                    __typename: 'ContractFormData',
+                },
             },
             draftRates: contract.draftRates || rates,
-            packageSubmissions: contract.packageSubmissions || packageSubmissions,
-            __typename: 'UnlockedContract'
+            packageSubmissions:
+                contract.packageSubmissions || packageSubmissions,
+            __typename: 'UnlockedContract',
         }
         // set up data to return
         draftSubmission = unlockedContract
-        return {draftSubmission, previousDocuments,  updateDraft, createDraft, interimState, showPageErrorMessage }
+        return {
+            draftSubmission,
+            previousDocuments,
+            updateDraft,
+            createDraft,
+            interimState,
+            showPageErrorMessage,
+        }
     }
-    return {draftSubmission, previousDocuments,  updateDraft, createDraft, interimState, showPageErrorMessage }
-
+    return {
+        draftSubmission,
+        previousDocuments,
+        updateDraft,
+        createDraft,
+        interimState,
+        showPageErrorMessage,
+    }
 }
 
 export { useContractForm }

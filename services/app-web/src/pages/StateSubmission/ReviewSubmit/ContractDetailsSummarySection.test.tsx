@@ -5,13 +5,13 @@ import {
     fetchCurrentUserMock,
     mockContractPackageDraft,
     mockContractPackageSubmitted,
-} from '../../../testHelpers/apolloMocks'
+} from '@mc-review/mocks'
 import { testS3Client } from '../../../testHelpers/s3Helpers'
 import {
     StatutoryRegulatoryAttestation,
     StatutoryRegulatoryAttestationQuestion,
-} from '../../../constants/statutoryRegulatoryAttestation'
-import { mockContractFormData } from '../../../testHelpers/apolloMocks/contractPackageDataMock'
+} from '@mc-review/constants'
+import { mockContractFormData } from '@mc-review/mocks'
 
 describe('ContractDetailsSummarySection', () => {
     const defaultApolloMocks = {

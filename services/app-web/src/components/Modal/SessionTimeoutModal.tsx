@@ -3,7 +3,7 @@ import { ModalRef } from '@trussworks/react-uswds'
 import { Modal } from './Modal'
 import styles from './Modal.module.scss'
 import { useIdleTimerContext } from 'react-idle-timer'
-import dayjs from 'dayjs'
+import { dayjs } from '@mc-review/dates'
 import { SESSION_ACTIONS } from '../../pages/Wrapper/AuthenticatedRouteWrapper'
 
 type SessionTimeoutModalProps = {

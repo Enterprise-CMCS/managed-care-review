@@ -14,7 +14,7 @@ import {
 import { type ApolloServer } from 'apollo-server-lambda'
 import { fetchTestRateById, must } from '../../testHelpers'
 import { type ContractRevision } from '../../gen/gqlServer'
-import { type HealthPlanFormDataType } from '../../common-code/healthPlanFormDataType'
+import { type HealthPlanFormDataType } from '@mc-review/hpp'
 import { withdrawRateInsideTransaction } from '../../postgres/contractAndRates'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 import type { WithdrawDateArgsType } from '../../postgres/contractAndRates/withdrawRate'

@@ -17,7 +17,8 @@ import {
 } from '../../../components'
 
 import styles from '../StateSubmissionForm.module.scss'
-import { formatUserInputDate, isDateRangeEmpty } from '../../../formHelpers'
+import { isDateRangeEmpty } from '../../../formHelpers'
+import { formatUserInputDate } from '@mc-review/dates'
 import {
     ACCEPTED_RATE_SUPPORTING_DOCS_FILE_TYPES,
     ACCEPTED_RATE_CERTIFICATION_FILE_TYPES,

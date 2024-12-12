@@ -5,7 +5,7 @@ import styles from './Errors.module.scss'
 
 import { PageHeading } from '../../components/PageHeading'
 import { GridContainer } from '@trussworks/react-uswds'
-import { RoutesRecord } from '../../constants'
+import { RoutesRecord } from '@mc-review/constants'
 
 export const ErrorInvalidSubmissionStatus = (): React.ReactElement => {
     return (

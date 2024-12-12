@@ -10,8 +10,8 @@ import {
     mockValidCMSUser,
     mockValidHelpDeskUser,
     mockValidStateUser,
-} from '../../../testHelpers/apolloMocks'
-import { RoutesRecord } from '../../../constants'
+} from '@mc-review/mocks'
+import { RoutesRecord } from '@mc-review/constants'
 import { Location, Route, Routes } from 'react-router-dom'
 import { EditStateAssign } from './EditStateAssign'
 
@@ -20,7 +20,7 @@ import { User } from '../../../gen/gqlClient'
 import {
     updateStateAssignmentsMutationMockFailure,
     updateStateAssignmentsMutationMockSuccess,
-} from '../../../testHelpers/apolloMocks/userGQLMock'
+} from '@mc-review/mocks'
 import { Settings } from '../Settings'
 
 // Wrap test component in some top level routes to allow getParams to be tested

@@ -1,7 +1,6 @@
 export {
     formatForApi,
     formatForForm,
-    formatUserInputDate,
     formatFormDateForDomain,
 } from './formatters'
 export {
