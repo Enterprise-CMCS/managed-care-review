@@ -1,11 +1,11 @@
 import type { Resolvers } from '../../gen/gqlServer'
-import statePrograms from '../../../../app-web/src/common-code/data/statePrograms.json'
+import { typedStatePrograms } from '@mc-review/hpp'
 import type { CMSUsersUnionType } from '../../domain-models/UserType'
 
 function getStateAssignments(user: CMSUsersUnionType) {
     const userStates = user.stateAssignments
     const statesWithPrograms = userStates.map((userState) => {
-        const state = statePrograms.states.find(
+        const state = typedStatePrograms.states.find(
             (st) => st.code === userState.stateCode
         )
 
@@ -26,7 +26,9 @@ function getStateAssignments(user: CMSUsersUnionType) {
 export const stateUserResolver: Resolvers['StateUser'] = {
     state(parent) {
         const userState = parent.stateCode
-        const state = statePrograms.states.find((st) => st.code === userState)
+        const state = typedStatePrograms.states.find(
+            (st) => st.code === userState
+        )
 
         if (state === undefined) {
             return {

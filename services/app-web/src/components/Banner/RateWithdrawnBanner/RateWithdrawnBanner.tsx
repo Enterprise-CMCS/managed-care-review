@@ -3,8 +3,8 @@ import React from 'react'
 import { Alert } from '@trussworks/react-uswds'
 import styles from '../Banner.module.scss'
 import { ExpandableText } from '../../ExpandableText'
-import { formatBannerDate } from '../../../common-code/dateHelpers'
-import { getUpdatedByDisplayName } from '../../../gqlHelpers/userHelpers'
+import { formatBannerDate } from '@mc-review/dates'
+import { getUpdatedByDisplayName } from '@mc-review/helpers'
 
 export type RateWithdrawnProps = {
     withdrawInfo: UpdateInformation

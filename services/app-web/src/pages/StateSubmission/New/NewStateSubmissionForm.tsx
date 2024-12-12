@@ -4,14 +4,14 @@ import { DynamicStepIndicator } from '../../../components/DynamicStepIndicator'
 import {
     STATE_SUBMISSION_FORM_ROUTES,
     STATE_SUBMISSION_FORM_ROUTES_WITHOUT_SUPPORTING_DOCS,
-} from '../../../constants/routes'
+} from '@mc-review/constants'
 import stylesForm from '../StateSubmissionForm.module.scss'
 import stylesSideNav from '../../SubmissionSideNav/SubmissionSideNav.module.scss'
 import { FormContainer } from '../../../components/FormContainer/FormContainer'
 import { SubmissionType } from '../SubmissionType/SubmissionType'
 import { GridContainer } from '@trussworks/react-uswds'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
-import { featureFlags } from '../../../common-code/featureFlags'
+import { featureFlags } from '@mc-review/common-code'
 
 export const NewStateSubmissionForm = (): React.ReactElement => {
     const ldClient = useLDClient()

@@ -13,15 +13,15 @@ import {
     mockContractPackageSubmitted,
     rateDataMock,
     iterableNonCMSUsersMockData,
-} from '../../testHelpers/apolloMocks'
+} from '@mc-review/mocks'
 import { RateSummary } from './RateSummary'
-import { RoutesRecord } from '../../constants'
+import { RoutesRecord } from '@mc-review/constants'
 import { Location, Route, Routes } from 'react-router-dom'
 import { RateEdit } from '../RateEdit/RateEdit'
 import {
     rateUnlockedWithHistoryMock,
     rateWithHistoryMock,
-} from '../../testHelpers/apolloMocks/rateDataMock'
+} from '@mc-review/mocks'
 
 // Wrap test component in some top level routes to allow getParams to be tested
 const wrapInRoutes = (children: React.ReactNode) => {

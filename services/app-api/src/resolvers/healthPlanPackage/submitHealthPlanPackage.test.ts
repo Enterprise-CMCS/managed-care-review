@@ -17,8 +17,8 @@ import {
 } from '../../testHelpers/gqlHelpers'
 import { v4 as uuidv4 } from 'uuid'
 import { testEmailConfig, testEmailer } from '../../testHelpers/emailerHelpers'
-import { base64ToDomain } from '../../common-code/proto/healthPlanFormDataProto'
-import { packageName } from '../../common-code/healthPlanFormDataType'
+import { base64ToDomain } from '@mc-review/hpp'
+import { packageName } from '@mc-review/hpp'
 import {
     latestFormData,
     previousFormData,
@@ -57,7 +57,7 @@ describe(`Tests $testName`, () => {
 
     afterEach(async () => {
         await createDBUsersWithFullData([...assignedUsers, cmsUser])
-        jest.restoreAllMocks()
+        vi.resetAllMocks()
     })
     it('returns a StateSubmission if complete', async () => {
         const server = await constructTestPostgresServer()
@@ -1099,7 +1099,7 @@ describe(`Tests $testName`, () => {
     it('errors when SES email has failed.', async () => {
         const mockEmailer = testEmailer()
 
-        jest.spyOn(awsSESHelpers, 'testSendSESEmail').mockImplementation(
+        vi.spyOn(awsSESHelpers, 'testSendSESEmail').mockImplementation(
             async () => {
                 throw new Error('Network error occurred')
             }
@@ -1127,7 +1127,7 @@ describe(`Tests $testName`, () => {
         // expect sendEmail to have been called, so we know it did not error earlier
         expect(mockEmailer.sendEmail).toHaveBeenCalled()
 
-        jest.resetAllMocks()
+        vi.resetAllMocks()
 
         // expect correct graphql error.
         expect(submitResult.errors?.[0]).toEqual(

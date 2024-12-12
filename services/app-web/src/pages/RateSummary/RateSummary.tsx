@@ -15,18 +15,18 @@ import {
 } from '../../gen/gqlClient'
 import styles from '../SubmissionSummary/SubmissionSummary.module.scss'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
-import { ERROR_MESSAGES, RoutesRecord } from '../../constants'
+import { ERROR_MESSAGES, RoutesRecord } from '@mc-review/constants'
 import { SingleRateSummarySection } from '../../components/SubmissionSummarySection/RateDetailsSummarySection/SingleRateSummarySection'
 import { useAuth } from '../../contexts/AuthContext'
 import { ErrorForbiddenPage } from '../Errors/ErrorForbiddenPage'
 import { Error404 } from '../Errors/Error404Page'
 import { RateWithdrawnBanner } from '../../components/Banner'
-import { hasCMSUserPermissions } from '../../gqlHelpers'
+import { hasCMSUserPermissions } from '@mc-review/helpers'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
-import { featureFlags } from '../../common-code/featureFlags'
+import { featureFlags } from '@mc-review/common-code'
 import { UnlockRateButton } from '../../components/SubmissionSummarySection/RateDetailsSummarySection/UnlockRateButton'
-import { recordJSException } from '../../otelHelpers'
-import { handleApolloErrorsAndAddUserFacingMessages } from '../../gqlHelpers/mutationWrappersForUserFriendlyErrors'
+import { recordJSException } from '@mc-review/otel'
+import { handleApolloErrorsAndAddUserFacingMessages } from '@mc-review/helpers'
 
 export const RateSummary = (): React.ReactElement => {
     // Page level state

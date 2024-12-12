@@ -1,10 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import { SubmissionUnlockedBanner } from './SubmissionUnlockedBanner'
 import { UpdateInformation } from '../../../gen/gqlClient'
-import {
-    mockValidCMSUser,
-    mockValidStateUser,
-} from '../../../testHelpers/apolloMocks'
+import { mockValidCMSUser, mockValidStateUser } from '@mc-review/mocks'
 
 describe('SubmissionUnlockBanner', () => {
     const mockUnlockInfo = (

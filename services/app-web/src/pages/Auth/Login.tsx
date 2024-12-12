@@ -5,8 +5,8 @@ import { useNavigate } from 'react-router-dom'
 import { signIn } from '../Auth/cognitoAuth'
 import { useAuth } from '../../contexts/AuthContext'
 import { ButtonWithLogging, ErrorAlertSignIn } from '../../components'
-import { recordJSException } from '../../otelHelpers'
-import { RoutesRecord } from '../../constants'
+import { recordJSException } from '@mc-review/otel'
+import { RoutesRecord } from '@mc-review/constants'
 
 type Props = {
     defaultEmail?: string

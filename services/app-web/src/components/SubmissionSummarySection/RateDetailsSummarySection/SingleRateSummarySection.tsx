@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import styles from '../SubmissionSummarySection.module.scss'
 import { DoubleColumnGrid } from '../../DoubleColumnGrid'
 import { DataDetail, DataDetailContactField } from '../../DataDetail'
-import { formatCalendarDate } from '../../../common-code/dateHelpers'
+import { formatCalendarDate } from '@mc-review/dates'
 import {
     ActuaryContact,
     ContractRevision,
@@ -16,14 +16,14 @@ import { renderDownloadButton } from './RateDetailsSummarySection'
 import { DocumentWarningBanner } from '../../Banner'
 import { useS3 } from '../../../contexts/S3Context'
 import useDeepCompareEffect from 'use-deep-compare-effect'
-import { recordJSException } from '../../../otelHelpers'
+import { recordJSException } from '@mc-review/otel'
 import { Grid } from '@trussworks/react-uswds'
 import { UploadedDocumentsTableProps } from '../UploadedDocumentsTable/UploadedDocumentsTable'
 import { useAuth } from '../../../contexts/AuthContext'
 import { SectionCard } from '../../SectionCard'
-import { ActuaryCommunicationRecord } from '../../../constants'
+import { ActuaryCommunicationRecord } from '@mc-review/hpp'
 import { NavLinkWithLogging } from '../../TealiumLogging'
-import { hasCMSUserPermissions } from '../../../gqlHelpers'
+import { hasCMSUserPermissions } from '@mc-review/helpers'
 
 const rateCapitationType = (formData: RateFormData) =>
     formData.rateCapitationType

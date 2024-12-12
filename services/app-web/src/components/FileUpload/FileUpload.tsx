@@ -8,16 +8,16 @@ import {
     FileInputRef,
 } from '@trussworks/react-uswds'
 import { PoliteErrorMessage } from '../'
-import { recordJSException } from '../../otelHelpers'
+import { recordJSException } from '@mc-review/otel'
 
 import styles from './FileUpload.module.scss'
 
 import { FileItemT } from './FileProcessor/FileProcessor'
 import { FileItemsList } from './FileItemList/FileItemsList'
-import { pluralize } from '../../common-code/formatters'
+import { pluralize } from '@mc-review/common-code'
 
-import { recordUserInputException } from '../../otelHelpers'
-import { calculateSHA256 } from '../../common-code/sha/generateSha'
+import { recordUserInputException } from '@mc-review/otel'
+import { calculateSHA256 } from '@mc-review/common-code'
 
 export type S3FileData = {
     key: string

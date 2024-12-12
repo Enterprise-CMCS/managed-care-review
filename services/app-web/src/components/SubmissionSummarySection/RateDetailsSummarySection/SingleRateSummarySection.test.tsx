@@ -1,4 +1,4 @@
-import { renderWithProviders } from '../../../testHelpers/jestHelpers'
+import { renderWithProviders } from '../../../testHelpers'
 import { SingleRateSummarySection } from './SingleRateSummarySection'
 import {
     fetchCurrentUserMock,
@@ -6,9 +6,9 @@ import {
     mockValidCMSUser,
     mockValidHelpDeskUser,
     mockValidStateUser,
-} from '../../../testHelpers/apolloMocks'
+} from '@mc-review/mocks'
 import { screen, within } from '@testing-library/react'
-import { rateWithHistoryMock } from '../../../testHelpers/apolloMocks/rateDataMock'
+import { rateWithHistoryMock } from '@mc-review/mocks'
 
 describe('SingleRateSummarySection', () => {
     it('can render rate details without errors', async () => {

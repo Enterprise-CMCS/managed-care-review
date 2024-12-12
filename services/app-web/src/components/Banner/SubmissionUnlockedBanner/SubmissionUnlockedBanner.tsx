@@ -1,11 +1,11 @@
 import React from 'react'
 import styles from '../Banner.module.scss'
 import { Alert } from '@trussworks/react-uswds'
-import { formatBannerDate } from '../../../common-code/dateHelpers'
+import { formatBannerDate } from '@mc-review/dates'
 import { ExpandableText } from '../../ExpandableText'
 import { UpdateInformation, User } from '../../../gen/gqlClient'
-import { getUpdatedByDisplayName } from '../../../gqlHelpers/userHelpers'
-import { hasCMSUserPermissions } from '../../../gqlHelpers/userHelpers'
+import { getUpdatedByDisplayName } from '@mc-review/helpers'
+import { hasCMSUserPermissions } from '@mc-review/helpers'
 
 export type UnlockedProps = {
     loggedInUser?: User

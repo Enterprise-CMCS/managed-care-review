@@ -1,8 +1,5 @@
 import { screen } from '@testing-library/react'
-import {
-    ActuaryContact,
-    StateContact,
-} from '../../../common-code/healthPlanFormDataType'
+import { ActuaryContact, StateContact } from '@mc-review/hpp'
 
 import { DataDetailContactField } from './DataDetailContactField'
 import { renderWithProviders } from '../../../testHelpers'

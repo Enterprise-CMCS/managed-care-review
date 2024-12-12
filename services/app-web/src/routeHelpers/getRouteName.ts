@@ -1,5 +1,5 @@
 import { matchPath, PathMatch } from 'react-router'
-import { RouteT, RoutesRecord, ROUTES } from '../constants/routes'
+import { RouteT, RoutesRecord, ROUTES } from '@mc-review/constants'
 import { isWildcardPath } from './isWildcardPath'
 /* 
     Calculate the route name for a path (often from the current location). Relies on react-router matchPath. 

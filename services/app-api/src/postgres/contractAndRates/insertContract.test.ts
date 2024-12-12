@@ -2,11 +2,11 @@ import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 import { must, mockInsertContractArgs, getStateRecord } from '../../testHelpers'
 import { insertDraftContract } from './insertContract'
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'
-import type { StateCodeType } from '../../common-code/healthPlanFormDataType'
+import type { StateCodeType } from '@mc-review/hpp'
 
 describe('insertContract', () => {
     afterEach(() => {
-        jest.clearAllMocks()
+        vi.clearAllMocks()
     })
 
     it('creates a new draft contract', async () => {
@@ -74,7 +74,7 @@ describe('insertContract', () => {
         )
     })
     it('returns an error when invalid state code is provided', async () => {
-        jest.spyOn(console, 'error').mockImplementation()
+        vi.spyOn(console, 'error').mockImplementation(() => {})
         const client = await sharedTestPrismaClient()
 
         const draftContractData = mockInsertContractArgs({

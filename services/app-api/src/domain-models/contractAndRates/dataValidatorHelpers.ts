@@ -1,10 +1,7 @@
-import type { FeatureFlagSettings } from '../../common-code/featureFlags'
+import type { FeatureFlagSettings } from '@mc-review/common-code'
 import type { ContractDraftRevisionFormDataInput } from '../../gen/gqlServer'
 import { contractFormDataSchema, preprocessNulls } from './formDataTypes'
-import {
-    contractTypeSchema,
-    populationCoveredSchema,
-} from '../../common-code/proto/healthPlanFormDataProto/zodSchemas'
+import { contractTypeSchema, populationCoveredSchema } from '@mc-review/hpp'
 import { z } from 'zod'
 import type { Store } from '../../postgres'
 
