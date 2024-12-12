@@ -15,7 +15,6 @@ export const UnlockRateButton = ({
         <ActionButton
             {...props}
             type="button"
-            variant="outline"
             disabled={disabled}
             onClick={onClick}
         >

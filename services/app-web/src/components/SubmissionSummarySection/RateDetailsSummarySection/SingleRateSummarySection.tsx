@@ -5,12 +5,10 @@ import { DataDetail, DataDetailContactField } from '../../DataDetail'
 import { formatCalendarDate } from '../../../common-code/dateHelpers'
 import {
     ActuaryContact,
-    ConsolidatedContractStatus,
     ContractRevision,
     Program,
     Rate,
     RateFormData,
-    useUnlockRateMutation,
 } from '../../../gen/gqlClient'
 import { UploadedDocumentsTable } from '../UploadedDocumentsTable'
 import { SectionHeader } from '../../SectionHeader'
@@ -20,15 +18,10 @@ import { useS3 } from '../../../contexts/S3Context'
 import useDeepCompareEffect from 'use-deep-compare-effect'
 import { recordJSException } from '../../../otelHelpers'
 import { Grid } from '@trussworks/react-uswds'
-import { useNavigate } from 'react-router-dom'
 import { UploadedDocumentsTableProps } from '../UploadedDocumentsTable/UploadedDocumentsTable'
 import { useAuth } from '../../../contexts/AuthContext'
 import { SectionCard } from '../../SectionCard'
-import { UnlockRateButton } from './UnlockRateButton'
-import { ActuaryCommunicationRecord, ERROR_MESSAGES } from '../../../constants'
-import { handleApolloErrorsAndAddUserFacingMessages } from '../../../gqlHelpers/mutationWrappersForUserFriendlyErrors'
-import { useLDClient } from 'launchdarkly-react-client-sdk'
-import { featureFlags } from '../../../common-code/featureFlags'
+import { ActuaryCommunicationRecord } from '../../../constants'
 import { NavLinkWithLogging } from '../../TealiumLogging'
 import { hasCMSUserPermissions } from '../../../gqlHelpers'
 
@@ -95,16 +88,12 @@ export const SingleRateSummarySection = ({
     rate,
     isSubmitted,
     statePrograms,
-    parentContractStatus,
 }: {
     rate: Rate
     isSubmitted: boolean
     statePrograms: Program[]
-    parentContractStatus: ConsolidatedContractStatus
 }): React.ReactElement | null => {
     const { loggedInUser } = useAuth()
-    const navigate = useNavigate()
-    const parentContractIsApproved = parentContractStatus === 'APPROVED'
     const latestSubmission = rate.packageSubmissions?.[0]
     if (!latestSubmission) {
         // This is unusual and ugly, we try not to throw ever, but we can't early return here.
@@ -119,7 +108,6 @@ export const SingleRateSummarySection = ({
     const lastSubmittedDate = latestSubmission.submitInfo.updatedAt
 
     const isRateAmendment = formData.rateType === 'AMENDMENT'
-    const isUnlocked = rate.status === 'UNLOCKED'
     const explainMissingData =
         !isSubmitted &&
         (loggedInUser?.role === 'STATE_USER' ||
@@ -129,13 +117,6 @@ export const SingleRateSummarySection = ({
         rate.status === 'SUBMITTED' ||
         rate.status === 'RESUBMITTED' ||
         isCMSUser
-
-    // feature flags
-    const ldClient = useLDClient()
-    const showRateUnlock: boolean = ldClient?.variation(
-        featureFlags.RATE_EDIT_UNLOCK.flag,
-        featureFlags.RATE_EDIT_UNLOCK.defaultValue
-    )
 
     const linkedContracts = latestSubmission.contractRevisions
 
@@ -167,10 +148,7 @@ export const SingleRateSummarySection = ({
     }
 
     const validateActuary = (actuary: ActuaryContact): boolean => {
-        if (!actuary?.name || !actuary?.email) {
-            return false
-        }
-        return true
+        return !(!actuary?.name || !actuary?.email)
     }
 
     useDeepCompareEffect(() => {
@@ -208,35 +186,6 @@ export const SingleRateSummarySection = ({
     }, [getKey, getBulkDlURL, formData])
     // END bulk download logic
 
-    const [unlockRate, { loading: unlockLoading }] = useUnlockRateMutation()
-
-    const handleUnlockRate = async () => {
-        try {
-            const { data } = await unlockRate({
-                variables: {
-                    input: {
-                        rateID: rate.id,
-                        unlockedReason: '',
-                    },
-                },
-            })
-
-            if (data?.unlockRate.rate) {
-                // don't do anything, eventually this entire function will be in the modal
-            } else {
-                recordJSException(
-                    `[UNEXPECTED]: Error attempting to unlock rate, no data present.`
-                )
-                return new Error(ERROR_MESSAGES.unlock_error_generic)
-            }
-        } catch (error) {
-            return handleApolloErrorsAndAddUserFacingMessages(
-                error,
-                'UNLOCK_RATE'
-            )
-        }
-    }
-    const parentContractSubmissionID = rate.parentContractID
     return (
         <React.Fragment key={rate.id}>
             <SectionCard
@@ -248,38 +197,7 @@ export const SingleRateSummarySection = ({
                         rate.revisions[0].formData.rateCertificationName ||
                         'Unknown rate name'
                     }
-                >
-                    {isCMSUser && showRateUnlock && (
-                        <UnlockRateButton
-                            disabled={
-                                isUnlocked ||
-                                unlockLoading ||
-                                parentContractIsApproved
-                            }
-                            onClick={handleUnlockRate}
-                        >
-                            Unlock rate
-                        </UnlockRateButton>
-                    )}
-                    {/* This second option is an interim state for unlock rate button (when linked rates is turned on but unlock and edit rate is not available yet). Remove when rate unlock is permanently on. */}
-                    {isCMSUser && !showRateUnlock && (
-                        <UnlockRateButton
-                            disabled={
-                                isUnlocked ||
-                                unlockLoading ||
-                                parentContractIsApproved
-                            }
-                            onClick={() => {
-                                navigate(
-                                    `/submissions/${parentContractSubmissionID}`
-                                )
-                            }}
-                            link_url={`/submissions/${parentContractSubmissionID}`}
-                        >
-                            Unlock rate
-                        </UnlockRateButton>
-                    )}
-                </SectionHeader>
+                />
                 {documentError && (
                     <DocumentWarningBanner className={styles.banner} />
                 )}
