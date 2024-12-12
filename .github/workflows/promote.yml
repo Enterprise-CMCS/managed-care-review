@@ -268,10 +268,12 @@ jobs:
           name: cypress-gen deploy prod
           path: ./services/cypress/gen
 
-      - name: Cypress chrome fix
-        run: |
-          export DISPLAY=:1
-          Xvfb :1 -screen 0 1024x768x16 2>/dev/null &
+      - name: Generate Code
+        run: pnpm -r generate
+
+      - name: Build packages
+        shell: bash
+        run: pnpm build:packages
 
       - name: Cypress on Prod -- Chrome
         id: cypress
