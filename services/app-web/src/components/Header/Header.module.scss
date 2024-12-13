@@ -80,8 +80,9 @@
     color: custom.$mcr-foundation-white;
 }
 
-@media (min-width: 63px) and (max-width: 1023px) {
+@media (min-width: 63px) and (max-width: 1280px) {
     .divider {
+        position: absolute;
         display: none;
     }
 
@@ -96,13 +97,14 @@
         li {
             border-top: none !important;
             margin-top: 1rem;
-            margin-bottom: 1rem;
         }
     }
 
     .primaryNav {
-        ul {
-            margin-top: unset !important;
+        ul[class='usa-nav__primary usa-accordion'] {
+            margin-top: unset;
+            flex-direction: column;
+            display: flex;
         }
         a:hover {
             background-color: transparent !important;

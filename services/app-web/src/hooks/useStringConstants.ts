@@ -4,6 +4,6 @@ export const useStringConstants = () => {
 
     return {
         MAIL_TO_SUPPORT: SUPPORT_ADDRESS,
-        MAIL_TO_SUPPORT_HREF: `mailto: ${SUPPORT_ADDRESS}, mc-review-team@truss.works`,
+        MAIL_TO_SUPPORT_HREF: `mailto: ${SUPPORT_ADDRESS}`,
     }
 }
