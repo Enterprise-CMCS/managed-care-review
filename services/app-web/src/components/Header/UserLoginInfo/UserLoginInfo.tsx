@@ -15,6 +15,7 @@ import {
 import { ContactSupportLink } from '../../ErrorAlert/ContactSupportLink'
 import { NavDropDownButton, Menu } from '@trussworks/react-uswds'
 import { useTealium } from '../../../hooks'
+import classNames from 'classnames'
 
 type LogoutHandlerT = (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>
@@ -66,10 +67,14 @@ const LoggedInUserInfo = (
                                     MC-Review settings
                                 </NavLinkWithLogging>
                             </li>
-                            <li aria-hidden className={`usa-nav__primary-item`}>
-                                <span aria-hidden className={styles.divider}>
-                                    |
-                                </span>
+                            <li
+                                aria-hidden
+                                className={classNames(
+                                    `usa-nav__primary-item`,
+                                    styles.divider
+                                )}
+                            >
+                                <span aria-hidden>|</span>
                             </li>
                         </>
                     )}
@@ -78,7 +83,7 @@ const LoggedInUserInfo = (
                     >
                         <>
                             <NavDropDownButton
-                                key="testItemOne"
+                                key="accountDropDownButton"
                                 label="Your account"
                                 menuId="accountDropDown"
                                 className={styles.headerSignOutButton}
@@ -88,7 +93,7 @@ const LoggedInUserInfo = (
                                 }}
                             />
                             <Menu
-                                key="one"
+                                key="accountDropDown"
                                 items={[
                                     <span key="email">{user.email}</span>,
                                     <ButtonWithLogging
