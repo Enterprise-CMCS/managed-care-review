@@ -75,22 +75,22 @@ const genericContractFormDataSchema = z.object({
     managedCareEntities: z.array(managedCareEntitiesSchema),
     federalAuthorities: z.array(federalAuthoritySchema),
     inLieuServicesAndSettings: z.boolean(),
-    modifiedBenefitsProvided: z.boolean(),
-    modifiedGeoAreaServed: z.boolean(),
-    modifiedMedicaidBeneficiaries: z.boolean(),
-    modifiedRiskSharingStrategy: z.boolean(),
-    modifiedIncentiveArrangements: z.boolean(),
-    modifiedWitholdAgreements: z.boolean(),
-    modifiedStateDirectedPayments: z.boolean(),
-    modifiedPassThroughPayments: z.boolean(),
-    modifiedPaymentsForMentalDiseaseInstitutions: z.boolean(),
-    modifiedMedicalLossRatioStandards: z.boolean(),
-    modifiedOtherFinancialPaymentIncentive: z.boolean(),
-    modifiedEnrollmentProcess: z.boolean(),
-    modifiedGrevienceAndAppeal: z.boolean(),
-    modifiedNetworkAdequacyStandards: z.boolean(),
-    modifiedLengthOfContract: z.boolean(),
-    modifiedNonRiskPaymentArrangements: z.boolean(),
+    modifiedBenefitsProvided: z.boolean().optional(),
+    modifiedGeoAreaServed: z.boolean().optional(),
+    modifiedMedicaidBeneficiaries: z.boolean().optional(),
+    modifiedRiskSharingStrategy: z.boolean().optional(),
+    modifiedIncentiveArrangements: z.boolean().optional(),
+    modifiedWitholdAgreements: z.boolean().optional(),
+    modifiedStateDirectedPayments: z.boolean().optional(),
+    modifiedPassThroughPayments: z.boolean().optional(),
+    modifiedPaymentsForMentalDiseaseInstitutions: z.boolean().optional(),
+    modifiedMedicalLossRatioStandards: z.boolean().optional(),
+    modifiedOtherFinancialPaymentIncentive: z.boolean().optional(),
+    modifiedEnrollmentProcess: z.boolean().optional(),
+    modifiedGrevienceAndAppeal: z.boolean().optional(),
+    modifiedNetworkAdequacyStandards: z.boolean().optional(),
+    modifiedLengthOfContract: z.boolean().optional(),
+    modifiedNonRiskPaymentArrangements: z.boolean().optional(),
     statutoryRegulatoryAttestation: preprocessNulls(z.boolean().optional()),
     statutoryRegulatoryAttestationDescription: preprocessNulls(
         z.string().optional()
@@ -171,28 +171,15 @@ const contractFormDataSchema = genericContractFormDataSchema.extend({
 
 // submittedFormDataSchema is the schema used during submission validation. Most fields are required and most arrays are nonempty.
 // refinements check for validations across the whole formData
-const submittableContractFormDataSchema = genericContractFormDataSchema
-    .extend({
-        managedCareEntities:
-            genericContractFormDataSchema.shape.managedCareEntities.nonempty(),
-        stateContacts:
-            genericContractFormDataSchema.shape.stateContacts.nonempty(),
-        contractDocuments:
-            genericContractFormDataSchema.shape.contractDocuments.nonempty(),
-        federalAuthorities:
-            genericContractFormDataSchema.shape.federalAuthorities.nonempty(),
-    })
-    .superRefine((formData, ctx) => {
-        if (
-            formData.populationCovered === 'CHIP' &&
-            formData.submissionType === 'CONTRACT_AND_RATES'
-        ) {
-            ctx.addIssue({
-                code: z.ZodIssueCode.custom,
-                message: 'cannot submit rates with CHIP only populationCovered',
-            })
-        }
-    })
+const submittableContractFormDataSchema = genericContractFormDataSchema.extend({
+    managedCareEntities:
+        genericContractFormDataSchema.shape.managedCareEntities.nonempty(),
+    stateContacts: genericContractFormDataSchema.shape.stateContacts.nonempty(),
+    contractDocuments:
+        genericContractFormDataSchema.shape.contractDocuments.nonempty(),
+    federalAuthorities:
+        genericContractFormDataSchema.shape.federalAuthorities.nonempty(),
+})
 
 const genericRateFormDataSchema = z.object({
     id: z.string().optional(), // 10.4.23 eng pairing - we discussed future reactor that would delete this from the rate revision form data schema all together.
