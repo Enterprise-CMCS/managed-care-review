@@ -117,12 +117,45 @@ const iterableCmsUsersMockData: {
     },
 ]
 
+const iterableNonCMSUsersMockData: {
+    userRole:
+        | 'HELPDESK_USER'
+        | 'BUSINESSOWNER_USER'
+        | 'ADMIN_USER'
+        | 'STATE_USER'
+    mockUser: <T>(
+        userData?: Partial<T>
+    ) =>
+        | AdminUserType
+        | BusinessOwnerUserType
+        | HelpdeskUserType
+        | StateUserType
+}[] = [
+    {
+        userRole: 'ADMIN_USER',
+        mockUser: testAdminUser,
+    },
+    {
+        userRole: 'BUSINESSOWNER_USER',
+        mockUser: testBusinessOwnerUser,
+    },
+    {
+        userRole: 'HELPDESK_USER',
+        mockUser: testHelpdeskUser,
+    },
+    {
+        userRole: 'STATE_USER',
+        mockUser: testStateUser,
+    },
+]
+
 export {
     testAdminUser,
     testStateUser,
     testCMSUser,
     createDBUsersWithFullData,
     iterableCmsUsersMockData,
+    iterableNonCMSUsersMockData,
     testCMSApproverUser,
     testBusinessOwnerUser,
     testHelpdeskUser,

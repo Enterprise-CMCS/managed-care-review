@@ -301,7 +301,8 @@ const mockRate = (ratePartial?: Partial<RateType>): RateType => {
         stateCode: 'MN',
         stateNumber: 2,
         parentContractID: 'test-contract-234',
-
+        reviewStatus: 'UNDER_REVIEW',
+        consolidatedStatus: 'SUBMITTED',
         revisions: [rateRev],
         packageSubmissions: [rateSubmission],
         questions: {

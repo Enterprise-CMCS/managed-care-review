@@ -20,6 +20,19 @@ fragment rateFieldsFragment on Rate {
         ...updateInformationFields
     }
     status
-    parentContractID
     initiallySubmittedAt
+    reviewStatus
+    consolidatedStatus
+    reviewStatusActions {
+        updatedAt
+        updatedBy {
+            email
+            role
+            familyName
+            givenName
+        }
+        updatedReason
+        rateID
+        actionType
+    }
 }
