@@ -286,6 +286,8 @@ describe('parseContract', () => {
                     createdAt: new Date(),
                     updatedAt: new Date(),
                     status: 'DRAFT',
+                    reviewStatus: 'UNDER_REVIEW',
+                    consolidatedStatus: 'DRAFT',
                     stateCode: 'FL',
                     stateNumber: 5,
                     parentContractID: 'cb9a1ecb-cdb6-4ef2-956d-3fba8776cd8b',
@@ -440,6 +442,8 @@ describe('parseContract', () => {
                     status: 'DRAFT',
                     stateCode: 'FL',
                     stateNumber: 5,
+                    consolidatedStatus: 'DRAFT',
+                    reviewStatus: 'UNDER_REVIEW',
                     parentContractID: '6ab1b4c0-f9d2-4567-958a-3123e98328e8',
                     packageSubmissions: [],
                     draftRevision: {
