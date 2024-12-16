@@ -12,7 +12,7 @@ import {
 } from './parseRateWithHistory'
 import type { ContractRevisionTableWithFormData } from './prismaSharedContractRateHelpers'
 import {
-    getConsolidatedStatus,
+    getConsolidatedContractStatus,
     setDateAddedForContractRevisions,
     setDateAddedForRateRevisions,
 } from './prismaSharedContractRateHelpers'
@@ -208,7 +208,10 @@ function contractWithHistoryToDomainModelWithoutRates(
 
     const status = getContractRateStatus(contract.revisions)
     const reviewStatus = getContractReviewStatus(contract)
-    const consolidatedStatus = getConsolidatedStatus(status, reviewStatus)
+    const consolidatedStatus = getConsolidatedContractStatus(
+        status,
+        reviewStatus
+    )
 
     return {
         id: contract.id,

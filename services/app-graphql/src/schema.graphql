@@ -539,6 +539,23 @@ type Mutation {
     approveContract(
         input: ApproveContractInput!
     ): ApproveContractPayload
+
+    """
+    withdrawRate is CMS user only action to withdraw a rate from review
+
+    Errors:
+    - ForbiddenError:
+    - A non CMS/CMS Approver user called this
+    - UserInputError:
+    - A contract is not in the correct submission status: SUBMITTED or RESUBMITTED
+    - A contract is not in the correct review status: UNDER_REVIEW
+    - INTERNAL_SERVER_ERROR
+    - DB_ERROR
+    - A contract cannot be found by id
+    """
+    withdrawRate(
+        input: WithdrawRateInput!
+    ): WithdrawRatePayload
 }
 
 input CreateHealthPlanPackageInput {
@@ -607,6 +624,15 @@ input ApproveContractInput {
     contractID: ID!
     "Manually entered date for when the approval was released to the state"
     dateApprovalReleasedToState: Date!
+}
+
+type WithdrawRatePayload {
+    rate: Rate!
+}
+
+input WithdrawRateInput {
+    rateID: ID!
+    updatedReason: String!
 }
 
 input FetchHealthPlanPackageInput {
@@ -1004,9 +1030,17 @@ enum HealthPlanPackageStatus {
 This status is used to determine whether the package is currently being edited by a state user
 or if it has been submitted and is being reviewed by CMS users.
 """
-enum ReviewStatus {
+enum ContractReviewStatus {
     UNDER_REVIEW
     APPROVED
+}
+
+"""
+This status is used to determine the review status of the rate.
+"""
+enum RateReviewStatus {
+    UNDER_REVIEW
+    WITHDRAWN
 }
 
 """
@@ -1021,6 +1055,18 @@ enum ConsolidatedContractStatus {
     APPROVED
 }
 
+"""
+This status has been synthesized to reflect if the status or review status
+should be used
+"""
+enum ConsolidatedRateStatus {
+    DRAFT
+    SUBMITTED
+    UNLOCKED
+    RESUBMITTED
+    WITHDRAWN
+}
+
 enum UnlockedStatus {
     UNLOCKED
     DRAFT
@@ -1029,6 +1075,11 @@ enum UnlockedStatus {
 enum ContractActionType {
     UNDER_REVIEW
     MARK_AS_APPROVED
+}
+
+enum RateActionType {
+    UNDER_REVIEW
+    WITHDRAW
 }
 
 """
@@ -1089,7 +1140,7 @@ type UpdateInformation {
 ContractReviewStatusActions is used for the review status actions on the contract
 """
 type ContractReviewStatusActions {
-    "the datetime when the update occured"
+    "the datetime when the update occurred"
     updatedAt: DateTime!
     "the user who performed the update"
     updatedBy: UpdatedBy!
@@ -1100,6 +1151,21 @@ type ContractReviewStatusActions {
     "Manual time entered by CMS to represent when an approval released to state"
     dateApprovalReleasedToState: DateTime
     contractID: ID!
+}
+
+"""
+RateReviewStatusActions is used for the review status actions on the rate
+"""
+type RateReviewStatusActions {
+    "the datetime when the update occurred"
+    updatedAt: DateTime!
+    "the user who performed the update"
+    updatedBy: UpdatedBy!
+    "the reason provided by the user when performing the update"
+    updatedReason: String!
+    "type of action"
+    actionType: RateActionType!
+    rateID: ID!
 }
 
 """
@@ -1674,6 +1740,17 @@ type Rate {
     SUBMITTED and RESUBMITTED packages cannot be modified
     """
     status: HealthPlanPackageStatus!
+    """
+    Where the rate is in the review submission flow
+    Options are UNDER_REVIEW, WITHDRAWN
+    """
+    reviewStatus: RateReviewStatus!
+    """
+    Synthesized field that represents if a rate's status or
+    reviewStatus should take precedence
+    Options are DRAFT, SUBMITTED, RESUBMITTED UNLOCKED, UNDER_REVIEW, WITHDRAWN
+    """
+    consolidatedStatus: ConsolidatedRateStatus!
     "The initial date this rate was submitted at. Is not changed by unlock or resubmission."
     initiallySubmittedAt: DateTime
     "The state code (e.g. CA or TN) for the submitting state"
@@ -1695,6 +1772,10 @@ type Rate {
 
     "The currently modifiable revision of the rate. Only present when rate has a status of DRAFT or UNLOCKED"
     draftRevision: RateRevision
+
+    "reviewStatusActions are the who/when/why for review status changes on this contract"
+    reviewStatusActions: [RateReviewStatusActions!]
+
     """
     Array of revisions for this rate. Each revision represents a single submission
     for the rate and contains the full data from when the rate cert was submitted
@@ -1806,7 +1887,7 @@ type Contract {
     Where the contract is in the review submission flow
     Options are UNDER_REVIEW, APPROVED
     """
-    reviewStatus: ReviewStatus!
+    reviewStatus: ContractReviewStatus!
     """
     Synthesized field that represents if a contract's status or
     reviewStatus should take precedence 
@@ -1881,7 +1962,7 @@ type UnlockedContract {
     Where the contract is in the review submission flow
     Options are UNDER_REVIEW, APPROVED
     """
-    reviewStatus: ReviewStatus!
+    reviewStatus: ContractReviewStatus!
     """
     Synthesized field that represents if a contract's status or
     reviewStatus should take precedence 

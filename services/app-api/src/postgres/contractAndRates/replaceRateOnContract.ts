@@ -11,8 +11,8 @@ import {
 import { type ContractType } from '../../domain-models'
 import {
     type WithdrawDateArgsType,
-    withdrawRateInsideTransaction,
-} from './withdrawRate'
+    withdrawRedundantRateInsideTransaction,
+} from './withdrawRedundantRate'
 import {
     type SubmitContractArgsType,
     submitContractInsideTransaction,
@@ -162,7 +162,7 @@ async function replaceRateOnContractInsideTransaction(
         withdrawReason: replaceReason,
     }
 
-    const withdrawResult = await withdrawRateInsideTransaction(
+    const withdrawResult = await withdrawRedundantRateInsideTransaction(
         tx,
         withdrawRateArgs
     )

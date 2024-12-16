@@ -1,70 +1,63 @@
-import { findRateWithHistory } from './findRateWithHistory'
-import type { RateType } from '../../domain-models/contractAndRates'
 import type { PrismaTransactionType } from '../prismaTypes'
-import { NotFoundError } from '../postgresErrors'
+import type { RateType } from '../../domain-models'
+import { findRateWithHistory } from './findRateWithHistory'
+import type { PrismaClient } from '@prisma/client'
 
-type WithdrawDateArgsType = {
+type WithdrawRateArgsType = {
     rateID: string
-    withdrawnByUserID: string
-    withdrawReason: string
+    updatedByID: string
+    updatedReason: string
 }
 
-// This function was originally built for use within replaceRateOnContract, which is a limited admin-only use case
-// would likely need to be more robust  for use on demand
-async function withdrawRateInsideTransaction(
+const withdrawRateInsideTransaction = async (
     tx: PrismaTransactionType,
-    args: WithdrawDateArgsType
-): Promise<RateType | Error> {
-    const { rateID, withdrawReason, withdrawnByUserID } = args
+    args: WithdrawRateArgsType
+): Promise<RateType | Error> => {
+    const { rateID, updatedByID, updatedReason } = args
 
     try {
-        // check rate is not already withdrawn
-        const rate = await tx.rateTable.findUnique({
-            where: {
-                id: rateID,
-            },
-        })
-
-        if (rate === null) {
-            const err = `PRISMA ERROR: Cannot find rate with id: ${rateID}`
-            return new NotFoundError(err)
-        }
-        if (rate.withdrawInfoID !== null) {
-            const err = `PRISMA ERROR: Cannot withdraw rate more than once. See rate id: ${rateID}`
-            return new Error(err)
-        }
-
-        // generate withdraw info and update rate
-        const currentDateTime = new Date()
-        const withdrawInfo = await tx.updateInfoTable.create({
-            data: {
-                updatedAt: currentDateTime,
-                updatedByID: withdrawnByUserID,
-                updatedReason: withdrawReason,
-            },
-        })
-
-        const updatedRate = await tx.rateTable.update({
+        await tx.rateTable.update({
             where: {
                 id: rateID,
             },
             data: {
-                withdrawInfo: {
-                    connect: { id: withdrawInfo.id },
+                reviewStatusActions: {
+                    create: {
+                        updatedByID,
+                        updatedReason,
+                        actionType: 'WITHDRAW',
+                    },
                 },
             },
         })
 
-        if (updatedRate instanceof Error) {
-            return updatedRate
-        }
-
         return findRateWithHistory(tx, rateID)
     } catch (err) {
-        console.error('Prisma error finding rate to withdraw', err)
+        console.error('PRISMA ERROR: Error withdrawing rate', err)
         return new Error(err)
     }
 }
 
-export { withdrawRateInsideTransaction }
-export type { WithdrawDateArgsType }
+const withdrawRate = async (
+    client: PrismaClient,
+    args: WithdrawRateArgsType
+): Promise<RateType | Error> => {
+    try {
+        return await client.$transaction(async (tx) => {
+            const withdrawResult = await withdrawRateInsideTransaction(tx, args)
+            if (withdrawResult instanceof Error) {
+                return withdrawResult
+            }
+            return withdrawResult
+        })
+    } catch (err) {
+        console.error('PRISMA ERROR: Error withdrawing rate', err)
+        return err
+    }
+}
+
+export {
+    withdrawRate,
+    withdrawRateInsideTransaction,
+    type WithdrawRateArgsType,
+}

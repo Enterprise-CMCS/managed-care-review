@@ -1,0 +1,18 @@
+mutation withdrawRate($input: WithdrawRateInput!) {
+    withdrawRate(input: $input) {
+        rate {
+            ...rateFieldsFragment
+            draftRevision {
+                ...rateRevisionFragment
+            }
+
+            revisions {
+                ...rateRevisionFragment
+            }
+
+            packageSubmissions {
+                ...ratePackageSubmissionsFragment
+            }
+        }
+    }
+}

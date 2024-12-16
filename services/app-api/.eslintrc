@@ -2,7 +2,7 @@
     "parser": "@typescript-eslint/parser",
     "parserOptions": {
         "project": "./tsconfig.json",
-        "sourceType": "module",
+        "sourceType": "module"
     },
     "plugins": ["@typescript-eslint", "jest"],
     "extends": [
@@ -10,10 +10,10 @@
         "plugin:jest/recommended",
         "plugin:jest/style",
         "plugin:@typescript-eslint/recommended",
-        "prettier",
+        "prettier"
     ],
     "env": {
-        "jest/globals": true,
+        "jest/globals": true
     },
     "ignorePatterns": ["gen/*", "**/esbuild.config.js"],
     "rules": {
@@ -28,7 +28,7 @@
         "@typescript-eslint/consistent-type-imports": "error",
         "@typescript-eslint/no-unused-vars": [
             "warn",
-            { "argsIgnorePattern": "^_*" },
+            { "argsIgnorePattern": "^_*" }
         ],
         "no-console": [
             "warn",
@@ -54,10 +54,10 @@
                     "timeLog",
                     "timeStamp",
                     "trace",
-                    "warn",
-                ],
-            },
-        ],
+                    "warn"
+                ]
+            }
+        ]
     },
-    "overrides": [],
+    "overrides": []
 }
