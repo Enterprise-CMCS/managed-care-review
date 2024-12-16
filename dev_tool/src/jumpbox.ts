@@ -12,9 +12,8 @@ import os from 'node:os'
 import { retry } from './retry.js'
 import { fileExists, httpsRequest } from './nodeWrappers.js'
 import { Instance } from '@aws-sdk/client-ec2'
-import { createInterface } from 'readline'
-import { stdin as input, stdout as output } from 'node:process'
 import { readFileSync } from 'fs'
+import prompts from 'prompts'
 
 function stageForEnv(env: string): string {
     if (env === 'dev') {
@@ -194,65 +193,16 @@ async function ensureAllowlistIP(
     return undefined
 }
 
-// Function to securely prompt for password
 async function promptPassword(prompt: string): Promise<string> {
-    const rl = createInterface({ input, output })
-
-    return new Promise((resolve) => {
-        const stdin = process.stdin
-        const listener = (char: Buffer) => {
-            const charStr = char.toString()
-            switch (charStr) {
-                case '\n':
-                case '\r':
-                case '\u0004':
-                    stdin.removeListener('data', listener)
-                    stdin.setRawMode(false)
-                    stdin.pause()
-                    output.write('\n')
-                    rl.close()
-                    resolve(password)
-                    break
-                case '\u0003': // Ctrl+C
-                    stdin.removeListener('data', listener)
-                    stdin.setRawMode(false)
-                    stdin.pause()
-                    rl.close()
-                    process.exit()
-                    break
-                case '\u007f': // Backspace
-                    if (password.length > 0) {
-                        password = password.slice(0, -1)
-                        output.write('\b \b')
-                    }
-                    break
-                default:
-                    password += charStr
-                    break
-            }
-        }
-
-        let password = ''
-        output.write(prompt)
-        // Set raw mode and disable echo
-        stdin.setRawMode(true)
-        process.stdin.setRawMode(true)
-        const originalIsRaw = stdin.isRaw
-        const originalIsTTY = stdin.isTTY
-        stdin.setRawMode(true)
-        stdin.resume()
-
-        // Clean up on exit
-        const cleanup = () => {
-            stdin.setRawMode(originalIsRaw)
-            if (originalIsTTY) {
-                stdin.isTTY = originalIsTTY
-            }
-        }
-
-        stdin.on('data', listener)
-        rl.once('close', cleanup)
+    const response = await prompts({
+        type: 'password',
+        name: 'password',
+        message: prompt,
+        validate: (value: string): boolean | string =>
+            value.length > 0 ? true : 'Password cannot be empty',
     })
+
+    return response.password
 }
 
 // Attempt SSH connection, prompting for password if needed
@@ -280,7 +230,7 @@ async function attemptSSHConnection(
                     err.message.includes('encrypted'))
             ) {
                 const keyPassword = await promptPassword(
-                    'Enter SSH key password: '
+                    'Enter SSH key password:'
                 )
                 await ssh.connect({
                     host,
@@ -294,7 +244,6 @@ async function attemptSSHConnection(
         }
     } catch (err) {
         if (err instanceof Error) {
-            // Add more context to the error message
             throw new Error(`SSH connection failed: ${err.message}`)
         }
         throw err
