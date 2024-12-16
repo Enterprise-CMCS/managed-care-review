@@ -75,10 +75,13 @@ describe('withdrawRate', () => {
             ])
         )
     })
-    it('returns error if rate is in invalid status to withdraw', async () => {
-        const stateUser = testStateUser()
-        const cmsUser = testCMSUser()
+})
 
+describe('withdrawRate invalid status handling', () => {
+    const stateUser = testStateUser()
+    const cmsUser = testCMSUser()
+
+    it('returns error if rate is in invalid status to withdraw', async () => {
         const stateServer = await constructTestPostgresServer({
             context: {
                 user: stateUser,
@@ -172,8 +175,6 @@ describe('withdrawRate', () => {
     })
 
     it('returns and error when rate is not found', async () => {
-        const cmsUser = testCMSUser()
-
         const cmsServer = await constructTestPostgresServer({
             context: {
                 user: cmsUser,
@@ -198,9 +199,6 @@ describe('withdrawRate', () => {
     })
 
     it('returns and error when withdraw rate failed in postgres', async () => {
-        const stateUser = testStateUser()
-        const cmsUser = testCMSUser()
-
         const stateServer = await constructTestPostgresServer({
             context: {
                 user: stateUser,
