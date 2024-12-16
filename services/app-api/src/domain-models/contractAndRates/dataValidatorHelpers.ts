@@ -92,42 +92,48 @@ const validateContractDraftRevisionInput = (
     return parsedData.data
 }
 
+const refineForFeatureFlags = (featureFlags?: FeatureFlagSettings) => {
+    if (featureFlags?.['438-attestation']) {
+        return submittableContractSchema.superRefine((contract, ctx) => {
+            // since we have different validations based on a feature flag, we add them as a refinement here.
+            // once 438 attestation ships this refinement should be moved to the submittableContractSchema
+            // and statutoryRegulatoryAttestation should be made non-optional.
+
+            const formData = contract.draftRevision.formData
+            if (formData.statutoryRegulatoryAttestation === undefined) {
+                ctx.addIssue({
+                    code: z.ZodIssueCode.custom,
+                    message:
+                        'statutoryRegulatoryAttestationDescription is required when  438-attestation feature flag is on',
+                })
+            }
+
+            if (
+                (formData.statutoryRegulatoryAttestation === false &&
+                    !formData.statutoryRegulatoryAttestationDescription) ||
+                (formData.statutoryRegulatoryAttestationDescription &&
+                    formData.statutoryRegulatoryAttestationDescription
+                        .length === 0)
+            ) {
+                ctx.addIssue({
+                    code: z.ZodIssueCode.custom,
+                    message:
+                        'statutoryRegulatoryAttestationDescription is Required if statutoryRegulatoryAttestation is false',
+                })
+            }
+        })
+    } else {
+        return submittableContractSchema
+    }
+}
+
 const parseContract = (
     contract: ContractType,
     stateCode: string,
     store: Store,
     featureFlags?: FeatureFlagSettings
 ): ContractType | z.ZodError => {
-    const contractParser = featureFlags?.['438-attestation']
-        ? submittableContractSchema.superRefine((contract, ctx) => {
-              // since we have different validations based on a feature flag, we add them as a refinement here.
-              // once 438 attestation ships this refinement should be moved to the submittableContractSchema
-              // and statutoryRegulatoryAttestation should be made non-optional.
-
-              const formData = contract.draftRevision.formData
-              if (formData.statutoryRegulatoryAttestation === undefined) {
-                  ctx.addIssue({
-                      code: z.ZodIssueCode.custom,
-                      message:
-                          'statutoryRegulatoryAttestationDescription is required when  438-attestation feature flag is on',
-                  })
-              }
-
-              if (
-                  (formData.statutoryRegulatoryAttestation === false &&
-                      !formData.statutoryRegulatoryAttestationDescription) ||
-                  (formData.statutoryRegulatoryAttestationDescription &&
-                      formData.statutoryRegulatoryAttestationDescription
-                          .length === 0)
-              ) {
-                  ctx.addIssue({
-                      code: z.ZodIssueCode.custom,
-                      message:
-                          'statutoryRegulatoryAttestationDescription is Required if statutoryRegulatoryAttestation is false',
-                  })
-              }
-          })
-        : submittableContractSchema
+    const contractParser = refineForFeatureFlags(featureFlags)
 
     // since validating programs requires looking in the DB, and once we move programs into the db that
     // validation will be performed there instead. I'm just adding this check as a refinement instead of trying
@@ -160,12 +166,6 @@ const parseContract = (
     if (parsedData.error) {
         return parsedData.error
     }
-
-    // if (!parsedData.data) {
-    //     return new Error(
-    //         'Error: validateContractDraftRevisionInput returned no data'
-    //     )
-    // }
 
     return parsedData.data
 }
