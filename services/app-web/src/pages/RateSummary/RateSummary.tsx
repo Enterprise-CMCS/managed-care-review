@@ -1,17 +1,33 @@
 import { GridContainer, Icon } from '@trussworks/react-uswds'
 import React, { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { Loading, NavLinkWithLogging } from '../../components'
+import {
+    ButtonWithLogging,
+    DoubleColumnGrid,
+    Loading,
+    NavLinkWithLogging,
+    SectionCard,
+} from '../../components'
 import { usePage } from '../../contexts/PageContext'
-import { useFetchRateQuery, useFetchContractQuery } from '../../gen/gqlClient'
+import {
+    useFetchRateQuery,
+    useFetchContractQuery,
+    useUnlockRateMutation,
+} from '../../gen/gqlClient'
 import styles from '../SubmissionSummary/SubmissionSummary.module.scss'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
-import { RoutesRecord } from '@mc-review/constants'
+import { ERROR_MESSAGES, RoutesRecord } from '@mc-review/constants'
 import { SingleRateSummarySection } from '../../components/SubmissionSummarySection/RateDetailsSummarySection/SingleRateSummarySection'
 import { useAuth } from '../../contexts/AuthContext'
 import { ErrorForbiddenPage } from '../Errors/ErrorForbiddenPage'
 import { Error404 } from '../Errors/Error404Page'
 import { RateWithdrawnBanner } from '../../components/Banner'
+import { hasCMSUserPermissions } from '@mc-review/helpers'
+import { useLDClient } from 'launchdarkly-react-client-sdk'
+import { featureFlags } from '@mc-review/common-code'
+import { UnlockRateButton } from '../../components/SubmissionSummarySection/RateDetailsSummarySection/UnlockRateButton'
+import { recordJSException } from '@mc-review/otel'
+import { handleApolloErrorsAndAddUserFacingMessages } from '@mc-review/helpers'
 
 export const RateSummary = (): React.ReactElement => {
     // Page level state
@@ -26,6 +42,18 @@ export const RateSummary = (): React.ReactElement => {
     }, [rateName, updateHeading])
 
     const isStateUser = loggedInUser?.role === 'STATE_USER'
+    const isCMSUser = hasCMSUserPermissions(loggedInUser)
+
+    const ldClient = useLDClient()
+    const showRateUnlock: boolean = ldClient?.variation(
+        featureFlags.RATE_EDIT_UNLOCK.flag,
+        featureFlags.RATE_EDIT_UNLOCK.defaultValue
+    )
+    const showWithdrawRate: boolean = ldClient?.variation(
+        featureFlags.WITHDRAW_RATE.flag,
+        featureFlags.WITHDRAW_RATE.defaultValue
+    )
+    const [unlockRate, { loading: unlockLoading }] = useUnlockRateMutation()
 
     const { data, loading, error } = useFetchRateQuery({
         variables: {
@@ -114,6 +142,37 @@ export const RateSummary = (): React.ReactElement => {
         }
     }
 
+    const handleUnlockRate = async () => {
+        try {
+            const { data } = await unlockRate({
+                variables: {
+                    input: {
+                        rateID: rate.id,
+                        unlockedReason: '',
+                    },
+                },
+            })
+
+            if (data?.unlockRate.rate) {
+                // don't do anything, eventually this entire function will be in the modal
+            } else {
+                recordJSException(
+                    `[UNEXPECTED]: Error attempting to unlock rate, no data present.`
+                )
+                return new Error(ERROR_MESSAGES.unlock_error_generic)
+            }
+        } catch (error) {
+            return handleApolloErrorsAndAddUserFacingMessages(
+                error,
+                'UNLOCK_RATE'
+            )
+        }
+    }
+
+    const parentContractSubmissionID = rate.parentContractID
+    const isUnlocked = rate.status === 'UNLOCKED'
+    const parentContractIsApproved = contract.consolidatedStatus === 'APPROVED'
+
     return (
         <div className={styles.background}>
             <GridContainer
@@ -141,11 +200,58 @@ export const RateSummary = (): React.ReactElement => {
                     </div>
                 )}
 
+                {isCMSUser && (
+                    <SectionCard className={styles.actionsSection}>
+                        <h3>Actions</h3>
+                        <DoubleColumnGrid>
+                            {showRateUnlock ? (
+                                <UnlockRateButton
+                                    disabled={
+                                        isUnlocked ||
+                                        unlockLoading ||
+                                        parentContractIsApproved
+                                    }
+                                    onClick={handleUnlockRate}
+                                >
+                                    Unlock rate
+                                </UnlockRateButton>
+                            ) : (
+                                /* This second option is an interim state for unlock rate button (when linked rates is turned on but unlock and edit rate is not available yet). Remove when rate unlock is permanently on. */
+                                <UnlockRateButton
+                                    disabled={
+                                        isUnlocked ||
+                                        unlockLoading ||
+                                        parentContractIsApproved
+                                    }
+                                    onClick={() => {
+                                        navigate(
+                                            `/submissions/${parentContractSubmissionID}`
+                                        )
+                                    }}
+                                    link_url={`/submissions/${parentContractSubmissionID}`}
+                                >
+                                    Unlock rate
+                                </UnlockRateButton>
+                            )}
+                            {showWithdrawRate && (
+                                <ButtonWithLogging
+                                    disabled={isUnlocked}
+                                    className="usa-button usa-button--outline"
+                                    type="button"
+                                    onClick={() => navigate('./')}
+                                    link_url={'./'}
+                                    outline
+                                >
+                                    Withdraw rate
+                                </ButtonWithLogging>
+                            )}
+                        </DoubleColumnGrid>
+                    </SectionCard>
+                )}
                 <SingleRateSummarySection
                     rate={rate}
                     isSubmitted // can assume isSubmitted because we redirect for unlocked
                     statePrograms={rate.state.programs}
-                    parentContractStatus={contract?.consolidatedStatus}
                 />
             </GridContainer>
         </div>
