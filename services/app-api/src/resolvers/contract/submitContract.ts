@@ -22,11 +22,11 @@ import type { UpdateDraftContractRatesArgsType } from '../../postgres/contractAn
 import type { StateCodeType } from '@mc-review/hpp'
 import type { Span } from '@opentelemetry/api'
 import {
-    isContractWithProvisions,
     isCHIPOnly,
+    isContractWithProvisions,
     generateApplicableProvisionsList,
-} from '../../common-code/contractAndRates/'
-import type { GeneralizedModifiedProvisions } from '../../common-code/contractAndRates/ModifiedProvisions'
+} from '../../domain-models/contractAndRates'
+import type { GeneralizedModifiedProvisions } from '@mc-review/hpp'
 
 const validateStatusAndUpdateInfo = (
     status: PackageStatusType,
@@ -87,7 +87,7 @@ export function submitContract(
         }
         const stateFromCurrentUser: State['code'] = user.stateCode
 
-        // fetch contract and related reates - convert to HealthPlanPackage and proto-ize to match the pattern for flag off\
+        // fetch contract and related rates
         // this could be replaced with parsing to locked versus unlocked contracts and rates when types are available
         const contractWithHistory = await store.findContractWithHistory(
             input.contractID

@@ -508,21 +508,22 @@ describe('parseContract', () => {
                 'Unexpected error: Was expecting validateContractDraftRevisionInput to return and error'
             )
         }
-
-        expect(parsedContract.message).toContain(
-            `cannot submit rates with CHIP only populationCovered`
+        expect(parsedContract.errors).toHaveLength(5)
+        const errMessages = parsedContract.errors.map((err) => err.message)
+        expect(errMessages[0]).toContain(
+            'Array must contain at least 1 element(s)'
         )
-        expect(parsedContract.message).toContain(
-            `statutoryRegulatoryAttestationDescription is required when  438-attestation feature flag is on`
+        expect(errMessages[1]).toContain(
+            'Array must contain at least 1 element(s)'
         )
-        expect(parsedContract.message).toContain(
-            `Program(s) in [fake-id,fakerateprogramid] are not valid FL programs`
+        expect(errMessages[2]).toContain(
+            'cannot submit rates with CHIP only populationCovered'
         )
-        expect(parsedContract.message).toContain(
-            `only submit amendment related fields for an AMENDMENT`
+        expect(errMessages[3]).toContain(
+            'statutoryRegulatoryAttestationDescription is required when  438-attestation feature flag is on'
         )
-        expect(parsedContract.message).toContain(
-            `Array must contain at least 1 element(s)`
+        expect(errMessages[4]).toContain(
+            'Program(s) in [fake-id,fakerateprogramid] are not valid FL programs'
         )
     })
 })

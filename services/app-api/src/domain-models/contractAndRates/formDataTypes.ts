@@ -171,16 +171,28 @@ const contractFormDataSchema = genericContractFormDataSchema.extend({
 
 // submittedFormDataSchema is the schema used during submission validation. Most fields are required and most arrays are nonempty.
 // refinements check for validations across the whole formData
-const submittableContractFormDataSchema = genericContractFormDataSchema.extend({
-    managedCareEntities:
-        genericContractFormDataSchema.shape.managedCareEntities.nonempty(),
-    stateContacts: genericContractFormDataSchema.shape.stateContacts.nonempty(),
-    contractDocuments:
-        genericContractFormDataSchema.shape.contractDocuments.nonempty(),
-    federalAuthorities:
-        genericContractFormDataSchema.shape.federalAuthorities.nonempty(),
-})
-
+const submittableContractFormDataSchema = genericContractFormDataSchema
+    .extend({
+        managedCareEntities:
+            genericContractFormDataSchema.shape.managedCareEntities.nonempty(),
+        stateContacts:
+            genericContractFormDataSchema.shape.stateContacts.nonempty(),
+        contractDocuments:
+            genericContractFormDataSchema.shape.contractDocuments.nonempty(),
+        federalAuthorities:
+            genericContractFormDataSchema.shape.federalAuthorities.nonempty(),
+    })
+    .superRefine((formData, ctx) => {
+        if (
+            formData.populationCovered === 'CHIP' &&
+            formData.submissionType === 'CONTRACT_AND_RATES'
+        ) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: 'cannot submit rates with CHIP only populationCovered',
+            })
+        }
+    })
 const genericRateFormDataSchema = z.object({
     id: z.string().optional(), // 10.4.23 eng pairing - we discussed future reactor that would delete this from the rate revision form data schema all together.
     rateID: z.string().optional(), // 10.4.23 eng pairing - we discussed future refactor to move this up to rate revision schema.
@@ -249,34 +261,12 @@ const rateFormDataSchema = genericRateFormDataSchema.extend({
     ),
 })
 
-const submittableRateFormDataSchema = genericRateFormDataSchema
-    .extend({
-        rateDocuments: genericRateFormDataSchema.shape.rateDocuments.nonempty(),
-        rateProgramIDs:
-            genericRateFormDataSchema.shape.rateProgramIDs.nonempty(),
-        certifyingActuaryContacts:
-            genericRateFormDataSchema.shape.certifyingActuaryContacts.nonempty(),
-    })
-    .refine((formData) => {
-        if (formData.rateType === 'AMENDMENT') {
-            if (
-                !(
-                    formData.amendmentEffectiveDateStart &&
-                    formData.amendmentEffectiveDateEnd
-                )
-            ) {
-                return false
-            }
-        } else {
-            if (
-                formData.amendmentEffectiveDateStart ||
-                formData.amendmentEffectiveDateEnd
-            ) {
-                return false
-            }
-        }
-        return true
-    }, 'only submit amendment related fields for an AMENDMENT')
+const submittableRateFormDataSchema = genericRateFormDataSchema.extend({
+    rateDocuments: genericRateFormDataSchema.shape.rateDocuments.nonempty(),
+    rateProgramIDs: genericRateFormDataSchema.shape.rateProgramIDs.nonempty(),
+    certifyingActuaryContacts:
+        genericRateFormDataSchema.shape.certifyingActuaryContacts.nonempty(),
+})
 
 type DocumentType = z.infer<typeof documentSchema>
 type ContractFormDataType = z.infer<typeof contractFormDataSchema>

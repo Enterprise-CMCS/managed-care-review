@@ -97,7 +97,7 @@ const parseContract = (
     stateCode: string,
     store: Store,
     featureFlags?: FeatureFlagSettings
-): ContractType | Error => {
+): ContractType | z.ZodError => {
     const contractParser = featureFlags?.['438-attestation']
         ? submittableContractSchema.superRefine((contract, ctx) => {
               // since we have different validations based on a feature flag, we add them as a refinement here.
@@ -161,11 +161,11 @@ const parseContract = (
         return parsedData.error
     }
 
-    if (!parsedData.data) {
-        return new Error(
-            'Error: validateContractDraftRevisionInput returned no data'
-        )
-    }
+    // if (!parsedData.data) {
+    //     return new Error(
+    //         'Error: validateContractDraftRevisionInput returned no data'
+    //     )
+    // }
 
     return parsedData.data
 }
