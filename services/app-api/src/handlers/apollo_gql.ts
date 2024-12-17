@@ -168,7 +168,7 @@ function ipRestrictionMiddleware(
                 if (!isValidIpAddress) {
                     return Promise.resolve({
                         statusCode: 403,
-                        body: `{ "error": IP Address ${ipAddress} is not in the allowed list }\n`,
+                        body: `{ "error": IP Address ${ipAddress} is not in the allowed list ${allowedIps} }\n`,
                         headers: {
                             'Access-Control-Allow-Origin': '*',
                             'Access-Control-Allow-Credentials': true,
