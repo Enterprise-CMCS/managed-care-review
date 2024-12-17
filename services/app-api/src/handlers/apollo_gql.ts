@@ -159,7 +159,7 @@ function ipRestrictionMiddleware(
             const fromThirdPartyAuthorizer = event.requestContext.path.includes(
                 '/v1/graphql/external'
             )
-
+            console.info(`Allowed IP addresses: ${allowedIps}`)
             if (fromThirdPartyAuthorizer) {
                 const isValidIpAddress =
                     allowedIps.includes(ipAddress) ||
