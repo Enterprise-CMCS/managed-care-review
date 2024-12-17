@@ -8,7 +8,7 @@
     "author": "",
     "license": "CC0-1.0",
     "devDependencies": {
-        "prettier": "^3.3.3",
+        "prettier": "^3.4.2",
         "serverless": "^3.39.0",
         "serverless-iam-helper": "https://github.com/CMSgov/serverless-iam-helper",
         "serverless-offline-ssm": "^6.2.0",
