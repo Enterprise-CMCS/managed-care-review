@@ -56,71 +56,216 @@ function preprocessNulls<T extends ZodTypeAny>(
     return z.preprocess((val) => val ?? undefined, schema, params)
 }
 
-const contractFormDataSchema = z.object({
+// genericContractFormDataSchema has all the types for all fields in ContractFormData
+// they will be modified to create the draft and the submitted types.
+const genericContractFormDataSchema = z.object({
     programIDs: z.array(z.string()),
-    populationCovered: preprocessNulls(populationCoveredSchema.optional()),
     submissionType: submissionTypeSchema,
-    riskBasedContract: preprocessNulls(z.boolean().optional()),
     submissionDescription: z.string(),
+    contractType: contractTypeSchema,
+
+    populationCovered: populationCoveredSchema,
+    riskBasedContract: z.boolean(),
     stateContacts: z.array(stateContactSchema),
     supportingDocuments: z.array(documentSchema),
-    contractType: contractTypeSchema,
-    contractExecutionStatus: preprocessNulls(
-        contractExecutionStatusSchema.optional()
-    ),
+    contractExecutionStatus: contractExecutionStatusSchema,
     contractDocuments: z.array(documentSchema),
-    contractDateStart: preprocessNulls(z.date().optional()),
-    contractDateEnd: preprocessNulls(z.date().optional()),
+    contractDateStart: z.date(),
+    contractDateEnd: z.date(),
     managedCareEntities: z.array(managedCareEntitiesSchema),
     federalAuthorities: z.array(federalAuthoritySchema),
-    inLieuServicesAndSettings: preprocessNulls(z.boolean().optional()),
-    modifiedBenefitsProvided: preprocessNulls(z.boolean().optional()),
-    modifiedGeoAreaServed: preprocessNulls(z.boolean().optional()),
-    modifiedMedicaidBeneficiaries: preprocessNulls(z.boolean().optional()),
-    modifiedRiskSharingStrategy: preprocessNulls(z.boolean().optional()),
-    modifiedIncentiveArrangements: preprocessNulls(z.boolean().optional()),
-    modifiedWitholdAgreements: preprocessNulls(z.boolean().optional()),
-    modifiedStateDirectedPayments: preprocessNulls(z.boolean().optional()),
-    modifiedPassThroughPayments: preprocessNulls(z.boolean().optional()),
-    modifiedPaymentsForMentalDiseaseInstitutions: preprocessNulls(
-        z.boolean().optional()
-    ),
-    modifiedMedicalLossRatioStandards: preprocessNulls(z.boolean().optional()),
-    modifiedOtherFinancialPaymentIncentive: preprocessNulls(
-        z.boolean().optional()
-    ),
-    modifiedEnrollmentProcess: preprocessNulls(z.boolean().optional()),
-    modifiedGrevienceAndAppeal: preprocessNulls(z.boolean().optional()),
-    modifiedNetworkAdequacyStandards: preprocessNulls(z.boolean().optional()),
-    modifiedLengthOfContract: preprocessNulls(z.boolean().optional()),
-    modifiedNonRiskPaymentArrangements: preprocessNulls(z.boolean().optional()),
+    inLieuServicesAndSettings: z.boolean(),
+    modifiedBenefitsProvided: z.boolean().optional(),
+    modifiedGeoAreaServed: z.boolean().optional(),
+    modifiedMedicaidBeneficiaries: z.boolean().optional(),
+    modifiedRiskSharingStrategy: z.boolean().optional(),
+    modifiedIncentiveArrangements: z.boolean().optional(),
+    modifiedWitholdAgreements: z.boolean().optional(),
+    modifiedStateDirectedPayments: z.boolean().optional(),
+    modifiedPassThroughPayments: z.boolean().optional(),
+    modifiedPaymentsForMentalDiseaseInstitutions: z.boolean().optional(),
+    modifiedMedicalLossRatioStandards: z.boolean().optional(),
+    modifiedOtherFinancialPaymentIncentive: z.boolean().optional(),
+    modifiedEnrollmentProcess: z.boolean().optional(),
+    modifiedGrevienceAndAppeal: z.boolean().optional(),
+    modifiedNetworkAdequacyStandards: z.boolean().optional(),
+    modifiedLengthOfContract: z.boolean().optional(),
+    modifiedNonRiskPaymentArrangements: z.boolean().optional(),
     statutoryRegulatoryAttestation: preprocessNulls(z.boolean().optional()),
     statutoryRegulatoryAttestationDescription: preprocessNulls(
         z.string().optional()
     ),
 })
 
-const rateFormDataSchema = z.object({
+// contractFormDataSchema is the normal contractFormData setup for Draft contracts. Most fields are optional and array fields can be empty.
+const contractFormDataSchema = genericContractFormDataSchema.extend({
+    contractDateStart: preprocessNulls(
+        genericContractFormDataSchema.shape.contractDateStart.optional()
+    ),
+    contractDateEnd: preprocessNulls(
+        genericContractFormDataSchema.shape.contractDateEnd.optional()
+    ),
+    populationCovered: preprocessNulls(
+        genericContractFormDataSchema.shape.populationCovered.optional()
+    ),
+    riskBasedContract: preprocessNulls(
+        genericContractFormDataSchema.shape.riskBasedContract.optional()
+    ),
+    contractExecutionStatus: preprocessNulls(
+        genericContractFormDataSchema.shape.contractExecutionStatus.optional()
+    ),
+
+    inLieuServicesAndSettings: preprocessNulls(
+        genericContractFormDataSchema.shape.inLieuServicesAndSettings.optional()
+    ),
+    modifiedBenefitsProvided: preprocessNulls(
+        genericContractFormDataSchema.shape.modifiedBenefitsProvided.optional()
+    ),
+    modifiedGeoAreaServed: preprocessNulls(
+        genericContractFormDataSchema.shape.modifiedGeoAreaServed.optional()
+    ),
+    modifiedMedicaidBeneficiaries: preprocessNulls(
+        genericContractFormDataSchema.shape.modifiedMedicaidBeneficiaries.optional()
+    ),
+    modifiedRiskSharingStrategy: preprocessNulls(
+        genericContractFormDataSchema.shape.modifiedRiskSharingStrategy.optional()
+    ),
+    modifiedIncentiveArrangements: preprocessNulls(
+        genericContractFormDataSchema.shape.modifiedIncentiveArrangements.optional()
+    ),
+    modifiedWitholdAgreements: preprocessNulls(
+        genericContractFormDataSchema.shape.modifiedWitholdAgreements.optional()
+    ),
+    modifiedStateDirectedPayments: preprocessNulls(
+        genericContractFormDataSchema.shape.modifiedStateDirectedPayments.optional()
+    ),
+    modifiedPassThroughPayments: preprocessNulls(
+        genericContractFormDataSchema.shape.modifiedPassThroughPayments.optional()
+    ),
+    modifiedPaymentsForMentalDiseaseInstitutions: preprocessNulls(
+        genericContractFormDataSchema.shape.modifiedPaymentsForMentalDiseaseInstitutions.optional()
+    ),
+    modifiedMedicalLossRatioStandards: preprocessNulls(
+        genericContractFormDataSchema.shape.modifiedMedicalLossRatioStandards.optional()
+    ),
+    modifiedOtherFinancialPaymentIncentive: preprocessNulls(
+        genericContractFormDataSchema.shape.modifiedOtherFinancialPaymentIncentive.optional()
+    ),
+    modifiedEnrollmentProcess: preprocessNulls(
+        genericContractFormDataSchema.shape.modifiedEnrollmentProcess.optional()
+    ),
+    modifiedGrevienceAndAppeal: preprocessNulls(
+        genericContractFormDataSchema.shape.modifiedGrevienceAndAppeal.optional()
+    ),
+    modifiedNetworkAdequacyStandards: preprocessNulls(
+        genericContractFormDataSchema.shape.modifiedNetworkAdequacyStandards.optional()
+    ),
+    modifiedLengthOfContract: preprocessNulls(
+        genericContractFormDataSchema.shape.modifiedLengthOfContract.optional()
+    ),
+    modifiedNonRiskPaymentArrangements: preprocessNulls(
+        genericContractFormDataSchema.shape.modifiedNonRiskPaymentArrangements.optional()
+    ),
+    // statutoryRegulatoryAttestation: genericContractFormDataSchema.shape.statutoryRegulatoryAttestation.optional(),
+})
+
+// submittedFormDataSchema is the schema used during submission validation. Most fields are required and most arrays are nonempty.
+// refinements check for validations across the whole formData
+const submittableContractFormDataSchema = genericContractFormDataSchema
+    .extend({
+        managedCareEntities:
+            genericContractFormDataSchema.shape.managedCareEntities.nonempty(),
+        stateContacts:
+            genericContractFormDataSchema.shape.stateContacts.nonempty(),
+        contractDocuments:
+            genericContractFormDataSchema.shape.contractDocuments.nonempty(),
+        federalAuthorities:
+            genericContractFormDataSchema.shape.federalAuthorities.nonempty(),
+    })
+    .superRefine((formData, ctx) => {
+        if (
+            formData.populationCovered === 'CHIP' &&
+            formData.submissionType === 'CONTRACT_AND_RATES'
+        ) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: 'cannot submit rates with CHIP only populationCovered',
+            })
+        }
+    })
+const genericRateFormDataSchema = z.object({
     id: z.string().optional(), // 10.4.23 eng pairing - we discussed future reactor that would delete this from the rate revision form data schema all together.
     rateID: z.string().optional(), // 10.4.23 eng pairing - we discussed future refactor to move this up to rate revision schema.
-    rateType: rateTypeSchema.optional(),
-    rateCapitationType: rateCapitationTypeSchema.optional(),
-    rateDocuments: z.array(documentSchema).optional(),
-    supportingDocuments: z.array(documentSchema).optional(),
-    rateDateStart: z.date().optional(),
-    rateDateEnd: z.date().optional(),
-    rateDateCertified: z.date().optional(),
-    amendmentEffectiveDateStart: z.date().optional(),
-    amendmentEffectiveDateEnd: z.date().optional(),
-    deprecatedRateProgramIDs: z.array(z.string()).optional(),
-    rateProgramIDs: z.array(z.string()).optional(),
-    rateCertificationName: z.string().optional(),
-    certifyingActuaryContacts: z.array(actuaryContactSchema).optional(),
-    addtlActuaryContacts: z.array(actuaryContactSchema).optional(),
-    actuaryCommunicationPreference: actuaryCommunicationTypeSchema.optional(),
-    packagesWithSharedRateCerts: z
-        .array(packagesWithSharedRateCerts)
-        .optional(),
+    rateType: rateTypeSchema,
+    rateCapitationType: rateCapitationTypeSchema,
+    rateDocuments: z.array(documentSchema),
+    supportingDocuments: z.array(documentSchema),
+    rateDateStart: z.date(),
+    rateDateEnd: z.date(),
+    rateDateCertified: z.date(),
+    amendmentEffectiveDateStart: preprocessNulls(z.date().optional()),
+    amendmentEffectiveDateEnd: preprocessNulls(z.date().optional()),
+    deprecatedRateProgramIDs: z.array(z.string()),
+    rateProgramIDs: z.array(z.string()),
+    rateCertificationName: z.string(),
+    certifyingActuaryContacts: z.array(actuaryContactSchema),
+    addtlActuaryContacts: z.array(actuaryContactSchema),
+    actuaryCommunicationPreference: actuaryCommunicationTypeSchema,
+    packagesWithSharedRateCerts: z.array(packagesWithSharedRateCerts),
+})
+
+const rateFormDataSchema = genericRateFormDataSchema.extend({
+    // id: genericRateFormDataSchema.shape.id.optional(),
+    // rateID: genericRateFormDataSchema.shape.rateID.optional(),
+    rateType: preprocessNulls(
+        genericRateFormDataSchema.shape.rateType.optional()
+    ),
+    rateCapitationType: preprocessNulls(
+        genericRateFormDataSchema.shape.rateCapitationType.optional()
+    ),
+    rateDocuments: preprocessNulls(
+        genericRateFormDataSchema.shape.rateDocuments.optional()
+    ),
+    supportingDocuments: preprocessNulls(
+        genericRateFormDataSchema.shape.supportingDocuments.optional()
+    ),
+    rateDateStart: preprocessNulls(
+        genericRateFormDataSchema.shape.rateDateStart.optional()
+    ),
+    rateDateEnd: preprocessNulls(
+        genericRateFormDataSchema.shape.rateDateEnd.optional()
+    ),
+    rateDateCertified: preprocessNulls(
+        genericRateFormDataSchema.shape.rateDateCertified.optional()
+    ),
+    deprecatedRateProgramIDs: preprocessNulls(
+        genericRateFormDataSchema.shape.deprecatedRateProgramIDs.optional()
+    ),
+    rateProgramIDs: preprocessNulls(
+        genericRateFormDataSchema.shape.rateProgramIDs.optional()
+    ),
+    rateCertificationName: preprocessNulls(
+        genericRateFormDataSchema.shape.rateCertificationName.optional()
+    ),
+    certifyingActuaryContacts: preprocessNulls(
+        genericRateFormDataSchema.shape.certifyingActuaryContacts.optional()
+    ),
+    addtlActuaryContacts: preprocessNulls(
+        genericRateFormDataSchema.shape.addtlActuaryContacts.optional()
+    ),
+    actuaryCommunicationPreference: preprocessNulls(
+        genericRateFormDataSchema.shape.actuaryCommunicationPreference.optional()
+    ),
+    packagesWithSharedRateCerts: preprocessNulls(
+        genericRateFormDataSchema.shape.packagesWithSharedRateCerts.optional()
+    ),
+})
+
+const submittableRateFormDataSchema = genericRateFormDataSchema.extend({
+    rateDocuments: genericRateFormDataSchema.shape.rateDocuments.nonempty(),
+    rateProgramIDs: genericRateFormDataSchema.shape.rateProgramIDs.nonempty(),
+    certifyingActuaryContacts:
+        genericRateFormDataSchema.shape.certifyingActuaryContacts.nonempty(),
 })
 
 type DocumentType = z.infer<typeof documentSchema>
@@ -132,7 +277,14 @@ type RateFormEditableType = Partial<RateFormDataType>
 type StateContactType = z.infer<typeof stateContactSchema>
 type ActuaryContactType = z.infer<typeof actuaryContactSchema>
 
-export { contractFormDataSchema, rateFormDataSchema, preprocessNulls }
+export {
+    submittableContractFormDataSchema,
+    submittableRateFormDataSchema,
+    contractFormDataSchema,
+    rateFormDataSchema,
+    preprocessNulls,
+    documentSchema,
+}
 
 export type {
     ContractFormDataType,

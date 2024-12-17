@@ -565,7 +565,6 @@ describe('StateSubmissionForm', () => {
     })
 
     describe('the delete button', () => {
-        // For this test, we want to mock the call to deleteFile to see when it gets called
         const mockS3 = testS3Client()
 
         it('does not delete files from past revisions', async () => {

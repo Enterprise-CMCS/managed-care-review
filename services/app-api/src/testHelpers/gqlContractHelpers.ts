@@ -77,6 +77,34 @@ async function submitTestContract(
     return result.data.submitContract.contract
 }
 
+async function resubmitTestContract(
+    server: ApolloServer,
+    contractID: string,
+    submittedReason?: string
+): Promise<Contract> {
+    const updateResult = await server.executeOperation({
+        query: SubmitContractDocument,
+        variables: {
+            input: {
+                contractID,
+                submittedReason,
+            },
+        },
+    })
+
+    if (updateResult.errors) {
+        throw new Error(
+            `resubmitTestContract query failed with errors ${updateResult.errors}`
+        )
+    }
+
+    if (!updateResult.data) {
+        throw new Error('resubmitTestContract returned nothing')
+    }
+
+    return updateResult.data.submitContract.contract
+}
+
 async function unlockTestContract(
     server: ApolloServer,
     contractID: string,
@@ -336,6 +364,15 @@ const createAndUpdateTestContractWithoutRates = async (
             modifiedPassThroughPayments: true,
             modifiedPaymentsForMentalDiseaseInstitutions: true,
             modifiedNonRiskPaymentArrangements: true,
+            modifiedBenefitsProvided: false,
+            modifiedGeoAreaServed: false,
+            modifiedMedicaidBeneficiaries: false,
+            modifiedMedicalLossRatioStandards: false,
+            modifiedOtherFinancialPaymentIncentive: false,
+            modifiedEnrollmentProcess: false,
+            modifiedGrevienceAndAppeal: false,
+            modifiedNetworkAdequacyStandards: false,
+            modifiedLengthOfContract: false,
         },
     }
     draft.statutoryRegulatoryAttestation = false
@@ -474,6 +511,7 @@ export {
     linkRateToDraftContract,
     updateRateOnDraftContract,
     clearRatesOnDraftContract,
+    resubmitTestContract,
     updateTestContractDraftRevision,
     createTestContract,
     updateTestContractToReplaceRate,
