@@ -74,7 +74,7 @@ const genericContractFormDataSchema = z.object({
     contractDateEnd: z.date(),
     managedCareEntities: z.array(managedCareEntitiesSchema),
     federalAuthorities: z.array(federalAuthoritySchema),
-    inLieuServicesAndSettings: z.boolean(),
+    inLieuServicesAndSettings: z.boolean().optional(),
     modifiedBenefitsProvided: z.boolean().optional(),
     modifiedGeoAreaServed: z.boolean().optional(),
     modifiedMedicaidBeneficiaries: z.boolean().optional(),
