@@ -1,9 +1,10 @@
-import { ActionButton } from '../../ActionButton'
+import { ActionButton, type ActionButtonProps } from '../../ActionButton'
 import { TealiumButtonEventObject } from '../../../tealium'
 
 // Eventually ActionButton will be entirely swapped out for ModalOpenButton - part MCR-3782 when unlock reason modal is added
 type UnlockRateButtonProps = JSX.IntrinsicElements['button'] &
-    Partial<TealiumButtonEventObject>
+    Partial<TealiumButtonEventObject> &
+    Partial<ActionButtonProps>
 
 export const UnlockRateButton = ({
     onClick,
@@ -15,7 +16,6 @@ export const UnlockRateButton = ({
         <ActionButton
             {...props}
             type="button"
-            variant="outline"
             disabled={disabled}
             onClick={onClick}
         >

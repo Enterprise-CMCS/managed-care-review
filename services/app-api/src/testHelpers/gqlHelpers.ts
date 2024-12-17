@@ -85,7 +85,7 @@ const defaultContext = (): Context => {
 const constructTestPostgresServer = async (opts?: {
     context?: Context
     emailer?: Emailer
-    store?: Store
+    store?: Partial<Store>
     emailParameterStore?: EmailParameterStore
     ldService?: LDService
     jwt?: JWTLib
@@ -99,7 +99,10 @@ const constructTestPostgresServer = async (opts?: {
     const ldService = opts?.ldService || testLDService()
 
     const prismaClient = await sharedTestPrismaClient()
-    const postgresStore = opts?.store || NewPostgresStore(prismaClient)
+    const postgresStore = {
+        ...NewPostgresStore(prismaClient),
+        ...opts?.store,
+    }
     const jwt =
         opts?.jwt ||
         newJWTLib({

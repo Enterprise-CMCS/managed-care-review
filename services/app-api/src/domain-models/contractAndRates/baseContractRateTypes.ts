@@ -8,6 +8,8 @@ import {
     statusSchema,
     contractReviewStatusSchema,
     consolidatedContractStatusSchema,
+    rateReviewStatusSchema,
+    consolidatedRateStatusSchema,
 } from './statusType'
 import {
     indexContractQuestionsPayload,
@@ -15,6 +17,7 @@ import {
 } from '../QuestionsType'
 import { updateInfoSchema } from './updateInfoType'
 import { contractReviewActionSchema } from './contractReviewActionType'
+import { rateReviewActionSchema } from './rateReviewActionType'
 
 // Contract represents the contract specific information in a submission package
 // All that data is contained in revisions, each revision represents the data in a single submission
@@ -53,12 +56,15 @@ const rateWithoutDraftContractsSchema = z.object({
     createdAt: z.date(),
     updatedAt: z.date(),
     status: statusSchema,
+    reviewStatus: rateReviewStatusSchema,
+    consolidatedStatus: consolidatedRateStatusSchema,
     stateCode: z.string(),
     parentContractID: z.string().uuid(),
     stateNumber: z.number().min(1),
     withdrawInfo: updateInfoSchema.optional(),
     // If this rate is in a DRAFT or UNLOCKED status, there will be a draftRevision
     draftRevision: rateRevisionSchema.optional(),
+    reviewStatusActions: z.array(rateReviewActionSchema).optional(),
     // All revisions are submitted and in reverse chronological order
     revisions: z.array(rateRevisionSchema),
 
@@ -66,6 +72,10 @@ const rateWithoutDraftContractsSchema = z.object({
 
     questions: indexRateQuestionsPayload.optional(),
 })
+
+type RateReviewStatusType = z.infer<
+    typeof rateWithoutDraftContractsSchema.shape.reviewStatus
+>
 
 type RateWithoutDraftContractsType = z.infer<
     typeof rateWithoutDraftContractsSchema
@@ -77,4 +87,5 @@ export type {
     ContractWithoutDraftRatesType,
     RateWithoutDraftContractsType,
     ContractReviewStatusType,
+    RateReviewStatusType,
 }
