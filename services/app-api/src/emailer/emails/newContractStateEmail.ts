@@ -1,24 +1,25 @@
-import type { LockedHealthPlanFormDataType } from '@mc-review/hpp'
 import { packageName as generatePackageName } from '@mc-review/hpp'
 import { formatCalendarDate } from '@mc-review/dates'
 import { formatEmailAddresses, pruneDuplicateEmails } from '../formatters'
 import type { EmailConfiguration, EmailData } from '..'
-import type { ProgramType } from '../../domain-models'
+import type { ProgramType, ContractType } from '../../domain-models'
 import {
     stripHTMLFromTemplate,
     SubmissionTypeRecord,
     renderTemplate,
-    findPackagePrograms,
+    findContractPrograms,
 } from '../templateHelpers'
 import { submissionSummaryURL } from '../generateURLs'
 
-export const newPackageStateEmail = async (
-    formData: LockedHealthPlanFormDataType,
+export const newContractStateEmail = async (
+    contract: ContractType,
     submitterEmails: string[],
     config: EmailConfiguration,
     statePrograms: ProgramType[]
 ): Promise<EmailData | Error> => {
     const stateContactEmails: string[] = []
+    const contractRev = contract.packageSubmissions[0].contractRevision
+    const formData = contractRev.formData
     formData.stateContacts.forEach((contact) => {
         if (contact.email) stateContactEmails.push(contact.email)
     })
@@ -29,24 +30,24 @@ export const newPackageStateEmail = async (
     ])
 
     //This checks to make sure all programs contained in submission exists for the state.
-    const packagePrograms = findPackagePrograms(formData, statePrograms)
+    const packagePrograms = findContractPrograms(contractRev, statePrograms)
 
     if (packagePrograms instanceof Error) {
         return packagePrograms
     }
 
     const packageName = generatePackageName(
-        formData.stateCode,
-        formData.stateNumber,
+        contract.stateCode,
+        contract.stateNumber,
         formData.programIDs,
         packagePrograms
     )
 
     const isContractAndRates =
         formData.submissionType === 'CONTRACT_AND_RATES' &&
-        Boolean(formData.rateInfos.length)
+        Boolean(contract.packageSubmissions[0].rateRevisions.length)
 
-    const packageURL = submissionSummaryURL(formData.id, config.baseUrl)
+    const contractURL = submissionSummaryURL(contract.id, config.baseUrl)
 
     const data = {
         shouldIncludeRates: isContractAndRates,
@@ -72,32 +73,35 @@ export const newPackageStateEmail = async (
         contractDatesEnd: formatCalendarDate(formData.contractDateEnd, 'UTC'),
         rateInfos:
             isContractAndRates &&
-            formData.rateInfos.map((rate) => ({
-                rateName: rate.rateCertificationName,
+            contract.packageSubmissions[0].rateRevisions.map((rate) => ({
+                rateName: rate.formData.rateCertificationName,
                 rateDateLabel:
-                    rate.rateType === 'NEW'
+                    rate.formData.rateType === 'NEW'
                         ? 'Rating period'
                         : 'Rate amendment effective dates',
                 rateDatesStart:
-                    rate.rateType === 'AMENDMENT' && rate.rateAmendmentInfo
+                    rate.formData.rateType === 'AMENDMENT'
                         ? formatCalendarDate(
-                              rate.rateAmendmentInfo.effectiveDateStart,
+                              rate.formData.amendmentEffectiveDateStart,
                               'UTC'
                           )
-                        : formatCalendarDate(rate.rateDateStart, 'UTC'),
+                        : formatCalendarDate(
+                              rate.formData.rateDateStart,
+                              'UTC'
+                          ),
                 rateDatesEnd:
-                    rate.rateType === 'AMENDMENT' && rate.rateAmendmentInfo
+                    rate.formData.rateType === 'AMENDMENT'
                         ? formatCalendarDate(
-                              rate.rateAmendmentInfo.effectiveDateEnd,
+                              rate.formData.amendmentEffectiveDateEnd,
                               'UTC'
                           )
-                        : formatCalendarDate(rate.rateDateEnd, 'UTC'),
+                        : formatCalendarDate(rate.formData.rateDateEnd, 'UTC'),
             })),
-        submissionURL: packageURL,
+        submissionURL: contractURL,
     }
 
     const result = await renderTemplate<typeof data>(
-        'newPackageStateEmail',
+        'newContractStateEmail',
         data
     )
 

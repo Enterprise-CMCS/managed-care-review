@@ -1,7 +1,7 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`renders overall email as expected 1`] = `
-"Submission MCR-MN-0003-SNBC was successfully resubmitted<br />
+"Submission MCR-MN-0004-SNBC was successfully resubmitted<br />
 <br />
 <b>Submitted by:</b> bob@example.com<br />
 <b>Updated on:</b> 01/31/2022<br />

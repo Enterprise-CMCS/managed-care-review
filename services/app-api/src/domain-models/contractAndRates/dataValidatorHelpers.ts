@@ -4,6 +4,8 @@ import { contractFormDataSchema, preprocessNulls } from './formDataTypes'
 import { contractTypeSchema, populationCoveredSchema } from '@mc-review/hpp'
 import { z } from 'zod'
 import type { Store } from '../../postgres'
+import { submittableContractSchema } from './contractTypes'
+import type { ContractType } from './contractTypes'
 
 const updateDraftContractFormDataSchema = contractFormDataSchema.extend({
     contractType: preprocessNulls(contractTypeSchema.optional()),
@@ -22,7 +24,7 @@ const validateStatutoryRegulatoryAttestation = (
         z
             .string()
             .optional()
-            .transform((val, ctx) => {
+            .transform((val) => {
                 if (featureFlags?.['438-attestation']) {
                     // Clear out existing statutoryRegulatoryAttestationDescription if statutoryRegulatoryAttestation is true
                     if (formData.statutoryRegulatoryAttestation && val) {
@@ -90,4 +92,82 @@ const validateContractDraftRevisionInput = (
     return parsedData.data
 }
 
-export { validateContractDraftRevisionInput }
+const refineForFeatureFlags = (featureFlags?: FeatureFlagSettings) => {
+    if (featureFlags?.['438-attestation']) {
+        return submittableContractSchema.superRefine((contract, ctx) => {
+            // since we have different validations based on a feature flag, we add them as a refinement here.
+            // once 438 attestation ships this refinement should be moved to the submittableContractSchema
+            // and statutoryRegulatoryAttestation should be made non-optional.
+
+            const formData = contract.draftRevision.formData
+            if (formData.statutoryRegulatoryAttestation === undefined) {
+                ctx.addIssue({
+                    code: z.ZodIssueCode.custom,
+                    message:
+                        'statutoryRegulatoryAttestationDescription is required when  438-attestation feature flag is on',
+                })
+            }
+
+            if (
+                (formData.statutoryRegulatoryAttestation === false &&
+                    !formData.statutoryRegulatoryAttestationDescription) ||
+                (formData.statutoryRegulatoryAttestationDescription &&
+                    formData.statutoryRegulatoryAttestationDescription
+                        .length === 0)
+            ) {
+                ctx.addIssue({
+                    code: z.ZodIssueCode.custom,
+                    message:
+                        'statutoryRegulatoryAttestationDescription is Required if statutoryRegulatoryAttestation is false',
+                })
+            }
+        })
+    } else {
+        return submittableContractSchema
+    }
+}
+
+const parseContract = (
+    contract: ContractType,
+    stateCode: string,
+    store: Store,
+    featureFlags?: FeatureFlagSettings
+): ContractType | z.ZodError => {
+    const contractParser = refineForFeatureFlags(featureFlags)
+
+    // since validating programs requires looking in the DB, and once we move programs into the db that
+    // validation will be performed there instead. I'm just adding this check as a refinement instead of trying
+    // to make it part of the core zod parsing.
+    const contractWithProgramsParser = contractParser.superRefine(
+        (contract, ctx) => {
+            const contractProgramsIDs = new Set(
+                contract.draftRevision.formData.programIDs
+            )
+            const allProgramIDs = contract.draftRates.reduce((acc, rate) => {
+                const rateFormData = rate.draftRevision.formData
+                const rateProgramIDs = rateFormData.rateProgramIDs.concat(
+                    rateFormData.deprecatedRateProgramIDs
+                )
+                return new Set([...acc, ...rateProgramIDs])
+            }, contractProgramsIDs)
+
+            const findResult = store.findPrograms(stateCode, [...allProgramIDs])
+            if (findResult instanceof Error) {
+                ctx.addIssue({
+                    code: z.ZodIssueCode.custom,
+                    message: findResult.message,
+                })
+            }
+        }
+    )
+
+    const parsedData = contractWithProgramsParser.safeParse(contract)
+
+    if (parsedData.error) {
+        return parsedData.error
+    }
+
+    return parsedData.data
+}
+
+export { validateContractDraftRevisionInput, parseContract }

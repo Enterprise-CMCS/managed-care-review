@@ -1,3 +1,9 @@
+/* 
+    This resolver is no longer being used by the frontend
+    However, it still needs to be in the codebase because there
+    are multiple api test that still call submitHPP.
+    This will be addressed in https://jiraent.cms.gov/browse/MCR-4552
+*/
 import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
 import {
     hasValidContract,
@@ -11,12 +17,7 @@ import {
     isCHIPOnly,
 } from '@mc-review/hpp'
 import type { UpdateInfoType } from '../../domain-models'
-import {
-    isStateUser,
-    packageStatus,
-    packageSubmitters,
-} from '../../domain-models'
-import type { Emailer } from '../../emailer'
+import { isStateUser } from '../../domain-models'
 import type { MutationResolvers, State } from '../../gen/gqlServer'
 import { logError, logSuccess } from '../../logger'
 import type { Store } from '../../postgres'
@@ -26,13 +27,11 @@ import {
     setErrorAttributesOnActiveSpan,
     setSuccessAttributesOnActiveSpan,
 } from '../attributeHelper'
-import type { EmailParameterStore } from '../../parameterStore'
 import { GraphQLError } from 'graphql'
 
 import type {
     HealthPlanFormDataType,
     LockedHealthPlanFormDataType,
-    StateCodeType,
 } from '@mc-review/hpp'
 import type {
     FeatureFlagSettings,
@@ -193,12 +192,13 @@ export function parseAndSubmit(
 //
 export function submitHealthPlanPackageResolver(
     store: Store,
-    emailer: Emailer,
-    emailParameterStore: EmailParameterStore,
+    // emailer: Emailer,
+    // emailParameterStore: EmailParameterStore,
     launchDarkly: LDService
 ): MutationResolvers['submitHealthPlanPackage'] {
     return async (_parent, { input }, context) => {
         const featureFlags = await launchDarkly.allFlags(context)
+
         const { user, ctx, tracer } = context
         const span = tracer?.startSpan('submitHealthPlanPackage', {}, ctx)
         setResolverDetailsOnActiveSpan('submitHealthPlanPackage', user, span)
@@ -313,7 +313,7 @@ export function submitHealthPlanPackageResolver(
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new Error(errMessage)
         }
-
+        //////////////////////////////////////
         const initialFormData = conversionResult
         const contractRevisionID = contractWithHistory.draftRevision.id
 
@@ -487,102 +487,7 @@ export function submitHealthPlanPackageResolver(
             })
         }
 
-        // set variables used across feature flag boundary
-        const lockedFormData = maybeLocked
         const updatedPackage = maybeSubmittedPkg
-
-        // Send emails!
-        const status = packageStatus(updatedPackage)
-
-        let stateAnalystsEmails: string[] = []
-        // not great that state code type isn't being used in ContractType but I'll risk the conversion for now
-        const stateAnalystsEmailsResult = await store.findStateAssignedUsers(
-            updatedPackage.stateCode as StateCodeType
-        )
-
-        if (stateAnalystsEmailsResult instanceof Error) {
-            logError(
-                'getStateAnalystsEmails',
-                stateAnalystsEmailsResult.message
-            )
-            setErrorAttributesOnActiveSpan(
-                stateAnalystsEmailsResult.message,
-                span
-            )
-        } else {
-            stateAnalystsEmails = stateAnalystsEmailsResult.map((u) => u.email)
-        }
-
-        // Get submitter email from every pkg submitted revision.
-        const submitterEmails = packageSubmitters(updatedPackage)
-
-        const statePrograms = store.findStatePrograms(updatedPackage.stateCode)
-
-        if (statePrograms instanceof Error) {
-            logError('findStatePrograms', statePrograms.message)
-            setErrorAttributesOnActiveSpan(statePrograms.message, span)
-            throw new GraphQLError(statePrograms.message, {
-                extensions: {
-                    code: 'INTERNAL_SERVER_ERROR',
-                    cause: 'DB_ERROR',
-                },
-            })
-        }
-
-        let cmsPackageEmailResult
-        let statePackageEmailResult
-
-        if (status === 'RESUBMITTED') {
-            cmsPackageEmailResult = await emailer.sendResubmittedCMSEmail(
-                lockedFormData,
-                updateInfo,
-                stateAnalystsEmails,
-                statePrograms
-            )
-            statePackageEmailResult = await emailer.sendResubmittedStateEmail(
-                lockedFormData,
-                updateInfo,
-                submitterEmails,
-                statePrograms
-            )
-        } else if (status === 'SUBMITTED') {
-            cmsPackageEmailResult = await emailer.sendCMSNewPackage(
-                lockedFormData,
-                stateAnalystsEmails,
-                statePrograms
-            )
-            statePackageEmailResult = await emailer.sendStateNewPackage(
-                lockedFormData,
-                submitterEmails,
-                statePrograms
-            )
-        }
-
-        if (
-            cmsPackageEmailResult instanceof Error ||
-            statePackageEmailResult instanceof Error
-        ) {
-            if (cmsPackageEmailResult instanceof Error) {
-                logError(
-                    'submitHealthPlanPackage - CMS email failed',
-                    cmsPackageEmailResult
-                )
-                setErrorAttributesOnActiveSpan('CMS email failed', span)
-            }
-            if (statePackageEmailResult instanceof Error) {
-                logError(
-                    'submitHealthPlanPackage - state email failed',
-                    statePackageEmailResult
-                )
-                setErrorAttributesOnActiveSpan('state email failed', span)
-            }
-            throw new GraphQLError('Email failed', {
-                extensions: {
-                    code: 'INTERNAL_SERVER_ERROR',
-                    cause: 'EMAIL_ERROR',
-                },
-            })
-        }
 
         logSuccess('submitHealthPlanPackage')
         setSuccessAttributesOnActiveSpan(span)

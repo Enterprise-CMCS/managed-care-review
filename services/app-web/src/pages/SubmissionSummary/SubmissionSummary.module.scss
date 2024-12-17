@@ -12,6 +12,15 @@
     flex: 1 0 auto;
 }
 
+.actionsSection {
+    button {
+        width: 100%;
+    }
+    a {
+        width: 100%;
+    }
+}
+
 .container {
     max-width: custom.$mcr-container-standard-width-fixed;
     padding: 2rem 0;

@@ -18,7 +18,22 @@ export {
     convertContractWithRatesToUnlockedHPP,
     convertContractWithRatesToFormData,
 } from './convertContractWithRatesToHPP'
-
+export {
+    isBaseContract,
+    isCHIPOnly,
+    isContractOnly,
+    isContractAndRates,
+    isContractAmendment,
+    isSubmitted,
+    isContractWithProvisions,
+    getLastContractSubmission,
+    getProvisionDictionary,
+    sortModifiedProvisions,
+    generateApplicableProvisionsList,
+    generateProvisionLabel,
+    isMissingProvisions,
+    hasValidModifiedProvisions,
+} from './helpers'
 export type { ContractType, UnlockedContractType } from './contractTypes'
 export type { RateType } from './rateTypes'
 

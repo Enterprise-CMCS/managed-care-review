@@ -27,7 +27,6 @@ import {
     cmsApproverUserResolver,
     updateStateAssignment,
 } from './user'
-import type { EmailParameterStore } from '../parameterStore'
 import type { LDService } from '../launchDarkly/launchDarkly'
 import type { JWTLib } from '../jwt'
 import { indexRatesResolver } from './rate'
@@ -57,11 +56,11 @@ import { approveContract } from './contract/approveContract'
 import { fetchMcReviewSettings } from './settings'
 import { updateStateAssignmentsByState } from './user/updateStateAssignmentsByState'
 import { rateFormDataResolver } from './rate/rateFormDataResolver'
+import { withdrawRate } from './rate/withdrawRate'
 
 export function configureResolvers(
     store: Store,
     emailer: Emailer,
-    emailParameterStore: EmailParameterStore,
     launchDarkly: LDService,
     jwt: JWTLib,
     s3Client: S3ClientT,
@@ -90,21 +89,12 @@ export function configureResolvers(
             ),
             submitHealthPlanPackage: submitHealthPlanPackageResolver(
                 store,
-                emailer,
-                emailParameterStore,
                 launchDarkly
             ),
-            submitContract: submitContract(
-                store,
-                emailer,
-                emailParameterStore,
-                launchDarkly
-            ),
+            submitContract: submitContract(store, emailer, launchDarkly),
             unlockHealthPlanPackage: unlockHealthPlanPackageResolver(
                 store,
-                emailer,
-                emailParameterStore,
-                launchDarkly
+                emailer
             ),
             unlockContract: unlockContractResolver(store, emailer),
             createContract: createContract(store),
@@ -117,6 +107,7 @@ export function configureResolvers(
             withdrawAndReplaceRedundantRate:
                 withdrawAndReplaceRedundantRateResolver(store),
             approveContract: approveContract(store),
+            withdrawRate: withdrawRate(store),
             updateDivisionAssignment: updateDivisionAssignment(store),
             updateStateAssignment: updateStateAssignment(store),
             updateStateAssignmentsByState: updateStateAssignmentsByState(store),

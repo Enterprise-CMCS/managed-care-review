@@ -3,20 +3,18 @@ import {
     testStateAnalystsEmails,
     testDuplicateEmailConfig,
     testDuplicateStateAnalystsEmails,
-    mockContractAmendmentFormData,
-    mockContractOnlyFormData,
-    mockContractAndRatesFormData,
+    mockContract,
     mockMNState,
     mockMSState,
 } from '../../testHelpers/emailerHelpers'
-import type { LockedHealthPlanFormDataType } from '@mc-review/hpp'
-import { generateRateName, packageName } from '@mc-review/hpp'
-import { newPackageCMSEmail } from './index'
+import { newContractCMSEmail } from './index'
+import type { ContractType, RateFormDataType } from '../../domain-models'
+import { packageName } from '@mc-review/hpp'
 
 test('to addresses list includes review team email addresses', async () => {
-    const sub = mockContractOnlyFormData()
+    const sub = mockContract()
     const statePrograms = mockMNState().programs
-    const template = await newPackageCMSEmail(
+    const template = await newContractCMSEmail(
         sub,
         testEmailConfig(),
         [],
@@ -37,10 +35,10 @@ test('to addresses list includes review team email addresses', async () => {
 })
 
 test('to addresses list includes OACT and DMCP group emails for contract and rate package', async () => {
-    const sub = mockContractAndRatesFormData()
-    sub.riskBasedContract = true
+    const sub = mockContract()
+    sub.packageSubmissions[0].contractRevision.formData.riskBasedContract = true
     const statePrograms = mockMNState().programs
-    const template = await newPackageCMSEmail(
+    const template = await newContractCMSEmail(
         sub,
         testEmailConfig(),
         [],
@@ -78,9 +76,12 @@ test('to addresses list includes OACT and DMCP group emails for contract and rat
 })
 
 test('to addresses list  does not include OACT and DMCP group emails for CHIP submission', async () => {
-    const sub = mockContractOnlyFormData({ populationCovered: 'CHIP' })
+    const sub = mockContract()
+    sub.packageSubmissions[0].contractRevision.formData.populationCovered =
+        'CHIP'
+
     const statePrograms = mockMNState().programs
-    const template = await newPackageCMSEmail(
+    const template = await newContractCMSEmail(
         sub,
         testEmailConfig(),
         [],
@@ -109,9 +110,9 @@ test('to addresses list  does not include OACT and DMCP group emails for CHIP su
 })
 
 test('to addresses list does not include help addresses', async () => {
-    const sub = mockContractOnlyFormData()
+    const sub = mockContract()
     const statePrograms = mockMNState().programs
-    const template = await newPackageCMSEmail(
+    const template = await newContractCMSEmail(
         sub,
         testEmailConfig(),
         [],
@@ -139,9 +140,9 @@ test('to addresses list does not include help addresses', async () => {
     )
 })
 test('to addresses list does not include duplicate review email addresses', async () => {
-    const sub = mockContractAndRatesFormData()
+    const sub = mockContract()
     const statePrograms = mockMNState().programs
-    const template = await newPackageCMSEmail(
+    const template = await newContractCMSEmail(
         sub,
         testDuplicateEmailConfig,
         testDuplicateStateAnalystsEmails,
@@ -156,16 +157,16 @@ test('to addresses list does not include duplicate review email addresses', asyn
 })
 
 test('subject line is correct', async () => {
-    const sub = mockContractOnlyFormData()
+    const sub = mockContract()
     const statePrograms = mockMNState().programs
     const name = packageName(
         sub.stateCode,
         sub.stateNumber,
-        sub.programIDs,
+        sub.packageSubmissions[0].contractRevision.formData.programIDs,
         statePrograms
     )
 
-    const template = await newPackageCMSEmail(
+    const template = await newContractCMSEmail(
         sub,
         testEmailConfig(),
         [],
@@ -186,13 +187,19 @@ test('subject line is correct', async () => {
 })
 
 test('includes expected data summary for a contract only submission', async () => {
-    const sub: LockedHealthPlanFormDataType = {
-        ...mockContractOnlyFormData(),
-        contractDateStart: new Date('01/01/2021'),
-        contractDateEnd: new Date('01/01/2025'),
+    const sub: ContractType = {
+        ...mockContract(),
     }
+    sub.packageSubmissions[0].contractRevision.formData.contractDateEnd =
+        new Date('01/01/2025')
+    sub.packageSubmissions[0].contractRevision.formData.contractDateStart =
+        new Date('01/01/2021')
+    sub.packageSubmissions[0].contractRevision.formData.submissionType =
+        'CONTRACT_ONLY'
+    sub.packageSubmissions[0].contractRevision.formData.contractType = 'BASE'
+
     const statePrograms = mockMNState().programs
-    const template = await newPackageCMSEmail(
+    const template = await newContractCMSEmail(
         sub,
         testEmailConfig(),
         [],
@@ -226,44 +233,44 @@ test('includes expected data summary for a contract only submission', async () =
 })
 
 test('includes expected data summary for a contract and rates submission CMS email', async () => {
-    const sub: LockedHealthPlanFormDataType = {
-        ...mockContractAndRatesFormData(),
-        contractDateStart: new Date('01/01/2021'),
-        contractDateEnd: new Date('01/01/2025'),
-        rateInfos: [
+    const rateFormData: RateFormDataType = {
+        rateType: 'NEW',
+        rateDocuments: [
             {
-                rateType: 'NEW',
-                rateDocuments: [
-                    {
-                        s3URL: 's3://bucketname/key/test1',
-                        name: 'foo',
-                        sha256: 'fakesha',
-                    },
-                ],
-                supportingDocuments: [],
-                rateDateCertified: new Date('10/17/2022'),
-                rateProgramIDs: ['3fd36500-bf2c-47bc-80e8-e7aa417184c5'],
-                rateCertificationName:
-                    'MCR-MN-0003-MSHO-RATE-20210101-20220101-CERTIFICATION-20221017',
-                rateAmendmentInfo: undefined,
-                rateDateStart: new Date('01/01/2021'),
-                rateDateEnd: new Date('01/01/2022'),
-                actuaryContacts: [
-                    {
-                        actuarialFirm: 'DELOITTE',
-                        name: 'Actuary Contact 1',
-                        titleRole: 'Test Actuary Contact 1',
-                        email: 'actuarycontact1@example.com',
-                    },
-                ],
-                actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
-                packagesWithSharedRateCerts: [],
+                s3URL: 's3://bucketname/key/test1',
+                name: 'foo',
+                sha256: 'fakesha',
             },
         ],
+        supportingDocuments: [],
+        rateDateCertified: new Date('10/17/2022'),
+        rateProgramIDs: ['3fd36500-bf2c-47bc-80e8-e7aa417184c5'],
+        rateCertificationName:
+            'MCR-MN-0003-MSHO-RATE-20210101-20220101-CERTIFICATION-20221017',
+        rateDateStart: new Date('01/01/2021'),
+        rateDateEnd: new Date('01/01/2022'),
+        certifyingActuaryContacts: [
+            {
+                actuarialFirm: 'DELOITTE',
+                name: 'Actuary Contact 1',
+                titleRole: 'Test Actuary Contact 1',
+                email: 'actuarycontact1@example.com',
+            },
+        ],
+        actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+        packagesWithSharedRateCerts: [],
     }
+    const sub: ContractType = mockContract()
+    sub.packageSubmissions[0].contractRevision.formData.contractDateStart =
+        new Date('01/01/2021')
+    sub.packageSubmissions[0].contractRevision.formData.contractDateEnd =
+        new Date('01/01/2025')
+    sub.packageSubmissions[0].contractRevision.formData.contractType = 'BASE'
+    sub.packageSubmissions[0].rateRevisions[0].formData = rateFormData
+
     const statePrograms = mockMNState().programs
 
-    const template = await newPackageCMSEmail(
+    const template = await newContractCMSEmail(
         sub,
         testEmailConfig(),
         [],
@@ -305,112 +312,122 @@ test('includes expected data summary for a contract and rates submission CMS ema
     expect(template).toEqual(
         expect.objectContaining({
             bodyText: expect.stringContaining(
-                generateRateName(sub, sub.rateInfos[0], statePrograms)
+                sub.packageSubmissions[0].rateRevisions[0].formData
+                    .rateCertificationName!
             ),
         })
     )
 })
 
 test('includes expected data summary for a multi-rate contract and rates submission CMS email', async () => {
-    const sub: LockedHealthPlanFormDataType = {
-        ...mockContractAndRatesFormData(),
-        contractDateStart: new Date('01/01/2021'),
-        contractDateEnd: new Date('01/01/2025'),
-        rateInfos: [
+    const rate1FormData: RateFormDataType = {
+        rateType: 'NEW',
+        rateDocuments: [
             {
-                rateType: 'NEW',
-                rateDocuments: [
-                    {
-                        s3URL: 's3://bucketname/key/test1',
-                        name: 'foo',
-                        sha256: 'fakesha',
-                    },
-                ],
-                supportingDocuments: [],
-                rateDateCertified: new Date('10/17/2022'),
-                rateProgramIDs: ['3fd36500-bf2c-47bc-80e8-e7aa417184c5'],
-                rateCertificationName:
-                    'MCR-MN-0003-MSHO-RATE-20210101-20220101-CERTIFICATION-20221017',
-                rateAmendmentInfo: undefined,
-                rateDateStart: new Date('01/01/2021'),
-                rateDateEnd: new Date('01/01/2022'),
-                actuaryContacts: [
-                    {
-                        actuarialFirm: 'DELOITTE',
-                        name: 'Actuary Contact 1',
-                        titleRole: 'Test Actuary Contact 1',
-                        email: 'actuarycontact1@example.com',
-                    },
-                ],
-                actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
-                packagesWithSharedRateCerts: [],
-            },
-            {
-                rateType: 'NEW',
-                rateDocuments: [
-                    {
-                        s3URL: 's3://bucketname/key/test1',
-                        name: 'foo',
-                        sha256: 'fakesha',
-                    },
-                ],
-                supportingDocuments: [],
-                rateDateCertified: new Date('10/17/2022'),
-                rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
-                rateCertificationName:
-                    'MCR-MN-0003-SNBC-RATE-20220201-20230201-CERTIFICATION-20221017',
-                rateAmendmentInfo: undefined,
-                rateDateStart: new Date('02/01/2022'),
-                rateDateEnd: new Date('02/01/2023'),
-                actuaryContacts: [
-                    {
-                        actuarialFirm: 'STATE_IN_HOUSE',
-                        name: 'Actuary Contact 1',
-                        titleRole: 'Test Actuary Contact 1',
-                        email: 'actuarycontact1@example.com',
-                    },
-                ],
-                actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
-                packagesWithSharedRateCerts: [],
-            },
-            {
-                rateType: 'AMENDMENT',
-                rateDocuments: [
-                    {
-                        s3URL: 's3://bucketname/key/test1',
-                        name: 'foo',
-                        sha256: 'fakesha',
-                    },
-                ],
-                supportingDocuments: [],
-                rateDateCertified: new Date('10/17/2022'),
-                rateProgramIDs: [
-                    'ea16a6c0-5fc6-4df8-adac-c627e76660ab',
-                    'd95394e5-44d1-45df-8151-1cc1ee66f100',
-                ],
-                rateCertificationName:
-                    'MCR-MN-0003-MSC+-PMAP-RATE-20210605-20211231-AMENDMENT-20221017',
-                rateDateStart: new Date('01/01/2022'),
-                rateDateEnd: new Date('01/01/2023'),
-                rateAmendmentInfo: {
-                    effectiveDateStart: new Date('06/05/2021'),
-                    effectiveDateEnd: new Date('12/31/2021'),
-                },
-                actuaryContacts: [
-                    {
-                        actuarialFirm: 'MERCER',
-                        name: 'Actuary Contact 1',
-                        titleRole: 'Test Actuary Contact 1',
-                        email: 'actuarycontact1@example.com',
-                    },
-                ],
-                actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
-                packagesWithSharedRateCerts: [],
+                s3URL: 's3://bucketname/key/test1',
+                name: 'foo',
+                sha256: 'fakesha',
             },
         ],
+        supportingDocuments: [],
+        rateDateCertified: new Date('10/17/2022'),
+        rateProgramIDs: ['3fd36500-bf2c-47bc-80e8-e7aa417184c5'],
+        rateCertificationName:
+            'MCR-MN-0003-MSHO-RATE-20210101-20220101-CERTIFICATION-20221017',
+        rateDateStart: new Date('01/01/2021'),
+        rateDateEnd: new Date('01/01/2022'),
+        certifyingActuaryContacts: [
+            {
+                actuarialFirm: 'DELOITTE',
+                name: 'Actuary Contact 1',
+                titleRole: 'Test Actuary Contact 1',
+                email: 'actuarycontact1@example.com',
+            },
+        ],
+        actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+        packagesWithSharedRateCerts: [],
     }
+    const rate2FormData: RateFormDataType = {
+        rateType: 'NEW',
+        rateDocuments: [
+            {
+                s3URL: 's3://bucketname/key/test1',
+                name: 'foo',
+                sha256: 'fakesha',
+            },
+        ],
+        supportingDocuments: [],
+        rateDateCertified: new Date('10/17/2022'),
+        rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
+        rateCertificationName:
+            'MCR-MN-0003-SNBC-RATE-20220201-20230201-CERTIFICATION-20221017',
+        rateDateStart: new Date('02/01/2022'),
+        rateDateEnd: new Date('02/01/2023'),
+        certifyingActuaryContacts: [
+            {
+                actuarialFirm: 'STATE_IN_HOUSE',
+                name: 'Actuary Contact 1',
+                titleRole: 'Test Actuary Contact 1',
+                email: 'actuarycontact1@example.com',
+            },
+        ],
+        actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+        packagesWithSharedRateCerts: [],
+    }
+    const rate3FormData: RateFormDataType = {
+        rateType: 'AMENDMENT',
+        rateDocuments: [
+            {
+                s3URL: 's3://bucketname/key/test1',
+                name: 'foo',
+                sha256: 'fakesha',
+            },
+        ],
+        supportingDocuments: [],
+        rateDateCertified: new Date('10/17/2022'),
+        rateProgramIDs: [
+            'ea16a6c0-5fc6-4df8-adac-c627e76660ab',
+            'd95394e5-44d1-45df-8151-1cc1ee66f100',
+        ],
+        rateCertificationName:
+            'MCR-MN-0003-MSC+-PMAP-RATE-20210605-20211231-AMENDMENT-20221017',
+        rateDateStart: new Date('01/01/2022'),
+        rateDateEnd: new Date('01/01/2023'),
+        amendmentEffectiveDateStart: new Date('06/05/2021'),
+        amendmentEffectiveDateEnd: new Date('12/31/2021'),
+        certifyingActuaryContacts: [
+            {
+                actuarialFirm: 'MERCER',
+                name: 'Actuary Contact 1',
+                titleRole: 'Test Actuary Contact 1',
+                email: 'actuarycontact1@example.com',
+            },
+        ],
+        actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+        packagesWithSharedRateCerts: [],
+    }
+    const sub: ContractType = mockContract()
+    sub.packageSubmissions[0].contractRevision.formData.contractType = 'BASE'
+    sub.packageSubmissions[0].contractRevision.formData.contractDateStart =
+        new Date('01/01/2021')
+    sub.packageSubmissions[0].contractRevision.formData.contractDateEnd =
+        new Date('01/01/2025')
+    sub.packageSubmissions[0].rateRevisions = [
+        {
+            ...sub.packageSubmissions[0].rateRevisions[0],
+            formData: rate1FormData,
+        },
+        {
+            ...sub.packageSubmissions[0].rateRevisions[0],
+            formData: rate2FormData,
+        },
+        {
+            ...sub.packageSubmissions[0].rateRevisions[0],
+            formData: rate3FormData,
+        },
+    ]
     const statePrograms = mockMNState().programs
-    const template = await newPackageCMSEmail(
+    const template = await newContractCMSEmail(
         sub,
         testEmailConfig(),
         [],
@@ -446,7 +463,8 @@ test('includes expected data summary for a multi-rate contract and rates submiss
     expect(template).toEqual(
         expect.objectContaining({
             bodyText: expect.stringContaining(
-                generateRateName(sub, sub.rateInfos[0], statePrograms)
+                sub.packageSubmissions[0].rateRevisions[0].formData
+                    .rateCertificationName!
             ),
         })
     )
@@ -461,7 +479,8 @@ test('includes expected data summary for a multi-rate contract and rates submiss
     expect(template).toEqual(
         expect.objectContaining({
             bodyText: expect.stringContaining(
-                generateRateName(sub, sub.rateInfos[1], statePrograms)
+                sub.packageSubmissions[0].rateRevisions[1].formData
+                    .rateCertificationName!
             ),
         })
     )
@@ -476,7 +495,8 @@ test('includes expected data summary for a multi-rate contract and rates submiss
     expect(template).toEqual(
         expect.objectContaining({
             bodyText: expect.stringContaining(
-                generateRateName(sub, sub.rateInfos[2], statePrograms)
+                sub.packageSubmissions[0].rateRevisions[2].formData
+                    .rateCertificationName!
             ),
         })
     )
@@ -490,44 +510,44 @@ test('includes expected data summary for a multi-rate contract and rates submiss
 })
 
 test('includes expected data summary for a contract amendment submission', async () => {
-    const sub: LockedHealthPlanFormDataType = {
-        ...mockContractAmendmentFormData(),
-        contractDateStart: new Date('01/01/2021'),
-        contractDateEnd: new Date('01/01/2025'),
-        rateInfos: [
+    const rateFormData: RateFormDataType = {
+        rateType: 'NEW',
+        rateDocuments: [
             {
-                rateType: 'NEW',
-                rateDocuments: [
-                    {
-                        s3URL: 's3://bucketname/key/test1',
-                        name: 'foo',
-                        sha256: 'fakesha',
-                    },
-                ],
-                supportingDocuments: [],
-                rateDateCertified: new Date('10/17/2022'),
-                rateProgramIDs: ['3fd36500-bf2c-47bc-80e8-e7aa417184c5'],
-                rateCertificationName:
-                    'MCR-MN-0003-MSHO-RATE-20210101-20220101-CERTIFICATION-20221017',
-                rateAmendmentInfo: undefined,
-                rateDateStart: new Date('01/01/2021'),
-                rateDateEnd: new Date('01/01/2022'),
-                actuaryContacts: [
-                    {
-                        actuarialFirm: 'DELOITTE',
-                        name: 'Actuary Contact 1',
-                        titleRole: 'Test Actuary Contact 1',
-                        email: 'actuarycontact1@example.com',
-                    },
-                ],
-                actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
-                packagesWithSharedRateCerts: [],
+                s3URL: 's3://bucketname/key/test1',
+                name: 'foo',
+                sha256: 'fakesha',
             },
         ],
+        supportingDocuments: [],
+        rateDateCertified: new Date('10/17/2022'),
+        rateProgramIDs: ['3fd36500-bf2c-47bc-80e8-e7aa417184c5'],
+        rateCertificationName:
+            'MCR-MN-0003-MSHO-RATE-20210101-20220101-CERTIFICATION-20221017',
+        rateDateStart: new Date('01/01/2021'),
+        rateDateEnd: new Date('01/01/2022'),
+        certifyingActuaryContacts: [
+            {
+                actuarialFirm: 'DELOITTE',
+                name: 'Actuary Contact 1',
+                titleRole: 'Test Actuary Contact 1',
+                email: 'actuarycontact1@example.com',
+            },
+        ],
+        actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+        packagesWithSharedRateCerts: [],
     }
+    const sub: ContractType = mockContract()
+    sub.packageSubmissions[0].contractRevision.formData.contractDateStart =
+        new Date('01/01/2021')
+    sub.packageSubmissions[0].contractRevision.formData.contractDateEnd =
+        new Date('01/01/2025')
+    sub.packageSubmissions[0].contractRevision.formData.contractType =
+        'AMENDMENT'
+    sub.packageSubmissions[0].rateRevisions[0].formData = rateFormData
     const statePrograms = mockMNState().programs
 
-    const template = await newPackageCMSEmail(
+    const template = await newContractCMSEmail(
         sub,
         testEmailConfig(),
         [],
@@ -563,54 +583,52 @@ test('includes expected data summary for a contract amendment submission', async
     expect(template).toEqual(
         expect.objectContaining({
             bodyText: expect.stringContaining(
-                generateRateName(sub, sub.rateInfos[0], statePrograms)
+                sub.packageSubmissions[0].rateRevisions[0].formData
+                    .rateCertificationName!
             ),
         })
     )
 })
 
 test('includes expected data summary for a rate amendment submission CMS email', async () => {
-    const sub: LockedHealthPlanFormDataType = {
-        ...mockContractAndRatesFormData(),
-        contractDateStart: new Date('01/01/2021'),
-        contractDateEnd: new Date('01/01/2025'),
-        rateInfos: [
+    const sub: ContractType = mockContract()
+    sub.packageSubmissions[0].contractRevision.formData.contractDateStart =
+        new Date('01/01/2021')
+    sub.packageSubmissions[0].contractRevision.formData.contractDateEnd =
+        new Date('01/01/2025')
+    const rateFormData: RateFormDataType = {
+        rateType: 'AMENDMENT',
+        rateDocuments: [
             {
-                rateType: 'AMENDMENT',
-                rateDocuments: [
-                    {
-                        s3URL: 's3://bucketname/key/test1',
-                        name: 'foo',
-                        sha256: 'fakesha',
-                    },
-                ],
-                supportingDocuments: [],
-                rateDateCertified: new Date('10/17/2022'),
-                rateProgramIDs: ['3fd36500-bf2c-47bc-80e8-e7aa417184c5'],
-                rateCertificationName:
-                    'MCR-MN-0003-MSHO-RATE-20210605-20211231-AMENDMENT-20221017',
-                rateDateStart: new Date('01/01/2021'),
-                rateDateEnd: new Date('01/01/2022'),
-                rateAmendmentInfo: {
-                    effectiveDateStart: new Date('06/05/2021'),
-                    effectiveDateEnd: new Date('12/31/2021'),
-                },
-                actuaryContacts: [
-                    {
-                        actuarialFirm: 'DELOITTE',
-                        name: 'Actuary Contact 1',
-                        titleRole: 'Test Actuary Contact 1',
-                        email: 'actuarycontact1@example.com',
-                    },
-                ],
-                actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
-                packagesWithSharedRateCerts: [],
+                s3URL: 's3://bucketname/key/test1',
+                name: 'foo',
+                sha256: 'fakesha',
             },
         ],
+        supportingDocuments: [],
+        rateDateCertified: new Date('10/17/2022'),
+        rateProgramIDs: ['3fd36500-bf2c-47bc-80e8-e7aa417184c5'],
+        rateCertificationName:
+            'MCR-MN-0003-MSHO-RATE-20210605-20211231-AMENDMENT-20221017',
+        rateDateStart: new Date('01/01/2021'),
+        rateDateEnd: new Date('01/01/2022'),
+        amendmentEffectiveDateStart: new Date('06/05/2021'),
+        amendmentEffectiveDateEnd: new Date('12/31/2021'),
+        certifyingActuaryContacts: [
+            {
+                actuarialFirm: 'DELOITTE',
+                name: 'Actuary Contact 1',
+                titleRole: 'Test Actuary Contact 1',
+                email: 'actuarycontact1@example.com',
+            },
+        ],
+        actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+        packagesWithSharedRateCerts: [],
     }
+    sub.packageSubmissions[0].rateRevisions[0].formData = rateFormData
     const statePrograms = mockMNState().programs
 
-    const template = await newPackageCMSEmail(
+    const template = await newContractCMSEmail(
         sub,
         testEmailConfig(),
         [],
@@ -638,16 +656,19 @@ test('includes expected data summary for a rate amendment submission CMS email',
     expect(template).toEqual(
         expect.objectContaining({
             bodyText: expect.stringContaining(
-                generateRateName(sub, sub.rateInfos[0], statePrograms)
+                sub.packageSubmissions[0].rateRevisions[0].formData
+                    .rateCertificationName!
             ),
         })
     )
 })
 
 test('includes link to submission', async () => {
-    const sub = mockContractAmendmentFormData()
+    const sub = mockContract()
+    sub.packageSubmissions[0].contractRevision.formData.contractType =
+        'AMENDMENT'
     const statePrograms = mockMNState().programs
-    const template = await newPackageCMSEmail(
+    const template = await newContractCMSEmail(
         sub,
         testEmailConfig(),
         [],
@@ -668,10 +689,10 @@ test('includes link to submission', async () => {
 })
 
 test('includes state specific analyst on contract only submission', async () => {
-    const sub = mockContractAndRatesFormData()
+    const sub = mockContract()
     const testStateAnalystEmails = testStateAnalystsEmails
     const statePrograms = mockMNState().programs
-    const template = await newPackageCMSEmail(
+    const template = await newContractCMSEmail(
         sub,
         testEmailConfig(),
         testStateAnalystEmails,
@@ -696,11 +717,11 @@ test('includes state specific analyst on contract only submission', async () => 
 })
 
 test('includes state specific analyst on contract and rate submission', async () => {
-    const sub = mockContractAndRatesFormData()
-    sub.riskBasedContract = true
+    const sub = mockContract()
+    sub.packageSubmissions[0].contractRevision.formData.riskBasedContract = true
     const testStateAnalystEmails = testStateAnalystsEmails
     const statePrograms = mockMNState().programs
-    const template = await newPackageCMSEmail(
+    const template = await newContractCMSEmail(
         sub,
         testEmailConfig(),
         testStateAnalystEmails,
@@ -726,10 +747,10 @@ test('includes state specific analyst on contract and rate submission', async ()
 })
 
 test('does not include state specific analyst on contract and rate submission', async () => {
-    const sub = mockContractAndRatesFormData()
+    const sub = mockContract()
     const testStateAnalystEmails = testStateAnalystsEmails
     const statePrograms = mockMNState().programs
-    const template = await newPackageCMSEmail(
+    const template = await newContractCMSEmail(
         sub,
         testEmailConfig(),
         [],
@@ -750,11 +771,11 @@ test('does not include state specific analyst on contract and rate submission', 
 })
 
 test('includes oactEmails on contract and rate submission for a risked based contract', async () => {
-    const sub = mockContractAndRatesFormData()
+    const sub = mockContract()
     // ensure oact will be notified
-    sub.riskBasedContract = true
+    sub.packageSubmissions[0].contractRevision.formData.riskBasedContract = true
     const statePrograms = mockMNState().programs
-    const template = await newPackageCMSEmail(
+    const template = await newContractCMSEmail(
         sub,
         testEmailConfig(),
         [],
@@ -779,9 +800,11 @@ test('includes oactEmails on contract and rate submission for a risked based con
 })
 
 test('does not include oactEmails on contract only submission', async () => {
-    const sub = mockContractOnlyFormData()
+    const sub = mockContract()
+    sub.packageSubmissions[0].contractRevision.formData.submissionType =
+        'CONTRACT_ONLY'
     const statePrograms = mockMNState().programs
-    const template = await newPackageCMSEmail(
+    const template = await newContractCMSEmail(
         sub,
         testEmailConfig(),
         [],
@@ -803,10 +826,14 @@ test('does not include oactEmails on contract only submission', async () => {
 })
 
 test('does not include oactEmails on non risked based contract', async () => {
-    const sub = mockContractAndRatesFormData()
-    sub.riskBasedContract = false
+    const sub = mockContract()
+    sub.packageSubmissions[0].contractRevision.formData.submissionType =
+        'CONTRACT_ONLY'
+    sub.packageSubmissions[0].contractRevision.formData.riskBasedContract =
+        false
+
     const statePrograms = mockMNState().programs
-    const template = await newPackageCMSEmail(
+    const template = await newContractCMSEmail(
         sub,
         testEmailConfig(),
         [],
@@ -828,13 +855,18 @@ test('does not include oactEmails on non risked based contract', async () => {
 })
 
 test('CHIP contract only submission does include state specific analysts emails', async () => {
-    const sub = mockContractOnlyFormData({
+    const sub = mockContract({
         stateCode: 'MS',
-        programIDs: ['36c54daf-7611-4a15-8c3b-cdeb3fd7e25a'],
     })
+    sub.packageSubmissions[0].contractRevision.formData.submissionType =
+        'CONTRACT_ONLY'
+    sub.packageSubmissions[0].contractRevision.formData.programIDs = [
+        '36c54daf-7611-4a15-8c3b-cdeb3fd7e25a',
+    ]
+
     const statePrograms = mockMSState().programs
     const testStateAnalystEmails = testStateAnalystsEmails
-    const template = await newPackageCMSEmail(
+    const template = await newContractCMSEmail(
         sub,
         testEmailConfig(),
         testStateAnalystEmails,
@@ -855,41 +887,41 @@ test('CHIP contract only submission does include state specific analysts emails'
 })
 
 test('CHIP contract and rate submission does include state specific analysts emails', async () => {
-    const sub = mockContractAndRatesFormData({
+    const sub = mockContract({
         stateCode: 'MS',
-        programIDs: ['e0819153-5894-4153-937e-aad00ab01a8f'],
-        rateInfos: [
+    })
+    const rateFormData: RateFormDataType = {
+        rateType: 'NEW',
+        rateDocuments: [
             {
-                rateType: 'NEW',
-                rateDocuments: [
-                    {
-                        s3URL: 's3://bucketname/key/test1',
-                        name: 'foo',
-                        sha256: 'fakesha',
-                    },
-                ],
-                supportingDocuments: [],
-                rateDateStart: new Date(),
-                rateDateEnd: new Date(),
-                rateDateCertified: new Date(),
-                rateProgramIDs: ['36c54daf-7611-4a15-8c3b-cdeb3fd7e25a'],
-                rateAmendmentInfo: undefined,
-                actuaryContacts: [
-                    {
-                        actuarialFirm: 'DELOITTE',
-                        name: 'Actuary Contact 1',
-                        titleRole: 'Test Actuary Contact 1',
-                        email: 'actuarycontact1@example.com',
-                    },
-                ],
-                actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
-                packagesWithSharedRateCerts: [],
+                s3URL: 's3://bucketname/key/test1',
+                name: 'foo',
+                sha256: 'fakesha',
             },
         ],
-    })
+        supportingDocuments: [],
+        rateDateStart: new Date(),
+        rateDateEnd: new Date(),
+        rateDateCertified: new Date(),
+        rateProgramIDs: ['36c54daf-7611-4a15-8c3b-cdeb3fd7e25a'],
+        certifyingActuaryContacts: [
+            {
+                actuarialFirm: 'DELOITTE',
+                name: 'Actuary Contact 1',
+                titleRole: 'Test Actuary Contact 1',
+                email: 'actuarycontact1@example.com',
+            },
+        ],
+        actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+        packagesWithSharedRateCerts: [],
+    }
+    sub.packageSubmissions[0].contractRevision.formData.programIDs = [
+        '36c54daf-7611-4a15-8c3b-cdeb3fd7e25a',
+    ]
+    sub.packageSubmissions[0].rateRevisions[0].formData = rateFormData
     const statePrograms = mockMSState().programs
     const testStateAnalystEmails = testStateAnalystsEmails
-    const template = await newPackageCMSEmail(
+    const template = await newContractCMSEmail(
         sub,
         testEmailConfig(),
         testStateAnalystEmails,
@@ -910,12 +942,17 @@ test('CHIP contract and rate submission does include state specific analysts ema
 })
 
 test('CHIP contract only submission does not include oactEmails', async () => {
-    const sub = mockContractOnlyFormData({
+    const sub = mockContract({
         stateCode: 'MS',
-        programIDs: ['36c54daf-7611-4a15-8c3b-cdeb3fd7e25a'],
     })
+    sub.packageSubmissions[0].contractRevision.formData.programIDs = [
+        '36c54daf-7611-4a15-8c3b-cdeb3fd7e25a',
+    ]
+    sub.packageSubmissions[0].contractRevision.formData.submissionType =
+        'CONTRACT_ONLY'
+
     const statePrograms = mockMSState().programs
-    const template = await newPackageCMSEmail(
+    const template = await newContractCMSEmail(
         sub,
         testEmailConfig(),
         [],
@@ -938,40 +975,43 @@ test('CHIP contract only submission does not include oactEmails', async () => {
 })
 
 test('CHIP contract and rate submission does not include oactEmails', async () => {
-    const sub = mockContractAndRatesFormData({
+    const sub = mockContract({
         stateCode: 'MS',
-        programIDs: ['e0819153-5894-4153-937e-aad00ab01a8f'],
-        rateInfos: [
+    })
+    const rateFormData: RateFormDataType = {
+        rateType: 'NEW',
+        rateDocuments: [
             {
-                rateType: 'NEW',
-                rateDocuments: [
-                    {
-                        s3URL: 's3://bucketname/key/test1',
-                        name: 'foo',
-                        sha256: 'fakesha',
-                    },
-                ],
-                supportingDocuments: [],
-                rateDateStart: new Date('2021-02-02'),
-                rateDateEnd: new Date('2021-11-31'),
-                rateDateCertified: new Date('2020-12-01'),
-                rateProgramIDs: ['36c54daf-7611-4a15-8c3b-cdeb3fd7e25a'],
-                rateAmendmentInfo: undefined,
-                actuaryContacts: [
-                    {
-                        actuarialFirm: 'DELOITTE',
-                        name: 'Actuary Contact 1',
-                        titleRole: 'Test Actuary Contact 1',
-                        email: 'actuarycontact1@example.com',
-                    },
-                ],
-                actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
-                packagesWithSharedRateCerts: [],
+                s3URL: 's3://bucketname/key/test1',
+                name: 'foo',
+                sha256: 'fakesha',
             },
         ],
-    })
+        supportingDocuments: [],
+        rateDateStart: new Date('2021-02-02'),
+        rateDateEnd: new Date('2021-11-31'),
+        rateDateCertified: new Date('2020-12-01'),
+        rateProgramIDs: ['36c54daf-7611-4a15-8c3b-cdeb3fd7e25a'],
+        certifyingActuaryContacts: [
+            {
+                actuarialFirm: 'DELOITTE',
+                name: 'Actuary Contact 1',
+                titleRole: 'Test Actuary Contact 1',
+                email: 'actuarycontact1@example.com',
+            },
+        ],
+        actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+        packagesWithSharedRateCerts: [],
+    }
+    sub.packageSubmissions[0].contractRevision.formData.programIDs = [
+        '36c54daf-7611-4a15-8c3b-cdeb3fd7e25a',
+    ]
+    sub.packageSubmissions[0].contractRevision.formData.submissionType =
+        'CONTRACT_ONLY'
+    sub.packageSubmissions[0].rateRevisions[0].formData = rateFormData
+
     const statePrograms = mockMSState().programs
-    const template = await newPackageCMSEmail(
+    const template = await newContractCMSEmail(
         sub,
         testEmailConfig(),
         [],
@@ -993,9 +1033,9 @@ test('CHIP contract and rate submission does not include oactEmails', async () =
 })
 
 test('does not include rate name on contract only submission', async () => {
-    const sub = mockContractOnlyFormData()
+    const sub = mockContract()
     const statePrograms = mockMNState().programs
-    const template = await newPackageCMSEmail(
+    const template = await newContractCMSEmail(
         sub,
         testEmailConfig(),
         [],
@@ -1014,71 +1054,77 @@ test('does not include rate name on contract only submission', async () => {
 })
 
 test('renders overall email as expected', async () => {
-    const sub: LockedHealthPlanFormDataType = {
-        ...mockContractAndRatesFormData(),
-        contractDateStart: new Date('2021-01-01'),
-        contractDateEnd: new Date('2021-12-31'),
-        rateInfos: [
+    const rate1FormData: RateFormDataType = {
+        rateType: 'NEW',
+        rateDocuments: [
             {
-                rateType: 'NEW',
-                rateDocuments: [
-                    {
-                        s3URL: 's3://bucketname/key/test1',
-                        name: 'foo',
-                        sha256: 'fakesha',
-                    },
-                ],
-                supportingDocuments: [],
-                rateDateCertified: new Date('01/02/2021'),
-                rateProgramIDs: ['3fd36500-bf2c-47bc-80e8-e7aa417184c5'],
-                rateCertificationName:
-                    'MCR-MN-0003-MSHO-RATE-20210101-20220101-CERTIFICATION-20210102',
-                rateAmendmentInfo: undefined,
-                rateDateStart: new Date('01/01/2021'),
-                rateDateEnd: new Date('01/01/2022'),
-                actuaryContacts: [
-                    {
-                        actuarialFirm: 'DELOITTE',
-                        name: 'Actuary Contact 1',
-                        titleRole: 'Test Actuary Contact 1',
-                        email: 'actuarycontact1@example.com',
-                    },
-                ],
-                actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
-                packagesWithSharedRateCerts: [],
-            },
-            {
-                rateType: 'NEW',
-                rateDocuments: [
-                    {
-                        s3URL: 's3://bucketname/key/test1',
-                        name: 'foo',
-                        sha256: 'fakesha',
-                    },
-                ],
-                supportingDocuments: [],
-                rateDateCertified: new Date('02/02/2022'),
-                rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
-                rateCertificationName:
-                    'MCR-MN-0003-SNBC-RATE-20220201-20230201-CERTIFICATION-20220202',
-                rateAmendmentInfo: undefined,
-                rateDateStart: new Date('02/01/2022'),
-                rateDateEnd: new Date('02/01/2023'),
-                actuaryContacts: [
-                    {
-                        actuarialFirm: 'MERCER',
-                        name: 'Actuary Contact 1',
-                        titleRole: 'Test Actuary Contact 1',
-                        email: 'actuarycontact1@example.com',
-                    },
-                ],
-                actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
-                packagesWithSharedRateCerts: [],
+                s3URL: 's3://bucketname/key/test1',
+                name: 'foo',
+                sha256: 'fakesha',
             },
         ],
+        supportingDocuments: [],
+        rateDateCertified: new Date('01/02/2021'),
+        rateProgramIDs: ['3fd36500-bf2c-47bc-80e8-e7aa417184c5'],
+        rateCertificationName:
+            'MCR-MN-0003-MSHO-RATE-20210101-20220101-CERTIFICATION-20210102',
+        rateDateStart: new Date('01/01/2021'),
+        rateDateEnd: new Date('01/01/2022'),
+        certifyingActuaryContacts: [
+            {
+                actuarialFirm: 'DELOITTE',
+                name: 'Actuary Contact 1',
+                titleRole: 'Test Actuary Contact 1',
+                email: 'actuarycontact1@example.com',
+            },
+        ],
+        actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+        packagesWithSharedRateCerts: [],
     }
+    const rate2FormData: RateFormDataType = {
+        rateType: 'NEW',
+        rateDocuments: [
+            {
+                s3URL: 's3://bucketname/key/test1',
+                name: 'foo',
+                sha256: 'fakesha',
+            },
+        ],
+        supportingDocuments: [],
+        rateDateCertified: new Date('02/02/2022'),
+        rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
+        rateCertificationName:
+            'MCR-MN-0003-SNBC-RATE-20220201-20230201-CERTIFICATION-20220202',
+        rateDateStart: new Date('02/01/2022'),
+        rateDateEnd: new Date('02/01/2023'),
+        certifyingActuaryContacts: [
+            {
+                actuarialFirm: 'MERCER',
+                name: 'Actuary Contact 1',
+                titleRole: 'Test Actuary Contact 1',
+                email: 'actuarycontact1@example.com',
+            },
+        ],
+        actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+        packagesWithSharedRateCerts: [],
+    }
+    const sub: ContractType = mockContract()
+    sub.packageSubmissions[0].contractRevision.formData.contractDateStart =
+        new Date('2021-01-01')
+    sub.packageSubmissions[0].contractRevision.formData.contractDateEnd =
+        new Date('2021-12-31')
+    sub.packageSubmissions[0].rateRevisions = [
+        {
+            ...sub.packageSubmissions[0].rateRevisions[0],
+            formData: rate1FormData,
+        },
+        {
+            ...sub.packageSubmissions[0].rateRevisions[0],
+            formData: rate2FormData,
+        },
+    ]
     const statePrograms = mockMNState().programs
-    const result = await newPackageCMSEmail(
+    const result = await newContractCMSEmail(
         sub,
         testEmailConfig(),
         [],

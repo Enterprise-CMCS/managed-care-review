@@ -17,17 +17,13 @@ import {
     setResolverDetailsOnActiveSpan,
     setSuccessAttributesOnActiveSpan,
 } from '../attributeHelper'
-import type { EmailParameterStore } from '../../parameterStore'
 import { GraphQLError } from 'graphql'
-import type { LDService } from '../../launchDarkly/launchDarkly'
 import type { StateCodeType } from '@mc-review/hpp'
 
 // unlockHealthPlanPackageResolver is a state machine transition for HealthPlanPackage
 export function unlockHealthPlanPackageResolver(
     store: Store,
-    emailer: Emailer,
-    emailParameterStore: EmailParameterStore,
-    launchDarkly: LDService
+    emailer: Emailer
 ): MutationResolvers['unlockHealthPlanPackage'] {
     return async (_parent, { input }, context) => {
         const { user, ctx, tracer } = context

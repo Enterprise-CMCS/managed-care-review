@@ -263,6 +263,7 @@ describe('fetchRate', () => {
             rateDateStart: '2025-05-01',
             rateDateEnd: '2026-04-30',
             rateDateCertified: '2025-03-15',
+            rateCapitationType: 'RATE_CELL',
             rateDocuments: [
                 {
                     name: 'rateDocument.pdf',

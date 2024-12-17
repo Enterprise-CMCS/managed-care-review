@@ -3,29 +3,7 @@ query indexRatesForDashboard($input: IndexRatesInput) {
         totalCount
         edges {
             node {
-                id
-                webURL
-                createdAt
-                updatedAt
-                stateCode
-                stateNumber
-                state {
-                    code
-                    name
-                    programs {
-                        id
-                        name
-                        fullName
-                        isRateProgram
-                    }
-                }
-                status
-                withdrawInfo {
-                    ...updateInformationFields
-                }
-                initiallySubmittedAt
-                parentContractID
-
+                ...rateFieldsFragment
                 draftRevision {
                     id
                     rateID

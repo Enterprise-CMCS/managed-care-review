@@ -16,7 +16,9 @@ import {
 import type { RateRevisionTableWithFormData } from './prismaSharedContractRateHelpers'
 import {
     convertUpdateInfoToDomainModel,
+    getConsolidatedRateStatus,
     getContractRateStatus,
+    getRateReviewStatus,
     rateFormDataToDomainModel,
 } from './prismaSharedContractRateHelpers'
 import type { RateTableWithoutDraftContractsPayload } from './prismaSubmittedRateHelpers'
@@ -205,11 +207,17 @@ function rateWithoutDraftContractsToDomainModel(
         }
     }
 
+    const status = getContractRateStatus(rateRevisions)
+    const reviewStatus = getRateReviewStatus(rate)
+    const consolidatedStatus = getConsolidatedRateStatus(status, reviewStatus)
+
     return {
         id: rate.id,
         createdAt: rate.createdAt,
         updatedAt: rate.updatedAt,
-        status: getContractRateStatus(rateRevisions),
+        status,
+        reviewStatus,
+        consolidatedStatus,
         stateCode: rate.stateCode,
         parentContractID: parentContractID,
         withdrawInfo: convertUpdateInfoToDomainModel(rate.withdrawInfo),
@@ -217,6 +225,7 @@ function rateWithoutDraftContractsToDomainModel(
         draftRevision,
         revisions: submittedRevisions.reverse(),
         packageSubmissions: packageSubmissions.reverse(),
+        reviewStatusActions: rate.reviewStatusActions.reverse(),
     }
 }
 

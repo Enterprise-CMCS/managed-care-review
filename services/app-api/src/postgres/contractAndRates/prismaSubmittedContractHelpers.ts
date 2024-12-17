@@ -55,6 +55,9 @@ const includeContractWithoutDraftRates = {
         include: {
             updatedBy: true,
         },
+        orderBy: {
+            updatedAt: 'asc',
+        },
     },
 } satisfies Prisma.ContractTableInclude
 
