@@ -13,7 +13,7 @@
         "@mc-review/hpp": "workspace:*",
         "typescript": "^4.9.5",
         "url-parse": "^1.5.10",
-        "zod": "^3.10.1"
+        "zod": "^3.24.1"
     },
     "devDependencies": {
         "@types/jest": "^29.5.6",
