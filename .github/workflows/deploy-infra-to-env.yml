@@ -93,8 +93,7 @@ jobs:
 
       - name: Bootstrap CDK
         run: |
-          cd infrastructure/cdk
-          pnpm cdk bootstrap aws://${{ secrets.aws_account_id }}/${{ inputs.aws_default_region }}
+          pushd infrastructure/cdk && pnpm cdk bootstrap aws://${{ secrets.aws_account_id }}/${{ inputs.aws_default_region }}
 
 
   postgres:
