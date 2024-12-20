@@ -1,54 +1,61 @@
-import type { LockedHealthPlanFormDataType } from '@mc-review/hpp'
 import { packageName as generatePackageName } from '@mc-review/hpp'
 import { formatCalendarDate } from '@mc-review/dates'
-import type { UpdateInfoType, ProgramType } from '../../domain-models'
 import {
-    renderTemplate,
     stripHTMLFromTemplate,
-    findPackagePrograms,
+    generateCMSReviewerEmailsForSubmittedContract,
+    renderTemplate,
+    findContractPrograms,
 } from '../templateHelpers'
 
-import type { EmailData, EmailConfiguration } from '../'
-import { pruneDuplicateEmails } from '../formatters'
+import type { EmailData, EmailConfiguration, StateAnalystsEmails } from '../'
+import type {
+    ProgramType,
+    UpdateInfoType,
+    ContractType,
+} from '../../domain-models'
+import { submissionSummaryURL } from '../generateURLs'
 
-export const resubmitPackageStateEmail = async (
-    formData: LockedHealthPlanFormDataType,
-    submitterEmails: string[],
+export const resubmitContractCMSEmail = async (
+    contract: ContractType,
     updateInfo: UpdateInfoType,
     config: EmailConfiguration,
+    stateAnalystsEmails: StateAnalystsEmails,
     statePrograms: ProgramType[]
 ): Promise<EmailData | Error> => {
     const isTestEnvironment = config.stage !== 'prod'
-    const stateContactEmails: string[] = []
-    formData.stateContacts.forEach((contact) => {
-        if (contact.email) stateContactEmails.push(contact.email)
-    })
-    const receiverEmails = pruneDuplicateEmails([
-        ...stateContactEmails,
-        ...submitterEmails,
-        ...config.devReviewTeamEmails,
-    ])
+    const reviewerEmails = generateCMSReviewerEmailsForSubmittedContract(
+        config,
+        contract,
+        stateAnalystsEmails
+    )
 
+    if (reviewerEmails instanceof Error) {
+        return reviewerEmails
+    }
+    const contractRev = contract.packageSubmissions[0].contractRevision
+    const formData = contractRev.formData
     //This checks to make sure all programs contained in submission exists for the state.
-    const packagePrograms = findPackagePrograms(formData, statePrograms)
+    const packagePrograms = findContractPrograms(contractRev, statePrograms)
 
     if (packagePrograms instanceof Error) {
         return packagePrograms
     }
 
     const packageName = generatePackageName(
-        formData.stateCode,
-        formData.stateNumber,
+        contract.stateCode,
+        contract.stateNumber,
         formData.programIDs,
         packagePrograms
     )
 
     const isContractAndRates =
         formData.submissionType === 'CONTRACT_AND_RATES' &&
-        Boolean(formData.rateInfos.length)
+        Boolean(contract.packageSubmissions[0].rateRevisions.length)
+
+    const packageURL = submissionSummaryURL(contract.id, config.baseUrl)
 
     const data = {
-        packageName,
+        packageName: packageName,
         resubmittedBy: updateInfo.updatedBy.email,
         resubmittedOn: formatCalendarDate(
             updateInfo.updatedAt,
@@ -58,20 +65,21 @@ export const resubmitPackageStateEmail = async (
         shouldIncludeRates: isContractAndRates,
         rateInfos:
             isContractAndRates &&
-            formData.rateInfos.map((rate) => ({
-                rateName: rate.rateCertificationName,
+            contract.packageSubmissions[0].rateRevisions.map((rate) => ({
+                rateName: rate.formData.rateCertificationName,
             })),
+        submissionURL: packageURL,
     }
 
     const result = await renderTemplate<typeof data>(
-        'resubmitPackageStateEmail',
+        'resubmitContractCMSEmail',
         data
     )
     if (result instanceof Error) {
         return result
     } else {
         return {
-            toAddresses: receiverEmails,
+            toAddresses: reviewerEmails,
             replyToAddresses: [],
             sourceEmail: config.emailSource,
             subject: `${

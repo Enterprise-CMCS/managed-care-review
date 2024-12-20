@@ -1,17 +1,17 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`renders overall email for a new package with a rate amendment as expected 1`] = `
-"MCR-MN-0003-SNBC was successfully submitted.
+"MCR-MN-0004-SNBC was successfully submitted.
 <br /><br />
 <b>Submission type</b>: Contract action and rate certification<br />
-<b>Contract effective dates</b>: 01/01/2021 to 01/01/2022<br />
+<b>Contract amendment effective dates</b>: 01/01/2021 to 01/01/2025<br />
 <br />
 <b>Rate name</b>: MCR-MN-0003-MSHO-RATE-20210605-20211231-AMENDMENT-20210102<br />
 <b>Rate amendment effective dates</b>: 06/05/2021 to 12/31/2021<br />
 <br />
-<b>Submission description</b>: A submitted submission<br />
+<b>Submission description</b>: A real submission<br />
 <br />
-<a href="http://localhost/submissions/test-abc-125">View submission</a>
+<a href="http://localhost/submissions/test-contract-123">View submission</a>
 <br /><br />
 If you need to make any changes, please contact CMS.
 <br /><br />

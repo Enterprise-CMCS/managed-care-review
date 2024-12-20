@@ -12,6 +12,8 @@ import os from 'node:os'
 import { retry } from './retry.js'
 import { fileExists, httpsRequest } from './nodeWrappers.js'
 import { Instance } from '@aws-sdk/client-ec2'
+import { readFileSync } from 'fs'
+import prompts from 'prompts'
 
 function stageForEnv(env: string): string {
     if (env === 'dev') {
@@ -191,6 +193,65 @@ async function ensureAllowlistIP(
     return undefined
 }
 
+async function promptPassword(prompt: string): Promise<string> {
+    const response = await prompts({
+        type: 'password',
+        name: 'password',
+        message: prompt,
+        validate: (value: string): boolean | string =>
+            value.length > 0 ? true : 'Password cannot be empty',
+    })
+
+    return response.password
+}
+
+// Attempt SSH connection, prompting for password if needed
+async function attemptSSHConnection(
+    host: string,
+    username: string,
+    privateKeyPath: string
+): Promise<NodeSSH> {
+    const ssh = new NodeSSH()
+
+    try {
+        // Read the private key file
+        const privateKey = readFileSync(privateKeyPath, 'utf8')
+
+        try {
+            await ssh.connect({
+                host,
+                username,
+                privateKey,
+            })
+        } catch (err) {
+            if (
+                err instanceof Error &&
+                (err.message.includes('password') ||
+                    err.message.includes('encrypted'))
+            ) {
+                const keyPassword = await promptPassword(
+                    'Enter SSH key password:'
+                )
+                await ssh.connect({
+                    host,
+                    username,
+                    privateKey,
+                    passphrase: keyPassword,
+                })
+            } else {
+                throw err
+            }
+        }
+    } catch (err) {
+        if (err instanceof Error) {
+            throw new Error(`SSH connection failed: ${err.message}`)
+        }
+        throw err
+    }
+
+    return ssh
+}
+
 async function cloneDBLocally(
     envName: string,
     sshKeyPath: string,
@@ -260,33 +321,83 @@ async function cloneDBLocally(
     try {
         // start an SSH connection
         console.info('Connecting to ', jumpboxIP)
-        const ssh = new NodeSSH()
+
+        // Hold the SSH connection outside the retry loop
+        let connection: NodeSSH | undefined
+
+        // Only retry for connection refused, handle password prompt separately
+        let needsPassword = false
+        let lastError: Error | undefined
 
         // If the jumpbox just started we often have the connection refused for ~10 seconds until it's really up.
-        const connectionResult = await retry(async () => {
+        await retry(async () => {
             try {
-                await ssh.connect({
-                    host: jumpboxIP,
-                    username: 'ubuntu',
-                    privateKeyPath: sshKeyPath,
-                })
+                // If we previously determined it needs a password, don't retry without one
+                if (needsPassword) {
+                    return lastError as Error
+                }
+
+                connection = await attemptSSHConnection(
+                    jumpboxIP,
+                    'ubuntu',
+                    sshKeyPath
+                )
                 console.info('Connected')
                 return true
             } catch (err) {
-                if (err.code === 'ECONNREFUSED') {
-                    process.stdout.write('.')
-                    return false
+                if (err instanceof Error) {
+                    lastError = err
+                    if (err.message.includes('ECONNREFUSED')) {
+                        process.stdout.write('.')
+                        return false
+                    }
+                    if (
+                        err.message.includes(
+                            'Encrypted OpenSSH private key detected'
+                        )
+                    ) {
+                        needsPassword = true
+                        // Don't retry for password issues
+                        return err
+                    }
+                    // Log the full error for debugging
+                    console.error('Connection attempt failed:', err.message)
                 }
-                return err
+                return err as Error
             }
         }, 60 * 1000)
-        if (connectionResult instanceof Error) {
-            console.error(
-                'failed to connect to jumpbox over ssh',
-                connectionResult
-            )
-            process.exit(1)
+
+        // If we need a password, try one more time with password prompt
+        if (needsPassword && !connection) {
+            try {
+                const keyPassword = await promptPassword(
+                    'Enter SSH key password: '
+                )
+                // Read the private key file
+                const privateKey = readFileSync(sshKeyPath, 'utf8')
+
+                const ssh = new NodeSSH()
+                await ssh.connect({
+                    host: jumpboxIP,
+                    username: 'ubuntu',
+                    privateKey,
+                    passphrase: keyPassword,
+                })
+                connection = ssh
+                console.info('Connected with password')
+            } catch (err) {
+                console.error('Failed to connect with password:', err)
+                throw new Error(
+                    'Failed to establish SSH connection with password'
+                )
+            }
         }
+
+        if (!connection) {
+            throw new Error('Failed to establish SSH connection')
+        }
+
+        const ssh = connection
 
         // create the filename for this db dump
         const now = new Date()

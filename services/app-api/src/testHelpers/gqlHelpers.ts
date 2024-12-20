@@ -40,7 +40,6 @@ import { latestFormData } from './healthPlanPackageHelpers'
 import { sharedTestPrismaClient } from './storeHelpers'
 import { domainToBase64 } from '@mc-review/hpp'
 import type { EmailParameterStore } from '../parameterStore'
-import { newLocalEmailParameterStore } from '../parameterStore'
 import { testLDService } from './launchDarklyHelpers'
 import type { LDService } from '../launchDarkly/launchDarkly'
 import { insertUserToLocalAurora } from '../authn'
@@ -94,8 +93,6 @@ const constructTestPostgresServer = async (opts?: {
     // set defaults
     const context = opts?.context || defaultContext()
     const emailer = opts?.emailer || constructTestEmailer()
-    const parameterStore =
-        opts?.emailParameterStore || newLocalEmailParameterStore()
     const ldService = opts?.ldService || testLDService()
 
     const prismaClient = await sharedTestPrismaClient()
@@ -118,7 +115,6 @@ const constructTestPostgresServer = async (opts?: {
     const postgresResolvers = configureResolvers(
         postgresStore,
         emailer,
-        parameterStore,
         ldService,
         jwt,
         s3,
@@ -263,6 +259,8 @@ const createAndUpdateTestHealthPlanPackage = async (
                 rateType: 'NEW' as const,
                 rateDateStart: '2025-05-01',
                 rateDateEnd: '2026-04-30',
+                amendmentEffectiveDateStart: undefined,
+                amendmentEffectiveDateEnd: undefined,
                 rateDateCertified: '2025-03-15',
                 rateDocuments: [
                     {

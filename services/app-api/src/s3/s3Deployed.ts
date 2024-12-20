@@ -2,7 +2,6 @@ import {
     S3Client,
     GetObjectCommand,
     PutObjectCommand,
-    DeleteObjectCommand,
 } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 
@@ -52,31 +51,6 @@ export function newDeployedS3Client(
                 }
 
                 console.info('Log: Unexpected Error putting file to S3', err)
-                return err
-            }
-        },
-
-        deleteFile: async (
-            s3Key: string,
-            bucket: BucketShortName
-        ): Promise<void | S3Error> => {
-            const command = new DeleteObjectCommand({
-                Bucket: bucketConfig[bucket],
-                Key: s3Key,
-            })
-            try {
-                await s3Client.send(command)
-
-                return
-            } catch (err) {
-                if (err.code === 'NetworkingError') {
-                    return {
-                        code: 'NETWORK_ERROR',
-                        message: 'Error saving file to the cloud.',
-                    }
-                }
-
-                console.info('Log: Unexpected Error deleting file on S3', err)
                 return err
             }
         },
