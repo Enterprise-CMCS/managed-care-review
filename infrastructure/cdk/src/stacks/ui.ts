@@ -296,7 +296,7 @@ export class UiStack extends cdk.Stack {
             }
         )
 
-        // Outputs
+        // CF Outputs
         new cdk.CfnOutput(this, 'S3BucketName', {
             value: this.bucket.ref,
         })
