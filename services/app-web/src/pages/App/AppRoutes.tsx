@@ -55,6 +55,7 @@ import { RateSummarySideNav } from '../SubmissionSideNav/RateSummarySideNav'
 import { RateQuestionResponse } from '../QuestionResponse/QuestionResponseSummary/RateQuestionResponse'
 import { UploadRateResponse } from '../QuestionResponse/UploadResponse/UploadRateResponse'
 import { ReleasedToState } from '../SubmissionReleasedToState/ReleasedToState'
+import { RateWithdraw } from '../RateWithdraw/RateWithdraw'
 
 function componentForAuthMode(
     authMode: AuthModeType
@@ -194,6 +195,10 @@ const CMSUserRoutes = ({
         featureFlags.SUBMISSION_APPROVALS.flag,
         featureFlags.SUBMISSION_APPROVALS.defaultValue
     )
+    const showWithdrawRate: boolean = ldClient?.variation(
+        featureFlags.WITHDRAW_RATE.flag,
+        featureFlags.WITHDRAW_RATE.defaultValue
+    )
 
     return (
         <AuthenticatedRouteWrapper>
@@ -273,6 +278,13 @@ const CMSUserRoutes = ({
                     <Route
                         path={RoutesRecord.SUBMISSIONS_RELEASED_TO_STATE}
                         element={<ReleasedToState />}
+                    />
+                )}
+
+                {showWithdrawRate && (
+                    <Route
+                        path={RoutesRecord.RATE_WITHDRAW}
+                        element={<RateWithdraw />}
                     />
                 )}
 
