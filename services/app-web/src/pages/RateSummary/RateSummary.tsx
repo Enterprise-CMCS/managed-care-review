@@ -238,8 +238,12 @@ export const RateSummary = (): React.ReactElement => {
                                     disabled={isUnlocked}
                                     className="usa-button usa-button--outline"
                                     type="button"
-                                    onClick={() => navigate('./')}
-                                    link_url={'./'}
+                                    onClick={() =>
+                                        navigate(
+                                            `/rate-reviews/${rate.id}/withdraw-rate`
+                                        )
+                                    }
+                                    link_url={`/rate-reviews/${rate.id}/withdraw-rate`}
                                     outline
                                 >
                                     Withdraw rate
