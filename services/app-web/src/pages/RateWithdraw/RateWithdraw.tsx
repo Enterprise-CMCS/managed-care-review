@@ -95,7 +95,7 @@ export const RateWithdraw = () => {
                             <h2>Withdraw a rate</h2>
                             <FormGroup className="margin-top-0">
                                 <Label
-                                    htmlFor="dateApprovalReleasedToState"
+                                    htmlFor="rateWithdrawReason"
                                     className="margin-bottom-0 text-bold"
                                 >
                                     Reason for withdrawing
@@ -108,8 +108,8 @@ export const RateWithdraw = () => {
                                     review.
                                 </p>
                                 <Textarea
-                                    name="reasonForWithdrawing"
-                                    id="reasonForWithdrawing"
+                                    name="rateWithdrawReason"
+                                    id="rateWithdrawReason"
                                 ></Textarea>
                             </FormGroup>
                         </fieldset>
