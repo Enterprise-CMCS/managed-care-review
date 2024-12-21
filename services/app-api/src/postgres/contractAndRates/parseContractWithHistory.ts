@@ -241,11 +241,23 @@ function contractWithHistoryToDomainModel(
         return contractWithoutRates
     }
 
+    const withdrawnRatesOrErrors = contract.withdrawnRates.map((wr) =>
+        rateWithoutDraftContractsToDomainModel(wr.rate)
+    )
+
+    const withdrawnRatesOrError = arrayOrFirstError(withdrawnRatesOrErrors)
+    if (withdrawnRatesOrError instanceof Error) {
+        return withdrawnRatesOrError
+    }
+
     if (
         contractWithoutRates.status === 'SUBMITTED' ||
         contractWithoutRates.status === 'RESUBMITTED'
     ) {
-        return contractWithoutRates
+        return {
+            ...contractWithoutRates,
+            withdrawnRates: withdrawnRatesOrError,
+        }
     }
 
     // since we have a draft revision, we should also hold onto any set draftRates for later
@@ -270,6 +282,7 @@ function contractWithHistoryToDomainModel(
 
     return {
         ...contractWithoutRates,
+        withdrawnRates: withdrawnRatesOrError,
         draftRates: draftRatesOrError,
     }
 }
