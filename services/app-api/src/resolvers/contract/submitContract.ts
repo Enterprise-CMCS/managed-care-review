@@ -200,11 +200,12 @@ export function submitContract(
         }
         // add all rates (including any linked rates) back in
         parsedContract.draftRates = contractWithHistory.draftRates
+        const parsedSubmissionType = parsedContract.draftRevision?.formData.submissionType
 
         // If this contract is being submitted as CONTRACT_ONLY but still has associations with rates
         // we need to prune those rates at submission time to make the submission clean
         if (
-            parsedContract.draftRevision?.formData.submissionType ===
+            parsedSubmissionType ===
                 'CONTRACT_ONLY' &&
             parsedContract.draftRates &&
             parsedContract.draftRates.length > 0
@@ -251,6 +252,26 @@ export function submitContract(
                 logError('submitContract', errMessage)
                 setErrorAttributesOnActiveSpan(errMessage, span)
                 throw new Error(errMessage)
+            }
+        }
+
+        // Validate that no rates, child or linked, is withdrawn
+        if (
+            parsedSubmissionType === 'CONTRACT_AND_RATES' &&
+            parsedContract.draftRates &&
+            parsedContract.draftRates.length > 0
+        ) {
+            for (const rate of parsedContract.draftRates) {
+                if (rate.consolidatedStatus === 'WITHDRAWN') {
+                    const errMessage = `Attempted to submit with a WITHDRAWN rate.`
+                    logError('submitContract', errMessage)
+                    throw new GraphQLError(errMessage, {
+                        extensions: {
+                            code: 'INTERNAL_SERVER_ERROR',
+                            cause: 'INVALID_PACKAGE_STATUS',
+                        },
+                    })
+                }
             }
         }
 
