@@ -4,7 +4,13 @@ import { includeRateWithoutDraftContracts } from './prismaSubmittedRateHelpers'
 
 const includeFullContract = {
     ...includeContractWithoutDraftRates,
-
+    withdrawnRates: {
+        include: {
+            rate: {
+                include: includeRateWithoutDraftContracts,
+            },
+        },
+    },
     draftRates: {
         orderBy: {
             ratePosition: 'asc',
@@ -29,6 +35,14 @@ type ContractRevisionTableWithRates = ContractTableFullPayload['revisions'][0]
 
 const includeFullRate = {
     ...includeRateWithoutDraftContracts,
+    withdrawnFromContracts: {
+        include: {
+            contract: {
+                include: includeContractWithoutDraftRates,
+            },
+        },
+    },
+
     draftContracts: {
         include: {
             contract: {
