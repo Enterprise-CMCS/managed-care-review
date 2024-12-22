@@ -15,6 +15,7 @@ import type { UpdateDraftContractRatesArgsType } from './updateDraftContractRate
 import { updateDraftContractRatesInsideTransaction } from './updateDraftContractRates'
 import type { SubmitContractArgsType } from './submitContract'
 import { submitContractInsideTransaction } from './submitContract'
+import { submitRateInsideTransaction } from './submitRate'
 
 type WithdrawRateArgsType = {
     rateID: string
@@ -192,7 +193,7 @@ const withdrawRateInsideTransaction = async (
             const resubmitContractArgs: SubmitContractArgsType = {
                 contractID: contract.id,
                 submittedByUserID: updatedByID,
-                submittedReason: `CMS withdrawn rate ${latestRevision.rateCertificationName} from this submission`,
+                submittedReason: `CMS has withdrawn rate ${latestRevision.rateCertificationName} from this submission`,
             }
             const resubmitResult = await submitContractInsideTransaction(
                 tx,
@@ -205,6 +206,14 @@ const withdrawRateInsideTransaction = async (
             withdrawnFromContracts.push({ contractID: contract.id })
         }
     }
+
+    // Resubmit the rate
+    await submitRateInsideTransaction(tx, {
+        rateID,
+        formData: undefined,
+        submittedByUserID: updatedByID,
+        submittedReason: 'CMS has withdrawn this rate',
+    })
 
     // Add review status action to rate and create new joins on withdrawn rate join table
     try {
