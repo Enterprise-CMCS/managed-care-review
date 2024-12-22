@@ -7,8 +7,8 @@ import {
     updateTestHealthPlanFormData,
     updateTestStateAssignments,
 } from '../../testHelpers/gqlHelpers'
-import {SubmitContractDocument, UpdateDraftContractRatesDocument} from '../../gen/gqlClient'
-import { testS3Client } from '../../../src/testHelpers/s3Helpers'
+import { SubmitContractDocument } from '../../gen/gqlClient'
+import { testS3Client } from '../../testHelpers'
 
 import {
     createDBUsersWithFullData,
@@ -33,7 +33,7 @@ import {
     addLinkedRateToTestContract,
     addNewRateToTestContract,
     updateRatesInputFromDraftContract,
-    updateTestDraftRatesOnContract, withdrawTestRate,
+    updateTestDraftRatesOnContract,
 } from '../../testHelpers/gqlRateHelpers'
 import { testLDService } from '../../testHelpers/launchDarklyHelpers'
 import { latestFormData } from '../../testHelpers/healthPlanPackageHelpers'
@@ -1054,65 +1054,6 @@ describe('submitContract', () => {
         })
 
         expect(res.errors).toBeDefined()
-    })
-
-    it('returns an error if any rates are withdrawn', async () => {
-        const stateUser = testStateUser()
-        const cmsUser = testCMSUser()
-        const stateServer = await constructTestPostgresServer({
-            context: {
-                user: stateUser,
-            },
-        })
-
-        const cmsServer = await constructTestPostgresServer({
-            context: {
-                user: cmsUser,
-            },
-        })
-
-        // contractA is parent contract and submitted
-        const contractA = await createAndSubmitTestContractWithRate(stateServer)
-        const rateID = contractA.packageSubmissions[0].rateRevisions[0].rateID
-
-        // contract B is linked and in draft
-        const contractB = await createAndUpdateTestContractWithoutRates(stateServer)
-
-        // link rate to contract B
-        await stateServer.executeOperation({
-            query: UpdateDraftContractRatesDocument,
-            variables: {
-                input: {
-                    contractID: contractB.id,
-                    lastSeenUpdatedAt: contractB.draftRevision?.updatedAt,
-                    updatedRates: [
-                        {
-                            type: 'LINK',
-                            rateID: rateID,
-                        },
-                    ],
-                }
-            }
-        })
-
-        // withdraw rate
-        await withdrawTestRate(cmsServer, rateID, 'Withdraw invalid rate')
-
-        const errorSubmittingContractB = await stateServer.executeOperation({
-            query: SubmitContractDocument,
-            variables: {
-                input: {
-                    contractID: contractB.id,
-                    submittedReason: 'Initial submit',
-                },
-            },
-        })
-
-        // expect error trying to submit contract B linking to a withdrawn rate
-        expect(errorSubmittingContractB.errors).toBeDefined()
-        expect(errorSubmittingContractB.errors && errorSubmittingContractB.errors[0].message).toBe(
-            'Attempted to submit with a WITHDRAWN rate.'
-        )
     })
 
     describe('emails', () => {

@@ -255,26 +255,6 @@ export function submitContract(
             }
         }
 
-        // Validate that no rates, child or linked, is withdrawn
-        if (
-            parsedSubmissionType === 'CONTRACT_AND_RATES' &&
-            parsedContract.draftRates &&
-            parsedContract.draftRates.length > 0
-        ) {
-            for (const rate of parsedContract.draftRates) {
-                if (rate.consolidatedStatus === 'WITHDRAWN') {
-                    const errMessage = `Attempted to submit with a WITHDRAWN rate.`
-                    logError('submitContract', errMessage)
-                    throw new GraphQLError(errMessage, {
-                        extensions: {
-                            code: 'INTERNAL_SERVER_ERROR',
-                            cause: 'INVALID_PACKAGE_STATUS',
-                        },
-                    })
-                }
-            }
-        }
-
         const updateResult = await store.updateDraftContractWithRates({
             contractID: input.contractID,
             formData: {
