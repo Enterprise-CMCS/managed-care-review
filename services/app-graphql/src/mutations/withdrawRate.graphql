@@ -2,6 +2,7 @@ mutation withdrawRate($input: WithdrawRateInput!) {
     withdrawRate(input: $input) {
         rate {
             ...rateFieldsFragment
+
             draftRevision {
                 ...rateRevisionFragment
             }
