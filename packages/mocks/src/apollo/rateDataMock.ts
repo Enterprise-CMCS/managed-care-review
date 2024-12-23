@@ -136,6 +136,7 @@ const draftRateDataMock = (
             ...rateRevisionDataMock({ submitInfo: null, ...draftRevision }),
         },
         revisions: [],
+        withdrawnFromContracts: [],
         ...rate,
         id: rateID,
     }
@@ -202,6 +203,7 @@ const rateDataMock = (
         draftRevision: null,
         parentContractID: 'foo-bar',
         id: rateID,
+        withdrawnFromContracts: [],
         ...rate,
     }
 
@@ -325,6 +327,7 @@ function submittedLinkedRatesScenarioMock(): {
         id: 'r-01',
         withdrawInfo: null,
         revisions: [r1r2, r1r01],
+        withdrawnFromContracts: [],
         packageSubmissions: [r1r2c1c2pkg, r1r1c2pkg, r1r1pkg],
     }
 
@@ -446,6 +449,7 @@ function mockRateSubmittedWithQuestions(
         revisions: [rateRev()],
         draftRevision: null,
         withdrawInfo: null,
+        withdrawnFromContracts: [],
         packageSubmissions: [
             {
                 cause: 'RATE_SUBMISSION',

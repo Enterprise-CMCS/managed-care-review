@@ -8,7 +8,7 @@ import {
     updateTestStateAssignments,
 } from '../../testHelpers/gqlHelpers'
 import { SubmitContractDocument } from '../../gen/gqlClient'
-import { testS3Client } from '../../../src/testHelpers/s3Helpers'
+import { testS3Client } from '../../testHelpers'
 
 import {
     createDBUsersWithFullData,
