@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import styles from './RateWithdraw.module.scss'
-import { ActionButton, Breadcrumbs } from '../../components'
+import { ActionButton, Breadcrumbs, PoliteErrorMessage } from '../../components'
 import { RoutesRecord } from '@mc-review/constants'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useFetchRateQuery } from '../../gen/gqlClient'
@@ -13,8 +13,9 @@ import {
     Label,
     Textarea,
 } from '@trussworks/react-uswds'
+import * as Yup from 'yup'
 import { PageActionsContainer } from '../StateSubmission/PageActions'
-import { Formik } from 'formik'
+import { Formik, FormikErrors } from 'formik'
 import { usePage } from '../../contexts/PageContext'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 
@@ -22,11 +23,24 @@ type RateWithdrawValues = {
     rateWithdrawReason: string
 }
 
+const RateWithdrawSchema = Yup.object().shape({
+    rateWithdrawReason: Yup.string().required(
+        'You must provide a reason for withdrawing this rate.'
+    ),
+})
+
+type FormError =
+    FormikErrors<RateWithdrawValues>[keyof FormikErrors<RateWithdrawValues>]
+
 export const RateWithdraw = () => {
     const { id } = useParams() as { id: string }
     const { updateHeading } = usePage()
     const navigate = useNavigate()
     const [rateName, setRateName] = useState<string | undefined>(undefined)
+    const [shouldValidate, setShouldValidate] = React.useState(false)
+
+    const showFieldErrors = (error?: FormError): boolean | undefined =>
+        shouldValidate && Boolean(error)
 
     const formInitialValues: RateWithdrawValues = {
         rateWithdrawReason: '',
@@ -80,20 +94,27 @@ export const RateWithdraw = () => {
             <Formik
                 initialValues={formInitialValues}
                 onSubmit={() => undefined}
+                validationSchema={RateWithdrawSchema}
             >
-                {({ handleSubmit }) => (
+                {({ handleSubmit, handleChange, errors, values }) => (
                     <Form
                         id="ReleasedToStateForm"
                         className={styles.formContainer}
                         aria-label="Mark this submission as Released to the state?"
                         aria-describedby="form-guidance"
                         onSubmit={(e) => {
+                            setShouldValidate(true)
                             return handleSubmit(e)
                         }}
                     >
                         <fieldset className="usa-fieldset">
                             <h2>Withdraw a rate</h2>
-                            <FormGroup className="margin-top-0">
+                            <FormGroup
+                                error={showFieldErrors(
+                                    errors.rateWithdrawReason
+                                )}
+                                className="margin-top-0"
+                            >
                                 <Label
                                     htmlFor="rateWithdrawReason"
                                     className="margin-bottom-0 text-bold"
@@ -107,9 +128,20 @@ export const RateWithdraw = () => {
                                     Provide a reason for withdrawing the rate
                                     review.
                                 </p>
+                                {showFieldErrors(errors.rateWithdrawReason) && (
+                                    <PoliteErrorMessage formFieldLabel="Reason for withdrawing">
+                                        {errors.rateWithdrawReason}
+                                    </PoliteErrorMessage>
+                                )}
                                 <Textarea
                                     name="rateWithdrawReason"
                                     id="rateWithdrawReason"
+                                    data-testid="rateWithdrawReason"
+                                    aria-labelledby="rateWithdrawReason"
+                                    aria-required
+                                    error={!!errors.rateWithdrawReason}
+                                    onChange={handleChange}
+                                    defaultValue={values.rateWithdrawReason}
                                 ></Textarea>
                             </FormGroup>
                         </fieldset>
