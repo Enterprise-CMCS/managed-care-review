@@ -162,6 +162,9 @@ export const RateWithdraw = () => {
                                 <ActionButton
                                     type="submit"
                                     variant="default"
+                                    disabled={Boolean(
+                                        errors.rateWithdrawReason
+                                    )}
                                     data-testid="page-actions-right-primary"
                                     parent_component_type="page body"
                                     link_url={`/submissions/${id}`}
