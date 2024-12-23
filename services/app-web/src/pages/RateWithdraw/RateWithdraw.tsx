@@ -81,7 +81,7 @@ export const RateWithdraw = () => {
                 className="usa-breadcrumb--wrap"
                 items={[
                     {
-                        link: RoutesRecord.DASHBOARD_SUBMISSIONS,
+                        link: RoutesRecord.DASHBOARD_RATES,
                         text: 'Dashboard',
                     },
                     { link: `/rates/${id}`, text: rateCertificationName || '' },
