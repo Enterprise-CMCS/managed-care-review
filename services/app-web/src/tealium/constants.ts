@@ -22,6 +22,7 @@ const TEALIUM_CONTENT_TYPE_BY_ROUTE: Record<RouteT | 'UNKNOWN_ROUTE', string> =
         REPLACE_RATE: 'form',
         RATES_UPLOAD_QUESTION: 'form',
         RATE_EDIT: 'form',
+        RATE_WITHDRAW: 'form',
         SUBMISSIONS: 'form',
         SUBMISSIONS_NEW: 'form',
         SUBMISSIONS_EDIT_TOP_LEVEL: 'form',
