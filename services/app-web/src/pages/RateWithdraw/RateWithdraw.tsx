@@ -152,7 +152,7 @@ export const RateWithdraw = () => {
                                     variant="outline"
                                     data-testid="page-actions-left-secondary"
                                     parent_component_type="page body"
-                                    link_url={`/submissions/${id}`}
+                                    link_url={`/rates/${id}`}
                                     onClick={() => navigate(`/rates/${id}`)}
                                 >
                                     Cancel
