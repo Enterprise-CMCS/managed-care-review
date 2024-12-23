@@ -98,9 +98,9 @@ export const RateWithdraw = () => {
             >
                 {({ handleSubmit, handleChange, errors, values }) => (
                     <Form
-                        id="ReleasedToStateForm"
+                        id="RateWithdrawForm"
                         className={styles.formContainer}
-                        aria-label="Mark this submission as Released to the state?"
+                        aria-label="Withdraw rate review"
                         aria-describedby="form-guidance"
                         onSubmit={(e) => {
                             setShouldValidate(true)
