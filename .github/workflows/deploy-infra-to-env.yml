@@ -74,7 +74,7 @@ jobs:
           pushd services/github-oidc && npx serverless deploy --stage ${{ inputs.stage_name }}
 
   bootstrap-cdk:
-    needs: github-oidc  # Run after OIDC is set up
+    needs: github-oidc 
     environment: ${{ inputs.environment }}
     runs-on: ubuntu-20.04
     steps:
