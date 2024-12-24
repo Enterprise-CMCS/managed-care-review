@@ -74,7 +74,7 @@
     },
     "homepage": "https://github.com/Enterprise-CMCS/managed-care-review#readme",
     "devDependencies": {
-        "c8": "^10.1.2",
+        "c8": "^10.1.3",
         "cypress": "^13.13.2",
         "axe-core": "^4.10.0",
         "cypress-axe": "^1.5.0",
