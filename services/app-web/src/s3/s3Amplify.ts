@@ -163,13 +163,16 @@ function newAmplifyS3Client(bucketConfig: S3BucketConfigType): S3ClientT {
                     response: true,
                     body: zipRequestParams,
                 })
+
+                return await retryWithBackoff(
+                    async () => Storage.get(filename, { expires: 3600 }),
+                    5
+                )
             } catch (err) {
                 const error = new Error('Could not get a bulk DL URL: ' + err)
                 recordJSException(error)
                 return error
             }
-
-            return await Storage.get(filename, { expires: 3600 })
         },
     }
 }
@@ -189,19 +192,19 @@ const waitFor = (delay = 1000) =>
  * increase the time elapsed between retries in each cycle by order of 2^n; 
  * e.g. with default values for retryCount and maxRetries, attempt the request at 1s, 2s, 4s.
 */
-const retryWithBackoff = async (
-    fn: () => Promise<void | S3Error>,
+const retryWithBackoff = async <T>(
+    fn: () => Promise<T>,
     retryCount = 0,
     maxRetries = 4,
-    err: null | S3Error = null
-): Promise<void | S3Error> => {
+    err: Error | null = null
+): Promise<T> => {
     if (retryCount > maxRetries) {
         return Promise.reject(err)
     }
     const nextDelay = 2 ** retryCount * 1000
     await waitFor(nextDelay)
-    return fn().catch((err) =>
-        retryWithBackoff(fn, retryCount + 1, maxRetries, err)
+    return fn().catch((error) =>
+        retryWithBackoff(fn, maxRetries, retryCount + 1, error)
     )
 }
 
