@@ -448,6 +448,9 @@ async function initializeGQLHandler(): Promise<Handler> {
                 origin: true,
                 credentials: true,
             },
+            bodyParserConfig: {
+                limit: '10mb',
+            },
         },
     })
 
