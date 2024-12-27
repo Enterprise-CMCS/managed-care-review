@@ -110,7 +110,7 @@
         "graphql": "^16.9.0",
         "jotai": "^2.9.3",
         "jotai-location": "^0.5.1",
-        "jsdom": "^24.1.1",
+        "jsdom": "^25.0.1",
         "launchdarkly-react-client-sdk": "^3.6.0",
         "path-browserify": "^1.0.1",
         "plugin": "^0.3.3",
@@ -136,9 +136,9 @@
         "zod": "^3.24.1"
     },
     "devDependencies": {
-        "@aws-sdk/client-amplify": "^3.715.0",
-        "@aws-sdk/client-s3": "^3.715.0",
-        "@aws-sdk/s3-request-presigner": "^3.715.0",
+        "@aws-sdk/client-amplify": "^3.716.0",
+        "@aws-sdk/client-s3": "^3.717.0",
+        "@aws-sdk/s3-request-presigner": "^3.717.0",
         "@chromatic-com/storybook": "^1",
         "@peculiar/webcrypto": "^1.5.0",
         "@storybook/addon-a11y": "^8.2.9",
