@@ -163,16 +163,12 @@ function newAmplifyS3Client(bucketConfig: S3BucketConfigType): S3ClientT {
                     response: true,
                     body: zipRequestParams,
                 })
-
-                return await retryWithBackoff(
-                    async () => Storage.get(filename, { expires: 3600 }),
-                    5
-                )
             } catch (err) {
                 const error = new Error('Could not get a bulk DL URL: ' + err)
                 recordJSException(error)
                 return error
             }
+            return Storage.get(filename, { expires: 3600 })
         },
     }
 }
