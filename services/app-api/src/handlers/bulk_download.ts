@@ -18,6 +18,9 @@ interface S3BulkDownloadRequest {
 }
 
 const main: APIGatewayProxyHandler = async (event) => {
+    console.info('Starting lambda with request size:', event.body?.length)
+    const startTime = Date.now()
+
     const authProvider =
         event.requestContext.identity.cognitoAuthenticationProvider
     if (authProvider == undefined) {
@@ -36,7 +39,6 @@ const main: APIGatewayProxyHandler = async (event) => {
         }
     }
 
-    console.time('zipProcess')
     if (!event.body) {
         console.timeEnd('zipProcess')
         return {
@@ -57,7 +59,6 @@ const main: APIGatewayProxyHandler = async (event) => {
         !bulkDlRequest.keys ||
         !bulkDlRequest.zipFileName
     ) {
-        console.timeEnd('zipProcess')
         return {
             statusCode: 400,
             body: JSON.stringify({
@@ -79,14 +80,27 @@ const main: APIGatewayProxyHandler = async (event) => {
     // here we go through all the keys and open a stream to the object.
     // also, the filename in s3 is a uuid, and we store the original
     // filename in the content-disposition header. set original filename too.
+    let totalBytes = 0
+    let processedFiles = 0
+
     let s3DownloadStreams: S3DownloadStreamDetails[]
     try {
+        console.info('Starting download of', bulkDlRequest.keys.length, 'files')
         s3DownloadStreams = await Promise.all(
-            bulkDlRequest.keys.map(async (key: string) => {
+            bulkDlRequest.keys.map(async (key: string, index: number) => {
+                console.info(
+                    `Downloading file ${index + 1}/${bulkDlRequest.keys.length}: ${key}`
+                )
+
                 const params = { Bucket: bulkDlRequest.bucket, Key: key }
 
                 const headCommand = new HeadObjectCommand(params)
                 const metadata = await s3.send(headCommand)
+
+                totalBytes += metadata.ContentLength || 0
+                console.info(
+                    `File ${key} size: ${metadata.ContentLength} bytes`
+                )
 
                 const filename = parseContentDisposition(
                     metadata.ContentDisposition ?? key
@@ -141,9 +155,9 @@ const main: APIGatewayProxyHandler = async (event) => {
                 }
             })
         )
+        console.info('Total bytes to process:', totalBytes)
     } catch (e) {
         console.error('Got an error downloading the files from s3: ', e)
-        console.timeEnd('zipProcess')
         return {
             statusCode: 500,
             body: JSON.stringify(e.message),
@@ -157,6 +171,10 @@ const main: APIGatewayProxyHandler = async (event) => {
     try {
         // This stream is written to by the archive and then read from by the uploader
         const zippedStream = new PassThrough()
+
+        zippedStream.on('data', (chunk) => {
+            console.info(`Zip stream progress: ${chunk.length} bytes`)
+        })
 
         zippedStream.on('error', (err) => {
             console.error('Error in our zipped stream', err)
@@ -190,11 +208,28 @@ const main: APIGatewayProxyHandler = async (event) => {
         })
 
         // Configure Zip
-        const zip = Archiver('zip')
+        const zip = Archiver('zip', { zlib: { level: 5 } })
 
         zip.on('warning', function (warn) {
             console.info('zip warning: ', warn.message)
         })
+
+        zip.on('entry', (entry) => {
+            processedFiles++
+            console.info(
+                `Zip progress: ${processedFiles}/${s3DownloadStreams.length} files processed`
+            )
+            console.info('Current entry:', entry.name)
+        })
+
+        setInterval(() => {
+            const used = process.memoryUsage()
+            console.info('Memory usage:', {
+                rss: `${Math.round(used.rss / 1024 / 1024)}MB`,
+                heapTotal: `${Math.round(used.heapTotal / 1024 / 1024)}MB`,
+                heapUsed: `${Math.round(used.heapUsed / 1024 / 1024)}MB`,
+            })
+        }, 5000)
 
         zip.on('error', (error: Archiver.ArchiverError) => {
             console.info('Error in zip.on: ', error.message, error.stack)
@@ -225,9 +260,19 @@ const main: APIGatewayProxyHandler = async (event) => {
 
         // We only stop and wait on the upload itself. Hopefully all our streams are streaming correctly
         await upload.done()
+        console.info(
+            'Upload completed in',
+            (Date.now() - startTime) / 1000,
+            'seconds'
+        )
     } catch (e) {
-        console.info('Error zipping or uploading', e)
-        console.timeEnd('zipProcess')
+        console.error('Error zipping or uploading', e)
+        console.error('Zip/Upload error:', {
+            error: e,
+            processedFiles,
+            totalFiles: s3DownloadStreams.length,
+            elapsedTime: (Date.now() - startTime) / 1000,
+        })
         return {
             statusCode: 500,
             body: JSON.stringify(e.message),
@@ -239,7 +284,6 @@ const main: APIGatewayProxyHandler = async (event) => {
     }
 
     console.info('Upload Success')
-    console.timeEnd('zipProcess')
     return {
         statusCode: 200,
         body: JSON.stringify({ code: 'SUCCESS', message: 'success' }),
