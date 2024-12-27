@@ -6,13 +6,13 @@ import { ExpandableText } from '../../ExpandableText'
 import { formatBannerDate } from '@mc-review/dates'
 import { getUpdatedByDisplayName } from '@mc-review/helpers'
 
-export type RateWithdrawnProps = {
+export type RateReplacedProps = {
     withdrawInfo: UpdateInformation
 }
-export const RateWithdrawnBanner = ({
+export const RateReplacedBanner = ({
     withdrawInfo,
     className,
-}: RateWithdrawnProps &
+}: RateReplacedProps &
     React.HTMLAttributes<HTMLDivElement>): React.ReactElement => {
     const { updatedAt, updatedReason, updatedBy } = withdrawInfo
 
