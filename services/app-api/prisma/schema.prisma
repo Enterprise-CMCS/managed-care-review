@@ -46,6 +46,7 @@ model ContractTable {
   questions           ContractQuestion[]
   reviewStatusActions ContractActionTable[]
   draftRates          DraftRateJoinTable[]
+  withdrawnRates      WithdrawnRatesJoinTable[]
 
   revisions           ContractRevisionTable[]
   sharedRateRevisions RateRevisionTable[]     @relation(name: "SharedRateRevisions")
@@ -60,8 +61,9 @@ model RateTable {
   state       State  @relation(fields: [stateCode], references: [stateCode])
   stateNumber Int
 
-  withdrawInfoID String?
-  withdrawInfo   UpdateInfoTable? @relation("withdrawRateInfo", fields: [withdrawInfoID], references: [id])
+  withdrawInfoID         String?
+  withdrawInfo           UpdateInfoTable?          @relation("withdrawRateInfo", fields: [withdrawInfoID], references: [id])
+  withdrawnFromContracts WithdrawnRatesJoinTable[]
 
   questions           RateQuestion[]
   reviewStatusActions RateActionTable[]
@@ -77,6 +79,16 @@ model DraftRateJoinTable {
   rateID       String
   rate         RateTable     @relation(fields: [rateID], references: [id], onDelete: Cascade)
   ratePosition Int
+
+  @@id([contractID, rateID])
+}
+
+// Relationship for withdrawn rates and contracts
+model WithdrawnRatesJoinTable {
+  contractID String
+  contract   ContractTable @relation(fields: [contractID], references: [id])
+  rateID     String
+  rate       RateTable     @relation(fields: [rateID], references: [id], onDelete: Cascade)
 
   @@id([contractID, rateID])
 }
@@ -166,15 +178,15 @@ model RateRevisionTable {
 }
 
 model ContractActionTable {
-  id                           String             @id @default(uuid())
-  updatedAt                    DateTime           @default(now()) @updatedAt
-  updatedByID                  String
-  updatedBy                    User               @relation(fields: [updatedByID], references: [id])
-  updatedReason                String?
-  actionType                   ContractActionType
-  dateApprovalReleasedToState  DateTime?          @db.Date 
-  contractID                   String  
-  contract                     ContractTable      @relation(fields: [contractID], references: [id])
+  id                          String             @id @default(uuid())
+  updatedAt                   DateTime           @default(now()) @updatedAt
+  updatedByID                 String
+  updatedBy                   User               @relation(fields: [updatedByID], references: [id])
+  updatedReason               String?
+  actionType                  ContractActionType
+  dateApprovalReleasedToState DateTime?          @db.Date
+  contractID                  String
+  contract                    ContractTable      @relation(fields: [contractID], references: [id])
 }
 
 model RateActionTable {

@@ -309,6 +309,7 @@ function mockContractPackageDraft(partial?: Partial<Contract>): Contract {
                 },
             },
         ],
+        withdrawnRates: [],
         packageSubmissions: [],
         ...partial,
     }
@@ -336,6 +337,7 @@ function mockContractPackageSubmittedWithQuestions(
         mccrsID: null,
         draftRates: [],
         draftRevision: null,
+        withdrawnRates: [],
         packageSubmissions: [
             {
                 cause: 'CONTRACT_SUBMISSION',
@@ -909,6 +911,7 @@ function mockContractWithLinkedRateDraft(
                 ],
             },
         ],
+        withdrawnRates: [],
         packageSubmissions: [],
         ...partial,
     }
@@ -932,6 +935,7 @@ function mockContractWithLinkedRateSubmitted(
         state: mockMNState(),
         stateNumber: 5,
         mccrsID: null,
+        withdrawnRates: [],
         packageSubmissions: [
             {
                 cause: 'CONTRACT_SUBMISSION',
@@ -1096,6 +1100,7 @@ function mockContractPackageSubmitted(partial?: Partial<Contract>): Contract {
         mccrsID: null,
         draftRevision: null,
         draftRates: [],
+        withdrawnRates: [],
         packageSubmissions: [
             {
                 cause: 'CONTRACT_SUBMISSION',
@@ -1307,6 +1312,7 @@ function mockContractPackageApproved(
         mccrsID: null,
         draftRevision: null,
         draftRates: [],
+        withdrawnRates: [],
         packageSubmissions: [
             {
                 cause: 'CONTRACT_SUBMISSION',
@@ -1697,6 +1703,7 @@ function mockContractPackageSubmittedWithRevisions(
         stateNumber: 5,
         draftRevision: null,
         draftRates: null,
+        withdrawnRates: [],
         packageSubmissions: [
             {
                 __typename: 'ContractPackageSubmission',
@@ -1841,6 +1848,7 @@ function mockContractPackageWithDifferentProgramsInRevisions(): Contract {
         __typename: 'Contract',
         draftRevision: null,
         draftRates: null,
+        withdrawnRates: [],
         packageSubmissions: [
             {
                 cause: 'CONTRACT_SUBMISSION',
@@ -2371,6 +2379,7 @@ function mockContractPackageUnlockedWithUnlockedType(
                 },
             },
         ],
+        withdrawnRates: [],
         packageSubmissions: [
             {
                 __typename: 'ContractPackageSubmission',
@@ -2821,6 +2830,7 @@ const mockEmptyDraftContractAndRate = (): Contract =>
                 },
             },
         ],
+        withdrawnRates: [],
     })
 
 export {

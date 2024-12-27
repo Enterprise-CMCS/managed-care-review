@@ -19,6 +19,16 @@ mutation unlockContract($input: UnlockContractInput!) {
                 }
             }
 
+            withdrawnRates {
+                ...rateFieldsFragment,
+                revisions {
+                    ...rateRevisionFragment
+                }
+                packageSubmissions {
+                    ...ratePackageSubmissionsFragment
+                }
+            }
+
             packageSubmissions {
                 ...packageSubmissionsFragment
             }
