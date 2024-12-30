@@ -176,7 +176,8 @@ export const RateSummary = (): React.ReactElement => {
     const showWithdrawBanner =
         showWithdrawRate &&
         latestRateAction &&
-        rate.consolidatedStatus === 'WITHDRAWN'
+        rate.consolidatedStatus === 'WITHDRAWN' &&
+        !parentContractIsApproved
     return (
         <div className={styles.background}>
             <GridContainer
