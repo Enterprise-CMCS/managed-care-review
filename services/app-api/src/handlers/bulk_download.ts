@@ -335,4 +335,4 @@ function parseContentDisposition(cd: string): string {
     return filename
 }
 
-export { main }
+module.exports = { main }
