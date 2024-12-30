@@ -22,6 +22,7 @@ const withdrawRateMockSuccess = (
     const rate = mockRateSubmittedWithQuestions({
         __typename: 'Rate',
         id: rateData?.id || rateID,
+        parentContractID: rateData?.parentContractID || 'parent-contract-id',
         reviewStatus: 'WITHDRAWN',
         consolidatedStatus: 'WITHDRAWN',
         reviewStatusActions: [
@@ -40,7 +41,6 @@ const withdrawRateMockSuccess = (
                 },
             },
         ],
-        ...rateData,
     })
 
     return {

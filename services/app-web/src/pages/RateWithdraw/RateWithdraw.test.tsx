@@ -15,6 +15,7 @@ import { RateSummary } from '../SubmissionSummary'
 import { RateWithdraw } from './RateWithdraw'
 import { waitFor, screen } from '@testing-library/react'
 import { RateSummarySideNav } from '../SubmissionSideNav/RateSummarySideNav'
+import { Rate } from '../../gen/gqlClient'
 
 describe('RateWithdraw', () => {
     it('can withdraw a rate', async () => {
@@ -25,6 +26,27 @@ describe('RateWithdraw', () => {
             id: 'test-abc-123',
             parentContractID: 'test-abc-123',
         })
+        const withdrawnRate: Rate = {
+            ...rate,
+            reviewStatus: 'WITHDRAWN',
+            consolidatedStatus: 'WITHDRAWN',
+            reviewStatusActions: [
+                {
+                    __typename: 'RateReviewStatusActions',
+                    actionType: 'WITHDRAW',
+                    rateID: rate.id,
+                    updatedReason: 'a valid note',
+                    updatedAt: new Date(),
+                    updatedBy: {
+                        __typename: 'UpdatedBy',
+                        email: 'cmsapprover@example.com',
+                        familyName: 'Smith',
+                        givenName: 'John',
+                        role: 'CMS_APPROVER_USER',
+                    },
+                },
+            ],
+        }
 
         const { user } = renderWithProviders(
             <Routes>
@@ -51,9 +73,13 @@ describe('RateWithdraw', () => {
                         }),
                         fetchRateMockSuccess(rate),
                         withdrawRateMockSuccess({ rateData: rate }),
-                        fetchRateMockSuccess(rate),
+                        fetchRateMockSuccess(withdrawnRate),
                         fetchContractMockSuccess({
                             contract,
+                        }),
+                        fetchCurrentUserMock({
+                            user: mockValidCMSUser(),
+                            statusCode: 200,
                         }),
                     ],
                 },
@@ -67,16 +93,17 @@ describe('RateWithdraw', () => {
         )
 
         await waitFor(() => {
+            expect(screen.getByText('Withdraw a rate')).toBeInTheDocument()
             expect(
-                screen.queryByTestId('rateWithdrawReason')
+                screen.getByRole('button', { name: 'Withdraw rate' })
             ).toBeInTheDocument()
         })
 
         const withdrawBtn = screen.getByRole('button', {
             name: 'Withdraw rate',
         })
-        const dateInput = screen.getByTestId('rateWithdrawReason')
-        await user.type(dateInput, 'a valid note')
+        const withdrawReasonInput = screen.getByTestId('rateWithdrawReason')
+        await user.type(withdrawReasonInput, 'a valid note')
 
         await user.click(withdrawBtn)
 

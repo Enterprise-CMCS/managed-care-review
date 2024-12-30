@@ -201,7 +201,7 @@ export const RateWithdraw = () => {
                                     )}
                                     data-testid="page-actions-right-primary"
                                     parent_component_type="page body"
-                                    link_url={`/submissions/${id}`}
+                                    link_url={`/rates/${id}`}
                                     animationTimeout={1000}
                                     loading={withdrawLoading}
                                 >
