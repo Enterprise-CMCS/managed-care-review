@@ -10,7 +10,7 @@ import {
     includeContractFormData,
 } from './prismaSharedContractRateHelpers'
 import { unlockContractInsideTransaction } from './unlockContract'
-import { UserInputPostgresError } from '../postgresErrors'
+import { NotFoundError, UserInputPostgresError } from '../postgresErrors'
 import type { UpdateDraftContractRatesArgsType } from './updateDraftContractRates'
 import { updateDraftContractRatesInsideTransaction } from './updateDraftContractRates'
 import type { SubmitContractArgsType } from './submitContract'
@@ -62,7 +62,8 @@ const withdrawRateInsideTransaction = async (
     })
 
     if (!rate) {
-        throw new Error('Oh no')
+        const err = `PRISMA ERROR: Cannot find rate with id: ${rateID}`
+        return new NotFoundError(err)
     }
 
     // Get the contractIDs of the latest submission package of each related submission
@@ -70,8 +71,6 @@ const withdrawRateInsideTransaction = async (
     const contractIDs = latestRevision.relatedSubmissions.map(
         (sub) => sub.submissionPackages[0].contractRevision.contractID
     )
-
-    //console.log(contractIDs)
 
     // get data for every contract
     const contracts = await tx.contractTable.findMany({
