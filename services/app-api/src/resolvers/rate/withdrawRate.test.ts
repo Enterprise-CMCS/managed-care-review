@@ -243,7 +243,13 @@ describe('withdrawRate', () => {
             },
         })
 
-        await submitTestContract(stateServer, contractB.id)
+        const submittedContractB = await submitTestContract(
+            stateServer,
+            contractB.id
+        )
+
+        // expect contract B to be submitted before we withdraw rate
+        expect(submittedContractB.status).toBe('SUBMITTED')
 
         const withdrawnRate = await withdrawTestRate(
             cmsServer,
