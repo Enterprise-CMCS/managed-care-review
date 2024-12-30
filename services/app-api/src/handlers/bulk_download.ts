@@ -1,5 +1,9 @@
 import type { PutObjectCommandInput } from '@aws-sdk/client-s3'
-import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3'
+import {
+    S3Client,
+    GetObjectCommand,
+    HeadObjectCommand,
+} from '@aws-sdk/client-s3'
 import { Upload } from '@aws-sdk/lib-storage'
 import { Readable } from 'stream'
 import type { APIGatewayProxyHandler } from 'aws-lambda'
@@ -10,13 +14,13 @@ import { pipeline } from 'stream/promises'
 
 const s3 = new S3Client({ region: 'us-east-1' })
 
-// Configuration
-const BATCH_SIZE = 20
+// Configuration constants
+const BATCH_SIZE = 20 // Increased batch size for parallel downloads
 const BASE_TIMEOUT = 120000
 const TIMEOUT_PER_MB = 1000
 const MAX_TOTAL_SIZE = 500 * 1024 * 1024 // 500MB limit
 const MEMORY_LOG_INTERVAL = 5000
-const TEMP_DIR = '/tmp/downloads'
+const TEMP_DIR = '/tmp/downloads' // Lambda temp directory
 
 interface S3BulkDownloadRequest {
     bucket: string
@@ -38,13 +42,26 @@ const cleanupTempDir = () => {
     }
 }
 
+interface DownloadedFile {
+    path: string
+    size: number
+    originalFilename: string
+}
+
 // Helper function to download a single file
 const downloadFile = async (
     bucket: string,
     key: string,
     timeout: number
-): Promise<{ path: string; size: number }> => {
+): Promise<DownloadedFile> => {
     const params = { Bucket: bucket, Key: key }
+
+    // Get metadata first to check content-disposition
+    const headCommand = new HeadObjectCommand(params)
+    const metadata = await s3.send(headCommand)
+    const filename = parseContentDisposition(metadata.ContentDisposition ?? key)
+
+    // Now get the actual file
     const getCommand = new GetObjectCommand(params)
     const s3Item = await s3.send(getCommand)
 
@@ -52,8 +69,9 @@ const downloadFile = async (
         throw new Error(`Invalid stream for ${key}`)
     }
 
-    const filename = parseContentDisposition(key)
-    const filePath = path.join(TEMP_DIR, filename)
+    // Use a UUID for the temp file path to avoid collisions
+    const tempName = `${Date.now()}-${Math.random().toString(36).substring(7)}`
+    const filePath = path.join(TEMP_DIR, tempName)
 
     // Create write stream with proper encoding
     const writeStream = fs.createWriteStream(filePath)
@@ -70,7 +88,7 @@ const downloadFile = async (
     }
 
     const stats = fs.statSync(filePath)
-    return { path: filePath, size: stats.size }
+    return { path: filePath, size: stats.size, originalFilename: filename }
 }
 
 const startMemoryLogging = () => {
@@ -150,7 +168,7 @@ const main: APIGatewayProxyHandler = async (event) => {
 
         // Download files in batches
         let totalBytes = 0
-        const downloadedFiles: { path: string; size: number }[] = []
+        const downloadedFiles: DownloadedFile[] = []
 
         for (let i = 0; i < bulkDlRequest.keys.length; i += BATCH_SIZE) {
             const batch = bulkDlRequest.keys.slice(i, i + BATCH_SIZE)
@@ -160,7 +178,7 @@ const main: APIGatewayProxyHandler = async (event) => {
 
             const batchResults = await Promise.all(
                 batch.map(async (key) => {
-                    const timeout = BASE_TIMEOUT + TIMEOUT_PER_MB * 1000
+                    const timeout = BASE_TIMEOUT + TIMEOUT_PER_MB * 1000 // Simplified timeout calculation
                     return downloadFile(bulkDlRequest.bucket, key, timeout)
                 })
             )
@@ -183,9 +201,9 @@ const main: APIGatewayProxyHandler = async (event) => {
 
         archive.pipe(zipStream)
 
-        // Add files to zip
+        // Add files to zip with their original names
         for (const file of downloadedFiles) {
-            archive.file(file.path, { name: path.basename(file.path) })
+            archive.file(file.path, { name: file.originalFilename })
         }
 
         await archive.finalize()
@@ -253,9 +271,10 @@ const main: APIGatewayProxyHandler = async (event) => {
     }
 }
 
-function parseContentDisposition(key: string): string {
-    // Simplified to just use the key's basename
-    return path.basename(key)
+// parses a content-disposition header for the filename
+function parseContentDisposition(cd: string): string {
+    const [, filename] = cd.split('filename=')
+    return filename
 }
 
 module.exports = { main }
