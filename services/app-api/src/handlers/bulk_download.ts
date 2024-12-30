@@ -296,9 +296,7 @@ const main: APIGatewayProxyHandler = async (event) => {
 
 // parses a content-disposition header for the filename
 function parseContentDisposition(cd: string): string {
-    console.info('original content-disposition: ' + cd)
     const [, filename] = cd.split('filename=')
-    console.info('original name: ' + filename)
     return filename
 }
 
