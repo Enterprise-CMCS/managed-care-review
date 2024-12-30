@@ -273,8 +273,20 @@ const main: APIGatewayProxyHandler = async (event) => {
 
 // parses a content-disposition header for the filename
 function parseContentDisposition(cd: string): string {
-    const [, filename] = cd.split('filename=')
-    return filename
+    if (!cd) return ''
+
+    const matches = cd.match(/filename=["']?([^"';\n]*)["']?/i)
+    if (matches && matches[1]) {
+        return decodeURIComponent(matches[1].trim())
+    }
+
+    // If it's just a key/path, decode it directly
+    try {
+        return decodeURIComponent(cd.trim())
+    } catch (error) {
+        console.warn('Error decoding filename:', cd, error)
+        return cd.trim()
+    }
 }
 
 module.exports = { main }
