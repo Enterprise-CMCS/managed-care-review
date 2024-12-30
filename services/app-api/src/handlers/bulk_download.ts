@@ -13,7 +13,9 @@ const s3 = new S3Client({ region: 'us-east-1' })
 
 // Configuration constants
 const BATCH_SIZE = 10 // Process 10 files at a time
-const FILE_TIMEOUT = 60000 // 1 minute timeout per file
+const BASE_TIMEOUT = 120000 // 2 minute base timeout
+const TIMEOUT_PER_MB = 1000 // Additional 1 second per MB
+const MAX_TIMEOUT = 900000 // 15 minute maximum timeout (Lambda limit)
 const MAX_TOTAL_SIZE = 500 * 1024 * 1024 // 500MB limit
 const MEMORY_LOG_INTERVAL = 5000 // Log memory usage every 5 seconds
 const STREAM_CHUNK_SIZE = 1024 * 1024 // 1MB chunks for backpressure
@@ -24,11 +26,13 @@ interface S3BulkDownloadRequest {
     zipFileName: string
 }
 
-// Wrap a stream with a timeout
 const streamWithTimeout = (
     stream: Readable,
     timeout: number
 ): Promise<void> => {
+    if (!(stream instanceof Readable)) {
+        return Promise.reject(new Error('Invalid stream type'))
+    }
     return new Promise((resolve, reject) => {
         const timer = setTimeout(() => {
             reject(new Error('Stream timeout'))
@@ -47,7 +51,7 @@ const streamWithTimeout = (
     })
 }
 
-// log memory usage
+// Helper function to log memory usage
 const startMemoryLogging = () => {
     return setInterval(() => {
         const used = process.memoryUsage()
@@ -82,6 +86,7 @@ const main: APIGatewayProxyHandler = async (event) => {
         }
     }
 
+    // Validate request body
     if (!event.body) {
         return {
             statusCode: 400,
@@ -230,16 +235,36 @@ const main: APIGatewayProxyHandler = async (event) => {
                         metadata.ContentDisposition ?? key
                     )
 
-                    // Add to zip with timeout wrapper
-                    const streamPromise = streamWithTimeout(
-                        s3Item.Body,
-                        FILE_TIMEOUT
+                    // Calculate timeout based on file size
+                    const fileSizeMB = metadata.ContentLength / (1024 * 1024)
+                    const timeout = Math.min(
+                        BASE_TIMEOUT + fileSizeMB * TIMEOUT_PER_MB,
+                        MAX_TIMEOUT
                     )
-                    zip.append(s3Item.Body, {
-                        name: decodeURIComponent(filename),
-                    })
 
-                    await streamPromise
+                    console.info(
+                        `Processing ${key} with timeout of ${timeout / 1000}s for ${fileSizeMB.toFixed(2)}MB`
+                    )
+
+                    try {
+                        // Add to zip with timeout wrapper
+                        const streamPromise = streamWithTimeout(
+                            s3Item.Body,
+                            timeout
+                        )
+                        zip.append(s3Item.Body, {
+                            name: decodeURIComponent(filename),
+                        })
+
+                        await streamPromise
+                    } catch (streamError) {
+                        if (streamError.message === 'Stream timeout') {
+                            console.error(
+                                `Timeout processing ${key} after ${timeout / 1000}s. File size: ${fileSizeMB.toFixed(2)}MB`
+                            )
+                        }
+                        throw streamError
+                    }
                 })
             )
         }
@@ -310,4 +335,4 @@ function parseContentDisposition(cd: string): string {
     return filename
 }
 
-module.exports = { main }
+export { main }
