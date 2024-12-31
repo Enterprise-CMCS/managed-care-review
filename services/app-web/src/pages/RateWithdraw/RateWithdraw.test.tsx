@@ -109,6 +109,10 @@ describe('RateWithdraw', () => {
 
         await waitFor(() => {
             expect(screen.getByTestId('rateWithdrawBanner')).toBeInTheDocument()
+            const unlockBtn = screen.getByRole('button', {
+                name: 'Unlock rate',
+            })
+            expect(unlockBtn).toHaveAttribute('aria-disabled', 'true')
         })
     })
 
