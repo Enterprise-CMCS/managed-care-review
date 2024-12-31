@@ -188,19 +188,19 @@ const waitFor = (delay = 1000) =>
  * increase the time elapsed between retries in each cycle by order of 2^n; 
  * e.g. with default values for retryCount and maxRetries, attempt the request at 1s, 2s, 4s.
 */
-const retryWithBackoff = async <T>(
-    fn: () => Promise<T>,
+const retryWithBackoff = async (
+    fn: () => Promise<void | S3Error>,
     retryCount = 0,
     maxRetries = 4,
-    err: Error | null = null
-): Promise<T> => {
+    err: null | S3Error = null
+): Promise<void | S3Error> => {
     if (retryCount > maxRetries) {
         return Promise.reject(err)
     }
     const nextDelay = 2 ** retryCount * 1000
     await waitFor(nextDelay)
-    return fn().catch((error) =>
-        retryWithBackoff(fn, maxRetries, retryCount + 1, error)
+    return fn().catch((err) =>
+        retryWithBackoff(fn, retryCount + 1, maxRetries, err)
     )
 }
 
