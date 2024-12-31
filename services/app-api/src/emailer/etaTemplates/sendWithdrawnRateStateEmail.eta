@@ -1,0 +1,22 @@
+<h1 style=<%~'"font-weight: normal;"'%>>Rate <%= it.rateName %> was withdrawn by CMS</h1>
+<b>Withdrawn by:</b> <%= it.withdrawnBy %><br />
+<b>Withdrawn on:</b> <%= it.withdrawnDate %><br />
+<b>Reason for withdrawal:</b> <%= it.withdrawnReason %><br />
+<b>Withdrawn from:</b>
+<% if (it.withdrawnFromContractData.length > 1) { %>
+<ul>
+<% it.withdrawnFromContractData.forEach(function(contract){ %>
+    <li>
+        <a href="<%= contract.submissionURL %>"><%= contract.contractName %></a>
+    </li>
+<% }) %>
+</ul>
+<div>If you have any questions, please reach out to your CMS point of contact.</div>
+<% } else { %>
+<%= it.withdrawnFromContractData[0].contractName %><br />
+<br />
+<div>If you have any questions, please reach out to your CMS point of contact.</div>
+<a href="<%= it.withdrawnFromContractData[0].submissionURL %>">View the submission in MC-Review</a>
+<% } %>
+
+
