@@ -1,9 +1,14 @@
 import React, { useEffect, useState } from 'react'
 import styles from './RateWithdraw.module.scss'
-import { ActionButton, Breadcrumbs, PoliteErrorMessage } from '../../components'
+import {
+    ActionButton,
+    Breadcrumbs,
+    GenericApiErrorBanner,
+    PoliteErrorMessage,
+} from '../../components'
 import { RoutesRecord } from '@mc-review/constants'
 import { useNavigate, useParams } from 'react-router-dom'
-import { useFetchRateQuery } from '../../gen/gqlClient'
+import { useFetchRateQuery, useWithdrawRateMutation } from '../../gen/gqlClient'
 import { ErrorOrLoadingPage } from '../StateSubmission'
 import { handleAndReturnErrorState } from '../StateSubmission/ErrorOrLoadingPage'
 import {
@@ -18,6 +23,8 @@ import { PageActionsContainer } from '../StateSubmission/PageActions'
 import { Formik, FormikErrors } from 'formik'
 import { usePage } from '../../contexts/PageContext'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
+import { useTealium } from '../../hooks'
+import { recordJSException } from '@mc-review/otel'
 
 type RateWithdrawValues = {
     rateWithdrawReason: string
@@ -36,9 +43,11 @@ export const RateWithdraw = () => {
     const { id } = useParams() as { id: string }
     const { updateHeading } = usePage()
     const navigate = useNavigate()
+    const { logFormSubmitEvent } = useTealium()
     const [rateName, setRateName] = useState<string | undefined>(undefined)
     const [shouldValidate, setShouldValidate] = React.useState(false)
-
+    const [withdrawRate, { error: withdrawError, loading: withdrawLoading }] =
+        useWithdrawRateMutation()
     const showFieldErrors = (error?: FormError): boolean | undefined =>
         shouldValidate && Boolean(error)
 
@@ -75,6 +84,30 @@ export const RateWithdraw = () => {
         setRateName(rateCertificationName)
     }
 
+    const withdrawRateAction = async (values: RateWithdrawValues) => {
+        logFormSubmitEvent({
+            heading: 'Withdraw rate',
+            form_name: 'Withdraw rate',
+            event_name: 'form_field_submit',
+            link_type: 'link_other',
+        })
+        try {
+            await withdrawRate({
+                variables: {
+                    input: {
+                        rateID: rate.id,
+                        updatedReason: values.rateWithdrawReason,
+                    },
+                },
+            })
+            navigate(`/rates/${id}`)
+        } catch (err) {
+            recordJSException(
+                `WithdrawRate: Apollo error reported. Error message: Failed to create form data ${err}`
+            )
+        }
+    }
+
     return (
         <div className={styles.rateWithdrawContainer}>
             <Breadcrumbs
@@ -93,7 +126,7 @@ export const RateWithdraw = () => {
             />
             <Formik
                 initialValues={formInitialValues}
-                onSubmit={() => undefined}
+                onSubmit={(values) => withdrawRateAction(values)}
                 validationSchema={RateWithdrawSchema}
             >
                 {({ handleSubmit, handleChange, errors, values }) => (
@@ -107,6 +140,7 @@ export const RateWithdraw = () => {
                             return handleSubmit(e)
                         }}
                     >
+                        {withdrawError && <GenericApiErrorBanner />}
                         <fieldset className="usa-fieldset">
                             <h2>Withdraw a rate</h2>
                             <FormGroup
@@ -139,7 +173,9 @@ export const RateWithdraw = () => {
                                     data-testid="rateWithdrawReason"
                                     aria-labelledby="rateWithdrawReason"
                                     aria-required
-                                    error={!!errors.rateWithdrawReason}
+                                    error={showFieldErrors(
+                                        errors.rateWithdrawReason
+                                    )}
                                     onChange={handleChange}
                                     defaultValue={values.rateWithdrawReason}
                                 ></Textarea>
@@ -160,13 +196,14 @@ export const RateWithdraw = () => {
                                 <ActionButton
                                     type="submit"
                                     variant="default"
-                                    disabled={Boolean(
+                                    disabled={showFieldErrors(
                                         errors.rateWithdrawReason
                                     )}
                                     data-testid="page-actions-right-primary"
                                     parent_component_type="page body"
-                                    link_url={`/submissions/${id}`}
+                                    link_url={`/rates/${id}`}
                                     animationTimeout={1000}
+                                    loading={withdrawLoading}
                                 >
                                     Withdraw rate
                                 </ActionButton>

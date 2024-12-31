@@ -2,6 +2,13 @@ mutation submitRate($input: SubmitRateInput!) {
     submitRate(input: $input) {
         rate {
             ...rateFieldsFragment
+
+            withdrawnFromContracts {
+                ...contractFieldsFragment,
+                packageSubmissions {
+                    ...packageSubmissionsFragment
+                }
+            }
             
             revisions {
                 ...rateRevisionFragment
