@@ -176,7 +176,10 @@ export const RateSummary = (): React.ReactElement => {
     const showWithdrawBanner =
         showWithdrawRate &&
         latestRateAction &&
-        rate.consolidatedStatus === 'WITHDRAWN' &&
+        rate.consolidatedStatus === 'WITHDRAWN'
+    const showWithdrawRateBtn =
+        showWithdrawRate &&
+        rate.consolidatedStatus !== 'WITHDRAWN' &&
         !parentContractIsApproved
     return (
         <div className={styles.background}>
@@ -245,23 +248,22 @@ export const RateSummary = (): React.ReactElement => {
                                     Unlock rate
                                 </UnlockRateButton>
                             )}
-                            {showWithdrawRate &&
-                                rate.consolidatedStatus !== 'WITHDRAWN' && (
-                                    <ButtonWithLogging
-                                        disabled={isUnlocked}
-                                        className="usa-button usa-button--outline"
-                                        type="button"
-                                        onClick={() =>
-                                            navigate(
-                                                `/rate-reviews/${rate.id}/withdraw-rate`
-                                            )
-                                        }
-                                        link_url={`/rate-reviews/${rate.id}/withdraw-rate`}
-                                        outline
-                                    >
-                                        Withdraw rate
-                                    </ButtonWithLogging>
-                                )}
+                            {showWithdrawRateBtn && (
+                                <ButtonWithLogging
+                                    disabled={isUnlocked}
+                                    className="usa-button usa-button--outline"
+                                    type="button"
+                                    onClick={() =>
+                                        navigate(
+                                            `/rate-reviews/${rate.id}/withdraw-rate`
+                                        )
+                                    }
+                                    link_url={`/rate-reviews/${rate.id}/withdraw-rate`}
+                                    outline
+                                >
+                                    Withdraw rate
+                                </ButtonWithLogging>
+                            )}
                         </DoubleColumnGrid>
                     </SectionCard>
                 )}
