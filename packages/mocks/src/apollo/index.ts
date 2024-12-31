@@ -18,6 +18,7 @@ export * from './rateDataMock'
 export * from './contractGQLMock'
 export * from './rateGQLMocks'
 
+export * from './withdrawRateGQLMock'
 export * from './replaceRateGQLMocks'
 export * from './mcReviewSettingsGQLMocks'
 
