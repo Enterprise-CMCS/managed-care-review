@@ -77,14 +77,17 @@ const downloadFile = async (
     const writeStream = fs.createWriteStream(filePath)
 
     try {
-        // Use pipeline for better error handling and cleanup
         await pipeline(s3Item.Body, writeStream)
     } catch (error) {
         // Clean up partial file if download fails
         if (fs.existsSync(filePath)) {
             fs.unlinkSync(filePath)
         }
-        throw error
+        const failedFileErr = new Error(
+            `Failed to download file ${key} (${filename}): ${error.message}`
+        )
+        failedFileErr.stack = error.stack
+        throw failedFileErr
     }
 
     const stats = fs.statSync(filePath)
@@ -186,8 +189,10 @@ const main: APIGatewayProxyHandler = async (event) => {
             for (const result of batchResults) {
                 totalBytes += result.size
                 if (totalBytes > MAX_TOTAL_SIZE) {
+                    const totalMB = (totalBytes / (1024 * 1024)).toFixed(2)
+                    const maxMB = (MAX_TOTAL_SIZE / (1024 * 1024)).toFixed(2)
                     throw new Error(
-                        `Total size exceeds maximum allowed size of ${MAX_TOTAL_SIZE} bytes`
+                        `Total size (${totalMB}MB) exceeds maximum allowed size of ${maxMB}MB`
                     )
                 }
                 downloadedFiles.push(result)
