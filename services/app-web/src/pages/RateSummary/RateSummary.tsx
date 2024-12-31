@@ -171,16 +171,14 @@ export const RateSummary = (): React.ReactElement => {
 
     const parentContractSubmissionID = rate.parentContractID
     const isUnlocked = rate.status === 'UNLOCKED'
+    const isWithdrawn = rate.consolidatedStatus === 'WITHDRAWN'
     const parentContractIsApproved = contract.consolidatedStatus === 'APPROVED'
     const latestRateAction = rate.reviewStatusActions?.[0]
     const showWithdrawBanner =
-        showWithdrawRate &&
-        latestRateAction &&
-        rate.consolidatedStatus === 'WITHDRAWN'
+        showWithdrawRate && latestRateAction && isWithdrawn
     const showWithdrawRateBtn =
-        showWithdrawRate &&
-        rate.consolidatedStatus !== 'WITHDRAWN' &&
-        !parentContractIsApproved
+        showWithdrawRate && !isWithdrawn && !parentContractIsApproved
+
     return (
         <div className={styles.background}>
             <GridContainer
@@ -224,7 +222,8 @@ export const RateSummary = (): React.ReactElement => {
                                     disabled={
                                         isUnlocked ||
                                         unlockLoading ||
-                                        parentContractIsApproved
+                                        parentContractIsApproved ||
+                                        isWithdrawn
                                     }
                                     onClick={handleUnlockRate}
                                 >
@@ -236,7 +235,8 @@ export const RateSummary = (): React.ReactElement => {
                                     disabled={
                                         isUnlocked ||
                                         unlockLoading ||
-                                        parentContractIsApproved
+                                        parentContractIsApproved ||
+                                        isWithdrawn
                                     }
                                     onClick={() => {
                                         navigate(
