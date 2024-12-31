@@ -187,8 +187,6 @@ describe('sendWithdrawnRateStateEmail', () => {
             throw template
         }
 
-        console.log(template.bodyHTML)
-
         expect(template.toAddresses).toEqual(
             expect.arrayContaining([
                 'parent-contract-state-contact@state.com',
