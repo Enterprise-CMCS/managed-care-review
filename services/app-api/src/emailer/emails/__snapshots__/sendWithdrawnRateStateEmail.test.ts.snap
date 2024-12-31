@@ -15,7 +15,5 @@ exports[`sendWithdrawnRateStateEmail > renders overall email for a withdrawn rat
     </li>
 </ul>
 <div>If you have any questions, please reach out to your CMS point of contact.</div>
-
-
 "
 `;
