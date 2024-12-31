@@ -168,7 +168,6 @@ function newAmplifyS3Client(bucketConfig: S3BucketConfigType): S3ClientT {
                 recordJSException(error)
                 return error
             }
-
             return await Storage.get(filename, { expires: 3600 })
         },
     }

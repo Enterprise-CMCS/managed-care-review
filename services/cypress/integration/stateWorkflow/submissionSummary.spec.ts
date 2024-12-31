@@ -19,17 +19,18 @@ describe('State user can view submissions', () => {
 
         cy.findByRole('heading', {
             level: 2,
-            name: /Rate details/
+            name: /Rate details/,
         }).should('exist')
         cy.fillOutNewRateCertification()
         cy.fillOutAdditionalActuaryContact()
         cy.findByRole('radiogroup', {
-            name: /Actuaries' communication preference/
+            name: /Actuaries' communication preference/,
         })
             .should('exist')
             .within(() => {
-                cy.findByText("OACT can communicate directly with the state's actuaries but should copy the state on all written communication and all appointments for verbal discussions.")
-                .click()
+                cy.findByText(
+                    "OACT can communicate directly with the state's actuaries but should copy the state on all written communication and all appointments for verbal discussions."
+                ).click()
             })
         cy.navigateContractRatesForm('CONTINUE')
 
@@ -63,7 +64,8 @@ describe('State user can view submissions', () => {
             cy.findByText(`${submissionName} was sent to CMS`).should('exist')
             cy.get('table')
                 .findByRole('link', { name: submissionName })
-                .should('exist').click()
+                .should('exist')
+                .click()
             cy.url({ timeout: 10_000 }).should('contain', submissionId)
             cy.findByTestId('submission-summary').should('exist')
             cy.findByRole('heading', {
@@ -73,7 +75,9 @@ describe('State user can view submissions', () => {
             cy.findByText('Rate details').should('exist')
             cy.findByText('New rate certification').should('exist')
             cy.findByText('02/29/2024 to 02/28/2025').should('exist')
-            cy.findByText('Download all contract documents').should('exist')
+            cy.findByText('Download all contract documents', {
+                timeout: 20000,
+            }).should('exist')
             cy.findByRole('table', {
                 name: 'Contract',
             }).should('exist')
@@ -90,7 +94,9 @@ describe('State user can view submissions', () => {
             }).should('exist')
 
             // Double check we do not show any missing field text. This UI is not used for submitted packages
-           cy.findByText(/You must provide this information/).should('not.exist')
+            cy.findByText(/You must provide this information/).should(
+                'not.exist'
+            )
 
             // Link back to dashboard, submission visible in default program
             cy.findByText('Go to state dashboard').should('exist').click()

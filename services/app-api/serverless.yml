@@ -230,7 +230,7 @@ functions:
           method: post
           cors: true
           authorizer: aws_iam
-    timeout: 30
+    timeout: 60
     memorySize: ${self:custom.lambdaMemory.${sls:stage}, self:custom.lambdaMemory.default}
 
   cleanup:
