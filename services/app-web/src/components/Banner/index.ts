@@ -5,5 +5,6 @@ export { GenericApiErrorBanner } from './GenericApiErrorBanner/GenericApiErrorBa
 export { QuestionResponseSubmitBanner } from './QuestionResponseSubmitBanner'
 export { UserAccountWarningBanner } from './UserAccountWarningBanner/UserAccountWarningBanner'
 export { DocumentWarningBanner } from './DocumentWarningBanner/DocumentWarningBanner'
-export { RateWithdrawnBanner } from './RateWithdrawnBanner/RateWithdrawnBanner'
+export { RateReplacedBanner } from './RateReplacedBanner/RateReplacedBanner'
+export { RateWithdrawBanner } from './RateWithdrawBanner/RateWithdrawBanner'
 export { SubmissionApprovedBanner } from './SubmissionApprovedBanner/SubmissionApprovedBanner'
