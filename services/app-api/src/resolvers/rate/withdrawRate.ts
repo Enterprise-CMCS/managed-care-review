@@ -143,7 +143,7 @@ export function withdrawRate(store: Store, emailer: Emailer): MutationResolvers[
             throw new GraphQLError(errMessage, {
                 extensions: {
                     code: 'INTERNAL_SERVER_ERROR',
-                    cause: 'DB_ERROR',
+                    cause: 'EMAIL_ERROR',
                 },
             })
         }
