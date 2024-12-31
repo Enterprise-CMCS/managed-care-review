@@ -114,5 +114,5 @@ async function submitRate(
     }
 }
 
-export { submitRate }
+export { submitRate, submitRateInsideTransaction }
 export type { SubmitRateArgsType }

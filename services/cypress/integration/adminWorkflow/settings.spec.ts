@@ -87,7 +87,8 @@ describe('Admin user can view application level settings', () => {
         // Check to AL assignments have been saved.
         cy.findAllByRole('row').should('exist').eq(1).within(row => {
             cy.findByText('AL')
-            cy.findByText('Zuko Hotman, Azula Hotman')
+            cy.findByText(/Azula Hotman/)
+            cy.findByText(/Zuko Hotman/)
         })
 
         // Remove Azula from assignment

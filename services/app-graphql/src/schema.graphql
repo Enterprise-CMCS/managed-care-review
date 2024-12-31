@@ -1770,6 +1770,9 @@ type Rate {
     "withdrawInfo is the who/when/why for this rate being withdrawn. Rates actively in use in the system will not have a withdrawInfo"
     withdrawInfo: UpdateInformation
 
+    "Contracts this withdrawn rates was the child or linked to"
+    withdrawnFromContracts: [Contract!]
+
     "The currently modifiable revision of the rate. Only present when rate has a status of DRAFT or UNLOCKED"
     draftRevision: RateRevision
 
@@ -1927,6 +1930,9 @@ type Contract {
     "reviewStatusActions are the who/when/why for review status changes on this contract"
     reviewStatusActions: [ContractReviewStatusActions!]
 
+    "Rates withdrawn from this contract submission"
+    withdrawnRates: [Rate!]
+
     """
     packageSubmissions are a snapshot of the contract and its related rates through time
     each packageSubmission was created by a submission of this contract and/or its related rates
@@ -2001,6 +2007,9 @@ type UnlockedContract {
     On submission they are cemented into a new ContractPackageSubmission
     """
     draftRates: [Rate!]!
+
+    "Rates withdrawn from this contract submission"
+    withdrawnRates: [Rate!]
 
     """
     packageSubmissions are a snapshot of the contract and its related rates through time

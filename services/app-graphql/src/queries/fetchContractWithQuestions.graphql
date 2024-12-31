@@ -19,6 +19,16 @@ query fetchContractWithQuestions($input: FetchContractInput!) {
                 }
             }
 
+            withdrawnRates {
+                ...rateFieldsFragment,
+                revisions {
+                    ...rateRevisionFragment
+                }
+                packageSubmissions {
+                    ...ratePackageSubmissionsFragment
+                }
+            }
+
             packageSubmissions {
                 ...packageSubmissionsFragment
             }

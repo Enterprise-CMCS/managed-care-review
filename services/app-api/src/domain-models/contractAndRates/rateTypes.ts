@@ -7,6 +7,7 @@ import { rateRevisionSchema } from './revisionTypes'
 import { pruneDuplicateEmails } from '../../emailer/formatters'
 
 const rateSchema = rateWithoutDraftContractsSchema.extend({
+    withdrawnFromContracts: z.array(contractWithoutDraftRatesSchema).optional(),
     draftContracts: z.array(contractWithoutDraftRatesSchema).optional(),
 })
 

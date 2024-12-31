@@ -4,6 +4,7 @@ import {
     FetchRateWithQuestionsDocument,
     UnlockRateDocument,
     UpdateDraftContractRatesDocument,
+    WithdrawRateDocument,
 } from '../gen/gqlClient'
 import { must } from './assertionHelpers'
 import { defaultFloridaRateProgram } from './gqlHelpers'
@@ -456,6 +457,35 @@ const updateTestRate = async (
     )
 }
 
+const withdrawTestRate = async (
+    server: ApolloServer,
+    rateID: string,
+    updatedReason: string
+): Promise<RateType> => {
+    const withdrawResult = await server.executeOperation({
+        query: WithdrawRateDocument,
+        variables: {
+            input: {
+                rateID,
+                updatedReason,
+            },
+        },
+    })
+
+    if (withdrawResult.errors) {
+        console.info('errors', withdrawResult.errors)
+        throw new Error(
+            `withdrawRate mutation failed with errors ${withdrawResult.errors}`
+        )
+    }
+
+    if (withdrawResult.data === undefined || withdrawResult.data === null) {
+        throw new Error('withdrawRate returned nothing')
+    }
+
+    return withdrawResult.data.withdrawRate.rate
+}
+
 export {
     createTestDraftRateOnContract,
     createSubmitAndUnlockTestRate,
@@ -472,4 +502,5 @@ export {
     updateTestRate,
     formatRateDataForSending,
     fetchTestRateWithQuestionsById,
+    withdrawTestRate,
 }
