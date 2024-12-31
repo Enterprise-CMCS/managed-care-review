@@ -10,8 +10,9 @@ import { hasCMSPermissions } from '../../domain-models'
 import { logError, logSuccess } from '../../logger'
 import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
 import { GraphQLError } from 'graphql/index'
+import { Emailer } from '../../emailer'
 
-export function withdrawRate(store: Store): MutationResolvers['withdrawRate'] {
+export function withdrawRate(store: Store, emailer: Emailer): MutationResolvers['withdrawRate'] {
     return async (_parent, { input }, context) => {
         const { user, ctx, tracer } = context
         const span = tracer?.startSpan('withdrawRate', {}, ctx)
@@ -129,6 +130,40 @@ export function withdrawRate(store: Store): MutationResolvers['withdrawRate'] {
 
         logSuccess('withdrawRate')
         setSuccessAttributesOnActiveSpan(span)
+
+        // Send out email to state contacts
+        const statePrograms = await store.findStatePrograms(
+            withdrawnRate.stateCode
+        )
+
+        if (statePrograms instanceof Error) {
+            const errMessage = `Email failed: ${statePrograms.message}`
+            logError('withdrawRate', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+            throw new GraphQLError(errMessage, {
+                extensions: {
+                    code: 'INTERNAL_SERVER_ERROR',
+                    cause: 'DB_ERROR',
+                },
+            })
+        }
+
+        const sendWithdrawEmail = await emailer.sendWithdrawnRateStateEmail(
+            withdrawnRate,
+            statePrograms
+        )
+
+        if (sendWithdrawEmail instanceof Error) {
+            const errMessage = `Email failed: ${sendWithdrawEmail.message}`
+            logError('withdrawRate', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+            throw new GraphQLError(errMessage, {
+                extensions: {
+                    code: 'INTERNAL_SERVER_ERROR',
+                    cause: 'EMAIL_ERROR',
+                },
+            })
+        }
 
         return {
             rate: withdrawnRate,
