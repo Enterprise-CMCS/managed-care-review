@@ -1,5 +1,5 @@
 import type { PrismaTransactionType } from '../prismaTypes'
-import type { RateType, UnlockedContractType } from '../../domain-models'
+import type { RateType } from '../../domain-models'
 import { findRateWithHistory } from './findRateWithHistory'
 import type { PrismaClient } from '@prisma/client'
 import { includeFullContract } from './prismaFullContractRateHelpers'
@@ -37,7 +37,7 @@ const withdrawRateInsideTransaction = async (
             draftContracts: {
                 select: {
                     contractID: true,
-                }
+                },
             },
             revisions: {
                 orderBy: {
@@ -76,10 +76,14 @@ const withdrawRateInsideTransaction = async (
 
     // Get the contractIDs of the latest submission package of each related submission
     const latestRevision = rate.revisions[0]
-    const contractIDs = [...new Set([
-        ...latestRevision.relatedSubmissions.map(sub => sub.submissionPackages[0].contractRevision.contractID),
-        ...rate.draftContracts.map(contract => contract.contractID)
-     ])];
+    const contractIDs = [
+        ...new Set([
+            ...latestRevision.relatedSubmissions.map(
+                (sub) => sub.submissionPackages[0].contractRevision.contractID
+            ),
+            ...rate.draftContracts.map((contract) => contract.contractID),
+        ]),
+    ]
 
     // get data for every contract
     const contracts = await tx.contractTable.findMany({
@@ -89,7 +93,7 @@ const withdrawRateInsideTransaction = async (
             },
         },
         include: {
-            ...includeFullContract
+            ...includeFullContract,
         },
     })
 
@@ -118,7 +122,7 @@ const withdrawRateInsideTransaction = async (
 
         let previousRates = []
 
-        // If the contract is locked, unlock it and set previousRates. 
+        // If the contract is locked, unlock it and set previousRates.
         if (['SUBMITTED', 'RESUBMITTED'].includes(consolidatedStatus)) {
             const unlockedContract = await unlockContractInsideTransaction(tx, {
                 contractID: contract.id,
@@ -152,7 +156,10 @@ const withdrawRateInsideTransaction = async (
 
             // Do not connect on withdrawn rate join table if contract has never been submitted with the rate to be withdrawn.
             if (consolidatedStatus === 'UNLOCKED' && lastRecentSubmission) {
-                const wasSubmittedWithWithdrawnRate = lastRecentSubmission.rateRevisions.find(rr => rr.rateID === rateID)
+                const wasSubmittedWithWithdrawnRate =
+                    lastRecentSubmission.rateRevisions.find(
+                        (rr) => rr.rateID === rateID
+                    )
                 // If Unlocked contract was last submitted with rate to be withdrawn, add to withdrawn rate join table
                 if (wasSubmittedWithWithdrawnRate) {
                     withdrawnFromContracts.push({ contractID: contract.id })
@@ -172,7 +179,7 @@ const withdrawRateInsideTransaction = async (
                 `withdrawnRateID ${rateID} does not map to a current rate on this contract`
             )
         }
-        
+
         // remove the rate to withdraw from previousRates. Removing it now prevents gaps in ratePosition.
         previousRates.splice(rateToWithdrawIndex, 1)
 
@@ -187,8 +194,7 @@ const withdrawRateInsideTransaction = async (
                 // keep any existing child rates and resubmit them unchanged
                 updateRates.push({
                     rateID: rate.id,
-                    formData:
-                        rate.packageSubmissions[0].rateRevision.formData,
+                    formData: rate.packageSubmissions[0].rateRevision.formData,
                     ratePosition: idx + 1,
                 })
             }
@@ -215,11 +221,10 @@ const withdrawRateInsideTransaction = async (
         }
 
         // update the contract to remove the withdrawn rate
-        const updateResult =
-            await updateDraftContractRatesInsideTransaction(
-                tx,
-                updateContractRatesArgs
-            )
+        const updateResult = await updateDraftContractRatesInsideTransaction(
+            tx,
+            updateContractRatesArgs
+        )
 
         if (updateResult instanceof Error) {
             throw updateResult
