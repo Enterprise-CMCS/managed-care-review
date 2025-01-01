@@ -55,7 +55,10 @@ export const sendWithdrawnRateStateEmail = async (
 
     // parse contract data and collect state contact emails
     for (const contract of withdrawnFromContracts) {
-        const latestContractRev = contract.packageSubmissions[0].contractRevision
+        const latestContractRev = contract.consolidatedStatus === 'UNLOCKED' ?
+            contract.draftRevision! :
+        contract.packageSubmissions[0].contractRevision
+
         const pkgPrograms = findContractPrograms(latestContractRev, statePrograms)
 
         if (pkgPrograms instanceof Error) {
