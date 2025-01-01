@@ -1,0 +1,19 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`sendWithdrawnRateStateEmail > renders overall email for a withdrawn rate as expected 1`] = `
+"<h1 style="font-weight: normal;">Rate test-rate-certification-name was withdrawn by CMS</h1>
+<b>Withdrawn by:</b> zuko@example.com<br />
+<b>Withdrawn on:</b> 04/11/2024<br />
+<b>Reason for withdrawal:</b> Test withdraw<br />
+<b>Withdrawn from:</b>
+<ul>
+    <li>
+        <a href="http://localhost/submissions/parent-contract">MCR-MN-0100-SNBC</a>
+    </li>
+    <li>
+        <a href="http://localhost/submissions/linked-contract">MCR-MN-0222-SNBC</a>
+    </li>
+</ul>
+<div>If you have any questions, please reach out to your CMS point of contact.</div>
+"
+`;
