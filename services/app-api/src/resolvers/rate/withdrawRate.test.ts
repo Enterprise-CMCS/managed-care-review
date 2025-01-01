@@ -127,6 +127,144 @@ describe('withdrawRate', () => {
         )
     })
 
+    it('can withdraw with a multiple rates in a contract', async () => {
+        const stateUser = testStateUser()
+        const cmsUser = testCMSUser()
+        const stateServer = await constructTestPostgresServer({
+            context: {
+                user: stateUser,
+            },
+        })
+
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: cmsUser,
+            },
+        })
+
+        const contract = await createAndUpdateTestContractWithRate(stateServer)
+
+        const rate = contract.draftRates?.[0]!
+        const testFormData = {
+                rateType: 'AMENDMENT',
+                rateCapitationType: 'RATE_CELL',
+                rateDateStart: '2024-01-01',
+                rateDateEnd: '2025-01-01',
+                rateDateCertified: '2024-01-01',
+                amendmentEffectiveDateStart: '2024-02-01',
+                amendmentEffectiveDateEnd: '2025-02-01',
+                rateProgramIDs: [defaultFloridaProgram().id],
+                deprecatedRateProgramIDs: [],
+                rateDocuments: [
+                    {
+                        s3URL: 's3://bucketname/key/test1',
+                        name: 'updatedratedoc1.doc',
+                        sha256: 'foobar',
+                    },
+                ],
+                supportingDocuments: [],
+                certifyingActuaryContacts: [
+                    {
+                        name: 'Foo Person',
+                        titleRole: 'Bar Job',
+                        email: 'foo@example.com',
+                        actuarialFirm: 'GUIDEHOUSE',
+                    },
+                ],
+                addtlActuaryContacts: [],
+                actuaryCommunicationPreference:
+                    'OACT_TO_ACTUARY',
+        }
+
+        await stateServer.executeOperation({
+            query: UpdateDraftContractRatesDocument,
+            variables: {
+                input: {
+                    contractID: contract.id,
+                    lastSeenUpdatedAt: contract.draftRevision?.updatedAt,
+                    updatedRates: [
+                        {
+                            type: 'UPDATE',
+                            rateID: rate.id,
+                            formData: {
+                                ...testFormData
+                            }
+                        },
+                        {
+                            type: 'CREATE',
+                            formData: {
+                                ...testFormData,
+                            },
+                        },
+                    ],
+                },
+            },
+        })
+    
+        const submittedContract = await submitTestContract(stateServer, contract.id)
+
+        // expect two submitted rates
+        expect(submittedContract.packageSubmissions[0].rateRevisions).toHaveLength(2)
+        const rateAID = submittedContract.packageSubmissions[0].rateRevisions[0].rateID
+        const rateBID = submittedContract.packageSubmissions[0].rateRevisions[1].rateID
+
+
+        // withdraw the first rate
+        const withdrawnRate = await withdrawTestRate(
+            cmsServer,
+            rateAID,
+            'Withdraw invalid rate'
+        )
+
+        // expect rate to contain contract in withdrawn join table
+        expect(withdrawnRate.withdrawnFromContracts).toHaveLength(1)
+        expect(withdrawnRate.withdrawnFromContracts).toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({
+                    id: contract.id,
+                }),
+            ])
+        )
+
+        const contractWithWithdrawnRate = await fetchTestContractWithQuestions(stateServer, contract.id)
+
+        expect(contractWithWithdrawnRate.withdrawnRates).toBeDefined()
+
+        // expect contract to be RESUBMITTED
+        expect(contractWithWithdrawnRate.consolidatedStatus).toEqual(
+            'RESUBMITTED'
+        )
+
+        // expect contract to contain the withdrawn rate
+        expect(contractWithWithdrawnRate?.withdrawnRates).toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({
+                    id: rateAID,
+                }),
+            ])
+        )
+
+        const packageSubmissions = contractWithWithdrawnRate.packageSubmissions
+
+        // expect withdrawn rate is no longer in latest package submission
+        expect(packageSubmissions[0].rateRevisions).not.toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({
+                    rateID: rateAID,
+                }),
+            ])
+        )
+
+        // expect rateB to be in the latest submission
+        expect(packageSubmissions[0].rateRevisions).toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({
+                    rateID: rateBID,
+                }),
+            ])
+        )
+    })
+
     it('can still unlock and resubmit after a rate has been withdrawn with expected packageSubmissions', async () => {
         const stateUser = testStateUser()
         const cmsUser = testCMSUser()
@@ -211,7 +349,7 @@ describe('withdrawRate', () => {
         )
     })
 
-    it('withdraws rate when linked to other contracts', async () => {
+    it('withdraws rate when linked to other multi-rate contracts', async () => {
         const stateUser = testStateUser()
         const cmsUser = testCMSUser()
         const stateServer = await constructTestPostgresServer({
@@ -225,6 +363,37 @@ describe('withdrawRate', () => {
                 user: cmsUser,
             },
         })
+
+        const testFormData = {
+            rateType: 'AMENDMENT',
+            rateCapitationType: 'RATE_CELL',
+            rateDateStart: '2024-01-01',
+            rateDateEnd: '2025-01-01',
+            rateDateCertified: '2024-01-01',
+            amendmentEffectiveDateStart: '2024-02-01',
+            amendmentEffectiveDateEnd: '2025-02-01',
+            rateProgramIDs: [defaultFloridaProgram().id],
+            deprecatedRateProgramIDs: [],
+            rateDocuments: [
+                {
+                    s3URL: 's3://bucketname/key/test1',
+                    name: 'updatedratedoc1.doc',
+                    sha256: 'foobar',
+                },
+            ],
+            supportingDocuments: [],
+            certifyingActuaryContacts: [
+                {
+                    name: 'Foo Person',
+                    titleRole: 'Bar Job',
+                    email: 'foo@example.com',
+                    actuarialFirm: 'GUIDEHOUSE',
+                },
+            ],
+            addtlActuaryContacts: [],
+            actuaryCommunicationPreference:
+                'OACT_TO_ACTUARY',
+        }
 
         const contractA = await createAndSubmitTestContractWithRate(stateServer)
         const rateID = contractA.packageSubmissions[0].rateRevisions[0].rateID
@@ -244,6 +413,12 @@ describe('withdrawRate', () => {
                             type: 'LINK',
                             rateID: rateID,
                         },
+                        {
+                            type: 'CREATE',
+                            formData: {
+                                ...testFormData
+                            }
+                        }
                     ],
                 },
             },
@@ -326,7 +501,7 @@ describe('withdrawRate', () => {
                 }),
             ])
         )
-    })
+    }, 10000)
 
     it('does not update draft contract linked to withdrawn rate', async () => {
         const stateUser = testStateUser()
@@ -496,7 +671,7 @@ describe('withdrawRate', () => {
                 }),
             ])
         )
-    })
+    }, 10000)
     it('sends an email to state contacts when a rate is withdrawn', async () => {
         const emailConfig = testEmailConfig()
         const mockEmailer = testEmailer(emailConfig)

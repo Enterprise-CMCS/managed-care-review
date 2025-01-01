@@ -110,7 +110,7 @@ const withdrawRateInsideTransaction = async (
             })
 
             if (unlockedContract instanceof Error) {
-                return unlockedContract
+                throw unlockedContract
             }
 
             const previousRates = unlockedContract.draftRates
@@ -124,17 +124,16 @@ const withdrawRateInsideTransaction = async (
                     `withdrawnRateID ${rateID} does not map to a current rate on this contract`
                 )
             }
+            
+            // remove the rate to withdraw from previousRates
+            previousRates.splice(rateToWithdrawIndex, 1)
 
             const updateRates: UpdateDraftContractRatesArgsType['rateUpdates']['update'] =
                 []
             const linkRates: UpdateDraftContractRatesArgsType['rateUpdates']['link'] =
                 []
 
-            // prepare rate data for updating
             previousRates.forEach((rate, idx) => {
-                if (rate.id === rateID) {
-                    return // we already know this is swapped, we will swap in replacement later, skip for now
-                }
                 // keep any existing linked rates besides replacement or withdrawn rate
                 if (rate.parentContractID !== contract.id) {
                     linkRates.push({
@@ -162,12 +161,7 @@ const withdrawRateInsideTransaction = async (
                         ...updateRates,
                     ],
                     delete: [],
-                    unlink: [
-                        // unlink the withdrawn child rate
-                        {
-                            rateID: rateID,
-                        },
-                    ],
+                    unlink: [],
                     link: [
                         // keep any other already added linked rates
                         ...linkRates.sort(
@@ -185,7 +179,7 @@ const withdrawRateInsideTransaction = async (
                 )
 
             if (updateResult instanceof Error) {
-                return updateResult
+                throw updateResult
             }
 
             // resubmit contract
@@ -199,7 +193,7 @@ const withdrawRateInsideTransaction = async (
                 resubmitContractArgs
             )
             if (resubmitResult instanceof Error) {
-                return resubmitResult
+                throw resubmitResult
             }
 
             withdrawnFromContracts.push({ contractID: contract.id })
