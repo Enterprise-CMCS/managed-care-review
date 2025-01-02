@@ -7,7 +7,6 @@ import {
     getConsolidatedContractStatus,
     getContractRateStatus,
     getContractReviewStatus,
-    includeContractFormData,
 } from './prismaSharedContractRateHelpers'
 import { unlockContractInsideTransaction } from './unlockContract'
 import { NotFoundError, UserInputPostgresError } from '../postgresErrors'
@@ -16,6 +15,7 @@ import { updateDraftContractRatesInsideTransaction } from './updateDraftContract
 import type { SubmitContractArgsType } from './submitContract'
 import { submitContractInsideTransaction } from './submitContract'
 import { submitRateInsideTransaction } from './submitRate'
+import { parseContractWithHistory } from './parseContractWithHistory'
 
 type WithdrawRateArgsType = {
     rateID: string
@@ -34,6 +34,11 @@ const withdrawRateInsideTransaction = async (
             id: rateID,
         },
         include: {
+            draftContracts: {
+                select: {
+                    contractID: true,
+                },
+            },
             revisions: {
                 orderBy: {
                     createdAt: 'desc',
@@ -47,11 +52,14 @@ const withdrawRateInsideTransaction = async (
                             submissionPackages: {
                                 include: {
                                     contractRevision: {
-                                        include: includeContractFormData,
+                                        select: {
+                                            id: true,
+                                            contractID: true,
+                                        },
                                     },
                                 },
                                 orderBy: {
-                                    ratePosition: 'desc',
+                                    ratePosition: 'asc',
                                 },
                             },
                         },
@@ -68,9 +76,14 @@ const withdrawRateInsideTransaction = async (
 
     // Get the contractIDs of the latest submission package of each related submission
     const latestRevision = rate.revisions[0]
-    const contractIDs = latestRevision.relatedSubmissions.map(
-        (sub) => sub.submissionPackages[0].contractRevision.contractID
-    )
+    const contractIDs = [
+        ...new Set([
+            ...latestRevision.relatedSubmissions.map(
+                (sub) => sub.submissionPackages[0].contractRevision.contractID
+            ),
+            ...rate.draftContracts.map((contract) => contract.contractID),
+        ]),
+    ]
 
     // get data for every contract
     const contracts = await tx.contractTable.findMany({
@@ -79,7 +92,9 @@ const withdrawRateInsideTransaction = async (
                 in: contractIDs,
             },
         },
-        include: includeFullContract,
+        include: {
+            ...includeFullContract,
+        },
     })
 
     // collect contractIDs we remove the rate from to make the new connection on the withdrawn rate table
@@ -87,22 +102,28 @@ const withdrawRateInsideTransaction = async (
 
     // Remove rate from each contract
     for (const contract of contracts) {
+        // Used to track original status of the contract
         const consolidatedStatus = getConsolidatedContractStatus(
             getContractRateStatus(contract.revisions),
             getContractReviewStatus(contract)
         )
 
-        // Any approved contracts returns an error to client
+        // Throw error if any contract is approved
         if (consolidatedStatus === 'APPROVED') {
-            return new Error(
+            throw new Error(
                 `Rate is a child or linked to an APPROVED contract with ID: ${contract.id}`
             )
         }
 
-        // Draft and unlocked contracts are ignored, since other API will prevent them from resubmitting a withdrawn rate, breaking the link.
-        if (['SUBMITTED', 'RESUBMITTED'].includes(consolidatedStatus)) {
-            //contractsToUnlock.push(contract)
+        const updateRates: UpdateDraftContractRatesArgsType['rateUpdates']['update'] =
+            []
+        const linkRates: UpdateDraftContractRatesArgsType['rateUpdates']['link'] =
+            []
 
+        let previousRates = []
+
+        // If the contract is locked, unlock it and set previousRates.
+        if (['SUBMITTED', 'RESUBMITTED'].includes(consolidatedStatus)) {
             const unlockedContract = await unlockContractInsideTransaction(tx, {
                 contractID: contract.id,
                 unlockedByUserID: updatedByID,
@@ -113,76 +134,104 @@ const withdrawRateInsideTransaction = async (
                 throw unlockedContract
             }
 
-            const previousRates = unlockedContract.draftRates
-            const rateToWithdrawIndex = previousRates
-                .map((rate) => rate.id)
-                .indexOf(rateID)
+            previousRates = unlockedContract.draftRates
 
-            // Validate that the rate to withdraw is on the now unlocked contract
-            if (rateToWithdrawIndex === -1) {
-                return new UserInputPostgresError(
-                    `withdrawnRateID ${rateID} does not map to a current rate on this contract`
+            // Add contract to connect on withdrawn rate join table
+            withdrawnFromContracts.push({ contractID: contract.id })
+        } else {
+            // parse the contract to get the draft rates in domain type
+            const parsedContract = parseContractWithHistory(contract)
+
+            if (parsedContract instanceof Error) {
+                throw parsedContract
+            }
+
+            if (!parsedContract.draftRates) {
+                throw new Error(
+                    `Contract ${contract.id} is missing draft rates`
                 )
             }
-            
-            // remove the rate to withdraw from previousRates
-            previousRates.splice(rateToWithdrawIndex, 1)
 
-            const updateRates: UpdateDraftContractRatesArgsType['rateUpdates']['update'] =
-                []
-            const linkRates: UpdateDraftContractRatesArgsType['rateUpdates']['link'] =
-                []
+            const lastRecentSubmission = parsedContract.packageSubmissions[0]
 
-            previousRates.forEach((rate, idx) => {
-                // keep any existing linked rates besides replacement or withdrawn rate
-                if (rate.parentContractID !== contract.id) {
-                    linkRates.push({
-                        rateID: rate.id,
-                        ratePosition: idx + 1,
-                    })
-                } else {
-                    // keep any existing child rates and resubmit them unchanged
-                    updateRates.push({
-                        rateID: rate.id,
-                        formData:
-                            rate.packageSubmissions[0].rateRevision.formData,
-                        ratePosition: idx + 1,
-                    })
+            // Do not connect on withdrawn rate join table if contract has never been submitted with the rate to be withdrawn.
+            if (consolidatedStatus === 'UNLOCKED' && lastRecentSubmission) {
+                const wasSubmittedWithWithdrawnRate =
+                    lastRecentSubmission.rateRevisions.find(
+                        (rr) => rr.rateID === rateID
+                    )
+                // If Unlocked contract was last submitted with rate to be withdrawn, add to withdrawn rate join table
+                if (wasSubmittedWithWithdrawnRate) {
+                    withdrawnFromContracts.push({ contractID: contract.id })
                 }
-            })
-
-            // arrange rate data for update draft contract rates
-            const updateContractRatesArgs: UpdateDraftContractRatesArgsType = {
-                contractID: contract.id,
-                rateUpdates: {
-                    create: [],
-                    update: [
-                        //  keep any already added child rates
-                        ...updateRates,
-                    ],
-                    delete: [],
-                    unlink: [],
-                    link: [
-                        // keep any other already added linked rates
-                        ...linkRates.sort(
-                            (a, b) => a.ratePosition - b.ratePosition
-                        ),
-                    ],
-                },
             }
 
-            // update the contract to remove the withdrawn rate
-            const updateResult =
-                await updateDraftContractRatesInsideTransaction(
-                    tx,
-                    updateContractRatesArgs
-                )
+            previousRates = parsedContract.draftRates
+        }
 
-            if (updateResult instanceof Error) {
-                throw updateResult
+        const rateToWithdrawIndex = previousRates
+            .map((rate) => rate.id)
+            .indexOf(rateID)
+
+        // Validate that the rate to withdraw is on the now unlocked contract
+        if (rateToWithdrawIndex === -1) {
+            throw new UserInputPostgresError(
+                `withdrawnRateID ${rateID} does not map to a current rate on this contract`
+            )
+        }
+
+        // remove the rate to withdraw from previousRates. Removing it now prevents gaps in ratePosition.
+        previousRates.splice(rateToWithdrawIndex, 1)
+
+        previousRates.forEach((rate, idx) => {
+            // keep any existing linked rates besides withdrawn rate
+            if (rate.parentContractID !== contract.id) {
+                linkRates.push({
+                    rateID: rate.id,
+                    ratePosition: idx + 1,
+                })
+            } else {
+                // keep any existing child rates and resubmit them unchanged
+                updateRates.push({
+                    rateID: rate.id,
+                    formData: rate.packageSubmissions[0].rateRevision.formData,
+                    ratePosition: idx + 1,
+                })
             }
+        })
 
-            // resubmit contract
+        // arrange rate data for update draft contract rates
+        const updateContractRatesArgs: UpdateDraftContractRatesArgsType = {
+            contractID: contract.id,
+            rateUpdates: {
+                create: [],
+                update: [
+                    //  keep any already added child rates
+                    ...updateRates,
+                ],
+                delete: [],
+                unlink: [],
+                link: [
+                    // keep any other already added linked rates
+                    ...linkRates.sort(
+                        (a, b) => a.ratePosition - b.ratePosition
+                    ),
+                ],
+            },
+        }
+
+        // update the contract to remove the withdrawn rate
+        const updateResult = await updateDraftContractRatesInsideTransaction(
+            tx,
+            updateContractRatesArgs
+        )
+
+        if (updateResult instanceof Error) {
+            throw updateResult
+        }
+
+        // Resubmit contract if it was unlocked in this loop
+        if (['SUBMITTED', 'RESUBMITTED'].includes(consolidatedStatus)) {
             const resubmitContractArgs: SubmitContractArgsType = {
                 contractID: contract.id,
                 submittedByUserID: updatedByID,
@@ -195,8 +244,6 @@ const withdrawRateInsideTransaction = async (
             if (resubmitResult instanceof Error) {
                 throw resubmitResult
             }
-
-            withdrawnFromContracts.push({ contractID: contract.id })
         }
     }
 
@@ -209,30 +256,25 @@ const withdrawRateInsideTransaction = async (
     })
 
     // Add review status action to rate and create new joins on withdrawn rate join table
-    try {
-        await tx.rateTable.update({
-            where: {
-                id: rateID,
-            },
-            data: {
-                reviewStatusActions: {
-                    create: {
-                        updatedByID,
-                        updatedReason,
-                        actionType: 'WITHDRAW',
-                    },
-                },
-                withdrawnFromContracts: {
-                    create: withdrawnFromContracts,
+    await tx.rateTable.update({
+        where: {
+            id: rateID,
+        },
+        data: {
+            reviewStatusActions: {
+                create: {
+                    updatedByID,
+                    updatedReason,
+                    actionType: 'WITHDRAW',
                 },
             },
-        })
+            withdrawnFromContracts: {
+                create: withdrawnFromContracts,
+            },
+        },
+    })
 
-        return findRateWithHistory(tx, rateID)
-    } catch (err) {
-        console.error('PRISMA ERROR: Error withdrawing rate', err)
-        return new Error(err)
-    }
+    return findRateWithHistory(tx, rateID)
 }
 
 const withdrawRate = async (
@@ -245,6 +287,7 @@ const withdrawRate = async (
             if (withdrawResult instanceof Error) {
                 return withdrawResult
             }
+
             return withdrawResult
         })
     } catch (err) {
