@@ -256,30 +256,25 @@ const withdrawRateInsideTransaction = async (
     })
 
     // Add review status action to rate and create new joins on withdrawn rate join table
-    try {
-        await tx.rateTable.update({
-            where: {
-                id: rateID,
-            },
-            data: {
-                reviewStatusActions: {
-                    create: {
-                        updatedByID,
-                        updatedReason,
-                        actionType: 'WITHDRAW',
-                    },
-                },
-                withdrawnFromContracts: {
-                    create: withdrawnFromContracts,
+    await tx.rateTable.update({
+        where: {
+            id: rateID,
+        },
+        data: {
+            reviewStatusActions: {
+                create: {
+                    updatedByID,
+                    updatedReason,
+                    actionType: 'WITHDRAW',
                 },
             },
-        })
+            withdrawnFromContracts: {
+                create: withdrawnFromContracts,
+            },
+        },
+    })
 
-        return findRateWithHistory(tx, rateID)
-    } catch (err) {
-        console.error('PRISMA ERROR: Error withdrawing rate', err)
-        return new Error(err)
-    }
+    return findRateWithHistory(tx, rateID)
 }
 
 const withdrawRate = async (
