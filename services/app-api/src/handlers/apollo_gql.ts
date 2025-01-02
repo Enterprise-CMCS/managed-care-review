@@ -150,38 +150,6 @@ function localAuthMiddleware(wrapped: APIGatewayProxyHandler): Handler {
     }
 }
 
-function ipRestrictionMiddleware(
-    allowedIps: string
-): (wrappedArg: Handler) => Handler {
-    return function (wrapped: Handler): Handler {
-        return async function (event, context, completion) {
-            const ipAddress = event.requestContext.identity.sourceIp
-            const fromThirdPartyAuthorizer = event.requestContext.path.includes(
-                '/v1/graphql/external'
-            )
-
-            if (fromThirdPartyAuthorizer) {
-                const isValidIpAddress =
-                    allowedIps.includes(ipAddress) ||
-                    allowedIps.includes('ALLOW_ALL')
-
-                if (!isValidIpAddress) {
-                    return Promise.resolve({
-                        statusCode: 403,
-                        body: `{ "error": IP Address ${ipAddress} is not in the allowed list }\n`,
-                        headers: {
-                            'Access-Control-Allow-Origin': '*',
-                            'Access-Control-Allow-Credentials': true,
-                        },
-                    })
-                }
-            }
-
-            return await wrapped(event, context, completion)
-        }
-    }
-}
-
 // This asynchronous function is started on the cold-load of this script
 // and is awaited by our handler function
 // Pattern is explained here https://serverlessfirst.com/function-initialisation/
@@ -200,7 +168,6 @@ async function initializeGQLHandler(): Promise<Handler> {
     const otelCollectorUrl = process.env.API_APP_OTEL_COLLECTOR_URL
     const parameterStoreMode = process.env.PARAMETER_STORE_MODE
     const ldSDKKey = process.env.LD_SDK_KEY
-    const allowedIpAddresses = process.env.ALLOWED_IP_ADDRESSES
     const jwtSecret = process.env.JWT_SECRET
     const s3DocumentsBucket = process.env.VITE_APP_S3_DOCUMENTS_BUCKET
     const s3QABucket = process.env.VITE_APP_S3_QA_BUCKET
@@ -217,9 +184,6 @@ async function initializeGQLHandler(): Promise<Handler> {
 
     if (stageName === undefined)
         throw new Error('Configuration Error: stage is required')
-
-    if (allowedIpAddresses === undefined)
-        throw new Error('Configuration Error: allowed IP addresses is required')
 
     if (!dbURL) {
         throw new Error('Init Error: DATABASE_URL is required to run app-api')
@@ -454,11 +418,9 @@ async function initializeGQLHandler(): Promise<Handler> {
         },
     })
 
-    const combinedHandler = ipRestrictionMiddleware(allowedIpAddresses)(handler)
-
     // Locally, we wrap our handler in a middleware that returns 403 for unauthenticated requests
     const isLocal = authMode === 'LOCAL'
-    return isLocal ? localAuthMiddleware(combinedHandler) : combinedHandler
+    return isLocal ? localAuthMiddleware(handler) : handler
 }
 
 const handlerPromise = initializeGQLHandler()
