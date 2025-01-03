@@ -58,17 +58,21 @@ export const LinkRateSelect = ({
     const [_field, _meta, helpers] = useField({ name }) // useField only relevant for non-autofill implementations
 
     const rates = data?.indexRates.edges.map((e) => e.node) || []
-
     // Sort rates by latest submission in desc order and remove withdrawn
-    rates
+    // Do not display withdrawn rates as an option of a linked rate to select
+    const updatedRates = rates
         .sort(
             (a, b) =>
                 new Date(b.revisions[0].submitInfo?.updatedAt).getTime() -
                 new Date(a.revisions[0].submitInfo?.updatedAt).getTime()
         )
-        .filter((rate) => rate.withdrawInfo === undefined)
+        .filter(
+            (rate) =>
+                rate.withdrawInfo === undefined ||
+                rate.consolidatedStatus !== 'WITHDRAWN'
+        )
 
-    const rateNames: LinkRateOptionType[] = rates.map((rate) => {
+    const rateNames: LinkRateOptionType[] = updatedRates.map((rate) => {
         const revision = rate.revisions[0]
         const rateProgramIDs =
             revision.formData.rateProgramIDs.length > 0

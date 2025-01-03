@@ -200,11 +200,12 @@ export function submitContract(
         }
         // add all rates (including any linked rates) back in
         parsedContract.draftRates = contractWithHistory.draftRates
+        const parsedSubmissionType = parsedContract.draftRevision?.formData.submissionType
 
         // If this contract is being submitted as CONTRACT_ONLY but still has associations with rates
         // we need to prune those rates at submission time to make the submission clean
         if (
-            parsedContract.draftRevision?.formData.submissionType ===
+            parsedSubmissionType ===
                 'CONTRACT_ONLY' &&
             parsedContract.draftRates &&
             parsedContract.draftRates.length > 0

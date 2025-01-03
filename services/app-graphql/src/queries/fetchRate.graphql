@@ -11,6 +11,13 @@ query fetchRate($input: FetchRateInput!) {
                 ...rateRevisionFragment
             }
 
+            withdrawnFromContracts {
+                ...contractFieldsFragment,
+                packageSubmissions {
+                    ...packageSubmissionsFragment
+                }
+            }
+
             packageSubmissions {
                 ...ratePackageSubmissionsFragment
             }

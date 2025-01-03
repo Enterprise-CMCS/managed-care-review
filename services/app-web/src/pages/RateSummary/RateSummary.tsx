@@ -21,7 +21,7 @@ import { SingleRateSummarySection } from '../../components/SubmissionSummarySect
 import { useAuth } from '../../contexts/AuthContext'
 import { ErrorForbiddenPage } from '../Errors/ErrorForbiddenPage'
 import { Error404 } from '../Errors/Error404Page'
-import { RateWithdrawnBanner } from '../../components/Banner'
+import { RateReplacedBanner, RateWithdrawBanner } from '../../components/Banner'
 import { hasCMSUserPermissions } from '@mc-review/helpers'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '@mc-review/common-code'
@@ -171,7 +171,13 @@ export const RateSummary = (): React.ReactElement => {
 
     const parentContractSubmissionID = rate.parentContractID
     const isUnlocked = rate.status === 'UNLOCKED'
+    const isWithdrawn = rate.consolidatedStatus === 'WITHDRAWN'
     const parentContractIsApproved = contract.consolidatedStatus === 'APPROVED'
+    const latestRateAction = rate.reviewStatusActions?.[0]
+    const showWithdrawBanner =
+        showWithdrawRate && latestRateAction && isWithdrawn
+    const showWithdrawRateBtn =
+        showWithdrawRate && !isWithdrawn && !parentContractIsApproved
 
     return (
         <div className={styles.background}>
@@ -180,9 +186,16 @@ export const RateSummary = (): React.ReactElement => {
                 className={styles.container}
             >
                 {withdrawInfo && (
-                    <RateWithdrawnBanner
+                    <RateReplacedBanner
                         withdrawInfo={withdrawInfo}
                         className={styles.banner}
+                    />
+                )}
+                {showWithdrawBanner && (
+                    <RateWithdrawBanner
+                        updatedAt={latestRateAction.updatedAt}
+                        updatedBy={latestRateAction.updatedBy}
+                        reasonForWithdraw={latestRateAction.updatedReason}
                     />
                 )}
                 {isStateUser && (
@@ -209,7 +222,8 @@ export const RateSummary = (): React.ReactElement => {
                                     disabled={
                                         isUnlocked ||
                                         unlockLoading ||
-                                        parentContractIsApproved
+                                        parentContractIsApproved ||
+                                        isWithdrawn
                                     }
                                     onClick={handleUnlockRate}
                                 >
@@ -221,7 +235,8 @@ export const RateSummary = (): React.ReactElement => {
                                     disabled={
                                         isUnlocked ||
                                         unlockLoading ||
-                                        parentContractIsApproved
+                                        parentContractIsApproved ||
+                                        isWithdrawn
                                     }
                                     onClick={() => {
                                         navigate(
@@ -233,13 +248,17 @@ export const RateSummary = (): React.ReactElement => {
                                     Unlock rate
                                 </UnlockRateButton>
                             )}
-                            {showWithdrawRate && (
+                            {showWithdrawRateBtn && (
                                 <ButtonWithLogging
                                     disabled={isUnlocked}
                                     className="usa-button usa-button--outline"
                                     type="button"
-                                    onClick={() => navigate('./')}
-                                    link_url={'./'}
+                                    onClick={() =>
+                                        navigate(
+                                            `/rate-reviews/${rate.id}/withdraw-rate`
+                                        )
+                                    }
+                                    link_url={`/rate-reviews/${rate.id}/withdraw-rate`}
                                     outline
                                 >
                                     Withdraw rate

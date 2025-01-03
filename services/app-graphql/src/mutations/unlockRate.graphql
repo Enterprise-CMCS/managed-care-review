@@ -7,6 +7,13 @@ mutation unlockRate($input: UnlockRateInput!) {
                 ...rateRevisionFragment
             }
 
+            withdrawnFromContracts {
+                ...contractFieldsFragment,
+                packageSubmissions {
+                    ...packageSubmissionsFragment
+                }
+            }
+
             revisions {
                 ...rateRevisionFragment
             }

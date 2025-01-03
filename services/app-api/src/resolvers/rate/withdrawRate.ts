@@ -10,8 +10,9 @@ import { hasCMSPermissions } from '../../domain-models'
 import { logError, logSuccess } from '../../logger'
 import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
 import { GraphQLError } from 'graphql/index'
+import { Emailer } from '../../emailer'
 
-export function withdrawRate(store: Store): MutationResolvers['withdrawRate'] {
+export function withdrawRate(store: Store, emailer: Emailer): MutationResolvers['withdrawRate'] {
     return async (_parent, { input }, context) => {
         const { user, ctx, tracer } = context
         const span = tracer?.startSpan('withdrawRate', {}, ctx)
@@ -51,12 +52,46 @@ export function withdrawRate(store: Store): MutationResolvers['withdrawRate'] {
             })
         }
 
-        const allowedStatus = ['SUBMITTED', 'RESUBMITTED'].includes(
+        const parentContractID = rateWithHistory.parentContractID
+
+        const parentContract =
+            await store.findContractWithHistory(parentContractID)
+
+        if (parentContract instanceof Error) {
+            const errMessage = `Issue finding contract message: ${parentContract.message}`
+            logError('withdrawRate', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+
+            if (parentContract instanceof NotFoundError) {
+                throw new GraphQLError(errMessage, {
+                    extensions: {
+                        code: 'NOT_FOUND',
+                        cause: 'DB_ERROR',
+                    },
+                })
+            }
+
+            throw new GraphQLError(errMessage, {
+                extensions: {
+                    code: 'INTERNAL_SERVER_ERROR',
+                    cause: 'DB_ERROR',
+                },
+            })
+        }
+
+        const allowedRateStatus = ['SUBMITTED', 'RESUBMITTED'].includes(
             rateWithHistory.consolidatedStatus
         )
 
-        if (!allowedStatus) {
-            const errMessage = `Attempted to withdraw rate with wrong status: ${rateWithHistory.consolidatedStatus}`
+        // Parent contract should also not be unlocked. Currently, there is no way to get into the state where rate is in
+        // a valid status, but parent contract is invalid status.
+        const allowedParentContractStatus = [
+            'SUBMITTED',
+            'RESUBMITTED',
+        ].includes(parentContract.consolidatedStatus)
+
+        if (!allowedRateStatus || !allowedParentContractStatus) {
+            const errMessage = `Attempted to withdraw rate with wrong status. Rate: ${rateWithHistory.consolidatedStatus}, Parent contract: ${parentContract.consolidatedStatus}`
             logError('withdrawRate', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new UserInputError(errMessage, {
@@ -95,6 +130,40 @@ export function withdrawRate(store: Store): MutationResolvers['withdrawRate'] {
 
         logSuccess('withdrawRate')
         setSuccessAttributesOnActiveSpan(span)
+
+        // Send out email to state contacts
+        const statePrograms = await store.findStatePrograms(
+            withdrawnRate.stateCode
+        )
+
+        if (statePrograms instanceof Error) {
+            const errMessage = `Email failed: ${statePrograms.message}`
+            logError('withdrawRate', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+            throw new GraphQLError(errMessage, {
+                extensions: {
+                    code: 'INTERNAL_SERVER_ERROR',
+                    cause: 'EMAIL_ERROR',
+                },
+            })
+        }
+
+        const sendWithdrawEmail = await emailer.sendWithdrawnRateStateEmail(
+            withdrawnRate,
+            statePrograms
+        )
+
+        if (sendWithdrawEmail instanceof Error) {
+            const errMessage = `Email failed: ${sendWithdrawEmail.message}`
+            logError('withdrawRate', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+            throw new GraphQLError(errMessage, {
+                extensions: {
+                    code: 'INTERNAL_SERVER_ERROR',
+                    cause: 'EMAIL_ERROR',
+                },
+            })
+        }
 
         return {
             rate: withdrawnRate,

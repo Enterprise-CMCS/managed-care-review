@@ -12,6 +12,7 @@ import {
 } from './formDataTypes'
 
 const contractSchema = contractWithoutDraftRatesSchema.extend({
+    withdrawnRates: z.array(rateWithoutDraftContractsSchema).optional(),
     draftRates: z.array(rateWithoutDraftContractsSchema).optional(),
 })
 

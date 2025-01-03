@@ -5,11 +5,22 @@ import {
     HeadObjectCommand,
 } from '@aws-sdk/client-s3'
 import { Upload } from '@aws-sdk/lib-storage'
-import { Readable, Writable, PassThrough } from 'stream'
+import { Readable } from 'stream'
 import type { APIGatewayProxyHandler } from 'aws-lambda'
 import Archiver from 'archiver'
+import * as fs from 'fs'
+import * as path from 'path'
+import { pipeline } from 'stream/promises'
 
 const s3 = new S3Client({ region: 'us-east-1' })
+
+// Configuration constants
+const BATCH_SIZE = 20 // Increased batch size for parallel downloads
+const BASE_TIMEOUT = 120000
+const TIMEOUT_PER_MB = 1000
+const MAX_TOTAL_SIZE = 500 * 1024 * 1024 // 500MB limit
+const MEMORY_LOG_INTERVAL = 5000
+const TEMP_DIR = '/tmp/downloads' // Lambda temp directory
 
 interface S3BulkDownloadRequest {
     bucket: string
@@ -17,245 +28,270 @@ interface S3BulkDownloadRequest {
     zipFileName: string
 }
 
+// Helper function to ensure temp directory exists
+const ensureTempDir = () => {
+    if (!fs.existsSync(TEMP_DIR)) {
+        fs.mkdirSync(TEMP_DIR, { recursive: true })
+    }
+}
+
+// Helper function to clean up temp directory
+const cleanupTempDir = () => {
+    if (fs.existsSync(TEMP_DIR)) {
+        fs.rmSync(TEMP_DIR, { recursive: true, force: true })
+    }
+}
+
+interface DownloadedFile {
+    path: string
+    size: number
+    originalFilename: string
+}
+
+// Helper function to download a single file
+const downloadFile = async (
+    bucket: string,
+    key: string,
+    timeout: number
+): Promise<DownloadedFile> => {
+    const params = { Bucket: bucket, Key: key }
+
+    // Get metadata first to check content-disposition
+    const headCommand = new HeadObjectCommand(params)
+    const metadata = await s3.send(headCommand)
+    const filename = parseContentDisposition(metadata.ContentDisposition ?? key)
+
+    // Now get the actual file
+    const getCommand = new GetObjectCommand(params)
+    const s3Item = await s3.send(getCommand)
+
+    if (!s3Item.Body || !(s3Item.Body instanceof Readable)) {
+        throw new Error(`Invalid stream for ${key}`)
+    }
+
+    // Use a UUID for the temp file path to avoid collisions
+    const tempName = `${Date.now()}-${Math.random().toString(36).substring(7)}`
+    const filePath = path.join(TEMP_DIR, tempName)
+
+    // Create write stream with proper encoding
+    const writeStream = fs.createWriteStream(filePath)
+
+    try {
+        await pipeline(s3Item.Body, writeStream)
+    } catch (error) {
+        // Clean up partial file if download fails
+        if (fs.existsSync(filePath)) {
+            fs.unlinkSync(filePath)
+        }
+        const failedFileErr = new Error(
+            `Failed to download file ${key} (${filename}): ${error.message}`
+        )
+        failedFileErr.stack = error.stack
+        throw failedFileErr
+    }
+
+    const stats = fs.statSync(filePath)
+    return { path: filePath, size: stats.size, originalFilename: filename }
+}
+
+const startMemoryLogging = () => {
+    return setInterval(() => {
+        const used = process.memoryUsage()
+        console.info('Memory usage:', {
+            rss: `${Math.round(used.rss / 1024 / 1024)}MB`,
+            heapTotal: `${Math.round(used.heapTotal / 1024 / 1024)}MB`,
+            heapUsed: `${Math.round(used.heapUsed / 1024 / 1024)}MB`,
+        })
+    }, MEMORY_LOG_INTERVAL)
+}
+
 const main: APIGatewayProxyHandler = async (event) => {
-    const authProvider =
-        event.requestContext.identity.cognitoAuthenticationProvider
-    if (authProvider == undefined) {
-        return {
-            statusCode: 400,
-            body:
-                JSON.stringify({
+    console.info('Starting lambda with request size:', event.body?.length)
+    const startTime = Date.now()
+    let memoryLoggingInterval: NodeJS.Timeout | undefined
+
+    try {
+        // Validate auth and request body
+        const authProvider =
+            event.requestContext.identity.cognitoAuthenticationProvider
+        if (!authProvider) {
+            return {
+                statusCode: 400,
+                body: JSON.stringify({
                     code: 'NO_AUTH_PROVIDER',
-                    message:
-                        'auth provider missing. This should always be taken care of by the API Gateway',
-                }) + '\n',
-            headers: {
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Credentials': true,
-            },
+                    message: 'Auth provider missing',
+                }),
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Credentials': true,
+                },
+            }
         }
-    }
 
-    console.time('zipProcess')
-    if (!event.body) {
-        console.timeEnd('zipProcess')
-        return {
-            statusCode: 400,
-            body: 'No body found in request',
-            headers: {
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Credentials': true,
-            },
+        if (!event.body) {
+            return {
+                statusCode: 400,
+                body: JSON.stringify({
+                    code: 'BAD_REQUEST',
+                    message: 'No body found in request',
+                }),
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Credentials': true,
+                },
+            }
         }
-    }
 
-    const bulkDlRequest: S3BulkDownloadRequest = JSON.parse(event.body)
-    console.info('Bulk download request:', bulkDlRequest)
+        const bulkDlRequest: S3BulkDownloadRequest = JSON.parse(event.body)
+        console.info('Bulk download request:', bulkDlRequest)
 
-    if (
-        !bulkDlRequest.bucket ||
-        !bulkDlRequest.keys ||
-        !bulkDlRequest.zipFileName
-    ) {
-        console.timeEnd('zipProcess')
+        if (
+            !bulkDlRequest.bucket ||
+            !bulkDlRequest.keys ||
+            !bulkDlRequest.zipFileName
+        ) {
+            return {
+                statusCode: 400,
+                body: JSON.stringify({
+                    code: 'BAD_REQUEST',
+                    message: 'Missing required fields',
+                }),
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Credentials': true,
+                },
+            }
+        }
+
+        // Start memory logging
+        memoryLoggingInterval = startMemoryLogging()
+
+        // Prepare temp directory
+        ensureTempDir()
+
+        // Download files in batches
+        let totalBytes = 0
+        const downloadedFiles: DownloadedFile[] = []
+
+        for (let i = 0; i < bulkDlRequest.keys.length; i += BATCH_SIZE) {
+            const batch = bulkDlRequest.keys.slice(i, i + BATCH_SIZE)
+            console.info(
+                `Processing batch ${i / BATCH_SIZE + 1}/${Math.ceil(bulkDlRequest.keys.length / BATCH_SIZE)}`
+            )
+
+            const batchResults = await Promise.all(
+                batch.map(async (key) => {
+                    const timeout = BASE_TIMEOUT + TIMEOUT_PER_MB * 1000 // Simplified timeout calculation
+                    return downloadFile(bulkDlRequest.bucket, key, timeout)
+                })
+            )
+
+            for (const result of batchResults) {
+                totalBytes += result.size
+                if (totalBytes > MAX_TOTAL_SIZE) {
+                    const totalMB = (totalBytes / (1024 * 1024)).toFixed(2)
+                    const maxMB = (MAX_TOTAL_SIZE / (1024 * 1024)).toFixed(2)
+                    throw new Error(
+                        `Total size (${totalMB}MB) exceeds maximum allowed size of ${maxMB}MB`
+                    )
+                }
+                downloadedFiles.push(result)
+            }
+        }
+
+        // Create zip file
+        const zipPath = path.join(TEMP_DIR, 'output.zip')
+        const zipStream = fs.createWriteStream(zipPath)
+        const archive = Archiver('zip', { zlib: { level: 5 } })
+
+        archive.pipe(zipStream)
+
+        // Add files to zip with their original names
+        for (const file of downloadedFiles) {
+            archive.file(file.path, { name: file.originalFilename })
+        }
+
+        await archive.finalize()
+
+        // Upload zip to S3
+        const uploadParams: PutObjectCommandInput = {
+            Bucket: bulkDlRequest.bucket,
+            Key: bulkDlRequest.zipFileName,
+            Body: fs.createReadStream(zipPath),
+            ContentType: 'application/zip',
+            ACL: 'private',
+            StorageClass: 'STANDARD',
+        }
+
+        const upload = new Upload({
+            client: s3,
+            params: uploadParams,
+            tags: [{ Key: 'contentsPreviouslyScanned', Value: 'TRUE' }],
+        })
+
+        await upload.done()
+
+        const processingTime = (Date.now() - startTime) / 1000
+        console.info('Upload completed:', {
+            files: downloadedFiles.length,
+            totalBytes,
+            processingTimeSeconds: processingTime,
+        })
+
         return {
-            statusCode: 400,
+            statusCode: 200,
             body: JSON.stringify({
-                code: 'BAD_REQUEST',
-                message: 'Missing bucket, keys or zipFileName in request',
+                code: 'SUCCESS',
+                message: 'success',
+                stats: {
+                    files: downloadedFiles.length,
+                    bytes: totalBytes,
+                    timeSeconds: processingTime,
+                },
             }),
             headers: {
                 'Access-Control-Allow-Origin': '*',
                 'Access-Control-Allow-Credentials': true,
             },
         }
-    }
-
-    type S3DownloadStreamDetails = {
-        stream: string | Readable | Buffer
-        filename: string
-    }
-
-    // here we go through all the keys and open a stream to the object.
-    // also, the filename in s3 is a uuid, and we store the original
-    // filename in the content-disposition header. set original filename too.
-    let s3DownloadStreams: S3DownloadStreamDetails[]
-    try {
-        s3DownloadStreams = await Promise.all(
-            bulkDlRequest.keys.map(async (key: string) => {
-                const params = { Bucket: bulkDlRequest.bucket, Key: key }
-
-                const headCommand = new HeadObjectCommand(params)
-                const metadata = await s3.send(headCommand)
-
-                const filename = parseContentDisposition(
-                    metadata.ContentDisposition ?? key
-                )
-
-                const getCommand = new GetObjectCommand(params)
-                const s3Item = await s3.send(getCommand)
-
-                if (s3Item.Body === undefined) {
-                    throw new Error(`stream for ${filename} returned undefined`)
-                }
-
-                if (s3Item.Body instanceof Readable) {
-                    return {
-                        stream: s3Item.Body,
-                        filename,
-                    }
-                } else if ('size' in s3Item.Body) {
-                    // type narrow to Blob
-                    throw new Error('Blob response not implemented. ')
-                } else if ('locked' in s3Item.Body) {
-                    // type narrow to ReadableStream
-                    // wml: WARNING: This was never tested but figuring out these types were so painful I want to leave
-                    // the work in here. Testing so far It appears that GetObject always returns the Readable type,
-                    // not a ReadableStream
-                    console.info(
-                        'WARNING UNTESTED: We are streaming a ReadableStream'
-                    )
-                    const readStreamBody = s3Item.Body
-
-                    // this is the node stream we will return as a Reader.
-                    const passThrough = new PassThrough()
-
-                    // Get a web stream we can write to. Unfortunately the types don't match enough to just transform our StreamReader
-                    const webWriter = Writable.toWeb(passThrough)
-
-                    // do we need to await this?
-                    void readStreamBody.pipeTo(webWriter)
-
-                    return {
-                        stream: passThrough,
-                        filename,
-                    }
-                } else {
-                    console.error(
-                        'Programming Error: Unknown return type for s3 Body',
-                        s3Item.Body
-                    )
-                    throw new Error(
-                        'Programming Error: Unknown return type for s3 Body'
-                    )
-                }
-            })
-        )
-    } catch (e) {
-        console.error('Got an error downloading the files from s3: ', e)
-        console.timeEnd('zipProcess')
+    } catch (error) {
+        console.error('Error during processing:', error)
         return {
             statusCode: 500,
-            body: JSON.stringify(e.message),
+            body: JSON.stringify({
+                code: 'ERROR',
+                message: error.message,
+            }),
             headers: {
                 'Access-Control-Allow-Origin': '*',
                 'Access-Control-Allow-Credentials': true,
             },
         }
-    }
-
-    try {
-        // This stream is written to by the archive and then read from by the uploader
-        const zippedStream = new PassThrough()
-
-        zippedStream.on('error', (err) => {
-            console.error('Error in our zipped stream', err)
-            throw new Error(`${err.name} ${err.message} ${err.stack}`)
-        })
-
-        const input: PutObjectCommandInput = {
-            ACL: 'private',
-            Body: zippedStream,
-            Bucket: bulkDlRequest.bucket,
-            ContentType: 'application/zip',
-            Key: bulkDlRequest.zipFileName,
-            StorageClass: 'STANDARD',
+    } finally {
+        // Clean up
+        if (memoryLoggingInterval) {
+            clearInterval(memoryLoggingInterval)
         }
-
-        // Upload is a composite command that correctly handles stream inputs and tagging
-        const upload = new Upload({
-            client: s3,
-            params: input,
-
-            tags: [
-                {
-                    Key: 'contentsPreviouslyScanned',
-                    Value: 'TRUE',
-                },
-            ],
-        })
-
-        upload.on('httpUploadProgress', (progress) => {
-            console.info('UploadProgress', progress)
-        })
-
-        // Configure Zip
-        const zip = Archiver('zip')
-
-        zip.on('warning', function (warn) {
-            console.info('zip warning: ', warn.message)
-        })
-
-        zip.on('error', (error: Archiver.ArchiverError) => {
-            console.info('Error in zip.on: ', error.message, error.stack)
-            console.timeEnd('zipProcess')
-            throw new Error(
-                `${error.name} ${error.code} ${error.message} ${error.path} ${error.stack}`
-            )
-        })
-
-        zip.on('progress', function (prog) {
-            console.info('zip progress: ', prog)
-        })
-
-        zip.pipe(zippedStream)
-
-        // Add files to the zip and finalize
-        for (const streamDetails of s3DownloadStreams) {
-            zip.append(streamDetails.stream, {
-                //decoding file names encoded in s3Amplify.ts
-                name: decodeURIComponent(streamDetails.filename),
-            })
-        }
-
-        zip.finalize().catch((err) => {
-            console.error('Error finalizing', err)
-            throw err
-        })
-
-        // We only stop and wait on the upload itself. Hopefully all our streams are streaming correctly
-        await upload.done()
-    } catch (e) {
-        console.info('Error zipping or uploading', e)
-        console.timeEnd('zipProcess')
-        return {
-            statusCode: 500,
-            body: JSON.stringify(e.message),
-            headers: {
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Credentials': true,
-            },
-        }
-    }
-
-    console.info('Upload Success')
-    console.timeEnd('zipProcess')
-    return {
-        statusCode: 200,
-        body: JSON.stringify({ code: 'SUCCESS', message: 'success' }),
-        headers: {
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Credentials': true,
-        },
+        cleanupTempDir()
     }
 }
 
 // parses a content-disposition header for the filename
 function parseContentDisposition(cd: string): string {
-    console.info('original content-disposition: ' + cd)
-    const [, filename] = cd.split('filename=')
-    console.info('original name: ' + filename)
-    return filename
+    if (!cd) return ''
+
+    const matches = cd.match(/filename=["']?([^"';\n]*)["']?/i)
+    if (matches && matches[1]) {
+        return decodeURIComponent(matches[1].trim())
+    }
+
+    // If it's just a key/path, decode it directly
+    try {
+        return decodeURIComponent(cd.trim())
+    } catch (error) {
+        console.warn('Error decoding filename:', cd, error)
+        return cd.trim()
+    }
 }
 
 module.exports = { main }

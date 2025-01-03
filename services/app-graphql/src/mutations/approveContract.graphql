@@ -19,6 +19,16 @@ mutation approveContract($input: ApproveContractInput!) {
                 }
             }
 
+            withdrawnRates {
+                ...rateFieldsFragment,
+                revisions {
+                    ...rateRevisionFragment
+                }
+                packageSubmissions {
+                    ...ratePackageSubmissionsFragment
+                }
+            }
+
             packageSubmissions {
                 ...packageSubmissionsFragment
             }
