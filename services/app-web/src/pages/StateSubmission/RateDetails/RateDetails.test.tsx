@@ -1051,6 +1051,149 @@ describe('RateDetails', () => {
             expect(dropdownOptions[2]).toHaveTextContent('Third-Position-Rate')
         })
 
+        it('omits withdrawn rates from the dropdown options', async () => {
+            const rates: Rate[] = [
+                {
+                    ...rateDataMock(),
+                    id: 'test-id-123',
+                    stateNumber: 1,
+                    consolidatedStatus: 'WITHDRAWN',
+                    reviewStatus: 'WITHDRAWN',
+                    revisions: [
+                        {
+                            ...rateRevisionDataMock(),
+                            submitInfo: {
+                                __typename: 'UpdateInformation',
+                                updatedAt: new Date('2022-04-10'),
+                                updatedBy: {
+                                    email: 'aang@example.com',
+                                    role: 'ADMIN_USER',
+                                    familyName: 'Hotman',
+                                    givenName: 'Iroh',
+                                },
+                                updatedReason: 'Resubmit',
+                            },
+                            formData: {
+                                ...rateRevisionDataMock().formData,
+                                rateCertificationName: 'Third-Position-Rate',
+                            },
+                        },
+                    ],
+                },
+                {
+                    ...rateDataMock(),
+                    id: 'test-id-124',
+                    stateNumber: 2,
+                    revisions: [
+                        {
+                            ...rateRevisionDataMock(),
+                            submitInfo: {
+                                __typename: 'UpdateInformation',
+                                updatedAt: new Date('2024-04-10'),
+                                updatedBy: {
+                                    email: 'aang@example.com',
+                                    role: 'STATE_USER',
+                                    familyName: 'Airman',
+                                    givenName: 'Aang',
+                                },
+                                updatedReason: 'Resubmit',
+                            },
+                            formData: {
+                                ...rateRevisionDataMock().formData,
+                                rateCertificationName: 'First-Position-Rate',
+                            },
+                        },
+                    ],
+                },
+                {
+                    ...rateDataMock(),
+                    id: 'test-id-125',
+                    stateNumber: 3,
+                    revisions: [
+                        {
+                            ...rateRevisionDataMock(),
+                            submitInfo: {
+                                __typename: 'UpdateInformation',
+                                updatedAt: new Date('2024-04-08'),
+                                updatedBy: {
+                                    email: 'aang@example.com',
+                                    role: 'STATE_USER',
+                                    familyName: 'Airman',
+                                    givenName: 'Aang',
+                                },
+                                updatedReason: 'Resubmit',
+                            },
+                            formData: {
+                                ...rateRevisionDataMock().formData,
+                                rateCertificationName: 'Second-Position-Rate',
+                            },
+                        },
+                    ],
+                },
+            ]
+
+            const { user } = renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_RATE_DETAILS}
+                        element={<RateDetails type="MULTI" />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            indexRatesMockSuccess(undefined, rates),
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchContractMockSuccess({
+                                contract: mockContractWithLinkedRateDraft(),
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: `/submissions/test-abc-123/edit/rate-details`,
+                    },
+                    featureFlags: {
+                        'rate-edit-unlock': false,
+                    },
+                }
+            )
+
+            //Making sure page loads
+            await screen.findByText('Rate Details')
+            expect(
+                screen.getByText(
+                    'Was this rate certification included with another submission?'
+                )
+            ).toBeInTheDocument()
+
+            //Click the yes button and assert it's clickable and checked
+            const yesRadioButton = screen.getByRole('radio', {
+                name: 'Yes, this rate certification is part of another submission',
+            })
+            expect(yesRadioButton).toBeInTheDocument()
+            await user.click(yesRadioButton)
+            expect(yesRadioButton).toBeChecked()
+
+            // Assert the dropdown has rendered
+            await waitFor(() => {
+                expect(
+                    screen.getByText('Which rate certification was it?')
+                ).toBeInTheDocument()
+                expect(screen.getByRole('combobox')).toBeInTheDocument()
+            })
+
+            // Assert the options menu is open when clicked
+            const dropdown = screen.getByRole('combobox')
+            expect(dropdown).toBeInTheDocument()
+            await user.click(dropdown)
+            const dropdownMenu = screen.getByRole('listbox')
+            expect(dropdownMenu).toBeInTheDocument()
+
+            // Assert options are present
+            const dropdownOptions = screen.getAllByRole('option')
+            expect(dropdownOptions).toHaveLength(2)
+        })
+
         it('removes the selected option from the dropdown list', async () => {
             const rateID = 'test-abc-123'
             const { user } = renderWithProviders(
