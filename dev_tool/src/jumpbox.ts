@@ -198,8 +198,6 @@ async function promptPassword(prompt: string): Promise<string> {
         type: 'password',
         name: 'password',
         message: prompt,
-        validate: (value: string): boolean | string =>
-            value.length > 0 ? true : 'Password cannot be empty',
     })
 
     return response.password
@@ -215,33 +213,13 @@ async function attemptSSHConnection(
 
     try {
         // Read the private key file
-        const privateKey = readFileSync(privateKeyPath, 'utf8')
+        const privateKey = await promptPassword('Enter SSH key password:')
 
-        try {
-            await ssh.connect({
-                host,
-                username,
-                privateKey,
-            })
-        } catch (err) {
-            if (
-                err instanceof Error &&
-                (err.message.includes('password') ||
-                    err.message.includes('encrypted'))
-            ) {
-                const keyPassword = await promptPassword(
-                    'Enter SSH key password:'
-                )
-                await ssh.connect({
-                    host,
-                    username,
-                    privateKey,
-                    passphrase: keyPassword,
-                })
-            } else {
-                throw err
-            }
-        }
+        await ssh.connect({
+            host,
+            username,
+            privateKey,
+        })
     } catch (err) {
         if (err instanceof Error) {
             throw new Error(`SSH connection failed: ${err.message}`)
