@@ -181,29 +181,22 @@ const withdrawRateInsideTransaction = async (
         // remove the rate to withdraw from previousRates. Removing it here prevents gaps in ratePosition.
         previousRates.splice(rateToWithdrawIndex, 1)
 
+        // Collect rates we keep on the contract
         previousRates.forEach((rate, idx) => {
-            // keep any existing linked rates besides withdrawn rate
             if (rate.parentContractID !== contract.id) {
                 linkRates.push({
                     rateID: rate.id,
                     ratePosition: idx + 1,
                 })
             } else {
-                // keep any existing child rates and resubmit them unchanged
-                let formData
-
-                // get the formData from correct source based on rate status
-                if (rate.consolidatedStatus === 'DRAFT') {
-                    if (!rate.draftRevision) {
-                        throw new Error(
-                            `Draft rate ${rate.id} is missing draft revision`
-                        )
-                    }
-
-                    formData = rate.draftRevision?.formData
-                } else {
-                    formData = rate.packageSubmissions[0].rateRevision.formData
+                // We unlocked any contract that was submitted. Now all rates are drafts so we use draftRevision to get form data.
+                if (!rate.draftRevision) {
+                    throw new Error(
+                        `Draft rate ${rate.id} is missing draft revision`
+                    )
                 }
+
+                const formData = rate.draftRevision?.formData
 
                 updateRates.push({
                     rateID: rate.id,
