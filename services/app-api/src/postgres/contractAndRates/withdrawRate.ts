@@ -49,19 +49,7 @@ const withdrawRateInsideTransaction = async (
                             updatedAt: 'desc',
                         },
                         include: {
-                            submissionPackages: {
-                                include: {
-                                    contractRevision: {
-                                        select: {
-                                            id: true,
-                                            contractID: true,
-                                        },
-                                    },
-                                },
-                                orderBy: {
-                                    ratePosition: 'asc',
-                                },
-                            },
+                            submittedContracts: true,
                         },
                     },
                 },
@@ -70,20 +58,30 @@ const withdrawRateInsideTransaction = async (
     })
 
     if (!rate) {
-        const err = `PRISMA ERROR: Cannot find rate with id: ${rateID}`
-        return new NotFoundError(err)
+        throw new NotFoundError(
+            `PRISMA ERROR: Cannot find rate with id: ${rateID}`
+        )
     }
 
-    // Get the contractIDs of the latest submission package of each related submission
-    const latestRevision = rate.revisions[0]
+    // collect all contracts submitted with this rate
+    const submittedContractsIds = rate.revisions[0].relatedSubmissions
+        .map((sub) =>
+            sub.submittedContracts.map((contract) => contract.contractID)
+        )
+        .flat()
+
+    // collect all draft contracts linked to this rate
+    const draftContractsIds = rate.draftContracts.map(
+        (contract) => contract.contractID
+    )
+
+    // create new array of unique contractIDs
     const contractIDs = [
-        ...new Set([
-            ...latestRevision.relatedSubmissions.map(
-                (sub) => sub.submissionPackages[0].contractRevision.contractID
-            ),
-            ...rate.draftContracts.map((contract) => contract.contractID),
-        ]),
+        ...new Set([...submittedContractsIds, ...draftContractsIds]),
     ]
+
+    // Get the contractIDs of the latest submission package of each related submission
+    const latestRateRev = rate.revisions[0]
 
     // get data for every contract
     const contracts = await tx.contractTable.findMany({
@@ -127,7 +125,7 @@ const withdrawRateInsideTransaction = async (
             const unlockedContract = await unlockContractInsideTransaction(tx, {
                 contractID: contract.id,
                 unlockedByUserID: updatedByID,
-                unlockReason: `CMS withdrawing rate ${latestRevision.rateCertificationName} from this submission`,
+                unlockReason: `CMS withdrawing rate ${latestRateRev.rateCertificationName} from this submission`,
             })
 
             if (unlockedContract instanceof Error) {
@@ -173,14 +171,14 @@ const withdrawRateInsideTransaction = async (
             .map((rate) => rate.id)
             .indexOf(rateID)
 
-        // Validate that the rate to withdraw is on the now unlocked contract
+        // validate that the rate to withdraw exists on the contract
         if (rateToWithdrawIndex === -1) {
             throw new UserInputPostgresError(
                 `withdrawnRateID ${rateID} does not map to a current rate on this contract`
             )
         }
 
-        // remove the rate to withdraw from previousRates. Removing it now prevents gaps in ratePosition.
+        // remove the rate to withdraw from previousRates. Removing it here prevents gaps in ratePosition.
         previousRates.splice(rateToWithdrawIndex, 1)
 
         previousRates.forEach((rate, idx) => {
@@ -192,9 +190,26 @@ const withdrawRateInsideTransaction = async (
                 })
             } else {
                 // keep any existing child rates and resubmit them unchanged
+                let formData
+
+                // get the formData from correct source based on rate status
+                if (rate.consolidatedStatus === 'DRAFT') {
+                    if (!rate.draftRevision) {
+                        throw new Error(
+                            `Draft rate ${rate.id} is missing draft revision`
+                        )
+                    }
+
+                    formData = rate.draftRevision?.formData
+                } else {
+                    formData = rate.packageSubmissions[0].rateRevision.formData
+                }
+
                 updateRates.push({
                     rateID: rate.id,
-                    formData: rate.packageSubmissions[0].rateRevision.formData,
+                    formData: {
+                        ...formData,
+                    },
                     ratePosition: idx + 1,
                 })
             }
@@ -230,12 +245,12 @@ const withdrawRateInsideTransaction = async (
             throw updateResult
         }
 
-        // Resubmit contract if it was unlocked in this loop
+        // Resubmit contract if it was unlocked in this loop. We know because of original consolidatedStatus
         if (['SUBMITTED', 'RESUBMITTED'].includes(consolidatedStatus)) {
             const resubmitContractArgs: SubmitContractArgsType = {
                 contractID: contract.id,
                 submittedByUserID: updatedByID,
-                submittedReason: `CMS has withdrawn rate ${latestRevision.rateCertificationName} from this submission`,
+                submittedReason: `CMS has withdrawn rate ${latestRateRev.rateCertificationName} from this submission`,
             }
             const resubmitResult = await submitContractInsideTransaction(
                 tx,
