@@ -73,29 +73,6 @@ jobs:
         run: |
           pushd services/github-oidc && npx serverless deploy --stage ${{ inputs.stage_name }}
 
-  bootstrap-cdk:
-    needs: github-oidc 
-    environment: ${{ inputs.environment }}
-    runs-on: ubuntu-20.04
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
-
-      - name: Setup env
-        uses: ./.github/actions/setup_env
-
-      - name: Get AWS credentials
-        uses: ./.github/actions/get_aws_credentials
-        with:
-          region: ${{ inputs.aws_default_region }}
-          account-id: ${{ secrets.aws_account_id }}
-          stage-name: ${{ inputs.stage_name }}
-
-      - name: Bootstrap CDK
-        run: |
-          pushd infrastructure/cdk && pnpm cdk bootstrap aws://${{ secrets.aws_account_id }}/${{ inputs.aws_default_region }}
-
-
   postgres:
     # for this and subsequent jobs, wait for the OIDC service to deploy (unless it was skipped)
     needs: github-oidc
@@ -144,10 +121,13 @@ jobs:
           stage-name: ${{ inputs.stage_name }}
           changed-services: ${{ inputs.changed_services }}
 
-      - name: deploy ui
+      - name: Deploy UI with CDK
         id: deploy-ui
         run: |
-          pushd services/ui && npx serverless deploy --stage ${{ inputs.stage_name }}
+          pushd infrastructure/cdk && \
+          pnpm cdk deploy ${inputs.stage_name}-ui \
+            --context stage=${inputs.stage_name} \
+            --require-approval never
 
   storybook:
     needs: github-oidc

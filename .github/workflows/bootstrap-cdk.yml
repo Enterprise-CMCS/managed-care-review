@@ -1,0 +1,36 @@
+name: Bootstrap AWS CDK
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to bootstrap'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+          - dev
+
+permissions:
+  id-token: write
+
+jobs:
+  bootstrap-cdk:
+    environment: ${{ inputs.environment }}
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Setup env
+        uses: ./.github/actions/setup_env
+
+      - name: Get AWS credentials
+        uses: ./.github/actions/get_aws_credentials
+        with:
+          region: ${{ vars.AWS_DEFAULT_REGION }}
+          account-id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
+          stage-name: main
+
+      - name: Bootstrap CDK
+        uses: ./.github/actions/bootstrap_cdk
