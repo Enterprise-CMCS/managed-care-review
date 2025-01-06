@@ -16,7 +16,11 @@ import { useAtom } from 'jotai/react'
 import { atom } from 'jotai'
 import { atomWithHash } from 'jotai-location'
 import { loadable } from 'jotai/vanilla/utils'
-import { HealthPlanPackageStatus, Program } from '../../../gen/gqlClient'
+import {
+    HealthPlanPackageStatus,
+    Program,
+    ConsolidatedRateStatus,
+} from '../../../gen/gqlClient'
 import styles from '../../../components/ContractTable/ContractTable.module.scss'
 import { Table, Tag } from '@trussworks/react-uswds'
 import qs from 'qs'
@@ -35,6 +39,8 @@ import { useTealium } from '../../../hooks'
 import useDeepCompareEffect from 'use-deep-compare-effect'
 import { getTealiumFiltersChanged } from '../../../tealium/tealiumHelpers'
 import { formatCalendarDate } from '@mc-review/dates'
+import { InfoTag, TagProps } from '../../../components/InfoTag/InfoTag'
+import { ConsolidatedRateStatusRecord } from '@mc-review/constants'
 
 type RatingPeriodFilterType = [string, string] | []
 
@@ -45,6 +51,7 @@ export type RateInDashboardType = {
     submittedAt: string
     updatedAt: Date
     status: HealthPlanPackageStatus
+    consolidatedStatus: ConsolidatedRateStatus
     programs: Program[]
     rateType: string
     rateDateStart: Date
@@ -72,6 +79,33 @@ const rateTypeOptions = [
         value: 'Amendment',
     },
 ]
+
+const StatusTag = ({
+    status,
+}: {
+    status: ConsolidatedRateStatus
+}): React.ReactElement => {
+    let color: TagProps['color'] = 'gold'
+    let emphasize = false
+    const isSubmittedStatus = status === 'RESUBMITTED' || status === 'SUBMITTED'
+    const isUnlocked = status === 'UNLOCKED'
+    const isWithdrawn = status === 'WITHDRAWN'
+    if (isSubmittedStatus) {
+        emphasize = true
+    } else if (isUnlocked) {
+        emphasize = true
+    } else if (isWithdrawn) {
+        color = 'gray'
+    }
+
+    const statusText = ConsolidatedRateStatusRecord[status]
+
+    return (
+        <InfoTag color={color} emphasize={emphasize}>
+            {statusText}
+        </InfoTag>
+    )
+}
 
 /* To keep the memoization from being refreshed every time, this needs to be
     created outside the render function */
@@ -328,6 +362,15 @@ export const RateReviewsTable = ({
                 meta: {
                     dataTestID: `${tableConfig.rowIDName}-date`,
                 },
+            }),
+            columnHelper.accessor('consolidatedStatus', {
+                id: 'status',
+                header: 'Status',
+                cell: (info) => <StatusTag status={info.getValue()} />,
+                meta: {
+                    dataTestID: `${tableConfig.rowIDName}-status`,
+                },
+                filterFn: `arrIncludesSome`,
             }),
         ],
         [tableConfig.rowIDName]
