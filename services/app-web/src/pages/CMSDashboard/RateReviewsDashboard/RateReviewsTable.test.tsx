@@ -25,6 +25,7 @@ describe('RateReviewsTable', () => {
             name: 'rate-1-certification-name',
             rateNumber: 1,
             programs: [statePrograms[0]],
+            consolidatedStatus: 'SUBMITTED',
             submittedAt: '2023-10-16',
             rateDateStart: new Date('2023-10-16'),
             rateDateEnd: new Date('2024-10-16'),
@@ -38,6 +39,7 @@ describe('RateReviewsTable', () => {
             name: 'rate-2-certification-name',
             rateNumber: 1,
             programs: [statePrograms[0]],
+            consolidatedStatus: 'WITHDRAWN',
             submittedAt: '2023-11-18',
             rateDateStart: new Date('2023-11-18'),
             rateDateEnd: new Date('2024-11-18'),
@@ -50,6 +52,7 @@ describe('RateReviewsTable', () => {
             id: 'rate-3-id',
             name: 'rate-3-certification-name',
             programs: [statePrograms[0]],
+            consolidatedStatus: 'UNLOCKED',
             rateNumber: 2,
             submittedAt: '2023-12-01',
             rateDateStart: new Date('2023-12-01'),
@@ -104,14 +107,24 @@ describe('RateReviewsTable', () => {
                 expect(tableRows).toHaveLength(4)
 
                 // expect rows to be in order where latest updatedAt is first in the array
+                // expect statuses to be drawn from the consolidatedStatus field
                 expect(
                     within(tableRows[1]).getByText('rate-3-certification-name')
+                ).toBeInTheDocument()
+                expect(
+                    within(tableRows[1]).getByText('Unlocked')
                 ).toBeInTheDocument()
                 expect(
                     within(tableRows[2]).getByText('rate-2-certification-name')
                 ).toBeInTheDocument()
                 expect(
+                    within(tableRows[2]).getByText('Withdrawn')
+                ).toBeInTheDocument()
+                expect(
                     within(tableRows[3]).getByText('rate-1-certification-name')
+                ).toBeInTheDocument()
+                expect(
+                    within(tableRows[3]).getByText('Submitted')
                 ).toBeInTheDocument()
             })
             it('renders rates table correctly without filters, captions and no rates', async () => {
