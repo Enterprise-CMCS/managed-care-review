@@ -5,7 +5,7 @@
     "license": "MIT",
     "type": "module",
     "scripts": {
-        "build": "esbuild src/app.ts --bundle --platform=node --outfile=build/app.js --format=esm --external:aws-cdk-lib --external:constructs",
+        "build": "pnpm esbuild src/app.ts --bundle --platform=node --outfile=build/app.js --format=esm --external:aws-cdk-lib --external:constructs",
         "synth": "pnpm build && cdk synth",
         "deploy:dev": "pnpm build && cdk deploy --context stage=dev '*'",
         "deploy:prod": "pnpm build && cdk deploy --context stage=prod '*'",
