@@ -281,7 +281,9 @@ export const RateDetailsSummarySection = ({
 
     const noRatesMessage = () => {
         if (isStateUser) {
-            return 'You must contact your CMS point of contact and request an unlock.'
+            return isSubmitted
+                ? 'You must contact your CMS point of contact and request an unlock.'
+                : 'You must add a rate certification before you can resubmit.'
         }
 
         if (isCMSUser) {
@@ -570,7 +572,7 @@ export const RateDetailsSummarySection = ({
                           </SectionCard>
                       )
                   })
-                : isSubmitted && (
+                : (isSubmitted || isStateUser) && (
                       <DataDetailMissingField requiredText={noRatesMessage()} />
                   )}
         </SectionCard>
