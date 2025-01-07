@@ -37,4 +37,7 @@ jobs:
           stage-name: main
 
       - name: Bootstrap CDK
-        uses: ./.github/actions/bootstrap_cdk
+        run: |
+          pushd infrastructure/cdk && \
+          pnpm cdk bootstrap \
+            aws://${{ secrets.aws_account_id }}/${{ vars.AWS_DEFAULT_REGION }}
