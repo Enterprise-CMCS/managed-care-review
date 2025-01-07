@@ -11,10 +11,6 @@ on:
         options:
           - dev
 
-  push:
-    paths:
-      - '.github/workflows/bootstrap-cdk.yml'
-
 permissions:
   id-token: write
 
