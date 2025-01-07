@@ -26,7 +26,7 @@ jobs:
         uses: ./.github/actions/setup_env
 
       - name: Get AWS credentials
-        uses: ./.github/actions/get_aws_credentials
+        uses: Enterprise-CMCS/managed-care-review/.github/actions/get_aws_credentials@mt-awscdk-migrate-ui
         with:
           region: ${{ vars.AWS_DEFAULT_REGION }}
           account-id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
