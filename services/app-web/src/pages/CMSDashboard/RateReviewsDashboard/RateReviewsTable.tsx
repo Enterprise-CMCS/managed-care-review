@@ -80,6 +80,21 @@ const rateTypeOptions = [
     },
 ]
 
+const rateStatusOptions = [
+    {
+        label: 'Submitted',
+        value: 'SUBMITTED',
+    },
+    {
+        label: 'Unlocked',
+        value: 'UNLOCKED',
+    },
+    {
+        label: 'Withdrawn',
+        value: 'WITHDRAWN',
+    },
+]
+
 const StatusTag = ({
     status,
 }: {
@@ -414,7 +429,9 @@ export const RateReviewsTable = ({
     const rateDateStartColumn = reactTable.getColumn(
         'rateDateStart'
     ) as Column<RateInDashboardType>
-
+    const statusColumn = reactTable.getColumn(
+        'status'
+    ) as Column<RateInDashboardType>
     // Filter options based on table data instead of static list of options.
     const stateFilterOptions = Array.from(
         stateColumn.getFacetedUniqueValues().keys()
@@ -632,6 +649,24 @@ export const RateReviewsTable = ({
                                     ),
                             }}
                         />
+                        <DoubleColumnGrid>
+                            <FilterSelect
+                                value={getSelectedFiltersFromColumnState(
+                                    columnFilters,
+                                    'status'
+                                )}
+                                name="status"
+                                label="Status"
+                                filterOptions={rateStatusOptions}
+                                onChange={(selectedOptions) =>
+                                    updateFilters(
+                                        statusColumn,
+                                        selectedOptions,
+                                        'status'
+                                    )
+                                }
+                            />
+                        </DoubleColumnGrid>
                     </FilterAccordion>
                     <div aria-live="polite" aria-atomic>
                         <div className={styles.filterCount}>
