@@ -96,6 +96,7 @@ export const RateDetailsSummarySection = ({
     const isSubmitted =
         contract.status === 'SUBMITTED' || contract.status === 'RESUBMITTED'
     const isCMSUser = hasCMSUserPermissions(loggedInUser)
+    const isStateUser = loggedInUser?.role === 'STATE_USER'
     const isAdminUser = loggedInUser?.role === 'ADMIN_USER'
     const isSubmittedOrCMSUser = isSubmitted || isCMSUser
     const isEditing = !isSubmittedOrCMSUser && editNavigateTo !== undefined
@@ -277,6 +278,18 @@ export const RateDetailsSummarySection = ({
             [styles.replaceRateWrapper]:
                 isAdminUser && !isLinkedRate && !isPreviousSubmission,
         })
+
+    const noRatesMessage = () => {
+        if (isStateUser) {
+            return 'You must contact your CMS point of contact and request an unlock.'
+        }
+
+        if (isCMSUser) {
+            return 'You must unlock the submission so the state can add a rate certification.'
+        }
+
+        return 'CMS must unlock the submission so the state can add a rate certification.'
+    }
 
     return (
         <SectionCard id="rateDetails" className={styles.summarySection}>
@@ -557,7 +570,9 @@ export const RateDetailsSummarySection = ({
                           </SectionCard>
                       )
                   })
-                : explainMissingData && <DataDetailMissingField />}
+                : isSubmitted && (
+                      <DataDetailMissingField requiredText={noRatesMessage()} />
+                  )}
         </SectionCard>
     )
 }
