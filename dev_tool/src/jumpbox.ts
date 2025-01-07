@@ -213,12 +213,14 @@ async function attemptSSHConnection(
 
     try {
         // Read the private key file
-        const privateKey = await promptPassword('Enter SSH key password:')
+        const privateKey = readFileSync(privateKeyPath, 'utf8')
+        const keyPassword = await promptPassword('Enter SSH key password:')
 
         await ssh.connect({
             host,
             username,
             privateKey,
+            passphrase: keyPassword,
         })
     } catch (err) {
         if (err instanceof Error) {
