@@ -3,19 +3,20 @@
     "private": "true",
     "version": "1.0.0",
     "license": "MIT",
-    "type": "module",
     "scripts": {
-        "build": "pnpm dlx esbuild src/app.ts --bundle --platform=node --outfile=build/app.js --format=esm --external:aws-cdk-lib --external:constructs",
+        "build": "pnpm dlx esbuild src/app.ts --bundle --platform=node --outfile=build/app.js --format=esm --conditions=node",
         "synth": "pnpm build && cdk synth",
         "deploy:dev": "pnpm build && cdk deploy --context stage=dev '*'",
         "deploy:prod": "pnpm build && cdk deploy --context stage=prod '*'",
         "diff": "pnpm build && cdk diff"
     },
+    "dependencies": {
+        "aws-cdk": "^2.174.1",
+        "aws-cdk-lib": "^2.174.1",
+        "constructs": "^10.4.2"
+    },
     "devDependencies": {
         "@types/node": "^20.14.12",
-        "aws-cdk": "^2.173.2",
-        "aws-cdk-lib": "^2.173.2",
-        "constructs": "^10.4.2",
         "esbuild": "^0.24.0",
         "ts-node": "^10.9.2",
         "typescript": "^5.7.2"

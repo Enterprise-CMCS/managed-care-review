@@ -1,9 +1,9 @@
 {
     "extends": "../../tsconfig.json",
     "compilerOptions": {
-        "module": "ESNext",
+        "module": "NodeNext",
         "target": "ES2021",
-        "moduleResolution": "node",
+        "moduleResolution": "NodeNext",
         "experimentalDecorators": true,
         "sourceMap": true,
         "skipLibCheck": true,

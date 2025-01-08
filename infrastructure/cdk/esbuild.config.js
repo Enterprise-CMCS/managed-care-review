@@ -7,5 +7,4 @@ await esbuild.build({
     platform: 'node',
     target: 'node20',
     format: 'esm',
-    external: ['aws-cdk-lib', 'constructs'],
 });

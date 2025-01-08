@@ -1,5 +1,6 @@
 packages:
     - 'services/**'
     - 'packages/**'
+    - 'infrastructure/**'
     - 'dev_tool'
     - 'scripts'
