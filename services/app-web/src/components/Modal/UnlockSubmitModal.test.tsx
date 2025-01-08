@@ -6,6 +6,7 @@ import userEvent from '@testing-library/user-event'
 import {
     mockContractPackageDraft,
     mockContractPackageSubmitted,
+    mockContractPackageUnlockedWithUnlockedType,
     unlockHealthPlanPackageMockError,
 } from '@mc-review/mocks'
 import { UnlockSubmitModal } from './UnlockSubmitModal'
@@ -19,6 +20,7 @@ import {
     unlockContractMockError,
     unlockContractMockSuccess,
 } from '@mc-review/mocks'
+import { Contract } from '../../gen/gqlClient'
 
 describe('UnlockSubmitModal', () => {
     // mock implementation so we can clear it between tests, otherwise the last tests will count function calls from previous tests.
@@ -638,6 +640,49 @@ describe('UnlockSubmitModal', () => {
                     '?justSubmitted=Test-Submission'
                 )
             )
+        })
+    })
+
+    describe('temporary contract and rates submission', () => {
+        it('displays validation error when submitting contract and rates submission without a rate', async () => {
+            const modalRef = createRef<ModalRef>()
+            const contractPackage: Contract = {
+                ...mockContractPackageUnlockedWithUnlockedType(),
+                __typename: 'Contract' as const,
+                draftRates: [],
+            }
+            const handleOpen = () =>
+                modalRef.current?.toggleModal(undefined, true)
+            renderWithProviders(
+                <UnlockSubmitModal
+                    submissionData={contractPackage}
+                    submissionName="Test-Submission"
+                    modalType="RESUBMIT_CONTRACT"
+                    modalRef={modalRef}
+                    setIsSubmitting={mockSetIsSubmitting}
+                />
+            )
+            await waitFor(() => handleOpen())
+            const dialog = screen.getByRole('dialog')
+            await waitFor(() => expect(dialog).toHaveClass('is-visible'))
+
+            await userEvent.type(
+                screen.getByTestId('unlockSubmitModalInput'),
+                'Test submission summary'
+            )
+
+            expect(screen.getByRole('dialog')).toHaveClass('is-visible')
+            expect(screen.getByText('Summarize changes')).toBeInTheDocument()
+
+            await userEvent.click(
+                screen.getByTestId('resubmit_contract-modal-submit')
+            )
+
+            expect(
+                await screen.findByText(
+                    'Your submission is missing information.'
+                )
+            ).toBeInTheDocument()
         })
     })
 })

@@ -11,8 +11,8 @@ import {
     mockContractPackageSubmittedWithQuestions,
     iterableCmsUsersMockData,
     mockValidCMSUser,
-    iterableNonCMSUsersMockData,
     mockContractPackageApproved,
+    iterableAdminUsersMockData,
 } from '@mc-review/mocks'
 import { renderWithProviders } from '../../testHelpers'
 import { SubmissionSummary } from './SubmissionSummary'
@@ -455,6 +455,59 @@ describe('SubmissionSummary', () => {
                 ).toBeInTheDocument()
             })
 
+            it('renders incomplete submission UI on submitted submission', async () => {
+                const contract = mockContractPackageSubmitted({
+                    id: 'test-abc-123',
+                })
+                contract.packageSubmissions[0].rateRevisions = []
+
+                renderWithProviders(
+                    <Routes>
+                        <Route element={<SubmissionSideNav />}>
+                            <Route
+                                path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                                element={<SubmissionSummary />}
+                            />
+                        </Route>
+                    </Routes>,
+                    {
+                        apolloProvider: {
+                            mocks: [
+                                fetchCurrentUserMock({
+                                    user: mockUser(),
+                                    statusCode: 200,
+                                }),
+                                fetchContractWithQuestionsMockSuccess({
+                                    contract,
+                                }),
+                                fetchContractMockSuccess({
+                                    contract,
+                                }),
+                            ],
+                        },
+                        routerProvider: {
+                            route: '/submissions/test-abc-123',
+                        },
+                        featureFlags: {},
+                    }
+                )
+
+                await waitFor(() => {
+                    expect(
+                        screen.getByTestId('error-alert')
+                    ).toBeInTheDocument()
+                    expect(
+                        screen.getByText('Incomplete Submission')
+                    ).toBeInTheDocument()
+
+                    expect(
+                        screen.getAllByText(
+                            'You must unlock the submission so the state can add a rate certification.'
+                        )
+                    ).toHaveLength(2)
+                })
+            })
+
             describe('Submission package data display', () => {
                 it('renders the OLD data for an unlocked submission for CMS user, ignoring unsubmitted changes from state user', async () => {
                     const contract =
@@ -781,6 +834,384 @@ describe('SubmissionSummary', () => {
                         'Reason for unlock: unlocked for a test'
                     )
                 })
+
+                it('does not render incomplete submission UI on unlocked submission', async () => {
+                    const contract =
+                        mockContractPackageUnlockedWithUnlockedType({
+                            id: 'test-abc-123',
+                        })
+                    contract.packageSubmissions[0].rateRevisions = []
+
+                    renderWithProviders(
+                        <Routes>
+                            <Route element={<SubmissionSideNav />}>
+                                <Route
+                                    path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                                    element={<SubmissionSummary />}
+                                />
+                            </Route>
+                        </Routes>,
+                        {
+                            apolloProvider: {
+                                mocks: [
+                                    fetchCurrentUserMock({
+                                        user: mockUser(),
+                                        statusCode: 200,
+                                    }),
+                                    fetchContractWithQuestionsMockSuccess({
+                                        contract,
+                                    }),
+                                    fetchContractMockSuccess({
+                                        contract,
+                                    }),
+                                ],
+                            },
+                            routerProvider: {
+                                route: '/submissions/test-abc-123',
+                            },
+                            featureFlags: {},
+                        }
+                    )
+
+                    await waitFor(() => {
+                        expect(
+                            screen.getByTestId('unlockedBanner')
+                        ).toBeInTheDocument()
+                        expect(
+                            screen.getByTestId('unlockedBanner')
+                        ).toHaveClass('usa-alert--warning')
+                        expect(
+                            screen.getByTestId('unlockedBanner')
+                        ).toHaveTextContent(
+                            /on: (0?[1-9]|[12][0-9]|3[01])\/[0-9]+\/[0-9]+\s[0-9]+:[0-9]+[a-zA-Z]+ PT/i
+                        )
+                        expect(
+                            screen.getByTestId('unlockedBanner')
+                        ).toHaveTextContent('by: cms@example.com')
+                        expect(
+                            screen.getByTestId('unlockedBanner')
+                        ).toHaveTextContent(
+                            'Reason for unlock: unlocked for a test'
+                        )
+                    })
+
+                    expect(
+                        screen.queryByRole('error-alert')
+                    ).not.toBeInTheDocument()
+                    expect(
+                        screen.queryByRole('Incomplete Submission')
+                    ).not.toBeInTheDocument()
+
+                    expect(
+                        screen.queryAllByText(
+                            'You must unlock the submission so the state can add a rate certification.'
+                        )
+                    ).toHaveLength(0)
+                })
+            })
+
+            describe('submission approval tests', () => {
+                it('renders released to state button', async () => {
+                    const contract =
+                        mockContractPackageSubmittedWithQuestions(
+                            'test-abc-123'
+                        )
+                    renderWithProviders(
+                        <Routes>
+                            <Route element={<SubmissionSideNav />}>
+                                <Route
+                                    path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                                    element={<SubmissionSummary />}
+                                />
+                            </Route>
+                        </Routes>,
+                        {
+                            apolloProvider: {
+                                mocks: [
+                                    fetchCurrentUserMock({
+                                        user: mockUser(),
+                                        statusCode: 200,
+                                    }),
+                                    fetchContractWithQuestionsMockSuccess({
+                                        contract,
+                                    }),
+                                    fetchContractMockSuccess({
+                                        contract,
+                                    }),
+                                ],
+                            },
+                            routerProvider: {
+                                route: '/submissions/test-abc-123',
+                            },
+                            featureFlags: {
+                                'submission-approvals': true,
+                            },
+                        }
+                    )
+
+                    await waitFor(() => {
+                        expect(
+                            screen.getByTestId('submission-side-nav')
+                        ).toBeInTheDocument()
+                        expect(
+                            screen.getByText('MCR-MN-0005-SNBC')
+                        ).toBeInTheDocument()
+                    })
+
+                    // expect submission released to state button to be on the screen
+                    expect(
+                        screen.queryByRole('link', {
+                            name: 'Released to state',
+                        })
+                    ).toBeInTheDocument()
+
+                    // expect unlock button to have outline style
+                    expect(
+                        screen.getByRole('button', {
+                            name: 'Unlock submission',
+                        })
+                    ).toHaveClass('usa-button--outline')
+                })
+                it('does not render released to state link on unlocked submission', async () => {
+                    const unlockedContract =
+                        mockContractPackageUnlockedWithUnlockedType({
+                            id: 'test-abc-123',
+                        })
+                    renderWithProviders(
+                        <Routes>
+                            <Route element={<SubmissionSideNav />}>
+                                <Route
+                                    path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                                    element={<SubmissionSummary />}
+                                />
+                            </Route>
+                        </Routes>,
+                        {
+                            apolloProvider: {
+                                mocks: [
+                                    fetchCurrentUserMock({
+                                        user: mockValidCMSUser(),
+                                        statusCode: 200,
+                                    }),
+                                    fetchContractWithQuestionsMockSuccess({
+                                        contract: unlockedContract,
+                                    }),
+                                    fetchContractMockSuccess({
+                                        contract: unlockedContract,
+                                    }),
+                                ],
+                            },
+                            routerProvider: {
+                                route: '/submissions/test-abc-123',
+                            },
+                            featureFlags: {
+                                'submission-approvals': true,
+                            },
+                        }
+                    )
+                    await waitFor(() => {
+                        expect(
+                            screen.getByTestId('submission-side-nav')
+                        ).toBeInTheDocument()
+                        expect(
+                            screen.getByText('MCR-MN-0005-SNBC')
+                        ).toBeInTheDocument()
+                    })
+
+                    // expect released to state link to not exist
+                    expect(
+                        screen.queryByRole('link', {
+                            name: 'Released to state',
+                        })
+                    ).not.toBeInTheDocument()
+
+                    // expect unlock button to be disabled
+                    expect(
+                        screen.getByRole('button', {
+                            name: 'Unlock submission',
+                        })
+                    ).toBeDisabled()
+                })
+
+                it('does not render released to state button for an approved submission', async () => {
+                    const contract =
+                        mockContractPackageSubmittedWithQuestions(
+                            'test-abc-123'
+                        )
+                    contract.reviewStatus = 'APPROVED'
+                    contract.consolidatedStatus = 'APPROVED'
+                    renderWithProviders(
+                        <Routes>
+                            <Route element={<SubmissionSideNav />}>
+                                <Route
+                                    path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                                    element={<SubmissionSummary />}
+                                />
+                            </Route>
+                        </Routes>,
+                        {
+                            apolloProvider: {
+                                mocks: [
+                                    fetchCurrentUserMock({
+                                        user: mockValidCMSUser(),
+                                        statusCode: 200,
+                                    }),
+                                    fetchContractWithQuestionsMockSuccess({
+                                        contract: contract,
+                                    }),
+                                    fetchContractMockSuccess({
+                                        contract: contract,
+                                    }),
+                                ],
+                            },
+                            routerProvider: {
+                                route: '/submissions/test-abc-123',
+                            },
+                            featureFlags: {
+                                'submission-approvals': true,
+                            },
+                        }
+                    )
+                    await waitFor(() => {
+                        expect(
+                            screen.getByTestId('submission-side-nav')
+                        ).toBeInTheDocument()
+                    })
+
+                    // expect submission released to state link to not exist
+                    expect(
+                        screen.queryByRole('link', {
+                            name: 'Released to state',
+                        })
+                    ).toBeNull()
+
+                    // expect unlock button to be disabled
+                    expect(
+                        screen.getByRole('button', {
+                            name: 'Unlock submission',
+                        })
+                    ).toBeDisabled()
+                })
+
+                it('renders approval banner on approved submission', async () => {
+                    const contract = mockContractPackageSubmittedWithQuestions(
+                        'test-abc-123',
+                        {
+                            status: 'RESUBMITTED',
+                            reviewStatus: 'APPROVED',
+                            consolidatedStatus: 'APPROVED',
+                            reviewStatusActions: [
+                                {
+                                    actionType: 'MARK_AS_APPROVED',
+                                    contractID: 'test-abc-123',
+                                    updatedAt: new Date(),
+                                    updatedBy: {
+                                        email: 'cmsapprover@example.com',
+                                        familyName: 'Smith',
+                                        givenName: 'John',
+                                        role: 'CMS_APPROVER_USER',
+                                    },
+                                    updatedReason: 'Some approval reason',
+                                },
+                            ],
+                        }
+                    )
+                    renderWithProviders(
+                        <Routes>
+                            <Route element={<SubmissionSideNav />}>
+                                <Route
+                                    path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                                    element={<SubmissionSummary />}
+                                />
+                            </Route>
+                        </Routes>,
+                        {
+                            apolloProvider: {
+                                mocks: [
+                                    fetchCurrentUserMock({
+                                        user: mockValidCMSUser(),
+                                        statusCode: 200,
+                                    }),
+                                    fetchContractWithQuestionsMockSuccess({
+                                        contract,
+                                    }),
+                                    fetchContractMockSuccess({
+                                        contract,
+                                    }),
+                                ],
+                            },
+                            routerProvider: {
+                                route: '/submissions/test-abc-123',
+                            },
+                            featureFlags: {
+                                'submission-approvals': true,
+                            },
+                        }
+                    )
+
+                    await waitFor(() => {
+                        expect(
+                            screen.getByTestId('submission-side-nav')
+                        ).toBeInTheDocument()
+                        expect(
+                            screen.getByText('MCR-MN-0005-SNBC')
+                        ).toBeInTheDocument()
+                        // expect submission approval banner to be on screen
+                        expect(
+                            screen.getByTestId('submissionApprovedBanner')
+                        ).toBeInTheDocument()
+                    })
+                })
+
+                it('does not render the unlock submission button for an approved contract', async () => {
+                    const contract = mockContractPackageApproved()
+                    renderWithProviders(
+                        <Routes>
+                            <Route element={<SubmissionSideNav />}>
+                                <Route
+                                    path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                                    element={<SubmissionSummary />}
+                                />
+                            </Route>
+                        </Routes>,
+                        {
+                            apolloProvider: {
+                                mocks: [
+                                    fetchCurrentUserMock({
+                                        user: mockValidCMSUser(),
+                                        statusCode: 200,
+                                    }),
+                                    fetchContractWithQuestionsMockSuccess({
+                                        contract,
+                                    }),
+                                    fetchContractMockSuccess({
+                                        contract,
+                                    }),
+                                ],
+                            },
+                            routerProvider: {
+                                route: '/submissions/test-abc-123',
+                            },
+                            featureFlags: {
+                                'submission-approvals': true,
+                            },
+                        }
+                    )
+
+                    await waitFor(() => {
+                        expect(
+                            screen.getByTestId('submission-side-nav')
+                        ).toBeInTheDocument()
+                        expect(
+                            screen.getByText('MCR-MN-0005-SNBC')
+                        ).toBeInTheDocument()
+                    })
+
+                    const unlockBtn = screen.queryByRole('button', {
+                        name: 'Unlock submission',
+                    })
+                    expect(unlockBtn).not.toBeInTheDocument()
+                })
             })
         }
     )
@@ -1075,299 +1506,192 @@ describe('SubmissionSummary', () => {
                 await screen.findByTestId('submission-side-nav')
             ).toBeInTheDocument()
         })
-    })
 
-    describe.each(iterableCmsUsersMockData)(
-        '$userRole submission approval tests',
-        ({ mockUser }) => {
-            it('renders released to state button', async () => {
-                const contract =
-                    mockContractPackageSubmittedWithQuestions('test-abc-123')
-                renderWithProviders(
-                    <Routes>
-                        <Route element={<SubmissionSideNav />}>
-                            <Route
-                                path={RoutesRecord.SUBMISSIONS_SUMMARY}
-                                element={<SubmissionSummary />}
-                            />
-                        </Route>
-                    </Routes>,
-                    {
-                        apolloProvider: {
-                            mocks: [
-                                fetchCurrentUserMock({
-                                    user: mockUser(),
-                                    statusCode: 200,
-                                }),
-                                fetchContractWithQuestionsMockSuccess({
-                                    contract,
-                                }),
-                                fetchContractMockSuccess({
-                                    contract,
-                                }),
-                            ],
-                        },
-                        routerProvider: {
-                            route: '/submissions/test-abc-123',
-                        },
-                        featureFlags: {
-                            'submission-approvals': true,
-                        },
-                    }
-                )
+        it('renders incomplete submission UI on submitted submission', async () => {
+            const contract = mockContractPackageSubmitted({
+                id: 'test-abc-123',
+            })
+            contract.packageSubmissions[0].rateRevisions = []
 
-                await waitFor(() => {
-                    expect(
-                        screen.getByTestId('submission-side-nav')
-                    ).toBeInTheDocument()
-                    expect(
-                        screen.getByText('MCR-MN-0005-SNBC')
-                    ).toBeInTheDocument()
-                })
+            renderWithProviders(
+                <Routes>
+                    <Route element={<SubmissionSideNav />}>
+                        <Route
+                            path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                            element={<SubmissionSummary />}
+                        />
+                    </Route>
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                user: mockValidStateUser(),
+                                statusCode: 200,
+                            }),
+                            fetchContractWithQuestionsMockSuccess({
+                                contract,
+                            }),
+                            fetchContractMockSuccess({
+                                contract,
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/test-abc-123',
+                    },
+                    featureFlags: {},
+                }
+            )
 
-                // expect submission released to state button to be on the screen
+            await waitFor(() => {
+                expect(screen.getByTestId('error-alert')).toBeInTheDocument()
                 expect(
-                    screen.queryByRole('link', { name: 'Released to state' })
+                    screen.getByText('Incomplete Submission')
                 ).toBeInTheDocument()
 
-                // expect unlock button to have outline style
                 expect(
-                    screen.getByRole('button', { name: 'Unlock submission' })
-                ).toHaveClass('usa-button--outline')
+                    screen.getByText(
+                        'You must contact your CMS point of contact and request an unlock to complete the submission.'
+                    )
+                ).toBeInTheDocument()
+
+                expect(
+                    screen.getByText(
+                        'You must contact your CMS point of contact and request an unlock.'
+                    )
+                ).toBeInTheDocument()
             })
-            it('does not render released to state link on unlocked submission', async () => {
-                const unlockedContract =
-                    mockContractPackageUnlockedWithUnlockedType({
-                        id: 'test-abc-123',
-                    })
-                renderWithProviders(
-                    <Routes>
-                        <Route element={<SubmissionSideNav />}>
-                            <Route
-                                path={RoutesRecord.SUBMISSIONS_SUMMARY}
-                                element={<SubmissionSummary />}
-                            />
-                        </Route>
-                    </Routes>,
-                    {
-                        apolloProvider: {
-                            mocks: [
-                                fetchCurrentUserMock({
-                                    user: mockValidCMSUser(),
-                                    statusCode: 200,
-                                }),
-                                fetchContractWithQuestionsMockSuccess({
-                                    contract: unlockedContract,
-                                }),
-                                fetchContractMockSuccess({
-                                    contract: unlockedContract,
-                                }),
-                            ],
-                        },
-                        routerProvider: {
-                            route: '/submissions/test-abc-123',
-                        },
-                        featureFlags: {
-                            'submission-approvals': true,
-                        },
-                    }
-                )
-                await waitFor(() => {
-                    expect(
-                        screen.getByTestId('submission-side-nav')
-                    ).toBeInTheDocument()
-                    expect(
-                        screen.getByText('MCR-MN-0005-SNBC')
-                    ).toBeInTheDocument()
-                })
+        })
 
-                // expect released to state link to not exist
-                expect(
-                    screen.queryByRole('link', { name: 'Released to state' })
-                ).not.toBeInTheDocument()
-
-                // expect unlock button to be disabled
-                expect(
-                    screen.getByRole('button', { name: 'Unlock submission' })
-                ).toBeDisabled()
-            })
-
-            it('does not render released to state button for an approved submission', async () => {
-                const contract =
-                    mockContractPackageSubmittedWithQuestions('test-abc-123')
-                contract.reviewStatus = 'APPROVED'
-                contract.consolidatedStatus = 'APPROVED'
-                renderWithProviders(
-                    <Routes>
-                        <Route element={<SubmissionSideNav />}>
-                            <Route
-                                path={RoutesRecord.SUBMISSIONS_SUMMARY}
-                                element={<SubmissionSummary />}
-                            />
-                        </Route>
-                    </Routes>,
-                    {
-                        apolloProvider: {
-                            mocks: [
-                                fetchCurrentUserMock({
-                                    user: mockValidCMSUser(),
-                                    statusCode: 200,
-                                }),
-                                fetchContractWithQuestionsMockSuccess({
-                                    contract: contract,
-                                }),
-                                fetchContractMockSuccess({
-                                    contract: contract,
-                                }),
-                            ],
-                        },
-                        routerProvider: {
-                            route: '/submissions/test-abc-123',
-                        },
-                        featureFlags: {
-                            'submission-approvals': true,
-                        },
-                    }
-                )
-                await waitFor(() => {
-                    expect(
-                        screen.getByTestId('submission-side-nav')
-                    ).toBeInTheDocument()
-                })
-
-                // expect submission released to state link to not exist
-                expect(
-                    screen.queryByRole('link', { name: 'Released to state' })
-                ).toBeNull()
-
-                // expect unlock button to be disabled
-                expect(
-                    screen.getByRole('button', { name: 'Unlock submission' })
-                ).toBeDisabled()
-            })
-
-            it('renders approval banner on approved submission', async () => {
-                const contract = mockContractPackageSubmittedWithQuestions(
-                    'test-abc-123',
-                    {
-                        status: 'RESUBMITTED',
-                        reviewStatus: 'APPROVED',
-                        consolidatedStatus: 'APPROVED',
-                        reviewStatusActions: [
-                            {
-                                actionType: 'MARK_AS_APPROVED',
-                                contractID: 'test-abc-123',
-                                updatedAt: new Date(),
-                                updatedBy: {
-                                    email: 'cmsapprover@example.com',
-                                    familyName: 'Smith',
-                                    givenName: 'John',
-                                    role: 'CMS_APPROVER_USER',
-                                },
-                                updatedReason: 'Some approval reason',
-                            },
+        it(`does not render released to state button`, async () => {
+            const contract =
+                mockContractPackageSubmittedWithQuestions('test-abc-123')
+            renderWithProviders(
+                <Routes>
+                    <Route element={<SubmissionSideNav />}>
+                        <Route
+                            path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                            element={<SubmissionSummary />}
+                        />
+                    </Route>
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                user: mockValidStateUser(),
+                                statusCode: 200,
+                            }),
+                            fetchContractWithQuestionsMockSuccess({
+                                contract,
+                            }),
+                            fetchContractMockSuccess({
+                                contract,
+                            }),
                         ],
-                    }
-                )
-                renderWithProviders(
-                    <Routes>
-                        <Route element={<SubmissionSideNav />}>
-                            <Route
-                                path={RoutesRecord.SUBMISSIONS_SUMMARY}
-                                element={<SubmissionSummary />}
-                            />
-                        </Route>
-                    </Routes>,
-                    {
-                        apolloProvider: {
-                            mocks: [
-                                fetchCurrentUserMock({
-                                    user: mockValidCMSUser(),
-                                    statusCode: 200,
-                                }),
-                                fetchContractWithQuestionsMockSuccess({
-                                    contract,
-                                }),
-                                fetchContractMockSuccess({
-                                    contract,
-                                }),
-                            ],
-                        },
-                        routerProvider: {
-                            route: '/submissions/test-abc-123',
-                        },
-                        featureFlags: {
-                            'submission-approvals': true,
-                        },
-                    }
-                )
+                    },
+                    routerProvider: {
+                        route: '/submissions/test-abc-123',
+                    },
+                    featureFlags: {
+                        'submission-approvals': true,
+                    },
+                }
+            )
 
-                await waitFor(() => {
-                    expect(
-                        screen.getByTestId('submission-side-nav')
-                    ).toBeInTheDocument()
-                    expect(
-                        screen.getByText('MCR-MN-0005-SNBC')
-                    ).toBeInTheDocument()
-                    // expect submission approval banner to be on screen
-                    expect(
-                        screen.getByTestId('submissionApprovedBanner')
-                    ).toBeInTheDocument()
-                })
+            await waitFor(() => {
+                expect(
+                    screen.getByTestId('submission-side-nav')
+                ).toBeInTheDocument()
+                expect(screen.getByText('MCR-MN-0005-SNBC')).toBeInTheDocument()
+                expect(
+                    screen.getByText('Submission description')
+                ).toBeInTheDocument()
             })
-        }
-    )
 
-    it('does not render the unlock submission button for an approved contract', async () => {
-        const contract = mockContractPackageApproved()
-        renderWithProviders(
-            <Routes>
-                <Route element={<SubmissionSideNav />}>
-                    <Route
-                        path={RoutesRecord.SUBMISSIONS_SUMMARY}
-                        element={<SubmissionSummary />}
-                    />
-                </Route>
-            </Routes>,
-            {
-                apolloProvider: {
-                    mocks: [
-                        fetchCurrentUserMock({
-                            user: mockValidCMSUser(),
-                            statusCode: 200,
-                        }),
-                        fetchContractWithQuestionsMockSuccess({
-                            contract,
-                        }),
-                        fetchContractMockSuccess({
-                            contract,
-                        }),
-                    ],
-                },
-                routerProvider: {
-                    route: '/submissions/test-abc-123',
-                },
-                featureFlags: {
-                    'submission-approvals': true,
-                },
-            }
-        )
-
-        await waitFor(() => {
+            // expect submission released to state button to not exist
             expect(
-                screen.getByTestId('submission-side-nav')
-            ).toBeInTheDocument()
-            expect(screen.getByText('MCR-MN-0005-SNBC')).toBeInTheDocument()
+                screen.queryByRole('link', { name: 'Released to state' })
+            ).toBeNull()
         })
 
-        const unlockBtn = screen.queryByRole('button', {
-            name: 'Unlock submission',
+        it(`renders approval banner on approved submissions`, async () => {
+            const contract = mockContractPackageSubmittedWithQuestions(
+                'test-abc-123',
+                {
+                    status: 'RESUBMITTED',
+                    reviewStatus: 'APPROVED',
+                    consolidatedStatus: 'APPROVED',
+                    reviewStatusActions: [
+                        {
+                            actionType: 'MARK_AS_APPROVED',
+                            contractID: 'test-abc-123',
+                            updatedAt: new Date(),
+                            updatedBy: {
+                                email: 'cmsapprover@example.com',
+                                familyName: 'Smith',
+                                givenName: 'John',
+                                role: 'CMS_APPROVER_USER',
+                            },
+                            updatedReason: 'Some approval reason',
+                        },
+                    ],
+                }
+            )
+
+            renderWithProviders(
+                <Routes>
+                    <Route element={<SubmissionSideNav />}>
+                        <Route
+                            path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                            element={<SubmissionSummary />}
+                        />
+                    </Route>
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                user: mockValidStateUser(),
+                                statusCode: 200,
+                            }),
+                            fetchContractWithQuestionsMockSuccess({
+                                contract,
+                            }),
+                            fetchContractMockSuccess({
+                                contract,
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/test-abc-123',
+                    },
+                    featureFlags: {
+                        'submission-approvals': true,
+                    },
+                }
+            )
+
+            await waitFor(() => {
+                expect(
+                    screen.getByTestId('submission-side-nav')
+                ).toBeInTheDocument()
+                expect(screen.getByText('MCR-MN-0005-SNBC')).toBeInTheDocument()
+            })
+
+            // expect submission approval banner to be on screen
+            expect(
+                screen.getByTestId('submissionApprovedBanner')
+            ).toBeInTheDocument()
+
+            // expect submission updated banner to not be on screen.
+            expect(screen.queryByTestId('updatedSubmissionBanner')).toBeNull()
         })
-        expect(unlockBtn).not.toBeInTheDocument()
     })
 
-    describe.each(iterableNonCMSUsersMockData)(
-        '$userRole submission approval tests',
+    describe.each(iterableAdminUsersMockData)(
+        '$userRole submission tests',
         ({ mockUser }) => {
             it(`does not render released to state button`, async () => {
                 const contract =
@@ -1498,6 +1822,116 @@ describe('SubmissionSummary', () => {
                 expect(
                     screen.queryByTestId('updatedSubmissionBanner')
                 ).toBeNull()
+            })
+
+            it('renders incomplete submission UI on submitted submission', async () => {
+                const contract = mockContractPackageSubmitted({
+                    id: 'test-abc-123',
+                })
+                contract.packageSubmissions[0].rateRevisions = []
+
+                renderWithProviders(
+                    <Routes>
+                        <Route element={<SubmissionSideNav />}>
+                            <Route
+                                path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                                element={<SubmissionSummary />}
+                            />
+                        </Route>
+                    </Routes>,
+                    {
+                        apolloProvider: {
+                            mocks: [
+                                fetchCurrentUserMock({
+                                    user: mockUser(),
+                                    statusCode: 200,
+                                }),
+                                fetchContractWithQuestionsMockSuccess({
+                                    contract,
+                                }),
+                                fetchContractMockSuccess({
+                                    contract,
+                                }),
+                            ],
+                        },
+                        routerProvider: {
+                            route: '/submissions/test-abc-123',
+                        },
+                        featureFlags: {},
+                    }
+                )
+
+                await waitFor(() => {
+                    expect(
+                        screen.getByTestId('error-alert')
+                    ).toBeInTheDocument()
+                    expect(
+                        screen.getByText('Incomplete Submission')
+                    ).toBeInTheDocument()
+
+                    expect(
+                        screen.getAllByText(
+                            'CMS must unlock the submission so the state can add a rate certification.'
+                        )
+                    ).toHaveLength(2)
+                })
+            })
+
+            it('does not render incomplete submission UI on unlocked submission', async () => {
+                const contract = mockContractPackageUnlockedWithUnlockedType({
+                    id: 'test-abc-123',
+                })
+                contract.packageSubmissions[0].rateRevisions = []
+
+                renderWithProviders(
+                    <Routes>
+                        <Route element={<SubmissionSideNav />}>
+                            <Route
+                                path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                                element={<SubmissionSummary />}
+                            />
+                        </Route>
+                    </Routes>,
+                    {
+                        apolloProvider: {
+                            mocks: [
+                                fetchCurrentUserMock({
+                                    user: mockUser(),
+                                    statusCode: 200,
+                                }),
+                                fetchContractWithQuestionsMockSuccess({
+                                    contract,
+                                }),
+                                fetchContractMockSuccess({
+                                    contract,
+                                }),
+                            ],
+                        },
+                        routerProvider: {
+                            route: '/submissions/test-abc-123',
+                        },
+                        featureFlags: {},
+                    }
+                )
+
+                await waitFor(() => {
+                    expect(
+                        screen.getByTestId('unlockedBanner')
+                    ).toBeInTheDocument()
+                })
+
+                expect(
+                    screen.queryByRole('error-alert')
+                ).not.toBeInTheDocument()
+                expect(
+                    screen.queryByRole('Incomplete Submission')
+                ).not.toBeInTheDocument()
+
+                expect(
+                    screen.queryAllByText(
+                        'CMS must unlock the submission so the state can add a rate certification.'
+                    )
+                ).toHaveLength(0)
             })
         }
     )

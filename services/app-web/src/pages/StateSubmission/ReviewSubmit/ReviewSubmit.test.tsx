@@ -324,4 +324,45 @@ describe('ReviewSubmit', () => {
         ).not.toBeInTheDocument()
         expect(await screen.queryByText('SHARED')).not.toBeInTheDocument()
     })
+
+    it('renders inline error when contract and rates submissions does not have any rate certifications', async () => {
+        const unlockedContract = mockContractPackageUnlockedWithUnlockedType({
+            id: 'test-abc-123',
+        })
+        unlockedContract.draftRates = []
+
+        renderWithProviders(
+            <Routes>
+                <Route
+                    path={RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT}
+                    element={<ReviewSubmit />}
+                />
+            </Routes>,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({ statusCode: 200 }),
+                        fetchContractMockSuccess({
+                            contract: unlockedContract,
+                        }),
+                    ],
+                },
+                routerProvider: {
+                    route: '/submissions/test-abc-123/edit/review-and-submit',
+                },
+                featureFlags: {},
+            }
+        )
+
+        await waitFor(() => {
+            expect(
+                screen.getByRole('heading', { name: 'Rate details' })
+            ).toBeInTheDocument()
+            expect(
+                screen.getByText(
+                    'You must add a rate certification before you can resubmit.'
+                )
+            ).toBeInTheDocument()
+        })
+    })
 })

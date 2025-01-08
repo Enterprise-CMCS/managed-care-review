@@ -120,6 +120,22 @@ const modalValueDictionary: { [Property in SharedModalType]: ModalValueType } =
         },
     }
 
+// Temporary fix for MCR-4871 to validate contract and rates submission until we can refactor API to validate and move off of HPP helper functions in tests.
+const validateContractAndRatesSubmission = async (
+    submissionData: Contract,
+    callback: () => Promise<unknown>
+): Promise<unknown | Error> => {
+    if (
+        submissionData.draftRevision?.formData.submissionType ===
+            'CONTRACT_AND_RATES' &&
+        submissionData.draftRates &&
+        submissionData.draftRates.length === 0
+    ) {
+        return new Error('Your submission is missing information.')
+    }
+    return await callback()
+}
+
 export const UnlockSubmitModal = ({
     submissionData,
     submissionName,
@@ -203,17 +219,25 @@ export const UnlockSubmitModal = ({
                 console.info('submit rate not implemented yet')
                 break
             case 'SUBMIT_CONTRACT':
-                result = await submitMutationWrapperV2(
-                    submitContract,
-                    submissionData.id,
-                    unlockSubmitModalInput
+                result = await validateContractAndRatesSubmission(
+                    submissionData,
+                    () =>
+                        submitMutationWrapperV2(
+                            submitContract,
+                            submissionData.id,
+                            unlockSubmitModalInput
+                        )
                 )
                 break
             case 'RESUBMIT_CONTRACT':
-                result = await submitMutationWrapperV2(
-                    submitContract,
-                    submissionData.id,
-                    unlockSubmitModalInput
+                result = await validateContractAndRatesSubmission(
+                    submissionData,
+                    () =>
+                        submitMutationWrapperV2(
+                            submitContract,
+                            submissionData.id,
+                            unlockSubmitModalInput
+                        )
                 )
                 break
             case 'UNLOCK_CONTRACT':
