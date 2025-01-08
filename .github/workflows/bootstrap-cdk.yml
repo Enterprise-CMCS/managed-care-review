@@ -39,6 +39,6 @@ jobs:
       - name: Bootstrap CDK
         run: |
           pushd infrastructure/cdk && \
-          pnpm install && pnpm build \
+          pnpm install && pnpm build && \
           pnpm dlx cdk bootstrap \
             aws://${{ secrets.aws_account_id }}/${{ vars.AWS_DEFAULT_REGION }}
