@@ -10,9 +10,13 @@ import { hasCMSPermissions } from '../../domain-models'
 import { logError, logSuccess } from '../../logger'
 import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
 import { GraphQLError } from 'graphql/index'
-import { Emailer } from '../../emailer'
+import type { Emailer } from '../../emailer'
+import type { StateCodeType } from '../../testHelpers'
 
-export function withdrawRate(store: Store, emailer: Emailer): MutationResolvers['withdrawRate'] {
+export function withdrawRate(
+    store: Store,
+    emailer: Emailer
+): MutationResolvers['withdrawRate'] {
     return async (_parent, { input }, context) => {
         const { user, ctx, tracer } = context
         const span = tracer?.startSpan('withdrawRate', {}, ctx)
@@ -148,13 +152,50 @@ export function withdrawRate(store: Store, emailer: Emailer): MutationResolvers[
             })
         }
 
-        const sendWithdrawEmail = await emailer.sendWithdrawnRateStateEmail(
-            withdrawnRate,
-            statePrograms
+        let stateAnalystsEmails: string[] = []
+        // not great that state code type isn't being used in ContractType but I'll risk the conversion for now
+        const stateAnalystsEmailsResult = await store.findStateAssignedUsers(
+            withdrawnRate.stateCode as StateCodeType
         )
 
-        if (sendWithdrawEmail instanceof Error) {
-            const errMessage = `Email failed: ${sendWithdrawEmail.message}`
+        if (stateAnalystsEmailsResult instanceof Error) {
+            logError(
+                'getStateAnalystsEmails',
+                stateAnalystsEmailsResult.message
+            )
+            setErrorAttributesOnActiveSpan(
+                stateAnalystsEmailsResult.message,
+                span
+            )
+        } else {
+            stateAnalystsEmails = stateAnalystsEmailsResult.map((u) => u.email)
+        }
+
+        const sendWithdrawCMSEmail = await emailer.sendWithdrawnRateCMSEmail(
+            withdrawnRate,
+            statePrograms,
+            stateAnalystsEmails
+        )
+
+        const sendWithdrawStateEmail =
+            await emailer.sendWithdrawnRateStateEmail(
+                withdrawnRate,
+                statePrograms
+            )
+
+        if (
+            sendWithdrawStateEmail instanceof Error ||
+            sendWithdrawCMSEmail instanceof Error
+        ) {
+            let errMessage = ''
+
+            if (sendWithdrawStateEmail instanceof Error) {
+                errMessage = `State Email failed: ${sendWithdrawStateEmail.message}`
+            }
+            if (sendWithdrawCMSEmail instanceof Error) {
+                errMessage = `CMS Email failed: ${sendWithdrawCMSEmail.message}`
+            }
+
             logError('withdrawRate', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new GraphQLError(errMessage, {
