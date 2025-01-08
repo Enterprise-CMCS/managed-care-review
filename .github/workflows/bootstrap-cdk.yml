@@ -41,4 +41,4 @@ jobs:
           pushd infrastructure/cdk && \
           pnpm install && pnpm build && \
           pnpm dlx cdk bootstrap \
-            aws://${{ secrets.aws_account_id }}/${{ vars.AWS_DEFAULT_REGION }}
+            aws://${{ secrets.DEV_AWS_ACCOUNT_ID }}/${{ vars.AWS_DEFAULT_REGION }}
