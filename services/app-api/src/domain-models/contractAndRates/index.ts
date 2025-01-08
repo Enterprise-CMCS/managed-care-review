@@ -36,6 +36,10 @@ export {
 } from './helpers'
 export type { ContractType, UnlockedContractType } from './contractTypes'
 export type { RateType } from './rateTypes'
+export type {
+    RateReviewActionType,
+    RateReviewType,
+} from './rateReviewActionType'
 
 export type { PackageStatusType, UpdateInfoType } from './updateInfoType'
 
