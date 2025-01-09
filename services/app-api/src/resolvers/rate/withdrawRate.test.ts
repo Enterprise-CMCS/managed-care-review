@@ -771,7 +771,7 @@ describe('withdrawRate', () => {
         )
     }, 10000)
 
-    it('sends an email to state contacts when a rate is withdrawn', async () => {
+    it('sends emails to state and CMS when a rate is withdrawn', async () => {
         const emailConfig = testEmailConfig()
         const mockEmailer = testEmailer(emailConfig)
         const stateUser = testStateUser()
@@ -848,22 +848,42 @@ describe('withdrawRate', () => {
 
         await withdrawTestRate(cmsServer, rateID, 'Withdraw invalid rate')
 
-        // expect email to contain correct subject
+        // expect CMS email to contain correct subject
         expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
             3,
             expect.objectContaining({
                 subject: expect.stringContaining(`${rateName} was withdrawn`),
                 sourceEmail: emailConfig.emailSource,
-                toAddresses: expect.arrayContaining(
-                    Array.from(stateReceiverEmails)
-                ),
+                toAddresses: expect.arrayContaining([
+                    ...testEmailConfig().dmcpSubmissionEmails,
+                    ...testEmailConfig().oactEmails,
+                ]),
                 bodyHTML: expect.stringContaining(contractAName),
             })
         )
 
-        // expect contract B to be in the email
+        // expect contract B to be in the CMS email
         expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
             3,
+            expect.objectContaining({
+                bodyHTML: expect.stringContaining(contractBName),
+            })
+        )
+
+        // expect state email to contain correct subject
+        expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
+            4,
+            expect.objectContaining({
+                subject: expect.stringContaining(`${rateName} was withdrawn`),
+                sourceEmail: emailConfig.emailSource,
+                toAddresses: expect.arrayContaining(stateReceiverEmails),
+                bodyHTML: expect.stringContaining(contractAName),
+            })
+        )
+
+        // expect contract B to be in the state email
+        expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
+            4,
             expect.objectContaining({
                 bodyHTML: expect.stringContaining(contractBName),
             })
