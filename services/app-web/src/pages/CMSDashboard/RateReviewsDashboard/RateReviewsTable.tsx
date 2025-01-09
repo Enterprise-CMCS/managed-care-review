@@ -31,7 +31,7 @@ import {
     FilterOptionType,
     FilterDateRange,
 } from '../../../components/FilterAccordion'
-import { pluralize } from '@mc-review/common-code'
+import { pluralize, titleCaseString } from '@mc-review/common-code'
 import { DoubleColumnGrid } from '../../../components'
 import { FilterDateRangeRef } from '../../../components/FilterAccordion/FilterDateRange/FilterDateRange'
 import { Loading, NavLinkWithLogging } from '../../../components'
@@ -177,7 +177,10 @@ const getSelectedFiltersFromColumnState = (
 
     const filterValues = valuesFromUrl
         .filter((item) => item.id === id)
-        .map((item) => ({ value: item.value, label: item.value }))
+        .map((item) => ({
+            value: item.value,
+            label: titleCaseString(item.value),
+        }))
 
     return filterValues as FilterOptionType[]
 }
