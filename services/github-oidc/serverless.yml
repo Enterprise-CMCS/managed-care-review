@@ -47,6 +47,7 @@ params:
       - 'cognito-identity:*'
       - 'cognito-idp:*'
       - 'ec2:*'
+      - 'ecr:*'
       - 'events:*'
       - 'firehose:*'
       - 'iam:*'
