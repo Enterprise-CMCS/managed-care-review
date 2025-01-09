@@ -70,7 +70,7 @@ type PackageNamesLookupType = {
 export function renderDownloadButton(
     zippedFilesURL: string | undefined | Error
 ) {
-    if (zippedFilesURL instanceof Error) {
+    if (zippedFilesURL instanceof Error || !zippedFilesURL) {
         return (
             <InlineDocumentWarning message="Rate document download is unavailable" />
         )
@@ -115,7 +115,7 @@ export const RateDetailsSummarySection = ({
                 acc.push(latestRevision)
             }
             return acc
-        }, [] as RateRevision[]) || []
+        }, [] as RateRevision[]) ?? []
 
     // Calculate last submitted data for document upload tables
     const lastSubmittedIndex = getIndexFromRevisionVersion(
@@ -237,8 +237,10 @@ export const RateDetailsSummarySection = ({
         // get all the keys for the documents we want to zip
         async function fetchZipUrl() {
             const submittedRates =
-                getLastContractSubmission(contract)?.rateRevisions
-            if (submittedRates !== undefined) {
+                getLastContractSubmission(contract)?.rateRevisions ?? []
+
+            // skip if no rates
+            if (submittedRates.length > 0) {
                 const keysFromDocs = submittedRates
                     .flatMap((rateInfo) =>
                         rateInfo.formData.rateDocuments.concat(
@@ -289,6 +291,12 @@ export const RateDetailsSummarySection = ({
                 isAdminUser && !isLinkedRate && !isPreviousSubmission,
         })
 
+    const showDownloadAllButton =
+        isSubmittedOrCMSUser &&
+        !isPreviousSubmission &&
+        rateRevs &&
+        rateRevs.length > 0
+
     const noRatesMessage = () => {
         if (isStateUser) {
             return isSubmitted
@@ -309,9 +317,7 @@ export const RateDetailsSummarySection = ({
                 header="Rate details"
                 editNavigateTo={editNavigateTo}
             >
-                {isSubmittedOrCMSUser &&
-                    !isPreviousSubmission &&
-                    renderDownloadButton(zippedFilesURL)}
+                {showDownloadAllButton && renderDownloadButton(zippedFilesURL)}
             </SectionHeader>
             {rateRevs && rateRevs.length > 0
                 ? rateRevs.map((rateRev) => {
