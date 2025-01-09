@@ -80,6 +80,9 @@ const withdrawRateInsideTransaction = async (
         ...new Set([...submittedContractsIds, ...draftContractsIds]),
     ]
 
+    // Get the contractIDs of the latest submission package of each related submission
+    const latestRateRev = rate.revisions[0]
+
     // get data for every contract
     const contracts = await tx.contractTable.findMany({
         where: {
@@ -122,7 +125,7 @@ const withdrawRateInsideTransaction = async (
             const unlockedContract = await unlockContractInsideTransaction(tx, {
                 contractID: contract.id,
                 unlockedByUserID: updatedByID,
-                unlockReason: args.updatedReason,
+                unlockReason: `CMS withdrawing rate ${latestRateRev.rateCertificationName} from this submission. ${args.updatedReason}`,
             })
 
             if (unlockedContract instanceof Error) {
@@ -240,7 +243,7 @@ const withdrawRateInsideTransaction = async (
             const resubmitContractArgs: SubmitContractArgsType = {
                 contractID: contract.id,
                 submittedByUserID: updatedByID,
-                submittedReason: args.updatedReason,
+                submittedReason: `CMS has withdrawn rate ${latestRateRev.rateCertificationName} from this submission. ${args.updatedReason}`,
             }
             const resubmitResult = await submitContractInsideTransaction(
                 tx,
