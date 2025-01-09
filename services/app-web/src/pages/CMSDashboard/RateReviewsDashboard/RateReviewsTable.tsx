@@ -31,7 +31,7 @@ import {
     FilterOptionType,
     FilterDateRange,
 } from '../../../components/FilterAccordion'
-import { pluralize } from '@mc-review/common-code'
+import { pluralize, titleCaseString } from '@mc-review/common-code'
 import { DoubleColumnGrid } from '../../../components'
 import { FilterDateRangeRef } from '../../../components/FilterAccordion/FilterDateRange/FilterDateRange'
 import { Loading, NavLinkWithLogging } from '../../../components'
@@ -77,6 +77,21 @@ const rateTypeOptions = [
     {
         label: 'Amendment',
         value: 'Amendment',
+    },
+]
+
+const rateStatusOptions = [
+    {
+        label: 'Submitted',
+        value: 'SUBMITTED',
+    },
+    {
+        label: 'Unlocked',
+        value: 'UNLOCKED',
+    },
+    {
+        label: 'Withdrawn',
+        value: 'WITHDRAWN',
     },
 ]
 
@@ -162,7 +177,10 @@ const getSelectedFiltersFromColumnState = (
 
     const filterValues = valuesFromUrl
         .filter((item) => item.id === id)
-        .map((item) => ({ value: item.value, label: item.value }))
+        .map((item) => ({
+            value: item.value,
+            label: titleCaseString(item.value),
+        }))
 
     return filterValues as FilterOptionType[]
 }
@@ -414,7 +432,9 @@ export const RateReviewsTable = ({
     const rateDateStartColumn = reactTable.getColumn(
         'rateDateStart'
     ) as Column<RateInDashboardType>
-
+    const statusColumn = reactTable.getColumn(
+        'status'
+    ) as Column<RateInDashboardType>
     // Filter options based on table data instead of static list of options.
     const stateFilterOptions = Array.from(
         stateColumn.getFacetedUniqueValues().keys()
@@ -632,6 +652,24 @@ export const RateReviewsTable = ({
                                     ),
                             }}
                         />
+                        <DoubleColumnGrid>
+                            <FilterSelect
+                                value={getSelectedFiltersFromColumnState(
+                                    columnFilters,
+                                    'status'
+                                )}
+                                name="status"
+                                label="Status"
+                                filterOptions={rateStatusOptions}
+                                onChange={(selectedOptions) =>
+                                    updateFilters(
+                                        statusColumn,
+                                        selectedOptions,
+                                        'status'
+                                    )
+                                }
+                            />
+                        </DoubleColumnGrid>
                     </FilterAccordion>
                     <div aria-live="polite" aria-atomic>
                         <div className={styles.filterCount}>
