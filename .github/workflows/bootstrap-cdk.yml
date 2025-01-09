@@ -41,4 +41,6 @@ jobs:
           pushd infrastructure/cdk && \
           pnpm install && pnpm build && \
           pnpm dlx cdk bootstrap \
+            --custom-permissions-boundary "arn:aws:iam::${{secrets.DEV_AWS_ACCOUNT_ID}}:policy/cms-cloud-admin/ct-ado-poweruser-permissions-boundary-policy" \
+            --toolkit-stack-name CDKToolkitMCReviewDev \
             aws://${{ secrets.DEV_AWS_ACCOUNT_ID }}/${{ vars.AWS_DEFAULT_REGION }}
