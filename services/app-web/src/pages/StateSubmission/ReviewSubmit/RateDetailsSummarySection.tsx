@@ -41,6 +41,7 @@ import { useParams } from 'react-router-dom'
 import { LinkWithLogging } from '../../../components/TealiumLogging/Link'
 import classnames from 'classnames'
 import { hasCMSUserPermissions } from '@mc-review/helpers'
+import { InfoTag } from '../../../components/InfoTag/InfoTag'
 
 export type RateDetailsSummarySectionProps = {
     contract: Contract | UnlockedContract
@@ -106,6 +107,15 @@ export const RateDetailsSummarySection = ({
     const rateRevs = rateRevisions
         ? rateRevisions
         : getVisibleLatestRateRevisions(contract, isEditing)
+
+    const withdrawnRateRevisions: RateRevision[] =
+        contract.withdrawnRates?.reduce((acc, rate) => {
+            const latestRevision = rate.packageSubmissions?.[0].rateRevision
+            if (rate.consolidatedStatus === 'WITHDRAWN' && latestRevision) {
+                acc.push(latestRevision)
+            }
+            return acc
+        }, [] as RateRevision[]) || []
 
     // Calculate last submitted data for document upload tables
     const lastSubmittedIndex = getIndexFromRevisionVersion(
@@ -575,6 +585,21 @@ export const RateDetailsSummarySection = ({
                 : (isSubmitted || isStateUser) && (
                       <DataDetailMissingField requiredText={noRatesMessage()} />
                   )}
+            {withdrawnRateRevisions.length > 0 &&
+                withdrawnRateRevisions.map((rateRev) => (
+                    <SectionCard
+                        id={`withdrawn-rate-${rateRev.id}`}
+                        key={rateRev.id}
+                    >
+                        <h3
+                            aria-label={`Rate ID: ${rateRev.formData.rateCertificationName}`}
+                            className={styles.rateName}
+                        >
+                            <InfoTag color="gray-medium">WITHDRAWN</InfoTag>{' '}
+                            {rateRev.formData.rateCertificationName}
+                        </h3>
+                    </SectionCard>
+                ))}
         </SectionCard>
     )
 }
