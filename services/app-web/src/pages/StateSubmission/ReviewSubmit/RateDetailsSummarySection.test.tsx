@@ -11,6 +11,7 @@ import {
     mockContractPackageUnlockedWithUnlockedType,
     mockContractWithLinkedRateDraft,
     mockContractWithLinkedRateSubmitted,
+    mockWithdrawnRates,
 } from '@mc-review/mocks'
 import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import { RateDetailsSummarySection } from './RateDetailsSummarySection'
@@ -1335,95 +1336,7 @@ describe('RateDetailsSummarySection', () => {
 
     it('displays withdrawn rates', async () => {
         const contractWithWithdrawnRates = mockContractPackageSubmitted({
-            withdrawnRates: [
-                {
-                    id: '1234',
-                    webURL: 'https://testmcreview.example/rates/1234',
-                    createdAt: new Date('01/01/2021'),
-                    updatedAt: new Date('01/01/2021'),
-                    status: 'SUBMITTED',
-                    reviewStatus: 'WITHDRAWN',
-                    consolidatedStatus: 'WITHDRAWN',
-                    state: mockMNState(),
-                    stateCode: 'MN',
-                    stateNumber: 5,
-                    parentContractID: 'test-abc-123',
-                    revisions: [],
-                    packageSubmissions: [
-                        {
-                            cause: 'CONTRACT_SUBMISSION',
-                            submitInfo: {
-                                updatedAt: new Date('01/01/2021'),
-                                updatedBy: {
-                                    email: 'testCMS@example.com',
-                                    familyName: 'Hotman',
-                                    givenName: 'Zuko',
-                                    role: 'CMS_USER',
-                                },
-                                updatedReason: 'Test reason',
-                            },
-                            contractRevisions: [],
-                            rateRevision: {
-                                id: '1234',
-                                rateID: '5678',
-                                createdAt: new Date('01/01/2021'),
-                                updatedAt: new Date('01/01/2021'),
-                                formData: {
-                                    rateType: 'NEW',
-                                    rateCapitationType: 'RATE_CELL',
-                                    rateDocuments: [
-                                        {
-                                            s3URL: 's3://foo/bar/rate',
-                                            name: 'rate docs test 1',
-                                            sha256: 'fakesha',
-                                            dateAdded: new Date(),
-                                        },
-                                    ],
-                                    supportingDocuments: [],
-                                    rateDateStart: new Date('01/01/2021'),
-                                    rateDateEnd: new Date('12/31/2021'),
-                                    rateDateCertified: new Date('12/31/2020'),
-                                    amendmentEffectiveDateStart: new Date(
-                                        '01/01/2021'
-                                    ),
-                                    amendmentEffectiveDateEnd: new Date(
-                                        '12/31/2021'
-                                    ),
-                                    rateCertificationName:
-                                        'WITHDRAWN-RATE-NAME',
-                                    rateProgramIDs: [
-                                        'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
-                                    ],
-                                    deprecatedRateProgramIDs: [],
-                                    consolidatedRateProgramIDs: [
-                                        'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
-                                    ],
-                                    certifyingActuaryContacts: [
-                                        {
-                                            actuarialFirm: 'DELOITTE',
-                                            name: 'Jimmy Jimerson',
-                                            titleRole: 'Certifying Actuary',
-                                            email: 'jj.actuary@test.com',
-                                        },
-                                    ],
-                                    addtlActuaryContacts: [
-                                        {
-                                            actuarialFirm: 'DELOITTE',
-                                            name: 'Additional actuary',
-                                            titleRole: 'Test Actuary Contact 1',
-                                            email: 'additionalactuarycontact1@test.com',
-                                        },
-                                    ],
-                                    actuaryCommunicationPreference:
-                                        'OACT_TO_ACTUARY',
-                                    packagesWithSharedRateCerts: [],
-                                },
-                            },
-                            submittedRevisions: [],
-                        },
-                    ],
-                },
-            ],
+            withdrawnRates: mockWithdrawnRates(),
         })
 
         renderWithProviders(
@@ -1455,11 +1368,17 @@ describe('RateDetailsSummarySection', () => {
             ).toBeInTheDocument()
         })
 
-        // expect withdrawn rate to be on the screen
+        // expect withdrawn rates to be on the screen
         expect(
             screen.getByRole('heading', {
                 level: 3,
-                name: /WITHDRAWN-RATE-NAME/,
+                name: /WITHDRAWN-RATE-1-NAME/,
+            })
+        ).toBeInTheDocument()
+        expect(
+            screen.getByRole('heading', {
+                level: 3,
+                name: /WITHDRAWN-RATE-2-NAME/,
             })
         ).toBeInTheDocument()
     })
