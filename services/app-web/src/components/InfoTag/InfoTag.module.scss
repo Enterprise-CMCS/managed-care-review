@@ -13,6 +13,11 @@
     color: custom.$mcr-foundation-ink;
 }
 
+.gray-medium {
+    @include uswds.u-bg('gray-60');
+    color: custom.$mcr-foundation-white;
+}
+
 .light-green {
     @include uswds.u-bg('green-cool-20v');
     color: custom.$mcr-foundation-ink;
