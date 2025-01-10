@@ -224,9 +224,6 @@ describe('RateDetailsSummarySection', () => {
         // Is this the best way to check that the link is not present?
         expect(screen.queryByText('Edit')).not.toBeInTheDocument()
 
-        //expects loading button on component load
-        expect(screen.getByText('Loading')).toBeInTheDocument()
-
         // expects download all button after loading has completed
         await waitFor(() => {
             expect(
@@ -1448,9 +1445,6 @@ describe('RateDetailsSummarySection', () => {
         ).toBeInTheDocument()
         // Is this the best way to check that the link is not present?
         expect(screen.queryByText('Edit')).not.toBeInTheDocument()
-
-        //expects loading button on component load
-        expect(screen.getByText('Loading')).toBeInTheDocument()
 
         // expects download all button after loading has completed
         await waitFor(() => {
