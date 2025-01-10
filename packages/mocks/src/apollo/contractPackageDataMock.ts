@@ -7,6 +7,7 @@ import {
     UnlockedContract,
     CmsUser,
     StateUser,
+    Rate,
 } from '../gen/gqlClient'
 import { s3DlUrl } from './documentDataMock'
 
@@ -2833,6 +2834,95 @@ const mockEmptyDraftContractAndRate = (): Contract =>
         withdrawnRates: [],
     })
 
+const mockWithdrawnRates = (parentContractID?: string): Rate[] => {
+    return [
+        {
+            id: '1234',
+            webURL: 'https://testmcreview.example/rates/1234',
+            createdAt: new Date('01/01/2021'),
+            updatedAt: new Date('01/01/2021'),
+            status: 'SUBMITTED',
+            reviewStatus: 'WITHDRAWN',
+            consolidatedStatus: 'WITHDRAWN',
+            state: mockMNState(),
+            stateCode: 'MN',
+            stateNumber: 5,
+            parentContractID: parentContractID ?? 'test-abc-123',
+            revisions: [],
+            packageSubmissions: [
+                {
+                    cause: 'CONTRACT_SUBMISSION',
+                    submitInfo: {
+                        updatedAt: new Date('01/01/2021'),
+                        updatedBy: {
+                            email: 'testCMS@example.com',
+                            familyName: 'Hotman',
+                            givenName: 'Zuko',
+                            role: 'CMS_USER',
+                        },
+                        updatedReason: 'Withdrawn rate reason',
+                    },
+                    contractRevisions: [],
+                    rateRevision: {
+                        id: 'test-rate-revision-id',
+                        rateID: '1234',
+                        createdAt: new Date('01/01/2021'),
+                        updatedAt: new Date('01/01/2021'),
+                        formData: {
+                            ...mockRateRevision().formData,
+                            rateCertificationName:
+                                'WITHDRAWN-RATE-1-NAME'
+                        },
+                    },
+                    submittedRevisions: [],
+                },
+            ],
+        },
+        {
+            id: '5678',
+            webURL: 'https://testmcreview.example/rates/5678',
+            createdAt: new Date('01/01/2021'),
+            updatedAt: new Date('01/01/2021'),
+            status: 'SUBMITTED',
+            reviewStatus: 'WITHDRAWN',
+            consolidatedStatus: 'WITHDRAWN',
+            state: mockMNState(),
+            stateCode: 'MN',
+            stateNumber: 5,
+            parentContractID: parentContractID ?? 'test-abc-123',
+            revisions: [],
+            packageSubmissions: [
+                {
+                    cause: 'CONTRACT_SUBMISSION',
+                    submitInfo: {
+                        updatedAt: new Date('01/01/2021'),
+                        updatedBy: {
+                            email: 'testCMS@example.com',
+                            familyName: 'Hotman',
+                            givenName: 'Zuko',
+                            role: 'CMS_USER',
+                        },
+                        updatedReason: 'Withdrawn rate reason',
+                    },
+                    contractRevisions: [],
+                    rateRevision: {
+                        id: 'test-rate-revision-id',
+                        rateID: '5678',
+                        createdAt: new Date('01/01/2021'),
+                        updatedAt: new Date('01/01/2021'),
+                        formData: {
+                            ...mockRateRevision().formData,
+                            rateCertificationName:
+                                'WITHDRAWN-RATE-2-NAME'
+                        },
+                    },
+                    submittedRevisions: [],
+                },
+            ],
+        },
+    ]
+}
+
 export {
     mockContractRevision,
     mockContractPackageDraft,
@@ -2848,4 +2938,5 @@ export {
     mockContractPackageSubmittedWithQuestions,
     mockContractPackageApproved,
     mockContractPackageApprovedWithQuestions,
+    mockWithdrawnRates
 }

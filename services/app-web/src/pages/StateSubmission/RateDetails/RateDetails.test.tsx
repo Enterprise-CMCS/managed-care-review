@@ -13,19 +13,16 @@ import {
     updateDraftContractRatesMockSuccess,
     mockContractWithLinkedRateDraft,
     mockContractPackageDraft,
+    rateDataMock,
+    rateRevisionDataMock,
+    draftRateDataMock,
+    fetchDraftRateMockSuccess,
+    indexRatesMockSuccess,
+    mockWithdrawnRates,
 } from '@mc-review/mocks'
 import { Route, Routes, Location } from 'react-router-dom'
 import { RoutesRecord } from '@mc-review/constants'
 import userEvent from '@testing-library/user-event'
-import {
-    rateDataMock,
-    rateRevisionDataMock,
-    draftRateDataMock,
-} from '@mc-review/mocks'
-import {
-    fetchDraftRateMockSuccess,
-    indexRatesMockSuccess,
-} from '@mc-review/mocks'
 import {
     clickAddNewRate,
     fillOutFirstRate,
@@ -1672,6 +1669,61 @@ describe('RateDetails', () => {
             const removeButtonsPostRemoval =
                 screen.getAllByTestId('removeContactBtn')
             expect(removeButtonsPostRemoval).toHaveLength(2)
+        })
+    })
+
+    describe('handles withdrawn rates', () => {
+        const withdrawnRates = mockWithdrawnRates()
+        it('renders withdrawn rates', async () => {
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_RATE_DETAILS}
+                        element={<RateDetails type="MULTI" />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    ...mockContractWithLinkedRateDraft(),
+                                    id: 'test-abc-123',
+                                    withdrawnRates,
+                                },
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: `/submissions/test-abc-123/edit/rate-details`,
+                    },
+                    featureFlags: {
+                        'rate-edit-unlock': false,
+                    },
+                }
+            )
+
+            await screen.findByText('Rate Details')
+            expect(
+                screen.getByText(
+                    'Was this rate certification included with another submission?'
+                )
+            ).toBeInTheDocument()
+
+            // expect withdrawn rates to be on the screen
+            expect(
+                screen.getByRole('heading', {
+                    level: 3,
+                    name: /WITHDRAWN-RATE-1-NAME/,
+                })
+            ).toBeInTheDocument()
+            expect(
+                screen.getByRole('heading', {
+                    level: 3,
+                    name: /WITHDRAWN-RATE-2-NAME/,
+                })
+            ).toBeInTheDocument()
         })
     })
 })
