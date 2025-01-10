@@ -59,6 +59,7 @@ params:
       - 'secretsmanager:*'
       - 'ssm:*'
       - 's3:*'
+      - 'tag:*'
       - 'wafv2:*'
       - 'securityhub:*'
 

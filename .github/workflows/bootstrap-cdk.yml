@@ -43,5 +43,11 @@ jobs:
           pnpm dlx cdk bootstrap \
             --cloudformation-execution-policies cms-cloud-admin/ct-ado-poweruser-permissions-boundary-policy \
             --custom-permissions-boundary cms-cloud-admin/ct-ado-poweruser-permissions-boundary-policy \
+            --qualifier mcreview \
+            --bootstrap-role-name delegatedadmin/developer/cdk-bootstrap-role \
             --toolkit-stack-name CDKToolkitMCReviewDev \
+            --cloudformation-execution-role-name delegatedadmin/developer/cdk-cfn-exec-role \
+            --file-asset-publishing-role-name delegatedadmin/developer/cdk-asset-publishing-role \
+            --image-publishing-role-name delegatedadmin/developer/cdk-image-publishing-role \
+            --lookup-role-name delegatedadmin/developer/cdk-lookup-role \
             aws://${{ secrets.DEV_AWS_ACCOUNT_ID }}/${{ vars.AWS_DEFAULT_REGION }}
