@@ -17,9 +17,9 @@
         ]
     },
     "dependencies": {
-        "@aws-sdk/client-cloudformation": "^3.721.0",
-        "@aws-sdk/client-cognito-identity-provider": "^3.721.0",
-        "@aws-sdk/client-s3": "^3.722.0",
+        "@aws-sdk/client-cloudformation": "^3.726.0",
+        "@aws-sdk/client-cognito-identity-provider": "^3.726.0",
+        "@aws-sdk/client-s3": "^3.726.0",
         "@types/papaparse": "^5.3.15",
         "@types/uuid": "^9.0.0",
         "octokit": "^3.1.2",
