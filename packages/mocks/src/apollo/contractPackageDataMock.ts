@@ -1686,6 +1686,7 @@ function mockContractPackageApprovedWithQuestions(
 function mockContractPackageSubmittedWithRevisions(
     partial?: Partial<Contract>
 ): Contract {
+    const contractID = partial?.id || 'test-abc-123'
     return {
         __typename: 'Contract',
         status: 'SUBMITTED',
@@ -1696,7 +1697,7 @@ function mockContractPackageSubmittedWithRevisions(
         lastUpdatedForDisplay: new Date(),
         initiallySubmittedAt: new Date('2024-01-01'),
         mccrsID: null,
-        id: 'test-abc-123',
+        id: contractID,
         webURL: 'https://testmcreview.example/submissions/test-abc-123',
         stateCode: 'MN',
         state: mockMNState(),
@@ -1719,8 +1720,9 @@ function mockContractPackageSubmittedWithRevisions(
                     },
                     updatedReason: 'submit 3',
                 },
-                submittedRevisions: [mockContractRevision('3')],
+                submittedRevisions: [mockContractRevision('3', { contractID })],
                 contractRevision: mockContractRevision('3', {
+                    contractID,
                     unlockInfo: {
                         __typename: 'UpdateInformation',
                         updatedAt: '2024-03-01T17:54:39.173Z',
@@ -1749,8 +1751,9 @@ function mockContractPackageSubmittedWithRevisions(
                     },
                     updatedReason: 'submit 2',
                 },
-                submittedRevisions: [mockContractRevision('2')],
+                submittedRevisions: [mockContractRevision('2', { contractID })],
                 contractRevision: mockContractRevision('2', {
+                    contractID,
                     unlockInfo: {
                         __typename: 'UpdateInformation',
                         updatedAt: '2024-01-25T21:13:56.174Z',
@@ -1779,8 +1782,8 @@ function mockContractPackageSubmittedWithRevisions(
                     },
                     updatedReason: 'submit 1',
                 },
-                submittedRevisions: [mockContractRevision('1')],
-                contractRevision: mockContractRevision('1'),
+                submittedRevisions: [mockContractRevision('1', { contractID })],
+                contractRevision: mockContractRevision('1', { contractID }),
                 rateRevisions: [mockRateRevision('1')],
             },
         ],
@@ -2211,6 +2214,7 @@ function mockContractPackageWithDifferentProgramsInRevisions(): Contract {
 function mockContractPackageUnlockedWithUnlockedType(
     partial?: Partial<UnlockedContract>
 ): UnlockedContract {
+    const contractID = partial?.id ?? 'test-abc-123'
     return {
         status: 'UNLOCKED',
         reviewStatus: 'UNDER_REVIEW',
@@ -2220,7 +2224,7 @@ function mockContractPackageUnlockedWithUnlockedType(
         updatedAt: '2024-12-01T16:54:39.173Z',
         lastUpdatedForDisplay: '2024-12-01T16:54:39.173Z',
         initiallySubmittedAt: new Date('2023-01-01'),
-        id: 'test-abc-123',
+        id: contractID,
         webURL: 'https://testmcreview.example/submissions/test-abc-123',
         stateCode: 'MN',
         state: mockMNState(),
@@ -2228,7 +2232,7 @@ function mockContractPackageUnlockedWithUnlockedType(
         mccrsID: '1234',
         draftRevision: {
             __typename: 'ContractRevision',
-            contractID: 'test-abc-123',
+            contractID,
             submitInfo: null,
             unlockInfo: {
                 __typename: 'UpdateInformation',
@@ -2312,7 +2316,7 @@ function mockContractPackageUnlockedWithUnlockedType(
                 revisions: [],
                 state: mockMNState(),
                 stateNumber: 5,
-                parentContractID: 'test-abc-123',
+                parentContractID: contractID,
                 draftRevision: {
                     __typename: 'RateRevision',
                     id: 'unlocked-rr-123',
@@ -2401,7 +2405,7 @@ function mockContractPackageUnlockedWithUnlockedType(
                         contractName: 'MCR-MN-0005-SNBC',
                         createdAt: new Date('01/01/2024'),
                         updatedAt: '2023-01-01T16:54:39.173Z',
-                        contractID: 'test-abc-123',
+                        contractID,
                         submitInfo: {
                             __typename: 'UpdateInformation',
                             updatedAt: '2023-01-01T16:54:39.173Z',
@@ -2465,7 +2469,7 @@ function mockContractPackageUnlockedWithUnlockedType(
                 ],
                 contractRevision: {
                     __typename: 'ContractRevision',
-                    contractID: 'test-abc-123',
+                    contractID,
                     contractName: 'MCR-MN-0005-SNBC',
                     createdAt: new Date('01/01/2024'),
                     updatedAt: '2024-01-01T18:54:39.173Z',
