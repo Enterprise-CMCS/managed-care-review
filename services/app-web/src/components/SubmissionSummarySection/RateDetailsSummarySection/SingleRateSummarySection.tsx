@@ -117,8 +117,21 @@ export const SingleRateSummarySection = ({
         rate.status === 'SUBMITTED' ||
         rate.status === 'RESUBMITTED' ||
         isCMSUser
+    const isWithdrawn = rate.consolidatedStatus === 'WITHDRAWN'
 
-    const linkedContracts = latestSubmission.contractRevisions
+    const withdrawnFromContractRevs =
+        rate.withdrawnFromContracts?.reduce((acc, contract) => {
+            const latestRevision =
+                contract.packageSubmissions?.[0].contractRevision
+            if (latestRevision) {
+                acc.push(latestRevision)
+            }
+            return acc
+        }, [] as ContractRevision[]) ?? []
+
+    const contractActions = isWithdrawn
+        ? withdrawnFromContractRevs
+        : latestSubmission.contractRevisions
 
     // TODO BULK DOWNLOAD
     // needs to be wrap in a standalone hook
@@ -338,7 +351,7 @@ export const SingleRateSummarySection = ({
                         <DataDetail
                             id="submittedWithContract"
                             label="Contract actions"
-                            children={relatedSubmissions(linkedContracts)}
+                            children={relatedSubmissions(contractActions)}
                         />
                     </Grid>
                 </dl>

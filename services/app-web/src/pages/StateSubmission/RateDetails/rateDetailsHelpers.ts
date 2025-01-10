@@ -144,7 +144,6 @@ const convertIndexRatesGQLRateToRateForm = (getKey: S3ClientT['getKey'], rate?: 
     }
 }
 
-
 // Convert from GQL Rate to FormikRateForm object used in the form
 // if rate is not passed in, return an empty RateForm // we need to pass in the  s3 handler because 3 urls generated client-side
 // useLatestSubmission means to pull the latest submitted info rather than the draft info

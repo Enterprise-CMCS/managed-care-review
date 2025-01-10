@@ -2,6 +2,8 @@ import { renderWithProviders } from '../../../testHelpers'
 import { SingleRateSummarySection } from './SingleRateSummarySection'
 import {
     fetchCurrentUserMock,
+    mockContractPackageSubmittedWithRevisions,
+    mockContractPackageUnlockedWithUnlockedType,
     mockEmptyDraftContractAndRate,
     mockValidCMSUser,
     mockValidHelpDeskUser,
@@ -9,6 +11,7 @@ import {
 } from '@mc-review/mocks'
 import { screen, within } from '@testing-library/react'
 import { rateWithHistoryMock } from '@mc-review/mocks'
+import type { Contract } from '../../../gen/gqlClient'
 
 describe('SingleRateSummarySection', () => {
     it('can render rate details without errors', async () => {
@@ -253,6 +256,82 @@ describe('SingleRateSummarySection', () => {
         expect(
             within(relatedContractActions).getByRole('link', {
                 name: contractPackageName,
+            })
+        ).toHaveAttribute(
+            'href',
+            `/submissions/${parentContractRev.contractID}`
+        )
+    })
+
+    it('renders contract actions correctly after rate withdraw', async () => {
+        const rateData = rateWithHistoryMock()
+        const parentContractRev =
+            rateData.packageSubmissions?.[2].contractRevisions[0]
+        if (!parentContractRev) {
+            throw new Error('no parent')
+        }
+
+        const withdrawnContractOne = mockContractPackageSubmittedWithRevisions({
+            id: 'c-01',
+        })
+
+        const withdrawnContractOnePkgName =
+            withdrawnContractOne.packageSubmissions[0].contractRevision
+                .contractName
+
+        const withdrawnContractTwo =
+            mockContractPackageUnlockedWithUnlockedType({
+                id: 'c-02',
+            })
+
+        const withdrawnContractTwoPkgName =
+            withdrawnContractTwo.packageSubmissions[0].contractRevision
+                .contractName
+
+        const withdrawnFromContracts = [
+            withdrawnContractOne,
+            withdrawnContractTwo as Contract,
+        ]
+
+        // add in contracts this rate was withdrawn from
+        rateData.withdrawnFromContracts = withdrawnFromContracts
+
+        renderWithProviders(
+            <SingleRateSummarySection
+                rate={rateData}
+                isSubmitted={true}
+                statePrograms={rateData.state.programs}
+            />,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            statusCode: 200,
+                            user: mockValidCMSUser(),
+                        }),
+                    ],
+                },
+            }
+        )
+
+        expect(
+            screen.getByRole('heading', { name: 'Rate documents' })
+        ).toBeInTheDocument()
+
+        const relatedContractActions = screen.getByRole('definition', {
+            name: 'Contract actions',
+        })
+
+        // Expect submissions this rate was submitted with link to exists
+        expect(relatedContractActions).toBeInTheDocument()
+        expect(
+            within(relatedContractActions).getByRole('link', {
+                name: withdrawnContractOnePkgName,
+            })
+        ).toBeInTheDocument()
+        expect(
+            within(relatedContractActions).getByRole('link', {
+                name: withdrawnContractTwoPkgName,
             })
         ).toHaveAttribute(
             'href',
