@@ -104,7 +104,7 @@
         "amazon-cognito-identity-js": "^6.3.12",
         "aws-amplify": "^5.0.10",
         "axios": "^1.7.9",
-        "babel-plugin-istanbul": "^6.1.1",
+        "babel-plugin-istanbul": "^7.0.0",
         "dayjs": "^1.11.12",
         "formik": "^2.4.6",
         "graphql": "^16.9.0",
