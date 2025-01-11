@@ -141,7 +141,7 @@ const withdrawRateInsideTransaction = async (
             const unlockedContract = await unlockContractInsideTransaction(tx, {
                 contractID: contract.id,
                 unlockedByUserID: updatedByID,
-                unlockReason: `CMS withdrawing rate ${latestRateRev.rateCertificationName} from this submission`,
+                unlockReason: `CMS withdrawing rate ${latestRateRev.rateCertificationName} from this submission. ${updatedReason}`,
             })
 
             if (unlockedContract instanceof Error) {
@@ -259,7 +259,7 @@ const withdrawRateInsideTransaction = async (
             const resubmitContractArgs: SubmitContractArgsType = {
                 contractID: contract.id,
                 submittedByUserID: updatedByID,
-                submittedReason: `CMS has withdrawn rate ${latestRateRev.rateCertificationName} from this submission`,
+                submittedReason: `CMS has withdrawn rate ${latestRateRev.rateCertificationName} from this submission. ${updatedReason}`,
             }
             const resubmitResult = await submitContractInsideTransaction(
                 tx,
@@ -276,7 +276,7 @@ const withdrawRateInsideTransaction = async (
         rateID,
         formData: undefined,
         submittedByUserID: updatedByID,
-        submittedReason: 'CMS has withdrawn this rate',
+        submittedReason: 'CMS has withdrawn this rate. ' + updatedReason,
     })
 
     if (submitRate instanceof Error) {

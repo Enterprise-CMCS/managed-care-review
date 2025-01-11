@@ -76,11 +76,15 @@ describe('withdrawRate', () => {
         })
 
         const contract = await createAndSubmitTestContractWithRate(stateServer)
-        const rateID = contract.packageSubmissions[0].rateRevisions[0].rateID
+        const rate = contract.packageSubmissions[0].rateRevisions[0]
+        const rateID = rate.rateID
+        const rateName = rate.formData.rateCertificationName
+        const updatedReason = 'Withdraw invalid rate'
+
         const withdrawnRate = await withdrawTestRate(
             cmsServer,
             rateID,
-            'Withdraw invalid rate'
+            updatedReason
         )
 
         // expect rate to contain contract in withdrawn join table
@@ -120,6 +124,20 @@ describe('withdrawRate', () => {
             ])
         )
 
+        const latestRateRev = withdrawnRate.packageSubmissions[0].rateRevision
+        const rateUnlockInfo = latestRateRev.unlockInfo
+        const rateSubmitInfo = latestRateRev.submitInfo
+
+        // expect the rate latest unlock info to contain default text and withdraw reason
+        expect(rateUnlockInfo?.updatedReason).toBe(
+            `CMS withdrawing rate ${rateName} from this submission. ${updatedReason}`
+        )
+
+        // expect rate latest submission to contain default text and withdraw reason
+        expect(rateSubmitInfo?.updatedReason).toBe(
+            `CMS has withdrawn this rate. ${updatedReason}`
+        )
+
         const contractWithWithdrawnRate = await fetchTestContractWithQuestions(
             stateServer,
             contract.id
@@ -141,6 +159,10 @@ describe('withdrawRate', () => {
         )
 
         const packageSubmissions = contractWithWithdrawnRate.packageSubmissions
+        const contractSubmitInfo =
+            packageSubmissions[0].contractRevision.submitInfo
+        const contractUnlockInfo =
+            packageSubmissions[0].contractRevision.unlockInfo
 
         // expect withdrawn rate is no longer in latest package submission
         expect(packageSubmissions[0].rateRevisions).not.toEqual(
@@ -149,6 +171,16 @@ describe('withdrawRate', () => {
                     rateID,
                 }),
             ])
+        )
+
+        // expect the contacts latest unlock info to contain default text and withdraw reason
+        expect(contractUnlockInfo?.updatedReason).toBe(
+            `CMS withdrawing rate ${rateName} from this submission. ${updatedReason}`
+        )
+
+        // expect contracts latest submission to contain default text and withdraw reason
+        expect(contractSubmitInfo?.updatedReason).toBe(
+            `CMS has withdrawn rate ${rateName} from this submission. ${updatedReason}`
         )
 
         // expect the withdrawn rate is on the previous packageSubmission

@@ -11,6 +11,7 @@ import {
     mockValidCMSUser,
     mockValidStateUser,
     mockContractPackageApproved,
+    mockContractWithLinkedRateSubmitted,
 } from '@mc-review/mocks'
 import { renderWithProviders } from '../../testHelpers'
 import { formatToPacificTime } from '@mc-review/dates'
@@ -93,6 +94,127 @@ describe('Change History', () => {
             })
         ).toBeInTheDocument()
         expect(screen.getByText('Approved')).toBeInTheDocument()
+    })
+
+    it('has expected text in the accordion titles and content for rate withdrawal', () => {
+        const contractWithWithdrawnRate = mockContractWithLinkedRateSubmitted({
+            packageSubmissions: [
+                {
+                    cause: 'CONTRACT_SUBMISSION',
+                    __typename: 'ContractPackageSubmission',
+                    submitInfo: {
+                        updatedAt: new Date('12/18/2023'),
+                        updatedBy: {
+                            email: 'example@state.com',
+                            role: 'STATE_USER',
+                            givenName: 'John',
+                            familyName: 'Vila',
+                        },
+                        updatedReason: 'withdraw rate',
+                    },
+                    submittedRevisions: [],
+                    contractRevision: {
+                        contractName: 'MCR-MN-0005-SNBC',
+                        createdAt: new Date('01/01/2024'),
+                        updatedAt: new Date('12/31/2024'),
+                        id: '123',
+                        contractID: 'test-abc-123',
+                        submitInfo: {
+                            updatedAt: new Date('12/18/2023'),
+                            updatedBy: {
+                                email: 'example@state.com',
+                                role: 'STATE_USER',
+                                givenName: 'John',
+                                familyName: 'Vila',
+                            },
+                            updatedReason: 'withdraw rate',
+                        },
+                        unlockInfo: {
+                            updatedAt: new Date('12/18/2023'),
+                            updatedBy: {
+                                email: 'example@state.com',
+                                role: 'STATE_USER',
+                                givenName: 'John',
+                                familyName: 'Vila',
+                            },
+                            updatedReason: 'withdraw rate',
+                        },
+                        formData: {
+                            programIDs: [
+                                'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
+                            ],
+                            populationCovered: 'MEDICAID',
+                            submissionType: 'CONTRACT_AND_RATES',
+                            riskBasedContract: true,
+                            submissionDescription: 'A real submission',
+                            supportingDocuments: [
+                                {
+                                    s3URL: 's3://bucketname/key/contractsupporting1',
+                                    sha256: 'fakesha',
+                                    name: 'contractSupporting1',
+                                    dateAdded: new Date('01/15/2024'),
+                                },
+                                {
+                                    s3URL: 's3://bucketname/key/contractSupporting2',
+                                    sha256: 'fakesha',
+                                    name: 'contractSupporting2',
+                                    dateAdded: new Date('01/13/2024'),
+                                },
+                            ],
+                            stateContacts: [],
+                            contractType: 'AMENDMENT',
+                            contractExecutionStatus: 'EXECUTED',
+                            contractDocuments: [
+                                {
+                                    s3URL: 's3://bucketname/key/contract',
+                                    sha256: 'fakesha',
+                                    name: 'contract',
+                                    dateAdded: new Date('01/01/2024'),
+                                },
+                            ],
+                            contractDateStart: new Date(),
+                            contractDateEnd: new Date(),
+                            managedCareEntities: ['MCO'],
+                            federalAuthorities: ['STATE_PLAN'],
+                            inLieuServicesAndSettings: true,
+                            modifiedBenefitsProvided: true,
+                            modifiedGeoAreaServed: false,
+                            modifiedMedicaidBeneficiaries: true,
+                            modifiedRiskSharingStrategy: true,
+                            modifiedIncentiveArrangements: false,
+                            modifiedWitholdAgreements: false,
+                            modifiedStateDirectedPayments: true,
+                            modifiedPassThroughPayments: true,
+                            modifiedPaymentsForMentalDiseaseInstitutions: false,
+                            modifiedMedicalLossRatioStandards: true,
+                            modifiedOtherFinancialPaymentIncentive: false,
+                            modifiedEnrollmentProcess: true,
+                            modifiedGrevienceAndAppeal: false,
+                            modifiedNetworkAdequacyStandards: true,
+                            modifiedLengthOfContract: false,
+                            modifiedNonRiskPaymentArrangements: true,
+                            statutoryRegulatoryAttestation: true,
+                            statutoryRegulatoryAttestationDescription:
+                                'everything meets regulatory attestation',
+                        },
+                    },
+                    rateRevisions: [],
+                },
+            ],
+        })
+        renderWithProviders(
+            <ChangeHistory contract={contractWithWithdrawnRate} />
+        )
+        const submitInfo =
+            contractWithWithdrawnRate.packageSubmissions[0].submitInfo
+        const updatedAt = submitInfo.updatedAt
+        // API returns UTC timezone, we display timestamped dates in PT timezone so 1 day before on these tests.
+        expect(
+            screen.getByRole('button', {
+                name: `${formatToPacificTime(updatedAt)} - Submission`,
+            })
+        ).toBeInTheDocument()
+        expect(screen.getAllByText(/withdraw rate/)).toHaveLength(2)
     })
 
     it('has expected text in the accordion titles and content for ADMIN events', () => {
