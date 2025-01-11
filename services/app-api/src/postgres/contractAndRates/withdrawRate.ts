@@ -260,7 +260,7 @@ const withdrawRateInsideTransaction = async (
         rateID,
         formData: undefined,
         submittedByUserID: updatedByID,
-        submittedReason: 'CMS has withdrawn this rate',
+        submittedReason: 'CMS has withdrawn this rate. ' + updatedReason,
     })
 
     // Add review status action to rate and create new joins on withdrawn rate join table
