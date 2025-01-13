@@ -3,6 +3,7 @@ import {
     ContractQuestionList,
     Division,
     RateQuestionList,
+    ConsolidatedRateStatus,
 } from '../../../gen/gqlClient'
 import type { QuestionRounds } from './QuestionResponseRound'
 import { QuestionResponseRound } from './QuestionResponseRound'
@@ -13,17 +14,18 @@ import { IndexQuestionType } from '../QuestionResponseHelpers'
 
 type CMSQuestionResponseTableProps = {
     indexQuestions: IndexQuestionType
-    contractStatus?: ConsolidatedContractStatus
+    consolidatedStatus?: ConsolidatedContractStatus | ConsolidatedRateStatus
     userDivision?: Division
 }
 
 export const CMSQuestionResponseTable = ({
     indexQuestions,
-    contractStatus,
+    consolidatedStatus,
     userDivision,
 }: CMSQuestionResponseTableProps) => {
     const { loggedInUser } = useAuth()
-    const isApprovedContract = contractStatus === 'APPROVED'
+    const canAddQuestions =
+        !['APPROVED', 'WITHDRAWN'].includes(consolidatedStatus!) && userDivision
     const currentDivisionRounds = (): QuestionRounds => {
         if (!userDivision) {
             return []
@@ -101,7 +103,7 @@ export const CMSQuestionResponseTable = ({
                 data-testid={'usersDivisionQuestions'}
             >
                 <SectionHeader header="Your division's questions">
-                    {userDivision && !isApprovedContract && (
+                    {canAddQuestions && (
                         <NavLinkWithLogging
                             className="usa-button"
                             variant="unstyled"
