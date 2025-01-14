@@ -82,22 +82,17 @@ Cypress.Commands.add(
             throw new Error(`Auth mode is not defined or is IDM: ${authMode}`)
         }
 
-        cy.wait('@fetchCurrentUserQuery', { timeout: 20_000 })
-        cy.wait('@indexContractsForDashboardQuery', { timeout: 80_000 })
-        cy.findByTestId('cms-dashboard-page', { timeout: 10_000 }).should(
-            'exist'
-        )
-
         if (initialURL !== '/') {
             cy.visit(initialURL)
             cy.url({ timeout: 20_000 }).should('contain', initialURL)
+            cy.wait('@fetchCurrentUserQuery', { timeout: 20_000 })
 
             if (initialURL.includes('submissions/')) {
                 cy.wait('@fetchContractWithQuestionsQuery', {
                     timeout: 20_000,
                 }) // for cases where CMs user goes to specific submission on login, likely from email link
             } else if (initialURL.includes('rate-reviews')) {
-                cy.wait('@indexRatesQuery', { timeout: 80_000 })
+                cy.wait('@indexRatesForDashboardQuery', { timeout: 80_000 })
                 cy.findByTestId('cms-dashboard-page', { timeout: 10_000 }).should(
                     'exist'
                 )
@@ -106,6 +101,9 @@ Cypress.Commands.add(
                 cy.wait('@fetchRateWithQuestionsQuery', { timeout: 80_000 })
             } else {
                 cy.wait('@indexContractsForDashboardQuery', { timeout: 80_000 })
+                cy.findByTestId('cms-dashboard-page', { timeout: 10_000 }).should(
+                    'exist'
+                )
             }
         }
     }

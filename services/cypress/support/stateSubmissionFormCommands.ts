@@ -548,14 +548,9 @@ Cypress.Commands.add(
                     cy.get('#unlockSubmitModalInput').type(
                         summary || 'Resubmission summary'
                     )
-
                     cy.findByTestId('resubmit_contract-modal-submit').click()
-
                 } else {
-
-                        cy.findByTestId('submit_contract-modal-submit').click()
-
-
+                    cy.findByTestId('submit_contract-modal-submit').click()
                 }
             })
 
@@ -566,4 +561,5 @@ Cypress.Commands.add(
             cy.findByTestId('state-dashboard-page').should('exist')
             cy.findByRole('heading',{name:'Submissions'}).should('exist')
         }
-        })
+    }
+)
