@@ -42,7 +42,7 @@ jobs:
           pnpm install && pnpm build && \
           pnpm dlx cdk bootstrap \
             --qualifier mcreview \
+            --template bootstrap.yaml \
             --toolkit-stack-name CDKToolkitMCReviewDev \
-            --custom-permissions-boundary "cms-cloud-admin/developer-boundary-policy" \
-            --cloudformation-execution-policies "arn:aws:iam::${{ secrets.DEV_AWS_ACCOUNT_ID }}:policy/cms-cloud-admin/developer-boundary-policy" \
+            --parameters InputPermissionsBoundary=cms-cloud-admin/developer-boundary-policy \
             aws://${{ secrets.DEV_AWS_ACCOUNT_ID }}/${{ vars.AWS_DEFAULT_REGION }}
