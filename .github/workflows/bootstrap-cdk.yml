@@ -43,7 +43,6 @@ jobs:
           pnpm dlx cdk bootstrap \
             --qualifier mcreview \
             --toolkit-stack-name CDKToolkitMCReviewDev \
+            --custom-permissions-boundary "cms-cloud-admin/developer-boundary-policy"
             --cloudformation-execution-policies "arn:aws:iam::${{ secrets.DEV_AWS_ACCOUNT_ID }}:policy/cms-cloud-admin/developer-boundary-policy" \
-            --trust-for-lookup "arn:aws:iam::${{ secrets.DEV_AWS_ACCOUNT_ID }}:role/delegatedadmin/developer/cdk-*" \
-            --trust "arn:aws:iam::${{ secrets.DEV_AWS_ACCOUNT_ID }}:role/delegatedadmin/developer/cdk-*" \
             aws://${{ secrets.DEV_AWS_ACCOUNT_ID }}/${{ vars.AWS_DEFAULT_REGION }}
