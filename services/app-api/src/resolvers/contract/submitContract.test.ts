@@ -87,6 +87,45 @@ describe('submitContract', () => {
         expect(submittedFormData).toEqual(draftFormData)
     })
 
+    it('submits a contract and removes existing rates on the contract', async () => {
+        const stateServer = await constructTestPostgresServer({
+            s3Client: mockS3,
+        })
+
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: testCMSUser(),
+            },
+            s3Client: mockS3,
+        })
+
+        const draft = await createAndUpdateTestContractWithoutRates(stateServer)
+        const updatedDraft = await addNewRateToTestContract(stateServer, draft)
+        const contractID = draft.id
+
+        const draftRates = updatedDraft.draftRates
+
+        expect(draftRates).toHaveLength(1)
+
+        const contractWithRate = await submitTestContract(stateServer, contractID)
+
+        // expect rates in latest submission
+        let latestSubmission = contractWithRate.packageSubmissions[0]
+        expect(latestSubmission.rateRevisions).toHaveLength(1)
+
+        await unlockTestContract(cmsServer, contractID, 'Change to contract only')
+
+        await updateTestContractDraftRevision(stateServer, contractID)
+
+        const contractWithoutRates = await submitTestContract(stateServer, contractID, 'resubmit as contract only')
+
+        // reassigned to the latest submission of contract without rates
+        latestSubmission = contractWithoutRates.packageSubmissions[0]
+
+        // expect no rates in latest submission
+        expect(latestSubmission.rateRevisions).toHaveLength(0)
+    })
+
     it('handles a submission with a linked rate', async () => {
         const stateServer = await constructTestPostgresServer()
 

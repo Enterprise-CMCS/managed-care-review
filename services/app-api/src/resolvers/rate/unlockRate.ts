@@ -56,8 +56,8 @@ export function unlockRate(store: Store): MutationResolvers['unlockRate'] {
 
         const rate: RateType = initialRateResult
 
-        if (rate.draftRevision) {
-            const errMessage = `Attempted to unlock rate with wrong status`
+        if (!['SUBMITTED', 'RESUBMITTED'].includes(rate.consolidatedStatus)) {
+            const errMessage = `Attempted to unlock rate with wrong status: ${rate.consolidatedStatus}`
             logError('unlockRate', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new UserInputError(errMessage, {
@@ -90,7 +90,11 @@ export function unlockRate(store: Store): MutationResolvers['unlockRate'] {
             })
         }
 
-        if (contractResult.consolidatedStatus === 'APPROVED') {
+        if (
+            ['WITHDRAWN', 'APPROVED'].includes(
+                contractResult.consolidatedStatus
+            )
+        ) {
             const errMessage = `Attempted to unlock a rate that is associated with a contract with wrong status: ${contractResult.consolidatedStatus}`
             logError('unlockRate', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
