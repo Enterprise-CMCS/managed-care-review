@@ -319,7 +319,7 @@ Resources:
                             Effect: Allow
                             Principal:
                                 AWS:
-                                    - Ref: AWS::AccountId
+                                    - Ref: TrustedAccounts
                                     - Fn::Sub: arn:aws:iam::${AWS::AccountId}:role/${InputIAMRole}
                           - Ref: AWS::NoValue
             RoleName:
