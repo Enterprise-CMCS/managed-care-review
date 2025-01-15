@@ -44,7 +44,7 @@ jobs:
             --qualifier mcreview \
             --template bootstrap.yaml \
             --toolkit-stack-name CDKToolkitMCReviewDev \
-            --cloudformation-execution-policies arn:aws:iam::aws:policy/AdministratorAccess,arn:aws:iam::${{secrets.DEV_AWS_ACCOUNT_ID}}:policy/ADO-Restriction-Policy,arn:aws:iam::${{secrets.DEV_AWS_ACCOUNT_ID}}}:policy/CMSApprovedAWSServices \
+            --cloudformation-execution-policies arn:aws:iam::aws:policy/AdministratorAccess,arn:aws:iam::${{secrets.DEV_AWS_ACCOUNT_ID}}:policy/ADO-Restriction-Policy,arn:aws:iam::${{secrets.DEV_AWS_ACCOUNT_ID}}:policy/CMSApprovedAWSServices \
             --parameters InputPermissionsBoundary=cms-cloud-admin/ct-ado-poweruser-permissions-boundary-policy \
             --parameters InputIAMRole=ct-ado-managedcare-developer-admin \
             aws://${{ secrets.DEV_AWS_ACCOUNT_ID }}/${{ vars.AWS_DEFAULT_REGION }}
