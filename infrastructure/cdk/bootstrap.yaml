@@ -544,6 +544,9 @@ Resources:
     CloudFormationExecutionRole:
         Type: AWS::IAM::Role
         Properties:
+            Path: /delegatedadmin/developer/
+            PermissionsBoundary:
+                Fn::Sub: arn:${AWS::Partition}:iam::${AWS::AccountId}:policy/${InputPermissionsBoundary}
             AssumeRolePolicyDocument:
                 Statement:
                     - Action: sts:AssumeRole
@@ -561,9 +564,6 @@ Resources:
                           - - Fn::Sub: arn:${AWS::Partition}:iam::aws:policy/AdministratorAccess
             RoleName:
                 Fn::Sub: cdk-${Qualifier}-cfn-exec-role-${AWS::AccountId}-${AWS::Region}
-            Path: /delegatedadmin/developer/
-            PermissionsBoundary:
-                - Fn::Sub: arn:${AWS::Partition}:iam::${AWS::AccountId}:policy/${InputPermissionsBoundary}
     CdkBoostrapPermissionsBoundaryPolicy:
         Condition: ShouldCreatePermissionsBoundary
         Type: AWS::IAM::ManagedPolicy
