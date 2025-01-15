@@ -87,7 +87,7 @@ export const ReviewSubmit = (): React.ReactElement => {
     if (!contractFormData) return <GenericErrorPage />
 
     const isContractActionAndRateCertification =
-        contract.draftRates && contract.draftRates.length > 0
+        contractFormData.submissionType === 'CONTRACT_AND_RATES'
     const programIDs = contractFormData?.programIDs
     const programs = statePrograms.filter((program) =>
         programIDs?.includes(program.id)

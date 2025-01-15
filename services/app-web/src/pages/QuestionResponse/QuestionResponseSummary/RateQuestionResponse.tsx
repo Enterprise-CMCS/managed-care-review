@@ -92,6 +92,7 @@ export const RateQuestionResponse = () => {
                 {hasCMSPermissions ? (
                     <CMSQuestionResponseTable
                         indexQuestions={rate.questions}
+                        consolidatedStatus={rate.consolidatedStatus}
                         userDivision={division}
                     />
                 ) : (

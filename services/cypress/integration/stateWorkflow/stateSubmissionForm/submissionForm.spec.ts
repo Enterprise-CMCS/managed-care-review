@@ -150,7 +150,21 @@ describe('state user in state submission form', () => {
             const draftSubmissionId = pathnameArray[2]
             cy.navigateFormByDirectLink(`/submissions/${draftSubmissionId}/edit/review-and-submit`)
 
-            cy.submitStateSubmissionForm({success: false})
+            // Testing around temporary client-side validation for contract and rates submission.
+            // Ensures rate certification is included. Remove after MCR-4871 and use cy.submitStateSubmissionForm below.
+            cy.findByRole('heading', { level: 2, name: /Review and submit/ })
+            cy.findByRole('button', {
+                name: 'Submit',
+            }).safeClick()
+            
+            cy.findAllByTestId('modalWindow')
+            .eq(1)
+            .should('exist')
+            .within(() => {
+                cy.findByTestId('submit_contract-modal-submit').click()
+            })
+
+            // cy.submitStateSubmissionForm({success: false})
             cy.findByRole('heading', { level: 4, name: /Submission error/ })
         })
     })

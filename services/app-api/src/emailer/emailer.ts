@@ -32,6 +32,7 @@ import { sendRateQuestionStateEmail } from './emails'
 import { sendRateQuestionCMSEmail } from './emails/sendRateQuestionCMSEmail'
 import { sendRateQuestionResponseCMSEmail } from './emails/sendRateQuestionResponseCMSEmail'
 import { sendRateQuestionResponseStateEmail } from './emails/sendRateQuestionResponseStateEmail'
+import { sendWithdrawnRateCMSEmail } from './emails/sendWithdrawnRateCMSEmail'
 
 // See more discussion of configuration in docs/Configuration.md
 type EmailConfiguration = {
@@ -175,6 +176,11 @@ type Emailer = {
     sendWithdrawnRateStateEmail: (
         rate: RateType,
         statePrograms: ProgramType[]
+    ) => Promise<void | Error>
+    sendWithdrawnRateCMSEmail: (
+        rate: RateType,
+        statePrograms: ProgramType[],
+        stateAnalystsEmails: StateAnalystsEmails
     ) => Promise<void | Error>
 }
 const localEmailerLogger = (emailData: EmailData) =>
@@ -502,7 +508,25 @@ function emailer(
             } else {
                 return await this.sendEmail(emailData)
             }
-        }
+        },
+        sendWithdrawnRateCMSEmail: async function (
+            rate,
+            statePrograms,
+            stateAnalystsEmails
+        ) {
+            const emailData = await sendWithdrawnRateCMSEmail(
+                config,
+                rate,
+                statePrograms,
+                stateAnalystsEmails
+            )
+
+            if (emailData instanceof Error) {
+                return emailData
+            } else {
+                return await this.sendEmail(emailData)
+            }
+        },
     }
 }
 

@@ -25,8 +25,10 @@ import {
     fetchTestRateById,
     formatRateDataForSending,
     unlockTestRate,
+    withdrawTestRate,
 } from '../../testHelpers/gqlRateHelpers'
 import {
+    createAndSubmitTestContractWithRate,
     createAndUpdateTestContractWithoutRates,
     fetchTestContract,
     submitTestContract,
@@ -458,6 +460,46 @@ describe('submitRate', () => {
         expect(result.errors).toBeUndefined()
         // expect rate to be resubmitted
         expect(submittedRate.status).toBe('RESUBMITTED')
+    })
+    it('errors with invalid rate status', async () => {
+        const stateUser = testStateUser()
+
+        const stateServer = await constructTestPostgresServer({
+            context: {
+                user: stateUser,
+            },
+            ldService,
+            s3Client: mockS3,
+        })
+
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: testCMSUser(),
+            },
+            ldService,
+            s3Client: mockS3,
+        })
+
+        const contract = await createAndSubmitTestContractWithRate(stateServer)
+        const rate = contract.packageSubmissions[0].rateRevisions[0]
+
+        await withdrawTestRate(cmsServer, rate.rateID, 'withdraw rate')
+
+        const submitResult = await await stateServer.executeOperation({
+            query: SubmitRateDocument,
+            variables: {
+                input: {
+                    rateID: rate.rateID,
+                    submittedReason: 'Submit a already submitted rate',
+                },
+            },
+        })
+
+        expect(submitResult.errors).toBeDefined()
+
+        expect(submitResult.errors?.[0]?.message).toBe(
+            'Attempted to submit a rate with invalid status: WITHDRAWN'
+        )
     })
     it('errors when feature flag is off', async () => {
         const stateUser = testStateUser()

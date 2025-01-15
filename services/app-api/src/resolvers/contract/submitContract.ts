@@ -149,17 +149,9 @@ export function submitContract(
             })
 
         // Remove fields from edits on irrelevant logic branches
-        // - CONTRACT_ONLY submission type should not contain any CONTRACT_AND_RATE rates data.
         // - CHIP_ONLY population covered should not contain any provision or authority relevant to other population.
         // - We delete at submission instead of update to preserve rates data in case user did not
         // intend or would like to revert the submission type before submitting.
-        if (
-            contractWithHistory.draftRevision?.formData.submissionType ===
-            'CONTRACT_ONLY'
-        ) {
-            contractWithHistory.draftRates = []
-        }
-
         if (isCHIPOnly(contractWithHistory)) {
             // remove invalid provisions
             if (isContractWithProvisions(contractWithHistory)) {
@@ -252,6 +244,30 @@ export function submitContract(
                 logError('submitContract', errMessage)
                 setErrorAttributesOnActiveSpan(errMessage, span)
                 throw new Error(errMessage)
+            }
+        }
+        
+        // If this is contract and rates lets verify that the rates are in a valid state
+        if (
+            parsedSubmissionType ===
+                'CONTRACT_AND_RATES' &&
+            parsedContract.draftRates &&
+            parsedContract.draftRates.length > 0
+        ) {
+            for (const draftRate of parsedContract.draftRates) {
+                if (
+                    ['WITHDRAWN'].includes(
+                        draftRate.consolidatedStatus
+                    )
+                ) {
+                    const errMessage = `Attempted to submit a rate withdrawn rate: ${draftRate.consolidatedStatus}`
+                    logError('submitContract', errMessage)
+                    setErrorAttributesOnActiveSpan(errMessage, span)
+                    throw new UserInputError(errMessage, {
+                        argumentName: 'rateID',
+                        cause: 'INVALID_PACKAGE_STATUS',
+                    })
+                }
             }
         }
 

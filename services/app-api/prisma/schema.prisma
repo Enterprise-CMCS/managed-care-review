@@ -85,6 +85,7 @@ model DraftRateJoinTable {
 
 // Relationship for withdrawn rates and contracts
 model WithdrawnRatesJoinTable {
+  createdAt  DateTime      @default(now())
   contractID String
   contract   ContractTable @relation(fields: [contractID], references: [id])
   rateID     String

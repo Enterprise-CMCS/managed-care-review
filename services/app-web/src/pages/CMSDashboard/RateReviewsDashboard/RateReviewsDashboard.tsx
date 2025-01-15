@@ -80,6 +80,7 @@ const RateReviewsDashboard = (): React.ReactElement => {
                 id: rate.id,
                 name: displayRateFormData.rateCertificationName || missingField,
                 rateNumber: rate.stateNumber,
+                consolidatedStatus: rate.consolidatedStatus,
                 programs: programs.filter(
                     (program) =>
                         (displayRateFormData?.rateProgramIDs &&

@@ -88,20 +88,6 @@ export function unlockContractResolver(
                 },
             })
         }
-        if (
-            unlockContractResult.status != 'UNLOCKED' &&
-            unlockContractResult.status != 'DRAFT'
-        ) {
-            const errMessage = `Programming Error: Got incorrect status from an unlocked contract.`
-            logError('unlockContract', errMessage)
-            setErrorAttributesOnActiveSpan(errMessage, span)
-            throw new GraphQLError(errMessage, {
-                extensions: {
-                    code: 'INTERNAL_SERVER_ERROR',
-                    cause: 'DB_ERROR',
-                },
-            })
-        }
 
         let stateAnalystsEmails: string[] = []
         // not great that state code type isn't being used in ContractType but I'll risk the conversion for now

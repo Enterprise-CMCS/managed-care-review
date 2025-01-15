@@ -16,7 +16,11 @@ import { useAtom } from 'jotai/react'
 import { atom } from 'jotai'
 import { atomWithHash } from 'jotai-location'
 import { loadable } from 'jotai/vanilla/utils'
-import { HealthPlanPackageStatus, Program } from '../../../gen/gqlClient'
+import {
+    HealthPlanPackageStatus,
+    Program,
+    ConsolidatedRateStatus,
+} from '../../../gen/gqlClient'
 import styles from '../../../components/ContractTable/ContractTable.module.scss'
 import { Table, Tag } from '@trussworks/react-uswds'
 import qs from 'qs'
@@ -27,7 +31,7 @@ import {
     FilterOptionType,
     FilterDateRange,
 } from '../../../components/FilterAccordion'
-import { pluralize } from '@mc-review/common-code'
+import { pluralize, titleCaseString } from '@mc-review/common-code'
 import { DoubleColumnGrid } from '../../../components'
 import { FilterDateRangeRef } from '../../../components/FilterAccordion/FilterDateRange/FilterDateRange'
 import { Loading, NavLinkWithLogging } from '../../../components'
@@ -35,6 +39,8 @@ import { useTealium } from '../../../hooks'
 import useDeepCompareEffect from 'use-deep-compare-effect'
 import { getTealiumFiltersChanged } from '../../../tealium/tealiumHelpers'
 import { formatCalendarDate } from '@mc-review/dates'
+import { InfoTag, TagProps } from '../../../components/InfoTag/InfoTag'
+import { ConsolidatedRateStatusRecord } from '@mc-review/constants'
 
 type RatingPeriodFilterType = [string, string] | []
 
@@ -45,6 +51,7 @@ export type RateInDashboardType = {
     submittedAt: string
     updatedAt: Date
     status: HealthPlanPackageStatus
+    consolidatedStatus: ConsolidatedRateStatus
     programs: Program[]
     rateType: string
     rateDateStart: Date
@@ -72,6 +79,48 @@ const rateTypeOptions = [
         value: 'Amendment',
     },
 ]
+
+const rateStatusOptions = [
+    {
+        label: 'Submitted',
+        value: 'SUBMITTED',
+    },
+    {
+        label: 'Unlocked',
+        value: 'UNLOCKED',
+    },
+    {
+        label: 'Withdrawn',
+        value: 'WITHDRAWN',
+    },
+]
+
+const StatusTag = ({
+    status,
+}: {
+    status: ConsolidatedRateStatus
+}): React.ReactElement => {
+    let color: TagProps['color'] = 'gold'
+    let emphasize = false
+    const isSubmittedStatus = status === 'RESUBMITTED' || status === 'SUBMITTED'
+    const isUnlocked = status === 'UNLOCKED'
+    const isWithdrawn = status === 'WITHDRAWN'
+    if (isSubmittedStatus) {
+        emphasize = true
+    } else if (isUnlocked) {
+        emphasize = true
+    } else if (isWithdrawn) {
+        color = 'gray'
+    }
+
+    const statusText = ConsolidatedRateStatusRecord[status]
+
+    return (
+        <InfoTag color={color} emphasize={emphasize}>
+            {statusText}
+        </InfoTag>
+    )
+}
 
 /* To keep the memoization from being refreshed every time, this needs to be
     created outside the render function */
@@ -128,7 +177,10 @@ const getSelectedFiltersFromColumnState = (
 
     const filterValues = valuesFromUrl
         .filter((item) => item.id === id)
-        .map((item) => ({ value: item.value, label: item.value }))
+        .map((item) => ({
+            value: item.value,
+            label: titleCaseString(item.value),
+        }))
 
     return filterValues as FilterOptionType[]
 }
@@ -329,6 +381,15 @@ export const RateReviewsTable = ({
                     dataTestID: `${tableConfig.rowIDName}-date`,
                 },
             }),
+            columnHelper.accessor('consolidatedStatus', {
+                id: 'status',
+                header: 'Status',
+                cell: (info) => <StatusTag status={info.getValue()} />,
+                meta: {
+                    dataTestID: `${tableConfig.rowIDName}-status`,
+                },
+                filterFn: `arrIncludesSome`,
+            }),
         ],
         [tableConfig.rowIDName]
     )
@@ -371,7 +432,9 @@ export const RateReviewsTable = ({
     const rateDateStartColumn = reactTable.getColumn(
         'rateDateStart'
     ) as Column<RateInDashboardType>
-
+    const statusColumn = reactTable.getColumn(
+        'status'
+    ) as Column<RateInDashboardType>
     // Filter options based on table data instead of static list of options.
     const stateFilterOptions = Array.from(
         stateColumn.getFacetedUniqueValues().keys()
@@ -589,6 +652,24 @@ export const RateReviewsTable = ({
                                     ),
                             }}
                         />
+                        <DoubleColumnGrid>
+                            <FilterSelect
+                                value={getSelectedFiltersFromColumnState(
+                                    columnFilters,
+                                    'status'
+                                )}
+                                name="status"
+                                label="Status"
+                                filterOptions={rateStatusOptions}
+                                onChange={(selectedOptions) =>
+                                    updateFilters(
+                                        statusColumn,
+                                        selectedOptions,
+                                        'status'
+                                    )
+                                }
+                            />
+                        </DoubleColumnGrid>
                     </FilterAccordion>
                     <div aria-live="polite" aria-atomic>
                         <div className={styles.filterCount}>

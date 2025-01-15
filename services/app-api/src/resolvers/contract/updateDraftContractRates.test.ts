@@ -13,10 +13,17 @@ import {
     createTestDraftRateOnContract,
     fetchTestRateById,
     updateTestDraftRateOnContract,
+    withdrawTestRate,
 } from '../../testHelpers/gqlRateHelpers'
 import { latestFormData } from '../../testHelpers/healthPlanPackageHelpers'
 import { testCMSUser, testStateUser } from '../../testHelpers/userHelpers'
 import { testS3Client } from '../../../../app-api/src/testHelpers/s3Helpers'
+import {
+    createAndSubmitTestContractWithRate,
+    createAndUpdateTestContractWithoutRates,
+    createAndUpdateTestContractWithRate,
+} from '../../testHelpers/gqlContractHelpers'
+import { must } from '../../testHelpers'
 
 describe('updateDraftContractRates', () => {
     const mockS3 = testS3Client()
@@ -853,24 +860,23 @@ describe('updateDraftContractRates', () => {
             s3Client: mockS3,
         })
         const otherPackage =
-            await createAndUpdateTestHealthPlanPackage(stateServer)
+            await createAndUpdateTestContractWithRate(stateServer)
 
-        const otherFD = latestFormData(otherPackage)
-        const foreignRateID = otherFD.rateInfos[0].id
+        const withdrawnRate = otherPackage.draftRates?.[0]
 
-        const contractDraft = await createTestHealthPlanPackage(stateServer)
-        const draftFD = latestFormData(contractDraft)
+        const contractDraft =
+            await createAndUpdateTestContractWithRate(stateServer)
 
         const result = await stateServer.executeOperation({
             query: UpdateDraftContractRatesDocument,
             variables: {
                 input: {
                     contractID: contractDraft.id,
-                    lastSeenUpdatedAt: draftFD.updatedAt,
+                    lastSeenUpdatedAt: contractDraft.draftRevision?.updatedAt,
                     updatedRates: [
                         {
                             type: 'LINK',
-                            rateID: foreignRateID,
+                            rateID: withdrawnRate?.id,
                         },
                     ],
                 },
@@ -883,7 +889,61 @@ describe('updateDraftContractRates', () => {
         }
 
         expect(result.errors[0].message).toContain(
-            'Attempted to link a rate that has never been submitted'
+            `Attempted to link a rate with an invalid status. Status: DRAFT. RateID: ${withdrawnRate?.id}`
+        )
+        expect(result.errors[0].extensions?.code).toBe('BAD_USER_INPUT')
+    })
+
+    it('doesnt allow linking a WITHDRAWN rate', async () => {
+        const stateServer = await constructTestPostgresServer({
+            s3Client: mockS3,
+        })
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: testCMSUser(),
+            },
+        })
+
+        const otherPackage =
+            await createAndSubmitTestContractWithRate(stateServer)
+
+        const withdrawnRate =
+            otherPackage.packageSubmissions[0].rateRevisions[0]
+
+        must(
+            await withdrawTestRate(
+                cmsServer,
+                withdrawnRate.rateID,
+                'Withdraw rate'
+            )
+        )
+
+        const contractDraft =
+            await createAndUpdateTestContractWithoutRates(stateServer)
+
+        const result = await stateServer.executeOperation({
+            query: UpdateDraftContractRatesDocument,
+            variables: {
+                input: {
+                    contractID: contractDraft.id,
+                    lastSeenUpdatedAt: contractDraft.draftRevision?.updatedAt,
+                    updatedRates: [
+                        {
+                            type: 'LINK',
+                            rateID: withdrawnRate.rateID,
+                        },
+                    ],
+                },
+            },
+        })
+
+        expect(result.errors).toBeDefined()
+        if (!result.errors) {
+            throw new Error('no result')
+        }
+
+        expect(result.errors[0].message).toContain(
+            `Attempted to link a rate with an invalid status. Status: WITHDRAWN. RateID: ${withdrawnRate.rateID}`
         )
         expect(result.errors[0].extensions?.code).toBe('BAD_USER_INPUT')
     })

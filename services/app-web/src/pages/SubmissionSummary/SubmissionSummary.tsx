@@ -23,12 +23,18 @@ import { ChangeHistory } from '../../components/ChangeHistory'
 import { ModalOpenButton, UnlockSubmitModal } from '../../components/Modal'
 import { RoutesRecord } from '@mc-review/constants'
 import { useRouteParams } from '../../hooks'
-import { getVisibleLatestContractFormData } from '@mc-review/helpers'
+import {
+    getVisibleLatestContractFormData,
+    getVisibleLatestRateRevisions,
+} from '@mc-review/helpers'
 import { generatePath, Navigate } from 'react-router-dom'
 import { hasCMSUserPermissions } from '@mc-review/helpers'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '@mc-review/common-code'
-import { SubmissionApprovedBanner } from '../../components/Banner'
+import {
+    SubmissionApprovedBanner,
+    IncompleteSubmissionBanner,
+} from '../../components/Banner'
 
 export interface SubmissionSummaryFormValues {
     dateApprovalReleasedToState: string
@@ -158,6 +164,14 @@ export const SubmissionSummary = (): React.ReactElement => {
     const isContractActionAndRateCertification =
         contractFormData?.submissionType === 'CONTRACT_AND_RATES'
 
+    const rateRevisions = getVisibleLatestRateRevisions(contract, false) || []
+
+    // Show incomplete submission banner if rates are missing
+    const showIncompleteRateError =
+        isSubmitted &&
+        isContractActionAndRateCertification &&
+        rateRevisions.length === 0
+
     const handleDocumentDownloadError = (error: boolean) =>
         setDocumentError(error)
 
@@ -212,12 +226,30 @@ export const SubmissionSummary = (): React.ReactElement => {
         }
     }
 
+    const incompleteSubmissionMessage = () => {
+        if (isStateUser) {
+            return 'You must contact your CMS point of contact and request an unlock to complete the submission.'
+        }
+
+        if (hasCMSPermissions) {
+            return 'You must unlock the submission so the state can add a rate certification.'
+        }
+
+        return 'CMS must unlock the submission so the state can add a rate certification.'
+    }
+
     return (
         <div className={styles.background}>
             <GridContainer
                 data-testid="submission-summary"
                 className={styles.container}
             >
+                {showIncompleteRateError && (
+                    <IncompleteSubmissionBanner
+                        message={incompleteSubmissionMessage()}
+                    />
+                )}
+
                 {renderStatusAlerts()}
 
                 {documentError && (

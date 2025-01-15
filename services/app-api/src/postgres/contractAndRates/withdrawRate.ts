@@ -23,6 +23,22 @@ type WithdrawRateArgsType = {
     updatedReason: string
 }
 
+/**
+ * Withdraws a rate from associated contracts within a transaction.
+ *
+ * This function performs the following steps:
+ * 1. Retrieves the rate and its associated draft contracts and revisions.
+ * 2. Collects all contract IDs linked to the rate.
+ * 3. Retrieves the contracts associated with these IDs.
+ * 4. Removes the rate from each contract, ensuring no approved contracts are affected.
+ * 5. Updates the contracts to reflect the removal of the rate.
+ * 6. Resubmits any contracts that were unlocked during the process.
+ * 7. Resubmits the rate itself.
+ * 8. Updates the rate's review status and logs the withdrawal action.
+ *
+ * @param tx - The Prisma transaction object.
+ * @param args - The arguments required to withdraw the rate, including rateID, updatedByID, and updatedReason.
+ */
 const withdrawRateInsideTransaction = async (
     tx: PrismaTransactionType,
     args: WithdrawRateArgsType
@@ -125,7 +141,7 @@ const withdrawRateInsideTransaction = async (
             const unlockedContract = await unlockContractInsideTransaction(tx, {
                 contractID: contract.id,
                 unlockedByUserID: updatedByID,
-                unlockReason: `CMS withdrawing rate ${latestRateRev.rateCertificationName} from this submission`,
+                unlockReason: `CMS withdrawing rate ${latestRateRev.rateCertificationName} from this submission. ${updatedReason}`,
             })
 
             if (unlockedContract instanceof Error) {
@@ -243,7 +259,7 @@ const withdrawRateInsideTransaction = async (
             const resubmitContractArgs: SubmitContractArgsType = {
                 contractID: contract.id,
                 submittedByUserID: updatedByID,
-                submittedReason: `CMS has withdrawn rate ${latestRateRev.rateCertificationName} from this submission`,
+                submittedReason: `CMS has withdrawn rate ${latestRateRev.rateCertificationName} from this submission. ${updatedReason}`,
             }
             const resubmitResult = await submitContractInsideTransaction(
                 tx,
@@ -256,12 +272,16 @@ const withdrawRateInsideTransaction = async (
     }
 
     // Resubmit the rate
-    await submitRateInsideTransaction(tx, {
+    const submitRate = await submitRateInsideTransaction(tx, {
         rateID,
         formData: undefined,
         submittedByUserID: updatedByID,
-        submittedReason: 'CMS has withdrawn this rate',
+        submittedReason: 'CMS has withdrawn this rate. ' + updatedReason,
     })
+
+    if (submitRate instanceof Error) {
+        throw submitRate
+    }
 
     // Add review status action to rate and create new joins on withdrawn rate join table
     await tx.rateTable.update({

@@ -15,6 +15,7 @@ const rateReviewActionSchema = z.object({
 })
 
 type RateReviewActionType = z.infer<typeof rateReviewActionTypeSchema>
+type RateReviewType = z.infer<typeof rateReviewActionSchema>
 
-export type { RateReviewActionType }
+export type { RateReviewActionType, RateReviewType }
 export { rateReviewActionSchema }

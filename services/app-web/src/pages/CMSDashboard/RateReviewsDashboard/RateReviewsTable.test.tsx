@@ -25,6 +25,7 @@ describe('RateReviewsTable', () => {
             name: 'rate-1-certification-name',
             rateNumber: 1,
             programs: [statePrograms[0]],
+            consolidatedStatus: 'SUBMITTED',
             submittedAt: '2023-10-16',
             rateDateStart: new Date('2023-10-16'),
             rateDateEnd: new Date('2024-10-16'),
@@ -38,6 +39,7 @@ describe('RateReviewsTable', () => {
             name: 'rate-2-certification-name',
             rateNumber: 1,
             programs: [statePrograms[0]],
+            consolidatedStatus: 'WITHDRAWN',
             submittedAt: '2023-11-18',
             rateDateStart: new Date('2023-11-18'),
             rateDateEnd: new Date('2024-11-18'),
@@ -50,6 +52,7 @@ describe('RateReviewsTable', () => {
             id: 'rate-3-id',
             name: 'rate-3-certification-name',
             programs: [statePrograms[0]],
+            consolidatedStatus: 'UNLOCKED',
             rateNumber: 2,
             submittedAt: '2023-12-01',
             rateDateStart: new Date('2023-12-01'),
@@ -104,14 +107,24 @@ describe('RateReviewsTable', () => {
                 expect(tableRows).toHaveLength(4)
 
                 // expect rows to be in order where latest updatedAt is first in the array
+                // expect statuses to be drawn from the consolidatedStatus field
                 expect(
                     within(tableRows[1]).getByText('rate-3-certification-name')
+                ).toBeInTheDocument()
+                expect(
+                    within(tableRows[1]).getByText('Unlocked')
                 ).toBeInTheDocument()
                 expect(
                     within(tableRows[2]).getByText('rate-2-certification-name')
                 ).toBeInTheDocument()
                 expect(
+                    within(tableRows[2]).getByText('Withdrawn')
+                ).toBeInTheDocument()
+                expect(
                     within(tableRows[3]).getByText('rate-1-certification-name')
+                ).toBeInTheDocument()
+                expect(
+                    within(tableRows[3]).getByText('Submitted')
                 ).toBeInTheDocument()
             })
             it('renders rates table correctly without filters, captions and no rates', async () => {
@@ -313,6 +326,97 @@ describe('RateReviewsTable', () => {
                 await userEvent.click(clearFilterButton)
 
                 // expect all rates to be displayed
+                expect(
+                    screen.getByText('Displaying 3 of 3 rate reviews')
+                ).toBeInTheDocument()
+            })
+
+            it('can filter table by rate review status', async () => {
+                const data = tableData()
+                renderWithProviders(<RateReviewsTable tableData={data} />, {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                statusCode: 200,
+                                user: mockUser(),
+                            }),
+                        ],
+                    },
+                })
+
+                const statusFilter = screen.getByTestId('status-filter')
+                const accordionButton = screen.getByTestId(
+                    'accordionButton_filterAccordionItems'
+                )
+                await waitFor(async () => {
+                    //Expect filter accordion and state filter to exist
+                    expect(
+                        screen.queryByTestId('accordion')
+                    ).toBeInTheDocument()
+                    //Expand filter accordion
+                    await userEvent.click(accordionButton)
+                })
+
+                //Look for status filter
+                const statusCombobox =
+                    within(statusFilter).getByRole('combobox')
+                expect(statusCombobox).toBeInTheDocument()
+
+                //Open combobox
+                selectEvent.openMenu(statusCombobox)
+                //Expect combobox options to exist
+                const comboboxOptions = () =>
+                    screen.getByTestId('status-filter-options')
+                expect(comboboxOptions()).toBeInTheDocument()
+
+                await waitFor(async () => {
+                    //Expected options are present
+                    expect(
+                        within(comboboxOptions()).getByText('Submitted')
+                    ).toBeInTheDocument()
+                    expect(
+                        within(comboboxOptions()).getByText('Unlocked')
+                    ).toBeInTheDocument()
+                    expect(
+                        within(comboboxOptions()).getByText('Withdrawn')
+                    ).toBeInTheDocument()
+                    await selectEvent.select(comboboxOptions(), 'Withdrawn')
+                })
+
+                const rows = await screen.findAllByRole('row')
+                expect(rows).toHaveLength(2)
+                expect(
+                    screen.getByText('Displaying 1 of 3 rate reviews')
+                ).toBeInTheDocument()
+
+                // Add UNLOCK to filter
+                selectEvent.openMenu(statusCombobox)
+                await waitFor(async () => {
+                    //Expected options are present
+                    expect(
+                        within(comboboxOptions()).getByText('Unlocked')
+                    ).toBeInTheDocument()
+                    await selectEvent.select(comboboxOptions(), 'Unlocked')
+                })
+
+                const rowsAgain = await screen.findAllByRole('row')
+                expect(rowsAgain).toHaveLength(3)
+                expect(
+                    screen.getByText('Displaying 2 of 3 rate reviews')
+                ).toBeInTheDocument()
+
+                // Add SUBMIITED to filters
+                selectEvent.openMenu(statusCombobox)
+                await waitFor(async () => {
+                    //Expected options are present
+                    expect(
+                        within(comboboxOptions()).getByText('Submitted')
+                    ).toBeInTheDocument()
+                    await selectEvent.select(comboboxOptions(), 'Submitted')
+                })
+
+                const rowsAgainAgain = await screen.findAllByRole('row')
+                expect(rowsAgainAgain).toHaveLength(4)
                 expect(
                     screen.getByText('Displaying 3 of 3 rate reviews')
                 ).toBeInTheDocument()

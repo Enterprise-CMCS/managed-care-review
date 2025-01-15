@@ -16,6 +16,7 @@ import {
 import { assertAnError, assertAnErrorCode, must } from '../../testHelpers'
 import { testEmailConfig, testEmailer } from '../../testHelpers/emailerHelpers'
 import { CreateRateQuestionDocument } from '../../gen/gqlClient'
+import { withdrawTestRate } from '../../testHelpers/gqlRateHelpers'
 
 describe('createRateQuestion', () => {
     const cmsUser = testCMSUser()
@@ -125,16 +126,20 @@ describe('createRateQuestion', () => {
             })
         )
     })
-    it('returns an error if the rate is in DRAFT', async () => {
+    it('returns an error if the rate is in invalid status for questions', async () => {
         const stateServer = await constructTestPostgresServer()
         const cmsServer = await constructTestPostgresServer({
             context: {
                 user: cmsUser,
             },
         })
-        const submittedContractAndRate = must(
+        const submittedContractAndRate =
             await createAndUpdateTestContractWithRate(stateServer)
-        )
+
+        const contractWithRateToWithdraw =
+            await createAndSubmitTestContractWithRate(stateServer)
+        const rateToWithdraw =
+            contractWithRateToWithdraw.packageSubmissions[0].rateRevisions[0]
 
         const rateID = submittedContractAndRate.draftRates?.[0].id
 
@@ -149,7 +154,25 @@ describe('createRateQuestion', () => {
         expect(rateQuestionRes.errors).toBeDefined()
         expect(assertAnErrorCode(rateQuestionRes)).toBe('BAD_USER_INPUT')
         expect(assertAnError(rateQuestionRes).message).toBe(
-            'Issue creating question for rate. Message: Cannot create question for rate in DRAFT status'
+            'Issue creating question for rate. Message: Rate is in a invalid statius: DRAFT'
+        )
+
+        const withdrawnRate = await withdrawTestRate(
+            cmsServer,
+            rateToWithdraw.rateID,
+            'Withdraw rate'
+        )
+        const rateQuestionForWithdrawnRate = await createTestRateQuestion(
+            cmsServer,
+            withdrawnRate.id
+        )
+
+        expect(rateQuestionForWithdrawnRate.errors).toBeDefined()
+        expect(assertAnErrorCode(rateQuestionForWithdrawnRate)).toBe(
+            'BAD_USER_INPUT'
+        )
+        expect(assertAnError(rateQuestionForWithdrawnRate).message).toBe(
+            'Issue creating question for rate. Message: Rate is in a invalid statius: WITHDRAWN'
         )
     })
     it('returns an error of a state user attempts to create a rate question', async () => {

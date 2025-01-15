@@ -53,6 +53,8 @@ export type {
     ContractPackageSubmissionWithCauseType,
     RatePackageSubmissionWithCauseType,
     UnlockedContractType,
+    RateReviewActionType,
+    RateReviewType,
 } from './contractAndRates'
 
 export type {

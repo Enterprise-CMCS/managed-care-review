@@ -69,9 +69,8 @@ export function createRateQuestionResolver(
             })
         }
 
-        // Draft rate will have no submitted revisions
-        if (rate.status === 'DRAFT') {
-            const errMessage = `Issue creating question for rate. Message: Cannot create question for rate in DRAFT status`
+        if (['DRAFT', 'WITHDRAWN'].includes(rate.consolidatedStatus)) {
+            const errMessage = `Issue creating question for rate. Message: Rate is in a invalid statius: ${rate.consolidatedStatus}`
             logError('createRateQuestion', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new UserInputError(errMessage)

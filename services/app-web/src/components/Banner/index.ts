@@ -8,3 +8,4 @@ export { DocumentWarningBanner } from './DocumentWarningBanner/DocumentWarningBa
 export { RateReplacedBanner } from './RateReplacedBanner/RateReplacedBanner'
 export { RateWithdrawBanner } from './RateWithdrawBanner/RateWithdrawBanner'
 export { SubmissionApprovedBanner } from './SubmissionApprovedBanner/SubmissionApprovedBanner'
+export { IncompleteSubmissionBanner } from './IncompleteSubmissionBanner/IncompleteSubmissionBanner'

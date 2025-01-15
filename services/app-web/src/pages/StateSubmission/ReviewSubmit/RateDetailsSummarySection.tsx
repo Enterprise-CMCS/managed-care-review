@@ -41,6 +41,7 @@ import { useParams } from 'react-router-dom'
 import { LinkWithLogging } from '../../../components/TealiumLogging/Link'
 import classnames from 'classnames'
 import { hasCMSUserPermissions } from '@mc-review/helpers'
+import { InfoTag } from '../../../components/InfoTag/InfoTag'
 
 export type RateDetailsSummarySectionProps = {
     contract: Contract | UnlockedContract
@@ -69,7 +70,7 @@ type PackageNamesLookupType = {
 export function renderDownloadButton(
     zippedFilesURL: string | undefined | Error
 ) {
-    if (zippedFilesURL instanceof Error) {
+    if (zippedFilesURL instanceof Error || !zippedFilesURL) {
         return (
             <InlineDocumentWarning message="Rate document download is unavailable" />
         )
@@ -96,6 +97,7 @@ export const RateDetailsSummarySection = ({
     const isSubmitted =
         contract.status === 'SUBMITTED' || contract.status === 'RESUBMITTED'
     const isCMSUser = hasCMSUserPermissions(loggedInUser)
+    const isStateUser = loggedInUser?.role === 'STATE_USER'
     const isAdminUser = loggedInUser?.role === 'ADMIN_USER'
     const isSubmittedOrCMSUser = isSubmitted || isCMSUser
     const isEditing = !isSubmittedOrCMSUser && editNavigateTo !== undefined
@@ -105,6 +107,15 @@ export const RateDetailsSummarySection = ({
     const rateRevs = rateRevisions
         ? rateRevisions
         : getVisibleLatestRateRevisions(contract, isEditing)
+
+    const withdrawnRateRevisions: RateRevision[] =
+        contract.withdrawnRates?.reduce((acc, rate) => {
+            const latestRevision = rate.packageSubmissions?.[0].rateRevision
+            if (rate.consolidatedStatus === 'WITHDRAWN' && latestRevision) {
+                acc.push(latestRevision)
+            }
+            return acc
+        }, [] as RateRevision[]) ?? []
 
     // Calculate last submitted data for document upload tables
     const lastSubmittedIndex = getIndexFromRevisionVersion(
@@ -226,8 +237,10 @@ export const RateDetailsSummarySection = ({
         // get all the keys for the documents we want to zip
         async function fetchZipUrl() {
             const submittedRates =
-                getLastContractSubmission(contract)?.rateRevisions
-            if (submittedRates !== undefined) {
+                getLastContractSubmission(contract)?.rateRevisions ?? []
+
+            // skip if no rates
+            if (submittedRates.length > 0) {
                 const keysFromDocs = submittedRates
                     .flatMap((rateInfo) =>
                         rateInfo.formData.rateDocuments.concat(
@@ -278,15 +291,33 @@ export const RateDetailsSummarySection = ({
                 isAdminUser && !isLinkedRate && !isPreviousSubmission,
         })
 
+    const showDownloadAllButton =
+        isSubmittedOrCMSUser &&
+        !isPreviousSubmission &&
+        rateRevs &&
+        rateRevs.length > 0
+
+    const noRatesMessage = () => {
+        if (isStateUser) {
+            return isSubmitted
+                ? 'You must contact your CMS point of contact and request an unlock.'
+                : 'You must add a rate certification before you can resubmit.'
+        }
+
+        if (isCMSUser) {
+            return 'You must unlock the submission so the state can add a rate certification.'
+        }
+
+        return 'CMS must unlock the submission so the state can add a rate certification.'
+    }
+
     return (
         <SectionCard id="rateDetails" className={styles.summarySection}>
             <SectionHeader
                 header="Rate details"
                 editNavigateTo={editNavigateTo}
             >
-                {isSubmittedOrCMSUser &&
-                    !isPreviousSubmission &&
-                    renderDownloadButton(zippedFilesURL)}
+                {showDownloadAllButton && renderDownloadButton(zippedFilesURL)}
             </SectionHeader>
             {rateRevs && rateRevs.length > 0
                 ? rateRevs.map((rateRev) => {
@@ -557,7 +588,24 @@ export const RateDetailsSummarySection = ({
                           </SectionCard>
                       )
                   })
-                : explainMissingData && <DataDetailMissingField />}
+                : (isSubmitted || isStateUser) && (
+                      <DataDetailMissingField requiredText={noRatesMessage()} />
+                  )}
+            {withdrawnRateRevisions.length > 0 &&
+                withdrawnRateRevisions.map((rateRev) => (
+                    <SectionCard
+                        id={`withdrawn-rate-${rateRev.id}`}
+                        key={rateRev.id}
+                    >
+                        <h3
+                            aria-label={`Rate ID: ${rateRev.formData.rateCertificationName}`}
+                            className={styles.rateName}
+                        >
+                            <InfoTag color="gray-medium">WITHDRAWN</InfoTag>{' '}
+                            {rateRev.formData.rateCertificationName}
+                        </h3>
+                    </SectionCard>
+                ))}
         </SectionCard>
     )
 }
