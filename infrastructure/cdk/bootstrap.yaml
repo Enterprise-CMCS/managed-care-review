@@ -278,7 +278,7 @@ Resources:
         Properties:
             Path: /delegatedadmin/developer/
             PermissionsBoundary:
-                Fn::Sub: arn:${AWS::Partition}:iam::${AWS::AccountId}:policy/${InputPermissionsBoundary}
+                Fn::Sub: arn:${AWS::Partition}:iam::${AWS::AccountId}:policy/cms-cloud-admin/ct-ado-poweruser-permissions-boundary-policy
             AssumeRolePolicyDocument:
                 Statement:
                     - Action: sts:AssumeRole
@@ -286,7 +286,7 @@ Resources:
                       Principal:
                           AWS:
                               - Ref: AWS::AccountId
-                              - Fn::Sub: arn:aws:iam::${AWS::AccountId}:role/${InputIAMRole}
+                              - Fn::Sub: arn:aws:iam::${AWS::AccountId}:role/ct-ado-managedcare-developer-admin
                     - Fn::If:
                           - HasTrustedAccounts
                           - Action: sts:AssumeRole
@@ -300,12 +300,13 @@ Resources:
             Tags:
                 - Key: aws-cdk:bootstrap-role
                   Value: file-publishing
+
     ImagePublishingRole:
         Type: AWS::IAM::Role
         Properties:
             Path: /delegatedadmin/developer/
             PermissionsBoundary:
-                Fn::Sub: arn:${AWS::Partition}:iam::${AWS::AccountId}:policy/${InputPermissionsBoundary}
+                Fn::Sub: arn:${AWS::Partition}:iam::${AWS::AccountId}:policy/cms-cloud-admin/ct-ado-poweruser-permissions-boundary-policy
             AssumeRolePolicyDocument:
                 Statement:
                     - Action: sts:AssumeRole
@@ -320,19 +321,20 @@ Resources:
                             Principal:
                                 AWS:
                                     - Ref: TrustedAccounts
-                                    - Fn::Sub: arn:aws:iam::${AWS::AccountId}:role/${InputIAMRole}
+                                    - Fn::Sub: arn:aws:iam::${AWS::AccountId}:role/ct-ado-managedcare-developer-admin
                           - Ref: AWS::NoValue
             RoleName:
                 Fn::Sub: cdk-${Qualifier}-image-publishing-role-${AWS::AccountId}-${AWS::Region}
             Tags:
                 - Key: aws-cdk:bootstrap-role
                   Value: image-publishing
+
     LookupRole:
         Type: AWS::IAM::Role
         Properties:
             Path: /delegatedadmin/developer/
             PermissionsBoundary:
-                Fn::Sub: arn:${AWS::Partition}:iam::${AWS::AccountId}:policy/${InputPermissionsBoundary}
+                Fn::Sub: arn:${AWS::Partition}:iam::${AWS::AccountId}:policy/cms-cloud-admin/ct-ado-poweruser-permissions-boundary-policy
             AssumeRolePolicyDocument:
                 Statement:
                     - Action: sts:AssumeRole
@@ -340,7 +342,7 @@ Resources:
                       Principal:
                           AWS:
                               - Ref: AWS::AccountId
-                              - Fn::Sub: arn:aws:iam::${AWS::AccountId}:role/${InputIAMRole}
+                              - Fn::Sub: arn:aws:iam::${AWS::AccountId}:role/ct-ado-managedcare-developer-admin
                     - Fn::If:
                           - HasTrustedAccountsForLookup
                           - Action: sts:AssumeRole
@@ -374,6 +376,7 @@ Resources:
             Tags:
                 - Key: aws-cdk:bootstrap-role
                   Value: lookup
+
     FilePublishingRoleDefaultPolicy:
         Type: AWS::IAM::Policy
         Properties:
@@ -390,10 +393,6 @@ Resources:
                       Resource:
                           - Fn::Sub: ${StagingBucket.Arn}
                           - Fn::Sub: ${StagingBucket.Arn}/*
-                      Condition:
-                          StringEquals:
-                              aws:ResourceAccount:
-                                  - Fn::Sub: ${AWS::AccountId}
                       Effect: Allow
                     - Action:
                           - kms:Decrypt
@@ -412,6 +411,7 @@ Resources:
                 - Ref: FilePublishingRole
             PolicyName:
                 Fn::Sub: cdk-${Qualifier}-file-publishing-role-default-policy-${AWS::AccountId}-${AWS::Region}
+
     ImagePublishingRoleDefaultPolicy:
         Type: AWS::IAM::Policy
         Properties:
@@ -439,9 +439,13 @@ Resources:
                 - Ref: ImagePublishingRole
             PolicyName:
                 Fn::Sub: cdk-${Qualifier}-image-publishing-role-default-policy-${AWS::AccountId}-${AWS::Region}
+
     DeploymentActionRole:
         Type: AWS::IAM::Role
         Properties:
+            Path: /delegatedadmin/developer/
+            PermissionsBoundary:
+                Fn::Sub: arn:${AWS::Partition}:iam::${AWS::AccountId}:policy/cms-cloud-admin/ct-ado-poweruser-permissions-boundary-policy
             AssumeRolePolicyDocument:
                 Statement:
                     - Action: sts:AssumeRole
@@ -449,7 +453,7 @@ Resources:
                       Principal:
                           AWS:
                               - Ref: AWS::AccountId
-                              - Fn::Sub: arn:aws:iam::${AWS::AccountId}:role/${InputIAMRole}
+                              - Fn::Sub: arn:aws:iam::${AWS::AccountId}:role/ct-ado-managedcare-developer-admin
                     - Fn::If:
                           - HasTrustedAccounts
                           - Action: sts:AssumeRole
@@ -471,8 +475,6 @@ Resources:
                                 - cloudformation:ExecuteChangeSet
                                 - cloudformation:CreateStack
                                 - cloudformation:UpdateStack
-                                - cloudformation:RollbackStack
-                                - cloudformation:ContinueUpdateRollback
                             Resource: '*'
                           - Sid: PipelineCrossAccountArtifactsBucket
                             Effect: Allow
@@ -533,20 +535,18 @@ Resources:
                                 - Fn::Sub: arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:parameter${CdkBootstrapVersion}
                       Version: '2012-10-17'
                   PolicyName: default
-            Path: /delegatedadmin/developer/
             RoleName:
                 Fn::Sub: cdk-${Qualifier}-deploy-role-${AWS::AccountId}-${AWS::Region}
-            PermissionsBoundary:
-                Fn::Sub: arn:${AWS::Partition}:iam::${AWS::AccountId}:policy/${InputPermissionsBoundary}
             Tags:
                 - Key: aws-cdk:bootstrap-role
                   Value: deploy
+
     CloudFormationExecutionRole:
         Type: AWS::IAM::Role
         Properties:
             Path: /delegatedadmin/developer/
             PermissionsBoundary:
-                Fn::Sub: arn:${AWS::Partition}:iam::${AWS::AccountId}:policy/${InputPermissionsBoundary}
+                Fn::Sub: arn:${AWS::Partition}:iam::${AWS::AccountId}:policy/cms-cloud-admin/ct-ado-poweruser-permissions-boundary-policy
             AssumeRolePolicyDocument:
                 Statement:
                     - Action: sts:AssumeRole
@@ -564,6 +564,7 @@ Resources:
                           - - Fn::Sub: arn:${AWS::Partition}:iam::aws:policy/AdministratorAccess
             RoleName:
                 Fn::Sub: cdk-${Qualifier}-cfn-exec-role-${AWS::AccountId}-${AWS::Region}
+
     CdkBoostrapPermissionsBoundaryPolicy:
         Condition: ShouldCreatePermissionsBoundary
         Type: AWS::IAM::ManagedPolicy
