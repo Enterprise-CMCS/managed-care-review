@@ -540,7 +540,6 @@ Resources:
             Tags:
                 - Key: aws-cdk:bootstrap-role
                   Value: deploy
-
     CloudFormationExecutionRole:
         Type: AWS::IAM::Role
         Properties:
