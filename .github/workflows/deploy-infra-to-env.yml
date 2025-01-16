@@ -129,7 +129,6 @@ jobs:
           pnpm cdk deploy ${{inputs.stage_name}}-ui \
             --context stage=${{inputs.stage_name}} \
             --toolkit-stack-name CDKToolkitMCReviewDev \
-            --qualifier mcreview \
             --require-approval never
 
   storybook:

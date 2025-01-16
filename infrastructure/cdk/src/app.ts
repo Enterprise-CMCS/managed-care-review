@@ -12,6 +12,9 @@ const env = {
 
 // Create the UI stack
 new UiStack(app, `${stage}-ui`, {
+    synthesizer: new cdk.DefaultStackSynthesizer({
+        qualifier: 'mcreview',
+    }),
     stage,
     env,
     tags: {
