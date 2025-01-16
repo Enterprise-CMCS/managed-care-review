@@ -40,9 +40,7 @@ const featureFlags = {
         defaultValue: false,
     },
     /**
-     * Flag for removing parameter store form the application. 
-     * False will continue to pull email configuration data from parameter store. 
-     * True will pull email configuration data from the database.
+     * Remove parameter store. False: use parameter store for email config. True: use database.
      */
     REMOVE_PARAMETER_STORE: {
         flag: 'remove-parameter-store',
