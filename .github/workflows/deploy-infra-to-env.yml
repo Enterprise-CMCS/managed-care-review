@@ -128,6 +128,7 @@ jobs:
           pnpm install && pnpm build && \
           pnpm cdk deploy ${{inputs.stage_name}}-ui \
             --context stage=${{inputs.stage_name}} \
+            --qualifier mcreview \
             --require-approval never
 
   storybook:
