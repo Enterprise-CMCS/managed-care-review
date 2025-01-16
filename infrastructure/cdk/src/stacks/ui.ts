@@ -198,16 +198,17 @@ export class UiStack extends cdk.Stack {
         )
 
         // Get SSM Parameters
-        const cloudfrontDomainName =
-            ssm.StringParameter.valueForStringParameter(
-                this,
-                `/configuration/${props.stage}/cloudfront/domain_name`
-            )
-        const cloudfrontCertificateArn =
-            ssm.StringParameter.valueForStringParameter(
-                this,
-                `/configuration/${props.stage}/cloudfront/certificate_arn`
-            )
+        const cloudfrontDomainName = ssm.StringParameter.valueFromLookup(
+            this,
+            `/configuration/${props.stage}/cloudfront/domain_name`,
+            ''
+        )
+
+        const cloudfrontCertificateArn = ssm.StringParameter.valueFromLookup(
+            this,
+            `/configuration/${props.stage}/cloudfront/certificate_arn`,
+            ''
+        )
 
         // Create custom domain condition
         const customDomainCondition = new cdk.CfnCondition(
