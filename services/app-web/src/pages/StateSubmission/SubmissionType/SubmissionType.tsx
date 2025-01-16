@@ -565,7 +565,7 @@ export const SubmissionType = ({
                                                     target="_blank"
                                                 >
                                                     Contact the Help Desk to
-                                                    edit this list
+                                                    edit state programs list
                                                 </LinkWithLogging>
                                             </div>
                                             {showFieldErrors(

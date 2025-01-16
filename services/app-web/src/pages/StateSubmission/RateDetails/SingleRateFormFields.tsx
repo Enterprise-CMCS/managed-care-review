@@ -232,7 +232,7 @@ export const SingleRateFormFields = ({
                         variant="external"
                         target="_blank"
                     >
-                        Contact the Help Desk to edit state programs list
+                        Contact the Help Desk to edit this list
                     </LinkWithLogging>
                 </div>
                 <PoliteErrorMessage formFieldLabel="What rates are included in this certification?">
