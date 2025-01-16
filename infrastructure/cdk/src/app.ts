@@ -12,7 +12,7 @@ const env = {
 
 const customSynthesizer = new cdk.DefaultStackSynthesizer({
     qualifier: 'mcreview',
-    fileAssetsBucketName: `cdk-one-assets-${env.account}-${env.region}`,
+    fileAssetsBucketName: `cdk-mcreview-assets-${env.account}-${env.region}`,
     bucketPrefix: '',
     cloudFormationExecutionRole: `arn:aws:iam::${env.account}:role/delegatedadmin/developer/cdk-mcreview-cfn-exec-role-${env.account}-${env.region}`,
     deployRoleArn: `arn:aws:iam::${env.account}:role/delegatedadmin/developer/cdk-mcreview-deploy-role-${env.account}-${env.region}`,
