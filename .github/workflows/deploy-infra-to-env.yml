@@ -126,7 +126,7 @@ jobs:
         run: |
           pushd infrastructure/cdk && \
           pnpm install && pnpm build && \
-          pnpm cdk deploy ui \
+          pnpm cdk deploy ${{inputs.stage_name}}-ui \
             --context stage=${{inputs.stage_name}} \
             --require-approval never
 
