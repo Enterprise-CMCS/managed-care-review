@@ -95,6 +95,7 @@ export class UiStack extends cdk.Stack {
         )
 
         // Bucket Policy
+        // Bucket Policy
         new s3.CfnBucketPolicy(this, 'BucketPolicy', {
             bucket: this.bucket.ref,
             policyDocument: {
@@ -123,12 +124,8 @@ export class UiStack extends cdk.Stack {
                             },
                         },
                         Resource: [
-                            cdk.Fn.sub('${S3Bucket.Arn}', {
-                                'S3Bucket.Arn': this.bucket.attrArn,
-                            }),
-                            cdk.Fn.sub('${S3Bucket.Arn}/*', {
-                                'S3Bucket.Arn': this.bucket.attrArn,
-                            }),
+                            this.bucket.attrArn,
+                            `${this.bucket.attrArn}/*`,
                         ],
                         Sid: 'DenyUnencryptedConnections',
                     },
