@@ -563,7 +563,6 @@ Resources:
                           - - Fn::Sub: arn:${AWS::Partition}:iam::aws:policy/AdministratorAccess
             RoleName:
                 Fn::Sub: cdk-${Qualifier}-cfn-exec-role-${AWS::AccountId}-${AWS::Region}
-
     CdkBoostrapPermissionsBoundaryPolicy:
         Condition: ShouldCreatePermissionsBoundary
         Type: AWS::IAM::ManagedPolicy
