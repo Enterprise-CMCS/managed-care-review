@@ -14,6 +14,7 @@ import {
     FieldTextarea,
     FieldYesNo,
     FormNotificationContainer,
+    LinkWithLogging,
     PoliteErrorMessage,
     ReactRouterLinkWithLogging,
 } from '../../../components'
@@ -547,13 +548,26 @@ export const SubmissionType = ({
                                                 Programs this contract action
                                                 covers
                                             </Label>
-                                            <span
-                                                className={
-                                                    styles.requiredOptionalText
-                                                }
-                                            >
-                                                Required
-                                            </span>
+                                            <div role="note">
+                                                <span
+                                                    className={
+                                                        styles.requiredOptionalText
+                                                    }
+                                                >
+                                                    Required
+                                                </span>
+                                                <LinkWithLogging
+                                                    aria-label="Managed care programs guidance (opens in new window)"
+                                                    href={
+                                                        '/help#managed-care-programs-guidance'
+                                                    }
+                                                    variant="external"
+                                                    target="_blank"
+                                                >
+                                                    Contact the Help Desk to
+                                                    edit state programs list
+                                                </LinkWithLogging>
+                                            </div>
                                             {showFieldErrors(
                                                 errors.programIDs
                                             ) && (
