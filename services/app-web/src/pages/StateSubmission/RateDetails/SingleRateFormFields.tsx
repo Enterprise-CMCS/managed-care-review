@@ -219,10 +219,22 @@ export const SingleRateFormFields = ({
                 <Label htmlFor={`${fieldNamePrefix}.rateProgramIDs`}>
                     What rates are included in this certification?
                 </Label>
-                <span className={styles.requiredOptionalText}>Required</span>
-                <span className={styles.requiredOptionalText}>
-                    This information will be used to generate the rate name
-                </span>
+                <div role="note">
+                    <span className={styles.requiredOptionalText}>
+                        Required
+                    </span>
+                    <span className={styles.requiredOptionalText}>
+                        This information will be used to generate the rate name
+                    </span>
+                    <LinkWithLogging
+                        aria-label="Managed care programs guidance (opens in new window)"
+                        href={'/help#managed-care-programs-guidance'}
+                        variant="external"
+                        target="_blank"
+                    >
+                        Contact the Help Desk to edit this list
+                    </LinkWithLogging>
+                </div>
                 <PoliteErrorMessage formFieldLabel="What rates are included in this certification?">
                     {showFieldErrors('rateProgramIDs')}
                 </PoliteErrorMessage>

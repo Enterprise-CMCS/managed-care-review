@@ -64,7 +64,6 @@ Cypress.Commands.add(
         cy.findByText(
             'Medicaid and CHIP Managed Care Reporting and Review System'
         )
-        // cy.findByRole('link', { name: 'Sign In' }).click()
         const authMode = Cypress.env('AUTH_MODE')
 
         if (authMode === 'LOCAL') {
@@ -84,10 +83,11 @@ Cypress.Commands.add(
 
         cy.wait('@fetchCurrentUserQuery', { timeout: 20_000 })
         cy.wait('@indexContractsForDashboardQuery', { timeout: 80_000 })
-        cy.findByTestId('cms-dashboard-page', { timeout: 10_000 }).should(
-            'exist'
-        )
+                cy.findByTestId('cms-dashboard-page', { timeout: 10_000 }).should(
+                    'exist'
+                )
 
+        // After logging in, we visit the initial URL if it's not the dashboard.
         if (initialURL !== '/') {
             cy.visit(initialURL)
             cy.url({ timeout: 20_000 }).should('contain', initialURL)
@@ -97,7 +97,7 @@ Cypress.Commands.add(
                     timeout: 20_000,
                 }) // for cases where CMs user goes to specific submission on login, likely from email link
             } else if (initialURL.includes('rate-reviews')) {
-                cy.wait('@indexRatesQuery', { timeout: 80_000 })
+                cy.wait('@indexRatesForDashboardQuery', { timeout: 80_000 })
                 cy.findByTestId('cms-dashboard-page', { timeout: 10_000 }).should(
                     'exist'
                 )
@@ -106,6 +106,9 @@ Cypress.Commands.add(
                 cy.wait('@fetchRateWithQuestionsQuery', { timeout: 80_000 })
             } else {
                 cy.wait('@indexContractsForDashboardQuery', { timeout: 80_000 })
+                cy.findByTestId('cms-dashboard-page', { timeout: 10_000 }).should(
+                    'exist'
+                )
             }
         }
     }
