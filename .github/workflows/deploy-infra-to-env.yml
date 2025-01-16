@@ -125,6 +125,7 @@ jobs:
         id: deploy-ui
         run: |
           pushd infrastructure/cdk && \
+          pnpm install && pnpm build && \
           pnpm cdk deploy ui \
             --context stage=${{inputs.stage_name}} \
             --require-approval never
