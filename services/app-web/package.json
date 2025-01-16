@@ -137,8 +137,8 @@
     },
     "devDependencies": {
         "@aws-sdk/client-amplify": "^3.726.1",
-        "@aws-sdk/client-s3": "^3.726.1",
-        "@aws-sdk/s3-request-presigner": "^3.726.1",
+        "@aws-sdk/client-s3": "^3.729.0",
+        "@aws-sdk/s3-request-presigner": "^3.729.0",
         "@chromatic-com/storybook": "^1",
         "@peculiar/webcrypto": "^1.5.0",
         "@storybook/addon-a11y": "^8.2.9",
