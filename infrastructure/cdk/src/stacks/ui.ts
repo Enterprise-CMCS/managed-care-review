@@ -5,6 +5,12 @@ import * as wafv2 from 'aws-cdk-lib/aws-wafv2'
 import * as ssm from 'aws-cdk-lib/aws-ssm'
 import { Construct } from 'constructs'
 
+export class UiStack extends cdk.Stack {
+    constructor(scope: Construct, id: string, props?: cdk.StackProps) {
+        super(scope, id, props)
+    }
+}
+
 interface UiStackProps extends cdk.StackProps {
     stage: string
 }
@@ -48,6 +54,7 @@ function getCloudFrontEndpointUrl(
     )
 }
 
+/*
 export class UiStack extends cdk.Stack {
     private readonly webAcl: wafv2.CfnWebACL
     private readonly bucket: s3.CfnBucket
@@ -94,7 +101,6 @@ export class UiStack extends cdk.Stack {
             }
         )
 
-        // Bucket Policy
         // Bucket Policy
         new s3.CfnBucketPolicy(this, 'BucketPolicy', {
             bucket: this.bucket.ref,
@@ -312,3 +318,4 @@ export class UiStack extends cdk.Stack {
         })
     }
 }
+*/
