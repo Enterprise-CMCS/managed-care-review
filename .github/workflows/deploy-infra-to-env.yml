@@ -121,6 +121,11 @@ jobs:
           stage-name: ${{ inputs.stage_name }}
           changed-services: ${{ inputs.changed_services }}
 
+      - name: deploy ui with serverless
+        id: deploy-ui
+        run: |
+          pushd services/ui && npx serverless deploy --stage ${{ inputs.stage_name }}
+
       - name: Deploy UI with CDK
         id: deploy-ui
         run: |
