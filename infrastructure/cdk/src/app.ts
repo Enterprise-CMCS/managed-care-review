@@ -22,7 +22,7 @@ const customSynthesizer = new cdk.DefaultStackSynthesizer({
 })
 
 // Create the UI stack
-new UiStack(app, `${stage}-ui`, {
+new UiStack(app, `ui-${stage}`, {
     synthesizer: customSynthesizer,
     stage,
     env,
@@ -40,6 +40,7 @@ new UiStack(app, `${stage}-ui`, {
     tags: {
         Environment: stage,
         Service: 'ui',
+        DeployBy: 'CDK',
     },
 })
 
