@@ -5,12 +5,6 @@ import * as wafv2 from 'aws-cdk-lib/aws-wafv2'
 import * as ssm from 'aws-cdk-lib/aws-ssm'
 import { Construct } from 'constructs'
 
-export class UiStack extends cdk.Stack {
-    constructor(scope: Construct, id: string, props?: cdk.StackProps) {
-        super(scope, id, props)
-    }
-}
-
 interface UiStackProps extends cdk.StackProps {
     stage: string
 }
@@ -38,7 +32,6 @@ function getViewerCertificateConfig(
     ) as cloudfront.CfnDistribution.ViewerCertificateProperty
 }
 
-/*
 function getCloudFrontEndpointUrl(
     condition: cdk.CfnCondition,
     domainName: string,
@@ -318,4 +311,3 @@ export class UiStack extends cdk.Stack {
         })
     }
 }
-*/
