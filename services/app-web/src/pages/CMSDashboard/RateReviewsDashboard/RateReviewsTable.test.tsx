@@ -87,24 +87,19 @@ describe('RateReviewsTable', () => {
 
                 await waitFor(() => {
                     expect(
-                        screen.getByText('Displaying 3 of 3 rate reviews')
+                        screen.getByText('Displaying 2 of 3 rate reviews')
                     ).toBeInTheDocument()
                 })
                 // expect filter accordion to be present
                 expect(screen.getByTestId('accordion')).toBeInTheDocument()
                 expect(
-                    screen.getByText('0 filters applied')
-                ).toBeInTheDocument()
-
-                // expect table caption
-                expect(
-                    screen.getByText('Test table caption')
+                    screen.getByText('2 filters applied')
                 ).toBeInTheDocument()
 
                 const tableRows = screen.getAllByRole('row')
 
                 // expect there to be 4 rows, one of which is the header row
-                expect(tableRows).toHaveLength(4)
+                expect(tableRows).toHaveLength(3)
 
                 // expect rows to be in order where latest updatedAt is first in the array
                 // expect statuses to be drawn from the consolidatedStatus field
@@ -115,17 +110,17 @@ describe('RateReviewsTable', () => {
                     within(tableRows[1]).getByText('Unlocked')
                 ).toBeInTheDocument()
                 expect(
-                    within(tableRows[2]).getByText('rate-2-certification-name')
+                    within(tableRows[2]).getByText('rate-1-certification-name')
                 ).toBeInTheDocument()
                 expect(
-                    within(tableRows[2]).getByText('Withdrawn')
+                    within(tableRows[2]).getByText('Submitted')
                 ).toBeInTheDocument()
+
+                // expect WITHDRAWN rates to be not visible
                 expect(
-                    within(tableRows[3]).getByText('rate-1-certification-name')
-                ).toBeInTheDocument()
-                expect(
-                    within(tableRows[3]).getByText('Submitted')
-                ).toBeInTheDocument()
+                    screen.queryByText('rate-2-certification-name')
+                ).toBeNull()
+                expect(screen.queryByText('Withdrawn')).toBeNull()
             })
             it('renders rates table correctly without filters, captions and no rates', async () => {
                 renderWithProviders(<RateReviewsTable tableData={[]} />, {
@@ -183,6 +178,12 @@ describe('RateReviewsTable', () => {
                     await userEvent.click(accordionButton)
                 })
 
+                // clear out default status filter
+                const clearFilterButton = screen.getByRole('button', {
+                    name: /Clear filters/,
+                })
+                await userEvent.click(clearFilterButton)
+
                 //Look for state filter
                 const stateCombobox = within(stateFilter).getByRole('combobox')
                 expect(stateCombobox).toBeInTheDocument()
@@ -233,7 +234,7 @@ describe('RateReviewsTable', () => {
 
                 await waitFor(() => {
                     expect(
-                        screen.getByText('Displaying 3 of 3 rate reviews')
+                        screen.getByText('Displaying 2 of 3 rate reviews')
                     ).toBeInTheDocument()
                 })
 
@@ -249,6 +250,14 @@ describe('RateReviewsTable', () => {
                     //Expand filter accordion
                     await userEvent.click(accordionButton)
                 })
+
+                // clear out default status filter
+                const clearFilterButton = screen.getByRole('button', {
+                    name: /Clear filters/,
+                })
+                expect(clearFilterButton).toBeInTheDocument()
+
+                await userEvent.click(clearFilterButton)
 
                 const ratingPeriodFilter = screen.getByTestId(
                     'filter-date-range-picker'
@@ -317,11 +326,6 @@ describe('RateReviewsTable', () => {
                     screen.getByText('Displaying 2 of 3 rate reviews')
                 ).toBeInTheDocument()
 
-                const clearFilterButton = screen.getByRole('button', {
-                    name: /Clear filters/,
-                })
-                expect(clearFilterButton).toBeInTheDocument()
-
                 // Clear all filters
                 await userEvent.click(clearFilterButton)
 
@@ -356,6 +360,14 @@ describe('RateReviewsTable', () => {
                     //Expand filter accordion
                     await userEvent.click(accordionButton)
                 })
+
+                // clear out default status filter
+                const clearFilterButton = screen.getByRole('button', {
+                    name: /Clear filters/,
+                })
+                expect(clearFilterButton).toBeInTheDocument()
+
+                await userEvent.click(clearFilterButton)
 
                 //Look for status filter
                 const statusCombobox =

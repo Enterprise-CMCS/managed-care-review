@@ -3,9 +3,12 @@ import { useLocation } from 'react-router'
 import { GridContainer, Table } from '@trussworks/react-uswds'
 import styles from './Help.module.scss'
 import { useAuth } from '../../contexts/AuthContext'
+import { ContactSupportLink } from '../../components/ErrorAlert/ContactSupportLink'
+import { useStringConstants } from '../../hooks/useStringConstants'
 
 export const Help = (): React.ReactElement => {
     const location = useLocation()
+    const stringConstants = useStringConstants()
     const { loggedInUser } = useAuth()
 
     useEffect(() => {
@@ -124,6 +127,33 @@ export const Help = (): React.ReactElement => {
                     This should be selected for any rate certifications that are
                     making changes to capitation rates in your current 12-month
                     rating period.
+                </p>
+            </section>
+            <section className={styles.helpSection}>
+                <h3 id="managed-care-programs-guidance">
+                    Managed care programs guidance
+                </h3>
+                <h4>Managed care programs list</h4>
+                <p className="line-height-sans-4 measure-6">
+                    When making a submission in MC-Review, you will be required
+                    to select from a pre-set list which managed care state
+                    programs are applicable to your contract action on the
+                    “Contract details” page, and which programs are applicable
+                    to your rate certifications on the “Rate details” page.
+                </p>
+                <p className="line-height-sans-4 measure-6">
+                    If you do not see the correct state programs in these lists,
+                    contact the help desk at{' '}
+                    <ContactSupportLink
+                        alternateText={stringConstants.MAIL_TO_SUPPORT}
+                    />{' '}
+                    with the name of the state program and the action to be
+                    taken (i.e. to add the program, remove the program, or edit
+                    the name of an existing program).
+                </p>
+                <p className="line-height-sans-4 measure-6">
+                    State programs will not appear in the pre-set list if their
+                    corresponding submission types are out of scope.
                 </p>
             </section>
             <section className={styles.helpSection}>

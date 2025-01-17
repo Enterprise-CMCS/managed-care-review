@@ -54,6 +54,7 @@ import {
 import { LinkYourRates } from '../../../LinkYourRates/LinkYourRates'
 import { LinkedRateSummary } from '../LinkedRateSummary'
 import { usePage } from '../../../../contexts/PageContext'
+import { InfoTag } from '../../../../components/InfoTag/InfoTag'
 
 export type FormikRateForm = {
     id?: string // no id if its a new rate
@@ -164,20 +165,28 @@ const RateDetails = ({
         }
     }, [focusNewRate])
 
-    const pageHeading = displayAsStandaloneRate
-        ? fetchRateData?.fetchRate.rate.draftRevision?.formData
-              .rateCertificationName
-        : fetchContractData?.fetchContract.contract?.draftRevision?.contractName
-    if (pageHeading) updateHeading({ customHeading: pageHeading })
-    const [updateDraftContractRates] = useUpdateDraftContractRatesMutation()
-    const [submitRate] = useSubmitRateMutation()
-
     // Set up data for form. Either based on contract API (for multi rate) or rates API (for edit and submit of standalone rate)
     const contract = fetchContractData?.fetchContract.contract
     const contractDraftRevision = contract?.draftRevision
     const ratesFromContract = contract?.draftRates
     const initialRequestLoading = fetchContractLoading || fetchRateLoading
     const initialRequestError = fetchContractError || fetchRateError
+    const withdrawnRateRevisions: RateRevision[] =
+        contract?.withdrawnRates?.reduce((acc, rate) => {
+            const latestRevision = rate.packageSubmissions?.[0].rateRevision
+            if (rate.consolidatedStatus === 'WITHDRAWN' && latestRevision) {
+                acc.push(latestRevision)
+            }
+            return acc
+        }, [] as RateRevision[]) ?? []
+
+    const pageHeading = displayAsStandaloneRate
+        ? fetchRateData?.fetchRate.rate.draftRevision?.formData
+              .rateCertificationName
+        : contract?.draftRevision?.contractName
+    if (pageHeading) updateHeading({ customHeading: pageHeading })
+    const [updateDraftContractRates] = useUpdateDraftContractRatesMutation()
+    const [submitRate] = useSubmitRateMutation()
 
     // Set up initial rate form values for Formik
     const initialRates: Rate[] = React.useMemo(
@@ -394,8 +403,7 @@ const RateDetails = ({
                     <PageBannerAlerts
                         loggedInUser={loggedInUser}
                         unlockedInfo={
-                            fetchContractData?.fetchContract.contract
-                                .draftRevision?.unlockInfo ||
+                            contract?.draftRevision?.unlockInfo ||
                             fetchRateData?.fetchRate.rate.draftRevision
                                 ?.unlockInfo
                         }
@@ -576,6 +584,32 @@ const RateDetails = ({
                                                         </button>
                                                     </SectionCard>
                                                 )}
+                                                {withdrawnRateRevisions.length >
+                                                    0 &&
+                                                    withdrawnRateRevisions.map(
+                                                        (rateRev) => (
+                                                            <SectionCard
+                                                                id={`withdrawn-rate-${rateRev.id}`}
+                                                                key={rateRev.id}
+                                                            >
+                                                                <h3
+                                                                    aria-label={`Rate ID: ${rateRev.formData.rateCertificationName}`}
+                                                                    className={
+                                                                        styles.rateName
+                                                                    }
+                                                                >
+                                                                    <InfoTag color="gray-medium">
+                                                                        WITHDRAWN
+                                                                    </InfoTag>{' '}
+                                                                    {
+                                                                        rateRev
+                                                                            .formData
+                                                                            .rateCertificationName
+                                                                    }
+                                                                </h3>
+                                                            </SectionCard>
+                                                        )
+                                                    )}
                                             </>
                                         )}
                                     </FieldArray>

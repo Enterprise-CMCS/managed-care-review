@@ -1976,7 +1976,7 @@ type UnlockedContract {
     """
     consolidatedStatus: ConsolidatedContractStatus!
     "initiallySubmittedAt is the initial date this contract was submitted at. Is not changed by unlock or resubmission."
-    initiallySubmittedAt: Date
+    initiallySubmittedAt: DateTime
     "lastUpdatedForDisplay is the last time this contract was officially updated. When it's a draft it will be the last updatedAt date. Afterwards it will be the most recent submit or unlock or review action date."
     lastUpdatedForDisplay: DateTime!
     "stateCode is the state code (e.g. CA or TN) for the submitting state"

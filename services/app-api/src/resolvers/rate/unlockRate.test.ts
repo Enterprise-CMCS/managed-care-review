@@ -1,22 +1,25 @@
 import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
 import { UnlockRateDocument } from '../../gen/gqlClient'
-import { iterableCmsUsersMockData } from '../../testHelpers/userHelpers'
+import {
+    iterableCmsUsersMockData,
+    testCMSUser,
+} from '../../testHelpers/userHelpers'
 import { expectToBeDefined } from '../../testHelpers/assertionHelpers'
 import { testLDService } from '../../testHelpers/launchDarklyHelpers'
 import { createSubmitAndUnlockTestRate } from '../../testHelpers/gqlRateHelpers'
 import { createAndSubmitTestContractWithRate } from '../../testHelpers/gqlContractHelpers'
 import { testS3Client } from '../../../../app-api/src/testHelpers/s3Helpers'
+import { withdrawTestRate } from '../../testHelpers/gqlRateHelpers'
 
 describe(`unlockRate`, () => {
+    const ldService = testLDService({
+        'rate-edit-unlock': true,
+    })
+    const mockS3 = testS3Client()
+
     describe.each(iterableCmsUsersMockData)(
         '$userRole tests',
         ({ mockUser }) => {
-            const ldService = testLDService({
-                'rate-edit-unlock': true,
-            })
-            const cmsUser = mockUser()
-            const mockS3 = testS3Client()
-
             it('changes rate status to UNLOCKED and creates a new draft revision with unlock info', async () => {
                 const stateServer = await constructTestPostgresServer({
                     ldService,
@@ -24,7 +27,7 @@ describe(`unlockRate`, () => {
                 })
                 const cmsServer = await constructTestPostgresServer({
                     context: {
-                        user: cmsUser,
+                        user: mockUser(),
                     },
                     ldService,
                     s3Client: mockS3,
@@ -58,7 +61,7 @@ describe(`unlockRate`, () => {
                 })
                 const cmsServer = await constructTestPostgresServer({
                     context: {
-                        user: cmsUser,
+                        user: mockUser(),
                     },
                     ldService,
                     s3Client: mockS3,
@@ -83,7 +86,7 @@ describe(`unlockRate`, () => {
 
                 expectToBeDefined(unlockResult2.errors)
                 expect(unlockResult2.errors[0].message).toBe(
-                    'Attempted to unlock rate with wrong status'
+                    'Attempted to unlock rate with wrong status: UNLOCKED'
                 )
             })
 
@@ -116,4 +119,43 @@ describe(`unlockRate`, () => {
             })
         }
     )
+
+    it('does not allow rates with wrong status to be unlocked', async () => {
+        const stateServer = await constructTestPostgresServer({
+            ldService,
+            s3Client: mockS3,
+        })
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: testCMSUser(),
+            },
+            ldService,
+            s3Client: mockS3,
+        })
+
+        // Create and unlock a rate
+        const contract = await createAndSubmitTestContractWithRate(stateServer)
+
+        const rateID = contract.packageSubmissions[0].rateRevisions[0].rateID
+
+        await withdrawTestRate(cmsServer, rateID, 'withdrawRate')
+
+        const unlockResult = await cmsServer.executeOperation({
+            query: UnlockRateDocument,
+            variables: {
+                input: {
+                    rateID,
+                    unlockedReason: 'Super duper good reason.',
+                },
+            },
+        })
+
+        // expect error to be defined
+        expectToBeDefined(unlockResult.errors)
+
+        // expect error to be invalid status
+        expect(unlockResult.errors[0].message).toBe(
+            'Attempted to unlock rate with wrong status: WITHDRAWN'
+        )
+    })
 })

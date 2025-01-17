@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useLayoutEffect } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import {
     ColumnFiltersState,
     createColumnHelper,
@@ -13,9 +13,7 @@ import {
     FilterFn,
 } from '@tanstack/react-table'
 import { useAtom } from 'jotai/react'
-import { atom } from 'jotai'
 import { atomWithHash } from 'jotai-location'
-import { loadable } from 'jotai/vanilla/utils'
 import {
     HealthPlanPackageStatus,
     Program,
@@ -34,7 +32,7 @@ import {
 import { pluralize, titleCaseString } from '@mc-review/common-code'
 import { DoubleColumnGrid } from '../../../components'
 import { FilterDateRangeRef } from '../../../components/FilterAccordion/FilterDateRange/FilterDateRange'
-import { Loading, NavLinkWithLogging } from '../../../components'
+import { NavLinkWithLogging } from '../../../components'
 import { useTealium } from '../../../hooks'
 import useDeepCompareEffect from 'use-deep-compare-effect'
 import { getTealiumFiltersChanged } from '../../../tealium/tealiumHelpers'
@@ -151,10 +149,6 @@ const columnHash = atomWithHash('filters', [] as ColumnFiltersState, {
     deserialize: fromReadableUrlToColumnFilters,
 })
 
-/* This returns the url filters along with a loading status. This is used to prevent flickering on first load with filters
-    in the url. */
-const loadableColumnHash = loadable(atom(async (get) => get(columnHash)))
-
 /* transform react-table's ColumnFilterState (stringified, formatted, and stored in the URL) to react-select's FilterOptionType
     and return only the items matching the FilterSelect component that's calling the function*/
 const getSelectedFiltersFromColumnState = (
@@ -235,10 +229,6 @@ export const RateReviewsTable = ({
     const lastClickedElement = useRef<string | null>(null)
     const filterDateRangeRef = useRef<FilterDateRangeRef>(null)
     const [columnFilters, setColumnFilters] = useAtom(columnHash)
-    const [defaultFiltersFromUrl] = useAtom(loadableColumnHash)
-    const [defaultColumnFilters, setDefaultColumnState] = useState<
-        ColumnFiltersState | undefined
-    >(undefined)
     const [prevFilters, setPrevFilters] = useState<{
         filtersForAnalytics: string
         results?: string
@@ -516,15 +506,25 @@ export const RateReviewsTable = ({
         )
     }, [filtersApplied, submissionCount, caption, tableConfig.tableName])
 
-    useLayoutEffect(() => {
-        // Do not set default column state again
-        if (
-            defaultFiltersFromUrl.state === 'hasData' &&
-            !defaultColumnFilters
-        ) {
-            setDefaultColumnState(defaultFiltersFromUrl.data)
+    useEffect(() => {
+        // if on root route
+        if (location.hash === '') {
+            updateFilters(
+                statusColumn,
+                [
+                    {
+                        label: 'Submitted',
+                        value: 'SUBMITTED',
+                    },
+                    {
+                        label: 'Unlocked',
+                        value: 'UNLOCKED',
+                    },
+                ],
+                'status'
+            )
         }
-    }, [defaultFiltersFromUrl, defaultColumnFilters])
+    }, [statusColumn])
 
     useDeepCompareEffect(() => {
         const prevFiltersForAnalytics = prevFilters.filtersForAnalytics
@@ -562,10 +562,6 @@ export const RateReviewsTable = ({
         }
     }, [submissionCount, columnFilters, setPrevFilters, prevFilters])
 
-    if (defaultColumnFilters === undefined) {
-        return <Loading />
-    }
-
     return (
         <>
             {tableData.length ? (
@@ -578,10 +574,6 @@ export const RateReviewsTable = ({
                             <FilterSelect
                                 value={getSelectedFiltersFromColumnState(
                                     columnFilters,
-                                    'stateName'
-                                )}
-                                defaultValue={getSelectedFiltersFromColumnState(
-                                    defaultColumnFilters,
                                     'stateName'
                                 )}
                                 name="state"
@@ -598,10 +590,6 @@ export const RateReviewsTable = ({
                             <FilterSelect
                                 value={getSelectedFiltersFromColumnState(
                                     columnFilters,
-                                    'rateType'
-                                )}
-                                defaultValue={getSelectedFiltersFromColumnState(
-                                    defaultColumnFilters,
                                     'rateType'
                                 )}
                                 name="rateType"
@@ -625,7 +613,7 @@ export const RateReviewsTable = ({
                                 id: 'ratingPeriodStartFrom',
                                 name: 'ratingPeriodStartFrom',
                                 defaultValue: getDateRangeFilterFromUrl(
-                                    defaultColumnFilters,
+                                    columnFilters,
                                     'rateDateStart'
                                 )[0],
                                 onChange: (date) =>
@@ -641,7 +629,7 @@ export const RateReviewsTable = ({
                                 id: 'ratingPeriodStartTo',
                                 name: 'ratingPeriodStartTo',
                                 defaultValue: getDateRangeFilterFromUrl(
-                                    defaultColumnFilters,
+                                    columnFilters,
                                     'rateDateStart'
                                 )[1],
                                 onChange: (date) =>

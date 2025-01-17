@@ -136,10 +136,12 @@ function updateDraftContractRates(
         }
         // state user is authorized
 
+        const editableStatuses = ['DRAFT', 'UNLOCKED']
+
         // Can only update a contract that is editable
         if (
             !contract.draftRevision ||
-            !(contract.status === 'DRAFT' || contract.status === 'UNLOCKED')
+            !editableStatuses.includes(contract.consolidatedStatus)
         ) {
             const errMsg =
                 'you cannot update a contract that is not DRAFT or UNLOCKED'
@@ -220,10 +222,7 @@ function updateDraftContractRates(
                 }
 
                 if (
-                    !(
-                        rateToUpdate.status === 'DRAFT' ||
-                        rateToUpdate.status === 'UNLOCKED'
-                    )
+                    !editableStatuses.includes(rateToUpdate.consolidatedStatus)
                 ) {
                     // eventually, this will be enough to cancel this. But until we have unlock-rate, you can edit UNLOCKED children of this contract.
                     const errmsg =
@@ -292,10 +291,12 @@ function updateDraftContractRates(
                         throw new Error(errmsg)
                     }
 
-                    if (rateToLink.status === 'DRAFT') {
-                        const errmsg =
-                            'Attempted to link a rate that has never been submitted: ' +
-                            rateUpdate.rateID
+                    if (
+                        ['DRAFT', 'WITHDRAWN'].includes(
+                            rateToLink.consolidatedStatus
+                        )
+                    ) {
+                        const errmsg = `Attempted to link a rate with an invalid status. Status: ${rateToLink.consolidatedStatus}. RateID: ${rateUpdate.rateID}`
                         logError('updateDraftContractRates', errmsg)
                         setErrorAttributesOnActiveSpan(errmsg, span)
                         throw new UserInputError(errmsg)

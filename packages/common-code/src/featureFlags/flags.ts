@@ -39,6 +39,13 @@ const featureFlags = {
         flag: 'withdraw-rate',
         defaultValue: false,
     },
+    /**
+     * Remove parameter store. False: use parameter store for email config. True: use database.
+     */
+    REMOVE_PARAMETER_STORE: {
+        flag: 'remove-parameter-store',
+        defaultValue: false,
+    },
     // PERMANENT FLAGS
     /**
      Enables the modal that alerts the user to an expiring session

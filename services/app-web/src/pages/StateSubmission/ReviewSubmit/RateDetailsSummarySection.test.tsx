@@ -11,6 +11,7 @@ import {
     mockContractPackageUnlockedWithUnlockedType,
     mockContractWithLinkedRateDraft,
     mockContractWithLinkedRateSubmitted,
+    mockWithdrawnRates,
 } from '@mc-review/mocks'
 import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import { RateDetailsSummarySection } from './RateDetailsSummarySection'
@@ -223,9 +224,6 @@ describe('RateDetailsSummarySection', () => {
         ).toBeInTheDocument()
         // Is this the best way to check that the link is not present?
         expect(screen.queryByText('Edit')).not.toBeInTheDocument()
-
-        //expects loading button on component load
-        expect(screen.getByText('Loading')).toBeInTheDocument()
 
         // expects download all button after loading has completed
         await waitFor(() => {
@@ -1253,6 +1251,7 @@ describe('RateDetailsSummarySection', () => {
             ).toBeInTheDocument()
         })
     })
+
     it('displays deprecated fields on previous submissions viewed by state users', async () => {
         vi.spyOn(
             usePreviousSubmission,
@@ -1301,6 +1300,7 @@ describe('RateDetailsSummarySection', () => {
             screen.findByText('Programs this rate certification covers')
         ).toBeTruthy()
     })
+
     it('does not display deprecated fields on unlocked submissions for state users', async () => {
         const draftContract = mockContractPackageDraft()
         if (
@@ -1332,5 +1332,54 @@ describe('RateDetailsSummarySection', () => {
         expect(
             screen.queryByText('Programs this rate certification covers')
         ).toBeNull()
+    })
+
+    it('displays withdrawn rates', async () => {
+        const contractWithWithdrawnRates = mockContractPackageSubmitted({
+            withdrawnRates: mockWithdrawnRates(),
+        })
+
+        renderWithProviders(
+            <RateDetailsSummarySection
+                contract={contractWithWithdrawnRates}
+                submissionName="MN-MSHO-0003"
+                statePrograms={statePrograms}
+            />,
+            {
+                apolloProvider: apolloProviderCMSUser,
+            }
+        )
+
+        expect(
+            screen.getByRole('heading', {
+                level: 2,
+                name: 'Rate details',
+            })
+        ).toBeInTheDocument()
+        // Is this the best way to check that the link is not present?
+        expect(screen.queryByText('Edit')).not.toBeInTheDocument()
+
+        // expects download all button after loading has completed
+        await waitFor(() => {
+            expect(
+                screen.getByRole('link', {
+                    name: 'Download all rate documents',
+                })
+            ).toBeInTheDocument()
+        })
+
+        // expect withdrawn rates to be on the screen
+        expect(
+            screen.getByRole('heading', {
+                level: 3,
+                name: /WITHDRAWN-RATE-1-NAME/,
+            })
+        ).toBeInTheDocument()
+        expect(
+            screen.getByRole('heading', {
+                level: 3,
+                name: /WITHDRAWN-RATE-2-NAME/,
+            })
+        ).toBeInTheDocument()
     })
 })

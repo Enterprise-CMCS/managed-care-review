@@ -72,26 +72,24 @@ export function submitRate(
             })
         }
 
-        const draftRateRevision = unsubmittedRate.draftRevision
-
-        if (!draftRateRevision) {
-            throw new Error(
-                'PROGRAMMING ERROR: Status should not be submittable without a draft rate revision'
-            )
-        }
-
-        // make sure it is draft or unlocked
         if (
-            unsubmittedRate.status === 'SUBMITTED' ||
-            unsubmittedRate.status === 'RESUBMITTED'
+            !['UNLOCKED', 'DRAFT'].includes(unsubmittedRate.consolidatedStatus)
         ) {
-            const errMessage = `Attempted to submit a rate that is already submitted`
+            const errMessage = `Attempted to submit a rate with invalid status: ${unsubmittedRate.consolidatedStatus}`
             logError('submitRate', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new UserInputError(errMessage, {
                 argumentName: 'rateID',
                 cause: 'INVALID_PACKAGE_STATUS',
             })
+        }
+
+        const draftRateRevision = unsubmittedRate.draftRevision
+
+        if (!draftRateRevision) {
+            throw new Error(
+                'PROGRAMMING ERROR: Status should not be submittable without a draft rate revision'
+            )
         }
 
         // prepare to generate rate cert name - either use new form data coming down on submit or unsubmitted submission data already in database
