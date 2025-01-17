@@ -38,6 +38,7 @@ function getViewerCertificateConfig(
     ) as cloudfront.CfnDistribution.ViewerCertificateProperty
 }
 
+/*
 function getCloudFrontEndpointUrl(
     condition: cdk.CfnCondition,
     domainName: string,
@@ -54,7 +55,6 @@ function getCloudFrontEndpointUrl(
     )
 }
 
-/*
 export class UiStack extends cdk.Stack {
     private readonly webAcl: wafv2.CfnWebACL
     private readonly bucket: s3.CfnBucket
