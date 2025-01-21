@@ -16,6 +16,7 @@ const commonQuestionSchema = z.object({
     division: divisionType, // DMCO, DMCP, OACT
     documents: z.array(document),
     responses: z.array(questionResponseType),
+    round: z.number(),
 })
 
 const contractQuestion = commonQuestionSchema.extend({

@@ -67,12 +67,19 @@ const convertToCommonIndexQuestionsPayload = <
     const getDivisionQuestionsEdge = (
         division: 'DMCP' | 'DMCO' | 'OACT',
         questions: P[]
-    ) => ({
-        totalCount: questions.filter((q) => q.division === division).length,
-        edges: questions
+    ) => {
+        const divisionQuestions = questions
             .filter((q) => q.division === division)
-            .map((question) => ({ node: question })),
-    })
+            .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())
+            .map((question, idx) => {
+                question.round = idx + 1
+                return { node: question }
+            })
+        return {
+            totalCount: divisionQuestions.length,
+            edges: divisionQuestions,
+        }
+    }
 
     return {
         DMCOQuestions: getDivisionQuestionsEdge('DMCO', questions),
