@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client'
+import { type Prisma, PrismaClient } from '@prisma/client'
 
 const errorMessages = {
     delete: 'Deletion of records is not allowed',
@@ -6,15 +6,16 @@ const errorMessages = {
 }
 
 /**
- * Creates an extended instance of the PrismaClient with custom behavior for certain operations.
+ * Extends PrismaClient with custom behavior for specific models.
  *
- * This function extends the PrismaClient to throw errors when attempting to perform
- * create or delete operations on the `applicationSettings` and `emailSettings` models.
+ * Overrides delete and create operations on `applicationSettings` and `emailSettings`
+ * models to throw custom error messages.
  *
- * @returns {PrismaClient} An extended instance of the PrismaClient with the custom behavior.
+ * @param {Prisma.PrismaClientOptions} optionArgs - PrismaClient configuration options.
+ * @returns {PrismaClient} A new PrismaClient instance with extended behavior.
  */
-function extendedPrismaClient() {
-    return new PrismaClient().$extends({
+function extendedPrismaClient(optionArgs: Prisma.PrismaClientOptions) {
+    return new PrismaClient(optionArgs).$extends({
         query: {
             applicationSettings: {
                 delete: () => {
@@ -62,7 +63,13 @@ async function NewPrismaClient(
     connURL: string
 ): Promise<ExtendedPrismaClient | Error> {
     try {
-        const prismaClient = extendedPrismaClient()
+        const prismaClient = extendedPrismaClient({
+            datasources: {
+                db: {
+                    url: connURL,
+                },
+            },
+        })
 
         return prismaClient
     } catch (e: unknown) {
