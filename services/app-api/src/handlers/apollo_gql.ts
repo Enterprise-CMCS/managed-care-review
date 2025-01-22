@@ -15,10 +15,9 @@ import {
     userFromLocalAuthProvider,
     userFromThirdPartyAuthorizer,
 } from '../authn'
-import { newLocalEmailer, newSESEmailer } from '../emailer'
 import { NewPostgresStore } from '../postgres/postgresStore'
 import { configureResolvers } from '../resolvers'
-import { configurePostgres } from './configuration'
+import { configurePostgres, configureEmailer } from './configuration'
 import { createTracer } from '../otel/otel_handler'
 import {
     newAWSEmailParameterStore,
@@ -239,57 +238,6 @@ async function initializeGQLHandler(): Promise<Handler> {
             ? newLocalEmailParameterStore()
             : newAWSEmailParameterStore()
 
-    // Configuring emails using emailParameterStore
-    // Moving setting these emails down here. We needed to retrieve all emails from parameter store using our
-    // emailParameterStore because serverless does not like array of strings as env variables.
-    // For more context see this ticket https://qmacbis.atlassian.net/browse/MR-2539.
-    const emailSource = await emailParameterStore.getSourceEmail()
-    const devReviewTeamEmails =
-        await emailParameterStore.getDevReviewTeamEmails()
-    const helpDeskEmail = await emailParameterStore.getHelpDeskEmail()
-    const cmsReviewHelpEmailAddress =
-        await emailParameterStore.getCmsReviewHelpEmail()
-    const cmsRateHelpEmailAddress =
-        await emailParameterStore.getCmsRateHelpEmail()
-    const oactEmails = await emailParameterStore.getOACTEmails()
-    const dmcpReviewEmails = await emailParameterStore.getDMCPReviewEmails()
-    const dmcpSubmissionEmails =
-        await emailParameterStore.getDMCPSubmissionEmails()
-    const dmcoEmails = await emailParameterStore.getDMCOEmails()
-
-    if (emailSource instanceof Error)
-        throw new Error(`Configuration Error: ${emailSource.message}`)
-
-    if (devReviewTeamEmails instanceof Error)
-        throw new Error(`Configuration Error: ${devReviewTeamEmails.message}`)
-
-    if (helpDeskEmail instanceof Error)
-        throw new Error(`Configuration Error: ${helpDeskEmail.message}`)
-
-    if (cmsReviewHelpEmailAddress instanceof Error) {
-        throw new Error(
-            `Configuration Error: ${cmsReviewHelpEmailAddress.message}`
-        )
-    }
-
-    if (cmsRateHelpEmailAddress instanceof Error) {
-        throw new Error(
-            `Configuration Error: ${cmsRateHelpEmailAddress.message}`
-        )
-    }
-
-    if (oactEmails instanceof Error)
-        throw new Error(`Configuration Error: ${oactEmails.message}`)
-
-    if (dmcpReviewEmails instanceof Error)
-        throw new Error(`Configuration Error: ${dmcpReviewEmails.message}`)
-
-    if (dmcpSubmissionEmails instanceof Error)
-        throw new Error(`Configuration Error: ${dmcpSubmissionEmails.message}`)
-
-    if (dmcoEmails instanceof Error)
-        throw new Error(`Configuration Error: ${dmcoEmails.message}`)
-
     // Configure LaunchDarkly
     const ldOptions: ld.LDOptions = {
         streamUri: 'https://stream.launchdarkly.us',
@@ -328,46 +276,21 @@ async function initializeGQLHandler(): Promise<Handler> {
         expirationDurationS: 90 * 24 * 60 * 60, // 90 days
     })
 
-    // Print out all the variables we've been configured with. Leave sensitive ones out, please.
-    console.info('Running With Config: ', {
-        authMode,
+    const emailer = await configureEmailer({
+        emailParameterStore,
+        store,
+        ldService: launchDarkly,
         stageName,
-        dbURL,
-        applicationEndpoint,
-        emailSource,
         emailerMode,
-        otelCollectorUrl,
-        parameterStoreMode,
+        applicationEndpoint,
     })
 
-    const emailer =
-        emailerMode == 'LOCAL'
-            ? newLocalEmailer({
-                  emailSource,
-                  stage: 'local',
-                  baseUrl: applicationEndpoint,
-                  devReviewTeamEmails,
-                  cmsReviewHelpEmailAddress,
-                  cmsRateHelpEmailAddress,
-                  oactEmails,
-                  dmcpReviewEmails,
-                  dmcpSubmissionEmails,
-                  dmcoEmails,
-                  helpDeskEmail,
-              })
-            : newSESEmailer({
-                  emailSource,
-                  stage: stageName,
-                  baseUrl: applicationEndpoint,
-                  devReviewTeamEmails,
-                  cmsReviewHelpEmailAddress,
-                  cmsRateHelpEmailAddress,
-                  oactEmails,
-                  dmcpReviewEmails,
-                  dmcpSubmissionEmails,
-                  dmcoEmails,
-                  helpDeskEmail,
-              })
+    if (emailer instanceof Error) {
+        const error = `Email Configuration error: ${emailer.message}`
+        console.error(error)
+        throw emailer
+    }
+
     const S3_BUCKETS_CONFIG: S3BucketConfigType = {
         HEALTH_PLAN_DOCS: s3DocumentsBucket,
         QUESTION_ANSWER_DOCS: s3QABucket,
@@ -379,6 +302,18 @@ async function initializeGQLHandler(): Promise<Handler> {
     } else {
         s3Client = newDeployedS3Client(S3_BUCKETS_CONFIG, region)
     }
+
+    // Print out all the variables we've been configured with. Leave sensitive ones out, please.
+    console.info('Running With Config: ', {
+        authMode,
+        stageName,
+        dbURL,
+        applicationEndpoint,
+        emailSource: emailer.config.emailSource,
+        emailerMode,
+        otelCollectorUrl,
+        parameterStoreMode,
+    })
 
     // Resolvers are defined and tested in the resolvers package
     const resolvers = configureResolvers(
