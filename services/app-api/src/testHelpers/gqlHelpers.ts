@@ -39,7 +39,10 @@ import { configureResolvers } from '../resolvers'
 import { latestFormData } from './healthPlanPackageHelpers'
 import { sharedTestPrismaClient } from './storeHelpers'
 import { domainToBase64 } from '@mc-review/hpp'
-import type { EmailParameterStore } from '../parameterStore'
+import {
+    newLocalEmailParameterStore,
+    type EmailParameterStore,
+} from '../parameterStore'
 import { testLDService } from './launchDarklyHelpers'
 import type { LDService } from '../launchDarkly/launchDarkly'
 import { insertUserToLocalAurora } from '../authn'
@@ -54,6 +57,7 @@ import { convertRateInfoToRateFormDataInput } from '../domain-models/contractAnd
 import { createAndUpdateTestContractWithoutRates } from './gqlContractHelpers'
 import { addNewRateToTestContract } from './gqlRateHelpers'
 import type { GraphQLResponse } from 'apollo-server-types'
+import { configureEmailer } from '../handlers/configuration'
 
 // Since our programs are checked into source code, we have a program we
 // use as our default
@@ -92,7 +96,6 @@ const constructTestPostgresServer = async (opts?: {
 }): Promise<ApolloServer> => {
     // set defaults
     const context = opts?.context || defaultContext()
-    const emailer = opts?.emailer || constructTestEmailer()
     const ldService = opts?.ldService || testLDService()
 
     const prismaClient = await sharedTestPrismaClient()
@@ -111,6 +114,22 @@ const constructTestPostgresServer = async (opts?: {
     await insertUserToLocalAurora(postgresStore, context.user)
     const s3TestClient = testS3Client()
     const s3 = opts?.s3Client || s3TestClient
+
+    const emailer =
+        opts?.emailer ??
+        (await configureEmailer({
+            emailParameterStore:
+                opts?.emailParameterStore || newLocalEmailParameterStore(),
+            store: postgresStore,
+            ldService,
+            stageName: 'localtest',
+            emailerMode: 'LOCAL',
+            applicationEndpoint: 'http://localtest',
+        }))
+
+    if (emailer instanceof Error) {
+        throw new Error(`Failed to configure emailer: ${emailer.message}`)
+    }
 
     const postgresResolvers = configureResolvers(
         postgresStore,
@@ -585,4 +604,5 @@ export {
     updateTestStateAssignments,
     createTestRateQuestion,
     createTestRateQuestionResponse,
+    constructTestEmailer,
 }
