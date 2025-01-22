@@ -92,7 +92,7 @@
         "jest": "^29.7.0",
         "lint-staged": "^15.2.7",
         "prettier": "^3.4.2",
-        "serverless": "^3.39.0",
+        "serverless": "^4.0.0",
         "serverless-associate-waf": "^1.2.1",
         "serverless-esbuild": "^1.52.1",
         "serverless-iam-helper": "https://github.com/CMSgov/serverless-iam-helper",

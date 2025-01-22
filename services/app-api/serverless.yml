@@ -1,6 +1,6 @@
 service: app-api
 
-frameworkVersion: '^3.19.0'
+frameworkVersion: '^4.0.0'
 
 package:
   individually: true
