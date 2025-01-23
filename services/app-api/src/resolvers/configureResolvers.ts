@@ -17,6 +17,7 @@ import {
     questionResponseDocumentResolver,
     createRateQuestionResolver,
     createRateQuestionResponseResolver,
+    questionResolver,
 } from './questionResponse'
 import {
     fetchCurrentUserResolver,
@@ -171,6 +172,7 @@ export function configureResolvers(
         Rate: rateResolver(store, applicationEndpoint),
         RateRevision: rateRevisionResolver(store),
         RateFormData: rateFormDataResolver(),
+        ContractQuestion: questionResolver(store),
         Contract: contractResolver(store, applicationEndpoint),
         UnlockedContract: unlockedContractResolver(store, applicationEndpoint),
         ContractRevision: contractRevisionResolver(store),

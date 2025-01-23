@@ -1239,6 +1239,7 @@ type ContractQuestion {
     addedBy: CMSUsersUnion!
     documents: [Document!]!
     division: Division!
+    round: Int!
     #    noteText: String
     #    dueDate: Date
     #    rateIDs: [String!]

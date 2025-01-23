@@ -12,6 +12,7 @@ fragment contractQuestionEdgeFragment on ContractQuestionEdge {
             }
         }
         division
+        round
         documents {
             s3URL
             name
