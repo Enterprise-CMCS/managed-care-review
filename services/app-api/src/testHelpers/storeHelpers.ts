@@ -151,6 +151,9 @@ function mockStoreThatErrors(): Store {
         withdrawRate: async (_ID) => {
             return genericError
         },
+        findEmailSettings: async () => {
+            return genericError
+        },
     }
 }
 
