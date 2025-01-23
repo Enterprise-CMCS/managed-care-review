@@ -39,7 +39,7 @@ import {
 import { testLDService } from '../../testHelpers/launchDarklyHelpers'
 import { latestFormData } from '../../testHelpers/healthPlanPackageHelpers'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
-import { testEmailConfig, testEmailer } from '../../testHelpers/emailerHelpers'
+import { testEmailConfig, testEmailer, testEmailerFromDatabase } from '../../testHelpers/emailerHelpers'
 import { NewPostgresStore } from '../../postgres'
 import { dayjs } from '@mc-review/dates'
 
@@ -1513,8 +1513,7 @@ describe('submitContract', () => {
         })
 
         it('uses email settings from database with remove-parameter-store flag on', async () => {
-            const mockEmailer = await constructTestEmailer()
-            mockEmailer.sendEmail = vi.fn()
+            const mockEmailer = await testEmailerFromDatabase()
             const ldService = testLDService(
                 {
                     'remove-parameter-store': true
