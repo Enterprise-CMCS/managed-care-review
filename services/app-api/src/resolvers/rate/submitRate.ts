@@ -28,7 +28,9 @@ export function submitRate(
         setResolverDetailsOnActiveSpan('submitRate', user, span)
 
         const { rateID, submittedReason, formData } = input
-        const featureFlags = await launchDarkly.allFlags(context)
+        const featureFlags = await launchDarkly.allFlags({
+            key: context.user.email,
+        })
 
         span?.setAttribute('mcreview.rate_id', rateID)
 

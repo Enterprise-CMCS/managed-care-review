@@ -58,7 +58,9 @@ export function submitContract(
     launchDarkly: LDService
 ): MutationResolvers['submitContract'] {
     return async (_parent, { input }, context) => {
-        const featureFlags = await launchDarkly.allFlags(context)
+        const featureFlags = await launchDarkly.allFlags({
+            key: context.user.email,
+        })
 
         const { user, ctx, tracer } = context
         const span = tracer?.startSpan('submitContract', {}, ctx)
@@ -192,13 +194,13 @@ export function submitContract(
         }
         // add all rates (including any linked rates) back in
         parsedContract.draftRates = contractWithHistory.draftRates
-        const parsedSubmissionType = parsedContract.draftRevision?.formData.submissionType
+        const parsedSubmissionType =
+            parsedContract.draftRevision?.formData.submissionType
 
         // If this contract is being submitted as CONTRACT_ONLY but still has associations with rates
         // we need to prune those rates at submission time to make the submission clean
         if (
-            parsedSubmissionType ===
-                'CONTRACT_ONLY' &&
+            parsedSubmissionType === 'CONTRACT_ONLY' &&
             parsedContract.draftRates &&
             parsedContract.draftRates.length > 0
         ) {
@@ -246,20 +248,15 @@ export function submitContract(
                 throw new Error(errMessage)
             }
         }
-        
+
         // If this is contract and rates lets verify that the rates are in a valid state
         if (
-            parsedSubmissionType ===
-                'CONTRACT_AND_RATES' &&
+            parsedSubmissionType === 'CONTRACT_AND_RATES' &&
             parsedContract.draftRates &&
             parsedContract.draftRates.length > 0
         ) {
             for (const draftRate of parsedContract.draftRates) {
-                if (
-                    ['WITHDRAWN'].includes(
-                        draftRate.consolidatedStatus
-                    )
-                ) {
+                if (['WITHDRAWN'].includes(draftRate.consolidatedStatus)) {
                     const errMessage = `Attempted to submit a rate withdrawn rate: ${draftRate.consolidatedStatus}`
                     logError('submitContract', errMessage)
                     setErrorAttributesOnActiveSpan(errMessage, span)
