@@ -1,5 +1,6 @@
 /* eslint-disable  @typescript-eslint/no-non-null-assertion */
 import {
+    constructTestEmailer,
     constructTestPostgresServer,
     createAndUpdateTestHealthPlanPackage,
     defaultFloridaProgram,
@@ -1509,6 +1510,46 @@ describe('submitContract', () => {
 
             expect(submitResult.errors).toBeDefined()
             expect(mockEmailer.sendEmail).not.toHaveBeenCalled()
+        })
+
+        it('uses email settings from database with remove-parameter-store flag on', async () => {
+            const mockEmailer = await constructTestEmailer()
+            mockEmailer.sendEmail = vi.fn()
+            const ldService = testLDService(
+                {
+                    'remove-parameter-store': true
+                }
+            )
+
+            const stateServer = await constructTestPostgresServer({
+                context: {
+                    user: testStateUser(),
+                },
+                ldService,
+                emailer: mockEmailer,
+            })
+
+            const submitResult = await createAndSubmitTestContractWithRate(stateServer)
+
+            const currentRevision =
+                submitResult.packageSubmissions[0].contractRevision
+
+            const name = currentRevision.contractName
+
+            expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
+                1,
+                expect.objectContaining({
+                    subject: expect.stringContaining(`New Managed Care Submission: ${name}`),
+                    sourceEmail: 'mc-review-qa@truss.works',
+                    toAddresses: expect.arrayContaining(
+                        Array.from([
+                            '<Dev Team <mc-review-qa+DevTeam@truss.works>', 
+                            'DMCP Submission Dev1 <mc-review-qa+DMCPsubmissiondev1@truss.works>', 
+                            'DMCP Submission Dev2 <mc-review-qa+DMCPsubmissiondev2@truss.works>'
+                        ])
+                    ),
+                })
+            )
         })
 
         // TODO: reimplement this test without using jest
