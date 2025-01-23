@@ -20,8 +20,8 @@ function testLDService(mockFeatureFlags?: FeatureFlagSettings): LDService {
     }
 
     return {
-        getFeatureFlag: async (user, flag) => featureFlags[flag],
-        allFlags: async (user) => featureFlags,
+        getFeatureFlag: async ({ flag }) => featureFlags[flag],
+        allFlags: async () => featureFlags,
     }
 }
 

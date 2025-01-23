@@ -2,7 +2,12 @@ import type { PrismaClient } from '@prisma/client'
 import { NewPrismaClient, type Store } from '../postgres'
 import { FetchSecrets, getConnectionURL } from '../secrets'
 import { type EmailParameterStore } from '../parameterStore'
-import { type Emailer, newLocalEmailer, newSESEmailer } from '../emailer'
+import {
+    type EmailConfiguration,
+    type Emailer,
+    newLocalEmailer,
+    newSESEmailer,
+} from '../emailer'
 import { type LDService } from '../launchDarkly/launchDarkly'
 
 /*
@@ -85,21 +90,30 @@ async function getDBClusterID(secretName: string): Promise<string | Error> {
     return dbID
 }
 
-async function configureEmailer({
-    emailParameterStore,
-    store,
-    ldService,
-    stageName,
-    emailerMode,
-    applicationEndpoint,
-}: {
-    emailParameterStore: EmailParameterStore
+async function configureEmailerFromDatabase(
     store: Store
-    ldService: LDService
-    stageName: string
-    emailerMode: string
-    applicationEndpoint: string
-}): Promise<Emailer | Error> {
+): Promise<Omit<EmailConfiguration, 'stage' | 'baseUrl'> | Error> {
+    const emailSettings = await store.findEmailSettings()
+    if (emailSettings instanceof Error) {
+        return emailSettings
+    }
+
+    return {
+        emailSource: emailSettings.emailSource,
+        devReviewTeamEmails: emailSettings.devReviewTeamEmails,
+        helpDeskEmail: emailSettings.helpDeskEmail[0],
+        cmsReviewHelpEmailAddress: emailSettings.cmsReviewHelpEmailAddress[0],
+        cmsRateHelpEmailAddress: emailSettings.cmsRateHelpEmailAddress[0],
+        oactEmails: emailSettings.oactEmails,
+        dmcpReviewEmails: emailSettings.dmcpReviewEmails,
+        dmcpSubmissionEmails: emailSettings.dmcpSubmissionEmails,
+        dmcoEmails: emailSettings.dmcoEmails,
+    }
+}
+
+async function configureEmailerFromParamStore(
+    emailParameterStore: EmailParameterStore
+): Promise<Omit<EmailConfiguration, 'stage' | 'baseUrl'> | Error> {
     // Configuring emails using emailParameterStore
     // Moving setting these emails down here. We needed to retrieve all emails from parameter store using our
     // emailParameterStore because serverless does not like array of strings as env variables.
@@ -141,32 +155,56 @@ async function configureEmailer({
 
     if (dmcoEmails instanceof Error) return new Error(dmcoEmails.message)
 
+    return {
+        emailSource,
+        devReviewTeamEmails,
+        helpDeskEmail,
+        cmsReviewHelpEmailAddress,
+        cmsRateHelpEmailAddress,
+        oactEmails,
+        dmcpReviewEmails,
+        dmcpSubmissionEmails,
+        dmcoEmails,
+    }
+}
+
+async function configureEmailer({
+    emailParameterStore,
+    store,
+    ldService,
+    stageName,
+    emailerMode,
+    applicationEndpoint,
+}: {
+    emailParameterStore: EmailParameterStore
+    store: Store
+    ldService: LDService
+    stageName: string
+    emailerMode: string
+    applicationEndpoint: string
+}): Promise<Emailer | Error> {
+    const removeParameterStore = await ldService.getFeatureFlag({
+        key: 'email-configuration',
+        flag: 'remove-parameter-store',
+    })
+    const emailSettings = removeParameterStore
+        ? await configureEmailerFromDatabase(store)
+        : await configureEmailerFromParamStore(emailParameterStore)
+
+    if (emailSettings instanceof Error) {
+        return emailSettings
+    }
+
     return emailerMode == 'LOCAL'
         ? newLocalEmailer({
-              emailSource,
               stage: 'local',
               baseUrl: applicationEndpoint,
-              devReviewTeamEmails,
-              cmsReviewHelpEmailAddress,
-              cmsRateHelpEmailAddress,
-              oactEmails,
-              dmcpReviewEmails,
-              dmcpSubmissionEmails,
-              dmcoEmails,
-              helpDeskEmail,
+              ...emailSettings,
           })
         : newSESEmailer({
-              emailSource,
               stage: stageName,
               baseUrl: applicationEndpoint,
-              devReviewTeamEmails,
-              cmsReviewHelpEmailAddress,
-              cmsRateHelpEmailAddress,
-              oactEmails,
-              dmcpReviewEmails,
-              dmcpSubmissionEmails,
-              dmcoEmails,
-              helpDeskEmail,
+              ...emailSettings,
           })
 }
 

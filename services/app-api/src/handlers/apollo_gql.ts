@@ -232,12 +232,6 @@ async function initializeGQLHandler(): Promise<Handler> {
 
     const store = NewPostgresStore(pgResult)
 
-    //Configure email parameter store.
-    const emailParameterStore =
-        parameterStoreMode === 'LOCAL'
-            ? newLocalEmailParameterStore()
-            : newAWSEmailParameterStore()
-
     // Configure LaunchDarkly
     const ldOptions: ld.LDOptions = {
         streamUri: 'https://stream.launchdarkly.us',
@@ -275,6 +269,12 @@ async function initializeGQLHandler(): Promise<Handler> {
         signingKey: Buffer.from(jwtSecret, 'hex'),
         expirationDurationS: 90 * 24 * 60 * 60, // 90 days
     })
+
+    //Configure email parameter store.
+    const emailParameterStore =
+        parameterStoreMode === 'LOCAL'
+            ? newLocalEmailParameterStore()
+            : newAWSEmailParameterStore()
 
     const emailer = await configureEmailer({
         emailParameterStore,
