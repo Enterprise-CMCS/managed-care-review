@@ -22,9 +22,9 @@ import type {
     InsertQuestionResponseArgs,
     ProgramType,
     CreateRateQuestionInputType,
+    EmailSettingsType,
 } from '../domain-models'
-import type { Emailer } from '../emailer'
-import { newLocalEmailer } from '../emailer'
+import type { EmailConfiguration, Emailer } from '../emailer'
 import type {
     CreateHealthPlanPackageInput,
     HealthPlanPackage,
@@ -117,14 +117,8 @@ const constructTestPostgresServer = async (opts?: {
 
     const emailer =
         opts?.emailer ??
-        (await configureEmailer({
-            emailParameterStore:
-                opts?.emailParameterStore || newLocalEmailParameterStore(),
-            store: postgresStore,
+        (await constructTestEmailer({
             ldService,
-            stageName: 'localtest',
-            emailerMode: 'LOCAL',
-            applicationEndpoint: 'http://localtest',
         }))
 
     if (emailer instanceof Error) {
@@ -147,21 +141,63 @@ const constructTestPostgresServer = async (opts?: {
     })
 }
 
-const constructTestEmailer = (): Emailer => {
-    const config = {
-        emailSource: 'local@example.com',
-        stage: 'localtest',
-        baseUrl: 'http://localtest',
-        devReviewTeamEmails: ['test@example.com'],
-        cmsReviewHelpEmailAddress: 'mcog@example.com',
-        cmsRateHelpEmailAddress: 'rates@example.com',
-        oactEmails: ['testRate@example.com'],
-        dmcpReviewEmails: ['testPolicy@example.com'],
-        dmcpSubmissionEmails: ['testPolicySubmission@example.com'],
-        dmcoEmails: ['testDmco@example.com'],
-        helpDeskEmail: 'MC_Review_HelpDesk@example.com>',
+const constructTestEmailer = async (opts?: {
+    emailConfig?: EmailConfiguration
+    postgresStore?: Store
+    ldService?: LDService
+}): Promise<Emailer> => {
+    const {
+        emailConfig,
+        postgresStore,
+        ldService = testLDService({ 'remove-parameter-store': true }), // default to using email settings from database
+    } = opts ?? {}
+
+    let store = postgresStore
+    if (!store) {
+        const prismaClient = await sharedTestPrismaClient()
+        store = NewPostgresStore(prismaClient)
     }
-    return newLocalEmailer(config)
+
+    const emailSettings = must(await store.findEmailSettings())
+
+    const testEmailSettings: EmailSettingsType = {
+        emailSource: emailConfig?.emailSource ?? emailSettings.emailSource,
+        devReviewTeamEmails:
+            emailConfig?.devReviewTeamEmails ??
+            emailSettings.devReviewTeamEmails,
+        oactEmails: emailConfig?.oactEmails ?? emailSettings.oactEmails,
+        dmcpReviewEmails:
+            emailConfig?.dmcpReviewEmails ?? emailSettings.dmcpReviewEmails,
+        dmcpSubmissionEmails:
+            emailConfig?.dmcpSubmissionEmails ??
+            emailSettings.dmcpSubmissionEmails,
+        dmcoEmails: emailConfig?.dmcoEmails ?? emailSettings.dmcoEmails,
+        // These three settings are string[] in db but string in EmailConfiguration, follow up ticket will convert EmailConfiguration to string[]
+        cmsReviewHelpEmailAddress: emailConfig?.cmsReviewHelpEmailAddress
+            ? [emailConfig?.cmsReviewHelpEmailAddress]
+            : emailSettings.cmsReviewHelpEmailAddress,
+        cmsRateHelpEmailAddress: emailConfig?.cmsRateHelpEmailAddress
+            ? [emailConfig?.cmsRateHelpEmailAddress]
+            : emailSettings.cmsRateHelpEmailAddress,
+        helpDeskEmail: emailConfig?.helpDeskEmail
+            ? [emailConfig?.helpDeskEmail]
+            : emailSettings.helpDeskEmail,
+    }
+
+    store.findEmailSettings = async () => {
+        return testEmailSettings
+    }
+
+    return must(
+        await configureEmailer({
+            emailParameterStore: newLocalEmailParameterStore(),
+            store,
+            ldService,
+            stageName: emailConfig?.stage ?? 'localtest',
+            emailerMode: 'LOCAL',
+            applicationEndpoint: emailConfig?.baseUrl ?? 'http://localtest',
+        })
+    )
 }
 
 const createTestHealthPlanPackage = async (
