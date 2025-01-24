@@ -1,15 +1,9 @@
 query fetchMcReviewSettings {
     fetchMcReviewSettings {
         emailConfiguration {
-            emailSource
-            devReviewTeamEmails
-            oactEmails
-            dmcpReviewEmails
-            dmcpSubmissionEmails
-            dmcoEmails
-            cmsReviewHelpEmailAddress
-            cmsRateHelpEmailAddress
-            helpDeskEmail
+            ...on EmailConfiguration {
+                ...emailConfigurationFragment
+            }
         }
         stateAssignments {
             stateCode

@@ -1,0 +1,9 @@
+mutation updateEmailSettings($input: UpdateEmailSettingsInput!) {
+  updateEmailSettings(input: $input) {
+    emailConfiguration {
+      ...on EmailConfiguration {
+        ...emailConfigurationFragment
+      }
+    }
+  }
+}

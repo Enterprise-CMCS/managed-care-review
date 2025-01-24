@@ -346,6 +346,11 @@ type Mutation {
     updateStateAssignmentsByState(input: UpdateStateAssignmentsByStateInput!): UpdateStateAssignmentsByStatePayload!
 
     """
+    updateEmailSettings updates the email settings the MC Review app
+    """
+    updateEmailSettings(input: UpdateEmailSettingsInput!): UpdateEmailSettingsPayload!
+
+    """
     createContractQuestion creates a new question for the given Contract
     A CMS User can add text to a note field and append a document to their question
     They can also specify a due date, and specify rate IDs that are associated with the question
@@ -1292,6 +1297,26 @@ type EmailConfiguration {
     cmsReviewHelpEmailAddress: String!
     cmsRateHelpEmailAddress: String!
     helpDeskEmail: String!
+}
+
+input EmailConfigurationInput {
+    emailSource: String!
+    devReviewTeamEmails: [String!]!
+    oactEmails: [String!]!
+    dmcpReviewEmails: [String!]!
+    dmcpSubmissionEmails: [String!]!
+    dmcoEmails: [String!]!
+    cmsReviewHelpEmailAddress: String!
+    cmsRateHelpEmailAddress: String!
+    helpDeskEmail: String!
+}
+
+input UpdateEmailSettingsInput {
+    emailConfiguration: EmailConfigurationInput!
+}
+
+type UpdateEmailSettingsPayload {
+    emailConfiguration: EmailConfiguration!
 }
 
 """
