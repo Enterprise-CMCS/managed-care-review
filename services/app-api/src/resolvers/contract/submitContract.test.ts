@@ -1,6 +1,5 @@
 /* eslint-disable  @typescript-eslint/no-non-null-assertion */
 import {
-    constructTestEmailer,
     constructTestPostgresServer,
     createAndUpdateTestHealthPlanPackage,
     defaultFloridaProgram,
@@ -1542,7 +1541,7 @@ describe('submitContract', () => {
                     sourceEmail: 'mc-review-qa@truss.works',
                     toAddresses: expect.arrayContaining(
                         Array.from([
-                            '<Dev Team <mc-review-qa+DevTeam@truss.works>', 
+                            'Dev Team <mc-review-qa+DevTeam@truss.works>', 
                             'DMCP Submission Dev1 <mc-review-qa+DMCPsubmissiondev1@truss.works>', 
                             'DMCP Submission Dev2 <mc-review-qa+DMCPsubmissiondev2@truss.works>'
                         ])
