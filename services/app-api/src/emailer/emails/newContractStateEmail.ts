@@ -98,6 +98,7 @@ export const newContractStateEmail = async (
                         : formatCalendarDate(rate.formData.rateDateEnd, 'UTC'),
             })),
         submissionURL: contractURL,
+        isChipOnly: formData.populationCovered === 'CHIP',
     }
 
     const result = await renderTemplate<typeof data>(
