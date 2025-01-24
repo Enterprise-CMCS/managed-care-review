@@ -3,3 +3,4 @@ export { createContractQuestionResponseResolver } from './createContractQuestion
 export { questionResponseDocumentResolver } from './questionResponseDocumentResolver'
 export { createRateQuestionResolver } from './createRateQuestion'
 export { createRateQuestionResponseResolver } from './createRateQuestionResponse'
+export { questionResolver } from './questionResolver'
