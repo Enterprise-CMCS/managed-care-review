@@ -1538,12 +1538,12 @@ describe('submitContract', () => {
                 1,
                 expect.objectContaining({
                     subject: expect.stringContaining(`New Managed Care Submission: ${name}`),
-                    sourceEmail: 'mc-review-qa@truss.works',
+                    sourceEmail: 'mc-review@cms.hhs.gov',
                     toAddresses: expect.arrayContaining(
                         Array.from([
-                            'Dev Team <mc-review-qa+DevTeam@truss.works>', 
-                            'DMCP Submission Dev1 <mc-review-qa+DMCPsubmissiondev1@truss.works>', 
-                            'DMCP Submission Dev2 <mc-review-qa+DMCPsubmissiondev2@truss.works>'
+                            'mc-review-qa+DevTeam@truss.works', 
+                            'mc-review-qa+DMCPsubmissiondev1@truss.works', 
+                            'mc-review-qa+DMCPsubmissiondev2@truss.works'
                         ])
                     ),
                 })
