@@ -1,7 +1,7 @@
 import { z } from 'zod'
 
 const emailAliasRegex = /^"?[^"]+?"?\s*<[^@\s]+@[^@\s]+\.[^@\s]+>$|^[^@\s]+@[^@\s]+\.[^@\s]+$/;
-const emailWithAliasSchema = z.string().regex(emailAliasRegex);
+const emailWithAliasSchema = z.string().trim().regex(emailAliasRegex);
 
 const emailSettingsSchema = z.object({
     emailSource: emailWithAliasSchema,

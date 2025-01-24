@@ -43,6 +43,38 @@ describe('emailSettingsSchema', () => {
         expect(result.success).toBe(true)
     })
 
+    it('should trim white space of emails', () => {
+        const validEmailsWithAliasAndWhiteSpace = {
+            emailSource: ' "MC-Review CMS HHS" <local@example.com> ',
+            devReviewTeamEmails: [
+                ' "Dev Reviewer 1" <Dev.reviewer.1@example.com> ',
+                ' "Dev Reviewer 2" <Dev.reviewer.2@example.com> ',
+            ],
+            oactEmails: [' "OACT Reviewer 1" <oact-reviewer.1@example.com> '],
+            dmcpReviewEmails: [
+                '      "DMCP Reviewer 1" <dmcp-reviewer.1@example.com>  ',
+            ],
+            dmcpSubmissionEmails: [
+                '"DMCP Submission 1" <dmcp-submission.1@example.com>       ',
+                '"DMCP Submission 2" <dmcp-submission.2@example.com>',
+            ],
+            dmcoEmails: [
+                '"DMCO Reviewer 1" <dmco-reviewer.1@example.com>         ',
+            ],
+            cmsReviewHelpEmailAddress: [
+                '      "Contract Help" <contract.help@example.com>',
+            ],
+            cmsRateHelpEmailAddress: [' "Rate Help" <rate.help@example.com>'],
+            helpDeskEmail: [' "Help Desk" <helpdesk@example.com>'],
+        }
+        const result = emailSettingsSchema.safeParse(
+            validEmailsWithAliasAndWhiteSpace
+        )
+
+        expect(result.success).toBe(true)
+        expect(result.data).toEqual(validEmailsWithAlias)
+    })
+
     it('should reject invalid email format', () => {
         const invalidData = { ...validEmailsWithAlias }
         invalidData.emailSource = 'invalid-email'
