@@ -30,7 +30,7 @@ model ApplicationSettings {
 model EmailSettings {
   id          Int      @id @default(1)
   emailSource String @default("mc-review-qa@truss.works")
-  devReviewTeamEmails String[] @default(["<Dev Team <mc-review-qa+DevTeam@truss.works>"])
+  devReviewTeamEmails String[] @default(["Dev Team <mc-review-qa+DevTeam@truss.works>"])
   cmsReviewHelpEmailAddress String[] @default(["MCOGDMCOActions <mc-review-qa+MCOGDMCOActionsHelp@truss.works>"])
   cmsRateHelpEmailAddress String[] @default(["MMCratesetting <mc-review-qa+MMCratesettingHelp@truss.works>"])
   oactEmails String[] @default(["OACT Dev1 <mc-review-qa+OACTdev1@truss.works>","OACT Dev2 <mc-review-qa+OACTdev2@truss.works>"])
