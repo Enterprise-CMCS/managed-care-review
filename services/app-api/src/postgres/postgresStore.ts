@@ -82,6 +82,7 @@ import { findAllDocuments } from './documents'
 import type { WithdrawRateArgsType } from './contractAndRates/withdrawRate'
 import { withdrawRate } from './contractAndRates/withdrawRate'
 import { findEmailSettings } from './settings/findEmailSettings'
+import { updateEmailSettings } from './settings/updateEmailSettings'
 
 type Store = {
     findPrograms: (
@@ -219,6 +220,9 @@ type Store = {
     ) => Promise<RateRevisionTable | Error>
 
     findEmailSettings: () => Promise<EmailSettingsType | Error>
+    updateEmailSettings: (
+        emailSettings: EmailSettingsType
+    ) => Promise<EmailSettingsType | Error>
 }
 
 function NewPostgresStore(client: PrismaClient): Store {
@@ -301,6 +305,8 @@ function NewPostgresStore(client: PrismaClient): Store {
         findRateRevision: (args) => findRateRevision(client, args),
 
         findEmailSettings: () => findEmailSettings(client),
+        updateEmailSettings: (emailSettings) =>
+            updateEmailSettings(client, emailSettings),
     }
 }
 
