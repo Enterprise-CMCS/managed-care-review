@@ -58,6 +58,7 @@ import { fetchMcReviewSettings } from './settings'
 import { updateStateAssignmentsByState } from './user/updateStateAssignmentsByState'
 import { rateFormDataResolver } from './rate/rateFormDataResolver'
 import { withdrawRate } from './rate/withdrawRate'
+import { updateEmailSettings } from './settings/updateEmailSettings'
 
 export function configureResolvers(
     store: Store,
@@ -126,6 +127,7 @@ export function configureResolvers(
             createAPIKey: createAPIKeyResolver(jwt),
             unlockRate: unlockRate(store),
             submitRate: submitRate(store, launchDarkly),
+            updateEmailSettings: updateEmailSettings(store),
         },
         User: {
             // resolveType is required to differentiate Unions
