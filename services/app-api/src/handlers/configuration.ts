@@ -72,7 +72,7 @@ async function configurePostgres(
         return new Error('Failed to create Prisma Client')
     }
 
-    const client: PrismaClient = prismaResult
+    const client: PrismaClient = prismaResult as unknown as PrismaClient
 
     return client
 }
@@ -101,13 +101,15 @@ async function configureEmailerFromDatabase(
     return {
         emailSource: emailSettings.emailSource,
         devReviewTeamEmails: emailSettings.devReviewTeamEmails,
-        helpDeskEmail: emailSettings.helpDeskEmail[0],
-        cmsReviewHelpEmailAddress: emailSettings.cmsReviewHelpEmailAddress[0],
-        cmsRateHelpEmailAddress: emailSettings.cmsRateHelpEmailAddress[0],
         oactEmails: emailSettings.oactEmails,
         dmcpReviewEmails: emailSettings.dmcpReviewEmails,
         dmcpSubmissionEmails: emailSettings.dmcpSubmissionEmails,
         dmcoEmails: emailSettings.dmcoEmails,
+        // These are stored as arrays in the database, but we need to convert them to strings
+        // There will be a follow up ticket to refactor EmailConfiguration
+        helpDeskEmail: emailSettings.helpDeskEmail[0],
+        cmsReviewHelpEmailAddress: emailSettings.cmsReviewHelpEmailAddress[0],
+        cmsRateHelpEmailAddress: emailSettings.cmsRateHelpEmailAddress[0],
     }
 }
 
