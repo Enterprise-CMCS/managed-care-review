@@ -168,6 +168,8 @@ async function configureEmailerFromParamStore(
     }
 }
 
+// Note: Email settings won't update dynamically if the database changes while this lambda is running.
+// Consider configuring the emailer later to fetch settings on demand.
 async function configureEmailer({
     emailParameterStore,
     store,
