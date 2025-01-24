@@ -1279,9 +1279,10 @@ type QuestionResponse {
     #    noteText: String
 }
 
+"""
+Email configurations for the application used in automated emails
+"""
 type EmailConfiguration {
-    stage: String!
-    baseUrl: String!
     emailSource: String!
     devReviewTeamEmails: [String!]!
     oactEmails: [String!]!
