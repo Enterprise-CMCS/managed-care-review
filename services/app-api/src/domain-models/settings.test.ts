@@ -75,6 +75,13 @@ describe('emailSettingsSchema', () => {
         expect(result.data).toEqual(validEmailsWithAlias)
     })
 
+    it('should reject empty email settings', () => {
+        const invalidData = { ...validEmailsWithAlias }
+        invalidData.helpDeskEmail = []
+        const result = emailSettingsSchema.safeParse(invalidData)
+        expect(result.success).toBe(false)
+    })
+
     it('should reject invalid email format', () => {
         const invalidData = { ...validEmailsWithAlias }
         invalidData.emailSource = 'invalid-email'
