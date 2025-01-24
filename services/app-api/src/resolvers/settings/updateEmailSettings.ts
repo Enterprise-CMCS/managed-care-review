@@ -7,7 +7,7 @@ import type { MutationResolvers } from '../../gen/gqlServer'
 import { logError } from '../../logger'
 import type { Store } from '../../postgres'
 import { setErrorAttributesOnActiveSpan } from '../attributeHelper'
-import { ForbiddenError } from 'apollo-server-core'
+import { ForbiddenError, UserInputError } from 'apollo-server-core'
 import { GraphQLError } from 'graphql'
 import type { EmailConfiguration } from '../../gen/gqlClient'
 
@@ -72,11 +72,9 @@ export function updateEmailSettings(
             const msg = `Invalid email settings: ${validatedEmailSettings.error}`
             logError('updateEmailSettings', msg)
             setErrorAttributesOnActiveSpan(msg, span)
-            throw new GraphQLError(msg, {
-                extensions: {
-                    code: 'BAD_USER_INPUT',
-                    cause: 'VALIDATION_ERROR',
-                },
+            throw new UserInputError(msg, {
+                argumentName: 'emailConfiguration',
+                cause: 'VALIDATION_ERROR',
             })
         }
 
