@@ -1,8 +1,6 @@
 BEGIN;
-
 -- AlterTable
-ALTER TABLE "EmailSettings" ALTER COLUMN "emailSource" SET DEFAULT 'mc-review@cms.hhs.gov',
-ALTER COLUMN "devReviewTeamEmails" SET DEFAULT ARRAY['mc-review-qa+DevTeam@truss.works']::TEXT[],
+ALTER TABLE "EmailSettings" ALTER COLUMN "devReviewTeamEmails" SET DEFAULT ARRAY['mc-review-qa+DevTeam@truss.works']::TEXT[],
 ALTER COLUMN "cmsReviewHelpEmailAddress" SET DEFAULT ARRAY['mc-review-qa+MCOGDMCOActionsHelp@truss.works']::TEXT[],
 ALTER COLUMN "cmsRateHelpEmailAddress" SET DEFAULT ARRAY['mc-review-qa+MMCratesettingHelp@truss.works']::TEXT[],
 ALTER COLUMN "oactEmails" SET DEFAULT ARRAY['mc-review-qa+OACTdev1@truss.works', 'mc-review-qa+OACTdev2@truss.works']::TEXT[],
@@ -13,7 +11,7 @@ ALTER COLUMN "helpDeskEmail" SET DEFAULT ARRAY['mc-review-qa+MC_Review_HelpDesk@
 
 -- Update existing record
 UPDATE "EmailSettings"
-SET 
+SET
  "emailSource" = 'mc-review@cms.hhs.gov',
  "devReviewTeamEmails" = ARRAY['mc-review-qa+DevTeam@truss.works']::TEXT[],
  "cmsReviewHelpEmailAddress" = ARRAY['mc-review-qa+MCOGDMCOActionsHelp@truss.works']::TEXT[],
