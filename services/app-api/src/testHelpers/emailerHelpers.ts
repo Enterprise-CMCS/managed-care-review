@@ -21,6 +21,7 @@ import { testSendSESEmail } from './awsSESHelpers'
 import { testCMSUser, testStateUser } from './userHelpers'
 import { v4 as uuidv4 } from 'uuid'
 import { constructTestEmailer } from './gqlHelpers'
+import type { Store } from '../postgres'
 
 const testEmailConfig = (): EmailConfiguration => ({
     stage: 'LOCAL',
@@ -85,10 +86,12 @@ function testEmailer(customConfig?: EmailConfiguration): Emailer {
     return emailer(config, vi.fn(sendTestEmails))
 }
 
-async function testEmailerFromDatabase(customConfig?: EmailConfiguration): Promise<Emailer> {
+async function testEmailerFromDatabase(store :Store, customConfig?: EmailConfiguration): Promise<Emailer> {
     const mockEmailer = await constructTestEmailer({
-        emailConfig: customConfig,
+        emailConfig: customConfig ?? testEmailConfig(),
+        postgresStore: store,
     })
+
     mockEmailer.sendEmail = vi.fn()
 
     return mockEmailer
