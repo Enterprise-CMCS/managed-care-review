@@ -8,6 +8,7 @@ plugins:
   - serverless-s3-bucket-helper
   - serverless-iam-helper
   - serverless-scriptable-plugin
+  - serverless-esbuild
 
 provider:
   name: aws
@@ -79,14 +80,25 @@ custom:
     hooks:
       before:package:createDeploymentArtifacts: pnpm build
       before:deploy:finalize: node scripts/uploadScripts.js ${self:custom.stage}
+  esbuild:
+    packager: pnpm
+    bundle: true
+    minify: true
+    sourcemap: true
+    exclude:
+      - aws-sdk
+    define:
+      'require.resolve': undefined
+    platform: 'node'
+    target: 'node20'
+    concurrency: 10
 
 package:
   individually: true
 
 functions:
   rotator:
-    runtime: python3.11
-    handler: lambda_function.lambda_handler
+    handler: src/rotator.handler
     description: Conducts an AWS SecretsManager secret rotation for RDS PostgreSQL using single user rotation scheme
     timeout: 30
     vpc:
@@ -95,7 +107,12 @@ functions:
     environment:
       SECRETS_MANAGER_ENDPOINT: !Sub 'https://secretsmanager.${AWS::Region}.amazonaws.com'
     package:
-      artifact: s3://secrets-manager-rotation-apps-c0de1e0412b469545054417cc38af3c3/SecretsManagerRDSPostgreSQLRotationSingleUser/SecretsManagerRDSPostgreSQLRotationSingleUser.zip
+      patterns:
+        - '!**'
+        - 'src/rotator.ts'
+        - 'src/db.ts'
+        - 'src/secrets.ts'
+        - 'src/types.ts'
 
 resources:
   Conditions:

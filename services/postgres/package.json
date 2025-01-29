@@ -10,7 +10,11 @@
     "devDependencies": {
         "@aws-sdk/types": "^3.734.0",
         "@types/pg": "^8.11.11",
+        "eslint": "^8.3.0",
+        "eslint-config-prettier": "^9.1.0",
+        "eslint-plugin-prettier": "^5.0.1",
         "serverless": "^3.39.0",
+        "serverless-esbuild": "^1.52.1",
         "serverless-iam-helper": "https://github.com/CMSgov/serverless-iam-helper",
         "serverless-offline-ssm": "^6.2.0",
         "serverless-s3-bucket-helper": "https://github.com/CMSgov/serverless-s3-bucket-helper",
