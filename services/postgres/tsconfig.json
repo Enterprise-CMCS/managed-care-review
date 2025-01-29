@@ -1,9 +1,9 @@
 {
     "extends": "../../tsconfig.json",
     "compilerOptions": {
-        "module": "es2022",
-        "lib": ["es2022"],
-        "target": "es2022",
+        "module": "ESNext",
+        "lib": ["ESNext"],
+        "target": "ESNext",
         "moduleResolution": "node",
 
         "baseUrl": "/",
@@ -16,6 +16,6 @@
         "resolveJsonModule": true,
         "outDir": "./dist"
     },
-    "include": ["scripts", "src/**/*"],
+    "include": ["scripts/**/*", "src/**/*", "esbuild.config.js"],
     "exclude": ["node_modules", "**/*.test.ts"]
 }
