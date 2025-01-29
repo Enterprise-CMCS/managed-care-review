@@ -392,8 +392,8 @@ importers:
         specifier: ^1.28.0
         version: 1.28.0
       '@prisma/client':
-        specifier: ^5.17.0
-        version: 5.17.0(prisma@5.17.0)
+        specifier: ^6.3.0
+        version: 6.3.0(prisma@5.17.0)(typescript@4.9.5)
       apollo-server-core:
         specifier: ^3.11.1
         version: 3.13.0(encoding@0.1.13)(graphql@16.9.0)
@@ -5325,13 +5325,16 @@ packages:
   '@polka/url@1.0.0-next.25':
     resolution: {integrity: sha512-j7P6Rgr3mmtdkeDGTe0E/aYyWEWVtc5yFXtHCRHs28/jptDEWfaVOc5T7cblqy1XKPPfCxJc/8DwQ5YgLOZOVQ==}
 
-  '@prisma/client@5.17.0':
-    resolution: {integrity: sha512-N2tnyKayT0Zf7mHjwEyE8iG7FwTmXDHFZ1GnNhQp0pJUObsuel4ZZ1XwfuAYkq5mRIiC/Kot0kt0tGCfLJ70Jw==}
-    engines: {node: '>=16.13'}
+  '@prisma/client@6.3.0':
+    resolution: {integrity: sha512-BY3Fi28PUSk447Bpv22LhZp4HgNPo7NsEN+EteM1CLDnLjig5863jpW+3c3HHLFmml+nB/eJv1CjSriFZ8z7Cg==}
+    engines: {node: '>=18.18'}
     peerDependencies:
       prisma: '*'
+      typescript: '>=5.1.0'
     peerDependenciesMeta:
       prisma:
+        optional: true
+      typescript:
         optional: true
 
   '@prisma/debug@5.17.0':
@@ -21929,9 +21932,10 @@ snapshots:
 
   '@polka/url@1.0.0-next.25': {}
 
-  '@prisma/client@5.17.0(prisma@5.17.0)':
+  '@prisma/client@6.3.0(prisma@5.17.0)(typescript@4.9.5)':
     optionalDependencies:
       prisma: 5.17.0
+      typescript: 4.9.5
 
   '@prisma/debug@5.17.0': {}
 
