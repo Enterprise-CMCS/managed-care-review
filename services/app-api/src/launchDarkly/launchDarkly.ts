@@ -5,6 +5,7 @@ import type {
 } from '@mc-review/common-code'
 import { featureFlagKeys, featureFlags } from '@mc-review/common-code'
 import type { LDClient } from '@launchdarkly/node-server-sdk'
+import { v4 as uuidv4 } from 'uuid'
 import { logError } from '../logger'
 import { setErrorAttributesOnActiveSpan } from '../resolvers/attributeHelper'
 import type { Span } from '@opentelemetry/api'
@@ -22,6 +23,7 @@ type LDServiceArgType = {
     flag: FeatureFlagLDConstant
     kind?: string
     span?: Span
+    anonymous?: boolean
 }
 
 type LDService = {
@@ -34,9 +36,11 @@ type LDService = {
 function ldService(ldClient: LDClient): LDService {
     return {
         getFeatureFlag: async (args) => {
+            const {kind, key, anonymous} = args
             const ldContext = {
-                kind: args.kind ?? 'user',
-                key: args.key,
+                kind: kind ?? 'user',
+                key,
+                anonymous // https://docs.launchdarkly.com/sdk/features/anonymou
             }
             return await ldClient.variation(args.flag, ldContext, false)
         },

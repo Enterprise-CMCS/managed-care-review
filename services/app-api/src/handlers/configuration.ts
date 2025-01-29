@@ -186,8 +186,9 @@ async function configureEmailer({
     applicationEndpoint: string
 }): Promise<Emailer | Error> {
     const removeParameterStore = await ldService.getFeatureFlag({
-        key: 'email-configuration',
+        key: 'throwaway-key-email-configuration',
         flag: 'remove-parameter-store',
+        anonymous: true
     })
     const emailSettings = removeParameterStore
         ? await configureEmailerFromDatabase(store)
