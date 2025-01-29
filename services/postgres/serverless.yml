@@ -81,13 +81,7 @@ custom:
       before:package:createDeploymentArtifacts: pnpm build
       before:deploy:finalize: node dist/scripts/uploadScripts.js ${self:custom.stage}
   esbuild:
-    packager: pnpm
-    bundle: true
-    minify: true
-    sourcemap: true
-    exclude:
-      - aws-sdk
-    concurrency: 10
+    config: ./esbuild.config.js
 
 package:
   individually: true

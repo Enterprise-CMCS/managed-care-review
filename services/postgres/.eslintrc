@@ -5,6 +5,7 @@
         "sourceType": "module",
     },
     "plugins": ["@typescript-eslint"],
+    "ignorePatterns": ["esbuild.config.js"],
     "extends": [
         "eslint:recommended",
         "plugin:@typescript-eslint/recommended",
