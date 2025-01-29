@@ -1078,6 +1078,9 @@ importers:
       serverless-stack-termination-protection:
         specifier: ^2.0.2
         version: 2.0.2
+      typescript:
+        specifier: 4.9.5
+        version: 4.9.5
 
   services/storybook:
     devDependencies:

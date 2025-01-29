@@ -13,7 +13,8 @@
         "sourceMap": false,
         "skipLibCheck": true,
         "esModuleInterop": true,
-        "resolveJsonModule": true
+        "resolveJsonModule": true,
+        "outDir": "./dist"
     },
     "include": ["scripts", "src/**/*"],
     "exclude": ["node_modules", "**/*.test.ts"]
