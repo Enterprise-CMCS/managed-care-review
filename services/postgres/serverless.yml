@@ -81,7 +81,7 @@ custom:
       before:package:createDeploymentArtifacts: pnpm build
       before:deploy:finalize: node dist/scripts/uploadScripts.js ${self:custom.stage}
   esbuild:
-    config: ./esbuild.config.js
+    config: ./esbuild.config.cjs
 
 package:
   individually: true
@@ -96,13 +96,6 @@ functions:
       subnetIds: ${self:custom.privateSubnets}
     environment:
       SECRETS_MANAGER_ENDPOINT: !Sub 'https://secretsmanager.${AWS::Region}.amazonaws.com'
-    package:
-      patterns:
-        - '!**'
-        - 'src/rotator.ts'
-        - 'src/db.ts'
-        - 'src/secrets.ts'
-        - 'src/types.ts'
 
 resources:
   Conditions:
