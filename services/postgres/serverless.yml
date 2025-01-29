@@ -3,16 +3,16 @@ service: postgres
 frameworkVersion: '^3.19.0'
 
 plugins:
+  - serverless-esbuild
   - serverless-offline-ssm
   - serverless-stack-termination-protection
   - serverless-s3-bucket-helper
   - serverless-iam-helper
   - serverless-scriptable-plugin
-  - serverless-esbuild
 
 provider:
   name: aws
-  runtime: python3.11
+  runtime: nodejs20.x
   region: us-east-1
   iam:
     role:
@@ -87,10 +87,6 @@ custom:
     sourcemap: true
     exclude:
       - aws-sdk
-    define:
-      'require.resolve': undefined
-    platform: 'node'
-    target: 'node20'
     concurrency: 10
 
 package:
