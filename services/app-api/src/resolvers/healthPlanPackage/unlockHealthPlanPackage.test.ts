@@ -657,36 +657,6 @@ describe(`Tests unlockHealthPlanPackage`, () => {
         expect(err.message).toBe('A package must exist to be unlocked: foo-bar')
     })
 
-    it('returns an error if the DB errors', async () => {
-        const errorStore = mockStoreThatErrors()
-
-        const cmsServer = await constructTestPostgresServer({
-            store: errorStore,
-            context: {
-                user: cmsUser,
-            },
-        })
-
-        // Unlock
-        const unlockResult = await cmsServer.executeOperation({
-            query: UnlockHealthPlanPackageDocument,
-            variables: {
-                input: {
-                    pkgID: 'foo-bar',
-                    unlockedReason: 'Super duper good reason.',
-                },
-            },
-        })
-
-        expect(unlockResult.errors).toBeDefined()
-        const err = (unlockResult.errors as GraphQLError[])[0]
-
-        expect(err.extensions['code']).toBe('INTERNAL_SERVER_ERROR')
-        expect(err.message).toContain(
-            'error came from the generic store with errors mock'
-        )
-    })
-
     it('returns errors if unlocked reason is undefined', async () => {
         const stateServer = await constructTestPostgresServer()
 

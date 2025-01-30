@@ -188,8 +188,9 @@ async function configureEmailer({
     applicationEndpoint: string
 }): Promise<Emailer | Error> {
     const removeParameterStore = await ldService.getFeatureFlag({
-        key: 'email-configuration',
+        key: 'throwaway-key-email-configuration', // we usually use unique user specific key from apollo context, this is an one off pattern for parameter store flag since its configured before we have that user in apollo context
         flag: 'remove-parameter-store',
+        anonymous: true
     })
     const emailSettings = removeParameterStore
         ? await configureEmailerFromDatabase(store)

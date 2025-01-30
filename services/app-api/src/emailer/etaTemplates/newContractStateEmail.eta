@@ -5,6 +5,7 @@
 If you need to make any changes, please contact CMS.
 <br /><br />
 
+<% if (!it.isChipOnly) {%>
 <div>What comes next:</div>
 <ol>
     <li>
@@ -22,4 +23,5 @@ If you need to make any changes, please contact CMS.
     </li>
 </ol>
 <br />
+<% } %>
 <%~ includeFile('./partialStateNeedAssistance', it) %>

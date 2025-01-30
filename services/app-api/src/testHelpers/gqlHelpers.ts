@@ -89,7 +89,7 @@ const constructTestPostgresServer = async (opts?: {
     context?: Context
     emailer?: Emailer
     store?: Partial<Store>
-    emailParameterStore?: EmailParameterStore
+    emailParameterStore?: EmailParameterStore // to be deleted when we remove parameter store, just rely on postgres
     ldService?: LDService
     jwt?: JWTLib
     s3Client?: S3ClientT
@@ -97,7 +97,6 @@ const constructTestPostgresServer = async (opts?: {
     // set defaults
     const context = opts?.context || defaultContext()
     const ldService = opts?.ldService || testLDService()
-
     const prismaClient = await sharedTestPrismaClient()
     const postgresStore = {
         ...NewPostgresStore(prismaClient),
@@ -115,11 +114,28 @@ const constructTestPostgresServer = async (opts?: {
     const s3TestClient = testS3Client()
     const s3 = opts?.s3Client || s3TestClient
 
+    const testEmailConfigForParameterStore = {
+        emailSource: 'local@example.com',
+        stage: 'localtest',
+        baseUrl: 'http://localtest',
+        devReviewTeamEmails: ['test@example.com'],
+        cmsReviewHelpEmailAddress: 'mcog@example.com',
+        cmsRateHelpEmailAddress: 'rates@example.com',
+        oactEmails: ['testRate@example.com'],
+        dmcpReviewEmails: ['testPolicy@example.com'],
+        dmcpSubmissionEmails: ['testPolicySubmission@example.com'],
+        dmcoEmails: ['testDmco@example.com'],
+        helpDeskEmail: 'MC_Review_HelpDesk@example.com>',
+    }
+
     const emailer =
         opts?.emailer ??
         (await constructTestEmailer({
+            emailConfig: testEmailConfigForParameterStore, // to be deleted when we remove parameter store, just rely on postgres
+            postgresStore,
             ldService,
         }))
+
 
     if (emailer instanceof Error) {
         throw new Error(`Failed to configure emailer: ${emailer.message}`)
@@ -141,9 +157,9 @@ const constructTestPostgresServer = async (opts?: {
     })
 }
 
-const constructTestEmailer = async (opts?: {
-    emailConfig?: EmailConfiguration
-    postgresStore?: Store
+const constructTestEmailer = async (opts: {
+    emailConfig: EmailConfiguration // to be deleted when we remove parameter store, only option will be to read from postgres
+    postgresStore: Store
     ldService?: LDService
 }): Promise<Emailer> => {
     const {
@@ -151,37 +167,32 @@ const constructTestEmailer = async (opts?: {
         postgresStore,
         ldService = testLDService({ 'remove-parameter-store': true }), // default to using email settings from database
     } = opts ?? {}
-
     let store = postgresStore
     if (!store) {
         const prismaClient = await sharedTestPrismaClient()
         store = NewPostgresStore(prismaClient)
     }
+    const removeParameterStore = await ldService.getFeatureFlag({  key: 'foo', flag: 'remove-parameter-store'})
 
-    const emailSettings = must(await store.findEmailSettings())
+    const emailSettings = await store.findEmailSettings()
+    if (emailSettings instanceof Error) {
+        throw emailSettings // throw error if email settings not in place in tests
+    }
 
+    // go into test emailer with both paramet
     const testEmailSettings: EmailSettingsType = {
-        emailSource: emailConfig?.emailSource ?? emailSettings.emailSource,
-        devReviewTeamEmails:
-            emailConfig?.devReviewTeamEmails ??
-            emailSettings.devReviewTeamEmails,
-        oactEmails: emailConfig?.oactEmails ?? emailSettings.oactEmails,
+        emailSource: removeParameterStore? emailSettings.emailSource : emailConfig.emailSource,
+        devReviewTeamEmails: removeParameterStore? emailSettings.devReviewTeamEmails : emailConfig.devReviewTeamEmails,
+        oactEmails: removeParameterStore? emailSettings.oactEmails : emailConfig.oactEmails,
         dmcpReviewEmails:
-            emailConfig?.dmcpReviewEmails ?? emailSettings.dmcpReviewEmails,
+        removeParameterStore? emailSettings.dmcpReviewEmails : emailConfig.dmcpReviewEmails,
         dmcpSubmissionEmails:
-            emailConfig?.dmcpSubmissionEmails ??
-            emailSettings.dmcpSubmissionEmails,
-        dmcoEmails: emailConfig?.dmcoEmails ?? emailSettings.dmcoEmails,
+        removeParameterStore? emailSettings.dmcpSubmissionEmails : emailConfig.dmcpSubmissionEmails,
+        dmcoEmails:     removeParameterStore? emailSettings.dmcoEmails : emailConfig.dmcoEmails,
         // These three settings are string[] in db but string in EmailConfiguration, follow up ticket will convert EmailConfiguration to string[]
-        cmsReviewHelpEmailAddress: emailConfig?.cmsReviewHelpEmailAddress
-            ? [emailConfig?.cmsReviewHelpEmailAddress]
-            : emailSettings.cmsReviewHelpEmailAddress,
-        cmsRateHelpEmailAddress: emailConfig?.cmsRateHelpEmailAddress
-            ? [emailConfig?.cmsRateHelpEmailAddress]
-            : emailSettings.cmsRateHelpEmailAddress,
-        helpDeskEmail: emailConfig?.helpDeskEmail
-            ? [emailConfig?.helpDeskEmail]
-            : emailSettings.helpDeskEmail,
+        cmsReviewHelpEmailAddress:     removeParameterStore? emailSettings.cmsReviewHelpEmailAddress : [emailConfig.cmsReviewHelpEmailAddress],
+        cmsRateHelpEmailAddress:     removeParameterStore? emailSettings.cmsRateHelpEmailAddress : [emailConfig.cmsRateHelpEmailAddress],
+        helpDeskEmail: removeParameterStore? emailSettings.helpDeskEmail : [emailConfig.helpDeskEmail],
     }
 
     store.findEmailSettings = async () => {
