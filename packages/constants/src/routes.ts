@@ -17,6 +17,7 @@ const ROUTES = [
     'STATE_ASSIGNMENTS',
     'DIVISION_ASSIGNMENTS',
     'AUTOMATED_EMAILS',
+    'EDIT_AUTOMATED_EMAILS',
     'SUPPORT_EMAILS',
     'RATES_SUMMARY',
     'RATES_UPLOAD_QUESTION',
@@ -70,6 +71,7 @@ const RoutesRecord: Record<RouteT, string> = {
         '/mc-review-settings/state-assignments/:stateCode/edit',
     DIVISION_ASSIGNMENTS: '/mc-review-settings/division-assignments',
     AUTOMATED_EMAILS: '/mc-review-settings/automated-emails',
+    EDIT_AUTOMATED_EMAILS: '/mc-review-settings/automated-emails/:email/edit',
     SUPPORT_EMAILS: '/mc-review-settings/support-emails',
     RATES_SUMMARY: '/rates/:id',
     RATES_SUMMARY_QUESTIONS_AND_ANSWERS: '/rates/:id/question-and-answers',
@@ -162,6 +164,7 @@ const CMS_WORKFLOW_FORM_ROUTES: RouteTWithUnknown[]  = [
 
 const SETTINGS_HIDE_SIDEBAR_ROUTES: RouteTWithUnknown[] = [
     'EDIT_STATE_ASSIGNMENTS',
+    'EDIT_AUTOMATED_EMAILS'
 ]
 
 /*
@@ -181,6 +184,7 @@ const PageTitlesRecord: Record<RouteT | 'UNKNOWN_ROUTE', string> = {
     EDIT_STATE_ASSIGNMENTS: 'Edit state assignments',
     DIVISION_ASSIGNMENTS: 'Division assignments',
     AUTOMATED_EMAILS: 'Automated emails',
+    EDIT_AUTOMATED_EMAILS: 'Edit automated emails',
     SUPPORT_EMAILS: 'Support emails',
     DASHBOARD: 'Dashboard',
     DASHBOARD_RATES: 'Rate review dashboard',

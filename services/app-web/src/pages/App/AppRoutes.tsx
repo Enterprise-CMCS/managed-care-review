@@ -56,6 +56,7 @@ import { RateQuestionResponse } from '../QuestionResponse/QuestionResponseSummar
 import { UploadRateResponse } from '../QuestionResponse/UploadResponse/UploadRateResponse'
 import { ReleasedToState } from '../SubmissionReleasedToState/ReleasedToState'
 import { RateWithdraw } from '../RateWithdraw/RateWithdraw'
+import { EditAutoEmails } from '../Settings/EditAutomatedEmails/EditAutoEmails'
 
 function componentForAuthMode(
     authMode: AuthModeType
@@ -316,6 +317,10 @@ const CMSUserRoutes = ({
                     <Route
                         path={RoutesRecord.AUTOMATED_EMAILS}
                         element={<AutomatedEmailsTable />}
+                    />
+                    <Route
+                        path={RoutesRecord.EDIT_AUTOMATED_EMAILS}
+                        element={<EditAutoEmails />}
                     />
                     <Route
                         path={RoutesRecord.SUPPORT_EMAILS}

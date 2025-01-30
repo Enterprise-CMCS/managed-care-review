@@ -12,6 +12,19 @@ const formatEmailsFromUsers = (arr?: AnalystDisplayType[]) =>
 const formatUserNamesFromUsers = (arr?: AnalystDisplayType[]) =>
     arr ? arr.map((analyst) => formatUserName(analyst)).join(', ') : ''
 
+const parseEmailData = (
+    emailData: string[] | string
+): { name: string; email: string }[] => {
+    const emailArray = Array.isArray(emailData) ? emailData : [emailData]
+
+    return emailArray.map((item) => {
+        const [nameSection, emailSection] = item.split('<')
+        const name = nameSection.trim().replace(/"/g, '')
+        const email = emailSection.replace('>', '').trim()
+        return { name, email }
+    })
+}
+
 const EditLink = ({
     url,
     rowID,
@@ -38,4 +51,5 @@ export {
     formatEmailsFromUsers,
     formatUserNamesFromUsers,
     formatUserName,
+    parseEmailData,
 }
