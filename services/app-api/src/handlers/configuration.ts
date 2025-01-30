@@ -90,15 +90,30 @@ async function getDBClusterID(secretName: string): Promise<string | Error> {
     return dbID
 }
 
+// cache settings for configureEmailerFromDatabse. Since we set these at lambda startup
+// time rather than when the emails are sent, we need a way to get the current
+// email settings if they are updated after the lambda has started.
+let cachedEmailSettings: Omit<EmailConfiguration, 'stage' | 'baseUrl'> | null =
+    null
+let cacheTime = 0
+const CACHE_TTL = 60 * 1000 // 1 minute
+
 async function configureEmailerFromDatabase(
     store: Store
 ): Promise<Omit<EmailConfiguration, 'stage' | 'baseUrl'> | Error> {
+    const now = Date.now()
+
+    // Return cached settings if they exist and haven't expired
+    if (cachedEmailSettings && now - cacheTime <= CACHE_TTL) {
+        return cachedEmailSettings
+    }
+
     const emailSettings = await store.findEmailSettings()
     if (emailSettings instanceof Error) {
         return emailSettings
     }
 
-    return {
+    const formattedSettings = {
         emailSource: emailSettings.emailSource,
         devReviewTeamEmails: emailSettings.devReviewTeamEmails,
         oactEmails: emailSettings.oactEmails,
@@ -111,6 +126,12 @@ async function configureEmailerFromDatabase(
         cmsReviewHelpEmailAddress: emailSettings.cmsReviewHelpEmailAddress[0],
         cmsRateHelpEmailAddress: emailSettings.cmsRateHelpEmailAddress[0],
     }
+
+    // Update cache and timestamp
+    cachedEmailSettings = formattedSettings
+    cacheTime = now
+
+    return formattedSettings
 }
 
 async function configureEmailerFromParamStore(
@@ -190,7 +211,7 @@ async function configureEmailer({
     const removeParameterStore = await ldService.getFeatureFlag({
         key: 'throwaway-key-email-configuration', // we usually use unique user specific key from apollo context, this is an one off pattern for parameter store flag since its configured before we have that user in apollo context
         flag: 'remove-parameter-store',
-        anonymous: true
+        anonymous: true,
     })
     const emailSettings = removeParameterStore
         ? await configureEmailerFromDatabase(store)
