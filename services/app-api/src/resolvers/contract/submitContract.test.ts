@@ -38,7 +38,7 @@ import {
 import { testLDService } from '../../testHelpers/launchDarklyHelpers'
 import { latestFormData } from '../../testHelpers/healthPlanPackageHelpers'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
-import { testEmailConfig, testEmailer } from '../../testHelpers/emailerHelpers'
+import { testEmailConfig, testEmailer, testEmailerFromDatabase } from '../../testHelpers/emailerHelpers'
 import { NewPostgresStore } from '../../postgres'
 import { dayjs } from '@mc-review/dates'
 
@@ -1509,6 +1509,45 @@ describe('submitContract', () => {
 
             expect(submitResult.errors).toBeDefined()
             expect(mockEmailer.sendEmail).not.toHaveBeenCalled()
+        })
+
+        it('uses email settings from database with remove-parameter-store flag on', async () => {
+            const mockEmailer = await testEmailerFromDatabase()
+            const ldService = testLDService(
+                {
+                    'remove-parameter-store': true
+                }
+            )
+
+            const stateServer = await constructTestPostgresServer({
+                context: {
+                    user: testStateUser(),
+                },
+                ldService,
+                emailer: mockEmailer,
+            })
+
+            const submitResult = await createAndSubmitTestContractWithRate(stateServer)
+
+            const currentRevision =
+                submitResult.packageSubmissions[0].contractRevision
+
+            const name = currentRevision.contractName
+
+            expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
+                1,
+                expect.objectContaining({
+                    subject: expect.stringContaining(`New Managed Care Submission: ${name}`),
+                    sourceEmail: 'mc-review@cms.hhs.gov',
+                    toAddresses: expect.arrayContaining(
+                        Array.from([
+                            'mc-review-qa+DevTeam@truss.works', 
+                            'mc-review-qa+DMCPsubmissiondev1@truss.works', 
+                            'mc-review-qa+DMCPsubmissiondev2@truss.works'
+                        ])
+                    ),
+                })
+            )
         })
 
         // TODO: reimplement this test without using jest

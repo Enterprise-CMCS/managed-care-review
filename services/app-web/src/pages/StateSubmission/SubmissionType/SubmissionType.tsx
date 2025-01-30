@@ -14,7 +14,6 @@ import {
     FieldTextarea,
     FieldYesNo,
     FormNotificationContainer,
-    LinkWithLogging,
     PoliteErrorMessage,
     ReactRouterLinkWithLogging,
 } from '../../../components'
@@ -54,6 +53,7 @@ import { useErrorSummary } from '../../../hooks/useErrorSummary'
 import { useContractForm } from '../../../hooks/useContractForm'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '@mc-review/common-code'
+import { ContactSupportLink } from '../../../components/ErrorAlert/ContactSupportLink'
 
 export interface SubmissionTypeFormValues {
     populationCovered?: PopulationCoveredType
@@ -556,17 +556,10 @@ export const SubmissionType = ({
                                                 >
                                                     Required
                                                 </span>
-                                                <LinkWithLogging
-                                                    aria-label="Managed care programs guidance (opens in new window)"
-                                                    href={
-                                                        '/help#managed-care-programs-guidance'
-                                                    }
+                                                <ContactSupportLink
+                                                    alternateText="Contact the Help Desk to edit state programs list"
                                                     variant="external"
-                                                    target="_blank"
-                                                >
-                                                    Contact the Help Desk to
-                                                    edit state programs list
-                                                </LinkWithLogging>
+                                                />
                                             </div>
                                             {showFieldErrors(
                                                 errors.programIDs

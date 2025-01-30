@@ -29,6 +29,7 @@ function mockQuestionsPayload(
                                 downloadURL: expect.any(String),
                             },
                         ],
+                        round: 1,
                         division: 'DMCO',
                         responses: [
                             {
@@ -56,6 +57,7 @@ function mockQuestionsPayload(
                         contractID,
                         createdAt: new Date('2022-12-18'),
                         addedBy: mockValidCMSUser() as CmsUser,
+                        round: 1,
                         documents: [
                             {
                                 s3URL: 's3://bucketname/key/dmco-question-2-document-1',
@@ -110,6 +112,7 @@ function mockQuestionsPayload(
                             },
                         ],
                         division: 'DMCP',
+                        round: 1,
                         responses: [
                             {
                                 __typename: 'QuestionResponse' as const,
@@ -143,6 +146,7 @@ function mockQuestionsPayload(
                         addedBy: mockValidCMSUser({
                             divisionAssignment: 'OACT',
                         }) as CmsUser,
+                        round: 1,
                         documents: [
                             {
                                 s3URL: 's3://bucketname/key/oact-question-1-document-1',

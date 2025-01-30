@@ -511,6 +511,7 @@ function mockContractPackageSubmittedWithQuestions(
                             __typename: 'ContractQuestion' as const,
                             id: 'dmco-question-1-id',
                             contractID,
+                            round: 1,
                             createdAt: new Date('2022-12-16'),
                             addedBy: mockValidCMSUser({
                                 divisionAssignment: null,
@@ -549,6 +550,7 @@ function mockContractPackageSubmittedWithQuestions(
                             contractID,
                             createdAt: new Date('2022-12-18'),
                             addedBy: mockValidCMSUser() as CmsUser,
+                            round: 1,
                             documents: [
                                 {
                                     s3URL: 's3://bucketname/key/dmco-question-2-document-1',
@@ -577,6 +579,7 @@ function mockContractPackageSubmittedWithQuestions(
                             id: 'dmcp-question-1-id',
                             contractID,
                             createdAt: new Date('2022-12-15'),
+                            round: 1,
                             addedBy: mockValidCMSUser({
                                 divisionAssignment: 'DMCP',
                             }) as CmsUser,
@@ -618,6 +621,7 @@ function mockContractPackageSubmittedWithQuestions(
                             id: 'oact-question-1-id',
                             contractID,
                             createdAt: new Date('2022-12-14'),
+                            round: 1,
                             addedBy: mockValidCMSUser({
                                 divisionAssignment: 'OACT',
                             }) as CmsUser,
@@ -657,6 +661,7 @@ function mockContractPackageSubmittedWithQuestions(
                             addedBy: mockValidCMSUser({
                                 divisionAssignment: 'OACT',
                             }) as CmsUser,
+                            round: 2,
                             documents: [
                                 {
                                     s3URL: 's3://bucketname/key/oact-question-1-document-1',
@@ -1509,6 +1514,7 @@ function mockContractPackageApprovedWithQuestions(
                             addedBy: mockValidCMSUser({
                                 divisionAssignment: null,
                             }) as CmsUser,
+                            round: 1,
                             documents: [
                                 {
                                     s3URL: 's3://bucketname/key/dmco-question-1-document-1',
@@ -1543,6 +1549,7 @@ function mockContractPackageApprovedWithQuestions(
                             contractID,
                             createdAt: new Date('2022-12-18'),
                             addedBy: mockValidCMSUser() as CmsUser,
+                            round: 2,
                             documents: [
                                 {
                                     s3URL: 's3://bucketname/key/dmco-question-2-document-1',
@@ -1571,6 +1578,7 @@ function mockContractPackageApprovedWithQuestions(
                             id: 'dmcp-question-1-id',
                             contractID,
                             createdAt: new Date('2022-12-15'),
+                            round: 1,
                             addedBy: mockValidCMSUser({
                                 divisionAssignment: 'DMCP',
                             }) as CmsUser,
@@ -1615,6 +1623,7 @@ function mockContractPackageApprovedWithQuestions(
                             addedBy: mockValidCMSUser({
                                 divisionAssignment: 'OACT',
                             }) as CmsUser,
+                            round: 1,
                             documents: [
                                 {
                                     s3URL: 's3://bucketname/key/oact-question-1-document-1',
@@ -1648,6 +1657,7 @@ function mockContractPackageApprovedWithQuestions(
                             id: 'oact-question-2-id',
                             contractID: 'test-abc-123',
                             createdAt: new Date('2022-12-17'),
+                            round: 2,
                             addedBy: mockValidCMSUser({
                                 divisionAssignment: 'OACT',
                             }) as CmsUser,
