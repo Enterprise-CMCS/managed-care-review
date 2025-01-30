@@ -86,3 +86,6 @@ export type { APIKeyType } from './apiKey'
 
 export type { AuditDocument } from './DocumentType'
 export { auditDocumentSchema } from './DocumentType'
+
+export type { EmailSettingsType, ApplicationSettingsType } from './SettingType'
+export { emailSettingsSchema, applicationSettingsSchema } from './SettingType'

@@ -25,7 +25,9 @@ export function updateContractDraftRevision(
             user,
             span
         )
-        const featureFlags = await launchDarkly.allFlags(context)
+        const featureFlags = await launchDarkly.allFlags({
+            key: context.user.email,
+        })
         const { formData, contractID, lastSeenUpdatedAt } = input
 
         const contractWithHistory =
