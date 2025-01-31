@@ -22,6 +22,8 @@ on:
         required: true
       nr_license_key:
         required: true
+      serverless_license_key:
+        required: true
 
 permissions:
   id-token: write
