@@ -1,4 +1,3 @@
-import { type PrismaClient } from '@prisma/client'
 import {
     type UpdateDraftContractRatesArgsType,
     updateDraftContractRatesInsideTransaction,
@@ -18,6 +17,7 @@ import {
     submitContractInsideTransaction,
 } from './submitContract'
 import { type PrismaTransactionType } from '../prismaTypes'
+import type { ExtendedPrismaClient } from '../prismaClient'
 
 /**
  * replaceRateOnContract
@@ -174,7 +174,7 @@ async function replaceRateOnContractInsideTransaction(
 }
 
 async function replaceRateOnContract(
-    client: PrismaClient,
+    client: ExtendedPrismaClient,
     args: ReplaceRateOnContractArgsType
 ): Promise<ContractType | NotFoundError | Error> {
     const {

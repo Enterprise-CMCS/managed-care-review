@@ -1,15 +1,18 @@
 import { z } from 'zod'
 
+const emailAliasRegex = /^"?[^"]+?"?\s*<[^@\s]+@[^@\s]+\.[^@\s]+>$|^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+const emailWithAliasSchema = z.string().trim().regex(emailAliasRegex);
+
 const emailSettingsSchema = z.object({
-    emailSource: z.string().email(),
-    devReviewTeamEmails: z.array(z.string().email()),
-    cmsReviewHelpEmailAddress: z.array(z.string().email()),
-    cmsRateHelpEmailAddress: z.array(z.string().email()),
-    oactEmails: z.array(z.string().email()),
-    dmcpReviewEmails: z.array(z.string().email()),
-    dmcpSubmissionEmails: z.array(z.string().email()),
-    dmcoEmails: z.array(z.string().email()),
-    helpDeskEmail: z.array(z.string().email()),
+    emailSource: emailWithAliasSchema,
+    devReviewTeamEmails: z.array(emailWithAliasSchema).min(1),
+    cmsReviewHelpEmailAddress: z.array(emailWithAliasSchema).min(1),
+    cmsRateHelpEmailAddress: z.array(emailWithAliasSchema).min(1),
+    oactEmails: z.array(emailWithAliasSchema).min(1),
+    dmcpReviewEmails: z.array(emailWithAliasSchema).min(1),
+    dmcpSubmissionEmails: z.array(emailWithAliasSchema).min(1),
+    dmcoEmails: z.array(emailWithAliasSchema).min(1),
+    helpDeskEmail: z.array(emailWithAliasSchema).min(1),
 })
 
 const applicationSettingsSchema = z.object({

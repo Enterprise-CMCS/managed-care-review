@@ -82,3 +82,4 @@ async function NewPrismaClient(
 }
 
 export { NewPrismaClient }
+export type { ExtendedPrismaClient }

@@ -1,10 +1,11 @@
-import type { PrismaClient } from '@prisma/client'
+
 import type { AuditDocument } from '../../domain-models'
 import { auditDocumentSchema } from '../../domain-models'
 import type { z } from 'zod'
+import type{ ExtendedPrismaClient } from '../prismaClient'
 
 export async function findAllDocuments(
-    client: PrismaClient
+    client: ExtendedPrismaClient
 ): Promise<AuditDocument[] | Error> {
     try {
         const [

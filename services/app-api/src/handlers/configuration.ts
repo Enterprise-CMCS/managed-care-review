@@ -1,4 +1,3 @@
-import type { PrismaClient } from '@prisma/client'
 import { NewPrismaClient, type Store } from '../postgres'
 import { FetchSecrets, getConnectionURL } from '../secrets'
 import { type EmailParameterStore } from '../parameterStore'
@@ -9,6 +8,7 @@ import {
     newSESEmailer,
 } from '../emailer'
 import { type LDService } from '../launchDarkly/launchDarkly'
+import type { ExtendedPrismaClient } from '../postgres/prismaClient'
 
 /*
  * configuration.ts
@@ -54,7 +54,7 @@ async function getPostgresURL(
 async function configurePostgres(
     dbURL: string,
     secretName: string | undefined
-): Promise<PrismaClient | Error> {
+): Promise<ExtendedPrismaClient | Error> {
     console.info('Getting Postgres Connection')
 
     const dbConnResult = await getPostgresURL(dbURL, secretName)
@@ -72,7 +72,7 @@ async function configurePostgres(
         return new Error('Failed to create Prisma Client')
     }
 
-    const client: PrismaClient = prismaResult
+    const client: ExtendedPrismaClient = prismaResult
 
     return client
 }
@@ -101,13 +101,15 @@ async function configureEmailerFromDatabase(
     return {
         emailSource: emailSettings.emailSource,
         devReviewTeamEmails: emailSettings.devReviewTeamEmails,
-        helpDeskEmail: emailSettings.helpDeskEmail[0],
-        cmsReviewHelpEmailAddress: emailSettings.cmsReviewHelpEmailAddress[0],
-        cmsRateHelpEmailAddress: emailSettings.cmsRateHelpEmailAddress[0],
         oactEmails: emailSettings.oactEmails,
         dmcpReviewEmails: emailSettings.dmcpReviewEmails,
         dmcpSubmissionEmails: emailSettings.dmcpSubmissionEmails,
         dmcoEmails: emailSettings.dmcoEmails,
+        // These are stored as arrays in the database, but we need to convert them to strings
+        // There will be a follow up ticket to refactor EmailConfiguration
+        helpDeskEmail: emailSettings.helpDeskEmail[0],
+        cmsReviewHelpEmailAddress: emailSettings.cmsReviewHelpEmailAddress[0],
+        cmsRateHelpEmailAddress: emailSettings.cmsRateHelpEmailAddress[0],
     }
 }
 
@@ -186,7 +188,7 @@ async function configureEmailer({
     applicationEndpoint: string
 }): Promise<Emailer | Error> {
     const removeParameterStore = await ldService.getFeatureFlag({
-        key: 'throwaway-key-email-configuration',
+        key: 'throwaway-key-email-configuration', // we usually use unique user specific key from apollo context, this is an one off pattern for parameter store flag since its configured before we have that user in apollo context
         flag: 'remove-parameter-store',
         anonymous: true
     })

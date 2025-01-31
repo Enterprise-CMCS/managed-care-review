@@ -5,7 +5,6 @@ import type {
 } from '@mc-review/common-code'
 import { featureFlagKeys, featureFlags } from '@mc-review/common-code'
 import type { LDClient } from '@launchdarkly/node-server-sdk'
-import { v4 as uuidv4 } from 'uuid'
 import { logError } from '../logger'
 import { setErrorAttributesOnActiveSpan } from '../resolvers/attributeHelper'
 import type { Span } from '@opentelemetry/api'
@@ -21,7 +20,7 @@ const defaultFeatureFlags = (): FeatureFlagSettings =>
 type LDServiceArgType = {
     key: string
     flag: FeatureFlagLDConstant
-    kind?: string
+    kind?: string// usually user specific data form apollo context
     span?: Span
     anonymous?: boolean
 }

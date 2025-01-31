@@ -1,4 +1,4 @@
-import type { PrismaClient } from '@prisma/client'
+
 import type {
     InsertQuestionResponseArgs,
     StateUserType,
@@ -9,9 +9,10 @@ import {
     contractQuestionPrismaToDomainType,
 } from './questionHelpers'
 import { NotFoundError } from '../postgresErrors'
+import type { ExtendedPrismaClient } from '../prismaClient'
 
 export async function insertContractQuestionResponse(
-    client: PrismaClient,
+    client: ExtendedPrismaClient,
     response: InsertQuestionResponseArgs,
     user: StateUserType
 ): Promise<ContractQuestionType | Error> {

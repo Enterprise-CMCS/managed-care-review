@@ -1,5 +1,5 @@
-import type { PrismaClient } from '@prisma/client'
 import type { RateType } from '../../domain-models/contractAndRates'
+import type { ExtendedPrismaClient } from '../prismaClient'
 import type { PrismaTransactionType } from '../prismaTypes'
 import { findRateWithHistory } from './findRateWithHistory'
 
@@ -179,7 +179,7 @@ async function unlockRateInDB(
 // * copy form data
 // * set relationships based on last submission
 async function unlockRate(
-    client: PrismaClient,
+    client: ExtendedPrismaClient,
     args: UnlockRateArgsType
 ): Promise<RateType | Error> {
     const { rateRevisionID, unlockedByUserID, unlockReason } = args
