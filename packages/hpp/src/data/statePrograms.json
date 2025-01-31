@@ -290,6 +290,18 @@
                     "fullName": "Prepaid Dental Health Program",
                     "name": "Dental",
                     "isRateProgram": false
+                },
+                {
+                    "id": "b797f2fd-1a62-47f1-9790-f43a042e4880",
+                    "fullName": "Comprehensive Intellectual and Developmental Disability",
+                    "name": "CIDD",
+                    "isRateProgram": false
+                },
+                {
+                    "id": "69e132bc-1b48-4a3f-a00d-73beeb69e522",
+                    "fullName": "Children’s Medical Services ",
+                    "name": "CMS",
+                    "isRateProgram": false
                 }
             ],
             "code": "FL"
