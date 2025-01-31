@@ -5,9 +5,9 @@ import type {
 } from '@mc-review/common-code'
 import { featureFlagKeys, featureFlags } from '@mc-review/common-code'
 import type { LDClient } from '@launchdarkly/node-server-sdk'
-import type { Context } from '../handlers/apollo_gql'
 import { logError } from '../logger'
 import { setErrorAttributesOnActiveSpan } from '../resolvers/attributeHelper'
+import type { Span } from '@opentelemetry/api'
 
 //Set up default feature flag values used to returned data
 const defaultFeatureFlags = (): FeatureFlagSettings =>
@@ -17,27 +17,36 @@ const defaultFeatureFlags = (): FeatureFlagSettings =>
         return Object.assign(a, { [flag]: defaultValue })
     }, {} as FeatureFlagSettings)
 
+type LDServiceArgType = {
+    key: string
+    flag: FeatureFlagLDConstant
+    kind?: string// usually user specific data form apollo context
+    span?: Span
+    anonymous?: boolean
+}
+
 type LDService = {
-    getFeatureFlag: (
-        context: Context,
-        flag: FeatureFlagLDConstant
-    ) => Promise<FlagValue | undefined>
-    allFlags: (context: Context) => Promise<FeatureFlagSettings | undefined>
+    getFeatureFlag: (args: LDServiceArgType) => Promise<FlagValue | undefined>
+    allFlags: (
+        args: Omit<LDServiceArgType, 'flag'>
+    ) => Promise<FeatureFlagSettings | undefined>
 }
 
 function ldService(ldClient: LDClient): LDService {
     return {
-        getFeatureFlag: async (context, flag) => {
+        getFeatureFlag: async (args) => {
+            const {kind, key, anonymous} = args
             const ldContext = {
-                kind: 'user',
-                key: context.user.email,
+                kind: kind ?? 'user',
+                key,
+                anonymous // https://docs.launchdarkly.com/sdk/features/anonymou
             }
-            return await ldClient.variation(flag, ldContext, false)
+            return await ldClient.variation(args.flag, ldContext, false)
         },
-        allFlags: async (context) => {
+        allFlags: async (args) => {
             const ldContext = {
-                kind: 'user',
-                key: context.user.email,
+                kind: args.kind ?? 'user',
+                key: args.key,
             }
             const state = await ldClient.allFlagsState(ldContext)
             return state.allValues()
@@ -47,26 +56,26 @@ function ldService(ldClient: LDClient): LDService {
 
 function offlineLDService(): LDService {
     return {
-        getFeatureFlag: async (context, flag) => {
+        getFeatureFlag: async (args) => {
             logError(
                 'getFeatureFlag',
-                `No connection to LaunchDarkly, fallback to offlineLDService with default value for ${flag}`
+                `No connection to LaunchDarkly, fallback to offlineLDService with default value for ${args.flag}`
             )
             setErrorAttributesOnActiveSpan(
-                `No connection to LaunchDarkly, fallback to offlineLDService with default value for ${flag}`,
-                context.span
+                `No connection to LaunchDarkly, fallback to offlineLDService with default value for ${args.flag}`,
+                args.span
             )
             const featureFlags = defaultFeatureFlags()
-            return featureFlags[flag]
+            return featureFlags[args.flag]
         },
-        allFlags: async (context) => {
+        allFlags: async (args) => {
             logError(
                 'allFlags',
                 `No connection to LaunchDarkly, fallback to offlineLDService with default values`
             )
             setErrorAttributesOnActiveSpan(
                 `No connection to LaunchDarkly, fallback to offlineLDService with default values`,
-                context.span
+                args.span
             )
             return defaultFeatureFlags()
         },

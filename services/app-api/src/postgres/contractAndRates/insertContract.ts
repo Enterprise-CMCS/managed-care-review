@@ -1,8 +1,8 @@
-import type { PrismaClient } from '@prisma/client'
 import type {
     ContractType,
     ContractFormDataType,
 } from '../../domain-models/contractAndRates'
+import type { ExtendedPrismaClient } from '../prismaClient'
 import { parseContractWithHistory } from './parseContractWithHistory'
 import { includeFullContract } from './prismaFullContractRateHelpers'
 
@@ -17,7 +17,7 @@ type InsertContractArgsType = Partial<ContractFormDataType> & {
 
 // creates a new contract, with a new revision
 async function insertDraftContract(
-    client: PrismaClient,
+    client: ExtendedPrismaClient,
     args: InsertContractArgsType
 ): Promise<ContractType | Error> {
     const {

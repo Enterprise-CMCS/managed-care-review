@@ -1,11 +1,12 @@
 import type { CMSUsersUnionType, StateType } from '../../domain-models'
 import { typedStatePrograms } from '@mc-review/hpp'
-import type { PrismaClient } from '@prisma/client'
+import type { ExtendedPrismaClient } from '../prismaClient'
+
 
 // Returns postgres state info for the states that currently supported for pilot.
 // Supported states are state that have had their programs added to the statePrograms json file.
 export async function findAllSupportedStates(
-    client: PrismaClient
+    client: ExtendedPrismaClient
 ): Promise<StateType[] | Error> {
     const pilotStateCodes = typedStatePrograms.states.map((state) => state.code)
 

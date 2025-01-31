@@ -197,7 +197,9 @@ export function submitHealthPlanPackageResolver(
     launchDarkly: LDService
 ): MutationResolvers['submitHealthPlanPackage'] {
     return async (_parent, { input }, context) => {
-        const featureFlags = await launchDarkly.allFlags(context)
+        const featureFlags = await launchDarkly.allFlags({
+            key: context.user.email,
+        })
 
         const { user, ctx, tracer } = context
         const span = tracer?.startSpan('submitHealthPlanPackage', {}, ctx)

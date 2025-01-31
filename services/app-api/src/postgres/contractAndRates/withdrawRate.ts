@@ -1,7 +1,7 @@
 import type { PrismaTransactionType } from '../prismaTypes'
 import type { RateType } from '../../domain-models'
 import { findRateWithHistory } from './findRateWithHistory'
-import type { PrismaClient } from '@prisma/client'
+
 import { includeFullContract } from './prismaFullContractRateHelpers'
 import {
     getConsolidatedContractStatus,
@@ -16,6 +16,7 @@ import type { SubmitContractArgsType } from './submitContract'
 import { submitContractInsideTransaction } from './submitContract'
 import { submitRateInsideTransaction } from './submitRate'
 import { parseContractWithHistory } from './parseContractWithHistory'
+import type { ExtendedPrismaClient } from '../prismaClient'
 
 type WithdrawRateArgsType = {
     rateID: string
@@ -306,7 +307,7 @@ const withdrawRateInsideTransaction = async (
 }
 
 const withdrawRate = async (
-    client: PrismaClient,
+    client: ExtendedPrismaClient,
     args: WithdrawRateArgsType
 ): Promise<RateType | Error> => {
     try {

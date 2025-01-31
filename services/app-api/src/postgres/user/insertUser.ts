@@ -1,6 +1,6 @@
-import type { PrismaClient, Role } from '@prisma/client'
 import type { DivisionType, UserType } from '../../domain-models'
 import { toDomainUser } from '../../domain-models'
+import type { ExtendedPrismaClient } from '../prismaClient'
 
 export type InsertUserArgsType = {
     userID: string
@@ -13,7 +13,7 @@ export type InsertUserArgsType = {
 }
 
 export async function insertUser(
-    client: PrismaClient,
+    client: ExtendedPrismaClient,
     user: InsertUserArgsType
 ): Promise<UserType | Error> {
     try {

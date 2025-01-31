@@ -160,7 +160,7 @@ jobs:
 
   promote-infra-dev:
     needs: [build-prisma-client-lambda-layer, build-clamav-layer, unit-tests]
-    uses: Enterprise-CMCS/managed-care-review/.github/workflows/deploy-infra-to-env.yml@main
+    uses: Enterprise-CMCS/managed-care-review/.github/workflows/deploy-infra-to-env.yml@mt-serverless-v4
     with:
       environment: dev
       stage_name: main
@@ -170,6 +170,7 @@ jobs:
       aws_account_id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
       nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
       slack_webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+      serverless_license_key: ${{ secrets.SERVERLESS_V4_LICENSE }}
 
   promote-app-dev:
     needs: [promote-infra-dev, build-prisma-client-lambda-layer, unit-tests]
@@ -187,7 +188,7 @@ jobs:
 
   promote-infra-val:
     needs: [promote-app-dev, unit-tests]
-    uses: Enterprise-CMCS/managed-care-review/.github/workflows/deploy-infra-to-env.yml@main
+    uses: Enterprise-CMCS/managed-care-review/.github/workflows/deploy-infra-to-env.yml@mt-serverless-v4
     with:
       environment: val
       stage_name: val
@@ -197,6 +198,7 @@ jobs:
       aws_account_id: ${{ secrets.VAL_AWS_ACCOUNT_ID }}
       nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
       slack_webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+      serverless_license_key: ${{ secrets.SERVERLESS_V4_LICENSE }}
 
   promote-app-val:
     needs: [promote-app-dev, promote-infra-val, unit-tests]
@@ -214,7 +216,7 @@ jobs:
 
   promote-infra-prod:
     needs: [promote-app-val, unit-tests]
-    uses: Enterprise-CMCS/managed-care-review/.github/workflows/deploy-infra-to-env.yml@main
+    uses: Enterprise-CMCS/managed-care-review/.github/workflows/deploy-infra-to-env.yml@mt-serverless-v4
     with:
       environment: prod
       stage_name: prod
@@ -224,6 +226,7 @@ jobs:
       aws_account_id: ${{ secrets.PROD_AWS_ACCOUNT_ID }}
       nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
       slack_webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+      serverless_license_key: ${{ secrets.SERVERLESS_V4_LICENSE }}
 
   promote-app-prod:
     needs: [promote-app-val, promote-infra-prod, unit-tests]

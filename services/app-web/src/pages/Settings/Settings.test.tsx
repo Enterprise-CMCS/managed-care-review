@@ -1,4 +1,3 @@
-import React from 'react'
 import { screen, waitFor, within } from '@testing-library/react'
 import { Routes, Route, Navigate } from 'react-router'
 import { Settings } from './Settings'

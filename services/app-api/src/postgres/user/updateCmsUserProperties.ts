@@ -1,12 +1,13 @@
 import type { StateCodeType } from '@mc-review/hpp'
-import type { Division, PrismaClient } from '@prisma/client'
+import type { Division } from '@prisma/client'
 import { AuditAction } from '@prisma/client'
 import type { CMSUsersUnionType } from '../../domain-models'
 import { domainUserFromPrismaUser } from './prismaDomainUser'
 import { NotFoundError, UserInputPostgresError } from '../postgresErrors'
+import type { ExtendedPrismaClient } from '../prismaClient'
 
 export async function updateCmsUserProperties(
-    client: PrismaClient,
+    client: ExtendedPrismaClient,
     userID: string,
     idOfUserPerformingUpdate: string,
     stateCodes?: StateCodeType[],
@@ -56,7 +57,7 @@ export async function updateCmsUserProperties(
             return new NotFoundError('user to update was not found')
         }
 
-        /* if all was well with the old values, update the user and make an audit record; 
+        /* if all was well with the old values, update the user and make an audit record;
             do it in one transaction to keep the tables in sync */
         const updateUserAndCreateAudit = await client.$transaction([
             client.user.update({

@@ -20,6 +20,8 @@ import { SESServiceException } from '@aws-sdk/client-ses'
 import { testSendSESEmail } from './awsSESHelpers'
 import { testCMSUser, testStateUser } from './userHelpers'
 import { v4 as uuidv4 } from 'uuid'
+import { constructTestEmailer } from './gqlHelpers'
+import type { Store } from '../postgres'
 
 const testEmailConfig = (): EmailConfiguration => ({
     stage: 'LOCAL',
@@ -82,6 +84,17 @@ const sendTestEmails = async (emailData: EmailData): Promise<void | Error> => {
 function testEmailer(customConfig?: EmailConfiguration): Emailer {
     const config = customConfig || testEmailConfig()
     return emailer(config, vi.fn(sendTestEmails))
+}
+
+async function testEmailerFromDatabase(store :Store, customConfig?: EmailConfiguration): Promise<Emailer> {
+    const mockEmailer = await constructTestEmailer({
+        emailConfig: customConfig ?? testEmailConfig(),
+        postgresStore: store,
+    })
+
+    mockEmailer.sendEmail = vi.fn()
+
+    return mockEmailer
 }
 
 type State = {
@@ -998,4 +1011,5 @@ export {
     mockQuestionAndResponses,
     mockRateQuestionAndResponses,
     mockRate,
+    testEmailerFromDatabase
 }

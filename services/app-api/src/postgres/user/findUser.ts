@@ -1,9 +1,9 @@
-import type { PrismaClient } from '@prisma/client'
 import type { UserType } from '../../domain-models'
 import { domainUserFromPrismaUser } from './prismaDomainUser'
+import type { ExtendedPrismaClient } from '../prismaClient'
 
 export async function findUser(
-    client: PrismaClient,
+    client: ExtendedPrismaClient,
     id: string
 ): Promise<UserType | Error | undefined> {
     try {

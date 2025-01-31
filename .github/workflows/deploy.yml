@@ -272,7 +272,7 @@ jobs:
 
   deploy-infra:
     needs: [begin-deployment, build-clamav-layer]
-    uses: Enterprise-CMCS/managed-care-review/.github/workflows/deploy-infra-to-env.yml@main
+    uses: Enterprise-CMCS/managed-care-review/.github/workflows/deploy-infra-to-env.yml@mt-serverless-v4-init
     with:
       environment: dev
       stage_name: ${{ needs.begin-deployment.outputs.stage-name}}
@@ -282,6 +282,7 @@ jobs:
       aws_account_id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
       nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
       slack_webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+      serverless_license_key: ${{ secrets.SERVERLESS_V4_LICENSE }}
 
   deploy-app:
     needs:

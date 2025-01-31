@@ -1,6 +1,14 @@
-import type { PrismaClient } from '@prisma/client'
-import { NewPrismaClient } from '../postgres'
+import { NewPrismaClient, type Store } from '../postgres'
 import { FetchSecrets, getConnectionURL } from '../secrets'
+import { type EmailParameterStore } from '../parameterStore'
+import {
+    type EmailConfiguration,
+    type Emailer,
+    newLocalEmailer,
+    newSESEmailer,
+} from '../emailer'
+import { type LDService } from '../launchDarkly/launchDarkly'
+import type { ExtendedPrismaClient } from '../postgres/prismaClient'
 
 /*
  * configuration.ts
@@ -46,7 +54,7 @@ async function getPostgresURL(
 async function configurePostgres(
     dbURL: string,
     secretName: string | undefined
-): Promise<PrismaClient | Error> {
+): Promise<ExtendedPrismaClient | Error> {
     console.info('Getting Postgres Connection')
 
     const dbConnResult = await getPostgresURL(dbURL, secretName)
@@ -64,7 +72,7 @@ async function configurePostgres(
         return new Error('Failed to create Prisma Client')
     }
 
-    const client: PrismaClient = prismaResult
+    const client: ExtendedPrismaClient = prismaResult
 
     return client
 }
@@ -82,4 +90,127 @@ async function getDBClusterID(secretName: string): Promise<string | Error> {
     return dbID
 }
 
-export { configurePostgres, getPostgresURL, getDBClusterID }
+async function configureEmailerFromDatabase(
+    store: Store
+): Promise<Omit<EmailConfiguration, 'stage' | 'baseUrl'> | Error> {
+    const emailSettings = await store.findEmailSettings()
+    if (emailSettings instanceof Error) {
+        return emailSettings
+    }
+
+    return {
+        emailSource: emailSettings.emailSource,
+        devReviewTeamEmails: emailSettings.devReviewTeamEmails,
+        oactEmails: emailSettings.oactEmails,
+        dmcpReviewEmails: emailSettings.dmcpReviewEmails,
+        dmcpSubmissionEmails: emailSettings.dmcpSubmissionEmails,
+        dmcoEmails: emailSettings.dmcoEmails,
+        // These are stored as arrays in the database, but we need to convert them to strings
+        // There will be a follow up ticket to refactor EmailConfiguration
+        helpDeskEmail: emailSettings.helpDeskEmail[0],
+        cmsReviewHelpEmailAddress: emailSettings.cmsReviewHelpEmailAddress[0],
+        cmsRateHelpEmailAddress: emailSettings.cmsRateHelpEmailAddress[0],
+    }
+}
+
+async function configureEmailerFromParamStore(
+    emailParameterStore: EmailParameterStore
+): Promise<Omit<EmailConfiguration, 'stage' | 'baseUrl'> | Error> {
+    // Configuring emails using emailParameterStore
+    // Moving setting these emails down here. We needed to retrieve all emails from parameter store using our
+    // emailParameterStore because serverless does not like array of strings as env variables.
+    // For more context see this ticket https://qmacbis.atlassian.net/browse/MR-2539.
+    const emailSource = await emailParameterStore.getSourceEmail()
+    const devReviewTeamEmails =
+        await emailParameterStore.getDevReviewTeamEmails()
+    const helpDeskEmail = await emailParameterStore.getHelpDeskEmail()
+    const cmsReviewHelpEmailAddress =
+        await emailParameterStore.getCmsReviewHelpEmail()
+    const cmsRateHelpEmailAddress =
+        await emailParameterStore.getCmsRateHelpEmail()
+    const oactEmails = await emailParameterStore.getOACTEmails()
+    const dmcpReviewEmails = await emailParameterStore.getDMCPReviewEmails()
+    const dmcpSubmissionEmails =
+        await emailParameterStore.getDMCPSubmissionEmails()
+    const dmcoEmails = await emailParameterStore.getDMCOEmails()
+
+    if (emailSource instanceof Error) return new Error(emailSource.message)
+
+    if (devReviewTeamEmails instanceof Error)
+        return new Error(devReviewTeamEmails.message)
+
+    if (helpDeskEmail instanceof Error) return new Error(helpDeskEmail.message)
+
+    if (cmsReviewHelpEmailAddress instanceof Error)
+        return new Error(cmsReviewHelpEmailAddress.message)
+
+    if (cmsRateHelpEmailAddress instanceof Error)
+        return new Error(cmsRateHelpEmailAddress.message)
+
+    if (oactEmails instanceof Error) return new Error(oactEmails.message)
+
+    if (dmcpReviewEmails instanceof Error)
+        return new Error(dmcpReviewEmails.message)
+
+    if (dmcpSubmissionEmails instanceof Error)
+        return new Error(dmcpSubmissionEmails.message)
+
+    if (dmcoEmails instanceof Error) return new Error(dmcoEmails.message)
+
+    return {
+        emailSource,
+        devReviewTeamEmails,
+        helpDeskEmail,
+        cmsReviewHelpEmailAddress,
+        cmsRateHelpEmailAddress,
+        oactEmails,
+        dmcpReviewEmails,
+        dmcpSubmissionEmails,
+        dmcoEmails,
+    }
+}
+
+// Note: Email settings won't update dynamically if the database changes while this lambda is running.
+// Consider configuring the emailer later to fetch settings on demand.
+async function configureEmailer({
+    emailParameterStore,
+    store,
+    ldService,
+    stageName,
+    emailerMode,
+    applicationEndpoint,
+}: {
+    emailParameterStore: EmailParameterStore
+    store: Store
+    ldService: LDService
+    stageName: string
+    emailerMode: string
+    applicationEndpoint: string
+}): Promise<Emailer | Error> {
+    const removeParameterStore = await ldService.getFeatureFlag({
+        key: 'throwaway-key-email-configuration', // we usually use unique user specific key from apollo context, this is an one off pattern for parameter store flag since its configured before we have that user in apollo context
+        flag: 'remove-parameter-store',
+        anonymous: true
+    })
+    const emailSettings = removeParameterStore
+        ? await configureEmailerFromDatabase(store)
+        : await configureEmailerFromParamStore(emailParameterStore)
+
+    if (emailSettings instanceof Error) {
+        return emailSettings
+    }
+
+    return emailerMode == 'LOCAL'
+        ? newLocalEmailer({
+              stage: 'local',
+              baseUrl: applicationEndpoint,
+              ...emailSettings,
+          })
+        : newSESEmailer({
+              stage: stageName,
+              baseUrl: applicationEndpoint,
+              ...emailSettings,
+          })
+}
+
+export { configurePostgres, getPostgresURL, getDBClusterID, configureEmailer }

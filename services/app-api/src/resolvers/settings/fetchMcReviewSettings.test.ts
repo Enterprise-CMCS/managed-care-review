@@ -12,6 +12,7 @@ import {
     UpdateStateAssignmentDocument,
 } from '../../gen/gqlClient'
 import { assertAnError, must } from '../../testHelpers'
+import { testLDService } from '../../testHelpers/launchDarklyHelpers'
 
 describe('fetchMcReviewSettings', () => {
     it('returns states with assignments', async () => {
@@ -201,5 +202,42 @@ describe('fetchMcReviewSettings', () => {
         expect(assertAnError(mcReviewSettings).message).toContain(
             'user not authorized to fetch mc review settings'
         )
+    })
+
+    it('uses email settings from database with remove-parameter-store flag on', async () => {
+        const prismaClient = await sharedTestPrismaClient()
+        const postgresStore = NewPostgresStore(prismaClient)
+
+        const server = await constructTestPostgresServer({
+            context: {
+                user: testAdminUser(),
+            },
+            ldService: testLDService(
+                {
+                    'remove-parameter-store': true
+                }
+            )
+        })
+
+        const emailSettings = must(await postgresStore.findEmailSettings())
+
+        const mcReviewSettings = must(await server.executeOperation({
+            query: FetchMcReviewSettingsDocument,
+        }))
+
+        const emailConfig = mcReviewSettings.data?.fetchMcReviewSettings.emailConfiguration
+
+        // Expect the default email settings from database
+        expect(emailConfig.emailSource).toEqual(emailSettings.emailSource)
+        expect(emailConfig.devReviewTeamEmails).toEqual(emailSettings.devReviewTeamEmails)
+        expect(emailConfig.oactEmails).toEqual(emailSettings.oactEmails)
+        expect(emailConfig.dmcpReviewEmails).toEqual(emailSettings.dmcpReviewEmails)
+        expect(emailConfig.dmcpSubmissionEmails).toEqual(emailSettings.dmcpSubmissionEmails)
+        expect(emailConfig.dmcoEmails).toEqual(emailSettings.dmcoEmails)
+        
+        //These emails are arrays in the DB, but single strings in EmailConfiguration type.
+        expect(emailConfig.cmsReviewHelpEmailAddress).toEqual(emailSettings.cmsReviewHelpEmailAddress[0])
+        expect(emailConfig.cmsRateHelpEmailAddress).toEqual(emailSettings.cmsRateHelpEmailAddress[0])
+        expect(emailConfig.helpDeskEmail).toEqual(emailSettings.helpDeskEmail[0])
     })
 })

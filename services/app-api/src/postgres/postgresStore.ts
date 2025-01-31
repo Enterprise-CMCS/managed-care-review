@@ -20,6 +20,7 @@ import type {
     RateQuestionType,
     CreateRateQuestionInputType,
     AuditDocument,
+    EmailSettingsType,
 } from '../domain-models'
 import { findPrograms, findStatePrograms } from '../postgres'
 import type { InsertUserArgsType } from './user'
@@ -80,6 +81,9 @@ import { findStateAssignedUsers } from './state/findStateAssignedUsers'
 import { findAllDocuments } from './documents'
 import type { WithdrawRateArgsType } from './contractAndRates/withdrawRate'
 import { withdrawRate } from './contractAndRates/withdrawRate'
+import { findEmailSettings } from './settings/findEmailSettings'
+import { updateEmailSettings } from './settings/updateEmailSettings'
+import type  { ExtendedPrismaClient } from './prismaClient'
 
 type Store = {
     findPrograms: (
@@ -215,9 +219,14 @@ type Store = {
     findRateRevision: (
         rateRevisionID: string
     ) => Promise<RateRevisionTable | Error>
+
+    findEmailSettings: () => Promise<EmailSettingsType | Error>
+    updateEmailSettings: (
+        emailSettings: EmailSettingsType
+    ) => Promise<EmailSettingsType | Error>
 }
 
-function NewPostgresStore(client: PrismaClient): Store {
+function NewPostgresStore(client: ExtendedPrismaClient): Store {
     return {
         findPrograms: findPrograms,
         findUser: (id) => findUser(client, id),
@@ -295,6 +304,10 @@ function NewPostgresStore(client: PrismaClient): Store {
         findAllDocuments: () => findAllDocuments(client),
         findContractRevision: (args) => findContractRevision(client, args),
         findRateRevision: (args) => findRateRevision(client, args),
+
+        findEmailSettings: () => findEmailSettings(client),
+        updateEmailSettings: (emailSettings) =>
+            updateEmailSettings(client, emailSettings),
     }
 }
 

@@ -1,10 +1,11 @@
-import type { PrismaClient } from '@prisma/client'
+
 import type { ContractType } from '../../domain-models/contractAndRates'
 import { findContractWithHistory } from './findContractWithHistory'
 import { NotFoundError } from '../postgresErrors'
 import type { UpdateInfoType } from '../../domain-models'
 import type { PrismaTransactionType } from '../prismaTypes'
 import { submitContractAndOrRates } from './submitContractAndOrRates'
+import type { ExtendedPrismaClient } from '../prismaClient'
 
 async function submitContractInsideTransaction(
     tx: PrismaTransactionType,
@@ -88,7 +89,7 @@ type SubmitContractArgsType = {
 // * invalidate relationships of previous revision by marking as outdated
 // * set the UpdateInfo
 async function submitContract(
-    client: PrismaClient,
+    client: ExtendedPrismaClient,
     args: SubmitContractArgsType
 ): Promise<ContractType | NotFoundError | Error> {
     const { contractID, submittedByUserID, submittedReason } = args
