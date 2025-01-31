@@ -160,7 +160,7 @@ jobs:
 
   promote-infra-dev:
     needs: [build-prisma-client-lambda-layer, build-clamav-layer, unit-tests]
-    uses: Enterprise-CMCS/managed-care-review/.github/workflows/deploy-infra-to-env.yml@mt-serverless-v4
+    uses: Enterprise-CMCS/managed-care-review/.github/workflows/deploy-infra-to-env.yml@main
     with:
       environment: dev
       stage_name: main
@@ -188,7 +188,7 @@ jobs:
 
   promote-infra-val:
     needs: [promote-app-dev, unit-tests]
-    uses: Enterprise-CMCS/managed-care-review/.github/workflows/deploy-infra-to-env.yml@mt-serverless-v4
+    uses: Enterprise-CMCS/managed-care-review/.github/workflows/deploy-infra-to-env.yml@main
     with:
       environment: val
       stage_name: val
@@ -216,7 +216,7 @@ jobs:
 
   promote-infra-prod:
     needs: [promote-app-val, unit-tests]
-    uses: Enterprise-CMCS/managed-care-review/.github/workflows/deploy-infra-to-env.yml@mt-serverless-v4
+    uses: Enterprise-CMCS/managed-care-review/.github/workflows/deploy-infra-to-env.yml@main
     with:
       environment: prod
       stage_name: prod
