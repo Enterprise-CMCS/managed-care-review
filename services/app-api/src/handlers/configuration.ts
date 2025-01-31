@@ -1,4 +1,3 @@
-import type { PrismaClient } from '@prisma/client'
 import { NewPrismaClient, type Store } from '../postgres'
 import { FetchSecrets, getConnectionURL } from '../secrets'
 import { type EmailParameterStore } from '../parameterStore'
@@ -9,6 +8,7 @@ import {
     newSESEmailer,
 } from '../emailer'
 import { type LDService } from '../launchDarkly/launchDarkly'
+import type { ExtendedPrismaClient } from '../postgres/prismaClient'
 
 /*
  * configuration.ts
@@ -54,7 +54,7 @@ async function getPostgresURL(
 async function configurePostgres(
     dbURL: string,
     secretName: string | undefined
-): Promise<PrismaClient | Error> {
+): Promise<ExtendedPrismaClient | Error> {
     console.info('Getting Postgres Connection')
 
     const dbConnResult = await getPostgresURL(dbURL, secretName)
@@ -72,7 +72,7 @@ async function configurePostgres(
         return new Error('Failed to create Prisma Client')
     }
 
-    const client: PrismaClient = prismaResult as unknown as PrismaClient
+    const client: ExtendedPrismaClient = prismaResult
 
     return client
 }

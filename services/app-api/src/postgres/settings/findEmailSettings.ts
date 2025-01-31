@@ -1,8 +1,9 @@
-import type { PrismaClient } from '@prisma/client'
+
 import type { EmailSettingsType } from '../../domain-models'
+import type { ExtendedPrismaClient } from '../prismaClient'
 
 export async function findEmailSettings(
-    client: PrismaClient
+    client: ExtendedPrismaClient
 ): Promise<EmailSettingsType | Error> {
     try {
         const result = await client.emailSettings.findUnique({

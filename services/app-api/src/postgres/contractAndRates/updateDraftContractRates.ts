@@ -1,9 +1,9 @@
-import type { PrismaClient } from '@prisma/client'
 import type {
     ContractType,
     RateFormEditableType,
 } from '../../domain-models/contractAndRates'
 import { NotFoundError } from '../postgresErrors'
+import type { ExtendedPrismaClient } from '../prismaClient'
 import type { PrismaTransactionType } from '../prismaTypes'
 import { findContractWithHistory } from './findContractWithHistory'
 import {
@@ -218,7 +218,7 @@ async function updateDraftContractRatesInsideTransaction(
 }
 
 async function updateDraftContractRates(
-    client: PrismaClient,
+    client: ExtendedPrismaClient,
     args: UpdateDraftContractRatesArgsType
 ): Promise<ContractType | Error> {
     try {

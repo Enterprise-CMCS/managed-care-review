@@ -5,7 +5,7 @@ import type {
 } from '../../domain-models/contractAndRates'
 import { parseRateWithHistory } from './parseRateWithHistory'
 import { includeFullRate } from './prismaFullContractRateHelpers'
-import type { PrismaClient } from '@prisma/client'
+import type { ExtendedPrismaClient } from '../prismaClient'
 
 type InsertRateArgsType = RateFormEditableType & {
     stateCode: StateCodeType
@@ -13,7 +13,7 @@ type InsertRateArgsType = RateFormEditableType & {
 
 // creates a new rate, with a new revision
 async function insertDraftRate(
-    client: PrismaClient,
+    client: ExtendedPrismaClient,
     draftContractID: string,
     args: InsertRateArgsType
 ): Promise<RateType | Error> {

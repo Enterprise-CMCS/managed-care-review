@@ -1,4 +1,4 @@
-import type { PrismaClient } from '@prisma/client'
+
 import type { Store } from '../postgres'
 import { NewPrismaClient } from '../postgres'
 

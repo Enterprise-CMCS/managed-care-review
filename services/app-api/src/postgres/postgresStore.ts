@@ -83,6 +83,7 @@ import type { WithdrawRateArgsType } from './contractAndRates/withdrawRate'
 import { withdrawRate } from './contractAndRates/withdrawRate'
 import { findEmailSettings } from './settings/findEmailSettings'
 import { updateEmailSettings } from './settings/updateEmailSettings'
+import type  { ExtendedPrismaClient } from './prismaClient'
 
 type Store = {
     findPrograms: (
@@ -225,7 +226,7 @@ type Store = {
     ) => Promise<EmailSettingsType | Error>
 }
 
-function NewPostgresStore(client: PrismaClient): Store {
+function NewPostgresStore(client: ExtendedPrismaClient): Store {
     return {
         findPrograms: findPrograms,
         findUser: (id) => findUser(client, id),

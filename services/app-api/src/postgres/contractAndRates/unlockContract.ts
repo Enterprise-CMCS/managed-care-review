@@ -1,9 +1,9 @@
-import type { PrismaClient } from '@prisma/client'
 import type { UnlockedContractType } from '../../domain-models/contractAndRates'
 import { findContractWithHistory } from './findContractWithHistory'
 import { NotFoundError } from '../postgresErrors'
 import { unlockRateInDB } from './unlockRate'
 import type { PrismaTransactionType } from '../prismaTypes'
+import type { ExtendedPrismaClient } from '../prismaClient'
 
 async function unlockContractInsideTransaction(
     tx: PrismaTransactionType,
@@ -259,7 +259,7 @@ type UnlockContractArgsType = {
 // * copy form data
 // * set relationships based on last submission
 async function unlockContract(
-    client: PrismaClient,
+    client: ExtendedPrismaClient,
     args: UnlockContractArgsType
 ): Promise<UnlockedContractType | NotFoundError | Error> {
     try {

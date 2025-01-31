@@ -1,10 +1,11 @@
 import { AuditAction } from '@prisma/client'
-import type { PrismaClient } from '@prisma/client'
+
 import type { StateCodeType } from '@mc-review/hpp'
 import type { UserType } from '../../domain-models'
 import { NotFoundError, UserInputPostgresError } from '../postgresErrors'
 import type { PrismaTransactionType } from '../prismaTypes'
 import { parseDomainUsersFromPrismaUsers } from '../user/prismaDomainUser'
+import type { ExtendedPrismaClient } from '../prismaClient'
 
 async function updateStateAssignedUsersInTransaction(
     tx: PrismaTransactionType,
@@ -126,7 +127,7 @@ async function updateStateAssignedUsersInTransaction(
 }
 
 async function updateStateAssignedUsers(
-    client: PrismaClient,
+    client: ExtendedPrismaClient,
     idOfUserPerformingUpdate: string,
     stateCode: StateCodeType,
     assignedUserIDs: string[]

@@ -1,7 +1,6 @@
 import { findRateWithHistory } from './findRateWithHistory'
 import { updateDraftRate } from './updateDraftRate'
 import type { UpdateInfoType } from '../../domain-models'
-import type { PrismaClient } from '@prisma/client'
 import type {
     RateFormEditableType,
     RateType,
@@ -9,6 +8,7 @@ import type {
 import { NotFoundError } from '../postgresErrors'
 import type { PrismaTransactionType } from '../prismaTypes'
 import { submitContractAndOrRates } from './submitContractAndOrRates'
+import type { ExtendedPrismaClient } from '../prismaClient'
 
 async function submitRateInsideTransaction(
     tx: PrismaTransactionType,
@@ -97,7 +97,7 @@ type SubmitRateArgsType = {
 // * invalidate relationships of previous revision
 // * set the UpdateInfo
 async function submitRate(
-    client: PrismaClient,
+    client: ExtendedPrismaClient,
     args: SubmitRateArgsType
 ): Promise<RateType | NotFoundError | Error> {
     try {

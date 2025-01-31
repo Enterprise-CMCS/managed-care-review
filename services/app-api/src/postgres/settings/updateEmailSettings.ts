@@ -1,8 +1,9 @@
-import type { PrismaClient } from '@prisma/client'
+
 import type { EmailSettingsType } from '../../domain-models'
+import type { ExtendedPrismaClient } from '../prismaClient'
 
 export async function updateEmailSettings(
-    client: PrismaClient,
+    client: ExtendedPrismaClient,
     emailSettings: EmailSettingsType
 ): Promise<EmailSettingsType | Error> {
     try {

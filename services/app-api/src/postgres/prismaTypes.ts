@@ -1,8 +1,8 @@
-import type { PrismaClient } from '@prisma/client'
+import type { ExtendedPrismaClient } from './prismaClient'
 
 // This is the type returned by client.$transaction
 type PrismaTransactionType = Omit<
-    PrismaClient,
+    ExtendedPrismaClient,
     '$connect' | '$disconnect' | '$on' | '$transaction' | '$use' | '$extends'
 >
 
