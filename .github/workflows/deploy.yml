@@ -300,7 +300,7 @@ jobs:
       needs.api-unit-tests.result == 'success' &&
       needs.build-prisma-client-lambda-layer.result == 'success' &&
       needs.begin-deployment.result == 'success'
-    uses: Enterprise-CMCS/managed-care-review/.github/workflows/deploy-app-to-env.yml@main
+    uses: Enterprise-CMCS/managed-care-review/.github/workflows/deploy-app-to-env.yml@mt-sls-v4-web
     with:
       environment: dev
       stage_name: ${{ needs.begin-deployment.outputs.stage-name }}
@@ -311,6 +311,7 @@ jobs:
     secrets:
       aws_account_id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
       nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
+      serverless_license_key: ${{ secrets.SERVERLESS_V4_LICENSE }}
 
   finishing-prep:
     name: Finishing Prep
