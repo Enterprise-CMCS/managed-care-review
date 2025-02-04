@@ -1070,11 +1070,11 @@ importers:
   services/ui:
     devDependencies:
       serverless:
-        specifier: ^3.39.0
-        version: 3.39.0(encoding@0.1.13)
+        specifier: 4.2.3
+        version: 4.2.3
       serverless-s3-bucket-helper:
         specifier: https://github.com/CMSgov/serverless-s3-bucket-helper
-        version: git+https://git@github.com:CMSgov/serverless-s3-bucket-helper.git#3e519d15676de237ec8ede3ff9ae26abf3f3ef0a(serverless@3.39.0(encoding@0.1.13))
+        version: git+https://git@github.com:CMSgov/serverless-s3-bucket-helper.git#3e519d15676de237ec8ede3ff9ae26abf3f3ef0a(serverless@4.2.3)
       serverless-stack-termination-protection:
         specifier: ^2.0.2
         version: 2.0.2
@@ -31763,6 +31763,10 @@ snapshots:
   serverless-s3-bucket-helper@git+https://git@github.com:CMSgov/serverless-s3-bucket-helper.git#3e519d15676de237ec8ede3ff9ae26abf3f3ef0a(serverless@3.39.0(encoding@0.1.13)):
     dependencies:
       serverless: 3.39.0(encoding@0.1.13)
+
+  serverless-s3-bucket-helper@git+https://git@github.com:CMSgov/serverless-s3-bucket-helper.git#3e519d15676de237ec8ede3ff9ae26abf3f3ef0a(serverless@4.2.3):
+    dependencies:
+      serverless: 4.2.3
 
   serverless-s3-local@0.8.4(serverless@3.39.0(encoding@0.1.13)):
     dependencies:
