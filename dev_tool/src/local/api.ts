@@ -11,7 +11,8 @@ export async function installAPIDeps(runner: LabeledProcessRunner) {
         ['pnpm', 'build:packages'],
         ''
     )
-
+    //Ensures we watch files in the packages directory for any changes to trigger build:packages
+    runner.runCommandAndOutput('watch packages', ['pnpm', 'packages:watch'], '')
     // prisma requires that prisma generate is run after any pnpm install
     return installPrismaDeps(runner)
 }

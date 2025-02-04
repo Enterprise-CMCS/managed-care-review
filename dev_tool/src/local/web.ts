@@ -21,7 +21,8 @@ export async function runWebLocally(runner: LabeledProcessRunner) {
         ['pnpm', 'build:packages'],
         ''
     )
-
+    //Ensures we watch files in the packages directory for any changes to trigger build:packages
+    runner.runCommandAndOutput('watch packages', ['pnpm', 'packages:watch'], '')
     await installWebDepsOnce(runner)
 
     runner.runCommandAndOutput('web', ['pnpm', 'start'], 'services/app-web')
