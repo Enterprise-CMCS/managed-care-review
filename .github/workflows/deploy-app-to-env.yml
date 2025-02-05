@@ -28,6 +28,22 @@ on:
         required: true
       serverless_license_key:
         required: true
+      vpc_id:
+        required: true
+      sg_id:
+        required: true
+      iam_permissions_boundary:
+        required: true
+      iam_path:
+        required: true
+      subnet_private_a_id:
+        required: true
+      subnet_private_b_id:
+        required: true
+      subnet_private_c_id:
+        required: true
+      subnet_public_a_id:
+        required: false
 
 permissions:
   id-token: write
@@ -135,6 +151,13 @@ jobs:
           VITE_APP_AUTH_MODE: ${{ inputs.vite_app_auth_mode }}
           EMAILER_MODE: SES
           NR_LICENSE_KEY: ${{ secrets.nr_license_key }}
+          VPC_ID: ${{ secrets.vpc_id }}
+          SG_ID: ${{ secrets.sg_id }}
+          SUBNET_PRIVATE_A_ID: ${{ secrets.subnet_private_a_id }}
+          SUBNET_PRIVATE_B_ID: ${{ secrets.subnet_private_b_id }}
+          SUBNET_PRIVATE_C_ID: ${{ secrets.subnet_private_c_id }}
+          IAM_PERMISSIONS_BOUNDARY: ${{ secrets.iam_permissions_boundary }}
+          IAM_PATH: ${{ secrets.iam_path }}
         run: |
           pushd services/app-api && npx serverless deploy --stage ${{ inputs.stage_name }}
 
