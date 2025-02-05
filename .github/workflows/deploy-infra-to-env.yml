@@ -26,7 +26,7 @@ on:
         required: true
       cloudfront_cert_arn:
         required: true
-      coundfront_sb_domain_name:
+      cloudfront_sb_domain_name:
         required: true
 
 permissions:
@@ -160,8 +160,8 @@ jobs:
         id: deploy-storybook
         env:
           SERVERLESS_ACCESS_KEY: ${{ secrets.serverless_license_key }}
-          CLOUDFRONT_CERT_ARN: ${{ secrets.cloudfront_cert_arn}}
-          CLOUDFRONT_SB_DOMAIN_NAME: ${{ secrets.coundfront_sb_domain_name }}
+          CLOUDFRONT_CERT_ARN: ${{ secrets.cloudfront_cert_arn }}
+          CLOUDFRONT_SB_DOMAIN_NAME: ${{ secrets.cloundfront_sb_domain_name }}
         run: |
           pushd services/storybook && npx serverless deploy --stage ${{ inputs.stage_name }}
 
