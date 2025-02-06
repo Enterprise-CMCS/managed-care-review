@@ -226,6 +226,7 @@ jobs:
         id: deploy-uploads
         env:
           NR_LICENSE_KEY: ${{ secrets.nr_license_key }}
+          SERVERLESS_ACCESS_KEY: ${{ secrets.serverless_license_key }}
         run: |
           pushd services/uploads && npx serverless deploy --stage ${{ inputs.stage_name }}
 
