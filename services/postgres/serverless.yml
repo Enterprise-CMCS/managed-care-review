@@ -3,7 +3,6 @@ service: postgres
 frameworkVersion: '^3.19.0'
 
 plugins:
-  - serverless-offline-ssm
   - serverless-stack-termination-protection
   - serverless-s3-bucket-helper
   - serverless-iam-helper
@@ -15,8 +14,8 @@ provider:
   region: us-east-1
   iam:
     role:
-      path: ${ssm:/configuration/iam/path, "/"}
-      permissionsBoundary: ${ssm:/configuration/iam/full_permissions_boundary_policy}
+      path: ${self:custom.iamPath}
+      permissionsBoundary: ${self:custom.iamPermissionsBoundary}
       statements:
         - Effect: 'Allow'
           Action:
@@ -42,21 +41,17 @@ provider:
 custom:
   stage: ${opt:stage, self:provider.stage}
   databaseName: !Sub aurora_${self:service}_${sls:stage}_${AWS::AccountId}
-  vpcId: ${ssm:/configuration/${sls:stage}/vpc/id, ssm:/configuration/default/vpc/id}
-  sgId: ${ssm:/configuration/${sls:stage}/vpc/sg/id, ssm:/configuration/default/vpc/sg/id}
+  vpcId: ${env:VPC_ID}
+  sgId: ${env:SG_ID}
   privateSubnets:
-    - ${ssm:/configuration/${sls:stage}/vpc/subnets/private/a/id, ssm:/configuration/default/vpc/subnets/private/a/id}
-    - ${ssm:/configuration/${sls:stage}/vpc/subnets/private/b/id, ssm:/configuration/default/vpc/subnets/private/b/id}
-    - ${ssm:/configuration/${sls:stage}/vpc/subnets/private/c/id, ssm:/configuration/default/vpc/subnets/private/c/id}
-  publicSubnetA: ${ssm:/configuration/${sls:stage}/vpc/subnets/public/a/id, ssm:/configuration/default/vpc/subnets/public/a/id}
+    - ${env:SUBNET_PRIVATE_A_ID}
+    - ${env:SUBNET_PRIVATE_B_ID}
+    - ${env:SUBNET_PRIVATE_C_ID}
+  publicSubnetA: ${env:SUBNET_PUBLIC_A_ID}
+  iamPermissionsBoundary: ${env:IAM_PERMISSIONS_BOUNDARY}
+  iamPath: ${env:IAM_PATH}
   rotatorArn: !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${self:service}-${sls:stage}-rotator'
   slackWebhookUrl: ${env:SLACK_WEBHOOK}
-  serverless-offline-ssm:
-    stages:
-      - local
-      - offline
-    ssm:
-      '/configuration/iam/full_permissions_boundary_policy': 'arn:aws:iam::local:policy/local/developer-boundary-policy'
   serverlessTerminationProtection:
     stages:
       - dev
