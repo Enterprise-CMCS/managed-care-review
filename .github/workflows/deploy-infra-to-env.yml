@@ -227,6 +227,13 @@ jobs:
         env:
           NR_LICENSE_KEY: ${{ secrets.nr_license_key }}
           SERVERLESS_ACCESS_KEY: ${{ secrets.serverless_license_key }}
+          VPC_ID: ${{ secrets.vpc_id }}
+          SG_ID: ${{ secrets.sg_id }}
+          SUBNET_PRIVATE_A_ID: ${{ secrets.subnet_private_a_id }}
+          SUBNET_PRIVATE_B_ID: ${{ secrets.subnet_private_b_id }}
+          SUBNET_PRIVATE_C_ID: ${{ secrets.subnet_private_c_id }}
+          IAM_PERMISSIONS_BOUNDARY: ${{ secrets.iam_permissions_boundary }}
+          IAM_PATH: ${{ secrets.iam_path }}
         run: |
           pushd services/uploads && npx serverless deploy --stage ${{ inputs.stage_name }}
 
