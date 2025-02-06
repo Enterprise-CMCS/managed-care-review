@@ -1010,19 +1010,16 @@ importers:
     devDependencies:
       '@enterprise-cmcs/serverless-waf-plugin':
         specifier: ^1.4.0
-        version: 1.4.0(serverless@3.39.0(encoding@0.1.13))(typescript@5.5.4)
+        version: 1.4.0(serverless@4.2.3)(typescript@5.5.4)
       serverless:
-        specifier: ^3.39.0
-        version: 3.39.0(encoding@0.1.13)
+        specifier: 4.2.3
+        version: 4.2.3
       serverless-iam-helper:
         specifier: https://github.com/CMSgov/serverless-iam-helper
-        version: git+https://git@github.com:CMSgov/serverless-iam-helper.git#ffcca526d127cf0e791f0d931d442f4131953483(serverless@3.39.0(encoding@0.1.13))
-      serverless-offline-ssm:
-        specifier: ^6.2.0
-        version: 6.2.0
+        version: git+https://git@github.com:CMSgov/serverless-iam-helper.git#ffcca526d127cf0e791f0d931d442f4131953483(serverless@4.2.3)
       serverless-s3-bucket-helper:
         specifier: https://github.com/CMSgov/serverless-s3-bucket-helper
-        version: git+https://git@github.com:CMSgov/serverless-s3-bucket-helper.git#3e519d15676de237ec8ede3ff9ae26abf3f3ef0a(serverless@3.39.0(encoding@0.1.13))
+        version: git+https://git@github.com:CMSgov/serverless-s3-bucket-helper.git#3e519d15676de237ec8ede3ff9ae26abf3f3ef0a(serverless@4.2.3)
       serverless-stack-termination-protection:
         specifier: ^2.0.2
         version: 2.0.2
@@ -19659,9 +19656,9 @@ snapshots:
 
   '@emotion/weak-memoize@0.3.0': {}
 
-  '@enterprise-cmcs/serverless-waf-plugin@1.4.0(serverless@3.39.0(encoding@0.1.13))(typescript@5.5.4)':
+  '@enterprise-cmcs/serverless-waf-plugin@1.4.0(serverless@4.2.3)(typescript@5.5.4)':
     dependencies:
-      serverless: 3.39.0(encoding@0.1.13)
+      serverless: 4.2.3
       typescript: 5.5.4
 
   '@esbuild/aix-ppc64@0.20.2':
@@ -31724,6 +31721,11 @@ snapshots:
     dependencies:
       lodash: 4.17.21
       serverless: 3.39.0(encoding@0.1.13)
+
+  serverless-iam-helper@git+https://git@github.com:CMSgov/serverless-iam-helper.git#ffcca526d127cf0e791f0d931d442f4131953483(serverless@4.2.3):
+    dependencies:
+      lodash: 4.17.21
+      serverless: 4.2.3
 
   serverless-offline-ssm@6.2.0: {}
 
