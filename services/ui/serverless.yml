@@ -33,7 +33,7 @@ resources:
         - Fn::Not:
             - Fn::Equals:
                 - ''
-                - ${self:custom.cloudfrontDomainName}
+                - ${self:custom.cloudfrontStorybookDomainName}
   Resources:
     S3Bucket:
       Type: AWS::S3::Bucket
