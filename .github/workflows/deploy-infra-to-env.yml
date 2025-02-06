@@ -232,6 +232,7 @@ jobs:
           SUBNET_PRIVATE_A_ID: ${{ secrets.subnet_private_a_id }}
           SUBNET_PRIVATE_B_ID: ${{ secrets.subnet_private_b_id }}
           SUBNET_PRIVATE_C_ID: ${{ secrets.subnet_private_c_id }}
+          SUBNET_PUBLIC_A_ID: ${{ secrets.subnet_public_a_id }}
           IAM_PERMISSIONS_BOUNDARY: ${{ secrets.iam_permissions_boundary }}
           IAM_PATH: ${{ secrets.iam_path }}
         run: |
