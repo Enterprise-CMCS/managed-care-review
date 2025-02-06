@@ -115,7 +115,7 @@ resources:
           Aliases:
             Fn::If:
               - CreateCustomCloudFrontDomain
-              - - ${self:custom.cloudfrontDomainName}
+              - - ${self:custom.cloudfrontStorybookDomainName}
               - !Ref AWS::NoValue
           Origins:
             - DomainName: !GetAtt S3Bucket.DomainName
@@ -179,5 +179,5 @@ resources:
       Value:
         Fn::If:
           - CreateCustomCloudFrontDomain
-          - https://${self:custom.cloudfrontDomainName}/
+          - https://${self:custom.cloudfrontStorybookDomainName}/
           - !Sub https://${CloudFrontDistribution.DomainName}
