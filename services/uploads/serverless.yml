@@ -1,6 +1,6 @@
 service: uploads
 
-frameworkVersion: '^3.19.0'
+frameworkVersion: '4.2.3'
 
 package:
   individually: true
@@ -10,7 +10,6 @@ plugins:
   - serverless-stack-termination-protection
   - serverless-iam-helper
   - serverless-s3-local
-  - serverless-offline-ssm
   - serverless-offline
 
 # The `provider` block defines where your service will be deployed
@@ -56,25 +55,15 @@ custom:
   authorizedKeys: ${file(../postgres/scripts/authorized_keys)}
   esbuild:
     config: ./esbuild.config.js
-  vpcId: ${ssm:/configuration/${sls:stage}/vpc/id, ssm:/configuration/default/vpc/id}
-  sgId: ${ssm:/configuration/${sls:stage}/vpc/sg/id, ssm:/configuration/default/vpc/sg/id}
+  vpcId: ${env:VPC_ID}
+  sgId: ${env:SG_ID}
   privateSubnets:
-    - ${ssm:/configuration/${sls:stage}/vpc/subnets/private/a/id, ssm:/configuration/default/vpc/subnets/private/a/id}
-    - ${ssm:/configuration/${sls:stage}/vpc/subnets/private/b/id, ssm:/configuration/default/vpc/subnets/private/b/id}
-    - ${ssm:/configuration/${sls:stage}/vpc/subnets/private/c/id, ssm:/configuration/default/vpc/subnets/private/c/id}
-  publicSubnetA: ${ssm:/configuration/${sls:stage}/vpc/subnets/public/a/id, ssm:/configuration/default/vpc/subnets/public/a/id}
-  serverless-offline-ssm:
-    stages:
-      - local
-      - offline
-    ssm:
-      '/configuration/iam/full_permissions_boundary_policy': 'arn:aws:iam::local:policy/local/developer-boundary-policy'
-      '/configuration/default/vpc/id': 'offline'
-      '/configuration/default/vpc/sg/id': 'offline'
-      '/configuration/default/vpc/subnets/private/a/id': 'offline'
-      '/configuration/default/vpc/subnets/private/b/id': 'offline'
-      '/configuration/default/vpc/subnets/private/c/id': 'offline'
-      '/configuration/default/vpc/subnets/public/a/id': 'offline'
+    - ${env:SUBNET_PRIVATE_A_ID}
+    - ${env:SUBNET_PRIVATE_B_ID}
+    - ${env:SUBNET_PRIVATE_C_ID}
+  publicSubnetA: ${env:SUBNET_PUBLIC_A_ID}
+  iamPermissionsBoundary: ${env:IAM_PERMISSIONS_BOUNDARY}
+  iamPath: ${env:IAM_PATH}
   s3:
     # address: 127.0.0.1 # this started defaulting to ipv6 which prevented tests from connecting
     # when vhostBuckets are enabled all non-localhost hostnames are re-written as buckets
