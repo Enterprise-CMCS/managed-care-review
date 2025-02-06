@@ -280,5 +280,9 @@ jobs:
 
       - name: deploy ui-auth
         id: deploy-ui-auth
+        env:
+          SERVERLESS_ACCESS_KEY: ${{ secrets.serverless_license_key }}
+          IAM_PERMISSIONS_BOUNDARY: ${{ secrets.iam_permissions_boundary }}
+          IAM_PATH: ${{ secrets.iam_path }}
         run: |
           pushd services/ui-auth && npx serverless deploy --stage ${{ inputs.stage_name }}
