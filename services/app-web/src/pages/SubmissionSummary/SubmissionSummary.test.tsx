@@ -3,7 +3,6 @@ import { Route, Routes } from 'react-router'
 import { RoutesRecord } from '@mc-review/constants'
 import {
     fetchCurrentUserMock,
-    fetchContractMockSuccess,
     fetchContractWithQuestionsMockSuccess,
     mockValidUser,
     mockValidStateUser,
@@ -28,7 +27,9 @@ describe('SubmissionSummary', () => {
         '$userRole SubmissionSummary tests',
         ({ mockUser }) => {
             it('renders submission unlocked banner for CMS user', async () => {
-                const contract = mockContractPackageUnlockedWithUnlockedType()
+                const contract = mockContractPackageUnlockedWithUnlockedType({
+                    id: 'test-abc-123',
+                })
 
                 renderWithProviders(
                     <Routes>
@@ -46,15 +47,11 @@ describe('SubmissionSummary', () => {
                                     user: mockUser(),
                                     statusCode: 200,
                                 }),
-                                fetchContractMockSuccess({
-                                    contract:
-                                        mockContractPackageUnlockedWithUnlockedType(),
+                                fetchContractWithQuestionsMockSuccess({
+                                    contract,
                                 }),
                                 fetchContractWithQuestionsMockSuccess({
-                                    contract: {
-                                        ...contract,
-                                        id: 'test-abc-123',
-                                    },
+                                    contract,
                                 }),
                             ],
                         },
@@ -88,7 +85,9 @@ describe('SubmissionSummary', () => {
             })
 
             it('pulls the right version of UNLOCKED data for CMS users', async () => {
-                const contract = mockContractPackageUnlockedWithUnlockedType()
+                const contract = mockContractPackageUnlockedWithUnlockedType({
+                    id: 'test-abc-123',
+                })
 
                 renderWithProviders(
                     <Routes>
@@ -106,9 +105,11 @@ describe('SubmissionSummary', () => {
                                     statusCode: 200,
                                     user: mockUser(),
                                 }),
-                                fetchContractMockSuccess({
-                                    contract:
-                                        mockContractPackageUnlockedWithUnlockedType(),
+                                fetchContractWithQuestionsMockSuccess({
+                                    contract: {
+                                        ...contract,
+                                        id: 'test-abc-123',
+                                    },
                                 }),
                                 fetchContractWithQuestionsMockSuccess({
                                     contract: {
@@ -142,7 +143,9 @@ describe('SubmissionSummary', () => {
             })
 
             it('displays the legacy shared rates across submissions UI for CMS users when unlocked', async () => {
-                const contract = mockContractPackageUnlockedWithUnlockedType()
+                const contract = mockContractPackageUnlockedWithUnlockedType({
+                    id: 'test-abc-123',
+                })
 
                 renderWithProviders(
                     <Routes>
@@ -160,15 +163,11 @@ describe('SubmissionSummary', () => {
                                     statusCode: 200,
                                     user: mockUser(),
                                 }),
-                                fetchContractMockSuccess({
-                                    contract:
-                                        mockContractPackageUnlockedWithUnlockedType(),
+                                fetchContractWithQuestionsMockSuccess({
+                                    contract,
                                 }),
                                 fetchContractWithQuestionsMockSuccess({
-                                    contract: {
-                                        ...contract,
-                                        id: 'test-abc-123',
-                                    },
+                                    contract,
                                 }),
                             ],
                         },
@@ -186,7 +185,8 @@ describe('SubmissionSummary', () => {
             })
 
             it('renders add mccrs-id link for CMS user', async () => {
-                const contract = mockContractPackageSubmittedWithQuestions()
+                const contract =
+                    mockContractPackageSubmittedWithQuestions('test-abc-123')
 
                 renderWithProviders(
                     <Routes>
@@ -204,23 +204,14 @@ describe('SubmissionSummary', () => {
                                     statusCode: 200,
                                     user: mockUser(),
                                 }),
-                                fetchContractMockSuccess({
-                                    contract: {
-                                        ...contract,
-                                        id: 'test-abc-123',
-                                    },
+                                fetchContractWithQuestionsMockSuccess({
+                                    contract,
                                 }),
                                 fetchContractWithQuestionsMockSuccess({
-                                    contract: {
-                                        ...contract,
-                                        id: 'test-abc-123',
-                                    },
+                                    contract,
                                 }),
                                 fetchContractWithQuestionsMockSuccess({
-                                    contract: {
-                                        ...contract,
-                                        id: 'test-abc-123',
-                                    },
+                                    contract,
                                 }),
                             ],
                         },
@@ -238,8 +229,12 @@ describe('SubmissionSummary', () => {
             })
 
             it('renders edit mccrs-id link for CMS user when submission has a mccrs id', async () => {
-                const contract = mockContractPackageSubmittedWithQuestions()
-                contract.mccrsID = '1234'
+                const contract = mockContractPackageSubmittedWithQuestions(
+                    'test-abc-123',
+                    {
+                        mccrsID: '1234',
+                    }
+                )
                 renderWithProviders(
                     <Routes>
                         <Route element={<SubmissionSideNav />}>
@@ -256,29 +251,20 @@ describe('SubmissionSummary', () => {
                                     user: mockUser(),
                                     statusCode: 200,
                                 }),
-                                fetchContractMockSuccess({
-                                    contract: mockContractPackageSubmitted({
-                                        id: 'test-abc-123',
+                                fetchContractWithQuestionsMockSuccess({
+                                    contract: {
+                                        ...contract,
                                         mccrsID: '3333',
-                                    }),
-                                }),
-                                fetchContractWithQuestionsMockSuccess({
-                                    contract: {
-                                        ...contract,
-                                        id: 'test-abc-123',
                                     },
                                 }),
                                 fetchContractWithQuestionsMockSuccess({
-                                    contract: {
-                                        ...contract,
-                                        id: 'test-abc-123',
-                                    },
+                                    contract,
                                 }),
                                 fetchContractWithQuestionsMockSuccess({
-                                    contract: {
-                                        ...contract,
-                                        id: 'test-abc-123',
-                                    },
+                                    contract,
+                                }),
+                                fetchContractWithQuestionsMockSuccess({
+                                    contract,
                                 }),
                             ],
                         },
@@ -310,7 +296,9 @@ describe('SubmissionSummary', () => {
                         )
                     },
                 }
-                const contract = mockContractPackageSubmitted()
+                const contract = mockContractPackageSubmitted({
+                    id: 'test-abc-123',
+                })
                 renderWithProviders(
                     <Routes>
                         <Route element={<SubmissionSideNav />}>
@@ -328,12 +316,9 @@ describe('SubmissionSummary', () => {
                                     statusCode: 200,
                                 }),
                                 fetchContractWithQuestionsMockSuccess({
-                                    contract: {
-                                        ...contract,
-                                        id: 'test-abc-123',
-                                    },
+                                    contract,
                                 }),
-                                fetchContractMockSuccess({
+                                fetchContractWithQuestionsMockSuccess({
                                     contract,
                                 }),
                             ],
@@ -360,7 +345,9 @@ describe('SubmissionSummary', () => {
             })
 
             it('renders back to dashboard link for CMS users', async () => {
-                const contract = mockContractPackageUnlockedWithUnlockedType()
+                const contract = mockContractPackageUnlockedWithUnlockedType({
+                    id: 'test-abc-123',
+                })
 
                 renderWithProviders(
                     <Routes>
@@ -379,14 +366,10 @@ describe('SubmissionSummary', () => {
                                     statusCode: 200,
                                 }),
                                 fetchContractWithQuestionsMockSuccess({
-                                    contract: {
-                                        ...contract,
-                                        id: 'test-abc-123',
-                                    },
+                                    contract,
                                 }),
-                                fetchContractMockSuccess({
-                                    contract:
-                                        mockContractPackageUnlockedWithUnlockedType(),
+                                fetchContractWithQuestionsMockSuccess({
+                                    contract,
                                 }),
                             ],
                         },
@@ -405,7 +388,8 @@ describe('SubmissionSummary', () => {
             })
 
             it('renders the sidenav for CMS users', async () => {
-                const contract = mockContractPackageSubmittedWithQuestions('15')
+                const contract =
+                    mockContractPackageSubmittedWithQuestions('test-abc-123')
 
                 renderWithProviders(
                     <Routes>
@@ -424,22 +408,13 @@ describe('SubmissionSummary', () => {
                                     statusCode: 200,
                                 }),
                                 fetchContractWithQuestionsMockSuccess({
-                                    contract: {
-                                        ...contract,
-                                        id: 'test-abc-123',
-                                    },
+                                    contract,
                                 }),
                                 fetchContractWithQuestionsMockSuccess({
-                                    contract: {
-                                        ...contract,
-                                        id: 'test-abc-123',
-                                    },
+                                    contract,
                                 }),
-                                fetchContractMockSuccess({
-                                    contract: {
-                                        ...contract,
-                                        id: 'test-abc-123',
-                                    },
+                                fetchContractWithQuestionsMockSuccess({
+                                    contract,
                                 }),
                             ],
                         },
@@ -480,7 +455,7 @@ describe('SubmissionSummary', () => {
                                 fetchContractWithQuestionsMockSuccess({
                                     contract,
                                 }),
-                                fetchContractMockSuccess({
+                                fetchContractWithQuestionsMockSuccess({
                                     contract,
                                 }),
                             ],
@@ -511,7 +486,9 @@ describe('SubmissionSummary', () => {
             describe('Submission package data display', () => {
                 it('renders the OLD data for an unlocked submission for CMS user, ignoring unsubmitted changes from state user', async () => {
                     const contract =
-                        mockContractPackageUnlockedWithUnlockedType()
+                        mockContractPackageUnlockedWithUnlockedType({
+                            id: 'test-abc-123',
+                        })
                     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                     contract.draftRevision!.formData.submissionDescription =
                         'NEW_DESCRIPTION'
@@ -535,12 +512,9 @@ describe('SubmissionSummary', () => {
                                         statusCode: 200,
                                     }),
                                     fetchContractWithQuestionsMockSuccess({
-                                        contract: {
-                                            ...contract,
-                                            id: 'test-abc-123',
-                                        },
+                                        contract,
                                     }),
-                                    fetchContractMockSuccess({
+                                    fetchContractWithQuestionsMockSuccess({
                                         contract,
                                     }),
                                 ],
@@ -564,7 +538,9 @@ describe('SubmissionSummary', () => {
             describe('CMS user unlock submission', () => {
                 it('renders the unlock button', async () => {
                     const contract =
-                        mockContractPackageUnlockedWithUnlockedType()
+                        mockContractPackageUnlockedWithUnlockedType({
+                            id: 'test-abc-123',
+                        })
 
                     renderWithProviders(
                         <Routes>
@@ -583,20 +559,13 @@ describe('SubmissionSummary', () => {
                                         statusCode: 200,
                                     }),
                                     fetchContractWithQuestionsMockSuccess({
-                                        contract: {
-                                            ...contract,
-                                            id: 'test-abc-123',
-                                        },
+                                        contract,
                                     }),
                                     fetchContractWithQuestionsMockSuccess({
-                                        contract: {
-                                            ...contract,
-                                            id: 'test-abc-123',
-                                        },
+                                        contract,
                                     }),
-                                    fetchContractMockSuccess({
-                                        contract:
-                                            mockContractPackageSubmitted(),
+                                    fetchContractWithQuestionsMockSuccess({
+                                        contract,
                                     }),
                                 ],
                             },
@@ -627,9 +596,10 @@ describe('SubmissionSummary', () => {
                     const ptDateFormatted = '02/02/2025'
 
                     const contract =
-                        mockContractPackageUnlockedWithUnlockedType()
-                    contract.id = 'test-abc-123'
-                    contract.initiallySubmittedAt = earlyMorningET.toDate()
+                        mockContractPackageUnlockedWithUnlockedType({
+                            id: 'test-abc-123',
+                            initiallySubmittedAt: earlyMorningET.toDate(),
+                        })
 
                     renderWithProviders(
                         <Routes>
@@ -650,7 +620,7 @@ describe('SubmissionSummary', () => {
                                     fetchContractWithQuestionsMockSuccess({
                                         contract,
                                     }),
-                                    fetchContractMockSuccess({
+                                    fetchContractWithQuestionsMockSuccess({
                                         contract,
                                     }),
                                 ],
@@ -667,6 +637,9 @@ describe('SubmissionSummary', () => {
                 })
 
                 it('extracts the correct document dates from the submission and displays them in tables', async () => {
+                    const contract = mockContractPackageSubmitted({
+                        id: 'test-abc-123',
+                    })
                     renderWithProviders(
                         <Routes>
                             <Route element={<SubmissionSideNav />}>
@@ -684,14 +657,10 @@ describe('SubmissionSummary', () => {
                                         statusCode: 200,
                                     }),
                                     fetchContractWithQuestionsMockSuccess({
-                                        contract: {
-                                            ...mockContractPackageSubmitted(),
-                                            id: 'test-abc-123',
-                                        },
+                                        contract,
                                     }),
-                                    fetchContractMockSuccess({
-                                        contract:
-                                            mockContractPackageSubmitted(),
+                                    fetchContractWithQuestionsMockSuccess({
+                                        contract,
                                     }),
                                 ],
                             },
@@ -739,6 +708,11 @@ describe('SubmissionSummary', () => {
                 })
 
                 it('disables the unlock button for an unlocked submission', async () => {
+                    const contract =
+                        mockContractPackageUnlockedWithUnlockedType({
+                            id: 'test-abc-123',
+                        })
+
                     renderWithProviders(
                         <Routes>
                             <Route element={<SubmissionSideNav />}>
@@ -756,14 +730,10 @@ describe('SubmissionSummary', () => {
                                         statusCode: 200,
                                     }),
                                     fetchContractWithQuestionsMockSuccess({
-                                        contract: {
-                                            ...mockContractPackageUnlockedWithUnlockedType(),
-                                            id: 'test-abc-123',
-                                        },
+                                        contract,
                                     }),
-                                    fetchContractMockSuccess({
-                                        contract:
-                                            mockContractPackageUnlockedWithUnlockedType(),
+                                    fetchContractWithQuestionsMockSuccess({
+                                        contract,
                                     }),
                                 ],
                             },
@@ -798,7 +768,7 @@ describe('SubmissionSummary', () => {
                                         user: mockUser(),
                                         statusCode: 200,
                                     }),
-                                    fetchContractMockSuccess({
+                                    fetchContractWithQuestionsMockSuccess({
                                         contract:
                                             mockContractPackageUnlockedWithUnlockedType(
                                                 {
@@ -861,7 +831,7 @@ describe('SubmissionSummary', () => {
                                     fetchContractWithQuestionsMockSuccess({
                                         contract,
                                     }),
-                                    fetchContractMockSuccess({
+                                    fetchContractWithQuestionsMockSuccess({
                                         contract,
                                     }),
                                 ],
@@ -935,7 +905,7 @@ describe('SubmissionSummary', () => {
                                     fetchContractWithQuestionsMockSuccess({
                                         contract,
                                     }),
-                                    fetchContractMockSuccess({
+                                    fetchContractWithQuestionsMockSuccess({
                                         contract,
                                     }),
                                 ],
@@ -996,7 +966,7 @@ describe('SubmissionSummary', () => {
                                     fetchContractWithQuestionsMockSuccess({
                                         contract: unlockedContract,
                                     }),
-                                    fetchContractMockSuccess({
+                                    fetchContractWithQuestionsMockSuccess({
                                         contract: unlockedContract,
                                     }),
                                 ],
@@ -1059,7 +1029,7 @@ describe('SubmissionSummary', () => {
                                     fetchContractWithQuestionsMockSuccess({
                                         contract: contract,
                                     }),
-                                    fetchContractMockSuccess({
+                                    fetchContractWithQuestionsMockSuccess({
                                         contract: contract,
                                     }),
                                 ],
@@ -1135,7 +1105,7 @@ describe('SubmissionSummary', () => {
                                     fetchContractWithQuestionsMockSuccess({
                                         contract,
                                     }),
-                                    fetchContractMockSuccess({
+                                    fetchContractWithQuestionsMockSuccess({
                                         contract,
                                     }),
                                 ],
@@ -1184,7 +1154,7 @@ describe('SubmissionSummary', () => {
                                     fetchContractWithQuestionsMockSuccess({
                                         contract,
                                     }),
-                                    fetchContractMockSuccess({
+                                    fetchContractWithQuestionsMockSuccess({
                                         contract,
                                     }),
                                 ],
@@ -1218,7 +1188,8 @@ describe('SubmissionSummary', () => {
 
     describe('STATE_USER SubmissionSummary tests', () => {
         it('renders without errors', async () => {
-            const contract = mockContractPackageSubmittedWithQuestions('15')
+            const contract =
+                mockContractPackageSubmittedWithQuestions('test-abc-123')
 
             renderWithProviders(
                 <Routes>
@@ -1235,17 +1206,11 @@ describe('SubmissionSummary', () => {
                             fetchCurrentUserMock({
                                 statusCode: 200,
                             }),
-                            fetchContractMockSuccess({
-                                contract: {
-                                    ...contract,
-                                    id: 'test-abc-123',
-                                },
+                            fetchContractWithQuestionsMockSuccess({
+                                contract,
                             }),
                             fetchContractWithQuestionsMockSuccess({
-                                contract: {
-                                    ...contract,
-                                    id: 'test-abc-123',
-                                },
+                                contract,
                             }),
                         ],
                     },
@@ -1280,7 +1245,7 @@ describe('SubmissionSummary', () => {
                             fetchCurrentUserMock({
                                 statusCode: 200,
                             }),
-                            fetchContractMockSuccess({
+                            fetchContractWithQuestionsMockSuccess({
                                 contract,
                             }),
                             fetchContractWithQuestionsMockSuccess({
@@ -1315,7 +1280,8 @@ describe('SubmissionSummary', () => {
         })
 
         it('does not render an add mccrs-id link for state user', async () => {
-            const contract = mockContractPackageSubmittedWithQuestions('15')
+            const contract =
+                mockContractPackageSubmittedWithQuestions('test-abc-123')
 
             renderWithProviders(
                 <Routes>
@@ -1333,17 +1299,11 @@ describe('SubmissionSummary', () => {
                                 user: mockValidUser(),
                                 statusCode: 200,
                             }),
-                            fetchContractMockSuccess({
-                                contract: {
-                                    ...mockContractPackageSubmitted(),
-                                    id: 'test-abc-123',
-                                },
+                            fetchContractWithQuestionsMockSuccess({
+                                contract,
                             }),
                             fetchContractWithQuestionsMockSuccess({
-                                contract: {
-                                    ...contract,
-                                    id: 'test-abc-123',
-                                },
+                                contract,
                             }),
                         ],
                     },
@@ -1362,6 +1322,9 @@ describe('SubmissionSummary', () => {
 
         it('redirects to review and submit page for State user', async () => {
             let testLocation: Location
+            const contract = mockContractPackageUnlockedWithUnlockedType({
+                id: 'test-abc-123',
+            })
 
             renderWithProviders(
                 <Routes>
@@ -1384,14 +1347,10 @@ describe('SubmissionSummary', () => {
                                 statusCode: 200,
                             }),
                             fetchContractWithQuestionsMockSuccess({
-                                contract: {
-                                    ...mockContractPackageUnlockedWithUnlockedType(),
-                                    id: 'test-abc-123',
-                                },
+                                contract,
                             }),
-                            fetchContractMockSuccess({
-                                contract:
-                                    mockContractPackageUnlockedWithUnlockedType(),
+                            fetchContractWithQuestionsMockSuccess({
+                                contract,
                             }),
                         ],
                     },
@@ -1412,7 +1371,8 @@ describe('SubmissionSummary', () => {
         })
 
         it('renders back to dashboard link for state users', async () => {
-            const contract = mockContractPackageSubmittedWithQuestions('15')
+            const contract =
+                mockContractPackageSubmittedWithQuestions('test-abc-123')
 
             renderWithProviders(
                 <Routes>
@@ -1430,16 +1390,10 @@ describe('SubmissionSummary', () => {
                                 statusCode: 200,
                             }),
                             fetchContractWithQuestionsMockSuccess({
-                                contract: {
-                                    ...contract,
-                                    id: 'test-abc-123',
-                                },
+                                contract,
                             }),
-                            fetchContractMockSuccess({
-                                contract: {
-                                    ...contract,
-                                    id: 'test-abc-123',
-                                },
+                            fetchContractWithQuestionsMockSuccess({
+                                contract,
                             }),
                         ],
                     },
@@ -1463,7 +1417,8 @@ describe('SubmissionSummary', () => {
         })
 
         it('renders the sidenav for State users', async () => {
-            const contract = mockContractPackageSubmittedWithQuestions('15')
+            const contract =
+                mockContractPackageSubmittedWithQuestions('test-abc-123')
 
             renderWithProviders(
                 <Routes>
@@ -1482,16 +1437,10 @@ describe('SubmissionSummary', () => {
                                 statusCode: 200,
                             }),
                             fetchContractWithQuestionsMockSuccess({
-                                contract: {
-                                    ...contract,
-                                    id: 'test-abc-123',
-                                },
+                                contract,
                             }),
-                            fetchContractMockSuccess({
-                                contract: {
-                                    ...contract,
-                                    id: 'test-abc-123',
-                                },
+                            fetchContractWithQuestionsMockSuccess({
+                                contract,
                             }),
                         ],
                     },
@@ -1532,7 +1481,7 @@ describe('SubmissionSummary', () => {
                             fetchContractWithQuestionsMockSuccess({
                                 contract,
                             }),
-                            fetchContractMockSuccess({
+                            fetchContractWithQuestionsMockSuccess({
                                 contract,
                             }),
                         ],
@@ -1586,7 +1535,7 @@ describe('SubmissionSummary', () => {
                             fetchContractWithQuestionsMockSuccess({
                                 contract,
                             }),
-                            fetchContractMockSuccess({
+                            fetchContractWithQuestionsMockSuccess({
                                 contract,
                             }),
                         ],
@@ -1659,7 +1608,7 @@ describe('SubmissionSummary', () => {
                             fetchContractWithQuestionsMockSuccess({
                                 contract,
                             }),
-                            fetchContractMockSuccess({
+                            fetchContractWithQuestionsMockSuccess({
                                 contract,
                             }),
                         ],
@@ -1715,7 +1664,7 @@ describe('SubmissionSummary', () => {
                                 fetchContractWithQuestionsMockSuccess({
                                     contract,
                                 }),
-                                fetchContractMockSuccess({
+                                fetchContractWithQuestionsMockSuccess({
                                     contract,
                                 }),
                             ],
@@ -1790,7 +1739,7 @@ describe('SubmissionSummary', () => {
                                 fetchContractWithQuestionsMockSuccess({
                                     contract,
                                 }),
-                                fetchContractMockSuccess({
+                                fetchContractWithQuestionsMockSuccess({
                                     contract,
                                 }),
                             ],
@@ -1849,7 +1798,7 @@ describe('SubmissionSummary', () => {
                                 fetchContractWithQuestionsMockSuccess({
                                     contract,
                                 }),
-                                fetchContractMockSuccess({
+                                fetchContractWithQuestionsMockSuccess({
                                     contract,
                                 }),
                             ],
@@ -1902,7 +1851,7 @@ describe('SubmissionSummary', () => {
                                 fetchContractWithQuestionsMockSuccess({
                                     contract,
                                 }),
-                                fetchContractMockSuccess({
+                                fetchContractWithQuestionsMockSuccess({
                                     contract,
                                 }),
                             ],

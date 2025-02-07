@@ -535,11 +535,11 @@ describe('RateQuestionResponse', () => {
                     mocks: [
                         fetchCurrentUserMock({
                             user: mockValidCMSUser({
-                                divisionAssignment: undefined,
+                                divisionAssignment: null,
                             }),
                             statusCode: 200,
                         }),
-                        fetchRateMockSuccess(rate),
+                        fetchRateWithQuestionsMockSuccess({ rate }),
                         fetchRateWithQuestionsMockSuccess({ rate }),
                     ],
                 },
