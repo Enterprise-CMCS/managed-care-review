@@ -5,6 +5,9 @@ frameworkVersion: '4.2.3'
 package:
   individually: true
 
+build:
+  esbuild: false
+
 plugins:
   - serverless-esbuild
   - serverless-stack-termination-protection
