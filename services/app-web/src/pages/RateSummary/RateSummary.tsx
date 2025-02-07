@@ -10,9 +10,9 @@ import {
 } from '../../components'
 import { usePage } from '../../contexts/PageContext'
 import {
-    useFetchRateQuery,
     useFetchContractQuery,
     useUnlockRateMutation,
+    useFetchRateWithQuestionsQuery,
 } from '../../gen/gqlClient'
 import styles from '../SubmissionSummary/SubmissionSummary.module.scss'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
@@ -55,18 +55,19 @@ export const RateSummary = (): React.ReactElement => {
     )
     const [unlockRate, { loading: unlockLoading }] = useUnlockRateMutation()
 
-    const { data, loading, error } = useFetchRateQuery({
+    const { data, loading, error } = useFetchRateWithQuestionsQuery({
         variables: {
             input: {
                 rateID: id,
             },
         },
+        fetchPolicy: 'cache-and-network',
     })
-
     const rate = data?.fetchRate.rate
+
     const {
         data: fetchContractData,
-        loading: loadingContract,
+        loading: fetchContractLoading,
         error: fetchContractError,
     } = useFetchContractQuery({
         variables: {
@@ -74,18 +75,17 @@ export const RateSummary = (): React.ReactElement => {
                 contractID: rate?.parentContractID ?? 'unknown-contract',
             },
         },
+        fetchPolicy: 'cache-and-network',
     })
-    const currentRateRev = rate?.revisions[0]
-    const withdrawInfo = rate?.withdrawInfo
 
-    if (loading) {
+    // Handle loading and error states for fetching data while using cached data
+    if (!data && loading) {
         return (
             <GridContainer>
                 <Loading />
             </GridContainer>
         )
-    } else if (error || !rate || !currentRateRev?.formData) {
-        //error handling for a state user that tries to access rates for a different state
+    } else if (!data && error) {
         if (error?.graphQLErrors[0]?.extensions?.code === 'FORBIDDEN') {
             return (
                 <ErrorForbiddenPage errorMsg={error.graphQLErrors[0].message} />
@@ -95,7 +95,12 @@ export const RateSummary = (): React.ReactElement => {
         } else {
             return <GenericErrorPage />
         }
+    } else if (!rate) {
+        return <GenericErrorPage />
     }
+
+    const currentRateRev = rate.revisions[0]
+    const withdrawInfo = rate.withdrawInfo
 
     // Redirecting a state user to the edit page if rate is unlocked
     if (
@@ -115,13 +120,14 @@ export const RateSummary = (): React.ReactElement => {
 
     const contract = fetchContractData?.fetchContract.contract
 
-    if (loadingContract) {
+    // Handle loading and error states for fetching data while using cached data
+    if (!fetchContractData && fetchContractLoading) {
         return (
             <GridContainer>
                 <Loading />
             </GridContainer>
         )
-    } else if (fetchContractError || !contract) {
+    } else if (fetchContractError && !fetchContractData) {
         //error handling for a state user that tries to access contracts for a different state
         if (
             fetchContractError?.graphQLErrors[0]?.extensions?.code ===
@@ -140,6 +146,8 @@ export const RateSummary = (): React.ReactElement => {
         } else {
             return <GenericErrorPage />
         }
+    } else if (!contract) {
+        return <GenericErrorPage />
     }
 
     const handleUnlockRate = async () => {

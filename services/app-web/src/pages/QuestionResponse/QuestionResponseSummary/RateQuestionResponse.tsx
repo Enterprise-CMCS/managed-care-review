@@ -44,26 +44,24 @@ export const RateQuestionResponse = () => {
                 rateID: fetchRateID,
             },
         },
-        fetchPolicy: 'network-only',
+        fetchPolicy: 'cache-and-network',
     })
 
     useEffect(() => {
         updateHeading({ customHeading: rateName })
     }, [rateName, updateHeading])
 
-    if (loading) {
-        return <ErrorOrLoadingPage state="LOADING" />
-    }
-
-    if (error) {
-        return <ErrorOrLoadingPage state={handleAndReturnErrorState(error)} />
-    }
     const rate = data?.fetchRate.rate
     const rateRev = rate?.packageSubmissions?.[0]?.rateRevision
     const rateCertificationName =
         rateRev?.formData.rateCertificationName ?? undefined
 
-    if (
+    // Handle loading and error states for fetching data while using cached data
+    if (!data && loading) {
+        return <ErrorOrLoadingPage state="LOADING" />
+    } else if (!data && error) {
+        return <ErrorOrLoadingPage state={handleAndReturnErrorState(error)} />
+    } else if (
         rate?.status === 'DRAFT' ||
         !loggedInUser ||
         !rateRev ||
