@@ -334,6 +334,8 @@ jobs:
   finishing-prep:
     name: Finishing Prep
     needs: [deploy-infra, begin-deployment, deploy-app]
+    env:
+      SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_V4_LICENSE }}
     environment: dev
     if: |
       always()
@@ -385,7 +387,6 @@ jobs:
         id: save-app-endpoint
         env:
           STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
-          SERVERLESS_ACCESS_KEY: ${{ secrets.serverless_license_key }}
         run: |
           cd services
           endpoint=$(./output.sh ui CloudFrontEndpointUrl $STAGE_NAME)
@@ -396,7 +397,6 @@ jobs:
         id: save-api-endpoint
         env:
           STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
-          SERVERLESS_ACCESS_KEY: ${{ secrets.serverless_license_key }}
         run: |
           cd services
           endpoint=$(./output.sh infra-api ApiGatewayRestApiUrl $STAGE_NAME)
@@ -406,7 +406,6 @@ jobs:
         id: save-cognito-user-pool-id
         env:
           STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
-          SERVERLESS_ACCESS_KEY: ${{ secrets.serverless_license_key }}
         run: |
           cd services
           endpoint=$(./output.sh ui-auth UserPoolId $STAGE_NAME)
@@ -416,7 +415,6 @@ jobs:
         id: save-cognito-region
         env:
           STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
-          SERVERLESS_ACCESS_KEY: ${{ secrets.serverless_license_key }}
         run: |
           cd services
           endpoint=$(./output.sh ui-auth Region $STAGE_NAME)
@@ -426,7 +424,6 @@ jobs:
         id: save-cognito-identity-pool-id
         env:
           STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
-          SERVERLESS_ACCESS_KEY: ${{ secrets.serverless_license_key }}
         run: |
           cd services
           endpoint=$(./output.sh ui-auth IdentityPoolId $STAGE_NAME)
@@ -436,7 +433,6 @@ jobs:
         id: save-cognito-user-pool-web-client-id
         env:
           STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
-          SERVERLESS_ACCESS_KEY: ${{ secrets.serverless_license_key }}
         run: |
           cd services
           endpoint=$(./output.sh ui-auth UserPoolClientId $STAGE_NAME)
@@ -446,7 +442,6 @@ jobs:
         id: save-storybook-endpoint
         env:
           STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
-          SERVERLESS_ACCESS_KEY: ${{ secrets.serverless_license_key }}
         run: |
           cd services
           endpoint=$(./output.sh storybook CloudFrontEndpointUrl $STAGE_NAME)
