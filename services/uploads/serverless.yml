@@ -22,8 +22,8 @@ provider:
   region: us-east-1
   iam:
     role:
-      path: ${ssm:/configuration/iam/path, "/"}
-      permissionsBoundary: ${ssm:/configuration/iam/full_permissions_boundary_policy}
+      path: ${self:custom.iamPath}
+      permissionsBoundary: ${self:custom.iamPermissionsBoundary}
       statements:
         - Effect: 'Allow'
           Action:
