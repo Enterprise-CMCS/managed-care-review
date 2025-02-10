@@ -33,7 +33,7 @@ async function findAllContractsWithHistoryBySubmitInfo(
     for (const contract of contracts) {
         const parsed = {
             contractID: contract.id,
-            contract: await parseContractWithHistory(contract)
+            contract: parseContractWithHistory(contract)
         }
         parsedContracts = parsedContracts.concat(parsed)
     }

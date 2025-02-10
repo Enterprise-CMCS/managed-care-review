@@ -56,9 +56,9 @@ function arrayOrFirstError<T>(
 // ContractRevisions in reverse chronological order. Each revision is a change to this
 // Contract with submit and unlock info. Changes to the data of this contract, or changes
 // to the data or relations of associate revisions will all surface as new ContractRevisions
-async function parseContractWithHistory(
+function parseContractWithHistory(
     contract: ContractTableFullPayload
-): Promise<ContractType | Error> {
+): ContractType | Error {
     const contractWithHistory = contractWithHistoryToDomainModel(contract)
     if (contractWithHistory instanceof Error) {
         console.warn(
@@ -67,7 +67,7 @@ async function parseContractWithHistory(
         return contractWithHistory
     }
 
-    const parseContract = await contractSchema.safeParseAsync(contractWithHistory)
+    const parseContract = contractSchema.safeParse(contractWithHistory)
     if (!parseContract.success) {
         const error = `ERROR: attempting to parse prisma contract with history failed: ${parseContract.error}`
         console.warn(error, contractWithHistory, parseContract.error)
