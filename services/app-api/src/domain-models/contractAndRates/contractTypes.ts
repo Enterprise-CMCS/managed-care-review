@@ -12,15 +12,15 @@ import {
 } from './formDataTypes'
 
 const contractSchema = contractWithoutDraftRatesSchema.extend({
-    withdrawnRates: z.lazy(() => z.array(rateWithoutDraftContractsSchema).optional()),
-    draftRates: z.lazy(() => z.array(rateWithoutDraftContractsSchema).optional()),
+    withdrawnRates: z.array(rateWithoutDraftContractsSchema).optional(),
+    draftRates: z.array(rateWithoutDraftContractsSchema).optional(),
 })
 
 const unlockedContractSchema = contractSchema.extend({
-    status: z.lazy(() => unlockedContractStatusSchema),
+    status: unlockedContractStatusSchema,
     // Since this is a contract in UNLOCKED status, there will be a draftRevision and draftRates
-    draftRevision: z.lazy(() => contractRevisionSchema),
-    draftRates: z.lazy(() => z.array(rateWithoutDraftContractsSchema)),
+    draftRevision: contractRevisionSchema,
+    draftRates: z.array(rateWithoutDraftContractsSchema),
 })
 
 const draftContractSchema = contractSchema.extend({

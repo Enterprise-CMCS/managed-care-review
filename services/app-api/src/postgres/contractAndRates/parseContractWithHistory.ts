@@ -67,14 +67,15 @@ function parseContractWithHistory(
         return contractWithHistory
     }
 
-    const parseContract = contractSchema.safeParse(contractWithHistory)
-    if (!parseContract.success) {
-        const error = `ERROR: attempting to parse prisma contract with history failed: ${parseContract.error}`
-        console.warn(error, contractWithHistory, parseContract.error)
-        return parseContract.error
-    }
+    return contractWithHistory
+    // const parseContract = contractSchema.safeParse(contractWithHistory)
+    // if (!parseContract.success) {
+    //     const error = `ERROR: attempting to parse prisma contract with history failed: ${parseContract.error}`
+    //     console.warn(error, contractWithHistory, parseContract.error)
+    //     return parseContract.error
+    // }
 
-    return parseContract.data
+    // return parseContract.data
 }
 
 function contractRevisionToDomainModel(
