@@ -17,11 +17,22 @@ import {
 } from '../attributeHelper'
 import { GraphQLError } from 'graphql/index'
 import type { ContractOrErrorArrayType } from '../../postgres/contractAndRates/findAllContractsWithHistoryByState'
+import { performance,  PerformanceObserver} from 'perf_hooks'
+
+const perfObserver = new PerformanceObserver((items) => {
+  items.getEntries().forEach((entry) => {
+    console.log(entry)
+  })
+})
+
+perfObserver.observe({ entryTypes: ["measure"], buffered: true })
+performance.measure('Start to Now');
 
 const parseContracts = (
     contractsWithHistory: ContractOrErrorArrayType,
     span?: Span
 ): ContractType[] => {
+    // performance.measure('beginParseContract to Now', 'beginParseContract');
     // separate valid contracts and errors
     const parsedContracts: ContractType[] = []
     const errorParseContracts: string[] = []
@@ -43,7 +54,8 @@ const parseContracts = (
         logError('indexContractsResolver', errMessage)
         setErrorAttributesOnActiveSpan(errMessage, span)
     }
-
+    // performance.mark('finishParseContract');
+    // performance.measure('beginParseContract to finishParseContract', 'beginParseContract', 'finishParseContract');
     return parsedContracts
 }
 
@@ -61,13 +73,18 @@ const formatContracts = (results: ContractType[]) => {
     return { totalCount: edges.length, edges }
 }
 
+// performance.measure('Start to Now');
+
+// performance.mark('A');
 export function indexContractsResolver(
     store: Store
 ): QueryResolvers['indexContracts'] {
     return async (_parent, _args, context) => {
+        // performance.measure('A to Now', 'A');
         const { user, ctx, tracer } = context
         const span = tracer?.startSpan('indexContracts', {}, ctx)
         setResolverDetailsOnActiveSpan('indexContracts', user, span)
+        // performance.measure('beginParseContract to Now', 'beginParseContract');
 
         if (isStateUser(user)) {
             const contractsWithHistory =
@@ -99,11 +116,14 @@ export function indexContractsResolver(
             const parsedContracts = parseContracts(contractsWithHistory, span)
             return formatContracts(parsedContracts)
         } else if (hasAdminPermissions(user) || hasCMSPermissions(user)) {
+            performance.mark('beginParseContract');
+            
             const contractsWithHistory =
                 await store.findAllContractsWithHistoryBySubmitInfo()
-
+                performance.mark('finishParseContract');
+                performance.measure('beginParseContract to finishParseContract', 'beginParseContract', 'finishParseContract');
             if (contractsWithHistory instanceof Error) {
-                const errMessage = `Issue finding contracts with history by submit info. Message: ${contractsWithHistory.message}`
+                const errMessage = `Issue finding contracts with history by submit info. Message: ${contractsWithHistory.message} AWESOME`
                 logError('indexContracts', errMessage)
                 setErrorAttributesOnActiveSpan(errMessage, span)
 
@@ -126,7 +146,6 @@ export function indexContractsResolver(
             logSuccess('indexContracts')
             setSuccessAttributesOnActiveSpan(span)
             const parsedContracts = parseContracts(contractsWithHistory, span)
-
             return formatContracts(parsedContracts)
         } else {
             const errMsg = 'user not authorized to fetch state data'

@@ -29,7 +29,7 @@ import {
 import type { ContractTableWithoutDraftRates } from './prismaSubmittedContractHelpers'
 import type { ContractTableFullPayload } from './prismaFullContractRateHelpers'
 import type { ContractReviewActionType } from '../../domain-models/contractAndRates/contractReviewActionType'
-
+import { ZodAccelerator } from "@duplojs/zod-accelerator";
 // This function might be generally useful later on. It takes an array of objects
 // that can be errors and either returns the first error, or returns the list but with
 // the assertion that none of the elements in the array are errors.
@@ -67,7 +67,7 @@ function parseContractWithHistory(
         return contractWithHistory
     }
 
-    const parseContract = contractSchema.safeParse(contractWithHistory)
+    const parseContract = ZodAccelerator.build(contractSchema).safeParse(contractWithHistory)
     if (!parseContract.success) {
         const error = `ERROR: attempting to parse prisma contract with history failed: ${parseContract.error}`
         console.warn(error, contractWithHistory, parseContract.error)
