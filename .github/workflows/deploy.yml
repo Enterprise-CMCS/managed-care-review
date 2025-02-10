@@ -336,6 +336,16 @@ jobs:
     needs: [deploy-infra, begin-deployment, deploy-app]
     env:
       SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_V4_LICENSE }}
+      CLOUDFRONT_CERT_ARN: ${{ secrets.cloudfront_cert_arn }}
+      CLOUDFRONT_SB_DOMAIN_NAME: ${{ secrets.cloundfront_sb_domain_name }}
+      VPC_ID: ${{ secrets.vpc_id }}
+      SG_ID: ${{ secrets.sg_id }}
+      SUBNET_PRIVATE_A_ID: ${{ secrets.subnet_private_a_id }}
+      SUBNET_PRIVATE_B_ID: ${{ secrets.subnet_private_b_id }}
+      SUBNET_PRIVATE_C_ID: ${{ secrets.subnet_private_c_id }}
+      SUBNET_PUBLIC_A_ID: ${{ secrets.subnet_public_a_id }}
+      IAM_PERMISSIONS_BOUNDARY: ${{ secrets.iam_permissions_boundary }}
+      IAM_PATH: ${{ secrets.iam_path }}
     environment: dev
     if: |
       always()
