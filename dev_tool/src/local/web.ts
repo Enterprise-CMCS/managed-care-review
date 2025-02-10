@@ -5,6 +5,7 @@ import { checkStageAccess, getWebAuthVars } from '../serverless.js'
 
 import { compileGraphQLTypesWatchOnce } from './graphql.js'
 import { compileProtoWatchOnce } from './proto.js'
+import { watchPackagesOnce } from './packages.js'
 
 async function installWebDeps(runner: LabeledProcessRunner) {
     return runner.runCommandAndOutput('web deps', ['pnpm', 'install'], '')
@@ -22,7 +23,7 @@ export async function runWebLocally(runner: LabeledProcessRunner) {
         ''
     )
     //Ensures we watch files in the packages directory for any changes to trigger build:packages
-    runner.runCommandAndOutput('watch packages', ['pnpm', 'packages:watch'], '')
+    watchPackagesOnce(runner)
     await installWebDepsOnce(runner)
 
     runner.runCommandAndOutput('web', ['pnpm', 'start'], 'services/app-web')

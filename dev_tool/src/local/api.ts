@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
 import LabeledProcessRunner from '../runner.js'
 import { compileGraphQLTypesWatchOnce } from './graphql.js'
+import { watchPackagesOnce } from './packages.js'
 import { installPrismaDeps } from './postgres.js'
 import { compileProtoWatchOnce } from './proto.js'
 
@@ -12,7 +13,7 @@ export async function installAPIDeps(runner: LabeledProcessRunner) {
         ''
     )
     //Ensures we watch files in the packages directory for any changes to trigger build:packages
-    runner.runCommandAndOutput('watch packages', ['pnpm', 'packages:watch'], '')
+    watchPackagesOnce(runner)
     // prisma requires that prisma generate is run after any pnpm install
     return installPrismaDeps(runner)
 }
