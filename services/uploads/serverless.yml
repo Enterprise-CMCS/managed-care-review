@@ -53,7 +53,7 @@ provider:
             - !Sub arn:aws:lambda:${self:provider.region}:${AWS::AccountId}:function:${self:service}-${sls:stage}-avAuditFiles
 
 custom:
-  region: ${aws:region}
+  region: us-east-1
   reactAppOtelCollectorUrl: ${env:VITE_APP_OTEL_COLLECTOR_URL, ssm:/configuration/react_app_otel_collector_url}
   authorizedKeys:
     - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDaR+UVq61k14jcuSFfoCfTxvB1IyhU3IQFp4OjpiN4fYMBjE9USeNoHon2ux8VTvL0nRc7Zn4g9HemxiDjdawUxh2oJ8GOTsiFTEWic2nf90SnbjBMn1OZELvMiZzoYDjQFvEp+AgETBA5nhrbHyxWQWIBa7A+XqiqnX0lcZ1p+x8sLIl4F0e583lJeuPQPVkpCicf2GDdtG1TnPxltqJgGaeVSONivpxeVofJwG4DCXy1b1xSo1NG0gzy9BWFJwOWKmZAk6nYq+rcxZg+TgU1x5WJ6z8/CS0PMSoTMRRIejm734PSmkGCU+WkR139Dl8o3DvQh/VQD71fxw30aONG98PSBJEUd5IouuiPPNYGP+fuDWgCBkaoA6JKlSVtbneNt1Qkm10FFHqExqzGWaSDeUCh6da3WG1BW4KZcC3MQ8CTEG47LFqUG5TvhklhiAAJH7cGF9W9SU1Beq2A6Wx1R/yGvgH/7U6X0/QfJi1ljY32pPzP2S+gzzOVGJgrMz3qRRgNvcY5k8EMbIuTK2yanFFHuVaWQq/zZW1T376oyHMfWdBB9WAtIKwpCgA5kYUu0XCo3XM0fWibZFIa/cEBNSKH1gEFKCBXolsc2+c4iZtdbG4YCHLgzOOqklERMEeK5dXq9Rz7UjoE91UVIyO2/d+mXmiVDRgtUsiQ34Sxyw== mojo.talantikite@gmail.com
