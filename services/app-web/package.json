@@ -135,10 +135,10 @@
         "zod": "^3.24.1"
     },
     "devDependencies": {
-        "@aws-sdk/client-amplify": "^3.741.0",
-        "@aws-sdk/client-s3": "^3.741.0",
-        "@aws-sdk/s3-request-presigner": "^3.741.0",
-        "@chromatic-com/storybook": "^1",
+        "@aws-sdk/client-amplify": "^3.744.0",
+        "@aws-sdk/client-s3": "^3.744.0",
+        "@aws-sdk/s3-request-presigner": "^3.744.0",
+        "@chromatic-com/storybook": "^3",
         "@peculiar/webcrypto": "^1.5.0",
         "@storybook/addon-a11y": "^8.2.9",
         "@storybook/addon-essentials": "^8.2.9",
