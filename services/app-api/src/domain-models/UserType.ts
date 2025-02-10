@@ -1,6 +1,8 @@
 import { z } from 'zod'
-import { stateType } from './StateType'
-import { divisionType } from './DivisionType'
+import * as v from "@badrap/valita";
+
+import { stateType, valitaStateType } from './StateType'
+import { divisionType, valitaDivisionType } from './DivisionType'
 
 type UserType =
     | StateUserType
@@ -19,6 +21,15 @@ const userRolesSchema = z.enum([
     'BUSINESSOWNER_USER',
 ])
 
+const valitaUserRolesSchema = v.union( // no support for enum
+    v.literal('STATE_USER'),
+    v.literal('CMS_USER'),
+    v.literal('CMS_APPROVER_USER'),
+    v.literal('ADMIN_USER'),
+    v.literal('HELPDESK_USER'),
+    v.literal('BUSINESSOWNER_USER'),
+)
+
 const baseUserSchema = z.object({
     id: z.string().uuid(),
     role: userRolesSchema,
@@ -27,9 +38,21 @@ const baseUserSchema = z.object({
     familyName: z.string(),
 })
 
+const valitaBaseUserSchema = v.object({
+    id: v.string(), // no support for uuid
+    role: valitaUserRolesSchema,
+    email: v.string(),
+    givenName: v.string(),
+    familyName: v.string(),
+})
+
 const stateUserSchema = baseUserSchema.extend({
     role: z.literal(userRolesSchema.enum.STATE_USER),
     stateCode: z.string(),
+})
+const valitaStateUserSchema = valitaBaseUserSchema.extend({
+    role: v.literal(userRolesSchema.enum.STATE_USER),
+    stateCode: v.string(),
 })
 
 const cmsUserSchema = baseUserSchema.extend({
@@ -37,14 +60,25 @@ const cmsUserSchema = baseUserSchema.extend({
     stateAssignments: z.array(stateType.omit({ assignedCMSUsers: true })),
     divisionAssignment: divisionType.optional(),
 })
+const valitaCmsUserSchema = valitaBaseUserSchema.extend({
+    role: v.literal(userRolesSchema.enum.CMS_USER),
+    stateAssignments: v.array(valitaStateType), // omit not supported
+    divisionAssignment: valitaDivisionType.optional(),
+})
 
 const cmsApproverUserSchema = baseUserSchema.extend({
     role: z.literal(userRolesSchema.enum.CMS_APPROVER_USER),
     stateAssignments: z.array(stateType.omit({ assignedCMSUsers: true })),
     divisionAssignment: divisionType.optional(),
 })
+const valitaCmsApproverUserSchema = valitaBaseUserSchema.extend({
+    role: v.literal(userRolesSchema.enum.CMS_APPROVER_USER),
+    stateAssignments: v.array(valitaStateType), // omit not supported
+    divisionAssignment: valitaDivisionType.optional(),
+})
 
 const cmsUsersUnionSchema = z.union([cmsUserSchema, cmsApproverUserSchema])
+const valitaCmsUsersUnionSchema = v.union(valitaCmsUserSchema, valitaCmsApproverUserSchema)
 
 const adminUserSchema = baseUserSchema.extend({
     role: z.literal(userRolesSchema.enum.ADMIN_USER),
@@ -95,4 +129,8 @@ export {
     userRolesSchema,
     baseUserSchema,
     cmsUsersUnionSchema,
+    valitaBaseUserSchema,
+    valitaUserRolesSchema,
+    valitaCmsUsersUnionSchema,
+    valitaStateUserSchema,
 }

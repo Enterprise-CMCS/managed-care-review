@@ -5,6 +5,7 @@ export {
     draftContractSchema,
     unlockedContractSchema,
     contractSubmitters,
+    valitaContractSchema
 } from './contractTypes'
 
 export { contractFormDataSchema, rateFormDataSchema } from './formDataTypes'

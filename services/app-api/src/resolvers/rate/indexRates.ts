@@ -17,11 +17,23 @@ import type { RateOrErrorArrayType } from '../../postgres/contractAndRates'
 import { logError } from '../../logger'
 import { GraphQLError } from 'graphql'
 import type { RateType } from '../../domain-models/contractAndRates'
+import { performance,  PerformanceObserver} from 'perf_hooks'
 
+const perfObserver = new PerformanceObserver((items) => {
+    items.getEntries().forEach((entry) => {
+      console.log(entry)
+    })
+})
+perfObserver.observe({ entryTypes: ["measure"], buffered: true })
+performance.measure('Start to Now');
+
+performance.mark('beginParseRate');
 const validateAndReturnRates = (
     results: RateOrErrorArrayType,
     span?: Span
 ): RateType[] => {
+    performance.measure('beginParseRate to Now', 'beginParseRate');
+
     // separate valid rates and errors
     const parsedRates: RateType[] = []
     const errorParseRates: string[] = []
@@ -41,6 +53,8 @@ const validateAndReturnRates = (
         logError('indexRatesResolver', errMessage)
         setErrorAttributesOnActiveSpan(errMessage, span)
     }
+    performance.mark('finishParseRate');
+    performance.measure('beginParseRate to finishParseRate', 'beginParseRate', 'finishParseRate');
     return parsedRates
 }
 

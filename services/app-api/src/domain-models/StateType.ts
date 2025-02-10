@@ -1,5 +1,7 @@
 import { z } from 'zod'
-import { divisionType } from './DivisionType'
+import * as v from "@badrap/valita";
+
+import { divisionType, valitaDivisionType } from './DivisionType'
 
 const stateType = z.object({
     stateCode: z.string(),
@@ -25,7 +27,31 @@ const stateType = z.object({
     ),
 })
 
+const valitaStateType = v.object({
+    stateCode: v.string(),
+    name: v.string(),
+    assignedCMSUsers: v.array(
+        v.object({
+            id: v.string(), // uuid not supported
+            role: v.union(
+                v.literal('CMS_USER'),
+                v.literal('CMS_APPROVER_USER'),
+            ),
+            email: v.string(),
+            givenName: v.string(),
+            familyName: v.string(),
+            stateAssignments: v.array(
+                v.object({
+                    stateCode: v.string(),
+                    name: v.string(),
+                })
+            ),
+            divisionAssignment: valitaDivisionType.optional(),
+        })
+    ),
+})
+
 type StateType = z.infer<typeof stateType>
 
 export type { StateType }
-export { stateType }
+export { stateType, valitaStateType }

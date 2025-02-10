@@ -3,7 +3,7 @@ import type {
     ContractRevisionType,
     RateRevisionType,
 } from '../../domain-models/contractAndRates'
-import { contractSchema } from '../../domain-models/contractAndRates'
+import { valitaContractSchema } from '../../domain-models/contractAndRates'
 import type { ContractWithoutDraftRatesType } from '../../domain-models/contractAndRates/baseContractRateTypes'
 import type { ContractPackageSubmissionType } from '../../domain-models/contractAndRates/packageSubmissions'
 import {
@@ -58,7 +58,7 @@ function arrayOrFirstError<T>(
 // to the data or relations of associate revisions will all surface as new ContractRevisions
 function parseContractWithHistory(
     contract: ContractTableFullPayload
-): ContractType | Error {
+): ContractType | Error | any {
     const contractWithHistory = contractWithHistoryToDomainModel(contract)
     if (contractWithHistory instanceof Error) {
         console.warn(
@@ -67,8 +67,7 @@ function parseContractWithHistory(
         return contractWithHistory
     }
 
-    return contractWithHistory
-    // const parseContract = contractSchema.safeParse(contractWithHistory)
+    const parseContract = valitaContractSchema.parse(contractWithHistory)
     // if (!parseContract.success) {
     //     const error = `ERROR: attempting to parse prisma contract with history failed: ${parseContract.error}`
     //     console.warn(error, contractWithHistory, parseContract.error)
@@ -76,6 +75,7 @@ function parseContractWithHistory(
     // }
 
     // return parseContract.data
+    return parseContract
 }
 
 function contractRevisionToDomainModel(

@@ -1,6 +1,8 @@
 import { z } from 'zod'
-import { contractRevisionSchema, rateRevisionSchema } from './revisionTypes'
-import { updateInfoSchema } from './updateInfoType'
+import * as v from "@badrap/valita";
+
+import { contractRevisionSchema, rateRevisionSchema, valitaContractRevisionSchema, valitaRateRevisionSchema } from './revisionTypes'
+import { updateInfoSchema, valitaUpdateInfoSchema } from './updateInfoType'
 
 const contractPackageSubmissionSchema = z.object({
     submitInfo: updateInfoSchema,
@@ -9,6 +11,15 @@ const contractPackageSubmissionSchema = z.object({
     ),
     contractRevision: contractRevisionSchema,
     rateRevisions: z.array(rateRevisionSchema),
+})
+
+const valitaContractPackageSubmissionSchema = v.object({
+    submitInfo: valitaUpdateInfoSchema,
+    submittedRevisions: v.array(
+        v.union(valitaContractRevisionSchema, valitaRateRevisionSchema)
+    ),
+    contractRevision: valitaContractRevisionSchema,
+    rateRevisions: v.array(valitaRateRevisionSchema),
 })
 
 const packgeSubmissionCause = z.union([
@@ -57,6 +68,7 @@ export {
     contractPackageSubmissionWithCauseSchema,
     ratePackageSubmissionWithCauseSchema,
     ratePackageSubmissionSchema,
+    valitaContractPackageSubmissionSchema,
 }
 
 export type {

@@ -123,7 +123,7 @@ export function indexContractsResolver(
                 performance.mark('finishParseContract');
                 performance.measure('beginParseContract to finishParseContract', 'beginParseContract', 'finishParseContract');
             if (contractsWithHistory instanceof Error) {
-                const errMessage = `Issue finding contracts with history by submit info. Message: ${contractsWithHistory.message} AWESOME`
+                const errMessage = `Issue finding contracts with history by submit info. Message: ${contractsWithHistory.message}`
                 logError('indexContracts', errMessage)
                 setErrorAttributesOnActiveSpan(errMessage, span)
 
