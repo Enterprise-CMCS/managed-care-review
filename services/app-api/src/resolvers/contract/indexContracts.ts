@@ -119,7 +119,7 @@ export function indexContractsResolver(
             performance.mark('beginParseContract');
             
             const contractsWithHistory =
-                await store.findAllContractsWithHistoryBySubmitInfo()
+                await store.findAllContractsWithHistoryBySubmitInfo(false)
                 performance.mark('finishParseContract');
                 performance.measure('beginParseContract to finishParseContract', 'beginParseContract', 'finishParseContract');
             if (contractsWithHistory instanceof Error) {

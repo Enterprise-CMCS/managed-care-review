@@ -4,7 +4,8 @@ import { parseContractWithHistory } from './parseContractWithHistory'
 import { includeFullContract } from './prismaFullContractRateHelpers'
 import type { ContractOrErrorArrayType } from './findAllContractsWithHistoryByState'
 async function findAllContractsWithHistoryBySubmitInfo(
-    client: PrismaTransactionType
+    client: PrismaTransactionType,
+    useZod: boolean = true
 ): Promise<ContractOrErrorArrayType | NotFoundError | Error> {
     try {
         const contracts = await client.contractTable.findMany({
@@ -33,7 +34,7 @@ async function findAllContractsWithHistoryBySubmitInfo(
     for (const contract of contracts) {
         const parsed = {
             contractID: contract.id,
-            contract: parseContractWithHistory(contract)
+            contract: parseContractWithHistory(contract, useZod)
         }
         parsedContracts = parsedContracts.concat(parsed)
     }
