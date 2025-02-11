@@ -10,7 +10,7 @@ import {
 } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { getRouteName } from '../../routeHelpers'
-import { useFetchRateQuery } from '../../gen/gqlClient'
+import { useFetchRateWithQuestionsQuery } from '../../gen/gqlClient'
 import { ApolloError } from '@apollo/client'
 import { handleApolloError } from '@mc-review/helpers'
 import { Error404 } from '../Errors/Error404Page'
@@ -36,12 +36,13 @@ export const RateSummarySideNav = () => {
         pathname
     )
 
-    const { data, loading, error } = useFetchRateQuery({
+    const { data, loading, error } = useFetchRateWithQuestionsQuery({
         variables: {
             input: {
                 rateID: id,
             },
         },
+        fetchPolicy: 'cache-and-network',
         skip: Boolean(shouldRedirect), //skip as we are redirecting.
     })
 
@@ -66,7 +67,16 @@ export const RateSummarySideNav = () => {
         }
     }
 
-    if (error) {
+    const rate = data?.fetchRate.rate
+
+    // Handle loading and error states for fetching data while using cached data
+    if (!data && loading) {
+        return (
+            <GridContainer>
+                <Loading />
+            </GridContainer>
+        )
+    } else if (!data && error) {
         const err = error
         console.error('Error from API fetch', error)
         if (err instanceof ApolloError) {
@@ -79,21 +89,10 @@ export const RateSummarySideNav = () => {
 
         recordJSException(err)
         return <GenericErrorPage /> // api failure or protobuf decode failure
-    }
-
-    if (loading) {
-        return (
-            <GridContainer>
-                <Loading />
-            </GridContainer>
-        )
-    }
-
-    const rate = data?.fetchRate.rate
-
-    if (!loggedInUser || !rate || rate.status === 'DRAFT') {
+    } else if (!loggedInUser || !rate || rate.status === 'DRAFT') {
         return <GenericErrorPage />
     }
+
     // All of this logic is to enable conditional styles with sidenabv
     const isEditable = isUnlockedOrDraft(rate.status)
     const isFormPage = shouldUseFormPageStyles(

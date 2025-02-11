@@ -14,7 +14,10 @@ import {
 } from '../../components'
 import { Loading } from '../../components'
 import { usePage } from '../../contexts/PageContext'
-import { useFetchContractQuery, UpdateInformation } from '../../gen/gqlClient'
+import {
+    UpdateInformation,
+    useFetchContractWithQuestionsQuery,
+} from '../../gen/gqlClient'
 import { ErrorForbiddenPage } from '../Errors/ErrorForbiddenPage'
 import { Error404 } from '../Errors/Error404Page'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
@@ -58,20 +61,16 @@ export const SubmissionSummary = (): React.ReactElement => {
     )
 
     // API requests
-    const {
-        data: fetchContractData,
-        loading: fetchContractLoading,
-        error: fetchContractError,
-    } = useFetchContractQuery({
+    const { data, loading, error } = useFetchContractWithQuestionsQuery({
         variables: {
             input: {
                 contractID: id ?? 'unknown-contract',
             },
         },
-        fetchPolicy: 'network-only',
+        fetchPolicy: 'cache-and-network',
     })
 
-    const contract = fetchContractData?.fetchContract.contract
+    const contract = data?.fetchContract.contract
     const name =
         contract && contract?.packageSubmissions.length > 0
             ? contract.packageSubmissions[0].contractRevision.contractName
@@ -83,27 +82,19 @@ export const SubmissionSummary = (): React.ReactElement => {
         })
     }, [name, updateHeading])
 
-    if (fetchContractLoading) {
+    // Handle loading and error states for fetching data while using cached data
+    if (!data && loading) {
         return (
             <GridContainer>
                 <Loading />
             </GridContainer>
         )
-    } else if (fetchContractError) {
-        //error handling for a state user that tries to access rates for a different state
-        if (
-            fetchContractError?.graphQLErrors[0]?.extensions?.code ===
-            'FORBIDDEN'
-        ) {
+    } else if (!data && error) {
+        if (error?.graphQLErrors[0]?.extensions?.code === 'FORBIDDEN') {
             return (
-                <ErrorForbiddenPage
-                    errorMsg={fetchContractError.graphQLErrors[0].message}
-                />
+                <ErrorForbiddenPage errorMsg={error.graphQLErrors[0].message} />
             )
-        } else if (
-            fetchContractError?.graphQLErrors[0]?.extensions?.code ===
-            'NOT_FOUND'
-        ) {
+        } else if (error?.graphQLErrors[0]?.extensions?.code === 'NOT_FOUND') {
             return <Error404 />
         } else {
             return <GenericErrorPage />

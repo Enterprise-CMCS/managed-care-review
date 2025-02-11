@@ -5,7 +5,7 @@ import { RateSummarySideNav } from './RateSummarySideNav'
 import { RateSummary } from '../RateSummary'
 import {
     fetchCurrentUserMock,
-    fetchRateMockSuccess,
+    fetchRateWithQuestionsMockSuccess,
     mockValidCMSUser,
     rateDataMock,
 } from '@mc-review/mocks'
@@ -37,7 +37,7 @@ describe('RateSummarySideNav', () => {
                         user: mockValidCMSUser(),
                         statusCode: 200,
                     }),
-                    fetchRateMockSuccess(rate),
+                    fetchRateWithQuestionsMockSuccess({ rate }),
                 ],
             },
             routerProvider: {
@@ -89,7 +89,7 @@ describe('RateSummarySideNav', () => {
                         user: mockValidCMSUser(),
                         statusCode: 200,
                     }),
-                    fetchRateMockSuccess(rate),
+                    fetchRateWithQuestionsMockSuccess({ rate }),
                 ],
             },
             routerProvider: {
@@ -128,7 +128,7 @@ describe('RateSummarySideNav', () => {
                             user: mockValidCMSUser(),
                             statusCode: 200,
                         }),
-                        fetchRateMockSuccess(rate),
+                        fetchRateWithQuestionsMockSuccess({ rate }),
                     ],
                 },
                 routerProvider: {

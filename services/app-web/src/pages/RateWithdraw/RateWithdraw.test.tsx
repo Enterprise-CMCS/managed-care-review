@@ -4,6 +4,7 @@ import {
     mockValidCMSUser,
     fetchContractMockSuccess,
     fetchRateMockSuccess,
+    fetchRateWithQuestionsMockSuccess,
     withdrawRateMockFailure,
     mockContractPackageSubmitted,
     mockRateSubmittedWithQuestions,
@@ -68,18 +69,13 @@ describe('RateWithdraw', () => {
                             user: mockValidCMSUser(),
                             statusCode: 200,
                         }),
-                        fetchContractMockSuccess({
-                            contract,
+                        fetchRateWithQuestionsMockSuccess({
+                            rate: withdrawnRate,
                         }),
                         fetchRateMockSuccess(rate),
                         withdrawRateMockSuccess({ rateData: rate }),
-                        fetchRateMockSuccess(withdrawnRate),
                         fetchContractMockSuccess({
                             contract,
-                        }),
-                        fetchCurrentUserMock({
-                            user: mockValidCMSUser(),
-                            statusCode: 200,
                         }),
                     ],
                 },
@@ -117,7 +113,6 @@ describe('RateWithdraw', () => {
     })
 
     it('renders generic API error on failed withdraw', async () => {
-        const contract = mockContractPackageSubmitted({ id: 'test-abc-123' })
         const rate = mockRateSubmittedWithQuestions({
             id: 'test-abc-123',
             parentContractID: 'test-abc-123',
@@ -143,9 +138,7 @@ describe('RateWithdraw', () => {
                             user: mockValidCMSUser(),
                             statusCode: 200,
                         }),
-                        fetchContractMockSuccess({
-                            contract,
-                        }),
+                        fetchRateWithQuestionsMockSuccess({ rate }),
                         fetchRateMockSuccess(rate),
                         withdrawRateMockFailure(),
                     ],
@@ -178,6 +171,10 @@ describe('RateWithdraw', () => {
     })
 
     it('renders form validation error when required withdraw reason field is missing', async () => {
+        const rate = mockRateSubmittedWithQuestions({
+            id: 'test-abc-123',
+            parentContractID: 'test-abc-123',
+        })
         const { user } = renderWithProviders(
             <Routes>
                 <Route element={<RateSummarySideNav />}>
@@ -198,6 +195,7 @@ describe('RateWithdraw', () => {
                             user: mockValidCMSUser(),
                             statusCode: 200,
                         }),
+                        fetchRateWithQuestionsMockSuccess({ rate }),
                         fetchRateMockSuccess({ id: 'test-abc-123' }),
                     ],
                 },

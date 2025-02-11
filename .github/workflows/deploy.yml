@@ -282,6 +282,7 @@ jobs:
       aws_account_id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
       nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
       slack_webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+      serverless_license_key: ${{ secrets.SERVERLESS_V4_LICENSE }}
 
   deploy-app:
     needs:

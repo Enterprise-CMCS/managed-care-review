@@ -37,7 +37,7 @@ export const ContractQuestionResponse = () => {
                 contractID: id,
             },
         },
-        fetchPolicy: 'network-only',
+        fetchPolicy: 'cache-and-network',
     })
 
     const contract = data?.fetchContract.contract
@@ -48,15 +48,16 @@ export const ContractQuestionResponse = () => {
         updateHeading({ customHeading: contractName })
     }, [contractName, updateHeading])
 
-    if (loading) {
+    // Handle loading and error states for fetching data while using cached data
+    if (!data && loading) {
         return <ErrorOrLoadingPage state="LOADING" />
-    }
-
-    if (error) {
+    } else if (!data && error) {
         return <ErrorOrLoadingPage state={handleAndReturnErrorState(error)} />
-    }
-
-    if (contract?.status === 'DRAFT' || !contractRev || !contract.questions) {
+    } else if (
+        contract?.status === 'DRAFT' ||
+        !contractRev ||
+        !contract.questions
+    ) {
         return <GenericErrorPage />
     }
 

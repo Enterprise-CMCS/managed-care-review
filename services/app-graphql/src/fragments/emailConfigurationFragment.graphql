@@ -1,0 +1,11 @@
+fragment emailConfigurationFragment on EmailConfiguration {
+    emailSource
+    devReviewTeamEmails
+    oactEmails
+    dmcpReviewEmails
+    dmcpSubmissionEmails
+    dmcoEmails
+    cmsReviewHelpEmailAddress
+    cmsRateHelpEmailAddress
+    helpDeskEmail
+}

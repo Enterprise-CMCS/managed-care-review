@@ -47,6 +47,7 @@ async function runAllBuild(runner: LabeledProcessRunner) {
         ['pnpm', 'build:packages'],
         ''
     )
+
     await runner.runCommandAndOutput('build', ['pnpm', 'build'], '')
 }
 

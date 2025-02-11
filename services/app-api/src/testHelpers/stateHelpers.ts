@@ -1,8 +1,9 @@
-import type { PrismaClient, State } from '@prisma/client'
+import type { State } from '@prisma/client'
 import { must } from './assertionHelpers'
+import type { ExtendedPrismaClient } from '../postgres/prismaClient'
 
 async function getStateRecord(
-    client: PrismaClient,
+    client: ExtendedPrismaClient,
     stateCode: string
 ): Promise<State> {
     const state = must(

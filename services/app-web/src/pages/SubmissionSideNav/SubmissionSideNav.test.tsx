@@ -7,7 +7,6 @@ import { ContractQuestionResponse } from '../QuestionResponse'
 import { renderWithProviders } from '../../testHelpers'
 import { RoutesRecord } from '@mc-review/constants'
 import {
-    fetchContractMockSuccess,
     fetchCurrentUserMock,
     mockContractPackageSubmitted,
     mockContractPackageSubmittedWithQuestions,
@@ -244,7 +243,8 @@ describe('SubmissionSideNav', () => {
 
     it('sidebar nav links routes to correct pages', async () => {
         let testLocation: Location
-        const testContract = mockContractPackageSubmittedWithQuestions('15')
+        const contract = mockContractPackageSubmittedWithQuestions()
+        contract.id = '15'
 
         renderWithProviders(<CommonRoutes />, {
             apolloProvider: {
@@ -254,28 +254,16 @@ describe('SubmissionSideNav', () => {
                         statusCode: 200,
                     }),
                     fetchContractWithQuestionsMockSuccess({
-                        contract: {
-                            ...testContract,
-                            id: '15',
-                        },
+                        contract,
                     }),
                     fetchContractWithQuestionsMockSuccess({
-                        contract: {
-                            ...testContract,
-                            id: '15',
-                        },
+                        contract,
                     }),
-                    fetchContractMockSuccess({
-                        contract: {
-                            ...testContract,
-                            id: '15',
-                        },
+                    fetchContractWithQuestionsMockSuccess({
+                        contract,
                     }),
-                    fetchContractMockSuccess({
-                        contract: {
-                            ...testContract,
-                            id: '15',
-                        },
+                    fetchContractWithQuestionsMockSuccess({
+                        contract,
                     }),
                 ],
             },

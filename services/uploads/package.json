@@ -19,8 +19,8 @@
         ]
     },
     "dependencies": {
-        "@aws-sdk/client-lambda": "^3.734.0",
-        "@aws-sdk/client-s3": "^3.735.0",
+        "@aws-sdk/client-lambda": "^3.744.0",
+        "@aws-sdk/client-s3": "^3.744.0",
         "@aws-sdk/util-utf8-node": "^3.259.0",
         "@opentelemetry/api": "^1.9.0",
         "@opentelemetry/exporter-metrics-otlp-http": "^0.57.1",
@@ -49,7 +49,7 @@
         "serverless-s3-local": "^0.8.4",
         "serverless-stack-termination-protection": "^2.0.2",
         "ts-jest": "^29.1.1",
-        "ts-loader": "^9.2.8",
+        "ts-loader": "^9.5.2",
         "vitest": "^2.1.5"
     }
 }

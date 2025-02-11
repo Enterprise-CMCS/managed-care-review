@@ -1,4 +1,4 @@
-import type { PrismaClient } from '@prisma/client'
+
 import type { Store } from '../postgres'
 import { NewPrismaClient } from '../postgres'
 
@@ -23,7 +23,7 @@ async function configurePrismaClient(): Promise<PrismaClient> {
         throw new Error('failed to configure postgres client for testing')
     }
 
-    return clientResult
+    return clientResult as unknown as PrismaClient
 }
 
 const sharedClientPromise = configurePrismaClient()
@@ -149,6 +149,12 @@ function mockStoreThatErrors(): Store {
             return genericError
         },
         withdrawRate: async (_ID) => {
+            return genericError
+        },
+        findEmailSettings: async () => {
+            return genericError
+        },
+        updateEmailSettings: async (_args) => {
             return genericError
         },
     }

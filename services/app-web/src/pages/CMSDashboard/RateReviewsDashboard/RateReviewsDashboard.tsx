@@ -9,16 +9,33 @@ import { Loading } from '../../../components'
 import { RateInDashboardType, RateReviewsTable } from './RateReviewsTable'
 import { ErrorFailedRequestPage } from '../../Errors/ErrorFailedRequestPage'
 import { RateTypeRecord } from '@mc-review/hpp'
+import { GenericErrorPage } from '../../Errors/GenericErrorPage'
 
 const RateReviewsDashboard = (): React.ReactElement => {
     const { loggedInUser } = useAuth()
     const isAdminUser = loggedInUser?.role === 'ADMIN_USER'
     const { data, loading, error } = useIndexRatesForDashboardQuery({
         variables: { input: { stateCode: undefined } },
+        fetchPolicy: 'cache-and-network',
+        pollInterval: 300000,
     })
 
+    // Handle loading and error states for fetching data while using cached data
+    if (!data && loading) {
+        return <Loading />
+    } else if (!data && error) {
+        return (
+            <ErrorFailedRequestPage
+                error={error}
+                testID="rate-review-dashboard"
+            />
+        )
+    } else if (!data || !loggedInUser) {
+        return <GenericErrorPage />
+    }
+
     const reviewRows: RateInDashboardType[] = []
-    data?.indexRates.edges
+    data.indexRates.edges
         .map((edge) => edge.node)
         .forEach((rate) => {
             // Skip rates that have been withdrawn
@@ -104,25 +121,14 @@ const RateReviewsDashboard = (): React.ReactElement => {
             })
         })
 
-    if (loading || !loggedInUser) {
-        return <Loading />
-    } else if (error) {
-        return (
-            <ErrorFailedRequestPage
-                error={error}
-                testID="rate-review-dashboard"
+    return (
+        <section className={styles.panel}>
+            <RateReviewsTable
+                tableData={reviewRows}
+                isAdminUser={isAdminUser}
             />
-        )
-    } else {
-        return (
-            <section className={styles.panel}>
-                <RateReviewsTable
-                    tableData={reviewRows}
-                    isAdminUser={isAdminUser}
-                />
-            </section>
-        )
-    }
+        </section>
+    )
 }
 
 export { RateReviewsDashboard }

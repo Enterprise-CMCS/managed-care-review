@@ -1,12 +1,13 @@
-import type { PrismaClient } from '@prisma/client'
+
 import type { RateQuestionType } from '../../domain-models'
+import type { ExtendedPrismaClient } from '../prismaClient'
 import {
     questionInclude,
     rateQuestionPrismaToDomainType,
 } from './questionHelpers'
 
 export async function findAllQuestionsByRate(
-    client: PrismaClient,
+    client: ExtendedPrismaClient,
     rateID: string
 ): Promise<RateQuestionType[] | Error> {
     try {

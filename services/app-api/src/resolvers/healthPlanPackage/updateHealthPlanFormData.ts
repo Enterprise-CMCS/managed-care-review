@@ -27,7 +27,9 @@ export function updateHealthPlanFormDataResolver(
         const span = tracer?.startSpan('updateHealthPlanFormData', {}, ctx)
         setResolverDetailsOnActiveSpan('updateHealthPlanFormData', user, span)
 
-        const featureFlags = await launchDarkly.allFlags(context)
+        const featureFlags = await launchDarkly.allFlags({
+            key: context.user.email,
+        })
 
         // This resolver is only callable by state users
         if (!isStateUser(context.user)) {

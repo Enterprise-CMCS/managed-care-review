@@ -1,17 +1,18 @@
-import type { PrismaClient } from '@prisma/client'
+
 import type {
     RateQuestionType,
     DivisionType,
     CMSUsersUnionType,
     CreateRateQuestionInputType,
 } from '../../domain-models'
+import type { ExtendedPrismaClient } from '../prismaClient'
 import {
     questionInclude,
     rateQuestionPrismaToDomainType,
 } from './questionHelpers'
 
 export async function insertRateQuestion(
-    client: PrismaClient,
+    client: ExtendedPrismaClient,
     questionInput: CreateRateQuestionInputType,
     user: CMSUsersUnionType
 ): Promise<RateQuestionType | Error> {

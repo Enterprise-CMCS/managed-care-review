@@ -2,7 +2,7 @@ import { findContractWithHistory } from './findContractWithHistory'
 import { NotFoundError } from '../postgresErrors'
 import type { ContractType } from '../../domain-models/contractAndRates'
 import type { PrismaTransactionType } from '../prismaTypes'
-import type { PrismaClient } from '@prisma/client'
+import type { ExtendedPrismaClient } from '../prismaClient'
 
 async function approveContractInsideTransaction(
     tx: PrismaTransactionType,
@@ -60,7 +60,7 @@ type ApproveContractArgsType = {
 }
 
 async function approveContract(
-    client: PrismaClient,
+    client: ExtendedPrismaClient,
     args: ApproveContractArgsType
 ): Promise<ContractType | NotFoundError | Error> {
     try {

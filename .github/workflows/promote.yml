@@ -170,6 +170,7 @@ jobs:
       aws_account_id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
       nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
       slack_webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+      serverless_license_key: ${{ secrets.SERVERLESS_V4_LICENSE }}
 
   promote-app-dev:
     needs: [promote-infra-dev, build-prisma-client-lambda-layer, unit-tests]
@@ -197,6 +198,7 @@ jobs:
       aws_account_id: ${{ secrets.VAL_AWS_ACCOUNT_ID }}
       nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
       slack_webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+      serverless_license_key: ${{ secrets.SERVERLESS_V4_LICENSE }}
 
   promote-app-val:
     needs: [promote-app-dev, promote-infra-val, unit-tests]
@@ -224,6 +226,7 @@ jobs:
       aws_account_id: ${{ secrets.PROD_AWS_ACCOUNT_ID }}
       nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
       slack_webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+      serverless_license_key: ${{ secrets.SERVERLESS_V4_LICENSE }}
 
   promote-app-prod:
     needs: [promote-app-val, promote-infra-prod, unit-tests]

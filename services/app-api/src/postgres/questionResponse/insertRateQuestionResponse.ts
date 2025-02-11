@@ -1,4 +1,4 @@
-import type { PrismaClient } from '@prisma/client'
+
 import type {
     InsertQuestionResponseArgs,
     RateQuestionType,
@@ -9,9 +9,10 @@ import {
     rateQuestionPrismaToDomainType,
 } from './questionHelpers'
 import { NotFoundError } from '../postgresErrors'
+import type { ExtendedPrismaClient } from '../prismaClient'
 
 export async function insertRateQuestionResponse(
-    client: PrismaClient,
+    client: ExtendedPrismaClient,
     response: InsertQuestionResponseArgs,
     user: StateUserType
 ): Promise<RateQuestionType | Error> {

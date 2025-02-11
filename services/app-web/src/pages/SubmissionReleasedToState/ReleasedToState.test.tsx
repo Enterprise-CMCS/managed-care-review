@@ -75,10 +75,10 @@ describe('ReleasedToState', () => {
                         }),
                         fetchContractWithQuestionsMockSuccess({
                             contract,
-                        }),
+                        }), // fetch from sidenav
                         fetchContractMockSuccess({
                             contract,
-                        }),
+                        }), // fetch from released to state page
                         approveContractMockSuccess({
                             contractID: 'test-abc-123',
                             contractData: approvedContract,
@@ -91,13 +91,10 @@ describe('ReleasedToState', () => {
                         }),
                         fetchContractWithQuestionsMockSuccess({
                             contract: approvedContract,
-                        }),
-                        fetchContractMockSuccess({
+                        }), // fetch from sidenav
+                        fetchContractWithQuestionsMockSuccess({
                             contract: approvedContract,
-                        }),
-                        fetchContractMockSuccess({
-                            contract: approvedContract,
-                        }),
+                        }), // fetch from summary page
                     ],
                 },
                 routerProvider: {

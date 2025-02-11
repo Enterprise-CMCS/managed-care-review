@@ -20,9 +20,8 @@ const fetchMcReviewSettingsMock =
                     fetchMcReviewSettings: {
                         __typename: 'FetchMcReviewSettingsPayload' as const,
                         emailConfiguration: {
+                            __typename: 'EmailConfiguration' as const,
                             emailSource: 'local@example.com',
-                            stage: 'localtest',
-                            baseUrl: 'http://localtest',
                             devReviewTeamEmails: ['test@example.com'],
                             cmsReviewHelpEmailAddress: 'mcog@example.com',
                             cmsRateHelpEmailAddress: 'rates@example.com',
