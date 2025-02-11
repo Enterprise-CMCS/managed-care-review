@@ -3,9 +3,8 @@
     "private": "true",
     "version": "1.0.0",
     "main": "index.js",
-    "type": "module",
     "scripts": {
-        "build": "tsc"
+        "build": "tsc --noEmit"
     },
     "devDependencies": {
         "@aws-sdk/types": "^3.734.0",
