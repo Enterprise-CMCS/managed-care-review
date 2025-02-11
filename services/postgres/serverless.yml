@@ -81,7 +81,7 @@ custom:
       before:package:createDeploymentArtifacts: pnpm build
       before:deploy:finalize: node dist/scripts/uploadScripts.js ${self:custom.stage}
   esbuild:
-    config: ./esbuild.config.cjs
+    config: ./esbuild.config.js
 
 package:
   individually: true
