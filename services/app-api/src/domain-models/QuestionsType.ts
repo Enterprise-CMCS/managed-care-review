@@ -1,19 +1,12 @@
 import { z } from 'zod'
-import * as v from "@badrap/valita";
-
-import { cmsUsersUnionSchema, valitaCmsUsersUnionSchema } from './UserType'
-import { questionResponseType, valitaQuestionResponseType } from './QuestionResponseType'
-import { divisionType, valitaDivisionType } from './DivisionType'
+import { cmsUsersUnionSchema } from './UserType'
+import { questionResponseType } from './QuestionResponseType'
+import { divisionType } from './DivisionType'
 
 const document = z.object({
     name: z.string(),
     s3URL: z.string(),
     downloadURL: z.string().optional(),
-})
-const valitaDocument = v.object({
-    name: v.string(),
-    s3URL: v.string(),
-    downloadURL: v.string().optional(),
 })
 
 const commonQuestionSchema = z.object({
@@ -24,29 +17,9 @@ const commonQuestionSchema = z.object({
     documents: z.array(document),
     responses: z.array(questionResponseType),
 })
-const DateType = v.string().chain((s) => {
-    const date = new Date(s);
-  
-    if (isNaN(+date)) {
-      return v.err("invalid date");
-    }
-  
-    return v.ok(date);
-  });
-const valitaCommonQuestionSchema = v.object({
-    id: v.string(), // uuid not supported
-    createdAt: DateType, // date not supported
-    addedBy: valitaCmsUsersUnionSchema,
-    division: valitaDivisionType, // DMCO, DMCP, OACT
-    documents: v.array(valitaDocument),
-    responses: v.array(valitaQuestionResponseType),
-})
 
 const contractQuestion = commonQuestionSchema.extend({
     contractID: z.string().uuid(),
-})
-const valitaContractQuestion = valitaCommonQuestionSchema.extend({
-    contractID: v.string(), // uuid not supported
 })
 
 const rateQuestion = commonQuestionSchema.extend({
@@ -56,9 +29,6 @@ const rateQuestion = commonQuestionSchema.extend({
 const contractQuestionEdge = z.object({
     node: contractQuestion,
 })
-const valitaContractQuestionEdge = v.object({
-    node: valitaContractQuestion,
-})
 
 const rateQuestionEdge = z.object({
     node: rateQuestion,
@@ -67,10 +37,6 @@ const rateQuestionEdge = z.object({
 const contractQuestionList = z.object({
     totalCount: z.number(),
     edges: z.array(contractQuestionEdge),
-})
-const valitaContractQuestionList = v.object({
-    totalCount: v.number(),
-    edges: v.array(valitaContractQuestionEdge),
 })
 
 const rateQuestionList = z.object({
@@ -82,12 +48,6 @@ const indexContractQuestionsPayload = z.object({
     DMCOQuestions: contractQuestionList,
     DMCPQuestions: contractQuestionList,
     OACTQuestions: contractQuestionList,
-})
-
-const valitaIndexContractQuestionsPayload = v.object({
-    DMCOQuestions: valitaContractQuestionList,
-    DMCPQuestions: valitaContractQuestionList,
-    OACTQuestions: valitaContractQuestionList,
 })
 
 const indexRateQuestionsPayload = z.object({
@@ -146,7 +106,6 @@ export type {
 
 export {
     indexContractQuestionsPayload,
-    valitaIndexContractQuestionsPayload,
     createContractQuestionInput,
     createContractQuestionPayload,
     contractQuestion,

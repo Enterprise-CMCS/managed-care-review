@@ -1,12 +1,10 @@
 import { z } from 'zod'
-import * as v from "@badrap/valita";
 import { contractRevisionSchema, rateRevisionSchema } from './revisionTypes'
 import { unlockedContractStatusSchema } from './statusType'
 import { pruneDuplicateEmails } from '../../emailer/formatters'
 import {
     contractWithoutDraftRatesSchema,
     rateWithoutDraftContractsSchema,
-    valitaContractWithoutDraftRatesSchema
 } from './baseContractRateTypes'
 import {
     submittableContractFormDataSchema,
@@ -18,12 +16,6 @@ const contractSchema = contractWithoutDraftRatesSchema.extend({
     draftRates: z.array(rateWithoutDraftContractsSchema).optional(),
 })
 
-const valitaContractSchema = valitaContractWithoutDraftRatesSchema.extend({
-    withdrawnRates: v.array().optional(),
-    // withdrawnRates: v.array(rateWithoutDraftContractsSchema).optional(),
-    draftRates: v.array().optional(),
-    // draftRates: z.array(rateWithoutDraftContractsSchema).optional(),
-})
 const unlockedContractSchema = contractSchema.extend({
     status: unlockedContractStatusSchema,
     // Since this is a contract in UNLOCKED status, there will be a draftRevision and draftRates
@@ -74,7 +66,6 @@ export {
     submittableContractSchema,
     contractSchema,
     contractSubmitters,
-    valitaContractSchema
 }
 
 export type { ContractType, DraftContractType, UnlockedContractType }
