@@ -79,7 +79,7 @@ custom:
   scriptable:
     hooks:
       before:package:createDeploymentArtifacts: pnpm build
-      before:deploy:finalize: node dist/scripts/uploadScripts.js ${self:custom.stage}
+      before:deploy:finalize: node scripts/uploadScripts.js ${self:custom.stage}
   esbuild:
     config: ./esbuild.config.js
 

@@ -4,7 +4,7 @@
     "version": "1.0.0",
     "main": "index.js",
     "scripts": {
-        "build": "tsc --noEmit"
+        "build": "tsc"
     },
     "devDependencies": {
         "@aws-sdk/types": "^3.734.0",
