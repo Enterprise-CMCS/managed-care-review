@@ -6,8 +6,7 @@ import {
     Contract,
     useSubmitContractMutation,
     useUnlockContractMutation,
-    FetchHealthPlanPackageWithQuestionsDocument,
-    FetchContractDocument,
+    FetchContractWithQuestionsDocument,
 } from '../../gen/gqlClient'
 import { useFormik } from 'formik'
 import { usePrevious } from '../../hooks/usePrevious'
@@ -264,13 +263,7 @@ export const UnlockSubmitModal = ({
                 )
             } else {
                 await client.refetchQueries({
-                    include: [FetchContractDocument],
-                })
-                // TODO: Remove HPP code fully from here, this is a hack to get through linked rates
-                // neded because sidebar UI that also displays questions that assumes latest data fetched on this page
-                // and we haven't had to migrate that yet to contract and ratesyet
-                await client.refetchQueries({
-                    include: [FetchHealthPlanPackageWithQuestionsDocument],
+                    include: [FetchContractWithQuestionsDocument],
                 })
             }
         } else if (result instanceof Error) {
@@ -295,13 +288,7 @@ export const UnlockSubmitModal = ({
                 )
             } else {
                 await client.refetchQueries({
-                    include: [FetchContractDocument],
-                })
-                // TODO: Remove HPP code fully from here, this is a hack to get through linked rates
-                // neded because sidebar UI that also displays questions that assumes latest data fetched on this page
-                // and we haven't had to migrate that yet to contract and ratesyet
-                await client.refetchQueries({
-                    include: [FetchHealthPlanPackageWithQuestionsDocument],
+                    include: [FetchContractWithQuestionsDocument],
                 })
             }
         }

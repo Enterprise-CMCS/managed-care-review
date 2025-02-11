@@ -6,7 +6,7 @@ import {
 } from '../../testHelpers'
 import {
     fetchCurrentUserMock,
-    fetchRateMockSuccess,
+    fetchRateWithQuestionsMockSuccess,
     fetchContractMockSuccess,
     iterableCmsUsersMockData,
     mockValidStateUser,
@@ -47,9 +47,11 @@ describe('RateSummary', () => {
                                 statusCode: 200,
                             }),
                             fetchContractMockSuccess({ contract }),
-                            fetchRateMockSuccess({
-                                id: '7a',
-                                parentContractID: contract.id,
+                            fetchRateWithQuestionsMockSuccess({
+                                rate: {
+                                    id: '7a',
+                                    parentContractID: contract.id,
+                                },
                             }),
                             fetchContractMockSuccess({ contract }),
                         ],
@@ -75,20 +77,22 @@ describe('RateSummary', () => {
                                 statusCode: 200,
                             }),
                             fetchContractMockSuccess({ contract }),
-                            fetchRateMockSuccess({
-                                id: '1337',
-                                parentContractID: contract.id,
-                                withdrawInfo: {
-                                    __typename: 'UpdateInformation',
-                                    updatedAt: new Date('2024-01-01'),
-                                    updatedBy: {
-                                        email: 'admin@example.com',
-                                        role: 'ADMIN_USER',
-                                        familyName: 'Hotman',
-                                        givenName: 'Iroh',
+                            fetchRateWithQuestionsMockSuccess({
+                                rate: {
+                                    id: '1337',
+                                    parentContractID: contract.id,
+                                    withdrawInfo: {
+                                        __typename: 'UpdateInformation',
+                                        updatedAt: new Date('2024-01-01'),
+                                        updatedBy: {
+                                            email: 'admin@example.com',
+                                            role: 'ADMIN_USER',
+                                            familyName: 'Hotman',
+                                            givenName: 'Iroh',
+                                        },
+                                        updatedReason:
+                                            'Admin as withdrawn this rate.',
                                     },
-                                    updatedReason:
-                                        'Admin as withdrawn this rate.',
                                 },
                             }),
                         ],
@@ -100,18 +104,9 @@ describe('RateSummary', () => {
                 })
 
                 await waitFor(() => {
-                    expect(
-                        screen.queryByTestId('rate-summary')
-                    ).toBeInTheDocument()
+                    expect(screen.queryByRole('alert')).toBeInTheDocument()
                 })
 
-                expect(
-                    await screen.findByText(
-                        'Rates this rate certification covers'
-                    )
-                ).toBeInTheDocument()
-
-                expect(screen.getByRole('alert')).toHaveClass('usa-alert--info')
                 expect(
                     screen.getByTestId('rateWithdrawnBanner')
                 ).toHaveTextContent(/Withdrawn by: Administrator/)
@@ -147,9 +142,11 @@ describe('RateSummary', () => {
                                 user: mockUser(),
                                 statusCode: 200,
                             }),
-                            fetchRateMockSuccess({
-                                id: '7a',
-                                parentContractID: contract.id,
+                            fetchRateWithQuestionsMockSuccess({
+                                rate: {
+                                    id: '7a',
+                                    parentContractID: contract.id,
+                                },
                             }),
                             fetchContractMockSuccess({ contract }),
                         ],
@@ -182,9 +179,11 @@ describe('RateSummary', () => {
                                 user: mockUser(),
                                 statusCode: 200,
                             }),
-                            fetchRateMockSuccess({
-                                id: '7a',
-                                parentContractID: contract.id,
+                            fetchRateWithQuestionsMockSuccess({
+                                rate: {
+                                    id: '7a',
+                                    parentContractID: contract.id,
+                                },
                             }),
                             fetchContractMockSuccess({ contract }),
                         ],
@@ -231,9 +230,11 @@ describe('RateSummary', () => {
                                     user: mockUser(),
                                     statusCode: 200,
                                 }),
-                                fetchRateMockSuccess({
-                                    ...rateData,
-                                    id: '7a',
+                                fetchRateWithQuestionsMockSuccess({
+                                    rate: {
+                                        ...rateData,
+                                        id: '7a',
+                                    },
                                 }),
                                 fetchContractMockSuccess({ contract }),
                             ],
@@ -273,9 +274,11 @@ describe('RateSummary', () => {
                                 user: mockUser(),
                                 statusCode: 200,
                             }),
-                            fetchRateMockSuccess({
-                                ...rateData,
-                                id: '7a',
+                            fetchRateWithQuestionsMockSuccess({
+                                rate: {
+                                    ...rateData,
+                                    id: '7a',
+                                },
                             }),
                             fetchContractMockSuccess({ contract }),
                         ],
@@ -299,10 +302,12 @@ describe('RateSummary', () => {
                                 user: mockUser(),
                                 statusCode: 200,
                             }),
-                            fetchRateMockSuccess({
-                                ...rateData,
-                                id: '7a',
-                                parentContractID: contract.id,
+                            fetchRateWithQuestionsMockSuccess({
+                                rate: {
+                                    ...rateData,
+                                    id: '7a',
+                                    parentContractID: contract.id,
+                                },
                             }),
                             fetchContractMockSuccess({ contract }),
                         ],
@@ -334,11 +339,13 @@ describe('RateSummary', () => {
                                 user: mockUser(),
                                 statusCode: 200,
                             }),
-                            fetchRateMockSuccess({
-                                ...rate,
-                                id: '7a',
-                                parentContractID: contract.id,
-                                status: 'SUBMITTED',
+                            fetchRateWithQuestionsMockSuccess({
+                                rate: {
+                                    ...rate,
+                                    id: '7a',
+                                    parentContractID: contract.id,
+                                    status: 'SUBMITTED',
+                                },
                             }),
                             fetchContractMockSuccess({
                                 contract: {
@@ -378,11 +385,13 @@ describe('RateSummary', () => {
                                 user: mockUser(),
                                 statusCode: 200,
                             }),
-                            fetchRateMockSuccess({
-                                ...rate,
-                                id: '7a',
-                                parentContractID: contract.id,
-                                status: 'UNLOCKED',
+                            fetchRateWithQuestionsMockSuccess({
+                                rate: {
+                                    ...rate,
+                                    id: '7a',
+                                    parentContractID: contract.id,
+                                    status: 'UNLOCKED',
+                                },
                             }),
                             fetchContractMockSuccess({
                                 contract: {
@@ -425,7 +434,7 @@ describe('RateSummary', () => {
                             user: mockValidStateUser(),
                             statusCode: 200,
                         }),
-                        fetchRateMockSuccess(rate),
+                        fetchRateWithQuestionsMockSuccess({ rate }),
                         fetchContractMockSuccess({ contract }),
                     ],
                 },
@@ -453,19 +462,22 @@ describe('RateSummary', () => {
                             statusCode: 200,
                         }),
                         fetchContractMockSuccess({ contract }),
-                        fetchRateMockSuccess({
-                            id: '1337',
-                            parentContractID: contract.id,
-                            withdrawInfo: {
-                                __typename: 'UpdateInformation',
-                                updatedAt: new Date('2024-01-01'),
-                                updatedBy: {
-                                    email: 'admin@example.com',
-                                    role: 'ADMIN_USER',
-                                    familyName: 'Hotman',
-                                    givenName: 'Iroh',
+                        fetchRateWithQuestionsMockSuccess({
+                            rate: {
+                                id: '1337',
+                                parentContractID: contract.id,
+                                withdrawInfo: {
+                                    __typename: 'UpdateInformation',
+                                    updatedAt: new Date('2024-01-01'),
+                                    updatedBy: {
+                                        email: 'admin@example.com',
+                                        role: 'ADMIN_USER',
+                                        familyName: 'Hotman',
+                                        givenName: 'Iroh',
+                                    },
+                                    updatedReason:
+                                        'Admin as withdrawn this rate.',
                                 },
-                                updatedReason: 'Admin as withdrawn this rate.',
                             },
                         }),
                     ],
@@ -514,10 +526,12 @@ describe('RateSummary', () => {
                                 user: mockValidStateUser(),
                                 statusCode: 200,
                             }),
-                            fetchRateMockSuccess({
-                                id: '1337',
-                                parentContractID: contract.id,
-                                status: 'UNLOCKED',
+                            fetchRateWithQuestionsMockSuccess({
+                                rate: {
+                                    id: '1337',
+                                    parentContractID: contract.id,
+                                    status: 'UNLOCKED',
+                                },
                             }),
                             fetchContractMockSuccess({ contract }),
                         ],
@@ -550,9 +564,11 @@ describe('RateSummary', () => {
                             user: mockValidStateUser(),
                             statusCode: 200,
                         }),
-                        fetchRateMockSuccess({
-                            id: '1337',
-                            parentContractID: contract.id,
+                        fetchRateWithQuestionsMockSuccess({
+                            rate: {
+                                id: '1337',
+                                parentContractID: contract.id,
+                            },
                         }),
                         fetchContractMockSuccess({ contract }),
                     ],
@@ -575,9 +591,11 @@ describe('RateSummary', () => {
                             user: mockValidStateUser(),
                             statusCode: 200,
                         }),
-                        fetchRateMockSuccess({
-                            id: '7a',
-                            parentContractID: contract.id,
+                        fetchRateWithQuestionsMockSuccess({
+                            rate: {
+                                id: '7a',
+                                parentContractID: contract.id,
+                            },
                         }),
                         fetchContractMockSuccess({ contract }),
                     ],
@@ -608,11 +626,13 @@ describe('RateSummary', () => {
                                 user: mockUser(),
                                 statusCode: 200,
                             }),
-                            fetchRateMockSuccess({
-                                ...rate,
-                                id: '7a',
-                                parentContractID: contract.id,
-                                status: 'SUBMITTED',
+                            fetchRateWithQuestionsMockSuccess({
+                                rate: {
+                                    ...rate,
+                                    id: '7a',
+                                    parentContractID: contract.id,
+                                    status: 'SUBMITTED',
+                                },
                             }),
                             fetchContractMockSuccess({
                                 contract: {

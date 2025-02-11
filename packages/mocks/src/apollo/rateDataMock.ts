@@ -438,7 +438,6 @@ function mockRateSubmittedWithQuestions(
         reviewStatusActions: [],
         createdAt: rate.createdAt ?? new Date(),
         updatedAt: rate.updatedAt ?? new Date(),
-        id: rateID,
         webURL: `https://testmcreview.example/rate/${rateID}`,
         stateCode: rate.stateCode ?? 'MN',
         state: rate.state ?? mockMNState(),
@@ -738,6 +737,7 @@ function mockRateSubmittedWithQuestions(
                 ],
             },
         },
+        ...rate
     }
 }
 

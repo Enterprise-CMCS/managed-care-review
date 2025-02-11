@@ -14,6 +14,7 @@ import {
     GenericApiErrorBanner,
     NavLinkWithLogging,
 } from '../../components'
+import { GenericErrorPage } from '../Errors/GenericErrorPage'
 
 /**
  * We only pull a subset of data out of the submission and revisions for display in Dashboard
@@ -21,14 +22,17 @@ import {
 
 const DASHBOARD_ATTRIBUTE = 'state-dashboard-page'
 export const StateDashboard = (): React.ReactElement => {
-    const { loginStatus, loggedInUser } = useAuth()
+    const { loggedInUser } = useAuth()
     const location = useLocation()
 
     const { loading, data, error } = useIndexContractsForDashboardQuery({
-        fetchPolicy: 'network-only',
+        fetchPolicy: 'cache-and-network',
+        pollInterval: 300000,
     })
 
-    if (error) {
+    if (!data && loading) {
+        return <Loading />
+    } else if (!data && error) {
         handleApolloError(error, true)
         return (
             <div id={DASHBOARD_ATTRIBUTE} className={styles.wrapper}>
@@ -41,10 +45,8 @@ export const StateDashboard = (): React.ReactElement => {
                 </GridContainer>
             </div>
         )
-    }
-
-    if (loginStatus === 'LOADING' || !loggedInUser || loading || !data) {
-        return <Loading />
+    } else if (!data || !loggedInUser) {
+        return <GenericErrorPage />
     }
 
     if (loggedInUser.__typename !== 'StateUser') {
@@ -60,7 +62,7 @@ export const StateDashboard = (): React.ReactElement => {
     )
     const submissionRows: ContractInDashboardType[] = []
 
-    data?.indexContracts.edges
+    data.indexContracts.edges
         .map((edge) => edge.node)
         .forEach((sub) => {
             // When a sub.reviewStatus has been moved out of 'UNDER_REVIEW'

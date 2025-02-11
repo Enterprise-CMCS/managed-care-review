@@ -11,25 +11,30 @@ import {
     ContractInDashboardType,
 } from '../../../components'
 import { ErrorFailedRequestPage } from '../../Errors/ErrorFailedRequestPage'
+import { GenericErrorPage } from '../../Errors/GenericErrorPage'
 
 const SubmissionsDashboard = (): React.ReactElement => {
     const { loggedInUser } = useAuth()
-    const { loading, data, error } = useIndexContractsForDashboardQuery({
-        fetchPolicy: 'network-only',
+    const { data, loading, error } = useIndexContractsForDashboardQuery({
+        fetchPolicy: 'cache-and-network',
+        pollInterval: 300000,
     })
 
-    if (loading || !loggedInUser) {
+    if (!data && loading) {
         return <Loading />
-    } else if (error) {
+    } else if (!data && error) {
         return (
             <ErrorFailedRequestPage
                 error={error}
                 testID="submissions-dashboard"
             />
         )
+    } else if (!data || !loggedInUser) {
+        return <GenericErrorPage />
     }
+
     const submissionRows: ContractInDashboardType[] = []
-    data?.indexContracts.edges
+    data.indexContracts.edges
         .map((edge) => edge.node)
         .forEach((sub) => {
             // When a sub.reviewStatus has been moved out of 'UNDER_REVIEW'

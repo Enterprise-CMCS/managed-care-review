@@ -63,10 +63,18 @@ export const SubmissionSideNav = () => {
                 contractID: id,
             },
         },
-        fetchPolicy: 'network-only',
+        fetchPolicy: 'cache-and-network',
     })
 
-    if (error) {
+    const contract = data?.fetchContract.contract
+
+    if (!data && loading) {
+        return (
+            <GridContainer>
+                <Loading />
+            </GridContainer>
+        )
+    } else if (!data && error) {
         const err = error
         console.error('Error from API fetch', error)
         if (err instanceof ApolloError) {
@@ -79,20 +87,7 @@ export const SubmissionSideNav = () => {
 
         recordJSException(err)
         return <GenericErrorPage /> // api failure or protobuf decode failure
-    }
-
-    if (loading) {
-        return (
-            <GridContainer>
-                <Loading />
-            </GridContainer>
-        )
-    }
-
-    const contract = data?.fetchContract.contract
-
-    // Display generic error page if getting logged in user returns undefined.
-    if (!loggedInUser || !contract) {
+    } else if (!loggedInUser || !contract) {
         return <GenericErrorPage />
     }
 
