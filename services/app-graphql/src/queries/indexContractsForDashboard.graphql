@@ -3,7 +3,30 @@ query indexContractsForDashboard {
         totalCount
         edges {
             node {
-                ...contractFieldsFragment
+                id
+                status
+                reviewStatus
+                consolidatedStatus
+                createdAt
+                updatedAt
+                initiallySubmittedAt
+                lastUpdatedForDisplay
+                stateCode
+                reviewStatusActions {
+                    updatedAt
+                    actionType
+                }
+                state {
+                    code
+                    name
+                    programs {
+                        id
+                        name
+                        fullName
+                        isRateProgram
+                    }
+                }
+                stateNumber
 
                 draftRevision {
                     id
@@ -12,57 +35,23 @@ query indexContractsForDashboard {
                     contractName
 
                     submitInfo {
-                        ...updateInformationFields
+                        updatedAt
                     }
 
                     unlockInfo {
-                        ...updateInformationFields
+                        updatedAt
                     }
 
                     formData {
                         programIDs
-                        populationCovered
                         submissionType
-                        riskBasedContract
-                        submissionDescription
-                        stateContacts {
-                            name
-                            titleRole
-                            email
-                        }
-                        contractType
-                        contractExecutionStatus
-                        contractDateStart
-                        contractDateEnd
-                        managedCareEntities
-                        federalAuthorities
-                        inLieuServicesAndSettings
-                        modifiedBenefitsProvided
-                        modifiedGeoAreaServed
-                        modifiedMedicaidBeneficiaries
-                        modifiedRiskSharingStrategy
-                        modifiedIncentiveArrangements
-                        modifiedWitholdAgreements
-                        modifiedStateDirectedPayments
-                        modifiedPassThroughPayments
-                        modifiedPaymentsForMentalDiseaseInstitutions
-                        modifiedMedicaidBeneficiaries
-                        modifiedMedicalLossRatioStandards
-                        modifiedOtherFinancialPaymentIncentive
-                        modifiedEnrollmentProcess
-                        modifiedGrevienceAndAppeal
-                        modifiedNetworkAdequacyStandards
-                        modifiedLengthOfContract
-                        modifiedNonRiskPaymentArrangements
-                        statutoryRegulatoryAttestation
-                        statutoryRegulatoryAttestationDescription
                     }
                 }
 
                 packageSubmissions {
                     cause
                     submitInfo {
-                        ...updateInformationFields
+                        updatedAt
                     }
 
                     contractRevision {
@@ -72,50 +61,16 @@ query indexContractsForDashboard {
                         contractName
 
                         submitInfo {
-                            ...updateInformationFields
+                            updatedAt
                         }
 
                         unlockInfo {
-                            ...updateInformationFields
+                            updatedAt
                         }
 
                         formData {
                             programIDs
-                            populationCovered
                             submissionType
-                            riskBasedContract
-                            submissionDescription
-                            stateContacts {
-                                name
-                                titleRole
-                                email
-                            }
-                            contractType
-                            contractExecutionStatus
-                            contractDateStart
-                            contractDateEnd
-                            managedCareEntities
-                            federalAuthorities
-                            inLieuServicesAndSettings
-                            modifiedBenefitsProvided
-                            modifiedGeoAreaServed
-                            modifiedMedicaidBeneficiaries
-                            modifiedRiskSharingStrategy
-                            modifiedIncentiveArrangements
-                            modifiedWitholdAgreements
-                            modifiedStateDirectedPayments
-                            modifiedPassThroughPayments
-                            modifiedPaymentsForMentalDiseaseInstitutions
-                            modifiedMedicaidBeneficiaries
-                            modifiedMedicalLossRatioStandards
-                            modifiedOtherFinancialPaymentIncentive
-                            modifiedEnrollmentProcess
-                            modifiedGrevienceAndAppeal
-                            modifiedNetworkAdequacyStandards
-                            modifiedLengthOfContract
-                            modifiedNonRiskPaymentArrangements
-                            statutoryRegulatoryAttestation
-                            statutoryRegulatoryAttestationDescription
                         }
                     }
                 }
