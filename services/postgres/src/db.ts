@@ -12,10 +12,8 @@ export class DatabaseClient {
             ssl: useSSL
                 ? {
                       rejectUnauthorized: true,
-                      ca: '/etc/pki/tls/cert.pem',
                   }
                 : false,
-            // Add reasonable defaults for lambda environment
             connectionTimeoutMillis: 5000,
             statement_timeout: 10000,
         }
@@ -41,15 +39,18 @@ export class DatabaseClient {
 
     async connect(secretDict: SecretDict): Promise<Client | null> {
         const [useSSL, fallBack] = this.getSSLConfig(secretDict)
-
-        // Try SSL first if configured
-        const conn = await this.tryConnect(secretDict, useSSL)
-        if (conn || !fallBack) {
-            return conn
+        try {
+            // Try SSL first if configured
+            const conn = await this.tryConnect(secretDict, useSSL)
+            if (conn || !fallBack) {
+                return conn
+            }
+            // Fallback to non-SSL if allowed
+            return this.tryConnect(secretDict, false)
+        } catch (error) {
+            console.error('Failed to connect:', error)
+            return null
         }
-
-        // Fallback to non-SSL if allowed
-        return this.tryConnect(secretDict, false)
     }
 
     private async tryConnect(
@@ -77,13 +78,17 @@ export class DatabaseClient {
         username: string,
         password: string
     ): Promise<void> {
+        // First escape the username
         const escapedResult = await client.query(
             'SELECT quote_ident($1) as username',
             [username]
         )
         const escapedUsername = escapedResult.rows[0].username
-        await client.query(`ALTER USER ${escapedUsername} WITH PASSWORD $1`, [
-            password,
-        ])
+
+        // Use dollar-quoted string literal for the password
+        await client.query(
+            `ALTER USER ${escapedUsername} WITH PASSWORD $1::text`,
+            [password]
+        )
     }
 }
