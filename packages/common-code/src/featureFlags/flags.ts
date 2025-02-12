@@ -46,6 +46,13 @@ const featureFlags = {
         flag: 'remove-parameter-store',
         defaultValue: false,
     },
+    /**
+     * test indexContract API refactors
+     */
+    TEST_INDEX_CONTRACT_REFACTOR: {
+        flag: 'test-index-contract-refactor',
+        defaultValue: false
+    },
     // PERMANENT FLAGS
     /**
      Enables the modal that alerts the user to an expiring session

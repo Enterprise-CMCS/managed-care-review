@@ -27,7 +27,10 @@ import {
     getContractReviewStatus,
 } from './prismaSharedContractRateHelpers'
 import type { ContractTableWithoutDraftRates } from './prismaSubmittedContractHelpers'
-import type { ContractTableFullPayload } from './prismaFullContractRateHelpers'
+import type {
+    ContractTableDashboardPayload,
+    ContractTableFullPayload,
+} from './prismaFullContractRateHelpers'
 import type { ContractReviewActionType } from '../../domain-models/contractAndRates/contractReviewActionType'
 
 // This function might be generally useful later on. It takes an array of objects
@@ -75,6 +78,20 @@ function parseContractWithHistory(
     }
 
     return parseContract.data
+}
+
+function parseContractForDashboard(
+    contract: ContractTableDashboardPayload
+): ContractType | Error {
+    const contractWithHistory = contractForDashboardToDomainModel(contract)
+    if (contractWithHistory instanceof Error) {
+        console.warn(
+            `ERROR: attempting to parse prisma contract with history failed: ${contractWithHistory.message}`
+        )
+        return contractWithHistory
+    }
+
+    return contractWithHistory
 }
 
 function contractRevisionToDomainModel(
@@ -287,10 +304,40 @@ function contractWithHistoryToDomainModel(
     }
 }
 
+// contractWithHistoryToDomainModel constructs a history for this particular contract including changes to all of its
+// revisions and all related rate revisions, including added and removed rates
+function contractForDashboardToDomainModel(
+    contract: ContractTableDashboardPayload
+): ContractType | Error {
+    const contractWithoutRates =
+        contractWithHistoryToDomainModelWithoutRates(contract)
+    if (contractWithoutRates instanceof Error) {
+        return contractWithoutRates
+    }
+
+    if (
+        contractWithoutRates.status === 'SUBMITTED' ||
+        contractWithoutRates.status === 'RESUBMITTED'
+    ) {
+        return {
+            ...contractWithoutRates,
+            withdrawnRates: [],
+        }
+    }
+
+    return {
+        ...contractWithoutRates,
+        withdrawnRates: [],
+        draftRates: [],
+    }
+}
+
 export {
     parseContractWithHistory,
     contractRevisionToDomainModel,
     contractWithHistoryToDomainModel,
     contractWithHistoryToDomainModelWithoutRates,
     arrayOrFirstError,
+    parseContractForDashboard,
+    contractForDashboardToDomainModel,
 }

@@ -17,6 +17,17 @@ import {
 } from '../attributeHelper'
 import { GraphQLError } from 'graphql/index'
 import type { ContractOrErrorArrayType } from '../../postgres/contractAndRates/findAllContractsWithHistoryByState'
+import { performance, PerformanceObserver } from 'perf_hooks'
+import type { LDService } from '../../launchDarkly/launchDarkly'
+
+const perfObserver = new PerformanceObserver((items) => {
+    items.getEntries().forEach((entry) => {
+        console.info(entry)
+    })
+})
+
+perfObserver.observe({ entryTypes: ['measure'], buffered: true })
+performance.measure('Start to Now')
 
 const parseContracts = (
     contractsWithHistory: ContractOrErrorArrayType,
@@ -62,9 +73,17 @@ const formatContracts = (results: ContractType[]) => {
 }
 
 export function indexContractsResolver(
-    store: Store
+    store: Store,
+    launchDarkly: LDService
 ): QueryResolvers['indexContracts'] {
     return async (_parent, _args, context) => {
+        const featureFlags = await launchDarkly.allFlags({
+            key: context.user.email,
+        })
+
+        const testIndexContractsFlag =
+            featureFlags?.['test-index-contract-refactor']
+
         const { user, ctx, tracer } = context
         const span = tracer?.startSpan('indexContracts', {}, ctx)
         setResolverDetailsOnActiveSpan('indexContracts', user, span)
@@ -99,8 +118,9 @@ export function indexContractsResolver(
             const parsedContracts = parseContracts(contractsWithHistory, span)
             return formatContracts(parsedContracts)
         } else if (hasAdminPermissions(user) || hasCMSPermissions(user)) {
-            const contractsWithHistory =
-                await store.findAllContractsWithHistoryBySubmitInfo()
+            const contractsWithHistory = testIndexContractsFlag
+                ? await store.findAllContractsForCMSDashboard()
+                : await store.findAllContractsWithHistoryBySubmitInfo()
 
             if (contractsWithHistory instanceof Error) {
                 const errMessage = `Issue finding contracts with history by submit info. Message: ${contractsWithHistory.message}`

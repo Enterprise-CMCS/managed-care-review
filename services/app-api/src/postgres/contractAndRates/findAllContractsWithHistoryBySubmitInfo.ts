@@ -8,6 +8,7 @@ async function findAllContractsWithHistoryBySubmitInfo(
     client: PrismaTransactionType
 ): Promise<ContractOrErrorArrayType | NotFoundError | Error> {
     try {
+        performance.mark('beginPostgresQuery')
         const contracts = await client.contractTable.findMany({
             where: {
                 revisions: {
@@ -23,6 +24,12 @@ async function findAllContractsWithHistoryBySubmitInfo(
             },
             include: includeFullContract,
         })
+        performance.mark('finishPostgresQuery')
+        performance.measure(
+            'findAllContractsWithHistoryBySubmitInfo: beginPostgresQuery to finishPostgresQuery',
+            'beginPostgresQuery',
+            'finishPostgresQuery'
+        )
 
         if (!contracts) {
             const err = `PRISMA ERROR: Cannot find all contracts by submit info`
@@ -30,11 +37,18 @@ async function findAllContractsWithHistoryBySubmitInfo(
             return new NotFoundError(err)
         }
 
+        performance.mark('beginParseContract')
         const parsedContracts: ContractOrErrorArrayType = contracts.map(
             (contract) => ({
                 contractID: contract.id,
                 contract: parseContractWithHistory(contract),
             })
+        )
+        performance.mark('finishParseContract')
+        performance.measure(
+            'findAllContractsWithHistoryBySubmitInfo: beginParseContract to finishParseContract',
+            'beginParseContract',
+            'finishParseContract'
         )
 
         return parsedContracts
