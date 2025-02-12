@@ -15,6 +15,13 @@ STACK_NAME="postgres-${STAGE_NAME}"
 SCRIPT_DIR="scripts"
 FILES=("vm-startup.sh" "vm-shutdown.sh" "slack-notify.service" "authorized_keys")
 
+# Check if this is a stage that uses the bucket
+# Temporarily including mtsechubsmrotation stage for testing
+if [[ "$STAGE_NAME" != "main" && "$STAGE_NAME" != "val" && "$STAGE_NAME" != "prod" && "$STAGE_NAME" != "mtsechubsmrotation" ]]; then
+    echo "Stage ${STAGE_NAME} does not use VM scripts bucket. Skipping upload."
+    exit 0
+fi
+
 # Validate that we're in the right directory
 if [ ! -d "$SCRIPT_DIR" ]; then
     echo "Error: Script directory not found: $SCRIPT_DIR"
