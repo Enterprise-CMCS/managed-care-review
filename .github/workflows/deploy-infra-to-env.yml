@@ -103,6 +103,11 @@ jobs:
         run: |
           pushd services/postgres && npx serverless deploy --stage ${{ inputs.stage_name }}
 
+      - name: Upload VM scripts to S3
+        run: |
+          chmod +x scripts/uploadUserData.sh
+          ./scripts/uploadUserData.sh ${{ inputs.stage_name }}
+
   ui:
     needs: github-oidc
     if: ${{ always() && contains(inputs.changed_services, 'ui') }}

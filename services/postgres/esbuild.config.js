@@ -6,6 +6,6 @@ module.exports = () => {
         bundle: true,
         exclude: ['aws-sdk'],
         sourcemap: true,
-        entryPoints: ['src/rotator.ts', 'scripts/uploadScripts.ts'],
+        entryPoints: ['src/rotator.ts'],
     };
 };
