@@ -105,6 +105,7 @@ jobs:
 
       - name: Upload VM scripts to S3
         run: |
+          pushd services/postgres
           chmod +x scripts/uploadUserData.sh
           ./scripts/uploadUserData.sh ${{ inputs.stage_name }}
 
