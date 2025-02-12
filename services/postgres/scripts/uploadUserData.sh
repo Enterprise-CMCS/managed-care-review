@@ -12,7 +12,7 @@ fi
 
 STAGE_NAME="$1"
 STACK_NAME="postgres-${STAGE_NAME}"
-SCRIPT_DIR="services/postgres/scripts"
+SCRIPT_DIR="scripts"
 FILES=("vm-startup.sh" "vm-shutdown.sh" "slack-notify.service" "authorized_keys")
 
 # Validate that we're in the right directory
