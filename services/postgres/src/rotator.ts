@@ -17,6 +17,23 @@ export class Rotator {
         this.db = new DatabaseClient()
         this.secrets = new SecretsManager()
     }
+    async getSecretDetails(arn: string): Promise<void> {
+        try {
+            const secretDict = await this.secrets.getSecretDict(
+                arn,
+                'AWSCURRENT'
+            )
+            console.log('Secret details:', {
+                username: secretDict.username,
+                host: secretDict.host,
+                dbname: secretDict.dbname,
+                port: secretDict.port,
+                // Don't log the password
+            })
+        } catch (error) {
+            console.error('Failed to get secret:', error)
+        }
+    }
 
     async describeSecret(arn: string): Promise<DescribeSecretCommandOutput> {
         return this.secrets.describeSecret(arn)
@@ -138,7 +155,10 @@ export async function handler(
     event: RotationEvent,
     context: Context
 ): Promise<void> {
+    console.log('Event:', JSON.stringify(event, null, 2))
+
     const rotator = new Rotator()
+    await rotator.getSecretDetails(event.SecretId) // Add this line
     const { SecretId: arn, ClientRequestToken: token, Step: step } = event
 
     // Validate rotation is enabled
