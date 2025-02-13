@@ -2,6 +2,7 @@ import { DescribeSecretCommandOutput } from '@aws-sdk/client-secrets-manager'
 import { DatabaseClient } from './db'
 import { SecretsManager } from './secrets'
 import { RotationEvent } from './types'
+import fs from 'fs'
 
 interface Context {
     awsRequestId: string
@@ -157,8 +158,27 @@ export async function handler(
 ): Promise<void> {
     console.log('Event:', JSON.stringify(event, null, 2))
 
+    try {
+        fs.accessSync('/etc/pki/tls/certs/ca-bundle.crt')
+        console.log('CA bundle exists at /etc/pki/tls/certs/ca-bundle.crt')
+    } catch (error) {
+        console.log('CA bundle not found:', error)
+        // Also check other common locations
+        ;[
+            '/',
+            '/etc/ssl/certs/ca-certificates.crt',
+            '/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem',
+        ].forEach((path) => {
+            try {
+                fs.accessSync(path)
+                console.log(`Found certificates at: ${path}`)
+            } catch (e) {
+                console.log(`No certificates at: ${path}`)
+            }
+        })
+    }
+
     const rotator = new Rotator()
-    await rotator.getSecretDetails(event.SecretId) // Add this line
     const { SecretId: arn, ClientRequestToken: token, Step: step } = event
 
     // Validate rotation is enabled

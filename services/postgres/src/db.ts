@@ -12,6 +12,7 @@ export class DatabaseClient {
             ssl: useSSL
                 ? {
                       rejectUnauthorized: true,
+                      ca: '/etc/pki/tls/certs/ca-bundle.crt', // AWS RDS cert bundle in Lambda
                   }
                 : false,
             connectionTimeoutMillis: 5000,
