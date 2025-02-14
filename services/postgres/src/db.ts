@@ -118,9 +118,14 @@ export class DatabaseClient {
         password: string
     ): Promise<void> {
         try {
-            const alterStatement = 'ALTER USER $1 WITH PASSWORD $2'
+            const usernameResult = await client.query(
+                'SELECT quote_ident($1) AS identifier',
+                [username]
+            )
+            const escapedUsername = usernameResult.rows[0].identifier
 
-            const res = await client.query(alterStatement, [username, password])
+            const alterStatement = `ALTER USER ${escapedUsername} WITH PASSWORD $1`
+            const res = await client.query(alterStatement, [password])
             console.log(`User ${username} altered successfully:`, res)
         } catch (error) {
             console.error('Error updating password:', error)
