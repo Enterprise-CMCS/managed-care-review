@@ -24,10 +24,7 @@ export class DatabaseClient {
         }
     }
 
-    private async getConfig(
-        secretDict: SecretDict,
-        useSSL: boolean
-    ): Promise<ClientConfig> {
+    private async getConfig(secretDict: SecretDict): Promise<ClientConfig> {
         const cert = await this.getRdsCertificate()
 
         return {
@@ -36,77 +33,29 @@ export class DatabaseClient {
             password: secretDict.password,
             database: secretDict.dbname || 'postgres',
             port: secretDict.port || 5432,
-            ssl: useSSL
-                ? {
-                      rejectUnauthorized: true,
-                      ca: cert,
-                  }
-                : false,
+            ssl: {
+                rejectUnauthorized: true,
+                ca: cert,
+            },
             connectionTimeoutMillis: 5000,
             statement_timeout: 10000,
         }
     }
 
-    getSSLConfig(secretDict: SecretDict): [boolean, boolean] {
-        if (!('ssl' in secretDict)) {
-            return [true, true]
-        }
-
-        if (typeof secretDict.ssl === 'boolean') {
-            return [secretDict.ssl, false]
-        }
-
-        if (typeof secretDict.ssl === 'string') {
-            const ssl = secretDict.ssl.toLowerCase()
-            if (ssl === 'true') return [true, false]
-            if (ssl === 'false') return [false, false]
-        }
-
-        return [true, true]
-    }
     async connect(secretDict: SecretDict): Promise<Client | null> {
-        const [useSSL, fallBack] = this.getSSLConfig(secretDict)
-        console.log(
-            `Initial connection attempt with SSL=${useSSL}, fallback=${fallBack}`
-        )
+        console.log('Attempting SSL connection for user:', secretDict.username)
 
-        // Try SSL first if configured
-        const conn = await this.tryConnect(secretDict, useSSL)
-        if (conn) {
-            return conn
-        }
-
-        if (!fallBack) {
-            console.log('No fallback configured, returning null')
-            return null
-        }
-
-        console.log('First attempt failed, trying fallback connection')
-        // Fallback to non-SSL if allowed
-        return this.tryConnect(secretDict, false)
-    }
-
-    private async tryConnect(
-        secretDict: SecretDict,
-        useSSL: boolean
-    ): Promise<Client | null> {
-        const config = await this.getConfig(secretDict, useSSL)
-        console.log(
-            `Attempting connection with SSL ${useSSL ? 'enabled' : 'disabled'} for user '${secretDict.username}'`
-        )
-
+        const config = await this.getConfig(secretDict)
         const client = new Client(config)
+
         try {
             await client.connect()
             console.log(
-                `Successfully connected ${useSSL ? 'with' : 'without'} SSL as user '${secretDict.username}'`
+                `Successfully connected with SSL as user '${secretDict.username}'`
             )
             return client
         } catch (err) {
-            console.error(
-                `Connection failed with SSL ${useSSL ? 'enabled' : 'disabled'}:`,
-                err
-            )
+            console.error('SSL connection failed:', err)
             await client.end().catch(console.error)
             return null
         }
@@ -119,14 +68,11 @@ export class DatabaseClient {
     ): Promise<void> {
         try {
             const alterPassword = `ALTER USER ${username} WITH PASSWORD '${password}'`
-            console.log(`Updating password for ${username} from secret`)
-
-            const res = await client.query(alterPassword)
             console.log(
-                `Result rowCount: ${res.rowCount}, rows: ${JSON.stringify(
-                    res.rows
-                )}`
+                `Updating password for ${username} from secrets manager`
             )
+
+            await client.query(alterPassword)
         } catch (error) {
             console.error('Error updating password:', error)
             throw error
