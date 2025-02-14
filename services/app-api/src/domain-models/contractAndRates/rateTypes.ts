@@ -7,8 +7,12 @@ import { rateRevisionSchema } from './revisionTypes'
 import { pruneDuplicateEmails } from '../../emailer/formatters'
 
 const rateSchema = rateWithoutDraftContractsSchema.extend({
-    withdrawnFromContracts: z.array(contractWithoutDraftRatesSchema).optional(),
-    draftContracts: z.array(contractWithoutDraftRatesSchema).optional(),
+    withdrawnFromContracts: z.lazy(() =>
+        z.array(contractWithoutDraftRatesSchema).optional()
+    ),
+    draftContracts: z.lazy(() =>
+        z.array(contractWithoutDraftRatesSchema).optional()
+    ),
 })
 
 type RateType = z.infer<typeof rateSchema>

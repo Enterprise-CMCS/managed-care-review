@@ -24,7 +24,10 @@ import {
 import type { RateTableWithoutDraftContractsPayload } from './prismaSubmittedRateHelpers'
 import type { RateTableFullPayload } from './prismaFullContractRateHelpers'
 
-function parseRateWithHistory(rate: RateTableFullPayload): RateType | Error {
+function parseRateWithHistory(
+    rate: RateTableFullPayload,
+    useZod: boolean = true
+): RateType | Error {
     const rateWithHistory = rateWithHistoryToDomainModel(rate)
 
     if (rateWithHistory instanceof Error) {
@@ -34,15 +37,22 @@ function parseRateWithHistory(rate: RateTableFullPayload): RateType | Error {
         return rateWithHistory
     }
 
-    const parseRate = rateSchema.safeParse(rateWithHistory)
+    // useZod flag allows us to skip parsing in parts of the code
+    // where converting to the domain model is enough
+    // such as when calling indexContract and indexRates
+    if (useZod) {
+        const parseRate = rateSchema.safeParse(rateWithHistory)
 
-    if (!parseRate.success) {
-        const error = `ERROR: attempting to parse prisma contract with history failed: ${parseRate.error}`
-        console.warn(error)
-        return parseRate.error
+        if (!parseRate.success) {
+            const error = `ERROR: attempting to parse prisma contract with history failed: ${parseRate.error}`
+            console.warn(error)
+            return parseRate.error
+        }
+
+        return parseRate.data
+    } else {
+        return rateWithHistory
     }
-
-    return parseRate.data
 }
 
 function rateRevisionToDomainModel(
