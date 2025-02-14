@@ -118,7 +118,7 @@ export class DatabaseClient {
         password: string
     ): Promise<void> {
         try {
-            const alterPassword = `ALTER USER ${username} WITH PASSWORD ${password}`
+            const alterPassword = `ALTER USER ${username} WITH PASSWORD '${password}'`
             console.log(`Updating password for ${username} from secret`)
 
             const res = await client.query(alterPassword)
