@@ -64,14 +64,24 @@ export class DatabaseClient {
 
         return [true, true]
     }
-
     async connect(secretDict: SecretDict): Promise<Client | null> {
         const [useSSL, fallBack] = this.getSSLConfig(secretDict)
+        console.log(
+            `Initial connection attempt with SSL=${useSSL}, fallback=${fallBack}`
+        )
+
         // Try SSL first if configured
         const conn = await this.tryConnect(secretDict, useSSL)
-        if (conn || !fallBack) {
+        if (conn) {
             return conn
         }
+
+        if (!fallBack) {
+            console.log('No fallback configured, returning null')
+            return null
+        }
+
+        console.log('First attempt failed, trying fallback connection')
         // Fallback to non-SSL if allowed
         return this.tryConnect(secretDict, false)
     }
@@ -81,6 +91,10 @@ export class DatabaseClient {
         useSSL: boolean
     ): Promise<Client | null> {
         const config = await this.getConfig(secretDict, useSSL)
+        console.log(
+            `Attempting connection with SSL ${useSSL ? 'enabled' : 'disabled'} for user '${secretDict.username}'`
+        )
+
         const client = new Client(config)
         try {
             await client.connect()
@@ -89,7 +103,10 @@ export class DatabaseClient {
             )
             return client
         } catch (err) {
-            console.error('Connection failed:', err)
+            console.error(
+                `Connection failed with SSL ${useSSL ? 'enabled' : 'disabled'}:`,
+                err
+            )
             await client.end().catch(console.error)
             return null
         }
@@ -100,17 +117,24 @@ export class DatabaseClient {
         username: string,
         password: string
     ): Promise<void> {
-        // First escape the username
-        const escapedResult = await client.query(
-            'SELECT quote_ident($1) as username',
-            [username]
-        )
-        const escapedUsername = escapedResult.rows[0].username
+        try {
+            // First escape the username properly
+            const escapedResult = await client.query(
+                'SELECT quote_ident($1) as username',
+                [username]
+            )
+            const escapedUsername = escapedResult.rows[0].username
 
-        // Use dollar-quoted string literal for the password
-        await client.query(
-            `ALTER USER ${escapedUsername} WITH PASSWORD $1::text`,
-            [password]
-        )
+            // Use proper parameter binding for password
+            await client.query(
+                'ALTER USER ' + escapedUsername + ' WITH PASSWORD $1',
+                [password]
+            )
+
+            console.log(`Successfully updated password for user ${username}`)
+        } catch (error) {
+            console.error('Error updating password:', error)
+            throw error
+        }
     }
 }
