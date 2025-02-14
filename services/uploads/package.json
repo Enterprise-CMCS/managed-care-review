@@ -50,6 +50,6 @@
         "serverless-stack-termination-protection": "^2.0.2",
         "ts-jest": "^29.1.1",
         "ts-loader": "^9.5.2",
-        "vitest": "^2.1.5"
+        "vitest": "^2.1.9"
     }
 }
