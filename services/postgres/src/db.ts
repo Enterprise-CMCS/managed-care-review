@@ -1,8 +1,35 @@
 import { Client, ClientConfig } from 'pg'
 import { SecretDict } from './types'
+import https from 'https'
 
 export class DatabaseClient {
-    private getConfig(secretDict: SecretDict, useSSL: boolean): ClientConfig {
+    private async getRdsCertificate(): Promise<string> {
+        try {
+            const certUrl =
+                'https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem'
+
+            return new Promise((resolve, reject) => {
+                https
+                    .get(certUrl, (res) => {
+                        let cert = ''
+                        res.on('data', (chunk) => (cert += chunk))
+                        res.on('end', () => resolve(cert))
+                        res.on('error', reject)
+                    })
+                    .on('error', reject)
+            })
+        } catch (error) {
+            console.error('Failed to download RDS certificate:', error)
+            throw error
+        }
+    }
+
+    private async getConfig(
+        secretDict: SecretDict,
+        useSSL: boolean
+    ): Promise<ClientConfig> {
+        const cert = await this.getRdsCertificate()
+
         return {
             host: secretDict.host,
             user: secretDict.username,
@@ -12,7 +39,7 @@ export class DatabaseClient {
             ssl: useSSL
                 ? {
                       rejectUnauthorized: true,
-                      ca: '/etc/pki/tls/certs/ca-bundle.crt', // AWS RDS cert bundle in Lambda
+                      ca: cert,
                   }
                 : false,
             connectionTimeoutMillis: 5000,
@@ -40,27 +67,21 @@ export class DatabaseClient {
 
     async connect(secretDict: SecretDict): Promise<Client | null> {
         const [useSSL, fallBack] = this.getSSLConfig(secretDict)
-        try {
-            // Try SSL first if configured
-            const conn = await this.tryConnect(secretDict, useSSL)
-            if (conn || !fallBack) {
-                return conn
-            }
-            // Fallback to non-SSL if allowed
-            return this.tryConnect(secretDict, false)
-        } catch (error) {
-            console.error('Failed to connect:', error)
-            return null
+        // Try SSL first if configured
+        const conn = await this.tryConnect(secretDict, useSSL)
+        if (conn || !fallBack) {
+            return conn
         }
+        // Fallback to non-SSL if allowed
+        return this.tryConnect(secretDict, false)
     }
 
     private async tryConnect(
         secretDict: SecretDict,
         useSSL: boolean
     ): Promise<Client | null> {
-        const config = this.getConfig(secretDict, useSSL)
+        const config = await this.getConfig(secretDict, useSSL)
         const client = new Client(config)
-
         try {
             await client.connect()
             console.log(

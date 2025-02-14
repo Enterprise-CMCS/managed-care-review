@@ -163,7 +163,6 @@ export async function handler(
         console.log('CA bundle exists at /etc/pki/tls/certs/ca-bundle.crt')
     } catch (error) {
         console.log('CA bundle not found:', error)
-        // Also check other common locations
         ;[
             '/',
             '/etc/ssl/certs/ca-certificates.crt',
