@@ -23,12 +23,20 @@ const includeFullContract = {
     },
 } satisfies Prisma.ContractTableInclude
 
+const includeContractForCMSDashboard = {
+    ...includeContractWithoutDraftRates,
+} satisfies Prisma.ContractTableInclude
+
 // ContractTableFullPayload is the type returned by any ContractTable find prisma query given the
 // includeFullContract include: parameter.
 // See https://www.prisma.io/blog/satisfies-operator-ur8ys8ccq7zb for a discussion of how
 // the satisfies keyword enables the construction of this type.
 type ContractTableFullPayload = Prisma.ContractTableGetPayload<{
     include: typeof includeFullContract
+}>
+
+type ContractTableDashboardPayload = Prisma.ContractTableGetPayload<{
+    include: typeof includeContractForCMSDashboard
 }>
 
 type ContractRevisionTableWithRates = ContractTableFullPayload['revisions'][0]
@@ -62,11 +70,12 @@ type RateTableFullPayload = Prisma.RateTableGetPayload<{
 
 type RateRevisionTableWithContracts = RateTableFullPayload['revisions'][0]
 
-export { includeFullContract, includeFullRate }
+export { includeFullContract, includeFullRate, includeContractForCMSDashboard }
 
 export type {
     ContractTableFullPayload,
     ContractRevisionTableWithRates,
     RateTableFullPayload,
     RateRevisionTableWithContracts,
+    ContractTableDashboardPayload,
 }

@@ -1,10 +1,11 @@
 import type { PrismaTransactionType } from '../prismaTypes'
-import { NotFoundError } from '../postgresErrors'
-import { parseContractWithHistory } from './parseContractWithHistory'
-import { includeFullContract } from './prismaFullContractRateHelpers'
 import type { ContractOrErrorArrayType } from './findAllContractsWithHistoryByState'
+import { NotFoundError } from '../postgresErrors'
+import { performance } from 'perf_hooks'
+import { parseContractForDashboard } from './parseContractWithHistory'
+import { includeContractForCMSDashboard } from './prismaFullContractRateHelpers'
 
-async function findAllContractsWithHistoryBySubmitInfo(
+async function findAllContractsForCMSDashboard(
     client: PrismaTransactionType
 ): Promise<ContractOrErrorArrayType | NotFoundError | Error> {
     try {
@@ -22,11 +23,14 @@ async function findAllContractsWithHistoryBySubmitInfo(
                     not: 'AS', // exclude test state as per ADR 019
                 },
             },
-            include: includeFullContract,
+            include: {
+                ...includeContractForCMSDashboard,
+            },
         })
+
         performance.mark('finishPostgresQuery')
         performance.measure(
-            'findAllContractsWithHistoryBySubmitInfo: beginPostgresQuery to finishPostgresQuery',
+            'findAllContractsForCMSDashboard: beginPostgresQuery to finishPostgresQuery',
             'beginPostgresQuery',
             'finishPostgresQuery'
         )
@@ -41,16 +45,15 @@ async function findAllContractsWithHistoryBySubmitInfo(
         const parsedContracts: ContractOrErrorArrayType = contracts.map(
             (contract) => ({
                 contractID: contract.id,
-                contract: parseContractWithHistory(contract),
+                contract: parseContractForDashboard(contract),
             })
         )
         performance.mark('finishParseContract')
         performance.measure(
-            'findAllContractsWithHistoryBySubmitInfo: beginParseContract to finishParseContract',
+            'findAllContractsForCMSDashboard: beginParseContract to finishParseContract',
             'beginParseContract',
             'finishParseContract'
         )
-
         return parsedContracts
     } catch (err) {
         console.error('PRISMA ERROR', err)
@@ -58,4 +61,4 @@ async function findAllContractsWithHistoryBySubmitInfo(
     }
 }
 
-export { findAllContractsWithHistoryBySubmitInfo }
+export { findAllContractsForCMSDashboard }
