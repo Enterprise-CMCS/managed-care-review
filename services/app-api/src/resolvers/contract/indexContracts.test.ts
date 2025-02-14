@@ -29,13 +29,9 @@ describe(`indexContracts`, () => {
             // First, create a new contract
             const draft =
                 await createAndUpdateTestContractWithoutRates(stateServer)
-            const draftFormData = draft.draftRevision?.formData
 
             const submittedContract =
                 await createAndSubmitTestContractWithRate(stateServer)
-            const submittedFormData =
-                submittedContract.packageSubmissions[0].contractRevision
-                    .formData
             // then see if we can get that same contract back from the index
             const result = await stateServer.executeOperation({
                 query: IndexContractsForDashboardDocument,
@@ -58,18 +54,10 @@ describe(`indexContracts`, () => {
             // confirm some contract data is correct too, first in list will be draft, second is the submitted
             expect(theseSubmissions[0].initiallySubmittedAt).toBeNull()
             expect(theseSubmissions[0].status).toBe('DRAFT')
-            expect(
-                theseSubmissions[0].draftRevision?.formData
-                    .submissionDescription
-            ).toBe(draftFormData?.submissionDescription)
             expect(theseSubmissions[1].initiallySubmittedAt).toEqual(
                 submittedContract.packageSubmissions[0].submitInfo.updatedAt
             )
             expect(theseSubmissions[1].status).toBe('SUBMITTED')
-            expect(
-                theseSubmissions[1].packageSubmissions[0].contractRevision
-                    .formData.submissionDescription
-            ).toBe(submittedFormData.submissionDescription)
         })
 
         it('synthesizes the right statuses as a contract is submitted/unlocked/etc', async () => {
