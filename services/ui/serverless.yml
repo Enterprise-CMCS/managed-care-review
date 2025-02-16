@@ -1,6 +1,6 @@
 service: ui
 
-frameworkVersion: '^3.19.0'
+frameworkVersion: '4.2.3'
 
 provider:
   name: aws
@@ -13,8 +13,8 @@ plugins:
 
 custom:
   region: ${aws:region}
-  cloudfrontDomainName: ${ssm:/configuration/${sls:stage}/cloudfront/domain_name, ""}
-  cloudfrontCertificateArn: ${ssm:/configuration/${sls:stage}/cloudfront/certificate_arn, ""}
+  cloudfrontCertificateArn: ${env:CLOUDFRONT_CERT_ARN}
+  cloudfrontStorybookDomainName: ${env:CLOUDFRONT_SB_DOMAIN_NAME}
   serverlessTerminationProtection:
     stages:
       - dev
@@ -33,7 +33,7 @@ resources:
         - Fn::Not:
             - Fn::Equals:
                 - ''
-                - ${self:custom.cloudfrontDomainName}
+                - ${self:custom.cloudfrontStorybookDomainName}
   Resources:
     S3Bucket:
       Type: AWS::S3::Bucket
@@ -115,7 +115,7 @@ resources:
           Aliases:
             Fn::If:
               - CreateCustomCloudFrontDomain
-              - - ${self:custom.cloudfrontDomainName}
+              - - ${self:custom.cloudfrontStorybookDomainName}
               - !Ref AWS::NoValue
           Origins:
             - DomainName: !GetAtt S3Bucket.DomainName
@@ -179,5 +179,5 @@ resources:
       Value:
         Fn::If:
           - CreateCustomCloudFrontDomain
-          - https://${self:custom.cloudfrontDomainName}/
+          - https://${self:custom.cloudfrontStorybookDomainName}/
           - !Sub https://${CloudFrontDistribution.DomainName}

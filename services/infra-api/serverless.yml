@@ -1,10 +1,9 @@
 service: infra-api
 variablesResolutionMode: 20210326
 
-frameworkVersion: '^3.19.0'
+frameworkVersion: '4.2.3'
 
 plugins:
-  - serverless-offline-ssm
   - serverless-stack-termination-protection
   - serverless-s3-bucket-helper
   - serverless-iam-helper
@@ -20,12 +19,8 @@ custom:
   nrFirehoseStreamName: 'NewRelic-Delivery-Stream'
   nrExternalId: '3407984'
   webAclName: ${self:custom.stage}-${self:service}-webacl
-  serverless-offline-ssm:
-    stages:
-      - local
-      - offline
-    ssm:
-      '/configuration/iam/full_permissions_boundary_policy': 'arn:aws:iam::local:policy/local/developer-boundary-policy'
+  iamPermissionsBoundary: ${env:IAM_PERMISSIONS_BOUNDARY}
+  iamPath: ${env:IAM_PATH}
   serverlessTerminationProtection:
     stages:
       - dev
@@ -39,8 +34,9 @@ provider:
   region: us-east-1
   iam:
     role:
-      path: ${ssm:/configuration/iam/path, "/"}
-      permissionsBoundary: ${ssm:/configuration/iam/full_permissions_boundary_policy}
+      path: ${self:custom.iamPath}
+      permissionsBoundary: ${self:custom.iamPermissionsBoundary}
+
       statements:
         - Effect: 'Allow'
           Action:

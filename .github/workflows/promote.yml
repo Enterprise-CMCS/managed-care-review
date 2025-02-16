@@ -171,6 +171,16 @@ jobs:
       nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
       slack_webhook_url: ${{ secrets.SLACK_WEBHOOK }}
       serverless_license_key: ${{ secrets.SERVERLESS_V4_LICENSE }}
+      cloudfront_cert_arn: ${{ secrets.DEV_CERTIFICATE_ARN}}
+      cloudfront_sb_domain_name: ${{ secrets.DEV_CLOUDFRONT_SB_DOMAIN_NAME }}
+      vpc_id: ${{ secrets.DEV_VPC_ID }}
+      sg_id: ${{ secrets.DEV_SG_ID }}
+      iam_permissions_boundary: ${{ secrets.DEV_IAM_PERMISSIONS_BOUNDARY }}
+      iam_path: ${{ secrets.IAM_PATH }}
+      subnet_private_a_id: ${{ secrets.DEV_SUBNET_PRIVATE_A_ID }}
+      subnet_private_b_id: ${{ secrets.DEV_SUBNET_PRIVATE_B_ID }}
+      subnet_private_c_id: ${{ secrets.DEV_SUBNET_PRIVATE_C_ID }}
+      subnet_public_a_id: ${{ secrets.DEV_SUBNET_PUBLIC_A_ID }}
 
   promote-app-dev:
     needs: [promote-infra-dev, build-prisma-client-lambda-layer, unit-tests]
@@ -185,6 +195,14 @@ jobs:
     secrets:
       aws_account_id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
       nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
+      vpc_id: ${{ secrets.DEV_VPC_ID }}
+      sg_id: ${{ secrets.DEV_SG_ID }}
+      iam_permissions_boundary: ${{ secrets.DEV_IAM_PERMISSIONS_BOUNDARY }}
+      iam_path: ${{ secrets.IAM_PATH }}
+      subnet_private_a_id: ${{ secrets.DEV_SUBNET_PRIVATE_A_ID }}
+      subnet_private_b_id: ${{ secrets.DEV_SUBNET_PRIVATE_B_ID }}
+      subnet_private_c_id: ${{ secrets.DEV_SUBNET_PRIVATE_C_ID }}
+      subnet_public_a_id: ${{ secrets.DEV_SUBNET_PUBLIC_A_ID }}
 
   promote-infra-val:
     needs: [promote-app-dev, unit-tests]
@@ -199,6 +217,16 @@ jobs:
       nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
       slack_webhook_url: ${{ secrets.SLACK_WEBHOOK }}
       serverless_license_key: ${{ secrets.SERVERLESS_V4_LICENSE }}
+      cloudfront_cert_arn: ${{ secrets.VAL_CERTIFICATE_ARN}}
+      cloudfront_sb_domain_name: ${{ secrets.VAL_CLOUDFRONT_SB_DOMAIN_NAME }}
+      vpc_id: ${{ secrets.VAL_VPC_ID }}
+      sg_id: ${{ secrets.VAL_SG_ID }}
+      iam_permissions_boundary: ${{ secrets.VAL_IAM_PERMISSIONS_BOUNDARY }}
+      iam_path: ${{ secrets.IAM_PATH }}
+      subnet_private_a_id: ${{ secrets.VAL_SUBNET_PRIVATE_A_ID }}
+      subnet_private_b_id: ${{ secrets.VAL_SUBNET_PRIVATE_B_ID }}
+      subnet_private_c_id: ${{ secrets.VAL_SUBNET_PRIVATE_C_ID }}
+      subnet_public_a_id: ${{ secrets.VAL_SUBNET_PUBLIC_A_ID }}
 
   promote-app-val:
     needs: [promote-app-dev, promote-infra-val, unit-tests]
@@ -213,6 +241,14 @@ jobs:
     secrets:
       aws_account_id: ${{ secrets.VAL_AWS_ACCOUNT_ID }}
       nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
+      vpc_id: ${{ secrets.VAL_VPC_ID }}
+      sg_id: ${{ secrets.VAL_SG_ID }}
+      iam_permissions_boundary: ${{ secrets.VAL_IAM_PERMISSIONS_BOUNDARY }}
+      iam_path: ${{ secrets.IAM_PATH }}
+      subnet_private_a_id: ${{ secrets.VAL_SUBNET_PRIVATE_A_ID }}
+      subnet_private_b_id: ${{ secrets.VAL_SUBNET_PRIVATE_B_ID }}
+      subnet_private_c_id: ${{ secrets.VAL_SUBNET_PRIVATE_C_ID }}
+      subnet_public_a_id: ${{ secrets.VAL_SUBNET_PUBLIC_A_ID }}
 
   promote-infra-prod:
     needs: [promote-app-val, unit-tests]
@@ -227,6 +263,16 @@ jobs:
       nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
       slack_webhook_url: ${{ secrets.SLACK_WEBHOOK }}
       serverless_license_key: ${{ secrets.SERVERLESS_V4_LICENSE }}
+      cloudfront_cert_arn: ${{ secrets.PROD_CERTIFICATE_ARN}}
+      cloudfront_sb_domain_name: ${{ secrets.PROD_CLOUDFRONT_SB_DOMAIN_NAME }}
+      vpc_id: ${{ secrets.PROD_VPC_ID }}
+      sg_id: ${{ secrets.PROD_SG_ID }}
+      iam_permissions_boundary: ${{ secrets.PROD_IAM_PERMISSIONS_BOUNDARY }}
+      iam_path: ${{ secrets.IAM_PATH }}
+      subnet_private_a_id: ${{ secrets.PROD_SUBNET_PRIVATE_A_ID }}
+      subnet_private_b_id: ${{ secrets.PROD_SUBNET_PRIVATE_B_ID }}
+      subnet_private_c_id: ${{ secrets.PROD_SUBNET_PRIVATE_C_ID }}
+      subnet_public_a_id: ${{ secrets.PROD_SUBNET_PUBLIC_A_ID }}
 
   promote-app-prod:
     needs: [promote-app-val, promote-infra-prod, unit-tests]
@@ -241,6 +287,14 @@ jobs:
     secrets:
       aws_account_id: ${{ secrets.PROD_AWS_ACCOUNT_ID }}
       nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
+      vpc_id: ${{ secrets.PROD_VPC_ID }}
+      sg_id: ${{ secrets.PROD_SG_ID }}
+      iam_permissions_boundary: ${{ secrets.PROD_IAM_PERMISSIONS_BOUNDARY }}
+      iam_path: ${{ secrets.IAM_PATH }}
+      subnet_private_a_id: ${{ secrets.PROD_SUBNET_PRIVATE_A_ID }}
+      subnet_private_b_id: ${{ secrets.PROD_SUBNET_PRIVATE_B_ID }}
+      subnet_private_c_id: ${{ secrets.PROD_SUBNET_PRIVATE_C_ID }}
+      subnet_public_a_id: ${{ secrets.PROD_SUBNET_PUBLIC_A_ID }}
 
   cypress-prod:
     name: prod - cypress

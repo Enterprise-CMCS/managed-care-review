@@ -1,9 +1,8 @@
 service: ui-auth
 
-frameworkVersion: '^3.19.0'
+frameworkVersion: '4.2.3'
 
 plugins:
-  - serverless-offline-ssm
   - serverless-stack-termination-protection
   - serverless-s3-bucket-helper
   - serverless-iam-helper
@@ -17,18 +16,14 @@ custom:
   application_endpoint_url: ${cf:ui-${sls:stage}.CloudFrontEndpointUrl}
   okta_metadata_url: ${ssm:/configuration/okta_metadata_url}
   sesSourceEmailAddress: ${ssm:/configuration/email/sourceAddress, "" }
-  serverless-offline-ssm:
-    stages:
-      - local
-      - offline
-    ssm:
-      '/configuration/iam/full_permissions_boundary_policy': 'arn:aws:iam::local:policy/local/developer-boundary-policy'
   serverlessTerminationProtection:
     stages:
       - dev
       - val
       - prod
       - main
+  iamPermissionsBoundary: ${env:IAM_PERMISSIONS_BOUNDARY}
+  iamPath: ${env:IAM_PATH}
 
 provider:
   name: aws
@@ -36,8 +31,8 @@ provider:
   region: us-east-1
   iam:
     role:
-      path: ${ssm:/configuration/iam/path, "/"}
-      permissionsBoundary: ${ssm:/configuration/iam/full_permissions_boundary_policy}
+      path: ${self:custom.iamPath}
+      permissionsBoundary: ${self:custom.iamPermissionsBoundary}
       statements:
         - Effect: 'Allow'
           Action:

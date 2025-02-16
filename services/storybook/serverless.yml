@@ -1,6 +1,6 @@
 service: storybook
 
-frameworkVersion: '^3.19.0'
+frameworkVersion: '4.2.3'
 
 plugins:
   - serverless-stack-termination-protection
@@ -9,8 +9,8 @@ plugins:
 custom:
   stage: ${opt:stage, self:provider.stage}
   region: ${aws:region}
-  cloudfrontCertificateArn: ${ssm:/configuration/${sls:stage}/cloudfront/certificate_arn, ""}
-  cloudfrontStorybookDomainName: ${ssm:/configuration/${sls:stage}/cloudfront/storybook_domain_name, ""}
+  cloudfrontCertificateArn: ${env:CLOUDFRONT_CERT_ARN}
+  cloudfrontStorybookDomainName: ${env:CLOUDFRONT_SB_DOMAIN_NAME}
   serverlessTerminationProtection:
     stages:
       - dev

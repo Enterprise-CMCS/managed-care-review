@@ -14,7 +14,6 @@ plugins:
   - serverless-stack-termination-protection
   - serverless-s3-bucket-helper
   - serverless-iam-helper
-  - serverless-offline-ssm
   - serverless-offline
 
 custom:
@@ -46,23 +45,14 @@ custom:
       - val
       - prod
       - main
-  serverless-offline-ssm:
-    stages:
-      - local
-      - offline
-    ssm:
-      '/configuration/default/vpc/id': 'offline'
-      '/configuration/default/vpc/sg/id': 'offline'
-      '/configuration/default/vpc/subnets/private/a/id': 'offline'
-      '/configuration/default/vpc/subnets/private/b/id': 'offline'
-      '/configuration/default/vpc/subnets/private/c/id': 'offline'
-      '/configuration/iam/full_permissions_boundary_policy': 'arn:aws:iam::local:policy/local/developer-boundary-policy'
-  vpcId: ${ssm:/configuration/${sls:stage}/vpc/id, ssm:/configuration/default/vpc/id}
-  sgId: ${ssm:/configuration/${sls:stage}/vpc/sg/id, ssm:/configuration/default/vpc/sg/id}
+  vpcId: ${env:VPC_ID}
+  sgId: ${env:SG_ID}
   privateSubnets:
-    - ${ssm:/configuration/${sls:stage}/vpc/subnets/private/a/id, ssm:/configuration/default/vpc/subnets/private/a/id}
-    - ${ssm:/configuration/${sls:stage}/vpc/subnets/private/b/id, ssm:/configuration/default/vpc/subnets/private/b/id}
-    - ${ssm:/configuration/${sls:stage}/vpc/subnets/private/c/id, ssm:/configuration/default/vpc/subnets/private/c/id}
+    - ${env:SUBNET_PRIVATE_A_ID}
+    - ${env:SUBNET_PRIVATE_B_ID}
+    - ${env:SUBNET_PRIVATE_C_ID}
+  iamPermissionsBoundary: ${env:IAM_PERMISSIONS_BOUNDARY}
+  iamPath: ${env:IAM_PATH}
   lambdaMemory:
     prod: 4096
     default: 1024
@@ -79,8 +69,8 @@ provider:
     - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-18-1:4
   iam:
     role:
-      path: ${ssm:/configuration/iam/path, "/"}
-      permissionsBoundary: ${ssm:/configuration/iam/full_permissions_boundary_policy}
+      path: ${self:custom.iamPath}
+      permissionsBoundary: ${self:custom.iamPermissionsBoundary}
       statements:
         - Effect: 'Allow' # cognito user lookup
           Action:
