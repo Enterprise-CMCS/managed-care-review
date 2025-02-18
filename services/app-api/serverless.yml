@@ -16,8 +16,10 @@ plugins:
   - serverless-iam-helper
   - serverless-offline
 
+build:
+  esbuild: false
+
 custom:
-  region: ${aws:region}
   applicationEndpoint: ${env:APPLICATION_ENDPOINT, cf:ui-${sls:stage}.CloudFrontEndpointUrl}
   appApiGatewayId: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:infra-api-${sls:stage}.ApiGatewayRestApiId}
   appApiGatewayRootResourceId: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:infra-api-${sls:stage}.AppApiGatewayRootResourceId}
@@ -120,7 +122,7 @@ provider:
 
   environment:
     stage: ${sls:stage}
-    REGION: ${self:custom.region}
+    REGION: ${self:provider.region}
     DATABASE_URL: ${self:custom.dbURL}
     VITE_APP_AUTH_MODE: ${self:custom.reactAppAuthMode}
     API_APP_OTEL_COLLECTOR_URL: ${self:custom.apiAppOtelCollectorUrl}
