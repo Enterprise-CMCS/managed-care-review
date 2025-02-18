@@ -158,25 +158,6 @@ export async function handler(
 ): Promise<void> {
     console.log('Event:', JSON.stringify(event, null, 2))
 
-    try {
-        fs.accessSync('/etc/pki/tls/certs/ca-bundle.crt')
-        console.log('CA bundle exists at /etc/pki/tls/certs/ca-bundle.crt')
-    } catch (error) {
-        console.log('CA bundle not found:', error)
-        ;[
-            '/',
-            '/etc/ssl/certs/ca-certificates.crt',
-            '/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem',
-        ].forEach((path) => {
-            try {
-                fs.accessSync(path)
-                console.log(`Found certificates at: ${path}`)
-            } catch (e) {
-                console.log(`No certificates at: ${path}`)
-            }
-        })
-    }
-
     const rotator = new Rotator()
     const { SecretId: arn, ClientRequestToken: token, Step: step } = event
 
