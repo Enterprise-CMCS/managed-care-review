@@ -12,6 +12,7 @@ type RateOrErrorArrayType = RateOrErrorType[]
 
 type FindAllRatesWithHistoryBySubmitType = {
     stateCode?: string
+    useZod?: boolean
 }
 
 async function findAllRatesWithHistoryBySubmitInfo(
