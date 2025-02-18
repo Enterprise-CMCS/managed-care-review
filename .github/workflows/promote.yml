@@ -195,6 +195,7 @@ jobs:
     secrets:
       aws_account_id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
       nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
+      serverless_license_key: ${{ secrets.SERVERLESS_V4_LICENSE }}
       vpc_id: ${{ secrets.DEV_VPC_ID }}
       sg_id: ${{ secrets.DEV_SG_ID }}
       iam_permissions_boundary: ${{ secrets.DEV_IAM_PERMISSIONS_BOUNDARY }}
@@ -241,6 +242,7 @@ jobs:
     secrets:
       aws_account_id: ${{ secrets.VAL_AWS_ACCOUNT_ID }}
       nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
+      serverless_license_key: ${{ secrets.SERVERLESS_V4_LICENSE }}
       vpc_id: ${{ secrets.VAL_VPC_ID }}
       sg_id: ${{ secrets.VAL_SG_ID }}
       iam_permissions_boundary: ${{ secrets.VAL_IAM_PERMISSIONS_BOUNDARY }}
@@ -287,6 +289,7 @@ jobs:
     secrets:
       aws_account_id: ${{ secrets.PROD_AWS_ACCOUNT_ID }}
       nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
+      serverless_license_key: ${{ secrets.SERVERLESS_V4_LICENSE }}
       vpc_id: ${{ secrets.PROD_VPC_ID }}
       sg_id: ${{ secrets.PROD_SG_ID }}
       iam_permissions_boundary: ${{ secrets.PROD_IAM_PERMISSIONS_BOUNDARY }}
