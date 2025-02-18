@@ -120,7 +120,7 @@ export function indexContractsResolver(
         } else if (hasAdminPermissions(user) || hasCMSPermissions(user)) {
             const contractsWithHistory = testIndexContractsFlag
                 ? await store.findAllContractsForCMSDashboard()
-                : await store.findAllContractsWithHistoryBySubmitInfo()
+                : await store.findAllContractsWithHistoryBySubmitInfo(false)
 
             if (contractsWithHistory instanceof Error) {
                 const errMessage = `Issue finding contracts with history by submit info. Message: ${contractsWithHistory.message}`

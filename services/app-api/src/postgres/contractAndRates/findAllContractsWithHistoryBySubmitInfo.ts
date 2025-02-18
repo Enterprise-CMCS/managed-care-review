@@ -3,9 +3,9 @@ import { NotFoundError } from '../postgresErrors'
 import { parseContractWithHistory } from './parseContractWithHistory'
 import { includeFullContract } from './prismaFullContractRateHelpers'
 import type { ContractOrErrorArrayType } from './findAllContractsWithHistoryByState'
-
 async function findAllContractsWithHistoryBySubmitInfo(
-    client: PrismaTransactionType
+    client: PrismaTransactionType,
+    useZod: boolean = true
 ): Promise<ContractOrErrorArrayType | NotFoundError | Error> {
     try {
         performance.mark('beginPostgresQuery')
@@ -38,19 +38,20 @@ async function findAllContractsWithHistoryBySubmitInfo(
         }
 
         performance.mark('beginParseContract')
-        const parsedContracts: ContractOrErrorArrayType = contracts.map(
-            (contract) => ({
+        let parsedContracts: ContractOrErrorArrayType = []
+        for (const contract of contracts) {
+            const parsed = {
                 contractID: contract.id,
-                contract: parseContractWithHistory(contract),
-            })
-        )
+                contract: parseContractWithHistory(contract, useZod),
+            }
+            parsedContracts = parsedContracts.concat(parsed)
+        }
         performance.mark('finishParseContract')
         performance.measure(
             'findAllContractsWithHistoryBySubmitInfo: beginParseContract to finishParseContract',
             'beginParseContract',
             'finishParseContract'
         )
-
         return parsedContracts
     } catch (err) {
         console.error('PRISMA ERROR', err)

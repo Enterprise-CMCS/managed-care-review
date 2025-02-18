@@ -40,6 +40,13 @@ const featureFlags = {
         defaultValue: false,
     },
     /**
+     * Enables undo withdraw rate feature
+     */
+    UNDO_WITHDRAW_RATE: {
+        flag: 'undo-withdraw-rate',
+        defaultValue: false,
+    },
+    /**
      * Remove parameter store. False: use parameter store for email config. True: use database.
      */
     REMOVE_PARAMETER_STORE: {

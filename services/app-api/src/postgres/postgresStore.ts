@@ -186,9 +186,9 @@ type Store = {
         stateCode: string
     ) => Promise<ContractOrErrorArrayType | Error>
 
-    findAllContractsWithHistoryBySubmitInfo: () => Promise<
-        ContractOrErrorArrayType | Error
-    >
+    findAllContractsWithHistoryBySubmitInfo: (
+        useZod?: boolean
+    ) => Promise<ContractOrErrorArrayType | Error>
 
     findAllContractsForCMSDashboard: () => Promise<
         ContractOrErrorArrayType | Error
@@ -297,8 +297,8 @@ function NewPostgresStore(client: ExtendedPrismaClient): Store {
         findAllContractsWithHistoryByState: (args) =>
             findAllContractsWithHistoryByState(client, args),
 
-        findAllContractsWithHistoryBySubmitInfo: () =>
-            findAllContractsWithHistoryBySubmitInfo(client),
+        findAllContractsWithHistoryBySubmitInfo: (args) =>
+            findAllContractsWithHistoryBySubmitInfo(client, args),
         findAllContractsForCMSDashboard: () =>
             findAllContractsForCMSDashboard(client),
 

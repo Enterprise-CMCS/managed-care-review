@@ -60,7 +60,8 @@ function arrayOrFirstError<T>(
 // Contract with submit and unlock info. Changes to the data of this contract, or changes
 // to the data or relations of associate revisions will all surface as new ContractRevisions
 function parseContractWithHistory(
-    contract: ContractTableFullPayload
+    contract: ContractTableFullPayload,
+    useZod: boolean = true
 ): ContractType | Error {
     const contractWithHistory = contractWithHistoryToDomainModel(contract)
     if (contractWithHistory instanceof Error) {
@@ -70,14 +71,21 @@ function parseContractWithHistory(
         return contractWithHistory
     }
 
-    const parseContract = contractSchema.safeParse(contractWithHistory)
-    if (!parseContract.success) {
-        const error = `ERROR: attempting to parse prisma contract with history failed: ${parseContract.error}`
-        console.warn(error, contractWithHistory, parseContract.error)
-        return parseContract.error
-    }
+    // useZod flag allows us to skip parsing in parts of the code
+    // where converting to the domain model is enough
+    // such as when calling indexContract and indexRates
+    if (useZod) {
+        const parseContract = contractSchema.safeParse(contractWithHistory)
+        if (!parseContract.success) {
+            const error = `ERROR: attempting to parse prisma contract with history failed: ${parseContract.error}`
+            console.warn(error, contractWithHistory, parseContract.error)
+            return parseContract.error
+        }
 
-    return parseContract.data
+        return parseContract.data
+    } else {
+        return contractWithHistory
+    }
 }
 
 function parseContractForDashboard(
