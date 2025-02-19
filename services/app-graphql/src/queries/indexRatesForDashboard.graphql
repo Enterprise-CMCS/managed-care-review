@@ -1,100 +1,64 @@
-query indexRatesForDashboard($input: IndexRatesInput) {
-    indexRates(input: $input) {
+query indexRatesForDashboard {
+    indexRatesForDashboard{
         totalCount
         edges {
             node {
-                ...rateFieldsFragment
-                draftRevision {
-                    id
-                    rateID
-                    createdAt
+                id
+                status
+                reviewStatus
+                consolidatedStatus
+                createdAt
+                updatedAt
+                initiallySubmittedAt
+                # lastUpdatedForDisplay - uses previous
+                stateCode
+                reviewStatusActions {
                     updatedAt
-                    unlockInfo {
-                        ...updateInformationFields
+                    actionType
+                }
+                stateCode
+                state {
+                    code
+                    name
+                    programs {
+                        id
+                        name
+                        fullName
+                        isRateProgram
                     }
+                }
+                stateNumber
+
+                latestSubmission {
+                    cause
                     submitInfo {
-                        ...updateInformationFields
+                        updatedAt
                     }
-                    formData {
-                        rateType,
-                        rateCapitationType,
-                        rateDateStart,
-                        rateDateEnd,
-                        rateDateCertified,
-                        amendmentEffectiveDateStart,
-                        amendmentEffectiveDateEnd,
-                        rateProgramIDs,
-                        deprecatedRateProgramIDs,
-                        consolidatedRateProgramIDs
-                        rateCertificationName,
-                        certifyingActuaryContacts {
-                            name
-                            titleRole
-                            email
-                            actuarialFirm
-                            actuarialFirmOther
-                        },
-                        addtlActuaryContacts {
-                            name
-                            titleRole
-                            email
-                            actuarialFirm
-                            actuarialFirmOther
-                        },
-                        actuaryCommunicationPreference
-                        packagesWithSharedRateCerts {
-                            packageName
-                            packageId
-                            packageStatus
+
+                    rateRevision {
+                        id
+                        createdAt
+                        updatedAt
+
+                        submitInfo {
+                            updatedAt
+                        }
+
+                        unlockInfo {
+                            updatedAt
+                        }
+
+                        formData {
+                            rateProgramIDs
+                            deprecatedRateProgramIDs
+                            rateType
+                            rateDateEnd
+                            rateDateStart
+                            rateCertificationName
                         }
                     }
                 }
 
-                revisions {
-                    id
-                    rateID
-                    createdAt
-                    updatedAt
-                    unlockInfo {
-                        ...updateInformationFields
-                    }
-                    submitInfo {
-                        ...updateInformationFields
-                    }
-                    formData {
-                        rateType,
-                        rateCapitationType,
-                        rateDateStart,
-                        rateDateEnd,
-                        rateDateCertified,
-                        amendmentEffectiveDateStart,
-                        amendmentEffectiveDateEnd,
-                        rateProgramIDs,
-                        deprecatedRateProgramIDs,
-                        consolidatedRateProgramIDs,
-                        rateCertificationName,
-                        certifyingActuaryContacts {
-                            name
-                            titleRole
-                            email
-                            actuarialFirm
-                            actuarialFirmOther
-                        },
-                        addtlActuaryContacts {
-                            name
-                            titleRole
-                            email
-                            actuarialFirm
-                            actuarialFirmOther
-                        },
-                        actuaryCommunicationPreference
-                        packagesWithSharedRateCerts {
-                            packageName
-                            packageId
-                            packageStatus
-                        }
-                    }
-                }
             }
         }
     }

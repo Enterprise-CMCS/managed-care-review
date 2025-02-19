@@ -42,6 +42,11 @@ type Query {
     """
     indexContracts: IndexContractsPayload!
     """
+    indexContractsForDashboard returns abbreviated contract data
+    Intended for use with CMS dashboards, more minimal contract query
+    """
+    indexContractsForDashboard: IndexContractsForDashboardPayload!
+    """
     indexUsers returns all of the Users in the system.
 
     It can only be called by an AdminUser
@@ -51,15 +56,23 @@ type Query {
     indexUsers: IndexUsersPayload!
 
     """
-    indexRates returns an array of rates with their revisions and related contracts
-    Only rates with at least one submitted revision are returned
-    indexRates can be called by CMS and admin users
+    indexRates returns full submitted rates
+    indexRates can be called by CMS and admin users, also used in link rate dropdown
 
     Errors:
     - ForbiddenError: User must be a CMS or Admin type user
-    - NotFoundError: No rates with at least one submitted revision were found
+    - NotFoundError:  No submitted rates found
     """
     indexRates(input: IndexRatesInput): IndexRatesPayload!
+    """
+    indexRatesForDashboard returns abbreviated rate data
+    Intended for use with CMS dashboards, initially minimal rate query
+
+      Errors:
+    - ForbiddenError: User must be a CMS or Admin type user
+    - NotFoundError: No submitted rates found
+    """
+    indexRatesForDashboard: IndexRatesForDashboardPayload!
     """
     fetchRate returns a rate with its revisions, including contract revisions
     for a given rate's ID
@@ -67,7 +80,7 @@ type Query {
     It can be called by CMS or State users
 
     Errors:
-    - ForbiddenError: This API is not available due to feature flags.
+    - ForbiddenError: This API is not available due to feature flags
     - NotFoundError: rate for rate.ID not found in database
     """
     fetchRate(input: FetchRateInput!): FetchRatePayload!
@@ -529,7 +542,7 @@ type Mutation {
     ): withdrawAndReplaceRedundantRatePayload
 
     """
-    approveContract is a CMS user only action 
+    approveContract is a CMS user only action
 
     Errors:
     - ForbiddenError:
@@ -667,6 +680,16 @@ type IndexContractsPayload {
     totalCount: Int
     edges: [ContractEdge!]!
 }
+
+type ContractInDashboardEdge{
+    node: ContractInDashboard!
+}
+
+type IndexContractsForDashboardPayload {
+    totalCount: Int
+    edges: [ContractInDashboardEdge!]!
+}
+
 
 type IndexContractQuestionsPayload {
     "Questions for a given submission that were asked by DMCO within CMS"
@@ -1824,6 +1847,55 @@ type Rate {
     """
     questions: IndexRateQuestionsPayload
 }
+"""
+RateInDashboard is abbreviated  are rate certifications and their associated actuary contacts and documents
+State users may create, update, and submit several rates at a time
+"""
+type RateInDashboard {
+    id: ID!
+    createdAt: DateTime!
+    updatedAt: DateTime!
+    """
+    Where the package is in the submission flow.
+    Options are DRAFT, SUBMITTED, RESUBMITTED and UNLOCKED
+    SUBMITTED and RESUBMITTED packages cannot be modified
+    """
+    status: HealthPlanPackageStatus!
+    """
+    Where the rate is in the review submission flow
+    Options are UNDER_REVIEW, WITHDRAWN
+    """
+    reviewStatus: RateReviewStatus!
+    """
+    Synthesized field that represents if a rate's status or
+    reviewStatus should take precedence
+    Options are DRAFT, SUBMITTED, RESUBMITTED UNLOCKED, UNDER_REVIEW, WITHDRAWN
+    """
+    consolidatedStatus: ConsolidatedRateStatus!
+    "The initial date this rate was submitted at. Is not changed by unlock or resubmission."
+    initiallySubmittedAt: DateTime
+    "The state code (e.g. CA or TN) for the submitting state"
+    stateCode: String!
+    "Fuller state data for the submitting state"
+    state: State!
+    "webURL is a URL that will open the MC Review web app to this Rate"
+    webURL: String!
+
+    """
+    A unique auto-incrementing number generated for this rate
+    This value is used to generate the rateName
+    """
+    stateNumber: Int!
+    "parentContractID is the ID of the contract that initially submitted this rate"
+    parentContractID: ID!
+    "withdrawInfo is the who/when/why for this rate being withdrawn. Rates actively in use in the system will not have a withdrawInfo"
+    withdrawInfo: UpdateInformation
+
+    "reviewStatusActions are the who/when/why for review status changes on this contract"
+    reviewStatusActions: [RateReviewStatusActions!]
+
+    latestSubmission: RatePackageSubmission!
+}
 
 """
 ContractRevision is a single instance of all the contract specific data in a submission
@@ -1920,7 +1992,7 @@ type Contract {
     reviewStatus: ContractReviewStatus!
     """
     Synthesized field that represents if a contract's status or
-    reviewStatus should take precedence 
+    reviewStatus should take precedence
     Options are DRAFT, SUBMITTED, RESUBMITTED UNLOCKED, UNDER_REVIEW, APPROVED
     """
     consolidatedStatus: ConsolidatedContractStatus!
@@ -1998,7 +2070,7 @@ type UnlockedContract {
     reviewStatus: ContractReviewStatus!
     """
     Synthesized field that represents if a contract's status or
-    reviewStatus should take precedence 
+    reviewStatus should take precedence
     Options are DRAFT, SUBMITTED, RESUBMITTED UNLOCKED, UNDER_REVIEW, APPROVED
     """
     consolidatedStatus: ConsolidatedContractStatus!
@@ -2054,6 +2126,56 @@ type UnlockedContract {
     questions: IndexContractQuestionsPayload
 }
 
+type ContractInDashboard {
+   id: ID!
+    createdAt: DateTime!
+    updatedAt: DateTime!
+
+    """
+    Where the contract is in the state submission flow.
+    Options are SUBMITTED, RESUBMITTED and UNLOCKED for ContractInDashboard
+    """
+    status: HealthPlanPackageStatus!
+    """
+    Where the contract is in the CMS review submission flow
+    """
+    reviewStatus: ContractReviewStatus!
+    """
+    Synthesized field that represents if a contract's status or
+    reviewStatus should take precedence. Used in dashboards.
+    """
+    consolidatedStatus: ConsolidatedContractStatus!
+    "The initial date this contract was first submitted to CMS. Is not changed by unlock or resubmission."
+    initiallySubmittedAt: DateTime
+    "The last time this contract was changed according to user perspective"
+    lastUpdatedForDisplay: DateTime!
+    "Shortened state code associated with the contract"
+    stateCode: String!
+    "Full state data associated with the contract"
+    state: State!
+    """
+    stateNumber is a unique auto-incrementing number identifying this contract
+    This value is used to generate the contractName
+    """
+    stateNumber: Int!
+    "mccrsID is the four digit id in MC-CRS that corresponds to this Contract, if set"
+    mccrsID: String
+
+    "webURL is a url that will open the MC Review web app to this Contract"
+    webURL: String!
+
+    "dateContractDocsExecuted is the first date, if any in which the revisions were submitted with all contract docs executed. Null otherwise."
+    dateContractDocsExecuted: DateTime
+
+    "reviewStatusActions are the who/when/why for review status changes on this contract"
+    reviewStatusActions: [ContractReviewStatusActions!]
+
+    """
+    Each packageSubmission preserve the last action on a contract and/or its related rates
+    """
+    latestSubmission: ContractPackageSubmission!
+}
+
 type RateEdge {
     node: Rate!
 }
@@ -2070,6 +2192,16 @@ type IndexRatesPayload {
     """
     edges: [RateEdge!]!
 }
+
+type RateInDashboardEdge{
+    node: RateInDashboard!
+}
+
+type IndexRatesForDashboardPayload {
+    totalCount: Int
+    edges: [RateInDashboardEdge]!
+}
+
 
 type FetchRatePayload {
     """

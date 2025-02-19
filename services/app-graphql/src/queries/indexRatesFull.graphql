@@ -9,10 +9,6 @@ query indexRates($input: IndexRatesInput) {
                     ...rateRevisionFragment
                 }
 
-                revisions {
-                    ...rateRevisionFragment
-                }
-
                 packageSubmissions {
                     ...ratePackageSubmissionsFragment
                 }
