@@ -159,7 +159,7 @@ jobs:
         env:
           SERVERLESS_ACCESS_KEY: ${{ secrets.serverless_license_key }}
           CLOUDFRONT_CERT_ARN: ${{ secrets.cloudfront_cert_arn }}
-          CLOUDFRONT_SB_DOMAIN_NAME: ${{ secrets.cloundfront_sb_domain_name }}
+          CLOUDFRONT_SB_DOMAIN_NAME: ${{ secrets.cloudfront_sb_domain_name }}
         run: |
           pushd services/ui && npx serverless deploy --stage ${{ inputs.stage_name }}
 
@@ -188,7 +188,7 @@ jobs:
         env:
           SERVERLESS_ACCESS_KEY: ${{ secrets.serverless_license_key }}
           CLOUDFRONT_CERT_ARN: ${{ secrets.cloudfront_cert_arn }}
-          CLOUDFRONT_SB_DOMAIN_NAME: ${{ secrets.cloundfront_sb_domain_name }}
+          CLOUDFRONT_SB_DOMAIN_NAME: ${{ secrets.cloudfront_sb_domain_name }}
         run: |
           pushd services/storybook && npx serverless deploy --stage ${{ inputs.stage_name }}
 
