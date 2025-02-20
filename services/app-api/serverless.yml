@@ -58,6 +58,7 @@ custom:
   lambdaMemory:
     prod: 4096
     default: 1024
+  instanceId: ${sls:instanceId}
 
 provider:
   name: aws
@@ -246,9 +247,18 @@ resources:
     ApiGwWebAclAssociation:
       Type: AWS::WAFv2::WebACLAssociation
       DependsOn:
-        - GraphqlLambdaFunction
-        - HealthLambdaFunction
-        - ZipUnderscorekeysLambdaFunction
+        - ApiGatewayMethodHealthcheckOptions
+        - ApiGatewayMethodOtelOptions
+        - ApiGatewayMethodGraphqlOptions
+        - ApiGatewayMethodV1GraphqlExternalOptions
+        - ApiGatewayMethodZipOptions
+        - ApiGatewayMethodHealthcheckGet
+        - ApiGatewayMethodOtelPost
+        - ApiGatewayMethodGraphqlPost
+        - ApiGatewayMethodGraphqlGet
+        - ApiGatewayMethodV1GraphqlExternalPost
+        - ApiGatewayMethodV1GraphqlExternalGet
+        - ApiGatewayMethodZipPost
       Properties:
         ResourceArn: arn:aws:apigateway:${self:provider.region}::/restapis/${self:custom.appApiGatewayId}/stages/${sls:stage}
         WebACLArn: ${self:custom.appApiWafAclArn}
