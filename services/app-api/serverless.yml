@@ -247,6 +247,8 @@ resources:
       Type: AWS::WAFv2::WebACLAssociation
       DependsOn:
         - GraphqlLambdaFunction
+        - HealthLambdaFunction
+        - ZipUnderscorekeysLambdaFunction
       Properties:
         ResourceArn: arn:aws:apigateway:${self:provider.region}::/restapis/${self:custom.appApiGatewayId}/stages/${sls:stage}
         WebACLArn: ${self:custom.appApiWafAclArn}
