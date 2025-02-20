@@ -98,6 +98,13 @@ async function unlockContractInsideTransaction(
                 },
             },
         },
+        include: {
+            reviewStatusActions: {
+                orderBy: {
+                    updatedAt: 'desc',
+                },
+            },
+        },
     })
 
     // only unlock children that were submitted in the latest submission
@@ -108,7 +115,8 @@ async function unlockContractInsideTransaction(
         if (
             submissionPackageEntries.some(
                 (p) => p.rateRevision.rateID === childRate.id
-            )
+            ) &&
+            childRate.reviewStatusActions[0]?.actionType !== 'WITHDRAW'
         ) {
             childRateIDs.push(childRate.id)
         }
