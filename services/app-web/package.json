@@ -135,9 +135,9 @@
         "zod": "^3.24.1"
     },
     "devDependencies": {
-        "@aws-sdk/client-amplify": "^3.744.0",
-        "@aws-sdk/client-s3": "^3.744.0",
-        "@aws-sdk/s3-request-presigner": "^3.744.0",
+        "@aws-sdk/client-amplify": "^3.749.0",
+        "@aws-sdk/client-s3": "^3.749.0",
+        "@aws-sdk/s3-request-presigner": "^3.749.0",
         "@chromatic-com/storybook": "^3",
         "@peculiar/webcrypto": "^1.5.0",
         "@storybook/addon-a11y": "^8.2.9",
@@ -180,7 +180,7 @@
         "prettier": "^3.4.2",
         "react-select-event": "^5.5.0",
         "react-test-renderer": "^18.2.0",
-        "serverless": "^3.39.0",
+        "serverless": "4.2.3",
         "serverless-cf-invalidate-proxy": "^1.0.1",
         "serverless-plugin-scripts": "^1.0.2",
         "serverless-s3-sync": "^3.3.0",

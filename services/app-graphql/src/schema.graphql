@@ -561,6 +561,25 @@ type Mutation {
     withdrawRate(
         input: WithdrawRateInput!
     ): WithdrawRatePayload
+
+    """
+    undoWithdrawRate is CMS user only action to undo a rate withdraw
+
+    Errors:
+    - ForbiddenError:
+    - A non CMS/CMS Approver user called this
+    - UserInputError:
+    - Rate is not in the correct consolidated status: WITHDRAWN
+    - A associated contract is not in the correct consolidated status: SUBMITTED or RESUBMITTED
+    - INTERNAL_SERVER_ERROR
+    - DB_ERROR
+    - A rate cannot be found
+    - Contracts that rate was withdrawn from cannot be found
+    - Issues restoring relationships between rate and contracts
+    """
+    undoWithdrawRate(
+        input: UndoWithdrawRateInput!
+    ): UndoWithdrawRatePayload
 }
 
 input CreateHealthPlanPackageInput {
@@ -635,7 +654,16 @@ type WithdrawRatePayload {
     rate: Rate!
 }
 
+type UndoWithdrawRatePayload {
+    rate: Rate!
+}
+
 input WithdrawRateInput {
+    rateID: ID!
+    updatedReason: String!
+}
+
+input UndoWithdrawRateInput {
     rateID: ID!
     updatedReason: String!
 }
