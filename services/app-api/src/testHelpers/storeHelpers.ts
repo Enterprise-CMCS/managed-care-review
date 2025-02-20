@@ -1,8 +1,8 @@
-
 import type { Store } from '../postgres'
 import { NewPrismaClient } from '../postgres'
+import type { ExtendedPrismaClient } from '../postgres/prismaClient'
 
-async function configurePrismaClient(): Promise<PrismaClient> {
+async function configurePrismaClient(): Promise<ExtendedPrismaClient> {
     const dbURL = process.env.DATABASE_URL
 
     if (!dbURL) {
@@ -23,12 +23,12 @@ async function configurePrismaClient(): Promise<PrismaClient> {
         throw new Error('failed to configure postgres client for testing')
     }
 
-    return clientResult as unknown as PrismaClient
+    return clientResult as unknown as ExtendedPrismaClient
 }
 
 const sharedClientPromise = configurePrismaClient()
 
-async function sharedTestPrismaClient(): Promise<PrismaClient> {
+async function sharedTestPrismaClient(): Promise<ExtendedPrismaClient> {
     return await sharedClientPromise
 }
 
@@ -149,6 +149,9 @@ function mockStoreThatErrors(): Store {
             return genericError
         },
         withdrawRate: async (_ID) => {
+            return genericError
+        },
+        undoWithdrawRate: async (_ID) => {
             return genericError
         },
         findEmailSettings: async () => {

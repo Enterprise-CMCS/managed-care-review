@@ -1,0 +1,26 @@
+mutation undoWithdrawnRate($input: UndoWithdrawRateInput!) {
+    undoWithdrawRate(input: $input) {
+        rate {
+            ...rateFieldsFragment
+
+            draftRevision {
+                ...rateRevisionFragment
+            }
+
+            revisions {
+                ...rateRevisionFragment
+            }
+
+            withdrawnFromContracts {
+                ...contractFieldsFragment,
+                packageSubmissions {
+                    ...packageSubmissionsFragment
+                }
+            }
+
+            packageSubmissions {
+                ...ratePackageSubmissionsFragment
+            }
+        }
+    }
+}
