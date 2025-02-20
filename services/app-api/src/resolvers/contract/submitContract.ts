@@ -266,6 +266,14 @@ export function submitContract(
                     })
                 }
             }
+        } else {
+            const errMessage = `Attempted to submit a contract and rates contract without rates: ${parsedContract.id}`
+            logError('submitContract', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+            throw new UserInputError(errMessage, {
+                argumentName: 'contractID',
+                cause: 'BAD_USER_INPUT',
+            })
         }
 
         const updateResult = await store.updateDraftContractWithRates({
