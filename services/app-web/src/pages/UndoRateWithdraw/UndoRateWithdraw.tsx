@@ -1,7 +1,15 @@
 import React, { useEffect, useState } from 'react'
 import styles from './UndoRateWithdraw.module.scss'
-import { ActionButton, Breadcrumbs, PoliteErrorMessage } from '../../components'
-import { useFetchRateQuery } from '../../gen/gqlClient'
+import {
+    ActionButton,
+    Breadcrumbs,
+    GenericApiErrorBanner,
+    PoliteErrorMessage,
+} from '../../components'
+import {
+    useFetchRateQuery,
+    useUndoWithdrawnRateMutation,
+} from '../../gen/gqlClient'
 import { ErrorOrLoadingPage } from '../StateSubmission'
 import { handleAndReturnErrorState } from '../StateSubmission/ErrorOrLoadingPage'
 import { RoutesRecord } from '@mc-review/constants'
@@ -43,6 +51,10 @@ export const UndoRateWithdraw = () => {
     const [rateName, setRateName] = useState<string | undefined>(undefined)
     const showFieldErrors = (error?: FormError): boolean | undefined =>
         shouldValidate && Boolean(error)
+    const [
+        undoWithdrawRate,
+        { error: undoWithdrawError, loading: undoWithdrawLoading },
+    ] = useUndoWithdrawnRateMutation()
 
     const formInitialValues: UndoRateWithdrawValues = {
         undoWithdrawReason: '',
@@ -85,8 +97,14 @@ export const UndoRateWithdraw = () => {
             link_type: 'link_other',
         })
         try {
-            console.info('Placeholder: Call undoRateWithdraw mutation')
-            console.info(values)
+            await undoWithdrawRate({
+                variables: {
+                    input: {
+                        rateID: rate.id,
+                        updatedReason: values.undoWithdrawReason,
+                    },
+                },
+            })
             navigate(`/rates/${id}`)
         } catch (err) {
             recordJSException(
@@ -127,6 +145,7 @@ export const UndoRateWithdraw = () => {
                             return handleSubmit(e)
                         }}
                     >
+                        {undoWithdrawError && <GenericApiErrorBanner />}
                         <fieldset className="usa-fieldset">
                             <h2>Undo withdraw</h2>
                             <FormGroup
@@ -190,8 +209,9 @@ export const UndoRateWithdraw = () => {
                                     parent_component_type="page body"
                                     link_url={`/rates/${id}`}
                                     animationTimeout={1000}
+                                    loading={undoWithdrawLoading}
                                 >
-                                    Undo Withdraw
+                                    Undo withdraw
                                 </ActionButton>
                             </ButtonGroup>
                         </PageActionsContainer>
