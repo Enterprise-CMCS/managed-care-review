@@ -25,11 +25,11 @@ on:
       serverless_license_key:
         required: true
       cloudfront_cert_arn:
-        required: true
+        required: false
       cloudfront_domain_name:
-        required: true
+        required: false
       cloudfront_sb_domain_name:
-        required: true
+        required: false
       vpc_id:
         required: true
       sg_id:
