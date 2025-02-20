@@ -52,7 +52,7 @@
         "@opentelemetry/sdk-trace-base": "^1.18.1",
         "@opentelemetry/sdk-trace-node": "^1.18.1",
         "@opentelemetry/semantic-conventions": "^1.30.0",
-        "@prisma/client": "^5.17.0",
+        "@prisma/client": "^6.4.0",
         "apollo-server-core": "^3.11.1",
         "apollo-server-lambda": "^3.5.0",
         "apollo-server-types": "^3.8.0",
