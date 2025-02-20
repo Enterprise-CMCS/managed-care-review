@@ -103,7 +103,7 @@ export const RateWithdraw = () => {
             navigate(`/rates/${id}`)
         } catch (err) {
             recordJSException(
-                `WithdrawRate: Apollo error reported. Error message: Failed to create form data ${err}`
+                `WithdrawRate: Apollo error reported. Error message: ${err}`
             )
         }
     }
