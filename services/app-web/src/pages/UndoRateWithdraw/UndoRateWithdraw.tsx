@@ -18,13 +18,15 @@ import { usePage } from '../../contexts/PageContext'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import { Formik, FormikErrors } from 'formik'
 import * as Yup from 'yup'
+import { useTealium } from '../../hooks'
+import { recordJSException } from '@mc-review/otel'
 
 type UndoRateWithdrawValues = {
-    undoRateWithdrawReason: string
+    undoWithdrawReason: string
 }
 
 const UndoRateWithdrawSchema = Yup.object().shape({
-    undoRateWithdrawReason: Yup.string().required(
+    undoWithdrawReason: Yup.string().required(
         'You must provide a reason for this change.'
     ),
 })
@@ -35,6 +37,7 @@ type FormError =
 export const UndoRateWithdraw = () => {
     const { id } = useParams() as { id: string }
     const { updateHeading } = usePage()
+    const { logFormSubmitEvent } = useTealium()
     const navigate = useNavigate()
     const [shouldValidate, setShouldValidate] = React.useState(false)
     const [rateName, setRateName] = useState<string | undefined>(undefined)
@@ -42,7 +45,7 @@ export const UndoRateWithdraw = () => {
         shouldValidate && Boolean(error)
 
     const formInitialValues: UndoRateWithdrawValues = {
-        undoRateWithdrawReason: '',
+        undoWithdrawReason: '',
     }
 
     const { data, loading, error } = useFetchRateQuery({
@@ -74,9 +77,22 @@ export const UndoRateWithdraw = () => {
         setRateName(rateCertificationName)
     }
 
-    const undoWithdrawRateAction = (values: UndoRateWithdrawValues) => {
-        console.info('Placeholder submit function')
-        console.info(values)
+    const undoWithdrawRateAction = async (values: UndoRateWithdrawValues) => {
+        logFormSubmitEvent({
+            heading: 'Undo withdraw',
+            form_name: 'Undo withdraw',
+            event_name: 'form_field_submit',
+            link_type: 'link_other',
+        })
+        try {
+            console.info('Placeholder: Call undoRateWithdraw mutation')
+            console.info(values)
+            navigate(`/rates/${id}`)
+        } catch (err) {
+            recordJSException(
+                `UndoWithdrawRate: Apollo error reported. Error message: ${err}`
+            )
+        }
     }
 
     return (
@@ -100,7 +116,7 @@ export const UndoRateWithdraw = () => {
                 onSubmit={(values) => undoWithdrawRateAction(values)}
                 validationSchema={UndoRateWithdrawSchema}
             >
-                {({ handleSubmit, handleChange, errors }) => (
+                {({ handleSubmit, handleChange, errors, values }) => (
                     <Form
                         id="UndoRateWithdrawForm"
                         className={styles.formContainer}
@@ -115,7 +131,7 @@ export const UndoRateWithdraw = () => {
                             <h2>Undo withdraw</h2>
                             <FormGroup
                                 error={showFieldErrors(
-                                    errors.undoRateWithdrawReason
+                                    errors.undoWithdrawReason
                                 )}
                                 className="margin-top-0"
                             >
@@ -133,11 +149,9 @@ export const UndoRateWithdraw = () => {
                                     'Undo withdraw' will move the rate back to
                                     the status of Submitted.
                                 </p>
-                                {showFieldErrors(
-                                    errors.undoRateWithdrawReason
-                                ) && (
+                                {showFieldErrors(errors.undoWithdrawReason) && (
                                     <PoliteErrorMessage formFieldLabel="Reason for withdrawing">
-                                        {errors.undoRateWithdrawReason}
+                                        {errors.undoWithdrawReason}
                                     </PoliteErrorMessage>
                                 )}
                                 <Textarea
@@ -145,6 +159,11 @@ export const UndoRateWithdraw = () => {
                                     id="undoWithdrawReason"
                                     data-testid="undoWithdrawReason"
                                     aria-labelledby="undoWithdrawReason"
+                                    error={showFieldErrors(
+                                        errors.undoWithdrawReason
+                                    )}
+                                    onChange={handleChange}
+                                    defaultValue={values.undoWithdrawReason}
                                     aria-required
                                 ></Textarea>
                             </FormGroup>
@@ -165,7 +184,7 @@ export const UndoRateWithdraw = () => {
                                     type="submit"
                                     variant="default"
                                     disabled={showFieldErrors(
-                                        errors.undoRateWithdrawReason
+                                        errors.undoWithdrawReason
                                     )}
                                     data-testid="page-actions-right-primary"
                                     parent_component_type="page body"
