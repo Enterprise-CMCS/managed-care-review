@@ -1,7 +1,6 @@
 /* eslint-disable  @typescript-eslint/no-non-null-assertion */
 import {
     constructTestPostgresServer,
-    createAndUpdateTestHealthPlanPackage,
     defaultFloridaProgram,
     unlockTestHealthPlanPackage,
     updateTestHealthPlanFormData,
@@ -20,6 +19,7 @@ import {
     createAndSubmitTestContract,
     createAndSubmitTestContractWithRate,
     createAndUpdateTestContractWithoutRates,
+    createAndUpdateTestContractWithRate,
     createSubmitAndUnlockTestContract,
     createTestContract,
     fetchTestContract,
@@ -38,7 +38,11 @@ import {
 import { testLDService } from '../../testHelpers/launchDarklyHelpers'
 import { latestFormData } from '../../testHelpers/healthPlanPackageHelpers'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
-import { testEmailConfig, testEmailer, testEmailerFromDatabase } from '../../testHelpers/emailerHelpers'
+import {
+    testEmailConfig,
+    testEmailer,
+    testEmailerFromDatabase,
+} from '../../testHelpers/emailerHelpers'
 import { NewPostgresStore } from '../../postgres'
 import { dayjs } from '@mc-review/dates'
 
@@ -107,17 +111,28 @@ describe('submitContract', () => {
 
         expect(draftRates).toHaveLength(1)
 
-        const contractWithRate = await submitTestContract(stateServer, contractID)
+        const contractWithRate = await submitTestContract(
+            stateServer,
+            contractID
+        )
 
         // expect rates in latest submission
         let latestSubmission = contractWithRate.packageSubmissions[0]
         expect(latestSubmission.rateRevisions).toHaveLength(1)
 
-        await unlockTestContract(cmsServer, contractID, 'Change to contract only')
+        await unlockTestContract(
+            cmsServer,
+            contractID,
+            'Change to contract only'
+        )
 
         await updateTestContractDraftRevision(stateServer, contractID)
 
-        const contractWithoutRates = await submitTestContract(stateServer, contractID, 'resubmit as contract only')
+        const contractWithoutRates = await submitTestContract(
+            stateServer,
+            contractID,
+            'resubmit as contract only'
+        )
 
         // reassigned to the latest submission of contract without rates
         latestSubmission = contractWithoutRates.packageSubmissions[0]
@@ -387,13 +402,11 @@ describe('submitContract', () => {
         expect(subC0.rateRevisions[0].rateID).toBe(TwoID)
 
         // 4. Submit D0, contract only
-        const draftD0 = await createAndUpdateTestHealthPlanPackage(
+        const draftD0 = await createAndUpdateTestContractWithoutRates(
             stateServer,
+            undefined,
             {
-                rateInfos: [],
                 submissionType: 'CONTRACT_ONLY',
-                addtlActuaryContacts: [],
-                addtlActuaryCommunicationPreference: undefined,
             }
         )
         const DID = draftD0.id
@@ -1304,6 +1317,7 @@ describe('submitContract', () => {
         })
 
         // TODO: reimplement this test without using jest
+        // eslint-disable-next-line jest/no-commented-out-tests
         // it('does log error when request for state specific analysts emails failed', async () => {
         //     const consoleErrorSpy = jest.spyOn(console, 'error')
         //     const error = {
@@ -1513,11 +1527,9 @@ describe('submitContract', () => {
 
         it('uses email settings from database with remove-parameter-store flag on', async () => {
             const mockEmailer = await testEmailerFromDatabase()
-            const ldService = testLDService(
-                {
-                    'remove-parameter-store': true
-                }
-            )
+            const ldService = testLDService({
+                'remove-parameter-store': true,
+            })
 
             const stateServer = await constructTestPostgresServer({
                 context: {
@@ -1527,7 +1539,8 @@ describe('submitContract', () => {
                 emailer: mockEmailer,
             })
 
-            const submitResult = await createAndSubmitTestContractWithRate(stateServer)
+            const submitResult =
+                await createAndSubmitTestContractWithRate(stateServer)
 
             const currentRevision =
                 submitResult.packageSubmissions[0].contractRevision
@@ -1537,13 +1550,15 @@ describe('submitContract', () => {
             expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
                 1,
                 expect.objectContaining({
-                    subject: expect.stringContaining(`New Managed Care Submission: ${name}`),
+                    subject: expect.stringContaining(
+                        `New Managed Care Submission: ${name}`
+                    ),
                     sourceEmail: 'mc-review@cms.hhs.gov',
                     toAddresses: expect.arrayContaining(
                         Array.from([
-                            'mc-review-qa+DevTeam@truss.works', 
-                            'mc-review-qa+DMCPsubmissiondev1@truss.works', 
-                            'mc-review-qa+DMCPsubmissiondev2@truss.works'
+                            'mc-review-qa+DevTeam@truss.works',
+                            'mc-review-qa+DMCPsubmissiondev1@truss.works',
+                            'mc-review-qa+DMCPsubmissiondev2@truss.works',
                         ])
                     ),
                 })
@@ -1551,6 +1566,7 @@ describe('submitContract', () => {
         })
 
         // TODO: reimplement this test without using jest
+        // eslint-disable-next-line jest/no-commented-out-tests
         // it('errors when SES email has failed.', async () => {
         //     const mockEmailer = testEmailer()
 
@@ -1658,12 +1674,15 @@ describe('submitContract', () => {
             })
 
             // setup
-            const initialContract =
-                await createAndUpdateTestContractWithoutRates(server, 'FL', {
+            const initialContract = await createAndUpdateTestContractWithRate(
+                server,
+                {
                     statutoryRegulatoryAttestationDescription:
                         'A valid description',
                     statutoryRegulatoryAttestation: false,
-                })
+                    stateCode: 'FL',
+                }
+            )
 
             await new Promise((resolve) => setTimeout(resolve, 2000))
 
