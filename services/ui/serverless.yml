@@ -1,6 +1,6 @@
 service: ui
 
-frameworkVersion: '^3.19.0'
+frameworkVersion: '4.2.3'
 
 provider:
   name: aws
@@ -13,8 +13,8 @@ plugins:
 
 custom:
   region: ${aws:region}
-  cloudfrontDomainName: ${ssm:/configuration/${sls:stage}/cloudfront/domain_name, ""}
-  cloudfrontCertificateArn: ${ssm:/configuration/${sls:stage}/cloudfront/certificate_arn, ""}
+  cloudfrontCertificateArn: ${env:CLOUDFRONT_CERT_ARN}
+  cloudfrontDomainName: ${env:CLOUDFRONT_DOMAIN_NAME}
   serverlessTerminationProtection:
     stages:
       - dev

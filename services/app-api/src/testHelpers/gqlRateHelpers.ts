@@ -5,6 +5,7 @@ import {
     UnlockRateDocument,
     UpdateDraftContractRatesDocument,
     WithdrawRateDocument,
+    UndoWithdrawnRateDocument,
 } from '../gen/gqlClient'
 import { must } from './assertionHelpers'
 import { defaultFloridaRateProgram } from './gqlHelpers'
@@ -486,6 +487,35 @@ const withdrawTestRate = async (
     return withdrawResult.data.withdrawRate.rate
 }
 
+const undoWithdrawRate = async (
+    server: ApolloServer,
+    rateID: string,
+    updatedReason: string
+): Promise<RateType> => {
+    const undoWithdrawRate = await server.executeOperation({
+        query: UndoWithdrawnRateDocument,
+        variables: {
+            input: {
+                rateID,
+                updatedReason,
+            },
+        },
+    })
+
+    if (undoWithdrawRate.errors) {
+        console.info('errors', undoWithdrawRate.errors)
+        throw new Error(
+            `undoWithdrawRate mutation failed with errors ${undoWithdrawRate.errors}`
+        )
+    }
+
+    if (undoWithdrawRate.data === undefined || undoWithdrawRate.data === null) {
+        throw new Error('undoWithdrawRate returned nothing')
+    }
+
+    return undoWithdrawRate.data.undoWithdrawRate.rate
+}
+
 export {
     createTestDraftRateOnContract,
     createSubmitAndUnlockTestRate,
@@ -503,4 +533,5 @@ export {
     formatRateDataForSending,
     fetchTestRateWithQuestionsById,
     withdrawTestRate,
+    undoWithdrawRate,
 }

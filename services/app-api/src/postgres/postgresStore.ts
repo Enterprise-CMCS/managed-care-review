@@ -1,5 +1,4 @@
 import type {
-    PrismaClient,
     Division,
     RateRevisionTable,
     ContractRevisionTable,
@@ -83,7 +82,11 @@ import type { WithdrawRateArgsType } from './contractAndRates/withdrawRate'
 import { withdrawRate } from './contractAndRates/withdrawRate'
 import { findEmailSettings } from './settings/findEmailSettings'
 import { updateEmailSettings } from './settings/updateEmailSettings'
-import type  { ExtendedPrismaClient } from './prismaClient'
+import type { ExtendedPrismaClient } from './prismaClient'
+import {
+    undoWithdrawRate,
+    type UndoWithdrawRateArgsType,
+} from './contractAndRates/undoWithdrawRate'
 
 type Store = {
     findPrograms: (
@@ -161,6 +164,10 @@ type Store = {
 
     withdrawRate: (args: WithdrawRateArgsType) => Promise<RateType | Error>
 
+    undoWithdrawRate: (
+        args: UndoWithdrawRateArgsType
+    ) => Promise<RateType | Error>
+
     findContractWithHistory: (
         contractID: string
     ) => Promise<ContractType | Error>
@@ -186,9 +193,9 @@ type Store = {
         stateCode: string
     ) => Promise<ContractOrErrorArrayType | Error>
 
-    findAllContractsWithHistoryBySubmitInfo: () => Promise<
-        ContractOrErrorArrayType | Error
-    >
+    findAllContractsWithHistoryBySubmitInfo: (
+        useZod?: boolean
+    ) => Promise<ContractOrErrorArrayType | Error>
     findAllRatesWithHistoryBySubmitInfo: (
         args?: FindAllRatesWithHistoryBySubmitType
     ) => Promise<RateOrErrorArrayType | Error>
@@ -280,6 +287,7 @@ function NewPostgresStore(client: ExtendedPrismaClient): Store {
         insertDraftContract: (args) => insertDraftContract(client, args),
         approveContract: (args) => approveContract(client, args),
         withdrawRate: (args) => withdrawRate(client, args),
+        undoWithdrawRate: (args) => undoWithdrawRate(client, args),
         findContractWithHistory: (args) =>
             findContractWithHistory(client, args),
         findRateWithHistory: (args) => findRateWithHistory(client, args),
@@ -291,8 +299,8 @@ function NewPostgresStore(client: ExtendedPrismaClient): Store {
             updateDraftContractRates(client, args),
         findAllContractsWithHistoryByState: (args) =>
             findAllContractsWithHistoryByState(client, args),
-        findAllContractsWithHistoryBySubmitInfo: () =>
-            findAllContractsWithHistoryBySubmitInfo(client),
+        findAllContractsWithHistoryBySubmitInfo: (args) =>
+            findAllContractsWithHistoryBySubmitInfo(client, args),
         findAllRatesWithHistoryBySubmitInfo: (args) =>
             findAllRatesWithHistoryBySubmitInfo(client, args),
         replaceRateOnContract: (args) => replaceRateOnContract(client, args),

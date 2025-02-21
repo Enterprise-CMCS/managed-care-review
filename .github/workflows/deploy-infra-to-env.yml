@@ -24,6 +24,28 @@ on:
         required: true
       serverless_license_key:
         required: true
+      cloudfront_cert_arn:
+        required: false
+      cloudfront_domain_name:
+        required: false
+      cloudfront_sb_domain_name:
+        required: false
+      vpc_id:
+        required: true
+      sg_id:
+        required: true
+      iam_permissions_boundary:
+        required: true
+      iam_path:
+        required: true
+      subnet_private_a_id:
+        required: true
+      subnet_private_b_id:
+        required: true
+      subnet_private_c_id:
+        required: true
+      subnet_public_a_id:
+        required: false
 
 permissions:
   id-token: write
@@ -72,6 +94,8 @@ jobs:
 
       - name: deploy github-oidc
         id: deploy-github-oidc
+        env:
+          SERVERLESS_ACCESS_KEY: ${{ secrets.serverless_license_key }}
         run: |
           pushd services/github-oidc && npx serverless deploy --stage ${{ inputs.stage_name }}
 
@@ -99,7 +123,16 @@ jobs:
       - name: deploy postgres
         id: deploy-postgres
         env:
+          SERVERLESS_ACCESS_KEY: ${{ secrets.serverless_license_key }}
           SLACK_WEBHOOK: ${{ secrets.slack_webhook_url }}
+          VPC_ID: ${{ secrets.vpc_id }}
+          SG_ID: ${{ secrets.sg_id }}
+          SUBNET_PRIVATE_A_ID: ${{ secrets.subnet_private_a_id }}
+          SUBNET_PRIVATE_B_ID: ${{ secrets.subnet_private_b_id }}
+          SUBNET_PRIVATE_C_ID: ${{ secrets.subnet_private_c_id }}
+          SUBNET_PUBLIC_A_ID: ${{ secrets.subnet_public_a_id }}
+          IAM_PERMISSIONS_BOUNDARY: ${{ secrets.iam_permissions_boundary }}
+          IAM_PATH: ${{ secrets.iam_path }}
         run: |
           pushd services/postgres && npx serverless deploy --stage ${{ inputs.stage_name }}
 
@@ -125,6 +158,10 @@ jobs:
 
       - name: deploy ui
         id: deploy-ui
+        env:
+          SERVERLESS_ACCESS_KEY: ${{ secrets.serverless_license_key }}
+          CLOUDFRONT_CERT_ARN: ${{ secrets.cloudfront_cert_arn }}
+          CLOUDFRONT_DOMAIN_NAME: ${{ secrets.cloudfront_domain_name }}
         run: |
           pushd services/ui && npx serverless deploy --stage ${{ inputs.stage_name }}
 
@@ -150,6 +187,10 @@ jobs:
 
       - name: deploy storybook
         id: deploy-storybook
+        env:
+          SERVERLESS_ACCESS_KEY: ${{ secrets.serverless_license_key }}
+          CLOUDFRONT_CERT_ARN: ${{ secrets.cloudfront_cert_arn }}
+          CLOUDFRONT_SB_DOMAIN_NAME: ${{ secrets.cloudfront_sb_domain_name }}
         run: |
           pushd services/storybook && npx serverless deploy --stage ${{ inputs.stage_name }}
 
@@ -187,6 +228,15 @@ jobs:
         id: deploy-uploads
         env:
           NR_LICENSE_KEY: ${{ secrets.nr_license_key }}
+          SERVERLESS_ACCESS_KEY: ${{ secrets.serverless_license_key }}
+          VPC_ID: ${{ secrets.vpc_id }}
+          SG_ID: ${{ secrets.sg_id }}
+          SUBNET_PRIVATE_A_ID: ${{ secrets.subnet_private_a_id }}
+          SUBNET_PRIVATE_B_ID: ${{ secrets.subnet_private_b_id }}
+          SUBNET_PRIVATE_C_ID: ${{ secrets.subnet_private_c_id }}
+          SUBNET_PUBLIC_A_ID: ${{ secrets.subnet_public_a_id }}
+          IAM_PERMISSIONS_BOUNDARY: ${{ secrets.iam_permissions_boundary }}
+          IAM_PATH: ${{ secrets.iam_path }}
         run: |
           pushd services/uploads && npx serverless deploy --stage ${{ inputs.stage_name }}
 
@@ -211,7 +261,11 @@ jobs:
           changed-services: ${{ inputs.changed_services }}
 
       - name: deploy infra-api
-        id: deploy-uploads
+        id: deploy-infra-api
+        env:
+          SERVERLESS_ACCESS_KEY: ${{ secrets.serverless_license_key }}
+          IAM_PERMISSIONS_BOUNDARY: ${{ secrets.iam_permissions_boundary }}
+          IAM_PATH: ${{ secrets.iam_path }}
         run: |
           pushd services/infra-api && npx serverless deploy --stage ${{ inputs.stage_name }}
 
@@ -237,5 +291,9 @@ jobs:
 
       - name: deploy ui-auth
         id: deploy-ui-auth
+        env:
+          SERVERLESS_ACCESS_KEY: ${{ secrets.serverless_license_key }}
+          IAM_PERMISSIONS_BOUNDARY: ${{ secrets.iam_permissions_boundary }}
+          IAM_PATH: ${{ secrets.iam_path }}
         run: |
           pushd services/ui-auth && npx serverless deploy --stage ${{ inputs.stage_name }}
