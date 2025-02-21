@@ -7,7 +7,6 @@ import {
 import {
     assertAnError,
     assertAnErrorCode,
-    createAndSubmitTestContract,
     createTestContract,
     fetchTestContractWithQuestions,
 } from '../../testHelpers'
@@ -19,6 +18,7 @@ import {
 import { testEmailConfig, testEmailer } from '../../testHelpers/emailerHelpers'
 import {
     approveTestContract,
+    createAndSubmitTestContractWithRate,
     submitTestContract,
     unlockTestContract,
 } from '../../testHelpers/gqlContractHelpers'
@@ -48,7 +48,7 @@ describe('createQuestion', () => {
             },
         })
 
-        const contract = await createAndSubmitTestContract(stateServer)
+        const contract = await createAndSubmitTestContractWithRate(stateServer)
 
         const createdQuestion = await createTestQuestion(cmsServer, contract.id)
 
@@ -74,7 +74,7 @@ describe('createQuestion', () => {
                 user: cmsUser,
             },
         })
-        const contract = await createAndSubmitTestContract(stateServer)
+        const contract = await createAndSubmitTestContractWithRate(stateServer)
 
         await unlockTestContract(cmsServer, contract.id, 'test unlock')
         await createTestQuestion(cmsServer, contract.id)
@@ -185,7 +185,7 @@ describe('createQuestion', () => {
             },
         })
 
-        const contract = await createAndSubmitTestContract(stateServer)
+        const contract = await createAndSubmitTestContractWithRate(stateServer)
         // approve contract
         const approvedContract = await approveTestContract(
             cmsServer,
@@ -214,7 +214,7 @@ describe('createQuestion', () => {
     })
     it('returns an error if a state user attempts to create a question for a package', async () => {
         const stateServer = await constructTestPostgresServer()
-        const contract = await createAndSubmitTestContract(stateServer)
+        const contract = await createAndSubmitTestContractWithRate(stateServer)
 
         const createdQuestion = await stateServer.executeOperation({
             query: CreateContractQuestionDocument,
@@ -245,7 +245,7 @@ describe('createQuestion', () => {
             },
         })
 
-        await createAndSubmitTestContract(stateServer)
+        await createAndSubmitTestContractWithRate(stateServer)
 
         const createdQuestion = await cmsServer.executeOperation({
             query: CreateContractQuestionDocument,
@@ -280,7 +280,7 @@ describe('createQuestion', () => {
             },
         })
 
-        await createAndSubmitTestContract(stateServer)
+        await createAndSubmitTestContractWithRate(stateServer)
 
         const createdQuestion = await cmsServer.executeOperation({
             query: CreateContractQuestionDocument,
@@ -315,7 +315,7 @@ describe('createQuestion', () => {
             },
         })
 
-        await createAndSubmitTestContract(stateServer)
+        await createAndSubmitTestContractWithRate(stateServer)
 
         const createdQuestion = await cmsServer.executeOperation({
             query: CreateContractQuestionDocument,
@@ -350,7 +350,7 @@ describe('createQuestion', () => {
             emailer: mockEmailer,
         })
 
-        const contract = await createAndSubmitTestContract(stateServer)
+        const contract = await createAndSubmitTestContractWithRate(stateServer)
 
         await createTestQuestion(cmsServer, contract.id)
 
@@ -398,7 +398,7 @@ describe('createQuestion', () => {
             emailer: mockEmailer,
         })
 
-        const contract = await createAndSubmitTestContract(stateServer)
+        const contract = await createAndSubmitTestContractWithRate(stateServer)
 
         await createTestQuestion(cmsServer, contract.id)
 
@@ -454,7 +454,8 @@ describe('createQuestion', () => {
             },
             emailer: mockEmailer,
         })
-        const stateSubmission = await createAndSubmitTestContract(stateServer)
+        const stateSubmission =
+            await createAndSubmitTestContractWithRate(stateServer)
 
         await createTestQuestion(cmsDMCPServer, stateSubmission.id)
         await createTestQuestion(cmsServer, stateSubmission.id)
