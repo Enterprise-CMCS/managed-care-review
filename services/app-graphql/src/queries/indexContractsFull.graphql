@@ -1,5 +1,5 @@
-query indexContractsForDashboard {
-    indexContractsForDashboard {
+query indexContracts {
+    indexContracts {
         totalCount
         edges {
             node {
@@ -28,7 +28,27 @@ query indexContractsForDashboard {
                 }
                 stateNumber
 
-                latestSubmission {
+                draftRevision {
+                    id
+                    createdAt
+                    updatedAt
+                    contractName
+
+                    submitInfo {
+                        updatedAt
+                    }
+
+                    unlockInfo {
+                        updatedAt
+                    }
+
+                    formData {
+                        programIDs
+                        submissionType
+                    }
+                }
+
+                packageSubmissions {
                     cause
                     submitInfo {
                         updatedAt
