@@ -20,11 +20,11 @@ type UndoWithdrawRateArgsType = {
  *
  * This function performs the following steps
  * 1. Add action to put review status back to `UNDER_REVIEW
- * 1. Unlock the withdrawn rate.
- * 2. Organize contracts it was withdrawn from so that the parent contract is first in restoring relationship.
- * 3. Loop through all contracts rate was withdrawn from to unlock, add rate back, and resubmit contract.
+ * 2. Unlock the withdrawn rate.
+ * 3. Organize contracts it was withdrawn from so that the parent contract is first in restoring relationship.
+ * 4. Loop through all contracts rate was withdrawn from to unlock, add rate back, and resubmit contract.
  *    - The first loop is the parent contract and resubmitting the parent contract will also submit the rate.
- * 4. Remove withdrawnFromContracts relationships since we add the rate back onto them.
+ * 5. Remove withdrawnFromContracts relationships since we add the rate back onto them.
  *
  * @param tx The Prisma transaction object.
  * @param args The arguments required to withdraw the rate, including rateID, updatedByID, and updatedReason.
