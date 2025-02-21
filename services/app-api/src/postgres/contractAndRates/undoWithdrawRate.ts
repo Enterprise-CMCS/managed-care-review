@@ -19,11 +19,12 @@ type UndoWithdrawRateArgsType = {
  * Undo a rate that was withdrawn and place it back onto contracts it was withdrawn from
  *
  * This function performs the following steps
- * 1. Unlock the withdrawn rate.
- * 2. Organize contracts it was withdrawn from so that the parent contract is first in restoring relationship.
- * 3. Loop through all contracts rate was withdrawn from to unlock, add rate back, and resubmit contract.
+ * 1. Add action to put review status back to `UNDER_REVIEW
+ * 2. Unlock the withdrawn rate.
+ * 3. Organize contracts it was withdrawn from so that the parent contract is first in restoring relationship.
+ * 4. Loop through all contracts rate was withdrawn from to unlock, add rate back, and resubmit contract.
  *    - The first loop is the parent contract and resubmitting the parent contract will also submit the rate.
- * 4. Add a new Rate action of `UNDER_REVIEW` and remove withdrawnFromContracts relationships since we add the rate back onto them.
+ * 5. Remove withdrawnFromContracts relationships since we add the rate back onto them.
  *
  * @param tx The Prisma transaction object.
  * @param args The arguments required to withdraw the rate, including rateID, updatedByID, and updatedReason.
@@ -33,6 +34,22 @@ const undoWithdrawRateInsideTransaction = async (
     args: UndoWithdrawRateArgsType
 ): Promise<RateType | Error> => {
     const { rateID, updatedByID, updatedReason } = args
+
+    // Update the review status first
+    await tx.rateTable.update({
+        where: {
+            id: rateID,
+        },
+        data: {
+            reviewStatusActions: {
+                create: {
+                    updatedByID,
+                    updatedReason,
+                    actionType: 'UNDER_REVIEW',
+                },
+            },
+        },
+    })
 
     // Unlock rate
     const rateUnlockInfo = await tx.updateInfoTable.create({
@@ -86,6 +103,13 @@ const undoWithdrawRateInsideTransaction = async (
 
     // Loop through contracts and undo withraw rate, starting with parent contract.
     for (const contract of withdrawnFromContracts) {
+        const latestRevision = contract.packageSubmissions[0].contractRevision
+
+        // Skip if this contract is now Contract only
+        if (latestRevision.formData.submissionType === 'CONTRACT_ONLY') {
+            continue
+        }
+
         // Unlock contract to add rate back in
         const unlockedParentContract = await unlockContractInsideTransaction(
             tx,
@@ -193,13 +217,6 @@ const undoWithdrawRateInsideTransaction = async (
             id: rateID,
         },
         data: {
-            reviewStatusActions: {
-                create: {
-                    updatedByID,
-                    updatedReason,
-                    actionType: 'UNDER_REVIEW',
-                },
-            },
             withdrawnFromContracts: {
                 deleteMany: {},
             },
