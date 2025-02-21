@@ -118,7 +118,7 @@ function getRateReviewStatus(
     rate: RateTableWithoutDraftContractsPayload
 ): RateReviewStatusType {
     // need to order actions from latest to earliest
-    const actions = rate.reviewStatusActions.sort(
+    const actions = [...rate.reviewStatusActions].sort(
         (actionA, actionB) =>
             actionB.updatedAt.getTime() - actionA.updatedAt.getTime()
     )
