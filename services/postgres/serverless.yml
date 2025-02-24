@@ -2,6 +2,9 @@ service: postgres
 
 frameworkVersion: '4.2.3'
 
+build:
+  esbuild: false
+
 plugins:
   - serverless-esbuild
   - serverless-stack-termination-protection
