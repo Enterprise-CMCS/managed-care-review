@@ -141,14 +141,18 @@ describe('submitContract', () => {
         expect(latestSubmission.rateRevisions).toHaveLength(0)
     })
 
+    // eslint-disable-next-line jest/no-disabled-tests
     it('handles a submission with a linked rate', async () => {
         const stateServer = await constructTestPostgresServer()
 
         const contract1 = await createAndSubmitTestContractWithRate(stateServer)
         const rate1ID = contract1.packageSubmissions[0].rateRevisions[0].rateID
 
-        const draft2 =
-            await createAndUpdateTestContractWithoutRates(stateServer)
+        const draft2 = await createAndUpdateTestContractWithoutRates(
+            stateServer,
+            undefined,
+            { submissionType: 'CONTRACT_ONLY' }
+        )
         await addLinkedRateToTestContract(stateServer, draft2, rate1ID)
         const contract2 = await submitTestContract(stateServer, draft2.id)
 
@@ -1172,6 +1176,7 @@ describe('submitContract', () => {
             )
         })
 
+        // eslint-disable-next-line jest/no-focused-tests
         it('send CMS email on contract only re-submission', async () => {
             const config = testEmailConfig()
             const mockEmailer = testEmailer(config)
@@ -1202,7 +1207,11 @@ describe('submitContract', () => {
             await createDBUsersWithFullData(assignedUsers)
             await updateTestStateAssignments(cmsServer, 'FL', assignedUserIDs)
 
-            const draft1 = await createAndUpdateTestContractWithoutRates(server)
+            const draft1 = await createAndUpdateTestContractWithoutRates(
+                server,
+                undefined,
+                { submissionType: 'CONTRACT_ONLY' }
+            )
             await submitTestContract(server, draft1.id)
             await unlockTestContract(cmsServer, draft1.id, 'unlock to resubmit')
             const submit1 = await submitTestContract(
@@ -1295,7 +1304,11 @@ describe('submitContract', () => {
             const server = await constructTestPostgresServer({
                 emailer: mockEmailer,
             })
-            const draft = await createAndUpdateTestContractWithoutRates(server)
+            const draft = await createAndUpdateTestContractWithoutRates(
+                server,
+                undefined,
+                { submissionType: 'CONTRACT_ONLY' }
+            )
             const draftID = draft.id
 
             await server.executeOperation({
@@ -1360,7 +1373,7 @@ describe('submitContract', () => {
                     }),
                 },
             })
-            const draft = await createAndUpdateTestContractWithoutRates(server)
+            const draft = await createAndUpdateTestContractWithRate(server)
             const draftID = draft.id
 
             const submitResult = await server.executeOperation({
@@ -1464,8 +1477,11 @@ describe('submitContract', () => {
                 },
             })
 
-            const stateSubmission =
-                await createAndSubmitTestContract(stateServer)
+            const stateSubmission = await createAndSubmitTestContract(
+                stateServer,
+                undefined,
+                { submissionType: 'CONTRACT_ONLY' }
+            )
 
             const cmsServer = await constructTestPostgresServer({
                 context: {
