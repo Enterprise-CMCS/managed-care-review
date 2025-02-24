@@ -339,7 +339,8 @@ describe(`indexContracts`, () => {
 
                 const draft = await createAndUpdateTestContractWithoutRates(
                     otherStateServer,
-                    'VA' as const
+                    'VA' as const,
+                    { submissionType: 'CONTRACT_ONLY' }
                 )
 
                 const otherState1 = await submitTestContract(
