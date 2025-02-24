@@ -59,6 +59,7 @@ import { updateStateAssignmentsByState } from './user/updateStateAssignmentsBySt
 import { rateFormDataResolver } from './rate/rateFormDataResolver'
 import { withdrawRate } from './rate/withdrawRate'
 import { updateEmailSettings } from './settings/updateEmailSettings'
+import { undoWithdrawRate } from './rate/undoWithdrawRate'
 
 export function configureResolvers(
     store: Store,
@@ -110,6 +111,7 @@ export function configureResolvers(
                 withdrawAndReplaceRedundantRateResolver(store),
             approveContract: approveContract(store),
             withdrawRate: withdrawRate(store, emailer),
+            undoWithdrawRate: undoWithdrawRate(store),
             updateDivisionAssignment: updateDivisionAssignment(store),
             updateStateAssignment: updateStateAssignment(store),
             updateStateAssignmentsByState: updateStateAssignmentsByState(store),

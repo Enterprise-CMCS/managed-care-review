@@ -60,15 +60,19 @@ export function indexRatesResolver(store: Store): QueryResolvers['indexRates'] {
                 ratesWithHistory =
                     await store.findAllRatesWithHistoryBySubmitInfo({
                         stateCode: user.stateCode,
+                        useZod: true,
                     })
             } else if (input && input.stateCode) {
                 ratesWithHistory =
                     await store.findAllRatesWithHistoryBySubmitInfo({
                         stateCode: input.stateCode,
+                        useZod: true,
                     })
             } else {
                 ratesWithHistory =
-                    await store.findAllRatesWithHistoryBySubmitInfo()
+                    await store.findAllRatesWithHistoryBySubmitInfo({
+                        useZod: false,
+                    })
             }
             if (ratesWithHistory instanceof Error) {
                 const errMessage = `Issue finding rates with history Message: ${ratesWithHistory.message}`
