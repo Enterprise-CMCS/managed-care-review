@@ -3,6 +3,11 @@ import { DatabaseClient } from './db'
 import { SecretsManager, SecretsManagerError } from './secrets'
 import { RotationEvent, SecretDict } from './types'
 
+// This script enables single-user rotation scheme to rotate an RDS PostgreSQL user credential. This rotation
+// scheme logs into the database as the user and rotates the user's own password, immediately invalidating the
+// user's previous password and updating it in secrets manager. It is modified from the hosted Python rotator AWS
+// gives as an example in https://github.com/aws-samples/aws-secrets-manager-rotation-lambdas
+
 interface Context {
     awsRequestId: string
     functionName: string
