@@ -25,9 +25,11 @@ on:
       serverless_license_key:
         required: true
       cloudfront_cert_arn:
-        required: true
+        required: false
+      cloudfront_domain_name:
+        required: false
       cloudfront_sb_domain_name:
-        required: true
+        required: false
       vpc_id:
         required: true
       sg_id:
@@ -159,7 +161,7 @@ jobs:
         env:
           SERVERLESS_ACCESS_KEY: ${{ secrets.serverless_license_key }}
           CLOUDFRONT_CERT_ARN: ${{ secrets.cloudfront_cert_arn }}
-          CLOUDFRONT_SB_DOMAIN_NAME: ${{ secrets.cloundfront_sb_domain_name }}
+          CLOUDFRONT_DOMAIN_NAME: ${{ secrets.cloudfront_domain_name }}
         run: |
           pushd services/ui && npx serverless deploy --stage ${{ inputs.stage_name }}
 
@@ -188,7 +190,7 @@ jobs:
         env:
           SERVERLESS_ACCESS_KEY: ${{ secrets.serverless_license_key }}
           CLOUDFRONT_CERT_ARN: ${{ secrets.cloudfront_cert_arn }}
-          CLOUDFRONT_SB_DOMAIN_NAME: ${{ secrets.cloundfront_sb_domain_name }}
+          CLOUDFRONT_SB_DOMAIN_NAME: ${{ secrets.cloudfront_sb_domain_name }}
         run: |
           pushd services/storybook && npx serverless deploy --stage ${{ inputs.stage_name }}
 
@@ -259,7 +261,7 @@ jobs:
           changed-services: ${{ inputs.changed_services }}
 
       - name: deploy infra-api
-        id: deploy-uploads
+        id: deploy-infra-api
         env:
           SERVERLESS_ACCESS_KEY: ${{ secrets.serverless_license_key }}
           IAM_PERMISSIONS_BOUNDARY: ${{ secrets.iam_permissions_boundary }}

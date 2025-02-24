@@ -53,6 +53,10 @@ export const RateSummary = (): React.ReactElement => {
         featureFlags.WITHDRAW_RATE.flag,
         featureFlags.WITHDRAW_RATE.defaultValue
     )
+    const showUndoWithdrawRate: boolean = ldClient?.variation(
+        featureFlags.UNDO_WITHDRAW_RATE.flag,
+        featureFlags.UNDO_WITHDRAW_RATE.defaultValue
+    )
     const [unlockRate, { loading: unlockLoading }] = useUnlockRateMutation()
 
     const { data, loading, error } = useFetchRateWithQuestionsQuery({
@@ -181,11 +185,16 @@ export const RateSummary = (): React.ReactElement => {
     const isUnlocked = rate.status === 'UNLOCKED'
     const isWithdrawn = rate.consolidatedStatus === 'WITHDRAWN'
     const parentContractIsApproved = contract.consolidatedStatus === 'APPROVED'
+    const parentContractIsSubmitted =
+        contract.consolidatedStatus === 'SUBMITTED' ||
+        contract.consolidatedStatus === 'RESUBMITTED'
     const latestRateAction = rate.reviewStatusActions?.[0]
     const showWithdrawBanner =
         showWithdrawRate && latestRateAction && isWithdrawn
     const showWithdrawRateBtn =
         showWithdrawRate && !isWithdrawn && !parentContractIsApproved
+    const showUndoWithdrawRateBtn =
+        showUndoWithdrawRate && isWithdrawn && parentContractIsSubmitted
 
     return (
         <div className={styles.background}>
@@ -270,6 +279,22 @@ export const RateSummary = (): React.ReactElement => {
                                     outline
                                 >
                                     Withdraw rate
+                                </ButtonWithLogging>
+                            )}
+                            {showUndoWithdrawRateBtn && (
+                                <ButtonWithLogging
+                                    disabled={isUnlocked}
+                                    className="usa-button usa-button--outline"
+                                    type="button"
+                                    onClick={() =>
+                                        navigate(
+                                            `/rate-reviews/${rate.id}/undo-withdraw`
+                                        )
+                                    }
+                                    link_url={`/rate-reviews/${rate.id}/undo-withdraw`}
+                                    outline
+                                >
+                                    Undo withdraw
                                 </ButtonWithLogging>
                             )}
                         </DoubleColumnGrid>

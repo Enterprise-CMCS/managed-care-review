@@ -45,7 +45,7 @@ async function findAllRatesWithHistoryBySubmitInfo(
 
         const parsedRatesOrErrors: RateOrErrorArrayType = rates.map((rate) => ({
             rateID: rate.id,
-            rate: parseRateWithHistory(rate),
+            rate: parseRateWithHistory(rate, args?.useZod),
         }))
 
         return parsedRatesOrErrors
