@@ -302,8 +302,11 @@ describe('submitRate', () => {
         expect(subB0.rateRevisions[0].rateID).toBe(TwoID)
 
         // 3. Submit C0 with Rate10 and Rate20
-        const draftC0 =
-            await createAndUpdateTestContractWithoutRates(stateServer)
+        const draftC0 = await createAndUpdateTestContractWithoutRates(
+            stateServer,
+            undefined,
+            { submissionType: 'CONTRACT_ONLY' }
+        )
         const draftC020 = await addLinkedRateToTestContract(
             stateServer,
             draftC0,
