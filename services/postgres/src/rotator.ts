@@ -2,7 +2,6 @@ import { DescribeSecretCommandOutput } from '@aws-sdk/client-secrets-manager'
 import { DatabaseClient } from './db'
 import { SecretsManager, SecretsManagerError } from './secrets'
 import { RotationEvent, SecretDict } from './types'
-import fs from 'fs'
 
 interface Context {
     awsRequestId: string
