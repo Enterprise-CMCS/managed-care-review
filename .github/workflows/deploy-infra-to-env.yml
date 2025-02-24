@@ -55,7 +55,7 @@ jobs:
   github-oidc:
     if: ${{ contains(inputs.changed_services, 'github-oidc') }}
     environment: ${{ inputs.environment }}
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -104,7 +104,7 @@ jobs:
     needs: github-oidc
     if: ${{ always() && contains(inputs.changed_services, 'postgres') }}
     environment: ${{ inputs.environment }}
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -140,7 +140,7 @@ jobs:
     needs: github-oidc
     if: ${{ always() && contains(inputs.changed_services, 'ui') }}
     environment: ${{ inputs.environment }}
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -169,7 +169,7 @@ jobs:
     needs: github-oidc
     if: ${{ always() && contains(inputs.changed_services, 'storybook') }}
     environment: ${{ inputs.environment }}
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -198,7 +198,7 @@ jobs:
     needs: github-oidc
     if: ${{ always() && contains(inputs.changed_services, 'uploads') }}
     environment: ${{ inputs.environment }}
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -244,7 +244,7 @@ jobs:
     needs: github-oidc
     if: ${{ always() && contains(inputs.changed_services, 'infra-api') }}
     environment: ${{ inputs.environment }}
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -273,7 +273,7 @@ jobs:
     needs: [github-oidc, infra-api, ui, uploads]
     if: ${{ always() && contains(inputs.changed_services, 'ui-auth') }}
     environment: ${{ inputs.environment }}
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
