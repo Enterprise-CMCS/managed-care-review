@@ -120,6 +120,7 @@ describe(`unlockRate`, () => {
         }
     )
 
+    // eslint-disable-next-line jest/no-focused-tests
     it('does not allow rates with wrong status to be unlocked', async () => {
         const stateServer = await constructTestPostgresServer({
             ldService,
