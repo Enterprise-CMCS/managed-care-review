@@ -7,6 +7,7 @@ import {
     approveTestContract,
     createAndSubmitTestContractWithRate,
     createAndUpdateTestContractWithoutRates,
+    createAndUpdateTestContractWithRate,
     fetchTestContract,
     submitTestContract,
     unlockTestContract,
@@ -14,6 +15,7 @@ import {
 import {
     withdrawTestRate,
     undoWithdrawRate,
+    addNewRateToTestContract,
 } from '../../testHelpers/gqlRateHelpers'
 import { must } from '../../testHelpers'
 import type { RateFormDataInput, Contract } from '../../gen/gqlClient'
@@ -91,7 +93,17 @@ it('can undo withdraw a rate without errors', async () => {
         },
     })
 
-    const contractA = await createAndSubmitTestContractWithRate(stateServer)
+    //We need to include an extra rate in order to be able to submit
+    const draftA = await createAndUpdateTestContractWithRate(stateServer)
+    const draftAWithExtraRate = await addNewRateToTestContract(
+        stateServer,
+        draftA
+    )
+    const contractA = await submitTestContract(
+        stateServer,
+        draftAWithExtraRate.id
+    )
+
     const rateID = contractA.packageSubmissions[0].rateRevisions[0].rateID
     const formData = contractA.packageSubmissions[0].rateRevisions[0].formData
 
