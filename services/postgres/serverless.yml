@@ -70,6 +70,11 @@ custom:
     other: 0.5
     val: 1
     prod: 1
+  backupRetentionPeriod:
+    other: 0 # No backups for feature branches/PR review environments
+    main: 7
+    val: 7
+    prod: 30
   scriptable:
     hooks:
       before:package:createDeploymentArtifacts: pnpm build
@@ -133,7 +138,7 @@ resources:
         DBSubnetGroupName: !Ref PostgresSubnetGroup
         VpcSecurityGroupIds: ['${self:custom.sgId}']
         CopyTagsToSnapshot: true
-        BackupRetentionPeriod: 7
+        BackupRetentionPeriod: ${self:custom.backupRetentionPeriod.${opt:stage}, self:custom.backupRetentionPeriod.other}
         EnableCloudwatchLogsExports:
           - postgresql
         ServerlessV2ScalingConfiguration:
