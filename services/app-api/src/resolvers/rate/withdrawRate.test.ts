@@ -835,8 +835,11 @@ describe('withdrawRate', () => {
         )
 
         // contractB is a linked contract that included the rate in its last submission before the rate was withdrawn
-        const contractB =
-            await createAndUpdateTestContractWithoutRates(stateServer)
+        const contractB = await createAndUpdateTestContractWithoutRates(
+            stateServer,
+            undefined,
+            { submissionType: 'CONTRACT_ONLY' }
+        )
 
         must(
             await stateServer.executeOperation({
