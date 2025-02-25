@@ -176,7 +176,10 @@ export function submitContract(
                 )
         }
 
-        const contractToParse = contractWithHistory
+        const contractToParse = {
+            ...contractWithHistory,
+        }
+
         contractToParse.draftRates = draftRatesWithoutLinkedRates
         const parsedContract = parseContract(
             contractToParse,
@@ -249,36 +252,37 @@ export function submitContract(
             }
         }
 
-        //Verifying contract and rates actually has rates
-        if (
-            parsedSubmissionType === 'CONTRACT_AND_RATES' &&
-            parsedContract.draftRates &&
-            parsedContract.draftRates.length === 0
-        ) {
-            const errMessage = `Attempted to submit a contract and rates contract without rates: ${parsedContract.id}`
-            logError('submitContract', errMessage)
-            setErrorAttributesOnActiveSpan(errMessage, span)
-            throw new UserInputError(errMessage, {
-                argumentName: 'contractID',
-                cause: 'BAD_USER_INPUT',
-            })
-        }
+        //Verifying contract and rates actually has rates or has withdrawn rates if contract and rates contract had them withdrawn at some point with no existing rates after the fact
+        if (parsedSubmissionType === 'CONTRACT_AND_RATES') {
+            // eslint-disable-next-line no-console
+            console.log(parsedContract.draftRates)
+            if (
+                parsedContract.draftRates &&
+                parsedContract.draftRates.length === 0
+            ) {
+                const errMessage = `Attempted to submit a contract and rates contract without rates: ${parsedContract.id}`
+                logError('submitContract', errMessage)
+                setErrorAttributesOnActiveSpan(errMessage, span)
+                throw new UserInputError(errMessage, {
+                    argumentName: 'contractID',
+                    cause: 'BAD_USER_INPUT',
+                })
+            }
 
-        // If this is contract and rates lets verify that the rates are in a valid state
-        if (
-            parsedSubmissionType === 'CONTRACT_AND_RATES' &&
-            parsedContract.draftRates &&
-            parsedContract.draftRates.length > 0
-        ) {
-            for (const draftRate of parsedContract.draftRates) {
-                if (['WITHDRAWN'].includes(draftRate.consolidatedStatus)) {
-                    const errMessage = `Attempted to submit a rate withdrawn rate: ${draftRate.consolidatedStatus}`
-                    logError('submitContract', errMessage)
-                    setErrorAttributesOnActiveSpan(errMessage, span)
-                    throw new UserInputError(errMessage, {
-                        argumentName: 'rateID',
-                        cause: 'INVALID_PACKAGE_STATUS',
-                    })
+            if (
+                parsedContract.draftRates &&
+                parsedContract.draftRates.length > 0
+            ) {
+                for (const draftRate of parsedContract.draftRates) {
+                    if (['WITHDRAWN'].includes(draftRate.consolidatedStatus)) {
+                        const errMessage = `Attempted to submit a rate withdrawn rate: ${draftRate.consolidatedStatus}`
+                        logError('submitContract', errMessage)
+                        setErrorAttributesOnActiveSpan(errMessage, span)
+                        throw new UserInputError(errMessage, {
+                            argumentName: 'rateID',
+                            cause: 'INVALID_PACKAGE_STATUS',
+                        })
+                    }
                 }
             }
         }
