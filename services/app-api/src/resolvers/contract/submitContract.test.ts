@@ -141,18 +141,14 @@ describe('submitContract', () => {
         expect(latestSubmission.rateRevisions).toHaveLength(0)
     })
 
-    // eslint-disable-next-line jest/no-disabled-tests
     it('handles a submission with a linked rate', async () => {
         const stateServer = await constructTestPostgresServer()
 
         const contract1 = await createAndSubmitTestContractWithRate(stateServer)
         const rate1ID = contract1.packageSubmissions[0].rateRevisions[0].rateID
 
-        const draft2 = await createAndUpdateTestContractWithoutRates(
-            stateServer,
-            undefined,
-            { submissionType: 'CONTRACT_ONLY' }
-        )
+        const draft2 =
+            await createAndUpdateTestContractWithoutRates(stateServer)
         await addLinkedRateToTestContract(stateServer, draft2, rate1ID)
         const contract2 = await submitTestContract(stateServer, draft2.id)
 
