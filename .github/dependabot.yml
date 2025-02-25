@@ -9,4 +9,34 @@ updates:
     directory: '/'
     schedule:
       interval: 'daily'
-    open-pull-requests-limit: 5
+    open-pull-requests-limit: 4
+    groups:
+      aws-sdk:
+        applies-to: version-updates
+        patterns:
+          - '@aws-sdk/*'
+      prisma:
+        applies-to: version-updates
+        patterns:
+          - '@prisma/client'
+          - 'prisma'
+      otel:
+        applies-to: version-updates
+        patterns:
+          - '@opentelemetry/exporter-trace-otlp-http'
+          - '@opentelemetry/instrumentation'
+          - '@opentelemetry/exporter-metrics-otlp-http'
+          - '@opentelemetry/sdk-node'
+      opentelemetry-js:
+        applies-to: version-updates
+        patterns:
+          - '@opentelemetry/core'
+          - '@opentelemetry/resources'
+          - '@opentelemetry/sdk-trace-base'
+          - '@opentelemetry/sdk-trace-node'
+          - '@opentelemetry/semantic-conventions'
+          - '@opentelemetry/sdk-metrics'
+      storybook:
+        applies-to: version-updates
+        patterns:
+          - '@storybook/*'
