@@ -252,10 +252,9 @@ export function submitContract(
             }
         }
 
-        //Verifying contract and rates actually has rates or has withdrawn rates if contract and rates contract had them withdrawn at some point with no existing rates after the fact
+        //Contract and rates rate verification
         if (parsedSubmissionType === 'CONTRACT_AND_RATES') {
-            // eslint-disable-next-line no-console
-            console.log(parsedContract.draftRates)
+            //Ensure a contract and rates contract includes rates
             if (
                 parsedContract.draftRates &&
                 parsedContract.draftRates.length === 0
@@ -269,6 +268,7 @@ export function submitContract(
                 })
             }
 
+            //Ensure included rates are in a valid state
             if (
                 parsedContract.draftRates &&
                 parsedContract.draftRates.length > 0
