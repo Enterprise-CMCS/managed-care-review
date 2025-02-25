@@ -8,7 +8,7 @@ on:
 jobs:
   unit-tests:
     name: test - unit tests
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     outputs:
       app-version: ${{ steps.branch-name.outputs.app-version}}
       changed-services: "[
@@ -108,7 +108,7 @@ jobs:
 
   build-prisma-client-lambda-layer:
     name: build - postgres prisma layer
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -141,7 +141,7 @@ jobs:
 
   build-clamav-layer:
     name: build - clamav layer
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -305,7 +305,7 @@ jobs:
   cypress-prod:
     name: prod - cypress
     needs: [promote-app-prod]
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     container:
       image: cypress/browsers:node-20.14.0-chrome-126.0.6478.114-1-ff-127.0.1-edge-126.0.2592.61-1
       options: --user 1001
@@ -371,7 +371,7 @@ jobs:
 
   slack:
     name: Slack notification on failure
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     needs: [cypress-prod, promote-app-val]
     if: always()
     steps:
