@@ -71,7 +71,7 @@ custom:
     val: 1
     prod: 1
   backupRetentionPeriod:
-    other: 0 # No backups for feature branches/PR review environments
+    other: 1
     main: 7
     val: 7
     prod: 30
