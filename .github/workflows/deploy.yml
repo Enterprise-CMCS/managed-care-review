@@ -14,7 +14,7 @@ permissions:
 jobs:
   begin-deployment:
     name: Begin Deployment
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     permissions:
       deployments: write
     outputs:
@@ -87,7 +87,7 @@ jobs:
 
   web-unit-tests:
     name: test - web unit tests
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -145,7 +145,7 @@ jobs:
 
   api-unit-tests:
     name: test - api unit tests
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     services:
       postgres:
         image: postgres:13.3
@@ -217,7 +217,7 @@ jobs:
 
   build-prisma-client-lambda-layer:
     name: build - postgres prisma layer
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -252,7 +252,7 @@ jobs:
 
   build-clamav-layer:
     name: build - clamav layer
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -272,7 +272,7 @@ jobs:
 
   deploy-infra:
     needs: [begin-deployment, build-clamav-layer]
-    uses: Enterprise-CMCS/managed-care-review/.github/workflows/deploy-infra-to-env.yml@main
+    uses: Enterprise-CMCS/managed-care-review/.github/workflows/deploy-infra-to-env.yml@mt-ubuntu22-gha
     with:
       environment: dev
       stage_name: ${{ needs.begin-deployment.outputs.stage-name}}
@@ -308,7 +308,7 @@ jobs:
       needs.api-unit-tests.result == 'success' &&
       needs.build-prisma-client-lambda-layer.result == 'success' &&
       needs.begin-deployment.result == 'success'
-    uses: Enterprise-CMCS/managed-care-review/.github/workflows/deploy-app-to-env.yml@main
+    uses: Enterprise-CMCS/managed-care-review/.github/workflows/deploy-app-to-env.yml@mt-ubuntu22-gha
     with:
       environment: dev
       stage_name: ${{ needs.begin-deployment.outputs.stage-name }}
@@ -351,7 +351,7 @@ jobs:
       && (needs.begin-deployment.result == 'success')
       && (needs.deploy-infra.result == 'success' || needs.deploy-infra.result == 'skipped')
       && (needs.deploy-app.result == 'success' || needs.deploy-app.result == 'skipped')
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     outputs:
       application-endpoint: ${{ steps.save-app-endpoint.outputs.app-endpoint }}
       api-endpoint: ${{ steps.save-api-endpoint.outputs.api-endpoint }}
@@ -461,7 +461,7 @@ jobs:
     needs: [begin-deployment, deploy-app, finishing-prep]
     if: always() && needs.begin-deployment.result == 'success'
     name: End Deployment
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     permissions:
       deployments: write
     steps:
@@ -496,7 +496,7 @@ jobs:
     timeout-minutes: 25
     needs: [deploy-app, finishing-prep]
     if: always() && needs.finishing-prep.result == 'success'
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     container:
       image: cypress/browsers:node-20.14.0-chrome-126.0.6478.114-1-ff-127.0.1-edge-126.0.2592.61-1
       options: --user 1001
@@ -607,7 +607,7 @@ jobs:
     name: test-coverage
     needs: [cypress]
     if: always() && needs.finishing-prep.result == 'success'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       deployments: write
     strategy:
