@@ -261,6 +261,15 @@ const rateFormDataSchema = genericRateFormDataSchema.extend({
     ),
 })
 
+const strippedRateFormDataSchema = rateFormDataSchema.omit({
+    rateDocuments: true,
+    addtlActuaryContacts: true,
+    certifyingActuaryContacts: true,
+    actuaryCommunicationPreference: true,
+    packagesWithSharedRateCerts: true,
+    supportingDocuments: true,
+})
+
 const submittableRateFormDataSchema = genericRateFormDataSchema.extend({
     rateDocuments: genericRateFormDataSchema.shape.rateDocuments.nonempty(),
     rateProgramIDs: genericRateFormDataSchema.shape.rateProgramIDs.nonempty(),
@@ -271,6 +280,7 @@ const submittableRateFormDataSchema = genericRateFormDataSchema.extend({
 type DocumentType = z.infer<typeof documentSchema>
 type ContractFormDataType = z.infer<typeof contractFormDataSchema>
 type RateFormDataType = z.infer<typeof rateFormDataSchema>
+type StrippedRateFormDataType = z.infer<typeof strippedRateFormDataSchema>
 
 type ContractFormEditableType = Partial<ContractFormDataType>
 type RateFormEditableType = Partial<RateFormDataType>
@@ -284,6 +294,7 @@ export {
     rateFormDataSchema,
     preprocessNulls,
     documentSchema,
+    strippedRateFormDataSchema,
 }
 
 export type {
@@ -294,4 +305,5 @@ export type {
     ContractFormEditableType,
     StateContactType,
     ActuaryContactType,
+    StrippedRateFormDataType,
 }

@@ -24,6 +24,7 @@ import type {
 } from '../../gen/gqlServer'
 import type { RateTableWithoutDraftContractsPayload } from './prismaSubmittedRateHelpers'
 import type { ConsolidatedRateStatusType } from '../../domain-models/contractAndRates/statusType'
+import type { RateTableStrippedPayload } from './prismaFullContractRateHelpers'
 
 const subincludeUpdateInfo = {
     updatedBy: true,
@@ -78,6 +79,7 @@ function getContractRateStatus(
     revisions:
         | ContractRevisionTableWithFormData[]
         | RateRevisionTableWithFormData[]
+        | StrippedRateRevisionTableWithFormData[]
 ): PackageStatusType {
     // need to order revisions from latest to earliest
     const revs = revisions.sort(
@@ -115,7 +117,7 @@ function getContractReviewStatus(
 }
 
 function getRateReviewStatus(
-    rate: RateTableWithoutDraftContractsPayload
+    rate: RateTableWithoutDraftContractsPayload | RateTableStrippedPayload
 ): RateReviewStatusType {
     // need to order actions from latest to earliest
     const actions = [...rate.reviewStatusActions].sort(
@@ -198,9 +200,19 @@ const includeRateFormData = {
     },
 } satisfies Prisma.RateRevisionTableInclude
 
+const includeStrippedRateFormData = {
+    submitInfo: includeUpdateInfo,
+    unlockInfo: includeUpdateInfo,
+} satisfies Prisma.RateRevisionTableInclude
+
 type RateRevisionTableWithFormData = Prisma.RateRevisionTableGetPayload<{
     include: typeof includeRateFormData
 }>
+
+type StrippedRateRevisionTableWithFormData =
+    Prisma.RateRevisionTableGetPayload<{
+        include: typeof includeStrippedRateFormData
+    }>
 
 function rateFormDataToDomainModel(
     rateRevision: RateRevisionTableWithFormData
@@ -467,6 +479,7 @@ export type {
     UpdateInfoTableWithUpdater,
     RateRevisionTableWithFormData,
     ContractRevisionTableWithFormData,
+    StrippedRateRevisionTableWithFormData,
 }
 
 export {
@@ -475,6 +488,7 @@ export {
     includeUpdateInfo,
     includeContractFormData,
     includeRateFormData,
+    includeStrippedRateFormData,
     getContractRateStatus,
     getContractReviewStatus,
     convertUpdateInfoToDomainModel,

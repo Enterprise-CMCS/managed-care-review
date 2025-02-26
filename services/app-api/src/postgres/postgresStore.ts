@@ -87,6 +87,8 @@ import {
     undoWithdrawRate,
     type UndoWithdrawRateArgsType,
 } from './contractAndRates/undoWithdrawRate'
+import type { StrippedRateOrErrorArrayType } from './contractAndRates/findAllRatesStripped'
+import { findAllRatesStripped } from './contractAndRates/findAllRatesStripped'
 
 type Store = {
     findPrograms: (
@@ -196,9 +198,14 @@ type Store = {
     findAllContractsWithHistoryBySubmitInfo: (
         useZod?: boolean
     ) => Promise<ContractOrErrorArrayType | Error>
+
     findAllRatesWithHistoryBySubmitInfo: (
         args?: FindAllRatesWithHistoryBySubmitType
     ) => Promise<RateOrErrorArrayType | Error>
+
+    findAllRatesStripped: (
+        stateCode?: string
+    ) => Promise<StrippedRateOrErrorArrayType | Error>
 
     replaceRateOnContract: (
         args: ReplaceRateOnContractArgsType
@@ -303,6 +310,7 @@ function NewPostgresStore(client: ExtendedPrismaClient): Store {
             findAllContractsWithHistoryBySubmitInfo(client, args),
         findAllRatesWithHistoryBySubmitInfo: (args) =>
             findAllRatesWithHistoryBySubmitInfo(client, args),
+        findAllRatesStripped: (args) => findAllRatesStripped(client, args),
         replaceRateOnContract: (args) => replaceRateOnContract(client, args),
         submitContract: (args) => submitContract(client, args),
         submitRate: (args) => submitRate(client, args),
