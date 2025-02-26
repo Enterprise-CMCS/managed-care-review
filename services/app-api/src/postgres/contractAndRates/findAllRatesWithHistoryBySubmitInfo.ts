@@ -20,6 +20,7 @@ async function findAllRatesWithHistoryBySubmitInfo(
     args?: FindAllRatesWithHistoryBySubmitType
 ): Promise<RateOrErrorArrayType | Error> {
     try {
+        performance.mark('beginFindAllRatesWithHistoryBySubmitInfo')
         const rates = await client.rateTable.findMany({
             where: {
                 revisions: {
@@ -42,6 +43,13 @@ async function findAllRatesWithHistoryBySubmitInfo(
                 state: true,
             },
         })
+
+        performance.mark('finishFindAllRatesWithHistoryBySubmitInfo')
+        performance.measure(
+            'findAllRatesWithHistoryBySubmitInfo: beginFindAllRatesWithHistoryBySubmitInfo to finishFindAllRatesWithHistoryBySubmitInfo',
+            'beginFindAllRatesWithHistoryBySubmitInfo',
+            'finishFindAllRatesWithHistoryBySubmitInfo'
+        )
 
         const parsedRatesOrErrors: RateOrErrorArrayType = rates.map((rate) => ({
             rateID: rate.id,
