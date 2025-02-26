@@ -13,7 +13,7 @@ import {
 } from '../../testHelpers/gqlContractHelpers'
 import {
     withdrawTestRate,
-    undoWithdrawRate,
+    undoWithdrawTestRate,
 } from '../../testHelpers/gqlRateHelpers'
 import { must } from '../../testHelpers'
 import type { RateFormDataInput, Contract } from '../../gen/gqlClient'
@@ -144,7 +144,7 @@ it('can undo withdraw a rate without errors', async () => {
         'Submit before undo withdraw'
     )
 
-    const unwithdrawnRate = await undoWithdrawRate(
+    const unwithdrawnRate = await undoWithdrawTestRate(
         cmsServer,
         rateID,
         'Undo withdraw rate'

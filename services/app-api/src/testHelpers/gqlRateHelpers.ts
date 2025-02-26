@@ -487,7 +487,7 @@ const withdrawTestRate = async (
     return withdrawResult.data.withdrawRate.rate
 }
 
-const undoWithdrawRate = async (
+const undoWithdrawTestRate = async (
     server: ApolloServer,
     rateID: string,
     updatedReason: string
@@ -533,5 +533,5 @@ export {
     formatRateDataForSending,
     fetchTestRateWithQuestionsById,
     withdrawTestRate,
-    undoWithdrawRate,
+    undoWithdrawTestRate,
 }

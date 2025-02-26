@@ -4,17 +4,17 @@ import {
     FetchRateWithQuestionsDocument,
     FetchRateWithQuestionsQuery,
     IndexRatesDocument,
-    IndexRatesForDashboardDocument,
-    IndexRatesForDashboardQuery,
+    IndexRatesStrippedDocument,
+    IndexRatesStrippedQuery,
     IndexRatesQuery,
     Rate,
-    RateRevision,
+    RateRevision, RateStripped,
 } from '../gen/gqlClient'
 import { MockedResponse } from '@apollo/client/testing'
 import {
     draftRateDataMock,
     rateDataMock,
-    mockRateSubmittedWithQuestions,
+    mockRateSubmittedWithQuestions, strippedRateDataMock,
 } from './rateDataMock'
 import { GraphQLError } from 'graphql/index'
 
@@ -64,14 +64,14 @@ const fetchDraftRateMockSuccess = (
     }
 }
 
-const indexRatesForDashboardMockSuccess = (
+const indexRatesStrippedMockSuccess = (
     stateCode?: string,
-    rates?: Rate[]
-): MockedResponse<IndexRatesForDashboardQuery> => {
+    rates?: RateStripped[]
+): MockedResponse<IndexRatesStrippedQuery> => {
     const mockRates = rates ?? [
-        { ...rateDataMock(), id: 'test-id-123', stateNumber: 3 },
-        { ...rateDataMock(), id: 'test-id-124', stateNumber: 2 },
-        { ...rateDataMock(), id: 'test-id-125', stateNumber: 1 },
+        { ...strippedRateDataMock(), id: 'test-id-123', stateNumber: 3 },
+        { ...strippedRateDataMock(), id: 'test-id-124', stateNumber: 2 },
+        { ...strippedRateDataMock(), id: 'test-id-125', stateNumber: 1 },
     ]
     const ratesEdge = mockRates.map((rate) => {
         return {
@@ -80,7 +80,7 @@ const indexRatesForDashboardMockSuccess = (
     })
     return {
         request: {
-            query: IndexRatesForDashboardDocument,
+            query: IndexRatesStrippedDocument,
             variables: {
                 input: {
                     stateCode: stateCode,
@@ -89,7 +89,7 @@ const indexRatesForDashboardMockSuccess = (
         },
         result: {
             data: {
-                indexRates: {
+                indexRatesStripped: {
                     totalCount: ratesEdge.length,
                     edges: ratesEdge,
                 },
@@ -132,10 +132,10 @@ const indexRatesMockSuccess = (
     }
 }
 
-const indexRatesForDashboardMockFailure =
-    (): MockedResponse<IndexRatesForDashboardQuery> => {
+const indexRatesStrippedMockFailure =
+    (): MockedResponse<IndexRatesStrippedQuery> => {
         const graphQLError = new GraphQLError(
-            'Issue finding rates with history',
+            'Issue finding rates stripped',
             {
                 extensions: {
                     code: 'NOT_FOUND',
@@ -145,7 +145,7 @@ const indexRatesForDashboardMockFailure =
         )
         return {
             request: {
-                query: IndexRatesForDashboardDocument,
+                query: IndexRatesStrippedDocument,
             },
             result: {
                 data: null,
@@ -204,8 +204,8 @@ const fetchRateWithQuestionsMockSuccess = ({
 export {
     fetchRateMockSuccess,
     indexRatesMockSuccess,
-    indexRatesForDashboardMockSuccess,
-    indexRatesForDashboardMockFailure,
+    indexRatesStrippedMockSuccess,
+    indexRatesStrippedMockFailure,
     indexRatesMockFailure,
     fetchDraftRateMockSuccess,
     fetchRateWithQuestionsMockSuccess,

@@ -2,13 +2,13 @@ import { renderWithProviders } from '../../../testHelpers'
 import { RateReviewsDashboard } from './RateReviewsDashboard'
 import {
     fetchCurrentUserMock,
-    indexRatesForDashboardMockSuccess,
-    indexRatesForDashboardMockFailure,
+    indexRatesStrippedMockSuccess,
+    indexRatesStrippedMockFailure,
     iterableCmsUsersMockData,
-    rateDataMock,
+    strippedRateDataMock,
 } from '@mc-review/mocks'
 import { screen, waitFor } from '@testing-library/react'
-import { Rate } from '../../../gen/gqlClient'
+import { RateStripped } from '../../../gen/gqlClient'
 
 describe('RateReviewsDashboard', () => {
     describe.each(iterableCmsUsersMockData)(
@@ -22,7 +22,7 @@ describe('RateReviewsDashboard', () => {
                                 statusCode: 200,
                                 user: mockUser(),
                             }),
-                            indexRatesForDashboardMockSuccess(),
+                            indexRatesStrippedMockSuccess(),
                         ],
                     },
                 })
@@ -42,10 +42,14 @@ describe('RateReviewsDashboard', () => {
             })
 
             it('renders dashboard without withdrawn rates', async () => {
-                const rates: Rate[] = [
-                    { ...rateDataMock(), id: 'test-id-123', stateNumber: 3 },
+                const rates: RateStripped[] = [
                     {
-                        ...rateDataMock(),
+                        ...strippedRateDataMock(),
+                        id: 'test-id-123',
+                        stateNumber: 3,
+                    },
+                    {
+                        ...strippedRateDataMock(),
                         id: 'test-id-124-withdrawn',
                         stateNumber: 2,
                         withdrawInfo: {
@@ -60,7 +64,7 @@ describe('RateReviewsDashboard', () => {
                         },
                     },
                     {
-                        ...rateDataMock(),
+                        ...strippedRateDataMock(),
                         id: 'test-id-125-withdrawn',
                         stateNumber: 2,
                         withdrawInfo: {
@@ -74,7 +78,11 @@ describe('RateReviewsDashboard', () => {
                             updatedReason: 'retreat!',
                         },
                     },
-                    { ...rateDataMock(), id: 'test-id-126', stateNumber: 1 },
+                    {
+                        ...strippedRateDataMock(),
+                        id: 'test-id-126',
+                        stateNumber: 1,
+                    },
                 ]
                 renderWithProviders(<RateReviewsDashboard />, {
                     apolloProvider: {
@@ -83,7 +91,7 @@ describe('RateReviewsDashboard', () => {
                                 statusCode: 200,
                                 user: mockUser(),
                             }),
-                            indexRatesForDashboardMockSuccess(undefined, rates),
+                            indexRatesStrippedMockSuccess(undefined, rates),
                         ],
                     },
                 })
@@ -110,7 +118,7 @@ describe('RateReviewsDashboard', () => {
                                 statusCode: 200,
                                 user: mockUser(),
                             }),
-                            indexRatesForDashboardMockFailure(),
+                            indexRatesStrippedMockFailure(),
                         ],
                     },
                 })
