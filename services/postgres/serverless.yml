@@ -79,6 +79,15 @@ custom:
     prod: 1
   esbuild:
     config: ./esbuild.config.js
+  backupRetentionPeriod:
+    other: 1
+    main: 7
+    val: 7
+    prod: 30
+  scriptable:
+    hooks:
+      before:package:createDeploymentArtifacts: pnpm build
+      before:deploy:finalize: node scripts/uploadScripts.js ${self:custom.stage}
 
 package:
   individually: true
@@ -136,7 +145,7 @@ resources:
         DBSubnetGroupName: !Ref PostgresSubnetGroup
         VpcSecurityGroupIds: ['${self:custom.sgId}']
         CopyTagsToSnapshot: true
-        BackupRetentionPeriod: 7
+        BackupRetentionPeriod: ${self:custom.backupRetentionPeriod.${opt:stage}, self:custom.backupRetentionPeriod.other}
         EnableCloudwatchLogsExports:
           - postgresql
         ServerlessV2ScalingConfiguration:
