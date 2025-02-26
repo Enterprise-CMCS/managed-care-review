@@ -16,7 +16,6 @@ async function findAllRatesStrippedInTransaction(
     stateCode?: string
 ): Promise<StrippedRateOrErrorArrayType | Error> {
     try {
-        performance.mark('beginPostgresQuery')
         const rates = await tx.rateTable.findMany({
             where: {
                 revisions: {
@@ -36,13 +35,6 @@ async function findAllRatesStrippedInTransaction(
             },
             include: includeStrippedRate,
         })
-
-        performance.mark('finishPostgresQuery')
-        performance.measure(
-            'findAllRatesStrippedInTransaction: beginPostgresQuery to finishPostgresQuery',
-            'beginPostgresQuery',
-            'finishPostgresQuery'
-        )
 
         const parsedRatesOrErrors: StrippedRateOrErrorArrayType = rates.map(
             (rate) => ({

@@ -20,15 +20,6 @@ import {
     withdrawTestRate,
 } from '../../testHelpers/gqlRateHelpers'
 
-const perfObserver = new PerformanceObserver((items) => {
-    items.getEntries().forEach((entry) => {
-        console.info(entry)
-    })
-})
-
-perfObserver.observe({ entryTypes: ['measure'], buffered: true })
-performance.measure('Start to Now')
-
 const testRateFormInputData = (): RateFormDataInput => ({
     rateType: 'AMENDMENT',
     rateCapitationType: 'RATE_CELL',
