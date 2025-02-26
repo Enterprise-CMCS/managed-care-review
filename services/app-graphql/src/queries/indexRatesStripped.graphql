@@ -1,0 +1,45 @@
+query indexRatesStripped($input: IndexRatesInput) {
+    indexRatesStripped(input: $input) {
+        totalCount
+        edges {
+            node {
+                id
+                createdAt
+                updatedAt
+                status
+                reviewStatus
+                consolidatedStatus
+                initiallySubmittedAt
+                stateCode
+                state {
+                    code
+                    name
+                    programs {
+                        id
+                        name
+                        fullName
+                        isRateProgram
+                    }
+                }
+                stateNumber
+                parentContractID
+                withdrawInfo {
+                    ...updateInformationFields
+                }
+
+                reviewStatusActions {
+                    updatedAt
+                    actionType
+                }
+
+                draftRevision {
+                    ...strippedRateRevisionFragment
+                }
+
+                latestSubmittedRevision {
+                    ...strippedRateRevisionFragment
+                }
+            }
+        }
+    }
+}
