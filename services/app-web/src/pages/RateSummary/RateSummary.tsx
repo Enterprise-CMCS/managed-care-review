@@ -37,16 +37,16 @@ export const RateSummary = (): React.ReactElement => {
     const navigate = useNavigate()
     const [rateName, setRateName] = useState<string | undefined>(undefined)
     const [searchParams, setSearchParams] = useSearchParams()
-    const [showUndowWithdrawBanner, setUndowWithdrawBanner] =
+    const [showUndoWithdrawBanner, setUndowWithdrawBanner] =
         useState<boolean>(false)
     const { id } = useParams() as { id: string }
 
     useEffect(() => {
-        if (searchParams.get('showUndowWithdrawBanner') === 'true') {
+        if (searchParams.get('showUndoWithdrawBanner') === 'true') {
             setUndowWithdrawBanner(true)
 
             //This ensures the banner goes away upon refresh or navigation
-            searchParams.delete('showUndowWithdrawBanner')
+            searchParams.delete('showUndoWithdrawBanner')
             setSearchParams(searchParams, { replace: true })
         }
     }, [searchParams, setSearchParams])
@@ -243,7 +243,7 @@ export const RateSummary = (): React.ReactElement => {
                         </NavLinkWithLogging>
                     </div>
                 )}
-                {showUndowWithdrawBanner && (
+                {showUndoWithdrawBanner && (
                     //Show status updated banner after undoing rate withdraw
                     <StatusUpdatedBanner />
                 )}

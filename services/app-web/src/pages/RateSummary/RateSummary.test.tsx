@@ -537,7 +537,7 @@ describe('RateSummary', () => {
                     ],
                 },
                 routerProvider: {
-                    route: '/rates/1337?showUndowWithdrawBanner=true',
+                    route: '/rates/1337?showUndoWithdrawBanner=true',
                 },
             })
 
