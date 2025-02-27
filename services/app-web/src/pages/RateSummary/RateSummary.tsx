@@ -229,6 +229,10 @@ export const RateSummary = (): React.ReactElement => {
                         reasonForWithdraw={latestRateAction.updatedReason}
                     />
                 )}
+                {showUndoWithdrawBanner && (
+                    //Show status updated banner after undoing rate withdraw
+                    <StatusUpdatedBanner />
+                )}
                 {isStateUser && (
                     // state user does not see the RateSummarySideNav which has its own back button.
                     <div>
@@ -242,10 +246,6 @@ export const RateSummary = (): React.ReactElement => {
                             <span>&nbsp;Back to dashboard</span>
                         </NavLinkWithLogging>
                     </div>
-                )}
-                {showUndoWithdrawBanner && (
-                    //Show status updated banner after undoing rate withdraw
-                    <StatusUpdatedBanner />
                 )}
 
                 {isCMSUser && (
