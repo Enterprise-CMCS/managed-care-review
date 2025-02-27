@@ -25,8 +25,13 @@ import {
     getContractRateStatus,
     getRateReviewStatus,
     rateFormDataToDomainModel,
+    getParentContractID,
+    DRAFT_PARENT_PLACEHOLDER,
 } from './prismaSharedContractRateHelpers'
-import type { RateTableWithoutDraftContractsPayload } from './prismaSubmittedRateHelpers'
+import type {
+    RateTableWithoutDraftContractsPayload,
+    RateTableWithoutDraftContractsStrippedPayload,
+} from './prismaSubmittedRateHelpers'
 import type {
     RateTableFullPayload,
     RateTableStrippedPayload,
@@ -63,21 +68,6 @@ function parseRateWithHistory(
     }
 }
 
-function parseStrippedRateWithHistory(
-    rate: RateTableStrippedPayload
-): StrippedRateType | Error {
-    const strippedRate = strippedRateToDomainModel(rate)
-
-    if (strippedRate instanceof Error) {
-        console.warn(
-            `ERROR: attempting to parse prisma rate with history failed: ${strippedRate.message}`
-        )
-        return strippedRate
-    }
-
-    return strippedRate
-}
-
 function rateRevisionToDomainModel(
     revision: RateRevisionTableWithFormData
 ): RateRevisionType {
@@ -94,39 +84,6 @@ function rateRevisionToDomainModel(
     }
 }
 
-function strippedRateRevisionToDomainModel(
-    revision: StrippedRateRevisionTableWithFormData
-): StrippedRateRevisionType {
-    const formData = {
-        id: revision.rateID,
-        rateID: revision.rateID,
-        rateType: revision.rateType ?? undefined,
-        rateCapitationType: revision.rateCapitationType ?? undefined,
-        rateDateStart: revision.rateDateStart ?? undefined,
-        rateDateEnd: revision.rateDateEnd ?? undefined,
-        rateDateCertified: revision.rateDateCertified ?? undefined,
-        amendmentEffectiveDateStart:
-            revision.amendmentEffectiveDateStart ?? undefined,
-        amendmentEffectiveDateEnd:
-            revision.amendmentEffectiveDateEnd ?? undefined,
-        rateProgramIDs: revision.rateProgramIDs,
-        deprecatedRateProgramIDs: revision.deprecatedRateProgramIDs,
-        rateCertificationName: revision.rateCertificationName ?? undefined,
-    }
-
-    return {
-        id: revision.id,
-        rateID: revision.rateID,
-        createdAt: revision.createdAt,
-        updatedAt: revision.updatedAt,
-        submitInfo: convertUpdateInfoToDomainModel(revision.submitInfo),
-        unlockInfo: convertUpdateInfoToDomainModel(revision.unlockInfo),
-        formData,
-    }
-}
-
-const DRAFT_PARENT_PLACEHOLDER = 'DRAFT_PARENT_REPLACE_ME'
-
 // rateWithoutDraftContractsToDomainModel constructs a history for this particular contract including changes to all of its
 // revisions and all related rate revisions, including added and removed rates, but eliding any draft contracts to break the recursion chain
 function rateWithoutDraftContractsToDomainModel(
@@ -135,7 +92,9 @@ function rateWithoutDraftContractsToDomainModel(
     // so you get all the rate revisions. each one has a bunch of contracts
     // each set of contracts gets its own "revision" in the return list
     // further rateRevs naturally are their own "revision"
-    const rateRevisions = rate.revisions
+    const rateRevisions = [...rate.revisions].sort(
+        (revA, revB) => revA.createdAt.getTime() - revB.createdAt.getTime()
+    )
 
     let draftRevision: RateRevisionType | undefined = undefined
     const submittedRevisions: RateRevisionType[] = []
@@ -215,35 +174,10 @@ function rateWithoutDraftContractsToDomainModel(
         }
     }
 
-    // Find this rate's parent contract. It'll be the contract it was initially submitted with
-    // or the contract it is associated with as an initial draft.
-    const firstRevision = rate.revisions[0]
-    const submission = firstRevision.submitInfo
+    const parentContractID = getParentContractID(rateRevisions)
 
-    let parentContractID = undefined
-    if (!submission) {
-        // this is a draft, never submitted, rate
-        // this is fragile code
-        // because this is a draft, it can only be parented by the single draft contract
-        // that created it. But because of the asymmetry required to break the recursive
-        // rate-draftContract bit, we don't have access to that here. Put a shibboleth in
-        // that can be replaced in higher places.
-        parentContractID = DRAFT_PARENT_PLACEHOLDER
-    } else {
-        // check the initial submission
-        if (firstRevision.relatedSubmissions.length == 0) {
-            console.info('No related submission. Unmigrated rate.')
-            parentContractID = '00000000-1111-2222-3333-444444444444'
-        } else {
-            if (submission.submittedContracts.length !== 1) {
-                const msg =
-                    'programming error: its a submitted rate that was not submitted with a contract initially'
-                console.error(msg)
-                return new Error(msg)
-            }
-            const firstContract = submission.submittedContracts[0]
-            parentContractID = firstContract.contractID
-        }
+    if (parentContractID instanceof Error) {
+        return parentContractID
     }
 
     // TODO: why are we handling this differently from how we're doing dates in parseContractWithHistory
@@ -289,96 +223,6 @@ function rateWithoutDraftContractsToDomainModel(
         draftRevision,
         revisions: submittedRevisions.reverse(),
         packageSubmissions: packageSubmissions.reverse(),
-        reviewStatusActions: rate.reviewStatusActions.reverse(),
-    }
-}
-
-function strippedRateWithoutDraftContractsToDomainModel(
-    rate: RateTableStrippedPayload
-): StrippedRateType | Error {
-    // so you get all the rate revisions. each one has a bunch of contracts
-    // each set of contracts gets its own "revision" in the return list
-    // further rateRevs naturally are their own "revision"
-    const rateRevisions = [...rate.revisions].sort(
-        (revA, revB) => revA.createdAt.getTime() - revB.createdAt.getTime()
-    )
-
-    let draftRevision: RateRevisionType | undefined = undefined
-    const submittedRevisions: RateRevisionType[] = []
-    for (const rateRev of rateRevisions) {
-        // If we have a draft revision
-        // We set the draft revision aside, format it properly
-        if (!rateRev.submitInfo) {
-            if (draftRevision) {
-                return new Error(
-                    'PROGRAMMING ERROR: a rate may not have multiple drafts simultaneously. ID: ' +
-                        rate.id
-                )
-            }
-
-            draftRevision = strippedRateRevisionToDomainModel(rateRev)
-
-            // skip the rest of the processing
-            continue
-        }
-
-        submittedRevisions.push(strippedRateRevisionToDomainModel(rateRev))
-    }
-
-    // Find this rate's parent contract. It'll be the contract it was initially submitted with
-    // or the contract it is associated with as an initial draft.
-    const firstRevision = rateRevisions[0]
-    const submission = firstRevision.submitInfo
-
-    let parentContractID = undefined
-    if (!submission) {
-        // this is a draft, never submitted, rate
-        // this is fragile code
-        // because this is a draft, it can only be parented by the single draft contract
-        // that created it. But because of the asymmetry required to break the recursive
-        // rate-draftContract bit, we don't have access to that here. Put a shibboleth in
-        // that can be replaced in higher places.
-        parentContractID = DRAFT_PARENT_PLACEHOLDER
-    } else {
-        // check the initial submission
-        if (firstRevision.relatedSubmissions.length == 0) {
-            console.info('No related submission. Unmigrated rate.')
-            parentContractID = '00000000-1111-2222-3333-444444444444'
-        } else {
-            if (submission.submittedContracts.length !== 1) {
-                const msg =
-                    'programming error: its a submitted rate that was not submitted with a contract initially'
-                console.error(msg)
-                return new Error(msg)
-            }
-            const firstContract = submission.submittedContracts[0]
-            parentContractID = firstContract.contractID
-        }
-    }
-
-    const status = getContractRateStatus(rateRevisions)
-    const reviewStatus = getRateReviewStatus(rate)
-    const consolidatedStatus = getConsolidatedRateStatus(status, reviewStatus)
-
-    const submittedRevisionsDescending = submittedRevisions.reverse()
-
-    return {
-        id: rate.id,
-        createdAt: rate.createdAt,
-        updatedAt: rate.updatedAt,
-        initiallySubmittedAt:
-            submittedRevisionsDescending[
-                submittedRevisionsDescending.length - 1
-            ].submitInfo?.updatedAt,
-        status,
-        reviewStatus,
-        consolidatedStatus,
-        stateCode: rate.stateCode,
-        parentContractID: parentContractID,
-        withdrawInfo: convertUpdateInfoToDomainModel(rate.withdrawInfo),
-        stateNumber: rate.stateNumber,
-        draftRevision,
-        latestSubmittedRevision: submittedRevisionsDescending[0],
         reviewStatusActions: rate.reviewStatusActions.reverse(),
     }
 }
@@ -447,8 +291,99 @@ function rateWithHistoryToDomainModel(
     }
 }
 
-// rateWithHistoryToDomainModel constructs a history for this particular contract including changes to all of its
-// revisions and all related rate revisions, including added and removed rates
+function strippedRateRevisionToDomainModel(
+    revision: StrippedRateRevisionTableWithFormData
+): StrippedRateRevisionType {
+    const formData = {
+        id: revision.rateID,
+        rateID: revision.rateID,
+        rateType: revision.rateType ?? undefined,
+        rateCapitationType: revision.rateCapitationType ?? undefined,
+        rateDateStart: revision.rateDateStart ?? undefined,
+        rateDateEnd: revision.rateDateEnd ?? undefined,
+        rateDateCertified: revision.rateDateCertified ?? undefined,
+        amendmentEffectiveDateStart:
+            revision.amendmentEffectiveDateStart ?? undefined,
+        amendmentEffectiveDateEnd:
+            revision.amendmentEffectiveDateEnd ?? undefined,
+        rateProgramIDs: revision.rateProgramIDs,
+        deprecatedRateProgramIDs: revision.deprecatedRateProgramIDs,
+        rateCertificationName: revision.rateCertificationName ?? undefined,
+    }
+
+    return {
+        id: revision.id,
+        rateID: revision.rateID,
+        createdAt: revision.createdAt,
+        updatedAt: revision.updatedAt,
+        submitInfo: convertUpdateInfoToDomainModel(revision.submitInfo),
+        unlockInfo: convertUpdateInfoToDomainModel(revision.unlockInfo),
+        formData,
+    }
+}
+
+function strippedRateWithoutDraftContractsToDomainModel(
+    rate: RateTableWithoutDraftContractsStrippedPayload
+): StrippedRateType | Error {
+    // so you get all the rate revisions. each one has a bunch of contracts
+    // each set of contracts gets its own "revision" in the return list
+    // further rateRevs naturally are their own "revision"
+    const rateRevisions = [...rate.revisions].sort(
+        (revA, revB) => revA.createdAt.getTime() - revB.createdAt.getTime()
+    )
+
+    let draftRevision: RateRevisionType | undefined = undefined
+    const submittedRevisions: RateRevisionType[] = []
+    for (const rateRev of rateRevisions) {
+        // set draft revision aside from submitted revisions.
+        if (!rateRev.submitInfo) {
+            if (draftRevision) {
+                return new Error(
+                    'PROGRAMMING ERROR: a rate may not have multiple drafts simultaneously. ID: ' +
+                        rate.id
+                )
+            }
+            draftRevision = strippedRateRevisionToDomainModel(rateRev)
+            continue
+        }
+
+        submittedRevisions.push(strippedRateRevisionToDomainModel(rateRev))
+    }
+
+    const parentContractID = getParentContractID(rateRevisions)
+
+    if (parentContractID instanceof Error) {
+        return parentContractID
+    }
+
+    const status = getContractRateStatus(rateRevisions)
+    const reviewStatus = getRateReviewStatus(rate)
+    const consolidatedStatus = getConsolidatedRateStatus(status, reviewStatus)
+
+    const submittedRevisionsDescending = submittedRevisions.reverse()
+
+    return {
+        id: rate.id,
+        createdAt: rate.createdAt,
+        updatedAt: rate.updatedAt,
+        initiallySubmittedAt:
+            submittedRevisionsDescending[
+                submittedRevisionsDescending.length - 1
+            ].submitInfo?.updatedAt,
+        status,
+        reviewStatus,
+        consolidatedStatus,
+        stateCode: rate.stateCode,
+        parentContractID: parentContractID,
+        withdrawInfo: convertUpdateInfoToDomainModel(rate.withdrawInfo),
+        stateNumber: rate.stateNumber,
+        draftRevision,
+        latestSubmittedRevision: submittedRevisionsDescending[0],
+        reviewStatusActions: rate.reviewStatusActions.reverse(),
+    }
+}
+
+// strippedRateToDomainModel constructs a stripped down version of a rate.
 function strippedRateToDomainModel(
     rate: RateTableStrippedPayload
 ): StrippedRateType | Error {
@@ -473,9 +408,22 @@ function strippedRateToDomainModel(
         rateWithoutContracts.parentContractID = draftContract.contractID
     }
 
-    return {
-        ...rateWithoutContracts,
+    return rateWithoutContracts
+}
+
+function parseStrippedRateWithHistory(
+    rate: RateTableStrippedPayload
+): StrippedRateType | Error {
+    const strippedRate = strippedRateToDomainModel(rate)
+
+    if (strippedRate instanceof Error) {
+        console.warn(
+            `ERROR: attempting to parse prisma rate with history failed: ${strippedRate.message}`
+        )
+        return strippedRate
     }
+
+    return strippedRate
 }
 
 export {
@@ -483,7 +431,6 @@ export {
     rateRevisionToDomainModel,
     rateWithHistoryToDomainModel,
     rateWithoutDraftContractsToDomainModel,
-    DRAFT_PARENT_PLACEHOLDER,
     parseStrippedRateWithHistory,
     strippedRateToDomainModel,
     strippedRateWithoutDraftContractsToDomainModel,

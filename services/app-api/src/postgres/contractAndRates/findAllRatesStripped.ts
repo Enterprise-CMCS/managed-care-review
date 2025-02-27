@@ -15,39 +15,34 @@ async function findAllRatesStrippedInTransaction(
     tx: PrismaTransactionType,
     stateCode?: string
 ): Promise<StrippedRateOrErrorArrayType | Error> {
-    try {
-        const rates = await tx.rateTable.findMany({
-            where: {
-                revisions: {
-                    some: {
-                        submitInfoID: {
-                            not: null,
-                        },
+    const rates = await tx.rateTable.findMany({
+        where: {
+            revisions: {
+                some: {
+                    submitInfoID: {
+                        not: null,
                     },
                 },
-                stateCode: stateCode
-                    ? {
-                          equals: stateCode,
-                      }
-                    : {
-                          not: 'AS', // exclude test state as per ADR 019
-                      },
             },
-            include: includeStrippedRate,
+            stateCode: stateCode
+                ? {
+                      equals: stateCode,
+                  }
+                : {
+                      not: 'AS', // exclude test state as per ADR 019
+                  },
+        },
+        include: includeStrippedRate,
+    })
+
+    const parsedRatesOrErrors: StrippedRateOrErrorArrayType = rates.map(
+        (rate) => ({
+            rateID: rate.id,
+            rate: parseStrippedRateWithHistory(rate),
         })
+    )
 
-        const parsedRatesOrErrors: StrippedRateOrErrorArrayType = rates.map(
-            (rate) => ({
-                rateID: rate.id,
-                rate: parseStrippedRateWithHistory(rate),
-            })
-        )
-
-        return parsedRatesOrErrors
-    } catch (err) {
-        console.error('PRISMA ERROR', err)
-        return err
-    }
+    return parsedRatesOrErrors
 }
 
 async function findAllRatesStripped(
