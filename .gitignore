@@ -57,7 +57,7 @@ services/app-api/healthPlanFormDataMigrations
 
 services/app-proto/build
 
-services/postgres/scripts/*.js
+services/postgres/dist
 
 services/uploads/src/avLayer/build/lambda_layer
 services/uploads/src/avLayer/build/lib
