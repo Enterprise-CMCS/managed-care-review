@@ -38,7 +38,7 @@ const validateAndReturnRates = (
         const errMessage = `Failed to parse the following rates:\n${errorParseRates.join(
             '\n'
         )}`
-        logError('indexRatesResolver', errMessage)
+        logError('indexRatesStripped', errMessage)
         setErrorAttributesOnActiveSpan(errMessage, span)
     }
     return parsedRates
@@ -49,8 +49,8 @@ export function indexRatesStripped(
 ): QueryResolvers['indexRatesStripped'] {
     return async (_parent, { input }, context) => {
         const { user, ctx, tracer } = context
-        const span = tracer?.startSpan('indexRates', {}, ctx)
-        setResolverDetailsOnActiveSpan('indexRates', user, span)
+        const span = tracer?.startSpan('indexRatesStripped', {}, ctx)
+        setResolverDetailsOnActiveSpan('indexRatesStripped', user, span)
 
         const adminPermissions = hasAdminPermissions(user)
         const cmsUser = hasCMSPermissions(user)
@@ -68,7 +68,7 @@ export function indexRatesStripped(
                 )
             }
             if (ratesWithHistory instanceof Error) {
-                const errMessage = `Issue finding rates with history Message: ${ratesWithHistory.message}`
+                const errMessage = `Issue finding rates: ${ratesWithHistory.message}`
                 setErrorAttributesOnActiveSpan(errMessage, span)
 
                 if (ratesWithHistory instanceof NotFoundError) {

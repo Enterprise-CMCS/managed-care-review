@@ -112,9 +112,6 @@ it('returns all rates with stripped down data', async () => {
     }
 
     await withdrawTestRate(cmsServer, rateBID, 'Withdraw invalid rate')
-    // test rate linked to another contract
-    // test withdrawn rate
-    // test undo withdrawn rate
 
     const strippedRatesOrErrors = must(await findAllRatesStripped(client))
     const strippedRates: StrippedRateType[] = []
