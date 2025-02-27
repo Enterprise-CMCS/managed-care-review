@@ -111,7 +111,7 @@ function getContractReviewStatus(
     contract: ContractTableWithoutDraftRates
 ): ContractReviewStatusType {
     // need to order actions from latest to earliest
-    const actions = contract.reviewStatusActions.sort(
+    const actions = [...contract.reviewStatusActions].sort(
         (actionA, actionB) =>
             actionB.updatedAt.getTime() - actionA.updatedAt.getTime()
     )
