@@ -1,6 +1,6 @@
 import { GridContainer, Icon } from '@trussworks/react-uswds'
 import React, { useEffect, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import {
     ButtonWithLogging,
     DoubleColumnGrid,
@@ -28,6 +28,7 @@ import { featureFlags } from '@mc-review/common-code'
 import { UnlockRateButton } from '../../components/SubmissionSummarySection/RateDetailsSummarySection/UnlockRateButton'
 import { recordJSException } from '@mc-review/otel'
 import { handleApolloErrorsAndAddUserFacingMessages } from '@mc-review/helpers'
+import { StatusUpdatedBanner } from '../../components/Banner/StatusUpdatedBanner/StatusUpdatedBanner'
 
 export const RateSummary = (): React.ReactElement => {
     // Page level state
@@ -35,7 +36,20 @@ export const RateSummary = (): React.ReactElement => {
     const { updateHeading } = usePage()
     const navigate = useNavigate()
     const [rateName, setRateName] = useState<string | undefined>(undefined)
+    const [searchParams, setSearchParams] = useSearchParams()
+    const [showUndowWithdrawBanner, setUndowWithdrawBanner] =
+        useState<boolean>(false)
     const { id } = useParams() as { id: string }
+
+    useEffect(() => {
+        if (searchParams.get('showUndowWithdrawBanner') === 'true') {
+            setUndowWithdrawBanner(true)
+
+            //This ensures the banner goes away upon refresh or navigation
+            searchParams.delete('showUndowWithdrawBanner')
+            setSearchParams(searchParams, { replace: true })
+        }
+    }, [searchParams, setSearchParams])
 
     useEffect(() => {
         updateHeading({ customHeading: rateName })
@@ -228,6 +242,10 @@ export const RateSummary = (): React.ReactElement => {
                             <span>&nbsp;Back to dashboard</span>
                         </NavLinkWithLogging>
                     </div>
+                )}
+                {showUndowWithdrawBanner && (
+                    //Show status updated banner after undoing rate withdraw
+                    <StatusUpdatedBanner />
                 )}
 
                 {isCMSUser && (
