@@ -117,6 +117,11 @@ type RateTableWithoutDraftContractsStrippedPayload =
         include: typeof includeStrippedRateWithoutDraftContracts
     }>
 
+type RateRevisionsTableStrippedPayload =
+    RateTableWithoutDraftContractsStrippedPayload['revisions']
+type RateRevisionTablePayload =
+    RateTableWithoutDraftContractsPayload['revisions']
+
 export {
     includeRateWithoutDraftContracts,
     includeLatestSubmittedRateRev,
@@ -126,4 +131,6 @@ export {
 export type {
     RateTableWithoutDraftContractsPayload,
     RateTableWithoutDraftContractsStrippedPayload,
+    RateRevisionsTableStrippedPayload,
+    RateRevisionTablePayload,
 }

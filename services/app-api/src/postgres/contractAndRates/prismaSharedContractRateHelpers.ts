@@ -22,9 +22,13 @@ import type {
     ContractReviewStatus,
     RateReviewStatus,
 } from '../../gen/gqlServer'
-import type { RateTableWithoutDraftContractsPayload } from './prismaSubmittedRateHelpers'
+import type {
+    RateTableWithoutDraftContractsPayload,
+    RateRevisionsTableStrippedPayload,
+    RateRevisionTablePayload,
+    RateTableWithoutDraftContractsStrippedPayload,
+} from './prismaSubmittedRateHelpers'
 import type { ConsolidatedRateStatusType } from '../../domain-models/contractAndRates/statusType'
-import type { RateTableStrippedPayload } from './prismaFullContractRateHelpers'
 
 const subincludeUpdateInfo = {
     updatedBy: true,
@@ -37,6 +41,8 @@ const includeUpdateInfo = {
 type UpdateInfoTableWithUpdater = Prisma.UpdateInfoTableGetPayload<{
     include: typeof subincludeUpdateInfo
 }>
+
+const DRAFT_PARENT_PLACEHOLDER = 'DRAFT_PARENT_REPLACE_ME'
 
 const includeContractFormData = {
     unlockInfo: includeUpdateInfo,
@@ -82,7 +88,7 @@ function getContractRateStatus(
         | StrippedRateRevisionTableWithFormData[]
 ): PackageStatusType {
     // need to order revisions from latest to earliest
-    const revs = revisions.sort(
+    const revs = [...revisions].sort(
         (revA, revB) => revB.createdAt.getTime() - revA.createdAt.getTime()
     )
     const latestRevision = revs[0]
@@ -117,7 +123,9 @@ function getContractReviewStatus(
 }
 
 function getRateReviewStatus(
-    rate: RateTableWithoutDraftContractsPayload | RateTableStrippedPayload
+    rate:
+        | RateTableWithoutDraftContractsPayload
+        | RateTableWithoutDraftContractsStrippedPayload
 ): RateReviewStatusType {
     // need to order actions from latest to earliest
     const actions = [...rate.reviewStatusActions].sort(
@@ -160,6 +168,47 @@ function getConsolidatedRateStatus(
     } else {
         return status
     }
+}
+
+// Find this rate's parent contract. It'll be the contract it was initially submitted with
+// or the contract it is associated with as an initial draft.
+const getParentContractID = (
+    rateRevisions: RateRevisionsTableStrippedPayload | RateRevisionTablePayload
+) => {
+    // sort in ascending order
+    rateRevisions.sort(
+        (revA, revB) => revA.createdAt.getTime() - revB.createdAt.getTime()
+    )
+    const firstRevision = rateRevisions[0]
+    const submission = firstRevision.submitInfo
+
+    let parentContractID = undefined
+    if (!submission) {
+        // this is a draft, never submitted, rate
+        // this is fragile code
+        // because this is a draft, it can only be parented by the single draft contract
+        // that created it. But because of the asymmetry required to break the recursive
+        // rate-draftContract bit, we don't have access to that here. Put a shibboleth in
+        // that can be replaced in higher places.
+        parentContractID = 'DRAFT_PARENT_REPLACE_ME'
+    } else {
+        // check the initial submission
+        if (firstRevision.relatedSubmissions.length == 0) {
+            console.info('No related submission. Unmigrated rate.')
+            parentContractID = '00000000-1111-2222-3333-444444444444'
+        } else {
+            if (submission.submittedContracts.length !== 1) {
+                const msg =
+                    'programming error: its a submitted rate that was not submitted with a contract initially'
+                console.error(msg)
+                return new Error(msg)
+            }
+            const firstContract = submission.submittedContracts[0]
+            parentContractID = firstContract.contractID
+        }
+    }
+
+    return parentContractID
 }
 // ------
 
@@ -500,4 +549,6 @@ export {
     setDateAddedForContractRevisions,
     setDateAddedForRateRevisions,
     getRateReviewStatus,
+    getParentContractID,
+    DRAFT_PARENT_PLACEHOLDER,
 }
