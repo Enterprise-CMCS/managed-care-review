@@ -1,0 +1,101 @@
+query indexRatesForDashboard($input: IndexRatesInput) {
+    indexRates(input: $input) {
+        totalCount
+        edges {
+            node {
+                ...rateFieldsFragment
+                draftRevision {
+                    id
+                    rateID
+                    createdAt
+                    updatedAt
+                    unlockInfo {
+                        ...updateInformationFields
+                    }
+                    submitInfo {
+                        ...updateInformationFields
+                    }
+                    formData {
+                        rateType,
+                        rateCapitationType,
+                        rateDateStart,
+                        rateDateEnd,
+                        rateDateCertified,
+                        amendmentEffectiveDateStart,
+                        amendmentEffectiveDateEnd,
+                        rateProgramIDs,
+                        deprecatedRateProgramIDs,
+                        consolidatedRateProgramIDs
+                        rateCertificationName,
+                        certifyingActuaryContacts {
+                            name
+                            titleRole
+                            email
+                            actuarialFirm
+                            actuarialFirmOther
+                        },
+                        addtlActuaryContacts {
+                            name
+                            titleRole
+                            email
+                            actuarialFirm
+                            actuarialFirmOther
+                        },
+                        actuaryCommunicationPreference
+                        packagesWithSharedRateCerts {
+                            packageName
+                            packageId
+                            packageStatus
+                        }
+                    }
+                }
+
+                revisions {
+                    id
+                    rateID
+                    createdAt
+                    updatedAt
+                    unlockInfo {
+                        ...updateInformationFields
+                    }
+                    submitInfo {
+                        ...updateInformationFields
+                    }
+                    formData {
+                        rateType,
+                        rateCapitationType,
+                        rateDateStart,
+                        rateDateEnd,
+                        rateDateCertified,
+                        amendmentEffectiveDateStart,
+                        amendmentEffectiveDateEnd,
+                        rateProgramIDs,
+                        deprecatedRateProgramIDs,
+                        consolidatedRateProgramIDs,
+                        rateCertificationName,
+                        certifyingActuaryContacts {
+                            name
+                            titleRole
+                            email
+                            actuarialFirm
+                            actuarialFirmOther
+                        },
+                        addtlActuaryContacts {
+                            name
+                            titleRole
+                            email
+                            actuarialFirm
+                            actuarialFirmOther
+                        },
+                        actuaryCommunicationPreference
+                        packagesWithSharedRateCerts {
+                            packageName
+                            packageId
+                            packageStatus
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
