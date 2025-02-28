@@ -1108,6 +1108,37 @@ describe('submitContract', () => {
         expect(res.errors).toBeDefined()
     })
 
+    it('returns an error if a CONTRACT_AND_RATES submission is missing rates', async () => {
+        const stateServer = await constructTestPostgresServer({
+            s3Client: mockS3,
+        })
+
+        const draft = await createAndUpdateTestContractWithoutRates(stateServer)
+        const res = await stateServer.executeOperation({
+            query: SubmitContractDocument,
+            variables: {
+                input: {
+                    contractID: draft.id,
+                },
+            },
+        })
+
+        expect(res.errors).toBeDefined()
+        expect(res.errors).toEqual([
+            expect.objectContaining({
+                message: expect.stringMatching(
+                    `Attempted to submit a contract and rates contract without rates: ${draft.id}`
+                ),
+                path: ['submitContract'],
+                extensions: expect.objectContaining({
+                    argumentName: 'contractID',
+                    cause: 'BAD_USER_INPUT',
+                    code: 'BAD_USER_INPUT',
+                }),
+            }),
+        ])
+    })
+
     describe('emails', () => {
         it('sends two emails', async () => {
             const mockEmailer = testEmailer()
