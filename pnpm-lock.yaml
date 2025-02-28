@@ -24,8 +24,8 @@ importers:
         specifier: ^11.2.6
         version: 11.3.1(encoding@0.1.13)
       husky:
-        specifier: ^9.1.5
-        version: 9.1.5
+        specifier: ^9.1.7
+        version: 9.1.7
       lint-staged:
         specifier: ^15.2.7
         version: 15.2.7
@@ -985,8 +985,8 @@ importers:
         specifier: ^1.5.0
         version: 1.5.0(axe-core@4.10.0)(cypress@13.13.2)
       husky:
-        specifier: ^9.1.5
-        version: 9.1.5
+        specifier: ^9.1.7
+        version: 9.1.7
       lint-staged:
         specifier: ^15.2.2
         version: 15.2.7
@@ -8654,8 +8654,8 @@ packages:
   electron-to-chromium@1.5.1:
     resolution: {integrity: sha512-FKbOCOQ5QRB3VlIbl1LZQefWIYwszlBloaXcY2rbfpu9ioJnNh3TK03YtIDKDo3WKBi8u+YV4+Fn2CkEozgf4w==}
 
-  electron-to-chromium@1.5.108:
-    resolution: {integrity: sha512-tiGxpQmvXBEzrfU5ertmbCV/nG5yqCkC1G4T1SIKP335Y5rjXzPWmijR6XcoGXZvVoo4dknfdNe4Tl7lcIROLg==}
+  electron-to-chromium@1.5.109:
+    resolution: {integrity: sha512-AidaH9JETVRr9DIPGfp1kAarm/W6hRJTPuCnkF+2MqhF4KaAgRIcBc8nvjk+YMXZhwfISof/7WG29eS4iGxQLQ==}
 
   electron-to-chromium@1.5.5:
     resolution: {integrity: sha512-QR7/A7ZkMS8tZuoftC/jfqNkZLQO779SSW3YuZHP4eXpj3EffGLFcB/Xu9AAZQzLccTiCV+EmUo3ha4mQ9wnlA==}
@@ -9857,8 +9857,8 @@ packages:
   humanize-number@0.0.2:
     resolution: {integrity: sha512-un3ZAcNQGI7RzaWGZzQDH47HETM4Wrj6z6E4TId8Yeq9w5ZKUVB1nrT2jwFheTUjEmqcgTjXDc959jum+ai1kQ==}
 
-  husky@9.1.5:
-    resolution: {integrity: sha512-rowAVRUBfI0b4+niA4SJMhfQwc107VLkBUgEYYAOQAbqDCnra1nYh83hF/MDmhYs9t9n1E3DuKOrs2LYNC+0Ag==}
+  husky@9.1.7:
+    resolution: {integrity: sha512-5gs5ytaNjBrh5Ow3zrvdUUY+0VxIuWVL4i9irt6friV+BqdCfmV11CQTWMiBYWHbXhco+J1kHfTOUkePhCDvMA==}
     engines: {node: '>=18'}
     hasBin: true
 
@@ -25344,7 +25344,7 @@ snapshots:
   browserslist@4.24.4:
     dependencies:
       caniuse-lite: 1.0.30001701
-      electron-to-chromium: 1.5.108
+      electron-to-chromium: 1.5.109
       node-releases: 2.0.19
       update-browserslist-db: 1.1.3(browserslist@4.24.4)
 
@@ -26576,7 +26576,7 @@ snapshots:
 
   electron-to-chromium@1.5.1: {}
 
-  electron-to-chromium@1.5.108: {}
+  electron-to-chromium@1.5.109: {}
 
   electron-to-chromium@1.5.5: {}
 
@@ -28095,7 +28095,7 @@ snapshots:
 
   humanize-number@0.0.2: {}
 
-  husky@9.1.5: {}
+  husky@9.1.7: {}
 
   hyperlinker@1.0.0: {}
 
