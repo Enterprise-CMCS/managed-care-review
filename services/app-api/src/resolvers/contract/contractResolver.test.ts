@@ -5,7 +5,7 @@ import {
     createTestQuestionResponse,
 } from '../../testHelpers/gqlHelpers'
 import {
-    createAndUpdateTestContractWithoutRates,
+    createAndUpdateTestContractWithRate,
     fetchTestContractWithQuestions,
     submitTestContract,
 } from '../../testHelpers/gqlContractHelpers'
@@ -57,7 +57,7 @@ describe('contractResolver', () => {
             s3Client: mockS3,
         })
 
-        const draft = await createAndUpdateTestContractWithoutRates(stateServer)
+        const draft = await createAndUpdateTestContractWithRate(stateServer)
         const stateSubmission = await submitTestContract(stateServer, draft.id)
 
         const createdDMCOQuestion = await createTestQuestion(
@@ -208,8 +208,7 @@ describe('contractResolver', () => {
             s3Client: mockS3,
         })
 
-        const draft =
-            await createAndUpdateTestContractWithoutRates(stateServerFL)
+        const draft = await createAndUpdateTestContractWithRate(stateServerFL)
         const stateSubmission = await submitTestContract(
             stateServerFL,
             draft.id

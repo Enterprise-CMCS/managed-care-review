@@ -1,7 +1,6 @@
 /* eslint-disable  @typescript-eslint/no-non-null-assertion */
 import {
     constructTestPostgresServer,
-    createAndUpdateTestHealthPlanPackage,
     defaultFloridaProgram,
     unlockTestHealthPlanPackage,
     updateTestHealthPlanFormData,
@@ -20,6 +19,7 @@ import {
     createAndSubmitTestContract,
     createAndSubmitTestContractWithRate,
     createAndUpdateTestContractWithoutRates,
+    createAndUpdateTestContractWithRate,
     createSubmitAndUnlockTestContract,
     createTestContract,
     fetchTestContract,
@@ -38,7 +38,11 @@ import {
 import { testLDService } from '../../testHelpers/launchDarklyHelpers'
 import { latestFormData } from '../../testHelpers/healthPlanPackageHelpers'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
-import { testEmailConfig, testEmailer, testEmailerFromDatabase } from '../../testHelpers/emailerHelpers'
+import {
+    testEmailConfig,
+    testEmailer,
+    testEmailerFromDatabase,
+} from '../../testHelpers/emailerHelpers'
 import { NewPostgresStore } from '../../postgres'
 import { dayjs } from '@mc-review/dates'
 
@@ -107,17 +111,28 @@ describe('submitContract', () => {
 
         expect(draftRates).toHaveLength(1)
 
-        const contractWithRate = await submitTestContract(stateServer, contractID)
+        const contractWithRate = await submitTestContract(
+            stateServer,
+            contractID
+        )
 
         // expect rates in latest submission
         let latestSubmission = contractWithRate.packageSubmissions[0]
         expect(latestSubmission.rateRevisions).toHaveLength(1)
 
-        await unlockTestContract(cmsServer, contractID, 'Change to contract only')
+        await unlockTestContract(
+            cmsServer,
+            contractID,
+            'Change to contract only'
+        )
 
         await updateTestContractDraftRevision(stateServer, contractID)
 
-        const contractWithoutRates = await submitTestContract(stateServer, contractID, 'resubmit as contract only')
+        const contractWithoutRates = await submitTestContract(
+            stateServer,
+            contractID,
+            'resubmit as contract only'
+        )
 
         // reassigned to the latest submission of contract without rates
         latestSubmission = contractWithoutRates.packageSubmissions[0]
@@ -387,13 +402,11 @@ describe('submitContract', () => {
         expect(subC0.rateRevisions[0].rateID).toBe(TwoID)
 
         // 4. Submit D0, contract only
-        const draftD0 = await createAndUpdateTestHealthPlanPackage(
+        const draftD0 = await createAndUpdateTestContractWithoutRates(
             stateServer,
+            undefined,
             {
-                rateInfos: [],
                 submissionType: 'CONTRACT_ONLY',
-                addtlActuaryContacts: [],
-                addtlActuaryCommunicationPreference: undefined,
             }
         )
         const DID = draftD0.id
@@ -1095,6 +1108,37 @@ describe('submitContract', () => {
         expect(res.errors).toBeDefined()
     })
 
+    it('returns an error if a CONTRACT_AND_RATES submission is missing rates', async () => {
+        const stateServer = await constructTestPostgresServer({
+            s3Client: mockS3,
+        })
+
+        const draft = await createAndUpdateTestContractWithoutRates(stateServer)
+        const res = await stateServer.executeOperation({
+            query: SubmitContractDocument,
+            variables: {
+                input: {
+                    contractID: draft.id,
+                },
+            },
+        })
+
+        expect(res.errors).toBeDefined()
+        expect(res.errors).toEqual([
+            expect.objectContaining({
+                message: expect.stringMatching(
+                    `Attempted to submit a contract and rates contract without rates: ${draft.id}`
+                ),
+                path: ['submitContract'],
+                extensions: expect.objectContaining({
+                    argumentName: 'contractID',
+                    cause: 'BAD_USER_INPUT',
+                    code: 'BAD_USER_INPUT',
+                }),
+            }),
+        ])
+    })
+
     describe('emails', () => {
         it('sends two emails', async () => {
             const mockEmailer = testEmailer()
@@ -1159,6 +1203,7 @@ describe('submitContract', () => {
             )
         })
 
+        // eslint-disable-next-line jest/no-focused-tests
         it('send CMS email on contract only re-submission', async () => {
             const config = testEmailConfig()
             const mockEmailer = testEmailer(config)
@@ -1189,7 +1234,11 @@ describe('submitContract', () => {
             await createDBUsersWithFullData(assignedUsers)
             await updateTestStateAssignments(cmsServer, 'FL', assignedUserIDs)
 
-            const draft1 = await createAndUpdateTestContractWithoutRates(server)
+            const draft1 = await createAndUpdateTestContractWithoutRates(
+                server,
+                undefined,
+                { submissionType: 'CONTRACT_ONLY' }
+            )
             await submitTestContract(server, draft1.id)
             await unlockTestContract(cmsServer, draft1.id, 'unlock to resubmit')
             const submit1 = await submitTestContract(
@@ -1282,7 +1331,11 @@ describe('submitContract', () => {
             const server = await constructTestPostgresServer({
                 emailer: mockEmailer,
             })
-            const draft = await createAndUpdateTestContractWithoutRates(server)
+            const draft = await createAndUpdateTestContractWithoutRates(
+                server,
+                undefined,
+                { submissionType: 'CONTRACT_ONLY' }
+            )
             const draftID = draft.id
 
             await server.executeOperation({
@@ -1304,6 +1357,7 @@ describe('submitContract', () => {
         })
 
         // TODO: reimplement this test without using jest
+        // eslint-disable-next-line jest/no-commented-out-tests
         // it('does log error when request for state specific analysts emails failed', async () => {
         //     const consoleErrorSpy = jest.spyOn(console, 'error')
         //     const error = {
@@ -1346,7 +1400,7 @@ describe('submitContract', () => {
                     }),
                 },
             })
-            const draft = await createAndUpdateTestContractWithoutRates(server)
+            const draft = await createAndUpdateTestContractWithRate(server)
             const draftID = draft.id
 
             const submitResult = await server.executeOperation({
@@ -1450,8 +1504,11 @@ describe('submitContract', () => {
                 },
             })
 
-            const stateSubmission =
-                await createAndSubmitTestContract(stateServer)
+            const stateSubmission = await createAndSubmitTestContract(
+                stateServer,
+                undefined,
+                { submissionType: 'CONTRACT_ONLY' }
+            )
 
             const cmsServer = await constructTestPostgresServer({
                 context: {
@@ -1513,11 +1570,9 @@ describe('submitContract', () => {
 
         it('uses email settings from database with remove-parameter-store flag on', async () => {
             const mockEmailer = await testEmailerFromDatabase()
-            const ldService = testLDService(
-                {
-                    'remove-parameter-store': true
-                }
-            )
+            const ldService = testLDService({
+                'remove-parameter-store': true,
+            })
 
             const stateServer = await constructTestPostgresServer({
                 context: {
@@ -1527,7 +1582,8 @@ describe('submitContract', () => {
                 emailer: mockEmailer,
             })
 
-            const submitResult = await createAndSubmitTestContractWithRate(stateServer)
+            const submitResult =
+                await createAndSubmitTestContractWithRate(stateServer)
 
             const currentRevision =
                 submitResult.packageSubmissions[0].contractRevision
@@ -1537,13 +1593,15 @@ describe('submitContract', () => {
             expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
                 1,
                 expect.objectContaining({
-                    subject: expect.stringContaining(`New Managed Care Submission: ${name}`),
+                    subject: expect.stringContaining(
+                        `New Managed Care Submission: ${name}`
+                    ),
                     sourceEmail: 'mc-review@cms.hhs.gov',
                     toAddresses: expect.arrayContaining(
                         Array.from([
-                            'mc-review-qa+DevTeam@truss.works', 
-                            'mc-review-qa+DMCPsubmissiondev1@truss.works', 
-                            'mc-review-qa+DMCPsubmissiondev2@truss.works'
+                            'mc-review-qa+DevTeam@truss.works',
+                            'mc-review-qa+DMCPsubmissiondev1@truss.works',
+                            'mc-review-qa+DMCPsubmissiondev2@truss.works',
                         ])
                     ),
                 })
@@ -1551,6 +1609,7 @@ describe('submitContract', () => {
         })
 
         // TODO: reimplement this test without using jest
+        // eslint-disable-next-line jest/no-commented-out-tests
         // it('errors when SES email has failed.', async () => {
         //     const mockEmailer = testEmailer()
 
@@ -1658,12 +1717,15 @@ describe('submitContract', () => {
             })
 
             // setup
-            const initialContract =
-                await createAndUpdateTestContractWithoutRates(server, 'FL', {
+            const initialContract = await createAndUpdateTestContractWithRate(
+                server,
+                {
                     statutoryRegulatoryAttestationDescription:
                         'A valid description',
                     statutoryRegulatoryAttestation: false,
-                })
+                    stateCode: 'FL',
+                }
+            )
 
             await new Promise((resolve) => setTimeout(resolve, 2000))
 

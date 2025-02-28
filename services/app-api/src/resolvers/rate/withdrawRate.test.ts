@@ -15,7 +15,10 @@ import {
     submitTestContract,
     unlockTestContract,
 } from '../../testHelpers/gqlContractHelpers'
-import { withdrawTestRate } from '../../testHelpers/gqlRateHelpers'
+import {
+    addNewRateToTestContract,
+    withdrawTestRate,
+} from '../../testHelpers/gqlRateHelpers'
 import {
     WithdrawRateDocument,
     UpdateDraftContractRatesDocument,
@@ -323,7 +326,16 @@ describe('withdrawRate', () => {
             },
         })
 
-        const contract = await createAndSubmitTestContractWithRate(stateServer)
+        const draft = await createAndUpdateTestContractWithRate(stateServer)
+        const draftWithExtraRate = await addNewRateToTestContract(
+            stateServer,
+            draft
+        )
+        const contract = await submitTestContract(
+            stateServer,
+            draftWithExtraRate.id
+        )
+
         const rateID = contract.packageSubmissions[0].rateRevisions[0].rateID
         await withdrawTestRate(cmsServer, rateID, 'Withdraw invalid rate')
 

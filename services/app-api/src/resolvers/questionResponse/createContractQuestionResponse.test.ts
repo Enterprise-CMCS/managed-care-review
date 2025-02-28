@@ -9,7 +9,6 @@ import {
     approveTestContract,
     assertAnError,
     assertAnErrorCode,
-    createAndSubmitTestContract,
 } from '../../testHelpers'
 import {
     createDBUsersWithFullData,
@@ -17,6 +16,7 @@ import {
 } from '../../testHelpers/userHelpers'
 import { testEmailConfig, testEmailer } from '../../testHelpers/emailerHelpers'
 import { findStatePrograms } from '../../postgres'
+import { createAndSubmitTestContractWithRate } from '../../testHelpers/gqlContractHelpers'
 
 describe('createContractQuestionResponse', () => {
     const cmsUser = testCMSUser()
@@ -44,7 +44,7 @@ describe('createContractQuestionResponse', () => {
             },
         })
 
-        const contract = await createAndSubmitTestContract(stateServer)
+        const contract = await createAndSubmitTestContractWithRate(stateServer)
 
         const createdQuestion = await createTestQuestion(cmsServer, contract.id)
 
@@ -108,7 +108,7 @@ describe('createContractQuestionResponse', () => {
                 user: cmsUser,
             },
         })
-        const contract = await createAndSubmitTestContract(stateServer)
+        const contract = await createAndSubmitTestContractWithRate(stateServer)
         const createdQuestion = await createTestQuestion(cmsServer, contract.id)
         await approveTestContract(cmsServer, contract.id)
 
@@ -141,7 +141,7 @@ describe('createContractQuestionResponse', () => {
                 user: cmsUser,
             },
         })
-        const contract = await createAndSubmitTestContract(stateServer)
+        const contract = await createAndSubmitTestContractWithRate(stateServer)
         const createdQuestion = await createTestQuestion(cmsServer, contract.id)
 
         const createResponseResult = await cmsServer.executeOperation({
@@ -187,9 +187,13 @@ describe('createContractQuestionResponse', () => {
 
         await updateTestStateAssignments(cmsServer, 'FL', assignedUserIDs)
 
-        const contract = await createAndSubmitTestContract(stateServer, 'FL', {
-            riskBasedContract: true,
-        })
+        const contract = await createAndSubmitTestContractWithRate(
+            stateServer,
+            {
+                stateCode: 'FL',
+                riskBasedContract: true,
+            }
+        )
 
         const createdQuestion = await createTestQuestion(cmsServer, contract.id)
 
@@ -243,7 +247,7 @@ describe('createContractQuestionResponse', () => {
             emailer: mockEmailer,
         })
 
-        const contract = await createAndSubmitTestContract(stateServer)
+        const contract = await createAndSubmitTestContractWithRate(stateServer)
 
         const createdQuestion = await createTestQuestion(cmsServer, contract.id)
 

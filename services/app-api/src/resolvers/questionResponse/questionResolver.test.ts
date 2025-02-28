@@ -7,10 +7,8 @@ import {
     createDBUsersWithFullData,
 } from '../../testHelpers/userHelpers'
 import { testS3Client } from '../../testHelpers/s3Helpers'
-import {
-    createAndSubmitTestContract,
-    fetchTestContractWithQuestions,
-} from '../../testHelpers'
+import { fetchTestContractWithQuestions } from '../../testHelpers'
+import { createAndSubmitTestContractWithRate } from '../../testHelpers/gqlContractHelpers'
 
 describe(`questionResolver`, () => {
     const mockS3 = testS3Client()
@@ -33,7 +31,7 @@ describe(`questionResolver`, () => {
             s3Client: mockS3,
         })
 
-        const contract = await createAndSubmitTestContract(stateServer)
+        const contract = await createAndSubmitTestContractWithRate(stateServer)
 
         const createdDMCPQuestion = await createTestQuestion(
             dmcpCMSServer,

@@ -4,8 +4,8 @@ import { testCMSUser } from '../../testHelpers/userHelpers'
 import {
     approveTestContract,
     createTestContract,
-    createAndSubmitTestContract,
     unlockTestContract,
+    createAndSubmitTestContractWithRate,
 } from '../../testHelpers/gqlContractHelpers'
 import { testS3Client } from '../../testHelpers'
 
@@ -24,7 +24,7 @@ describe('approveContract', () => {
             s3Client: mockS3,
         })
 
-        const contract = await createAndSubmitTestContract(stateServer)
+        const contract = await createAndSubmitTestContractWithRate(stateServer)
 
         const approvedContract = await approveTestContract(
             cmsServer,
@@ -92,7 +92,7 @@ describe('approveContract', () => {
             },
         })
 
-        const contract = await createAndSubmitTestContract(stateServer)
+        const contract = await createAndSubmitTestContractWithRate(stateServer)
 
         const unlockedContract = await unlockTestContract(
             cmsServer,
@@ -135,7 +135,7 @@ describe('approveContract', () => {
             },
         })
 
-        const contract = await createAndSubmitTestContract(stateServer)
+        const contract = await createAndSubmitTestContractWithRate(stateServer)
 
         await cmsServer.executeOperation({
             query: ApproveContractDocument,
@@ -182,7 +182,7 @@ describe('approveContract', () => {
             s3Client: mockS3,
         })
 
-        const contract = await createAndSubmitTestContract(stateServer)
+        const contract = await createAndSubmitTestContractWithRate(stateServer)
         const approveContractResult = await cmsServer.executeOperation({
             query: ApproveContractDocument,
             variables: {
@@ -210,7 +210,7 @@ describe('approveContract', () => {
             s3Client: mockS3,
         })
 
-        const contract = await createAndSubmitTestContract(stateServer)
+        const contract = await createAndSubmitTestContractWithRate(stateServer)
 
         const approveContractResult = await stateServer.executeOperation({
             query: ApproveContractDocument,
