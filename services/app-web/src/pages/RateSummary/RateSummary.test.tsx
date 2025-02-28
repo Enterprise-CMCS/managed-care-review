@@ -507,6 +507,47 @@ describe('RateSummary', () => {
             ).toBeInTheDocument()
         })
 
+        it('displays status banner upon undo rate withdraw', async () => {
+            renderWithProviders(wrapInRoutes(<RateSummary />), {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockValidStateUser(),
+                            statusCode: 200,
+                        }),
+                        fetchContractMockSuccess({ contract }),
+                        fetchRateWithQuestionsMockSuccess({
+                            rate: {
+                                id: '1337',
+                                parentContractID: contract.id,
+                                withdrawInfo: {
+                                    __typename: 'UpdateInformation',
+                                    updatedAt: new Date('2024-01-01'),
+                                    updatedBy: {
+                                        email: 'admin@example.com',
+                                        role: 'ADMIN_USER',
+                                        familyName: 'Hotman',
+                                        givenName: 'Iroh',
+                                    },
+                                    updatedReason:
+                                        'Admin as withdrawn this rate.',
+                                },
+                            },
+                        }),
+                    ],
+                },
+                routerProvider: {
+                    route: '/rates/1337?showUndoWithdrawBanner=true',
+                },
+            })
+
+            await waitFor(() => {
+                expect(
+                    screen.queryByTestId('statusUpdatedBanner')
+                ).toBeInTheDocument()
+            })
+        })
+
         it('redirects to RateEdit component from RateSummary without errors for unlocked rate', async () => {
             renderWithProviders(
                 <Routes>
