@@ -176,9 +176,7 @@ export function submitContract(
                 )
         }
 
-        const contractToParse = {
-            ...contractWithHistory,
-        }
+        const contractToParse = Object.assign({}, contractWithHistory)
 
         contractToParse.draftRates = draftRatesWithoutLinkedRates
         const parsedContract = parseContract(
@@ -275,7 +273,7 @@ export function submitContract(
             ) {
                 for (const draftRate of parsedContract.draftRates) {
                     if (['WITHDRAWN'].includes(draftRate.consolidatedStatus)) {
-                        const errMessage = `Attempted to submit a rate withdrawn rate: ${draftRate.consolidatedStatus}`
+                        const errMessage = `Attempted to submit a contract with a withdrawn rate: ${draftRate.consolidatedStatus}`
                         logError('submitContract', errMessage)
                         setErrorAttributesOnActiveSpan(errMessage, span)
                         throw new UserInputError(errMessage, {
