@@ -254,7 +254,7 @@ export function submitContract(
         if (parsedSubmissionType === 'CONTRACT_AND_RATES') {
             //Ensure a contract and rates contract includes rates
             if (
-                parsedContract.draftRates &&
+                !parsedContract.draftRates ||
                 parsedContract.draftRates.length === 0
             ) {
                 const errMessage = `Attempted to submit a contract and rates contract without rates: ${parsedContract.id}`
