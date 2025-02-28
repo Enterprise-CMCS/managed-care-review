@@ -97,7 +97,7 @@ Cypress.Commands.add(
                     timeout: 20_000,
                 }) // for cases where CMs user goes to specific submission on login, likely from email link
             } else if (initialURL.includes('rate-reviews')) {
-                cy.wait('@indexRatesForDashboardQuery', { timeout: 80_000 })
+                cy.wait('@indexRatesStrippedQuery', { timeout: 80_000 })
                 cy.findByTestId('cms-dashboard-page', { timeout: 10_000 }).should(
                     'exist'
                 )

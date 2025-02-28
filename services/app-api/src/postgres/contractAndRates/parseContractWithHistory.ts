@@ -6,10 +6,7 @@ import type {
 import { contractSchema } from '../../domain-models/contractAndRates'
 import type { ContractWithoutDraftRatesType } from '../../domain-models/contractAndRates/baseContractRateTypes'
 import type { ContractPackageSubmissionType } from '../../domain-models/contractAndRates/packageSubmissions'
-import {
-    DRAFT_PARENT_PLACEHOLDER,
-    rateWithoutDraftContractsToDomainModel,
-} from './parseRateWithHistory'
+import { rateWithoutDraftContractsToDomainModel } from './parseRateWithHistory'
 import type { ContractRevisionTableWithFormData } from './prismaSharedContractRateHelpers'
 import {
     getConsolidatedContractStatus,
@@ -25,6 +22,7 @@ import {
     convertUpdateInfoToDomainModel,
     getContractRateStatus,
     getContractReviewStatus,
+    DRAFT_PARENT_PLACEHOLDER,
 } from './prismaSharedContractRateHelpers'
 import type { ContractTableWithoutDraftRates } from './prismaSubmittedContractHelpers'
 import type { ContractTableFullPayload } from './prismaFullContractRateHelpers'

@@ -1,3 +1,4 @@
+#This query will be deprecated, please use indexRatesStripped for a slimmed down version of indexRates
 query indexRatesForDashboard($input: IndexRatesInput) {
     indexRates(input: $input) {
         totalCount
