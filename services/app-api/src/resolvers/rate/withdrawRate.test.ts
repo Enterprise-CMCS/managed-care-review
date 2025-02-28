@@ -373,8 +373,7 @@ describe('withdrawRate', () => {
                 }),
             ])
         )
-        // eslint-disable-next-line no-console
-        console.log('juan:', resubmittedContract)
+
         const packageSubmissions = resubmittedContract.packageSubmissions
 
         // expect withdrawn rate to be in the latest packageSubmissions.
