@@ -105,7 +105,7 @@ export const UndoRateWithdraw = () => {
                     },
                 },
             })
-            navigate(`/rates/${id}`)
+            navigate(`/rates/${id}?showUndoWithdrawBanner=true`)
         } catch (err) {
             recordJSException(
                 `UndoWithdrawRate: Apollo error reported. Error message: ${err}`
