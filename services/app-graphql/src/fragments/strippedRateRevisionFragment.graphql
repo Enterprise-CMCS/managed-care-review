@@ -1,0 +1,24 @@
+fragment strippedRateRevisionFragment on RateRevisionStripped {
+    id
+    rateID
+    createdAt
+    updatedAt
+    unlockInfo {
+        ...updateInformationFields
+    }
+    submitInfo {
+        ...updateInformationFields
+    }
+    formData {
+        rateType
+        rateCapitationType
+        rateDateStart
+        rateDateEnd
+        rateDateCertified
+        amendmentEffectiveDateStart
+        amendmentEffectiveDateEnd
+        rateProgramIDs
+        deprecatedRateProgramIDs
+        rateCertificationName
+    }
+}

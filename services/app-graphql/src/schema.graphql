@@ -41,6 +41,7 @@ type Query {
     CMSUsers can find all the contracts that do not have the DRAFT status
     """
     indexContracts: IndexContractsPayload!
+
     """
     indexUsers returns all of the Users in the system.
 
@@ -51,15 +52,23 @@ type Query {
     indexUsers: IndexUsersPayload!
 
     """
-    indexRates returns an array of rates with their revisions and related contracts
-    Only rates with at least one submitted revision are returned
-    indexRates can be called by CMS and admin users
+    indexRates returns full submitted rates
+    indexRates can be called by CMS and admin users, also used in link rate dropdown
 
     Errors:
     - ForbiddenError: User must be a CMS or Admin type user
-    - NotFoundError: No rates with at least one submitted revision were found
+    - NotFoundError:  No submitted rates found
     """
     indexRates(input: IndexRatesInput): IndexRatesPayload!
+    """
+    indexRatesStripped returns abbreviated rate data
+    Intended for use with CMS dashboards, initially minimal rate query
+
+      Errors:
+    - ForbiddenError: User must be a CMS or Admin type user
+    - NotFoundError: No submitted rates found
+    """
+    indexRatesStripped(input: IndexRatesInput): IndexRatesStrippedPayload!
     """
     fetchRate returns a rate with its revisions, including contract revisions
     for a given rate's ID
@@ -67,7 +76,7 @@ type Query {
     It can be called by CMS or State users
 
     Errors:
-    - ForbiddenError: This API is not available due to feature flags.
+    - ForbiddenError: This API is not available due to feature flags
     - NotFoundError: rate for rate.ID not found in database
     """
     fetchRate(input: FetchRateInput!): FetchRatePayload!
@@ -529,7 +538,7 @@ type Mutation {
     ): withdrawAndReplaceRedundantRatePayload
 
     """
-    approveContract is a CMS user only action 
+    approveContract is a CMS user only action
 
     Errors:
     - ForbiddenError:
@@ -1719,6 +1728,65 @@ type RateFormData {
     packagesWithSharedRateCerts: [PackageWithSameRate!]!
 }
 
+"""
+RateFormDataStripped represents stripped down form data that excludes relational fields.
+"""
+type RateFormDataStripped {
+    """
+    Can be 'NEW' or 'AMENDMENT'
+    Refers to whether the state is submitting a brand new rate certification
+    or an amendment to an existing rate certification
+    """
+    rateType: RateAmendmentType
+    """
+    Can be 'RATE_CELL' or 'RATE_RANGE'
+    These values represent on what basis the capitation rate is actuarially sound
+    """
+    rateCapitationType: RateCapitationType
+    """
+    If the rateType is NEW this is the start date of the
+    rating period for a new certification.
+    If the rateType is AMENDMENT this is the start date of the
+    rating period for the original rate certification
+    """
+    rateDateStart: Date
+    """
+    If the rateType is NEW this is the end date of the
+    rating period for a new certification.
+    If the rateType is AMENDMENT this is the end date of the
+    rating period for the original rate certification
+    """
+    rateDateEnd: Date
+    """
+    The date the rate certification was
+    certified/signed by the state's actuary
+    """
+    rateDateCertified: Date
+    """
+    The start date of the rate amendment
+    Only relevant if rate type is AMENDMENT
+    """
+    amendmentEffectiveDateStart: Date
+    """
+    The end date of the rate amendment
+    Only relevant if rate type is AMENDMENT
+    """
+    amendmentEffectiveDateEnd: Date
+    """
+    Deprecated an array of IDs representing historic state programs that the rate covers
+    """
+    deprecatedRateProgramIDs: [String!]!
+    """
+    An array of IDs representing historic state programs that the rate covers
+    """
+    rateProgramIDs: [String!]!
+    """
+    Represents the name of the rate.
+    This value is auto generated based on rate, package and state program details
+    """
+    rateCertificationName: String
+}
+
 "UpdateContractRateType describes the relationship of the updated rate to this contract"
 enum UpdateContractRateType {
     "CREATE is going to create a new child rate, never seen before. Future updates of this rate will call UPDATE"
@@ -1779,6 +1847,26 @@ type RateRevision {
     submitInfo: UpdateInformation
     "The rate related form data that was inputed by the state"
     formData: RateFormData!
+}
+
+"""
+A rate revision represents a single submission
+for the rate and contains stripped down data from when the rate cert was submitted
+"""
+type RateRevisionStripped {
+    id: ID!
+    rateID: String!
+    createdAt: DateTime!
+    updatedAt: DateTime!
+    """
+    Information about who, when, and why this revision was unlocked.
+    Will be blank on the initial revision.
+    """
+    unlockInfo: UpdateInformation
+    "Information on who, when, and why this revision was submitted."
+    submitInfo: UpdateInformation
+    "The rate related form data that was inputed by the state"
+    formData: RateFormDataStripped!
 }
 
 """
@@ -1851,6 +1939,58 @@ type Rate {
     , unlocked, or resubmitted. The array is in descending order by createdAt.
     """
     questions: IndexRateQuestionsPayload
+}
+"""
+RateStripped is a stripped down version of a Rate, removing many relational fields to provide a faster query.
+"""
+type RateStripped {
+    id: ID!
+    createdAt: DateTime!
+    updatedAt: DateTime!
+    """
+    Where the package is in the submission flow.
+    Options are DRAFT, SUBMITTED, RESUBMITTED and UNLOCKED
+    SUBMITTED and RESUBMITTED packages cannot be modified
+    """
+    status: HealthPlanPackageStatus!
+    """
+    Where the rate is in the review submission flow
+    Options are UNDER_REVIEW, WITHDRAWN
+    """
+    reviewStatus: RateReviewStatus!
+    """
+    Synthesized field that represents if a rate's status or
+    reviewStatus should take precedence
+    Options are DRAFT, SUBMITTED, RESUBMITTED UNLOCKED, UNDER_REVIEW, WITHDRAWN
+    """
+    consolidatedStatus: ConsolidatedRateStatus!
+    "The initial date this rate was submitted at. Is not changed by unlock or resubmission."
+    initiallySubmittedAt: DateTime
+    "The state code (e.g. CA or TN) for the submitting state"
+    stateCode: String!
+    "Fuller state data for the submitting state"
+    state: State!
+    "webURL is a URL that will open the MC Review web app to this Rate"
+    webURL: String!
+
+    """
+    A unique auto-incrementing number generated for this rate
+    This value is used to generate the rateName
+    """
+    stateNumber: Int!
+    "parentContractID is the ID of the contract that initially submitted this rate"
+    parentContractID: ID!
+    "withdrawInfo is the who/when/why for this rate being withdrawn. Rates actively in use in the system will not have a withdrawInfo"
+    withdrawInfo: UpdateInformation
+
+    "reviewStatusActions are the who/when/why for review status changes on this contract"
+    reviewStatusActions: [RateReviewStatusActions!]
+
+    "The currently modifiable revision of the rate. Only present when rate has a status of DRAFT or UNLOCKED"
+    draftRevision: RateRevisionStripped
+
+    "The latest submitted rate revision"
+    latestSubmittedRevision: RateRevisionStripped!
 }
 
 """
@@ -1948,7 +2088,7 @@ type Contract {
     reviewStatus: ContractReviewStatus!
     """
     Synthesized field that represents if a contract's status or
-    reviewStatus should take precedence 
+    reviewStatus should take precedence
     Options are DRAFT, SUBMITTED, RESUBMITTED UNLOCKED, UNDER_REVIEW, APPROVED
     """
     consolidatedStatus: ConsolidatedContractStatus!
@@ -2026,7 +2166,7 @@ type UnlockedContract {
     reviewStatus: ContractReviewStatus!
     """
     Synthesized field that represents if a contract's status or
-    reviewStatus should take precedence 
+    reviewStatus should take precedence
     Options are DRAFT, SUBMITTED, RESUBMITTED UNLOCKED, UNDER_REVIEW, APPROVED
     """
     consolidatedStatus: ConsolidatedContractStatus!
@@ -2098,6 +2238,16 @@ type IndexRatesPayload {
     """
     edges: [RateEdge!]!
 }
+
+type RateStrippedEdge{
+    node: RateStripped!
+}
+
+type IndexRatesStrippedPayload {
+    totalCount: Int
+    edges: [RateStrippedEdge!]!
+}
+
 
 type FetchRatePayload {
     """

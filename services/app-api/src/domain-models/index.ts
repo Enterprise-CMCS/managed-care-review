@@ -55,6 +55,9 @@ export type {
     UnlockedContractType,
     RateReviewActionType,
     RateReviewType,
+    StrippedRateType,
+    StrippedRateRevisionType,
+    StrippedRateFormDataType,
 } from './contractAndRates'
 
 export type {
