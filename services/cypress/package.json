@@ -59,7 +59,7 @@
         "aws-amplify": "^5.0.10",
         "cypress-file-upload": "^5.0.8",
         "cypress-pipe": "^2.0.0",
-        "axios": "^1.7.9",
+        "axios": "^1.8.0",
         "graphql": "^16.9.0"
     }
 }
