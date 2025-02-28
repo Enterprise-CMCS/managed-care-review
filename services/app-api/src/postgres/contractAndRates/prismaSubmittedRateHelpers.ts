@@ -72,10 +72,65 @@ const includeRateWithoutDraftContracts = {
     },
 } satisfies Prisma.RateTableInclude
 
+const includeStrippedRateWithoutDraftContracts = {
+    withdrawInfo: includeUpdateInfo,
+    revisions: {
+        orderBy: {
+            createdAt: 'asc',
+        },
+        include: {
+            submitInfo: {
+                include: {
+                    updatedBy: true,
+                    submittedContracts: {
+                        select: {
+                            id: true,
+                            contractID: true,
+                        },
+                    },
+                },
+            },
+            unlockInfo: includeUpdateInfo,
+            relatedSubmissions: {
+                orderBy: {
+                    updatedAt: 'asc',
+                },
+            },
+        },
+    },
+    reviewStatusActions: {
+        include: {
+            updatedBy: true,
+        },
+        orderBy: {
+            updatedAt: 'asc',
+        },
+    },
+} satisfies Prisma.RateTableInclude
+
 type RateTableWithoutDraftContractsPayload = Prisma.RateTableGetPayload<{
     include: typeof includeRateWithoutDraftContracts
 }>
 
-export { includeRateWithoutDraftContracts, includeLatestSubmittedRateRev }
+type RateTableWithoutDraftContractsStrippedPayload =
+    Prisma.RateTableGetPayload<{
+        include: typeof includeStrippedRateWithoutDraftContracts
+    }>
 
-export type { RateTableWithoutDraftContractsPayload }
+type RateRevisionsTableStrippedPayload =
+    RateTableWithoutDraftContractsStrippedPayload['revisions']
+type RateRevisionTablePayload =
+    RateTableWithoutDraftContractsPayload['revisions']
+
+export {
+    includeRateWithoutDraftContracts,
+    includeLatestSubmittedRateRev,
+    includeStrippedRateWithoutDraftContracts,
+}
+
+export type {
+    RateTableWithoutDraftContractsPayload,
+    RateTableWithoutDraftContractsStrippedPayload,
+    RateRevisionsTableStrippedPayload,
+    RateRevisionTablePayload,
+}

@@ -8,6 +8,7 @@ import {
     RateRevision,
     StateUser,
     UpdateInformation,
+    RateStripped
 } from '../gen/gqlClient'
 import { s3DlUrl } from './documentDataMock'
 import { mockMNState } from './stateMock'
@@ -211,6 +212,36 @@ const rateDataMock = (
     latestSub.rateRevision = modifiedRev
 
     return finalRate
+}
+
+const strippedRateDataMock = (
+    revision?: Partial<RateRevision>,
+    rate?: Partial<Rate>
+): RateStripped => {
+    const fullRate = rateDataMock(revision, rate)
+
+    const strippedRate: RateStripped = {
+        ...fullRate,
+        draftRevision: {
+            ...fullRate.revisions[0],
+            __typename: 'RateRevisionStripped',
+            formData: {
+                ...fullRate.revisions[0].formData,
+                __typename: 'RateFormDataStripped'
+            }
+        },
+        latestSubmittedRevision: {
+            ...fullRate.revisions[0],
+            __typename: 'RateRevisionStripped',
+            formData: {
+                ...fullRate.revisions[0].formData,
+                __typename: 'RateFormDataStripped'
+            }
+        },
+        __typename: 'RateStripped'
+    }
+
+    return strippedRate
 }
 
 // n. b. at time of this writing we don't return draftContracts on Rates yet, so this is simpler than the setup
@@ -749,4 +780,5 @@ export {
     rateUnlockedWithHistoryMock,
     submittedLinkedRatesScenarioMock,
     mockRateSubmittedWithQuestions,
+    strippedRateDataMock
 }

@@ -153,3 +153,33 @@ export function rateResolver(
         },
     }
 }
+
+export function rateStrippedResolver(
+    applicationEndpoint: string
+): Resolvers['RateStripped'] {
+    return {
+        webURL(parent) {
+            const urlPath = path.join('/rates/', parent.id)
+            const fullURL = new URL(urlPath, applicationEndpoint).href
+            return fullURL
+        },
+        state(parent) {
+            const packageState = parent.stateCode
+            const state = typedStatePrograms.states.find(
+                (st) => st.code === packageState
+            )
+
+            if (state === undefined) {
+                const errMessage =
+                    'State not found in database: ' + packageState
+                throw new GraphQLError(errMessage, {
+                    extensions: {
+                        code: 'INTERNAL_SERVER_ERROR',
+                        cause: 'DB_ERROR',
+                    },
+                })
+            }
+            return state
+        },
+    }
+}

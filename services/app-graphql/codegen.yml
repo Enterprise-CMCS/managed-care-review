@@ -24,6 +24,7 @@ generates:
         HealthPlanPackage: ../domain-models#HealthPlanPackageType
         Rate: ../domain-models#RateType
         RateRevision: ../domain-models#RateRevisionWithContractsType
+        RateStripped: ../domain-model#StrippedRateType
         Contract: ../domain-models#ContractType as ContractDomainType
         UnlockedContract: ../domain-models#UnlockedContractType as UnlockedContractDomainType
         ContractRevision: ../domain-models#ContractRevisionType
