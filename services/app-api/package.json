@@ -78,7 +78,7 @@
         "@types/uuid": "^9.0.0",
         "@typescript-eslint/eslint-plugin": "^6.21.0",
         "@typescript-eslint/parser": "^6.5.0",
-        "@vitest/coverage-v8": "^2.1.9",
+        "@vitest/coverage-v8": "^3.0.7",
         "eslint": "^8.3.0",
         "eslint-config-prettier": "^9.1.0",
         "eslint-plugin-jest": "^27.0.1",
