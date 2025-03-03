@@ -39,7 +39,9 @@ describe('FieldSelect', () => {
     beforeEach(
         () =>
             (mockOnChange = vi.fn((programs) => {
-                return programs.map((item: { value: string }) => item.value)
+                return programs
+                    ? programs.map((item: { value: string }) => item.value)
+                    : []
             }))
     )
     afterEach(() => vi.resetAllMocks())
