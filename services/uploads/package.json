@@ -43,7 +43,7 @@
         "serverless": "4.2.3",
         "serverless-esbuild": "^1.52.1",
         "serverless-iam-helper": "https://github.com/CMSgov/serverless-iam-helper.git",
-        "serverless-offline": "^13.9.0",
+        "serverless-offline": "^14.4.0",
         "serverless-s3-bucket-helper": "https://github.com/CMSgov/serverless-s3-bucket-helper",
         "serverless-s3-local": "^0.8.4",
         "serverless-stack-termination-protection": "^2.0.2",
