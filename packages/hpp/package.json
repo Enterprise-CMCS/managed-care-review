@@ -20,7 +20,7 @@
         "@types/node": "^20.14.12",
         "buffer": "^6.0.3",
         "protobufjs": "^7.3.0",
-        "vite-plugin-node-polyfills": "^0.22.0"
+        "vite-plugin-node-polyfills": "^0.23.0"
     },
     "browser": {
         "buffer": "buffer/"
