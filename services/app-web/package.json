@@ -183,6 +183,6 @@
         "vite-plugin-graphql-loader": "^4.0.4",
         "vite-plugin-node-polyfills": "^0.22.0",
         "vite-plugin-svgr": "^4.3.0",
-        "vitest": "^2.1.9"
+        "vitest": "^3.0.7"
     }
 }
