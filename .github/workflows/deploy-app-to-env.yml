@@ -151,6 +151,7 @@ jobs:
           VITE_APP_AUTH_MODE: ${{ inputs.vite_app_auth_mode }}
           EMAILER_MODE: SES
           NR_LICENSE_KEY: ${{ secrets.nr_license_key }}
+          SERVERLESS_ACCESS_KEY: ${{ secrets.serverless_license_key }}
           VPC_ID: ${{ secrets.vpc_id }}
           SG_ID: ${{ secrets.sg_id }}
           SUBNET_PRIVATE_A_ID: ${{ secrets.subnet_private_a_id }}
