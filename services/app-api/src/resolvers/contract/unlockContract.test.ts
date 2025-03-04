@@ -26,6 +26,7 @@ import {
     submitTestContract,
     approveTestContract,
     unlockTestContract,
+    createAndUpdateTestContractWithRate,
 } from '../../testHelpers/gqlContractHelpers'
 import {
     addLinkedRateToTestContract,
@@ -228,7 +229,7 @@ describe('unlockContract', () => {
                     s3Client: mockS3,
                 })
                 const draft =
-                    await createAndUpdateTestContractWithoutRates(stateServer)
+                    await createAndUpdateTestContractWithRate(stateServer)
                 const contract = await submitTestContract(stateServer, draft.id)
 
                 // approve contract

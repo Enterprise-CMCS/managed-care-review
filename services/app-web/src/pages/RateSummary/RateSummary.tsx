@@ -1,6 +1,6 @@
 import { GridContainer, Icon } from '@trussworks/react-uswds'
 import React, { useEffect, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import {
     ButtonWithLogging,
     DoubleColumnGrid,
@@ -28,6 +28,7 @@ import { featureFlags } from '@mc-review/common-code'
 import { UnlockRateButton } from '../../components/SubmissionSummarySection/RateDetailsSummarySection/UnlockRateButton'
 import { recordJSException } from '@mc-review/otel'
 import { handleApolloErrorsAndAddUserFacingMessages } from '@mc-review/helpers'
+import { StatusUpdatedBanner } from '../../components/Banner/StatusUpdatedBanner/StatusUpdatedBanner'
 
 export const RateSummary = (): React.ReactElement => {
     // Page level state
@@ -35,7 +36,20 @@ export const RateSummary = (): React.ReactElement => {
     const { updateHeading } = usePage()
     const navigate = useNavigate()
     const [rateName, setRateName] = useState<string | undefined>(undefined)
+    const [searchParams, setSearchParams] = useSearchParams()
+    const [showUndoWithdrawBanner, setUndowWithdrawBanner] =
+        useState<boolean>(false)
     const { id } = useParams() as { id: string }
+
+    useEffect(() => {
+        if (searchParams.get('showUndoWithdrawBanner') === 'true') {
+            setUndowWithdrawBanner(true)
+
+            //This ensures the banner goes away upon refresh or navigation
+            searchParams.delete('showUndoWithdrawBanner')
+            setSearchParams(searchParams, { replace: true })
+        }
+    }, [searchParams, setSearchParams])
 
     useEffect(() => {
         updateHeading({ customHeading: rateName })
@@ -52,6 +66,10 @@ export const RateSummary = (): React.ReactElement => {
     const showWithdrawRate: boolean = ldClient?.variation(
         featureFlags.WITHDRAW_RATE.flag,
         featureFlags.WITHDRAW_RATE.defaultValue
+    )
+    const showUndoWithdrawRate: boolean = ldClient?.variation(
+        featureFlags.UNDO_WITHDRAW_RATE.flag,
+        featureFlags.UNDO_WITHDRAW_RATE.defaultValue
     )
     const [unlockRate, { loading: unlockLoading }] = useUnlockRateMutation()
 
@@ -181,11 +199,16 @@ export const RateSummary = (): React.ReactElement => {
     const isUnlocked = rate.status === 'UNLOCKED'
     const isWithdrawn = rate.consolidatedStatus === 'WITHDRAWN'
     const parentContractIsApproved = contract.consolidatedStatus === 'APPROVED'
+    const parentContractIsSubmitted =
+        contract.consolidatedStatus === 'SUBMITTED' ||
+        contract.consolidatedStatus === 'RESUBMITTED'
     const latestRateAction = rate.reviewStatusActions?.[0]
     const showWithdrawBanner =
         showWithdrawRate && latestRateAction && isWithdrawn
     const showWithdrawRateBtn =
         showWithdrawRate && !isWithdrawn && !parentContractIsApproved
+    const showUndoWithdrawRateBtn =
+        showUndoWithdrawRate && isWithdrawn && parentContractIsSubmitted
 
     return (
         <div className={styles.background}>
@@ -205,6 +228,10 @@ export const RateSummary = (): React.ReactElement => {
                         updatedBy={latestRateAction.updatedBy}
                         reasonForWithdraw={latestRateAction.updatedReason}
                     />
+                )}
+                {showUndoWithdrawBanner && (
+                    //Show status updated banner after undoing rate withdraw
+                    <StatusUpdatedBanner />
                 )}
                 {isStateUser && (
                     // state user does not see the RateSummarySideNav which has its own back button.
@@ -270,6 +297,22 @@ export const RateSummary = (): React.ReactElement => {
                                     outline
                                 >
                                     Withdraw rate
+                                </ButtonWithLogging>
+                            )}
+                            {showUndoWithdrawRateBtn && (
+                                <ButtonWithLogging
+                                    disabled={isUnlocked}
+                                    className="usa-button usa-button--outline"
+                                    type="button"
+                                    onClick={() =>
+                                        navigate(
+                                            `/rate-reviews/${rate.id}/undo-withdraw`
+                                        )
+                                    }
+                                    link_url={`/rate-reviews/${rate.id}/undo-withdraw`}
+                                    outline
+                                >
+                                    Undo withdraw
                                 </ButtonWithLogging>
                             )}
                         </DoubleColumnGrid>

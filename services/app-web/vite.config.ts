@@ -103,6 +103,7 @@ export default defineConfig(() => ({
     css: {
         preprocessorOptions: {
             scss: {
+                api: 'legacy',
                 includePaths: [
                     path.resolve(__dirname, './node_modules/uswds/dist'),
                 ],

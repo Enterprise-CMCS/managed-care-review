@@ -1,6 +1,10 @@
 import { z } from 'zod'
 import { updateInfoSchema } from './updateInfoType'
-import { contractFormDataSchema, rateFormDataSchema } from './formDataTypes'
+import {
+    contractFormDataSchema,
+    rateFormDataSchema,
+    strippedRateFormDataSchema,
+} from './formDataTypes'
 
 const contractRevisionSchema = z.object({
     id: z.string().uuid(),
@@ -26,9 +30,24 @@ const rateRevisionSchema = z.object({
     formData: rateFormDataSchema,
 })
 
+const strippedRateRevisionSchema = z.object({
+    id: z.string().uuid(),
+    rateID: z.string().uuid(),
+    submitInfo: updateInfoSchema.optional(),
+    unlockInfo: updateInfoSchema.optional(),
+    createdAt: z.date(),
+    updatedAt: z.date(),
+    formData: strippedRateFormDataSchema,
+})
+
 type ContractRevisionType = z.infer<typeof contractRevisionSchema>
 type RateRevisionType = z.infer<typeof rateRevisionSchema>
+type StrippedRateRevisionType = z.infer<typeof strippedRateRevisionSchema>
 
-export { contractRevisionSchema, rateRevisionSchema }
+export {
+    contractRevisionSchema,
+    rateRevisionSchema,
+    strippedRateRevisionSchema,
+}
 
-export type { ContractRevisionType, RateRevisionType }
+export type { ContractRevisionType, RateRevisionType, StrippedRateRevisionType }

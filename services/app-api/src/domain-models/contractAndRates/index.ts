@@ -35,7 +35,7 @@ export {
     hasValidModifiedProvisions,
 } from './helpers'
 export type { ContractType, UnlockedContractType } from './contractTypes'
-export type { RateType } from './rateTypes'
+export type { RateType, StrippedRateType } from './rateTypes'
 export type {
     RateReviewActionType,
     RateReviewType,
@@ -51,9 +51,14 @@ export type {
     ContractFormEditableType,
     StateContactType,
     ActuaryContactType,
+    StrippedRateFormDataType,
 } from './formDataTypes'
 
-export type { ContractRevisionType, RateRevisionType } from './revisionTypes'
+export type {
+    ContractRevisionType,
+    RateRevisionType,
+    StrippedRateRevisionType,
+} from './revisionTypes'
 
 export type {
     ContractPackageSubmissionType,

@@ -60,6 +60,8 @@ import { rateFormDataResolver } from './rate/rateFormDataResolver'
 import { withdrawRate } from './rate/withdrawRate'
 import { updateEmailSettings } from './settings/updateEmailSettings'
 import { undoWithdrawRate } from './rate/undoWithdrawRate'
+import { rateStrippedResolver } from './rate/rateResolver'
+import { indexRatesStripped } from './rate/indexRatesStripped'
 
 export function configureResolvers(
     store: Store,
@@ -81,6 +83,7 @@ export function configureResolvers(
             fetchMcReviewSettings: fetchMcReviewSettings(store, emailer),
             // Rates refactor
             indexRates: indexRatesResolver(store),
+            indexRatesStripped: indexRatesStripped(store),
             fetchRate: fetchRateResolver(store),
             fetchContract: fetchContractResolver(store),
         },
@@ -174,6 +177,7 @@ export function configureResolvers(
         CMSApproverUser: cmsApproverUserResolver,
         HealthPlanPackage: healthPlanPackageResolver(store),
         Rate: rateResolver(store, applicationEndpoint),
+        RateStripped: rateStrippedResolver(applicationEndpoint),
         RateRevision: rateRevisionResolver(store),
         RateFormData: rateFormDataResolver(),
         ContractQuestion: questionResolver(store),

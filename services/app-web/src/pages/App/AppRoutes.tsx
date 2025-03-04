@@ -56,6 +56,7 @@ import { RateQuestionResponse } from '../QuestionResponse/QuestionResponseSummar
 import { UploadRateResponse } from '../QuestionResponse/UploadResponse/UploadRateResponse'
 import { ReleasedToState } from '../SubmissionReleasedToState/ReleasedToState'
 import { RateWithdraw } from '../RateWithdraw/RateWithdraw'
+import { UndoRateWithdraw } from '../UndoRateWithdraw/UndoRateWithdraw'
 
 function componentForAuthMode(
     authMode: AuthModeType
@@ -199,6 +200,10 @@ const CMSUserRoutes = ({
         featureFlags.WITHDRAW_RATE.flag,
         featureFlags.WITHDRAW_RATE.defaultValue
     )
+    const showUndoWithdrawRate: boolean = ldClient?.variation(
+        featureFlags.UNDO_WITHDRAW_RATE.flag,
+        featureFlags.UNDO_WITHDRAW_RATE.defaultValue
+    )
 
     return (
         <AuthenticatedRouteWrapper>
@@ -285,6 +290,13 @@ const CMSUserRoutes = ({
                     <Route
                         path={RoutesRecord.RATE_WITHDRAW}
                         element={<RateWithdraw />}
+                    />
+                )}
+
+                {showUndoWithdrawRate && (
+                    <Route
+                        path={RoutesRecord.UNDO_RATE_WITHDRAW}
+                        element={<UndoRateWithdraw />}
                     />
                 )}
 

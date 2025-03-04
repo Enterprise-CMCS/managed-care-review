@@ -1,6 +1,6 @@
 import React from 'react'
 import { useAuth } from '../../../contexts/AuthContext'
-import { useIndexRatesForDashboardQuery } from '../../../gen/gqlClient'
+import { useIndexRatesStrippedQuery } from '../../../gen/gqlClient'
 import { mostRecentDate } from '@mc-review/dates'
 import styles from '../../StateDashboard/StateDashboard.module.scss'
 import { recordJSException } from '@mc-review/otel'
@@ -14,7 +14,7 @@ import { GenericErrorPage } from '../../Errors/GenericErrorPage'
 const RateReviewsDashboard = (): React.ReactElement => {
     const { loggedInUser } = useAuth()
     const isAdminUser = loggedInUser?.role === 'ADMIN_USER'
-    const { data, loading, error } = useIndexRatesForDashboardQuery({
+    const { data, loading, error } = useIndexRatesStrippedQuery({
         variables: { input: { stateCode: undefined } },
         fetchPolicy: 'cache-and-network',
         pollInterval: 300000,
@@ -35,14 +35,14 @@ const RateReviewsDashboard = (): React.ReactElement => {
     }
 
     const reviewRows: RateInDashboardType[] = []
-    data.indexRates.edges
+    data.indexRatesStripped.edges
         .map((edge) => edge.node)
         .forEach((rate) => {
             // Skip rates that have been withdrawn
             if (rate.withdrawInfo) {
                 return
             }
-            const currentRevision = rate.revisions[0]
+            const currentRevision = rate.latestSubmittedRevision
 
             // Set rate display data - could be based on either current or previous revision depending on status
             const displayRateFormData = currentRevision.formData
