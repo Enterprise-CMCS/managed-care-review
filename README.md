@@ -269,18 +269,19 @@ Currently, `ctkey-wrapper` requires the user to be running the openconnect-tinyp
 container [here](https://github.com/trussworks/openconnect-tinyproxy) to connect
 to Cloudtamer.
 
-### Verify serverless setup
+### Serverless v4
 
-To verify serverless (and AWS access) is set up properly with ctkey, run:
+Our project uses [Serverless Framework](https://www.serverless.com/) to manage our lambdas and infrastructure. In order to use Serverless v4 in local dev, you'll need to get the license key from our team's `1password` space and add it as a value to your `.envrc.local` under the key `SERVERLESS_LICENSE_KEY`. This is a new requirement as Serverless went to a paid product in v4.
+
+The `dev` tool should be installing serverless globally with `pnpm install -g serverless@4.2.3`, but to verify the tool is accessible just run:
 
 ```shell
 which serverless
-which sls
 ```
 
-These will output the paths to the tools, which are likely installed locally to your `~/Library/pnpm/*` path.
+This will output the path to the tool, which is likely installed locally to your `~/Library/pnpm/*` path.
 
-We can then verify things are working by running any serverless command , e.g. `cd services/app-api && serverless info --stage main`. This command should print information and not return any Serverless Error around "AWS Credentials".
+We can then verify things are working by running any serverless command , e.g. `cd services/app-api && serverless info --stage main`. This command should print information and not return any Serverless errors around AWS credentials. If you do receive errors about AWS credentials, the tool may have been accidentally installed as a version `> 4.2.3` and you'll need to downgrade to that version. Unfortunately, Serverless decided to break local development by requiring AWS connections in versions after `4.2.3`, so we've pinned our version until we can fully move to AWS CDK in Spring 2025.
 
 ## Adding a Service
 
