@@ -1,0 +1,37 @@
+mutation withdrawSubmission($input: WithdrawSubmissionInput!) {
+    withdrawSubmission(input: $input) {
+        contract {
+            ...contractFieldsFragment
+
+            draftRevision {
+                ...contractRevisionFragment
+            }
+
+            draftRates {
+                ...rateFieldsFragment
+
+                draftRevision {
+                    ...rateRevisionFragment
+                }
+
+                revisions {
+                    ...rateRevisionFragment
+                }
+            }
+
+            withdrawnRates {
+                ...rateFieldsFragment,
+                revisions {
+                    ...rateRevisionFragment
+                }
+                packageSubmissions {
+                    ...ratePackageSubmissionsFragment
+                }
+            }
+
+            packageSubmissions {
+                ...packageSubmissionsFragment
+            }
+        }
+    }
+}
