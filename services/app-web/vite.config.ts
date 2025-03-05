@@ -4,14 +4,12 @@ import { defineConfig } from 'vite'
 import 'vitest/config'
 import react from '@vitejs/plugin-react'
 import svgr from 'vite-plugin-svgr'
-import { nodePolyfills } from 'vite-plugin-node-polyfills'
 import graphqlLoader from 'vite-plugin-graphql-loader'
 import path from 'path'
 
 export default defineConfig(() => ({
     base: '/',
     plugins: [
-        nodePolyfills(),
         react(),
         svgr({
             svgrOptions: {
