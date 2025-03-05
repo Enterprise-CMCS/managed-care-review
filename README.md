@@ -7,19 +7,19 @@ Managed Care Review is an application that accepts Managed Care contract and rat
 
 ## Key Documentation
 
--   [Managed Care Review Confluence page](https://qmacbis.atlassian.net/wiki/spaces/OY2/pages/2465300483/Managed+Care+Review). Includes an overview of the project, information about planned features, and ADRs (architectural decision records).
--   [`./docs`](./docs) folder. Includes architectural decision records and technical design documents.
--   [`./services`](./services) README files. Includes brief summary of the service and key dependencies.
+- [Managed Care Review Confluence page](https://qmacbis.atlassian.net/wiki/spaces/OY2/pages/2465300483/Managed+Care+Review). Includes an overview of the project, information about planned features, and ADRs (architectural decision records).
+- [`./docs`](./docs) folder. Includes architectural decision records and technical design documents.
+- [`./services`](./services) README files. Includes brief summary of the service and key dependencies.
 
 ## Application Requirements
 
--   [ ] Node.js
--   [ ] Serverless - Get help installing it here: [Serverless Getting Started page](https://www.serverless.com/framework/docs/providers/aws/guide/installation/). Learn more about serverless from the [Serverless Stack tutorial](https://serverless-stack.com/).
--   [ ] pnpm - In order to install dependencies, you need to [install pnpm](https://pnpm.io/installation).
--   [ ] AWS Account - You'll need an AWS account with appropriate IAM permissions (admin recommended) to deploy this app in Amazon.
--   [ ] NVM - If you are on a Mac using nvm, you should be able to install all the dependencies as [described below](#installing-node-and-dependencies).
--   [ ] envrc - Used to set environment variables locally
--   [ ] docker - Used to run postgres locally
+- [ ] Node.js
+- [ ] Serverless - Get help installing it here: [Serverless Getting Started page](https://www.serverless.com/framework/docs/providers/aws/guide/installation/).
+- [ ] pnpm - In order to install dependencies, you need to [install pnpm](https://pnpm.io/installation).
+- [ ] AWS Account - You'll need an AWS account with appropriate IAM permissions (admin recommended) to deploy this app in Amazon.
+- [ ] NVM - If you are on a Mac using nvm, you should be able to install all the dependencies as [described below](#installing-node-and-dependencies).
+- [ ] envrc - Used to set environment variables locally
+- [ ] docker - Used to run postgres locally
 
 ### Local Tooling
 
@@ -108,39 +108,39 @@ When run locally (with LOCAL_LOGIN=true), auth bypasses Cognito and uses [`serve
 
 Run whole app locally
 
--   `./dev local` to run the entire app and storybook
--   Available flags: `--web`, `--api`, `--s3`, '--postgres' for running services individually
--   (you can also exclude services by using the yargs 'no' standard: `./dev local --no-webk`)
+- `./dev local` to run the entire app and storybook
+- Available flags: `--web`, `--api`, `--s3`, '--postgres' for running services individually
+- (you can also exclude services by using the yargs 'no' standard: `./dev local --no-webk`)
 
 Run individual services locally
 
--   `./dev local web`
--   `./dev local api`
--   etc
+- `./dev local web`
+- `./dev local api`
+- etc
 
 Some of those services have their own options as well, namely app-web, see below for more info
 
 Run tests locally
 
--   `./dev test web` to run the web tests, watching the results, requires the database to be running.
--   `./dev test api` to run the api tests, watching the results, requires the database to be running.
--   `./dev test browser` to run the cypress browser based tests, this opens the cypress runner and requires an endpoint to test against. By default, runs on localhost (so you should be running the app locally if this is what you intend). To see options for flags cypress accepts see [docs](https://docs.cypress.io/guides/guides/command-line#Commands).
--   `./dev test` (or `dev test check`) to run all the tests that CI runs, once. This will run the web, api, and browser tests, requires the database to be running.
--   Run with flags `./dev test --unit`, `.dev test --online`, to filter down, but still run once.
+- `./dev test web` to run the web tests, watching the results, requires the database to be running.
+- `./dev test api` to run the api tests, watching the results, requires the database to be running.
+- `./dev test browser` to run the cypress browser based tests, this opens the cypress runner and requires an endpoint to test against. By default, runs on localhost (so you should be running the app locally if this is what you intend). To see options for flags cypress accepts see [docs](https://docs.cypress.io/guides/guides/command-line#Commands).
+- `./dev test` (or `dev test check`) to run all the tests that CI runs, once. This will run the web, api, and browser tests, requires the database to be running.
+- Run with flags `./dev test --unit`, `.dev test --online`, to filter down, but still run once.
 
 Clear and rebuild dependencies
 
--   `./dev clean` && `./dev rebuild`
+- `./dev clean` && `./dev rebuild`
 
 Run storybook
 
--   `./dev storybook`
+- `./dev storybook`
 
 Run web app locally, but configured to run against a deployed backend
 
--   `./dev local web --hybrid`
--   For local dev testing, you should push your local branch to deploy a review app and then `./dev local web --hybrid` will connect to that running review app by default.
--   If you want to specify a different instance to run against, you can set the `--hybrid-stage` parameter. For more info about stages/accounts take a gander at the Deploy section below.
+- `./dev local web --hybrid`
+- For local dev testing, you should push your local branch to deploy a review app and then `./dev local web --hybrid` will connect to that running review app by default.
+- If you want to specify a different instance to run against, you can set the `--hybrid-stage` parameter. For more info about stages/accounts take a gander at the Deploy section below.
 
 **Style guide**: Any new script added to a `package.json` file should prefer the format of `task:subtask`. For example, `test`, `test:once`, and `test:coverage` rather than `test_once` and `test_coverage`.
 
@@ -274,26 +274,26 @@ to Cloudtamer.
 To verify serverless (and AWS access) is set up properly with ctkey, run:
 
 ```shell
-which serverless # should return something like /managed-care-review/scripts/serverless
-which sls # should return something like /managed-care-review/scripts/sls
+which serverless
+which sls
 ```
 
-These should both point to paths inside the codebase (not to paths in /usr/local/bin).
+These will output the paths to the tools, which are likely installed locally to your `~/Library/pnpm/*` path.
 
-Then verify things are working by running any serverless command , e.g. `cd services/app-api && serverless info --stage main`. This command should print information and not return any Serverless Error around "AWS Credentials".
+We can then verify things are working by running any serverless command , e.g. `cd services/app-api && serverless info --stage main`. This command should print information and not return any Serverless Error around "AWS Credentials".
 
 ## Adding a Service
 
 The Serverless framework calls encapsulated units of lambdas + AWS infrastructure a "service", so we've inherited this terminology from that project. All of our services live under the `./services/` directory. If you need to add a new service to the project a few things need to happen:
 
--   Add a `serverless.yml` file to the root directory of this new service. You can copy off of an existing config or run the `serverless` command in `./services/${service-name}` to use one of their starter templates.
--   If this service is going to require js or ts code, you'll want to create a `src` directory as well as copy over the appropriate `tsconfig.json` and `.eslintrc` configs. Refer to one of the existing services to get an idea of how we are currently doing this.
+- Add a `serverless.yml` file to the root directory of this new service. You can copy off of an existing config or run the `serverless` command in `./services/${service-name}` to use one of their starter templates.
+- If this service is going to require js or ts code, you'll want to create a `src` directory as well as copy over the appropriate `tsconfig.json` and `.eslintrc` configs. Refer to one of the existing services to get an idea of how we are currently doing this.
 
 You'll need to add this service to our deployment GitHub Actions workflows:
 
--   If it is only infrastructure it can be added to `./.github/workflows/deploy-infra-to-env.yml`.
--   Services that include application code can be added to `./.github/workflows/deploy-app-to-env.yml`.
--   We have a CI script that skips branch redeploys when possible in `./scripts/get-changed-services/index.ts`. Make sure your service is added to that list.
+- If it is only infrastructure it can be added to `./.github/workflows/deploy-infra-to-env.yml`.
+- Services that include application code can be added to `./.github/workflows/deploy-app-to-env.yml`.
+- We have a CI script that skips branch redeploys when possible in `./scripts/get-changed-services/index.ts`. Make sure your service is added to that list.
 
 ## Monitoring
 
