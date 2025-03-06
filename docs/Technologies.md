@@ -86,9 +86,10 @@ More about the MC-Review testing approach can be found in [here](technical-desig
 
 [Testing library](https://testing-library.com) provides utility functions for testing DOM elements. We use the [version](https://testing-library.com/docs/react-testing-library/intro) specific to React. React Testing Library facilitates tests that find and interact with elements like a user would. It also provides a useful set of [matchers](https://github.com/testing-library/jest-dom#custom-matchers).
 
-### Pa11y and Cypress-Audit
+### Axe-core and Cypress-axe
 
-`pa11y` is a tool for accessibility testing. By default, pa11y uses the WCAG2AA standard. We are running pa11y on every page of our form using the cypress-audit library. This allows us to sign in and fill out the form using Cypress, and only rely on pa11y to scan those pages. This is also one place in our app where we have implemented a ratchet in CI. The issues present when we started testing with pa11y have been ignored, allowing CI to ensure that we aren't adding new errors in the future. Tickets have been filed to address those existing issues.
+We use the `cypress-axe tool`, which integrates `axe-core` for accessibility testing in Cypress. This tooling is configured to follow the WCAG2AA standard. We run these tests on every page of our form, allowing us to sign in and complete the form using Cypress while relying on `cypress-axe` to scan each page for accessibility issues.
+This is also one place in our app where we have implemented a ratchet in CI. The issues present when we started testing with `cypress-axe` have been ignored, allowing CI to ensure that we aren't adding new errors in the future. Tickets have been filed to address those existing issues."
 
 ### Storybook
 
