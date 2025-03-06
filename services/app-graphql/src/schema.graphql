@@ -603,9 +603,9 @@ type Mutation {
     - DB_ERROR
     - A contract cannot be found by id
     """
-    withdrawSubmission(
-        input: WithdrawSubmissionInput!
-    ): WithdrawSubmissionPayload
+    withdrawContract(
+        input: WithdrawContractInput!
+    ): WithdrawContractPayload
 }
 
 input CreateHealthPlanPackageInput {
@@ -684,7 +684,7 @@ type UndoWithdrawRatePayload {
     rate: Rate!
 }
 
-type WithdrawSubmissionPayload {
+type WithdrawContractPayload {
     contract: Contract!
 }
 
@@ -698,7 +698,7 @@ input UndoWithdrawRateInput {
     updatedReason: String!
 }
 
-input WithdrawSubmissionInput {
+input WithdrawContractInput {
     contractID: ID!
     updatedReason: String!
 }

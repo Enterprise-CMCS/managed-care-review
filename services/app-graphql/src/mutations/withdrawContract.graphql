@@ -1,5 +1,5 @@
-mutation withdrawSubmission($input: WithdrawSubmissionInput!) {
-    withdrawSubmission(input: $input) {
+mutation withdrawContract($input: WithdrawContractInput!) {
+    withdrawContract(input: $input) {
         contract {
             ...contractFieldsFragment
 
