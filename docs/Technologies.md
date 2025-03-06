@@ -1,6 +1,6 @@
 # Technology
 
-MC-Review is built on Serverless architecture (services deployed as AWS Lambdas) with a React client, Node server, and GraphQL as the api protocol. PostgresAurora is used as the database. The codebase is written primarily in Typescript. Additional technologies of interest are listed below.
+MC-Review is built on Serverless architecture (services deployed as AWS Lambdas) with a React client, Node server, and GraphQL as the api protocol. Postgres is used as the database and is running in AWS Aurora for deployed environments. The codebase is written primarily in Typescript. Additional technologies of interest are listed below.
 
 ## User authentication
 
@@ -13,10 +13,6 @@ MC-Review is built on Serverless architecture (services deployed as AWS Lambdas)
 ### Prisma
 
 [Prisma](https://www.prisma.io) is an ORM for Postgres databases. Prisma generates a typescript [client](https://www.prisma.io/docs/concepts/components/prisma-client) for making queries as well as [migrations](https://www.prisma.io/docs/guides/database/developing-with-prisma-migrate) for changing our database to match the desired state.
-
-### Protobuf
-
-Protobuf is a tool for serializing key-value data. Designed for API requests, the serialized format is space efficient and typed. We're using it to encode form data and save it in our database in a single column. Our protobuf schema is located in /services/app-proto/src/state_submission.proto. We serialize our domain models UnlockedHealthPlanFormDataType and LockedHealthPlanFormDataType into byte arrays which we write and read from postgres.
 
 ## API handling
 
@@ -52,9 +48,11 @@ Open Telemetry (OTEL) is an ecosystem of tools for collecting data about an appl
 
 ## React Web Application
 
-### Create React App
+Our frontend is built on React using the following tools:
 
-[Create React App](https://facebook.github.io/create-react-app) compiles, builds and configures our React client, including scripts, styles, and static assets. See also [react-scripts](https://github.com/facebook/create-react-app/tree/master/packages/react-scripts).
+### Vite
+
+[Vite](https://vite.dev/) is used to build and serve our application during development and package our frontend for production builds. It offers extremely fast hot module replacement through native ES modules, optimized production bundling via Rollup, and comes with built-in support for TypeScript, JSX, CSS and more.
 
 ### React Router
 
@@ -76,9 +74,9 @@ More about the MC-Review testing approach can be found in [here](technical-desig
 
 [LaunchDarkly](https://launchdarkly.com/implementation/) is a third party feature flag management tool that includes a online dashboard for viewing/auditing/updating flags and SDKs that are integrated into our codebase. The use of feature flags with LaunchDarkly allows us to de-couple the act of delivering code from the act of enabling a new feature to subsets of users. We currently use the CMS provisioned Federal instances that can be accessed through the [SSO portal](https://mo-idp.cms.gov).
 
-### Jest
+### Vitest
 
-[Jest](https://jestjs.io/) is a test runner and framework used for unit tests across the entire codebase.
+[Vitest](https://vitest.dev/) is our primary test runner for unit tests. Built on top of Vite, it provides extremely fast test execution through native ESM and supports the same configuration as our main build tool. Vitest offers Jest-compatible APIs.
 
 ### Cypress
 
@@ -96,6 +94,6 @@ More about the MC-Review testing approach can be found in [here](technical-desig
 
 [Storybook](https://storybook.js.org/docs/react/get-started/introduction) is a tool for building and deploying UI components in a isolated sandbox. It is often used for testing and reviewing components in a design library. Any shared component of interest in MC-Review is built with a storybook file for easy reference and testing by the design team.
 
-
 ### Apollo Studio Explorer
+
 [Apollo Studio Explorer](https://www.apollographql.com/docs/graphos/explorer/explorer/) is a web-based IDE for writing and executing GraphQL operations on our deployed GraphQL API, with features such as schema referencing, query linting, autocomplete, and a jump-to-definition tool. The tool allows developers to write and test GraphQL operations without the need for front-end UI to execute the operations. For information on accessing the tool, refer to the [creating-and-testing-endpoints.md](technical-design/creating-and-testing-endpoints.md#apollo-studio-explorer) documentation.
