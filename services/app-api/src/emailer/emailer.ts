@@ -15,6 +15,7 @@ import {
     sendQuestionResponseCMSEmail,
     sendQuestionResponseStateEmail,
     sendWithdrawnRateStateEmail,
+    sendUndoWithdrawnRateStateEmail,
 } from './'
 import type { UnlockedHealthPlanFormDataType } from '@mc-review/hpp'
 import type {
@@ -182,6 +183,7 @@ type Emailer = {
         statePrograms: ProgramType[],
         stateAnalystsEmails: StateAnalystsEmails
     ) => Promise<void | Error>
+    sendUndoWithdrawnRateStateEmail: (rate: RateType) => Promise<void | Error>
 }
 const localEmailerLogger = (emailData: EmailData) =>
     console.info(`
@@ -519,6 +521,18 @@ function emailer(
                 rate,
                 statePrograms,
                 stateAnalystsEmails
+            )
+
+            if (emailData instanceof Error) {
+                return emailData
+            } else {
+                return await this.sendEmail(emailData)
+            }
+        },
+        sendUndoWithdrawnRateStateEmail: async function (rate) {
+            const emailData = await sendUndoWithdrawnRateStateEmail(
+                config,
+                rate
             )
 
             if (emailData instanceof Error) {

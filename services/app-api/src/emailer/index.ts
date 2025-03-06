@@ -13,7 +13,8 @@ export {
     sendQuestionCMSEmail,
     sendQuestionResponseCMSEmail,
     sendQuestionResponseStateEmail,
-    sendWithdrawnRateStateEmail
+    sendWithdrawnRateStateEmail,
+    sendUndoWithdrawnRateStateEmail,
 } from './emails'
 export type {
     EmailConfiguration,

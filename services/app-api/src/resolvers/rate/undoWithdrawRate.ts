@@ -1,5 +1,6 @@
 import type { Store } from '../../postgres'
 import type { MutationResolvers } from '../../gen/gqlServer'
+import type { Emailer } from '../../emailer'
 import {
     setErrorAttributesOnActiveSpan,
     setResolverDetailsOnActiveSpan,
@@ -12,7 +13,8 @@ import { NotFoundError } from '../../postgres'
 import { GraphQLError } from 'graphql/index'
 
 export function undoWithdrawRate(
-    store: Store
+    store: Store,
+    emailer: Emailer
 ): MutationResolvers['undoWithdrawRate'] {
     return async (_parent, { input }, context) => {
         const { user, ctx, tracer } = context
@@ -122,6 +124,27 @@ export function undoWithdrawRate(
 
         logSuccess('undoWithdrawRate')
         setSuccessAttributesOnActiveSpan(span)
+
+        //Send emails upon success
+        const sendUndoWithdrawnRateStateEmail =
+            await emailer.sendUndoWithdrawnRateStateEmail(undoWithdrawRate)
+
+        if (sendUndoWithdrawnRateStateEmail instanceof Error) {
+            let errMessage = ''
+
+            if (sendUndoWithdrawnRateStateEmail instanceof Error) {
+                errMessage = `State email failed: ${sendUndoWithdrawnRateStateEmail.message}`
+            }
+
+            logError('undoWithdrawnRate', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+            throw new GraphQLError(errMessage, {
+                extensions: {
+                    code: 'INTERNAL_SERVER_ERROR',
+                    cause: 'EMAIL_ERROR',
+                },
+            })
+        }
 
         return {
             rate: undoWithdrawRate,
