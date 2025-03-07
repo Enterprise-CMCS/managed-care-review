@@ -1,10 +1,20 @@
 import { formatCalendarDate } from 'Users/juanruiz/managed-care-review/packages/dates/build'
-import type { RateReviewType, RateType } from '../../domain-models'
+import type {
+    ContractRevisionType,
+    ProgramType,
+    RateReviewType,
+    RateType,
+} from '../../domain-models'
 import type { StateContact } from '../../gen/gqlServer'
 import type { EmailData, EmailConfiguration } from '../emailer'
 import { pruneDuplicateEmails } from '../formatters'
 import { submissionSummaryURL } from '../generateURLs'
-import { renderTemplate, stripHTMLFromTemplate } from '../templateHelpers'
+import {
+    findContractPrograms,
+    renderTemplate,
+    stripHTMLFromTemplate,
+} from '../templateHelpers'
+import { packageName as generatePackageName } from '@mc-review/hpp'
 
 type ValidatedUnWithdrawnRate = {
     latestStatusAction: RateReviewType
@@ -26,21 +36,35 @@ type undoWithdrawnRateEtaData = {
     associatedContracts: associatedContracts[]
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+//This parses for data related to associated contracts and contacts (used within validateAndParseUnwithdrawnRate)
 const parseContractsAndContacts = (
-    contractRevisions: any,
+    contractRevisions: ContractRevisionType[],
+    statePrograms: ProgramType[],
     config: EmailConfiguration
 ) => {
     const stateContactEmails: string[] = []
     const associatedContracts: associatedContracts[] = []
-    const seenContracts = new Set()
+    const seenContracts = new Set() //Used to avoid duplicates below
 
     //Iterate through all the contracts to save the contract name and generate a url - avoiding duplicates
-    for (const contract of contractRevisions) {
+    for (const contractRev of contractRevisions) {
+        const pkgPrograms = findContractPrograms(contractRev, statePrograms)
+
+        if (pkgPrograms instanceof Error) {
+            return new Error(
+                `Error parsing contract revision for package programs: ${contractRev.id}. ${pkgPrograms.message}`
+            )
+        }
+
         const contractInfo = {
-            contractName: contract.contractName,
+            contractName: generatePackageName(
+                contractRev.contract.stateCode,
+                contractRev.contract.stateNumber,
+                contractRev.formData.programIDs,
+                pkgPrograms
+            ),
             summaryURL: submissionSummaryURL(
-                contract.contractID,
+                contractRev.contract.id,
                 config.baseUrl
             ),
         }
@@ -50,15 +74,10 @@ const parseContractsAndContacts = (
             associatedContracts.push(contractInfo)
         }
 
-        contract.formData.stateContacts.forEach((contact: StateContact) => {
+        contractRev.formData.stateContacts.forEach((contact: StateContact) => {
             if (contact.email) stateContactEmails.push(contact.email)
         })
     }
-
-    // eslint-disable-next-line no-console
-    console.log('associatedContracts:', associatedContracts)
-    // eslint-disable-next-line no-console
-    console.log('stateContactEmails:', stateContactEmails)
 
     return {
         associatedContracts,
@@ -66,8 +85,10 @@ const parseContractsAndContacts = (
     }
 }
 
+//Validates the unwithdrawn rate and parses it for necessary data
 export const validateAndParseUnwithdrawnRate = (
     rate: RateType,
+    statePrograms: ProgramType[],
     config: EmailConfiguration
 ): Error | ValidatedUnWithdrawnRate => {
     if (rate.consolidatedStatus !== 'RESUBMITTED') {
@@ -101,11 +122,21 @@ export const validateAndParseUnwithdrawnRate = (
 
     //Gathering contracts and state contacts associated to rate
     const contractRevisions = rate.packageSubmissions[0].contractRevisions
-    if (!contractRevisions || contractRevisions.length === 0) {
+    if (contractRevisions.length === 0) {
         return new Error('Rate does not have any contract revisions')
     }
+    const parsedContractsAndContacts = parseContractsAndContacts(
+        contractRevisions,
+        statePrograms,
+        config
+    )
+
+    if (parsedContractsAndContacts instanceof Error) {
+        return parsedContractsAndContacts
+    }
+
     const { associatedContracts, stateContactEmails } =
-        parseContractsAndContacts(contractRevisions, config)
+        parsedContractsAndContacts
 
     return {
         latestStatusAction,
@@ -116,10 +147,15 @@ export const validateAndParseUnwithdrawnRate = (
 }
 
 export const sendUndoWithdrawnRateStateEmail = async (
-    config: EmailConfiguration,
-    rate: RateType
+    rate: RateType,
+    statePrograms: ProgramType[],
+    config: EmailConfiguration
 ): Promise<EmailData | Error> => {
-    const undoWithdrawnRateData = validateAndParseUnwithdrawnRate(rate, config)
+    const undoWithdrawnRateData = validateAndParseUnwithdrawnRate(
+        rate,
+        statePrograms,
+        config
+    )
 
     if (undoWithdrawnRateData instanceof Error) {
         return undoWithdrawnRateData

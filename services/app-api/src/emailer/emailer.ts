@@ -183,7 +183,10 @@ type Emailer = {
         statePrograms: ProgramType[],
         stateAnalystsEmails: StateAnalystsEmails
     ) => Promise<void | Error>
-    sendUndoWithdrawnRateStateEmail: (rate: RateType) => Promise<void | Error>
+    sendUndoWithdrawnRateStateEmail: (
+        rate: RateType,
+        statePrograms: ProgramType[]
+    ) => Promise<void | Error>
 }
 const localEmailerLogger = (emailData: EmailData) =>
     console.info(`
@@ -529,10 +532,11 @@ function emailer(
                 return await this.sendEmail(emailData)
             }
         },
-        sendUndoWithdrawnRateStateEmail: async function (rate) {
+        sendUndoWithdrawnRateStateEmail: async function (rate, statePrograms) {
             const emailData = await sendUndoWithdrawnRateStateEmail(
-                config,
-                rate
+                rate,
+                statePrograms,
+                config
             )
 
             if (emailData instanceof Error) {
