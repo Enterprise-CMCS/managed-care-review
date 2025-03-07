@@ -247,11 +247,7 @@ resources:
     ApiGwWebAclAssociation:
       Type: AWS::WAFv2::WebACLAssociation
       DependsOn:
-        - ApiGatewayMethodHealthcheckOptions
-        - ApiGatewayMethodOtelOptions
-        - ApiGatewayMethodGraphqlOptions
-        - ApiGatewayMethodV1GraphqlExternalOptions
-        - ApiGatewayMethodZipOptions
+        # API Gateway methods
         - ApiGatewayMethodHealthcheckGet
         - ApiGatewayMethodOtelPost
         - ApiGatewayMethodGraphqlPost
@@ -259,6 +255,23 @@ resources:
         - ApiGatewayMethodV1GraphqlExternalPost
         - ApiGatewayMethodV1GraphqlExternalGet
         - ApiGatewayMethodZipPost
+        # API Gateway resources (paths and endpoints)
+        - ApiGatewayResourceHealthcheck
+        - ApiGatewayResourceOtel
+        - ApiGatewayResourceGraphql
+        - ApiGatewayResourceV1
+        - ApiGatewayResourceV1Graphql
+        - ApiGatewayResourceV1GraphqlExternal
+        - ApiGatewayResourceZip
+        # API Gateway authorizer
+        - ThirdUnderscorepartyUnderscoreapiUnderscoreauthorizerApiGatewayAuthorizer
+        # CORS OPTIONS methods
+        - ApiGatewayMethodHealthcheckOptions
+        - ApiGatewayMethodOtelOptions
+        - ApiGatewayMethodGraphqlOptions
+        - ApiGatewayMethodV1GraphqlExternalOptions
+        - ApiGatewayMethodZipOptions
+
       Properties:
         ResourceArn: arn:aws:apigateway:${self:provider.region}::/restapis/${self:custom.appApiGatewayId}/stages/${sls:stage}
         WebACLArn: ${self:custom.appApiWafAclArn}
