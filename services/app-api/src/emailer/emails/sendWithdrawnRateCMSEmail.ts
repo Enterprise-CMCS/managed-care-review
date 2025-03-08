@@ -58,7 +58,7 @@ export const validateAndParseWithdrawnRate = (
     const reviewStatusActions = rate.reviewStatusActions
 
     if (!reviewStatusActions || reviewStatusActions.length === 0) {
-        return new Error('Rate does not any have review actions')
+        return new Error('Rate does not have any review actions')
     }
 
     const latestAction = reviewStatusActions.sort(
