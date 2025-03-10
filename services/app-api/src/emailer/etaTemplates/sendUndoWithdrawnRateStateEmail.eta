@@ -6,7 +6,7 @@
 <% if (it.associatedContracts.length > 1) { %>
 <ul>
 <% it.associatedContracts.forEach(function(contract){ %>
-  <li><a href="<%= it.contract.summaryURL %>"><%= it.contract.contractName %></a></li>
+  <li><a href="<%= contract.summaryURL %>"><%= contract.contractName %></a></li>
 <% }) %>
 </ul>
 <% } else { %>
