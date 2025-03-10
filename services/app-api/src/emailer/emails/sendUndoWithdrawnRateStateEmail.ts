@@ -1,4 +1,4 @@
-import { formatCalendarDate } from 'Users/juanruiz/managed-care-review/packages/dates/build'
+import { formatCalendarDate } from '@mc-review/dates'
 import type {
     ContractRevisionType,
     ProgramType,
@@ -104,7 +104,7 @@ export const validateAndParseUnwithdrawnRate = (
     //check to make sure rate has actions
     const reviewStatusActions = rate.reviewStatusActions
     if (!reviewStatusActions || reviewStatusActions.length === 0) {
-        return new Error('Rate does not have any review actions')
+        return new Error('Rate does not have any review status actions')
     }
 
     //This gets us update info 'updatedBy/updatedAt/updateReason'
@@ -118,7 +118,10 @@ export const validateAndParseUnwithdrawnRate = (
 
     //This gets us the rate name
     const rateCertificationName =
-        rate.packageSubmissions[0].rateRevision.formData.rateCertificationName!
+        rate.packageSubmissions[0].rateRevision.formData.rateCertificationName
+    if (!rateCertificationName) {
+        return new Error('rateCertificationName is missing')
+    }
 
     //Gathering contracts and state contacts associated to rate
     const contractRevisions = rate.packageSubmissions[0].contractRevisions
