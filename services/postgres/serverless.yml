@@ -367,7 +367,6 @@ resources:
     PostgresSecretsRotationSchedule:
       Type: AWS::SecretsManager::RotationSchedule
       DependsOn:
-        - PostgresAuroraV2
         - SecretsRDSAttachment
       Properties:
         SecretId:
