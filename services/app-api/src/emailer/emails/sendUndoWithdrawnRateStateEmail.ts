@@ -28,7 +28,7 @@ type associatedContracts = {
     summaryURL: string
 }
 
-type undoWithdrawnRateEtaData = {
+export type undoWithdrawnRateEtaData = {
     rateName: string
     updatedBy: string
     updatedOn: string // mm/dd/yyyy format in PT timezone.

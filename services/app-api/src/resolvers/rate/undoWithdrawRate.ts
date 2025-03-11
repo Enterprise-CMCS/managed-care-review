@@ -11,6 +11,7 @@ import { logError, logSuccess } from '../../logger'
 import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
 import { NotFoundError } from '../../postgres'
 import { GraphQLError } from 'graphql/index'
+import type { StateCodeType } from '../../testHelpers'
 
 export function undoWithdrawRate(
     store: Store,
@@ -141,6 +142,21 @@ export function undoWithdrawRate(
             })
         }
 
+        let stateAnalystEmails: string[] = []
+        const stateAnalystEmailsResult = await store.findStateAssignedUsers(
+            undoWithdrawRate.stateCode as StateCodeType
+        )
+
+        if (stateAnalystEmailsResult instanceof Error) {
+            logError('getStateAnalystEmails', stateAnalystEmailsResult.message)
+            setErrorAttributesOnActiveSpan(
+                stateAnalystEmailsResult.message,
+                span
+            )
+        } else {
+            stateAnalystEmails = stateAnalystEmailsResult.map((u) => u.email)
+        }
+
         //State emails
         const sendUndoWithdrawnRateStateEmail =
             await emailer.sendUndoWithdrawnRateStateEmail(
@@ -148,11 +164,27 @@ export function undoWithdrawRate(
                 statePrograms
             )
 
-        if (sendUndoWithdrawnRateStateEmail instanceof Error) {
+        //CMS emails
+        const sendUndoWithdrawnRateCMSEmail =
+            await emailer.sendUndoWithdrawnRateCMSEmail(
+                undoWithdrawRate,
+                statePrograms,
+                stateAnalystEmails
+            )
+
+        //Send email error handling
+        if (
+            sendUndoWithdrawnRateStateEmail instanceof Error ||
+            sendUndoWithdrawnRateCMSEmail instanceof Error
+        ) {
             let errMessage = ''
 
             if (sendUndoWithdrawnRateStateEmail instanceof Error) {
                 errMessage = `State email failed: ${sendUndoWithdrawnRateStateEmail.message}`
+            }
+
+            if (sendUndoWithdrawnRateCMSEmail instanceof Error) {
+                errMessage = `CMS email failed: ${sendUndoWithdrawnRateCMSEmail.message}`
             }
 
             logError('undoWithdrawnRate', errMessage)

@@ -15,6 +15,7 @@ export {
     sendQuestionResponseStateEmail,
     sendWithdrawnRateStateEmail,
     sendUndoWithdrawnRateStateEmail,
+    sendUndoWithdrawnRateCMSEmail,
 } from './emails'
 export type {
     EmailConfiguration,
