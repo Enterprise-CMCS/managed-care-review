@@ -50,6 +50,7 @@ custom:
   databaseName: !Sub aurora_${self:service}_${sls:stage}_${AWS::AccountId}
   vpcId: ${env:VPC_ID}
   sgId: ${env:SG_ID}
+  devAuroraArn: ${env:CF_CONFIG_IGNORED_LOCALLY, env:DEV_AURORA_ARN}
   privateSubnets:
     - ${env:SUBNET_PRIVATE_A_ID}
     - ${env:SUBNET_PRIVATE_B_ID}
@@ -118,6 +119,7 @@ resources:
       - !Equals ['${sls:stage}', 'main']
       - !Equals ['${sls:stage}', 'val']
       - !Equals ['${sls:stage}', 'prod']
+    IsReviewEnvironment: !Not [!Condition IsDevValProd]
 
   Resources:
     # VPC endpoint for rotation lambda
@@ -361,11 +363,12 @@ resources:
       Type: AWS::SecretsManager::SecretTargetAttachment
       Properties:
         SecretId: !Ref PostgresSecret
-        TargetId: !Sub 'arn:aws:rds:${AWS::Region}:${AWS::AccountId}:cluster:${PostgresAuroraV2}'
+        TargetId: ${self:custom.devAuroraArn}
         TargetType: AWS::RDS::DBCluster
 
     PostgresSecretsRotationSchedule:
       Type: AWS::SecretsManager::RotationSchedule
+      Condition: IsDevValProd
       DependsOn:
         - SecretsRDSAttachment
       Properties:
@@ -385,7 +388,10 @@ resources:
 
   Outputs:
     PostgresAuroraV2Arn:
-      Value: !Sub 'arn:aws:rds:${AWS::Region}:${AWS::AccountId}:cluster:${PostgresAuroraV2}'
+      Value: !If
+        - IsReviewEnvironment
+        - ${self:custom.devAuroraArn}
+        - !Sub 'arn:aws:rds:${AWS::Region}:${AWS::AccountId}:cluster:${PostgresAuroraV2}'
     PostgresVMScriptsBucket:
       Condition: IsDevValProd
       Value: !Ref PostgresVMScriptsBucket
