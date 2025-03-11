@@ -8,7 +8,7 @@ import type {
 import type { StateContact } from '../../gen/gqlServer'
 import type { EmailData, EmailConfiguration } from '../emailer'
 import { pruneDuplicateEmails } from '../formatters'
-import { submissionSummaryURL } from '../generateURLs'
+import { rateSummaryURL, submissionSummaryURL } from '../generateURLs'
 import {
     findContractPrograms,
     renderTemplate,
@@ -18,7 +18,7 @@ import { packageName as generatePackageName } from '@mc-review/hpp'
 
 type ValidatedUnWithdrawnRate = {
     latestStatusAction: RateReviewType
-    rateCertificationName: string
+    rateInfo: rateInfo
     stateContactEmails: string[]
     associatedContracts: associatedContracts[]
 }
@@ -29,11 +29,16 @@ type associatedContracts = {
 }
 
 export type undoWithdrawnRateEtaData = {
-    rateName: string
+    rateInfo: rateInfo
     updatedBy: string
     updatedOn: string // mm/dd/yyyy format in PT timezone.
     reason: string
     associatedContracts: associatedContracts[]
+}
+
+type rateInfo = {
+    rateName: string
+    rateURL: string
 }
 
 //This parses for data related to associated contracts and contacts (used within validateAndParseUnwithdrawnRate)
@@ -116,11 +121,19 @@ export const validateAndParseUnwithdrawnRate = (
         return new Error('Latest rate review action is not UNDER_REVIEW')
     }
 
-    //This gets us the rate name
-    const rateCertificationName =
+    //This gets us the rate name and summary URL for the rate
+    const rateName =
         rate.packageSubmissions[0].rateRevision.formData.rateCertificationName
-    if (!rateCertificationName) {
-        return new Error('rateCertificationName is missing')
+    const rateID = rate.packageSubmissions[0].rateRevision.formData.rateID
+    if (!rateName || !rateID) {
+        return new Error(
+            `Error parsing for ${rateID ? 'ratecertificationName' : 'rateID'}`
+        )
+    }
+
+    const rateInfo: rateInfo = {
+        rateName,
+        rateURL: rateSummaryURL(rateID, config.baseUrl),
     }
 
     //Gathering contracts and state contacts associated to rate
@@ -143,7 +156,7 @@ export const validateAndParseUnwithdrawnRate = (
 
     return {
         latestStatusAction,
-        rateCertificationName,
+        rateInfo,
         associatedContracts,
         stateContactEmails,
     }
@@ -166,7 +179,7 @@ export const sendUndoWithdrawnRateStateEmail = async (
 
     const {
         latestStatusAction, //Contains update information
-        rateCertificationName, //Rate name
+        rateInfo, //Rate name and summary URL
         associatedContracts, //Contracts connected to the rate
         stateContactEmails,
     } = undoWithdrawnRateData
@@ -177,7 +190,7 @@ export const sendUndoWithdrawnRateStateEmail = async (
     ])
 
     const etaData: undoWithdrawnRateEtaData = {
-        rateName: rateCertificationName,
+        rateInfo: rateInfo,
         updatedBy: latestStatusAction.updatedBy.email,
         updatedOn: formatCalendarDate(
             latestStatusAction.updatedAt,
@@ -201,7 +214,7 @@ export const sendUndoWithdrawnRateStateEmail = async (
             sourceEmail: config.emailSource,
             subject: `${
                 config.stage !== 'prod' ? `[${config.stage}] ` : ''
-            }${etaData.rateName} was unwithdrawn`,
+            }${etaData.rateInfo.rateName} was unwithdrawn`,
             bodyText: stripHTMLFromTemplate(template),
             bodyHTML: template,
         }
