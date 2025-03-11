@@ -137,6 +137,7 @@ jobs:
           SUBNET_PUBLIC_A_ID: ${{ secrets.subnet_public_a_id }}
           IAM_PERMISSIONS_BOUNDARY: ${{ secrets.iam_permissions_boundary }}
           IAM_PATH: ${{ secrets.iam_path }}
+          DEV_AURORA_ARN: ${{ secrets.dev_aurora_arn }}
         run: |
           pushd services/postgres && npx serverless deploy --stage ${{ inputs.stage_name }}
 
@@ -145,7 +146,6 @@ jobs:
         env:
           STAGE_NAME: ${{ inputs.stage_name }}
           DEV_DB_SM_ARN: ${{ secrets.dev_db_sm_arn }}
-          DEV_AURORA_ARN: ${{ secrets.dev_aurora_arn }}
         run: |
           chmod +x services/postgres/db-manager.sh
           ./services/postgres/scripts/db-manager.sh create $STAGE_NAME $DEV_DB_SM_ARN $STAGE_NAME
