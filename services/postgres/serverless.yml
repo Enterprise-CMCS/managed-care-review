@@ -102,6 +102,15 @@ functions:
       subnetIds: ${self:custom.privateSubnets}
     environment:
       SECRETS_MANAGER_ENDPOINT: !Sub 'https://secretsmanager.${AWS::Region}.amazonaws.com'
+  dbManager:
+    handler: src/logicalDatabaseManager.handler
+    description: Manages logical databases in the shared dev PostgreSQL instance
+    timeout: 60
+    vpc:
+      securityGroupIds: ${self:custom.sgId}
+      subnetIds: ${self:custom.privateSubnets}
+    environment:
+      SECRETS_MANAGER_ENDPOINT: !Sub 'https://secretsmanager.${AWS::Region}.amazonaws.com'
 
 resources:
   Conditions:
@@ -109,7 +118,6 @@ resources:
       - !Equals ['${sls:stage}', 'main']
       - !Equals ['${sls:stage}', 'val']
       - !Equals ['${sls:stage}', 'prod']
-      - !Equals ['${sls:stage}', 'mtsechubsmrotation'] # Temporary addition for testing
 
   Resources:
     # VPC endpoint for rotation lambda
@@ -136,6 +144,7 @@ resources:
 
     PostgresAuroraV2:
       Type: AWS::RDS::DBCluster
+      Condition: IsDevValProd
       DeletionPolicy: ${self:custom.deletionPolicy.${opt:stage}, self:custom.deletionPolicy.other}
       Properties:
         Engine: aurora-postgresql
@@ -154,6 +163,7 @@ resources:
 
     PostgresAuroraV2Instance:
       Type: AWS::RDS::DBInstance
+      Condition: IsDevValProd
       DeletionPolicy: ${self:custom.deletionPolicy.${opt:stage}, self:custom.deletionPolicy.other}
       Properties:
         Engine: aurora-postgresql
