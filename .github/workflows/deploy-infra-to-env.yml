@@ -148,7 +148,7 @@ jobs:
           DEV_DB_SM_ARN: ${{ secrets.dev_db_sm_arn }}
         run: |
           chmod +x services/postgres/db-manager.sh
-          ./services/postgres/scripts/db-manager.sh create $STAGE_NAME $DEV_DB_SM_ARN $STAGE_NAME
+          ./services/postgres/db-manager.sh create $STAGE_NAME $DEV_DB_SM_ARN $STAGE_NAME
 
       - name: Upload VM scripts to S3
         run: |
