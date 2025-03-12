@@ -348,7 +348,7 @@ describe('sendUndoWithdrawnRateCMSEmail error handling', () => {
 
         expect(template).toBeInstanceOf(Error)
         expect((template as Error).message).toBe(
-            'Error parsing for ratecertificationName'
+            'Error parsing for rateCertificationName'
         )
     })
 
