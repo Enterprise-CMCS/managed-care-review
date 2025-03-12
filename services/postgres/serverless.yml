@@ -38,6 +38,11 @@ provider:
           Action:
             - secretsmanager:GetRandomPassword # pragma: allowlist secret
           Resource: '*'
+        - Effect: 'Allow'
+          Action:
+            - secretsmanager:GetSecretValue # pragma: allowlist secret
+          Resource:
+            - '${self:custom.dbManagerArn}'
         - Effect: Allow
           Action:
             - ec2:CreateNetworkInterface
@@ -59,6 +64,7 @@ custom:
   iamPermissionsBoundary: ${env:IAM_PERMISSIONS_BOUNDARY}
   iamPath: ${env:IAM_PATH}
   rotatorArn: !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${self:service}-${sls:stage}-rotator'
+  dbManagerArn: !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${self:service}-${sls:stage}-dbManager'
   slackWebhookUrl: ${env:SLACK_WEBHOOK}
   serverlessTerminationProtection:
     stages:
