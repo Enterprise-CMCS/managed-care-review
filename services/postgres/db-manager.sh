@@ -15,7 +15,7 @@ cli_read_timeout=240
 
 # Ensure all required parameters are provided
 if [[ -z "$action" || -z "$stage_name" || -z "$secret_arn" ]]; then
-  echo "Usage: $0 create|delete stageName dbSecretArn" 1>&2
+  echo "Usage: $0 create|delete stageName dbSecretArn [lambdaStage]" 1>&2
   exit 1
 fi
 
@@ -48,6 +48,28 @@ if (set -x ; aws lambda invoke \
       --cli-binary-format raw-in-base64-out \
       lambda_response.json) ; then
   
+  # Check if the response contains an error
+  if jq -e '.FunctionError' lambda_response.json > /dev/null; then
+    echo "Error: Lambda function returned an error" 1>&2
+    
+    # Extract the detailed error message
+    if jq -e '.body' lambda_response.json > /dev/null 2>&1; then
+      # Try to parse body if it exists
+      jq -r '.body' lambda_response.json | jq '.'
+    else
+      # If no body, show the raw response which might contain error details
+      cat lambda_response.json
+    fi
+    
+    # Check if there's a payload in the response that contains error details
+    if jq -e '.Payload' lambda_response.json > /dev/null 2>&1; then
+      echo "Error details from payload:"
+      jq -r '.Payload' lambda_response.json | jq '.'
+    fi
+    
+    exit 1
+  fi
+  
   # Check if the response is valid JSON
   if ! jq empty lambda_response.json 2>/dev/null; then
     echo "Error: Lambda function returned invalid JSON" 1>&2
@@ -55,20 +77,32 @@ if (set -x ; aws lambda invoke \
     exit 1
   fi
   
-  # Extract and check the status code
+  # Extract the body
   body=$(jq -r '.body' lambda_response.json)
+  
+  # If body is empty or null, check for Payload which might contain the actual response
   if [[ -z "$body" || "$body" == "null" ]]; then
-    echo "Error: Lambda response missing body field" 1>&2
-    cat lambda_response.json
-    exit 1
+    body=$(jq -r '.Payload' lambda_response.json)
+    if [[ -z "$body" || "$body" == "null" ]]; then
+      echo "Error: Lambda response missing body and Payload fields" 1>&2
+      cat lambda_response.json
+      exit 1
+    fi
   fi
   
-  # Parse the body which is a JSON string
-  status_code=$(echo "$body" | jq -r '.statusCode // 500')
+  # Try to parse the body (it might be a JSON string that needs to be parsed)
+  parsed_body=$(echo "$body" | jq -r '.' 2>/dev/null)
+  if [[ $? -eq 0 ]]; then
+    body="$parsed_body"
+  fi
+  
+  # Try to get status code from the parsed body
+  status_code=$(echo "$body" | jq -r '.statusCode // 500' 2>/dev/null)
   
   if [[ "$status_code" != "200" ]]; then
     echo "Error: Database operation failed with status code $status_code" 1>&2
-    cat lambda_response.json
+    echo "Error details:"
+    echo "$body" | jq '.'
     exit 1
   fi
   

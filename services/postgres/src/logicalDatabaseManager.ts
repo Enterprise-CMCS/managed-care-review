@@ -35,51 +35,87 @@ class DatabaseOperationError extends Error {
 export const handler = async (event: LambdaEvent): Promise<LambdaResponse> => {
     console.info('Event:', JSON.stringify(event, null, 2))
 
-    const { action, stageName, devDbSecretArn, dbNamePrefix, prSecretName } =
-        event
-
-    if (!action) {
-        throw new Error('Action is required (create or delete)')
-    }
-
-    if (!stageName) {
-        throw new Error('Stage name is required')
-    }
-
-    if (!devDbSecretArn) {
-        throw new Error('Dev database secret ARN is required')
-    }
-
-    const prefix = dbNamePrefix || process.env.DB_NAME_PREFIX || 'reviewapp'
-    const dbName = `${prefix}_${stageName}`
-    const userName = `${prefix}_user_${stageName}`
-    const secretName = prSecretName || `aurora_postgres_${stageName}`
-
-    const manager = new LogicalDatabaseManager()
-
     try {
-        if (action === 'create') {
-            return await manager.createLogicalDatabase(
-                devDbSecretArn,
-                dbName,
-                userName,
-                secretName
-            )
-        } else if (action === 'delete') {
-            return await manager.deleteLogicalDatabase(
-                devDbSecretArn,
-                dbName,
-                userName,
-                secretName
-            )
-        } else {
-            throw new Error(
-                `Invalid action: ${action}. Must be 'create' or 'delete'`
+        const {
+            action,
+            stageName,
+            devDbSecretArn,
+            dbNamePrefix,
+            prSecretName,
+        } = event
+
+        if (!action) {
+            return formatErrorResponse('Action is required (create or delete)')
+        }
+
+        if (!stageName) {
+            return formatErrorResponse('Stage name is required')
+        }
+
+        if (!devDbSecretArn) {
+            return formatErrorResponse('Dev database secret ARN is required')
+        }
+
+        const prefix = dbNamePrefix || process.env.DB_NAME_PREFIX || 'reviewapp'
+        const dbName = `${prefix}_${stageName}`
+        const userName = `${prefix}_user_${stageName}`
+        const secretName = prSecretName || `aurora_postgres_${stageName}`
+
+        const manager = new LogicalDatabaseManager()
+
+        try {
+            if (action === 'create') {
+                return await manager.createLogicalDatabase(
+                    devDbSecretArn,
+                    dbName,
+                    userName,
+                    secretName
+                )
+            } else if (action === 'delete') {
+                return await manager.deleteLogicalDatabase(
+                    devDbSecretArn,
+                    dbName,
+                    userName,
+                    secretName
+                )
+            } else {
+                return formatErrorResponse(
+                    `Invalid action: ${action}. Must be 'create' or 'delete'`
+                )
+            }
+        } catch (error) {
+            console.error(`Error in ${action} operation:`, error)
+            if (error instanceof DatabaseOperationError) {
+                return formatErrorResponse(
+                    `Database operation '${error.operation}' failed: ${error.message}`,
+                    error
+                )
+            }
+            return formatErrorResponse(
+                `Unexpected error during ${action} operation`,
+                error instanceof Error ? error : new Error(String(error))
             )
         }
     } catch (error) {
-        console.error(`Error in ${action} operation:`, error)
-        throw error
+        console.error('Unhandled error in handler:', error)
+        return formatErrorResponse(
+            'Unhandled error in Lambda handler',
+            error instanceof Error ? error : new Error(String(error))
+        )
+    }
+}
+
+// Helper function to format error responses consistently
+function formatErrorResponse(message: string, error?: Error): LambdaResponse {
+    console.error(message, error)
+
+    return {
+        statusCode: 500,
+        body: JSON.stringify({
+            statusCode: 500,
+            message: message,
+            error: error ? error.message : undefined,
+        }),
     }
 }
 
@@ -107,12 +143,20 @@ class LogicalDatabaseManager {
         let client: Client | null = null
 
         try {
+            console.info(`Getting secrets from ${secretArn}`)
             // Get the shared database credentials
             dbCredentials = await this.secrets.getSecretDict(
                 secretArn,
                 'AWSCURRENT'
             )
 
+            if (!dbCredentials || !dbCredentials.host) {
+                throw new Error(
+                    `Invalid database credentials from secret ${secretArn}`
+                )
+            }
+
+            console.info(`Connecting to database at ${dbCredentials.host}`)
             // Connect using our shared DatabaseClient which handles SSL correctly
             client = await this.dbClient.connect(dbCredentials)
 
@@ -126,6 +170,7 @@ class LogicalDatabaseManager {
             console.info('Connected to PostgreSQL')
 
             // Check if database already exists
+            console.info(`Checking if database ${dbName} exists`)
             const checkResult = await client.query(
                 'SELECT 1 FROM pg_database WHERE datname = $1',
                 [dbName]
@@ -144,6 +189,7 @@ class LogicalDatabaseManager {
             }
 
             // Check if user exists
+            console.info(`Checking if user ${userName} exists`)
             const userCheckResult = await client.query(
                 'SELECT 1 FROM pg_roles WHERE rolname = $1',
                 [userName]
@@ -157,10 +203,12 @@ class LogicalDatabaseManager {
 
                 console.info(`Creating user ${userName}`)
                 await client.query(
-                    `CREATE USER ${userName} WITH PASSWORD '${password}'`
+                    `CREATE USER "${userName}" WITH PASSWORD '${password}'`
                 )
+
+                console.info(`Granting privileges to ${userName}`)
                 await client.query(
-                    `GRANT ALL PRIVILEGES ON DATABASE "${dbName}" TO ${userName}`
+                    `GRANT ALL PRIVILEGES ON DATABASE "${dbName}" TO "${userName}"`
                 )
 
                 console.info(`User ${userName} created successfully`)
@@ -169,6 +217,8 @@ class LogicalDatabaseManager {
 
                 // Reset password for existing user using our DbClient's method
                 password = await this.secrets.generatePassword()
+
+                console.info(`Updating password for ${userName}`)
                 await this.dbClient.updatePassword(client, userName, password)
 
                 console.info(`Password for user ${userName} reset`)
@@ -187,12 +237,14 @@ class LogicalDatabaseManager {
             }
 
             try {
+                console.info(`Checking if secret ${prSecretName} exists`)
                 // Check if secret exists
                 await this.secrets.describeSecret(prSecretName)
 
                 // Store the token for the update
                 const token = randomBytes(32).toString('hex')
 
+                console.info(`Updating secret ${prSecretName}`)
                 // Update existing secret with AWSPENDING
                 await this.secrets.putSecret(prSecretName, token, secretValue)
 
@@ -203,6 +255,9 @@ class LogicalDatabaseManager {
                     `Secret ${prSecretName} updated with logical database credentials`
                 )
             } catch (error) {
+                console.info(
+                    `Secret ${prSecretName} doesn't exist, creating new secret`
+                )
                 // Secret doesn't exist, create it
                 const token = randomBytes(32).toString('hex')
                 await this.secrets.putSecret(prSecretName, token, secretValue)
@@ -216,6 +271,7 @@ class LogicalDatabaseManager {
             return {
                 statusCode: 200,
                 body: JSON.stringify({
+                    statusCode: 200,
                     message: `Database ${dbName} and user ${userName} setup complete`,
                     secretName: prSecretName,
                     dbName: dbName,
@@ -230,8 +286,15 @@ class LogicalDatabaseManager {
             )
         } finally {
             if (client) {
-                await client.end()
-                console.info('PostgreSQL connection closed')
+                try {
+                    await client.end()
+                    console.info('PostgreSQL connection closed')
+                } catch (closeError) {
+                    console.error(
+                        'Error closing database connection:',
+                        closeError
+                    )
+                }
             }
         }
     }
@@ -268,6 +331,7 @@ class LogicalDatabaseManager {
             console.info('Connected to PostgreSQL')
 
             // Terminate all connections to the database
+            console.info(`Terminating all connections to ${dbName}`)
             await client.query(
                 `
                 SELECT pg_terminate_backend(pg_stat_activity.pid)
@@ -280,15 +344,18 @@ class LogicalDatabaseManager {
             console.info(`Terminated all connections to ${dbName}`)
 
             // Drop the database
+            console.info(`Dropping database ${dbName}`)
             await client.query(`DROP DATABASE IF EXISTS "${dbName}"`)
             console.info(`Database ${dbName} dropped`)
 
             // Drop the user
-            await client.query(`DROP USER IF EXISTS ${userName}`)
+            console.info(`Dropping user ${userName}`)
+            await client.query(`DROP USER IF EXISTS "${userName}"`)
             console.info(`User ${userName} dropped`)
 
             // Delete the secret (same one that would have been used for the PR environment)
             try {
+                console.info(`Deleting secret ${prSecretName}`)
                 // Delete the secret directly using the AWS SDK
                 await this.secretsClient.send(
                     new DeleteSecretCommand({
@@ -308,6 +375,7 @@ class LogicalDatabaseManager {
             return {
                 statusCode: 200,
                 body: JSON.stringify({
+                    statusCode: 200,
                     message: `Database ${dbName} and user ${userName} deleted successfully`,
                 }),
             }
@@ -320,8 +388,15 @@ class LogicalDatabaseManager {
             )
         } finally {
             if (client) {
-                await client.end()
-                console.info('PostgreSQL connection closed')
+                try {
+                    await client.end()
+                    console.info('PostgreSQL connection closed')
+                } catch (closeError) {
+                    console.error(
+                        'Error closing database connection:',
+                        closeError
+                    )
+                }
             }
         }
     }
