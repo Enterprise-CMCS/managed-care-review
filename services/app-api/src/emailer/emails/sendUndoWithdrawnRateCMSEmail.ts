@@ -28,7 +28,7 @@ export const sendUndoWithdrawnRateCMSEmail = async (
 
     const {
         latestStatusAction, //Contains update information
-        rateCertificationName, //Rate name
+        rateInfo, //Rate name
         associatedContracts, //Contracts connected to the rate
     } = undoWithdrawnRateData
 
@@ -40,7 +40,7 @@ export const sendUndoWithdrawnRateCMSEmail = async (
     ])
 
     const etaData: undoWithdrawnRateEtaData = {
-        rateName: rateCertificationName,
+        rateInfo: rateInfo,
         updatedBy: latestStatusAction.updatedBy.email,
         updatedOn: formatCalendarDate(
             latestStatusAction.updatedAt,
@@ -64,7 +64,7 @@ export const sendUndoWithdrawnRateCMSEmail = async (
             sourceEmail: config.emailSource,
             subject: `${
                 config.stage !== 'prod' ? `[${config.stage}] ` : ''
-            }${etaData.rateName} was unwithdrawn`,
+            }${etaData.rateInfo.rateName} was unwithdrawn`,
             bodyText: stripHTMLFromTemplate(template),
             bodyHTML: template,
         }

@@ -47,6 +47,7 @@ const testRate = mockRate({
                     rateDateEnd: new Date('2025-03-05'),
                     rateDateCertified: new Date('2025-03-05'),
                     rateCertificationName: 'test-rate-certification-name',
+                    rateID: 'rate-id',
                     rateProgramIDs: [mockMNState().programs[0].id],
                     rateDocuments: [
                         {
@@ -304,6 +305,7 @@ describe('sendUndoWithdrawnRateCMSEmail error handling', () => {
                             rateDateEnd: new Date('2025-03-05'),
                             rateDateCertified: new Date('2025-03-05'),
                             rateCertificationName: '',
+                            rateID: 'test-rate',
                             rateProgramIDs: [mockMNState().programs[0].id],
                             rateDocuments: [
                                 {
@@ -333,7 +335,6 @@ describe('sendUndoWithdrawnRateCMSEmail error handling', () => {
                             actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
                         },
                     },
-                    contractRevisions: [],
                 },
             ],
         }
@@ -347,8 +348,77 @@ describe('sendUndoWithdrawnRateCMSEmail error handling', () => {
 
         expect(template).toBeInstanceOf(Error)
         expect((template as Error).message).toBe(
-            'rateCertificationName is missing'
+            'Error parsing for ratecertificationName'
         )
+    })
+
+    it('returns an error if there is no rateID', async () => {
+        const rateWithoutRateID = {
+            ...testRate,
+            packageSubmissions: [
+                {
+                    rateRevision: {
+                        id: 'test-rate-revision',
+                        rateID: 'test-rate',
+                        submitInfo: {
+                            updatedAt: new Date('2025-03-05'),
+                            updatedReason: 'Messed up - undoing withdraw',
+                            updatedBy: testCMSUser({
+                                email: 'undoer-of-withdraws@example.com',
+                            }),
+                        },
+                        createdAt: new Date('2025-03-05'),
+                        updatedAt: new Date('2025-03-05'),
+                        formData: {
+                            rateType: 'NEW',
+                            rateCapitationType: 'RATE_CELL',
+                            rateDateStart: new Date('2025-03-05'),
+                            rateDateEnd: new Date('2025-03-05'),
+                            rateDateCertified: new Date('2025-03-05'),
+                            rateCertificationName: 'test-rate',
+                            rateID: '',
+                            rateProgramIDs: [mockMNState().programs[0].id],
+                            rateDocuments: [
+                                {
+                                    s3URL: 's3://bucketname/key/test1',
+                                    name: 'ratedoc1.doc',
+                                    sha256: 'foobar',
+                                },
+                            ],
+                            supportingDocuments: [],
+                            certifyingActuaryContacts: [
+                                {
+                                    name: 'Foo Person',
+                                    titleRole: 'Bar Job',
+                                    email: 'certifyingActuary@example.com',
+                                    actuarialFirm: 'GUIDEHOUSE',
+                                },
+                            ],
+                            addtlActuaryContacts: [
+                                {
+                                    name: 'Bar Person',
+                                    titleRole: 'Baz Job',
+                                    email: 'addtlActuaryContacts@example.com',
+                                    actuarialFirm: 'OTHER',
+                                    actuarialFirmOther: 'Some Firm',
+                                },
+                            ],
+                            actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+                        },
+                    },
+                },
+            ],
+        }
+
+        const template = await sendUndoWithdrawnRateCMSEmail(
+            rateWithoutRateID,
+            statePrograms,
+            stateAnalystEmails(),
+            testEmailConfig()
+        )
+
+        expect(template).toBeInstanceOf(Error)
+        expect((template as Error).message).toBe('Error parsing for rateID')
     })
 
     it('returns an error if there are no contractRevisions', async () => {
@@ -376,6 +446,7 @@ describe('sendUndoWithdrawnRateCMSEmail error handling', () => {
                             rateDateCertified: new Date('2025-03-05'),
                             rateCertificationName:
                                 'test-rate-certification-name',
+                            rateID: 'test-rate-id',
                             rateProgramIDs: [mockMNState().programs[0].id],
                             rateDocuments: [
                                 {

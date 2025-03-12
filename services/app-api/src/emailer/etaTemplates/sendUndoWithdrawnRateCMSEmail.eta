@@ -1,4 +1,4 @@
-<h1 style=<%~'"font-weight: normal;"'%>>Rate <%= it.rateName %> status was updated to 'Submitted' by CMS</h1>
+<h1 style=<%~'"font-weight: normal;"'%>>Rate <%= it.rateInfo.rateName %> status was updated to 'Submitted' by CMS</h1>
 <b>Updated by:</b> <%= it.updatedBy %><br />
 <b>Updated on:</b> <%= it.updatedOn %><br />
 <b>Reason:</b> <%= it.reason %><br />
@@ -13,3 +13,4 @@
 <a href="<%= it.associatedContracts[0].summaryURL %>"><%= it.associatedContracts[0].contractName %></a><br />
 <br />
 <% } %>
+<a href="<%= it.rateInfo.rateURL %>">View rate in MC-Review</a>
