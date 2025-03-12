@@ -40,7 +40,10 @@ provider:
           Resource: '*'
         - Effect: 'Allow'
           Action:
+            - secretsmanager:DescribeSecret # pragma: allowlist secret
             - secretsmanager:GetSecretValue # pragma: allowlist secret
+            - secretsmanager:PutSecretValue # pragma: allowlist secret
+            - secretsmanager:UpdateSecretVersionStage # pragma: allowlist secret
           Resource:
             - '${self:custom.devDbSecretsArn}'
         - Effect: Allow
