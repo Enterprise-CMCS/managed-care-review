@@ -127,7 +127,7 @@ export const validateAndParseUnwithdrawnRate = (
     const rateID = rate.packageSubmissions[0].rateRevision.formData.rateID
     if (!rateName || !rateID) {
         return new Error(
-            `Error parsing for ${rateID ? 'ratecertificationName' : 'rateID'}`
+            `Error parsing for ${rateID ? 'rateCertificationName' : 'rateID'}`
         )
     }
 
