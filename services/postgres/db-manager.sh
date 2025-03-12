@@ -1,14 +1,11 @@
 #!/usr/bin/env bash
 set -u
-
 # Script to invoke the database manager lambda function
 # Usage: ./db-manager.sh create|delete stageName dbSecretArn
-
 action="$1"        # create or delete
 stage_name="$2"    # The stage/environment name for the database
 secret_arn="$3"    # ARN of the secrets manager secret for the main dev DB
 lambda_stage="${4:-dev}"  # Stage where the lambda is deployed, defaults to dev
-
 function_name="postgres-${lambda_stage}-dbManager"
 lambda_version="\$LATEST"
 cli_read_timeout=240
@@ -102,7 +99,37 @@ if (set -x ; aws lambda invoke \
   if [[ "$status_code" != "200" ]]; then
     echo "Error: Database operation failed with status code $status_code" 1>&2
     echo "Error details:"
+    
+    # Extract and format specific error fields for better diagnostics
+    message=$(echo "$body" | jq -r '.message // "Unknown error"')
+    error=$(echo "$body" | jq -r '.error // "No additional error details"')
+    cause=$(echo "$body" | jq -r '.cause // "No cause specified"')
+    operation=$(echo "$body" | jq -r '.operation // "Unknown operation"')
+    
+    echo "  Message: $message"
+    echo "  Error: $error"
+    
+    # Only show these if they exist and are not null
+    if [[ "$cause" != "null" && "$cause" != "No cause specified" ]]; then
+      echo "  Cause: $cause"
+    fi
+    
+    if [[ "$operation" != "null" && "$operation" != "Unknown operation" ]]; then
+      echo "  Failed operation: $operation"
+    fi
+    
+    # Show the stack trace if available for debugging
+    stack=$(echo "$body" | jq -r '.stack // ""')
+    if [[ -n "$stack" && "$stack" != "null" ]]; then
+      echo "  Stack trace for debugging:"
+      echo "$stack" | sed 's/^/    /'
+    fi
+    
+    # Full JSON response for complete details
+    echo "Full error response:"
     echo "$body" | jq '.'
+    
+    # Exit with error
     exit 1
   fi
   

@@ -109,12 +109,30 @@ export const handler = async (event: LambdaEvent): Promise<LambdaResponse> => {
 function formatErrorResponse(message: string, error?: Error): LambdaResponse {
     console.error(message, error)
 
+    // Extract cause from error if available
+    const cause =
+        error && 'cause' in error && error.cause instanceof Error
+            ? error.cause.message
+            : undefined
+
+    // Determine if this is a database operation error with more details
+    const isDatabaseError = error instanceof DatabaseOperationError
+
     return {
         statusCode: 500,
         body: JSON.stringify({
             statusCode: 500,
             message: message,
             error: error ? error.message : undefined,
+            cause: cause,
+            operation: isDatabaseError
+                ? (error as DatabaseOperationError).operation
+                : undefined,
+            // Include stack trace in dev environments but not in production
+            stack:
+                process.env.NODE_ENV !== 'production' && error
+                    ? error.stack
+                    : undefined,
         }),
     }
 }
@@ -169,6 +187,50 @@ class LogicalDatabaseManager {
 
             console.info('Connected to PostgreSQL')
 
+            // Run diagnostic queries to help debug issues
+            console.info('Running database diagnostics')
+
+            // Check current user and permissions
+            const userResult = await client.query(
+                'SELECT current_user, current_database()'
+            )
+            console.info(
+                `Connected as user: ${userResult.rows[0].current_user}, database: ${userResult.rows[0].current_database}`
+            )
+
+            // Check if connected user has createdb permission
+            const permissionResult = await client.query(`
+                SELECT rolname, rolcreatedb
+                FROM pg_roles
+                WHERE rolname = current_user
+            `)
+            if (permissionResult.rows.length > 0) {
+                console.info(
+                    `Current user createdb permission: ${permissionResult.rows[0].rolcreatedb}`
+                )
+
+                if (!permissionResult.rows[0].rolcreatedb) {
+                    console.warn(
+                        `Warning: Current user does not have createdb permission, which may cause failures`
+                    )
+                }
+            } else {
+                console.warn(
+                    `Warning: Could not determine permissions for current user`
+                )
+            }
+
+            // Check available databases
+            const dbListResult = await client.query(`
+                SELECT datname 
+                FROM pg_database 
+                WHERE datistemplate = false
+                ORDER BY datname
+            `)
+            console.info(
+                `Available databases: ${dbListResult.rows.map((row) => row.datname).join(', ')}`
+            )
+
             // Check if database already exists
             console.info(`Checking if database ${dbName} exists`)
             const checkResult = await client.query(
@@ -179,11 +241,59 @@ class LogicalDatabaseManager {
             if (checkResult.rowCount === 0) {
                 console.info(`Creating database ${dbName}`)
 
-                // Create the database if it doesn't exist
-                // Use double quotes to preserve case sensitivity
-                await client.query(`CREATE DATABASE "${dbName}"`)
+                try {
+                    // Create the database if it doesn't exist
+                    // Use double quotes to preserve case sensitivity
+                    await client.query(`CREATE DATABASE "${dbName}"`)
+                    console.info(`Database ${dbName} created successfully`)
+                } catch (createError) {
+                    console.error(
+                        `Error creating database ${dbName}:`,
+                        createError
+                    )
 
-                console.info(`Database ${dbName} created successfully`)
+                    // If we get a permission error, try using a connection string that switches the database after connection
+                    if (
+                        createError instanceof Error &&
+                        (createError.message.includes('permission denied') ||
+                            createError.message.includes(
+                                'insufficient privilege'
+                            ))
+                    ) {
+                        console.info(
+                            `Attempting alternative approach due to permission restrictions`
+                        )
+
+                        // Check if the connected user has CREATEDB privileges
+                        const altPermissionCheck = await client.query(`
+                            SELECT rolcreatedb FROM pg_roles WHERE rolname = current_user
+                        `)
+
+                        if (
+                            altPermissionCheck.rows.length > 0 &&
+                            altPermissionCheck.rows[0].rolcreatedb
+                        ) {
+                            console.info(
+                                `Current user has CREATEDB privilege, proceeding with creation`
+                            )
+                            // Try again with the standard approach
+                            await client.query(`CREATE DATABASE "${dbName}"`)
+                            console.info(
+                                `Database ${dbName} created successfully on second attempt`
+                            )
+                        } else {
+                            // If we still can't create the DB, throw a specific error with helpful information
+                            throw new Error(
+                                `Cannot create database ${dbName}: The database user lacks CREATE DATABASE permission. ` +
+                                    `Please ensure the user specified in secret ${secretArn} has CREATEDB privilege ` +
+                                    `or update this Lambda to use a user with appropriate permissions.`
+                            )
+                        }
+                    } else {
+                        // Re-throw the original error if it's not permission-related
+                        throw createError
+                    }
+                }
             } else {
                 console.info(`Database ${dbName} already exists`)
             }
@@ -279,8 +389,58 @@ class LogicalDatabaseManager {
             }
         } catch (error) {
             console.error('Error in createLogicalDatabase:', error)
+            // Capture more detailed error information
+            const errorDetails =
+                error instanceof Error ? error.message : String(error)
+
+            // Include error stack trace for debugging
+            if (error instanceof Error && error.stack) {
+                console.error('Error stack trace:', error.stack)
+            }
+
+            // If it's a cause from another error, log that too
+            if (error instanceof Error && 'cause' in error && error.cause) {
+                console.error('Error cause:', error.cause)
+            }
+
+            // Handle specific error types for better diagnostics
+            if (error instanceof Error) {
+                if (error.message.includes('permission denied')) {
+                    throw new DatabaseOperationError(
+                        `Permission denied: The database user lacks privileges to create database ${dbName}`,
+                        'createLogicalDatabase',
+                        error
+                    )
+                } else if (error.message.includes('connect')) {
+                    throw new DatabaseOperationError(
+                        `Connection failed: Unable to connect to the database host. Check network/VPC settings and database availability`,
+                        'createLogicalDatabase',
+                        error
+                    )
+                } else if (error.message.includes('does not exist')) {
+                    throw new DatabaseOperationError(
+                        `Resource not found: The specified database resource does not exist`,
+                        'createLogicalDatabase',
+                        error
+                    )
+                } else if (error.message.includes('already exists')) {
+                    throw new DatabaseOperationError(
+                        `Resource conflict: A database resource with this name already exists and cannot be created again`,
+                        'createLogicalDatabase',
+                        error
+                    )
+                } else if (error.message.includes('timed out')) {
+                    throw new DatabaseOperationError(
+                        `Operation timeout: The database operation took too long to complete`,
+                        'createLogicalDatabase',
+                        error
+                    )
+                }
+            }
+
+            // Default generic error
             throw new DatabaseOperationError(
-                `Failed to create logical database ${dbName}`,
+                `Failed to create logical database ${dbName}: ${errorDetails}`,
                 'createLogicalDatabase',
                 error instanceof Error ? error : new Error(String(error))
             )
