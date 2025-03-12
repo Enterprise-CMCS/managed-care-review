@@ -42,6 +42,12 @@ provider:
           Action:
             - secretsmanager:DescribeSecret # pragma: allowlist secret
             - secretsmanager:GetSecretValue # pragma: allowlist secret
+          Resource:
+            - '${self:custom.devDbSecretsArn}'
+        - Effect: 'Allow'
+          Action:
+            - secretsmanager:DescribeSecret # pragma: allowlist secret
+            - secretsmanager:GetSecretValue # pragma: allowlist secret
             - secretsmanager:PutSecretValue # pragma: allowlist secret
             - secretsmanager:UpdateSecretVersionStage # pragma: allowlist secret
           Resource:
@@ -67,6 +73,7 @@ custom:
   iamPermissionsBoundary: ${env:IAM_PERMISSIONS_BOUNDARY}
   iamPath: ${env:IAM_PATH}
   rotatorArn: !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${self:service}-${sls:stage}-rotator'
+  dbManagerArn: !Sub 'arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:aurora_${self:service}_*'
   devDbSecretsArn: ${env:CF_CONFIG_IGNORED_LOCALLY, env:DEV_DB_SM_ARN}
   slackWebhookUrl: ${env:SLACK_WEBHOOK}
   serverlessTerminationProtection:
