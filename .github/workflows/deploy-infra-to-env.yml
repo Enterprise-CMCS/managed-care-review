@@ -138,6 +138,7 @@ jobs:
           IAM_PERMISSIONS_BOUNDARY: ${{ secrets.iam_permissions_boundary }}
           IAM_PATH: ${{ secrets.iam_path }}
           DEV_AURORA_ARN: ${{ secrets.dev_aurora_arn }}
+          DEV_DB_SM_ARN: ${{ secrets.dev_db_sm_arn }}
         run: |
           pushd services/postgres && npx serverless deploy --stage ${{ inputs.stage_name }}
 
