@@ -35,22 +35,6 @@ const undoWithdrawRateInsideTransaction = async (
 ): Promise<RateType | Error> => {
     const { rateID, updatedByID, updatedReason } = args
 
-    // Update the review status first
-    await tx.rateTable.update({
-        where: {
-            id: rateID,
-        },
-        data: {
-            reviewStatusActions: {
-                create: {
-                    updatedByID,
-                    updatedReason,
-                    actionType: 'UNDER_REVIEW',
-                },
-            },
-        },
-    })
-
     // Unlock rate
     const rateUnlockInfo = await tx.updateInfoTable.create({
         data: {
@@ -210,6 +194,22 @@ const undoWithdrawRateInsideTransaction = async (
             throw resubmitResult
         }
     }
+
+    // Update the review status first
+    await tx.rateTable.update({
+        where: {
+            id: rateID,
+        },
+        data: {
+            reviewStatusActions: {
+                create: {
+                    updatedByID,
+                    updatedReason,
+                    actionType: 'UNDER_REVIEW',
+                },
+            },
+        },
+    })
 
     // Add a reviewStatus action and remove all contracts from withdrawnFromContracts
     await tx.rateTable.update({
