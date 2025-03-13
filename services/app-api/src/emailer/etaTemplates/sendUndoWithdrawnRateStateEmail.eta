@@ -2,7 +2,7 @@
 <b>Updated by:</b> <%= it.updatedBy %><br />
 <b>Updated on:</b> <%= it.updatedOn %><br />
 <b>Reason:</b> <%= it.reason %><br />
-<b>Related submission<%= it.associatedContracts.length > 1 ? 's' : '' %>:</b>
+<b>Related submission<%= (it.associatedContracts.length > 1 ? 's' : '') %>:</b>
 <% if (it.associatedContracts.length > 1) { %>
 <ul>
 <% it.associatedContracts.forEach(function(contract){ %>

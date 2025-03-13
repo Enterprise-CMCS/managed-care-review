@@ -366,7 +366,7 @@ describe('undoWithdrawRate', () => {
             7,
             expect.objectContaining({
                 subject: expect.stringContaining(
-                    `${unwithdrawnRateName} was unwithdrawn`
+                    `${unwithdrawnRateName} status update`
                 ),
                 sourceEmail: emailConfig.emailSource,
                 toAddresses: expect.arrayContaining(stateReceiverEmails),
@@ -393,7 +393,7 @@ describe('undoWithdrawRate', () => {
             8,
             expect.objectContaining({
                 subject: expect.stringContaining(
-                    `${unwithdrawnRateName} was unwithdrawn`
+                    `${unwithdrawnRateName} status update`
                 ),
                 sourceEmail: emailConfig.emailSource,
                 toAddresses: expect.arrayContaining([
