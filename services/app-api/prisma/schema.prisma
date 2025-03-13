@@ -109,7 +109,8 @@ model DraftRateJoinTable {
   @@id([contractID, rateID])
 }
 
-// Relationship for withdrawn rates and contracts
+// Relationship for independently withdrawn rates and contracts. These rates are withdrawn from all contracts and not
+// with the contract.
 model WithdrawnRatesJoinTable {
   createdAt  DateTime      @default(now())
   contractID String

@@ -14,15 +14,23 @@ export type WithdrawContractArgsType = {
     updatedReason: string
 }
 
-const perfObserver = new PerformanceObserver((items) => {
-    items.getEntries().forEach((entry) => {
-        console.info(entry)
-    })
-})
-
-perfObserver.observe({ entryTypes: ['measure'], buffered: true })
-performance.measure('Start to Now')
-
+/**
+ * Withdraws a contract and its associated eligible rates within a database transaction.
+ *
+ * This function performs the following operations:
+ * 1. Identifies related rates that should be withdrawn with the contract
+ * 2. Unlocks the contract and child rates with a withdrawal reason
+ * 3. Resubmits the contract and child rates with a withdrawal reason
+ * 4. Creates a withdrawal action for the contract
+ * 5. Creates withdrawal actions for all eligible associated rates
+ *
+ * @async
+ * @param {WithdrawContractArgsType} args - Withdrawal arguments
+ * @param {ContractType} args.contract - The contract to withdraw
+ * @param {string} args.updatedReason - The reason for withdrawal
+ * @param {string} args.updatedByID - ID of the user performing the withdrawal
+ *
+ */
 const withdrawContractInsideTransaction = async (
     tx: PrismaTransactionType,
     args: WithdrawContractArgsType
@@ -289,13 +297,6 @@ const withdrawContractInsideTransaction = async (
     if (withdrawnContract.consolidatedStatus !== 'WITHDRAWN') {
         throw new Error('contract failed to withdraw')
     }
-
-    performance.mark('finishWithdrawContractInsideTransaction')
-    performance.measure(
-        'withdrawContractInsideTransaction',
-        'beginWithdrawContractInsideTransaction',
-        'finishWithdrawContractInsideTransaction'
-    )
 
     return withdrawnContract
 }
