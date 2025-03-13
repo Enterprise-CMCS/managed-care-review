@@ -51,7 +51,7 @@ provider:
             - secretsmanager:PutSecretValue # pragma: allowlist secret
             - secretsmanager:UpdateSecretVersionStage # pragma: allowlist secret
           Resource:
-            - '${self:custom.devDbSecretsArn}'
+            - '${self:custom.dbManagerArn}'
         - Effect: Allow
           Action:
             - ec2:CreateNetworkInterface
