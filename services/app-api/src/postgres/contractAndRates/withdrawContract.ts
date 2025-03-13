@@ -1,0 +1,356 @@
+import type { PrismaTransactionType } from '../prismaTypes'
+import type { ContractType } from '../../domain-models'
+import { unlockContractInsideTransaction } from './unlockContract'
+import { findStatePrograms } from '../state'
+import { packageName } from '@mc-review/hpp'
+import { submitContractInsideTransaction } from './submitContract'
+import { findContractWithHistory } from './findContractWithHistory'
+import { NotFoundError } from '../postgresErrors'
+import type { ExtendedPrismaClient } from '../prismaClient'
+
+export type WithdrawContractArgsType = {
+    contract: ContractType
+    updatedByID: string
+    updatedReason: string
+}
+
+const perfObserver = new PerformanceObserver((items) => {
+    items.getEntries().forEach((entry) => {
+        console.info(entry)
+    })
+})
+
+perfObserver.observe({ entryTypes: ['measure'], buffered: true })
+performance.measure('Start to Now')
+
+const withdrawContractInsideTransaction = async (
+    tx: PrismaTransactionType,
+    args: WithdrawContractArgsType
+): Promise<ContractType | Error> => {
+    performance.mark('beginWithdrawContractInsideTransaction')
+    const { contract, updatedReason, updatedByID } = args
+
+    const latestSubmission = contract.packageSubmissions[0]
+    const latestContractRev = latestSubmission.contractRevision
+    const rateIDS = latestSubmission.rateRevisions.map((rr) => rr.rateID)
+
+    // Very stripped down rate, only selecting data we need to determine which rates are to be withdrawn with contract.
+    const rates = await tx.rateTable.findMany({
+        where: {
+            id: {
+                in: rateIDS,
+            },
+        },
+        include: {
+            reviewStatusActions: {
+                orderBy: {
+                    updatedAt: 'desc',
+                },
+                take: 1,
+                select: {
+                    id: true,
+                    updatedAt: true,
+                    updatedReason: true,
+                    actionType: true,
+                },
+            },
+            revisions: {
+                orderBy: {
+                    createdAt: 'desc',
+                },
+                include: {
+                    submitInfo: {
+                        select: {
+                            id: true,
+                            updatedAt: true,
+                            updatedReason: true,
+                            submittedContracts: {
+                                select: {
+                                    contractID: true,
+                                },
+                            },
+                        },
+                    },
+                    unlockInfo: {
+                        select: {
+                            id: true,
+                            updatedAt: true,
+                            updatedReason: true,
+                        },
+                    },
+                    relatedSubmissions: {
+                        orderBy: {
+                            updatedAt: 'desc',
+                        },
+                        include: {
+                            submissionPackages: {
+                                include: {
+                                    contractRevision: {
+                                        select: {
+                                            createdAt: true,
+                                            contract: {
+                                                select: {
+                                                    id: true,
+                                                    revisions: {
+                                                        orderBy: {
+                                                            updatedAt: 'desc',
+                                                        },
+                                                        take: 1,
+                                                        select: {
+                                                            unlockInfo: {
+                                                                select: {
+                                                                    id: true,
+                                                                    updatedAt:
+                                                                        true,
+                                                                    updatedReason:
+                                                                        true,
+                                                                },
+                                                            },
+                                                            submitInfo: {
+                                                                select: {
+                                                                    id: true,
+                                                                    updatedAt:
+                                                                        true,
+                                                                    updatedReason:
+                                                                        true,
+                                                                },
+                                                            },
+                                                        },
+                                                    },
+                                                    reviewStatusActions: {
+                                                        orderBy: {
+                                                            updatedAt: 'desc',
+                                                        },
+                                                        take: 1,
+                                                        select: {
+                                                            id: true,
+                                                            updatedAt: true,
+                                                            updatedReason: true,
+                                                            actionType: true,
+                                                        },
+                                                    },
+                                                },
+                                            },
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                        take: 1,
+                    },
+                },
+            },
+        },
+    })
+
+    if (!rates) {
+        throw new NotFoundError('Could not find rates on contract')
+    }
+
+    // Child rates to withdraw with the submission, so it includes the same withdraw reason
+    const childRateWithdraw = []
+
+    // Linked rates, where the parent is withdrawn and needs to set the review status of this rate as withdrawn also
+    // so that it's not an active rate review linked to only withdrawn contracts.
+    // The withdrawal reason for these should possibly be something else?
+    const linkedRateWithdraw = []
+
+    // loop through all rates to determine which ones can be withdrawn.
+    for (const rate of rates) {
+        // latest rate revision of the current rate on the submission
+        const latestRateRevision = rate.revisions[0]
+        // find the parent contract of the rate, it is the contract on the rates first submission revision
+        const firstRateRevision = rate.revisions[rate.revisions.length - 1]
+        const parentContractID =
+            firstRateRevision.submitInfo?.submittedContracts[0].contractID
+
+        // filter out submission packages that do not belong to this rate revision
+        const submissionPackages =
+            latestRateRevision.relatedSubmissions[0].submissionPackages
+                .filter((p) => p.rateRevisionID === latestRateRevision.id)
+                .sort(
+                    (a, b) =>
+                        b.contractRevision.createdAt.getTime() -
+                        a.contractRevision.createdAt.getTime()
+                )
+
+        // get the parent contract data of this rate.
+        const parentContract = submissionPackages?.find(
+            (pkg) => pkg.contractRevision.contract.id === parentContractID
+        )?.contractRevision.contract
+
+        // check if any of the linked submissions are approved or submitted and not withdrawn
+        const hasApprovedOrSubmittedSubs = submissionPackages.some((pkg) => {
+            const reviewStatusAction =
+                pkg.contractRevision.contract.reviewStatusActions[0]?.actionType
+            const isSubmitted =
+                pkg.contractRevision.contract.revisions[0].submitInfo
+
+            // skip if this is the parent contract submission package.
+            if (pkg.contractRevision.contract.id === contract.id) return false
+            // is contract approved
+            if (reviewStatusAction === 'MARK_AS_APPROVED') return true
+            // is contract submitted and review status is not withdrawn
+            if (isSubmitted && reviewStatusAction !== 'WITHDRAW') return true
+            // otherwise does not meet condition
+            return false
+        })
+
+        //TODO: Ask if we want to withdraw rate if its linked to unlocked submission, because the state user
+        // will not be allowed to resubmit with a withdrawn rate, they can ake the action to remove the
+        // rate to resubmit. This removes the process of CMS having to contact the state about an unlocked
+        // submission, which cannot be done in the app today. This approach lets CMS withdraw and have the state user correct unlocked or draft rates.
+
+        // skipping rate it conditions are met
+        if (
+            !latestRateRevision.submitInfo || // unlocked rate. linked rates can be in unlocked status
+            rate.reviewStatusActions[0]?.actionType === 'WITHDRAW' || // is the rate already withdrawn
+            hasApprovedOrSubmittedSubs || // any of the linked submissions are approved or submitted
+            !parentContract // standalone rate could happen from a bug, old feature, or new feature. We don't want to withdraw these in this fashion.
+        ) {
+            continue
+        }
+
+        //TODO: Double check if we need this. I think there really is no difference in the two because they would probably
+        // share the same update reason.
+        // Ask if the rates would have the same withdraw reason. Use figure 3 as example, where submission B with withdrawn.
+        if (
+            parentContract.id === contract.id // is this a child rate
+        ) {
+            // set rate to be withdrawn with this submission
+            childRateWithdraw.push(rate)
+        } else if (
+            parentContract.reviewStatusActions[0]?.actionType === 'WITHDRAW'
+        ) {
+            // set rate to be withdrawn
+            linkedRateWithdraw.push(rate)
+        }
+    }
+    const statePrograms = findStatePrograms(contract.stateCode)
+
+    if (statePrograms instanceof Error) {
+        throw new Error(
+            `State programs for stateCode ${contract.stateCode} not found.`
+        )
+    }
+
+    const withdrawRateNames = [...childRateWithdraw, ...linkedRateWithdraw].map(
+        (r) => r.revisions[0]?.rateCertificationName ?? r.revisions[0].rateID
+    )
+    const contractName = packageName(
+        contract.stateCode,
+        contract.stateNumber,
+        latestContractRev.formData.programIDs,
+        statePrograms
+    )
+
+    const rateNamesMessage =
+        withdrawRateNames.length > 0
+            ? ` along with the following rates: ${withdrawRateNames}`
+            : ''
+
+    // unlock contract with withdraw default message and withdraw input reason
+    await unlockContractInsideTransaction(tx, {
+        contractID: contract.id,
+        unlockedByUserID: updatedByID,
+        unlockReason: `CMS withdrawing the submission ${contractName}${rateNamesMessage}. ${updatedReason}`,
+    })
+
+    // resubmit contract with the default message and withdraw input reason
+    await submitContractInsideTransaction(tx, {
+        contractID: contract.id,
+        submittedByUserID: updatedByID,
+        submittedReason: `CMS has withdrawn the submission ${contractName}${rateNamesMessage}. ${updatedReason}`,
+    })
+
+    // add withdraw action to contract
+    await tx.contractTable.update({
+        where: {
+            id: contract.id,
+        },
+        data: {
+            reviewStatusActions: {
+                create: {
+                    updatedByID,
+                    updatedReason,
+                    actionType: 'WITHDRAW',
+                },
+            },
+        },
+    })
+
+    // add withdraw action to all rates that are withdrawn with this submission
+    for (const rate of childRateWithdraw) {
+        await tx.rateActionTable.create({
+            data: {
+                updatedReason,
+                updatedBy: {
+                    connect: {
+                        id: updatedByID,
+                    },
+                },
+                actionType: 'WITHDRAW',
+                rate: {
+                    connect: {
+                        id: rate.id,
+                    },
+                },
+            },
+        })
+    }
+    for (const rate of linkedRateWithdraw) {
+        await tx.rateActionTable.create({
+            data: {
+                updatedReason, // TODO: This may have a different withdraw reason, pending discussion with design. If not we can combine this with the loop above
+                updatedBy: {
+                    connect: {
+                        id: updatedByID,
+                    },
+                },
+                actionType: 'WITHDRAW',
+                rate: {
+                    connect: {
+                        id: rate.id,
+                    },
+                },
+            },
+        })
+    }
+
+    // fetch contract with history and return
+    const withdrawnContract = await findContractWithHistory(tx, contract.id)
+
+    if (withdrawnContract instanceof Error) {
+        throw new Error(withdrawnContract.message)
+    }
+
+    if (withdrawnContract.consolidatedStatus !== 'WITHDRAWN') {
+        throw new Error('contract failed to withdraw')
+    }
+
+    performance.mark('finishWithdrawContractInsideTransaction')
+    performance.measure(
+        'withdrawContractInsideTransaction',
+        'beginWithdrawContractInsideTransaction',
+        'finishWithdrawContractInsideTransaction'
+    )
+
+    return withdrawnContract
+}
+
+const withdrawContract = async (
+    client: ExtendedPrismaClient,
+    args: WithdrawContractArgsType
+): Promise<ContractType | Error> => {
+    try {
+        return await client.$transaction(
+            async (tx) => await withdrawContractInsideTransaction(tx, args)
+        )
+    } catch (err) {
+        const msg = `PRISMA ERROR: Error withdrawing contract: ${err.message}`
+        console.error(msg)
+        return err
+    }
+}
+
+export { withdrawContractInsideTransaction, withdrawContract }
