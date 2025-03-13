@@ -607,7 +607,7 @@ jobs:
             ${{github.workspace}}/coverage-cypress/lcov.info
   coverage:
     name: test-coverage
-    needs: [cypress]
+    needs: [begin-deployment, cypress]
     if: always() && needs.finishing-prep.result == 'success'
     runs-on: ubuntu-24.04
     permissions:
@@ -689,3 +689,11 @@ jobs:
         with:
           name: combined-test-coverage
           path: ./coverage-all/
+
+      - name: Delete logical database
+        env:
+          STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name}}
+          DEV_DB_SM_ARN: ${{ secrets.DEV_DB_SM_ARN }}
+        run: |
+          chmod +x services/postgres/db-manager.sh
+          ./services/postgres/db-manager.sh delete $STAGE_NAME $DEV_DB_SM_ARN $STAGE_NAME
