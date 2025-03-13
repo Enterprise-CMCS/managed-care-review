@@ -237,8 +237,7 @@ describe('undoWithdrawRate', () => {
         )
     }, 10000)
 
-    // eslint-disable-next-line jest/expect-expect, jest/no-focused-tests
-    it.only('sends emails to CMS and state contacts when a rate is unwithdrawn', async () => {
+    it('sends emails to CMS and state contacts when a rate is unwithdrawn', async () => {
         const emailConfig = testEmailConfig()
         const mockEmailer = testEmailer(emailConfig)
         const stateUser = testStateUser()
