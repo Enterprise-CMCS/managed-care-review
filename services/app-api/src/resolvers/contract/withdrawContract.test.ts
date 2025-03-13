@@ -10,6 +10,7 @@ import {
     submitTestContract,
     unlockTestContract,
     withdrawTestContract,
+    contractHistoryToDescriptions,
 } from '../../testHelpers/gqlContractHelpers'
 import { fetchTestRateById, must } from '../../testHelpers'
 import type { RateFormDataInput, RateStrippedEdge } from '../../gen/gqlClient'
@@ -85,7 +86,19 @@ describe('withdrawContract', () => {
             'withdraw submission'
         )
 
+        const contractName =
+            withdrawnContract.packageSubmissions[0].contractRevision
+                .contractName
+
+        const contractHistory = contractHistoryToDescriptions(withdrawnContract)
         expect(withdrawnContract.consolidatedStatus).toBe('WITHDRAWN')
+        expect(contractHistory).toStrictEqual(
+            expect.arrayContaining([
+                'Initial submission',
+                `CMS withdrawing the submission ${contractName}. withdraw submission`,
+                `CMS has withdrawn the submission ${contractName}. withdraw submission`,
+            ])
+        )
     })
 
     it('cant withdraw contract and rate submission', async () => {
@@ -127,12 +140,27 @@ describe('withdrawContract', () => {
             'withdraw submission'
         )
 
+        const contractHistory =
+            await contractHistoryToDescriptions(withdrawnContract)
+
+        const contractName =
+            withdrawnContract.packageSubmissions[0].contractRevision
+                .contractName
         const rateA = await fetchTestRateById(cmsServer, rateARevision.rateID)
         const rateB = await fetchTestRateById(cmsServer, rateBRevision.rateID)
+        const rateAName = rateA.revisions[0].formData.rateCertificationName
+        const rateBName = rateB.revisions[0].formData.rateCertificationName
 
         expect(withdrawnContract.consolidatedStatus).toBe('WITHDRAWN')
         expect(rateA.consolidatedStatus).toBe('WITHDRAWN')
         expect(rateB.consolidatedStatus).toBe('WITHDRAWN')
+        expect(contractHistory).toStrictEqual(
+            expect.arrayContaining([
+                'Initial submission',
+                `CMS withdrawing the submission ${contractName} along with the following rates: ${rateAName}, ${rateBName}. withdraw submission`,
+                `CMS has withdrawn the submission ${contractName} along with the following rates: ${rateAName}, ${rateBName}. withdraw submission`,
+            ])
+        )
     })
 
     it('cant withdraw contract and rates submissions without withdrawing linked rates', async () => {

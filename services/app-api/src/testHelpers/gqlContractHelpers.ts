@@ -502,7 +502,7 @@ const withdrawTestContract = async (
     server: ApolloServer,
     contractID: string,
     updatedReason: string
-): Promise<ContractType> => {
+): Promise<Contract> => {
     const withdrawResult = await server.executeOperation({
         query: WithdrawContractDocument,
         variables: {
@@ -524,6 +524,28 @@ const withdrawTestContract = async (
     return withdrawResult.data.withdrawContract.contract
 }
 
+const contractHistoryToDescriptions = (contract: Contract): string[] => {
+    return contract.packageSubmissions.reduce((history: string[], pkgSub) => {
+        const updatedHistory = history
+
+        if (pkgSub.cause !== 'CONTRACT_SUBMISSION') {
+            return updatedHistory
+        }
+
+        if (pkgSub.submitInfo.updatedReason) {
+            updatedHistory.unshift(pkgSub.submitInfo.updatedReason)
+        }
+
+        if (pkgSub.contractRevision.unlockInfo?.updatedReason) {
+            updatedHistory.unshift(
+                pkgSub.contractRevision.unlockInfo.updatedReason
+            )
+        }
+
+        return updatedHistory
+    }, [])
+}
+
 export {
     submitTestContract,
     unlockTestContract,
@@ -543,4 +565,5 @@ export {
     createTestContract,
     updateTestContractToReplaceRate,
     withdrawTestContract,
+    contractHistoryToDescriptions,
 }

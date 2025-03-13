@@ -234,7 +234,7 @@ const withdrawContractInsideTransaction = async (
 
     const rateNamesMessage =
         withdrawRateNames.length > 0
-            ? ` along with the following rates: ${withdrawRateNames}`
+            ? ` along with the following rates: ${withdrawRateNames.join(', ')}`
             : ''
 
     // unlock contract with withdraw default message and withdraw input reason
