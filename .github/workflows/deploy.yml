@@ -694,7 +694,7 @@ jobs:
         env:
           STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name}}
           DEV_DB_SM_ARN: ${{ secrets.DEV_DB_SM_ARN }}
-          AWS_REGION: ${{ var.AWS_DEFAULT_REGION }}
+          AWS_REGION: ${{ vars.AWS_DEFAULT_REGION }}
         run: |
           chmod +x services/postgres/db-manager.sh
           ./services/postgres/db-manager.sh delete $STAGE_NAME $DEV_DB_SM_ARN $STAGE_NAME
