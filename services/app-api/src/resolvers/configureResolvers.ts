@@ -62,6 +62,7 @@ import { updateEmailSettings } from './settings/updateEmailSettings'
 import { undoWithdrawRate } from './rate/undoWithdrawRate'
 import { rateStrippedResolver } from './rate/rateResolver'
 import { indexRatesStripped } from './rate/indexRatesStripped'
+import { withdrawContract } from './contract/withdrawContract'
 
 export function configureResolvers(
     store: Store,
@@ -113,6 +114,7 @@ export function configureResolvers(
             withdrawAndReplaceRedundantRate:
                 withdrawAndReplaceRedundantRateResolver(store),
             approveContract: approveContract(store),
+            withdrawContract: withdrawContract(store),
             withdrawRate: withdrawRate(store, emailer),
             undoWithdrawRate: undoWithdrawRate(store),
             updateDivisionAssignment: updateDivisionAssignment(store),
