@@ -195,7 +195,7 @@ const undoWithdrawRateInsideTransaction = async (
         }
     }
 
-    // Update the review status first
+    // Update the review status
     await tx.rateTable.update({
         where: {
             id: rateID,
