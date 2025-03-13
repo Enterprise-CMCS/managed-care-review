@@ -607,7 +607,7 @@ jobs:
             ${{github.workspace}}/coverage-cypress/lcov.info
   coverage:
     name: test-coverage
-    needs: [begin-deployment, cypress]
+    needs: [begin-deployment, cypress, deploy-infra]
     if: always() && needs.finishing-prep.result == 'success'
     runs-on: ubuntu-24.04
     permissions:
