@@ -8,6 +8,7 @@ import {
     CreateContractDocument,
     FetchContractWithQuestionsDocument,
     ApproveContractDocument,
+    WithdrawContractDocument,
 } from '../gen/gqlClient'
 
 import { findStatePrograms } from '../postgres'
@@ -497,6 +498,32 @@ const updateTestContractDraftRevision = async (
     return updateResult.data.updateContractDraftRevision.contract
 }
 
+const withdrawTestContract = async (
+    server: ApolloServer,
+    contractID: string,
+    updatedReason: string
+): Promise<ContractType> => {
+    const withdrawResult = await server.executeOperation({
+        query: WithdrawContractDocument,
+        variables: {
+            input: {
+                contractID,
+                updatedReason,
+            },
+        },
+    })
+
+    if (withdrawResult.errors) {
+        console.info('errors', withdrawResult.errors)
+    }
+
+    if (withdrawResult.data === undefined || withdrawResult.data === null) {
+        throw new Error('withdraw contract returned nothing')
+    }
+
+    return withdrawResult.data.withdrawContract.contract
+}
+
 export {
     submitTestContract,
     unlockTestContract,
@@ -515,4 +542,5 @@ export {
     updateTestContractDraftRevision,
     createTestContract,
     updateTestContractToReplaceRate,
+    withdrawTestContract,
 }
