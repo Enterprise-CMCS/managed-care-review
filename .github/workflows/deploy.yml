@@ -607,7 +607,7 @@ jobs:
             ${{github.workspace}}/coverage-cypress/lcov.info
   coverage:
     name: test-coverage
-    needs: [begin-deployment, cypress]
+    needs: [begin-deployment, deploy-infra, cypress]
     if: always() && needs.finishing-prep.result == 'success'
     runs-on: ubuntu-24.04
     permissions:
@@ -689,6 +689,14 @@ jobs:
         with:
           name: combined-test-coverage
           path: ./coverage-all/
+
+      - name: Get AWS credentials
+        uses: ./.github/actions/get_aws_credentials
+        with:
+          region: ${{ vars.AWS_DEFAULT_REGION }}
+          account-id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
+          stage-name: ${{ needs.begin-deployment.outputs.stage-name }}
+          changed-services: ${{ needs.begin-deployment.outputs.changed-services }}
 
       - name: Delete logical database
         env:
