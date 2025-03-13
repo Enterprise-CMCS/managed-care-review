@@ -78,6 +78,7 @@ const StatusTag = ({
     let emphasize = false
     const isSubmittedStatus = status === 'RESUBMITTED' || status === 'SUBMITTED'
     const isApproved = status === 'APPROVED'
+    const isWithdrawn = status === 'WITHDRAWN'
     const isUnlocked = status === 'UNLOCKED'
     const isDraft = status === 'DRAFT'
     if (isSubmittedStatus) {
@@ -85,6 +86,8 @@ const StatusTag = ({
         emphasize = notStateUser
     } else if (isApproved) {
         color = 'green'
+    } else if (isWithdrawn) {
+        color = 'gray'
     } else if (isUnlocked) {
         emphasize = true
     } else if (isDraft) {
@@ -93,7 +96,7 @@ const StatusTag = ({
 
     const statusText = isSubmittedStatus
         ? SubmissionStatusRecord['SUBMITTED']
-        : isApproved
+        : isApproved || isWithdrawn
           ? SubmissionReviewStatusRecord[status]
           : SubmissionStatusRecord[status]
 

@@ -1,10 +1,11 @@
 import type { MutationResolvers } from '../../gen/gqlServer'
-import { logError } from '../../logger'
+import { logError, logSuccess } from '../../logger'
 import { NotFoundError } from '../../postgres'
 import type { Store } from '../../postgres'
 import {
     setErrorAttributesOnActiveSpan,
     setResolverDetailsOnActiveSpan,
+    setSuccessAttributesOnActiveSpan,
 } from '../attributeHelper'
 import { GraphQLError } from 'graphql'
 import { isStateUser } from '../../domain-models'
@@ -343,6 +344,8 @@ function updateDraftContractRates(
             throw result
         }
 
+        logSuccess('updateDraftContractRates')
+        setSuccessAttributesOnActiveSpan(span)
         // return result.
         return { contract: result }
     }

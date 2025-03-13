@@ -11,6 +11,7 @@ import {
     fetchTestContract,
     submitTestContract,
     unlockTestContract,
+    contractHistoryToDescriptions,
 } from '../../testHelpers/gqlContractHelpers'
 import {
     withdrawTestRate,
@@ -18,7 +19,7 @@ import {
     addNewRateToTestContract,
 } from '../../testHelpers/gqlRateHelpers'
 import { must } from '../../testHelpers'
-import type { RateFormDataInput, Contract } from '../../gen/gqlClient'
+import type { RateFormDataInput } from '../../gen/gqlClient'
 import {
     UndoWithdrawnRateDocument,
     UpdateDraftContractRatesDocument,
@@ -55,28 +56,6 @@ const testRateFormInputData = (): RateFormDataInput => ({
     addtlActuaryContacts: [],
     actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
 })
-
-const reduceHistoryToDescriptions = (contract: Contract): string[] => {
-    return contract.packageSubmissions.reduce((history: string[], pkgSub) => {
-        const updatedHistory = history
-
-        if (pkgSub.cause !== 'CONTRACT_SUBMISSION') {
-            return updatedHistory
-        }
-
-        if (pkgSub.submitInfo.updatedReason) {
-            updatedHistory.unshift(pkgSub.submitInfo.updatedReason)
-        }
-
-        if (pkgSub.contractRevision.unlockInfo?.updatedReason) {
-            updatedHistory.unshift(
-                pkgSub.contractRevision.unlockInfo.updatedReason
-            )
-        }
-
-        return updatedHistory
-    }, [])
-}
 
 it('can undo withdraw a rate without errors', async () => {
     const stateUser = testStateUser()
@@ -194,8 +173,8 @@ it('can undo withdraw a rate without errors', async () => {
     )
 
     // Check history
-    const contractAHistory = reduceHistoryToDescriptions(submittedContractA)
-    const contractBHistory = reduceHistoryToDescriptions(submittedContractB)
+    const contractAHistory = contractHistoryToDescriptions(submittedContractA)
+    const contractBHistory = contractHistoryToDescriptions(submittedContractB)
 
     // Expect contract A history to be in order
     expect(contractAHistory).toStrictEqual(

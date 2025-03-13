@@ -119,6 +119,9 @@ function getContractReviewStatus(
     if (latestAction?.actionType === 'MARK_AS_APPROVED') {
         return 'APPROVED'
     }
+    if (latestAction?.actionType === 'WITHDRAW') {
+        return 'WITHDRAWN'
+    }
     return 'UNDER_REVIEW'
 }
 
