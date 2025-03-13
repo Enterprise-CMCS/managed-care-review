@@ -13,3 +13,5 @@ export { sendQuestionResponseStateEmail } from './sendQuestionResponseStateEmail
 export { sendRateQuestionStateEmail } from './sendRateQuestionStateEmail'
 export { sendRateQuestionResponseCMSEmail } from './sendRateQuestionResponseCMSEmail'
 export { sendWithdrawnRateStateEmail } from './sendWithdrawnRateStateEmail'
+export { sendUndoWithdrawnRateStateEmail } from './sendUndoWithdrawnRateStateEmail'
+export { sendUndoWithdrawnRateCMSEmail } from './sendUndoWithdrawnRateCMSEmail'

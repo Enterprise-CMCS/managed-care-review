@@ -1,0 +1,18 @@
+<h1 style=<%~'"font-weight: normal;"'%>>Rate <%= it.rateInfo.rateName %> status was updated to 'Submitted' by CMS</h1>
+<b>Updated by:</b> <%= it.updatedBy %><br />
+<b>Updated on:</b> <%= it.updatedOn %><br />
+<b>Reason:</b> <%= it.reason %><br />
+<b>Related submission<%= (it.associatedContracts.length > 1 ? 's' : '') %>:</b>
+<% if (it.associatedContracts.length > 1) { %>
+<ul>
+<% it.associatedContracts.forEach(function(contract){ %>
+  <li><a href="<%= contract.summaryURL %>"><%= contract.contractName %></a></li>
+<% }) %>
+</ul>
+<% } else { %>
+<a href="<%= it.associatedContracts[0].summaryURL %>"><%= it.associatedContracts[0].contractName %></a><br />
+<br />
+<% } %>
+If you have any questions, please reach out to your CMS point of contact.
+<br />
+<a href="<%= it.rateInfo.rateURL %>">View the submission in MC-Review</a>

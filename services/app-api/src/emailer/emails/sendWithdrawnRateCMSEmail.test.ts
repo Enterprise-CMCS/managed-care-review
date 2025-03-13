@@ -323,7 +323,7 @@ describe('sendWithdrawnRateStateEmail error handling', () => {
 
         expect(template).toBeInstanceOf(Error)
         expect((template as Error).message).toBe(
-            'Rate does not any have review actions'
+            'Rate does not have any review actions'
         )
     })
     it('returns an error if latest reviewStatusActions action was not withdraw action', async () => {

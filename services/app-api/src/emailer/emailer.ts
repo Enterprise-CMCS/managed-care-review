@@ -15,6 +15,8 @@ import {
     sendQuestionResponseCMSEmail,
     sendQuestionResponseStateEmail,
     sendWithdrawnRateStateEmail,
+    sendUndoWithdrawnRateStateEmail,
+    sendUndoWithdrawnRateCMSEmail,
 } from './'
 import type { UnlockedHealthPlanFormDataType } from '@mc-review/hpp'
 import type {
@@ -178,6 +180,15 @@ type Emailer = {
         statePrograms: ProgramType[]
     ) => Promise<void | Error>
     sendWithdrawnRateCMSEmail: (
+        rate: RateType,
+        statePrograms: ProgramType[],
+        stateAnalystsEmails: StateAnalystsEmails
+    ) => Promise<void | Error>
+    sendUndoWithdrawnRateStateEmail: (
+        rate: RateType,
+        statePrograms: ProgramType[]
+    ) => Promise<void | Error>
+    sendUndoWithdrawnRateCMSEmail: (
         rate: RateType,
         statePrograms: ProgramType[],
         stateAnalystsEmails: StateAnalystsEmails
@@ -519,6 +530,37 @@ function emailer(
                 rate,
                 statePrograms,
                 stateAnalystsEmails
+            )
+
+            if (emailData instanceof Error) {
+                return emailData
+            } else {
+                return await this.sendEmail(emailData)
+            }
+        },
+        sendUndoWithdrawnRateStateEmail: async function (rate, statePrograms) {
+            const emailData = await sendUndoWithdrawnRateStateEmail(
+                rate,
+                statePrograms,
+                config
+            )
+
+            if (emailData instanceof Error) {
+                return emailData
+            } else {
+                return await this.sendEmail(emailData)
+            }
+        },
+        sendUndoWithdrawnRateCMSEmail: async function (
+            rate,
+            statePrograms,
+            stateAnalystsEmails
+        ) {
+            const emailData = await sendUndoWithdrawnRateCMSEmail(
+                rate,
+                statePrograms,
+                stateAnalystsEmails,
+                config
             )
 
             if (emailData instanceof Error) {
