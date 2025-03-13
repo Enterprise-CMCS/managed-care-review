@@ -1,6 +1,5 @@
 import { SecretsManager } from './secrets'
 import { DatabaseClient } from './db'
-import { randomBytes } from 'crypto'
 import { SecretDict } from './types'
 import { Client } from 'pg'
 import {
@@ -347,34 +346,28 @@ class LogicalDatabaseManager {
             }
 
             try {
-                console.info(`Checking if secret ${prSecretName} exists`)
-                // Check if secret exists
-                await this.secrets.describeSecret(prSecretName)
+                console.info(
+                    `Creating or updating secret ${prSecretName} with logical database credentials`
+                )
 
-                // Store the token for the update
-                const token = randomBytes(32).toString('hex')
-
-                console.info(`Updating secret ${prSecretName}`)
-                // Update existing secret with AWSPENDING
-                await this.secrets.putSecret(prSecretName, token, secretValue)
-
-                // Move AWSPENDING to AWSCURRENT
-                await this.secrets.updateSecretStage(prSecretName, token)
+                // Use the new specialized function that properly handles existing/new secrets
+                await this.secrets.createOrUpdateDatabaseSecret(
+                    prSecretName,
+                    secretValue
+                )
 
                 console.info(
-                    `Secret ${prSecretName} updated with logical database credentials`
+                    `Secret ${prSecretName} created/updated with logical database credentials`
                 )
             } catch (error) {
-                console.info(
-                    `Secret ${prSecretName} doesn't exist, creating new secret`
+                console.error(
+                    `Failed to create/update secret ${prSecretName}:`,
+                    error
                 )
-                // Secret doesn't exist, create it
-                const token = randomBytes(32).toString('hex')
-                await this.secrets.putSecret(prSecretName, token, secretValue)
-                await this.secrets.updateSecretStage(prSecretName, token)
-
-                console.info(
-                    `Secret ${prSecretName} created with logical database credentials`
+                throw new DatabaseOperationError(
+                    `Failed to create/update secret ${prSecretName} for logical database`,
+                    'createLogicalDatabase',
+                    error instanceof Error ? error : new Error(String(error))
                 )
             }
 
