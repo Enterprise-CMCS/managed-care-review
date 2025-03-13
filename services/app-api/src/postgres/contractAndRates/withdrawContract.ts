@@ -148,12 +148,7 @@ const withdrawContractInsideTransaction = async (
     }
 
     // Child rates to withdraw with the submission, so it includes the same withdraw reason
-    const childRateWithdraw = []
-
-    // Linked rates, where the parent is withdrawn and needs to set the review status of this rate as withdrawn also
-    // so that it's not an active rate review linked to only withdrawn contracts.
-    // The withdrawal reason for these should possibly be something else?
-    const linkedRateWithdraw = []
+    const ratesToWithdraw = []
 
     // loop through all rates to determine which ones can be withdrawn.
     for (const rate of rates) {
@@ -196,11 +191,6 @@ const withdrawContractInsideTransaction = async (
             return false
         })
 
-        //TODO: Ask if we want to withdraw rate if its linked to unlocked submission, because the state user
-        // will not be allowed to resubmit with a withdrawn rate, they can ake the action to remove the
-        // rate to resubmit. This removes the process of CMS having to contact the state about an unlocked
-        // submission, which cannot be done in the app today. This approach lets CMS withdraw and have the state user correct unlocked or draft rates.
-
         // skipping rate it conditions are met
         if (
             !latestRateRevision.submitInfo || // unlocked rate. linked rates can be in unlocked status
@@ -211,20 +201,10 @@ const withdrawContractInsideTransaction = async (
             continue
         }
 
-        //TODO: Double check if we need this. I think there really is no difference in the two because they would probably
-        // share the same update reason.
-        // Ask if the rates would have the same withdraw reason. Use figure 3 as example, where submission B with withdrawn.
-        if (
-            parentContract.id === contract.id // is this a child rate
-        ) {
-            // set rate to be withdrawn with this submission
-            childRateWithdraw.push(rate)
-        } else if (
-            parentContract.reviewStatusActions[0]?.actionType === 'WITHDRAW'
-        ) {
-            // set rate to be withdrawn
-            linkedRateWithdraw.push(rate)
-        }
+        // TODO: Pending decision if rate can be withdrawn if its linked to a unlocked submission that had this rate in its latest submission package.
+        //  - If we do allow it, then delete this TODO, if we do not allow it we need to add logic to check unlocked
+        //      submissions for rate in its latest submission package.
+        ratesToWithdraw.push(rate)
     }
     const statePrograms = findStatePrograms(contract.stateCode)
 
@@ -234,7 +214,7 @@ const withdrawContractInsideTransaction = async (
         )
     }
 
-    const withdrawRateNames = [...childRateWithdraw, ...linkedRateWithdraw].map(
+    const withdrawRateNames = ratesToWithdraw.map(
         (r) => r.revisions[0]?.rateCertificationName ?? r.revisions[0].rateID
     )
     const contractName = packageName(
@@ -280,28 +260,10 @@ const withdrawContractInsideTransaction = async (
     })
 
     // add withdraw action to all rates that are withdrawn with this submission
-    for (const rate of childRateWithdraw) {
+    for (const rate of ratesToWithdraw) {
         await tx.rateActionTable.create({
             data: {
                 updatedReason,
-                updatedBy: {
-                    connect: {
-                        id: updatedByID,
-                    },
-                },
-                actionType: 'WITHDRAW',
-                rate: {
-                    connect: {
-                        id: rate.id,
-                    },
-                },
-            },
-        })
-    }
-    for (const rate of linkedRateWithdraw) {
-        await tx.rateActionTable.create({
-            data: {
-                updatedReason, // TODO: This may have a different withdraw reason, pending discussion with design. If not we can combine this with the loop above
                 updatedBy: {
                     connect: {
                         id: updatedByID,
