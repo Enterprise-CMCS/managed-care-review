@@ -365,8 +365,8 @@ importers:
         specifier: ^1.2.1
         version: 1.2.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/propagator-aws-xray':
-        specifier: ^1.26.0
-        version: 1.26.0(@opentelemetry/api@1.9.0)
+        specifier: ^1.26.2
+        version: 1.26.2(@opentelemetry/api@1.9.0)
       '@opentelemetry/resources':
         specifier: ^1.18.1
         version: 1.25.0(@opentelemetry/api@1.9.0)
@@ -617,8 +617,8 @@ importers:
         specifier: ^0.45.1
         version: 0.45.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/propagator-aws-xray':
-        specifier: ^1.26.0
-        version: 1.26.0(@opentelemetry/api@1.9.0)
+        specifier: ^1.26.2
+        version: 1.26.2(@opentelemetry/api@1.9.0)
       '@opentelemetry/resources':
         specifier: ^1.18.1
         version: 1.25.0(@opentelemetry/api@1.9.0)
@@ -4587,12 +4587,6 @@ packages:
     peerDependencies:
       '@opentelemetry/api': '>=1.0.0 <1.10.0'
 
-  '@opentelemetry/core@1.26.0':
-    resolution: {integrity: sha512-1iKxXXE8415Cdv0yjG3G6hQnB5eVEsJce3QaawX8SjDn0mAS0ZM8fAbZZJD4ajvhC15cePvosSCut404KrIIvQ==}
-    engines: {node: '>=14'}
-    peerDependencies:
-      '@opentelemetry/api': '>=1.0.0 <1.10.0'
-
   '@opentelemetry/core@1.27.0':
     resolution: {integrity: sha512-yQPKnK5e+76XuiqUH/gKyS8wv/7qITd5ln56QkBTf3uggr0VkXOXfcaAuG330UfdYu83wsyoBwqwxigpIG+Jkg==}
     engines: {node: '>=14'}
@@ -4762,8 +4756,8 @@ packages:
     peerDependencies:
       '@opentelemetry/api': ^1.3.0
 
-  '@opentelemetry/propagator-aws-xray@1.26.0':
-    resolution: {integrity: sha512-Sex+JyEZ/xX328TArBqQjh1NZSfNyw5NdASUIi9hnPsnMBMSBaDe7B9JRnXv0swz7niNyAnXa6MY7yOCV76EvA==}
+  '@opentelemetry/propagator-aws-xray@1.26.2':
+    resolution: {integrity: sha512-k43wxTjKYvwfce9L4eT8fFYy/ATmCfPHZPZsyT/6ABimf2KE1HafoOsIcxLOtmNSZt6dCvBIYCrXaOWta20xJg==}
     engines: {node: '>=14'}
     peerDependencies:
       '@opentelemetry/api': '>=1.0.0 <1.10.0'
@@ -19632,11 +19626,6 @@ snapshots:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/semantic-conventions': 1.25.0
 
-  '@opentelemetry/core@1.26.0(@opentelemetry/api@1.9.0)':
-    dependencies:
-      '@opentelemetry/api': 1.9.0
-      '@opentelemetry/semantic-conventions': 1.27.0
-
   '@opentelemetry/core@1.27.0(@opentelemetry/api@1.9.0)':
     dependencies:
       '@opentelemetry/api': 1.9.0
@@ -19892,10 +19881,9 @@ snapshots:
       '@opentelemetry/sdk-trace-base': 1.30.1(@opentelemetry/api@1.9.0)
       protobufjs: 7.3.2
 
-  '@opentelemetry/propagator-aws-xray@1.26.0(@opentelemetry/api@1.9.0)':
+  '@opentelemetry/propagator-aws-xray@1.26.2(@opentelemetry/api@1.9.0)':
     dependencies:
       '@opentelemetry/api': 1.9.0
-      '@opentelemetry/core': 1.26.0(@opentelemetry/api@1.9.0)
 
   '@opentelemetry/propagator-b3@1.25.0(@opentelemetry/api@1.9.0)':
     dependencies:
