@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 set -u
+
 # Script to invoke the database manager lambda function
 # Usage: ./db-manager.sh create|delete stageName dbSecretArn
+
 action="$1"        # create or delete
 stage_name="$2"    # The stage/environment name for the database
 secret_arn="$3"    # ARN of the secrets manager secret for the main dev DB
