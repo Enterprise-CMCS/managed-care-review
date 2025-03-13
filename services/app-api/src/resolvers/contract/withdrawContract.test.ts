@@ -316,10 +316,36 @@ describe('withdrawContract', () => {
             (edge: RateStrippedEdge) => edge.node.id === rateCRevision.rateID
         )?.node
 
+        if (!rateA) {
+            throw new Error('Expected rateA to exist')
+        }
+        if (!rateB) {
+            throw new Error('Expected rateB to exist')
+        }
+        if (!rateC) {
+            throw new Error('Expected rateC to exist')
+        }
+
         expect(withdrawnContract.consolidatedStatus).toBe('WITHDRAWN')
-        expect(rateA?.consolidatedStatus).toBe('WITHDRAWN')
-        expect(rateB?.consolidatedStatus).toBe('RESUBMITTED')
-        expect(rateC?.consolidatedStatus).toBe('RESUBMITTED')
+        expect(rateA.consolidatedStatus).toBe('WITHDRAWN')
+        expect(rateB.consolidatedStatus).toBe('RESUBMITTED')
+        expect(rateC.consolidatedStatus).toBe('RESUBMITTED')
+
+        const contractAHistory =
+            await contractHistoryToDescriptions(withdrawnContract)
+        const contractName =
+            withdrawnContract.packageSubmissions[0].contractRevision
+                .contractName
+        const rateAName =
+            rateA.latestSubmittedRevision.formData.rateCertificationName
+
+        expect(contractAHistory).toStrictEqual(
+            expect.arrayContaining([
+                'Initial submission',
+                `CMS withdrawing the submission ${contractName} along with the following rates: ${rateAName}. withdraw contract A`,
+                `CMS has withdrawn the submission ${contractName} along with the following rates: ${rateAName}. withdraw contract A`,
+            ])
+        )
     }, 10000)
 
     it('withdraws rate with parent contract when linked to withdrawn contract', async () => {
