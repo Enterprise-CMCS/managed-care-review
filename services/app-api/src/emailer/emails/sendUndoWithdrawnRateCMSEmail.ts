@@ -64,7 +64,7 @@ export const sendUndoWithdrawnRateCMSEmail = async (
             sourceEmail: config.emailSource,
             subject: `${
                 config.stage !== 'prod' ? `[${config.stage}] ` : ''
-            }${etaData.rateInfo.rateName} was unwithdrawn`,
+            }${etaData.rateInfo.rateName} status update`,
             bodyText: stripHTMLFromTemplate(template),
             bodyHTML: template,
         }
