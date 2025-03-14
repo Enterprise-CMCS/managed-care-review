@@ -53,6 +53,13 @@ const featureFlags = {
         flag: 'remove-parameter-store',
         defaultValue: false,
     },
+    /**
+     * Enables withdraw submission features
+     */
+    WITHDRAW_SUBMISSION: {
+        flag: 'withdraw-submission',
+        defaultValue: false
+    },
     // PERMANENT FLAGS
     /**
      Enables the modal that alerts the user to an expiring session
