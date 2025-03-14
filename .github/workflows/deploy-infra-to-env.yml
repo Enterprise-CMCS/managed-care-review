@@ -46,6 +46,10 @@ on:
         required: true
       subnet_public_a_id:
         required: false
+      dev_db_sm_arn:
+        required: false
+      dev_aurora_arn:
+        required: false
 
 permissions:
   id-token: write
@@ -133,8 +137,19 @@ jobs:
           SUBNET_PUBLIC_A_ID: ${{ secrets.subnet_public_a_id }}
           IAM_PERMISSIONS_BOUNDARY: ${{ secrets.iam_permissions_boundary }}
           IAM_PATH: ${{ secrets.iam_path }}
+          DEV_AURORA_ARN: ${{ secrets.dev_aurora_arn }}
+          DEV_DB_SM_ARN: ${{ secrets.dev_db_sm_arn }}
         run: |
           pushd services/postgres && npx serverless deploy --stage ${{ inputs.stage_name }}
+
+      - name: Create logical database
+        if: ${{ github.ref != 'refs/heads/main' }}
+        env:
+          STAGE_NAME: ${{ inputs.stage_name }}
+          DEV_DB_SM_ARN: ${{ secrets.dev_db_sm_arn }}
+        run: |
+          chmod +x services/postgres/db-manager.sh
+          ./services/postgres/db-manager.sh create $STAGE_NAME $DEV_DB_SM_ARN $STAGE_NAME
 
       - name: Upload VM scripts to S3
         run: |
