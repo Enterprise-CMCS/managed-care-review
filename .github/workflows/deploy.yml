@@ -394,6 +394,15 @@ jobs:
         run: |
           ./scripts/invoke-migrate-lambda.sh app-api-$STAGE_NAME-migrate
 
+      - name: TEST DONT MERGE -- Delete logical database
+        env:
+          STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
+          DEV_DB_SM_ARN: ${{ secrets.DEV_DB_SM_ARN }}
+          AWS_REGION: ${{ vars.AWS_DEFAULT_REGION }}
+        run: |
+          chmod +x services/postgres/db-manager.sh
+          ./services/postgres/db-manager.sh delete $STAGE_NAME $DEV_DB_SM_ARN $STAGE_NAME
+
       - name: get application endpoint
         id: save-app-endpoint
         env:
