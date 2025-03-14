@@ -71,6 +71,9 @@ export const handler = async (event: LambdaEvent): Promise<LambdaResponse> => {
                     secretName
                 )
             } else if (action === 'delete') {
+                console.info(
+                    `DELETE: ${devDbSecretArn}, ${dbName}, ${userName}, ${secretName}`
+                )
                 return await manager.deleteLogicalDatabase(
                     devDbSecretArn,
                     dbName,
@@ -481,25 +484,37 @@ class LogicalDatabaseManager {
                 )
             }
 
-            console.info('Connected to PostgreSQL')
+            if (dbCredentials.dbname === dbName) {
+                throw new DatabaseOperationError(
+                    `Safety check failed: Cannot drop the database (${dbName}) we're currently connected to`,
+                    'deleteLogicalDatabase'
+                )
+            }
 
-            // Terminate all connections to the database
-            console.info(`Terminating all connections to ${dbName}`)
-            await client.query(
-                `
-                SELECT pg_terminate_backend(pg_stat_activity.pid)
-                FROM pg_stat_activity
-                WHERE pg_stat_activity.datname = $1
-            `,
-                [dbName]
+            // Log the database name we're about to operate on
+            console.info(
+                `Preparing to drop review database ${dbName} (distinct from current database ${dbCredentials.dbname})`
             )
 
-            console.info(`Terminated all connections to ${dbName}`)
+            // Use PostgreSQL 14's WITH (FORCE) option to automatically terminate connections
+            try {
+                console.info(`Dropping database ${dbName} with FORCE option`)
+                await client.query(
+                    `DROP DATABASE IF EXISTS "${dbName}" WITH (FORCE)`
+                )
+                console.info(`Database ${dbName} dropped successfully`)
+            } catch (error) {
+                console.error(`Error dropping database ${dbName}:`, error)
+                // Log the specific error for debugging
+                if (error instanceof Error) {
+                    console.error(`Error details: ${error.message}`)
+                }
 
-            // Drop the database
-            console.info(`Dropping database ${dbName}`)
-            await client.query(`DROP DATABASE IF EXISTS "${dbName}"`)
-            console.info(`Database ${dbName} dropped`)
+                // Proceed with other cleanup tasks even if database drop fails
+                console.warn(
+                    `Continuing with cleanup despite database drop issue`
+                )
+            }
 
             // Drop the user
             console.info(`Dropping user ${userName}`)
