@@ -1,4 +1,4 @@
-import { Grid, GridContainer, Link, ModalRef } from '@trussworks/react-uswds'
+import { GridContainer, Link, ModalRef } from '@trussworks/react-uswds'
 import React, { useEffect, useRef, useState } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
 import { ContractDetailsSummarySection } from '../StateSubmission/ReviewSubmit/ContractDetailsSummarySection'
@@ -11,6 +11,8 @@ import {
     DocumentWarningBanner,
     LinkWithLogging,
     NavLinkWithLogging,
+    SectionCard,
+    DoubleColumnGrid,
 } from '../../components'
 import { Loading } from '../../components'
 import { usePage } from '../../contexts/PageContext'
@@ -247,16 +249,36 @@ export const SubmissionSummary = (): React.ReactElement => {
                     <DocumentWarningBanner className={styles.banner} />
                 )}
 
-                {showSubmissionApproval && (
-                    <Grid className={styles.releaseToStateContainer} row>
-                        <NavLinkWithLogging
-                            className="usa-button"
-                            variant="unstyled"
-                            to={'./released-to-state'}
-                        >
-                            Released to state
-                        </NavLinkWithLogging>
-                    </Grid>
+                {hasCMSPermissions && (
+                    <SectionCard className={styles.actionsSection}>
+                        <h3>Actions</h3>
+                        <DoubleColumnGrid>
+                            {hasCMSPermissions && !showApprovalBanner && (
+                                <ModalOpenButton
+                                    modalRef={modalRef}
+                                    disabled={
+                                        ['DRAFT', 'UNLOCKED'].includes(
+                                            contract.status
+                                        ) ||
+                                        contract.reviewStatus === 'APPROVED'
+                                    }
+                                    className={styles.submitButton}
+                                    id="form-submit"
+                                >
+                                    Unlock submission
+                                </ModalOpenButton>
+                            )}
+                            {showSubmissionApproval && (
+                                <NavLinkWithLogging
+                                    className="usa-button bg-green"
+                                    variant="unstyled"
+                                    to={'./released-to-state'}
+                                >
+                                    Released to state
+                                </NavLinkWithLogging>
+                            )}
+                        </DoubleColumnGrid>
+                    </SectionCard>
                 )}
 
                 <SubmissionTypeSummarySection
@@ -288,23 +310,6 @@ export const SubmissionSummary = (): React.ReactElement => {
                     }
                     contract={contract}
                     submissionName={name}
-                    headerChildComponent={
-                        hasCMSPermissions && !showApprovalBanner ? (
-                            <ModalOpenButton
-                                modalRef={modalRef}
-                                disabled={
-                                    ['DRAFT', 'UNLOCKED'].includes(
-                                        contract.status
-                                    ) || contract.reviewStatus === 'APPROVED'
-                                }
-                                className={styles.submitButton}
-                                id="form-submit"
-                                outline={showSubmissionApproval}
-                            >
-                                Unlock submission
-                            </ModalOpenButton>
-                        ) : undefined
-                    }
                     statePrograms={statePrograms}
                     initiallySubmittedAt={contract.initiallySubmittedAt}
                     isStateUser={isStateUser}

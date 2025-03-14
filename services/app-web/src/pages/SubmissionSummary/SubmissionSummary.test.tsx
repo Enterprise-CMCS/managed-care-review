@@ -935,12 +935,12 @@ describe('SubmissionSummary', () => {
                         })
                     ).toBeInTheDocument()
 
-                    // expect unlock button to have outline style
+                    // expect unlock button
                     expect(
                         screen.getByRole('button', {
                             name: 'Unlock submission',
                         })
-                    ).toHaveClass('usa-button--outline')
+                    ).toHaveClass('usa-button')
                 })
                 it('does not render released to state link on unlocked submission', async () => {
                     const unlockedContract =
