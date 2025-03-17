@@ -537,9 +537,10 @@ describe('SubmissionSummary', () => {
 
             describe('CMS user unlock submission', () => {
                 it('renders the unlock button', async () => {
-                    const contract = mockContractPackageSubmittedWithQuestions({
-                        id: 'test-abc-123',
-                    })
+                    const contract =
+                        mockContractPackageSubmittedWithQuestions(
+                            'test-abc-123'
+                        )
 
                     renderWithProviders(
                         <Routes>
