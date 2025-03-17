@@ -89,6 +89,8 @@ import {
 } from './contractAndRates/undoWithdrawRate'
 import type { StrippedRateOrErrorArrayType } from './contractAndRates/findAllRatesStripped'
 import { findAllRatesStripped } from './contractAndRates/findAllRatesStripped'
+import type { WithdrawContractArgsType } from './contractAndRates/withdrawContract'
+import { withdrawContract } from './contractAndRates/withdrawContract'
 
 type Store = {
     findPrograms: (
@@ -162,6 +164,10 @@ type Store = {
 
     approveContract: (
         args: ApproveContractArgsType
+    ) => Promise<ContractType | Error>
+
+    withdrawContract: (
+        args: WithdrawContractArgsType
     ) => Promise<ContractType | Error>
 
     withdrawRate: (args: WithdrawRateArgsType) => Promise<RateType | Error>
@@ -293,6 +299,7 @@ function NewPostgresStore(client: ExtendedPrismaClient): Store {
 
         insertDraftContract: (args) => insertDraftContract(client, args),
         approveContract: (args) => approveContract(client, args),
+        withdrawContract: (args) => withdrawContract(client, args),
         withdrawRate: (args) => withdrawRate(client, args),
         undoWithdrawRate: (args) => undoWithdrawRate(client, args),
         findContractWithHistory: (args) =>

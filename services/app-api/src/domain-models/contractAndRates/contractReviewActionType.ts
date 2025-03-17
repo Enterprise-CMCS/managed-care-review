@@ -5,6 +5,7 @@ import { baseUserSchema } from '../UserType'
 const contractReviewActionTypeSchema = z.union([
     z.literal('UNDER_REVIEW'),
     z.literal('MARK_AS_APPROVED'),
+    z.literal('WITHDRAW'),
 ])
 
 const contractReviewActionSchema = z.object({

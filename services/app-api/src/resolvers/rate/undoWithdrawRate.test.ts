@@ -11,6 +11,7 @@ import {
     fetchTestContract,
     submitTestContract,
     unlockTestContract,
+    contractHistoryToDescriptions,
 } from '../../testHelpers/gqlContractHelpers'
 import {
     withdrawTestRate,
@@ -18,7 +19,7 @@ import {
     addNewRateToTestContract,
 } from '../../testHelpers/gqlRateHelpers'
 import { must } from '../../testHelpers'
-import type { RateFormDataInput, Contract } from '../../gen/gqlClient'
+import type { RateFormDataInput } from '../../gen/gqlClient'
 import {
     UndoWithdrawnRateDocument,
     UpdateDraftContractRatesDocument,
@@ -26,7 +27,6 @@ import {
 import { describe } from 'vitest'
 import { mockStoreThatErrors } from '../../testHelpers/storeHelpers'
 import { testEmailConfig, testEmailer } from '../../testHelpers/emailerHelpers'
-import { packageName } from '@mc-review/hpp/build/healthPlanFormDataType/healthPlanFormData'
 
 const testRateFormInputData = (): RateFormDataInput => ({
     rateType: 'AMENDMENT',
@@ -57,28 +57,6 @@ const testRateFormInputData = (): RateFormDataInput => ({
     addtlActuaryContacts: [],
     actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
 })
-
-const reduceHistoryToDescriptions = (contract: Contract): string[] => {
-    return contract.packageSubmissions.reduce((history: string[], pkgSub) => {
-        const updatedHistory = history
-
-        if (pkgSub.cause !== 'CONTRACT_SUBMISSION') {
-            return updatedHistory
-        }
-
-        if (pkgSub.submitInfo.updatedReason) {
-            updatedHistory.unshift(pkgSub.submitInfo.updatedReason)
-        }
-
-        if (pkgSub.contractRevision.unlockInfo?.updatedReason) {
-            updatedHistory.unshift(
-                pkgSub.contractRevision.unlockInfo.updatedReason
-            )
-        }
-
-        return updatedHistory
-    }, [])
-}
 
 describe('undoWithdrawRate', () => {
     it('can undo withdraw a rate without errors', async () => {
@@ -209,8 +187,10 @@ describe('undoWithdrawRate', () => {
         )
 
         // Check history
-        const contractAHistory = reduceHistoryToDescriptions(submittedContractA)
-        const contractBHistory = reduceHistoryToDescriptions(submittedContractB)
+        const contractAHistory =
+            contractHistoryToDescriptions(submittedContractA)
+        const contractBHistory =
+            contractHistoryToDescriptions(submittedContractB)
 
         // Expect contract A history to be in order
         expect(contractAHistory).toStrictEqual(
@@ -309,42 +289,24 @@ describe('undoWithdrawRate', () => {
             'Unlock after withdraw'
         )
 
-        await submitTestContract(
+        const submittedContractB = await submitTestContract(
             stateServer,
             contractB.id,
             'resubmit after withdrawing rate'
         )
 
-        await submitTestContract(
+        const submittedContractA = await submitTestContract(
             stateServer,
             contractA.id,
             'Submit before undo withdraw'
         )
 
-        const submittedContractA = await fetchTestContract(
-            cmsServer,
-            contractA.id
-        )
-        const submittedContractB = await fetchTestContract(
-            cmsServer,
-            contractB.id
-        )
-
-        const contractAName = packageName(
-            submittedContractA.stateCode,
-            submittedContractA.stateNumber,
-            submittedContractA.packageSubmissions[0].contractRevision.formData
-                .programIDs,
-            [defaultFloridaProgram()]
-        )
-
-        const contractBName = packageName(
-            submittedContractB.stateCode,
-            submittedContractB.stateNumber,
-            submittedContractB.packageSubmissions[0].contractRevision.formData
-                .programIDs,
-            [defaultFloridaProgram()]
-        )
+        const contractAName =
+            submittedContractA.packageSubmissions[0].contractRevision
+                .contractName
+        const contractBName =
+            submittedContractB.packageSubmissions[0].contractRevision
+                .contractName
 
         const stateReceiverEmails =
             contractA.packageSubmissions[0].contractRevision.formData.stateContacts.map(

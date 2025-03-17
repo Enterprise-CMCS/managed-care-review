@@ -1,3 +1,4 @@
+import type { IndexRatesStrippedPayload } from '../gen/gqlClient'
 import {
     SubmitRateDocument,
     FetchRateDocument,
@@ -6,6 +7,7 @@ import {
     UpdateDraftContractRatesDocument,
     WithdrawRateDocument,
     UndoWithdrawnRateDocument,
+    IndexRatesStrippedDocument,
 } from '../gen/gqlClient'
 import { must } from './assertionHelpers'
 import { defaultFloridaRateProgram } from './gqlHelpers'
@@ -516,6 +518,42 @@ const undoWithdrawTestRate = async (
     return undoWithdrawRate.data.undoWithdrawRate.rate
 }
 
+const fetchTestIndexRatesStripped = async (
+    server: ApolloServer,
+    stateCode?: string
+): Promise<IndexRatesStrippedPayload> => {
+    const indexRatesStrippedResult = await server.executeOperation({
+        query: IndexRatesStrippedDocument,
+        variables: {
+            input: {
+                stateCode: stateCode,
+            },
+        },
+    })
+
+    if (indexRatesStrippedResult.errors) {
+        console.info('errors', indexRatesStrippedResult.errors)
+        throw new Error(
+            `fetchTestIndexRatesStripped query failed with errors ${indexRatesStrippedResult.errors}`
+        )
+    }
+
+    if (
+        indexRatesStrippedResult.data === undefined ||
+        indexRatesStrippedResult.data === null
+    ) {
+        throw new Error('fetchTestIndexRatesStripped returned nothing')
+    }
+
+    const indexRatesStripped = indexRatesStrippedResult.data.indexRatesStripped
+
+    if (!indexRatesStripped || indexRatesStripped.length === 0) {
+        throw new Error('fetchTestIndexRatesStripped returned with no rates')
+    }
+
+    return indexRatesStripped
+}
+
 export {
     createTestDraftRateOnContract,
     createSubmitAndUnlockTestRate,
@@ -534,4 +572,5 @@ export {
     fetchTestRateWithQuestionsById,
     withdrawTestRate,
     undoWithdrawTestRate,
+    fetchTestIndexRatesStripped,
 }
