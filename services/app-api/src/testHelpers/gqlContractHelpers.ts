@@ -8,6 +8,7 @@ import {
     CreateContractDocument,
     FetchContractWithQuestionsDocument,
     ApproveContractDocument,
+    WithdrawContractDocument,
 } from '../gen/gqlClient'
 
 import { findStatePrograms } from '../postgres'
@@ -497,6 +498,54 @@ const updateTestContractDraftRevision = async (
     return updateResult.data.updateContractDraftRevision.contract
 }
 
+const withdrawTestContract = async (
+    server: ApolloServer,
+    contractID: string,
+    updatedReason: string
+): Promise<Contract> => {
+    const withdrawResult = await server.executeOperation({
+        query: WithdrawContractDocument,
+        variables: {
+            input: {
+                contractID,
+                updatedReason,
+            },
+        },
+    })
+
+    if (withdrawResult.errors) {
+        console.info('errors', withdrawResult.errors)
+    }
+
+    if (withdrawResult.data === undefined || withdrawResult.data === null) {
+        throw new Error('withdraw contract returned nothing')
+    }
+
+    return withdrawResult.data.withdrawContract.contract
+}
+
+const contractHistoryToDescriptions = (contract: Contract): string[] => {
+    return contract.packageSubmissions.reduce((history: string[], pkgSub) => {
+        const updatedHistory = history
+
+        if (pkgSub.cause !== 'CONTRACT_SUBMISSION') {
+            return updatedHistory
+        }
+
+        if (pkgSub.submitInfo.updatedReason) {
+            updatedHistory.unshift(pkgSub.submitInfo.updatedReason)
+        }
+
+        if (pkgSub.contractRevision.unlockInfo?.updatedReason) {
+            updatedHistory.unshift(
+                pkgSub.contractRevision.unlockInfo.updatedReason
+            )
+        }
+
+        return updatedHistory
+    }, [])
+}
+
 export {
     submitTestContract,
     unlockTestContract,
@@ -515,4 +564,6 @@ export {
     updateTestContractDraftRevision,
     createTestContract,
     updateTestContractToReplaceRate,
+    withdrawTestContract,
+    contractHistoryToDescriptions,
 }

@@ -589,6 +589,23 @@ type Mutation {
     undoWithdrawRate(
         input: UndoWithdrawRateInput!
     ): UndoWithdrawRatePayload
+
+    """
+    withdrawSubmission is a CMS user only action to withdraw an entire submission package, which includes contract and child rates
+
+    Errors:
+    - ForbiddenError:
+    - A non CMS/CMS Approver user called this
+    - UserInputError:
+    - A contract is not in the correct submission status: SUBMITTED or RESUBMITTED
+    - A contract is not in the correct review status: UNDER_REVIEW
+    - INTERNAL_SERVER_ERROR
+    - DB_ERROR
+    - A contract cannot be found by id
+    """
+    withdrawContract(
+        input: WithdrawContractInput!
+    ): WithdrawContractPayload
 }
 
 input CreateHealthPlanPackageInput {
@@ -667,6 +684,10 @@ type UndoWithdrawRatePayload {
     rate: Rate!
 }
 
+type WithdrawContractPayload {
+    contract: Contract!
+}
+
 input WithdrawRateInput {
     rateID: ID!
     updatedReason: String!
@@ -674,6 +695,11 @@ input WithdrawRateInput {
 
 input UndoWithdrawRateInput {
     rateID: ID!
+    updatedReason: String!
+}
+
+input WithdrawContractInput {
+    contractID: ID!
     updatedReason: String!
 }
 
@@ -1075,6 +1101,7 @@ or if it has been submitted and is being reviewed by CMS users.
 enum ContractReviewStatus {
     UNDER_REVIEW
     APPROVED
+    WITHDRAWN
 }
 
 """
@@ -1095,6 +1122,7 @@ enum ConsolidatedContractStatus {
     UNLOCKED
     RESUBMITTED
     APPROVED
+    WITHDRAWN
 }
 
 """
@@ -1117,6 +1145,7 @@ enum UnlockedStatus {
 enum ContractActionType {
     UNDER_REVIEW
     MARK_AS_APPROVED
+    WITHDRAW
 }
 
 enum RateActionType {
@@ -2083,13 +2112,13 @@ type Contract {
     status: HealthPlanPackageStatus!
     """
     Where the contract is in the review submission flow
-    Options are UNDER_REVIEW, APPROVED
+    Options are UNDER_REVIEW, APPROVED, WITHDRAWN
     """
     reviewStatus: ContractReviewStatus!
     """
     Synthesized field that represents if a contract's status or
     reviewStatus should take precedence
-    Options are DRAFT, SUBMITTED, RESUBMITTED UNLOCKED, UNDER_REVIEW, APPROVED
+    Options are DRAFT, SUBMITTED, RESUBMITTED UNLOCKED, UNDER_REVIEW, APPROVED, WITHDRAWN
     """
     consolidatedStatus: ConsolidatedContractStatus!
     "initiallySubmittedAt is the initial date this contract was submitted at. Is not changed by unlock or resubmission."
@@ -2161,13 +2190,13 @@ type UnlockedContract {
     status: UnlockedStatus!
      """
     Where the contract is in the review submission flow
-    Options are UNDER_REVIEW, APPROVED
+    Options are UNDER_REVIEW, APPROVED, WITHDRAWN
     """
     reviewStatus: ContractReviewStatus!
     """
     Synthesized field that represents if a contract's status or
     reviewStatus should take precedence
-    Options are DRAFT, SUBMITTED, RESUBMITTED UNLOCKED, UNDER_REVIEW, APPROVED
+    Options are DRAFT, SUBMITTED, RESUBMITTED UNLOCKED, UNDER_REVIEW, APPROVED, WITHDRAWN
     """
     consolidatedStatus: ConsolidatedContractStatus!
     "initiallySubmittedAt is the initial date this contract was submitted at. Is not changed by unlock or resubmission."
