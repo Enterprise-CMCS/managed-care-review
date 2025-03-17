@@ -35,7 +35,6 @@ const withdrawContractInsideTransaction = async (
     tx: PrismaTransactionType,
     args: WithdrawContractArgsType
 ): Promise<ContractType | Error> => {
-    performance.mark('beginWithdrawContractInsideTransaction')
     const { contract, updatedReason, updatedByID } = args
 
     const latestSubmission = contract.packageSubmissions[0]
