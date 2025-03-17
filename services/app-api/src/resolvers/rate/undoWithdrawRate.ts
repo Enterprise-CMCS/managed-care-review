@@ -1,5 +1,6 @@
 import type { Store } from '../../postgres'
 import type { MutationResolvers } from '../../gen/gqlServer'
+import type { Emailer } from '../../emailer'
 import {
     setErrorAttributesOnActiveSpan,
     setResolverDetailsOnActiveSpan,
@@ -10,9 +11,11 @@ import { logError, logSuccess } from '../../logger'
 import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
 import { NotFoundError } from '../../postgres'
 import { GraphQLError } from 'graphql/index'
+import type { StateCodeType } from '../../testHelpers'
 
 export function undoWithdrawRate(
-    store: Store
+    store: Store,
+    emailer: Emailer
 ): MutationResolvers['undoWithdrawRate'] {
     return async (_parent, { input }, context) => {
         const { user, ctx, tracer } = context
@@ -119,9 +122,80 @@ export function undoWithdrawRate(
                 },
             })
         }
-
         logSuccess('undoWithdrawRate')
         setSuccessAttributesOnActiveSpan(span)
+
+        //Send emails upon success
+        const statePrograms = await store.findStatePrograms(
+            undoWithdrawRate.stateCode
+        )
+
+        if (statePrograms instanceof Error) {
+            const errMessage = `Email failed: ${statePrograms.message}`
+            logError('undoWithdrawRate', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+            throw new GraphQLError(errMessage, {
+                extensions: {
+                    code: 'INTERNAL_SERVER_ERROR',
+                    cause: 'EMAIL_ERROR',
+                },
+            })
+        }
+
+        let stateAnalystEmails: string[] = []
+        const stateAnalystEmailsResult = await store.findStateAssignedUsers(
+            undoWithdrawRate.stateCode as StateCodeType
+        )
+
+        if (stateAnalystEmailsResult instanceof Error) {
+            logError('getStateAnalystEmails', stateAnalystEmailsResult.message)
+            setErrorAttributesOnActiveSpan(
+                stateAnalystEmailsResult.message,
+                span
+            )
+        } else {
+            stateAnalystEmails = stateAnalystEmailsResult.map((u) => u.email)
+        }
+
+        //State emails
+        const sendUndoWithdrawnRateStateEmail =
+            await emailer.sendUndoWithdrawnRateStateEmail(
+                undoWithdrawRate,
+                statePrograms
+            )
+
+        //CMS emails
+        const sendUndoWithdrawnRateCMSEmail =
+            await emailer.sendUndoWithdrawnRateCMSEmail(
+                undoWithdrawRate,
+                statePrograms,
+                stateAnalystEmails
+            )
+
+        //Send email error handling
+        if (
+            sendUndoWithdrawnRateStateEmail instanceof Error ||
+            sendUndoWithdrawnRateCMSEmail instanceof Error
+        ) {
+            let errMessage = ''
+
+            if (sendUndoWithdrawnRateStateEmail instanceof Error) {
+                errMessage = `State email failed: ${sendUndoWithdrawnRateStateEmail.message}`
+            }
+
+            if (sendUndoWithdrawnRateCMSEmail instanceof Error) {
+                errMessage = `CMS email failed: ${sendUndoWithdrawnRateCMSEmail.message}`
+            }
+
+            logError('undoWithdrawnRate', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+            throw new GraphQLError(errMessage, {
+                extensions: {
+                    code: 'INTERNAL_SERVER_ERROR',
+                    cause: 'EMAIL_ERROR',
+                },
+            })
+        }
 
         return {
             rate: undoWithdrawRate,

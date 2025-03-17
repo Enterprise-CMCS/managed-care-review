@@ -116,7 +116,7 @@ export function configureResolvers(
             approveContract: approveContract(store),
             withdrawContract: withdrawContract(store),
             withdrawRate: withdrawRate(store, emailer),
-            undoWithdrawRate: undoWithdrawRate(store),
+            undoWithdrawRate: undoWithdrawRate(store, emailer),
             updateDivisionAssignment: updateDivisionAssignment(store),
             updateStateAssignment: updateStateAssignment(store),
             updateStateAssignmentsByState: updateStateAssignmentsByState(store),

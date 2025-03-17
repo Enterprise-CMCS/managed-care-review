@@ -1,0 +1,12 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`sendUndoWithdrawnRateCMSEmail > renders overall email for a withdrawn rate as expected 1`] = `
+"<h1 style="font-weight: normal;">Rate test-rate-certification-name status was updated to 'Submitted' by CMS</h1>
+<b>Updated by:</b> zuko@example.com<br />
+<b>Updated on:</b> 03/04/2025<br />
+<b>Reason:</b> I am undoing a withdraw<br />
+<b>Related contract action(s):</b>
+<a href="http://localhost/submissions/12345">MCR-MN-0003-SNBC</a><br />
+<br />
+<a href="http://localhost/rates/rate-id">View rate in MC-Review</a>"
+`;

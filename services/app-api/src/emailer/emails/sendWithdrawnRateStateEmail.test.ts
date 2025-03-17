@@ -1,7 +1,12 @@
-import { consoleLogFullData, mockRateRevision } from "../../testHelpers";
-import { mockContract, mockContractRev, mockMNState, mockRate, testEmailConfig } from "../../testHelpers/emailerHelpers";
-import { testCMSUser, testStateUser } from "../../testHelpers/userHelpers";
-import { sendWithdrawnRateStateEmail } from "./sendWithdrawnRateStateEmail";
+import {
+    mockContract,
+    mockContractRev,
+    mockMNState,
+    mockRate,
+    testEmailConfig,
+} from '../../testHelpers/emailerHelpers'
+import { testCMSUser, testStateUser } from '../../testHelpers/userHelpers'
+import { sendWithdrawnRateStateEmail } from './sendWithdrawnRateStateEmail'
 
 const testRate = mockRate({
     id: 'test-rate',
@@ -38,18 +43,17 @@ const testRate = mockRate({
                             formData: {
                                 ...mockContractRev().formData,
                                 stateContacts: [
-                                {
-                                    name: 'parent-contract-state-contact',
-                                    titleRole: 'state contact',
-                                    email: 'parent-contract-state-contact@state.com',
-                                }
-                            ],
-                            }
-                            
-                        })
-                    }
-                ]
-            })
+                                    {
+                                        name: 'parent-contract-state-contact',
+                                        titleRole: 'state contact',
+                                        email: 'parent-contract-state-contact@state.com',
+                                    },
+                                ],
+                            },
+                        }),
+                    },
+                ],
+            }),
         },
         {
             ...mockContract({
@@ -77,28 +81,27 @@ const testRate = mockRate({
                             formData: {
                                 ...mockContractRev().formData,
                                 stateContacts: [
-                                {
-                                    name: 'linked-contract-state-contact',
-                                    titleRole: 'state contact',
-                                    email: 'linked-contract-state-contact@state.com',
-                                },
-                                {
-                                    name: 'duplicate-state-contact',
-                                    titleRole: 'state contact',
-                                    email: 'duplicateContact@state-contact.com',
-                                },
-                                {
-                                    name: 'duplicate-state-contact',
-                                    titleRole: 'state contact',
-                                    email: 'duplicateContact@state-contact.com',
-                                },
-                            ],
-                            }
-                            
-                        })
-                    }
-                ]
-            })
+                                    {
+                                        name: 'linked-contract-state-contact',
+                                        titleRole: 'state contact',
+                                        email: 'linked-contract-state-contact@state.com',
+                                    },
+                                    {
+                                        name: 'duplicate-state-contact',
+                                        titleRole: 'state contact',
+                                        email: 'duplicateContact@state-contact.com',
+                                    },
+                                    {
+                                        name: 'duplicate-state-contact',
+                                        titleRole: 'state contact',
+                                        email: 'duplicateContact@state-contact.com',
+                                    },
+                                ],
+                            },
+                        }),
+                    },
+                ],
+            }),
         },
     ],
     packageSubmissions: [
@@ -111,7 +114,7 @@ const testRate = mockRate({
                 }),
             },
             submittedRevisions: [],
-            rateRevision:  {
+            rateRevision: {
                 id: 'test-rate-revision',
                 rateID: 'test-rate',
                 submitInfo: {
@@ -159,7 +162,7 @@ const testRate = mockRate({
                     actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
                 },
             },
-            contractRevisions: []
+            contractRevisions: [],
         },
     ],
     reviewStatusActions: [
@@ -193,7 +196,7 @@ describe('sendWithdrawnRateStateEmail', () => {
                 'linked-contract-state-contact@state.com',
                 'duplicateContact@state-contact.com',
                 'devreview1@example.com',
-                'devreview2@example.com'
+                'devreview2@example.com',
             ])
         )
     })
@@ -228,18 +231,17 @@ describe('sendWithdrawnRateStateEmail', () => {
                                     formData: {
                                         ...mockContractRev().formData,
                                         stateContacts: [
-                                        {
-                                            name: 'parent-contract-state-contact',
-                                            titleRole: 'state contact',
-                                            email: 'parent-contract-state-contact@state.com',
-                                        }
-                                    ],
-                                    }
-                                    
-                                })
-                            }
-                        ]
-                    })
+                                            {
+                                                name: 'parent-contract-state-contact',
+                                                titleRole: 'state contact',
+                                                email: 'parent-contract-state-contact@state.com',
+                                            },
+                                        ],
+                                    },
+                                }),
+                            },
+                        ],
+                    }),
                 },
             ],
         }
@@ -253,16 +255,20 @@ describe('sendWithdrawnRateStateEmail', () => {
             throw template
         }
 
-        console.log(template.bodyHTML)
-
         // does not contain a ul element
-        expect(template.bodyHTML).not.toEqual(expect.stringContaining('<ul>'));
+        expect(template.bodyHTML).not.toEqual(expect.stringContaining('<ul>'))
 
         // expect single contract name
-        expect(template.bodyHTML).toEqual(expect.stringContaining('MCR-MN-0100-SNBC'));
+        expect(template.bodyHTML).toEqual(
+            expect.stringContaining('MCR-MN-0100-SNBC')
+        )
 
         // expect View the submission link
-        expect(template.bodyHTML).toEqual(expect.stringContaining('<a href="http://localhost/submissions/parent-contract">View the submission in MC-Review</a>'));
+        expect(template.bodyHTML).toEqual(
+            expect.stringContaining(
+                '<a href="http://localhost/submissions/parent-contract">View the submission in MC-Review</a>'
+            )
+        )
     })
 
     it('renders overall email for a withdrawn rate as expected', async () => {
@@ -284,7 +290,7 @@ describe('sendWithdrawnRateStateEmail error handling', () => {
     it('returns an error if rate consolidatedStatus is not WITHDRAWN', async () => {
         const rateWithBadStatus = {
             ...testRate,
-            consolidatedStatus: 'SUBMITTED' as const
+            consolidatedStatus: 'SUBMITTED' as const,
         }
         const template = await sendWithdrawnRateStateEmail(
             testEmailConfig(),
@@ -293,12 +299,14 @@ describe('sendWithdrawnRateStateEmail error handling', () => {
         )
 
         expect(template).toBeInstanceOf(Error)
-        expect((template as Error).message).toEqual('Rate consolidated status is not WITHDRAWN')
+        expect((template as Error).message).toBe(
+            'Rate consolidated status is not WITHDRAWN'
+        )
     })
     it('returns an error if no reviewStatusActions are present', async () => {
         const rateWithoutActions = {
             ...testRate,
-            reviewStatusActions: []
+            reviewStatusActions: [],
         }
         const template = await sendWithdrawnRateStateEmail(
             testEmailConfig(),
@@ -307,7 +315,9 @@ describe('sendWithdrawnRateStateEmail error handling', () => {
         )
 
         expect(template).toBeInstanceOf(Error)
-        expect((template as Error).message).toEqual('Rate does not any have review actions')
+        expect((template as Error).message).toBe(
+            'Rate does not have any review actions'
+        )
     })
     it('returns an error if latest reviewStatusActions action was not withdraw action', async () => {
         const rateWithoutActions = {
@@ -333,8 +343,8 @@ describe('sendWithdrawnRateStateEmail error handling', () => {
                     updatedReason: 'Test withdraw',
                     actionType: 'WITHDRAW' as const,
                     updatedAt: new Date('2024-04-12'),
-                }
-            ]
+                },
+            ],
         }
         const template = await sendWithdrawnRateStateEmail(
             testEmailConfig(),
@@ -343,19 +353,22 @@ describe('sendWithdrawnRateStateEmail error handling', () => {
         )
 
         expect(template).toBeInstanceOf(Error)
-        expect((template as Error).message).toEqual('Rate latest review action was not a withdraw action')
+        expect((template as Error).message).toBe(
+            'Rate latest review action was not a withdraw action'
+        )
     })
     it('returns an error when parsing withdrawn from contract data fails', async () => {
         const rateWithBadContractData = {
-            ...testRate
+            ...testRate,
         }
 
         if (!rateWithBadContractData.withdrawnFromContracts?.[0]) {
             throw new Error('Expected rate to have withdrawn from contracts')
         }
 
-        rateWithBadContractData.withdrawnFromContracts[0].packageSubmissions[0].contractRevision.formData.programIDs = ['bad-program-id']
-    
+        rateWithBadContractData.withdrawnFromContracts[0].packageSubmissions[0].contractRevision.formData.programIDs =
+            ['bad-program-id']
+
         const template = await sendWithdrawnRateStateEmail(
             testEmailConfig(),
             rateWithBadContractData,
@@ -363,12 +376,14 @@ describe('sendWithdrawnRateStateEmail error handling', () => {
         )
 
         expect(template).toBeInstanceOf(Error)
-        expect((template as Error).message).toEqual("Error parsing withdrawn from contract data for contract with ID: parent-contract. Can't find programs bad-program-id from state MN")
+        expect((template as Error).message).toBe(
+            "Error parsing withdrawn from contract data for contract with ID: parent-contract. Can't find programs bad-program-id from state MN"
+        )
     })
     it('returns an error when rate has no withdrawn from contracts', async () => {
         const rateWithoutContracts = {
             ...testRate,
-            withdrawnFromContracts: []
+            withdrawnFromContracts: [],
         }
         const template = await sendWithdrawnRateStateEmail(
             testEmailConfig(),
@@ -377,6 +392,8 @@ describe('sendWithdrawnRateStateEmail error handling', () => {
         )
 
         expect(template).toBeInstanceOf(Error)
-        expect((template as Error).message).toEqual('Rate was withdrawn, but was not associated with any contracts')
+        expect((template as Error).message).toBe(
+            'Rate was withdrawn, but was not associated with any contracts'
+        )
     })
 })
