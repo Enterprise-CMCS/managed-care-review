@@ -1,4 +1,4 @@
-import { GridContainer, Link, ModalRef } from '@trussworks/react-uswds'
+import { GridContainer, Link, ModalRef, Grid } from '@trussworks/react-uswds'
 import React, { useEffect, useRef, useState } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
 import { ContractDetailsSummarySection } from '../StateSubmission/ReviewSubmit/ContractDetailsSummarySection'
@@ -177,7 +177,7 @@ export const SubmissionSummary = (): React.ReactElement => {
 
     // Only show for CMS_USER or CMS_APPROVER_USER users
     // and if the submission isn't approved
-    const showSubmissionApproval =
+    const showApprovalBtn =
         submissionApprovalFlag &&
         hasCMSPermissions &&
         !['APPROVED', 'UNLOCKED'].includes(contract.consolidatedStatus)
@@ -185,6 +185,10 @@ export const SubmissionSummary = (): React.ReactElement => {
         submissionApprovalFlag &&
         contract.reviewStatus === 'APPROVED' &&
         latestContractAction
+    const showUnlockBtn =
+        hasCMSPermissions &&
+        ['SUBMITTED', 'RESUBMITTED'].includes(contract.consolidatedStatus)
+    const showNoActionsMsg = !showApprovalBtn && !showUnlockBtn
 
     const renderStatusAlerts = () => {
         if (showApprovalBanner) {
@@ -252,32 +256,39 @@ export const SubmissionSummary = (): React.ReactElement => {
                 {hasCMSPermissions && (
                     <SectionCard className={styles.actionsSection}>
                         <h3>Actions</h3>
-                        <DoubleColumnGrid>
-                            {hasCMSPermissions && !showApprovalBanner && (
-                                <ModalOpenButton
-                                    modalRef={modalRef}
-                                    disabled={
-                                        ['DRAFT', 'UNLOCKED'].includes(
-                                            contract.status
-                                        ) ||
-                                        contract.reviewStatus === 'APPROVED'
-                                    }
-                                    className={styles.submitButton}
-                                    id="form-submit"
-                                >
-                                    Unlock submission
-                                </ModalOpenButton>
-                            )}
-                            {showSubmissionApproval && (
-                                <NavLinkWithLogging
-                                    className="usa-button bg-green"
-                                    variant="unstyled"
-                                    to={'./released-to-state'}
-                                >
-                                    Released to state
-                                </NavLinkWithLogging>
-                            )}
-                        </DoubleColumnGrid>
+                        {showNoActionsMsg ? (
+                            <Grid>
+                                No action can be taken on this submission in
+                                it's current status.
+                            </Grid>
+                        ) : (
+                            <DoubleColumnGrid>
+                                {showUnlockBtn && (
+                                    <ModalOpenButton
+                                        modalRef={modalRef}
+                                        disabled={
+                                            ['DRAFT', 'UNLOCKED'].includes(
+                                                contract.status
+                                            ) ||
+                                            contract.reviewStatus === 'APPROVED'
+                                        }
+                                        className={styles.submitButton}
+                                        id="form-submit"
+                                    >
+                                        Unlock submission
+                                    </ModalOpenButton>
+                                )}
+                                {showApprovalBtn && (
+                                    <NavLinkWithLogging
+                                        className="usa-button bg-green"
+                                        variant="unstyled"
+                                        to={'./released-to-state'}
+                                    >
+                                        Released to state
+                                    </NavLinkWithLogging>
+                                )}
+                            </DoubleColumnGrid>
+                        )}
                     </SectionCard>
                 )}
 
