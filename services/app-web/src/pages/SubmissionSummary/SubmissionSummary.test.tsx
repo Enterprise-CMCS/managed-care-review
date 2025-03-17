@@ -538,9 +538,9 @@ describe('SubmissionSummary', () => {
             describe('CMS user unlock submission', () => {
                 it('renders the unlock button', async () => {
                     const contract =
-                        mockContractPackageUnlockedWithUnlockedType({
-                            id: 'test-abc-123',
-                        })
+                        mockContractPackageSubmittedWithQuestions(
+                            'test-abc-123'
+                        )
 
                     renderWithProviders(
                         <Routes>
@@ -557,9 +557,6 @@ describe('SubmissionSummary', () => {
                                     fetchCurrentUserMock({
                                         user: mockUser(),
                                         statusCode: 200,
-                                    }),
-                                    fetchContractWithQuestionsMockSuccess({
-                                        contract,
                                     }),
                                     fetchContractWithQuestionsMockSuccess({
                                         contract,
@@ -746,10 +743,16 @@ describe('SubmissionSummary', () => {
 
                     await waitFor(() => {
                         expect(
-                            screen.getByRole('button', {
+                            screen.queryByRole('button', {
                                 name: 'Unlock submission',
                             })
-                        ).toBeDisabled()
+                        ).not.toBeInTheDocument()
+
+                        expect(
+                            screen.getByText(
+                                "No action can be taken on this submission in it's current status."
+                            )
+                        ).toBeInTheDocument()
                     })
                 })
 
@@ -935,12 +938,12 @@ describe('SubmissionSummary', () => {
                         })
                     ).toBeInTheDocument()
 
-                    // expect unlock button to have outline style
+                    // expect unlock button
                     expect(
                         screen.getByRole('button', {
                             name: 'Unlock submission',
                         })
-                    ).toHaveClass('usa-button--outline')
+                    ).toHaveClass('usa-button')
                 })
                 it('does not render released to state link on unlocked submission', async () => {
                     const unlockedContract =
@@ -995,12 +998,18 @@ describe('SubmissionSummary', () => {
                         })
                     ).not.toBeInTheDocument()
 
-                    // expect unlock button to be disabled
+                    // expect unlock button to be not on the page
                     expect(
-                        screen.getByRole('button', {
+                        screen.queryByRole('button', {
                             name: 'Unlock submission',
                         })
-                    ).toBeDisabled()
+                    ).not.toBeInTheDocument()
+
+                    expect(
+                        screen.getByText(
+                            "No action can be taken on this submission in it's current status."
+                        )
+                    ).toBeInTheDocument()
                 })
 
                 it('does not render released to state button for an approved submission', async () => {
@@ -1055,12 +1064,18 @@ describe('SubmissionSummary', () => {
                         })
                     ).toBeNull()
 
-                    // expect unlock button to be disabled
+                    // expect unlock button to be not on the page
                     expect(
-                        screen.getByRole('button', {
+                        screen.queryByRole('button', {
                             name: 'Unlock submission',
                         })
-                    ).toBeDisabled()
+                    ).not.toBeInTheDocument()
+
+                    expect(
+                        screen.getByText(
+                            "No action can be taken on this submission in it's current status."
+                        )
+                    ).toBeInTheDocument()
                 })
 
                 it('renders approval banner on approved submission', async () => {
@@ -1181,6 +1196,12 @@ describe('SubmissionSummary', () => {
                         name: 'Unlock submission',
                     })
                     expect(unlockBtn).not.toBeInTheDocument()
+
+                    expect(
+                        screen.getByText(
+                            "No action can be taken on this submission in it's current status."
+                        )
+                    ).toBeInTheDocument()
                 })
             })
         }
