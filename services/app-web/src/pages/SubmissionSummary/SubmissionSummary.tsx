@@ -12,7 +12,7 @@ import {
     LinkWithLogging,
     NavLinkWithLogging,
     SectionCard,
-    DoubleColumnGrid,
+    ButtonWithLogging,
 } from '../../components'
 import { Loading } from '../../components'
 import { usePage } from '../../contexts/PageContext'
@@ -40,6 +40,7 @@ import {
     SubmissionApprovedBanner,
     IncompleteSubmissionBanner,
 } from '../../components/Banner'
+import { MultiColumnGrid } from '../../components/MultiColumnGrid/MultiColumnGrid'
 
 export interface SubmissionSummaryFormValues {
     dateApprovalReleasedToState: string
@@ -60,6 +61,11 @@ export const SubmissionSummary = (): React.ReactElement => {
     const submissionApprovalFlag = ldClient?.variation(
         featureFlags.SUBMISSION_APPROVALS.flag,
         featureFlags.SUBMISSION_APPROVALS.defaultValue
+    )
+
+    const withdrawSubmissionFlag = ldClient?.variation(
+        featureFlags.WITHDRAW_SUBMISSION.flag,
+        featureFlags.WITHDRAW_SUBMISSION.defaultValue
     )
 
     // API requests
@@ -185,6 +191,9 @@ export const SubmissionSummary = (): React.ReactElement => {
         submissionApprovalFlag &&
         contract.reviewStatus === 'APPROVED' &&
         latestContractAction
+    const showWithdrawBtn =
+        withdrawSubmissionFlag &&
+        ['SUBMITTED', 'RESUBMITTED'].includes(contract.consolidatedStatus)
 
     const renderStatusAlerts = () => {
         if (showApprovalBanner) {
@@ -252,7 +261,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                 {hasCMSPermissions && (
                     <SectionCard className={styles.actionsSection}>
                         <h3>Actions</h3>
-                        <DoubleColumnGrid>
+                        <MultiColumnGrid columns={3}>
                             {hasCMSPermissions && !showApprovalBanner && (
                                 <ModalOpenButton
                                     modalRef={modalRef}
@@ -277,7 +286,16 @@ export const SubmissionSummary = (): React.ReactElement => {
                                     Released to state
                                 </NavLinkWithLogging>
                             )}
-                        </DoubleColumnGrid>
+                            {showWithdrawBtn && (
+                                <ButtonWithLogging
+                                    type="button"
+                                    outline
+                                    className="usa-button"
+                                >
+                                    Withdraw submission
+                                </ButtonWithLogging>
+                            )}
+                        </MultiColumnGrid>
                     </SectionCard>
                 )}
 
