@@ -2,7 +2,7 @@ import { Grid } from '@trussworks/react-uswds'
 import dayjs from 'dayjs'
 import { HealthPlanFormDataType } from '@mc-review/hpp'
 import { DataDetail } from '../../../components/DataDetail'
-import { DoubleColumnGrid } from '../../../components/DoubleColumnGrid'
+import { MultiColumnGrid } from '../../MultiColumnGrid'
 import { SectionHeader } from '../../../components/SectionHeader'
 import {
     SubmissionTypeRecord,
@@ -56,7 +56,7 @@ export const SubmissionTypeSummarySection = ({
 
             <dl>
                 {isSubmitted && !isPreviousSubmission && (
-                    <DoubleColumnGrid>
+                    <MultiColumnGrid columns={2}>
                         <DataDetail
                             id="submitted"
                             label="Submitted"
@@ -69,9 +69,9 @@ export const SubmissionTypeSummarySection = ({
                             }
                         />
                         <></>
-                    </DoubleColumnGrid>
+                    </MultiColumnGrid>
                 )}
-                <DoubleColumnGrid>
+                <MultiColumnGrid columns={2}>
                     <DataDetail
                         id="program"
                         label="Program(s)"
@@ -115,7 +115,7 @@ export const SubmissionTypeSummarySection = ({
                             ]
                         }
                     />
-                </DoubleColumnGrid>
+                </MultiColumnGrid>
 
                 <Grid row gap className={styles.reviewDataRow}>
                     <Grid col={12}>

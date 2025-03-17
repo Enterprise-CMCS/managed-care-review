@@ -1,6 +1,6 @@
 import { Grid } from '@trussworks/react-uswds'
 import { DataDetail } from '../../../components/DataDetail'
-import { DoubleColumnGrid } from '../../../components/DoubleColumnGrid'
+import { MultiColumnGrid } from '../../../components/MultiColumnGrid'
 import { SectionHeader } from '../../../components/SectionHeader'
 import {
     SubmissionTypeRecord,
@@ -75,7 +75,7 @@ export const SubmissionTypeSummarySection = ({
             <dl>
                 {initiallySubmittedAt &&
                     (isSubmitted || (!isStateUser && isUnlocked)) && (
-                        <DoubleColumnGrid>
+                        <MultiColumnGrid columns={2}>
                             <DataDetail
                                 id="submitted"
                                 label="Submitted"
@@ -88,9 +88,9 @@ export const SubmissionTypeSummarySection = ({
                                     </span>
                                 }
                             />
-                        </DoubleColumnGrid>
+                        </MultiColumnGrid>
                     )}
-                <DoubleColumnGrid>
+                <MultiColumnGrid columns={2}>
                     {(programNames?.length > 0 || !isSubmitted) && (
                         <DataDetail
                             id="program"
@@ -150,7 +150,7 @@ export const SubmissionTypeSummarySection = ({
                             }
                         />
                     )}
-                </DoubleColumnGrid>
+                </MultiColumnGrid>
 
                 <Grid row gap className={styles.reviewDataRow}>
                     <Grid col={12}>

@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import styles from '../SubmissionSummarySection.module.scss'
-import { DoubleColumnGrid } from '../../DoubleColumnGrid'
+import { MultiColumnGrid } from '../../MultiColumnGrid'
 import { DataDetail, DataDetailContactField } from '../../DataDetail'
 import { formatCalendarDate } from '@mc-review/dates'
 import {
@@ -215,7 +215,7 @@ export const SingleRateSummarySection = ({
                     <DocumentWarningBanner className={styles.banner} />
                 )}
                 <dl>
-                    <DoubleColumnGrid>
+                    <MultiColumnGrid columns={2}>
                         {formData.deprecatedRateProgramIDs.length > 0 &&
                             isSubmittedOrCMSUser && (
                                 <DataDetail
@@ -335,7 +335,7 @@ export const SingleRateSummarySection = ({
                                   )
                               )
                             : null}
-                    </DoubleColumnGrid>
+                    </MultiColumnGrid>
                     <Grid row gap className={styles.singleColumnGrid}>
                         <DataDetail
                             id="communicationPreference"

@@ -1,7 +1,7 @@
 import { formatCalendarDate } from '@mc-review/dates'
 import {
     DataDetail,
-    DoubleColumnGrid,
+    MultiColumnGrid,
     SectionCard,
     UploadedDocumentsTable,
 } from '../../../components'
@@ -22,7 +22,7 @@ export const LinkedRateSummary = ({
                 {rateForm.rateCertificationName}
             </h3>
             <dl>
-                <DoubleColumnGrid>
+                <MultiColumnGrid columns={2}>
                     <DataDetail
                         id="submissionDate"
                         label="Submission date"
@@ -53,7 +53,7 @@ export const LinkedRateSummary = ({
                             )} to ${formatCalendarDate(rateForm?.rateDateEnd, 'UTC')}`
                         }
                     />
-                </DoubleColumnGrid>
+                </MultiColumnGrid>
             </dl>
             <UploadedDocumentsTable
                 documents={formatDocumentsForGQL(rateForm.rateDocuments)}

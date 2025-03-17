@@ -4,7 +4,7 @@ import { DataDetail } from '../../../components/DataDetail'
 import { SectionHeader } from '../../../components/SectionHeader'
 import { useS3 } from '../../../contexts/S3Context'
 import { formatCalendarDate } from '@mc-review/dates'
-import { DoubleColumnGrid } from '../../../components/DoubleColumnGrid'
+import { MultiColumnGrid } from '../../../components/MultiColumnGrid'
 import { DownloadButton } from '../../../components/DownloadButton'
 import { UploadedDocumentsTable } from '../../../components/SubmissionSummarySection'
 import { usePreviousSubmission } from '../../../hooks/usePreviousSubmission'
@@ -377,7 +377,7 @@ export const RateDetailsSummarySection = ({
                                   )}
                               </div>
                               <dl>
-                                  <DoubleColumnGrid>
+                                  <MultiColumnGrid columns={2}>
                                       {showLegacyRatePrograms ? (
                                           <DataDetail
                                               id="historicRatePrograms"
@@ -538,7 +538,7 @@ export const RateDetailsSummarySection = ({
                                                   : explainMissingData
                                           }
                                       />
-                                  </DoubleColumnGrid>
+                                  </MultiColumnGrid>
                               </dl>
                               {rateFormData.rateDocuments && (
                                   <UploadedDocumentsTable
