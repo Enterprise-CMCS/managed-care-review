@@ -17,7 +17,7 @@ import {
     FilterSelect,
     FilterSelectedOptionsType,
 } from '../../../components/FilterAccordion'
-import { DoubleColumnGrid, Loading } from '../../../components'
+import { MultiColumnGrid, Loading } from '../../../components'
 import { GridContainer, Table } from '@trussworks/react-uswds'
 
 import styles from '../Settings.module.scss'
@@ -268,7 +268,7 @@ const StateAssignmentTable = () => {
                 onClearFilters={clearFilters}
                 filterTitle={'Filters'}
             >
-                <DoubleColumnGrid>
+                <MultiColumnGrid columns={2}>
                     <FilterSelect
                         value={getAppliedFilters(columnFilters, 'stateCode')}
                         name="state"
@@ -298,7 +298,7 @@ const StateAssignmentTable = () => {
                             )
                         }
                     />
-                </DoubleColumnGrid>
+                </MultiColumnGrid>
             </FilterAccordion>
             <div aria-live="polite" aria-atomic>
                 <div className={styles.filterCount}>{rowCount}</div>

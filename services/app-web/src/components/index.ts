@@ -4,7 +4,7 @@ export {
     DataDetailDateRange,
     DataDetailMissingField,
 } from './DataDetail'
-export { DoubleColumnGrid } from './DoubleColumnGrid'
+export { MultiColumnGrid } from './MultiColumnGrid'
 export { DownloadButton } from './DownloadButton'
 
 export { DynamicStepIndicator } from './DynamicStepIndicator'

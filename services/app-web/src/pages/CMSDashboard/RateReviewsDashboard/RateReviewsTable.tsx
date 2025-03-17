@@ -30,7 +30,7 @@ import {
     FilterDateRange,
 } from '../../../components/FilterAccordion'
 import { pluralize, titleCaseString } from '@mc-review/common-code'
-import { DoubleColumnGrid } from '../../../components'
+import { MultiColumnGrid } from '../../../components'
 import { FilterDateRangeRef } from '../../../components/FilterAccordion/FilterDateRange/FilterDateRange'
 import { NavLinkWithLogging } from '../../../components'
 import { useTealium } from '../../../hooks'
@@ -570,7 +570,7 @@ export const RateReviewsTable = ({
                         onClearFilters={clearFilters}
                         filterTitle="Filters"
                     >
-                        <DoubleColumnGrid>
+                        <MultiColumnGrid columns={2}>
                             <FilterSelect
                                 value={getSelectedFiltersFromColumnState(
                                     columnFilters,
@@ -603,7 +603,7 @@ export const RateReviewsTable = ({
                                     )
                                 }
                             />
-                        </DoubleColumnGrid>
+                        </MultiColumnGrid>
                         <FilterDateRange
                             ref={filterDateRangeRef}
                             legend={'Rating period start date'}
@@ -640,7 +640,7 @@ export const RateReviewsTable = ({
                                     ),
                             }}
                         />
-                        <DoubleColumnGrid>
+                        <MultiColumnGrid columns={2}>
                             <FilterSelect
                                 value={getSelectedFiltersFromColumnState(
                                     columnFilters,
@@ -657,7 +657,7 @@ export const RateReviewsTable = ({
                                     )
                                 }
                             />
-                        </DoubleColumnGrid>
+                        </MultiColumnGrid>
                     </FilterAccordion>
                     <div aria-live="polite" aria-atomic>
                         <div className={styles.filterCount}>

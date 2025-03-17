@@ -26,7 +26,7 @@ import {
 } from '../FilterAccordion'
 import { InfoTag, TagProps } from '../InfoTag/InfoTag'
 import { pluralize } from '@mc-review/common-code'
-import { DoubleColumnGrid } from '../DoubleColumnGrid'
+import { MultiColumnGrid } from '../MultiColumnGrid'
 import { NavLinkWithLogging } from '../TealiumLogging/Link'
 import { useTealium } from '../../hooks'
 import useDeepCompareEffect from 'use-deep-compare-effect'
@@ -518,7 +518,7 @@ export const ContractTable = ({
                             onClearFilters={clearFilters}
                             filterTitle="Filters"
                         >
-                            <DoubleColumnGrid>
+                            <MultiColumnGrid columns={2}>
                                 <FilterSelect
                                     value={getSelectedFiltersFromUrl(
                                         columnFilters,
@@ -551,8 +551,8 @@ export const ContractTable = ({
                                         )
                                     }
                                 />
-                            </DoubleColumnGrid>
-                            <DoubleColumnGrid>
+                            </MultiColumnGrid>
+                            <MultiColumnGrid columns={2}>
                                 <FilterSelect
                                     value={getSelectedFiltersFromUrl(
                                         columnFilters,
@@ -569,7 +569,7 @@ export const ContractTable = ({
                                         )
                                     }
                                 />
-                            </DoubleColumnGrid>
+                            </MultiColumnGrid>
                         </FilterAccordion>
                     )}
                     <div aria-live="polite" aria-atomic>

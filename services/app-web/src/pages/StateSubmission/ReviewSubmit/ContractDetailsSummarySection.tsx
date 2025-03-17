@@ -9,7 +9,7 @@ import {
 } from '@mc-review/hpp'
 import { useS3 } from '../../../contexts/S3Context'
 import { formatCalendarDate } from '@mc-review/dates'
-import { DoubleColumnGrid } from '../../../components/DoubleColumnGrid'
+import { MultiColumnGrid } from '../../../components/MultiColumnGrid'
 import { DownloadButton } from '../../../components/DownloadButton'
 import { usePreviousSubmission } from '../../../hooks/usePreviousSubmission'
 import styles from '../../SubmissionSummary/SubmissionSummary.module.scss'
@@ -238,7 +238,7 @@ export const ContractDetailsSummarySection = ({
                         )}
                     </Grid>
                 )}
-                <DoubleColumnGrid>
+                <MultiColumnGrid columns={2}>
                     <DataDetail
                         id="contractExecutionStatus"
                         label="Contract status"
@@ -300,9 +300,9 @@ export const ContractDetailsSummarySection = ({
                             )
                         }
                     />
-                </DoubleColumnGrid>
+                </MultiColumnGrid>
                 {isContractWithProvisions(contract) && (
-                    <DoubleColumnGrid>
+                    <MultiColumnGrid columns={2}>
                         <DataDetail
                             id="modifiedProvisions"
                             label={
@@ -342,7 +342,7 @@ export const ContractDetailsSummarySection = ({
                                 />
                             )}
                         </DataDetail>
-                    </DoubleColumnGrid>
+                    </MultiColumnGrid>
                 )}
             </dl>
             {contractFormData?.contractDocuments && (

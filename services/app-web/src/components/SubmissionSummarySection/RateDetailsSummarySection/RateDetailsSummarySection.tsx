@@ -4,7 +4,7 @@ import { SectionHeader } from '../../../components/SectionHeader'
 import { UploadedDocumentsTable } from '../../../components/SubmissionSummarySection'
 import { useS3 } from '../../../contexts/S3Context'
 import { formatCalendarDate } from '@mc-review/dates'
-import { DoubleColumnGrid } from '../../DoubleColumnGrid'
+import { MultiColumnGrid } from '../../MultiColumnGrid'
 import { DownloadButton } from '../../DownloadButton'
 import { usePreviousSubmission } from '../../../hooks/usePreviousSubmission'
 import styles from '../SubmissionSummarySection.module.scss'
@@ -261,7 +261,7 @@ export const RateDetailsSummarySection = ({
                                 {rateInfo.rateCertificationName}
                             </h3>
                             <dl>
-                                <DoubleColumnGrid>
+                                <MultiColumnGrid columns={2}>
                                     {ratePrograms && (
                                         <DataDetail
                                             id="ratePrograms"
@@ -385,7 +385,7 @@ export const RateDetailsSummarySection = ({
                                         }
                                         explainMissingData={!isSubmitted}
                                     />
-                                </DoubleColumnGrid>
+                                </MultiColumnGrid>
                             </dl>
                             {!loading ? (
                                 <UploadedDocumentsTable

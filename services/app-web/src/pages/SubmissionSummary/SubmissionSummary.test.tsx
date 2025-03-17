@@ -704,7 +704,7 @@ describe('SubmissionSummary', () => {
                     })
                 })
 
-                it('disables the unlock button for an unlocked submission', async () => {
+                it('displays no actions text for an unlocked submission', async () => {
                     const contract =
                         mockContractPackageUnlockedWithUnlockedType({
                             id: 'test-abc-123',
@@ -1196,6 +1196,137 @@ describe('SubmissionSummary', () => {
                         name: 'Unlock submission',
                     })
                     expect(unlockBtn).not.toBeInTheDocument()
+
+                    expect(
+                        screen.getByText(
+                            "No action can be taken on this submission in it's current status."
+                        )
+                    ).toBeInTheDocument()
+                })
+            })
+
+            describe('withdrawn submission tests', () => {
+                it('renders withdrawn submission button', async () => {
+                    const contract =
+                        mockContractPackageSubmittedWithQuestions(
+                            'test-abc-123'
+                        )
+                    renderWithProviders(
+                        <Routes>
+                            <Route element={<SubmissionSideNav />}>
+                                <Route
+                                    path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                                    element={<SubmissionSummary />}
+                                />
+                            </Route>
+                        </Routes>,
+                        {
+                            apolloProvider: {
+                                mocks: [
+                                    fetchCurrentUserMock({
+                                        user: mockUser(),
+                                        statusCode: 200,
+                                    }),
+                                    fetchContractWithQuestionsMockSuccess({
+                                        contract,
+                                    }),
+                                    fetchContractWithQuestionsMockSuccess({
+                                        contract,
+                                    }),
+                                ],
+                            },
+                            routerProvider: {
+                                route: '/submissions/test-abc-123',
+                            },
+                            featureFlags: {
+                                'submission-approvals': true,
+                                'withdraw-submission': true,
+                            },
+                        }
+                    )
+
+                    await waitFor(() => {
+                        expect(
+                            screen.getByTestId('submission-side-nav')
+                        ).toBeInTheDocument()
+                        expect(
+                            screen.getByText('MCR-MN-0005-SNBC')
+                        ).toBeInTheDocument()
+                    })
+
+                    // expect submission released to state button to be on the screen
+                    expect(
+                        screen.queryByRole('link', {
+                            name: 'Released to state',
+                        })
+                    ).toBeInTheDocument()
+
+                    // expect unlock button
+                    expect(
+                        screen.getByRole('button', {
+                            name: 'Withdraw submission',
+                        })
+                    ).toHaveClass('usa-button')
+                })
+
+                it('does not render withdraw submission button for an withdrawn submission', async () => {
+                    const contract =
+                        mockContractPackageSubmittedWithQuestions(
+                            'test-abc-123'
+                        )
+                    contract.reviewStatus = 'WITHDRAWN'
+                    contract.consolidatedStatus = 'WITHDRAWN'
+                    renderWithProviders(
+                        <Routes>
+                            <Route element={<SubmissionSideNav />}>
+                                <Route
+                                    path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                                    element={<SubmissionSummary />}
+                                />
+                            </Route>
+                        </Routes>,
+                        {
+                            apolloProvider: {
+                                mocks: [
+                                    fetchCurrentUserMock({
+                                        user: mockValidCMSUser(),
+                                        statusCode: 200,
+                                    }),
+                                    fetchContractWithQuestionsMockSuccess({
+                                        contract: contract,
+                                    }),
+                                    fetchContractWithQuestionsMockSuccess({
+                                        contract: contract,
+                                    }),
+                                ],
+                            },
+                            routerProvider: {
+                                route: '/submissions/test-abc-123',
+                            },
+                            featureFlags: {
+                                'submission-approvals': true,
+                            },
+                        }
+                    )
+                    await waitFor(() => {
+                        expect(
+                            screen.getByTestId('submission-side-nav')
+                        ).toBeInTheDocument()
+                    })
+
+                    // expect submission released to state link to not exist
+                    expect(
+                        screen.queryByRole('link', {
+                            name: 'Withdrawn submission',
+                        })
+                    ).toBeNull()
+
+                    // expect unlock button to be not on the page
+                    expect(
+                        screen.queryByRole('button', {
+                            name: 'Unlock submission',
+                        })
+                    ).not.toBeInTheDocument()
 
                     expect(
                         screen.getByText(

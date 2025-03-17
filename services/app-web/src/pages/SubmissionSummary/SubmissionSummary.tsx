@@ -12,7 +12,7 @@ import {
     LinkWithLogging,
     NavLinkWithLogging,
     SectionCard,
-    DoubleColumnGrid,
+    ButtonWithLogging,
 } from '../../components'
 import { Loading } from '../../components'
 import { usePage } from '../../contexts/PageContext'
@@ -40,6 +40,7 @@ import {
     SubmissionApprovedBanner,
     IncompleteSubmissionBanner,
 } from '../../components/Banner'
+import { MultiColumnGrid } from '../../components/MultiColumnGrid/MultiColumnGrid'
 
 export interface SubmissionSummaryFormValues {
     dateApprovalReleasedToState: string
@@ -60,6 +61,11 @@ export const SubmissionSummary = (): React.ReactElement => {
     const submissionApprovalFlag = ldClient?.variation(
         featureFlags.SUBMISSION_APPROVALS.flag,
         featureFlags.SUBMISSION_APPROVALS.defaultValue
+    )
+
+    const withdrawSubmissionFlag = ldClient?.variation(
+        featureFlags.WITHDRAW_SUBMISSION.flag,
+        featureFlags.WITHDRAW_SUBMISSION.defaultValue
     )
 
     // API requests
@@ -180,7 +186,7 @@ export const SubmissionSummary = (): React.ReactElement => {
     const showApprovalBtn =
         submissionApprovalFlag &&
         hasCMSPermissions &&
-        !['APPROVED', 'UNLOCKED'].includes(contract.consolidatedStatus)
+        ['SUBMITTED', 'RESUBMITTED'].includes(contract.consolidatedStatus)
     const showApprovalBanner =
         submissionApprovalFlag &&
         contract.reviewStatus === 'APPROVED' &&
@@ -188,7 +194,13 @@ export const SubmissionSummary = (): React.ReactElement => {
     const showUnlockBtn =
         hasCMSPermissions &&
         ['SUBMITTED', 'RESUBMITTED'].includes(contract.consolidatedStatus)
-    const showNoActionsMsg = !showApprovalBtn && !showUnlockBtn
+    const showWithdrawBtn =
+        hasCMSPermissions &&
+        withdrawSubmissionFlag &&
+        ['SUBMITTED', 'RESUBMITTED'].includes(contract.consolidatedStatus)
+
+    const showNoActionsMsg =
+        !showApprovalBtn && !showUnlockBtn && !showWithdrawBtn
 
     const renderStatusAlerts = () => {
         if (showApprovalBanner) {
@@ -262,7 +274,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                                 it's current status.
                             </Grid>
                         ) : (
-                            <DoubleColumnGrid>
+                            <MultiColumnGrid columns={3}>
                                 {showUnlockBtn && (
                                     <ModalOpenButton
                                         modalRef={modalRef}
@@ -287,7 +299,16 @@ export const SubmissionSummary = (): React.ReactElement => {
                                         Released to state
                                     </NavLinkWithLogging>
                                 )}
-                            </DoubleColumnGrid>
+                                {showWithdrawBtn && (
+                                    <ButtonWithLogging
+                                        type="button"
+                                        outline
+                                        className="usa-button"
+                                    >
+                                        Withdraw submission
+                                    </ButtonWithLogging>
+                                )}
+                            </MultiColumnGrid>
                         )}
                     </SectionCard>
                 )}

@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import {
     ButtonWithLogging,
-    DoubleColumnGrid,
+    MultiColumnGrid,
     Loading,
     NavLinkWithLogging,
     SectionCard,
@@ -251,7 +251,7 @@ export const RateSummary = (): React.ReactElement => {
                 {isCMSUser && (
                     <SectionCard className={styles.actionsSection}>
                         <h3>Actions</h3>
-                        <DoubleColumnGrid>
+                        <MultiColumnGrid columns={2}>
                             {showRateUnlock ? (
                                 <UnlockRateButton
                                     disabled={
@@ -315,7 +315,7 @@ export const RateSummary = (): React.ReactElement => {
                                     Undo withdraw
                                 </ButtonWithLogging>
                             )}
-                        </DoubleColumnGrid>
+                        </MultiColumnGrid>
                     </SectionCard>
                 )}
                 <SingleRateSummarySection
