@@ -27,7 +27,6 @@ import {
 import { describe } from 'vitest'
 import { mockStoreThatErrors } from '../../testHelpers/storeHelpers'
 import { testEmailConfig, testEmailer } from '../../testHelpers/emailerHelpers'
-import { packageName } from '@mc-review/hpp/build/healthPlanFormDataType/healthPlanFormData'
 
 const testRateFormInputData = (): RateFormDataInput => ({
     rateType: 'AMENDMENT',
@@ -290,42 +289,24 @@ describe('undoWithdrawRate', () => {
             'Unlock after withdraw'
         )
 
-        await submitTestContract(
+        const submittedContractB = await submitTestContract(
             stateServer,
             contractB.id,
             'resubmit after withdrawing rate'
         )
 
-        await submitTestContract(
+        const submittedContractA = await submitTestContract(
             stateServer,
             contractA.id,
             'Submit before undo withdraw'
         )
 
-        const submittedContractA = await fetchTestContract(
-            cmsServer,
-            contractA.id
-        )
-        const submittedContractB = await fetchTestContract(
-            cmsServer,
-            contractB.id
-        )
-
-        const contractAName = packageName(
-            submittedContractA.stateCode,
-            submittedContractA.stateNumber,
-            submittedContractA.packageSubmissions[0].contractRevision.formData
-                .programIDs,
-            [defaultFloridaProgram()]
-        )
-
-        const contractBName = packageName(
-            submittedContractB.stateCode,
-            submittedContractB.stateNumber,
-            submittedContractB.packageSubmissions[0].contractRevision.formData
-                .programIDs,
-            [defaultFloridaProgram()]
-        )
+        const contractAName =
+            submittedContractA.packageSubmissions[0].contractRevision
+                .contractName
+        const contractBName =
+            submittedContractB.packageSubmissions[0].contractRevision
+                .contractName
 
         const stateReceiverEmails =
             contractA.packageSubmissions[0].contractRevision.formData.stateContacts.map(
