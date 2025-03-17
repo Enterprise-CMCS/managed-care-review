@@ -41,49 +41,49 @@ describe('MultiColumnGrid', () => {
     it('Forms pairs of elements in an array given an array of elements', () => {
         expect(groupedChildren(2, testDataOdd)).toStrictEqual([
             [
-                <div key={'Row 1 Column 1'}>Row 1 Column 1</div>,
-                <div key={'Row 1 Column 2'}>Row 1 Column 2</div>,
+                createElement('div', 'Row 1 Column 1'),
+                createElement('div', 'Row 1 Column 2'),
             ],
             [
-                <div key={'Row 2 Column 1'}>Row 2 Column 1</div>,
-                <div key={'Row 2 Column 2'}>Row 2 Column 2</div>,
+                createElement('div', 'Row 2 Column 1'),
+                createElement('div', 'Row 2 Column 2'),
             ],
-            [<div key={'Row 3 Column 1'}>Row 3 Column 1</div>],
-        ])
-
-        expect(groupedChildren(3, testDataMultiColumnOdd)).toStrictEqual([
-            [
-                <div key={'Row 1 Column 1'}>Row 1 Column 1</div>,
-                <div key={'Row 1 Column 2'}>Row 1 Column 2</div>,
-                <div key={'Row 1 Column 2'}>Row 1 Column 3</div>,
-            ],
-            [
-                <div key={'Row 2 Column 1'}>Row 2 Column 1</div>,
-                <div key={'Row 2 Column 2'}>Row 2 Column 2</div>,
-            ],
+            [createElement('div', 'Row 3 Column 1')],
         ])
 
         expect(groupedChildren(2, testDataEven)).toStrictEqual([
             [
-                <div key={'Row 1 Column 1'}>Row 1 Column 1</div>,
-                <div key={'Row 1 Column 2'}>Row 1 Column 2</div>,
+                createElement('div', 'Row 1 Column 1'),
+                createElement('div', 'Row 1 Column 2'),
             ],
             [
-                <div key={'Row 2 Column 1'}>Row 2 Column 1</div>,
-                <div key={'Row 2 Column 2'}>Row 2 Column 2</div>,
+                createElement('div', 'Row 2 Column 1'),
+                createElement('div', 'Row 2 Column 2'),
             ],
         ])
 
-        expect(groupedChildren(2, testDataMultiColumnEven)).toStrictEqual([
+        expect(groupedChildren(3, testDataMultiColumnOdd)).toStrictEqual([
             [
-                <div key={'Row 1 Column 1'}>Row 1 Column 1</div>,
-                <div key={'Row 1 Column 2'}>Row 1 Column 2</div>,
-                <div key={'Row 1 Column 2'}>Row 1 Column 3</div>,
+                createElement('div', 'Row 1 Column 1'),
+                createElement('div', 'Row 1 Column 2'),
+                createElement('div', 'Row 1 Column 3'),
             ],
             [
-                <div key={'Row 2 Column 1'}>Row 2 Column 1</div>,
-                <div key={'Row 2 Column 2'}>Row 2 Column 2</div>,
-                <div key={'Row 2 Column 2'}>Row 2 Column 3</div>,
+                createElement('div', 'Row 2 Column 1'),
+                createElement('div', 'Row 2 Column 2'),
+            ],
+        ])
+
+        expect(groupedChildren(3, testDataMultiColumnEven)).toStrictEqual([
+            [
+                createElement('div', 'Row 1 Column 1'),
+                createElement('div', 'Row 1 Column 2'),
+                createElement('div', 'Row 1 Column 3'),
+            ],
+            [
+                createElement('div', 'Row 2 Column 1'),
+                createElement('div', 'Row 2 Column 2'),
+                createElement('div', 'Row 2 Column 3'),
             ],
         ])
     })
