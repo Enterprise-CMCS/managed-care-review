@@ -199,7 +199,7 @@ const withdrawContractInsideTransaction = async (
             return false
         })
 
-        // skipping rate it conditions are met
+        // skipping rate if conditions are met
         if (
             !latestRateRevision.submitInfo || // unlocked rate. linked rates can be in unlocked status
             rate.reviewStatusActions[0]?.actionType === 'WITHDRAW' || // is the rate already withdrawn
