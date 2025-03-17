@@ -186,7 +186,7 @@ export const SubmissionSummary = (): React.ReactElement => {
     const showApprovalBtn =
         submissionApprovalFlag &&
         hasCMSPermissions &&
-        !['APPROVED', 'UNLOCKED'].includes(contract.consolidatedStatus)
+        ['SUBMITTED', 'RESUBMITTED'].includes(contract.consolidatedStatus)
     const showApprovalBanner =
         submissionApprovalFlag &&
         contract.reviewStatus === 'APPROVED' &&
@@ -195,6 +195,7 @@ export const SubmissionSummary = (): React.ReactElement => {
         hasCMSPermissions &&
         ['SUBMITTED', 'RESUBMITTED'].includes(contract.consolidatedStatus)
     const showWithdrawBtn =
+        hasCMSPermissions &&
         withdrawSubmissionFlag &&
         ['SUBMITTED', 'RESUBMITTED'].includes(contract.consolidatedStatus)
 
