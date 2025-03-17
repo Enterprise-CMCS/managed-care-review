@@ -50,6 +50,7 @@ provider:
             - secretsmanager:GetSecretValue # pragma: allowlist secret
             - secretsmanager:PutSecretValue # pragma: allowlist secret
             - secretsmanager:UpdateSecretVersionStage # pragma: allowlist secret
+            - secretsmanager:DeleteSecret # pragma: allowlist secret
           Resource:
             - '${self:custom.dbManagerArn}'
         - Effect: Allow
