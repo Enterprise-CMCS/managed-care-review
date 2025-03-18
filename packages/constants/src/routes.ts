@@ -44,7 +44,8 @@ const ROUTES = [
     'SUBMISSIONS_UPLOAD_CONTRACT_QUESTION',
     'SUBMISSIONS_UPLOAD_CONTRACT_RESPONSE',
     'SUBMISSIONS_UPLOAD_RATE_RESPONSE',
-    'SUBMISSIONS_RELEASED_TO_STATE'
+    'SUBMISSIONS_RELEASED_TO_STATE',
+    'SUBMISSION_WITHDRAW'
 ] as const // iterable union type
 type RouteT = (typeof ROUTES)[number]
 type RouteTWithUnknown = RouteT | 'UNKNOWN_ROUTE'
@@ -102,7 +103,8 @@ const RoutesRecord: Record<RouteT, string> = {
         '/submissions/:id/question-and-answers/:division/:questionID/upload-response',
     SUBMISSIONS_UPLOAD_RATE_RESPONSE:
         '/submissions/:id/rates/:rateID/question-and-answers/:division/:questionID/upload-response',
-    SUBMISSIONS_RELEASED_TO_STATE: '/submissions/:id/released-to-state'
+    SUBMISSIONS_RELEASED_TO_STATE: '/submissions/:id/released-to-state',
+    SUBMISSION_WITHDRAW: '/submission-reviews/:id/withdraw-submission'
 }
 
 // Constants for releated descendant routes
@@ -160,7 +162,8 @@ const CMS_WORKFLOW_FORM_ROUTES: RouteTWithUnknown[]  = [
     'REPLACE_RATE',
     'RATE_WITHDRAW',
     'UNDO_RATE_WITHDRAW',
-    'SUBMISSIONS_RELEASED_TO_STATE'
+    'SUBMISSIONS_RELEASED_TO_STATE',
+    'SUBMISSION_WITHDRAW'
 ]
 
 const SETTINGS_HIDE_SIDEBAR_ROUTES: RouteTWithUnknown[] = [
@@ -214,6 +217,7 @@ const PageTitlesRecord: Record<RouteT | 'UNKNOWN_ROUTE', string> = {
     SUBMISSIONS_UPLOAD_RATE_RESPONSE: 'Add rate response',
     SUBMISSIONS_RELEASED_TO_STATE: 'Released to state',
     UNKNOWN_ROUTE: 'Not found',
+    SUBMISSION_WITHDRAW: 'Withdraw submission'
 }
 
 /*
