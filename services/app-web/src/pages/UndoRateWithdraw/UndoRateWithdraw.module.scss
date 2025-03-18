@@ -12,28 +12,5 @@
 }
 
 .formContainer {
-    > [class^='usa-fieldset'] {
-        padding: uswds.units(4);
-        margin-bottom: uswds.units(2);
-        margin-top: uswds.units(2);
-        background: custom.$mcr-foundation-white;
-        border: 1px solid custom.$mcr-gray-lighter;
-        @include uswds.u-radius('md');
-    }
-
-    h2 {
-        margin-top: 0;
-        font-weight: bold;
-    }
-
-    &[class^='usa-form'] {
-        min-width: 100%;
-        max-width: 100%;
-
-        @include uswds.at-media('tablet') {
-            min-width: 20rem;
-            max-width: 40rem;
-            margin: 0 auto;
-        }
-    }
+    @include custom.form-fields
 }
