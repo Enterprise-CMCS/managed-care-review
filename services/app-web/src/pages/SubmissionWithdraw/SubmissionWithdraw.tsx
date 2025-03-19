@@ -28,7 +28,7 @@ export const SubmissionWithdraw = (): React.ReactElement => {
     const { data } = useFetchContractQuery({
         variables: {
             input: {
-                contractID: id ?? 'unknown contract',
+                contractID: id,
             },
         },
     })
