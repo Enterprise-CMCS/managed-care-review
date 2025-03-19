@@ -15,4 +15,6 @@
 <% } %>
 If you have any questions, please reach out to your CMS point of contact.
 <br />
-<%= (it.associatedContracts.length === 1 ? <a href="<%= it.associatedContracts[0].summaryURL %>">View the submission in MC-Review</a> : '')%>
+<% if (it.associatedContracts.length === 1) { %>
+  <a href="<%= it.associatedContracts[0].summaryURL %>">View the submission in MC-Review</a>
+<% } %>
