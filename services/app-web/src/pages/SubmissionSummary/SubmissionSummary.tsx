@@ -32,7 +32,7 @@ import {
     getVisibleLatestContractFormData,
     getVisibleLatestRateRevisions,
 } from '@mc-review/helpers'
-import { generatePath, Navigate } from 'react-router-dom'
+import { generatePath, Navigate, useNavigate } from 'react-router-dom'
 import { hasCMSUserPermissions } from '@mc-review/helpers'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '@mc-review/common-code'
@@ -56,6 +56,7 @@ export const SubmissionSummary = (): React.ReactElement => {
     const hasCMSPermissions = hasCMSUserPermissions(loggedInUser)
     const isStateUser = loggedInUser?.role === 'STATE_USER'
     const isHelpDeskUser = loggedInUser?.role === 'HELPDESK_USER'
+    const navigate = useNavigate()
     const ldClient = useLDClient()
 
     const submissionApprovalFlag = ldClient?.variation(
@@ -304,6 +305,12 @@ export const SubmissionSummary = (): React.ReactElement => {
                                         type="button"
                                         outline
                                         className="usa-button"
+                                        onClick={() =>
+                                            navigate(
+                                                `/submission-reviews/${contract.id}/withdraw-submission`
+                                            )
+                                        }
+                                        link_url={`/submission-reviews/${contract.id}/withdraw-submission`}
                                     >
                                         Withdraw submission
                                     </ButtonWithLogging>
