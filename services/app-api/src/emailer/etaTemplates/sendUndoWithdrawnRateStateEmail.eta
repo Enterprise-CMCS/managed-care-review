@@ -15,4 +15,4 @@
 <% } %>
 If you have any questions, please reach out to your CMS point of contact.
 <br />
-<a href="<%= it.rateInfo.rateURL %>">View the submission in MC-Review</a>
+<%= (it.associatedContracts.length === 1 ? <a href="<%= it.associatedContracts[0].summaryURL %>">View the submission in MC-Review</a> : '')%>
