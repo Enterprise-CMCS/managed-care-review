@@ -10,5 +10,6 @@ exports[`sendUndoWithdrawnRateStateEmail > renders email for unwithdrawn rate as
 <br />
 If you have any questions, please reach out to your CMS point of contact.
 <br />
-<a href="http://localhost/rates/test-rate">View the submission in MC-Review</a>"
+  <a href="http://localhost/submissions/12345">View the submission in MC-Review</a>
+"
 `;
