@@ -59,12 +59,68 @@ describe('SubmissionWithdraw', () => {
                 })
             ).toBeInTheDocument()
             expect(
-                screen.getByText(
-                    'Provide a reason for withdrawing the submission.'
-                )
+                screen.getByText('Reason for withdrawing the submission.')
             ).toBeInTheDocument()
             expect(
                 screen.getByRole('button', { name: 'Withdraw submission' })
+            ).toBeInTheDocument()
+        })
+    })
+
+    it('displays an error message if no reason is provided', async () => {
+        const contract = mockContractPackageUnlockedWithUnlockedType({
+            id: 'test-abc-123',
+        })
+        const { user } = renderWithProviders(
+            <Routes>
+                <Route element={<SubmissionSideNav />}>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                        element={<SubmissionSummary />}
+                    />
+                    <Route
+                        path={RoutesRecord.SUBMISSION_WITHDRAW}
+                        element={<SubmissionWithdraw />}
+                    />
+                </Route>
+            </Routes>,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockValidCMSUser(),
+                            statusCode: 200,
+                        }),
+                        fetchContractWithQuestionsMockSuccess({
+                            contract,
+                        }),
+                    ],
+                },
+                routerProvider: {
+                    route: '/submission-reviews/test-abc-123/withdraw-submission',
+                },
+                featureFlags: {
+                    'withdraw-rate': true,
+                },
+            }
+        )
+
+        await waitFor(() => {
+            expect(
+                screen.queryByTestId('submissionWithdrawReason')
+            ).toBeInTheDocument()
+        })
+
+        const submitButton = screen.getByRole('button', {
+            name: 'Withdraw submission',
+        })
+        await user.click(submitButton)
+
+        await waitFor(() => {
+            expect(
+                screen.getByText(
+                    'You must provide a reason for withdrawing this submission.'
+                )
             ).toBeInTheDocument()
         })
     })
