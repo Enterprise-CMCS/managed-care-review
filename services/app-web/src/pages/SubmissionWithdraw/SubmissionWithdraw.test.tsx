@@ -6,6 +6,7 @@ import { RoutesRecord } from '@mc-review/constants'
 import { SubmissionSummary } from '../SubmissionSummary'
 import { SubmissionWithdraw } from './SubmissionWithdraw'
 import {
+    fetchContractMockSuccess,
     fetchContractWithQuestionsMockSuccess,
     fetchCurrentUserMock,
     mockContractPackageUnlockedWithUnlockedType,
@@ -40,6 +41,7 @@ describe('SubmissionWithdraw', () => {
                         fetchContractWithQuestionsMockSuccess({
                             contract,
                         }),
+                        fetchContractMockSuccess({ contract }),
                     ],
                 },
                 routerProvider: {
@@ -94,6 +96,7 @@ describe('SubmissionWithdraw', () => {
                         fetchContractWithQuestionsMockSuccess({
                             contract,
                         }),
+                        fetchContractMockSuccess({ contract }),
                     ],
                 },
                 routerProvider: {
