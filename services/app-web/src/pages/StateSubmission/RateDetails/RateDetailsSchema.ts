@@ -6,6 +6,7 @@ import {
     validateFileItemsList,
     validateFileItemsListSingleUpload,
 } from '../../../formHelpers/validators'
+import { getCurrentDate } from '@mc-review/dates';
 
 Yup.addMethod(Yup.date, 'validateDateFormat', validateDateFormat)
 
@@ -86,6 +87,7 @@ const SingleRateCertSchema = (_activeFeatureFlags: FeatureFlagSettings) =>
                         .typeError(
                             'The certified date must be in MM/DD/YYYY format'
                         )
+                        .max(getCurrentDate(), 'The certification date cannot be a future date')
                 )
             }
         }),

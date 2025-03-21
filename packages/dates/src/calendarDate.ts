@@ -41,11 +41,24 @@ function formatRateNameDate(date: Date | undefined): string {
     return dayjs(date).tz('UTC').format('YYYYMMDD')
 }
 
-const formatUserInputDate = (initialValue?: string): string | undefined => {
+function formatUserInputDate(initialValue?: string): string | undefined {
     const dayjsValue = dayjs(initialValue)
     return initialValue && dayjsValue.isValid()
         ? dayjs(initialValue).format('YYYY-MM-DD')
         : initialValue // preserve undefined to show validations later
+}
+
+/**
+ * Returns the current date in the format YYYY-M-D.
+ * Uses the user's local timezone.
+ *
+ * @returns {string} Current date formatted as YYYY-M-D (year-month-day).
+ * Note: Month is not zero-padded (e.g., January returns 1, not 01).
+ * Note: Day is not zero-padded (e.g., the 1st returns 1, not 01).
+ */
+function getCurrentDate() {
+    const today = new Date()
+    return `${today.getFullYear()}-${today.getMonth()+1}-${today.getDate()}`
 }
 
 export {
@@ -53,4 +66,5 @@ export {
     formatRateNameDate,
     formatToPacificTime,
     formatUserInputDate,
+    getCurrentDate
 }
