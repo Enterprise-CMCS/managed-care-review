@@ -210,7 +210,8 @@ type Store = {
     ) => Promise<RateOrErrorArrayType | Error>
 
     findAllRatesStripped: (
-        stateCode?: string
+        stateCode?: string,
+        rateIDs?: string[]
     ) => Promise<StrippedRateOrErrorArrayType | Error>
 
     replaceRateOnContract: (

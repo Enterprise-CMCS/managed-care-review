@@ -60,11 +60,13 @@ export function indexRatesStripped(
             let ratesWithHistory
             if (stateUser) {
                 ratesWithHistory = await store.findAllRatesStripped(
-                    user.stateCode
+                    user.stateCode,
+                    input?.rateIDs ?? undefined
                 )
             } else {
                 ratesWithHistory = await store.findAllRatesStripped(
-                    input?.stateCode ?? undefined
+                    input?.stateCode ?? undefined,
+                    input?.rateIDs ?? undefined
                 )
             }
             if (ratesWithHistory instanceof Error) {

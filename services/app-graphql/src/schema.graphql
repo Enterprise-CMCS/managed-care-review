@@ -2257,6 +2257,7 @@ type RateEdge {
 
 input IndexRatesInput {
     stateCode: String
+    rateIDs: [String!]
 }
 
 type IndexRatesPayload {

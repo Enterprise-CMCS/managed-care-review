@@ -11,7 +11,7 @@ import {
     unlockTestContract,
 } from '../../testHelpers/gqlContractHelpers'
 import { findAllRatesStripped } from './findAllRatesStripped'
-import { consoleLogFullData, must } from '../../testHelpers'
+import { must } from '../../testHelpers'
 import type { StrippedRateType } from '../../domain-models/contractAndRates'
 import type { RateFormDataInput } from '../../gen/gqlClient'
 import { UpdateDraftContractRatesDocument } from '../../gen/gqlClient'
@@ -19,6 +19,7 @@ import {
     undoWithdrawTestRate,
     withdrawTestRate,
 } from '../../testHelpers/gqlRateHelpers'
+import { expect } from 'vitest'
 
 const testRateFormInputData = (): RateFormDataInput => ({
     rateType: 'AMENDMENT',
@@ -168,25 +169,66 @@ it('returns all rates with stripped down data', async () => {
     const rateBFromArrayAgain = strippedRatesAgain.find(
         (rate) => rate.id === rateBID
     )
+
+    if (!rateBFromArrayAgain) {
+        throw new Error('Expected to find rateB')
+    }
+
     // expect rateB to have expected data after undo withdraw rate
-    consoleLogFullData(rateBFromArrayAgain)
     expect(
-        rateBFromArrayAgain?.latestSubmittedRevision.submitInfo?.updatedReason
+        rateBFromArrayAgain.latestSubmittedRevision.submitInfo?.updatedReason
     ).toContain('Undo withdraw rateB')
-    expect(rateBFromArrayAgain?.initiallySubmittedAt).toStrictEqual(
+    expect(rateBFromArrayAgain.initiallySubmittedAt).toStrictEqual(
         submittedContractB.initiallySubmittedAt
     )
-    expect(rateBFromArrayAgain?.parentContractID).toEqual(submittedContractB.id)
-    expect(rateBFromArrayAgain?.status).toBe('RESUBMITTED')
-    expect(rateBFromArrayAgain?.consolidatedStatus).toBe('RESUBMITTED')
+    expect(rateBFromArrayAgain.parentContractID).toEqual(submittedContractB.id)
+    expect(rateBFromArrayAgain.status).toBe('RESUBMITTED')
+    expect(rateBFromArrayAgain.consolidatedStatus).toBe('RESUBMITTED')
     expect(
-        rateBFromArrayAgain?.latestSubmittedRevision?.unlockInfo?.updatedReason
+        rateBFromArrayAgain.latestSubmittedRevision?.unlockInfo?.updatedReason
     ).toContain('Undo withdraw rateB')
-    expect(rateBFromArrayAgain?.reviewStatusActions?.length).toBe(2)
-    expect(rateBFromArrayAgain?.reviewStatusActions?.[0].actionType).toBe(
+    expect(rateBFromArrayAgain.reviewStatusActions?.length).toBe(2)
+    expect(rateBFromArrayAgain.reviewStatusActions?.[0].actionType).toBe(
         'UNDER_REVIEW'
     )
-    expect(rateBFromArrayAgain?.reviewStatusActions?.[1].actionType).toBe(
+    expect(rateBFromArrayAgain.reviewStatusActions?.[1].actionType).toBe(
         'WITHDRAW'
     )
+
+    const selectedStrippedRates = must(
+        await findAllRatesStripped(client, undefined, [rateBFromArrayAgain.id])
+    )
+
+    // Expect only rate B to return
+    expect(selectedStrippedRates).toHaveLength(1)
+    expect(selectedStrippedRates[0].rateID).toBe(rateBFromArrayAgain.id)
+
+    const emptySelectedStrippedRatesOrError = must(
+        await findAllRatesStripped(client, undefined, [])
+    )
+    const emptySelectedStrippedRates: StrippedRateType[] = []
+    emptySelectedStrippedRatesOrError.forEach((rate) => {
+        if (!(rate.rate instanceof Error)) {
+            emptySelectedStrippedRates.push(rate.rate)
+        }
+    })
+
+    // Expect our only two rate
+    const rateAFromArrayEmptyArray = emptySelectedStrippedRates.find(
+        (rate) => rate.id === rateAID
+    )
+    const rateBFromArrayEmptyArray = emptySelectedStrippedRates.find(
+        (rate) => rate.id === rateBID
+    )
+
+    // expect both our rates, we cannot expect on length of rates because DB data persists between tests.
+    expect(rateAFromArrayEmptyArray).toBeDefined()
+    expect(rateBFromArrayEmptyArray).toBeDefined()
+
+    const notRealRateSelectedOrError = must(
+        await findAllRatesStripped(client, undefined, ['not-a-real-rate-id'])
+    )
+
+    // ID should not exist so we expect no results
+    expect(notRealRateSelectedOrError).toHaveLength(0)
 }, 10000)
