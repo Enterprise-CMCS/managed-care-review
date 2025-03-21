@@ -18,6 +18,9 @@ fragment packageSubmissionsFragment on ContractPackageSubmission {
             revisions {
                 ...rateRevisionFragment
             }
+            packageSubmissions {
+                ...ratePackageSubmissionsFragment
+            }
         }
     }
 }
