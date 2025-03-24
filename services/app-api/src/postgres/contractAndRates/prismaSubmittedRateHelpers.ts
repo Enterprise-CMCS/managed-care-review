@@ -95,6 +95,43 @@ const includeStrippedRateWithoutDraftContracts = {
                 orderBy: {
                     updatedAt: 'asc',
                 },
+            },
+        },
+    },
+    reviewStatusActions: {
+        include: {
+            updatedBy: true,
+        },
+        orderBy: {
+            updatedAt: 'asc',
+        },
+    },
+} satisfies Prisma.RateTableInclude
+
+const includeRateRelatedContracts = {
+    revisions: {
+        orderBy: {
+            createdAt: 'asc',
+        },
+        include: {
+            submitInfo: {
+                select: {
+                    id: true,
+                    updatedAt: true,
+                    updatedReason: true,
+                },
+            },
+            unlockInfo: {
+                select: {
+                    id: true,
+                    updatedAt: true,
+                    updatedReason: true,
+                },
+            },
+            relatedSubmissions: {
+                orderBy: {
+                    updatedAt: 'asc',
+                },
                 include: {
                     submissionPackages: {
                         include: {
@@ -148,14 +185,6 @@ const includeStrippedRateWithoutDraftContracts = {
             },
         },
     },
-    reviewStatusActions: {
-        include: {
-            updatedBy: true,
-        },
-        orderBy: {
-            updatedAt: 'asc',
-        },
-    },
 } satisfies Prisma.RateTableInclude
 
 type RateTableWithoutDraftContractsPayload = Prisma.RateTableGetPayload<{
@@ -167,6 +196,10 @@ type RateTableWithoutDraftContractsStrippedPayload =
         include: typeof includeStrippedRateWithoutDraftContracts
     }>
 
+type RateTableWithRelatedContractsPayload = Prisma.RateTableGetPayload<{
+    include: typeof includeRateRelatedContracts
+}>
+
 type RateRevisionsTableStrippedPayload =
     RateTableWithoutDraftContractsStrippedPayload['revisions']
 type RateRevisionTablePayload =
@@ -176,6 +209,7 @@ export {
     includeRateWithoutDraftContracts,
     includeLatestSubmittedRateRev,
     includeStrippedRateWithoutDraftContracts,
+    includeRateRelatedContracts,
 }
 
 export type {
@@ -183,4 +217,5 @@ export type {
     RateTableWithoutDraftContractsStrippedPayload,
     RateRevisionsTableStrippedPayload,
     RateRevisionTablePayload,
+    RateTableWithRelatedContractsPayload,
 }
