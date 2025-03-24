@@ -20,7 +20,6 @@ import type {
     CreateRateQuestionInputType,
     AuditDocument,
     EmailSettingsType,
-    StrippedRelatedContract,
 } from '../domain-models'
 import { findPrograms, findStatePrograms } from '../postgres'
 import type { InsertUserArgsType } from './user'
@@ -96,6 +95,7 @@ import { findAllRatesStripped } from './contractAndRates/findAllRatesStripped'
 import type { WithdrawContractArgsType } from './contractAndRates/withdrawContract'
 import { withdrawContract } from './contractAndRates/withdrawContract'
 import { findRateRelatedContracts } from './contractAndRates/findRateRelatedContracts'
+import type { RelatedContractStripped } from '../gen/gqlClient'
 
 type Store = {
     findPrograms: (
@@ -188,7 +188,7 @@ type Store = {
     findRateWithHistory: (rateID: string) => Promise<RateType | Error>
     findRateRelatedContracts: (
         rateID: string
-    ) => Promise<StrippedRelatedContract[] | Error>
+    ) => Promise<RelatedContractStripped[] | Error>
 
     updateContract: (
         args: UpdateMCCRSIDFormArgsType

@@ -1,14 +1,14 @@
 import type {PrismaTransactionType} from '../prismaTypes';
-import type { StrippedRelatedContract } from '../../domain-models';
 import type {ExtendedPrismaClient} from '../prismaClient';
 import {NotFoundError} from '../postgresErrors';
 import { getRelatedContracts } from './prismaSharedContractRateHelpers';
 import { includeRateRelatedContracts } from './prismaSubmittedRateHelpers';
+import type {RelatedContractStripped} from '../../gen/gqlClient';
 
 async function findRateRelatedContractsInTransaction(
     tx: PrismaTransactionType,
     rateID: string
-): Promise<StrippedRelatedContract[]> {
+): Promise<RelatedContractStripped[]> {
     const rate = await tx.rateTable.findFirst({
         where: {
             id: rateID
@@ -28,7 +28,7 @@ async function findRateRelatedContractsInTransaction(
 async function findRateRelatedContracts(
     client: ExtendedPrismaClient,
     rateID: string
-): Promise<StrippedRelatedContract[] | Error> {
+): Promise<RelatedContractStripped[] | Error> {
     try {
         return await client.$transaction(
             async (tx) => await findRateRelatedContractsInTransaction(tx, rateID)
