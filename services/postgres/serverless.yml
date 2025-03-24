@@ -38,6 +38,21 @@ provider:
           Action:
             - secretsmanager:GetRandomPassword # pragma: allowlist secret
           Resource: '*'
+        - Effect: 'Allow'
+          Action:
+            - secretsmanager:DescribeSecret # pragma: allowlist secret
+            - secretsmanager:GetSecretValue # pragma: allowlist secret
+          Resource:
+            - '${self:custom.devDbSecretsArn}'
+        - Effect: 'Allow'
+          Action:
+            - secretsmanager:DescribeSecret # pragma: allowlist secret
+            - secretsmanager:GetSecretValue # pragma: allowlist secret
+            - secretsmanager:PutSecretValue # pragma: allowlist secret
+            - secretsmanager:UpdateSecretVersionStage # pragma: allowlist secret
+            - secretsmanager:DeleteSecret # pragma: allowlist secret
+          Resource:
+            - '${self:custom.dbManagerArn}'
         - Effect: Allow
           Action:
             - ec2:CreateNetworkInterface
@@ -50,6 +65,7 @@ custom:
   databaseName: !Sub aurora_${self:service}_${sls:stage}_${AWS::AccountId}
   vpcId: ${env:VPC_ID}
   sgId: ${env:SG_ID}
+  devAuroraArn: ${env:CF_CONFIG_IGNORED_LOCALLY, env:DEV_AURORA_ARN}
   privateSubnets:
     - ${env:SUBNET_PRIVATE_A_ID}
     - ${env:SUBNET_PRIVATE_B_ID}
@@ -58,6 +74,8 @@ custom:
   iamPermissionsBoundary: ${env:IAM_PERMISSIONS_BOUNDARY}
   iamPath: ${env:IAM_PATH}
   rotatorArn: !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${self:service}-${sls:stage}-rotator'
+  dbManagerArn: !Sub 'arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:aurora_${self:service}_*'
+  devDbSecretsArn: ${env:CF_CONFIG_IGNORED_LOCALLY, env:DEV_DB_SM_ARN}
   slackWebhookUrl: ${env:SLACK_WEBHOOK}
   serverlessTerminationProtection:
     stages:
@@ -102,6 +120,15 @@ functions:
       subnetIds: ${self:custom.privateSubnets}
     environment:
       SECRETS_MANAGER_ENDPOINT: !Sub 'https://secretsmanager.${AWS::Region}.amazonaws.com'
+  dbManager:
+    handler: src/logicalDatabaseManager.handler
+    description: Manages logical databases in the shared dev PostgreSQL instance
+    timeout: 60
+    vpc:
+      securityGroupIds: ${self:custom.sgId}
+      subnetIds: ${self:custom.privateSubnets}
+    environment:
+      SECRETS_MANAGER_ENDPOINT: !Sub 'https://secretsmanager.${AWS::Region}.amazonaws.com'
 
 resources:
   Conditions:
@@ -109,7 +136,7 @@ resources:
       - !Equals ['${sls:stage}', 'main']
       - !Equals ['${sls:stage}', 'val']
       - !Equals ['${sls:stage}', 'prod']
-      - !Equals ['${sls:stage}', 'mtsechubsmrotation'] # Temporary addition for testing
+    IsReviewEnvironment: !Not [!Condition IsDevValProd]
 
   Resources:
     # VPC endpoint for rotation lambda
@@ -136,6 +163,7 @@ resources:
 
     PostgresAuroraV2:
       Type: AWS::RDS::DBCluster
+      Condition: IsDevValProd
       DeletionPolicy: ${self:custom.deletionPolicy.${opt:stage}, self:custom.deletionPolicy.other}
       Properties:
         Engine: aurora-postgresql
@@ -154,6 +182,7 @@ resources:
 
     PostgresAuroraV2Instance:
       Type: AWS::RDS::DBInstance
+      Condition: IsDevValProd
       DeletionPolicy: ${self:custom.deletionPolicy.${opt:stage}, self:custom.deletionPolicy.other}
       Properties:
         Engine: aurora-postgresql
@@ -351,13 +380,13 @@ resources:
       Type: AWS::SecretsManager::SecretTargetAttachment
       Properties:
         SecretId: !Ref PostgresSecret
-        TargetId: !Sub 'arn:aws:rds:${AWS::Region}:${AWS::AccountId}:cluster:${PostgresAuroraV2}'
+        TargetId: ${self:custom.devAuroraArn}
         TargetType: AWS::RDS::DBCluster
 
     PostgresSecretsRotationSchedule:
       Type: AWS::SecretsManager::RotationSchedule
+      Condition: IsDevValProd
       DependsOn:
-        - PostgresAuroraV2
         - SecretsRDSAttachment
       Properties:
         SecretId:
@@ -376,7 +405,10 @@ resources:
 
   Outputs:
     PostgresAuroraV2Arn:
-      Value: !Sub 'arn:aws:rds:${AWS::Region}:${AWS::AccountId}:cluster:${PostgresAuroraV2}'
+      Value: !If
+        - IsReviewEnvironment
+        - ${self:custom.devAuroraArn}
+        - !Sub 'arn:aws:rds:${AWS::Region}:${AWS::AccountId}:cluster:${PostgresAuroraV2}'
     PostgresVMScriptsBucket:
       Condition: IsDevValProd
       Value: !Ref PostgresVMScriptsBucket

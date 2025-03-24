@@ -16,8 +16,14 @@ jobs:
     environment: dev
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 40
+
       - name: set stage_name
+        id: stage-name
+        shell: bash
         run: |
           echo "stage_name=$(./scripts/stage_name_for_branch.sh ${{ github.event.ref }})" >> $GITHUB_ENV
 
@@ -39,6 +45,15 @@ jobs:
           region: ${{ vars.AWS_DEFAULT_REGION }}
           account-id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
           stage-name: main
+
+      - name: Delete logical database
+        env:
+          STAGE_NAME: ${{ steps.stage-name.outputs.stage_name }}
+          DEV_DB_SM_ARN: ${{ secrets.DEV_DB_SM_ARN }}
+          AWS_REGION: ${{ vars.AWS_DEFAULT_REGION }}
+        run: |
+          chmod +x services/postgres/db-manager.sh
+          ./services/postgres/db-manager.sh delete $STAGE_NAME $DEV_DB_SM_ARN $STAGE_NAME
 
       - name: destroy all
         env:
