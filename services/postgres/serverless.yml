@@ -65,7 +65,6 @@ custom:
   databaseName: !Sub aurora_${self:service}_${sls:stage}_${AWS::AccountId}
   vpcId: ${env:VPC_ID}
   sgId: ${env:SG_ID}
-  devAuroraArn: ${env:CF_CONFIG_IGNORED_LOCALLY, env:DEV_AURORA_ARN}
   privateSubnets:
     - ${env:SUBNET_PRIVATE_A_ID}
     - ${env:SUBNET_PRIVATE_B_ID}
@@ -75,6 +74,7 @@ custom:
   iamPath: ${env:IAM_PATH}
   rotatorArn: !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${self:service}-${sls:stage}-rotator'
   dbManagerArn: !Sub 'arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:aurora_${self:service}_*'
+  devAuroraArn: ${env:CF_CONFIG_IGNORED_LOCALLY, env:DEV_AURORA_ARN}
   devDbSecretsArn: ${env:CF_CONFIG_IGNORED_LOCALLY, env:DEV_DB_SM_ARN}
   slackWebhookUrl: ${env:SLACK_WEBHOOK}
   serverlessTerminationProtection:
