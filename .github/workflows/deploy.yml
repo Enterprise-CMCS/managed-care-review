@@ -272,7 +272,7 @@ jobs:
 
   deploy-infra:
     needs: [begin-deployment, build-clamav-layer]
-    uses: Enterprise-CMCS/managed-care-review/.github/workflows/deploy-infra-to-env.yml@main
+    uses: Enterprise-CMCS/managed-care-review/.github/workflows/deploy-infra-to-env.yml@mt-promote-2645-v2
     with:
       environment: dev
       stage_name: ${{ needs.begin-deployment.outputs.stage-name}}
@@ -291,8 +291,8 @@ jobs:
       subnet_private_b_id: ${{ secrets.DEV_SUBNET_PRIVATE_B_ID }}
       subnet_private_c_id: ${{ secrets.DEV_SUBNET_PRIVATE_C_ID }}
       subnet_public_a_id: ${{ secrets.DEV_SUBNET_PUBLIC_A_ID }}
-      dev_db_sm_arn: ${{ secrets.DEV_DB_SM_ARN }}
-      dev_aurora_arn: ${{ secrets.DEV_AURORA_ARN }}
+      db_sm_arn: ${{ secrets.DEV_DB_SM_ARN }}
+      aurora_arn: ${{ secrets.DEV_AURORA_ARN }}
 
   deploy-app:
     needs:
