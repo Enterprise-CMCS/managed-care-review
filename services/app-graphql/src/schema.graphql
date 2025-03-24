@@ -1899,6 +1899,15 @@ type RateRevisionStripped {
 }
 
 """
+A rate revision represents a single submission
+for the rate and contains stripped down data from when the rate cert was submitted
+"""
+type RelatedContractStripped {
+    id: ID!
+    consolidatedStatus: ConsolidatedContractStatus!
+}
+
+"""
 Rates are rate certifications and their associated actuary contacts and documents
 State users may create, update, and submit several rates at a time
 """
@@ -2020,6 +2029,9 @@ type RateStripped {
 
     "The latest submitted rate revision"
     latestSubmittedRevision: RateRevisionStripped!
+
+    "Contracts this rate is related to"
+    relatedContracts: [RelatedContractStripped!]
 }
 
 """

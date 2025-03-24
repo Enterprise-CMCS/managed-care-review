@@ -6,6 +6,7 @@ import {
 import { rateRevisionSchema, strippedRateRevisionSchema } from './revisionTypes'
 import { pruneDuplicateEmails } from '../../emailer/formatters'
 import {
+    consolidatedContractStatusSchema,
     consolidatedRateStatusSchema,
     rateReviewStatusSchema,
     statusSchema,
@@ -20,6 +21,11 @@ const rateSchema = rateWithoutDraftContractsSchema.extend({
     draftContracts: z.lazy(() =>
         z.array(contractWithoutDraftRatesSchema).optional()
     ),
+})
+
+const strippedRelatedContract = z.object({
+    id: z.string().uuid(),
+    consolidatedStatus: consolidatedContractStatusSchema,
 })
 
 const strippedRateSchema = z.object({
@@ -38,6 +44,7 @@ const strippedRateSchema = z.object({
     draftRevision: strippedRateRevisionSchema.optional(),
     reviewStatusActions: z.array(rateReviewActionSchema).optional(),
     latestSubmittedRevision: strippedRateRevisionSchema,
+    relatedContracts: z.array(strippedRelatedContract),
 })
 
 type RateType = z.infer<typeof rateSchema>
@@ -55,6 +62,12 @@ function rateSubmitters(rate: RateType): string[] {
     return pruneDuplicateEmails(submitters)
 }
 
-export { rateRevisionSchema, rateSchema, strippedRateSchema, rateSubmitters }
+export {
+    rateRevisionSchema,
+    rateSchema,
+    strippedRateSchema,
+    rateSubmitters,
+    strippedRelatedContract,
+}
 
 export type { RateType, StrippedRateType }

@@ -9,7 +9,10 @@ import type {
     ContractPackageSubmissionType,
     RatePackageSubmissionType,
 } from '../../domain-models/contractAndRates/packageSubmissions'
-import type { RateWithoutDraftContractsType } from '../../domain-models/contractAndRates/baseContractRateTypes'
+import type {
+    ContractReviewStatusType,
+    RateWithoutDraftContractsType,
+} from '../../domain-models/contractAndRates/baseContractRateTypes'
 import {
     arrayOrFirstError,
     contractWithHistoryToDomainModelWithoutRates,
@@ -27,6 +30,7 @@ import {
     rateFormDataToDomainModel,
     getParentContractID,
     DRAFT_PARENT_PLACEHOLDER,
+    getConsolidatedContractStatus,
 } from './prismaSharedContractRateHelpers'
 import type {
     RateTableWithoutDraftContractsPayload,
@@ -36,6 +40,7 @@ import type {
     RateTableFullPayload,
     RateTableStrippedPayload,
 } from './prismaFullContractRateHelpers'
+import type { HealthPlanPackageStatusType } from '../../domain-models'
 
 function parseRateWithHistory(
     rate: RateTableFullPayload,
@@ -334,6 +339,7 @@ function strippedRateWithoutDraftContractsToDomainModel(
 
     let draftRevision: RateRevisionType | undefined = undefined
     const submittedRevisions: RateRevisionType[] = []
+    let relatedContracts: StrippedRateType['relatedContracts'] = []
     for (const rateRev of rateRevisions) {
         // set draft revision aside from submitted revisions.
         if (!rateRev.submitInfo) {
@@ -347,6 +353,63 @@ function strippedRateWithoutDraftContractsToDomainModel(
             continue
         }
 
+        // get the latest related submissions entry
+        const latestRelatedSubmission = rateRev.relatedSubmissions.sort(
+            (a, b) => b.updatedAt.getTime() - a.updatedAt.getTime()
+        )[0]
+        // collect related contracts with latest consolidated statuses
+        const contracts: StrippedRateType['relatedContracts'] = []
+
+        // looping throw all the submission packages of the related submissions to find the contracts for this rate.
+        latestRelatedSubmission.submissionPackages.forEach((pkg) => {
+            if (pkg.rateRevisionID === rateRev.id) {
+                let status: HealthPlanPackageStatusType = 'DRAFT'
+                let reviewStatus: ContractReviewStatusType = 'UNDER_REVIEW'
+
+                const submitInfo =
+                    pkg.contractRevision.contract.revisions[0].submitInfo
+                const unlockInfo =
+                    pkg.contractRevision.contract.revisions[0].unlockInfo
+                const latestAction =
+                    pkg.contractRevision.contract.reviewStatusActions[0]
+
+                // Find the current status of all related contracts as some could be in different status than the rate.
+                // If it has both unlock and submit info, then it was resubmitted
+                if (submitInfo && unlockInfo) {
+                    status = 'RESUBMITTED'
+                }
+                // if only unlock info, then this unlocked. When unlocking contract, a new revision with unlock info is created.
+                if (unlockInfo && !submitInfo) {
+                    status = 'UNLOCKED'
+                }
+                // if there is a submit info, but not unlock info then this is the initial submission.
+                if (submitInfo && !unlockInfo) {
+                    status = 'SUBMITTED'
+                }
+                // Contract review statuses
+                if (latestAction?.actionType === 'MARK_AS_APPROVED') {
+                    reviewStatus = 'APPROVED'
+                }
+                if (latestAction?.actionType === 'WITHDRAW') {
+                    reviewStatus = 'WITHDRAWN'
+                }
+
+                // Consolidate the statuses.
+                const consolidatedStatus = getConsolidatedContractStatus(
+                    status,
+                    reviewStatus
+                )
+
+                // Add to our temporary array
+                contracts.push({
+                    id: pkg.contractRevision.contract.id,
+                    consolidatedStatus,
+                })
+            }
+        })
+
+        // Set the related contracts array, replacing the previous with the current so that the result is related contracts from the latest submission.
+        relatedContracts = contracts
         submittedRevisions.push(strippedRateRevisionToDomainModel(rateRev))
     }
 
@@ -380,6 +443,7 @@ function strippedRateWithoutDraftContractsToDomainModel(
         draftRevision,
         latestSubmittedRevision: submittedRevisionsDescending[0],
         reviewStatusActions: rate.reviewStatusActions.reverse(),
+        relatedContracts: relatedContracts,
     }
 }
 

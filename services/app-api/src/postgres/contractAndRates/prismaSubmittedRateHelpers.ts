@@ -95,6 +95,56 @@ const includeStrippedRateWithoutDraftContracts = {
                 orderBy: {
                     updatedAt: 'asc',
                 },
+                include: {
+                    submissionPackages: {
+                        include: {
+                            contractRevision: {
+                                select: {
+                                    createdAt: true,
+                                    contract: {
+                                        select: {
+                                            id: true,
+                                            revisions: {
+                                                orderBy: {
+                                                    updatedAt: 'desc',
+                                                },
+                                                take: 1,
+                                                select: {
+                                                    unlockInfo: {
+                                                        select: {
+                                                            id: true,
+                                                            updatedAt: true,
+                                                            updatedReason: true,
+                                                        },
+                                                    },
+                                                    submitInfo: {
+                                                        select: {
+                                                            id: true,
+                                                            updatedAt: true,
+                                                            updatedReason: true,
+                                                        },
+                                                    },
+                                                },
+                                            },
+                                            reviewStatusActions: {
+                                                orderBy: {
+                                                    updatedAt: 'desc',
+                                                },
+                                                take: 1,
+                                                select: {
+                                                    id: true,
+                                                    updatedAt: true,
+                                                    updatedReason: true,
+                                                    actionType: true,
+                                                },
+                                            },
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
             },
         },
     },

@@ -179,10 +179,10 @@ const getParentContractID = (
     rateRevisions: RateRevisionsTableStrippedPayload | RateRevisionTablePayload
 ) => {
     // sort in ascending order
-    rateRevisions.sort(
+    const ascendingRevisions = [...rateRevisions].sort(
         (revA, revB) => revA.createdAt.getTime() - revB.createdAt.getTime()
     )
-    const firstRevision = rateRevisions[0]
+    const firstRevision = ascendingRevisions[0]
     const submission = firstRevision.submitInfo
 
     let parentContractID = undefined
