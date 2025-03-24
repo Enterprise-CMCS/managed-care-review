@@ -444,6 +444,7 @@ const RateDetails = ({
                                     setFocusErrorSummaryHeading(true)
                                     handleSubmit(e)
                                 }}
+                                noValidate
                             >
                                 <fieldset className="usa-fieldset with-sections">
                                     <legend className="srOnly">
