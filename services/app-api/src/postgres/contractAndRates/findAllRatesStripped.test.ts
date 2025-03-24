@@ -1,11 +1,7 @@
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
-import {
-    constructTestPostgresServer,
-    defaultFloridaProgram,
-} from '../../testHelpers/gqlHelpers'
+import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
 import { testCMSUser, testStateUser } from '../../testHelpers/userHelpers'
 import {
-    approveTestContract,
     createAndSubmitTestContractWithRate,
     createAndUpdateTestContractWithoutRates,
     submitTestContract,
@@ -14,43 +10,13 @@ import {
 import { findAllRatesStripped } from './findAllRatesStripped'
 import { must } from '../../testHelpers'
 import type { StrippedRateType } from '../../domain-models/contractAndRates'
-import type { RateFormDataInput } from '../../gen/gqlClient'
 import { UpdateDraftContractRatesDocument } from '../../gen/gqlClient'
 import {
     undoWithdrawTestRate,
     withdrawTestRate,
+    testRateFormInputData,
 } from '../../testHelpers/gqlRateHelpers'
 import { expect } from 'vitest'
-
-const testRateFormInputData = (): RateFormDataInput => ({
-    rateType: 'AMENDMENT',
-    rateCapitationType: 'RATE_CELL',
-    rateDateStart: '2024-01-01',
-    rateDateEnd: '2025-01-01',
-    rateDateCertified: '2024-01-01',
-    amendmentEffectiveDateStart: '2024-02-01',
-    amendmentEffectiveDateEnd: '2025-02-01',
-    rateProgramIDs: [defaultFloridaProgram().id],
-    deprecatedRateProgramIDs: [],
-    rateDocuments: [
-        {
-            s3URL: 's3://bucketname/key/test1',
-            name: 'updatedratedoc1.doc',
-            sha256: 'foobar',
-        },
-    ],
-    supportingDocuments: [],
-    certifyingActuaryContacts: [
-        {
-            name: 'Foo Person',
-            titleRole: 'Bar Job',
-            email: 'foo@example.com',
-            actuarialFirm: 'GUIDEHOUSE',
-        },
-    ],
-    addtlActuaryContacts: [],
-    actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
-})
 
 it('returns all rates with stripped down data', async () => {
     const client = await sharedTestPrismaClient()
@@ -115,7 +81,7 @@ it('returns all rates with stripped down data', async () => {
 
     await withdrawTestRate(cmsServer, rateBID, 'Withdraw invalid rate')
 
-    const strippedRatesOrErrors = must(await findAllRatesStripped(client))
+    const strippedRatesOrErrors = must(await findAllRatesStripped(client, {}))
     const strippedRates: StrippedRateType[] = []
     strippedRatesOrErrors.forEach((rate) => {
         if (!(rate.rate instanceof Error)) {
@@ -159,7 +125,9 @@ it('returns all rates with stripped down data', async () => {
     // Undo the rate withdraw
     await undoWithdrawTestRate(cmsServer, rateBID, 'Undo withdraw rateB')
 
-    const strippedRatesOrErrorsAgain = must(await findAllRatesStripped(client))
+    const strippedRatesOrErrorsAgain = must(
+        await findAllRatesStripped(client, {})
+    )
     const strippedRatesAgain: StrippedRateType[] = []
     strippedRatesOrErrorsAgain.forEach((rate) => {
         if (!(rate.rate instanceof Error)) {
@@ -197,7 +165,9 @@ it('returns all rates with stripped down data', async () => {
     )
 
     const selectedStrippedRates = must(
-        await findAllRatesStripped(client, undefined, [rateBFromArrayAgain.id])
+        await findAllRatesStripped(client, {
+            rateIDs: [rateBFromArrayAgain.id],
+        })
     )
 
     // Expect only rate B to return
@@ -205,7 +175,7 @@ it('returns all rates with stripped down data', async () => {
     expect(selectedStrippedRates[0].rateID).toBe(rateBFromArrayAgain.id)
 
     const emptySelectedStrippedRatesOrError = must(
-        await findAllRatesStripped(client, undefined, [])
+        await findAllRatesStripped(client, { rateIDs: [] })
     )
     const emptySelectedStrippedRates: StrippedRateType[] = []
     emptySelectedStrippedRatesOrError.forEach((rate) => {
@@ -227,221 +197,9 @@ it('returns all rates with stripped down data', async () => {
     expect(rateBFromArrayEmptyArray).toBeDefined()
 
     const notRealRateSelectedOrError = must(
-        await findAllRatesStripped(client, undefined, ['not-a-real-rate-id'])
+        await findAllRatesStripped(client, { rateIDs: ['not-a-real-rate-id'] })
     )
 
     // ID should not exist so we expect no results
     expect(notRealRateSelectedOrError).toHaveLength(0)
-}, 10000)
-
-it('returns related contracts with correct status', async () => {
-    const client = await sharedTestPrismaClient()
-
-    const stateServer = await constructTestPostgresServer({
-        context: {
-            user: testStateUser(),
-        },
-    })
-
-    const cmsServer = await constructTestPostgresServer({
-        context: {
-            user: testCMSUser(),
-        },
-    })
-
-    const submittedContractA =
-        await createAndSubmitTestContractWithRate(stateServer)
-    const rateAID =
-        submittedContractA.packageSubmissions[0].rateRevisions[0].rateID
-
-    await unlockTestContract(cmsServer, submittedContractA.id, 'unlock 1')
-    await submitTestContract(stateServer, submittedContractA.id, 'submit 2')
-
-    const contractB = await createAndUpdateTestContractWithoutRates(stateServer)
-
-    // link rate contract B
-    must(
-        await stateServer.executeOperation({
-            query: UpdateDraftContractRatesDocument,
-            variables: {
-                input: {
-                    contractID: contractB.id,
-                    lastSeenUpdatedAt: contractB.draftRevision?.updatedAt,
-                    updatedRates: [
-                        {
-                            type: 'LINK',
-                            rateID: rateAID,
-                        },
-                        {
-                            type: 'CREATE',
-                            formData: testRateFormInputData(),
-                        },
-                    ],
-                },
-            },
-        })
-    )
-
-    await submitTestContract(stateServer, contractB.id)
-
-    let strippedRatesOrErrors = must(
-        await findAllRatesStripped(client, undefined, [rateAID])
-    )
-    let strippedRates: StrippedRateType[] = strippedRatesOrErrors.reduce(
-        (acc, rate) => {
-            if (!(rate.rate instanceof Error)) {
-                acc.push(rate.rate)
-            }
-            return acc
-        },
-        [] as StrippedRateType[]
-    )
-
-    let strippedRateA = strippedRates[0]
-
-    // expect parent contract B to be resubmitted
-    expect(strippedRateA.relatedContracts).toEqual(
-        expect.arrayContaining([
-            {
-                id: submittedContractA.id,
-                consolidatedStatus: 'RESUBMITTED',
-            },
-            {
-                id: contractB.id,
-                consolidatedStatus: 'SUBMITTED',
-            },
-        ])
-    )
-
-    await unlockTestContract(
-        cmsServer,
-        submittedContractA.id,
-        'unlocked parent contract'
-    )
-
-    const contractC = await createAndUpdateTestContractWithoutRates(stateServer)
-    // link rate contract C
-    must(
-        await stateServer.executeOperation({
-            query: UpdateDraftContractRatesDocument,
-            variables: {
-                input: {
-                    contractID: contractC.id,
-                    lastSeenUpdatedAt: contractC.draftRevision?.updatedAt,
-                    updatedRates: [
-                        {
-                            type: 'LINK',
-                            rateID: rateAID,
-                        },
-                        {
-                            type: 'CREATE',
-                            formData: testRateFormInputData(),
-                        },
-                    ],
-                },
-            },
-        })
-    )
-
-    await submitTestContract(stateServer, contractC.id)
-
-    const unlockedContractB = await unlockTestContract(
-        cmsServer,
-        contractB.id,
-        'unlock to remove rate A'
-    )
-    const rateBID = unlockedContractB.packageSubmissions[0].rateRevisions.find(
-        (rate) => rate.rateID !== rateAID
-    )?.rateID
-
-    if (!rateBID) {
-        throw new Error('Unexpected error: rateBID should exist, but does not.')
-    }
-
-    // Remove rateA from contractB, but keep it unlocked
-    must(
-        await stateServer.executeOperation({
-            query: UpdateDraftContractRatesDocument,
-            variables: {
-                input: {
-                    contractID: unlockedContractB.id,
-                    lastSeenUpdatedAt:
-                        unlockedContractB.draftRevision?.updatedAt,
-                    updatedRates: [
-                        {
-                            type: 'UPDATE',
-                            formData: testRateFormInputData(),
-                            rateID: rateBID,
-                        },
-                    ],
-                },
-            },
-        })
-    )
-
-    strippedRatesOrErrors = must(
-        await findAllRatesStripped(client, undefined, [rateAID])
-    )
-    strippedRates = strippedRatesOrErrors.reduce((acc, rate) => {
-        if (!(rate.rate instanceof Error)) {
-            acc.push(rate.rate)
-        }
-        return acc
-    }, [] as StrippedRateType[])
-
-    strippedRateA = strippedRates[0]
-
-    // expect all contracts to still be related
-    expect(strippedRateA.relatedContracts).toEqual(
-        expect.arrayContaining([
-            {
-                id: submittedContractA.id,
-                consolidatedStatus: 'UNLOCKED',
-            },
-            {
-                id: contractB.id,
-                consolidatedStatus: 'UNLOCKED',
-            },
-            {
-                id: contractC.id,
-                consolidatedStatus: 'SUBMITTED',
-            },
-        ])
-    )
-
-    // resubmit contract B should remove it from the related contracts
-    await submitTestContract(
-        stateServer,
-        contractB.id,
-        'resubmit contractB without rateA'
-    )
-
-    // approve contractC
-    await approveTestContract(cmsServer, contractC.id)
-
-    strippedRatesOrErrors = must(
-        await findAllRatesStripped(client, undefined, [rateAID])
-    )
-    strippedRates = strippedRatesOrErrors.reduce((acc, rate) => {
-        if (!(rate.rate instanceof Error)) {
-            acc.push(rate.rate)
-        }
-        return acc
-    }, [] as StrippedRateType[])
-
-    strippedRateA = strippedRates[0]
-
-    // expect B to be gone and C to be approved
-    expect(strippedRateA.relatedContracts).toEqual(
-        expect.arrayContaining([
-            {
-                id: submittedContractA.id,
-                consolidatedStatus: 'UNLOCKED',
-            },
-            {
-                id: contractC.id,
-                consolidatedStatus: 'APPROVED',
-            },
-        ])
-    )
 }, 10000)
