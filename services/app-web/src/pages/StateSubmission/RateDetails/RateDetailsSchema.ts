@@ -86,6 +86,7 @@ const SingleRateCertSchema = (_activeFeatureFlags: FeatureFlagSettings) =>
                         .typeError(
                             'The certified date must be in MM/DD/YYYY format'
                         )
+                        .max(dayjs(new Date()), 'The certification date cannot be a future date')
                 )
             }
         }),
