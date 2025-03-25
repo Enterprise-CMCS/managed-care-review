@@ -18,7 +18,7 @@ import {
 
 import styles from '../StateSubmissionForm.module.scss'
 import { isDateRangeEmpty } from '../../../formHelpers'
-import { formatUserInputDate } from '@mc-review/dates'
+import { dayjs, formatUserInputDate } from '@mc-review/dates'
 import {
     ACCEPTED_RATE_SUPPORTING_DOCS_FILE_TYPES,
     ACCEPTED_RATE_CERTIFICATION_FILE_TYPES,
@@ -522,6 +522,7 @@ export const SingleRateFormFields = ({
                                     formatUserInputDate(val)
                                 )
                             }
+                            maxDate={dayjs(new Date()).format('YYYY-MM-DD')}
                         />
                     </FormGroup>
                 </>
