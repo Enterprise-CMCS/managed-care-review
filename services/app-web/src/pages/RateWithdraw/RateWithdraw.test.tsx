@@ -105,11 +105,13 @@ describe('RateWithdraw', () => {
 
         await waitFor(() => {
             expect(screen.getByTestId('rateWithdrawBanner')).toBeInTheDocument()
-            const unlockBtn = screen.getByRole('button', {
-                name: 'Unlock rate',
-            })
-            expect(unlockBtn).toHaveAttribute('aria-disabled', 'true')
         })
+
+        expect(
+            screen.getByText(
+                "No action can be taken on this submission in it's current status."
+            )
+        ).toBeInTheDocument()
     })
 
     it('renders generic API error on failed withdraw', async () => {
