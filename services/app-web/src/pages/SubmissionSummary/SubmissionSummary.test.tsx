@@ -750,7 +750,7 @@ describe('SubmissionSummary', () => {
 
                         expect(
                             screen.getByText(
-                                "No action can be taken on this submission in it's current status."
+                                'No action can be taken on this submission in its current status.'
                             )
                         ).toBeInTheDocument()
                     })
@@ -1007,7 +1007,7 @@ describe('SubmissionSummary', () => {
 
                     expect(
                         screen.getByText(
-                            "No action can be taken on this submission in it's current status."
+                            'No action can be taken on this submission in its current status.'
                         )
                     ).toBeInTheDocument()
                 })
@@ -1073,7 +1073,7 @@ describe('SubmissionSummary', () => {
 
                     expect(
                         screen.getByText(
-                            "No action can be taken on this submission in it's current status."
+                            'No action can be taken on this submission in its current status.'
                         )
                     ).toBeInTheDocument()
                 })
@@ -1199,7 +1199,7 @@ describe('SubmissionSummary', () => {
 
                     expect(
                         screen.getByText(
-                            "No action can be taken on this submission in it's current status."
+                            'No action can be taken on this submission in its current status.'
                         )
                     ).toBeInTheDocument()
                 })
@@ -1330,7 +1330,7 @@ describe('SubmissionSummary', () => {
 
                     expect(
                         screen.getByText(
-                            "No action can be taken on this submission in it's current status."
+                            'No action can be taken on this submission in its current status.'
                         )
                     ).toBeInTheDocument()
                 })
