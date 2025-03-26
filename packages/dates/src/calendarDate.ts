@@ -41,7 +41,7 @@ function formatRateNameDate(date: Date | undefined): string {
     return dayjs(date).tz('UTC').format('YYYYMMDD')
 }
 
-const formatUserInputDate = (initialValue?: string): string | undefined => {
+function formatUserInputDate(initialValue?: string): string | undefined {
     const dayjsValue = dayjs(initialValue)
     return initialValue && dayjsValue.isValid()
         ? dayjs(initialValue).format('YYYY-MM-DD')

@@ -182,6 +182,8 @@ jobs:
       subnet_private_b_id: ${{ secrets.DEV_SUBNET_PRIVATE_B_ID }}
       subnet_private_c_id: ${{ secrets.DEV_SUBNET_PRIVATE_C_ID }}
       subnet_public_a_id: ${{ secrets.DEV_SUBNET_PUBLIC_A_ID }}
+      db_sm_arn: ${{ secrets.DEV_DB_SM_ARN }}
+      aurora_arn: ${{ secrets.DEV_AURORA_ARN }}
 
   promote-app-dev:
     needs: [promote-infra-dev, build-prisma-client-lambda-layer, unit-tests]
@@ -230,6 +232,8 @@ jobs:
       subnet_private_b_id: ${{ secrets.VAL_SUBNET_PRIVATE_B_ID }}
       subnet_private_c_id: ${{ secrets.VAL_SUBNET_PRIVATE_C_ID }}
       subnet_public_a_id: ${{ secrets.VAL_SUBNET_PUBLIC_A_ID }}
+      db_sm_arn: ${{ secrets.VAL_DB_SM_ARN }}
+      aurora_arn: ${{ secrets.VAL_AURORA_ARN }}
 
   promote-app-val:
     needs: [promote-app-dev, promote-infra-val, unit-tests]
@@ -278,6 +282,8 @@ jobs:
       subnet_private_b_id: ${{ secrets.PROD_SUBNET_PRIVATE_B_ID }}
       subnet_private_c_id: ${{ secrets.PROD_SUBNET_PRIVATE_C_ID }}
       subnet_public_a_id: ${{ secrets.PROD_SUBNET_PUBLIC_A_ID }}
+      db_sm_arn: ${{ secrets.PROD_DB_SM_ARN }}
+      aurora_arn: ${{ secrets.PROD_AURORA_ARN }}
 
   promote-app-prod:
     needs: [promote-app-val, promote-infra-prod, unit-tests]

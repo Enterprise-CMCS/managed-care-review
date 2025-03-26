@@ -9,6 +9,7 @@ import {
     DescribeSecretCommandOutput,
 } from '@aws-sdk/client-secrets-manager'
 import { SecretDict } from './types'
+import { randomBytes } from 'crypto'
 
 export class SecretsManagerError extends Error {
     constructor(
@@ -185,6 +186,93 @@ export class SecretsManager {
                 `Failed to describe secret for ARN: ${arn}`,
                 'describeSecret',
                 error instanceof Error ? error : new Error(String(error))
+            )
+        }
+    }
+
+    // Create or update a secret with database credentials. This is used
+    // by the logical db manager as the secret may not yet exists.
+    async createOrUpdateDatabaseSecret(
+        secretName: string,
+        secretValue: SecretDict
+    ): Promise<string> {
+        try {
+            // Check if the secret already exists
+            let secretExists = true
+            let secretInfo
+
+            try {
+                secretInfo = await this.describeSecret(secretName)
+            } catch (error) {
+                if (
+                    error instanceof Error &&
+                    (error.name === 'ResourceNotFoundException' ||
+                        error.message.includes('ResourceNotFoundException'))
+                ) {
+                    secretExists = false
+                } else {
+                    throw error // Re-throw unexpected errors
+                }
+            }
+
+            // Generate a token for the new version
+            const token = randomBytes(32).toString('hex')
+
+            if (secretExists) {
+                console.info(`Updating existing secret: ${secretName}`)
+
+                await this.putSecret(secretName, token, secretValue)
+
+                // Find the current version with AWSCURRENT label
+                let currentVersionId: string | undefined
+
+                if (secretInfo && secretInfo.VersionIdsToStages) {
+                    for (const [version, stages] of Object.entries(
+                        secretInfo.VersionIdsToStages
+                    )) {
+                        if (
+                            Array.isArray(stages) &&
+                            stages.includes('AWSCURRENT')
+                        ) {
+                            currentVersionId = version
+                            break
+                        }
+                    }
+                }
+
+                // Use the existing updateSecretStage function with the current version
+                console.info(
+                    `Moving AWSCURRENT label to new version ${token}` +
+                        (currentVersionId
+                            ? ` from version ${currentVersionId}`
+                            : '')
+                )
+
+                await this.updateSecretStage(
+                    secretName,
+                    token,
+                    currentVersionId
+                )
+            } else {
+                // Secret doesn't exist yet. Creating.
+                console.info(`Creating new secret: ${secretName}`)
+
+                await this.putSecret(secretName, token, secretValue)
+
+                await this.updateSecretStage(secretName, token)
+            }
+
+            console.info(`Secret ${secretName} successfully created/updated`)
+            return token
+        } catch (error) {
+            console.error(
+                `Failed to create/update secret ${secretName}:`,
+                error
+            )
+            throw new Error(
+                `Failed to create/update secret ${secretName}: ${
+                    error instanceof Error ? error.message : String(error)
+                }`
             )
         }
     }
