@@ -32,7 +32,7 @@ export type RatesToNotBeWithdrawn = {
     rateURL: string
 }
 
-type RelatedContracts = {
+type RelatedContract = {
     consolidatedStatus: string
     id: string
 }
@@ -115,7 +115,7 @@ export const SubmissionWithdraw = (): React.ReactElement => {
         const rateStatus = rate.consolidatedStatus
         const relatedContracts = rate.relatedContracts
         const parentContract = relatedContracts!.find(
-            (contract: RelatedContracts) => contract.id === parentContractID
+            (contract: RelatedContract) => contract.id === parentContractID
         )
 
         //If not in a submitted status it should not be withdrawn
@@ -149,7 +149,7 @@ export const SubmissionWithdraw = (): React.ReactElement => {
     const contractName =
         contract.packageSubmissions[0].contractRevision.contractName
 
-    //These rates will displayed in the warning banner
+    //These rates will be displayed in the warning banner
     const ratesToNotBeWithdrawn: RatesToNotBeWithdrawn[] = []
     if (ratesData && ratesData.indexRatesStripped.edges.length > 0) {
         const ratesWithContractData = ratesData.indexRatesStripped.edges
