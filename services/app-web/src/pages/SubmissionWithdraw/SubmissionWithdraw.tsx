@@ -4,6 +4,7 @@ import { ActionButton, Breadcrumbs, PoliteErrorMessage } from '../../components'
 import { RoutesRecord } from '@mc-review/constants'
 import { useNavigate, useParams } from 'react-router-dom'
 import {
+    RateStripped,
     useFetchContractQuery,
     useIndexRatesStrippedWithRelatedContractsQuery,
 } from '../../gen/gqlClient'
@@ -109,14 +110,10 @@ export const SubmissionWithdraw = (): React.ReactElement => {
         return <GenericErrorPage />
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const shouldWithdraw = (rate: {
-        __typename?: 'RateStrippedEdge' | undefined
-        node: any
-    }) => {
-        const parentContractID = rate.node.parentContractID
-        const rateStatus = rate.node.consolidatedStatus
-        const relatedContracts = rate.node.relatedContracts
+    const shouldWithdraw = (rate: RateStripped) => {
+        const parentContractID = rate.parentContractID
+        const rateStatus = rate.consolidatedStatus
+        const relatedContracts = rate.relatedContracts
         const parentContract = relatedContracts!.find(
             (contract: RelatedContracts) => contract.id === parentContractID
         )
@@ -152,11 +149,12 @@ export const SubmissionWithdraw = (): React.ReactElement => {
     const contractName =
         contract.packageSubmissions[0].contractRevision.contractName
 
+    //These rates will displayed in the warning banner
     const ratesToNotBeWithdrawn: RatesToNotBeWithdrawn[] = []
     if (ratesData && ratesData.indexRatesStripped.edges.length > 0) {
         const ratesWithContractData = ratesData.indexRatesStripped.edges
         ratesWithContractData.forEach((rate) => {
-            if (!shouldWithdraw(rate)) {
+            if (!shouldWithdraw(rate.node as RateStripped)) {
                 ratesToNotBeWithdrawn.push({
                     rateName:
                         rate.node.latestSubmittedRevision.formData
