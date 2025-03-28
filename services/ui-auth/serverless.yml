@@ -218,7 +218,9 @@ resources:
                           - '{cognito-identity.amazonaws.com:sub}/*'
                   Condition:
                     StringEquals:
-                      'aws:referer': ['https://*.mc-review.onemac.cms.gov/*']
+                      'aws:referer':
+                        - 'https://*.mc-review.onemac.cms.gov/*'
+                        - 'https://*.cloudfront.net'
 
   Outputs:
     UserPoolId:
