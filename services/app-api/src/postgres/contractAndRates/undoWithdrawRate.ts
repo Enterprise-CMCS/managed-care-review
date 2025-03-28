@@ -234,7 +234,7 @@ const undoWithdrawRate = async (
         return await client.$transaction(
             async (tx) => await undoWithdrawRateInsideTransaction(tx, args),
             {
-                timeout: 15000,
+                timeout: 30000,
             }
         )
     } catch (err) {
