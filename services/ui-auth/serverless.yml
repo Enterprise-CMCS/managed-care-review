@@ -220,7 +220,7 @@ resources:
                     StringEquals:
                       'aws:referer':
                         - 'https://*.mc-review.onemac.cms.gov/*'
-                        - 'https://*.cloudfront.net'
+                        - 'https://*.cloudfront.net/*'
 
   Outputs:
     UserPoolId:
