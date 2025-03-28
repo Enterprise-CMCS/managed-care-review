@@ -312,7 +312,10 @@ const withdrawRate = async (
 ): Promise<RateType | Error> => {
     try {
         return await client.$transaction(
-            async (tx) => await withdrawRateInsideTransaction(tx, args)
+            async (tx) => await withdrawRateInsideTransaction(tx, args),
+            {
+                timeout: 10000,
+            }
         )
     } catch (err) {
         console.error('PRISMA ERROR: Error withdrawing rate', err)

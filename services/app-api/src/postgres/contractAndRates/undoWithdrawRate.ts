@@ -232,7 +232,10 @@ const undoWithdrawRate = async (
 ): Promise<RateType | Error> => {
     try {
         return await client.$transaction(
-            async (tx) => await undoWithdrawRateInsideTransaction(tx, args)
+            async (tx) => await undoWithdrawRateInsideTransaction(tx, args),
+            {
+                timeout: 10000,
+            }
         )
     } catch (err) {
         console.error('PRISMA ERROR: Error undoing rate withdrawal', err)
