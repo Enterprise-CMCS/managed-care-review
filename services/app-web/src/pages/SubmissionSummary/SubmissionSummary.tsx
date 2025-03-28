@@ -271,8 +271,8 @@ export const SubmissionSummary = (): React.ReactElement => {
                         <h3>Actions</h3>
                         {showNoActionsMsg ? (
                             <Grid>
-                                No action can be taken on this submission in
-                                it's current status.
+                                No action can be taken on this submission in its
+                                current status.
                             </Grid>
                         ) : (
                             <MultiColumnGrid columns={3}>

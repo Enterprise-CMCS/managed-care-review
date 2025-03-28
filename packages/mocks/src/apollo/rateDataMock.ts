@@ -255,6 +255,7 @@ function rateUnlockedWithHistoryMock(): Rate {
     })
 
     r1.status = 'UNLOCKED'
+    r1.consolidatedStatus = 'UNLOCKED'
     r1.draftRevision = draftRevision
 
     return r1

@@ -7,7 +7,7 @@ Cypress.Commands.add('unlockSubmission', (unlockReason) => {
     )
     cy.findByRole('button', { name: 'Unlock' }).click()
 
-    cy.findByText('No action can be taken on this submission in it\'s current status.').should('exist')
+    cy.findByText('No action can be taken on this submission in its current status.').should('exist')
     cy.findAllByTestId('modalWindow').eq(1).should('be.hidden')
 
     // Unlock banner for CMS user to be present with correct data.
