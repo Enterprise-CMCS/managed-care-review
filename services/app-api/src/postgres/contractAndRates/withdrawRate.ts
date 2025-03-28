@@ -314,7 +314,7 @@ const withdrawRate = async (
         return await client.$transaction(
             async (tx) => await withdrawRateInsideTransaction(tx, args),
             {
-                timeout: 10000,
+                timeout: 15000,
             }
         )
     } catch (err) {
