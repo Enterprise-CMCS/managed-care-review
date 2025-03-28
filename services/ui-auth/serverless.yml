@@ -216,6 +216,9 @@ resources:
                         - - ${self:custom.document_uploads_bucket_arn}/private/
                           - '$'
                           - '{cognito-identity.amazonaws.com:sub}/*'
+                  Condition:
+                    StringEquals:
+                      'aws:referer': ['https://*.mc-review.onemac.cms.gov/*']
 
   Outputs:
     UserPoolId:
