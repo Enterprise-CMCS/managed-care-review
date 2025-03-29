@@ -179,7 +179,7 @@ export function configureResolvers(
         CMSApproverUser: cmsApproverUserResolver,
         HealthPlanPackage: healthPlanPackageResolver(store),
         Rate: rateResolver(store, applicationEndpoint),
-        RateStripped: rateStrippedResolver(applicationEndpoint),
+        RateStripped: rateStrippedResolver(store, applicationEndpoint),
         RateRevision: rateRevisionResolver(store),
         RateFormData: rateFormDataResolver(),
         ContractQuestion: questionResolver(store),

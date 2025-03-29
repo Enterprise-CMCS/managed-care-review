@@ -1,6 +1,9 @@
 import { testLDService } from '../../testHelpers/launchDarklyHelpers'
 import type { RateStripped, RateStrippedEdge } from '../../gen/gqlClient'
-import { IndexRatesStrippedDocument } from '../../gen/gqlClient'
+import {
+    IndexRatesStrippedDocument,
+    IndexRatesStrippedWithRelatedContractsDocument,
+} from '../../gen/gqlClient'
 import {
     constructTestPostgresServer,
     createAndUpdateTestHealthPlanPackage,
@@ -20,7 +23,7 @@ describe('indexRatesStripped', () => {
     })
     const mockS3 = testS3Client()
 
-    it('returns stripped rates for cms user with no errors', async () => {
+    it('returns stripped rates with related contracts for cms user with no errors', async () => {
         const stateServer = await constructTestPostgresServer({
             ldService,
             s3Client: mockS3,
@@ -43,7 +46,7 @@ describe('indexRatesStripped', () => {
 
         // index rates
         const result = await cmsServer.executeOperation({
-            query: IndexRatesStrippedDocument,
+            query: IndexRatesStrippedWithRelatedContractsDocument,
         })
 
         expect(result.data).toBeDefined()
@@ -58,6 +61,10 @@ describe('indexRatesStripped', () => {
             })
 
         expect(matchedTestRates).toHaveLength(2)
+
+        // Expect related contracts to have 1 contract, the parent contract
+        expect(matchedTestRates[0].relatedContracts).toHaveLength(1)
+        expect(matchedTestRates[1].relatedContracts).toHaveLength(1)
     })
 
     it('does not return rates still in initial draft', async () => {
