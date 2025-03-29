@@ -46,6 +46,45 @@ const submissionWithdrawSchema = Yup.object().shape({
     ),
 })
 
+export const shouldWithdraw = (
+    rate: RateStripped,
+    submissionToBeWithdrawnID: string
+) => {
+    const parentContractID = rate.parentContractID
+    const rateStatus = rate.consolidatedStatus
+    const relatedContracts = rate.relatedContracts
+    const parentContract = relatedContracts?.find(
+        (contract: RelatedContract) => contract.id === parentContractID
+    )
+
+    //If the rate is not in a submitted status it will not be withdrawn
+    if (!['RESUBMITTED', 'SUBMITTED'].includes(rateStatus)) {
+        return false
+    }
+
+    //If the parent contract for a LINKED rate is NOT in a withdrawn state then the LINKED rate is not withdrawn
+    if (
+        parentContractID !== submissionToBeWithdrawnID &&
+        parentContract?.consolidatedStatus !== 'WITHDRAWN'
+    ) {
+        return false
+    }
+
+    //If ANY of the RELATED contracts are in a submitted or approved state excluding the parent - the rate will not be withdrawn
+    for (const contract of relatedContracts!) {
+        if (
+            contract.id !== submissionToBeWithdrawnID &&
+            ['APPROVED', 'SUBMITTED', 'RESUBMITTED'].includes(
+                contract.consolidatedStatus
+            )
+        ) {
+            return false
+        }
+    }
+
+    return true
+}
+
 export const SubmissionWithdraw = (): React.ReactElement => {
     const { id } = useParams() as { id: string }
     const navigate = useNavigate()
@@ -110,51 +149,15 @@ export const SubmissionWithdraw = (): React.ReactElement => {
         return <GenericErrorPage />
     }
 
-    const shouldWithdraw = (rate: RateStripped) => {
-        const parentContractID = rate.parentContractID
-        const rateStatus = rate.consolidatedStatus
-        const relatedContracts = rate.relatedContracts
-        const parentContract = relatedContracts!.find(
-            (contract: RelatedContract) => contract.id === parentContractID
-        )
-
-        //If not in a submitted status it should not be withdrawn
-        if (!['RESUBMITTED', 'SUBMITTED'].includes(rateStatus)) {
-            return false
-        }
-
-        //If the parent contract is not in a withdrawn state then the LINKED rate is not withdrawn
-        if (
-            parentContractID !== id &&
-            parentContract?.consolidatedStatus !== 'WITHDRAWN'
-        ) {
-            return false
-        }
-
-        //If ANY of the linked submissions are in a submitted or approved state excluding the parent it will not be withdrawn
-        for (const contract of relatedContracts!) {
-            if (
-                contract.id !== id &&
-                ['APPROVED', 'SUBMITTED', 'RESUBMITTED'].includes(
-                    contract.consolidatedStatus
-                )
-            ) {
-                return false
-            }
-        }
-
-        return true
-    }
-
     const contractName =
-        contract.packageSubmissions[0].contractRevision.contractName
+        contract?.packageSubmissions[0].contractRevision.contractName
 
     //These rates will be displayed in the warning banner
     const ratesToNotBeWithdrawn: RatesToNotBeWithdrawn[] = []
     if (ratesData && ratesData.indexRatesStripped.edges.length > 0) {
         const ratesWithContractData = ratesData.indexRatesStripped.edges
         ratesWithContractData.forEach((rate) => {
-            if (!shouldWithdraw(rate.node as RateStripped)) {
+            if (!shouldWithdraw(rate.node as RateStripped, id)) {
                 ratesToNotBeWithdrawn.push({
                     rateName:
                         rate.node.latestSubmittedRevision.formData
