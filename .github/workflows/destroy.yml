@@ -48,12 +48,11 @@ jobs:
 
       - name: Delete logical database
         env:
-          STAGE_NAME: ${{ steps.stage-name.outputs.stage_name }}
           DEV_DB_SM_ARN: ${{ secrets.DEV_DB_SM_ARN }}
           AWS_REGION: ${{ vars.AWS_DEFAULT_REGION }}
         run: |
           chmod +x services/postgres/db-manager.sh
-          ./services/postgres/db-manager.sh delete $STAGE_NAME $DEV_DB_SM_ARN $STAGE_NAME
+          ./services/postgres/db-manager.sh delete $stage_name $DEV_DB_SM_ARN $stage_name
 
       - name: destroy all
         env:
