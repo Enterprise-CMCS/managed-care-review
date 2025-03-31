@@ -13,15 +13,13 @@ import {
     mockContractPackageSubmitted,
     rateDataMock,
     iterableNonCMSUsersMockData,
+    mockValidCMSUser,
 } from '@mc-review/mocks'
 import { RateSummary } from './RateSummary'
 import { RoutesRecord } from '@mc-review/constants'
 import { Location, Route, Routes } from 'react-router-dom'
 import { RateEdit } from '../RateEdit/RateEdit'
-import {
-    rateUnlockedWithHistoryMock,
-    rateWithHistoryMock,
-} from '@mc-review/mocks'
+import { rateWithHistoryMock } from '@mc-review/mocks'
 
 // Wrap test component in some top level routes to allow getParams to be tested
 const wrapInRoutes = (children: React.ReactNode) => {
@@ -292,42 +290,6 @@ describe('RateSummary', () => {
                     name: 'Unlock rate',
                 })
                 expect(unlockRateBtn).not.toBeInTheDocument()
-            })
-            it('disables the unlock button for CMS users when rate already unlocked', async () => {
-                const rateData = rateUnlockedWithHistoryMock()
-                renderWithProviders(wrapInRoutes(<RateSummary />), {
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({
-                                user: mockUser(),
-                                statusCode: 200,
-                            }),
-                            fetchRateWithQuestionsMockSuccess({
-                                rate: {
-                                    ...rateData,
-                                    id: '7a',
-                                    parentContractID: contract.id,
-                                },
-                            }),
-                            fetchContractMockSuccess({ contract }),
-                        ],
-                    },
-                    routerProvider: {
-                        route: '/rates/7a',
-                    },
-                    featureFlags: {
-                        'rate-edit-unlock': true,
-                        'withdraw-rate': true,
-                    },
-                })
-
-                await waitFor(() => {
-                    expect(
-                        screen.getByRole('button', {
-                            name: 'Unlock rate',
-                        })
-                    ).toHaveAttribute('aria-disabled', 'true')
-                })
             })
             it('should not display unlock rate button if parent contract has been approved', async () => {
                 const rate = rateDataMock()
@@ -709,5 +671,323 @@ describe('RateSummary', () => {
                 ).not.toBeInTheDocument()
             }
         )
+    })
+
+    describe('Action section tests', () => {
+        it('renders unlock and withdraw button on submitted rate', async () => {
+            const contract = mockContractPackageSubmitted({
+                consolidatedStatus: 'SUBMITTED',
+            })
+            const rateData = rateWithHistoryMock()
+            rateData.parentContractID = contract.id
+            renderWithProviders(wrapInRoutes(<RateSummary />), {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockValidCMSUser(),
+                            statusCode: 200,
+                        }),
+                        fetchContractMockSuccess({ contract }),
+                        fetchRateWithQuestionsMockSuccess({
+                            rate: {
+                                id: '1337',
+                                status: 'SUBMITTED',
+                                consolidatedStatus: 'SUBMITTED',
+                                parentContractID: contract.id,
+                                withdrawnFromContracts: [],
+                                reviewStatusActions: [],
+                            },
+                        }),
+                        fetchContractMockSuccess({ contract }),
+                    ],
+                },
+                routerProvider: {
+                    route: '/rates/1337',
+                },
+                featureFlags: {
+                    'withdraw-rate': true,
+                    'undo-withdraw-rate': true,
+                },
+            })
+
+            await waitFor(() => {
+                expect(
+                    screen.getByRole('button', { name: 'Withdraw rate' })
+                ).toBeInTheDocument()
+                expect(
+                    screen.getByRole('button', { name: 'Unlock rate' })
+                ).toBeInTheDocument()
+            })
+        })
+        it('renders no actions message when rate is withdrawn with submission', async () => {
+            const contract = mockContractPackageSubmitted({
+                consolidatedStatus: 'WITHDRAWN',
+            })
+            const rateData = rateWithHistoryMock()
+            rateData.parentContractID = contract.id
+            renderWithProviders(wrapInRoutes(<RateSummary />), {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockValidCMSUser(),
+                            statusCode: 200,
+                        }),
+                        fetchContractMockSuccess({ contract }),
+                        fetchRateWithQuestionsMockSuccess({
+                            rate: {
+                                id: '1337',
+                                parentContractID: contract.id,
+                                consolidatedStatus: 'WITHDRAWN',
+                                withdrawnFromContracts: [],
+                            },
+                        }),
+                        fetchContractMockSuccess({ contract }),
+                    ],
+                },
+                routerProvider: {
+                    route: '/rates/1337',
+                },
+            })
+
+            await waitFor(() => {
+                expect(
+                    screen.getByText(
+                        'No action can be taken on this submission in its current status.'
+                    )
+                ).toBeInTheDocument()
+            })
+        })
+        it('renders no actions message when rate when submission is approved', async () => {
+            const contract = mockContractPackageSubmitted({
+                consolidatedStatus: 'APPROVED',
+            })
+            const rateData = rateWithHistoryMock()
+            rateData.parentContractID = contract.id
+            renderWithProviders(wrapInRoutes(<RateSummary />), {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockValidCMSUser(),
+                            statusCode: 200,
+                        }),
+                        fetchContractMockSuccess({ contract }),
+                        fetchRateWithQuestionsMockSuccess({
+                            rate: {
+                                id: '1337',
+                                parentContractID: contract.id,
+                            },
+                        }),
+                        fetchContractMockSuccess({ contract }),
+                    ],
+                },
+                routerProvider: {
+                    route: '/rates/1337',
+                },
+            })
+
+            await waitFor(() => {
+                expect(
+                    screen.getByText(
+                        'No action can be taken on this submission in its current status.'
+                    )
+                ).toBeInTheDocument()
+            })
+        })
+        it('renders no actions message when rate when unlocked', async () => {
+            const contract = mockContractPackageSubmitted({
+                consolidatedStatus: 'UNLOCKED',
+            })
+            const rateData = rateWithHistoryMock()
+            rateData.parentContractID = contract.id
+            renderWithProviders(wrapInRoutes(<RateSummary />), {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockValidCMSUser(),
+                            statusCode: 200,
+                        }),
+                        fetchContractMockSuccess({ contract }),
+                        fetchRateWithQuestionsMockSuccess({
+                            rate: {
+                                id: '1337',
+                                status: 'UNLOCKED',
+                                consolidatedStatus: 'UNLOCKED',
+                                parentContractID: contract.id,
+                            },
+                        }),
+                        fetchContractMockSuccess({ contract }),
+                    ],
+                },
+                routerProvider: {
+                    route: '/rates/1337',
+                },
+            })
+
+            await waitFor(() => {
+                expect(
+                    screen.getByText(
+                        'No action can be taken on this submission in its current status.'
+                    )
+                ).toBeInTheDocument()
+            })
+        })
+        it('renders no actions message when parent contract is unlocked', async () => {
+            const contract = mockContractPackageSubmitted({
+                consolidatedStatus: 'UNLOCKED',
+            })
+            const rateData = rateWithHistoryMock()
+            rateData.parentContractID = contract.id
+            renderWithProviders(wrapInRoutes(<RateSummary />), {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockValidCMSUser(),
+                            statusCode: 200,
+                        }),
+                        fetchContractMockSuccess({ contract }),
+                        fetchRateWithQuestionsMockSuccess({
+                            rate: {
+                                id: '1337',
+                                status: 'SUBMITTED',
+                                consolidatedStatus: 'SUBMITTED',
+                                parentContractID: contract.id,
+                            },
+                        }),
+                        fetchContractMockSuccess({ contract }),
+                    ],
+                },
+                routerProvider: {
+                    route: '/rates/1337',
+                },
+            })
+
+            await waitFor(() => {
+                expect(
+                    screen.getByText(
+                        'No action can be taken on this submission in its current status.'
+                    )
+                ).toBeInTheDocument()
+            })
+        })
+        it('renders undo withdraw button when withdrawn independently', async () => {
+            const contract = mockContractPackageSubmitted({
+                consolidatedStatus: 'WITHDRAWN',
+            })
+            const rateData = rateWithHistoryMock()
+            rateData.parentContractID = contract.id
+            renderWithProviders(wrapInRoutes(<RateSummary />), {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockValidCMSUser(),
+                            statusCode: 200,
+                        }),
+                        fetchContractMockSuccess({ contract }),
+                        fetchRateWithQuestionsMockSuccess({
+                            rate: {
+                                id: '1337',
+                                status: 'SUBMITTED',
+                                consolidatedStatus: 'WITHDRAWN',
+                                parentContractID: contract.id,
+                                withdrawnFromContracts: [contract],
+                                reviewStatusActions: [
+                                    {
+                                        rateID: '1337',
+                                        actionType: 'WITHDRAW',
+                                        updatedAt: new Date(),
+                                        updatedReason: 'Independent withdraw',
+                                        updatedBy: {
+                                            email: 'someone@example.com',
+                                            familyName: 'one',
+                                            givenName: 'some',
+                                            role: 'CMS_USER',
+                                        },
+                                    },
+                                ],
+                            },
+                        }),
+                        fetchContractMockSuccess({ contract }),
+                    ],
+                },
+                routerProvider: {
+                    route: '/rates/1337',
+                },
+                featureFlags: {
+                    'withdraw-rate': true,
+                    'undo-withdraw-rate': true,
+                },
+            })
+
+            await waitFor(() => {
+                expect(screen.queryByRole('alert')).toBeInTheDocument()
+                expect(screen.queryByRole('alert')).toHaveTextContent(
+                    /Status: Withdrawn/
+                )
+            })
+
+            expect(
+                screen.getByRole('button', { name: 'Undo withdraw' })
+            ).toBeInTheDocument()
+        })
+        it('does not render withdraw button when withdrawn independently', async () => {
+            const contract = mockContractPackageSubmitted({
+                consolidatedStatus: 'WITHDRAWN',
+            })
+            const rateData = rateWithHistoryMock()
+            rateData.parentContractID = contract.id
+            renderWithProviders(wrapInRoutes(<RateSummary />), {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockValidCMSUser(),
+                            statusCode: 200,
+                        }),
+                        fetchContractMockSuccess({ contract }),
+                        fetchRateWithQuestionsMockSuccess({
+                            rate: {
+                                id: '1337',
+                                status: 'SUBMITTED',
+                                consolidatedStatus: 'WITHDRAWN',
+                                parentContractID: contract.id,
+                                withdrawnFromContracts: [contract],
+                                reviewStatusActions: [
+                                    {
+                                        rateID: '1337',
+                                        actionType: 'WITHDRAW',
+                                        updatedAt: new Date(),
+                                        updatedReason: 'Independent withdraw',
+                                        updatedBy: {
+                                            email: 'someone@example.com',
+                                            familyName: 'one',
+                                            givenName: 'some',
+                                            role: 'CMS_USER',
+                                        },
+                                    },
+                                ],
+                            },
+                        }),
+                        fetchContractMockSuccess({ contract }),
+                    ],
+                },
+                routerProvider: {
+                    route: '/rates/1337',
+                },
+                featureFlags: {
+                    'withdraw-rate': true,
+                    'undo-withdraw-rate': true,
+                },
+            })
+
+            await waitFor(() => {
+                expect(screen.queryByRole('alert')).toBeInTheDocument()
+                expect(screen.queryByRole('alert')).toHaveTextContent(
+                    /Status: Withdrawn/
+                )
+            })
+
+            expect(
+                screen.getByRole('button', { name: 'Undo withdraw' })
+            ).toBeInTheDocument()
+        })
     })
 })
