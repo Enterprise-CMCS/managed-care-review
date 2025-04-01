@@ -1,0 +1,40 @@
+model RateTable {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+  stateCode   String
+  stateNumber Int
+  revisions RateRevisionTable[]
+}
+
+
+model RateRevisionTable {
+    id     String    @id @default(uuid())
+    rateID String
+    rate   RateTable @relation(fields: [rateID], references: [id])
+
+    createdAt    DateTime         @default(now())
+    updatedAt    DateTime         @default(now()) @updatedAt
+
+
+    rateDateStart                   DateTime?
+    rateDateEnd                     DateTime?
+    rateDateCertified               DateTime?
+    rateCertificationName           String?
+    certifyingActuaryContacts       ActuaryContact[]         @relation(name: "CertifyingActuaryOnRateRevision")
+    addtlActuaryContacts            ActuaryContact[]         @relation(name: "AddtlActuaryOnRateRevision")
+  }
+
+  model ActuaryContact {
+  id                          String             @id @default(uuid())
+  createdAt                   DateTime           @default(now())
+  updatedAt                   DateTime           @default(now()) @updatedAt
+  position                    Int                @default(-1)
+  name                        String?
+  titleRole                   String?
+  email                       String?
+  rateWithCertifyingActuaryID String?
+  rateWithAddtlActuaryID      String?
+  rateActuaryCertifying       RateRevisionTable? @relation(name: "CertifyingActuaryOnRateRevision", fields: [rateWithCertifyingActuaryID], references: [id], onDelete: Cascade)
+  rateActuaryAddtl            RateRevisionTable? @relation(name: "AddtlActuaryOnRateRevision", fields: [rateWithAddtlActuaryID], references: [id], onDelete: Cascade)
+}
