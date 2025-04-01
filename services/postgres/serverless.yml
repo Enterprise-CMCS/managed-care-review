@@ -178,6 +178,7 @@ resources:
 
     PostgresAuroraV2Instance:
       Type: AWS::RDS::DBInstance
+      DependsOn: PostgresAuroraV2
       Condition: IsDevValProd
       DeletionPolicy: ${self:custom.deletionPolicy.${opt:stage}, self:custom.deletionPolicy.other}
       Properties:
