@@ -92,7 +92,7 @@ custom:
     val: 'Retain'
     prod: 'Retain'
   auroraMinCapacity:
-    other: 0.5
+    other: 1
     val: 1
     prod: 1
   esbuild:
