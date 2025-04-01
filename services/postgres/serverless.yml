@@ -91,10 +91,6 @@ custom:
     other: 'Delete'
     val: 'Retain'
     prod: 'Retain'
-  auroraMinCapacity:
-    other: 1
-    val: 1
-    prod: 1
   esbuild:
     config: ./esbuild.config.js
   backupRetentionPeriod:
@@ -177,7 +173,7 @@ resources:
         EnableCloudwatchLogsExports:
           - postgresql
         ServerlessV2ScalingConfiguration:
-          MinCapacity: ${self:custom.auroraMinCapacity.${opt:stage}, self:custom.auroraMinCapacity.other}
+          MinCapacity: 1
           MaxCapacity: 16
 
     PostgresAuroraV2Instance:
@@ -189,6 +185,9 @@ resources:
         DBInstanceClass: db.serverless
         DBClusterIdentifier: !Ref PostgresAuroraV2
         AutoMinorVersionUpgrade: true
+        Tags:
+          - Key: TemporaryTag
+            Value: DeleteTagAfterMerge
 
     PostgresVMScriptsBucket:
       Type: 'AWS::S3::Bucket'
