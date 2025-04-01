@@ -178,6 +178,7 @@ resources:
 
     PostgresAuroraV2Instance:
       Type: AWS::RDS::DBInstance
+      DependsOn: PostgresAuroraV2
       Condition: IsDevValProd
       DeletionPolicy: ${self:custom.deletionPolicy.${opt:stage}, self:custom.deletionPolicy.other}
       Properties:
@@ -185,9 +186,6 @@ resources:
         DBInstanceClass: db.serverless
         DBClusterIdentifier: !Ref PostgresAuroraV2
         AutoMinorVersionUpgrade: true
-        Tags:
-          - Key: TemporaryTag
-            Value: DeleteTagAfterMerge
 
     PostgresVMScriptsBucket:
       Type: 'AWS::S3::Bucket'
@@ -377,6 +375,7 @@ resources:
 
     SecretsRDSAttachment:
       Type: AWS::SecretsManager::SecretTargetAttachment
+      DependsOn: PostgresAuroraV2
       Properties:
         SecretId: !Ref PostgresSecret
         TargetId: ${self:custom.auroraArn}
