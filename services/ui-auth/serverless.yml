@@ -46,17 +46,6 @@ resources:
         - Fn::Equals:
             - ''
             - ${self:custom.sesSourceEmailAddress}
-    IsValOrProd:
-      Fn::Or:
-        - Fn::Equals:
-            - ${sls:stage}
-            - 'val'
-        - Fn::Equals:
-            - ${sls:stage}
-            - 'prod'
-        - Fn::Equals:
-            - ${sls:stage}
-            - 'mtsecfindingusers'
   Resources:
     CognitoUserPool:
       Type: AWS::Cognito::UserPool
