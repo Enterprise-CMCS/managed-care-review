@@ -1,15 +1,43 @@
 // @ts-nocheck
-import type { CMSUsersUnionType, StateType } from '../../domain-models'
-import { typedStatePrograms } from '@mc-review/hpp'
-import type { ExtendedPrismaClient } from '../prismaClient'
 
+// GraphQL Query function
+export function fetchMcReviewSettings(
+    store: Store,
+): QueryResolvers['fetchMcReviewSettings'] {
+    return async (_parent, _args, context) => {
+        const { user } = context
+
+        if (!hasCMSPermissions(user) && !hasAdminPermissions(user)) {
+            throw new ForbiddenError(msg, {
+                cause: 'NOT_AUTHORIZED',
+            })
+        }
+
+        const stateAssignments = await store.findAllSupportedStates()
+
+        if (stateAssignments instanceof Error) {
+            throw new GraphQLError(msg, {
+                extensions: {
+                    code: 'INTERNAL_SERVER_ERROR',
+                    cause: 'DB_ERROR',
+                },
+            })
+        }
+
+        return {
+            stateAssignments: stateAssignments,
+        }
+    }
+}
+
+// Related database function
 export async function findAllSupportedStates(
-    client: ExtendedPrismaClient
+   store: Store
 ): Promise<StateType[] | Error> {
     const pilotStateCodes = typedStatePrograms.states.map((state) => state.code)
 
     try {
-        const allStates = await client.state.findMany({
+        const allStates = await store.state.findMany({
             orderBy: {
                 stateCode: 'asc',
             },
@@ -47,7 +75,8 @@ export async function findAllSupportedStates(
             ),
         }))
     } catch (err) {
-        console.error(err)
         return err
     }
 }
+
+
