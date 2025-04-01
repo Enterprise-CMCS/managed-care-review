@@ -63,10 +63,7 @@ resources:
       Properties:
         UserPoolName: ${sls:stage}-user-pool
         AdminCreateUserConfig:
-          AllowAdminCreateUserOnly: !If
-            - IsValOrProd
-            - true
-            - false
+          AllowAdminCreateUserOnly: true
         UsernameAttributes:
           - email
         AutoVerifiedAttributes:
