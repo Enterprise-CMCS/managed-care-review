@@ -375,7 +375,6 @@ resources:
 
     SecretsRDSAttachment:
       Type: AWS::SecretsManager::SecretTargetAttachment
-      DependsOn: !If [IsDevValProd, PostgresAuroraV2, !Ref AWS::NoValue]
       Properties:
         SecretId: !Ref PostgresSecret
         TargetId: !If
