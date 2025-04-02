@@ -72,7 +72,7 @@
         "@graphql-tools/jest-transform": "^2.0.0",
         "@luckycatfactory/esbuild-graphql-loader": "^3.8.1",
         "@types/archiver": "^6.0.3",
-        "@types/aws-lambda": "^8.10.145",
+        "@types/aws-lambda": "^8.10.148",
         "@types/jsonwebtoken": "^9.0.9",
         "@types/url-parse": "^1.4.3",
         "@types/uuid": "^9.0.0",
