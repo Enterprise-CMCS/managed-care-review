@@ -378,7 +378,7 @@ resources:
       DependsOn: PostgresAuroraV2
       Properties:
         SecretId: !Ref PostgresSecret
-        TargetId: ${self:custom.auroraArn}
+        TargetId: !Ref PostgresAuroraV2
         TargetType: AWS::RDS::DBCluster
 
     PostgresSecretsRotationSchedule:
