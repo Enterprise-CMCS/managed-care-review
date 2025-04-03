@@ -1,16 +1,17 @@
-import {sharedTestPrismaClient} from '../../testHelpers/storeHelpers';
-import {constructTestPostgresServer} from '../../testHelpers/gqlHelpers';
-import {testCMSUser, testStateUser} from '../../testHelpers/userHelpers';
+import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
+import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
+import { testCMSUser, testStateUser } from '../../testHelpers/userHelpers'
 import {
     approveTestContract,
-    createAndSubmitTestContractWithRate, createAndUpdateTestContractWithoutRates,
+    createAndSubmitTestContractWithRate,
+    createAndUpdateTestContractWithoutRates,
     submitTestContract,
-    unlockTestContract
-} from '../../testHelpers/gqlContractHelpers';
-import {must} from '../../testHelpers';
-import {UpdateDraftContractRatesDocument} from '../../gen/gqlClient';
-import { testRateFormInputData } from '../../testHelpers/gqlRateHelpers';
-import {findRateRelatedContracts} from './findRateRelatedContracts';
+    unlockTestContract,
+} from '../../testHelpers/gqlContractHelpers'
+import { must } from '../../testHelpers'
+import { UpdateDraftContractRatesDocument } from '../../gen/gqlClient'
+import { testRateFormInputData } from '../../testHelpers/gqlRateHelpers'
+import { findRateRelatedContracts } from './findRateRelatedContracts'
 
 it('returns related contracts with correct status', async () => {
     const client = await sharedTestPrismaClient()
@@ -62,7 +63,9 @@ it('returns related contracts with correct status', async () => {
 
     await submitTestContract(stateServer, contractB.id)
 
-    let rateARelatedStrippedContracts =  must(await findRateRelatedContracts(client, rateAID))
+    let rateARelatedStrippedContracts = must(
+        await findRateRelatedContracts(client, rateAID)
+    )
 
     // expect parent contract B to be resubmitted
     expect(rateARelatedStrippedContracts).toEqual(
@@ -131,7 +134,7 @@ it('returns related contracts with correct status', async () => {
                 input: {
                     contractID: unlockedContractB.id,
                     lastSeenUpdatedAt:
-                    unlockedContractB.draftRevision?.updatedAt,
+                        unlockedContractB.draftRevision?.updatedAt,
                     updatedRates: [
                         {
                             type: 'UPDATE',
@@ -144,7 +147,9 @@ it('returns related contracts with correct status', async () => {
         })
     )
 
-    rateARelatedStrippedContracts =  must(await findRateRelatedContracts(client, rateAID))
+    rateARelatedStrippedContracts = must(
+        await findRateRelatedContracts(client, rateAID)
+    )
 
     // expect all contracts to still be related
     expect(rateARelatedStrippedContracts).toEqual(
@@ -174,7 +179,9 @@ it('returns related contracts with correct status', async () => {
     // approve contractC
     await approveTestContract(cmsServer, contractC.id)
 
-    rateARelatedStrippedContracts =  must(await findRateRelatedContracts(client, rateAID))
+    rateARelatedStrippedContracts = must(
+        await findRateRelatedContracts(client, rateAID)
+    )
 
     // expect B to be gone and C to be approved
     expect(rateARelatedStrippedContracts).toEqual(

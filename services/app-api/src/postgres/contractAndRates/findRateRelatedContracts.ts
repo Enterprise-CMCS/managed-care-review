@@ -1,9 +1,9 @@
-import type {PrismaTransactionType} from '../prismaTypes';
-import type {ExtendedPrismaClient} from '../prismaClient';
-import {NotFoundError} from '../postgresErrors';
-import { getRelatedContracts } from './prismaSharedContractRateHelpers';
-import { includeRateRelatedContracts } from './prismaSubmittedRateHelpers';
-import type {RelatedContractStripped} from '../../gen/gqlClient';
+import type { PrismaTransactionType } from '../prismaTypes'
+import type { ExtendedPrismaClient } from '../prismaClient'
+import { NotFoundError } from '../postgresErrors'
+import { getRelatedContracts } from './prismaSharedContractRateHelpers'
+import { includeRateRelatedContracts } from './prismaSubmittedRateHelpers'
+import type { RelatedContractStripped } from '../../gen/gqlClient'
 
 async function findRateRelatedContractsInTransaction(
     tx: PrismaTransactionType,
@@ -11,11 +11,11 @@ async function findRateRelatedContractsInTransaction(
 ): Promise<RelatedContractStripped[]> {
     const rate = await tx.rateTable.findFirst({
         where: {
-            id: rateID
+            id: rateID,
         },
         include: {
-            ...includeRateRelatedContracts
-        }
+            ...includeRateRelatedContracts,
+        },
     })
 
     if (!rate) {
@@ -31,7 +31,8 @@ async function findRateRelatedContracts(
 ): Promise<RelatedContractStripped[] | Error> {
     try {
         return await client.$transaction(
-            async (tx) => await findRateRelatedContractsInTransaction(tx, rateID)
+            async (tx) =>
+                await findRateRelatedContractsInTransaction(tx, rateID)
         )
     } catch (err) {
         console.error(
@@ -42,7 +43,4 @@ async function findRateRelatedContracts(
     }
 }
 
-export {
-    findRateRelatedContracts,
-    findRateRelatedContractsInTransaction
-}
+export { findRateRelatedContracts, findRateRelatedContractsInTransaction }
