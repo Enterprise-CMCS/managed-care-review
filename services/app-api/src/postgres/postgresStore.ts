@@ -219,7 +219,7 @@ type Store = {
     ) => Promise<RateOrErrorArrayType | Error>
 
     findAllRatesStripped: (
-        args: FindAllRatesStrippedType
+        args?: FindAllRatesStrippedType
     ) => Promise<StrippedRateOrErrorArrayType | Error>
 
     replaceRateOnContract: (
