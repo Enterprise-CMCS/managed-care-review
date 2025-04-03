@@ -375,10 +375,12 @@ resources:
 
     SecretsRDSAttachment:
       Type: AWS::SecretsManager::SecretTargetAttachment
-      DependsOn: PostgresAuroraV2
       Properties:
         SecretId: !Ref PostgresSecret
-        TargetId: !Ref PostgresAuroraV2
+        TargetId: !If
+          - IsDevValProd
+          - !Ref PostgresAuroraV2
+          - ${self:custom.auroraArn}
         TargetType: AWS::RDS::DBCluster
 
     PostgresSecretsRotationSchedule:
