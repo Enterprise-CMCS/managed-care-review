@@ -74,11 +74,13 @@ describe('SubmissionWithdraw', () => {
     })
 
     it('can withdraw a submission', async () => {
-        const contract = mockContractPackageSubmittedWithQuestions()
+        const contract =
+            mockContractPackageSubmittedWithQuestions('test-abc-123')
         const withdrawnContract: Contract = {
             ...contract,
             reviewStatus: 'WITHDRAWN',
             consolidatedStatus: 'WITHDRAWN',
+            status: 'RESUBMITTED',
         }
 
         const { user } = renderWithProviders(
@@ -102,11 +104,16 @@ describe('SubmissionWithdraw', () => {
                             statusCode: 200,
                         }),
                         fetchContractWithQuestionsMockSuccess({
-                            contract: withdrawnContract,
+                            contract,
                         }),
                         fetchContractMockSuccess({ contract }),
                         withdrawContractMockSuccess({ contractData: contract }),
-                        fetchContractMockSuccess({ contract }),
+                        fetchContractWithQuestionsMockSuccess({
+                            contract: withdrawnContract,
+                        }),
+                        fetchContractWithQuestionsMockSuccess({
+                            contract: withdrawnContract,
+                        }),
                     ],
                 },
                 routerProvider: {
@@ -139,6 +146,11 @@ describe('SubmissionWithdraw', () => {
                 screen.getByTestId('updatedSubmissionBanner')
             ).toBeInTheDocument()
         })
+        expect(
+            screen.getByText(
+                'No action can be taken on this submission in its current status.'
+            )
+        ).toBeInTheDocument()
     })
 
     it('renders error banner on failed withdraw', async () => {

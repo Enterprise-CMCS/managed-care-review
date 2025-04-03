@@ -18,7 +18,8 @@ const withdrawContractMockSuccess = (
   const contract = mockContractPackageSubmittedWithQuestions(contractData?.id || contractID, {
     __typename: 'Contract',
     reviewStatus: 'WITHDRAWN',
-    consolidatedStatus: 'WITHDRAWN'
+    consolidatedStatus: 'WITHDRAWN',
+    status: 'RESUBMITTED'
   })
 
   return {
