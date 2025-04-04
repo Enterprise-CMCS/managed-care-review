@@ -1899,8 +1899,8 @@ type RateRevisionStripped {
 }
 
 """
-A rate revision represents a single submission
-for the rate and contains stripped down data from when the rate cert was submitted
+Related Contracts are the contracts tied to the given child/linked rate
+Only contains the necessary info for displaying the SubmissionWithdrawWarningBanner
 """
 type RelatedContractStripped {
     id: ID!
@@ -2030,7 +2030,7 @@ type RateStripped {
     "The latest submitted rate revision"
     latestSubmittedRevision: RateRevisionStripped!
 
-    "Contracts this rate is related to"
+    "Contracts this child or linked rate is tied to"
     relatedContracts: [RelatedContractStripped!]
 }
 
