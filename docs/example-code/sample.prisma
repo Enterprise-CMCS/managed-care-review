@@ -1,43 +1,52 @@
+model State {
+  stateCode                   String                   @id @default(uuid())
+  rates                       RateTable[]
+}
 model RateTable {
-  id        String   @id @default(uuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
+  id          String   @id @default(uuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now()) @updatedAt
   stateCode   String
-  stateNumber Int
+  state       State  @relation(fields: [stateCode], references: [stateCode])
 
   revisions RateRevisionTable[]
 }
 
-
 model RateRevisionTable {
-    id     String    @id @default(uuid())
-    rateID String
-    rate   RateTable @relation(fields: [rateID], references: [id])
-    createdAt    DateTime         @default(now())
-    updatedAt    DateTime         @default(now()) @updatedAt
+  id           String           @id @default(uuid())
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @default(now()) @updatedAt
+  rateID       String
+  rate         RateTable        @relation(fields: [rateID], references: [id])
+  submitInfoID String?
+  submitInfo   UpdateInfoTable? @relation("submitRateInfo", fields: [submitInfoID], references: [id], onDelete: Cascade)
 
-    rateDateStart                   DateTime?
-    rateDateEnd                     DateTime?
-    rateDateCertified               DateTime?
-    rateCertificationName           String?
+  certifyingActuaryContacts ActuaryContact[] @relation(name: "CertifyingActuaryOnRateRevision")
+  addtlActuaryContacts      ActuaryContact[] @relation(name: "AddtlActuaryOnRateRevision")
 
-    certifyingActuaryContacts       ActuaryContact[]         @relation(name: "CertifyingActuaryOnRateRevision")
-    addtlActuaryContacts            ActuaryContact[]         @relation(name: "AddtlActuaryOnRateRevision")
-  }
+}
+
+model UpdateInfoTable {
+  id            String   @id @default(uuid())
+  updatedAt     DateTime
+  updatedReason String
+
+  submittedRates     RateRevisionTable[]     @relation("submitRateInfo")
+}
 
 
-  model ActuaryContact {
-    id                          String             @id @default(uuid())
-    createdAt                   DateTime           @default(now())
-    updatedAt                   DateTime           @default(now()) @updatedAt
-    position                    Int                @default(-1)
+model ActuaryContact {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+  position  Int      @default(-1)
 
-    name                        String?
-    titleRole                   String?
-    email                       String?
+  name      String?
+  titleRole String?
+  email     String?
 
-    rateWithCertifyingActuaryID String?
-    rateWithAddtlActuaryID      String?
-    rateActuaryCertifying       RateRevisionTable? @relation(name: "CertifyingActuaryOnRateRevision", fields: [rateWithCertifyingActuaryID], references: [id], onDelete: Cascade)
-    rateActuaryAddtl            RateRevisionTable? @relation(name: "AddtlActuaryOnRateRevision", fields: [rateWithAddtlActuaryID], references: [id], onDelete: Cascade)
+  rateWithCertifyingActuaryID String?
+  rateWithAddtlActuaryID      String?
+  rateActuaryCertifying       RateRevisionTable? @relation(name: "CertifyingActuaryOnRateRevision", fields: [rateWithCertifyingActuaryID], references: [id], onDelete: Cascade)
+  rateActuaryAddtl            RateRevisionTable? @relation(name: "AddtlActuaryOnRateRevision", fields: [rateWithAddtlActuaryID], references: [id], onDelete: Cascade)
 }
