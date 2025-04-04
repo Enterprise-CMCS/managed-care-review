@@ -21,7 +21,7 @@ import * as Yup from 'yup'
 import { ErrorOrLoadingPage } from '../StateSubmission'
 import { handleAndReturnErrorState } from '../StateSubmission/ErrorOrLoadingPage'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
-import { WithdrawSubmissionBanner } from '../../components/Banner/WithdrawSubmissionBanner/WithdrawSubmissionBanner'
+import { SubmissionWithdrawWarningBanner } from '../../components/Banner/WithdrawSubmissionBanner/SubmissionWithdrawWarningBanner'
 
 type SubmissionWithdrawValues = {
     submissionWithdrawReason: string
@@ -188,7 +188,9 @@ export const SubmissionWithdraw = (): React.ReactElement => {
                 ]}
             />
             {ratesToNotBeWithdrawn.length > 0 && (
-                <WithdrawSubmissionBanner rates={ratesToNotBeWithdrawn} />
+                <SubmissionWithdrawWarningBanner
+                    rates={ratesToNotBeWithdrawn}
+                />
             )}
             <Formik
                 initialValues={formInitialValues}

@@ -4,15 +4,15 @@ import styles from '../Banner.module.scss'
 import { RatesToNotBeWithdrawn } from '../../../pages/SubmissionWithdraw/SubmissionWithdraw'
 import { NavLinkWithLogging } from '../../TealiumLogging'
 
-interface WithdrawSubmissionBannerProps
+interface SubmissionWithdrawWarningBannerProps
     extends React.HTMLAttributes<HTMLDivElement> {
     rates: RatesToNotBeWithdrawn[]
 }
 
-export const WithdrawSubmissionBanner = ({
+export const SubmissionWithdrawWarningBanner = ({
     className,
     rates,
-}: WithdrawSubmissionBannerProps) => {
+}: SubmissionWithdrawWarningBannerProps) => {
     return (
         <Alert
             role="alert"

@@ -1,6 +1,6 @@
 import { screen } from '@testing-library/react'
 import { renderWithProviders } from '../../../testHelpers'
-import { WithdrawSubmissionBanner } from './WithdrawSubmissionBanner'
+import { SubmissionWithdrawWarningBanner } from './SubmissionWithdrawWarningBanner'
 
 const ratesToNotBeWithdrawn = [
     {
@@ -15,7 +15,7 @@ const ratesToNotBeWithdrawn = [
 
 test('renders submission withdraw warning banner without errors', () => {
     renderWithProviders(
-        <WithdrawSubmissionBanner rates={ratesToNotBeWithdrawn} />
+        <SubmissionWithdrawWarningBanner rates={ratesToNotBeWithdrawn} />
     )
 
     expect(screen.getByTestId('withdrawSubmissionBanner')).toBeInTheDocument()
