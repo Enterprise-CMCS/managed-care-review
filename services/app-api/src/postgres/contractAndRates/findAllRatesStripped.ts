@@ -18,9 +18,10 @@ type FindAllRatesStrippedType = {
 
 async function findAllRatesStrippedInTransaction(
     tx: PrismaTransactionType,
-    args: FindAllRatesStrippedType
+    args?: FindAllRatesStrippedType
 ): Promise<StrippedRateOrErrorArrayType | Error> {
-    const { stateCode, rateIDs } = args
+    const stateCode = args?.stateCode
+    const rateIDs = args?.rateIDs
     const rates = await tx.rateTable.findMany({
         where: {
             revisions: {
@@ -37,12 +38,11 @@ async function findAllRatesStrippedInTransaction(
                 : {
                       not: 'AS', // exclude test state as per ADR 019
                   },
-            id:
-                rateIDs && rateIDs.length > 0
-                    ? {
-                          in: rateIDs,
-                      }
-                    : undefined,
+            id: rateIDs
+                ? {
+                      in: rateIDs,
+                  }
+                : undefined,
         },
         include: includeStrippedRate,
     })
@@ -59,7 +59,7 @@ async function findAllRatesStrippedInTransaction(
 
 async function findAllRatesStripped(
     client: ExtendedPrismaClient,
-    args: FindAllRatesStrippedType
+    args?: FindAllRatesStrippedType
 ): Promise<StrippedRateOrErrorArrayType | Error> {
     try {
         return await client.$transaction(

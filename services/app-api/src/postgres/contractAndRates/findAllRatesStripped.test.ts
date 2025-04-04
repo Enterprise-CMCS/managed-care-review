@@ -81,7 +81,7 @@ it('returns all rates with stripped down data', async () => {
 
     await withdrawTestRate(cmsServer, rateBID, 'Withdraw invalid rate')
 
-    const strippedRatesOrErrors = must(await findAllRatesStripped(client, {}))
+    const strippedRatesOrErrors = must(await findAllRatesStripped(client))
     const strippedRates: StrippedRateType[] = []
     strippedRatesOrErrors.forEach((rate) => {
         if (!(rate.rate instanceof Error)) {
@@ -125,9 +125,7 @@ it('returns all rates with stripped down data', async () => {
     // Undo the rate withdraw
     await undoWithdrawTestRate(cmsServer, rateBID, 'Undo withdraw rateB')
 
-    const strippedRatesOrErrorsAgain = must(
-        await findAllRatesStripped(client, {})
-    )
+    const strippedRatesOrErrorsAgain = must(await findAllRatesStripped(client))
     const strippedRatesAgain: StrippedRateType[] = []
     strippedRatesOrErrorsAgain.forEach((rate) => {
         if (!(rate.rate instanceof Error)) {
@@ -175,7 +173,7 @@ it('returns all rates with stripped down data', async () => {
     expect(selectedStrippedRates[0].rateID).toBe(rateBFromArrayAgain.id)
 
     const emptySelectedStrippedRatesOrError = must(
-        await findAllRatesStripped(client, { rateIDs: [] })
+        await findAllRatesStripped(client)
     )
     const emptySelectedStrippedRates: StrippedRateType[] = []
     emptySelectedStrippedRatesOrError.forEach((rate) => {
