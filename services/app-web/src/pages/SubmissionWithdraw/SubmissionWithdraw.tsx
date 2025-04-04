@@ -46,7 +46,7 @@ const submissionWithdrawSchema = Yup.object().shape({
     ),
 })
 
-export const shouldWithdraw = (
+export const shouldWarnOnWithdraw = (
     rate: RateStripped,
     submissionToBeWithdrawnID: string
 ) => {
@@ -157,7 +157,7 @@ export const SubmissionWithdraw = (): React.ReactElement => {
     if (ratesData && ratesData.indexRatesStripped.edges.length > 0) {
         const ratesWithContractData = ratesData.indexRatesStripped.edges
         ratesWithContractData.forEach((rate) => {
-            if (!shouldWithdraw(rate.node as RateStripped, id)) {
+            if (!shouldWarnOnWithdraw(rate.node as RateStripped, id)) {
                 ratesToNotBeWithdrawn.push({
                     rateName:
                         rate.node.latestSubmittedRevision.formData

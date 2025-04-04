@@ -4,7 +4,7 @@ import { renderWithProviders } from '../../testHelpers'
 import { SubmissionSideNav } from '../SubmissionSideNav'
 import { RoutesRecord } from '@mc-review/constants'
 import { SubmissionSummary } from '../SubmissionSummary'
-import { SubmissionWithdraw, shouldWithdraw } from './SubmissionWithdraw'
+import { SubmissionWithdraw, shouldWarnOnWithdraw } from './SubmissionWithdraw'
 import {
     fetchContractMockSuccess,
     fetchContractWithQuestionsMockSuccess,
@@ -215,8 +215,8 @@ const ratesWithContractData = [
 ]
 const submissionToBeWithdrawnID = 'contract-to-be-withdrawn-ID'
 
-describe('shouldWithdraw function', () => {
-    //The shouldWithdraw function is what handles the logic in deciding whether or not a rate will
+describe('shouldWarnOnWithdraw function', () => {
+    //The shouldWarnOnWithdraw function is what handles the logic in deciding whether or not a rate will
     //be displayed in the warning banner
     it.each([
         [ratesWithContractData[0], true], //Case 1
@@ -226,7 +226,10 @@ describe('shouldWithdraw function', () => {
         [ratesWithContractData[4], false], //Case 5
     ])('Rate: %s - Should return: %s', (rate, expected) => {
         expect(
-            shouldWithdraw(rate as RateStripped, submissionToBeWithdrawnID)
+            shouldWarnOnWithdraw(
+                rate as RateStripped,
+                submissionToBeWithdrawnID
+            )
         ).toBe(expected)
     })
 })
