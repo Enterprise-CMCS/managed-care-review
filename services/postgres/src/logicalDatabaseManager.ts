@@ -323,6 +323,69 @@ class LogicalDatabaseManager {
                     `GRANT ALL PRIVILEGES ON DATABASE "${dbName}" TO "${userName}"`
                 )
 
+                console.info(
+                    `Setting up schema permissions for PostgreSQL 16+ compatibility`
+                )
+                const newDbConfig = {
+                    ...dbCredentials,
+                    dbname: dbName,
+                }
+
+                let schemaClient: Client | null = null
+                try {
+                    console.info(
+                        `Connecting to database ${dbName} to set schema permissions`
+                    )
+                    schemaClient = await this.dbClient.connect(newDbConfig)
+
+                    if (schemaClient) {
+                        console.info(
+                            `Granting schema privileges to ${userName}`
+                        )
+                        await schemaClient.query(
+                            `GRANT ALL ON SCHEMA public TO "${userName}"`
+                        )
+                        console.info(`Granted ALL on schema public`)
+
+                        await schemaClient.query(
+                            `ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO "${userName}"`
+                        )
+                        console.info(`Granted default privileges on tables`)
+
+                        await schemaClient.query(
+                            `ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO "${userName}"`
+                        )
+                        console.info(`Granted default privileges on sequences`)
+
+                        await schemaClient.query(
+                            `ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON FUNCTIONS TO "${userName}"`
+                        )
+                        console.info(`Granted default privileges on functions`)
+                    } else {
+                        console.warn(
+                            `Failed to establish connection to ${dbName} for schema permissions`
+                        )
+                    }
+                } catch (schemaError) {
+                    console.warn(
+                        `Warning: Error setting schema permissions: ${schemaError instanceof Error ? schemaError.message : String(schemaError)}`
+                    )
+                    console.info(
+                        `Will continue with user creation despite schema permission error`
+                    )
+                } finally {
+                    if (schemaClient) {
+                        try {
+                            await schemaClient.end()
+                            console.info(`Schema permission connection closed`)
+                        } catch (closeError) {
+                            console.error(
+                                `Error closing schema connection: ${closeError instanceof Error ? closeError.message : String(closeError)}`
+                            )
+                        }
+                    }
+                }
+
                 console.info(`User ${userName} created successfully`)
             } else {
                 console.info(`User ${userName} already exists`)
