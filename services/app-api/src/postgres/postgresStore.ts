@@ -87,10 +87,15 @@ import {
     undoWithdrawRate,
     type UndoWithdrawRateArgsType,
 } from './contractAndRates/undoWithdrawRate'
-import type { StrippedRateOrErrorArrayType } from './contractAndRates/findAllRatesStripped'
+import type {
+    FindAllRatesStrippedType,
+    StrippedRateOrErrorArrayType,
+} from './contractAndRates/findAllRatesStripped'
 import { findAllRatesStripped } from './contractAndRates/findAllRatesStripped'
 import type { WithdrawContractArgsType } from './contractAndRates/withdrawContract'
 import { withdrawContract } from './contractAndRates/withdrawContract'
+import { findRateRelatedContracts } from './contractAndRates/findRateRelatedContracts'
+import type { RelatedContractStripped } from '../gen/gqlClient'
 
 type Store = {
     findPrograms: (
@@ -181,6 +186,10 @@ type Store = {
     ) => Promise<ContractType | Error>
 
     findRateWithHistory: (rateID: string) => Promise<RateType | Error>
+    findRateRelatedContracts: (
+        rateID: string
+    ) => Promise<RelatedContractStripped[] | Error>
+
     updateContract: (
         args: UpdateMCCRSIDFormArgsType
     ) => Promise<ContractType | Error>
@@ -210,7 +219,7 @@ type Store = {
     ) => Promise<RateOrErrorArrayType | Error>
 
     findAllRatesStripped: (
-        stateCode?: string
+        args?: FindAllRatesStrippedType
     ) => Promise<StrippedRateOrErrorArrayType | Error>
 
     replaceRateOnContract: (
@@ -305,6 +314,8 @@ function NewPostgresStore(client: ExtendedPrismaClient): Store {
         findContractWithHistory: (args) =>
             findContractWithHistory(client, args),
         findRateWithHistory: (args) => findRateWithHistory(client, args),
+        findRateRelatedContracts: (args) =>
+            findRateRelatedContracts(client, args),
         updateDraftContractWithRates: (args) =>
             updateDraftContractWithRates(client, args),
         updateContract: (args) => updateMCCRSID(client, args),

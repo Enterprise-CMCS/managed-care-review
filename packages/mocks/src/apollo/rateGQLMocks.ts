@@ -8,7 +8,10 @@ import {
     IndexRatesStrippedQuery,
     IndexRatesQuery,
     Rate,
-    RateRevision, RateStripped,
+    RateRevision, 
+    RateStripped,
+    IndexRatesStrippedWithRelatedContractsQuery,
+    IndexRatesStrippedWithRelatedContractsDocument
 } from '../gen/gqlClient'
 import { MockedResponse } from '@apollo/client/testing'
 import {
@@ -95,6 +98,42 @@ const indexRatesStrippedMockSuccess = (
                 },
             },
         },
+    }
+}
+
+const indexRatesStrippedWithRelatedContractsMockSuccess = (
+    stateCode?: string, 
+    rateIDs?: string[]
+): MockedResponse<IndexRatesStrippedWithRelatedContractsQuery> => {
+    const mockRates = [
+        { ...strippedRateDataMock(), id: 'test-id-123', stateNumber: 3 },
+        { ...strippedRateDataMock(), id: 'test-id-124', stateNumber: 2 },
+        { ...strippedRateDataMock(), id: 'test-id-125', stateNumber: 1 },
+    ]
+    const ratesEdge = mockRates.map((rate) => {
+        return {
+            node: rate,
+        }
+    })
+
+    return {
+        request: {
+            query: IndexRatesStrippedWithRelatedContractsDocument,
+            variables: {
+                input: {
+                    stateCode: stateCode,
+                    rateIDs: rateIDs
+                },
+            }
+        },
+        result: {
+            data: {
+                indexRatesStripped: {
+                    totalCount: ratesEdge.length,
+                    edges: ratesEdge
+                }
+            }
+        }
     }
 }
 
@@ -204,9 +243,10 @@ const fetchRateWithQuestionsMockSuccess = ({
 export {
     fetchRateMockSuccess,
     indexRatesMockSuccess,
+    indexRatesMockFailure,
     indexRatesStrippedMockSuccess,
     indexRatesStrippedMockFailure,
-    indexRatesMockFailure,
+    indexRatesStrippedWithRelatedContractsMockSuccess,
     fetchDraftRateMockSuccess,
     fetchRateWithQuestionsMockSuccess,
 }

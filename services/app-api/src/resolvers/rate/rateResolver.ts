@@ -14,6 +14,7 @@ import {
 import type { Store } from '../../postgres'
 import { NotFoundError } from '../../postgres'
 import { convertToIndexRateQuestionsPayload } from '../../postgres/questionResponse'
+import { logError } from '../../logger'
 
 // Return the date of the first submission for a rate
 // This method relies on revisions always being presented in most-recent-first order
@@ -155,6 +156,7 @@ export function rateResolver(
 }
 
 export function rateStrippedResolver(
+    store: Store,
     applicationEndpoint: string
 ): Resolvers['RateStripped'] {
     return {
@@ -180,6 +182,31 @@ export function rateStrippedResolver(
                 })
             }
             return state
+        },
+        relatedContracts: async (parent, _args, context) => {
+            const { ctx, tracer } = context
+            const span = tracer?.startSpan(
+                'rateStrippedResolver.relatedContracts',
+                {},
+                ctx
+            )
+            const relatedContracts = await store.findRateRelatedContracts(
+                parent.id
+            )
+
+            if (relatedContracts instanceof Error) {
+                const msg = `Issue finding related contracts for rate with id: ${parent.id}. Message: ${relatedContracts.message}`
+                logError('rateStrippedResolver.relatedContracts', msg)
+                setErrorAttributesOnActiveSpan(msg, span)
+                throw new GraphQLError(msg, {
+                    extensions: {
+                        code: 'INTERNAL_SERVER_ERROR',
+                        cause: 'DB_ERROR',
+                    },
+                })
+            }
+
+            return relatedContracts
         },
     }
 }

@@ -15,7 +15,12 @@ const RateReviewsDashboard = (): React.ReactElement => {
     const { loggedInUser } = useAuth()
     const isAdminUser = loggedInUser?.role === 'ADMIN_USER'
     const { data, loading, error } = useIndexRatesStrippedQuery({
-        variables: { input: { stateCode: undefined } },
+        variables: {
+            input: {
+                stateCode: undefined,
+                rateIDs: undefined,
+            },
+        },
         fetchPolicy: 'cache-and-network',
         pollInterval: 300000,
     })

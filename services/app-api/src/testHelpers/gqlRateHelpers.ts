@@ -10,7 +10,7 @@ import {
     IndexRatesStrippedDocument,
 } from '../gen/gqlClient'
 import { must } from './assertionHelpers'
-import { defaultFloridaRateProgram } from './gqlHelpers'
+import { defaultFloridaProgram, defaultFloridaRateProgram } from './gqlHelpers'
 import { mockRateFormDataInput } from './rateDataMocks'
 import { sharedTestPrismaClient } from './storeHelpers'
 import { updateDraftRate } from '../postgres/contractAndRates/updateDraftRate'
@@ -554,6 +554,36 @@ const fetchTestIndexRatesStripped = async (
     return indexRatesStripped
 }
 
+const testRateFormInputData = (): RateFormDataInput => ({
+    rateType: 'AMENDMENT',
+    rateCapitationType: 'RATE_CELL',
+    rateDateStart: '2024-01-01',
+    rateDateEnd: '2025-01-01',
+    rateDateCertified: '2024-01-01',
+    amendmentEffectiveDateStart: '2024-02-01',
+    amendmentEffectiveDateEnd: '2025-02-01',
+    rateProgramIDs: [defaultFloridaProgram().id],
+    deprecatedRateProgramIDs: [],
+    rateDocuments: [
+        {
+            s3URL: 's3://bucketname/key/test1',
+            name: 'updatedratedoc1.doc',
+            sha256: 'foobar',
+        },
+    ],
+    supportingDocuments: [],
+    certifyingActuaryContacts: [
+        {
+            name: 'Foo Person',
+            titleRole: 'Bar Job',
+            email: 'foo@example.com',
+            actuarialFirm: 'GUIDEHOUSE',
+        },
+    ],
+    addtlActuaryContacts: [],
+    actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+})
+
 export {
     createTestDraftRateOnContract,
     createSubmitAndUnlockTestRate,
@@ -573,4 +603,5 @@ export {
     withdrawTestRate,
     undoWithdrawTestRate,
     fetchTestIndexRatesStripped,
+    testRateFormInputData,
 }
