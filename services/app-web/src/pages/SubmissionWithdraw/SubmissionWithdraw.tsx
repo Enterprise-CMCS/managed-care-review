@@ -1,12 +1,18 @@
 import React from 'react'
 import styles from './SubmissionWithdraw.module.scss'
-import { ActionButton, Breadcrumbs, PoliteErrorMessage } from '../../components'
+import {
+    ActionButton,
+    Breadcrumbs,
+    GenericApiErrorBanner,
+    PoliteErrorMessage,
+} from '../../components'
 import { RoutesRecord } from '@mc-review/constants'
 import { useNavigate, useParams } from 'react-router-dom'
 import {
     RateStripped,
     useFetchContractQuery,
     useIndexRatesStrippedWithRelatedContractsQuery,
+    useWithdrawContractMutation,
 } from '../../gen/gqlClient'
 import { Formik, FormikErrors } from 'formik'
 import {
@@ -22,6 +28,8 @@ import { ErrorOrLoadingPage } from '../StateSubmission'
 import { handleAndReturnErrorState } from '../StateSubmission/ErrorOrLoadingPage'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import { SubmissionWithdrawWarningBanner } from '../../components/Banner/WithdrawSubmissionBanner/SubmissionWithdrawWarningBanner'
+import { useTealium } from '../../hooks'
+import { recordJSException } from '@mc-review/otel'
 
 type SubmissionWithdrawValues = {
     submissionWithdrawReason: string
@@ -87,8 +95,13 @@ export const shouldWarnOnWithdraw = (
 
 export const SubmissionWithdraw = (): React.ReactElement => {
     const { id } = useParams() as { id: string }
+    const { logFormSubmitEvent } = useTealium()
     const navigate = useNavigate()
     const [shouldValidate, setShouldValidate] = React.useState(false)
+    const [
+        withdrawContract,
+        { error: withdrawError, loading: withdrawLoading },
+    ] = useWithdrawContractMutation()
     const showFieldErrors = (error?: FormError): boolean | undefined =>
         shouldValidate && Boolean(error)
     const formInitialValues: SubmissionWithdrawValues = {
@@ -168,6 +181,32 @@ export const SubmissionWithdraw = (): React.ReactElement => {
         })
     }
 
+    const withdrawSubmissionPackage = async (
+        values: SubmissionWithdrawValues
+    ) => {
+        logFormSubmitEvent({
+            heading: 'Withdraw submission',
+            form_name: 'Withdraw submission',
+            event_name: 'form_field_submit',
+            link_type: 'link_other',
+        })
+        try {
+            await withdrawContract({
+                variables: {
+                    input: {
+                        contractID: id,
+                        updatedReason: values.submissionWithdrawReason,
+                    },
+                },
+            })
+            navigate(`/submissions/${id}`)
+        } catch (err) {
+            recordJSException(
+                `WithdrawContract: Apollo error reported. Error message: Failed to create form data ${err}`
+            )
+        }
+    }
+
     return (
         <div className={styles.submissionWithdrawContainer}>
             <Breadcrumbs
@@ -194,7 +233,7 @@ export const SubmissionWithdraw = (): React.ReactElement => {
             )}
             <Formik
                 initialValues={formInitialValues}
-                onSubmit={() => window.alert('Not implemented')}
+                onSubmit={(values) => withdrawSubmissionPackage(values)}
                 validationSchema={submissionWithdrawSchema}
             >
                 {({ handleSubmit, handleChange, errors, values }) => (
@@ -208,6 +247,7 @@ export const SubmissionWithdraw = (): React.ReactElement => {
                             return handleSubmit(e)
                         }}
                     >
+                        {withdrawError && <GenericApiErrorBanner />}
                         <fieldset className="usa-fieldset">
                             <h2>Withdraw submission</h2>
                             <FormGroup
@@ -272,6 +312,7 @@ export const SubmissionWithdraw = (): React.ReactElement => {
                                     disabled={showFieldErrors(
                                         errors.submissionWithdrawReason
                                     )}
+                                    loading={withdrawLoading}
                                 >
                                     Withdraw submission
                                 </ActionButton>

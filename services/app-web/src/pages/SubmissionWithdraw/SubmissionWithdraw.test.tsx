@@ -9,15 +9,19 @@ import {
     fetchContractMockSuccess,
     fetchContractWithQuestionsMockSuccess,
     fetchCurrentUserMock,
-    mockContractPackageUnlockedWithUnlockedType,
+    mockContractPackageSubmitted,
+    mockContractPackageSubmittedWithQuestions,
     mockValidCMSUser,
     indexRatesStrippedWithRelatedContractsMockSuccess,
+    withdrawContractMockFailure,
+    withdrawContractMockSuccess,
 } from '@mc-review/mocks'
 import { RateStripped } from '../../gen/gqlClient'
+import { Contract } from '../../gen/gqlClient'
 
 describe('SubmissionWithdraw', () => {
     it('renders without errors', async () => {
-        const contract = mockContractPackageUnlockedWithUnlockedType({
+        const contract = mockContractPackageSubmitted({
             id: 'test-abc-123',
         })
         renderWithProviders(
@@ -54,7 +58,7 @@ describe('SubmissionWithdraw', () => {
                     route: '/submission-reviews/test-abc-123/withdraw-submission',
                 },
                 featureFlags: {
-                    'withdraw-rate': true,
+                    'withdraw-submission': true,
                 },
             }
         )
@@ -75,8 +79,149 @@ describe('SubmissionWithdraw', () => {
         })
     })
 
+    it('can withdraw a submission', async () => {
+        const contract =
+            mockContractPackageSubmittedWithQuestions('test-abc-123')
+        const withdrawnContract: Contract = {
+            ...contract,
+            reviewStatus: 'WITHDRAWN',
+            consolidatedStatus: 'WITHDRAWN',
+            status: 'RESUBMITTED',
+        }
+
+        const { user } = renderWithProviders(
+            <Routes>
+                <Route element={<SubmissionSideNav />}>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                        element={<SubmissionSummary />}
+                    />
+                    <Route
+                        path={RoutesRecord.SUBMISSION_WITHDRAW}
+                        element={<SubmissionWithdraw />}
+                    />
+                </Route>
+            </Routes>,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockValidCMSUser(),
+                            statusCode: 200,
+                        }),
+                        fetchContractWithQuestionsMockSuccess({
+                            contract,
+                        }),
+                        fetchContractMockSuccess({ contract }),
+                        withdrawContractMockSuccess({ contractData: contract }),
+                        fetchContractWithQuestionsMockSuccess({
+                            contract: withdrawnContract,
+                        }),
+                        fetchContractWithQuestionsMockSuccess({
+                            contract: withdrawnContract,
+                        }),
+                    ],
+                },
+                routerProvider: {
+                    route: '/submission-reviews/test-abc-123/withdraw-submission',
+                },
+                featureFlags: {
+                    'withdraw-submission': true,
+                },
+            }
+        )
+
+        await waitFor(() => {
+            expect(
+                screen.getByRole('button', { name: 'Withdraw submission' })
+            ).toBeInTheDocument()
+        })
+
+        const withdrawBtn = screen.getByRole('button', {
+            name: 'Withdraw submission',
+        })
+        const withdrawReasonInput = screen.getByTestId(
+            'submissionWithdrawReason'
+        )
+
+        await user.type(withdrawReasonInput, 'a valid note')
+        await user.click(withdrawBtn)
+
+        await waitFor(() => {
+            expect(
+                screen.getByTestId('updatedSubmissionBanner')
+            ).toBeInTheDocument()
+        })
+        expect(
+            screen.getByText(
+                'No action can be taken on this submission in its current status.'
+            )
+        ).toBeInTheDocument()
+    })
+
+    it('renders error banner on failed withdraw', async () => {
+        const contract = mockContractPackageSubmitted({
+            id: 'test-abc-123',
+        })
+        const { user } = renderWithProviders(
+            <Routes>
+                <Route element={<SubmissionSideNav />}>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                        element={<SubmissionSummary />}
+                    />
+                    <Route
+                        path={RoutesRecord.SUBMISSION_WITHDRAW}
+                        element={<SubmissionWithdraw />}
+                    />
+                </Route>
+            </Routes>,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockValidCMSUser(),
+                            statusCode: 200,
+                        }),
+                        fetchContractWithQuestionsMockSuccess({
+                            contract,
+                        }),
+                        fetchContractMockSuccess({ contract }),
+                        withdrawContractMockFailure(),
+                    ],
+                },
+                routerProvider: {
+                    route: '/submission-reviews/test-abc-123/withdraw-submission',
+                },
+                featureFlags: {
+                    'withdraw-submission': true,
+                },
+            }
+        )
+
+        await waitFor(() => {
+            expect(
+                screen.getByRole('button', { name: 'Withdraw submission' })
+            ).toBeInTheDocument()
+        })
+
+        const withdrawBtn = screen.getByRole('button', {
+            name: 'Withdraw submission',
+        })
+        const withdrawReasonInput = screen.getByTestId(
+            'submissionWithdrawReason'
+        )
+
+        await user.type(withdrawReasonInput, 'reason for withdraw')
+        await user.click(withdrawBtn)
+
+        await waitFor(() => {
+            expect(screen.getByTestId('error-alert')).toBeInTheDocument()
+        })
+    })
+
     it('displays an error message if no reason is provided', async () => {
-        const contract = mockContractPackageUnlockedWithUnlockedType({
+        const contract = mockContractPackageSubmitted({
             id: 'test-abc-123',
         })
         const { user } = renderWithProviders(
@@ -113,7 +258,7 @@ describe('SubmissionWithdraw', () => {
                     route: '/submission-reviews/test-abc-123/withdraw-submission',
                 },
                 featureFlags: {
-                    'withdraw-rate': true,
+                    'withdraw-submission': true,
                 },
             }
         )
