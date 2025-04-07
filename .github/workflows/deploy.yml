@@ -251,8 +251,8 @@ jobs:
           path: ./services/app-api/lambda-layers-prisma-client-engine
 
       - name: Prepare postgres tools lambda layer
-        working-directory: service/postgres
-        run: ./services/postgres/build-postgres-lambda-layer.sh
+        working-directory: services/postgres
+        run: ./build-postgres-lambda-layer.sh
 
       - uses: actions/upload-artifact@v4
         with:
