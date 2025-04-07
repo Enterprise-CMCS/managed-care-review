@@ -215,8 +215,8 @@ jobs:
           coverageLocations: |
             ${{github.workspace}}/services/app-api/coverage/lcov.info:lcov
 
-  build-prisma-client-lambda-layer:
-    name: build - postgres prisma layer
+  build-lambda-layers:
+    name: build - lambda layers
     runs-on: ubuntu-24.04
     steps:
       - name: Check out repository
@@ -249,6 +249,15 @@ jobs:
         with:
           name: lambda-layers-prisma-client-engine
           path: ./services/app-api/lambda-layers-prisma-client-engine
+
+      - name: Prepare postgres tools lambda layer
+        working-directory: service/postgres
+        run: ./services/postgres/build-postgres-lambda-layer.sh
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: lambda-layers-postgres-tools
+          path: ./services/postgres/lambda-layer-postgres-tools
 
   build-clamav-layer:
     name: build - clamav layer
@@ -298,7 +307,7 @@ jobs:
     needs:
       [
         begin-deployment,
-        build-prisma-client-lambda-layer,
+        build-lambda-layers,
         web-unit-tests,
         api-unit-tests,
         deploy-infra,
@@ -308,7 +317,7 @@ jobs:
       (needs.deploy-infra.result == 'success' || needs.deploy-infra.result == 'skipped') &&
       needs.web-unit-tests.result == 'success' &&
       needs.api-unit-tests.result == 'success' &&
-      needs.build-prisma-client-lambda-layer.result == 'success' &&
+      needs.build-lambda-layers.result == 'success' &&
       needs.begin-deployment.result == 'success'
     uses: Enterprise-CMCS/managed-care-review/.github/workflows/deploy-app-to-env.yml@main
     with:
