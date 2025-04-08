@@ -50,7 +50,7 @@ describe('SubmissionWithdraw', () => {
                         fetchContractMockSuccess({ contract }),
                         indexRatesStrippedWithRelatedContractsMockSuccess(
                             undefined,
-                            ['unlocked-rate-123']
+                            ['123']
                         ),
                     ],
                 },
@@ -120,6 +120,10 @@ describe('SubmissionWithdraw', () => {
                         fetchContractWithQuestionsMockSuccess({
                             contract: withdrawnContract,
                         }),
+                        indexRatesStrippedWithRelatedContractsMockSuccess(
+                            undefined,
+                            ['123']
+                        ),
                     ],
                 },
                 routerProvider: {
@@ -187,6 +191,10 @@ describe('SubmissionWithdraw', () => {
                             contract,
                         }),
                         fetchContractMockSuccess({ contract }),
+                        indexRatesStrippedWithRelatedContractsMockSuccess(
+                            undefined,
+                            ['123']
+                        ),
                         withdrawContractMockFailure(),
                     ],
                 },
@@ -250,7 +258,7 @@ describe('SubmissionWithdraw', () => {
                         fetchContractMockSuccess({ contract }),
                         indexRatesStrippedWithRelatedContractsMockSuccess(
                             undefined,
-                            ['unlocked-rate-123']
+                            ['123']
                         ),
                     ],
                 },

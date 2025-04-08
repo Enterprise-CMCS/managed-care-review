@@ -124,7 +124,7 @@ export const SubmissionWithdraw = (): React.ReactElement => {
     const contract = contractData?.fetchContract.contract
     //Extracting rateIDs to query for parent contract data
     const rateIDs = contract
-        ? contract.packageSubmissions[0].rateRevisions.map((rr) => rr.rate!.id)
+        ? contract.packageSubmissions[0].rateRevisions.map((rr) => rr.rateID)
         : []
 
     //Fetching rates associated with above contract to determine whether or not they will be withdrawn (banner display)
