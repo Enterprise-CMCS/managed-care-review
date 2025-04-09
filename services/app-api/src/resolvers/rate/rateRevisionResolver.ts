@@ -13,7 +13,7 @@ export function rateRevisionResolver(store: Store): Resolvers['RateRevision'] {
             const rate = await store.findRateWithHistory(parent.rateID)
             if (rate instanceof Error) {
                 const errMessage = `Issue finding rate with id: ${parent.rateID}. Message: ${rate.message}`
-                logError('indexQuestions', errMessage)
+                logError('rateRevisionResolver.rate', errMessage)
                 setErrorAttributesOnActiveSpan(errMessage, span)
                 throw new GraphQLError(errMessage, {
                     extensions: {

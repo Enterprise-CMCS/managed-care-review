@@ -1899,6 +1899,15 @@ type RateRevisionStripped {
 }
 
 """
+Related Contracts are the contracts tied to the given child/linked rate
+Only contains the necessary info for displaying the SubmissionWithdrawWarningBanner
+"""
+type RelatedContractStripped {
+    id: ID!
+    consolidatedStatus: ConsolidatedContractStatus!
+}
+
+"""
 Rates are rate certifications and their associated actuary contacts and documents
 State users may create, update, and submit several rates at a time
 """
@@ -2020,6 +2029,9 @@ type RateStripped {
 
     "The latest submitted rate revision"
     latestSubmittedRevision: RateRevisionStripped!
+
+    "Contracts this child or linked rate is tied to"
+    relatedContracts: [RelatedContractStripped!]
 }
 
 """
@@ -2257,6 +2269,7 @@ type RateEdge {
 
 input IndexRatesInput {
     stateCode: String
+    rateIDs: [String!]
 }
 
 type IndexRatesPayload {

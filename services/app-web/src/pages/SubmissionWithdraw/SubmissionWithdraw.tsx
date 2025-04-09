@@ -9,7 +9,9 @@ import {
 import { RoutesRecord } from '@mc-review/constants'
 import { useNavigate, useParams } from 'react-router-dom'
 import {
+    RateStripped,
     useFetchContractQuery,
+    useIndexRatesStrippedWithRelatedContractsQuery,
     useWithdrawContractMutation,
 } from '../../gen/gqlClient'
 import { Formik, FormikErrors } from 'formik'
@@ -25,11 +27,22 @@ import * as Yup from 'yup'
 import { ErrorOrLoadingPage } from '../StateSubmission'
 import { handleAndReturnErrorState } from '../StateSubmission/ErrorOrLoadingPage'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
+import { SubmissionWithdrawWarningBanner } from '../../components/Banner/WithdrawSubmissionBanner/SubmissionWithdrawWarningBanner'
 import { useTealium } from '../../hooks'
 import { recordJSException } from '@mc-review/otel'
 
 type SubmissionWithdrawValues = {
     submissionWithdrawReason: string
+}
+
+export type RatesToNotBeWithdrawn = {
+    rateName: string
+    rateURL: string
+}
+
+type RelatedContract = {
+    consolidatedStatus: string
+    id: string
 }
 
 type FormError =
@@ -40,6 +53,45 @@ const submissionWithdrawSchema = Yup.object().shape({
         'You must provide a reason for withdrawing this submission.'
     ),
 })
+
+export const shouldWarnOnWithdraw = (
+    rate: RateStripped,
+    submissionToBeWithdrawnID: string
+) => {
+    const parentContractID = rate.parentContractID
+    const rateStatus = rate.consolidatedStatus
+    const relatedContracts = rate.relatedContracts
+    const parentContract = relatedContracts?.find(
+        (contract: RelatedContract) => contract.id === parentContractID
+    )
+
+    //If the rate is not in a submitted status it will not be withdrawn
+    if (!['RESUBMITTED', 'SUBMITTED'].includes(rateStatus)) {
+        return false
+    }
+
+    //If the parent contract for a LINKED rate is NOT in a withdrawn state then the LINKED rate is not withdrawn
+    if (
+        parentContractID !== submissionToBeWithdrawnID &&
+        parentContract?.consolidatedStatus !== 'WITHDRAWN'
+    ) {
+        return false
+    }
+
+    //If ANY of the RELATED contracts are in a submitted or approved state excluding the parent - the rate will not be withdrawn
+    for (const contract of relatedContracts!) {
+        if (
+            contract.id !== submissionToBeWithdrawnID &&
+            ['APPROVED', 'SUBMITTED', 'RESUBMITTED'].includes(
+                contract.consolidatedStatus
+            )
+        ) {
+            return false
+        }
+    }
+
+    return true
+}
 
 export const SubmissionWithdraw = (): React.ReactElement => {
     const { id } = useParams() as { id: string }
@@ -56,25 +108,78 @@ export const SubmissionWithdraw = (): React.ReactElement => {
         submissionWithdrawReason: '',
     }
 
-    const { data, loading, error } = useFetchContractQuery({
+    //Fetching contract to be withdrawn
+    const {
+        data: contractData,
+        loading: contractLoading,
+        error: contractError,
+    } = useFetchContractQuery({
         variables: {
             input: {
                 contractID: id,
             },
         },
+        fetchPolicy: 'cache-and-network',
     })
-    const contract = data?.fetchContract.contract
+    const contract = contractData?.fetchContract.contract
+    //Extracting rateIDs to query for parent contract data
+    const rateIDs = contract
+        ? contract.packageSubmissions[0].rateRevisions.map((rr) => rr.rateID)
+        : []
 
-    if (loading) {
+    //Fetching rates associated with above contract to determine whether or not they will be withdrawn (banner display)
+    //This query will be skipped if rateIDs comes up empty
+    const {
+        data: ratesData,
+        loading: ratesLoading,
+        error: ratesError,
+    } = useIndexRatesStrippedWithRelatedContractsQuery({
+        variables: {
+            input: {
+                stateCode: undefined,
+                rateIDs: rateIDs,
+            },
+        },
+        skip: rateIDs.length === 0,
+        fetchPolicy: 'cache-and-network',
+    })
+
+    if (contractLoading || ratesLoading) {
         return <ErrorOrLoadingPage state="LOADING" />
-    } else if (error) {
-        return <ErrorOrLoadingPage state={handleAndReturnErrorState(error)} />
+    } else if (contractError || ratesError) {
+        const queryError = contractError ?? ratesError
+        return (
+            <ErrorOrLoadingPage
+                state={handleAndReturnErrorState(queryError!)}
+            />
+        )
     } else if (!contract || !contract.packageSubmissions) {
+        return <GenericErrorPage />
+    } else if (
+        rateIDs.length !== 0 &&
+        (!ratesData || !ratesData.indexRatesStripped.edges)
+    ) {
         return <GenericErrorPage />
     }
 
     const contractName =
         contract?.packageSubmissions[0].contractRevision.contractName
+
+    //These rates will be displayed in the warning banner
+    const ratesToNotBeWithdrawn: RatesToNotBeWithdrawn[] = []
+    if (ratesData && ratesData.indexRatesStripped.edges.length > 0) {
+        const ratesWithContractData = ratesData.indexRatesStripped.edges
+        ratesWithContractData.forEach((rate) => {
+            if (!shouldWarnOnWithdraw(rate.node as RateStripped, id)) {
+                ratesToNotBeWithdrawn.push({
+                    rateName:
+                        rate.node.latestSubmittedRevision.formData
+                            .rateCertificationName!,
+                    rateURL: `/rates/${rate.node.id}`,
+                })
+            }
+        })
+    }
 
     const withdrawSubmissionPackage = async (
         values: SubmissionWithdrawValues
@@ -121,6 +226,11 @@ export const SubmissionWithdraw = (): React.ReactElement => {
                     },
                 ]}
             />
+            {ratesToNotBeWithdrawn.length > 0 && (
+                <SubmissionWithdrawWarningBanner
+                    rates={ratesToNotBeWithdrawn}
+                />
+            )}
             <Formik
                 initialValues={formInitialValues}
                 onSubmit={(values) => withdrawSubmissionPackage(values)}

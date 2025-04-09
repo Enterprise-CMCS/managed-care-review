@@ -29,6 +29,9 @@ import type {
     RateTableWithoutDraftContractsStrippedPayload,
 } from './prismaSubmittedRateHelpers'
 import type { ConsolidatedRateStatusType } from '../../domain-models/contractAndRates/statusType'
+import type { RateTableWithRelatedContractsPayload } from './prismaSubmittedRateHelpers'
+import type { HealthPlanPackageStatusType } from '../../domain-models'
+import type { RelatedContractStripped } from '../../gen/gqlClient'
 
 const subincludeUpdateInfo = {
     updatedBy: true,
@@ -228,6 +231,82 @@ const getParentContractID = (
     }
 
     return parentContractID
+}
+
+const getRelatedContracts = (
+    rate: RateTableWithRelatedContractsPayload
+): RelatedContractStripped[] => {
+    const rateRevisions = [...rate.revisions].sort(
+        (revA, revB) => revA.createdAt.getTime() - revB.createdAt.getTime()
+    )
+
+    let relatedContracts: RelatedContractStripped[] = []
+    for (const rateRev of rateRevisions) {
+        if (!rateRev.submitInfo) {
+            continue
+        }
+
+        // get the latest related submissions entry
+        const latestRelatedSubmission = rateRev.relatedSubmissions.sort(
+            (a, b) => b.updatedAt.getTime() - a.updatedAt.getTime()
+        )[0]
+
+        // collect related contracts with latest consolidated statuses
+        const contracts: RelatedContractStripped[] = []
+
+        // looping throw all the submission packages of the related submissions to find the contracts for this rate.
+        latestRelatedSubmission.submissionPackages.forEach((pkg) => {
+            if (pkg.rateRevisionID === rateRev.id) {
+                let status: HealthPlanPackageStatusType = 'DRAFT'
+                let reviewStatus: ContractReviewStatusType = 'UNDER_REVIEW'
+
+                const submitInfo =
+                    pkg.contractRevision.contract.revisions[0].submitInfo
+                const unlockInfo =
+                    pkg.contractRevision.contract.revisions[0].unlockInfo
+                const latestAction =
+                    pkg.contractRevision.contract.reviewStatusActions[0]
+
+                // Find the current status of all related contracts as some could be in different status than the rate.
+                // If it has both unlock and submit info, then it was resubmitted
+                if (submitInfo && unlockInfo) {
+                    status = 'RESUBMITTED'
+                }
+                // if only unlock info, then this unlocked. When unlocking contract, a new revision with unlock info is created.
+                if (unlockInfo && !submitInfo) {
+                    status = 'UNLOCKED'
+                }
+                // if there is a submit info, but not unlock info then this is the initial submission.
+                if (submitInfo && !unlockInfo) {
+                    status = 'SUBMITTED'
+                }
+                // Contract review statuses
+                if (latestAction?.actionType === 'MARK_AS_APPROVED') {
+                    reviewStatus = 'APPROVED'
+                }
+                if (latestAction?.actionType === 'WITHDRAW') {
+                    reviewStatus = 'WITHDRAWN'
+                }
+
+                // Consolidate the statuses.
+                const consolidatedStatus = getConsolidatedContractStatus(
+                    status,
+                    reviewStatus
+                )
+
+                // Add to our temporary array
+                contracts.push({
+                    id: pkg.contractRevision.contract.id,
+                    consolidatedStatus,
+                })
+            }
+        })
+
+        // Set the related contracts array, replacing the previous with the current so that the result is related contracts from the latest submission.
+        relatedContracts = contracts
+    }
+
+    return relatedContracts
 }
 // ------
 
@@ -569,5 +648,6 @@ export {
     setDateAddedForRateRevisions,
     getRateReviewStatus,
     getParentContractID,
+    getRelatedContracts,
     DRAFT_PARENT_PLACEHOLDER,
 }

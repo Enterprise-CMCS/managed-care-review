@@ -4,7 +4,7 @@ import { renderWithProviders } from '../../testHelpers'
 import { SubmissionSideNav } from '../SubmissionSideNav'
 import { RoutesRecord } from '@mc-review/constants'
 import { SubmissionSummary } from '../SubmissionSummary'
-import { SubmissionWithdraw } from './SubmissionWithdraw'
+import { SubmissionWithdraw, shouldWarnOnWithdraw } from './SubmissionWithdraw'
 import {
     fetchContractMockSuccess,
     fetchContractWithQuestionsMockSuccess,
@@ -12,9 +12,11 @@ import {
     mockContractPackageSubmitted,
     mockContractPackageSubmittedWithQuestions,
     mockValidCMSUser,
+    indexRatesStrippedWithRelatedContractsMockSuccess,
     withdrawContractMockFailure,
     withdrawContractMockSuccess,
 } from '@mc-review/mocks'
+import { RateStripped } from '../../gen/gqlClient'
 import { Contract } from '../../gen/gqlClient'
 
 describe('SubmissionWithdraw', () => {
@@ -46,6 +48,10 @@ describe('SubmissionWithdraw', () => {
                             contract,
                         }),
                         fetchContractMockSuccess({ contract }),
+                        indexRatesStrippedWithRelatedContractsMockSuccess(
+                            undefined,
+                            ['123']
+                        ),
                     ],
                 },
                 routerProvider: {
@@ -114,6 +120,10 @@ describe('SubmissionWithdraw', () => {
                         fetchContractWithQuestionsMockSuccess({
                             contract: withdrawnContract,
                         }),
+                        indexRatesStrippedWithRelatedContractsMockSuccess(
+                            undefined,
+                            ['123']
+                        ),
                     ],
                 },
                 routerProvider: {
@@ -181,6 +191,10 @@ describe('SubmissionWithdraw', () => {
                             contract,
                         }),
                         fetchContractMockSuccess({ contract }),
+                        indexRatesStrippedWithRelatedContractsMockSuccess(
+                            undefined,
+                            ['123']
+                        ),
                         withdrawContractMockFailure(),
                     ],
                 },
@@ -242,6 +256,10 @@ describe('SubmissionWithdraw', () => {
                             contract,
                         }),
                         fetchContractMockSuccess({ contract }),
+                        indexRatesStrippedWithRelatedContractsMockSuccess(
+                            undefined,
+                            ['123']
+                        ),
                     ],
                 },
                 routerProvider: {
@@ -271,5 +289,100 @@ describe('SubmissionWithdraw', () => {
                 )
             ).toBeInTheDocument()
         })
+    })
+})
+
+//Each rate object is just the bare bones data we need for the sake of testing
+const ratesWithContractData = [
+    // Case 1: Does withdraw - single child rate attached to submission being withdrawn
+    {
+        id: 'rate-1',
+        consolidatedStatus: 'SUBMITTED',
+        parentContractID: 'contract-to-be-withdrawn-ID',
+        relatedContracts: [
+            {
+                id: 'contract-to-be-withdrawn-ID',
+                consolidatedStatus: 'SUBMITTED',
+            },
+        ],
+    },
+
+    // Case 2: Does not withdraw - Same case as above but the rate was already withdrawn
+    {
+        id: 'rate-2',
+        consolidatedStatus: 'WITHDRAWN', // Not in submitted status
+        parentContractID: 'contract-to-be-withdrawn-ID',
+        relatedContracts: [
+            {
+                id: 'contract-to-be-withdrawn-ID',
+                consolidatedStatus: 'SUBMITTED',
+            },
+        ],
+    },
+
+    // Case 3: Does withdraw - Linked rate's parent is in a withdrawn state
+    {
+        id: 'rate-3',
+        consolidatedStatus: 'SUBMITTED',
+        parentContractID: 'contract-1',
+        relatedContracts: [
+            {
+                id: 'contract-to-be-withdrawn-ID',
+                consolidatedStatus: 'SUBMITTED',
+            },
+            { id: 'contract-1', consolidatedStatus: 'WITHDRAWN' }, //Rate's parent contract is in a withdrawn state
+        ],
+    },
+
+    // Case 4: Does not withdraw - Linked rate's parent MUST be in a withdrawn state
+    {
+        id: 'rate-4',
+        consolidatedStatus: 'SUBMITTED',
+        parentContractID: 'contract-1',
+        relatedContracts: [
+            {
+                id: 'contract-to-be-withdrawn-ID',
+                consolidatedStatus: 'SUBMITTED',
+            },
+            { id: 'contract-1', consolidatedStatus: 'SUBMITTED' }, //Rate's parent contract is NOT in withdrawn state
+        ],
+    },
+
+    // Case 5: Does not withdraw - in the case of mulitple related contracts,
+    // if ANY of the related contracts (excluding the parent) are not in a WITHDRAWN state the rate
+    // will not be withdrawn
+    {
+        id: 'rate-5',
+        consolidatedStatus: 'SUBMITTED',
+        parentContractID: 'contract-1',
+        relatedContracts: [
+            {
+                id: 'contract-to-be-withdrawn-ID',
+                consolidatedStatus: 'SUBMITTED',
+            },
+            { id: 'contract-1', consolidatedStatus: 'WITHDRAWN' },
+            { id: 'contract-2', consolidatedStatus: 'SUBMITTED' }, //This one is not withdrawn so it returns false
+            { id: 'contract-3', consolidatedStatus: 'WITHDRAWN' },
+        ],
+    },
+]
+const submissionToBeWithdrawnID = 'contract-to-be-withdrawn-ID'
+
+describe('shouldWarnOnWithdraw function', () => {
+    //The shouldWarnOnWithdraw function is what handles the logic in deciding whether or not a rate will
+    //be displayed in the warning banner
+    it.each([
+        [ratesWithContractData[0], true], //Case 1
+        [ratesWithContractData[1], false], //Case 2
+        [ratesWithContractData[2], true], //Case 3
+        [ratesWithContractData[3], false], //Case 4
+        [ratesWithContractData[4], false], //Case 5
+    ])('Rate: %s - Should return: %s', (rate, expected) => {
+        expect(
+            shouldWarnOnWithdraw(
+                rate as RateStripped,
+                submissionToBeWithdrawnID
+            )
+        ).toBe(expected)
     })
 })
