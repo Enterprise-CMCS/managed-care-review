@@ -178,15 +178,15 @@ function getConsolidatedRateStatus(
 const getParentContractID = (
     rateRevisions: RateRevisionsTableStrippedPayload | RateRevisionTablePayload
 ) => {
-    // sort in ascending order
-    rateRevisions.sort(
-        (revA, revB) => revA.createdAt.getTime() - revB.createdAt.getTime()
+    // sort in descending order
+    const revisions = [...rateRevisions].sort(
+        (revA, revB) => revB.createdAt.getTime() - revA.createdAt.getTime()
     )
-    const firstRevision = rateRevisions[0]
-    const submission = firstRevision.submitInfo
+    const firstRevision = revisions[revisions.length - 1]
+    const initialSubmission = firstRevision.submitInfo
 
     let parentContractID = undefined
-    if (!submission) {
+    if (!initialSubmission) {
         // this is a draft, never submitted, rate
         // this is fragile code
         // because this is a draft, it can only be parented by the single draft contract
@@ -195,19 +195,35 @@ const getParentContractID = (
         // that can be replaced in higher places.
         parentContractID = 'DRAFT_PARENT_REPLACE_ME'
     } else {
-        // check the initial submission
-        if (firstRevision.relatedSubmissions.length == 0) {
-            console.info('No related submission. Unmigrated rate.')
-            parentContractID = '00000000-1111-2222-3333-444444444444'
-        } else {
-            if (submission.submittedContracts.length !== 1) {
-                const msg =
-                    'programming error: its a submitted rate that was not submitted with a contract initially'
-                console.error(msg)
-                return new Error(msg)
+        //find the latest submitted revision with submitted contracts
+        const latestSubmittedRevision = revisions.find(
+            (revision) => revision.submitInfo?.submittedContracts[0]
+        )
+
+        if (latestSubmittedRevision?.submitInfo) {
+            if (latestSubmittedRevision.relatedSubmissions.length == 0) {
+                console.info('No related submission. Unmigrated rate.')
+                parentContractID = '00000000-1111-2222-3333-444444444444'
+            } else {
+                // there should always only be one submitted contract at the revision level submit info
+                const latestParentContract =
+                    latestSubmittedRevision.submitInfo.submittedContracts[0]
+
+                if (
+                    latestSubmittedRevision.submitInfo?.submittedContracts
+                        .length !== 1
+                ) {
+                    return new Error(
+                        'programming error: its a submitted rate that was not submitted with a contract initially'
+                    )
+                }
+
+                parentContractID = latestParentContract.contractID
             }
-            const firstContract = submission.submittedContracts[0]
-            parentContractID = firstContract.contractID
+        } else {
+            return new Error(
+                'Could not find a submitted revision to get parent contract id.'
+            )
         }
     }
 
