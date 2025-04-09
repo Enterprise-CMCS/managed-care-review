@@ -175,8 +175,6 @@ const withdrawContractInsideTransaction = async (
     for (const rate of rates) {
         // latest rate revision of the current rate on the submission
         const latestRateRevision = rate.revisions[0]
-        // find the parent contract of the rate, it is the contract on the rates first submission revision
-
         if (!latestRateRevision.submitInfo) {
             throw new Error(
                 `Child rate ${rate.id} of contract to be withdrawn does is not submitted.`
@@ -205,7 +203,6 @@ const withdrawContractInsideTransaction = async (
             continue
         }
 
-        // check if any of the linked submissions are approved or submitted and not withdrawn
         let reassignToContractID:
             | {
                   contractID: string
@@ -224,15 +221,11 @@ const withdrawContractInsideTransaction = async (
                 pkg.contractRevision.contract.reviewStatusActions[0]
                     ?.actionType === 'WITHDRAW'
 
-            // Skip if this was the contract being withdrawn
-            if (contractID === contract.id) {
+            // Skip if this was the contract being withdrawn or is withdrawn
+            if (contractID === contract.id || isWithdrawn) {
                 continue
             }
 
-            // If withdrawn, skip to the next package
-            if (isWithdrawn) {
-                continue
-            }
             // These next few conditionals are ordered by preferred contract status
             // Is submitted assigned new value
             if (latestRevision.submitInfo && !isApproved) {
@@ -249,7 +242,6 @@ const withdrawContractInsideTransaction = async (
                 latestRevision.unlockInfo &&
                 !isApproved
             ) {
-                // contract with consolidated status of submitted is our preferred contract, break the loop if we find it.
                 reassignToContractID = {
                     contractID,
                     status: 'UNLOCKED',
@@ -472,7 +464,7 @@ const withdrawContractInsideTransaction = async (
         })
     }
 
-    // fetch contract with history and return
+    // fetch contract with history and validate withdraw
     const withdrawnContract = await findContractWithHistory(tx, contract.id)
 
     if (withdrawnContract instanceof Error) {
