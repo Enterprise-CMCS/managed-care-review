@@ -655,7 +655,7 @@ describe('withdrawContract', () => {
         expect(rateA.parentContractID).toBe(draftContractB.id)
     }, 10000)
 
-    it('withdraws rate with reassgined parent', async () => {
+    it('withdraws rate with reassigned parent', async () => {
         const stateServer = await constructTestPostgresServer({
             context: {
                 user: stateUser,

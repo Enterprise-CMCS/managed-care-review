@@ -227,16 +227,15 @@ const withdrawContractInsideTransaction = async (
             }
 
             // These next few conditionals are ordered by preferred contract status
-            // Is submitted assigned new value
             if (latestRevision.submitInfo && !isApproved) {
                 // contract with consolidated status of submitted is our preferred contract, break the loop if we find it.
                 reassignToContractID = {
                     contractID,
-                    status: 'SUBMITTED',
+                    status: 'SUBMITTED', // SUBMITTED includes resubmitted, there is no distinction here.
                 }
                 break
             }
-            // Is unlocked
+            // Is unlocked and not approved
             if (
                 !latestRevision.submitInfo &&
                 latestRevision.unlockInfo &&
