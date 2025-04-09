@@ -1569,7 +1569,9 @@ describe('submitContract', () => {
         })
 
         it('uses email settings from database with remove-parameter-store flag on', async () => {
-            const mockEmailer = await testEmailerFromDatabase()
+            const prismaClient = await sharedTestPrismaClient()
+            const store = NewPostgresStore(prismaClient)
+            const mockEmailer = await testEmailerFromDatabase(store)
             const ldService = testLDService({
                 'remove-parameter-store': true,
             })

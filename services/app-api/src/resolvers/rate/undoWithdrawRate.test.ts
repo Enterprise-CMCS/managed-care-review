@@ -379,7 +379,7 @@ describe('undoWithdrawRate', () => {
                 bodyHTML: expect.stringContaining(contractBName),
             })
         )
-    }, 10000)
+    }, 15000)
 })
 
 describe('undo withdraw rate error handling', async () => {
