@@ -163,7 +163,7 @@ describe('withdrawContract', () => {
         )
     })
 
-    it('cant withdraw contract and rates submissions without withdrawing linked rates', async () => {
+    it('can withdraw contract and reassigns parent contract to rates that cannot be withdrawn', async () => {
         const stateServer = await constructTestPostgresServer({
             context: {
                 user: stateUser,
@@ -261,7 +261,6 @@ describe('withdrawContract', () => {
             })
         )
 
-        // leave contract B submitted, which should not allow rate B to be withdrawn
         await submitTestContract(stateServer, draftContractB.id)
 
         const draftContractC =
@@ -292,7 +291,7 @@ describe('withdrawContract', () => {
             })
         )
 
-        // contract C is approved, which should not allow rate C to be withdrawn
+        // // contract C is approved, which should not allow rate C to be withdrawn
         await submitTestContract(stateServer, draftContractC.id)
         await approveTestContract(cmsServer, draftContractC.id)
 
@@ -301,6 +300,7 @@ describe('withdrawContract', () => {
             contractA.id,
             'withdraw contract A'
         )
+
         const indexRatesStripped = await fetchTestIndexRatesStripped(
             cmsServer,
             contractA.stateCode
@@ -326,10 +326,18 @@ describe('withdrawContract', () => {
             throw new Error('Expected rateC to exist')
         }
 
+        // expect rateA to be withdrawn with the original parent contract
         expect(withdrawnContract.consolidatedStatus).toBe('WITHDRAWN')
         expect(rateA.consolidatedStatus).toBe('WITHDRAWN')
+        expect(rateA.parentContractID).toBe(contractA.id)
+
+        // expect rateB to be resubmitted and contract B to be the parent
         expect(rateB.consolidatedStatus).toBe('RESUBMITTED')
+        expect(rateB.parentContractID).toBe(draftContractB.id)
+
+        // expect rateB to be resubmitted and contract C to be the parent
         expect(rateC.consolidatedStatus).toBe('RESUBMITTED')
+        expect(rateC.parentContractID).toBe(draftContractC.id)
 
         const contractAHistory =
             await contractHistoryToDescriptions(withdrawnContract)
@@ -348,7 +356,7 @@ describe('withdrawContract', () => {
         )
     }, 10000)
 
-    it('withdraws rate with parent contract when linked to withdrawn contract', async () => {
+    it('prioritizes submitted contracts for rate parent contract reassignment', async () => {
         const stateServer = await constructTestPostgresServer({
             context: {
                 user: stateUser,
@@ -362,8 +370,32 @@ describe('withdrawContract', () => {
         })
 
         const draftContract =
-            await createAndUpdateTestContractWithRate(stateServer)
-        await addNewRateToTestContract(stateServer, draftContract)
+            await createAndUpdateTestContractWithoutRates(stateServer)
+
+        if (!draftContract.draftRevision) {
+            throw new Error(
+                'Unexpected error, no draft revision on draft contract'
+            )
+        }
+
+        must(
+            await stateServer.executeOperation({
+                query: UpdateDraftContractRatesDocument,
+                variables: {
+                    input: {
+                        contractID: draftContract.id,
+                        lastSeenUpdatedAt:
+                            draftContract.draftRevision.updatedAt,
+                        updatedRates: [
+                            {
+                                type: 'CREATE',
+                                formData: testRateFormInputData(),
+                            },
+                        ],
+                    },
+                },
+            })
+        )
 
         const contractA = await submitTestContract(
             stateServer,
@@ -371,13 +403,8 @@ describe('withdrawContract', () => {
         )
 
         const rateARevision = contractA.packageSubmissions[0].rateRevisions[0]
-        const rateBRevision = contractA.packageSubmissions[0].rateRevisions[1]
 
         if (!rateARevision) {
-            throw new Error('Unexpected error, expecting rate to exist')
-        }
-
-        if (!rateBRevision) {
             throw new Error('Unexpected error, expecting rate to exist')
         }
 
@@ -401,7 +428,7 @@ describe('withdrawContract', () => {
                         updatedRates: [
                             {
                                 type: 'LINK',
-                                rateID: rateBRevision.rateID,
+                                rateID: rateARevision.rateID,
                             },
                         ],
                     },
@@ -411,39 +438,89 @@ describe('withdrawContract', () => {
 
         await submitTestContract(stateServer, draftContractB.id)
 
-        // Withdraw contractB
-        const withdrawnContractB = await withdrawTestContract(
-            cmsServer,
-            draftContractB.id,
-            'withdraw contract b'
-        )
-        expect(withdrawnContractB.consolidatedStatus).toBe('WITHDRAWN')
+        const draftContractC =
+            await createAndUpdateTestContractWithoutRates(stateServer)
 
-        const withdrawnContractA = await withdrawTestContract(
+        if (!draftContractC.draftRevision) {
+            throw new Error(
+                'Unexpected error, no draft revision on draft contract'
+            )
+        }
+
+        must(
+            await stateServer.executeOperation({
+                query: UpdateDraftContractRatesDocument,
+                variables: {
+                    input: {
+                        contractID: draftContractC.id,
+                        lastSeenUpdatedAt:
+                            draftContractC.draftRevision.updatedAt,
+                        updatedRates: [
+                            {
+                                type: 'LINK',
+                                rateID: rateARevision.rateID,
+                            },
+                        ],
+                    },
+                },
+            })
+        )
+
+        await submitTestContract(stateServer, draftContractC.id)
+        await approveTestContract(cmsServer, draftContractC.id)
+
+        const draftContractD =
+            await createAndUpdateTestContractWithoutRates(stateServer)
+
+        if (!draftContractD.draftRevision) {
+            throw new Error(
+                'Unexpected error, no draft revision on draft contract'
+            )
+        }
+
+        must(
+            await stateServer.executeOperation({
+                query: UpdateDraftContractRatesDocument,
+                variables: {
+                    input: {
+                        contractID: draftContractD.id,
+                        lastSeenUpdatedAt:
+                            draftContractD.draftRevision.updatedAt,
+                        updatedRates: [
+                            {
+                                type: 'LINK',
+                                rateID: rateARevision.rateID,
+                            },
+                        ],
+                    },
+                },
+            })
+        )
+
+        await submitTestContract(stateServer, draftContractD.id)
+        await unlockTestContract(
+            cmsServer,
+            draftContractD.id,
+            'unlock contract D'
+        )
+
+        const withdrawnContract = await withdrawTestContract(
             cmsServer,
             contractA.id,
-            'withdraw contract a'
+            'withdraw contract A'
         )
 
-        const indexRatesStripped = await fetchTestIndexRatesStripped(
-            cmsServer,
-            contractA.stateCode
-        )
+        const rateA = await fetchTestRateById(cmsServer, rateARevision.rateID)
 
-        const rateA = indexRatesStripped.edges.find(
-            (edge: RateStrippedEdge) => edge.node.id === rateARevision.rateID
-        )?.node
-        const rateB = indexRatesStripped.edges.find(
-            (edge: RateStrippedEdge) => edge.node.id === rateBRevision.rateID
-        )?.node
+        // expect rateA to be withdrawn with the original parent contract
+        expect(withdrawnContract.consolidatedStatus).toBe('WITHDRAWN')
 
-        // Expect contractA and all child rates to be withdrawn
-        expect(withdrawnContractA.consolidatedStatus).toBe('WITHDRAWN')
-        expect(rateA?.consolidatedStatus).toBe('WITHDRAWN')
-        expect(rateB?.consolidatedStatus).toBe('WITHDRAWN')
-    })
+        // expect rate A to be resubmitted and its new parent contract is B.
+        expect(rateA.consolidatedStatus).toBe('RESUBMITTED')
+        expect(rateA.parentContractID).toBe(draftContractB.id)
+    }, 15000)
 
-    it('withdraws rate if when withdrawing linked contract and parent contract is already withdrawn', async () => {
+    it('prioritizes unlocked contracts for rate parent contract reassignment when there are no submitted contracts', async () => {
         const stateServer = await constructTestPostgresServer({
             context: {
                 user: stateUser,
@@ -457,8 +534,32 @@ describe('withdrawContract', () => {
         })
 
         const draftContract =
-            await createAndUpdateTestContractWithRate(stateServer)
-        await addNewRateToTestContract(stateServer, draftContract)
+            await createAndUpdateTestContractWithoutRates(stateServer)
+
+        if (!draftContract.draftRevision) {
+            throw new Error(
+                'Unexpected error, no draft revision on draft contract'
+            )
+        }
+
+        must(
+            await stateServer.executeOperation({
+                query: UpdateDraftContractRatesDocument,
+                variables: {
+                    input: {
+                        contractID: draftContract.id,
+                        lastSeenUpdatedAt:
+                            draftContract.draftRevision.updatedAt,
+                        updatedRates: [
+                            {
+                                type: 'CREATE',
+                                formData: testRateFormInputData(),
+                            },
+                        ],
+                    },
+                },
+            })
+        )
 
         const contractA = await submitTestContract(
             stateServer,
@@ -466,13 +567,8 @@ describe('withdrawContract', () => {
         )
 
         const rateARevision = contractA.packageSubmissions[0].rateRevisions[0]
-        const rateBRevision = contractA.packageSubmissions[0].rateRevisions[1]
 
         if (!rateARevision) {
-            throw new Error('Unexpected error, expecting rate to exist')
-        }
-
-        if (!rateBRevision) {
             throw new Error('Unexpected error, expecting rate to exist')
         }
 
@@ -496,7 +592,118 @@ describe('withdrawContract', () => {
                         updatedRates: [
                             {
                                 type: 'LINK',
-                                rateID: rateBRevision.rateID,
+                                rateID: rateARevision.rateID,
+                            },
+                        ],
+                    },
+                },
+            })
+        )
+
+        await submitTestContract(stateServer, draftContractB.id)
+        await unlockTestContract(
+            cmsServer,
+            draftContractB.id,
+            'unlock and should be parent contract of rate A'
+        )
+
+        const draftContractC =
+            await createAndUpdateTestContractWithoutRates(stateServer)
+
+        if (!draftContractC.draftRevision) {
+            throw new Error(
+                'Unexpected error, no draft revision on draft contract'
+            )
+        }
+
+        must(
+            await stateServer.executeOperation({
+                query: UpdateDraftContractRatesDocument,
+                variables: {
+                    input: {
+                        contractID: draftContractC.id,
+                        lastSeenUpdatedAt:
+                            draftContractC.draftRevision.updatedAt,
+                        updatedRates: [
+                            {
+                                type: 'LINK',
+                                rateID: rateARevision.rateID,
+                            },
+                        ],
+                    },
+                },
+            })
+        )
+
+        // // contract C is approved, which should not allow rate C to be withdrawn
+        await submitTestContract(stateServer, draftContractC.id)
+        await approveTestContract(cmsServer, draftContractC.id)
+
+        const withdrawnContract = await withdrawTestContract(
+            cmsServer,
+            contractA.id,
+            'withdraw contract A'
+        )
+
+        const rateA = await fetchTestRateById(cmsServer, rateARevision.rateID)
+
+        // expect rateA to be withdrawn with the original parent contract
+        expect(withdrawnContract.consolidatedStatus).toBe('WITHDRAWN')
+
+        // expect rate B to be unlocked and its new parent contract is B.
+        expect(rateA.consolidatedStatus).toBe('UNLOCKED')
+        expect(rateA.parentContractID).toBe(draftContractB.id)
+    }, 10000)
+
+    it('withdraws rate with reassgined parent', async () => {
+        const stateServer = await constructTestPostgresServer({
+            context: {
+                user: stateUser,
+            },
+        })
+
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: cmsUser,
+            },
+        })
+
+        const draftContract =
+            await createAndUpdateTestContractWithRate(stateServer)
+        await addNewRateToTestContract(stateServer, draftContract)
+
+        const contractA = await submitTestContract(
+            stateServer,
+            draftContract.id
+        )
+
+        const rateARevision = contractA.packageSubmissions[0].rateRevisions[0]
+
+        if (!rateARevision) {
+            throw new Error('Unexpected error, expecting rate to exist')
+        }
+
+        const draftContractB =
+            await createAndUpdateTestContractWithoutRates(stateServer)
+
+        if (!draftContractB.draftRevision) {
+            throw new Error(
+                'Unexpected error, no draft revision on draft contract'
+            )
+        }
+
+        must(
+            await stateServer.executeOperation({
+                query: UpdateDraftContractRatesDocument,
+                variables: {
+                    input: {
+                        contractID: draftContractB.id,
+                        lastSeenUpdatedAt:
+                            draftContractB.draftRevision.updatedAt,
+                        updatedRates: [
+                            {
+                                type: 'LINK',
+                                rateID: rateARevision.rateID,
                             },
                         ],
                     },
@@ -514,12 +721,13 @@ describe('withdrawContract', () => {
             'withdraw contractA'
         )
 
-        const rateB = await fetchTestRateById(cmsServer, rateBRevision.rateID)
+        const rateA = await fetchTestRateById(cmsServer, rateARevision.rateID)
 
         // expect contractA to be withdrawn
         expect(withdrawnContractA.consolidatedStatus).toBe('WITHDRAWN')
-        // expect rateB to be resubmitted
-        expect(rateB.consolidatedStatus).toBe('RESUBMITTED')
+        // expect rateB to be resubmitted and contractB to be its new parent
+        expect(rateA.consolidatedStatus).toBe('RESUBMITTED')
+        expect(rateA.parentContractID).toBe(draftContractB.id)
 
         // withdraw contractB
         const withdrawnContractB = await withdrawTestContract(
@@ -527,17 +735,14 @@ describe('withdrawContract', () => {
             draftContractB.id,
             'withdraw contractB'
         )
-        const withdrawnRateB = await fetchTestRateById(
-            cmsServer,
-            rateBRevision.rateID
-        )
+        const withdrawnRateA = await fetchTestRateById(cmsServer, rateA.id)
         // expect contractB to be withdrawn
         expect(withdrawnContractB.consolidatedStatus).toBe('WITHDRAWN')
         // expect rateB to now be withdrawn since parent submission is also withdrawn
-        expect(withdrawnRateB.consolidatedStatus).toBe('WITHDRAWN')
+        expect(withdrawnRateA.consolidatedStatus).toBe('WITHDRAWN')
     })
 
-    it('withdraws rate with contract when rate is linked to unlocked contract', async () => {
+    it('withdraws rate with parent when linked contract is unlocked without previously submitting with linked rate', async () => {
         const stateServer = await constructTestPostgresServer({
             context: {
                 user: stateUser,
@@ -592,14 +797,6 @@ describe('withdrawContract', () => {
             })
         )
 
-        await submitTestContract(stateServer, draftContractB.id)
-        // unlock contractB
-        await unlockTestContract(
-            cmsServer,
-            draftContractB.id,
-            'unlock contractB'
-        )
-
         const withdrawnContractA = await withdrawTestContract(
             cmsServer,
             contractA.id,
@@ -612,6 +809,7 @@ describe('withdrawContract', () => {
         // expect rate to be withdrawn even though it is linked to unlocked contract b
         expect(rateA.consolidatedStatus).toBe('WITHDRAWN')
 
+        // try to resubmit unlocked contract linked to rate without previously having submitted with it.
         const resubmitContractB = await stateServer.executeOperation({
             query: SubmitContractDocument,
             variables: {
@@ -622,7 +820,7 @@ describe('withdrawContract', () => {
             },
         })
 
-        // expect errors
+        // expect errors when trying to resubmit with a withdrawn rate
         expect(resubmitContractB.errors).toBeDefined()
         // expect error to be rateA in withdrawn status
         expect(resubmitContractB.errors?.[0].message).toBe(
