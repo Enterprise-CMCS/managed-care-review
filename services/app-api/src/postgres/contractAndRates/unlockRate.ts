@@ -13,8 +13,12 @@ type UnlockRateArgsType = {
 async function unlockRateInDB(
     tx: PrismaTransactionType,
     rateID: string,
-    unlockInfoID: string
+    unlockInfoID: string,
+    // Used to specify a timestamp when calling multiple prisma functions within the same transaction that need
+    // sequential timestamps for revision history.
+    manualCreatedAt?: Date
 ): Promise<string | Error> {
+    const currentDateTime = new Date()
     // find the current rate revision in order to create a new unlocked revision
     const currentRev = await tx.rateRevisionTable.findFirst({
         where: {
@@ -84,6 +88,7 @@ async function unlockRateInDB(
 
     await tx.rateRevisionTable.create({
         data: {
+            createdAt: manualCreatedAt ?? currentDateTime,
             rate: {
                 connect: {
                     id: currentRev.rateID,
