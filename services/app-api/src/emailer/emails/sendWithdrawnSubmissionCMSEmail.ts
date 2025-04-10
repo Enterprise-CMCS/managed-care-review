@@ -73,11 +73,14 @@ export const parseAndValidateContractsAndRates = (
 
     // Rates withdrawn with the submission that will be displayed in the email
     const formattedRateDisplayData: FormattedRateDisplayDataType[] = []
-    for (const rate of rates) {
-        formattedRateDisplayData.push({
-            rateCertificationName: rate.rateCertificationName,
-            rateSummaryURL: rateSummaryURL(rate.id, config.baseUrl),
-        })
+
+    if (rates.length > 0) {
+        for (const rate of rates) {
+            formattedRateDisplayData.push({
+                rateCertificationName: rate.rateCertificationName,
+                rateSummaryURL: rateSummaryURL(rate.id, config.baseUrl),
+            })
+        }
     }
 
     return {
