@@ -114,7 +114,7 @@ export function configureResolvers(
             withdrawAndReplaceRedundantRate:
                 withdrawAndReplaceRedundantRateResolver(store),
             approveContract: approveContract(store),
-            withdrawContract: withdrawContract(store),
+            withdrawContract: withdrawContract(store, emailer),
             withdrawRate: withdrawRate(store, emailer),
             undoWithdrawRate: undoWithdrawRate(store, emailer),
             updateDivisionAssignment: updateDivisionAssignment(store),
