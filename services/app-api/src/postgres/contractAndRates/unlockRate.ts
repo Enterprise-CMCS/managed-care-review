@@ -14,7 +14,7 @@ async function unlockRateInDB(
     tx: PrismaTransactionType,
     rateID: string,
     unlockInfoID: string,
-    // Used to specify a timestamp when calling multiple prisma functions within the same transaction that need
+    // Used to override createdAt timestamp when calling multiple prisma functions within the same transaction that need
     // sequential timestamps for revision history.
     manualCreatedAt?: Date
 ): Promise<string | Error> {
