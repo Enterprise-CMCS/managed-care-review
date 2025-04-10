@@ -15,3 +15,4 @@ export { sendRateQuestionResponseCMSEmail } from './sendRateQuestionResponseCMSE
 export { sendWithdrawnRateStateEmail } from './sendWithdrawnRateStateEmail'
 export { sendUndoWithdrawnRateStateEmail } from './sendUndoWithdrawnRateStateEmail'
 export { sendUndoWithdrawnRateCMSEmail } from './sendUndoWithdrawnRateCMSEmail'
+export { sendWithdrawnSubmissionCMSEmail } from './sendWithdrawnSubmissionCMSEmail'

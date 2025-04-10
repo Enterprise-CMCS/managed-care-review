@@ -1,0 +1,14 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`sendWithdrawnSubmissionCMSEmail > renders overall email for withdrawn contract as expected 1`] = `
+"<h1 style="font-weight: normal;">Submission MCR-MN-0004-SNBC was withdrawn by CMS</h1>
+<b>Withdrawn by:</b> zuko@example.com<br />
+<b>Withdrawn on:</b> 04/09/2025<br />
+<b>Reason for withdrawal:</b> Test Withdraw<br />
+<b>Related rate certification(s):</b>
+<ul>
+  <li><a href="http://localhost/rates/rate-123">rate-name-123</a></li>
+  <li><a href="http://localhost/rates/rate-321">rate-name-321</a></li>
+</ul>
+<a href="http://localhost/submissions/test-contract-123">View submission in MC-Review</a>"
+`;
