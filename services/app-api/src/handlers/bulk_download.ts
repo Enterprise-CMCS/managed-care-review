@@ -18,7 +18,7 @@ const s3 = new S3Client({ region: 'us-east-1' })
 const BATCH_SIZE = 20 // Increased batch size for parallel downloads
 const BASE_TIMEOUT = 120000
 const TIMEOUT_PER_MB = 1000
-const MAX_TOTAL_SIZE = 500 * 1024 * 1024 // 500MB limit
+const MAX_TOTAL_SIZE = 600 * 1024 * 1024 // 600MB limit
 const MEMORY_LOG_INTERVAL = 5000
 const TEMP_DIR = '/tmp/downloads' // Lambda temp directory
 
