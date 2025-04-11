@@ -8,8 +8,10 @@ import { NotFoundError } from '../postgresErrors'
 import type { ExtendedPrismaClient } from '../prismaClient'
 import type { ConsolidatedContractStatus } from '../../gen/gqlClient'
 import { submitContractAndOrRates } from './submitContractAndOrRates'
-import { includeRateWithoutDraftContracts } from './prismaSubmittedRateHelpers'
-import { getParentContractID } from './prismaSharedContractRateHelpers'
+import { includeRateRevisionWithRelatedSubmissionContracts } from './prismaSubmittedRateHelpers'
+import { getNewParentContract } from './prismaSharedContractRateHelpers'
+import type { RatesToReassign } from './reassignParentContract'
+import { reassignParentContractInTransaction } from './reassignParentContract'
 
 export type WithdrawContractArgsType = {
     contract: ContractType
@@ -29,7 +31,7 @@ export type WithdrawContractArgsType = {
  * 6. Creates a withdrawal action for the contract
  * 7. Creates withdrawal actions for all eligible associated rates
  *
- * @async
+ * @param tx - The Prisma transaction object used for database operations
  * @param {WithdrawContractArgsType} args - Withdrawal arguments
  * @param {ContractType} args.contract - The contract to withdraw
  * @param {string} args.updatedReason - The reason for withdrawal
@@ -70,87 +72,7 @@ const withdrawContractInsideTransaction = async (
                 orderBy: {
                     createdAt: 'desc',
                 },
-                include: {
-                    submitInfo: {
-                        select: {
-                            id: true,
-                            updatedAt: true,
-                            updatedReason: true,
-                            submittedContracts: {
-                                select: {
-                                    contractID: true,
-                                },
-                            },
-                        },
-                    },
-                    unlockInfo: {
-                        select: {
-                            id: true,
-                            updatedAt: true,
-                            updatedReason: true,
-                        },
-                    },
-                    relatedSubmissions: {
-                        orderBy: {
-                            updatedAt: 'desc',
-                        },
-                        include: {
-                            submissionPackages: {
-                                include: {
-                                    contractRevision: {
-                                        select: {
-                                            createdAt: true,
-                                            contract: {
-                                                select: {
-                                                    id: true,
-                                                    revisions: {
-                                                        orderBy: {
-                                                            updatedAt: 'desc',
-                                                        },
-                                                        take: 1,
-                                                        select: {
-                                                            unlockInfo: {
-                                                                select: {
-                                                                    id: true,
-                                                                    updatedAt:
-                                                                        true,
-                                                                    updatedReason:
-                                                                        true,
-                                                                },
-                                                            },
-                                                            submitInfo: {
-                                                                select: {
-                                                                    id: true,
-                                                                    updatedAt:
-                                                                        true,
-                                                                    updatedReason:
-                                                                        true,
-                                                                },
-                                                            },
-                                                        },
-                                                    },
-                                                    reviewStatusActions: {
-                                                        orderBy: {
-                                                            updatedAt: 'desc',
-                                                        },
-                                                        take: 1,
-                                                        select: {
-                                                            id: true,
-                                                            updatedAt: true,
-                                                            updatedReason: true,
-                                                            actionType: true,
-                                                        },
-                                                    },
-                                                },
-                                            },
-                                        },
-                                    },
-                                },
-                            },
-                        },
-                        take: 1,
-                    },
-                },
+                include: includeRateRevisionWithRelatedSubmissionContracts,
             },
         },
     })
@@ -163,19 +85,21 @@ const withdrawContractInsideTransaction = async (
 
     // Child rates to withdraw with the submission, so it includes the same withdraw reason
     const ratesToWithdraw = []
-    // Child rates that need to be reassigned a new parent contract
-    const ratesToReAssign: {
-        rateID: string
-        rateName?: string
-        reassignToContractID: string
-        contractStatus: ConsolidatedContractStatus
-    }[] = []
+
+    // Hashmap of contracts that will have reassigned rates. Multiple rates can be reassigned in one reassignParentContractInTransaction
+    const reassignParenContracts: {
+        [key: string]: {
+            rates: RatesToReassign[]
+            contractStatus: ConsolidatedContractStatus
+        }
+    } = {}
 
     // Loop through all rates to determine which ones can be withdrawn or reassigned parent contract
     for (const rate of rates) {
-        // latest rate revision of the current rate on the submission
         const latestRateRevision = rate.revisions[0]
-        if (!latestRateRevision.submitInfo) {
+        const submitInfo = latestRateRevision.submitInfo
+
+        if (!submitInfo) {
             throw new Error(
                 `Child rate ${rate.id} of contract to be withdrawn does is not submitted.`
             )
@@ -184,89 +108,41 @@ const withdrawContractInsideTransaction = async (
         const parentContractID =
             latestRateRevision.submitInfo?.submittedContracts[0].contractID
 
-        // filter out submission packages that do not belong to this rate revision
-        const submissionPackages =
-            latestRateRevision.relatedSubmissions[0].submissionPackages
-                .filter((p) => p.rateRevisionID === latestRateRevision.id)
-                .sort(
-                    (a, b) =>
-                        b.contractRevision.createdAt.getTime() -
-                        a.contractRevision.createdAt.getTime()
-                )
-
         // skipping rate if conditions are met
         if (
-            !latestRateRevision.submitInfo || // unlocked rate. linked rates can be in unlocked status
             rate.reviewStatusActions[0]?.actionType === 'WITHDRAW' || // is the rate already withdrawn
             parentContractID !== contract.id // if it is a linked rate
         ) {
             continue
         }
 
-        let reassignToContractID:
-            | {
-                  contractID: string
-                  status: ConsolidatedContractStatus
-              }
-            | undefined = undefined
-
-        // Looping through each rate's latest revision's related submissions to find a valid new parent contract.
-        for (const pkg of submissionPackages) {
-            const contractID = pkg.contractRevision.contract.id
-            const latestRevision = pkg.contractRevision.contract.revisions[0]
-            const isApproved =
-                pkg.contractRevision.contract.reviewStatusActions[0]
-                    ?.actionType === 'MARK_AS_APPROVED'
-            const isWithdrawn =
-                pkg.contractRevision.contract.reviewStatusActions[0]
-                    ?.actionType === 'WITHDRAW'
-
-            // Skip if this was the contract being withdrawn or is withdrawn
-            if (contractID === contract.id || isWithdrawn) {
-                continue
-            }
-
-            // These next few conditionals are ordered by preferred contract status
-            if (latestRevision.submitInfo && !isApproved) {
-                // contract with consolidated status of submitted is our preferred contract, break the loop if we find it.
-                reassignToContractID = {
-                    contractID,
-                    status: 'SUBMITTED', // SUBMITTED includes resubmitted, there is no distinction here.
-                }
-                break
-            }
-            // Is unlocked and not approved
-            if (
-                !latestRevision.submitInfo &&
-                latestRevision.unlockInfo &&
-                !isApproved
-            ) {
-                reassignToContractID = {
-                    contractID,
-                    status: 'UNLOCKED',
-                }
-            }
-            // Is approved and no reassigned contract is set, this is the least preferred contract.
-            if (isApproved && !reassignToContractID) {
-                reassignToContractID = {
-                    contractID,
-                    status: 'APPROVED',
-                }
-            }
-        }
+        const reassignToContractID = getNewParentContract(
+            parentContractID,
+            latestRateRevision
+        )
 
         // Reassign if there is a valid contract to reassign to, otherwise we set rate for withdraw
         if (reassignToContractID) {
-            ratesToReAssign.push({
+            const { contractID, status } = reassignToContractID
+            const reassignRate = {
                 rateID: rate.id,
-                rateName: rate.revisions[0].rateCertificationName ?? undefined,
-                reassignToContractID: reassignToContractID.contractID,
-                contractStatus: reassignToContractID.status,
-            })
+                rateName:
+                    rate.revisions[0].rateCertificationName ?? 'Unknown Rate',
+            }
+
+            // if the contract exists in the dictionary, then add the rate to the array else add a new entry with rate and contract status
+            if (!reassignParenContracts[contractID]) {
+                reassignParenContracts[contractID] = {
+                    rates: [],
+                    contractStatus: status,
+                }
+            }
+            reassignParenContracts[contractID].rates.push(reassignRate)
         } else {
             ratesToWithdraw.push(rate)
         }
     }
+
     const statePrograms = findStatePrograms(contract.stateCode)
 
     if (statePrograms instanceof Error) {
@@ -275,14 +151,15 @@ const withdrawContractInsideTransaction = async (
         )
     }
 
-    const withdrawRateNames = ratesToWithdraw.map(
-        (r) => r.revisions[0]?.rateCertificationName ?? r.revisions[0].rateID
-    )
     const contractName = packageName(
         contract.stateCode,
         contract.stateNumber,
         latestContractRev.formData.programIDs,
         statePrograms
+    )
+
+    const withdrawRateNames = ratesToWithdraw.map(
+        (r) => r.revisions[0]?.rateCertificationName ?? r.revisions[0].rateID
     )
 
     const rateNamesMessage =
@@ -303,114 +180,17 @@ const withdrawContractInsideTransaction = async (
         )
     }
 
-    //NOTE: Consider a separate function to do the reassignment
-
-    // Reassign rate to a new parent contract
-    for (const reassignRate of ratesToReAssign) {
-        const { rateID, reassignToContractID, rateName, contractStatus } =
-            reassignRate
-
-        let draftRates = []
-        if (contractStatus === 'UNLOCKED') {
-            // if this contract is already unlocked, we just want to get the current child rates, so we can submit the
-            // reassigned rate with it ot become its child.
-            const contractWithDraftRates = await tx.contractTable.findFirst({
-                where: {
-                    id: reassignToContractID,
-                },
-                select: {
-                    draftRates: {
-                        orderBy: {
-                            ratePosition: 'asc',
-                        },
-                        include: {
-                            rate: {
-                                include: includeRateWithoutDraftContracts,
-                            },
-                        },
-                    },
-                },
-            })
-
-            if (!contractWithDraftRates) {
-                throw new Error(
-                    `Unable to reassign rate ${rateID}, contract ${reassignToContractID} not found.`
-                )
-            }
-
-            if (!contractWithDraftRates?.draftRates) {
-                throw new Error(
-                    `Unable to reassign rate ${rateID}, contract ${reassignToContractID} has no draft rates.`
-                )
-            }
-
-            draftRates = contractWithDraftRates.draftRates.map((dr) => ({
-                ...dr.rate,
-                parentContractID: getParentContractID(dr.rate.revisions),
-            }))
-        } else {
-            // Unlock the contract, so we can resubmit it with the reassigned rate to become its child.
-            const unlockedContract = await unlockContractInsideTransaction(tx, {
-                contractID: reassignToContractID,
-                unlockedByUserID: updatedByID,
-                unlockReason: `CMS to reassign rate ${rateName} to be editable on this submission`,
-            })
-
-            if (unlockedContract instanceof Error) {
-                throw new Error(
-                    `Unable to reassign rate ${rateID}, new parent Contract ${reassignToContractID} could not be unlocked. ${unlockedContract.message}`
-                )
-            }
-
-            draftRates = unlockedContract.draftRates
-        }
-
-        const ratesToSubmit: string[] = []
-
-        // loop through draft rates as it will also contain linked rates that are also in draft
-        for (const draftRate of draftRates) {
-            // filter out linked rates, except for the one linked rate we want to reassign to this contract.
-            if (
-                draftRate.parentContractID === reassignToContractID ||
-                draftRate.id === reassignRate.rateID // now include this rate we need to reassign
-            ) {
-                ratesToSubmit.push(draftRate.id)
-            }
-        }
-
-        // resubmit the contract, so we create the submit info for the reassigned rate this will now be our marker in the
-        // do to identify the parent contract
-        const resubmitContract = await submitContractAndOrRates(
-            tx,
-            reassignToContractID,
-            ratesToSubmit,
+    // loop through the new parent contracts to assign its new child rates
+    for (const [contractID, reassignmentData] of Object.entries(
+        reassignParenContracts
+    )) {
+        await reassignParentContractInTransaction(tx, {
+            contractID,
+            rates: reassignmentData.rates,
+            contractStatus: reassignmentData.contractStatus,
             updatedByID,
-            `CMS reassigned rate ${rateName} to be editable on this submission`
-        )
-
-        if (resubmitContract instanceof Error) {
-            throw new Error(
-                `Unable to reassign rate ${rateID}, new parent Contract ${reassignToContractID} could not be resubmitted. ${resubmitContract.message}`
-            )
-        }
-
-        // If this contract was originally unlocked, we want to put it back into that status with the new chil rate.
-        if (contractStatus === 'UNLOCKED') {
-            const unlockedContract = await unlockContractInsideTransaction(tx, {
-                contractID: reassignToContractID,
-                unlockedByUserID: updatedByID,
-                unlockReason: `CMS to reassign rate ${rateName} to be editable on this submission`,
-                // Adding 50ms to ensure this revision timestamp is later than the rate revision created for the old
-                // parent contract. Needed for reliable sorting in revision history.
-                manualCreatedAt: new Date(new Date().getTime() + 50),
-            })
-
-            if (unlockedContract instanceof Error) {
-                throw new Error(
-                    `Unable to reassign rate ${rateID}, could not return new parent Contract ${reassignToContractID} to UNLOCKED status. ${unlockedContract.message}`
-                )
-            }
-        }
+            statePrograms,
+        })
     }
 
     const resubmitWithdrawnContract = await submitContractAndOrRates(
