@@ -14,4 +14,6 @@ function expectToBeDefined<T>(arg: T): asserts arg is NonNullable<T> {
     expect(arg).toBeDefined()
 }
 
-export { must, expectToBeDefined }
+const EXTENDED_TIMEOUT = 20000
+
+export { must, expectToBeDefined, EXTENDED_TIMEOUT }
