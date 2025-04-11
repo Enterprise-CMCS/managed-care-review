@@ -72,6 +72,28 @@ const includeRateWithoutDraftContracts = {
     },
 } satisfies Prisma.RateTableInclude
 
+const selectSubmissionPackageContractRevision = {
+    unlockInfo: {
+        select: {
+            id: true,
+            updatedAt: true,
+            updatedReason: true,
+        },
+    },
+    submitInfo: {
+        select: {
+            id: true,
+            updatedAt: true,
+            updatedReason: true,
+        },
+    },
+} satisfies Prisma.ContractRevisionTableInclude
+
+type SelectSubmissionPackageContractRevisionData =
+    Prisma.ContractRevisionTableGetPayload<{
+        include: typeof selectSubmissionPackageContractRevision
+    }>
+
 const includeStrippedRateWithoutDraftContracts = {
     withdrawInfo: includeUpdateInfo,
     revisions: {
@@ -146,33 +168,16 @@ const includeRateRevisionWithRelatedSubmissionContracts = {
                                             updatedAt: 'desc',
                                         },
                                         take: 1,
-                                        select: {
-                                            unlockInfo: {
-                                                select: {
-                                                    id: true,
-                                                    updatedAt: true,
-                                                    updatedReason: true,
-                                                },
-                                            },
-                                            submitInfo: {
-                                                select: {
-                                                    id: true,
-                                                    updatedAt: true,
-                                                    updatedReason: true,
-                                                },
-                                            },
-                                        },
+                                        include:
+                                            selectSubmissionPackageContractRevision,
                                     },
                                     reviewStatusActions: {
                                         orderBy: {
                                             updatedAt: 'desc',
                                         },
                                         take: 1,
-                                        select: {
-                                            id: true,
-                                            updatedAt: true,
-                                            updatedReason: true,
-                                            actionType: true,
+                                        include: {
+                                            updatedBy: true,
                                         },
                                     },
                                 },
@@ -233,4 +238,5 @@ export type {
     RateRevisionTablePayload,
     RateTableWithRelatedContractsPayload,
     RateRevisionTableWithRelatedSubmissionContracts,
+    SelectSubmissionPackageContractRevisionData,
 }

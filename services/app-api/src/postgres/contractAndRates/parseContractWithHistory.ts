@@ -213,7 +213,7 @@ function contractWithHistoryToDomainModelWithoutRates(
     }
 
     const status = getContractRateStatus(contract.revisions)
-    const reviewStatus = getContractReviewStatus(contract)
+    const reviewStatus = getContractReviewStatus(contract.reviewStatusActions)
     const consolidatedStatus = getConsolidatedContractStatus(
         status,
         reviewStatus

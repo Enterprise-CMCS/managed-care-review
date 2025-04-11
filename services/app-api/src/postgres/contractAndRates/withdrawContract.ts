@@ -116,10 +116,7 @@ const withdrawContractInsideTransaction = async (
             continue
         }
 
-        const reassignToContractID = getNewParentContract(
-            parentContractID,
-            latestRateRevision
-        )
+        const reassignToContractID = getNewParentContract(rate.revisions)
 
         // Reassign if there is a valid contract to reassign to, otherwise we set rate for withdraw
         if (reassignToContractID) {
