@@ -31,7 +31,6 @@ import { expect } from 'vitest'
 import { testEmailConfig, testEmailer } from '../../testHelpers/emailerHelpers'
 import { packageName } from '@mc-review/hpp/build/healthPlanFormDataType/healthPlanFormData'
 import { must } from '../../testHelpers'
-import { EXTENDED_TIMEOUT } from '../../testHelpers/assertionHelpers'
 
 const testRateFormInputData = (): RateFormDataInput => ({
     rateType: 'AMENDMENT',
@@ -405,429 +404,416 @@ describe('withdrawRate', () => {
         )
     })
 
-    it(
-        'withdraws rate when linked to other multi-rate contracts',
-        async () => {
-            const stateUser = testStateUser()
-            const cmsUser = testCMSUser()
-            const stateServer = await constructTestPostgresServer({
-                context: {
-                    user: stateUser,
+    it('withdraws rate when linked to other multi-rate contracts', async () => {
+        const stateUser = testStateUser()
+        const cmsUser = testCMSUser()
+        const stateServer = await constructTestPostgresServer({
+            context: {
+                user: stateUser,
+            },
+        })
+
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: cmsUser,
+            },
+        })
+
+        const contractA = await createAndSubmitTestContractWithRate(stateServer)
+        const rateID = contractA.packageSubmissions[0].rateRevisions[0].rateID
+
+        const contractB =
+            await createAndUpdateTestContractWithoutRates(stateServer)
+
+        // link rate to contract B
+        must(
+            await stateServer.executeOperation({
+                query: UpdateDraftContractRatesDocument,
+                variables: {
+                    input: {
+                        contractID: contractB.id,
+                        lastSeenUpdatedAt: contractB.draftRevision?.updatedAt,
+                        updatedRates: [
+                            {
+                                type: 'LINK',
+                                rateID: rateID,
+                            },
+                            {
+                                type: 'CREATE',
+                                formData: testRateFormInputData(),
+                            },
+                        ],
+                    },
                 },
             })
+        )
 
-            const cmsServer = await constructTestPostgresServer({
-                context: {
-                    user: cmsUser,
-                },
-            })
+        const submittedContractB = await submitTestContract(
+            stateServer,
+            contractB.id
+        )
 
-            const contractA =
-                await createAndSubmitTestContractWithRate(stateServer)
-            const rateID =
-                contractA.packageSubmissions[0].rateRevisions[0].rateID
+        // expect contract B to be submitted before we withdraw rate
+        expect(submittedContractB.status).toBe('SUBMITTED')
 
-            const contractB =
-                await createAndUpdateTestContractWithoutRates(stateServer)
+        const withdrawnRate = await withdrawTestRate(
+            cmsServer,
+            rateID,
+            'Withdraw invalid rate'
+        )
 
-            // link rate to contract B
-            must(
-                await stateServer.executeOperation({
-                    query: UpdateDraftContractRatesDocument,
-                    variables: {
-                        input: {
-                            contractID: contractB.id,
-                            lastSeenUpdatedAt:
-                                contractB.draftRevision?.updatedAt,
-                            updatedRates: [
-                                {
-                                    type: 'LINK',
-                                    rateID: rateID,
-                                },
-                                {
-                                    type: 'CREATE',
-                                    formData: testRateFormInputData(),
-                                },
-                            ],
-                        },
-                    },
-                })
-            )
-
-            const submittedContractB = await submitTestContract(
-                stateServer,
-                contractB.id
-            )
-
-            // expect contract B to be submitted before we withdraw rate
-            expect(submittedContractB.status).toBe('SUBMITTED')
-
-            const withdrawnRate = await withdrawTestRate(
-                cmsServer,
-                rateID,
-                'Withdraw invalid rate'
-            )
-
-            // expect rate to contain both contracts in withdrawn join table
-            expect(withdrawnRate.withdrawnFromContracts).toHaveLength(2)
-            expect(withdrawnRate.withdrawnFromContracts).toEqual(
-                expect.arrayContaining([
-                    expect.objectContaining({
-                        id: contractB.id,
-                    }),
-                    expect.objectContaining({
-                        id: contractA.id,
-                    }),
-                ])
-            )
-
-            // expect review status action to be WITHDRAW
-            expect(withdrawnRate.reviewStatusActions).toHaveLength(1)
-            expect(withdrawnRate.reviewStatusActions).toEqual(
-                expect.arrayContaining([
-                    expect.objectContaining({
-                        updatedAt: expect.any(Date),
-                        updatedBy: expect.objectContaining({
-                            role: cmsUser.role,
-                            email: cmsUser.email,
-                            givenName: cmsUser.givenName,
-                            familyName: cmsUser.familyName,
-                        }),
-                        updatedReason: 'Withdraw invalid rate',
-                        actionType: 'WITHDRAW',
-                        rateID,
-                    }),
-                ])
-            )
-
-            const contractAWithWithdrawnRate =
-                await fetchTestContractWithQuestions(stateServer, contractA.id)
-            expect(contractAWithWithdrawnRate.withdrawnRates).toBeDefined()
-
-            // expect contract A to contain the withdrawn rate
-            expect(contractAWithWithdrawnRate?.withdrawnRates).toHaveLength(1)
-            expect(contractAWithWithdrawnRate?.withdrawnRates).toEqual(
-                expect.arrayContaining([
-                    expect.objectContaining({
-                        id: rateID,
-                    }),
-                ])
-            )
-
-            const contractBWithWithdrawnRate =
-                await fetchTestContractWithQuestions(stateServer, contractB.id)
-            expect(contractBWithWithdrawnRate.withdrawnRates).toBeDefined()
-
-            // expect contract B to contain the withdrawn rate
-            expect(contractBWithWithdrawnRate?.withdrawnRates).toHaveLength(1)
-            expect(contractBWithWithdrawnRate?.withdrawnRates).toEqual(
-                expect.arrayContaining([
-                    expect.objectContaining({
-                        id: rateID,
-                    }),
-                ])
-            )
-        },
-        EXTENDED_TIMEOUT
-    )
-
-    it(
-        'removes rate from DRAFT and UNLOCKED contracts linked to rate',
-        async () => {
-            const stateUser = testStateUser()
-            const cmsUser = testCMSUser()
-            const stateServer = await constructTestPostgresServer({
-                context: {
-                    user: stateUser,
-                },
-            })
-
-            const cmsServer = await constructTestPostgresServer({
-                context: {
-                    user: cmsUser,
-                },
-            })
-
-            // contractA is parent contract and submitted
-            const contractA =
-                await createAndSubmitTestContractWithRate(stateServer)
-            const rateID =
-                contractA.packageSubmissions[0].rateRevisions[0].rateID
-
-            // contract B is linked and in draft
-            const contractB =
-                await createAndUpdateTestContractWithoutRates(stateServer)
-
-            // contract C is linked, submitted, then unlocked
-            const contractC =
-                await createAndUpdateTestContractWithoutRates(stateServer)
-
-            // contract D is submitted, unlocked, then linked
-            const contractD =
-                await createAndSubmitTestContractWithRate(stateServer)
-
-            // link rate to contract B
-            must(
-                await stateServer.executeOperation({
-                    query: UpdateDraftContractRatesDocument,
-                    variables: {
-                        input: {
-                            contractID: contractB.id,
-                            lastSeenUpdatedAt:
-                                contractB.draftRevision?.updatedAt,
-                            updatedRates: [
-                                {
-                                    type: 'LINK',
-                                    rateID: rateID,
-                                },
-                            ],
-                        },
-                    },
-                })
-            )
-
-            // link rate to contract C, submit, unlock, then update child rate
-            must(
-                await stateServer.executeOperation({
-                    query: UpdateDraftContractRatesDocument,
-                    variables: {
-                        input: {
-                            contractID: contractC.id,
-                            lastSeenUpdatedAt:
-                                contractC.draftRevision?.updatedAt,
-                            updatedRates: [
-                                {
-                                    type: 'LINK',
-                                    rateID: rateID,
-                                },
-                                {
-                                    type: 'CREATE',
-                                    formData: testRateFormInputData(),
-                                },
-                            ],
-                        },
-                    },
-                })
-            )
-
-            const submittedContractC = await submitTestContract(
-                stateServer,
-                contractC.id
-            )
-            const newContractCRate =
-                submittedContractC.packageSubmissions[0].rateRevisions.find(
-                    (rev) => rev.rateID !== rateID
-                )
-            if (!newContractCRate) {
-                throw new Error('Expected contract C child rate to be defined')
-            }
-
-            const unlockContractC = await unlockTestContract(
-                cmsServer,
-                contractC.id,
-                'unlock to make updates'
-            )
-
-            // update contract C child rate to assert it wasn't modified
-            must(
-                await stateServer.executeOperation({
-                    query: UpdateDraftContractRatesDocument,
-                    variables: {
-                        input: {
-                            contractID: contractC.id,
-                            lastSeenUpdatedAt:
-                                unlockContractC.draftRevision.updatedAt,
-                            updatedRates: [
-                                {
-                                    type: 'LINK',
-                                    rateID: rateID,
-                                },
-                                {
-                                    type: 'UPDATE',
-                                    rateID: newContractCRate.rateID,
-                                    formData: {
-                                        rateType: 'AMENDMENT',
-                                        rateDocuments: [],
-                                        supportingDocuments: [],
-                                        certifyingActuaryContacts: [],
-                                        deprecatedRateProgramIDs: [],
-                                        rateProgramIDs: [],
-                                    },
-                                },
-                            ],
-                        },
-                    },
-                })
-            )
-
-            // submit unlock contractD, then link rate
-            await unlockTestContract(
-                cmsServer,
-                contractD.id,
-                'unlock to make updates'
-            )
-            must(
-                await stateServer.executeOperation({
-                    query: UpdateDraftContractRatesDocument,
-                    variables: {
-                        input: {
-                            contractID: contractD.id,
-                            lastSeenUpdatedAt:
-                                contractD.draftRevision?.updatedAt,
-                            updatedRates: [
-                                {
-                                    type: 'LINK',
-                                    rateID: rateID,
-                                },
-                            ],
-                        },
-                    },
-                })
-            )
-
-            const withdrawnRate = await withdrawTestRate(
-                cmsServer,
-                rateID,
-                'Withdraw invalid rate'
-            )
-
-            // expect withdrawn rate to contain contractA and contractC in withdrawn join table
-            expect(withdrawnRate.withdrawnFromContracts).toHaveLength(2)
-            expect(withdrawnRate.withdrawnFromContracts).toEqual(
-                expect.arrayContaining([
-                    expect.objectContaining({
-                        id: contractA.id,
-                    }),
-                    expect.objectContaining({
-                        id: contractC.id,
-                    }),
-                ])
-            )
-
-            // expect withdrawn rate to not contain DRAFT contractB and Unlocked contractD.
-            // Both contracts were never submitted with the rate before it was withdrawn.
-            expect(withdrawnRate.withdrawnFromContracts).not.toEqual(
-                expect.arrayContaining([
-                    expect.objectContaining({
-                        id: contractB.id,
-                    }),
-                    expect.objectContaining({
-                        id: contractD.id,
-                    }),
-                ])
-            )
-
-            // expect withdrawn status
-            expect(withdrawnRate).toEqual(
+        // expect rate to contain both contracts in withdrawn join table
+        expect(withdrawnRate.withdrawnFromContracts).toHaveLength(2)
+        expect(withdrawnRate.withdrawnFromContracts).toEqual(
+            expect.arrayContaining([
                 expect.objectContaining({
-                    reviewStatus: 'WITHDRAWN',
+                    id: contractB.id,
+                }),
+                expect.objectContaining({
+                    id: contractA.id,
+                }),
+            ])
+        )
+
+        // expect review status action to be WITHDRAW
+        expect(withdrawnRate.reviewStatusActions).toHaveLength(1)
+        expect(withdrawnRate.reviewStatusActions).toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({
+                    updatedAt: expect.any(Date),
+                    updatedBy: expect.objectContaining({
+                        role: cmsUser.role,
+                        email: cmsUser.email,
+                        givenName: cmsUser.givenName,
+                        familyName: cmsUser.familyName,
+                    }),
+                    updatedReason: 'Withdraw invalid rate',
+                    actionType: 'WITHDRAW',
+                    rateID,
+                }),
+            ])
+        )
+
+        const contractAWithWithdrawnRate = await fetchTestContractWithQuestions(
+            stateServer,
+            contractA.id
+        )
+        expect(contractAWithWithdrawnRate.withdrawnRates).toBeDefined()
+
+        // expect contract A to contain the withdrawn rate
+        expect(contractAWithWithdrawnRate?.withdrawnRates).toHaveLength(1)
+        expect(contractAWithWithdrawnRate?.withdrawnRates).toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({
+                    id: rateID,
+                }),
+            ])
+        )
+
+        const contractBWithWithdrawnRate = await fetchTestContractWithQuestions(
+            stateServer,
+            contractB.id
+        )
+        expect(contractBWithWithdrawnRate.withdrawnRates).toBeDefined()
+
+        // expect contract B to contain the withdrawn rate
+        expect(contractBWithWithdrawnRate?.withdrawnRates).toHaveLength(1)
+        expect(contractBWithWithdrawnRate?.withdrawnRates).toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({
+                    id: rateID,
+                }),
+            ])
+        )
+    })
+
+    it('removes rate from DRAFT and UNLOCKED contracts linked to rate', async () => {
+        const stateUser = testStateUser()
+        const cmsUser = testCMSUser()
+        const stateServer = await constructTestPostgresServer({
+            context: {
+                user: stateUser,
+            },
+        })
+
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: cmsUser,
+            },
+        })
+
+        // contractA is parent contract and submitted
+        const contractA = await createAndSubmitTestContractWithRate(stateServer)
+        const rateID = contractA.packageSubmissions[0].rateRevisions[0].rateID
+
+        // contract B is linked and in draft
+        const contractB =
+            await createAndUpdateTestContractWithoutRates(stateServer)
+
+        // contract C is linked, submitted, then unlocked
+        const contractC =
+            await createAndUpdateTestContractWithoutRates(stateServer)
+
+        // contract D is submitted, unlocked, then linked
+        const contractD = await createAndSubmitTestContractWithRate(stateServer)
+
+        // link rate to contract B
+        must(
+            await stateServer.executeOperation({
+                query: UpdateDraftContractRatesDocument,
+                variables: {
+                    input: {
+                        contractID: contractB.id,
+                        lastSeenUpdatedAt: contractB.draftRevision?.updatedAt,
+                        updatedRates: [
+                            {
+                                type: 'LINK',
+                                rateID: rateID,
+                            },
+                        ],
+                    },
+                },
+            })
+        )
+
+        // link rate to contract C, submit, unlock, then update child rate
+        must(
+            await stateServer.executeOperation({
+                query: UpdateDraftContractRatesDocument,
+                variables: {
+                    input: {
+                        contractID: contractC.id,
+                        lastSeenUpdatedAt: contractC.draftRevision?.updatedAt,
+                        updatedRates: [
+                            {
+                                type: 'LINK',
+                                rateID: rateID,
+                            },
+                            {
+                                type: 'CREATE',
+                                formData: testRateFormInputData(),
+                            },
+                        ],
+                    },
+                },
+            })
+        )
+
+        const submittedContractC = await submitTestContract(
+            stateServer,
+            contractC.id
+        )
+        const newContractCRate =
+            submittedContractC.packageSubmissions[0].rateRevisions.find(
+                (rev) => rev.rateID !== rateID
+            )
+        if (!newContractCRate) {
+            throw new Error('Expected contract C child rate to be defined')
+        }
+
+        const unlockContractC = await unlockTestContract(
+            cmsServer,
+            contractC.id,
+            'unlock to make updates'
+        )
+
+        // update contract C child rate to assert it wasn't modified
+        must(
+            await stateServer.executeOperation({
+                query: UpdateDraftContractRatesDocument,
+                variables: {
+                    input: {
+                        contractID: contractC.id,
+                        lastSeenUpdatedAt:
+                            unlockContractC.draftRevision.updatedAt,
+                        updatedRates: [
+                            {
+                                type: 'LINK',
+                                rateID: rateID,
+                            },
+                            {
+                                type: 'UPDATE',
+                                rateID: newContractCRate.rateID,
+                                formData: {
+                                    rateType: 'AMENDMENT',
+                                    rateDocuments: [],
+                                    supportingDocuments: [],
+                                    certifyingActuaryContacts: [],
+                                    deprecatedRateProgramIDs: [],
+                                    rateProgramIDs: [],
+                                },
+                            },
+                        ],
+                    },
+                },
+            })
+        )
+
+        // submit unlock contractD, then link rate
+        await unlockTestContract(
+            cmsServer,
+            contractD.id,
+            'unlock to make updates'
+        )
+        must(
+            await stateServer.executeOperation({
+                query: UpdateDraftContractRatesDocument,
+                variables: {
+                    input: {
+                        contractID: contractD.id,
+                        lastSeenUpdatedAt: contractD.draftRevision?.updatedAt,
+                        updatedRates: [
+                            {
+                                type: 'LINK',
+                                rateID: rateID,
+                            },
+                        ],
+                    },
+                },
+            })
+        )
+
+        const withdrawnRate = await withdrawTestRate(
+            cmsServer,
+            rateID,
+            'Withdraw invalid rate'
+        )
+
+        // expect withdrawn rate to contain contractA and contractC in withdrawn join table
+        expect(withdrawnRate.withdrawnFromContracts).toHaveLength(2)
+        expect(withdrawnRate.withdrawnFromContracts).toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({
+                    id: contractA.id,
+                }),
+                expect.objectContaining({
+                    id: contractC.id,
+                }),
+            ])
+        )
+
+        // expect withdrawn rate to not contain DRAFT contractB and Unlocked contractD.
+        // Both contracts were never submitted with the rate before it was withdrawn.
+        expect(withdrawnRate.withdrawnFromContracts).not.toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({
+                    id: contractB.id,
+                }),
+                expect.objectContaining({
+                    id: contractD.id,
+                }),
+            ])
+        )
+
+        // expect withdrawn status
+        expect(withdrawnRate).toEqual(
+            expect.objectContaining({
+                reviewStatus: 'WITHDRAWN',
+                consolidatedStatus: 'WITHDRAWN',
+            })
+        )
+
+        // expect correct actions
+        expect(withdrawnRate.reviewStatusActions).toHaveLength(1)
+        expect(withdrawnRate.reviewStatusActions).toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({
+                    updatedAt: expect.any(Date),
+                    updatedBy: expect.objectContaining({
+                        role: cmsUser.role,
+                        email: cmsUser.email,
+                        givenName: cmsUser.givenName,
+                        familyName: cmsUser.familyName,
+                    }),
+                    updatedReason: 'Withdraw invalid rate',
+                    actionType: 'WITHDRAW',
+                    rateID,
+                }),
+            ])
+        )
+
+        const contractBResult = await fetchTestContractWithQuestions(
+            stateServer,
+            contractB.id
+        )
+
+        // expect no withdrawn rates, since rate was never submitted with this contract before the withdraw
+        expect(contractBResult.withdrawnRates).toHaveLength(0)
+
+        // expect contract B to still be DRAFT
+        expect(contractBResult.consolidatedStatus).toEqual('DRAFT')
+
+        // expect contract B to not contain withdrawn rate in DraftRates
+        expect(contractBResult.draftRates).not.toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({
+                    id: rateID,
                     consolidatedStatus: 'WITHDRAWN',
-                })
-            )
+                }),
+            ])
+        )
 
-            // expect correct actions
-            expect(withdrawnRate.reviewStatusActions).toHaveLength(1)
-            expect(withdrawnRate.reviewStatusActions).toEqual(
-                expect.arrayContaining([
-                    expect.objectContaining({
-                        updatedAt: expect.any(Date),
-                        updatedBy: expect.objectContaining({
-                            role: cmsUser.role,
-                            email: cmsUser.email,
-                            givenName: cmsUser.givenName,
-                            familyName: cmsUser.familyName,
-                        }),
-                        updatedReason: 'Withdraw invalid rate',
-                        actionType: 'WITHDRAW',
-                        rateID,
-                    }),
-                ])
-            )
+        const contractCResult = await fetchTestContractWithQuestions(
+            stateServer,
+            contractC.id
+        )
 
-            const contractBResult = await fetchTestContractWithQuestions(
-                stateServer,
-                contractB.id
-            )
+        // expect contract C to contain the withdrawn rate, since it had been submitted with this
+        expect(contractCResult.withdrawnRates).toHaveLength(1)
 
-            // expect no withdrawn rates, since rate was never submitted with this contract before the withdraw
-            expect(contractBResult.withdrawnRates).toHaveLength(0)
+        expect(contractCResult.withdrawnRates).toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({
+                    id: rateID,
+                    consolidatedStatus: 'WITHDRAWN',
+                }),
+            ])
+        )
 
-            // expect contract B to still be DRAFT
-            expect(contractBResult.consolidatedStatus).toEqual('DRAFT')
+        // expect contract C to still be UNLOCKED
+        expect(contractCResult.consolidatedStatus).toEqual('UNLOCKED')
 
-            // expect contract B to not contain withdrawn rate in DraftRates
-            expect(contractBResult.draftRates).not.toEqual(
-                expect.arrayContaining([
-                    expect.objectContaining({
-                        id: rateID,
-                        consolidatedStatus: 'WITHDRAWN',
-                    }),
-                ])
-            )
+        //expect contract C to not contain withdrawn rate in DraftRates
+        expect(contractCResult.draftRates).not.toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({
+                    id: rateID,
+                    consolidatedStatus: 'WITHDRAWN',
+                }),
+            ])
+        )
 
-            const contractCResult = await fetchTestContractWithQuestions(
-                stateServer,
-                contractC.id
-            )
+        // expect contractC draft child rate to not be modified
+        const contractCdraftRateFormData =
+            contractCResult.draftRates?.[0].draftRevision?.formData
 
-            // expect contract C to contain the withdrawn rate, since it had been submitted with this
-            expect(contractCResult.withdrawnRates).toHaveLength(1)
+        if (!contractCdraftRateFormData) {
+            throw new Error('Contract C child rate not found')
+        }
 
-            expect(contractCResult.withdrawnRates).toEqual(
-                expect.arrayContaining([
-                    expect.objectContaining({
-                        id: rateID,
-                        consolidatedStatus: 'WITHDRAWN',
-                    }),
-                ])
-            )
+        expect(contractCdraftRateFormData.rateType).toBe('AMENDMENT')
 
-            // expect contract C to still be UNLOCKED
-            expect(contractCResult.consolidatedStatus).toEqual('UNLOCKED')
+        const contractDResult = await fetchTestContractWithQuestions(
+            stateServer,
+            contractD.id
+        )
 
-            //expect contract C to not contain withdrawn rate in DraftRates
-            expect(contractCResult.draftRates).not.toEqual(
-                expect.arrayContaining([
-                    expect.objectContaining({
-                        id: rateID,
-                        consolidatedStatus: 'WITHDRAWN',
-                    }),
-                ])
-            )
+        // expect no withdrawn rates, since rate was never submitted with this contract before the withdraw
+        expect(contractDResult.withdrawnRates).toHaveLength(0)
 
-            // expect contractC draft child rate to not be modified
-            const contractCdraftRateFormData =
-                contractCResult.draftRates?.[0].draftRevision?.formData
+        // expect contract D to still be UNLOCKED
+        expect(contractDResult.consolidatedStatus).toEqual('UNLOCKED')
 
-            if (!contractCdraftRateFormData) {
-                throw new Error('Contract C child rate not found')
-            }
-
-            expect(contractCdraftRateFormData.rateType).toBe('AMENDMENT')
-
-            const contractDResult = await fetchTestContractWithQuestions(
-                stateServer,
-                contractD.id
-            )
-
-            // expect no withdrawn rates, since rate was never submitted with this contract before the withdraw
-            expect(contractDResult.withdrawnRates).toHaveLength(0)
-
-            // expect contract D to still be UNLOCKED
-            expect(contractDResult.consolidatedStatus).toEqual('UNLOCKED')
-
-            // expect contract D to not contain withdrawn rate in DraftRates
-            expect(contractDResult.draftRates).not.toEqual(
-                expect.arrayContaining([
-                    expect.objectContaining({
-                        id: rateID,
-                        consolidatedStatus: 'WITHDRAWN',
-                    }),
-                ])
-            )
-        },
-        EXTENDED_TIMEOUT
-    )
+        // expect contract D to not contain withdrawn rate in DraftRates
+        expect(contractDResult.draftRates).not.toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({
+                    id: rateID,
+                    consolidatedStatus: 'WITHDRAWN',
+                }),
+            ])
+        )
+    })
 
     it('sends emails to state and CMS when a rate is withdrawn', async () => {
         const emailConfig = testEmailConfig()

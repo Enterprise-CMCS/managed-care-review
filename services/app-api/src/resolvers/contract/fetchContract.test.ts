@@ -20,7 +20,6 @@ import {
     mockGqlContractDraftRevisionFormDataInput,
     testS3Client,
 } from '../../testHelpers'
-import { EXTENDED_TIMEOUT } from '../../testHelpers/assertionHelpers'
 
 describe('fetchContract', () => {
     const mockS3 = testS3Client()
@@ -77,66 +76,59 @@ describe('fetchContract', () => {
         expect(draftContractRev.contractID).toBe(draftContract.id)
     })
 
-    it(
-        'returns a stable initially submitted at',
-        async () => {
-            const stateServer = await constructTestPostgresServer({
-                s3Client: mockS3,
-            })
-            const cmsServer = await constructTestPostgresServer({
-                context: {
-                    user: testCMSUser(),
-                },
-                s3Client: mockS3,
-            })
+    it('returns a stable initially submitted at', async () => {
+        const stateServer = await constructTestPostgresServer({
+            s3Client: mockS3,
+        })
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: testCMSUser(),
+            },
+            s3Client: mockS3,
+        })
 
-            const draftA0 =
-                await createAndUpdateTestContractWithoutRates(stateServer)
-            const AID = draftA0.id
-            const draftA010 = await addNewRateToTestContract(
-                stateServer,
-                draftA0
-            )
-            await addNewRateToTestContract(stateServer, draftA010)
+        const draftA0 =
+            await createAndUpdateTestContractWithoutRates(stateServer)
+        const AID = draftA0.id
+        const draftA010 = await addNewRateToTestContract(stateServer, draftA0)
+        await addNewRateToTestContract(stateServer, draftA010)
 
-            const unsubmitted = await fetchTestContract(stateServer, AID)
-            expect(unsubmitted.initiallySubmittedAt).toBeNull()
+        const unsubmitted = await fetchTestContract(stateServer, AID)
+        expect(unsubmitted.initiallySubmittedAt).toBeNull()
 
-            const intiallySubmitted = await submitTestContract(stateServer, AID)
+        const intiallySubmitted = await submitTestContract(stateServer, AID)
 
-            await unlockTestHealthPlanPackage(cmsServer, AID, 'Unlock A.0')
-            await submitTestContract(stateServer, AID, 'Submit A.1')
+        await unlockTestHealthPlanPackage(cmsServer, AID, 'Unlock A.0')
+        await submitTestContract(stateServer, AID, 'Submit A.1')
 
-            await unlockTestHealthPlanPackage(cmsServer, AID, 'Unlock A.1')
-            await submitTestContract(stateServer, AID, 'Submit A.2')
+        await unlockTestHealthPlanPackage(cmsServer, AID, 'Unlock A.1')
+        await submitTestContract(stateServer, AID, 'Submit A.2')
 
-            await unlockTestHealthPlanPackage(cmsServer, AID, 'Unlock A.2')
-            await submitTestContract(stateServer, AID, 'Submit A.3')
+        await unlockTestHealthPlanPackage(cmsServer, AID, 'Unlock A.2')
+        await submitTestContract(stateServer, AID, 'Submit A.3')
 
-            await unlockTestHealthPlanPackage(cmsServer, AID, 'Unlock A.3')
-            await submitTestContract(stateServer, AID, 'Submit A.4')
+        await unlockTestHealthPlanPackage(cmsServer, AID, 'Unlock A.3')
+        await submitTestContract(stateServer, AID, 'Submit A.4')
 
-            const submittedMultiply = await fetchTestContract(stateServer, AID)
+        const submittedMultiply = await fetchTestContract(stateServer, AID)
 
-            expect(submittedMultiply.packageSubmissions).toHaveLength(5)
+        expect(submittedMultiply.packageSubmissions).toHaveLength(5)
 
-            expect(submittedMultiply.initiallySubmittedAt).toBeTruthy()
-            expect(submittedMultiply.initiallySubmittedAt).toEqual(
-                intiallySubmitted.initiallySubmittedAt
-            )
+        expect(submittedMultiply.initiallySubmittedAt).toBeTruthy()
+        expect(submittedMultiply.initiallySubmittedAt).toEqual(
+            intiallySubmitted.initiallySubmittedAt
+        )
 
-            await unlockTestHealthPlanPackage(cmsServer, AID, 'Unlock A.4')
+        await unlockTestHealthPlanPackage(cmsServer, AID, 'Unlock A.4')
 
-            const finallyUnlocked = await fetchTestContract(stateServer, AID)
-            expect(finallyUnlocked.packageSubmissions).toHaveLength(5)
+        const finallyUnlocked = await fetchTestContract(stateServer, AID)
+        expect(finallyUnlocked.packageSubmissions).toHaveLength(5)
 
-            expect(finallyUnlocked.initiallySubmittedAt).toBeTruthy()
-            expect(finallyUnlocked.initiallySubmittedAt).toEqual(
-                intiallySubmitted.initiallySubmittedAt
-            )
-        },
-        EXTENDED_TIMEOUT
-    )
+        expect(finallyUnlocked.initiallySubmittedAt).toBeTruthy()
+        expect(finallyUnlocked.initiallySubmittedAt).toEqual(
+            intiallySubmitted.initiallySubmittedAt
+        )
+    })
 
     it('returns lastUpdatedForDisplay', async () => {
         const stateServer = await constructTestPostgresServer({

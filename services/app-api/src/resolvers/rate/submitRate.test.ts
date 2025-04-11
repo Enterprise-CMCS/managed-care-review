@@ -36,7 +36,6 @@ import {
 import { testS3Client } from '../../../../app-api/src/testHelpers/s3Helpers'
 import { submitRate } from '../../postgres/contractAndRates'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
-import { EXTENDED_TIMEOUT } from '../../testHelpers/assertionHelpers'
 
 describe('submitRate', () => {
     const ldService = testLDService({
@@ -259,137 +258,124 @@ describe('submitRate', () => {
         )
     })
 
-    it(
-        'returns the latest linked contracts',
-        async () => {
-            const stateServer = await constructTestPostgresServer({
-                ldService,
-                s3Client: mockS3,
-            })
-            const cmsServer = await constructTestPostgresServer({
-                ldService,
-                context: {
-                    user: testCMSUser(),
-                },
-                s3Client: mockS3,
-            })
+    it('returns the latest linked contracts', async () => {
+        const stateServer = await constructTestPostgresServer({
+            ldService,
+            s3Client: mockS3,
+        })
+        const cmsServer = await constructTestPostgresServer({
+            ldService,
+            context: {
+                user: testCMSUser(),
+            },
+            s3Client: mockS3,
+        })
 
-            // 1. Submit A0 with Rate1 and Rate2
-            const draftA0 =
-                await createAndUpdateTestContractWithoutRates(stateServer)
-            const AID = draftA0.id
-            await addNewRateToTestContract(stateServer, draftA0, {
-                rateDateStart: '2001-01-01',
-            })
+        // 1. Submit A0 with Rate1 and Rate2
+        const draftA0 =
+            await createAndUpdateTestContractWithoutRates(stateServer)
+        const AID = draftA0.id
+        await addNewRateToTestContract(stateServer, draftA0, {
+            rateDateStart: '2001-01-01',
+        })
 
-            const contractA0 = await submitTestContract(stateServer, AID)
-            const subA0 = contractA0.packageSubmissions[0]
-            const rate10 = subA0.rateRevisions[0]
-            const OneID = rate10.rateID
+        const contractA0 = await submitTestContract(stateServer, AID)
+        const subA0 = contractA0.packageSubmissions[0]
+        const rate10 = subA0.rateRevisions[0]
+        const OneID = rate10.rateID
 
-            console.info('ONEID', OneID)
+        console.info('ONEID', OneID)
 
-            // 2. Submit B0 with Rate2
-            const draftB0 =
-                await createAndUpdateTestContractWithoutRates(stateServer)
-            await addNewRateToTestContract(stateServer, draftB0, {
-                rateDateStart: '2003-01-01',
-            })
+        // 2. Submit B0 with Rate2
+        const draftB0 =
+            await createAndUpdateTestContractWithoutRates(stateServer)
+        await addNewRateToTestContract(stateServer, draftB0, {
+            rateDateStart: '2003-01-01',
+        })
 
-            const contractB0 = await submitTestContract(stateServer, draftB0.id)
-            const subB0 = contractB0.packageSubmissions[0]
-            const rate30 = subB0.rateRevisions[0]
-            const TwoID = rate30.rateID
-            console.info('TWOID', TwoID)
+        const contractB0 = await submitTestContract(stateServer, draftB0.id)
+        const subB0 = contractB0.packageSubmissions[0]
+        const rate30 = subB0.rateRevisions[0]
+        const TwoID = rate30.rateID
+        console.info('TWOID', TwoID)
 
-            expect(subB0.rateRevisions[0].rateID).toBe(TwoID)
+        expect(subB0.rateRevisions[0].rateID).toBe(TwoID)
 
-            // 3. Submit C0 with Rate10 and Rate20
-            const draftC0 =
-                await createAndUpdateTestContractWithoutRates(stateServer)
-            const draftC020 = await addLinkedRateToTestContract(
-                stateServer,
-                draftC0,
-                OneID
-            )
-            await addLinkedRateToTestContract(stateServer, draftC020, TwoID)
+        // 3. Submit C0 with Rate10 and Rate20
+        const draftC0 =
+            await createAndUpdateTestContractWithoutRates(stateServer)
+        const draftC020 = await addLinkedRateToTestContract(
+            stateServer,
+            draftC0,
+            OneID
+        )
+        await addLinkedRateToTestContract(stateServer, draftC020, TwoID)
 
-            const contractC0 = await submitTestContract(stateServer, draftC0.id)
+        const contractC0 = await submitTestContract(stateServer, draftC0.id)
 
-            // 4. make sure both rates return contract C in their list of revisions
-            const rateOne = await fetchTestRateById(stateServer, OneID)
+        // 4. make sure both rates return contract C in their list of revisions
+        const rateOne = await fetchTestRateById(stateServer, OneID)
 
-            expect(rateOne.packageSubmissions).toHaveLength(2)
-            expect(
-                rateOne.packageSubmissions?.[0].contractRevisions
-            ).toHaveLength(2)
-            expect(
-                rateOne.packageSubmissions?.[1].contractRevisions
-            ).toHaveLength(1)
+        expect(rateOne.packageSubmissions).toHaveLength(2)
+        expect(rateOne.packageSubmissions?.[0].contractRevisions).toHaveLength(
+            2
+        )
+        expect(rateOne.packageSubmissions?.[1].contractRevisions).toHaveLength(
+            1
+        )
 
-            const rateTwo = await fetchTestRateById(stateServer, TwoID)
+        const rateTwo = await fetchTestRateById(stateServer, TwoID)
 
-            expect(rateTwo.packageSubmissions).toHaveLength(2)
-            expect(
-                rateTwo.packageSubmissions?.[0].contractRevisions
-            ).toHaveLength(2)
-            expect(
-                rateTwo.packageSubmissions?.[1].contractRevisions
-            ).toHaveLength(1)
+        expect(rateTwo.packageSubmissions).toHaveLength(2)
+        expect(rateTwo.packageSubmissions?.[0].contractRevisions).toHaveLength(
+            2
+        )
+        expect(rateTwo.packageSubmissions?.[1].contractRevisions).toHaveLength(
+            1
+        )
 
-            // 5. unlock and resubmit A
-            await unlockTestHealthPlanPackage(
-                cmsServer,
-                contractA0.id,
-                'does this mess history'
-            )
+        // 5. unlock and resubmit A
+        await unlockTestHealthPlanPackage(
+            cmsServer,
+            contractA0.id,
+            'does this mess history'
+        )
 
-            const unlockedRateOne = await fetchTestRateById(stateServer, OneID)
+        const unlockedRateOne = await fetchTestRateById(stateServer, OneID)
 
-            expect(unlockedRateOne.packageSubmissions).toHaveLength(2)
-            expect(
-                unlockedRateOne.packageSubmissions?.[0].contractRevisions
-            ).toHaveLength(2)
-            expect(
-                unlockedRateOne.packageSubmissions?.[1].contractRevisions
-            ).toHaveLength(1)
+        expect(unlockedRateOne.packageSubmissions).toHaveLength(2)
+        expect(
+            unlockedRateOne.packageSubmissions?.[0].contractRevisions
+        ).toHaveLength(2)
+        expect(
+            unlockedRateOne.packageSubmissions?.[1].contractRevisions
+        ).toHaveLength(1)
 
-            await submitTestContract(
-                stateServer,
-                contractA0.id,
-                'but what about this'
-            )
+        await submitTestContract(
+            stateServer,
+            contractA0.id,
+            'but what about this'
+        )
 
-            // everything should have the latest
-            const resubmittedRateOne = await fetchTestRateById(
-                stateServer,
-                OneID
-            )
+        // everything should have the latest
+        const resubmittedRateOne = await fetchTestRateById(stateServer, OneID)
 
-            expect(resubmittedRateOne.packageSubmissions).toHaveLength(3)
-            expect(
-                resubmittedRateOne.packageSubmissions?.[0].contractRevisions
-            ).toHaveLength(2)
+        expect(resubmittedRateOne.packageSubmissions).toHaveLength(3)
+        expect(
+            resubmittedRateOne.packageSubmissions?.[0].contractRevisions
+        ).toHaveLength(2)
 
-            const postResubmitRateTwo = await fetchTestRateById(
-                stateServer,
-                TwoID
-            )
+        const postResubmitRateTwo = await fetchTestRateById(stateServer, TwoID)
 
-            expect(postResubmitRateTwo.packageSubmissions).toHaveLength(2)
-            expect(
-                postResubmitRateTwo.packageSubmissions?.[0].contractRevisions
-            ).toHaveLength(2)
+        expect(postResubmitRateTwo.packageSubmissions).toHaveLength(2)
+        expect(
+            postResubmitRateTwo.packageSubmissions?.[0].contractRevisions
+        ).toHaveLength(2)
 
-            const postSubmitC = await fetchTestContract(
-                stateServer,
-                contractC0.id
-            )
+        const postSubmitC = await fetchTestContract(stateServer, contractC0.id)
 
-            expect(postSubmitC.packageSubmissions).toHaveLength(2)
-        },
-        EXTENDED_TIMEOUT
-    )
+        expect(postSubmitC.packageSubmissions).toHaveLength(2)
+    })
 
     // TODO: this test needs to be updated to remove references to healthplanpackage
     it('can unlock and submit rate independent of contract status', async () => {

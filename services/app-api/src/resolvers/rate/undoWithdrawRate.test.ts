@@ -27,7 +27,6 @@ import {
 import { describe } from 'vitest'
 import { mockStoreThatErrors } from '../../testHelpers/storeHelpers'
 import { testEmailConfig, testEmailer } from '../../testHelpers/emailerHelpers'
-import { EXTENDED_TIMEOUT } from '../../testHelpers/assertionHelpers'
 
 const testRateFormInputData = (): RateFormDataInput => ({
     rateType: 'AMENDMENT',
@@ -60,345 +59,327 @@ const testRateFormInputData = (): RateFormDataInput => ({
 })
 
 describe('undoWithdrawRate', () => {
-    it(
-        'can undo withdraw a rate without errors',
-        async () => {
-            const stateUser = testStateUser()
-            const cmsUser = testCMSUser()
-            const stateServer = await constructTestPostgresServer({
-                context: {
-                    user: stateUser,
-                },
-            })
+    it('can undo withdraw a rate without errors', async () => {
+        const stateUser = testStateUser()
+        const cmsUser = testCMSUser()
+        const stateServer = await constructTestPostgresServer({
+            context: {
+                user: stateUser,
+            },
+        })
 
-            const cmsServer = await constructTestPostgresServer({
-                context: {
-                    user: cmsUser,
-                },
-            })
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: cmsUser,
+            },
+        })
 
-            //We need to include an extra rate in order to be able to submit
-            const draftA =
-                await createAndUpdateTestContractWithRate(stateServer)
-            const draftAWithExtraRate = await addNewRateToTestContract(
-                stateServer,
-                draftA
-            )
-            const contractA = await submitTestContract(
-                stateServer,
-                draftAWithExtraRate.id
-            )
+        //We need to include an extra rate in order to be able to submit
+        const draftA = await createAndUpdateTestContractWithRate(stateServer)
+        const draftAWithExtraRate = await addNewRateToTestContract(
+            stateServer,
+            draftA
+        )
+        const contractA = await submitTestContract(
+            stateServer,
+            draftAWithExtraRate.id
+        )
 
-            const rateID =
-                contractA.packageSubmissions[0].rateRevisions[0].rateID
-            const formData =
-                contractA.packageSubmissions[0].rateRevisions[0].formData
+        const rateID = contractA.packageSubmissions[0].rateRevisions[0].rateID
+        const formData =
+            contractA.packageSubmissions[0].rateRevisions[0].formData
 
-            const contractB =
-                await createAndUpdateTestContractWithoutRates(stateServer)
+        const contractB =
+            await createAndUpdateTestContractWithoutRates(stateServer)
 
-            // link rate contract B
-            must(
-                await stateServer.executeOperation({
-                    query: UpdateDraftContractRatesDocument,
-                    variables: {
-                        input: {
-                            contractID: contractB.id,
-                            lastSeenUpdatedAt:
-                                contractB.draftRevision?.updatedAt,
-                            updatedRates: [
-                                {
-                                    type: 'LINK',
-                                    rateID: rateID,
-                                },
-                                {
-                                    type: 'CREATE',
-                                    formData: testRateFormInputData(),
-                                },
-                            ],
-                        },
+        // link rate contract B
+        must(
+            await stateServer.executeOperation({
+                query: UpdateDraftContractRatesDocument,
+                variables: {
+                    input: {
+                        contractID: contractB.id,
+                        lastSeenUpdatedAt: contractB.draftRevision?.updatedAt,
+                        updatedRates: [
+                            {
+                                type: 'LINK',
+                                rateID: rateID,
+                            },
+                            {
+                                type: 'CREATE',
+                                formData: testRateFormInputData(),
+                            },
+                        ],
                     },
-                })
-            )
-
-            await submitTestContract(stateServer, contractB.id)
-
-            await unlockTestContract(
-                cmsServer,
-                contractB.id,
-                'unlock to prep for withdraw rate'
-            )
-
-            await withdrawTestRate(cmsServer, rateID, 'Withdraw invalid rate')
-
-            await unlockTestContract(
-                cmsServer,
-                contractA.id,
-                'Unlock after withdraw'
-            )
-
-            await submitTestContract(
-                stateServer,
-                contractB.id,
-                'resubmit after withdrawing rate'
-            )
-
-            await submitTestContract(
-                stateServer,
-                contractA.id,
-                'Submit before undo withdraw'
-            )
-
-            const unwithdrawnRate = await undoWithdrawTestRate(
-                cmsServer,
-                rateID,
-                'Undo withdraw rate'
-            )
-
-            const submittedContractA = await fetchTestContract(
-                cmsServer,
-                contractA.id
-            )
-            const submittedContractB = await fetchTestContract(
-                cmsServer,
-                contractB.id
-            )
-
-            // Expect un-withdrawn rate formData to equal formData before it was withdrawn
-            expect(
-                unwithdrawnRate.packageSubmissions[0].rateRevision.formData
-            ).toEqual(formData)
-            expect(unwithdrawnRate.withdrawnFromContracts).toHaveLength(0)
-            expect(unwithdrawnRate.consolidatedStatus).toBe('RESUBMITTED')
-            expect(unwithdrawnRate.parentContractID).toBe(contractA.id)
-
-            //expect contract A to have rate back
-            expect(submittedContractA.withdrawnRates).toHaveLength(0)
-            expect(
-                submittedContractA.packageSubmissions[0].rateRevisions
-            ).toEqual(
-                expect.arrayContaining([
-                    expect.objectContaining({
-                        rateID,
-                    }),
-                ])
-            )
-
-            //expect contract B to have rate back
-            expect(submittedContractB.withdrawnRates).toHaveLength(0)
-            expect(
-                submittedContractB.packageSubmissions[0].rateRevisions
-            ).toEqual(
-                expect.arrayContaining([
-                    expect.objectContaining({
-                        rateID,
-                    }),
-                ])
-            )
-
-            // Check history
-            const contractAHistory =
-                contractHistoryToDescriptions(submittedContractA)
-            const contractBHistory =
-                contractHistoryToDescriptions(submittedContractB)
-
-            // Expect contract A history to be in order
-            expect(contractAHistory).toStrictEqual(
-                expect.arrayContaining([
-                    'Initial submission',
-                    `CMS withdrawing rate ${formData.rateCertificationName} from this submission. Withdraw invalid rate`,
-                    `CMS has withdrawn rate ${formData.rateCertificationName} from this submission. Withdraw invalid rate`,
-                    'Unlock after withdraw',
-                    'Submit before undo withdraw',
-                    `Undo withdrawal of rate ${formData.rateCertificationName} from this submission. Undo withdraw rate`,
-                    `CMS has changed the status of rate ${formData.rateCertificationName} to submitted. Undo withdraw rate`,
-                ])
-            )
-
-            // Expect contract B to be in order
-            expect(contractBHistory).toStrictEqual(
-                expect.arrayContaining([
-                    'Initial submission',
-                    'unlock to prep for withdraw rate',
-                    'resubmit after withdrawing rate',
-                    `Undo withdrawal of rate ${formData.rateCertificationName} from this submission. Undo withdraw rate`,
-                    `CMS has changed the status of rate ${formData.rateCertificationName} to submitted. Undo withdraw rate`,
-                ])
-            )
-        },
-        EXTENDED_TIMEOUT
-    )
-
-    it(
-        'sends emails to CMS and state contacts when a rate is unwithdrawn',
-        async () => {
-            const emailConfig = testEmailConfig()
-            const mockEmailer = testEmailer(emailConfig)
-            const stateUser = testStateUser()
-            const cmsUser = testCMSUser()
-            const stateServer = await constructTestPostgresServer({
-                context: {
-                    user: stateUser,
                 },
             })
+        )
 
-            const cmsServer = await constructTestPostgresServer({
-                context: {
-                    user: cmsUser,
-                },
-                emailer: mockEmailer,
-            })
+        await submitTestContract(stateServer, contractB.id)
 
-            const draftA =
-                await createAndUpdateTestContractWithRate(stateServer)
-            const draftAWithExtraRate = await addNewRateToTestContract(
-                stateServer,
-                draftA
-            )
-            const contractA = await submitTestContract(
-                stateServer,
-                draftAWithExtraRate.id
-            )
+        await unlockTestContract(
+            cmsServer,
+            contractB.id,
+            'unlock to prep for withdraw rate'
+        )
 
-            const rateID =
-                contractA.packageSubmissions[0].rateRevisions[0].rateID
+        await withdrawTestRate(cmsServer, rateID, 'Withdraw invalid rate')
 
-            const contractB =
-                await createAndUpdateTestContractWithoutRates(stateServer)
+        await unlockTestContract(
+            cmsServer,
+            contractA.id,
+            'Unlock after withdraw'
+        )
 
-            // link rate contract B
-            must(
-                await stateServer.executeOperation({
-                    query: UpdateDraftContractRatesDocument,
-                    variables: {
-                        input: {
-                            contractID: contractB.id,
-                            lastSeenUpdatedAt:
-                                contractB.draftRevision?.updatedAt,
-                            updatedRates: [
-                                {
-                                    type: 'LINK',
-                                    rateID: rateID,
-                                },
-                                {
-                                    type: 'CREATE',
-                                    formData: testRateFormInputData(),
-                                },
-                            ],
-                        },
+        await submitTestContract(
+            stateServer,
+            contractB.id,
+            'resubmit after withdrawing rate'
+        )
+
+        await submitTestContract(
+            stateServer,
+            contractA.id,
+            'Submit before undo withdraw'
+        )
+
+        const unwithdrawnRate = await undoWithdrawTestRate(
+            cmsServer,
+            rateID,
+            'Undo withdraw rate'
+        )
+
+        const submittedContractA = await fetchTestContract(
+            cmsServer,
+            contractA.id
+        )
+        const submittedContractB = await fetchTestContract(
+            cmsServer,
+            contractB.id
+        )
+
+        // Expect un-withdrawn rate formData to equal formData before it was withdrawn
+        expect(
+            unwithdrawnRate.packageSubmissions[0].rateRevision.formData
+        ).toEqual(formData)
+        expect(unwithdrawnRate.withdrawnFromContracts).toHaveLength(0)
+        expect(unwithdrawnRate.consolidatedStatus).toBe('RESUBMITTED')
+        expect(unwithdrawnRate.parentContractID).toBe(contractA.id)
+
+        //expect contract A to have rate back
+        expect(submittedContractA.withdrawnRates).toHaveLength(0)
+        expect(submittedContractA.packageSubmissions[0].rateRevisions).toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({
+                    rateID,
+                }),
+            ])
+        )
+
+        //expect contract B to have rate back
+        expect(submittedContractB.withdrawnRates).toHaveLength(0)
+        expect(submittedContractB.packageSubmissions[0].rateRevisions).toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({
+                    rateID,
+                }),
+            ])
+        )
+
+        // Check history
+        const contractAHistory =
+            contractHistoryToDescriptions(submittedContractA)
+        const contractBHistory =
+            contractHistoryToDescriptions(submittedContractB)
+
+        // Expect contract A history to be in order
+        expect(contractAHistory).toStrictEqual(
+            expect.arrayContaining([
+                'Initial submission',
+                `CMS withdrawing rate ${formData.rateCertificationName} from this submission. Withdraw invalid rate`,
+                `CMS has withdrawn rate ${formData.rateCertificationName} from this submission. Withdraw invalid rate`,
+                'Unlock after withdraw',
+                'Submit before undo withdraw',
+                `Undo withdrawal of rate ${formData.rateCertificationName} from this submission. Undo withdraw rate`,
+                `CMS has changed the status of rate ${formData.rateCertificationName} to submitted. Undo withdraw rate`,
+            ])
+        )
+
+        // Expect contract B to be in order
+        expect(contractBHistory).toStrictEqual(
+            expect.arrayContaining([
+                'Initial submission',
+                'unlock to prep for withdraw rate',
+                'resubmit after withdrawing rate',
+                `Undo withdrawal of rate ${formData.rateCertificationName} from this submission. Undo withdraw rate`,
+                `CMS has changed the status of rate ${formData.rateCertificationName} to submitted. Undo withdraw rate`,
+            ])
+        )
+    })
+
+    it('sends emails to CMS and state contacts when a rate is unwithdrawn', async () => {
+        const emailConfig = testEmailConfig()
+        const mockEmailer = testEmailer(emailConfig)
+        const stateUser = testStateUser()
+        const cmsUser = testCMSUser()
+        const stateServer = await constructTestPostgresServer({
+            context: {
+                user: stateUser,
+            },
+        })
+
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: cmsUser,
+            },
+            emailer: mockEmailer,
+        })
+
+        const draftA = await createAndUpdateTestContractWithRate(stateServer)
+        const draftAWithExtraRate = await addNewRateToTestContract(
+            stateServer,
+            draftA
+        )
+        const contractA = await submitTestContract(
+            stateServer,
+            draftAWithExtraRate.id
+        )
+
+        const rateID = contractA.packageSubmissions[0].rateRevisions[0].rateID
+
+        const contractB =
+            await createAndUpdateTestContractWithoutRates(stateServer)
+
+        // link rate contract B
+        must(
+            await stateServer.executeOperation({
+                query: UpdateDraftContractRatesDocument,
+                variables: {
+                    input: {
+                        contractID: contractB.id,
+                        lastSeenUpdatedAt: contractB.draftRevision?.updatedAt,
+                        updatedRates: [
+                            {
+                                type: 'LINK',
+                                rateID: rateID,
+                            },
+                            {
+                                type: 'CREATE',
+                                formData: testRateFormInputData(),
+                            },
+                        ],
                     },
-                })
+                },
+            })
+        )
+
+        await submitTestContract(stateServer, contractB.id)
+
+        await unlockTestContract(
+            cmsServer,
+            contractB.id,
+            'unlock to prep for withdraw rate'
+        )
+
+        await withdrawTestRate(cmsServer, rateID, 'Withdraw invalid rate')
+
+        await unlockTestContract(
+            cmsServer,
+            contractA.id,
+            'Unlock after withdraw'
+        )
+
+        const submittedContractB = await submitTestContract(
+            stateServer,
+            contractB.id,
+            'resubmit after withdrawing rate'
+        )
+
+        const submittedContractA = await submitTestContract(
+            stateServer,
+            contractA.id,
+            'Submit before undo withdraw'
+        )
+
+        const contractAName =
+            submittedContractA.packageSubmissions[0].contractRevision
+                .contractName
+        const contractBName =
+            submittedContractB.packageSubmissions[0].contractRevision
+                .contractName
+
+        const stateReceiverEmails =
+            contractA.packageSubmissions[0].contractRevision.formData.stateContacts.map(
+                (contact) => contact.email
             )
 
-            await submitTestContract(stateServer, contractB.id)
+        const unwithdrawnRate = await undoWithdrawTestRate(
+            cmsServer,
+            rateID,
+            'Undo withdraw rate'
+        )
 
-            await unlockTestContract(
-                cmsServer,
-                contractB.id,
-                'unlock to prep for withdraw rate'
-            )
+        const unwithdrawnRateName =
+            unwithdrawnRate.packageSubmissions[0].rateRevision.formData
+                .rateCertificationName!
 
-            await withdrawTestRate(cmsServer, rateID, 'Withdraw invalid rate')
+        //Check state email for proper info
+        expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
+            7,
+            expect.objectContaining({
+                subject: expect.stringContaining(
+                    `${unwithdrawnRateName} status update`
+                ),
+                sourceEmail: emailConfig.emailSource,
+                toAddresses: expect.arrayContaining(stateReceiverEmails),
+                bodyHTML: expect.stringContaining(unwithdrawnRateName),
+            })
+        )
 
-            await unlockTestContract(
-                cmsServer,
-                contractA.id,
-                'Unlock after withdraw'
-            )
+        //Check that all submissions related to the rate were included in the state email
+        expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
+            7,
+            expect.objectContaining({
+                bodyHTML: expect.stringContaining(contractAName),
+            })
+        )
+        expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
+            7,
+            expect.objectContaining({
+                bodyHTML: expect.stringContaining(contractBName),
+            })
+        )
 
-            const submittedContractB = await submitTestContract(
-                stateServer,
-                contractB.id,
-                'resubmit after withdrawing rate'
-            )
+        //Check CMS email for proper info
+        expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
+            8,
+            expect.objectContaining({
+                subject: expect.stringContaining(
+                    `${unwithdrawnRateName} status update`
+                ),
+                sourceEmail: emailConfig.emailSource,
+                toAddresses: expect.arrayContaining([
+                    ...testEmailConfig().dmcpSubmissionEmails,
+                    ...testEmailConfig().oactEmails,
+                ]),
+                bodyHTML: expect.stringContaining(unwithdrawnRateName),
+            })
+        )
 
-            const submittedContractA = await submitTestContract(
-                stateServer,
-                contractA.id,
-                'Submit before undo withdraw'
-            )
-
-            const contractAName =
-                submittedContractA.packageSubmissions[0].contractRevision
-                    .contractName
-            const contractBName =
-                submittedContractB.packageSubmissions[0].contractRevision
-                    .contractName
-
-            const stateReceiverEmails =
-                contractA.packageSubmissions[0].contractRevision.formData.stateContacts.map(
-                    (contact) => contact.email
-                )
-
-            const unwithdrawnRate = await undoWithdrawTestRate(
-                cmsServer,
-                rateID,
-                'Undo withdraw rate'
-            )
-
-            const unwithdrawnRateName =
-                unwithdrawnRate.packageSubmissions[0].rateRevision.formData
-                    .rateCertificationName!
-
-            //Check state email for proper info
-            expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
-                7,
-                expect.objectContaining({
-                    subject: expect.stringContaining(
-                        `${unwithdrawnRateName} status update`
-                    ),
-                    sourceEmail: emailConfig.emailSource,
-                    toAddresses: expect.arrayContaining(stateReceiverEmails),
-                    bodyHTML: expect.stringContaining(unwithdrawnRateName),
-                })
-            )
-
-            //Check that all submissions related to the rate were included in the state email
-            expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
-                7,
-                expect.objectContaining({
-                    bodyHTML: expect.stringContaining(contractAName),
-                })
-            )
-            expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
-                7,
-                expect.objectContaining({
-                    bodyHTML: expect.stringContaining(contractBName),
-                })
-            )
-
-            //Check CMS email for proper info
-            expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
-                8,
-                expect.objectContaining({
-                    subject: expect.stringContaining(
-                        `${unwithdrawnRateName} status update`
-                    ),
-                    sourceEmail: emailConfig.emailSource,
-                    toAddresses: expect.arrayContaining([
-                        ...testEmailConfig().dmcpSubmissionEmails,
-                        ...testEmailConfig().oactEmails,
-                    ]),
-                    bodyHTML: expect.stringContaining(unwithdrawnRateName),
-                })
-            )
-
-            //Check that all submissions related to the rate were included in the CMS email
-            expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
-                8,
-                expect.objectContaining({
-                    bodyHTML: expect.stringContaining(contractAName),
-                })
-            )
-            expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
-                8,
-                expect.objectContaining({
-                    bodyHTML: expect.stringContaining(contractBName),
-                })
-            )
-        },
-        EXTENDED_TIMEOUT
-    )
+        //Check that all submissions related to the rate were included in the CMS email
+        expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
+            8,
+            expect.objectContaining({
+                bodyHTML: expect.stringContaining(contractAName),
+            })
+        )
+        expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
+            8,
+            expect.objectContaining({
+                bodyHTML: expect.stringContaining(contractBName),
+            })
+        )
+    })
 })
 
 describe('undo withdraw rate error handling', async () => {
