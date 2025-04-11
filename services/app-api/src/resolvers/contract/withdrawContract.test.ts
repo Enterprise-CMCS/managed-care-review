@@ -86,17 +86,13 @@ describe('withdrawContract', () => {
             'withdraw submission'
         )
 
-        const contractName =
-            withdrawnContract.packageSubmissions[0].contractRevision
-                .contractName
-
         const contractHistory = contractHistoryToDescriptions(withdrawnContract)
         expect(withdrawnContract.consolidatedStatus).toBe('WITHDRAWN')
         expect(contractHistory).toStrictEqual(
             expect.arrayContaining([
                 'Initial submission',
-                `CMS withdrawing the submission ${contractName}. withdraw submission`,
-                `CMS has withdrawn the submission ${contractName}. withdraw submission`,
+                `Withdraw submission. withdraw submission`,
+                `CMS withdrew the submission from review. withdraw submission`,
             ])
         )
     })
@@ -143,13 +139,8 @@ describe('withdrawContract', () => {
         const contractHistory =
             await contractHistoryToDescriptions(withdrawnContract)
 
-        const contractName =
-            withdrawnContract.packageSubmissions[0].contractRevision
-                .contractName
         const rateA = await fetchTestRateById(cmsServer, rateARevision.rateID)
         const rateB = await fetchTestRateById(cmsServer, rateBRevision.rateID)
-        const rateAName = rateA.revisions[0].formData.rateCertificationName
-        const rateBName = rateB.revisions[0].formData.rateCertificationName
 
         expect(withdrawnContract.consolidatedStatus).toBe('WITHDRAWN')
         expect(rateA.consolidatedStatus).toBe('WITHDRAWN')
@@ -157,8 +148,8 @@ describe('withdrawContract', () => {
         expect(contractHistory).toStrictEqual(
             expect.arrayContaining([
                 'Initial submission',
-                `CMS withdrawing the submission ${contractName} along with the following rates: ${rateAName}, ${rateBName}. withdraw submission`,
-                `CMS has withdrawn the submission ${contractName} along with the following rates: ${rateAName}, ${rateBName}. withdraw submission`,
+                `Withdraw submission. withdraw submission`,
+                `CMS withdrew the submission from review. withdraw submission`,
             ])
         )
     })
@@ -333,17 +324,12 @@ describe('withdrawContract', () => {
 
         const contractAHistory =
             await contractHistoryToDescriptions(withdrawnContract)
-        const contractName =
-            withdrawnContract.packageSubmissions[0].contractRevision
-                .contractName
-        const rateAName =
-            rateA.latestSubmittedRevision.formData.rateCertificationName
 
         expect(contractAHistory).toStrictEqual(
             expect.arrayContaining([
                 'Initial submission',
-                `CMS withdrawing the submission ${contractName} along with the following rates: ${rateAName}. withdraw contract A`,
-                `CMS has withdrawn the submission ${contractName} along with the following rates: ${rateAName}. withdraw contract A`,
+                `Withdraw submission. withdraw contract A`,
+                `CMS withdrew the submission from review. withdraw contract A`,
             ])
         )
     }, 10000)

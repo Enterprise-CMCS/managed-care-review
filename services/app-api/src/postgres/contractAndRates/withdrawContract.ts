@@ -2,7 +2,6 @@ import type { PrismaTransactionType } from '../prismaTypes'
 import type { ContractType } from '../../domain-models'
 import { unlockContractInsideTransaction } from './unlockContract'
 import { findStatePrograms } from '../state'
-import { packageName } from '@mc-review/hpp'
 import { submitContractInsideTransaction } from './submitContract'
 import { findContractWithHistory } from './findContractWithHistory'
 import { NotFoundError } from '../postgresErrors'
@@ -38,7 +37,6 @@ const withdrawContractInsideTransaction = async (
     const { contract, updatedReason, updatedByID } = args
 
     const latestSubmission = contract.packageSubmissions[0]
-    const latestContractRev = latestSubmission.contractRevision
     const rateIDS = latestSubmission.rateRevisions.map((rr) => rr.rateID)
 
     // Very stripped down rate, only selecting data we need to determine which rates are to be withdrawn with contract.
@@ -221,33 +219,18 @@ const withdrawContractInsideTransaction = async (
         )
     }
 
-    const withdrawRateNames = ratesToWithdraw.map(
-        (r) => r.revisions[0]?.rateCertificationName ?? r.revisions[0].rateID
-    )
-    const contractName = packageName(
-        contract.stateCode,
-        contract.stateNumber,
-        latestContractRev.formData.programIDs,
-        statePrograms
-    )
-
-    const rateNamesMessage =
-        withdrawRateNames.length > 0
-            ? ` along with the following rates: ${withdrawRateNames.join(', ')}`
-            : ''
-
     // unlock contract with withdraw default message and withdraw input reason
     await unlockContractInsideTransaction(tx, {
         contractID: contract.id,
         unlockedByUserID: updatedByID,
-        unlockReason: `CMS withdrawing the submission ${contractName}${rateNamesMessage}. ${updatedReason}`,
+        unlockReason: `Withdraw submission. ${updatedReason}`,
     })
 
     // resubmit contract with the default message and withdraw input reason
     await submitContractInsideTransaction(tx, {
         contractID: contract.id,
         submittedByUserID: updatedByID,
-        submittedReason: `CMS has withdrawn the submission ${contractName}${rateNamesMessage}. ${updatedReason}`,
+        submittedReason: `CMS withdrew the submission from review. ${updatedReason}`,
     })
 
     // add withdraw action to contract
