@@ -17,6 +17,7 @@ import {
     unlockTestContract,
 } from '../../testHelpers/gqlContractHelpers'
 import { testS3Client } from '../../../../app-api/src/testHelpers/s3Helpers'
+import { EXTENDED_TIMEOUT } from '../../testHelpers/assertionHelpers'
 
 describe(`indexContracts`, () => {
     describe('isStateUser', () => {
@@ -60,78 +61,84 @@ describe(`indexContracts`, () => {
             expect(theseSubmissions[1].status).toBe('SUBMITTED')
         })
 
-        it('synthesizes the right statuses as a contract is submitted/unlocked/etc', async () => {
-            const stateServer = await constructTestPostgresServer({
-                s3Client: mockS3,
-            })
+        it(
+            'synthesizes the right statuses as a contract is submitted/unlocked/etc',
+            async () => {
+                const stateServer = await constructTestPostgresServer({
+                    s3Client: mockS3,
+                })
 
-            const cmsServer = await constructTestPostgresServer({
-                context: {
-                    user: cmsUser,
-                },
-            })
+                const cmsServer = await constructTestPostgresServer({
+                    context: {
+                        user: cmsUser,
+                    },
+                })
 
-            // First, create a new contracts
-            const draftContract =
-                await createAndUpdateTestContractWithoutRates(stateServer)
-            const submittedContract =
-                await createAndSubmitTestContractWithRate(stateServer)
-            const unlockedContract =
-                await createAndSubmitTestContractWithRate(stateServer)
-            const relockedContract =
-                await createAndSubmitTestContractWithRate(stateServer)
+                // First, create a new contracts
+                const draftContract =
+                    await createAndUpdateTestContractWithoutRates(stateServer)
+                const submittedContract =
+                    await createAndSubmitTestContractWithRate(stateServer)
+                const unlockedContract =
+                    await createAndSubmitTestContractWithRate(stateServer)
+                const relockedContract =
+                    await createAndSubmitTestContractWithRate(stateServer)
 
-            // unlock two
-            await unlockTestContract(
-                cmsServer,
-                unlockedContract.id,
-                'Test reason'
-            )
-            await unlockTestContract(
-                cmsServer,
-                relockedContract.id,
-                'Test reason'
-            )
+                // unlock two
+                await unlockTestContract(
+                    cmsServer,
+                    unlockedContract.id,
+                    'Test reason'
+                )
+                await unlockTestContract(
+                    cmsServer,
+                    relockedContract.id,
+                    'Test reason'
+                )
 
-            // resubmit one
-            await submitTestContract(
-                stateServer,
-                relockedContract.id,
-                'Test first resubmission'
-            )
+                // resubmit one
+                await submitTestContract(
+                    stateServer,
+                    relockedContract.id,
+                    'Test first resubmission'
+                )
 
-            // index contracts api request
-            const result = await stateServer.executeOperation({
-                query: IndexContractsForDashboardDocument,
-            })
-            const submissionsIndex = result.data?.indexContracts
+                // index contracts api request
+                const result = await stateServer.executeOperation({
+                    query: IndexContractsForDashboardDocument,
+                })
+                const submissionsIndex = result.data?.indexContracts
 
-            // pull out test related contracts and order them
-            const testSubmissionIDs = [
-                draftContract.id,
-                submittedContract.id,
-                unlockedContract.id,
-                relockedContract.id,
-            ]
-            const testContracts: Contract[] = submissionsIndex.edges
-                .map((edge: ContractEdge) => edge.node)
-                .filter((test: Contract) => testSubmissionIDs.includes(test.id))
+                // pull out test related contracts and order them
+                const testSubmissionIDs = [
+                    draftContract.id,
+                    submittedContract.id,
+                    unlockedContract.id,
+                    relockedContract.id,
+                ]
+                const testContracts: Contract[] = submissionsIndex.edges
+                    .map((edge: ContractEdge) => edge.node)
+                    .filter((test: Contract) =>
+                        testSubmissionIDs.includes(test.id)
+                    )
 
-            expect(testContracts).toHaveLength(4)
+                expect(testContracts).toHaveLength(4)
 
-            // organize test contracts in a predictable order via testContractsIds array
-            testContracts.sort((a, b) => {
-                if (
-                    testSubmissionIDs.indexOf(a.id) >
-                    testSubmissionIDs.indexOf(b.id)
-                ) {
-                    return 1
-                } else {
-                    return -1
-                }
-            })
-            expect(testContracts[0].status).toBe('DRAFT')
-        }, 10000)
+                // organize test contracts in a predictable order via testContractsIds array
+                testContracts.sort((a, b) => {
+                    if (
+                        testSubmissionIDs.indexOf(a.id) >
+                        testSubmissionIDs.indexOf(b.id)
+                    ) {
+                        return 1
+                    } else {
+                        return -1
+                    }
+                })
+                expect(testContracts[0].status).toBe('DRAFT')
+            },
+            EXTENDED_TIMEOUT
+        )
 
         it('a different user from the same state can index contracts', async () => {
             const server = await constructTestPostgresServer()
