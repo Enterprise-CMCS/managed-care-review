@@ -72,7 +72,7 @@ const includeRateWithoutDraftContracts = {
     },
 } satisfies Prisma.RateTableInclude
 
-const selectSubmissionPackageContractRevision = {
+const includeSubmissionPackageContractRevision = {
     unlockInfo: {
         select: {
             id: true,
@@ -89,9 +89,9 @@ const selectSubmissionPackageContractRevision = {
     },
 } satisfies Prisma.ContractRevisionTableInclude
 
-type SelectSubmissionPackageContractRevisionData =
+type SubmissionPackageContractRevisionData =
     Prisma.ContractRevisionTableGetPayload<{
-        include: typeof selectSubmissionPackageContractRevision
+        include: typeof includeSubmissionPackageContractRevision
     }>
 
 const includeStrippedRateWithoutDraftContracts = {
@@ -169,7 +169,7 @@ const includeRateRevisionWithRelatedSubmissionContracts = {
                                         },
                                         take: 1,
                                         include:
-                                            selectSubmissionPackageContractRevision,
+                                            includeSubmissionPackageContractRevision,
                                     },
                                     reviewStatusActions: {
                                         orderBy: {
@@ -229,6 +229,7 @@ export {
     includeStrippedRateWithoutDraftContracts,
     includeRateRelatedContracts,
     includeRateRevisionWithRelatedSubmissionContracts,
+    includeSubmissionPackageContractRevision,
 }
 
 export type {
@@ -238,5 +239,5 @@ export type {
     RateRevisionTablePayload,
     RateTableWithRelatedContractsPayload,
     RateRevisionTableWithRelatedSubmissionContracts,
-    SelectSubmissionPackageContractRevisionData,
+    SubmissionPackageContractRevisionData,
 }

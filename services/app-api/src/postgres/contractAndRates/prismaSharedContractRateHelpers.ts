@@ -28,7 +28,7 @@ import type {
     RateRevisionTablePayload,
     RateTableWithoutDraftContractsStrippedPayload,
     RateRevisionTableWithRelatedSubmissionContracts,
-    SelectSubmissionPackageContractRevisionData,
+    SubmissionPackageContractRevisionData,
     RateTableWithRelatedContractsPayload,
 } from './prismaSubmittedRateHelpers'
 import type { ConsolidatedRateStatusType } from '../../domain-models/contractAndRates/statusType'
@@ -90,7 +90,7 @@ function getContractRateStatus(
         | ContractRevisionTableWithFormData[]
         | RateRevisionTableWithFormData[]
         | StrippedRateRevisionTableWithFormData[]
-        | SelectSubmissionPackageContractRevisionData[]
+        | SubmissionPackageContractRevisionData[]
 ): PackageStatusType {
     // need to order revisions from latest to earliest
     const revs = [...revisions].sort(
