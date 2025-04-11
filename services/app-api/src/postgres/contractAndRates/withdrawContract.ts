@@ -3,10 +3,15 @@ import type { ContractType } from '../../domain-models'
 import { unlockContractInsideTransaction } from './unlockContract'
 import { findStatePrograms } from '../state'
 import { packageName } from '@mc-review/hpp'
-import { submitContractInsideTransaction } from './submitContract'
 import { findContractWithHistory } from './findContractWithHistory'
 import { NotFoundError } from '../postgresErrors'
 import type { ExtendedPrismaClient } from '../prismaClient'
+import type { ConsolidatedContractStatus } from '../../gen/gqlClient'
+import { submitContractAndOrRates } from './submitContractAndOrRates'
+import { includeRateRevisionWithRelatedSubmissionContracts } from './prismaSubmittedRateHelpers'
+import { getNewParentContract } from './prismaSharedContractRateHelpers'
+import type { RatesToReassign } from './reassignParentContract'
+import { reassignParentContractInTransaction } from './reassignParentContract'
 
 export type WithdrawContractArgsType = {
     contract: ContractType
@@ -18,13 +23,15 @@ export type WithdrawContractArgsType = {
  * Withdraws a contract and its associated eligible rates within a database transaction.
  *
  * This function performs the following operations:
- * 1. Identifies related rates that should be withdrawn with the contract
- * 2. Unlocks the contract and child rates with a withdrawal reason
- * 3. Resubmits the contract and child rates with a withdrawal reason
- * 4. Creates a withdrawal action for the contract
- * 5. Creates withdrawal actions for all eligible associated rates
+ * 1. Identifies child rates that should be withdrawn with the contract
+ * 2. Identifies child rates that cannot be withdrawn should be assigned a new parent contract
+ * 3. Unlocks the contract and child rates with a withdrawal reason
+ * 4. Assign new parent contracts for rates that cannot be withdrawn
+ * 5. Resubmits the contract and child rates with a withdrawal reason
+ * 6. Creates a withdrawal action for the contract
+ * 7. Creates withdrawal actions for all eligible associated rates
  *
- * @async
+ * @param tx - The Prisma transaction object used for database operations
  * @param {WithdrawContractArgsType} args - Withdrawal arguments
  * @param {ContractType} args.contract - The contract to withdraw
  * @param {string} args.updatedReason - The reason for withdrawal
@@ -65,154 +72,74 @@ const withdrawContractInsideTransaction = async (
                 orderBy: {
                     createdAt: 'desc',
                 },
-                include: {
-                    submitInfo: {
-                        select: {
-                            id: true,
-                            updatedAt: true,
-                            updatedReason: true,
-                            submittedContracts: {
-                                select: {
-                                    contractID: true,
-                                },
-                            },
-                        },
-                    },
-                    unlockInfo: {
-                        select: {
-                            id: true,
-                            updatedAt: true,
-                            updatedReason: true,
-                        },
-                    },
-                    relatedSubmissions: {
-                        orderBy: {
-                            updatedAt: 'desc',
-                        },
-                        include: {
-                            submissionPackages: {
-                                include: {
-                                    contractRevision: {
-                                        select: {
-                                            createdAt: true,
-                                            contract: {
-                                                select: {
-                                                    id: true,
-                                                    revisions: {
-                                                        orderBy: {
-                                                            updatedAt: 'desc',
-                                                        },
-                                                        take: 1,
-                                                        select: {
-                                                            unlockInfo: {
-                                                                select: {
-                                                                    id: true,
-                                                                    updatedAt:
-                                                                        true,
-                                                                    updatedReason:
-                                                                        true,
-                                                                },
-                                                            },
-                                                            submitInfo: {
-                                                                select: {
-                                                                    id: true,
-                                                                    updatedAt:
-                                                                        true,
-                                                                    updatedReason:
-                                                                        true,
-                                                                },
-                                                            },
-                                                        },
-                                                    },
-                                                    reviewStatusActions: {
-                                                        orderBy: {
-                                                            updatedAt: 'desc',
-                                                        },
-                                                        take: 1,
-                                                        select: {
-                                                            id: true,
-                                                            updatedAt: true,
-                                                            updatedReason: true,
-                                                            actionType: true,
-                                                        },
-                                                    },
-                                                },
-                                            },
-                                        },
-                                    },
-                                },
-                            },
-                        },
-                        take: 1,
-                    },
-                },
+                include: includeRateRevisionWithRelatedSubmissionContracts,
             },
         },
     })
 
     if (!rates) {
-        throw new NotFoundError('Could not find rates on contract')
+        throw new NotFoundError(
+            'Could not find rates on contract to be withdrawn'
+        )
     }
 
     // Child rates to withdraw with the submission, so it includes the same withdraw reason
     const ratesToWithdraw = []
 
-    // loop through all rates to determine which ones can be withdrawn.
+    // Hashmap of contracts that will have reassigned rates. Multiple rates can be reassigned in one reassignParentContractInTransaction
+    const reassignParenContracts: {
+        [key: string]: {
+            rates: RatesToReassign[]
+            contractStatus: ConsolidatedContractStatus
+        }
+    } = {}
+
+    // Loop through all rates to determine which ones can be withdrawn or reassigned parent contract
     for (const rate of rates) {
-        // latest rate revision of the current rate on the submission
         const latestRateRevision = rate.revisions[0]
-        // find the parent contract of the rate, it is the contract on the rates first submission revision
-        const firstRateRevision = rate.revisions[rate.revisions.length - 1]
+        const submitInfo = latestRateRevision.submitInfo
+
+        if (!submitInfo) {
+            throw new Error(
+                `Child rate ${rate.id} of contract to be withdrawn does is not submitted.`
+            )
+        }
+
         const parentContractID =
-            firstRateRevision.submitInfo?.submittedContracts[0].contractID
-
-        // filter out submission packages that do not belong to this rate revision
-        const submissionPackages =
-            latestRateRevision.relatedSubmissions[0].submissionPackages
-                .filter((p) => p.rateRevisionID === latestRateRevision.id)
-                .sort(
-                    (a, b) =>
-                        b.contractRevision.createdAt.getTime() -
-                        a.contractRevision.createdAt.getTime()
-                )
-
-        // get the parent contract data of this rate.
-        const parentContract = submissionPackages?.find(
-            (pkg) => pkg.contractRevision.contract.id === parentContractID
-        )?.contractRevision.contract
-
-        // check if any of the linked submissions are approved or submitted and not withdrawn
-        const hasApprovedOrSubmittedSubs = submissionPackages.some((pkg) => {
-            const reviewStatusAction =
-                pkg.contractRevision.contract.reviewStatusActions[0]?.actionType
-            const isSubmitted =
-                pkg.contractRevision.contract.revisions[0].submitInfo
-
-            // skip if this is the parent contract submission package.
-            if (pkg.contractRevision.contract.id === contract.id) return false
-            // is contract approved
-            if (reviewStatusAction === 'MARK_AS_APPROVED') return true
-            // is contract submitted and review status is not withdrawn
-            if (isSubmitted && reviewStatusAction !== 'WITHDRAW') return true
-            // otherwise does not meet condition
-            return false
-        })
+            latestRateRevision.submitInfo?.submittedContracts[0].contractID
 
         // skipping rate if conditions are met
         if (
-            !latestRateRevision.submitInfo || // unlocked rate. linked rates can be in unlocked status
             rate.reviewStatusActions[0]?.actionType === 'WITHDRAW' || // is the rate already withdrawn
-            hasApprovedOrSubmittedSubs || // any of the linked submissions are approved or submitted
-            !parentContract // standalone rate could happen from a bug, old feature, or new feature. We don't want to withdraw these in this fashion.
+            parentContractID !== contract.id // if it is a linked rate
         ) {
             continue
         }
 
-        // TODO: Pending decision if rate can be withdrawn if its linked to a unlocked submission that had this rate in its latest submission package.
-        //  - If we do allow it, then delete this TODO, if we do not allow it we need to add logic to check unlocked
-        //      submissions for rate in its latest submission package.
-        ratesToWithdraw.push(rate)
+        const reassignToContractID = getNewParentContract(rate.revisions)
+
+        // Reassign if there is a valid contract to reassign to, otherwise we set rate for withdraw
+        if (reassignToContractID) {
+            const { contractID, status } = reassignToContractID
+            const reassignRate = {
+                rateID: rate.id,
+                rateName:
+                    rate.revisions[0].rateCertificationName ?? 'Unknown Rate',
+            }
+
+            // if the contract exists in the dictionary, then add the rate to the array else add a new entry with rate and contract status
+            if (!reassignParenContracts[contractID]) {
+                reassignParenContracts[contractID] = {
+                    rates: [],
+                    contractStatus: status,
+                }
+            }
+            reassignParenContracts[contractID].rates.push(reassignRate)
+        } else {
+            ratesToWithdraw.push(rate)
+        }
     }
+
     const statePrograms = findStatePrograms(contract.stateCode)
 
     if (statePrograms instanceof Error) {
@@ -221,14 +148,15 @@ const withdrawContractInsideTransaction = async (
         )
     }
 
-    const withdrawRateNames = ratesToWithdraw.map(
-        (r) => r.revisions[0]?.rateCertificationName ?? r.revisions[0].rateID
-    )
     const contractName = packageName(
         contract.stateCode,
         contract.stateNumber,
         latestContractRev.formData.programIDs,
         statePrograms
+    )
+
+    const withdrawRateNames = ratesToWithdraw.map(
+        (r) => r.revisions[0]?.rateCertificationName ?? r.revisions[0].rateID
     )
 
     const rateNamesMessage =
@@ -237,18 +165,44 @@ const withdrawContractInsideTransaction = async (
             : ''
 
     // unlock contract with withdraw default message and withdraw input reason
-    await unlockContractInsideTransaction(tx, {
+    const unlockContract = await unlockContractInsideTransaction(tx, {
         contractID: contract.id,
         unlockedByUserID: updatedByID,
         unlockReason: `CMS withdrawing the submission ${contractName}${rateNamesMessage}. ${updatedReason}`,
     })
 
-    // resubmit contract with the default message and withdraw input reason
-    await submitContractInsideTransaction(tx, {
-        contractID: contract.id,
-        submittedByUserID: updatedByID,
-        submittedReason: `CMS has withdrawn the submission ${contractName}${rateNamesMessage}. ${updatedReason}`,
-    })
+    if (unlockContract instanceof Error) {
+        throw new Error(
+            `Cannot unlock contract to be withdrawn. ${unlockContract.message}`
+        )
+    }
+
+    // loop through the new parent contracts to assign its new child rates
+    for (const [contractID, reassignmentData] of Object.entries(
+        reassignParenContracts
+    )) {
+        await reassignParentContractInTransaction(tx, {
+            contractID,
+            rates: reassignmentData.rates,
+            contractStatus: reassignmentData.contractStatus,
+            updatedByID,
+            statePrograms,
+        })
+    }
+
+    const resubmitWithdrawnContract = await submitContractAndOrRates(
+        tx,
+        contract.id,
+        ratesToWithdraw.map((rate) => rate.id),
+        updatedByID,
+        `CMS has withdrawn the submission ${contractName}${rateNamesMessage}. ${updatedReason}`
+    )
+
+    if (resubmitWithdrawnContract instanceof Error) {
+        throw new Error(
+            `Could not resubmit contract to be withdrawn. ${resubmitWithdrawnContract.message}`
+        )
+    }
 
     // add withdraw action to contract
     await tx.contractTable.update({
@@ -286,7 +240,7 @@ const withdrawContractInsideTransaction = async (
         })
     }
 
-    // fetch contract with history and return
+    // fetch contract with history and validate withdraw
     const withdrawnContract = await findContractWithHistory(tx, contract.id)
 
     if (withdrawnContract instanceof Error) {
@@ -294,7 +248,7 @@ const withdrawContractInsideTransaction = async (
     }
 
     if (withdrawnContract.consolidatedStatus !== 'WITHDRAWN') {
-        throw new Error('contract failed to withdraw')
+        throw new Error('Contract failed to withdraw')
     }
 
     return withdrawnContract
@@ -306,7 +260,10 @@ const withdrawContract = async (
 ): Promise<ContractType | Error> => {
     try {
         return await client.$transaction(
-            async (tx) => await withdrawContractInsideTransaction(tx, args)
+            async (tx) => await withdrawContractInsideTransaction(tx, args),
+            {
+                timeout: 30000,
+            }
         )
     } catch (err) {
         const msg = `PRISMA ERROR: Error withdrawing contract: ${err.message}`

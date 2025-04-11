@@ -88,6 +88,23 @@ describe('prismaToDomainModel', () => {
                 revision: [
                     {
                         createdAt: new Date(21, 4, 1),
+                        unlockInfo: {
+                            id: uuidv4(),
+                            updatedAt: new Date(),
+                            updatedByID: 'someone',
+                            updatedReason: 'second unlock',
+                            updatedBy: {
+                                id: 'someone',
+                                createdAt: new Date(),
+                                updatedAt: new Date(),
+                                givenName: 'Bob',
+                                familyName: 'Law',
+                                email: 'boblaw@example.com',
+                                role: 'STATE_USER',
+                                divisionAssignment: null,
+                                stateCode: 'OH',
+                            },
+                        },
                     } as ContractRevisionTableWithFormData,
                     {
                         createdAt: new Date(21, 3, 1),
@@ -95,7 +112,24 @@ describe('prismaToDomainModel', () => {
                             id: uuidv4(),
                             updatedAt: new Date(),
                             updatedByID: 'someone',
-                            updatedReason: 'submit',
+                            updatedReason: 'first resubmit',
+                            updatedBy: {
+                                id: 'someone',
+                                createdAt: new Date(),
+                                updatedAt: new Date(),
+                                givenName: 'Bob',
+                                familyName: 'Law',
+                                email: 'boblaw@example.com',
+                                role: 'STATE_USER',
+                                divisionAssignment: null,
+                                stateCode: 'OH',
+                            },
+                        },
+                        unlockInfo: {
+                            id: uuidv4(),
+                            updatedAt: new Date(),
+                            updatedByID: 'someone',
+                            updatedReason: 'first unlock',
                             updatedBy: {
                                 id: 'someone',
                                 createdAt: new Date(),
@@ -115,7 +149,7 @@ describe('prismaToDomainModel', () => {
                             id: uuidv4(),
                             updatedAt: new Date(),
                             updatedByID: 'someone',
-                            updatedReason: 'submit',
+                            updatedReason: 'initial submit',
                             updatedBy: {
                                 id: 'someone',
                                 createdAt: new Date(),
@@ -131,7 +165,7 @@ describe('prismaToDomainModel', () => {
                     } as ContractRevisionTableWithFormData,
                 ],
                 testDescription:
-                    'multiple reivsions and latest revision has not been submitted',
+                    'multiple revisions and latest revision has not been resubmitted',
                 expectedResult: 'UNLOCKED',
             },
             {
@@ -142,7 +176,24 @@ describe('prismaToDomainModel', () => {
                             id: uuidv4(),
                             updatedAt: new Date(),
                             updatedByID: 'someone',
-                            updatedReason: 'submit',
+                            updatedReason: 'resubmit submit',
+                            updatedBy: {
+                                id: 'someone',
+                                createdAt: new Date(),
+                                updatedAt: new Date(),
+                                givenName: 'Bob',
+                                familyName: 'Law',
+                                email: 'boblaw@example.com',
+                                role: 'STATE_USER',
+                                divisionAssignment: null,
+                                stateCode: 'OH',
+                            },
+                        },
+                        unlockInfo: {
+                            id: uuidv4(),
+                            updatedAt: new Date(),
+                            updatedByID: 'someone',
+                            updatedReason: 'first unlock',
                             updatedBy: {
                                 id: 'someone',
                                 createdAt: new Date(),
@@ -162,7 +213,24 @@ describe('prismaToDomainModel', () => {
                             id: uuidv4(),
                             updatedAt: new Date(),
                             updatedByID: 'someone',
-                            updatedReason: 'submit',
+                            updatedReason: 'second resubmit',
+                            updatedBy: {
+                                id: 'someone',
+                                createdAt: new Date(),
+                                updatedAt: new Date(),
+                                givenName: 'Bob',
+                                familyName: 'Law',
+                                email: 'boblaw@example.com',
+                                role: 'STATE_USER',
+                                divisionAssignment: null,
+                                stateCode: 'OH',
+                            },
+                        },
+                        unlockInfo: {
+                            id: uuidv4(),
+                            updatedAt: new Date(),
+                            updatedByID: 'someone',
+                            updatedReason: 'second Unlock',
                             updatedBy: {
                                 id: 'someone',
                                 createdAt: new Date(),
@@ -182,7 +250,7 @@ describe('prismaToDomainModel', () => {
                             id: uuidv4(),
                             updatedAt: new Date(),
                             updatedByID: 'someone',
-                            updatedReason: 'submit',
+                            updatedReason: 'initial submit',
                             updatedBy: {
                                 id: 'someone',
                                 createdAt: new Date(),

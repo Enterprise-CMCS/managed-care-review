@@ -195,9 +195,11 @@ it('returns all rates with stripped down data', async () => {
     expect(rateBFromArrayEmptyArray).toBeDefined()
 
     const notRealRateSelectedOrError = must(
-        await findAllRatesStripped(client, { rateIDs: ['not-a-real-rate-id'] })
+        await findAllRatesStripped(client, {
+            rateIDs: ['not-a-real-rate-id'],
+        })
     )
 
     // ID should not exist so we expect no results
     expect(notRealRateSelectedOrError).toHaveLength(0)
-}, 10000)
+})

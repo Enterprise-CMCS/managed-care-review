@@ -799,7 +799,7 @@ describe('submitContract', () => {
         )
         expect(ds1.rateRevisions).toHaveLength(0)
         expect(ds1.cause).toBe('CONTRACT_SUBMISSION')
-    }, 15000)
+    })
 
     it('returns the correct dateAdded for documents', async () => {
         const ldService = testLDService({})
@@ -1569,7 +1569,9 @@ describe('submitContract', () => {
         })
 
         it('uses email settings from database with remove-parameter-store flag on', async () => {
-            const mockEmailer = await testEmailerFromDatabase()
+            const prismaClient = await sharedTestPrismaClient()
+            const store = NewPostgresStore(prismaClient)
+            const mockEmailer = await testEmailerFromDatabase(store)
             const ldService = testLDService({
                 'remove-parameter-store': true,
             })

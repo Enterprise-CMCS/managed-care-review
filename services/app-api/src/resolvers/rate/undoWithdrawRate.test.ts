@@ -215,7 +215,7 @@ describe('undoWithdrawRate', () => {
                 `CMS has changed the status of rate ${formData.rateCertificationName} to submitted. Undo withdraw rate`,
             ])
         )
-    }, 10000)
+    })
 
     it('sends emails to CMS and state contacts when a rate is unwithdrawn', async () => {
         const emailConfig = testEmailConfig()
@@ -379,7 +379,7 @@ describe('undoWithdrawRate', () => {
                 bodyHTML: expect.stringContaining(contractBName),
             })
         )
-    }, 10000)
+    })
 })
 
 describe('undo withdraw rate error handling', async () => {

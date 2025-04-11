@@ -120,7 +120,7 @@ const withdrawRateInsideTransaction = async (
         // Used to track original status of the contract
         const consolidatedStatus = getConsolidatedContractStatus(
             getContractRateStatus(contract.revisions),
-            getContractReviewStatus(contract)
+            getContractReviewStatus(contract.reviewStatusActions)
         )
 
         // Throw error if any contract is approved

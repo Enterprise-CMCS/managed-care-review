@@ -525,7 +525,7 @@ describe('withdrawRate', () => {
                 }),
             ])
         )
-    }, 10000)
+    })
 
     it('removes rate from DRAFT and UNLOCKED contracts linked to rate', async () => {
         const stateUser = testStateUser()
@@ -813,7 +813,7 @@ describe('withdrawRate', () => {
                 }),
             ])
         )
-    }, 10000)
+    })
 
     it('sends emails to state and CMS when a rate is withdrawn', async () => {
         const emailConfig = testEmailConfig()

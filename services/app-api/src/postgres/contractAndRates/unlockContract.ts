@@ -10,11 +10,11 @@ async function unlockContractInsideTransaction(
     args: UnlockContractArgsType
 ): Promise<UnlockedContractType | Error> {
     const currentDateTime = new Date()
-    const { contractID, unlockedByUserID, unlockReason } = args
+    const { contractID, unlockedByUserID, unlockReason, manualCreatedAt } = args
     // create the unlock info to be shared across all submissions.
     const unlockInfo = await tx.updateInfoTable.create({
         data: {
-            updatedAt: currentDateTime,
+            updatedAt: manualCreatedAt ?? currentDateTime,
             updatedByID: unlockedByUserID,
             updatedReason: unlockReason,
         },
@@ -143,6 +143,7 @@ async function unlockContractInsideTransaction(
 
     await tx.contractRevisionTable.create({
         data: {
+            createdAt: manualCreatedAt ?? currentDateTime,
             contract: {
                 connect: {
                     id: contractID,
@@ -260,6 +261,9 @@ type UnlockContractArgsType = {
     contractID: string
     unlockedByUserID: string
     unlockReason: string
+    // Used to specify a timestamp when calling multiple prisma functions within the same transaction that need
+    // sequential timestamps for revision history
+    manualCreatedAt?: Date
 }
 
 // Unlock the given contract
