@@ -238,7 +238,7 @@ const getParentContractID = (
     return latestParentContract.contractID
 }
 
-// Function to loop through a rate revisions related submissions to find a new suitable parent contract.
+// Function to loop through a list of revisions on a rate and find a suitable parent contract. Meant to be used in cases where the original parent contract associated with that rate has been withdrawn but the rate is still linked to other contracts.
 const getNewParentContract = (
     rateRevisions: RateRevisionTableWithRelatedSubmissionContracts[]
 ):
