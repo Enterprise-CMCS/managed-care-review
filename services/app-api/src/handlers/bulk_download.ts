@@ -202,7 +202,7 @@ const main: APIGatewayProxyHandler = async (event) => {
         // Create zip file
         const zipPath = path.join(TEMP_DIR, 'output.zip')
         const zipStream = fs.createWriteStream(zipPath)
-        const archive = Archiver('zip', { zlib: { level: 5 } })
+        const archive = Archiver('zip', { zlib: { level: 2 } })
 
         archive.pipe(zipStream)
 
