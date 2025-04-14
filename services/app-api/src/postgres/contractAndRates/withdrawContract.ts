@@ -2,7 +2,6 @@ import type { PrismaTransactionType } from '../prismaTypes'
 import type { ContractType } from '../../domain-models'
 import { unlockContractInsideTransaction } from './unlockContract'
 import { findStatePrograms } from '../state'
-import { packageName } from '@mc-review/hpp'
 import { findContractWithHistory } from './findContractWithHistory'
 import { NotFoundError } from '../postgresErrors'
 import type { ExtendedPrismaClient } from '../prismaClient'
@@ -45,7 +44,6 @@ const withdrawContractInsideTransaction = async (
     const { contract, updatedReason, updatedByID } = args
 
     const latestSubmission = contract.packageSubmissions[0]
-    const latestContractRev = latestSubmission.contractRevision
     const rateIDS = latestSubmission.rateRevisions.map((rr) => rr.rateID)
 
     // Very stripped down rate, only selecting data we need to determine which rates are to be withdrawn with contract.
@@ -87,7 +85,7 @@ const withdrawContractInsideTransaction = async (
     const ratesToWithdraw = []
 
     // Hashmap of contracts that will have reassigned rates. Multiple rates can be reassigned in one reassignParentContractInTransaction
-    const reassignParenContracts: {
+    const reassignParentContracts: {
         [key: string]: {
             rates: RatesToReassign[]
             contractStatus: ConsolidatedContractStatus
@@ -128,13 +126,13 @@ const withdrawContractInsideTransaction = async (
             }
 
             // if the contract exists in the dictionary, then add the rate to the array else add a new entry with rate and contract status
-            if (!reassignParenContracts[contractID]) {
-                reassignParenContracts[contractID] = {
+            if (!reassignParentContracts[contractID]) {
+                reassignParentContracts[contractID] = {
                     rates: [],
                     contractStatus: status,
                 }
             }
-            reassignParenContracts[contractID].rates.push(reassignRate)
+            reassignParentContracts[contractID].rates.push(reassignRate)
         } else {
             ratesToWithdraw.push(rate)
         }
@@ -148,27 +146,11 @@ const withdrawContractInsideTransaction = async (
         )
     }
 
-    const contractName = packageName(
-        contract.stateCode,
-        contract.stateNumber,
-        latestContractRev.formData.programIDs,
-        statePrograms
-    )
-
-    const withdrawRateNames = ratesToWithdraw.map(
-        (r) => r.revisions[0]?.rateCertificationName ?? r.revisions[0].rateID
-    )
-
-    const rateNamesMessage =
-        withdrawRateNames.length > 0
-            ? ` along with the following rates: ${withdrawRateNames.join(', ')}`
-            : ''
-
     // unlock contract with withdraw default message and withdraw input reason
     const unlockContract = await unlockContractInsideTransaction(tx, {
         contractID: contract.id,
         unlockedByUserID: updatedByID,
-        unlockReason: `CMS withdrawing the submission ${contractName}${rateNamesMessage}. ${updatedReason}`,
+        unlockReason: `Withdraw submission. ${updatedReason}`,
     })
 
     if (unlockContract instanceof Error) {
@@ -179,7 +161,7 @@ const withdrawContractInsideTransaction = async (
 
     // loop through the new parent contracts to assign its new child rates
     for (const [contractID, reassignmentData] of Object.entries(
-        reassignParenContracts
+        reassignParentContracts
     )) {
         await reassignParentContractInTransaction(tx, {
             contractID,
@@ -195,7 +177,7 @@ const withdrawContractInsideTransaction = async (
         contract.id,
         ratesToWithdraw.map((rate) => rate.id),
         updatedByID,
-        `CMS has withdrawn the submission ${contractName}${rateNamesMessage}. ${updatedReason}`
+        `CMS withdrew the submission from review. ${updatedReason}`
     )
 
     if (resubmitWithdrawnContract instanceof Error) {

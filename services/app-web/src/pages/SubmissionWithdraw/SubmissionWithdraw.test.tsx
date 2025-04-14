@@ -153,7 +153,7 @@ describe('SubmissionWithdraw', () => {
 
         await waitFor(() => {
             expect(
-                screen.getByTestId('updatedSubmissionBanner')
+                screen.getByTestId('withdrawnSubmissionBanner')
             ).toBeInTheDocument()
         })
         expect(

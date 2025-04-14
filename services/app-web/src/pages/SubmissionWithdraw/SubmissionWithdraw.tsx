@@ -27,7 +27,7 @@ import * as Yup from 'yup'
 import { ErrorOrLoadingPage } from '../StateSubmission'
 import { handleAndReturnErrorState } from '../StateSubmission/ErrorOrLoadingPage'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
-import { SubmissionWithdrawWarningBanner } from '../../components/Banner/WithdrawSubmissionBanner/SubmissionWithdrawWarningBanner'
+import { SubmissionWithdrawWarningBanner } from '../../components/Banner/SubmissionWithdrawWarningBanner/SubmissionWithdrawWarningBanner'
 import { useTealium } from '../../hooks'
 import { recordJSException } from '@mc-review/otel'
 

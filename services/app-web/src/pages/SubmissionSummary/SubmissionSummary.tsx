@@ -41,6 +41,7 @@ import {
     IncompleteSubmissionBanner,
 } from '../../components/Banner'
 import { MultiColumnGrid } from '../../components/MultiColumnGrid/MultiColumnGrid'
+import { SubmissionWithdrawnBanner } from '../../components/Banner/SubmissionWithdrawnBanner/SubmissionWithdrawnBanner'
 
 export interface SubmissionSummaryFormValues {
     dateApprovalReleasedToState: string
@@ -113,6 +114,7 @@ export const SubmissionSummary = (): React.ReactElement => {
     }
 
     const submissionStatus = contract.status
+    const consolidatedStatus = contract.consolidatedStatus
     const isSubmitted =
         submissionStatus === 'SUBMITTED' || submissionStatus === 'RESUBMITTED'
     const statePrograms = contract.state.programs
@@ -226,9 +228,26 @@ export const SubmissionSummary = (): React.ReactElement => {
             )
         }
 
-        if (submissionStatus === 'RESUBMITTED' && updateInfo) {
+        if (
+            submissionStatus === 'RESUBMITTED' &&
+            consolidatedStatus !== 'WITHDRAWN' &&
+            updateInfo
+        ) {
             return (
                 <SubmissionUpdatedBanner
+                    className={styles.banner}
+                    updateInfo={updateInfo}
+                />
+            )
+        }
+
+        if (
+            submissionStatus === 'RESUBMITTED' &&
+            consolidatedStatus === 'WITHDRAWN' &&
+            updateInfo
+        ) {
+            return (
+                <SubmissionWithdrawnBanner
                     className={styles.banner}
                     updateInfo={updateInfo}
                 />

@@ -73,7 +73,7 @@ custom:
   iamPermissionsBoundary: ${env:IAM_PERMISSIONS_BOUNDARY}
   iamPath: ${env:IAM_PATH}
   rotatorArn: !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${self:service}-${sls:stage}-rotator'
-  dbManagerArn: !Sub 'arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:aurora_${self:service}_*'
+  dbManagerArn: !Sub 'arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:aurora_${self:service}_*' # pragma: allowlist secret
   auroraArn: ${env:CF_CONFIG_IGNORED_LOCALLY, env:AURORA_ARN}
   dbSecretsArn: ${env:CF_CONFIG_IGNORED_LOCALLY, env:DB_SM_ARN}
   slackWebhookUrl: ${env:SLACK_WEBHOOK}
