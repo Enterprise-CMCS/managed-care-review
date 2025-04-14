@@ -73,7 +73,7 @@ custom:
   iamPermissionsBoundary: ${env:IAM_PERMISSIONS_BOUNDARY}
   iamPath: ${env:IAM_PATH}
   rotatorArn: !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${self:service}-${sls:stage}-rotator'
-  dbManagerArn: !Sub 'arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:aurora_${self:service}_*'
+  dbManagerArn: !Sub 'arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:aurora_${self:service}_*' # pragma: allowlist secret
   auroraArn: ${env:CF_CONFIG_IGNORED_LOCALLY, env:AURORA_ARN}
   dbSecretsArn: ${env:CF_CONFIG_IGNORED_LOCALLY, env:DB_SM_ARN}
   slackWebhookUrl: ${env:SLACK_WEBHOOK}
@@ -133,6 +133,10 @@ resources:
       - !Equals ['${sls:stage}', 'val']
       - !Equals ['${sls:stage}', 'prod']
     IsReviewEnvironment: !Not [!Condition IsDevValProd]
+    IsValOrProd: !Or
+      - !Equals ['${sls:stage}', 'val']
+      - !Equals ['${sls:stage}', 'prod']
+      - !Equals ['${sls:stage}', 'mtvalprodinfra']
 
   Resources:
     # VPC endpoint for rotation lambda
@@ -403,6 +407,49 @@ resources:
         FunctionName: !GetAtt RotatorLambdaFunction.Arn
         Principal: 'secretsmanager.amazonaws.com'
 
+    DataExportBucket:
+      Type: 'AWS::S3::Bucket'
+      Condition: IsValOrProd
+      Properties:
+        BucketName: !Sub ${self:service}-${sls:stage}-data-export
+        AccessControl: Private
+        PublicAccessBlockConfiguration:
+          BlockPublicAcls: true
+          BlockPublicPolicy: true
+          IgnorePublicAcls: true
+          RestrictPublicBuckets: true
+        BucketEncryption:
+          ServerSideEncryptionConfiguration:
+            - ServerSideEncryptionByDefault:
+                SSEAlgorithm: AES256
+        VersioningConfiguration:
+          Status: Enabled
+        LifecycleConfiguration:
+          Rules:
+            - Id: ExpireOldVersions
+              Status: Enabled
+              NoncurrentVersionExpiration:
+                NoncurrentDays: 30
+
+    DataExportBucketPolicy:
+      Type: AWS::S3::BucketPolicy
+      Condition: IsValOrProd
+      Properties:
+        Bucket: !Ref DataExportBucket
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Sid: ForceSSLOnlyAccess
+              Effect: Deny
+              Principal: '*'
+              Action: 's3:*'
+              Resource:
+                - !Sub arn:aws:s3:::${self:service}-${sls:stage}-data-export
+                - !Sub arn:aws:s3:::${self:service}-${sls:stage}-data-export/*
+              Condition:
+                Bool:
+                  aws:SecureTransport: false
+
   Outputs:
     PostgresAuroraV2Arn:
       Value: !If
@@ -412,3 +459,7 @@ resources:
     PostgresVMScriptsBucket:
       Condition: IsDevValProd
       Value: !Ref PostgresVMScriptsBucket
+    DataExportBucket:
+      Condition: IsValOrProd
+      Value: !Ref DataExportBucket
+      Description: S3 Bucket for Val/Prod Data Export

@@ -196,4 +196,4 @@ it('returns related contracts with correct status', async () => {
             },
         ])
     )
-}, 10000)
+})
