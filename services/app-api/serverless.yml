@@ -58,6 +58,9 @@ custom:
   lambdaMemory:
     prod: 4096
     default: 1024
+  lambdaTmp:
+    prod: 2048
+    default: 512
   instanceId: ${sls:instanceId}
 
 provider:
@@ -223,6 +226,7 @@ functions:
           authorizer: aws_iam
     timeout: 60
     memorySize: ${self:custom.lambdaMemory.${sls:stage}, self:custom.lambdaMemory.default}
+    ephemeralStorageSize: ${self:custom.lambdaTmp.${sls:stage}, self:custom.lambdaTmp.default}
 
   cleanup:
     handler: src/handlers/cleanup.main

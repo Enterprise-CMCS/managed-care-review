@@ -15,7 +15,7 @@ import { pipeline } from 'stream/promises'
 const s3 = new S3Client({ region: 'us-east-1' })
 
 // Configuration constants
-const BATCH_SIZE = 20 // Increased batch size for parallel downloads
+const BATCH_SIZE = 50 // Increased batch size for parallel downloads
 const BASE_TIMEOUT = 120000
 const TIMEOUT_PER_MB = 1000
 const MAX_TOTAL_SIZE = 1024 * 1024 * 1024 // 1GB limit
@@ -202,7 +202,7 @@ const main: APIGatewayProxyHandler = async (event) => {
         // Create zip file
         const zipPath = path.join(TEMP_DIR, 'output.zip')
         const zipStream = fs.createWriteStream(zipPath)
-        const archive = Archiver('zip', { zlib: { level: 5 } })
+        const archive = Archiver('zip', { zlib: { level: 0 } })
 
         archive.pipe(zipStream)
 
