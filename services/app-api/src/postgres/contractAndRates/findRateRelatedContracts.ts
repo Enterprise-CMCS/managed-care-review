@@ -13,9 +13,7 @@ async function findRateRelatedContractsInTransaction(
         where: {
             id: rateID,
         },
-        include: {
-            ...includeRateRelatedContracts,
-        },
+        include: includeRateRelatedContracts,
     })
 
     if (!rate) {

@@ -27,10 +27,11 @@ import type {
     RateRevisionsTableStrippedPayload,
     RateRevisionTablePayload,
     RateTableWithoutDraftContractsStrippedPayload,
+    RateRevisionTableWithRelatedSubmissionContracts,
+    SubmissionPackageContractRevisionData,
+    RateTableWithRelatedContractsPayload,
 } from './prismaSubmittedRateHelpers'
 import type { ConsolidatedRateStatusType } from '../../domain-models/contractAndRates/statusType'
-import type { RateTableWithRelatedContractsPayload } from './prismaSubmittedRateHelpers'
-import type { HealthPlanPackageStatusType } from '../../domain-models'
 import type { RelatedContractStripped } from '../../gen/gqlClient'
 
 const subincludeUpdateInfo = {
@@ -89,32 +90,42 @@ function getContractRateStatus(
         | ContractRevisionTableWithFormData[]
         | RateRevisionTableWithFormData[]
         | StrippedRateRevisionTableWithFormData[]
+        | SubmissionPackageContractRevisionData[]
 ): PackageStatusType {
     // need to order revisions from latest to earliest
     const revs = [...revisions].sort(
         (revA, revB) => revB.createdAt.getTime() - revA.createdAt.getTime()
     )
     const latestRevision = revs[0]
-    // submitted - one revision with submission status
-    if (revs.length === 1 && latestRevision.submitInfo) {
-        return 'SUBMITTED'
-    } else if (revs.length > 1) {
-        // unlocked - multiple revs, latest revision has unlocked status and no submitted status
-        // resubmitted - multiple revs, latest revision has submitted status
-        if (latestRevision.submitInfo) {
-            return 'RESUBMITTED'
-        }
+
+    const submitInfo = latestRevision.submitInfo
+    const unlockInfo = latestRevision.unlockInfo
+
+    // If both info exists then it was resubmitted, you can only get an unlockInfo after the initial submit.
+    if (submitInfo && unlockInfo) {
+        return 'RESUBMITTED'
+    }
+
+    // If only unlock info exists, then it was never resubmitted,
+    if (!submitInfo && unlockInfo) {
         return 'UNLOCKED'
     }
+
+    // If only submitInfo exists, then it is the first submission as a first revision can never have a unlockInfo.
+    if (submitInfo && !unlockInfo) {
+        return 'SUBMITTED'
+    }
+
+    // If no submitInfo or unlockInfo we know this is a newly created contract with an initial revision.
     return 'DRAFT'
 }
 
 // -----
 function getContractReviewStatus(
-    contract: ContractTableWithoutDraftRates
+    reviewStatusActions: ContractTableWithoutDraftRates['reviewStatusActions']
 ): ContractReviewStatusType {
     // need to order actions from latest to earliest
-    const actions = [...contract.reviewStatusActions].sort(
+    const actions = [...reviewStatusActions].sort(
         (actionA, actionB) =>
             actionB.updatedAt.getTime() - actionA.updatedAt.getTime()
     )
@@ -181,59 +192,147 @@ function getConsolidatedRateStatus(
 const getParentContractID = (
     rateRevisions: RateRevisionsTableStrippedPayload | RateRevisionTablePayload
 ) => {
-    // sort in ascending order
-    const ascendingRevisions = [...rateRevisions].sort(
-        (revA, revB) => revA.createdAt.getTime() - revB.createdAt.getTime()
+    // sort in descending order
+    const revisions = [...rateRevisions].sort(
+        (revA, revB) => revB.createdAt.getTime() - revA.createdAt.getTime()
     )
-    const firstRevision = ascendingRevisions[0]
-    const submission = firstRevision.submitInfo
+    const initialSubmission = revisions[revisions.length - 1].submitInfo
 
-    let parentContractID = undefined
-    if (!submission) {
+    if (!initialSubmission) {
         // this is a draft, never submitted, rate
         // this is fragile code
         // because this is a draft, it can only be parented by the single draft contract
         // that created it. But because of the asymmetry required to break the recursive
         // rate-draftContract bit, we don't have access to that here. Put a shibboleth in
         // that can be replaced in higher places.
-        parentContractID = 'DRAFT_PARENT_REPLACE_ME'
-    } else {
-        // check the initial submission
-        if (firstRevision.relatedSubmissions.length == 0) {
-            console.info('No related submission. Unmigrated rate.')
-            parentContractID = '00000000-1111-2222-3333-444444444444'
-        } else {
-            if (submission.submittedContracts.length !== 1) {
-                const msg =
-                    'programming error: its a submitted rate that was not submitted with a contract initially'
-                console.error(msg)
-                return new Error(msg)
+        return DRAFT_PARENT_PLACEHOLDER
+    }
+
+    // Find the latest submitted revision with submitted contracts. For an independent withdrawn rate, it will find the
+    // parent contract of the rate before it was withdrawn.
+    const latestSubmittedRevision = revisions.find(
+        (revision) => revision.submitInfo?.submittedContracts[0]
+    )
+
+    if (!latestSubmittedRevision?.submitInfo) {
+        return new Error(
+            'Could not find a submitted revision to get parent contract id.'
+        )
+    }
+
+    if (latestSubmittedRevision.relatedSubmissions.length == 0) {
+        console.info('No related submission. Unmigrated rate.')
+        return '00000000-1111-2222-3333-444444444444'
+    }
+
+    // there should always only be one submitted contract at the revision level submit info
+    const latestParentContract =
+        latestSubmittedRevision.submitInfo.submittedContracts[0]
+
+    if (!latestParentContract) {
+        return new Error(
+            'programming error: its a submitted rate that was not submitted with a contract initially'
+        )
+    }
+
+    return latestParentContract.contractID
+}
+
+// Function to loop through a list of revisions on a rate and find a suitable parent contract. Meant to be used in cases where the original parent contract associated with that rate has been withdrawn but the rate is still linked to other contracts.
+const getNewParentContract = (
+    rateRevisions: RateRevisionTableWithRelatedSubmissionContracts[]
+):
+    | {
+          contractID: string
+          status: ConsolidatedContractStatusType
+      }
+    | undefined => {
+    const latestRevision = [...rateRevisions].sort(
+        (revA, revB) => revB.createdAt.getTime() - revA.createdAt.getTime()
+    )[0]
+
+    // find the current parent contract
+    const currentContractID =
+        latestRevision.submitInfo?.submittedContracts[0].contractID
+
+    const submissionPackages =
+        latestRevision.relatedSubmissions[0].submissionPackages
+            .filter((p) => p.rateRevisionID === latestRevision.id)
+            .sort(
+                (a, b) =>
+                    b.contractRevision.createdAt.getTime() -
+                    a.contractRevision.createdAt.getTime()
+            )
+
+    let reassignToContract = undefined
+
+    // Loop through the latest submission packages to find a new contract that is linked to this rate.
+    for (const pkg of submissionPackages) {
+        const newContractID = pkg.contractRevision.contract.id
+        const reviewStatus = getContractReviewStatus(
+            pkg.contractRevision.contract.reviewStatusActions
+        )
+        const contractStatus = getContractRateStatus(
+            pkg.contractRevision.contract.revisions
+        )
+        const consolidatedStatus = getConsolidatedContractStatus(
+            contractStatus,
+            reviewStatus
+        )
+
+        // Skip if this was the contract being withdrawn or is withdrawn
+        if (
+            newContractID === currentContractID ||
+            reviewStatus === 'WITHDRAWN'
+        ) {
+            continue
+        }
+
+        // These next few conditionals are ordered by preferred contract status
+        if (['SUBMITTED', 'RESUBMITTED'].includes(consolidatedStatus)) {
+            // contract with consolidated status of submitted is our preferred contract, break the loop if we find it.
+            reassignToContract = {
+                contractID: newContractID,
+                status: contractStatus, // SUBMITTED includes resubmitted, there is no distinction here.
             }
-            const firstContract = submission.submittedContracts[0]
-            parentContractID = firstContract.contractID
+            break
+        }
+        // Is unlocked and not approved
+        if (consolidatedStatus === 'UNLOCKED') {
+            reassignToContract = {
+                contractID: newContractID,
+                status: consolidatedStatus,
+            }
+        }
+        // Is approved and no reassigned contract is set, this is the least preferred contract.
+        if (consolidatedStatus === 'APPROVED' && !reassignToContract) {
+            reassignToContract = {
+                contractID: newContractID,
+                status: consolidatedStatus,
+            }
         }
     }
 
-    return parentContractID
+    return reassignToContract
 }
 
+// Loops though a stripped down rate to find the latest linked and parent contract of this rate.
 const getRelatedContracts = (
     rate: RateTableWithRelatedContractsPayload
 ): RelatedContractStripped[] => {
-    const rateRevisions = [...rate.revisions].sort(
+    const revisions = [...rate.revisions].sort(
         (revA, revB) => revA.createdAt.getTime() - revB.createdAt.getTime()
     )
 
     let relatedContracts: RelatedContractStripped[] = []
-    for (const rateRev of rateRevisions) {
+
+    for (const rateRev of revisions) {
         if (!rateRev.submitInfo) {
             continue
         }
 
         // get the latest related submissions entry
-        const latestRelatedSubmission = rateRev.relatedSubmissions.sort(
-            (a, b) => b.updatedAt.getTime() - a.updatedAt.getTime()
-        )[0]
+        const latestRelatedSubmission = rateRev.relatedSubmissions[0]
 
         // collect related contracts with latest consolidated statuses
         const contracts: RelatedContractStripped[] = []
@@ -241,40 +340,16 @@ const getRelatedContracts = (
         // looping throw all the submission packages of the related submissions to find the contracts for this rate.
         latestRelatedSubmission.submissionPackages.forEach((pkg) => {
             if (pkg.rateRevisionID === rateRev.id) {
-                let status: HealthPlanPackageStatusType = 'DRAFT'
-                let reviewStatus: ContractReviewStatusType = 'UNDER_REVIEW'
-
-                const submitInfo =
-                    pkg.contractRevision.contract.revisions[0].submitInfo
-                const unlockInfo =
-                    pkg.contractRevision.contract.revisions[0].unlockInfo
-                const latestAction =
-                    pkg.contractRevision.contract.reviewStatusActions[0]
-
-                // Find the current status of all related contracts as some could be in different status than the rate.
-                // If it has both unlock and submit info, then it was resubmitted
-                if (submitInfo && unlockInfo) {
-                    status = 'RESUBMITTED'
-                }
-                // if only unlock info, then this unlocked. When unlocking contract, a new revision with unlock info is created.
-                if (unlockInfo && !submitInfo) {
-                    status = 'UNLOCKED'
-                }
-                // if there is a submit info, but not unlock info then this is the initial submission.
-                if (submitInfo && !unlockInfo) {
-                    status = 'SUBMITTED'
-                }
-                // Contract review statuses
-                if (latestAction?.actionType === 'MARK_AS_APPROVED') {
-                    reviewStatus = 'APPROVED'
-                }
-                if (latestAction?.actionType === 'WITHDRAW') {
-                    reviewStatus = 'WITHDRAWN'
-                }
+                const reviewStatus = getContractReviewStatus(
+                    pkg.contractRevision.contract.reviewStatusActions
+                )
+                const contractStatus = getContractRateStatus(
+                    pkg.contractRevision.contract.revisions
+                )
 
                 // Consolidate the statuses.
                 const consolidatedStatus = getConsolidatedContractStatus(
-                    status,
+                    contractStatus,
                     reviewStatus
                 )
 
@@ -634,4 +709,5 @@ export {
     getParentContractID,
     getRelatedContracts,
     DRAFT_PARENT_PLACEHOLDER,
+    getNewParentContract,
 }
