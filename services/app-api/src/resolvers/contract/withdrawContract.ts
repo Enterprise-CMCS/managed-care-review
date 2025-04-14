@@ -25,8 +25,8 @@ export function withdrawContract(
         span?.setAttribute('mcreview.package_id', contractID)
 
         if (!hasCMSPermissions(user)) {
-            const message = 'user not authorized to withdraw a rate'
-            logError('withdrawRate', message)
+            const message = 'user not authorized to withdraw a contract'
+            logError('withdrawContract', message)
             setErrorAttributesOnActiveSpan(message, span)
             throw new ForbiddenError(message)
         }
@@ -123,14 +123,27 @@ export function withdrawContract(
                 stateAnalystsEmails
             )
 
-        if (sendWithdrawCMSEmail instanceof Error) {
+        const sendWithdrawStateEmail =
+            await emailer.sendWithdrawnSubmissionStateEmail(
+                withdrawnContract,
+                ratesForDisplay
+            )
+
+        if (
+            sendWithdrawCMSEmail instanceof Error ||
+            sendWithdrawStateEmail instanceof Error
+        ) {
             let errMessage = ''
 
             if (sendWithdrawCMSEmail instanceof Error) {
                 errMessage = `CMS Email failed: ${sendWithdrawCMSEmail.message}`
             }
 
-            logError('withdrawRate', errMessage)
+            if (sendWithdrawCMSEmail instanceof Error) {
+                errMessage = `State Email failed: ${sendWithdrawCMSEmail.message}`
+            }
+
+            logError('withdrawContract', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new GraphQLError(errMessage, {
                 extensions: {

@@ -86,7 +86,10 @@ function testEmailer(customConfig?: EmailConfiguration): Emailer {
     return emailer(config, vi.fn(sendTestEmails))
 }
 
-async function testEmailerFromDatabase(store :Store, customConfig?: EmailConfiguration): Promise<Emailer> {
+async function testEmailerFromDatabase(
+    store: Store,
+    customConfig?: EmailConfiguration
+): Promise<Emailer> {
     const mockEmailer = await constructTestEmailer({
         emailConfig: customConfig ?? testEmailConfig(),
         postgresStore: store,
@@ -452,7 +455,13 @@ const mockContract = (
                                 downloadURL: s3DlUrl,
                             },
                         ],
-                        stateContacts: [],
+                        stateContacts: [
+                            {
+                                name: 'contract-state-contact',
+                                titleRole: 'state contact',
+                                email: 'contract-state-contact@state.com',
+                            },
+                        ],
                         contractType: 'AMENDMENT',
                         contractExecutionStatus: 'EXECUTED',
                         contractDocuments: [
@@ -1011,5 +1020,5 @@ export {
     mockQuestionAndResponses,
     mockRateQuestionAndResponses,
     mockRate,
-    testEmailerFromDatabase
+    testEmailerFromDatabase,
 }
