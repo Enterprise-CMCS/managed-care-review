@@ -405,7 +405,7 @@ const mockContract = (
                 submitInfo: {
                     updatedAt: new Date('01/01/2023'),
                     updatedBy: {
-                        email: 'example@state.com',
+                        email: 'example@example.com',
                         role: 'STATE_USER',
                         givenName: 'John',
                         familyName: 'Vila',
@@ -425,7 +425,7 @@ const mockContract = (
                     submitInfo: {
                         updatedAt: new Date(),
                         updatedBy: {
-                            email: 'example@state.com',
+                            email: 'example@example.com',
                             role: 'STATE_USER',
                             givenName: 'John',
                             familyName: 'Vila',
@@ -459,7 +459,7 @@ const mockContract = (
                             {
                                 name: 'contract-state-contact',
                                 titleRole: 'state contact',
-                                email: 'contract-state-contact@state.com',
+                                email: 'contract-state-contact@example.com',
                             },
                         ],
                         contractType: 'AMENDMENT',

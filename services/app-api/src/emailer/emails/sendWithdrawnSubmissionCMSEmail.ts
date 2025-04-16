@@ -72,16 +72,12 @@ export const parseAndValidateContractsAndRates = (
     const withdrawReason = latestStatusAction.updatedReason!
 
     // Rates withdrawn with the submission that will be displayed in the email
-    const formattedRateDisplayData: FormattedRateDisplayDataType[] = []
-
-    if (rates.length > 0) {
-        for (const rate of rates) {
-            formattedRateDisplayData.push({
-                rateCertificationName: rate.rateCertificationName,
-                rateSummaryURL: rateSummaryURL(rate.id, config.baseUrl),
-            })
-        }
-    }
+    const formattedRateDisplayData: FormattedRateDisplayDataType[] = rates.map(
+        (rate) => ({
+            rateCertificationName: rate.rateCertificationName,
+            rateSummaryURL: rateSummaryURL(rate.id, config.baseUrl),
+        })
+    )
 
     return {
         contractName,
@@ -129,7 +125,7 @@ export const sendWithdrawnSubmissionCMSEmail = async (
             sourceEmail: config.emailSource,
             subject: `${
                 config.stage !== 'prod' ? `[${config.stage}] ` : ''
-            }${etaData.contractName} was withdrawn`,
+            }${etaData.contractName} was withdrawn by CMS`,
             bodyText: stripHTMLFromTemplate(template),
             bodyHTML: template,
         }

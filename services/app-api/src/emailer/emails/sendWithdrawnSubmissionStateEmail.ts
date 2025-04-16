@@ -44,7 +44,7 @@ export const sendWithdrawnSubmissionStateEmail = async (
             sourceEmail: config.emailSource,
             subject: `${
                 config.stage !== 'prod' ? `[${config.stage}] ` : ''
-            }${etaData.contractName} was withdrawn`,
+            }${etaData.contractName} was withdrawn by CMS`,
             bodyText: stripHTMLFromTemplate(template),
             bodyHTML: template,
         }

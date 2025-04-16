@@ -22,6 +22,7 @@ import {
     addNewRateToTestContract,
     fetchTestIndexRatesStripped,
 } from '../../testHelpers/gqlRateHelpers'
+import { testEmailConfig, testEmailer } from '../../testHelpers/emailerHelpers'
 
 const testRateFormInputData = (): RateFormDataInput => ({
     rateType: 'AMENDMENT',
@@ -627,6 +628,76 @@ describe('withdrawContract', () => {
         // expect error to be rateA in withdrawn status
         expect(resubmitContractB.errors?.[0].message).toBe(
             `Attempted to submit a contract with a withdrawn rate. Rate id: ${rateA.id}`
+        )
+    })
+
+    it('sends emails to state and CMS when a rate is withdrawn', async () => {
+        const emailConfig = testEmailConfig()
+        const mockEmailer = testEmailer()
+        const stateUser = testStateUser()
+        const cmsUser = testCMSUser()
+        const stateServer = await constructTestPostgresServer({
+            context: {
+                user: stateUser,
+            },
+        })
+
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: cmsUser,
+            },
+            emailer: mockEmailer,
+        })
+
+        const contract = await createAndUpdateTestContractWithoutRates(
+            stateServer,
+            undefined,
+            {
+                submissionType: 'CONTRACT_ONLY',
+            }
+        )
+
+        await submitTestContract(stateServer, contract.id)
+
+        const withdrawnContract = await withdrawTestContract(
+            cmsServer,
+            contract.id,
+            'withdraw submission'
+        )
+
+        const contractName =
+            withdrawnContract.packageSubmissions[0].contractRevision
+                .contractName
+        const stateReceiverEmails =
+            withdrawnContract.packageSubmissions[0].contractRevision.formData.stateContacts.map(
+                (contact) => contact.email
+            )
+
+        expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
+            2,
+            expect.objectContaining({
+                subject: expect.stringContaining(
+                    `${contractName} was withdrawn by CMS`
+                ),
+                sourceEmail: emailConfig.emailSource,
+                toAddresses: expect.arrayContaining(stateReceiverEmails),
+                bodyHTML: expect.stringContaining(contractName),
+            })
+        )
+
+        expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
+            1,
+            expect.objectContaining({
+                subject: expect.stringContaining(
+                    `${contractName} was withdrawn by CMS`
+                ),
+                sourceEmail: emailConfig.emailSource,
+                toAddresses: expect.arrayContaining([
+                    ...testEmailConfig().dmcpSubmissionEmails,
+                    ...testEmailConfig().oactEmails,
+                ]),
+                bodyHTML: expect.stringContaining(contractName),
+            })
         )
     })
 })

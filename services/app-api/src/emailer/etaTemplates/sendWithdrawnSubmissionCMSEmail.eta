@@ -15,4 +15,7 @@
 <br />
 <% } %>
 <% } %>
+<% if (it.formattedRateDisplayData.length === 0) { %>
+<br />
+<% } %>
 <a href="<%= it.contractSummaryURL %>">View submission in MC-Review</a>

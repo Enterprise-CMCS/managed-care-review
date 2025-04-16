@@ -7,12 +7,15 @@
 <% if (it.formattedRateDisplayData.length > 1) { %>
 <ul>
 <% it.formattedRateDisplayData.forEach(function(rate) { %>
-<li><a href="<%= rate.rateSummaryURL %>"><%= rate.rateCertificationName %></a></li>
+<li><%= rate.rateCertificationName %></li>
 <% }) %>
 </ul>
 <% } else { %>
-<a href="<%= it.formattedRateDisplayData[0].rateSummaryURL %>"><%= it.formattedRateDisplayData[0].rateCertificationName %></a><br />
+<%= it.formattedRateDisplayData[0].rateCertificationName %><br />
 <br />
 <% } %>
+<% } %>
+<% if (it.formattedRateDisplayData.length === 0) { %>
+<br />
 <% } %>
 <a href="<%= it.contractSummaryURL %>">View submission in MC-Review</a>

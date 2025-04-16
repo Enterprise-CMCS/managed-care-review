@@ -46,7 +46,7 @@ describe('sendWithdrawnSubmissionStateEmail', () => {
 
         expect(template.toAddresses).toEqual(
             expect.arrayContaining([
-                'contract-state-contact@state.com',
+                'contract-state-contact@example.com',
                 ...testEmailConfig().devReviewTeamEmails,
             ])
         )
