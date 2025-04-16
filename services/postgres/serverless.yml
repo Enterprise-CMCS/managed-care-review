@@ -125,6 +125,16 @@ functions:
       subnetIds: ${self:custom.privateSubnets}
     environment:
       SECRETS_MANAGER_ENDPOINT: !Sub 'https://secretsmanager.${AWS::Region}.amazonaws.com'
+  dbExport:
+    handler: src/db_export.handler
+    description: Exports data from the Postgres Aurora database
+    timeout: 60
+    vpc:
+      securityGroupIds: ${self:custom.sgId}
+      subnetIds: ${self:custom.privateSubnets}
+    environment:
+      DB_SECRET_ARN: !Ref PostgresSecret
+      SECRETS_MANAGER_ENDPOINT: !Sub 'https://secretsmanager.${AWS::Region}.amazonaws.com'
 
 resources:
   Conditions:
