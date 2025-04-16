@@ -17,6 +17,8 @@ import {
     sendWithdrawnRateStateEmail,
     sendUndoWithdrawnRateStateEmail,
     sendUndoWithdrawnRateCMSEmail,
+    sendWithdrawnSubmissionCMSEmail,
+    sendWithdrawnSubmissionStateEmail,
 } from './'
 import type { UnlockedHealthPlanFormDataType } from '@mc-review/hpp'
 import type {
@@ -35,6 +37,7 @@ import { sendRateQuestionCMSEmail } from './emails/sendRateQuestionCMSEmail'
 import { sendRateQuestionResponseCMSEmail } from './emails/sendRateQuestionResponseCMSEmail'
 import { sendRateQuestionResponseStateEmail } from './emails/sendRateQuestionResponseStateEmail'
 import { sendWithdrawnRateCMSEmail } from './emails/sendWithdrawnRateCMSEmail'
+import type { RateForDisplay } from '../postgres/contractAndRates/withdrawContract'
 
 // See more discussion of configuration in docs/Configuration.md
 type EmailConfiguration = {
@@ -192,6 +195,15 @@ type Emailer = {
         rate: RateType,
         statePrograms: ProgramType[],
         stateAnalystsEmails: StateAnalystsEmails
+    ) => Promise<void | Error>
+    sendWithdrawnSubmissionCMSEmail: (
+        withdrawnContract: ContractType,
+        ratesForDisplay: RateForDisplay[],
+        stateAnalystsEmails: StateAnalystsEmails
+    ) => Promise<void | Error>
+    sendWithdrawnSubmissionStateEmail: (
+        withdrawnContract: ContractType,
+        ratesForDisplay: RateForDisplay[]
     ) => Promise<void | Error>
 }
 const localEmailerLogger = (emailData: EmailData) =>
@@ -560,6 +572,40 @@ function emailer(
                 rate,
                 statePrograms,
                 stateAnalystsEmails,
+                config
+            )
+
+            if (emailData instanceof Error) {
+                return emailData
+            } else {
+                return await this.sendEmail(emailData)
+            }
+        },
+        sendWithdrawnSubmissionCMSEmail: async function (
+            withdrawnContract,
+            ratesForDisplay,
+            stateAnalystsEmails
+        ) {
+            const emailData = await sendWithdrawnSubmissionCMSEmail(
+                withdrawnContract,
+                ratesForDisplay,
+                stateAnalystsEmails,
+                config
+            )
+
+            if (emailData instanceof Error) {
+                return emailData
+            } else {
+                return await this.sendEmail(emailData)
+            }
+        },
+        sendWithdrawnSubmissionStateEmail: async function (
+            withdrawnContract,
+            ratesForDisplay
+        ) {
+            const emailData = await sendWithdrawnSubmissionStateEmail(
+                withdrawnContract,
+                ratesForDisplay,
                 config
             )
 

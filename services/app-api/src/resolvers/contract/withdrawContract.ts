@@ -9,9 +9,12 @@ import { hasCMSPermissions } from '../../domain-models'
 import { logError } from '../../logger'
 import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
 import { GraphQLError } from 'graphql/index'
+import type { Emailer } from '../../emailer'
+import type { StateCodeType } from '../../testHelpers'
 
 export function withdrawContract(
-    store: Store
+    store: Store,
+    emailer: Emailer
 ): MutationResolvers['withdrawContract'] {
     return async (_parent, { input }, context) => {
         const { user, ctx, tracer } = context
@@ -22,8 +25,8 @@ export function withdrawContract(
         span?.setAttribute('mcreview.package_id', contractID)
 
         if (!hasCMSPermissions(user)) {
-            const message = 'user not authorized to withdraw a rate'
-            logError('withdrawRate', message)
+            const message = 'user not authorized to withdraw a contract'
+            logError('withdrawContract', message)
             setErrorAttributesOnActiveSpan(message, span)
             throw new ForbiddenError(message)
         }
@@ -66,17 +69,17 @@ export function withdrawContract(
             })
         }
 
-        const withdrawnContract = await store.withdrawContract({
+        const withdrawResult = await store.withdrawContract({
             contract: contractWithHistory,
             updatedByID: user.id,
             updatedReason,
         })
 
-        if (withdrawnContract instanceof Error) {
-            const errMessage = `Failed to withdraw contract. ${withdrawnContract.message}`
+        if (withdrawResult instanceof Error) {
+            const errMessage = `Failed to withdraw contract. ${withdrawResult.message}`
             logError('withdrawSubmission', errMessage)
 
-            if (withdrawnContract instanceof NotFoundError) {
+            if (withdrawResult instanceof NotFoundError) {
                 throw new GraphQLError(errMessage, {
                     extensions: {
                         code: 'NOT_FOUND',
@@ -89,6 +92,63 @@ export function withdrawContract(
                 extensions: {
                     code: 'INTERNAL_SERVER_ERROR',
                     cause: 'DB_ERROR',
+                },
+            })
+        }
+
+        const { withdrawnContract, ratesForDisplay } = withdrawResult
+
+        let stateAnalystsEmails: string[] = []
+        const stateAnalystsEmailsResult = await store.findStateAssignedUsers(
+            withdrawnContract.stateCode as StateCodeType
+        )
+
+        if (stateAnalystsEmailsResult instanceof Error) {
+            logError(
+                'getStateAnalystsEmails',
+                stateAnalystsEmailsResult.message
+            )
+            setErrorAttributesOnActiveSpan(
+                stateAnalystsEmailsResult.message,
+                span
+            )
+        } else {
+            stateAnalystsEmails = stateAnalystsEmailsResult.map((u) => u.email)
+        }
+
+        const sendWithdrawCMSEmail =
+            await emailer.sendWithdrawnSubmissionCMSEmail(
+                withdrawnContract,
+                ratesForDisplay,
+                stateAnalystsEmails
+            )
+
+        const sendWithdrawStateEmail =
+            await emailer.sendWithdrawnSubmissionStateEmail(
+                withdrawnContract,
+                ratesForDisplay
+            )
+
+        if (
+            sendWithdrawCMSEmail instanceof Error ||
+            sendWithdrawStateEmail instanceof Error
+        ) {
+            let errMessage = ''
+
+            if (sendWithdrawCMSEmail instanceof Error) {
+                errMessage = `CMS Email failed: ${sendWithdrawCMSEmail.message}`
+            }
+
+            if (sendWithdrawCMSEmail instanceof Error) {
+                errMessage = `State Email failed: ${sendWithdrawCMSEmail.message}`
+            }
+
+            logError('withdrawContract', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+            throw new GraphQLError(errMessage, {
+                extensions: {
+                    code: 'INTERNAL_SERVER_ERROR',
+                    cause: 'EMAIL_ERROR',
                 },
             })
         }

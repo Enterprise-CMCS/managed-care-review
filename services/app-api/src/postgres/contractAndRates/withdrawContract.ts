@@ -18,6 +18,16 @@ export type WithdrawContractArgsType = {
     updatedReason: string
 }
 
+export type RateForDisplay = {
+    id: string
+    rateCertificationName: string
+}
+
+export type WithdrawContractReturnType = {
+    withdrawnContract: ContractType
+    ratesForDisplay: RateForDisplay[]
+}
+
 /**
  * Withdraws a contract and its associated eligible rates within a database transaction.
  *
@@ -40,7 +50,7 @@ export type WithdrawContractArgsType = {
 const withdrawContractInsideTransaction = async (
     tx: PrismaTransactionType,
     args: WithdrawContractArgsType
-): Promise<ContractType | Error> => {
+): Promise<WithdrawContractReturnType | Error> => {
     const { contract, updatedReason, updatedByID } = args
 
     const latestSubmission = contract.packageSubmissions[0]
@@ -202,8 +212,16 @@ const withdrawContractInsideTransaction = async (
         },
     })
 
-    // add withdraw action to all rates that are withdrawn with this submission
+    const ratesForDisplay: RateForDisplay[] = []
     for (const rate of ratesToWithdraw) {
+        // Grabbing necessary rate info to display in notif email
+        ratesForDisplay.push({
+            id: rate.id,
+            rateCertificationName:
+                rate.revisions[0].rateCertificationName ?? 'Unknown Rate',
+        })
+
+        // Add withdraw action to all rates that are withdrawn with this submission
         await tx.rateActionTable.create({
             data: {
                 updatedReason,
@@ -233,13 +251,16 @@ const withdrawContractInsideTransaction = async (
         throw new Error('Contract failed to withdraw')
     }
 
-    return withdrawnContract
+    return {
+        withdrawnContract,
+        ratesForDisplay,
+    }
 }
 
 const withdrawContract = async (
     client: ExtendedPrismaClient,
     args: WithdrawContractArgsType
-): Promise<ContractType | Error> => {
+): Promise<WithdrawContractReturnType | Error> => {
     try {
         return await client.$transaction(
             async (tx) => await withdrawContractInsideTransaction(tx, args),

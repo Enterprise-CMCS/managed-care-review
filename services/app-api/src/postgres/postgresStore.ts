@@ -92,7 +92,10 @@ import type {
     StrippedRateOrErrorArrayType,
 } from './contractAndRates/findAllRatesStripped'
 import { findAllRatesStripped } from './contractAndRates/findAllRatesStripped'
-import type { WithdrawContractArgsType } from './contractAndRates/withdrawContract'
+import type {
+    WithdrawContractArgsType,
+    WithdrawContractReturnType,
+} from './contractAndRates/withdrawContract'
 import { withdrawContract } from './contractAndRates/withdrawContract'
 import { findRateRelatedContracts } from './contractAndRates/findRateRelatedContracts'
 import type { RelatedContractStripped } from '../gen/gqlClient'
@@ -173,7 +176,7 @@ type Store = {
 
     withdrawContract: (
         args: WithdrawContractArgsType
-    ) => Promise<ContractType | Error>
+    ) => Promise<WithdrawContractReturnType | Error>
 
     withdrawRate: (args: WithdrawRateArgsType) => Promise<RateType | Error>
 
