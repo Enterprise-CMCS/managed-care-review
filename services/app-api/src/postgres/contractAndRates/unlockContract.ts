@@ -115,7 +115,7 @@ async function unlockContractInsideTransaction(
                     },
                     unlockInfo: true,
                 },
-                //take: 2 // Only two revision states are possible: mutually unlocked or submitted
+                take: 2, // Only two revision states are possible: mutually unlocked or submitted
             },
             reviewStatusActions: {
                 orderBy: {
