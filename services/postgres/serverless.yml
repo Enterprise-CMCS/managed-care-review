@@ -133,8 +133,15 @@ functions:
       securityGroupIds: ${self:custom.sgId}
       subnetIds: ${self:custom.privateSubnets}
     environment:
+      S3_BUCKET: !Ref DataExportBucket
       DB_SECRET_ARN: !Ref PostgresSecret
       SECRETS_MANAGER_ENDPOINT: !Sub 'https://secretsmanager.${AWS::Region}.amazonaws.com'
+    layers:
+      - !Ref pgToolsLambdaLayer
+
+layers:
+  pgTools:
+    path: lambda-layer-postgres-tools
 
 resources:
   Conditions:
