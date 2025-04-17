@@ -220,6 +220,7 @@ export const RateSummary = (): React.ReactElement => {
     const showNoActionsMessage =
         parentContractIsApproved ||
         parentContractIsUnlocked ||
+        parentContractIsWithdrawn ||
         isWithdrawnWithContract ||
         (!showUndoWithdrawRate && isWithdrawn) ||
         isUnlocked

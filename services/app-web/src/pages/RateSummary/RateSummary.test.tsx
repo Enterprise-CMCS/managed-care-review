@@ -871,7 +871,7 @@ describe('RateSummary', () => {
         })
         it('renders undo withdraw button when withdrawn independently', async () => {
             const contract = mockContractPackageSubmitted({
-                consolidatedStatus: 'WITHDRAWN',
+                consolidatedStatus: 'SUBMITTED',
             })
             const rateData = rateWithHistoryMock()
             rateData.parentContractID = contract.id
@@ -929,7 +929,7 @@ describe('RateSummary', () => {
                 screen.getByRole('button', { name: 'Undo withdraw' })
             ).toBeInTheDocument()
         })
-        it('does not render withdraw button when withdrawn independently', async () => {
+        it('does not render undo withdraw button when parent submission is withdrawn', async () => {
             const contract = mockContractPackageSubmitted({
                 consolidatedStatus: 'WITHDRAWN',
             })
@@ -986,8 +986,8 @@ describe('RateSummary', () => {
             })
 
             expect(
-                screen.getByRole('button', { name: 'Undo withdraw' })
-            ).toBeInTheDocument()
+                screen.queryByRole('button', { name: 'Undo withdraw' })
+            ).not.toBeInTheDocument()
         })
     })
 })
