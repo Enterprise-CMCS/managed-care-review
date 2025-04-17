@@ -80,7 +80,7 @@ async function unlockContractInsideTransaction(
 
     const childRateIDs: string[] = []
     // This find rates that where submitted with this contract at least once.
-    // The result could be a child or a previous child of the rate.
+    // The result could be a child, previous child, or a withdrawn rate .
     // A rate can become a previous child if the contract was withdrawn and the rate is reassigned a new parent contract.
     const childRates = await tx.rateTable.findMany({
         where: {
@@ -96,8 +96,8 @@ async function unlockContractInsideTransaction(
                 },
             },
         },
-        // return data only queries data we need.
         select: {
+            // return data only queries data we need.
             id: true,
             revisions: {
                 orderBy: {
@@ -125,12 +125,13 @@ async function unlockContractInsideTransaction(
         },
     })
 
-    // Only unlock child rates if the rate latest parent contract is still this one.
-    // Withdrawing a contract will reassign parent contracts.
     const submissionPackageEntries =
         currentRev.relatedSubmisions[0].submissionPackages
 
+    // Collect child rates to unlock with contract
     for (const childRate of childRates) {
+        // We only want to unlock this child rate if the latest rate submission was submitted with this contract. If
+        // it wasn't then we know this rate was reassigned or withdrawn from this contract
         const latestSubmittedRev = childRate.revisions.find((r) => r.submitInfo)
         const latestSubmissionParentContract =
             latestSubmittedRev?.submitInfo?.submittedContracts[0]?.contractID
