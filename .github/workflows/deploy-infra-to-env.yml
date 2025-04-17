@@ -124,6 +124,16 @@ jobs:
           stage-name: ${{ inputs.stage_name }}
           changed-services: ${{ inputs.changed_services }}
 
+      - uses: actions/download-artifact@v4
+        with:
+          name: lambda-layers-postgres-tools
+          path: ./services/postgres/lambda-layers-postgres-tools
+
+      - name: Unzip prisma migration layer
+        run: |
+          tar -C ./services/postgres/lambda-layers-postgres-tools -xf ./services/postgres/lambda-layers-postgres-tools/nodejs.tar.gz
+          rm -rf ./services/postgres/lambda-layers-postgres-tools/nodejs.tar.gz
+
       - name: deploy postgres
         id: deploy-postgres
         env:
