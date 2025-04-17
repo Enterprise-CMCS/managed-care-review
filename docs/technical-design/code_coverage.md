@@ -22,7 +22,7 @@ In the root `package.json` there's a series of scripts to run tests and generate
 }
 ```
 
-then running `yarn run myscript` will output
+then running `pnpm run myscript` will output
 
 ```
 pre script

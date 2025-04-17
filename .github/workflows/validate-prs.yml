@@ -19,7 +19,7 @@ jobs:
         uses: ./.github/actions/setup_env
 
       - name: DangerJS
-        run: yarn danger ci
+        run: pnpm danger ci
         env:
           DANGER_GITHUB_API_TOKEN: ${{ secrets.DANGER_GITHUB_API_TOKEN}}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,6 +1,6 @@
 # 010 — Use Prisma to connect to postgres
 
-As explained in a [previous ADR](./008-move-to-postgres.md), we are moving to using postgres as our database on MC Review. This means we need to pick a library to connect to the database from our Typescript API code. Additionally we'll need a way to run migrations when we make changes to the database as part of development.
+As explained in [ADR 008](./008-move-to-postgres.md), we are moving to using postgres as our database on MC Review. This means we need to pick a library to connect to the database from our Typescript API code. Additionally we'll need a way to run migrations when we make changes to the database as part of development.
 
 ## Considered Options
 

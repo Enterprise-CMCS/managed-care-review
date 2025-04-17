@@ -1,4 +1,4 @@
-# Define Frontend Toolset for Accessibility Standards
+# OUTDATED Define Frontend Toolset for Accessibility Standards
 
 ## This ADR has been superseded by [028-updated-frontend-a11y-toolset](028-updated-frontend-a11y-toolset.md)
 
