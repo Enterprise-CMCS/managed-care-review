@@ -6,51 +6,7 @@ describe('CMS user can view rate reviews', () => {
         cy.interceptGraphQL()
     })
 
-    it('and withdraw a rate', () => {
-        cy.interceptFeatureFlags({
-            'withdraw-rate': true,
-        })
-        cy.apiAssignDivisionToCMSUser(cmsUser(), 'DMCO').then(() => {
-            // Create a new contract and rates submission with two attached rates
-            cy.apiCreateAndSubmitContractWithRates(stateUser()).then(
-                (contract) => {
-                    const latestSubmission = contract.packageSubmissions[0]
-                    const rate1 = latestSubmission.rateRevisions[0]
-
-                    // Then check both rates in rate reviews table
-                    cy.logInAsCMSUser({
-                        initialURL: `/dashboard/rate-reviews`,
-                    })
-
-                    cy.get('table')
-                        .findByTestId(`rate-link-${rate1.rateID}`)
-                        .should('exist')
-                    // click the first rate to navigate to rate summary page
-                    cy.get('table')
-                        .findByTestId(`rate-link-${rate1.rateID}`)
-                        .click()
-                    cy.url({ timeout: 10_000 }).should('contain', rate1.rateID)
-                    cy.findByRole('heading', {
-                        name: `${rate1.formData.rateCertificationName}`,
-                    }).should('exist')
-
-                    cy.findByRole('button', { name: 'Withdraw rate' }).click()
-
-                    cy.findByText('Withdraw a rate').should('exist')
-
-                    cy.get('#rateWithdrawReason').type('Withdrawn for testing')
-
-                    cy.findByRole('button', { name: 'Withdraw rate' }).click()
-
-                    cy.url({ timeout: 20_000 }).should('contain', `rates/${rate1.rateID}`)
-                    
-                    cy.findByTestId('rateWithdrawBanner').should('exist')
-                }
-            )
-        })
-    })
-
-    it('and undo a withdrawn rate', () => {
+    it('and withdraw then unwithdraw a rate', () => {
         cy.interceptFeatureFlags({
             'withdraw-rate': true,
             'undo-withdraw-rate': true
@@ -84,19 +40,25 @@ describe('CMS user can view rate reviews', () => {
                     cy.findByText('Withdraw a rate').should('exist')
 
                     cy.get('#rateWithdrawReason').type('Withdrawn for testing')
-                    
+
                     cy.findByRole('button', { name: 'Withdraw rate' }).click()
-                    
-                    cy.url({ timeout: 20_000 }).should('contain', `rates/${rate1.rateID}`)
-                    
+
+                    cy.wait(['@withdrawRateMutation'], { timeout: 50_000 })
+
+                    cy.url().should('contain', `rates/${rate1.rateID}`)
+
+                    cy.findByTestId('rateWithdrawBanner').should('exist')
+
                     cy.findByRole('button', { name: 'Undo withdraw' }).click()
                     
                     cy.get('#undoWithdrawReason').type('Undo withdraw for testing')
                     
                     cy.findByRole('button', { name: 'Undo withdraw' }).click()
                     
-                    cy.url({ timeout: 20_000 }).should('contain', `rates/${rate1.rateID}`)
+                    cy.wait(['@undoWithdrawnRateMutation'], { timeout: 50_000 })
                     
+                    cy.url().should('contain', `rates/${rate1.rateID}`)
+
                     cy.findByTestId('statusUpdatedBanner').should('exist')
                 }
             )
