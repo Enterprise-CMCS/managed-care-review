@@ -12,6 +12,7 @@ import {
     unlockTestContract,
     contractHistoryToDescriptions,
     withdrawTestContract,
+    approveTestContract,
 } from '../../testHelpers/gqlContractHelpers'
 import {
     withdrawTestRate,
@@ -585,18 +586,78 @@ describe('undo withdraw rate error handling', async () => {
 
         await submitTestContract(stateServer, contractB.id)
 
-        await unlockTestContract(
-            cmsServer,
-            contractB.id,
-            'unlock to prep for withdraw rate'
+        await withdrawTestRate(cmsServer, rateID, 'Withdraw invalid rate')
+
+        await approveTestContract(cmsServer, contractB.id)
+
+        const unwithdrawnRate = await cmsServer.executeOperation({
+            query: UndoWithdrawnRateDocument,
+            variables: {
+                input: {
+                    rateID,
+                    updatedReason: 'I expect an undo withdraw error',
+                },
+            },
+        })
+
+        expect(unwithdrawnRate.errors).toBeDefined()
+        expect(unwithdrawnRate.errors?.[0].message).toContain(
+            `Attempted to undo rate withdrawal with contract(s) that are in an invalid state. Invalid contract IDs: ${[contractB.id]}`
         )
+    })
+
+    it('returns an error if parent contract is in an invalid state', async () => {
+        const stateUser = testStateUser()
+        const cmsUser = testCMSUser()
+        const stateServer = await constructTestPostgresServer({
+            context: {
+                user: stateUser,
+            },
+        })
+
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: cmsUser,
+            },
+        })
+
+        const contractA = await createAndSubmitTestContractWithRate(stateServer)
+        const rateID = contractA.packageSubmissions[0].rateRevisions[0].rateID
+
+        const contractB =
+            await createAndUpdateTestContractWithoutRates(stateServer)
+
+        // link rate contract B
+        must(
+            await stateServer.executeOperation({
+                query: UpdateDraftContractRatesDocument,
+                variables: {
+                    input: {
+                        contractID: contractB.id,
+                        lastSeenUpdatedAt: contractB.draftRevision?.updatedAt,
+                        updatedRates: [
+                            {
+                                type: 'LINK',
+                                rateID: rateID,
+                            },
+                            {
+                                type: 'CREATE',
+                                formData: testRateFormInputData(),
+                            },
+                        ],
+                    },
+                },
+            })
+        )
+
+        await submitTestContract(stateServer, contractB.id)
 
         await withdrawTestRate(cmsServer, rateID, 'Withdraw invalid rate')
 
         await withdrawTestContract(
             cmsServer,
             contractA.id,
-            'Withdraw contractA'
+            'Withdraw ContractA'
         )
 
         const unwithdrawnRate = await cmsServer.executeOperation({
@@ -611,7 +672,7 @@ describe('undo withdraw rate error handling', async () => {
 
         expect(unwithdrawnRate.errors).toBeDefined()
         expect(unwithdrawnRate.errors?.[0].message).toContain(
-            `Attempted to undo rate withdrawal with parent contract in an invalid state: APPROVED`
+            `Attempted to undo rate withdrawal with parent contract in an invalid state: WITHDRAWN`
         )
     })
 
