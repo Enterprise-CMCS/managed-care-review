@@ -92,6 +92,7 @@ export function withdrawRate(
         const allowedParentContractStatus = [
             'SUBMITTED',
             'RESUBMITTED',
+            'WITHDRAWN',
         ].includes(parentContract.consolidatedStatus)
 
         if (!allowedRateStatus || !allowedParentContractStatus) {

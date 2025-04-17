@@ -14,9 +14,11 @@ import {
     fetchTestContractWithQuestions,
     submitTestContract,
     unlockTestContract,
+    withdrawTestContract,
 } from '../../testHelpers/gqlContractHelpers'
 import {
     addNewRateToTestContract,
+    fetchTestRateById,
     withdrawTestRate,
 } from '../../testHelpers/gqlRateHelpers'
 import {
@@ -26,7 +28,10 @@ import {
     SubmitContractDocument,
     type RateFormDataInput,
 } from '../../gen/gqlClient'
-import { mockStoreThatErrors } from '../../testHelpers/storeHelpers'
+import {
+    mockStoreThatErrors,
+    sharedTestPrismaClient,
+} from '../../testHelpers/storeHelpers'
 import { expect } from 'vitest'
 import { testEmailConfig, testEmailer } from '../../testHelpers/emailerHelpers'
 import { packageName } from '@mc-review/hpp/build/healthPlanFormDataType/healthPlanFormData'
@@ -150,6 +155,159 @@ describe('withdrawRate', () => {
         // expect contract to be RESUBMITTED
         expect(contractWithWithdrawnRate.consolidatedStatus).toEqual(
             'RESUBMITTED'
+        )
+
+        // expect contract to contain the withdrawn rate
+        expect(contractWithWithdrawnRate?.withdrawnRates).toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({
+                    id: rateID,
+                }),
+            ])
+        )
+
+        const packageSubmissions = contractWithWithdrawnRate.packageSubmissions
+        const contractSubmitInfo =
+            packageSubmissions[0].contractRevision.submitInfo
+        const contractUnlockInfo =
+            packageSubmissions[0].contractRevision.unlockInfo
+
+        // expect withdrawn rate is no longer in latest package submission
+        expect(packageSubmissions[0].rateRevisions).not.toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({
+                    rateID,
+                }),
+            ])
+        )
+
+        // expect the contacts latest unlock info to contain default text and withdraw reason
+        expect(contractUnlockInfo?.updatedReason).toBe(
+            `CMS withdrawing rate ${rateName} from this submission. ${updatedReason}`
+        )
+
+        // expect contracts latest submission to contain default text and withdraw reason
+        expect(contractSubmitInfo?.updatedReason).toBe(
+            `CMS has withdrawn rate ${rateName} from this submission. ${updatedReason}`
+        )
+
+        // expect the withdrawn rate is on the previous packageSubmission
+        expect(packageSubmissions[1].rateRevisions).toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({
+                    rateID,
+                }),
+            ])
+        )
+    })
+
+    // No known path exists for a child rate to be submitted while its parent contract is withdrawn.
+    // However, we allow rate withdrawal in this edge case so CMS can fix rates without valid parent
+    // contracts, which warrants testing.
+    it('can withdraw a rate when parent contract is withdrawn', async () => {
+        const client = await sharedTestPrismaClient()
+        const stateUser = testStateUser()
+        const cmsUser = testCMSUser()
+        const stateServer = await constructTestPostgresServer({
+            context: {
+                user: stateUser,
+            },
+        })
+
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: cmsUser,
+            },
+        })
+
+        const contract = await createAndSubmitTestContractWithRate(stateServer)
+        const rate = contract.packageSubmissions[0].rateRevisions[0]
+        const rateID = rate.rateID
+        const rateName = rate.formData.rateCertificationName
+        const updatedReason = 'Withdraw invalid rate'
+
+        // To get into this state we manually add a review action, outside our regular methods in the API
+        await client.contractTable.update({
+            where: {
+                id: contract.id,
+            },
+            data: {
+                reviewStatusActions: {
+                    create: {
+                        updatedByID: cmsUser.id,
+                        updatedReason: 'Withdrawing contractC',
+                        actionType: 'WITHDRAW',
+                    },
+                },
+            },
+        })
+
+        const withdrawnRate = await withdrawTestRate(
+            cmsServer,
+            rateID,
+            updatedReason
+        )
+
+        // expect rate to contain contract in withdrawn join table
+        expect(withdrawnRate.withdrawnFromContracts).toHaveLength(1)
+        expect(withdrawnRate.withdrawnFromContracts).toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({
+                    id: contract.id,
+                }),
+            ])
+        )
+
+        // expect withdrawn status
+        expect(withdrawnRate).toEqual(
+            expect.objectContaining({
+                reviewStatus: 'WITHDRAWN',
+                consolidatedStatus: 'WITHDRAWN',
+            })
+        )
+
+        // expect correct actions
+        expect(withdrawnRate.reviewStatusActions).toHaveLength(1)
+        expect(withdrawnRate.reviewStatusActions).toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({
+                    updatedAt: expect.any(Date),
+                    updatedBy: expect.objectContaining({
+                        role: cmsUser.role,
+                        email: cmsUser.email,
+                        givenName: cmsUser.givenName,
+                        familyName: cmsUser.familyName,
+                    }),
+                    updatedReason: 'Withdraw invalid rate',
+                    actionType: 'WITHDRAW',
+                    rateID,
+                }),
+            ])
+        )
+
+        const latestRateRev = withdrawnRate.packageSubmissions[0].rateRevision
+        const rateUnlockInfo = latestRateRev.unlockInfo
+        const rateSubmitInfo = latestRateRev.submitInfo
+
+        // expect the rate latest unlock info to contain default text and withdraw reason
+        expect(rateUnlockInfo?.updatedReason).toBe(
+            `CMS withdrawing rate ${rateName} from this submission. ${updatedReason}`
+        )
+
+        // expect rate latest submission to contain default text and withdraw reason
+        expect(rateSubmitInfo?.updatedReason).toBe(
+            `CMS has withdrawn this rate. ${updatedReason}`
+        )
+
+        const contractWithWithdrawnRate = await fetchTestContractWithQuestions(
+            stateServer,
+            contract.id
+        )
+        expect(contractWithWithdrawnRate.withdrawnRates).toBeDefined()
+
+        // expect contract to be WITHDRAWN
+        expect(contractWithWithdrawnRate.consolidatedStatus).toEqual(
+            'WITHDRAWN'
         )
 
         // expect contract to contain the withdrawn rate
@@ -455,6 +613,136 @@ describe('withdrawRate', () => {
 
         // expect contract B to be submitted before we withdraw rate
         expect(submittedContractB.status).toBe('SUBMITTED')
+
+        const withdrawnRate = await withdrawTestRate(
+            cmsServer,
+            rateID,
+            'Withdraw invalid rate'
+        )
+
+        // expect rate to contain both contracts in withdrawn join table
+        expect(withdrawnRate.withdrawnFromContracts).toHaveLength(2)
+        expect(withdrawnRate.withdrawnFromContracts).toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({
+                    id: contractB.id,
+                }),
+                expect.objectContaining({
+                    id: contractA.id,
+                }),
+            ])
+        )
+
+        // expect review status action to be WITHDRAW
+        expect(withdrawnRate.reviewStatusActions).toHaveLength(1)
+        expect(withdrawnRate.reviewStatusActions).toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({
+                    updatedAt: expect.any(Date),
+                    updatedBy: expect.objectContaining({
+                        role: cmsUser.role,
+                        email: cmsUser.email,
+                        givenName: cmsUser.givenName,
+                        familyName: cmsUser.familyName,
+                    }),
+                    updatedReason: 'Withdraw invalid rate',
+                    actionType: 'WITHDRAW',
+                    rateID,
+                }),
+            ])
+        )
+
+        const contractAWithWithdrawnRate = await fetchTestContractWithQuestions(
+            stateServer,
+            contractA.id
+        )
+        expect(contractAWithWithdrawnRate.withdrawnRates).toBeDefined()
+
+        // expect contract A to contain the withdrawn rate
+        expect(contractAWithWithdrawnRate?.withdrawnRates).toHaveLength(1)
+        expect(contractAWithWithdrawnRate?.withdrawnRates).toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({
+                    id: rateID,
+                }),
+            ])
+        )
+
+        const contractBWithWithdrawnRate = await fetchTestContractWithQuestions(
+            stateServer,
+            contractB.id
+        )
+        expect(contractBWithWithdrawnRate.withdrawnRates).toBeDefined()
+
+        // expect contract B to contain the withdrawn rate
+        expect(contractBWithWithdrawnRate?.withdrawnRates).toHaveLength(1)
+        expect(contractBWithWithdrawnRate?.withdrawnRates).toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({
+                    id: rateID,
+                }),
+            ])
+        )
+    })
+
+    it('withdraws rate when linked to withdrawn contract', async () => {
+        const stateUser = testStateUser()
+        const cmsUser = testCMSUser()
+        const stateServer = await constructTestPostgresServer({
+            context: {
+                user: stateUser,
+            },
+        })
+
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: cmsUser,
+            },
+        })
+
+        const contractA = await createAndSubmitTestContractWithRate(stateServer)
+        const rateID = contractA.packageSubmissions[0].rateRevisions[0].rateID
+
+        const contractB =
+            await createAndUpdateTestContractWithoutRates(stateServer)
+
+        // link rate to contract B
+        must(
+            await stateServer.executeOperation({
+                query: UpdateDraftContractRatesDocument,
+                variables: {
+                    input: {
+                        contractID: contractB.id,
+                        lastSeenUpdatedAt: contractB.draftRevision?.updatedAt,
+                        updatedRates: [
+                            {
+                                type: 'LINK',
+                                rateID: rateID,
+                            },
+                        ],
+                    },
+                },
+            })
+        )
+
+        const submittedContractB = await submitTestContract(
+            stateServer,
+            contractB.id
+        )
+
+        // expect contract B to be submitted before we withdraw rate
+        expect(submittedContractB.status).toBe('SUBMITTED')
+
+        // withdraw contract A
+        await withdrawTestContract(
+            cmsServer,
+            contractA.id,
+            'withdraw contract A'
+        )
+
+        // expect rateA to have a new parent contract B
+        const rateA = await fetchTestRateById(cmsServer, rateID)
+        expect(rateA.parentContractID).toBe(contractB.id)
 
         const withdrawnRate = await withdrawTestRate(
             cmsServer,
