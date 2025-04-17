@@ -1,6 +1,8 @@
 # 007 — Move to Postgres
 
-As we move beyond our submission MVP, our database needs are becoming more complex. Up until now we’ve only stored a single datatype: the submission form data. The CMS review workflow will require much more relational data, as we track the status of different parts of the submission across three different departments, as well as more firm data integrity guarantees as different people start to handle the same data. These needs have driven us to reevaluate our reliance on DynamoDB just as [we suspected we would](./004-use-dynamodb-for-now.md) back in January. After considering the options, we have decided to move to using postgres as our database, replacing our use of Dynamo.
+This ADR overrides a previous decision from [ADR 004](./004-use-dynamodb-for-now.md) to store health plan data in Dynamo, a NoSQL data store.
+
+As we move beyond our MVP release, our database needs are becoming more complex. Up until now we’ve only stored a single datatype: the submission form data. The CMS review workflow will require much more relational data, as we track the status of different parts of the submission across three different departments, as well as more firm data integrity guarantees as different people start to handle the same data. These needs have driven us to reevaluate our reliance on DynamoDB just as [we suspected we would](./004-use-dynamodb-for-now.md) back in January. After considering the options, we have decided to move to using postgres as our database, replacing our use of Dynamo.
 
 ## Decision Drivers
 

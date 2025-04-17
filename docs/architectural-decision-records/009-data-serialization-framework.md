@@ -1,6 +1,6 @@
-# 009 — Use protobufs as the data storage approach for submission data
+# 009 — OUTDATED Use protobufs as the data storage approach for submission data
 
-## This document is now outdated. This ADR is now superceded by [ADR 0024](./024-remove-protobufs)
+## This document is now outdated. This ADR is superceded by  [ADR 0024](./024-remove-protobufs)
 
 ---
 Data for managed care submission forms is central to our application. A pain point in the project has been determining ‘what is a submission’ and how this data should be structured. As we add more and more states to our system, as we continue design and research, and as CMS policy changes we expect our data model will continue to be highly unstable. Knowing this, we will use a data serialization tool to encode our data using a schema that can be stored alongside the data record. The background behind this approach is described in [ADR 008](./008-form-data-serialization.md).

@@ -1,4 +1,4 @@
-# 008 — Seralize form data in a single health plan package
+# 008 — OUTDATED Seralize form data in a single health plan package
 
 ## This document is now outdated. This ADR is now superceded by [ADR 0023](./023-seperate-contract-rates-tables-postgres)
 

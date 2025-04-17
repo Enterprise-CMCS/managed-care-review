@@ -1,4 +1,5 @@
-# 004 — Use DynamoDB as our Datastore
+# 004 — OUTDATED Use DynamoDB as our Datastore
+This ADR was superceded by [ADR 007](./007-move-to-postgres.md).
 
 We need to decide on what database to use to store data for the pilot. Our current infra plan has some weaknesses we intend to shore up when we have dedicated infra engineers on the project, so we are going to consider a few different options for how we might store data. For the pilot, we need to store some static user/state info as well as user submissions.
 

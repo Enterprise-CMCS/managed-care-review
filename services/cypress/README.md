@@ -32,7 +32,7 @@ CI deployment is congifured in `.github/workflows/deploy.yml`.
               path: ./services/cypress/gen
         ```
 
-    -   In the `Cypress -- Chrome` step we have configured it to point to our `cypress.config.ts`. This is because cypress is actually ran from the root directory and not in the `services/cypress` directory. We had issues with running Cypress in `services/cypress` we think this is because that directory has no `yarn.lock` which seems like what Cypress needs to check versions. So Cypress is now ran from the root folder, while all the config and test files are pointed to our `services/cypress` directory
+    -   In the `Cypress -- Chrome` step we have configured it to point to our `cypress.config.ts`. This is because cypress is actually ran from the root directory as a result of legacy code decisions, and not in the `services/cypress` directory. All the config and test files are pointed to our `services/cypress` directory
         ```yaml
         - name: Cypress -- Chrome
           id: cypress
@@ -68,7 +68,7 @@ CI deployment is congifured in `.github/workflows/deploy.yml`.
 
 LaunchDarkly integration docs can be found in [launch-darkly-testing-approach.md](../../docs/technical-design/launch-darkly-testing-approach.md#feature-flag-cypress-testing)
 
-### Accessibility Testing 
+### Accessibility Testing
 
 We are using the `cypress-axe` plugin to run our a11y tests. `cypress-axe` uses the `axe-core` testing engine.
 
@@ -101,14 +101,14 @@ Using the app to navigate allows us to check a11y without injecting the runtime 
         // 438-attestation still needs to go through design, there is an a11y violation for links and spacing
         cy.interceptFeatureFlags({'438-attestation': false})
         cy.logInAsStateUser()
-    
+
         // Inject the axe run-time
         cy.injectAxe()
-    
+
         // Start a base contract only submissions
         cy.findByTestId('state-dashboard-page').should('exist')
         cy.findByRole('link', { name: 'Start new submission' }).click()
-    
+
         // Check accessibility on Submission type page
         cy.findByRole('heading', { level: 1, name: /New submission/ })
         cy.findByRole('button', {
@@ -118,10 +118,10 @@ Using the app to navigate allows us to check a11y without injecting the runtime 
             name: 'Continue',
         }).safeClick()
         cy.checkA11yWithWcag22aa()
-    
+
         cy.fillOutContractActionAndRateCertification()
         cy.deprecatedNavigateV1Form('CONTINUE_FROM_START_NEW')
-    
+
         cy.findByRole('heading', { level: 2, name: /Contract details/ })
         cy.findByRole('button', {
             name: 'Continue',
