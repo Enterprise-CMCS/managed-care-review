@@ -6,9 +6,10 @@ describe('CMS user can view rate reviews', () => {
         cy.interceptGraphQL()
     })
 
-    it('and withdraw a rate', () => {
+    it('and withdraw then unwithdraw a rate', () => {
         cy.interceptFeatureFlags({
             'withdraw-rate': true,
+            'undo-withdraw-rate': true
         })
         cy.apiAssignDivisionToCMSUser(cmsUser(), 'DMCO').then(() => {
             // Create a new contract and rates submission with two attached rates
@@ -42,9 +43,23 @@ describe('CMS user can view rate reviews', () => {
 
                     cy.findByRole('button', { name: 'Withdraw rate' }).click()
 
-                    cy.url({ timeout: 20_000 }).should('contain', `rates/${rate1.rateID}`)
-                    
+                    cy.wait(['@withdrawRateMutation'], { timeout: 50_000 })
+
+                    cy.url().should('contain', `rates/${rate1.rateID}`)
+
                     cy.findByTestId('rateWithdrawBanner').should('exist')
+
+                    cy.findByRole('button', { name: 'Undo withdraw' }).click()
+                    
+                    cy.get('#undoWithdrawReason').type('Undo withdraw for testing')
+                    
+                    cy.findByRole('button', { name: 'Undo withdraw' }).click()
+                    
+                    cy.wait(['@undoWithdrawnRateMutation'], { timeout: 50_000 })
+                    
+                    cy.url().should('contain', `rates/${rate1.rateID}`)
+
+                    cy.findByTestId('statusUpdatedBanner').should('exist')
                 }
             )
         })
