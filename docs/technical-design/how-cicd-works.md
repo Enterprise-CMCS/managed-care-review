@@ -3,7 +3,7 @@ title: How the MC-Review CI/CD works
 ---
 
 # How the MC-Review CI/CD works
-We use Github Actions and deploy between three environments. These environments are referred to in our github actions workflows as `dev` `val` and `prod`.
+We use Github Actions and deploy between three main environments. These environments are referred to in our github actions workflows as `dev` `val` and `prod`.
 
 Dev is used as the shared developer environment. It also provides infrastructureu sed for the transient PR review app sandboxes which are built and torn down as pull requests are put up. These review app sandboxes get a fresh install of MC-Review to a distinct url, a seperate db, etc witha  `deploy` script and are torn down after PRs merge with the `destroy` script.
 
@@ -20,3 +20,6 @@ Improvements of note:
 - [feature flags](../architectural-decision-records/016-use-launch-darkly-for-feature-flags.md) to allow shipping of partial features
 - [github OIDC](../architectural-decision-records/020-use-oidc-for-aws-credentials.md) for short term credential and [targeted github environments](../architectural-decision-records/021-use-github-environments.md), following the work of MAC-FC
 
+## Breadcrumbs
+- Primary github actions workflows can be found in `.github/workflows`.
+- View the [actions panel](https://github.com/Enterprise-CMCS/managed-care-review/actions) in Github and click in to see steps running
