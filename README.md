@@ -162,13 +162,7 @@ We are using Postgres as our primary data store and [Prisma](https://prisma.io) 
 
 We describe our database tables and relationships between them in our Prisma schema at /services/app-api/prisma/schema.prisma. If you want to change our database, start by changing [that schema file](https://www.prisma.io/docs/concepts/components/prisma-schema) how you like.
 
-If you want to test that schema before you generate the migration that will be checked in an run by other dev and in dev/val/prod, you can use the [`./dev prisma -- db push`](https://www.prisma.io/docs/guides/database/prototyping-schema-db-push) to make the changes to your current database and generate the matching PrismaClient.
-
-When you're happy with your schema.prisma, use [`./dev prisma -- migrate dev`](https://www.prisma.io/docs/concepts/components/prisma-migrate) to generate a new migration file. (if you have run `prisma db push` you will have to wipe your local db to do so). That file gets checked in and used to make the changes in all other environments.
-
-If you are going to need to modify the migration that prisma generates you can use `./dev prisma -- migrate dev --create-only`. That will generate the migration file but not actually apply it to the database. `./dev prisma -- migrate dev` will apply it.
-
-Whenever you run `./dev postgres` we start a new postgres docker container and run `prisma migrate reset --force` to clean it out and run all of our checked in migrations there. After that you should be ready to develop.
+For more suggestions about how to run a migration see [how to complete migrations](/docs//technical-design/howto-migrations.md)
 
 ## Build & Deploy in CI
 

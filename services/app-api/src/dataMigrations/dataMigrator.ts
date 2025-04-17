@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client'
 import type { PrismaTransactionType } from '../postgres/prismaTypes'
 import { migrate as migrate1 } from './migrations/20231026123042_test_migrator_works'
+// Deprecated do not use
 
 // MigrationType describes a single migration with a name and a callable function called migrateProto
 interface DBMigrationType {
