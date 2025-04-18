@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import styles from './SubmissionWithdraw.module.scss'
 import {
     ActionButton,
@@ -30,6 +30,7 @@ import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import { SubmissionWithdrawWarningBanner } from '../../components/Banner/SubmissionWithdrawWarningBanner/SubmissionWithdrawWarningBanner'
 import { useTealium } from '../../hooks'
 import { recordJSException } from '@mc-review/otel'
+import { usePage } from '../../contexts/PageContext'
 
 type SubmissionWithdrawValues = {
     submissionWithdrawReason: string
@@ -95,6 +96,7 @@ export const shouldWarnOnWithdraw = (
 
 export const SubmissionWithdraw = (): React.ReactElement => {
     const { id } = useParams() as { id: string }
+    const { updateHeading } = usePage()
     const { logFormSubmitEvent } = useTealium()
     const navigate = useNavigate()
     const [shouldValidate, setShouldValidate] = React.useState(false)
@@ -126,6 +128,13 @@ export const SubmissionWithdraw = (): React.ReactElement => {
     const rateIDs = contract
         ? contract.packageSubmissions[0].rateRevisions.map((rr) => rr.rateID)
         : []
+
+    const contractName =
+        contract?.packageSubmissions[0].contractRevision.contractName
+
+    useEffect(() => {
+        updateHeading({ customHeading: contractName })
+    }, [contractName, updateHeading])
 
     //Fetching rates associated with above contract to determine whether or not they will be withdrawn (banner display)
     //This query will be skipped if rateIDs comes up empty
@@ -161,9 +170,6 @@ export const SubmissionWithdraw = (): React.ReactElement => {
     ) {
         return <GenericErrorPage />
     }
-
-    const contractName =
-        contract?.packageSubmissions[0].contractRevision.contractName
 
     //These rates will be displayed in the warning banner
     const ratesToNotBeWithdrawn: RatesToNotBeWithdrawn[] = []
