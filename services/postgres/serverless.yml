@@ -137,10 +137,10 @@ functions:
       DB_SECRET_ARN: !Ref PostgresSecret
       SECRETS_MANAGER_ENDPOINT: !Sub 'https://secretsmanager.${AWS::Region}.amazonaws.com'
     layers:
-      - !Ref pgToolsLambdaLayer
+      - !Ref PgToolsLambdaLayer
 
 layers:
-  pgTools:
+  PgTools:
     path: lambda-layers-postgres-tools
 
 resources:
