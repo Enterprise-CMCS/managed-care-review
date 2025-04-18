@@ -4,16 +4,11 @@
 <b>Reason for withdrawal:</b> <%= it.withdrawReason %><br />
 <% if (it.formattedRateDisplayData && it.formattedRateDisplayData.length > 0) { %>
 <b>Related rate certification(s):</b>
-<% if (it.formattedRateDisplayData.length > 1) { %>
 <ul>
 <% it.formattedRateDisplayData.forEach(function(rate) { %>
-<li><%= rate.rateCertificationName %></li>
+  <li><%= rate.rateCertificationName %></li>
 <% }) %>
 </ul>
-<% } else { %>
-<%= it.formattedRateDisplayData[0].rateCertificationName %><br />
-<br />
-<% } %>
 <% } %>
 <% if (it.formattedRateDisplayData.length === 0) { %>
 <br />
