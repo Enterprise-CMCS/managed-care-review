@@ -141,7 +141,7 @@ functions:
 
 layers:
   pgTools:
-    path: lambda-layer-postgres-tools
+    path: lambda-layers-postgres-tools
 
 resources:
   Conditions:
