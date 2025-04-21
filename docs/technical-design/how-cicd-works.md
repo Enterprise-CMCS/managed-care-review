@@ -5,7 +5,7 @@ title: How the MC-Review CI/CD works
 # How the MC-Review CI/CD works
 We use Github Actions and deploy between three main environments. These environments are referred to in our github actions workflows as `dev` `val` and `prod`. However, a quirk of our Serverless deployment, which we inherited from the quick start, is that the `stage` for our `dev` environment is called `main` while `val` has a stage of `val` and `prod` has a stage of `prod`.
 
-Dev is used as the shared developer environment. It also provides infrastructureu used for the transient PR review app sandboxes which are built and torn down as pull requests are put up. These review app sandboxes are built on demand when a developer pushes code, and on the initial push, will build a fresh install of MC-Review to a distinct url, with a seperate db.
+Dev is used as the shared developer environment. It also provides infrastructure used for the transient PR review app sandboxes which are built and torn down as pull requests are put up. These review app sandboxes are built on demand when a developer pushes code, and on the initial push, will build a fresh install of MC-Review to a distinct url, with a separate db.
 
 Val is used as the shared staging environment. It is an important place for testing integrations with other teams and applications as well.
 
