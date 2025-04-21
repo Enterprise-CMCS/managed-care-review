@@ -25,4 +25,4 @@ Improvements of note:
 ## Breadcrumbs
 - Primary github actions workflows can be found in `.github/workflows`.
 - View the [actions panel](https://github.com/Enterprise-CMCS/managed-care-review/actions) in Github and click in to see steps running
-- Rerunning just the cypress step from the Github panel online doesn't reliably work. Another way to restart the cypress step of our PR deploy workflow is making a `cypress re-run`
+- Rerunning just the cypress step from the Github panel online doesn't reliably work. Another way to restart the cypress step of our PR deploy workflow is making an empty commit with the commit message `cypress re-run`
