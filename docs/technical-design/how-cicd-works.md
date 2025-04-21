@@ -11,7 +11,7 @@ Val is used as the shared staging environment. It is an important place for test
 
 Prod is the production environment that serve our users.
 
-There are two main workflow actions: `deploy` and  `promote`. Deploy is used to build all the services that make up MC-Review. It calls `deploy-app-to-env` and `deploy-infra-to-env` with the environment specific context. Promote will deploy the application through dev> val> prod in success, gating for tests and checks at each step.
+There are two main workflow actions: `deploy` and  `promote`. Deploy is used to build all the services that make up MC-Review. It calls `deploy-app-to-env` and `deploy-infra-to-env` with the environment specific context. Promote will deploy the application through dev > val > prod in success, gating for tests and checks at each step.
 
 ## Background
 We inherited our initial CI and deployments setup from the [Quickstart application](https://github.com/Enterprise-CMCS/macpro-quickstart-serverless), relying heavily on Github Actions and a `deploy` script.  We then added improvments.
