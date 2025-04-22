@@ -79,11 +79,9 @@ async function unlockContractInsideTransaction(
     }
 
     const childRateIDs: string[] = []
-    // This finds the child rates for this submission.
-    // A child rate is a rate that shares a submit info with this contract.
-    // technically only a rate that is _initially_ submitted with a contract
-    // is a child rate, but we should never allow re-submission so this simpler
-    // query that doesn't try to filter to initial revisions works.
+    // This find rates that where submitted with this contract at least once.
+    // The result could be a child, previous child, or a withdrawn rate .
+    // A rate can become a previous child if the contract was withdrawn and the rate is reassigned a new parent contract.
     const childRates = await tx.rateTable.findMany({
         where: {
             revisions: {
@@ -98,7 +96,27 @@ async function unlockContractInsideTransaction(
                 },
             },
         },
-        include: {
+        select: {
+            // return data only queries data we need.
+            id: true,
+            revisions: {
+                orderBy: {
+                    createdAt: 'desc',
+                },
+                select: {
+                    submitInfo: {
+                        select: {
+                            submittedContracts: {
+                                select: {
+                                    contractID: true,
+                                },
+                            },
+                        },
+                    },
+                    unlockInfo: true,
+                },
+                take: 2, // Only two revision states are possible: mutually unlocked or submitted
+            },
             reviewStatusActions: {
                 orderBy: {
                     updatedAt: 'desc',
@@ -107,16 +125,22 @@ async function unlockContractInsideTransaction(
         },
     })
 
-    // only unlock children that were submitted in the latest submission
     const submissionPackageEntries =
         currentRev.relatedSubmisions[0].submissionPackages
 
+    // Collect child rates to unlock with contract
     for (const childRate of childRates) {
+        // We only want to unlock this child rate if the latest rate submission was submitted with this contract. If
+        // it wasn't then we know this rate was reassigned or withdrawn from this contract
+        const latestSubmittedRev = childRate.revisions.find((r) => r.submitInfo)
+        const latestSubmissionParentContract =
+            latestSubmittedRev?.submitInfo?.submittedContracts[0]?.contractID
+
         if (
             submissionPackageEntries.some(
                 (p) => p.rateRevision.rateID === childRate.id
             ) &&
-            childRate.reviewStatusActions[0]?.actionType !== 'WITHDRAW'
+            latestSubmissionParentContract === contractID
         ) {
             childRateIDs.push(childRate.id)
         }
