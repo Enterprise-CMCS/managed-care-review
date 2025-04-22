@@ -8,7 +8,10 @@ import type { ExtendedPrismaClient } from '../prismaClient'
 import type { ConsolidatedContractStatus } from '../../gen/gqlClient'
 import { submitContractAndOrRates } from './submitContractAndOrRates'
 import { includeRateRevisionWithRelatedSubmissionContracts } from './prismaSubmittedRateHelpers'
-import { getNewParentContract } from './prismaSharedContractRateHelpers'
+import {
+    getNewParentContract,
+    getParentContractID,
+} from './prismaSharedContractRateHelpers'
 import type { RatesToReassign } from './reassignParentContract'
 import { reassignParentContractInTransaction } from './reassignParentContract'
 
@@ -105,16 +108,15 @@ const withdrawContractInsideTransaction = async (
     // Loop through all rates to determine which ones can be withdrawn or reassigned parent contract
     for (const rate of rates) {
         const latestRateRevision = rate.revisions[0]
-        const submitInfo = latestRateRevision.submitInfo
 
-        if (!submitInfo) {
+        // get the latest parentContract ID of the rate
+        const parentContractID = getParentContractID(rate.revisions)
+
+        if (parentContractID instanceof Error) {
             throw new Error(
-                `Child rate ${rate.id} of contract to be withdrawn does is not submitted.`
+                `Cannot get parentContractID of rate ${rate.id}: ${parentContractID.message}`
             )
         }
-
-        const parentContractID =
-            latestRateRevision.submitInfo?.submittedContracts[0].contractID
 
         // skipping rate if conditions are met
         if (
@@ -144,6 +146,13 @@ const withdrawContractInsideTransaction = async (
             }
             reassignParentContracts[contractID].rates.push(reassignRate)
         } else {
+            // Abort withdraw any child rates we want to withdraw is not submitted
+            if (!latestRateRevision.submitInfo) {
+                throw new Error(
+                    `Child rate ${rate.id} of contract to be withdrawn is not submitted.`
+                )
+            }
+
             ratesToWithdraw.push(rate)
         }
     }
