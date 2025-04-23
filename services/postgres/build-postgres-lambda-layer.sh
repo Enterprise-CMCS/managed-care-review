@@ -54,8 +54,8 @@ docker run --rm \
 
 # Create the final layer archive
 cd lambda-layer-postgres-tools || exit
-tar -czvf ../lambda-layer-postgres-tools.tar.gz .
+tar -czvf ../postgres-tools.tar.gz .
 cd ..
 
-echo "Done! Lambda layer created: lambda-layer-postgres-tools.tar.gz"
-ls -lh lambda-layer-postgres-tools.tar.gz
+echo "Done! Lambda layer created: postgres-tools.tar.gz"
+ls -lh postgres-tools.tar.gz
