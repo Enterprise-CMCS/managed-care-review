@@ -16,6 +16,44 @@ const s3Client = new S3Client({ region: REGION })
 export const handler = async () => {
     console.info('Starting database export process...')
 
+    //debug
+    try {
+        // Check if pg_dump is in PATH
+        console.info('Checking if pg_dump is in PATH:')
+        execSync('which pg_dump || echo "Not found in PATH"', {
+            stdio: 'inherit',
+        })
+
+        // Try running pg_dump with version flag
+        console.info('Attempting to run pg_dump --version:')
+        try {
+            execSync('pg_dump --version', { stdio: 'inherit' })
+        } catch (e) {
+            console.info('Failed to run pg_dump --version:', e.message)
+        }
+        // List all contents of /opt
+        console.info('Contents of /opt:')
+        execSync('ls -la /opt', { stdio: 'inherit' })
+
+        // List any subdirectories
+        console.info('Looking for subdirectories in /opt:')
+        execSync('find /opt -type d | sort', { stdio: 'inherit' })
+
+        // Search for pg_dump binary
+        console.info('Searching for pg_dump binary:')
+        execSync('find /opt -name pg_dump', { stdio: 'inherit' })
+
+        // Search for any PostgreSQL-related files
+        console.info('Searching for PostgreSQL-related files:')
+        execSync('find /opt -name "*pg*"', { stdio: 'inherit' })
+
+        // Check system paths
+        console.info('System PATH:')
+        execSync('echo $PATH', { stdio: 'inherit' })
+    } catch (error) {
+        console.error('Error in directory exploration:', error)
+    }
+
     if (!DB_SECRET_ARN) {
         throw new Error('DB_SECRET_ARN environment variable is not set')
     }
