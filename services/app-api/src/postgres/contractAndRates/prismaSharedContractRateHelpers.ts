@@ -24,8 +24,6 @@ import type {
 } from '../../gen/gqlServer'
 import type {
     RateTableWithoutDraftContractsPayload,
-    RateRevisionsTableStrippedPayload,
-    RateRevisionTablePayload,
     RateTableWithoutDraftContractsStrippedPayload,
     RateRevisionTableWithRelatedSubmissionContracts,
     SubmissionPackageContractRevisionData,
@@ -187,11 +185,22 @@ function getConsolidatedRateStatus(
     }
 }
 
+// Minimum required structure of a rate revision that contains parent contract relationship information.
+interface RateRevisionWithSubmittedContracts {
+    createdAt: Date
+    submitInfo?: {
+        submittedContracts: Array<{
+            contractID: string
+        }>
+    } | null
+    relatedSubmissions: Array<unknown>
+}
+
 // Find this rate's parent contract. It'll be the contract it was initially submitted with
 // or the contract it is associated with as an initial draft.
 const getParentContractID = (
-    rateRevisions: RateRevisionsTableStrippedPayload | RateRevisionTablePayload
-) => {
+    rateRevisions: RateRevisionWithSubmittedContracts[]
+): string | Error => {
     // sort in descending order
     const revisions = [...rateRevisions].sort(
         (revA, revB) => revB.createdAt.getTime() - revA.createdAt.getTime()
