@@ -17,41 +17,30 @@ export const handler = async () => {
     console.info('Starting database export process...')
 
     //debug
+    console.info('Examining /opt/bin directory:')
     try {
-        // Check if pg_dump is in PATH
-        console.info('Checking if pg_dump is in PATH:')
-        execSync('which pg_dump || echo "Not found in PATH"', {
+        execSync('ls -la /opt/bin', { stdio: 'inherit' })
+
+        // Check if pg_dump exists and its permissions
+        console.info('Checking pg_dump file:')
+        execSync('ls -la /opt/bin/pg_dump || echo "File not found"', {
             stdio: 'inherit',
         })
 
-        // Try running pg_dump with version flag
-        console.info('Attempting to run pg_dump --version:')
-        try {
-            execSync('pg_dump --version', { stdio: 'inherit' })
-        } catch (e) {
-            console.info('Failed to run pg_dump --version:', e.message)
-        }
-        // List all contents of /opt
-        console.info('Contents of /opt:')
-        execSync('ls -la /opt', { stdio: 'inherit' })
+        // Try to determine file type
+        console.info('Checking file type:')
+        execSync('file /opt/bin/pg_dump || echo "Cannot determine file type"', {
+            stdio: 'inherit',
+        })
 
-        // List any subdirectories
-        console.info('Looking for subdirectories in /opt:')
-        execSync('find /opt -type d | sort', { stdio: 'inherit' })
-
-        // Search for pg_dump binary
-        console.info('Searching for pg_dump binary:')
-        execSync('find /opt -name pg_dump', { stdio: 'inherit' })
-
-        // Search for any PostgreSQL-related files
-        console.info('Searching for PostgreSQL-related files:')
-        execSync('find /opt -name "*pg*"', { stdio: 'inherit' })
-
-        // Check system paths
-        console.info('System PATH:')
-        execSync('echo $PATH', { stdio: 'inherit' })
+        // Check shared library dependencies
+        console.info('Checking shared library dependencies:')
+        execSync(
+            '/opt/bin/pg_dump --version 2>&1 || echo "Failed to run pg_dump"',
+            { stdio: 'inherit' }
+        )
     } catch (error) {
-        console.error('Error in directory exploration:', error)
+        console.error('Error in examination:', error)
     }
 
     if (!DB_SECRET_ARN) {
