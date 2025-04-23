@@ -126,6 +126,7 @@ functions:
     environment:
       SECRETS_MANAGER_ENDPOINT: !Sub 'https://secretsmanager.${AWS::Region}.amazonaws.com'
   dbExport:
+    condition: : IsValOrProd
     handler: src/db_export.handler
     description: Exports data from the Postgres Aurora database
     timeout: 60
@@ -153,7 +154,7 @@ resources:
     IsValOrProd: !Or
       - !Equals ['${sls:stage}', 'val']
       - !Equals ['${sls:stage}', 'prod']
-      - !Equals ['${sls:stage}', 'mtvalprodinfra']
+      - !Equals ['${sls:stage}', 'mttestexport']
 
   Resources:
     # VPC endpoint for rotation lambda
