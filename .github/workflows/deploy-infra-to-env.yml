@@ -131,6 +131,8 @@ jobs:
 
       - name: Unzip prisma migration layer
         run: |
+          ls -al ./services/postgres/
+          ls -al ./services/postgres/lambda-layers-postgres-tools
           tar -C ./services/postgres/lambda-layers-postgres-tools -xf ./services/postgres/lambda-layers-postgres-tools/postgres-tools.tar.gz
           rm -rf ./services/postgres/lambda-layers-postgres-tools/postgres-tools.tar.gz
 
