@@ -100,7 +100,7 @@ dataExport: DataExport
 Once we've told GraphQL what query we want and described that data's return type, we can generate type information that can be shared between the web and api layers. We have a generated file at `/app-web/src/gen/gqlClient.tsx`, which contains graphQL types that we can use in the front end.
 
 _**On the command line, navigate to `/services/app-graphql`.**_
-_**Run `yarn gqlgen`**_
+_**Run `pnpm gqlgen`**_
 
 The generated file isn't checked into source control, but if you look inside, you'll now find a new type that you can use on the front-end if necessary.
 
@@ -226,7 +226,7 @@ dataExport: dataExportResolver(store),
 Once we have our backend code in place, if we've modified the prisma schema (we did not, in this example), we need to run another generate command.
 
 _**On the command line, navigate to `/services/app-api`**_
-_**Run `yarn prisma generate`**_
+_**Run `pnpm prisma generate`**_
 
 or from the root run  `./dev generate` which includes prisma code generation
 
@@ -234,7 +234,7 @@ This command will create `node_modules/.prisma/client/index.d.ts`
 
 ### Generating graphql types
 _**On the command line, navigate to `/services/app-graphql`**_
-_**Run `yarn gqlgen`**_
+_**Run `pnpm gqlgen`**_
 
 or from the root run `./dev generate` which includes graphql types code generation
 

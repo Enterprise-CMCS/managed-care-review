@@ -69,6 +69,8 @@ Cypress.Commands.add('interceptGraphQL', () => {
         aliasMutation(req, 'updateContractDraftRevision')
         aliasMutation(req, 'submitContract')
         aliasMutation(req, 'updateStateAssignmentsByState')
+        aliasMutation(req, 'withdrawRate')
+        aliasMutation(req, 'undoWithdrawnRate')
     }).as('GraphQL')
 })
 

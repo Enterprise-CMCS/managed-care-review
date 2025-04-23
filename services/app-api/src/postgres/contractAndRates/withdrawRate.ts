@@ -138,7 +138,11 @@ const withdrawRateInsideTransaction = async (
         let previousRates = []
 
         // If the contract is locked, unlock it and set previousRates.
-        if (['SUBMITTED', 'RESUBMITTED'].includes(consolidatedStatus)) {
+        if (
+            ['SUBMITTED', 'RESUBMITTED', 'WITHDRAWN'].includes(
+                consolidatedStatus
+            )
+        ) {
             const unlockedContract = await unlockContractInsideTransaction(tx, {
                 contractID: contract.id,
                 unlockedByUserID: updatedByID,
@@ -256,7 +260,11 @@ const withdrawRateInsideTransaction = async (
         }
 
         // Resubmit contract if it was unlocked in this loop. We know because of original consolidatedStatus
-        if (['SUBMITTED', 'RESUBMITTED'].includes(consolidatedStatus)) {
+        if (
+            ['SUBMITTED', 'RESUBMITTED', 'WITHDRAWN'].includes(
+                consolidatedStatus
+            )
+        ) {
             const resubmitContractArgs: SubmitContractArgsType = {
                 contractID: contract.id,
                 submittedByUserID: updatedByID,

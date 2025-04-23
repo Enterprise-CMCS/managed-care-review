@@ -7,8 +7,8 @@ exports[`sendWithdrawnSubmissionStateEmail > renders overall email for withdrawn
 <b>Reason for withdrawal:</b> Test Withdraw<br />
 <b>Related rate certification(s):</b>
 <ul>
-<li>rate-name-123</li>
-<li>rate-name-321</li>
+  <li>rate-name-123</li>
+  <li>rate-name-321</li>
 </ul>
 <a href="http://localhost/submissions/test-contract-123">View submission in MC-Review</a>"
 `;
