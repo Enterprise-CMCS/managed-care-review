@@ -184,26 +184,28 @@ export const SubmissionSummary = (): React.ReactElement => {
 
     const latestContractAction = contract.reviewStatusActions?.[0]
 
-    // Only show for CMS_USER or CMS_APPROVER_USER users
-    // and if the submission isn't approved
     const showApprovalBtn =
         submissionApprovalFlag &&
         hasCMSPermissions &&
-        ['SUBMITTED', 'RESUBMITTED'].includes(contract.consolidatedStatus)
-    const showApprovalBanner =
-        submissionApprovalFlag &&
-        contract.reviewStatus === 'APPROVED' &&
-        latestContractAction
+        ['SUBMITTED', 'RESUBMITTED'].includes(consolidatedStatus)
     const showUnlockBtn =
         hasCMSPermissions &&
-        ['SUBMITTED', 'RESUBMITTED'].includes(contract.consolidatedStatus)
+        ['SUBMITTED', 'RESUBMITTED'].includes(consolidatedStatus)
     const showWithdrawBtn =
         hasCMSPermissions &&
         withdrawSubmissionFlag &&
-        ['SUBMITTED', 'RESUBMITTED'].includes(contract.consolidatedStatus)
-
+        ['SUBMITTED', 'RESUBMITTED'].includes(consolidatedStatus)
     const showNoActionsMsg =
         !showApprovalBtn && !showUnlockBtn && !showWithdrawBtn
+
+    const showApprovalBanner =
+        submissionApprovalFlag &&
+        consolidatedStatus === 'APPROVED' &&
+        latestContractAction
+    const showWithdrawnBanner =
+        withdrawSubmissionFlag &&
+        consolidatedStatus === 'WITHDRAWN' &&
+        latestContractAction
 
     const renderStatusAlerts = () => {
         if (showApprovalBanner) {
@@ -214,6 +216,15 @@ export const SubmissionSummary = (): React.ReactElement => {
                     dateReleasedToState={
                         latestContractAction.dateApprovalReleasedToState
                     }
+                />
+            )
+        }
+
+        if (showWithdrawnBanner) {
+            return (
+                <SubmissionWithdrawnBanner
+                    className={styles.banner}
+                    withdrawInfo={latestContractAction}
                 />
             )
         }
@@ -235,19 +246,6 @@ export const SubmissionSummary = (): React.ReactElement => {
         ) {
             return (
                 <SubmissionUpdatedBanner
-                    className={styles.banner}
-                    updateInfo={updateInfo}
-                />
-            )
-        }
-
-        if (
-            submissionStatus === 'RESUBMITTED' &&
-            consolidatedStatus === 'WITHDRAWN' &&
-            updateInfo
-        ) {
-            return (
-                <SubmissionWithdrawnBanner
                     className={styles.banner}
                     updateInfo={updateInfo}
                 />

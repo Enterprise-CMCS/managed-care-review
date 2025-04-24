@@ -87,6 +87,20 @@ describe('SubmissionWithdraw', () => {
             reviewStatus: 'WITHDRAWN',
             consolidatedStatus: 'WITHDRAWN',
             status: 'RESUBMITTED',
+            reviewStatusActions: [
+                {
+                    contractID: contract.id,
+                    updatedAt: new Date(),
+                    updatedBy: {
+                        role: 'CMS_USER',
+                        givenName: 'bob',
+                        familyName: 'ddmas',
+                        email: 'bob@dmas.mn.gov',
+                    },
+                    actionType: 'WITHDRAW',
+                    updatedReason: 'a valid note',
+                },
+            ],
         }
 
         const { user } = renderWithProviders(
