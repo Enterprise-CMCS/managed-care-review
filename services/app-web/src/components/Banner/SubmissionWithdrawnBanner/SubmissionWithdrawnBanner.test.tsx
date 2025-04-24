@@ -14,7 +14,7 @@ const updateInfo = {
 }
 
 test('renders submission withdraw success banner without errors', () => {
-    renderWithProviders(<SubmissionWithdrawnBanner updateInfo={updateInfo} />)
+    renderWithProviders(<SubmissionWithdrawnBanner withdrawInfo={updateInfo} />)
 
     expect(screen.getByTestId('withdrawnSubmissionBanner')).toBeInTheDocument()
     expect(screen.getByText('Status Updated')).toBeInTheDocument()
