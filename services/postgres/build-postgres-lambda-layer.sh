@@ -11,7 +11,7 @@ docker run --rm \
   amazonlinux:2023 bash -c '
     # Update and install packages
     dnf update -y
-    dnf install -y postgresql16 postgresql16-client tar gzip
+    dnf install -y postgresql16 tar gzip
 
     # Create layer directories
     mkdir -p /output/bin /output/lib
