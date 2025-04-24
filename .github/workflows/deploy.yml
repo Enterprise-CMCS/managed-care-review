@@ -257,7 +257,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: lambda-layers-postgres-tools
-          path: ./services/postgres/lambda-layer-postgres-tools
+          path: ./services/postgres/lambda-layers-postgres-tools
 
   build-clamav-layer:
     name: build - clamav layer
