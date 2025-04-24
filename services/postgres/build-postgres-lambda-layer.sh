@@ -1,65 +1,67 @@
 #!/bin/bash
-# Script to build PostgreSQL tools Lambda layer using Docker with official PostgreSQL repo
+# Script to build PostgreSQL tools Lambda layer using Docker
 echo "Building PostgreSQL Lambda layer..."
 # Ensure we have a clean workspace
 rm -rf lambda-layer-postgres-tools
 mkdir -p lambda-layer-postgres-tools
+
+# Create the proper Lambda layer structure
+mkdir -p lambda-layer-postgres-tools/bin
+mkdir -p lambda-layer-postgres-tools/lib
+
 # Run build in Amazon Linux 2 container
 docker run --rm \
   -v "$(pwd)/lambda-layer-postgres-tools:/output" \
   amazonlinux:2 bash -c '
     # Install prerequisites
-    yum install -y yum-utils which findutils tar gzip wget
+    yum install -y wget
 
     # Add PostgreSQL official repository
-    yum install -y https://download.postgresql.org/pub/repos/yum/reporpms/EL-7-x86_64/pgdg-redhat-repo-latest.noarch.rpm
+    wget https://download.postgresql.org/pub/repos/yum/reporpms/EL-7-x86_64/pgdg-redhat-repo-latest.noarch.rpm
+    yum install -y pgdg-redhat-repo-latest.noarch.rpm
     
-    # Install PostgreSQL 14 client only (not the server)
+    # Install PostgreSQL 14 client only
     yum install -y postgresql14
-    
-    # Create layer directories
-    mkdir -p /output/bin /output/lib
     
     # Find PostgreSQL binaries location
     PG_BIN_DIR="/usr/pgsql-14/bin"
-    PG_DUMP_PATH="$PG_BIN_DIR/pg_dump"
-    PG_RESTORE_PATH="$PG_BIN_DIR/pg_restore"
-    PSQL_PATH="$PG_BIN_DIR/psql"
     
-    # Copy PostgreSQL binaries
-    cp "$PG_DUMP_PATH" /output/bin/pg_dump.original
-    cp "$PG_RESTORE_PATH" /output/bin/pg_restore.original
-    cp "$PSQL_PATH" /output/bin/psql.original
+    # Copy PostgreSQL binaries directly to bin directory (not using .original suffix)
+    cp "$PG_BIN_DIR/pg_dump" /output/bin/pg_dump
+    cp "$PG_BIN_DIR/pg_restore" /output/bin/pg_restore
+    cp "$PG_BIN_DIR/psql" /output/bin/psql
     
-    # Copy all needed libraries - use ldd more carefully
-    for bin in "$PG_DUMP_PATH" "$PG_RESTORE_PATH" "$PSQL_PATH"; do
-      if [ -f "$bin" ]; then
-        ldd "$bin" | grep "=> /" | awk "{print \$3}" | sort | uniq | while read -r lib; do
-          if [ -f "$lib" ]; then
-            cp "$lib" "/output/lib/$(basename $lib)"
-          fi
-        done
-      fi
+    # Make binaries executable
+    chmod 755 /output/bin/*
+    
+    # Copy all needed libraries
+    for bin in pg_dump pg_restore psql; do
+      ldd "$PG_BIN_DIR/$bin" | grep "=> /" | awk "{print \$3}" | sort | uniq | while read -r lib; do
+        if [ -f "$lib" ]; then
+          cp "$lib" "/output/lib/$(basename $lib)"
+          chmod 755 "/output/lib/$(basename $lib)"
+        fi
+      done
     done
     
-    # Look for PostgreSQL specific libraries that might be needed
+    # Copy PostgreSQL specific libraries
     for lib in /usr/pgsql-14/lib/*.so*; do
       if [ -f "$lib" ]; then
         cp "$lib" "/output/lib/$(basename $lib)"
+        chmod 755 "/output/lib/$(basename $lib)"
       fi
     done
     
-    # Create wrapper scripts
-    for bin in pg_dump pg_restore psql; do
-      echo "#!/bin/bash" > "/output/bin/$bin"
-      echo "export LD_LIBRARY_PATH=/opt/lib:\$LD_LIBRARY_PATH" >> "/output/bin/$bin"
-      echo "/opt/bin/$bin.original \"\$@\"" >> "/output/bin/$bin"
-      chmod +x "/output/bin/$bin"
-    done
+    # Create a bootstrap script that will be referenced in the Lambda function
+    echo "#!/bin/bash" > "/output/bootstrap.sh"
+    echo "export LD_LIBRARY_PATH=/opt/lib:\$LD_LIBRARY_PATH" >> "/output/bootstrap.sh"
+    echo "# This script can be sourced in your Lambda function" >> "/output/bootstrap.sh"
+    chmod 755 "/output/bootstrap.sh"
   '
+
 # Create the final layer archive
 cd lambda-layer-postgres-tools || exit
-tar -zcf ../postgres-tools.tar.gz .
+zip -r ../postgres-tools-layer.zip .
 cd ..
-echo "Done! Lambda layer created: postgres-tools.tar.gz"
-ls -lh postgres-tools.tar.gz
+echo "Done! Lambda layer created: postgres-tools-layer.zip"
+ls -lh postgres-tools-layer.zip
