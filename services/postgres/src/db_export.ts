@@ -15,34 +15,6 @@ const s3Client = new S3Client({ region: REGION })
 
 export const handler = async () => {
     console.info('Starting database export process...')
-
-    //debug
-    console.info('Examining /opt/bin directory:')
-    try {
-        execSync('ls -la /opt/bin', { stdio: 'inherit' })
-
-        // Check if pg_dump exists and its permissions
-        console.info('Checking pg_dump file:')
-        execSync('ls -la /opt/bin/pg_dump || echo "File not found"', {
-            stdio: 'inherit',
-        })
-
-        // Try to determine file type
-        console.info('Checking file type:')
-        execSync('file /opt/bin/pg_dump || echo "Cannot determine file type"', {
-            stdio: 'inherit',
-        })
-
-        // Check shared library dependencies
-        console.info('Checking shared library dependencies:')
-        execSync(
-            '/opt/bin/pg_dump --version 2>&1 || echo "Failed to run pg_dump"',
-            { stdio: 'inherit' }
-        )
-    } catch (error) {
-        console.error('Error in examination:', error)
-    }
-
     if (!DB_SECRET_ARN) {
         throw new Error('DB_SECRET_ARN environment variable is not set')
     }
