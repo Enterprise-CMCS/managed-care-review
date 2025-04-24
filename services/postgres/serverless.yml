@@ -59,6 +59,12 @@ provider:
             - ec2:DeleteNetworkInterface
             - ec2:DescribeNetworkInterfaces
           Resource: '*'
+        - Effect: Allow
+          Action:
+            - s3:PutObject
+            - s3:PutObjectAcl
+          Resource:
+            - !Sub 'arn:aws:s3:::${self:service}-${sls:stage}-data-export/*'
 
 custom:
   stage: ${opt:stage, self:provider.stage}
