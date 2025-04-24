@@ -224,7 +224,12 @@ export const SubmissionSummary = (): React.ReactElement => {
             return (
                 <SubmissionWithdrawnBanner
                     className={styles.banner}
-                    withdrawInfo={latestContractAction}
+                    withdrawInfo={{
+                        updatedReason:
+                            latestContractAction?.updatedReason ?? '',
+                        updatedAt: latestContractAction.updatedAt,
+                        updatedBy: latestContractAction.updatedBy,
+                    }}
                 />
             )
         }
