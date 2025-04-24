@@ -1216,7 +1216,7 @@ type ContractReviewStatusActions {
     "the user who performed the update"
     updatedBy: UpdatedBy!
     "the reason provided by the user when performing the update"
-    updatedReason: String
+    updatedReason: String!
     "the type of review action performed on the contract: APPROVED, WITHDRAWN"
     actionType: ContractActionType!
     "Manual time entered by CMS to represent when an approval released to state"
