@@ -43,6 +43,11 @@ export const handler = async () => {
         const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
         const dumpFilename = `${dbCredentials.dbname || 'postgres'}_${timestamp}.sql`
         const dumpFilePath = path.join(TMP_DIR, dumpFilename)
+        const plainSqlPath = path.join(TMP_DIR, `plain_${dumpFilename}`)
+        const sanitizedDumpPath = path.join(
+            TMP_DIR,
+            `sanitized_${dumpFilename}`
+        )
 
         // Use pg_dump from the Lambda layer to dump the database
         console.info(`Dumping database to ${dumpFilePath}...`)
@@ -66,6 +71,25 @@ export const handler = async () => {
             execSync(pgDumpCmd, { stdio: 'inherit' })
 
             console.info('Database dump completed successfully')
+
+            // Convert to plain SQL
+            console.info('Converting dump to plain SQL...')
+            execSync(`pg_restore ${dumpFilePath} > ${plainSqlPath}`, {
+                stdio: 'inherit',
+            })
+
+            // Read, sanitize, and write back SQL content
+            console.info('Sanitizing email addresses...')
+            const sqlContent = fs.readFileSync(plainSqlPath, 'utf8')
+            const sanitizedContent = sanitizeSqlDump(sqlContent)
+            fs.writeFileSync(plainSqlPath, sanitizedContent)
+
+            // Convert back to custom format
+            console.info('Creating final sanitized dump...')
+            execSync(
+                `pg_dump --format=custom --file=${sanitizedDumpPath} ${plainSqlPath}`,
+                { stdio: 'inherit' }
+            )
         } catch (error) {
             console.error('Error executing pg_dump:', error)
             throw new Error(`pg_dump execution failed: ${error}`)
@@ -78,7 +102,7 @@ export const handler = async () => {
         const s3Key = `${S3_PREFIX}/${dumpFilename}`
         console.info(`Uploading dump to S3: s3://${S3_BUCKET}/${s3Key}`)
 
-        const fileContent = fs.readFileSync(dumpFilePath)
+        const fileContent = fs.readFileSync(sanitizedDumpPath)
         await s3Client.send(
             new PutObjectCommand({
                 Bucket: S3_BUCKET,
@@ -92,7 +116,9 @@ export const handler = async () => {
 
         // Clean up the temporary file
         fs.unlinkSync(dumpFilePath)
-        console.info('Temporary file cleaned up')
+        fs.unlinkSync(plainSqlPath)
+        fs.unlinkSync(sanitizedDumpPath)
+        console.info('Temporary files cleaned up')
     } catch (err) {
         console.error('Error in db export process:', err)
         return {
@@ -103,4 +129,50 @@ export const handler = async () => {
             }),
         }
     }
+}
+
+function sanitizeEmail(email: string): string {
+    // Keep the username  but change the domain to example.com
+    const [username] = email.split('@')
+    return `${username}@example.com`
+}
+
+function sanitizeSqlDump(sqlContent: string): string {
+    // Replace individual email fields
+    sqlContent = sqlContent.replace(
+        /"email"\s*=\s*'([^']+)'/g,
+        (match, email) => `"email" = '${sanitizeEmail(email)}'`
+    )
+
+    // Replace array email fields (for EmailSettings model)
+    const arrayEmailFields = [
+        'devReviewTeamEmails',
+        'cmsReviewHelpEmailAddress',
+        'cmsRateHelpEmailAddress',
+        'oactEmails',
+        'dmcpReviewEmails',
+        'dmcpSubmissionEmails',
+        'dmcoEmails',
+        'helpDeskEmail',
+    ]
+
+    arrayEmailFields.forEach((field) => {
+        sqlContent = sqlContent.replace(
+            new RegExp(`"${field}"\\s*=\\s*'\\{([^}]+)\\}'`, 'g'),
+            (match, emails) => {
+                const emailArray = emails
+                    .split(',')
+                    .map((email: string) => sanitizeEmail(email.trim()))
+                return `"${field}" = '{${emailArray.join(',')}}'`
+            }
+        )
+    })
+
+    // Replace emailSource field
+    sqlContent = sqlContent.replace(
+        /"emailSource"\s*=\s*'([^']+)'/g,
+        (match, email) => `"emailSource" = '${sanitizeEmail(email)}'`
+    )
+
+    return sqlContent
 }
