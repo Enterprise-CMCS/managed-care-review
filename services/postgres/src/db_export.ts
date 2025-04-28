@@ -63,7 +63,7 @@ export const handler = async () => {
                 `-p ${dbCredentials.port || 5432}`,
                 `-U ${dbCredentials.username}`,
                 `-d ${dbCredentials.dbname || 'postgres'}`,
-                '--format=custom', // Using custom format for better compression
+                '--format=plain',
                 `--file=${dumpFilePath}`,
             ].join(' ')
 
@@ -72,24 +72,11 @@ export const handler = async () => {
 
             console.info('Database dump completed successfully')
 
-            // Convert to plain SQL
-            console.info('Converting dump to plain SQL...')
-            execSync(`pg_restore ${dumpFilePath} > ${plainSqlPath}`, {
-                stdio: 'inherit',
-            })
-
             // Read, sanitize, and write back SQL content
             console.info('Sanitizing email addresses...')
-            const sqlContent = fs.readFileSync(plainSqlPath, 'utf8')
+            const sqlContent = fs.readFileSync(dumpFilePath, 'utf8')
             const sanitizedContent = sanitizeSqlDump(sqlContent)
-            fs.writeFileSync(plainSqlPath, sanitizedContent)
-
-            // Convert back to custom format
-            console.info('Creating final sanitized dump...')
-            execSync(
-                `pg_dump --format=custom --file=${sanitizedDumpPath} ${plainSqlPath}`,
-                { stdio: 'inherit' }
-            )
+            fs.writeFileSync(sanitizedDumpPath, sanitizedContent)
         } catch (error) {
             console.error('Error executing pg_dump:', error)
             throw new Error(`pg_dump execution failed: ${error}`)
@@ -98,10 +85,9 @@ export const handler = async () => {
             delete process.env.PGPASSWORD
         }
 
-        // Upload the dump to S3
+        // Upload the sanitized dump to S3
         const s3Key = `${S3_PREFIX}/${dumpFilename}`
         console.info(`Uploading dump to S3: s3://${S3_BUCKET}/${s3Key}`)
-
         const fileContent = fs.readFileSync(sanitizedDumpPath)
         await s3Client.send(
             new PutObjectCommand({
@@ -112,11 +98,10 @@ export const handler = async () => {
             })
         )
 
-        console.log('Upload to S3 completed successfully')
+        console.info('Upload to S3 completed successfully')
 
-        // Clean up the temporary file
+        // Clean up temporary files
         fs.unlinkSync(dumpFilePath)
-        fs.unlinkSync(plainSqlPath)
         fs.unlinkSync(sanitizedDumpPath)
         console.info('Temporary files cleaned up')
     } catch (err) {
