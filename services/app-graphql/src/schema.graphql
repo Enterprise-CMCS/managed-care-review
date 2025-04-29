@@ -1946,7 +1946,7 @@ type Rate {
     This value is used to generate the rateName
     """
     stateNumber: Int!
-    "parentContractID is the ID of the contract that initially submitted this rate"
+    "parentContractID is the ID of the contract that last submitted this rate"
     parentContractID: ID!
     "withdrawInfo is the who/when/why for this rate being withdrawn. Rates actively in use in the system will not have a withdrawInfo"
     withdrawInfo: UpdateInformation
@@ -2016,7 +2016,7 @@ type RateStripped {
     This value is used to generate the rateName
     """
     stateNumber: Int!
-    "parentContractID is the ID of the contract that initially submitted this rate"
+    "parentContractID is the ID of the contract that last submitted this rate"
     parentContractID: ID!
     "withdrawInfo is the who/when/why for this rate being withdrawn. Rates actively in use in the system will not have a withdrawInfo"
     withdrawInfo: UpdateInformation
