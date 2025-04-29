@@ -14,6 +14,7 @@ import {
     rateDataMock,
     iterableNonCMSUsersMockData,
     mockValidCMSUser,
+    mockRateSubmittedWithQuestions,
 } from '@mc-review/mocks'
 import { RateSummary } from './RateSummary'
 import { RoutesRecord } from '@mc-review/constants'
@@ -739,12 +740,35 @@ describe('RateSummary', () => {
                 ).toBeInTheDocument()
             })
         })
-        it('renders unlock and withdraw button on submitted rate', async () => {
+        it('renders withdraw rate on orphaned rates', async () => {
             const contract = mockContractPackageSubmitted({
                 consolidatedStatus: 'SUBMITTED',
             })
-            const rateData = rateWithHistoryMock()
-            rateData.parentContractID = contract.id
+            const rateData = mockRateSubmittedWithQuestions({
+                id: '1337',
+                status: 'UNLOCKED',
+                consolidatedStatus: 'UNLOCKED',
+                parentContractID: contract.id,
+                withdrawnFromContracts: [],
+                reviewStatusActions: [],
+            })
+
+            const latestPackageSubmission = rateData.packageSubmissions?.[0]
+
+            if (!latestPackageSubmission) {
+                throw new Error(
+                    'Unexpected error: mock rate data had no packageSubmissions'
+                )
+            }
+
+            // Remove associated contracts
+            rateData.packageSubmissions = [
+                {
+                    ...latestPackageSubmission,
+                    contractRevisions: [],
+                },
+            ]
+
             renderWithProviders(wrapInRoutes(<RateSummary />), {
                 apolloProvider: {
                     mocks: [
@@ -754,14 +778,7 @@ describe('RateSummary', () => {
                         }),
                         fetchContractMockSuccess({ contract }),
                         fetchRateWithQuestionsMockSuccess({
-                            rate: {
-                                id: '1337',
-                                status: 'SUBMITTED',
-                                consolidatedStatus: 'SUBMITTED',
-                                parentContractID: contract.id,
-                                withdrawnFromContracts: [],
-                                reviewStatusActions: [],
-                            },
+                            rate: rateData,
                         }),
                         fetchContractMockSuccess({ contract }),
                     ],
@@ -778,9 +795,6 @@ describe('RateSummary', () => {
             await waitFor(() => {
                 expect(
                     screen.getByRole('button', { name: 'Withdraw rate' })
-                ).toBeInTheDocument()
-                expect(
-                    screen.getByRole('button', { name: 'Unlock rate' })
                 ).toBeInTheDocument()
             })
         })
