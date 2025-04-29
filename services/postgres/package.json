@@ -20,9 +20,9 @@
         "typescript": "4.9.5"
     },
     "dependencies": {
-        "@aws-sdk/client-secrets-manager": "^3.787.0",
+        "@aws-sdk/client-secrets-manager": "^3.797.0",
         "pg": "^8.13.1",
-        "@aws-sdk/client-cloudformation": "^3.787.0",
-        "@aws-sdk/client-s3": "^3.787.0"
+        "@aws-sdk/client-cloudformation": "^3.797.0",
+        "@aws-sdk/client-s3": "^3.797.0"
     }
 }
