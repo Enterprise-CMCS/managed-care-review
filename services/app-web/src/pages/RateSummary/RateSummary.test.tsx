@@ -396,10 +396,13 @@ describe('RateSummary', () => {
                     },
                 })
 
-                const unlockRateBtn = await screen.queryByRole('button', {
-                    name: 'Unlock rate',
+                await waitFor(() => {
+                    expect(
+                        screen.queryByRole('button', {
+                            name: 'Unlock rate',
+                        })
+                    ).not.toBeInTheDocument()
                 })
-                expect(unlockRateBtn).not.toBeInTheDocument()
             })
         }
     )
@@ -1013,9 +1016,13 @@ describe('RateSummary', () => {
                 expect(
                     screen.queryByRole('button', { name: 'Withdraw rate' })
                 ).not.toBeInTheDocument()
+
+                expect(
+                    screen.queryByRole('button', { name: 'Unlock rate' })
+                ).not.toBeInTheDocument()
             })
         })
-        it('does not render withdraw rate button when withdrawn button is on screen', async () => {
+        it('does not render undo withdraw and unlock rate button when withdrawn button is on screen', async () => {
             const contract = mockContractPackageSubmitted({
                 consolidatedStatus: 'SUBMITTED',
             })
@@ -1057,9 +1064,13 @@ describe('RateSummary', () => {
                 expect(
                     screen.queryByRole('button', { name: 'Withdraw rate' })
                 ).toBeInTheDocument()
+
+                expect(
+                    screen.queryByRole('button', { name: 'Unlock rate' })
+                ).toBeInTheDocument()
             })
         })
-        it('does not render undo withdraw button when parent submission is withdrawn', async () => {
+        it('does not render undo withdraw and unlock button when parent submission is withdrawn', async () => {
             const contract = mockContractPackageSubmitted({
                 consolidatedStatus: 'WITHDRAWN',
             })
@@ -1133,6 +1144,10 @@ describe('RateSummary', () => {
 
             expect(
                 screen.queryByRole('button', { name: 'Undo withdraw' })
+            ).not.toBeInTheDocument()
+
+            expect(
+                screen.queryByRole('button', { name: 'Unlock rate' })
             ).not.toBeInTheDocument()
         })
     })
