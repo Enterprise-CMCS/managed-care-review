@@ -66,7 +66,7 @@ describe('RateSummary', () => {
                 ).toBeInTheDocument()
             })
 
-            it('displays withdrawn banner on a withdrawn rate', async () => {
+            it('displays withdrawn banner on a redundant rate', async () => {
                 renderWithProviders(wrapInRoutes(<RateSummary />), {
                     apolloProvider: {
                         mocks: [
@@ -114,6 +114,152 @@ describe('RateSummary', () => {
                 ).toBeInTheDocument()
                 expect(
                     screen.getByText('Admin as withdrawn this rate.')
+                ).toBeInTheDocument()
+            })
+
+            it('displays withdrawn banner on a independently withdrawn rate', async () => {
+                renderWithProviders(wrapInRoutes(<RateSummary />), {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                user: mockUser(),
+                                statusCode: 200,
+                            }),
+                            fetchContractMockSuccess({ contract }),
+                            fetchRateWithQuestionsMockSuccess({
+                                rate: {
+                                    id: '1337',
+                                    status: 'SUBMITTED',
+                                    consolidatedStatus: 'WITHDRAWN',
+                                    parentContractID: contract.id,
+                                    withdrawnFromContracts: [contract],
+                                    reviewStatusActions: [
+                                        {
+                                            rateID: '1337',
+                                            actionType: 'WITHDRAW',
+                                            updatedAt: new Date('2024-01-01'),
+                                            updatedReason:
+                                                'Withdraw only the rate',
+                                            updatedBy: {
+                                                email: 'someone@example.com',
+                                                familyName: 'one',
+                                                givenName: 'some',
+                                                role: 'CMS_USER',
+                                            },
+                                        },
+                                    ],
+                                },
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/rates/1337',
+                    },
+                    featureFlags: {
+                        'withdraw-rate': true,
+                        'undo-withdraw-rate': true,
+                    },
+                })
+
+                await waitFor(() => {
+                    expect(screen.queryByRole('alert')).toBeInTheDocument()
+                })
+
+                expect(screen.queryByRole('alert')).toHaveTextContent(
+                    /Status: Withdrawn/
+                )
+                expect(screen.queryByRole('alert')).toHaveTextContent(
+                    /Updated by: someone@example.com/
+                )
+                // API returns UTC timezone, we display timestamped dates in PT timezone so 1 day before on these tests.
+                expect(
+                    screen.getByText('12/31/2023 4:00pm PT')
+                ).toBeInTheDocument()
+                expect(
+                    screen.getByText('Withdraw only the rate')
+                ).toBeInTheDocument()
+            })
+
+            it('displays withdrawn banner on a rate withdrawn with parent contract', async () => {
+                const withdrawnContract = mockContractPackageSubmitted()
+
+                withdrawnContract.reviewStatusActions = [
+                    {
+                        contractID: withdrawnContract.id,
+                        actionType: 'WITHDRAW',
+                        updatedAt: new Date('2024-01-01'),
+                        updatedReason: 'Withdraw whole submission',
+                        updatedBy: {
+                            email: 'someone@example.com',
+                            familyName: 'one',
+                            givenName: 'some',
+                            role: 'CMS_USER',
+                        },
+                    },
+                ]
+                withdrawnContract.consolidatedStatus = 'WITHDRAWN'
+
+                renderWithProviders(wrapInRoutes(<RateSummary />), {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                user: mockUser(),
+                                statusCode: 200,
+                            }),
+                            fetchContractMockSuccess({
+                                contract: withdrawnContract,
+                            }),
+                            fetchRateWithQuestionsMockSuccess({
+                                rate: {
+                                    id: '1337',
+                                    status: 'SUBMITTED',
+                                    consolidatedStatus: 'WITHDRAWN',
+                                    parentContractID: withdrawnContract.id,
+                                    withdrawnFromContracts: [],
+                                    reviewStatusActions: [
+                                        {
+                                            rateID: '1337',
+                                            actionType: 'WITHDRAW',
+                                            updatedAt: new Date('2024-01-01'),
+                                            updatedReason:
+                                                'Withdraw whole submission',
+                                            updatedBy: {
+                                                email: 'someone@example.com',
+                                                familyName: 'one',
+                                                givenName: 'some',
+                                                role: 'CMS_USER',
+                                            },
+                                        },
+                                    ],
+                                },
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/rates/1337',
+                    },
+                    featureFlags: {
+                        'withdraw-rate': true,
+                        'undo-withdraw-rate': true,
+                    },
+                })
+
+                await waitFor(() => {
+                    expect(screen.queryByRole('alert')).toBeInTheDocument()
+                })
+
+                expect(screen.queryByRole('alert')).toHaveTextContent(
+                    /Status: Withdrawn/
+                )
+                expect(screen.queryByRole('alert')).toHaveTextContent(
+                    /Updated by: someone@example.com/
+                )
+                // API returns UTC timezone, we display timestamped dates in PT timezone so 1 day before on these tests.
+                expect(
+                    screen.getByText('12/31/2023 4:00pm PT')
+                ).toBeInTheDocument()
+                expect(
+                    screen.getByText('Withdraw whole submission')
                 ).toBeInTheDocument()
             })
 
@@ -166,42 +312,6 @@ describe('RateSummary', () => {
                         screen.getByTestId('warning-alert')
                     ).toHaveTextContent('Document download unavailable')
                     expect(error).toHaveBeenCalled()
-                })
-            })
-
-            it('renders unlock and withdraw buttons', async () => {
-                renderWithProviders(wrapInRoutes(<RateSummary />), {
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({
-                                user: mockUser(),
-                                statusCode: 200,
-                            }),
-                            fetchRateWithQuestionsMockSuccess({
-                                rate: {
-                                    id: '7a',
-                                    parentContractID: contract.id,
-                                },
-                            }),
-                            fetchContractMockSuccess({ contract }),
-                        ],
-                    },
-                    routerProvider: {
-                        route: '/rates/7a',
-                    },
-                    featureFlags: {
-                        'rate-edit-unlock': true,
-                        'withdraw-rate': true,
-                    },
-                })
-
-                await waitFor(() => {
-                    expect(
-                        screen.queryByRole('button', { name: 'Withdraw rate' })
-                    ).toBeInTheDocument()
-                    expect(
-                        screen.queryByRole('button', { name: 'Unlock rate' })
-                    ).toBeInTheDocument()
                 })
             })
 
@@ -261,7 +371,7 @@ describe('RateSummary', () => {
                 })
             })
 
-            it('does not render unlock button when linked rates on but standalone rate edit and unlock is still disabled if the associated contract is approved', async () => {
+            it('does not render unlock button on linked rate, but standalone rate edit and unlock is still disabled if the associated contract is approved', async () => {
                 const rateData = rateWithHistoryMock()
                 rateData.parentContractID = contract.id
 
@@ -290,95 +400,6 @@ describe('RateSummary', () => {
                     name: 'Unlock rate',
                 })
                 expect(unlockRateBtn).not.toBeInTheDocument()
-            })
-            it('should not display unlock rate button if parent contract has been approved', async () => {
-                const rate = rateDataMock()
-
-                renderWithProviders(wrapInRoutes(<RateSummary />), {
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({
-                                user: mockUser(),
-                                statusCode: 200,
-                            }),
-                            fetchRateWithQuestionsMockSuccess({
-                                rate: {
-                                    ...rate,
-                                    id: '7a',
-                                    parentContractID: contract.id,
-                                    status: 'SUBMITTED',
-                                },
-                            }),
-                            fetchContractMockSuccess({
-                                contract: {
-                                    ...contract,
-                                    reviewStatus: 'APPROVED',
-                                    consolidatedStatus: 'APPROVED',
-                                },
-                            }),
-                        ],
-                    },
-                    routerProvider: {
-                        route: '/rates/7a',
-                    },
-                    featureFlags: { 'rate-edit-unlock': true },
-                })
-
-                // Wait for all the documents to be in the table
-                await screen.findByText(
-                    rate.revisions[0].formData.rateDocuments[0].name
-                )
-                await screen.findByRole('link', {
-                    name: 'Download all rate documents',
-                })
-
-                expect(
-                    screen.queryByRole('link', { name: 'Unlock rate' })
-                ).not.toBeInTheDocument()
-            })
-
-            it('should not display withdraw rate button if rate is unlocked', async () => {
-                const rate = rateDataMock()
-
-                renderWithProviders(wrapInRoutes(<RateSummary />), {
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({
-                                user: mockUser(),
-                                statusCode: 200,
-                            }),
-                            fetchRateWithQuestionsMockSuccess({
-                                rate: {
-                                    ...rate,
-                                    id: '7a',
-                                    parentContractID: contract.id,
-                                    status: 'UNLOCKED',
-                                },
-                            }),
-                            fetchContractMockSuccess({
-                                contract: {
-                                    ...contract,
-                                },
-                            }),
-                        ],
-                    },
-                    routerProvider: {
-                        route: '/rates/7a',
-                    },
-                    featureFlags: { 'rate-edit-unlock': true },
-                })
-
-                // Wait for all the documents to be in the table
-                await screen.findByText(
-                    rate.revisions[0].formData.rateDocuments[0].name
-                )
-                await screen.findByRole('link', {
-                    name: 'Download all rate documents',
-                })
-
-                expect(
-                    screen.queryByRole('button', { name: 'Withdraw rate' })
-                ).not.toBeInTheDocument()
             })
         }
     )
@@ -674,6 +695,47 @@ describe('RateSummary', () => {
     })
 
     describe('Action section tests', () => {
+        it('renders unlock and withdraw buttons', async () => {
+            const contract = mockContractPackageSubmitted({
+                consolidatedStatus: 'SUBMITTED',
+            })
+            renderWithProviders(wrapInRoutes(<RateSummary />), {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockValidCMSUser(),
+                            statusCode: 200,
+                        }),
+                        fetchRateWithQuestionsMockSuccess({
+                            rate: {
+                                id: '7a',
+                                parentContractID: contract.id,
+                            },
+                        }),
+                        fetchContractMockSuccess({ contract }),
+                    ],
+                },
+                routerProvider: {
+                    route: '/rates/7a',
+                },
+                featureFlags: {
+                    'rate-edit-unlock': true,
+                    'withdraw-rate': true,
+                },
+            })
+
+            await waitFor(() => {
+                expect(
+                    screen.queryByRole('button', { name: 'Withdraw rate' })
+                ).toBeInTheDocument()
+                expect(
+                    screen.queryByRole('button', { name: 'Undo withdraw' })
+                ).toBeNull()
+                expect(
+                    screen.queryByRole('button', { name: 'Unlock rate' })
+                ).toBeInTheDocument()
+            })
+        })
         it('renders unlock and withdraw button on submitted rate', async () => {
             const contract = mockContractPackageSubmitted({
                 consolidatedStatus: 'SUBMITTED',
@@ -761,6 +823,22 @@ describe('RateSummary', () => {
             const contract = mockContractPackageSubmitted({
                 consolidatedStatus: 'APPROVED',
             })
+
+            contract.reviewStatusActions = [
+                {
+                    contractID: contract.id,
+                    updatedReason: 'Approved submission',
+                    updatedBy: {
+                        email: 'someone@example.com',
+                        familyName: 'one',
+                        givenName: 'some',
+                        role: 'CMS_USER',
+                    },
+                    updatedAt: new Date(),
+                    actionType: 'MARK_AS_APPROVED',
+                },
+            ]
+
             const rateData = rateWithHistoryMock()
             rateData.parentContractID = contract.id
             renderWithProviders(wrapInRoutes(<RateSummary />), {
@@ -859,6 +937,10 @@ describe('RateSummary', () => {
                 routerProvider: {
                     route: '/rates/1337',
                 },
+                featureFlags: {
+                    'withdraw-rate': true,
+                    'undo-withdraw-rate': true,
+                },
             })
 
             await waitFor(() => {
@@ -923,16 +1005,80 @@ describe('RateSummary', () => {
                 expect(screen.queryByRole('alert')).toHaveTextContent(
                     /Status: Withdrawn/
                 )
+
+                expect(
+                    screen.getByRole('button', { name: 'Undo withdraw' })
+                ).toBeInTheDocument()
+
+                expect(
+                    screen.queryByRole('button', { name: 'Withdraw rate' })
+                ).not.toBeInTheDocument()
+            })
+        })
+        it('does not render withdraw rate button when withdrawn button is on screen', async () => {
+            const contract = mockContractPackageSubmitted({
+                consolidatedStatus: 'SUBMITTED',
+            })
+            const rateData = rateWithHistoryMock()
+            rateData.parentContractID = contract.id
+            renderWithProviders(wrapInRoutes(<RateSummary />), {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockValidCMSUser(),
+                            statusCode: 200,
+                        }),
+                        fetchContractMockSuccess({ contract }),
+                        fetchRateWithQuestionsMockSuccess({
+                            rate: {
+                                id: '1337',
+                                status: 'SUBMITTED',
+                                consolidatedStatus: 'SUBMITTED',
+                                parentContractID: contract.id,
+                            },
+                        }),
+                        fetchContractMockSuccess({ contract }),
+                    ],
+                },
+                routerProvider: {
+                    route: '/rates/1337',
+                },
+                featureFlags: {
+                    'withdraw-rate': true,
+                    'undo-withdraw-rate': true,
+                },
             })
 
-            expect(
-                screen.getByRole('button', { name: 'Undo withdraw' })
-            ).toBeInTheDocument()
+            await waitFor(() => {
+                expect(
+                    screen.queryByRole('button', { name: 'Undo withdraw' })
+                ).not.toBeInTheDocument()
+
+                expect(
+                    screen.queryByRole('button', { name: 'Withdraw rate' })
+                ).toBeInTheDocument()
+            })
         })
         it('does not render undo withdraw button when parent submission is withdrawn', async () => {
             const contract = mockContractPackageSubmitted({
                 consolidatedStatus: 'WITHDRAWN',
             })
+
+            contract.reviewStatusActions = [
+                {
+                    contractID: contract.id,
+                    actionType: 'WITHDRAW',
+                    updatedAt: new Date(),
+                    updatedReason: 'Contract withdraw',
+                    updatedBy: {
+                        email: 'someone@example.com',
+                        familyName: 'one',
+                        givenName: 'some',
+                        role: 'CMS_USER',
+                    },
+                },
+            ]
+
             const rateData = rateWithHistoryMock()
             rateData.parentContractID = contract.id
             renderWithProviders(wrapInRoutes(<RateSummary />), {
