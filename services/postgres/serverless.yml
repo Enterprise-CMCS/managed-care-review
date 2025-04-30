@@ -65,6 +65,14 @@ provider:
             - s3:PutObjectAcl
           Resource:
             - !Sub 'arn:aws:s3:::${self:service}-${sls:stage}-data-export/*'
+        - !If
+          - !Equals ['${sls:stage}', 'prod']
+          - Effect: Allow
+            Action:
+              - sts:AssumeRole
+            Resource:
+              - !Sub 'arn:aws:iam::${self:custom.valAWSAccountID}:role/${self:service}-cross-account-upload-val'
+          - !Ref AWS::NoValue
 
 custom:
   stage: ${opt:stage, self:provider.stage}
@@ -78,6 +86,8 @@ custom:
   publicSubnetA: ${env:SUBNET_PUBLIC_A_ID}
   iamPermissionsBoundary: ${env:IAM_PERMISSIONS_BOUNDARY}
   iamPath: ${env:IAM_PATH}
+  valAWSAccountID: ${env:VAL_AWS_ACCOUNT_ID}
+  prodAWSAccountID: ${env:PROD_AWS_ACCOUNT_ID}
   rotatorArn: !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${self:service}-${sls:stage}-rotator'
   dbManagerArn: !Sub 'arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:aurora_${self:service}_*' # pragma: allowlist secret
   auroraArn: ${env:CF_CONFIG_IGNORED_LOCALLY, env:AURORA_ARN}
@@ -157,6 +167,9 @@ resources:
       - !Equals ['${sls:stage}', 'val']
       - !Equals ['${sls:stage}', 'prod']
     IsReviewEnvironment: !Not [!Condition IsDevValProd]
+    IsVal: !Or
+      - !Equals ['${sls:stage}', 'val']
+      - !Equals ['${sls:stage}', 'mttestexport']
     IsValOrProd: !Or
       - !Equals ['${sls:stage}', 'val']
       - !Equals ['${sls:stage}', 'prod']
@@ -473,6 +486,42 @@ resources:
               Condition:
                 Bool:
                   aws:SecureTransport: false
+            - !If
+              - IsVal
+              - Sid: AllowCrossAccountAccess
+                Effect: Allow
+                Principal:
+                  AWS: !GetAtt CrossAccountUploadRole.Arn
+                Action:
+                  - s3:PutObject
+                  - s3:PutObjectAcl
+                Resource:
+                  - !Sub '${DataExportBucket.Arn}/*'
+              - !Ref AWS::NoValue
+
+  CrossAccountUploadRole:
+    Condition: IsVal
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub '${self:service}-cross-account-upload-${sls:stage}'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: 'arn:aws:iam::{self:custom.prodAccountId}:root'
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: 'S3Upload'
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:PutObject
+                  - s3:PutObjectAcl
+                Resource:
+                  - !Sub '${DataExportBucket.Arn}/*'
 
   Outputs:
     PostgresAuroraV2Arn:
