@@ -65,14 +65,11 @@ provider:
             - s3:PutObjectAcl
           Resource:
             - !Sub 'arn:aws:s3:::${self:service}-${sls:stage}-data-export/*'
-        - !If
-          - !Equals ['${sls:stage}', 'prod']
-          - Effect: Allow
-            Action:
-              - sts:AssumeRole
-            Resource:
-              - !Sub 'arn:aws:iam::${self:custom.valAWSAccountID}:role/${self:service}-cross-account-upload-val'
-          - !Ref AWS::NoValue
+        - Effect: Allow
+          Action:
+            - sts:AssumeRole
+          Resource:
+            - ${self:custom.crossAccountRoleArn.${opt:stage, 'other'}}
 
 custom:
   stage: ${opt:stage, self:provider.stage}
@@ -88,6 +85,10 @@ custom:
   iamPath: ${env:IAM_PATH}
   valAWSAccountID: ${env:VAL_AWS_ACCOUNT_ID}
   prodAWSAccountID: ${env:PROD_AWS_ACCOUNT_ID}
+  crossAccountRoleArn:
+    prod: arn:aws:iam::${self:custom.valAWSAccountID}:role/${self:service}-cross-account-upload-val
+    mttestexport: arn:aws:iam::${self:custom.valAWSAccountID}:role/${self:service}-cross-account-upload-val
+    other: ''
   rotatorArn: !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${self:service}-${sls:stage}-rotator'
   dbManagerArn: !Sub 'arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:aurora_${self:service}_*' # pragma: allowlist secret
   auroraArn: ${env:CF_CONFIG_IGNORED_LOCALLY, env:AURORA_ARN}
@@ -499,29 +500,29 @@ resources:
                   - !Sub '${DataExportBucket.Arn}/*'
               - !Ref AWS::NoValue
 
-  CrossAccountUploadRole:
-    Condition: IsVal
-    Type: AWS::IAM::Role
-    Properties:
-      RoleName: !Sub '${self:service}-cross-account-upload-${sls:stage}'
-      AssumeRolePolicyDocument:
-        Version: '2012-10-17'
-        Statement:
-          - Effect: Allow
-            Principal:
-              AWS: 'arn:aws:iam::{self:custom.prodAccountId}:root'
-            Action: sts:AssumeRole
-      Policies:
-        - PolicyName: 'S3Upload'
-          PolicyDocument:
-            Version: '2012-10-17'
-            Statement:
-              - Effect: Allow
-                Action:
-                  - s3:PutObject
-                  - s3:PutObjectAcl
-                Resource:
-                  - !Sub '${DataExportBucket.Arn}/*'
+    CrossAccountUploadRole:
+      Type: AWS::IAM::Role
+      Condition: IsVal
+      Properties:
+        RoleName: !Sub '${self:service}-cross-account-upload-${sls:stage}'
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Principal:
+                AWS: ${self:custom.prodAWSAccountID}
+              Action: sts:AssumeRole
+        Policies:
+          - PolicyName: 'S3Upload'
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - s3:PutObject
+                    - s3:PutObjectAcl
+                  Resource:
+                    - !Sub '${DataExportBucket.Arn}/*'
 
   Outputs:
     PostgresAuroraV2Arn:
