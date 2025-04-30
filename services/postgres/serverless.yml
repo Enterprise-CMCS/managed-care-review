@@ -65,11 +65,6 @@ provider:
             - s3:PutObjectAcl
           Resource:
             - !Sub 'arn:aws:s3:::${self:service}-${sls:stage}-data-export/*'
-        - Effect: Allow
-          Action:
-            - sts:AssumeRole
-          Resource:
-            - ${self:custom.crossAccountRoleArn.${opt:stage, 'other'}}
 
 custom:
   stage: ${opt:stage, self:provider.stage}
@@ -150,6 +145,7 @@ functions:
     vpc:
       securityGroupIds: ${self:custom.sgId}
       subnetIds: ${self:custom.privateSubnets}
+    role: !GetAtt CrossAccountLambdaRole.Arn
     environment:
       S3_BUCKET: !Ref DataExportBucket
       DB_SECRET_ARN: !Ref PostgresSecret
@@ -468,6 +464,77 @@ resources:
               Status: Enabled
               NoncurrentVersionExpiration:
                 NoncurrentDays: 30
+
+    CrossAccountLambdaRole:
+      Type: AWS::IAM::Role
+      Properties:
+        Path: ${self:custom.iamPath}
+        PermissionsBoundary: ${self:custom.iamPermissionsBoundary}
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service: lambda.amazonaws.com
+              Action: sts:AssumeRole
+        Policies:
+          - PolicyName: cross-account-access
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - logs:CreateLogGroup
+                    - logs:CreateLogStream
+                    - logs:PutLogEvents
+                  Resource: arn:aws:logs:*:*:*
+                - Effect: Allow
+                  Action:
+                    - sts:AssumeRole
+                  Resource:
+                    Fn::If:
+                      - IsValOrProd
+                      - !Sub 'arn:aws:iam::${self:custom.valAWSAccountID}:role/${self:service}-cross-account-upload-val'
+                      - !Sub 'arn:aws:iam::${AWS::AccountId}:role/fallback-role-${self:service}'
+                - Effect: 'Allow'
+                  Action:
+                    - secretsmanager:DescribeSecret # pragma: allowlist secret
+                  Resource: '*'
+                - Effect: 'Allow'
+                  Action:
+                    - secretsmanager:DescribeSecret # pragma: allowlist secret
+                    - secretsmanager:GetSecretValue # pragma: allowlist secret
+                    - secretsmanager:PutSecretValue # pragma: allowlist secret
+                    - secretsmanager:UpdateSecretVersionStage # pragma: allowlist secret
+                  Resource: '*'
+                  Condition:
+                    StringEquals:
+                      'secretsmanager:resource/AllowRotationLambdaArn': '${self:custom.rotatorArn}' # pragma: allowlist secret
+                - Effect: Allow
+                  Action:
+                    - secretsmanager:GetRandomPassword # pragma: allowlist secret
+                  Resource: '*'
+                - Effect: 'Allow'
+                  Action:
+                    - secretsmanager:DescribeSecret # pragma: allowlist secret
+                    - secretsmanager:GetSecretValue # pragma: allowlist secret
+                  Resource:
+                    - '${self:custom.dbSecretsArn}'
+                - Effect: 'Allow'
+                  Action:
+                    - secretsmanager:DescribeSecret # pragma: allowlist secret
+                    - secretsmanager:GetSecretValue # pragma: allowlist secret
+                    - secretsmanager:PutSecretValue # pragma: allowlist secret
+                    - secretsmanager:UpdateSecretVersionStage # pragma: allowlist secret
+                    - secretsmanager:DeleteSecret # pragma: allowlist secret
+                  Resource:
+                    - '${self:custom.dbManagerArn}'
+                - Effect: Allow
+                  Action:
+                    - s3:PutObject
+                    - s3:PutObjectAcl
+                  Resource:
+                    - !Sub 'arn:aws:s3:::${self:service}-${sls:stage}-data-export/*'
 
     DataExportBucketPolicy:
       Type: AWS::S3::BucketPolicy
