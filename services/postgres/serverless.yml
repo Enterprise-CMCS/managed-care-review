@@ -68,8 +68,7 @@ provider:
         - Effect: Allow
           Action:
             - sts:AssumeRole
-          Resource:
-            - ${self:custom.crossAccountRoleArn.${opt:stage, 'other'}}
+          Resource: ${self:custom.crossAccountRoleArn.${opt:stage, 'other'}}
 
 custom:
   stage: ${opt:stage, self:provider.stage}
