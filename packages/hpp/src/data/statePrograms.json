@@ -158,6 +158,12 @@
                     "fullName": "Single Plan Model",
                     "name": "Single Plan",
                     "isRateProgram": false
+                },
+                {
+                    "id": "550e8400-e29b-41d4-a716-446655440000",
+                    "fullName": "Behavioral Health Administration Integration",
+                    "name": "BHAI",
+                    "isRateProgram": false
                 }
             ],
             "code": "CA"
