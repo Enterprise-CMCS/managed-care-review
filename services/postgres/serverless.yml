@@ -483,37 +483,15 @@ resources:
                 Service: lambda.amazonaws.com
               Action: sts:AssumeRole
         Policies:
-          - PolicyName: prod-export-permissions
+          - PolicyName: 'ProdExportPermissions'
             PolicyDocument:
               Version: '2012-10-17'
               Statement:
-                # Permission to assume the role in the val account
                 - Effect: Allow
                   Action:
                     - sts:AssumeRole
                   Resource:
                     - !Sub 'arn:aws:iam::${self:custom.valAWSAccountID}:role/${self:service}-cross-account-upload-val'
-                # DB permissions
-                - Effect: Allow
-                  Action:
-                    - secretsmanager:DescribeSecret
-                    - secretsmanager:GetSecretValue
-                  Resource:
-                    - '${self:custom.dbSecretsArn}'
-                # VPC permissions
-                - Effect: Allow
-                  Action:
-                    - ec2:CreateNetworkInterface
-                    - ec2:DeleteNetworkInterface
-                    - ec2:DescribeNetworkInterfaces
-                  Resource: '*'
-                # CloudWatch Logs permissions
-                - Effect: Allow
-                  Action:
-                    - logs:CreateLogGroup
-                    - logs:CreateLogStream
-                    - logs:PutLogEvents
-                  Resource: '*'
 
     DataExportBucketPolicy:
       Type: AWS::S3::BucketPolicy
