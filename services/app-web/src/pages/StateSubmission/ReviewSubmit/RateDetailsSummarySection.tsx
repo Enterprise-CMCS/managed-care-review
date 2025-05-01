@@ -38,8 +38,6 @@ import {
 import { useAuth } from '../../../contexts/AuthContext'
 import { ActuaryCommunicationRecord } from '@mc-review/hpp'
 import { useParams } from 'react-router-dom'
-import { LinkWithLogging } from '../../../components/TealiumLogging/Link'
-import classnames from 'classnames'
 import { hasCMSUserPermissions } from '@mc-review/helpers'
 import { InfoTag } from '../../../components/InfoTag/InfoTag'
 
@@ -98,7 +96,6 @@ export const RateDetailsSummarySection = ({
         contract.status === 'SUBMITTED' || contract.status === 'RESUBMITTED'
     const isCMSUser = hasCMSUserPermissions(loggedInUser)
     const isStateUser = loggedInUser?.role === 'STATE_USER'
-    const isAdminUser = loggedInUser?.role === 'ADMIN_USER'
     const isSubmittedOrCMSUser = isSubmitted || isCMSUser
     const isEditing = !isSubmittedOrCMSUser && editNavigateTo !== undefined
     const isPreviousSubmission = usePreviousSubmission()
@@ -285,12 +282,6 @@ export const RateDetailsSummarySection = ({
         isPreviousSubmission,
     ])
 
-    const replaceRateClass = (isLinkedRate: boolean) =>
-        classnames({
-            [styles.replaceRateWrapper]:
-                isAdminUser && !isLinkedRate && !isPreviousSubmission,
-        })
-
     const showDownloadAllButton =
         isSubmittedOrCMSUser &&
         !isPreviousSubmission &&
@@ -327,8 +318,6 @@ export const RateDetailsSummarySection = ({
                       const hasNoRatePrograms =
                           rateFormData.rateProgramIDs.length === 0
                       const isLinkedRate = rateRev.isLinked
-                      // Is this rate linked to by another contract
-                      const isLinkedTo = rateRev.isLinked
 
                       /**
                     Rate programs switched in summer 2024. We still show deprecated program field values when
@@ -343,38 +332,19 @@ export const RateDetailsSummarySection = ({
                           hasDeprecatedRatePrograms &&
                           hasNoRatePrograms &&
                           (isSubmittedOrCMSUser || isLinkedRate)
-                      const showReplaceRateBtn =
-                          isAdminUser &&
-                          !isPreviousSubmission &&
-                          !isLinkedRate &&
-                          !isLinkedTo
-                      if (!rateFormData) {
-                          return <GenericErrorPage />
-                      }
 
                       return (
                           <SectionCard
                               id={`rate-details-${rateRev.id}`}
                               key={rateRev.id}
                           >
-                              <div className={replaceRateClass(isLinkedRate)}>
+                              <div>
                                   <h3
                                       aria-label={`Rate ID: ${rateFormData.rateCertificationName}`}
                                       className={styles.rateName}
                                   >
                                       {rateFormData.rateCertificationName}
                                   </h3>
-                                  {showReplaceRateBtn && (
-                                      <LinkWithLogging
-                                          href={`/submissions/${contract.id}/replace-rate/${rateRev.rateID}`}
-                                          className={
-                                              'usa-button usa-button--outline'
-                                          }
-                                          variant="unstyled"
-                                      >
-                                          Replace rate
-                                      </LinkWithLogging>
-                                  )}
                               </div>
                               <dl>
                                   <MultiColumnGrid columns={2}>
