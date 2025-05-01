@@ -138,17 +138,18 @@ functions:
     environment:
       SECRETS_MANAGER_ENDPOINT: !Sub 'https://secretsmanager.${AWS::Region}.amazonaws.com'
   dbExport:
-    condition: IsValOrProd
+    condition: IsProd
     handler: src/db_export.handler
     description: Exports data from the Postgres Aurora database
     timeout: 60
     vpc:
       securityGroupIds: ${self:custom.sgId}
       subnetIds: ${self:custom.privateSubnets}
-    role: !GetAtt CrossAccountLambdaRole.Arn
+    role: !GetAtt ProdExportLambdaRole.Arn
     environment:
       S3_BUCKET: !Ref DataExportBucket
       DB_SECRET_ARN: !Ref PostgresSecret
+      VAL_ROLE_ARN: !Sub 'arn:aws:iam::${self:custom.valAWSAccountID}:role/${self:service}-cross-account-upload-val'
       SECRETS_MANAGER_ENDPOINT: !Sub 'https://secretsmanager.${AWS::Region}.amazonaws.com'
     layers:
       - !Ref PgToolsLambdaLayer
@@ -166,6 +167,9 @@ resources:
     IsReviewEnvironment: !Not [!Condition IsDevValProd]
     IsVal: !Or
       - !Equals ['${sls:stage}', 'val']
+      - !Equals ['${sls:stage}', 'mttestexport']
+    IsProd: !Or
+      - !Equals ['${sls:stage}', 'prod']
       - !Equals ['${sls:stage}', 'mttestexport']
     IsValOrProd: !Or
       - !Equals ['${sls:stage}', 'val']
@@ -465,8 +469,9 @@ resources:
               NoncurrentVersionExpiration:
                 NoncurrentDays: 30
 
-    CrossAccountLambdaRole:
+    ProdExportLambdaRole:
       Type: AWS::IAM::Role
+      Condition: IsProd
       Properties:
         Path: ${self:custom.iamPath}
         PermissionsBoundary: ${self:custom.iamPermissionsBoundary}
@@ -478,57 +483,37 @@ resources:
                 Service: lambda.amazonaws.com
               Action: sts:AssumeRole
         Policies:
-          - PolicyName: cross-account-access
+          - PolicyName: prod-export-permissions
             PolicyDocument:
               Version: '2012-10-17'
               Statement:
+                # Permission to assume the role in the val account
                 - Effect: Allow
                   Action:
                     - sts:AssumeRole
                   Resource:
-                    Fn::If:
-                      - IsValOrProd
-                      - !Sub 'arn:aws:iam::${self:custom.valAWSAccountID}:role/${self:service}-cross-account-upload-val'
-                      - !Sub 'arn:aws:iam::${AWS::AccountId}:role/fallback-role-${self:service}'
-                - Effect: 'Allow'
-                  Action:
-                    - secretsmanager:DescribeSecret # pragma: allowlist secret
-                  Resource: '*'
-                - Effect: 'Allow'
-                  Action:
-                    - secretsmanager:DescribeSecret # pragma: allowlist secret
-                    - secretsmanager:GetSecretValue # pragma: allowlist secret
-                    - secretsmanager:PutSecretValue # pragma: allowlist secret
-                    - secretsmanager:UpdateSecretVersionStage # pragma: allowlist secret
-                  Resource: '*'
-                  Condition:
-                    StringEquals:
-                      'secretsmanager:resource/AllowRotationLambdaArn': '${self:custom.rotatorArn}' # pragma: allowlist secret
+                    - !Sub 'arn:aws:iam::${self:custom.valAWSAccountID}:role/${self:service}-cross-account-upload-val'
+                # DB permissions
                 - Effect: Allow
                   Action:
-                    - secretsmanager:GetRandomPassword # pragma: allowlist secret
-                  Resource: '*'
-                - Effect: 'Allow'
-                  Action:
-                    - secretsmanager:DescribeSecret # pragma: allowlist secret
-                    - secretsmanager:GetSecretValue # pragma: allowlist secret
+                    - secretsmanager:DescribeSecret
+                    - secretsmanager:GetSecretValue
                   Resource:
                     - '${self:custom.dbSecretsArn}'
-                - Effect: 'Allow'
-                  Action:
-                    - secretsmanager:DescribeSecret # pragma: allowlist secret
-                    - secretsmanager:GetSecretValue # pragma: allowlist secret
-                    - secretsmanager:PutSecretValue # pragma: allowlist secret
-                    - secretsmanager:UpdateSecretVersionStage # pragma: allowlist secret
-                    - secretsmanager:DeleteSecret # pragma: allowlist secret
-                  Resource:
-                    - '${self:custom.dbManagerArn}'
+                # VPC permissions
                 - Effect: Allow
                   Action:
-                    - s3:PutObject
-                    - s3:PutObjectAcl
-                  Resource:
-                    - !Sub 'arn:aws:s3:::${self:service}-${sls:stage}-data-export/*'
+                    - ec2:CreateNetworkInterface
+                    - ec2:DeleteNetworkInterface
+                    - ec2:DescribeNetworkInterfaces
+                  Resource: '*'
+                # CloudWatch Logs permissions
+                - Effect: Allow
+                  Action:
+                    - logs:CreateLogGroup
+                    - logs:CreateLogStream
+                    - logs:PutLogEvents
+                  Resource: '*'
 
     DataExportBucketPolicy:
       Type: AWS::S3::BucketPolicy
@@ -565,13 +550,13 @@ resources:
       Type: AWS::IAM::Role
       Condition: IsVal
       Properties:
-        RoleName: !Sub '${self:service}-cross-account-upload-${sls:stage}'
+        RoleName: !Sub '${self:service}-cross-account-upload-val'
         AssumeRolePolicyDocument:
           Version: '2012-10-17'
           Statement:
             - Effect: Allow
               Principal:
-                AWS: ${self:custom.prodAWSAccountID}
+                AWS: !Sub 'arn:aws:iam::${self:custom.prodAWSAccountID}:role/service-role/ProdExportLambdaRole-${sls:stage}'
               Action: sts:AssumeRole
         Policies:
           - PolicyName: 'S3Upload'
