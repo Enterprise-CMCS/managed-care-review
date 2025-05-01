@@ -484,12 +484,6 @@ resources:
               Statement:
                 - Effect: Allow
                   Action:
-                    - logs:CreateLogGroup
-                    - logs:CreateLogStream
-                    - logs:PutLogEvents
-                  Resource: arn:aws:logs:*:*:*
-                - Effect: Allow
-                  Action:
                     - sts:AssumeRole
                   Resource:
                     Fn::If:
