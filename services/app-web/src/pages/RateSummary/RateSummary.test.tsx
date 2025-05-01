@@ -352,6 +352,7 @@ describe('RateSummary', () => {
                                     id: '7a',
                                     parentContractID: contract.id,
                                     status: 'UNLOCKED',
+                                    consolidatedStatus: 'UNLOCKED',
                                 },
                             }),
                             fetchContractMockSuccess({
