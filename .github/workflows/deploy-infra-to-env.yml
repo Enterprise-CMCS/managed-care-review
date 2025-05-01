@@ -148,8 +148,8 @@ jobs:
           IAM_PATH: ${{ secrets.iam_path }}
           AURORA_ARN: ${{ secrets.aurora_arn }}
           DB_SM_ARN: ${{ secrets.db_sm_arn }}
-          VAL_AWS_ACCOUNT_ID: $${{ secrets.val_aws_account_id}}
-          PROD_AWS_ACCOUNT_ID: $${{ secrets.prod_aws_account_id}}
+          VAL_AWS_ACCOUNT_ID: ${{ secrets.val_aws_account_id}}
+          PROD_AWS_ACCOUNT_ID: ${{ secrets.prod_aws_account_id}}
         run: |
           pushd services/postgres && npx serverless deploy --stage ${{ inputs.stage_name }}
 
