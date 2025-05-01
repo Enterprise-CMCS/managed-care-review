@@ -20,7 +20,6 @@ export * from './rateGQLMocks'
 
 export * from './withdrawRateGQLMock'
 export * from './withdrawContractGQLMock'
-export * from './replaceRateGQLMocks'
 export * from './mcReviewSettingsGQLMocks'
 
 export * from './approveContractMocks'
