@@ -482,6 +482,9 @@ resources:
               Principal:
                 Service: lambda.amazonaws.com
               Action: sts:AssumeRole
+        ManagedPolicyArns:
+          - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+          - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
         Policies:
           - PolicyName: 'ProdExportPermissions'
             PolicyDocument:
@@ -492,6 +495,17 @@ resources:
                     - sts:AssumeRole
                   Resource:
                     - !Sub 'arn:aws:iam::${self:custom.valAWSAccountID}:role/${self:service}-cross-account-upload-val'
+                - Effect: Allow
+                  Action:
+                    - secretsmanager:GetSecretValue
+                  Resource:
+                    - !Ref PostgresSecret
+                - Effect: Allow
+                  Action:
+                    - s3:PutObject
+                    - s3:PutObjectAcl
+                  Resource:
+                    - !Sub 'arn:aws:s3:::${self:service}-${sls:stage}-data-export/*'
 
     DataExportBucketPolicy:
       Type: AWS::S3::BucketPolicy
@@ -534,7 +548,7 @@ resources:
           Statement:
             - Effect: Allow
               Principal:
-                AWS: !Sub 'arn:aws:iam::${self:custom.prodAWSAccountID}:role/service-role/ProdExportLambdaRole-${sls:stage}'
+                AWS: !Sub 'arn:aws:iam::${self:custom.prodAWSAccountID}:root'
               Action: sts:AssumeRole
         Policies:
           - PolicyName: 'S3Upload'
