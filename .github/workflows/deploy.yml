@@ -302,8 +302,8 @@ jobs:
       subnet_public_a_id: ${{ secrets.DEV_SUBNET_PUBLIC_A_ID }}
       db_sm_arn: ${{ secrets.DEV_DB_SM_ARN }}
       aurora_arn: ${{ secrets.DEV_AURORA_ARN }}
-      prod_aws_account_id: ${{ secrets.PROD_AWS_ACCESS_KEY_ID }}
-      val_aws_account_id: ${{ secrets.VAL_AWS_ACCESS_KEY_ID }}
+      prod_aws_account_id: ${{ secrets.PROD_AWS_ACCOUNT_ID }}
+      val_aws_account_id: ${{ secrets.VAL_AWS_ACCOUNT_ID }}
 
   deploy-app:
     needs:
