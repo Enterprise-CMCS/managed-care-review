@@ -63,10 +63,6 @@ export const RateSummary = (): React.ReactElement => {
         featureFlags.RATE_EDIT_UNLOCK.flag,
         featureFlags.RATE_EDIT_UNLOCK.defaultValue
     )
-    const showWithdrawRate: boolean = ldClient?.variation(
-        featureFlags.WITHDRAW_RATE.flag,
-        featureFlags.WITHDRAW_RATE.defaultValue
-    )
     const showUndoWithdrawRate: boolean = ldClient?.variation(
         featureFlags.UNDO_WITHDRAW_RATE.flag,
         featureFlags.UNDO_WITHDRAW_RATE.defaultValue
@@ -214,8 +210,7 @@ export const RateSummary = (): React.ReactElement => {
 
     const latestRateAction = rate.reviewStatusActions?.[0]
 
-    const showWithdrawBanner =
-        showWithdrawRate && latestRateAction && isWithdrawn
+    const showWithdrawBanner = latestRateAction && isWithdrawn
 
     const showNoActionsMessage =
         parentContractIsApproved ||
@@ -273,7 +268,7 @@ export const RateSummary = (): React.ReactElement => {
                 </ButtonWithLogging>
             )
         }
-        if (showWithdrawRate && !isWithdrawn) {
+        if (!isWithdrawn) {
             return (
                 <ButtonWithLogging
                     disabled={isUnlocked}

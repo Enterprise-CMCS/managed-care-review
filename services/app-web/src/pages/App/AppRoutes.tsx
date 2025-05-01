@@ -197,10 +197,6 @@ const CMSUserRoutes = ({
         featureFlags.SUBMISSION_APPROVALS.flag,
         featureFlags.SUBMISSION_APPROVALS.defaultValue
     )
-    const showWithdrawRate: boolean = ldClient?.variation(
-        featureFlags.WITHDRAW_RATE.flag,
-        featureFlags.WITHDRAW_RATE.defaultValue
-    )
     const showUndoWithdrawRate: boolean = ldClient?.variation(
         featureFlags.UNDO_WITHDRAW_RATE.flag,
         featureFlags.UNDO_WITHDRAW_RATE.defaultValue
@@ -298,12 +294,10 @@ const CMSUserRoutes = ({
                     />
                 )}
 
-                {showWithdrawRate && (
-                    <Route
-                        path={RoutesRecord.RATE_WITHDRAW}
-                        element={<RateWithdraw />}
-                    />
-                )}
+                <Route
+                    path={RoutesRecord.RATE_WITHDRAW}
+                    element={<RateWithdraw />}
+                />
 
                 {showUndoWithdrawRate && (
                     <Route
