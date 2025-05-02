@@ -71,13 +71,7 @@ export const validateAndParseWithdrawnRate = (
     }
 
     // These contracts will not include linked contracts that are unlocked or in draft
-    const withdrawnFromContracts = rate.withdrawnFromContracts
-
-    if (!withdrawnFromContracts || withdrawnFromContracts.length === 0) {
-        return new Error(
-            'Rate was withdrawn, but was not associated with any contracts'
-        )
-    }
+    const withdrawnFromContracts = rate.withdrawnFromContracts ?? []
 
     const latestRateRev = rate.packageSubmissions[0].rateRevision
     if (!latestRateRev) {

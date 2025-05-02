@@ -271,6 +271,46 @@ describe('sendWithdrawnRateStateEmail', () => {
         )
     })
 
+    it('renders email correctly for withdrawn orphan rates', async () => {
+        // orphan rates have no contract associations in withdrawnFromContracts and latest submission
+        const orphanRate = {
+            ...testRate,
+            withdrawnFromContracts: [],
+            packageSubmissions: [
+                {
+                    ...testRate.packageSubmissions[0],
+                    contractRevisions: [],
+                },
+            ],
+        }
+        const template = await sendWithdrawnRateStateEmail(
+            testEmailConfig(),
+            orphanRate,
+            statePrograms
+        )
+
+        if (template instanceof Error) {
+            throw template
+        }
+
+        // expect single contract name
+        expect(template.bodyHTML).toEqual(
+            expect.not.stringContaining('MCR-MN-0100-SNBC')
+        )
+
+        // expect View the submission link
+        expect(template.bodyHTML).toEqual(
+            expect.not.stringContaining('Withdrawn from:')
+        )
+
+        // expect View the submission link
+        expect(template.bodyHTML).toEqual(
+            expect.stringContaining(
+                'If you have any questions, please reach out to your CMS point of contact.'
+            )
+        )
+    })
+
     it('renders overall email for a withdrawn rate as expected', async () => {
         const template = await sendWithdrawnRateStateEmail(
             testEmailConfig(),
@@ -378,22 +418,6 @@ describe('sendWithdrawnRateStateEmail error handling', () => {
         expect(template).toBeInstanceOf(Error)
         expect((template as Error).message).toBe(
             "Error parsing withdrawn from contract data for contract with ID: parent-contract. Can't find programs bad-program-id from state MN"
-        )
-    })
-    it('returns an error when rate has no withdrawn from contracts', async () => {
-        const rateWithoutContracts = {
-            ...testRate,
-            withdrawnFromContracts: [],
-        }
-        const template = await sendWithdrawnRateStateEmail(
-            testEmailConfig(),
-            rateWithoutContracts,
-            statePrograms
-        )
-
-        expect(template).toBeInstanceOf(Error)
-        expect((template as Error).message).toBe(
-            'Rate was withdrawn, but was not associated with any contracts'
         )
     })
 })

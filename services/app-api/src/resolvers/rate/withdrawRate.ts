@@ -139,9 +139,7 @@ export function withdrawRate(
         setSuccessAttributesOnActiveSpan(span)
 
         // Send out email to state contacts
-        const statePrograms = await store.findStatePrograms(
-            withdrawnRate.stateCode
-        )
+        const statePrograms = store.findStatePrograms(withdrawnRate.stateCode)
 
         if (statePrograms instanceof Error) {
             const errMessage = `Email failed: ${statePrograms.message}`
