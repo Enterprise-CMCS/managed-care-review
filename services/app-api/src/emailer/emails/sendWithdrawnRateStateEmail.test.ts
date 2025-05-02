@@ -281,6 +281,65 @@ describe('sendWithdrawnRateStateEmail', () => {
                     ...testRate.packageSubmissions[0],
                     contractRevisions: [],
                 },
+                {
+                    ...testRate.packageSubmissions[0],
+                    contractRevisions: [
+                        {
+                            ...mockContractRev({
+                                id: '1',
+                                submitInfo: {
+                                    updatedAt: new Date('2024-04-13'),
+                                    updatedReason: 'Some reason',
+                                    updatedBy: testCMSUser({
+                                        email: 'cms@cms.com',
+                                    }),
+                                },
+                                formData: {
+                                    ...mockContractRev().formData,
+                                    stateContacts: [
+                                        {
+                                            name: 'parent-contract-state-contact',
+                                            titleRole: 'state contact',
+                                            email: 'parent-contract-state-contact@state.com',
+                                        },
+                                    ],
+                                },
+                            }),
+                        },
+                        {
+                            ...mockContractRev({
+                                id: '2',
+                                submitInfo: {
+                                    updatedAt: new Date('2024-04-12'),
+                                    updatedReason: 'Some reason',
+                                    updatedBy: testCMSUser({
+                                        email: 'cms@cms.com',
+                                    }),
+                                },
+                                formData: {
+                                    ...mockContractRev().formData,
+                                    stateContacts: [
+                                        {
+                                            name: 'linked-contract-state-contact',
+                                            titleRole: 'state contact',
+                                            email: 'linked-contract-state-contact@state.com',
+                                        },
+                                        {
+                                            name: 'duplicate-state-contact',
+                                            titleRole: 'state contact',
+                                            email: 'duplicateContact@state-contact.com',
+                                        },
+                                        {
+                                            name: 'duplicate-state-contact',
+                                            titleRole: 'state contact',
+                                            email: 'duplicateContact@state-contact.com',
+                                        },
+                                    ],
+                                },
+                            }),
+                        },
+                    ],
+                },
             ],
         }
         const template = await sendWithdrawnRateStateEmail(
@@ -292,6 +351,16 @@ describe('sendWithdrawnRateStateEmail', () => {
         if (template instanceof Error) {
             throw template
         }
+
+        expect(template.toAddresses).toEqual(
+            expect.arrayContaining([
+                'parent-contract-state-contact@state.com',
+                'linked-contract-state-contact@state.com',
+                'duplicateContact@state-contact.com',
+                'devreview1@example.com',
+                'devreview2@example.com',
+            ])
+        )
 
         // expect single contract name
         expect(template.bodyHTML).toEqual(
