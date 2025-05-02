@@ -19,5 +19,6 @@
 <div>If you have any questions, please reach out to your CMS point of contact.</div>
 <a href="<%= it.withdrawnFromContractData[0].submissionURL %>">View the submission in MC-Review</a>
 <% } else { %>
+<br />
 <div>If you have any questions, please reach out to your CMS point of contact.</div>
 <% } %>

@@ -13,5 +13,7 @@
 <b>Withdrawn from:</b>
 <%= it.withdrawnFromContractData[0].contractName %><br />
 <br />
+<% } else { %>
+<br />
 <% } %>
 <a href="<%= it.summaryURL %>">View withdrawn rate in MC-Review</a>
