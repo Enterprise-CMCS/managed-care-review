@@ -51,7 +51,6 @@ import {
     submitRate,
     unlockContract,
     updateDraftContract,
-    replaceRateOnContract,
     findContractRevision,
     findRateRevision,
     approveContract,
@@ -64,7 +63,6 @@ import type {
     ContractOrErrorArrayType,
     RateOrErrorArrayType,
     UpdateMCCRSIDFormArgsType,
-    ReplaceRateOnContractArgsType,
     FindAllRatesWithHistoryBySubmitType,
     ApproveContractArgsType,
 } from './contractAndRates'
@@ -225,10 +223,6 @@ type Store = {
         args?: FindAllRatesStrippedType
     ) => Promise<StrippedRateOrErrorArrayType | Error>
 
-    replaceRateOnContract: (
-        args: ReplaceRateOnContractArgsType
-    ) => Promise<ContractType | Error>
-
     submitContract: (
         args: SubmitContractArgsType
     ) => Promise<ContractType | Error>
@@ -332,7 +326,6 @@ function NewPostgresStore(client: ExtendedPrismaClient): Store {
         findAllRatesWithHistoryBySubmitInfo: (args) =>
             findAllRatesWithHistoryBySubmitInfo(client, args),
         findAllRatesStripped: (args) => findAllRatesStripped(client, args),
-        replaceRateOnContract: (args) => replaceRateOnContract(client, args),
         submitContract: (args) => submitContract(client, args),
         submitRate: (args) => submitRate(client, args),
         unlockContract: (args) => unlockContract(client, args),

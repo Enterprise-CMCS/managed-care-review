@@ -24,7 +24,6 @@ const ROUTES = [
     'RATE_EDIT',
     'RATE_WITHDRAW',
     'UNDO_RATE_WITHDRAW',
-    'REPLACE_RATE',
     'SUBMISSIONS',
     'SUBMISSIONS_NEW',
     'SUBMISSIONS_TYPE',
@@ -80,7 +79,6 @@ const RoutesRecord: Record<RouteT, string> = {
     UNDO_RATE_WITHDRAW: '/rate-reviews/:id/undo-withdraw',
     RATES_UPLOAD_QUESTION:
         '/rates/:id/question-and-answers/:division/upload-questions',
-    REPLACE_RATE: '/submissions/:id/replace-rate/:rateID',
     SUBMISSIONS: '/submissions',
     SUBMISSIONS_NEW: '/submissions/new',
     SUBMISSIONS_EDIT_TOP_LEVEL: '/submissions/:id/edit/*',
@@ -159,7 +157,6 @@ const QUESTION_RESPONSE_FORM_ROUTES: RouteTWithUnknown[]  = [
 // Collect CMS review or workflow related forms
 const CMS_WORKFLOW_FORM_ROUTES: RouteTWithUnknown[]  = [
     'SUBMISSIONS_MCCRSID',
-    'REPLACE_RATE',
     'RATE_WITHDRAW',
     'UNDO_RATE_WITHDRAW',
     'SUBMISSIONS_RELEASED_TO_STATE',
@@ -196,7 +193,6 @@ const PageTitlesRecord: Record<RouteT | 'UNKNOWN_ROUTE', string> = {
     RATE_EDIT: 'Edit rate',
     RATE_WITHDRAW: 'Withdraw rate',
     UNDO_RATE_WITHDRAW: 'Undo withdraw',
-    REPLACE_RATE: 'Replace rate',
     RATES_UPLOAD_QUESTION: 'Add rate questions',
     SUBMISSIONS: 'Submissions',
     SUBMISSIONS_NEW: 'New submission',

@@ -37,7 +37,6 @@ import {
 } from '../QuestionResponse'
 import { GraphQLExplorer } from '../GraphQLExplorer/GraphQLExplorer'
 import { RateSummary } from '../RateSummary'
-import { ReplaceRate } from '../ReplaceRate/ReplaceRate'
 import { RateEdit } from '../RateEdit/RateEdit'
 import { APIAccess } from '../APIAccess/APIAccess'
 import {
@@ -277,11 +276,6 @@ const CMSUserRoutes = ({
                 <Route
                     path={RoutesRecord.SUBMISSIONS_MCCRSID}
                     element={<MccrsId />}
-                />
-
-                <Route
-                    path={RoutesRecord.REPLACE_RATE}
-                    element={<ReplaceRate />}
                 />
 
                 {showApprovals && (
