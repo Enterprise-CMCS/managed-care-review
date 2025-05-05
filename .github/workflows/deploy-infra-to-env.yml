@@ -179,6 +179,7 @@ jobs:
 
       - name: test serverless reconcile
         run: |
+          pnpm add -g serverless
           serverless reconcile
 
       - name: deploy ui
