@@ -29,6 +29,7 @@ import { UnlockRateButton } from '../../components/SubmissionSummarySection/Rate
 import { recordJSException } from '@mc-review/otel'
 import { handleApolloErrorsAndAddUserFacingMessages } from '@mc-review/helpers'
 import { StatusUpdatedBanner } from '../../components/Banner/StatusUpdatedBanner/StatusUpdatedBanner'
+import { ChildrenType } from '../../components/MultiColumnGrid/MultiColumnGrid'
 
 export const RateSummary = (): React.ReactElement => {
     // Page level state
@@ -191,14 +192,15 @@ export const RateSummary = (): React.ReactElement => {
         }
     }
 
+    const latestRateAction = rate.reviewStatusActions?.[0]
+    const latestPackageSubmission = rate.packageSubmissions?.[0]
+
     const parentContractSubmissionID = rate.parentContractID
     const isUnlocked = rate.consolidatedStatus === 'UNLOCKED'
     const isWithdrawn = rate.consolidatedStatus === 'WITHDRAWN'
-    const parentContractIsApproved = contract.consolidatedStatus === 'APPROVED'
     const parentContractIsSubmitted =
         contract.consolidatedStatus === 'SUBMITTED' ||
         contract.consolidatedStatus === 'RESUBMITTED'
-    const parentContractIsUnlocked = contract.consolidatedStatus === 'UNLOCKED'
     const parentContractIsWithdrawn =
         contract.consolidatedStatus === 'WITHDRAWN'
     const isWithdrawnWithContract =
@@ -208,82 +210,88 @@ export const RateSummary = (): React.ReactElement => {
             (contract) => contract.id === rate.parentContractID
         )
 
-    const latestRateAction = rate.reviewStatusActions?.[0]
+    // Orphaned rates are ones not associated with any contracts in its latest packageSubmission and withdrawnFromContracts.
+    // Contracts the rate was removed from must be resubmitted before the latest packageSubmission will show the disassociation.
+    const isOrphanedRate =
+        latestPackageSubmission &&
+        latestPackageSubmission.contractRevisions.length === 0 &&
+        rate.withdrawnFromContracts?.length === 0
 
     const showWithdrawBanner = latestRateAction && isWithdrawn
 
-    const showNoActionsMessage =
-        parentContractIsApproved ||
-        parentContractIsUnlocked ||
-        parentContractIsWithdrawn ||
-        isWithdrawnWithContract ||
-        (!showUndoWithdrawRate && isWithdrawn) ||
-        isUnlocked
+    const rateActions: ChildrenType[] = []
 
-    const unlockRateActions = () => {
-        if (
-            showRateUnlock &&
-            !isWithdrawn &&
-            !isUnlocked &&
-            parentContractIsSubmitted
-        ) {
-            return (
-                <UnlockRateButton
-                    disabled={unlockLoading}
-                    onClick={handleUnlockRate}
-                >
-                    Unlock rate
-                </UnlockRateButton>
-            )
-        } else if (!isWithdrawn && !isUnlocked && parentContractIsSubmitted) {
-            return (
-                /* This second option is an interim state for unlock rate button (when linked rates is turned on but unlock and edit rate is not available yet). Remove when rate unlock is permanently on. */
-                <UnlockRateButton
-                    disabled={unlockLoading}
-                    onClick={() => {
-                        navigate(`/submissions/${parentContractSubmissionID}`)
-                    }}
-                    link_url={`/submissions/${parentContractSubmissionID}`}
-                >
-                    Unlock rate
-                </UnlockRateButton>
-            )
-        }
+    // Adding Unlock rate button to action section
+    if (
+        showRateUnlock &&
+        !isWithdrawn &&
+        !isUnlocked &&
+        parentContractIsSubmitted
+    ) {
+        rateActions.push(
+            <UnlockRateButton
+                disabled={unlockLoading}
+                onClick={handleUnlockRate}
+            >
+                Unlock rate
+            </UnlockRateButton>
+        )
+    } else if (!isWithdrawn && !isUnlocked && parentContractIsSubmitted) {
+        rateActions.push(
+            /* This second option is an interim state for unlock rate button (when linked rates is turned on but unlock and edit rate is not available yet). Remove when rate unlock is permanently on. */
+            <UnlockRateButton
+                onClick={() => {
+                    navigate(`/submissions/${parentContractSubmissionID}`)
+                }}
+                link_url={`/submissions/${parentContractSubmissionID}`}
+            >
+                Unlock rate
+            </UnlockRateButton>
+        )
     }
 
-    const rateWithdrawActions = () => {
-        if (showUndoWithdrawRate && isWithdrawn) {
-            return (
-                <ButtonWithLogging
-                    disabled={isUnlocked}
-                    className="usa-button usa-button--outline"
-                    type="button"
-                    onClick={() =>
-                        navigate(`/rate-reviews/${rate.id}/undo-withdraw`)
-                    }
-                    link_url={`/rate-reviews/${rate.id}/undo-withdraw`}
-                    outline
-                >
-                    Undo withdraw
-                </ButtonWithLogging>
-            )
-        }
-        if (!isWithdrawn) {
-            return (
-                <ButtonWithLogging
-                    disabled={isUnlocked}
-                    className="usa-button usa-button--outline"
-                    type="button"
-                    onClick={() =>
-                        navigate(`/rate-reviews/${rate.id}/withdraw-rate`)
-                    }
-                    link_url={`/rate-reviews/${rate.id}/withdraw-rate`}
-                    outline
-                >
-                    Withdraw rate
-                </ButtonWithLogging>
-            )
-        }
+    // Adding undo withdraw button to action section
+    if (
+        showUndoWithdrawRate &&
+        isWithdrawn &&
+        !isWithdrawnWithContract &&
+        parentContractIsSubmitted &&
+        !isOrphanedRate
+    ) {
+        rateActions.push(
+            <ButtonWithLogging
+                className="usa-button usa-button--outline"
+                type="button"
+                onClick={() =>
+                    navigate(`/rate-reviews/${rate.id}/undo-withdraw`)
+                }
+                link_url={`/rate-reviews/${rate.id}/undo-withdraw`}
+                outline
+            >
+                Undo withdraw
+            </ButtonWithLogging>
+        )
+    }
+
+    // Adding withdraw button to action section
+    if (
+        (!isWithdrawn &&
+            (parentContractIsSubmitted || parentContractIsWithdrawn)) ||
+        (!isWithdrawn && isOrphanedRate)
+    ) {
+        rateActions.push(
+            <ButtonWithLogging
+                className="usa-button usa-button--outline"
+                type="button"
+                onClick={() =>
+                    navigate(`/rate-reviews/${rate.id}/withdraw-rate`)
+                }
+                link_url={`/rate-reviews/${rate.id}/withdraw-rate`}
+                outline
+            >
+                Withdraw rate
+            </ButtonWithLogging>
+        )
     }
 
     return (
@@ -327,16 +335,16 @@ export const RateSummary = (): React.ReactElement => {
                 {isCMSUser && (
                     <SectionCard className={styles.actionsSection}>
                         <h3>Actions</h3>
-                        {showNoActionsMessage ? (
+                        {rateActions.length === 0 ? (
                             <Grid>
                                 No action can be taken on this submission in its
                                 current status.
                             </Grid>
                         ) : (
-                            <MultiColumnGrid columns={2}>
-                                {unlockRateActions()}
-                                {rateWithdrawActions()}
-                            </MultiColumnGrid>
+                            <MultiColumnGrid
+                                columns={2}
+                                children={rateActions}
+                            />
                         )}
                     </SectionCard>
                 )}

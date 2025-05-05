@@ -83,9 +83,11 @@ export function withdrawRate(
             })
         }
 
-        const allowedRateStatus = ['SUBMITTED', 'RESUBMITTED'].includes(
-            rateWithHistory.consolidatedStatus
-        )
+        const allowedRateStatus = [
+            'SUBMITTED',
+            'RESUBMITTED',
+            'UNLOCKED',
+        ].includes(rateWithHistory.consolidatedStatus)
 
         // Parent contract should also not be unlocked. Currently, there is no way to get into the state where rate is in
         // a valid status, but parent contract is invalid status.
@@ -137,9 +139,7 @@ export function withdrawRate(
         setSuccessAttributesOnActiveSpan(span)
 
         // Send out email to state contacts
-        const statePrograms = await store.findStatePrograms(
-            withdrawnRate.stateCode
-        )
+        const statePrograms = store.findStatePrograms(withdrawnRate.stateCode)
 
         if (statePrograms instanceof Error) {
             const errMessage = `Email failed: ${statePrograms.message}`

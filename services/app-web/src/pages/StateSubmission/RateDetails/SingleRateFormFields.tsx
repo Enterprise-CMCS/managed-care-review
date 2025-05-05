@@ -115,8 +115,9 @@ export const SingleRateFormFields = ({
 
     useEffect(() => {
         if (focusNewActuaryContact) {
-            newActuaryContactNameRef.current &&
+            if (newActuaryContactNameRef.current) {
                 newActuaryContactNameRef.current.focus()
+            }
             setFocusNewActuaryContact(false)
             newActuaryContactNameRef.current = null
         }

@@ -52,7 +52,6 @@ import { rateRevisionResolver } from './rate/rateRevisionResolver'
 import type { S3ClientT } from '../s3'
 import { createContract } from './contract/createContract'
 import { updateContractDraftRevision } from './contract/updateContractDraftRevision'
-import { withdrawAndReplaceRedundantRateResolver } from './contract/withdrawAndReplaceRedundantRate'
 import { approveContract } from './contract/approveContract'
 import { fetchMcReviewSettings } from './settings'
 import { updateStateAssignmentsByState } from './user/updateStateAssignmentsByState'
@@ -111,8 +110,6 @@ export function configureResolvers(
                 launchDarkly
             ),
             updateDraftContractRates: updateDraftContractRates(store),
-            withdrawAndReplaceRedundantRate:
-                withdrawAndReplaceRedundantRateResolver(store),
             approveContract: approveContract(store),
             withdrawContract: withdrawContract(store, emailer),
             withdrawRate: withdrawRate(store, emailer),
