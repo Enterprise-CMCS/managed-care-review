@@ -177,6 +177,10 @@ jobs:
           stage-name: ${{ inputs.stage_name }}
           changed-services: ${{ inputs.changed_services }}
 
+      - name: test serverless reconcile
+        run: |
+          serverless reconcile
+
       - name: deploy ui
         id: deploy-ui
         env:
