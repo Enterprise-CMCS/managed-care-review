@@ -79,7 +79,7 @@ describe('sendWithdrawnSubmissionCMSEmail error handling', () => {
     it('returns an error if contract consolidated status is not WITHDRAWN', async () => {
         const contractWithWrongStatus = {
             ...testContract,
-            consolidatedStatus: 'RESUBMITTED',
+            consolidatedStatus: 'RESUBMITTED' as const,
         }
 
         const template = await sendWithdrawnSubmissionCMSEmail(
@@ -121,14 +121,14 @@ describe('sendWithdrawnSubmissionCMSEmail error handling', () => {
                 {
                     updatedAt: new Date('2025-04-10'),
                     updatedBy: {
-                        role: 'CMS_USER',
+                        role: 'CMS_USER' as const,
                         email: 'zuko@example.com',
                         givenName: 'Zuko',
                         familyName: 'Hotman',
                     },
                     updatedReason: 'Test Withdraw',
                     dateApprovalReleasedToState: undefined,
-                    actionType: 'UNDER_REVIEW',
+                    actionType: 'UNDER_REVIEW' as const,
                     contractID: 'test-contract-123',
                 },
             ],

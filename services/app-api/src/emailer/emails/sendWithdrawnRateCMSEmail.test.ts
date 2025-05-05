@@ -181,7 +181,7 @@ const statePrograms = mockMNState().programs
 
 const stateAnalystsEmails = () => [...testStateAnalystsEmails]
 
-describe('sendWithdrawnRateStateEmail', () => {
+describe('sendWithdrawnRateCMSEmail', () => {
     it('includes expected CMS contacts in toAddress', async () => {
         const template = await sendWithdrawnRateCMSEmail(
             testEmailConfig(),
@@ -265,6 +265,48 @@ describe('sendWithdrawnRateStateEmail', () => {
         // expect single contract name
         expect(template.bodyHTML).toEqual(
             expect.stringContaining('MCR-MN-0100-SNBC')
+        )
+
+        // expect View the submission link
+        expect(template.bodyHTML).toEqual(
+            expect.stringContaining(
+                '<a href="http://localhost/rates/test-rate">View withdrawn rate in MC-Review</a>'
+            )
+        )
+    })
+
+    it('renders email correctly for withdrawn orphan rates', async () => {
+        // orphan rates have no contract associations in withdrawnFromContracts and latest submission
+        const orphanRate = {
+            ...testRate,
+            withdrawnFromContracts: [],
+            packageSubmissions: [
+                {
+                    ...testRate.packageSubmissions[0],
+                    contractRevisions: [],
+                },
+            ],
+        }
+
+        const template = await sendWithdrawnRateCMSEmail(
+            testEmailConfig(),
+            orphanRate,
+            statePrograms,
+            stateAnalystsEmails()
+        )
+
+        if (template instanceof Error) {
+            throw template
+        }
+
+        // expect single contract name
+        expect(template.bodyHTML).toEqual(
+            expect.not.stringContaining('MCR-MN-0100-SNBC')
+        )
+
+        // expect View the submission link
+        expect(template.bodyHTML).toEqual(
+            expect.not.stringContaining('Withdrawn from:')
         )
 
         // expect View the submission link
@@ -386,23 +428,6 @@ describe('sendWithdrawnRateStateEmail error handling', () => {
         expect(template).toBeInstanceOf(Error)
         expect((template as Error).message).toBe(
             "Error parsing withdrawn from contract data for contract with ID: parent-contract. Can't find programs bad-program-id from state MN"
-        )
-    })
-    it('returns an error when rate has no withdrawn from contracts', async () => {
-        const rateWithoutContracts = {
-            ...testRate,
-            withdrawnFromContracts: [],
-        }
-        const template = await sendWithdrawnRateCMSEmail(
-            testEmailConfig(),
-            rateWithoutContracts,
-            statePrograms,
-            stateAnalystsEmails()
-        )
-
-        expect(template).toBeInstanceOf(Error)
-        expect((template as Error).message).toBe(
-            'Rate was withdrawn, but was not associated with any contracts'
         )
     })
 })

@@ -125,8 +125,11 @@ async function unlockContractInsideTransaction(
         },
     })
 
+    // filter out submissionPackages to only this latest revision. We only want to compare rates from the lates submission.
     const submissionPackageEntries =
-        currentRev.relatedSubmisions[0].submissionPackages
+        currentRev.relatedSubmisions[0].submissionPackages.filter(
+            (pkg) => pkg.contractRevisionID === currentRev.id
+        )
 
     // Collect child rates to unlock with contract
     for (const childRate of childRates) {
