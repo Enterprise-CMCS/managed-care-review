@@ -184,6 +184,7 @@ jobs:
           pnpm add -g serverless
           echo "serverlessAccessKey: $SERVERLESS_ACCESS_KEY" > ~/.serverlessrc
           serverless reconcile
+          serverless usage
 
       - name: deploy ui
         id: deploy-ui
