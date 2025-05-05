@@ -59,6 +59,11 @@ jobs:
           STAGE_PREFIX: ${{ secrets.STAGE_PREFIX }}
         run: node ./scripts/destroy_stage.js $stage_name
 
+      - name: serverless reconcile
+        env:
+          AWS_REGIONS: ${{ vars.AWS_DEFAULT_REGION }}
+        run: serverless reconcile
+
       - name: Alert Slack On Destroy Failure
         uses: rtCamp/action-slack-notify@v2
         if: failure()
