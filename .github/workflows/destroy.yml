@@ -61,8 +61,10 @@ jobs:
 
       - name: serverless reconcile
         env:
-          AWS_REGIONS: ${{ vars.AWS_DEFAULT_REGION }}
-        run: serverless reconcile
+          SERVERLESS_ACCESS_KEY: ${{ secrets.serverless_license_key }}
+        run: |
+          pnpm add -g serverless
+          serverless reconcile
 
       - name: Alert Slack On Destroy Failure
         uses: rtCamp/action-slack-notify@v2
