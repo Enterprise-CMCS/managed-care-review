@@ -182,6 +182,7 @@ jobs:
           SERVERLESS_ACCESS_KEY: ${{ secrets.serverless_license_key }}
         run: |
           pnpm add -g serverless
+          echo "serverlessAccessKey: $SERVERLESS_ACCESS_KEY" > ~/.serverlessrc
           serverless reconcile
 
       - name: deploy ui
