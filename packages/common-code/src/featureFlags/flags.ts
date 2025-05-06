@@ -33,13 +33,6 @@ const featureFlags = {
         defaultValue: false,
     },
     /**
-     * Enables withdraw rate features
-     */
-    WITHDRAW_RATE: {
-        flag: 'withdraw-rate',
-        defaultValue: false,
-    },
-    /**
      * Enables undo withdraw rate feature
      */
     UNDO_WITHDRAW_RATE: {

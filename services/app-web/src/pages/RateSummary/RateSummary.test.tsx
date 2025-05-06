@@ -157,7 +157,6 @@ describe('RateSummary', () => {
                         route: '/rates/1337',
                     },
                     featureFlags: {
-                        'withdraw-rate': true,
                         'undo-withdraw-rate': true,
                     },
                 })
@@ -240,7 +239,6 @@ describe('RateSummary', () => {
                         route: '/rates/1337',
                     },
                     featureFlags: {
-                        'withdraw-rate': true,
                         'undo-withdraw-rate': true,
                     },
                 })
@@ -674,7 +672,6 @@ describe('RateSummary', () => {
                     },
                     featureFlags: {
                         'rate-edit-unlock': true,
-                        'withdraw-rate': true,
                     },
                 })
 
@@ -724,7 +721,6 @@ describe('RateSummary', () => {
                 },
                 featureFlags: {
                     'rate-edit-unlock': true,
-                    'withdraw-rate': true,
                 },
             })
 
@@ -787,7 +783,6 @@ describe('RateSummary', () => {
                     route: '/rates/1337',
                 },
                 featureFlags: {
-                    'withdraw-rate': true,
                     'undo-withdraw-rate': true,
                 },
             })
@@ -955,7 +950,6 @@ describe('RateSummary', () => {
                     route: '/rates/1337',
                 },
                 featureFlags: {
-                    'withdraw-rate': true,
                     'undo-withdraw-rate': true,
                 },
             })
@@ -1012,7 +1006,6 @@ describe('RateSummary', () => {
                     route: '/rates/1337',
                 },
                 featureFlags: {
-                    'withdraw-rate': true,
                     'undo-withdraw-rate': true,
                 },
             })
@@ -1065,7 +1058,6 @@ describe('RateSummary', () => {
                     route: '/rates/1337',
                 },
                 featureFlags: {
-                    'withdraw-rate': true,
                     'undo-withdraw-rate': true,
                 },
             })
@@ -1144,7 +1136,6 @@ describe('RateSummary', () => {
                     route: '/rates/1337',
                 },
                 featureFlags: {
-                    'withdraw-rate': true,
                     'undo-withdraw-rate': true,
                 },
             })

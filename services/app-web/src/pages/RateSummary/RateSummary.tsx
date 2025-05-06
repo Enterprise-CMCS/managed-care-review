@@ -64,10 +64,6 @@ export const RateSummary = (): React.ReactElement => {
         featureFlags.RATE_EDIT_UNLOCK.flag,
         featureFlags.RATE_EDIT_UNLOCK.defaultValue
     )
-    const showWithdrawRate: boolean = ldClient?.variation(
-        featureFlags.WITHDRAW_RATE.flag,
-        featureFlags.WITHDRAW_RATE.defaultValue
-    )
     const showUndoWithdrawRate: boolean = ldClient?.variation(
         featureFlags.UNDO_WITHDRAW_RATE.flag,
         featureFlags.UNDO_WITHDRAW_RATE.defaultValue
@@ -221,8 +217,7 @@ export const RateSummary = (): React.ReactElement => {
         latestPackageSubmission.contractRevisions.length === 0 &&
         rate.withdrawnFromContracts?.length === 0
 
-    const showWithdrawBanner =
-        showWithdrawRate && latestRateAction && isWithdrawn
+    const showWithdrawBanner = latestRateAction && isWithdrawn
 
     const rateActions: ChildrenType[] = []
 
@@ -280,8 +275,7 @@ export const RateSummary = (): React.ReactElement => {
 
     // Adding withdraw button to action section
     if (
-        (showWithdrawRate &&
-            !isWithdrawn &&
+        (!isWithdrawn &&
             (parentContractIsSubmitted || parentContractIsWithdrawn)) ||
         (!isWithdrawn && isOrphanedRate)
     ) {

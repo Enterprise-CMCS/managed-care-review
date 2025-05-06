@@ -123,7 +123,6 @@ describe('UndoRateWithdraw', () => {
                 },
                 featureFlags: {
                     'undo-withdraw-rate': true,
-                    'withdraw-rate': true,
                 },
                 location: (location) => (testLocation = location),
             }
