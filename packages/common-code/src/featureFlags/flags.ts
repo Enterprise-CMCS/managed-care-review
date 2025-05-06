@@ -26,13 +26,6 @@ const featureFlags = {
         defaultValue: false,
     },
     /**
-     * Enables submission approvals, withdraws, and reviews features
-     */
-    SUBMISSION_APPROVALS: {
-        flag: 'submission-approvals',
-        defaultValue: false,
-    },
-    /**
      * Enables undo withdraw rate feature
      */
     UNDO_WITHDRAW_RATE: {

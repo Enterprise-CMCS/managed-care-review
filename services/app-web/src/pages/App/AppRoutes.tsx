@@ -192,10 +192,6 @@ const CMSUserRoutes = ({
 }): React.ReactElement => {
     // feature flag
     const ldClient = useLDClient()
-    const showApprovals: boolean = ldClient?.variation(
-        featureFlags.SUBMISSION_APPROVALS.flag,
-        featureFlags.SUBMISSION_APPROVALS.defaultValue
-    )
     const showUndoWithdrawRate: boolean = ldClient?.variation(
         featureFlags.UNDO_WITHDRAW_RATE.flag,
         featureFlags.UNDO_WITHDRAW_RATE.defaultValue
@@ -274,12 +270,10 @@ const CMSUserRoutes = ({
                     element={<MccrsId />}
                 />
 
-                {showApprovals && (
-                    <Route
-                        path={RoutesRecord.SUBMISSIONS_RELEASED_TO_STATE}
-                        element={<ReleasedToState />}
-                    />
-                )}
+                <Route
+                    path={RoutesRecord.SUBMISSIONS_RELEASED_TO_STATE}
+                    element={<ReleasedToState />}
+                />
 
                 {showWithdrawSubmission && (
                     <Route
