@@ -60,6 +60,13 @@ const featureFlags = {
         flag: 'withdraw-submission',
         defaultValue: false
     },
+    /**
+     * Enables undo withdraw submission features
+     */
+    UNDO_WITHDRAW_SUBMISSION: {
+        flag: 'undo-withdraw-submission',
+        defaultValue: false
+    },
     // PERMANENT FLAGS
     /**
      Enables the modal that alerts the user to an expiring session
