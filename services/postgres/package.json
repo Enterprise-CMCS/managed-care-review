@@ -23,6 +23,7 @@
         "@aws-sdk/client-secrets-manager": "^3.787.0",
         "pg": "^8.13.1",
         "@aws-sdk/client-cloudformation": "^3.787.0",
-        "@aws-sdk/client-s3": "^3.787.0"
+        "@aws-sdk/client-s3": "^3.787.0",
+        "@prisma/client": "^5.17.0"
     }
 }
