@@ -15,7 +15,6 @@ import {
     indexContractQuestionsPayload,
     indexRateQuestionsPayload,
 } from '../QuestionsType'
-import { updateInfoSchema } from './updateInfoType'
 import { contractReviewActionSchema } from './contractReviewActionType'
 import { rateReviewActionSchema } from './rateReviewActionType'
 
@@ -61,7 +60,6 @@ const rateWithoutDraftContractsSchema = z.object({
     stateCode: z.string(),
     parentContractID: z.string().uuid(),
     stateNumber: z.number().min(1),
-    withdrawInfo: updateInfoSchema.optional(),
     // If this rate is in a DRAFT or UNLOCKED status, there will be a draftRevision
     draftRevision: rateRevisionSchema.optional(),
     reviewStatusActions: z.array(rateReviewActionSchema).optional(),

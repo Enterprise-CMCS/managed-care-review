@@ -96,7 +96,6 @@ const reassignParentContractInTransaction = async (
                             include: {
                                 ...includeStrippedRateWithoutDraftContracts,
                                 reviewStatusActions: false,
-                                withdrawInfo: false,
                             },
                         },
                     },
