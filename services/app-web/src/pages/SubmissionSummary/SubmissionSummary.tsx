@@ -60,11 +60,6 @@ export const SubmissionSummary = (): React.ReactElement => {
     const navigate = useNavigate()
     const ldClient = useLDClient()
 
-    const submissionApprovalFlag = ldClient?.variation(
-        featureFlags.SUBMISSION_APPROVALS.flag,
-        featureFlags.SUBMISSION_APPROVALS.defaultValue
-    )
-
     const withdrawSubmissionFlag = ldClient?.variation(
         featureFlags.WITHDRAW_SUBMISSION.flag,
         featureFlags.WITHDRAW_SUBMISSION.defaultValue
@@ -185,7 +180,6 @@ export const SubmissionSummary = (): React.ReactElement => {
     const latestContractAction = contract.reviewStatusActions?.[0]
 
     const showApprovalBtn =
-        submissionApprovalFlag &&
         hasCMSPermissions &&
         ['SUBMITTED', 'RESUBMITTED'].includes(consolidatedStatus)
     const showUnlockBtn =
@@ -199,9 +193,7 @@ export const SubmissionSummary = (): React.ReactElement => {
         !showApprovalBtn && !showUnlockBtn && !showWithdrawBtn
 
     const showApprovalBanner =
-        submissionApprovalFlag &&
-        consolidatedStatus === 'APPROVED' &&
-        latestContractAction
+        consolidatedStatus === 'APPROVED' && latestContractAction
     const showWithdrawnBanner =
         withdrawSubmissionFlag &&
         consolidatedStatus === 'WITHDRAWN' &&
