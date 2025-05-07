@@ -133,6 +133,16 @@ jobs:
           name: lambda-layers-postgres-tools
           path: ./services/postgres/lambda-layers-postgres-tools
 
+      - uses: actions/download-artifact@v4
+        with:
+          name: lambda-layers-prisma-client-engine
+          path: ./services/postgres/lambda-layers-prisma-client-engine
+
+      - name: Unzip prisma engine layer
+        run: |
+          tar -C ./services/postgres/lambda-layers-prisma-client-engine -xf ./services/postgres/lambda-layers-prisma-client-engine/nodejs.tar.gz
+          rm -rf ./services/postgres/lambda-layers-prisma-client-engine/nodejs.tar.gz
+
       - name: deploy postgres
         id: deploy-postgres
         env:

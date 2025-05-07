@@ -63,8 +63,19 @@ provider:
           Action:
             - s3:PutObject
             - s3:PutObjectAcl
+            - 's3:GetObject'
+            - 's3:ListObjects'
+            - 's3:ListObjectsV2'
           Resource:
             - !Sub 'arn:aws:s3:::${self:service}-${sls:stage}-data-export/*'
+        - Effect: 'Allow'
+          Action:
+            - 's3:GetObject'
+            - 's3:PutObject'
+            - 's3:ListObjects'
+            - 's3:ListObjectsV2'
+          Resource:
+            - !Sub 'arn:aws:s3:::${self:custom.documentUploadsBucketName}/*'
 
 custom:
   stage: ${opt:stage, self:provider.stage}
@@ -169,10 +180,13 @@ functions:
       SECRETS_MANAGER_ENDPOINT: !Sub 'https://secretsmanager.${AWS::Region}.amazonaws.com'
     layers:
       - !Ref PgToolsLambdaLayer
+      - !Ref PrismaClientEngineLambdaLayer
 
 layers:
   PgTools:
     path: lambda-layers-postgres-tools
+  prismaClientEngine:
+    path: lambda-layers-prisma-client-engine
 
 resources:
   Conditions:
