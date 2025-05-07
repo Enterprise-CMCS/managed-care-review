@@ -89,6 +89,7 @@ custom:
   auroraArn: ${env:CF_CONFIG_IGNORED_LOCALLY, env:AURORA_ARN}
   dbSecretsArn: ${env:CF_CONFIG_IGNORED_LOCALLY, env:DB_SM_ARN}
   slackWebhookUrl: ${env:SLACK_WEBHOOK}
+  documentUploadsBucketName: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:uploads-${sls:stage}.DocumentUploadsBucketName}
   serverlessTerminationProtection:
     stages:
       - dev
@@ -150,6 +151,21 @@ functions:
       S3_BUCKET: !Ref DataExportBucket
       DB_SECRET_ARN: !Ref PostgresSecret
       VAL_ROLE_ARN: !Sub 'arn:aws:iam::${self:custom.valAWSAccountID}:role/${self:service}-cross-account-upload-val'
+      SECRETS_MANAGER_ENDPOINT: !Sub 'https://secretsmanager.${AWS::Region}.amazonaws.com'
+    layers:
+      - !Ref PgToolsLambdaLayer
+  dbImport:
+    condition: IsVal
+    handler: src/db_import.handler
+    description: Imports data from S3 into Postgres Aurora database and replaces documents with placeholders
+    timeout: 300 # 5 minutes, adjust as needed for your database size
+    vpc:
+      securityGroupIds: ${self:custom.sgId}
+      subnetIds: ${self:custom.privateSubnets}
+    environment:
+      S3_BUCKET: !Ref DataExportBucket
+      DOCS_S3_BUCKET: ${self:custom.documentUploadsBucketName}
+      DB_SECRET_ARN: !Ref PostgresSecret
       SECRETS_MANAGER_ENDPOINT: !Sub 'https://secretsmanager.${AWS::Region}.amazonaws.com'
     layers:
       - !Ref PgToolsLambdaLayer
