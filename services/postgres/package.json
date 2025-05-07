@@ -25,6 +25,7 @@
         "@aws-sdk/client-cloudformation": "^3.787.0",
         "@aws-sdk/client-s3": "^3.787.0",
         "@prisma/client": "^5.17.0",
-        "prisma": "^5.17.0"
+        "prisma": "^5.17.0",
+        "axios": "^1.8.4"
     }
 }

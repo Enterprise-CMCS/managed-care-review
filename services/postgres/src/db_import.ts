@@ -12,6 +12,7 @@ import {
 import { SecretDict } from './types'
 import { createHash } from 'crypto'
 import { PrismaClient } from '@prisma/client'
+import axios from 'axios'
 
 // Environment variables
 const REGION = process.env.AWS_REGION || 'us-east-1'
@@ -28,8 +29,54 @@ const CONTENT_TYPES = {
 
 const s3Client = new S3Client({ region: REGION })
 
-// Paths to sample PDFs in the Lambda package
-const PUBLIC_DOMAIN_PDFS = ['public-domain/placeholder.pdf']
+// URLs to public domain PDFs
+const PUBLIC_DOMAIN_PDF_URLS = [
+    'https://www.postgresql.org/files/documentation/pdf/17/postgresql-17-A4.pdf',
+    'https://www.dhammatalks.org/Archive/Writings/Ebooks/Dhammapada200129.pdf',
+    'https://www.planetebook.com/free-ebooks/anna-karenina.pdf',
+    'https://www.planetebook.com/free-ebooks/the-iliad.pdf',
+    'https://www.planetebook.com/free-ebooks/dracula.pdf',
+]
+
+// Cache to track downloaded PDFs
+const pdfCache: Record<string, string> = {}
+
+/**
+ * Download a file from a URL to a local path using Axios
+ * @param url The URL to download
+ * @param destPath The local path to save the file to
+ * @returns Promise that resolves when download is complete
+ */
+async function downloadFile(url: string, destPath: string): Promise<void> {
+    try {
+        console.info(`Downloading file from ${url}...`)
+
+        // Make a GET request with Axios, setting responseType to 'arraybuffer' for binary files
+        const response = await axios.get(url, {
+            responseType: 'arraybuffer',
+            timeout: 30000, // 30 second timeout
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Node.js Lambda Function)',
+            },
+        })
+
+        // Write the response data to the file
+        fs.writeFileSync(destPath, response.data)
+
+        console.info(`Successfully downloaded file to ${destPath}`)
+    } catch (error) {
+        // Clean up the partial file if it exists
+        if (fs.existsSync(destPath)) {
+            fs.unlinkSync(destPath)
+        }
+
+        // Re-throw the error with additional context
+        console.error(`Error downloading file from ${url}:`, error)
+        throw new Error(
+            `Failed to download file: ${error instanceof Error ? error.message : String(error)}`
+        )
+    }
+}
 
 /**
  * Finds the most recent database dump file in the S3 bucket
@@ -328,15 +375,58 @@ function calculateFileSha256(filePath: string): string {
 }
 
 /**
- * Get a replacement PDF based on document ID
+ * Get a replacement PDF URL based on document ID
  */
-function getReplacementPDF(documentId: string): string {
-    // Use the document ID to deterministically select a PDF
+function getReplacementPDFUrl(documentId: string): string {
+    // Use the document ID to deterministically select a PDF URL
     const hash = createHash('md5').update(documentId).digest('hex')
     const hashNum = parseInt(hash.substring(0, 8), 16)
-    const selectedIndex = hashNum % PUBLIC_DOMAIN_PDFS.length
+    const selectedIndex = hashNum % PUBLIC_DOMAIN_PDF_URLS.length
 
-    return PUBLIC_DOMAIN_PDFS[selectedIndex]
+    return PUBLIC_DOMAIN_PDF_URLS[selectedIndex]
+}
+
+/**
+ * Download a PDF from a URL to the Lambda's /tmp directory with caching
+ */
+async function downloadPDF(url: string): Promise<string> {
+    // Create a unique cache key for this PDF URL
+    const cacheKey = url
+
+    // If we've already downloaded this PDF, return the cached path
+    if (pdfCache[cacheKey]) {
+        console.info(`Using cached PDF for ${url} at ${pdfCache[cacheKey]}`)
+        return pdfCache[cacheKey]
+    }
+
+    // Create a temporary filename for the PDF
+    const urlHash = createHash('md5').update(url).digest('hex').substring(0, 8)
+    const filename = `${urlHash}-${path.basename(url)}`
+    const filePath = path.join(TMP_DIR, filename)
+
+    // If the file already exists on disk (from a previous invocation that didn't set the cache)
+    if (fs.existsSync(filePath)) {
+        console.info(`PDF already exists at ${filePath}, using cached version`)
+        pdfCache[cacheKey] = filePath
+        return filePath
+    }
+
+    console.info(`Downloading PDF from ${url} to ${filePath}...`)
+
+    try {
+        await downloadFile(url, filePath)
+        console.info(`PDF downloaded successfully to ${filePath}`)
+
+        // Cache the file path
+        pdfCache[cacheKey] = filePath
+
+        return filePath
+    } catch (error) {
+        console.error(`Error downloading PDF from ${url}:`, error)
+        throw new Error(
+            `Failed to download PDF: ${error instanceof Error ? error.message : String(error)}`
+        )
+    }
 }
 
 /**
@@ -354,21 +444,17 @@ async function replaceDocument(
             ''
         )
 
-        // Get replacement document
-        const replacementPDFPath = getReplacementPDF(documentId)
-        const fullPath = path.join(__dirname, replacementPDFPath)
+        // Get replacement document URL
+        const replacementPDFUrl = getReplacementPDFUrl(documentId)
 
-        // Check if replacement file exists locally
-        if (!fs.existsSync(fullPath)) {
-            console.warn(`Replacement PDF not found: ${fullPath}`)
-            return { newSha256: '', replaced: false }
-        }
+        // Download the PDF (or get from cache)
+        const pdfPath = await downloadPDF(replacementPDFUrl)
 
         // Calculate SHA-256 of the replacement file
-        const newSha256 = calculateFileSha256(fullPath)
+        const newSha256 = calculateFileSha256(pdfPath)
 
         // Read the replacement file
-        const fileContent = fs.readFileSync(fullPath)
+        const fileContent = fs.readFileSync(pdfPath)
 
         // Determine content type (always PDF for now)
         const contentType = CONTENT_TYPES.pdf
