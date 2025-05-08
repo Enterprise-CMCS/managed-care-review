@@ -71,6 +71,10 @@ provider:
   apiGateway:
     restApiId: ${self:custom.appApiGatewayId}
     restApiRootResourceId: ${self:custom.appApiGatewayRootResourceId}
+    minimumCompressionSize: 4096 # Enable compression for responses larger than 4KB
+    binaryMediaTypes:
+      - 'application/json'
+      - '*/*'
   layers:
     - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-18-1:4
   iam:

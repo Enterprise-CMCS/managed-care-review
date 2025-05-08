@@ -346,6 +346,14 @@ async function initializeGQLHandler(): Promise<Handler> {
             cors: {
                 origin: true,
                 credentials: true,
+                exposedHeaders: ['Content-Length', 'Content-Type'],
+                allowedHeaders: [
+                    'Content-Type',
+                    'Authorization',
+                    'Content-Length',
+                    'Accept-Encoding',
+                    'Content-Encoding',
+                ],
             },
             bodyParserConfig: {
                 limit: '10mb',

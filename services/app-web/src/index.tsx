@@ -3,8 +3,8 @@ import { createRoot } from 'react-dom/client'
 import {
     ApolloClient,
     InMemoryCache,
-    HttpLink,
     DefaultOptions,
+    createHttpLink,
 } from '@apollo/client'
 import { Amplify } from 'aws-amplify'
 
@@ -89,11 +89,17 @@ const defaultOptions: DefaultOptions = {
     },
 }
 
+const httpLink = createHttpLink({
+    uri: '/graphql',
+    fetch: authMode === 'LOCAL' ? localGQLFetch : fakeAmplifyFetch,
+    useGETForQueries: false, // Ensure POST is used for all operations
+    headers: {
+        'Accept-Encoding': 'gzip, deflate, br', // Signal that client accepts compressed responses
+    },
+})
+
 const apolloClient = new ApolloClient({
-    link: new HttpLink({
-        uri: '/graphql',
-        fetch: authMode === 'LOCAL' ? localGQLFetch : fakeAmplifyFetch,
-    }),
+    link: httpLink,
     cache,
     defaultOptions,
     typeDefs: schema,
