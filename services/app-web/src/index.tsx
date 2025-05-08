@@ -5,6 +5,7 @@ import {
     InMemoryCache,
     HttpLink,
     DefaultOptions,
+    ApolloLink,
 } from '@apollo/client'
 import { Amplify } from 'aws-amplify'
 
@@ -17,12 +18,84 @@ import { assertIsAuthMode } from '@mc-review/common-code'
 import { S3ClientT, newAmplifyS3Client, newLocalS3Client } from './s3'
 import { asyncWithLDProvider } from 'launchdarkly-react-client-sdk'
 import type { S3BucketConfigType } from './s3/s3Amplify'
+import { gzip } from 'fflate'
 
 import schema from './gen/schema.graphql'
 
 const apiURL = import.meta.env.VITE_APP_API_URL
 if (!apiURL || apiURL === '') {
     throw new Error('VITE_APP_API_URL must be set to the url for the API')
+}
+
+const compressionLink = new ApolloLink((operation, forward) => {
+    // Only compress mutations and queries (not subscriptions)
+    const isQuery = operation.query.definitions.some(
+        (definition) =>
+            definition.kind === 'OperationDefinition' &&
+            (definition.operation === 'query' ||
+                definition.operation === 'mutation')
+    )
+
+    if (!isQuery) {
+        return forward(operation)
+    }
+
+    return forward(operation).map((response) => {
+        // Add compression headers for future requests
+        operation.setContext(({ headers = {} }) => ({
+            headers: {
+                ...headers,
+                'Accept-Encoding': 'gzip',
+            },
+        }))
+
+        return response
+    })
+})
+
+// Create a custom fetch function that compresses the request body
+const compressedFetch = async (uri: string, options: RequestInit) => {
+    // Get the original fetch function based on auth mode
+    const originalFetch =
+        authMode === 'LOCAL' ? localGQLFetch : fakeAmplifyFetch
+
+    // Only compress POST requests with a body
+    if (options.method === 'POST' && options.body) {
+        try {
+            const body = options.body.toString()
+
+            // Use fflate to compress the body (convert to promise)
+            const compressedBody = await new Promise<Uint8Array>(
+                (resolve, reject) => {
+                    gzip(new TextEncoder().encode(body), (err, data) => {
+                        if (err) {
+                            reject(err)
+                        } else {
+                            resolve(data)
+                        }
+                    })
+                }
+            )
+
+            // Create new options with compressed body
+            const newOptions = {
+                ...options,
+                body: compressedBody,
+                headers: {
+                    ...options.headers,
+                    'Content-Encoding': 'gzip',
+                    'Accept-Encoding': 'gzip',
+                },
+            }
+
+            return originalFetch(uri, newOptions)
+        } catch (error) {
+            console.error('Error compressing request:', error)
+            return originalFetch(uri, options)
+        }
+    }
+
+    return originalFetch(uri, options)
 }
 
 // We are using Amplify for communicating with Cognito, for now.
@@ -89,11 +162,17 @@ const defaultOptions: DefaultOptions = {
     },
 }
 
+// Create the HTTP link with compressed fetch
+const httpLink = new HttpLink({
+    uri: '/graphql',
+    fetch: compressedFetch,
+})
+
+// Combine the links
+const link = compressionLink.concat(httpLink)
+
 const apolloClient = new ApolloClient({
-    link: new HttpLink({
-        uri: '/graphql',
-        fetch: authMode === 'LOCAL' ? localGQLFetch : fakeAmplifyFetch,
-    }),
+    link: link,
     cache,
     defaultOptions,
     typeDefs: schema,

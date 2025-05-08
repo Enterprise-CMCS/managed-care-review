@@ -34,6 +34,7 @@ import {
 } from 'apollo-server-core'
 import { newDeployedS3Client, newLocalS3Client } from '../s3'
 import type { S3ClientT, S3BucketConfigType } from '../s3'
+import * as zlib from 'zlib'
 
 let ldClient: LDClient
 let s3Client: S3ClientT
@@ -353,9 +354,75 @@ async function initializeGQLHandler(): Promise<Handler> {
         },
     })
 
+    const handlerWithCompression = wrapHandlerWithCompression(handler)
+
     // Locally, we wrap our handler in a middleware that returns 403 for unauthenticated requests
     const isLocal = authMode === 'LOCAL'
-    return isLocal ? localAuthMiddleware(handler) : handler
+    return isLocal
+        ? localAuthMiddleware(handlerWithCompression)
+        : handlerWithCompression
+}
+
+function wrapHandlerWithCompression(apolloHandler: Handler): Handler {
+    return async (event, context, completion) => {
+        // Check for compressed requests
+        const contentEncoding =
+            event.headers['Content-Encoding'] ||
+            event.headers['content-encoding']
+        if (contentEncoding && contentEncoding.includes('gzip') && event.body) {
+            try {
+                // Decompress the body if it's compressed
+                let body
+                if (event.isBase64Encoded) {
+                    body = Buffer.from(event.body, 'base64')
+                } else {
+                    body = Buffer.from(event.body)
+                }
+
+                const decompressed = zlib.gunzipSync(body).toString('utf8')
+                event.body = decompressed
+                // Remove content-encoding header after decompression
+                delete event.headers['Content-Encoding']
+                delete event.headers['content-encoding']
+            } catch (error) {
+                console.error('Failed to decompress request body:', error)
+                // Continue with original body if decompression fails
+            }
+        }
+
+        // Process request with Apollo handler
+        const result = await apolloHandler(event, context, completion)
+
+        // Check if client accepts gzip for response
+        const acceptEncoding =
+            event.headers['Accept-Encoding'] || event.headers['accept-encoding']
+        if (
+            acceptEncoding &&
+            acceptEncoding.includes('gzip') &&
+            result &&
+            result.body
+        ) {
+            try {
+                // Compress the response
+                const compressed = zlib
+                    .gzipSync(Buffer.from(result.body))
+                    .toString('base64')
+                result.body = compressed
+                result.isBase64Encoded = true
+
+                // Add compression headers
+                if (!result.headers) {
+                    result.headers = {}
+                }
+                result.headers['Content-Encoding'] = 'gzip'
+            } catch (error) {
+                console.error('Failed to compress response body:', error)
+                // Return uncompressed if compression fails
+            }
+        }
+
+        return result
+    }
 }
 
 const handlerPromise = initializeGQLHandler()
