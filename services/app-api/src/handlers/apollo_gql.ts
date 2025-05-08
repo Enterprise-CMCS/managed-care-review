@@ -364,7 +364,18 @@ const gqlHandler: Handler = async (event, context, completion) => {
     // Once initialized, future awaits will return immediately
     const initializedHandler = await handlerPromise
 
-    return await initializedHandler(event, context, completion)
+    const response = await initializedHandler(event, context, completion)
+
+    // Log response size metrics without modifying the response
+    if (response && response.body) {
+        const bodySize = Buffer.from(response.body).length
+        console.info(`Response size: ${bodySize} bytes`)
+        if (bodySize > 4 * 1024 * 1024) {
+            console.warn(`Large response detected: ${bodySize} bytes`)
+        }
+    }
+
+    return response
 }
 
 module.exports = { gqlHandler }
