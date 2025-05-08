@@ -179,13 +179,25 @@ functions:
       - http:
           path: graphql
           method: post
-          cors: true
+          cors:
+            origin: '*'
+            headers:
+              - '*'
+              - Content-Encoding
+              - Accept-Encoding
+            allowCredentials: true
           authorizer: aws_iam
           contentHandling: CONVERT_TO_BINARY
       - http:
           path: graphql
           method: get
-          cors: true
+          cors:
+            origin: '*'
+            headers:
+              - '*'
+              - Content-Encoding
+              - Accept-Encoding
+            allowCredentials: true
           authorizer: aws_iam
           contentHandling: CONVERT_TO_BINARY
       - http:
