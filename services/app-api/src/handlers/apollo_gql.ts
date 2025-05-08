@@ -365,13 +365,14 @@ async function initializeGQLHandler(): Promise<Handler> {
 
 function wrapHandlerWithCompression(apolloHandler: Handler): Handler {
     return async (event, context, completion) => {
-        // Check for compressed requests
+        // Set proper content type for compressed requests
         const contentEncoding =
             event.headers['Content-Encoding'] ||
             event.headers['content-encoding']
+
         if (contentEncoding && contentEncoding.includes('gzip') && event.body) {
             try {
-                // Decompress the body if it's compressed
+                // Decompress the body
                 let body
                 if (event.isBase64Encoded) {
                     body = Buffer.from(event.body, 'base64')
@@ -381,6 +382,10 @@ function wrapHandlerWithCompression(apolloHandler: Handler): Handler {
 
                 const decompressed = zlib.gunzipSync(body).toString('utf8')
                 event.body = decompressed
+
+                // Ensure proper content type is set
+                event.headers['Content-Type'] = 'application/json'
+
                 // Remove content-encoding header after decompression
                 delete event.headers['Content-Encoding']
                 delete event.headers['content-encoding']
@@ -392,6 +397,17 @@ function wrapHandlerWithCompression(apolloHandler: Handler): Handler {
 
         // Process request with Apollo handler
         const result = await apolloHandler(event, context, completion)
+
+        // Always add CORS headers to the response
+        if (!result.headers) {
+            result.headers = {}
+        }
+
+        // Ensure CORS headers are present even on error responses
+        result.headers['Access-Control-Allow-Origin'] = '*'
+        result.headers['Access-Control-Allow-Headers'] =
+            'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent,Content-Encoding,Accept-Encoding'
+        result.headers['Access-Control-Allow-Methods'] = 'GET,POST,OPTIONS'
 
         // Check if client accepts gzip for response
         const acceptEncoding =
@@ -410,11 +426,9 @@ function wrapHandlerWithCompression(apolloHandler: Handler): Handler {
                 result.body = compressed
                 result.isBase64Encoded = true
 
-                // Add compression headers
-                if (!result.headers) {
-                    result.headers = {}
-                }
+                // Set appropriate content encoding
                 result.headers['Content-Encoding'] = 'gzip'
+                result.headers['Content-Type'] = 'application/json'
             } catch (error) {
                 console.error('Failed to compress response body:', error)
                 // Return uncompressed if compression fails

@@ -64,6 +64,10 @@ resources:
       Type: AWS::ApiGateway::RestApi
       Properties:
         Name: ${self:service}-${sls:stage}-app-api-gateway
+        BinaryMediaTypes:
+          - 'application/json'
+          - 'application/json+gzip'
+          - '*/*'
 
     GatewayResponseDefault4XX:
       Type: 'AWS::ApiGateway::GatewayResponse'
@@ -80,6 +84,16 @@ resources:
           gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
           gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
         ResponseType: DEFAULT_5XX
+        RestApiId: !Ref AppApiGateway
+
+    GatewayResponseUnsupportedMediaType:
+      Type: 'AWS::ApiGateway::GatewayResponse'
+      Properties:
+        ResponseParameters:
+          gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+          gatewayresponse.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent,Content-Encoding,Accept-Encoding'"
+          gatewayresponse.header.Access-Control-Allow-Methods: "'GET,POST,OPTIONS'"
+        ResponseType: UNSUPPORTED_MEDIA_TYPE
         RestApiId: !Ref AppApiGateway
 
     NewRelicInfraIntegrations:

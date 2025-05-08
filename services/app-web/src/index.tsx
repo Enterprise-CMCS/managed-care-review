@@ -64,7 +64,7 @@ const compressedFetch = async (uri: string, options: RequestInit) => {
         try {
             const body = options.body.toString()
 
-            // Use fflate to compress the body (convert to promise)
+            // Use fflate to compress the body
             const compressedBody = await new Promise<Uint8Array>(
                 (resolve, reject) => {
                     gzip(new TextEncoder().encode(body), (err, data) => {
@@ -77,12 +77,18 @@ const compressedFetch = async (uri: string, options: RequestInit) => {
                 }
             )
 
+            // Create a Blob with the correct type
+            const blob = new Blob([compressedBody], {
+                type: 'application/json',
+            })
+
             // Create new options with compressed body
             const newOptions = {
                 ...options,
-                body: compressedBody,
+                body: blob,
                 headers: {
                     ...options.headers,
+                    'Content-Type': 'application/json',
                     'Content-Encoding': 'gzip',
                     'Accept-Encoding': 'gzip',
                 },
@@ -95,6 +101,7 @@ const compressedFetch = async (uri: string, options: RequestInit) => {
         }
     }
 
+    // For non-POST requests, use original fetch
     return originalFetch(uri, options)
 }
 
