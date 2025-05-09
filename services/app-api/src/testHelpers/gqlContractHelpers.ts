@@ -3,7 +3,6 @@ import {
     SubmitContractDocument,
     UnlockContractDocument,
     UpdateDraftContractRatesDocument,
-    WithdrawAndReplaceRedundantRateDocument,
     UpdateContractDraftRevisionDocument,
     CreateContractDocument,
     FetchContractWithQuestionsDocument,
@@ -238,41 +237,6 @@ const fetchTestContractWithQuestions = async (
     return result.data.fetchContract.contract
 }
 
-async function updateTestContractToReplaceRate(
-    server: ApolloServer,
-    args: {
-        contractID: string
-        withdrawnRateID: string
-        replacementRateID: string
-        replaceReason: string
-    }
-): Promise<Contract> {
-    const { contractID, withdrawnRateID, replacementRateID, replaceReason } =
-        args
-    const result = await server.executeOperation({
-        query: WithdrawAndReplaceRedundantRateDocument,
-        variables: {
-            input: {
-                contractID,
-                withdrawnRateID,
-                replacementRateID,
-                replaceReason,
-            },
-        },
-    })
-
-    if (result.errors) {
-        throw new Error(
-            `updateContractToReplaceRate mutation failed with errors ${result.errors}`
-        )
-    }
-
-    if (!result.data) {
-        throw new Error('updateContractToReplaceRate returned nothing')
-    }
-
-    return result.data.withdrawAndReplaceRedundantRate.contract
-}
 const createTestContract = async (
     server: ApolloServer,
     stateCode?: StateCodeType,
@@ -563,7 +527,6 @@ export {
     resubmitTestContract,
     updateTestContractDraftRevision,
     createTestContract,
-    updateTestContractToReplaceRate,
     withdrawTestContract,
     contractHistoryToDescriptions,
 }

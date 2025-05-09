@@ -1916,8 +1916,6 @@ type Rate {
     stateNumber: Int!
     "parentContractID is the ID of the contract that last submitted this rate"
     parentContractID: ID!
-    "withdrawInfo is the who/when/why for this rate being withdrawn. Rates actively in use in the system will not have a withdrawInfo"
-    withdrawInfo: UpdateInformation
 
     "Contracts this withdrawn rates was the child or linked to"
     withdrawnFromContracts: [Contract!]
@@ -1986,8 +1984,6 @@ type RateStripped {
     stateNumber: Int!
     "parentContractID is the ID of the contract that last submitted this rate"
     parentContractID: ID!
-    "withdrawInfo is the who/when/why for this rate being withdrawn. Rates actively in use in the system will not have a withdrawInfo"
-    withdrawInfo: UpdateInformation
 
     "reviewStatusActions are the who/when/why for review status changes on this contract"
     reviewStatusActions: [RateReviewStatusActions!]

@@ -21,7 +21,7 @@ import { SingleRateSummarySection } from '../../components/SubmissionSummarySect
 import { useAuth } from '../../contexts/AuthContext'
 import { ErrorForbiddenPage } from '../Errors/ErrorForbiddenPage'
 import { Error404 } from '../Errors/Error404Page'
-import { RateReplacedBanner, RateWithdrawBanner } from '../../components/Banner'
+import { RateWithdrawBanner } from '../../components/Banner'
 import { hasCMSUserPermissions } from '@mc-review/helpers'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '@mc-review/common-code'
@@ -115,7 +115,6 @@ export const RateSummary = (): React.ReactElement => {
     }
 
     const currentRateRev = rate.revisions[0]
-    const withdrawInfo = rate.withdrawInfo
 
     // Redirecting a state user to the edit page if rate is unlocked
     if (
@@ -300,12 +299,6 @@ export const RateSummary = (): React.ReactElement => {
                 data-testid="rate-summary"
                 className={styles.container}
             >
-                {withdrawInfo && (
-                    <RateReplacedBanner
-                        withdrawInfo={withdrawInfo}
-                        className={styles.banner}
-                    />
-                )}
                 {showWithdrawBanner && (
                     <RateWithdrawBanner
                         updatedAt={latestRateAction.updatedAt}

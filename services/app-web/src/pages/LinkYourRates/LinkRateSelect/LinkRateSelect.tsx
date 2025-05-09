@@ -66,11 +66,7 @@ export const LinkRateSelect = ({
                 new Date(b.revisions[0].submitInfo?.updatedAt).getTime() -
                 new Date(a.revisions[0].submitInfo?.updatedAt).getTime()
         )
-        .filter(
-            (rate) =>
-                rate.withdrawInfo === undefined ||
-                rate.consolidatedStatus !== 'WITHDRAWN'
-        )
+        .filter((rate) => rate.consolidatedStatus !== 'WITHDRAWN')
 
     const rateNames: LinkRateOptionType[] = updatedRates.map((rate) => {
         const revision = rate.revisions[0]

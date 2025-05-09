@@ -23,9 +23,6 @@ query indexRatesStripped($input: IndexRatesInput) {
                 }
                 stateNumber
                 parentContractID
-                withdrawInfo {
-                    ...updateInformationFields
-                }
 
                 reviewStatusActions {
                     updatedAt

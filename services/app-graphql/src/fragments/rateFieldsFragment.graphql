@@ -16,9 +16,6 @@ fragment rateFieldsFragment on Rate {
             isRateProgram
         }
     }
-    withdrawInfo {
-        ...updateInformationFields
-    }
     status
     initiallySubmittedAt
     reviewStatus
