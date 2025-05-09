@@ -348,11 +348,40 @@ async function replaceDocument(
     originalFilename: string
 ): Promise<{ newSha256: string; replaced: boolean }> {
     try {
-        // Extract the S3 key from the S3 URL
-        const s3Key = s3Url.replace(
-            `https://${DOCS_S3_BUCKET}.s3.amazonaws.com/`,
-            ''
-        )
+        console.info(`Processing document ID: ${documentId}`)
+        console.info(`Original S3 URL: ${s3Url}`)
+        console.info(`Original filename: ${originalFilename}`)
+
+        // Extract the key (filename) from the s3URL
+        let s3Key: string
+
+        // Case 1: Full S3 URL - https://bucket-name.s3.amazonaws.com/path/to/file.pdf
+        if (s3Url.includes('s3.amazonaws.com')) {
+            const url = new URL(s3Url)
+            s3Key = url.pathname.substring(1) // Remove leading slash
+        }
+        // Case 2: S3 URI format - s3://bucket-name/path/to/file.pdf
+        else if (s3Url.startsWith('s3://')) {
+            const parts = s3Url.substring(5).split('/')
+            s3Key = parts.join('/') // Remaining path is the key
+        }
+        // Case 3: Just the key itself
+        else {
+            s3Key = s3Url
+        }
+
+        // If the key ends with a slash, it's being treated as a directory
+        // In this case, append the original filename
+        if (s3Key.endsWith('/')) {
+            s3Key = s3Key + originalFilename
+        }
+
+        // If we have a path like file.pdf/ (with slash but no filename), remove trailing slash
+        if (s3Key.endsWith('/') && s3Key.includes('.')) {
+            s3Key = s3Key.replace(/\/$/, '')
+        }
+
+        console.info(`Parsed S3 Key: ${s3Key}`)
 
         // Get replacement document URL
         const replacementPDFUrl = getReplacementPDFUrl(documentId)
@@ -370,6 +399,8 @@ async function replaceDocument(
         const contentType = CONTENT_TYPES.pdf
 
         // Upload to S3
+        console.info(`Uploading to S3 bucket: ${DOCS_S3_BUCKET}, key: ${s3Key}`)
+
         await s3Client.send(
             new PutObjectCommand({
                 Bucket: DOCS_S3_BUCKET,
@@ -380,10 +411,11 @@ async function replaceDocument(
             })
         )
 
-        console.info(`Replaced document ${documentId} at ${s3Key}`)
+        console.info(`Successfully replaced document ${documentId}`)
         return { newSha256, replaced: true }
     } catch (error) {
         console.error(`Error replacing document ${documentId}:`, error)
+        console.error(`S3 URL was: ${s3Url}`)
         return { newSha256: '', replaced: false }
     }
 }
