@@ -987,9 +987,18 @@ importers:
       '@aws-sdk/client-secrets-manager':
         specifier: ^3.806.0
         version: 3.806.0
+      '@prisma/client':
+        specifier: ^5.17.0
+        version: 5.17.0(prisma@5.17.0)
+      axios:
+        specifier: ^1.8.4
+        version: 1.8.4
       pg:
         specifier: ^8.13.1
         version: 8.13.1
+      prisma:
+        specifier: ^5.17.0
+        version: 5.17.0
     devDependencies:
       '@aws-sdk/types':
         specifier: ^3.804.0
