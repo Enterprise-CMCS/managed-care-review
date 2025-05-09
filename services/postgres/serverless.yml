@@ -76,6 +76,11 @@ provider:
             - 's3:ListObjectsV2'
           Resource:
             - !Sub 'arn:aws:s3:::${self:custom.documentUploadsBucketName}/*'
+        - Effect: Allow
+          Action:
+            - 's3:ListBucket'
+          Resource:
+            - !Sub 'arn:aws:s3:::${self:service}-${sls:stage}-data-export'
 
 custom:
   stage: ${opt:stage, self:provider.stage}
@@ -534,7 +539,6 @@ resources:
                   Action:
                     - s3:PutObject
                     - s3:PutObjectAcl
-                    - s3:ListBucket
                   Resource:
                     - !Sub 'arn:aws:s3:::${self:service}-${sls:stage}-data-export/*'
 
@@ -565,7 +569,6 @@ resources:
                 Action:
                   - s3:PutObject
                   - s3:PutObjectAcl
-                  - s3:ListBucket
                 Resource:
                   - !Sub '${DataExportBucket.Arn}/*'
               - !Ref AWS::NoValue
