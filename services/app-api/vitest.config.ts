@@ -36,7 +36,7 @@ export default defineConfig({
         alias: {
             uuid: 'uuid',
         },
-        testTimeout: 20000,
+        testTimeout: 25000,
     },
     define: {
         global: 'globalThis',

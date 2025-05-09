@@ -15,8 +15,6 @@ const defaultRateData = () => ({
     updatedAt: new Date(),
     stateCode: 'MN',
     stateNumber: 111,
-    withdrawInfo: null,
-    withdrawInfoID: null,
 })
 
 const mockInsertRateArgs = (
@@ -37,8 +35,7 @@ const mockDraftRate = (
     stateCode: 'MN',
     stateNumber: 111,
     draftContracts: [],
-    withdrawInfoID: null,
-    withdrawInfo: null,
+    withdrawnFromContracts: [],
     reviewStatusActions: [],
     revisions: rate?.revisions ?? [
         mockRateRevision(
@@ -51,6 +48,7 @@ const mockDraftRate = (
     ],
     ...rate,
 })
+
 const mockRateRevision = (
     rate?: Partial<RateTableFullPayload>,
     revision?: Partial<RateRevisionTableWithContracts>,

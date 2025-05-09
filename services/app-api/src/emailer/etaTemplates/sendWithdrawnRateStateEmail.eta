@@ -2,8 +2,8 @@
 <b>Withdrawn by:</b> <%= it.withdrawnBy %><br />
 <b>Withdrawn on:</b> <%= it.withdrawnDate %><br />
 <b>Reason for withdrawal:</b> <%= it.withdrawnReason %><br />
-<b>Withdrawn from:</b>
 <% if (it.withdrawnFromContractData.length > 1) { %>
+<b>Withdrawn from:</b>
 <ul>
 <% it.withdrawnFromContractData.forEach(function(contract){ %>
     <li>
@@ -12,9 +12,13 @@
 <% }) %>
 </ul>
 <div>If you have any questions, please reach out to your CMS point of contact.</div>
-<% } else { %>
+<% } else if (it.withdrawnFromContractData[0]) { %>
+<b>Withdrawn from:</b>
 <%= it.withdrawnFromContractData[0].contractName %><br />
 <br />
 <div>If you have any questions, please reach out to your CMS point of contact.</div>
 <a href="<%= it.withdrawnFromContractData[0].submissionURL %>">View the submission in MC-Review</a>
+<% } else { %>
+<br />
+<div>If you have any questions, please reach out to your CMS point of contact.</div>
 <% } %>

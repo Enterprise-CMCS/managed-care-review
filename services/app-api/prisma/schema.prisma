@@ -87,8 +87,6 @@ model RateTable {
   state       State  @relation(fields: [stateCode], references: [stateCode])
   stateNumber Int
 
-  withdrawInfoID         String?
-  withdrawInfo           UpdateInfoTable?          @relation("withdrawRateInfo", fields: [withdrawInfoID], references: [id])
   withdrawnFromContracts WithdrawnRatesJoinTable[]
 
   questions           RateQuestion[]
@@ -242,11 +240,11 @@ model UpdateInfoTable {
   // These relations are inverse 1:1 relations that are not really used.
   unlockedContracts  ContractRevisionTable[]      @relation("unlockContractInfo")
   unlockedRates      RateRevisionTable[]          @relation("unlockRateInfo")
-  withdrawnRates     RateTable[]                  @relation("withdrawRateInfo")
   submissionPackages SubmissionPackageJoinTable[] @relation("submission")
+
   // these get ALL related contracts + revisions for given update.
-  relatedContracts   ContractRevisionTable[]
-  relatedRates       RateRevisionTable[]
+  relatedContracts ContractRevisionTable[]
+  relatedRates     RateRevisionTable[]
 }
 
 // SubmissionPackageJoinTable records the set of related rate and contracts for a given submission.

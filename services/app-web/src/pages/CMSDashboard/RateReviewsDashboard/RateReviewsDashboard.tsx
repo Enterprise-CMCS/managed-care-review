@@ -43,10 +43,6 @@ const RateReviewsDashboard = (): React.ReactElement => {
     data.indexRatesStripped.edges
         .map((edge) => edge.node)
         .forEach((rate) => {
-            // Skip rates that have been withdrawn
-            if (rate.withdrawInfo) {
-                return
-            }
             const currentRevision = rate.latestSubmittedRevision
 
             // Set rate display data - could be based on either current or previous revision depending on status

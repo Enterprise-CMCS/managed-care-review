@@ -916,9 +916,6 @@ describe('SubmissionSummary', () => {
                             routerProvider: {
                                 route: '/submissions/test-abc-123',
                             },
-                            featureFlags: {
-                                'submission-approvals': true,
-                            },
                         }
                     )
 
@@ -976,9 +973,6 @@ describe('SubmissionSummary', () => {
                             },
                             routerProvider: {
                                 route: '/submissions/test-abc-123',
-                            },
-                            featureFlags: {
-                                'submission-approvals': true,
                             },
                         }
                     )
@@ -1045,9 +1039,6 @@ describe('SubmissionSummary', () => {
                             },
                             routerProvider: {
                                 route: '/submissions/test-abc-123',
-                            },
-                            featureFlags: {
-                                'submission-approvals': true,
                             },
                         }
                     )
@@ -1128,9 +1119,6 @@ describe('SubmissionSummary', () => {
                             routerProvider: {
                                 route: '/submissions/test-abc-123',
                             },
-                            featureFlags: {
-                                'submission-approvals': true,
-                            },
                         }
                     )
 
@@ -1176,9 +1164,6 @@ describe('SubmissionSummary', () => {
                             },
                             routerProvider: {
                                 route: '/submissions/test-abc-123',
-                            },
-                            featureFlags: {
-                                'submission-approvals': true,
                             },
                         }
                     )
@@ -1239,7 +1224,6 @@ describe('SubmissionSummary', () => {
                                 route: '/submissions/test-abc-123',
                             },
                             featureFlags: {
-                                'submission-approvals': true,
                                 'withdraw-submission': true,
                             },
                         }
@@ -1302,9 +1286,6 @@ describe('SubmissionSummary', () => {
                             },
                             routerProvider: {
                                 route: '/submissions/test-abc-123',
-                            },
-                            featureFlags: {
-                                'submission-approvals': true,
                             },
                         }
                     )
@@ -1695,9 +1676,6 @@ describe('SubmissionSummary', () => {
                     routerProvider: {
                         route: '/submissions/test-abc-123',
                     },
-                    featureFlags: {
-                        'submission-approvals': true,
-                    },
                 }
             )
 
@@ -1768,9 +1746,6 @@ describe('SubmissionSummary', () => {
                     routerProvider: {
                         route: '/submissions/test-abc-123',
                     },
-                    featureFlags: {
-                        'submission-approvals': true,
-                    },
                 }
             )
 
@@ -1823,9 +1798,6 @@ describe('SubmissionSummary', () => {
                         },
                         routerProvider: {
                             route: '/submissions/test-abc-123',
-                        },
-                        featureFlags: {
-                            'submission-approvals': true,
                         },
                     }
                 )
@@ -1898,9 +1870,6 @@ describe('SubmissionSummary', () => {
                         },
                         routerProvider: {
                             route: '/submissions/test-abc-123',
-                        },
-                        featureFlags: {
-                            'submission-approvals': true,
                         },
                     }
                 )

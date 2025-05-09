@@ -82,9 +82,6 @@ describe('RateWithdraw', () => {
                 routerProvider: {
                     route: '/rate-reviews/test-abc-123/withdraw-rate',
                 },
-                featureFlags: {
-                    'withdraw-rate': true,
-                },
             }
         )
 
@@ -148,9 +145,6 @@ describe('RateWithdraw', () => {
                 routerProvider: {
                     route: '/rate-reviews/test-abc-123/withdraw-rate',
                 },
-                featureFlags: {
-                    'withdraw-rate': true,
-                },
             }
         )
 
@@ -203,9 +197,6 @@ describe('RateWithdraw', () => {
                 },
                 routerProvider: {
                     route: '/rate-reviews/test-abc-123/withdraw-rate',
-                },
-                featureFlags: {
-                    'withdraw-rate': true,
                 },
             }
         )

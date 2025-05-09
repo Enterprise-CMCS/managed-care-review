@@ -10,7 +10,6 @@ import {
     rateReviewStatusSchema,
     statusSchema,
 } from './statusType'
-import { updateInfoSchema } from './updateInfoType'
 import { rateReviewActionSchema } from './rateReviewActionType'
 
 const rateSchema = rateWithoutDraftContractsSchema.extend({
@@ -33,7 +32,6 @@ const strippedRateSchema = z.object({
     stateCode: z.string(),
     parentContractID: z.string().uuid(),
     stateNumber: z.number().min(1),
-    withdrawInfo: updateInfoSchema.optional(),
     // If this rate is in a DRAFT or UNLOCKED status, there will be a draftRevision
     draftRevision: strippedRateRevisionSchema.optional(),
     reviewStatusActions: z.array(rateReviewActionSchema).optional(),

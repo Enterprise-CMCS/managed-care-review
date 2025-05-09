@@ -1,18 +1,23 @@
+import React from 'react'
 import { Alert } from '@trussworks/react-uswds'
 import styles from '../Banner.module.scss'
 import { getUpdatedByDisplayName } from '@mc-review/helpers'
 import { formatBannerDate } from '@mc-review/dates'
 import { ExpandableText } from '../../ExpandableText'
-import { UpdateInformation } from '../../../gen/gqlClient'
+import { UpdatedBy } from '../../../gen/gqlClient'
 
 interface SubmissionWithdrawnBannerProps
     extends React.HTMLAttributes<HTMLDivElement> {
-    updateInfo: UpdateInformation
+    withdrawInfo: {
+        updatedBy: UpdatedBy
+        updatedAt: Date
+        updatedReason: string
+    }
 }
 
 export const SubmissionWithdrawnBanner = ({
     className,
-    updateInfo,
+    withdrawInfo,
 }: SubmissionWithdrawnBannerProps): React.ReactElement => {
     return (
         <Alert
@@ -30,15 +35,15 @@ export const SubmissionWithdrawnBanner = ({
                 </p>
                 <p className="usa-alert__text">
                     <b>Updated by:&nbsp;</b>
-                    {getUpdatedByDisplayName(updateInfo.updatedBy)}
+                    {getUpdatedByDisplayName(withdrawInfo.updatedBy)}
                 </p>
                 <p className="usa-alert__text">
                     <b>Updated on:&nbsp;</b>
-                    {formatBannerDate(updateInfo.updatedAt)}
+                    {formatBannerDate(withdrawInfo.updatedAt)}
                 </p>
                 <ExpandableText>
                     <b>Reason for withdrawing the submission:&nbsp;</b>
-                    {updateInfo.updatedReason}
+                    {withdrawInfo.updatedReason}
                 </ExpandableText>
             </div>
         </Alert>

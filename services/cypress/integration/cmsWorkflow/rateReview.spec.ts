@@ -8,7 +8,6 @@ describe('CMS user can view rate reviews', () => {
 
     it('and withdraw then unwithdraw a rate', () => {
         cy.interceptFeatureFlags({
-            'withdraw-rate': true,
             'undo-withdraw-rate': true
         })
         cy.apiAssignDivisionToCMSUser(cmsUser(), 'DMCO').then(() => {

@@ -2,15 +2,18 @@
 <b>Withdrawn by:</b> <%= it.withdrawnBy %><br />
 <b>Withdrawn on:</b> <%= it.withdrawnDate %><br />
 <b>Reason for withdrawal:</b> <%= it.withdrawnReason %><br />
-<b>Withdrawn from:</b>
 <% if (it.withdrawnFromContractData.length > 1) { %>
+<b>Withdrawn from:</b>
 <ul>
 <% it.withdrawnFromContractData.forEach(function(contract){ %>
     <li><%= contract.contractName %></li>
 <% }) %>
 </ul>
-<% } else { %>
+<% } else if (it.withdrawnFromContractData[0]) { %>
+<b>Withdrawn from:</b>
 <%= it.withdrawnFromContractData[0].contractName %><br />
+<br />
+<% } else { %>
 <br />
 <% } %>
 <a href="<%= it.summaryURL %>">View withdrawn rate in MC-Review</a>

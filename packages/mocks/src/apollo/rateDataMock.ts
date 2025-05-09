@@ -357,7 +357,6 @@ function submittedLinkedRatesScenarioMock(): {
         draftRevision: null,
         parentContractID: 'c-01',
         id: 'r-01',
-        withdrawInfo: null,
         revisions: [r1r2, r1r01],
         withdrawnFromContracts: [],
         packageSubmissions: [r1r2c1c2pkg, r1r1c2pkg, r1r1pkg],
@@ -479,7 +478,6 @@ function mockRateSubmittedWithQuestions(
             rate.initiallySubmittedAt ?? '2024-12-18T16:54:39.173Z',
         revisions: [rateRev()],
         draftRevision: null,
-        withdrawInfo: null,
         withdrawnFromContracts: [],
         packageSubmissions: [
             {

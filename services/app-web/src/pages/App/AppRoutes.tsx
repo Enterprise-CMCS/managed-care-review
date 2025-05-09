@@ -37,7 +37,6 @@ import {
 } from '../QuestionResponse'
 import { GraphQLExplorer } from '../GraphQLExplorer/GraphQLExplorer'
 import { RateSummary } from '../RateSummary'
-import { ReplaceRate } from '../ReplaceRate/ReplaceRate'
 import { RateEdit } from '../RateEdit/RateEdit'
 import { APIAccess } from '../APIAccess/APIAccess'
 import {
@@ -193,14 +192,6 @@ const CMSUserRoutes = ({
 }): React.ReactElement => {
     // feature flag
     const ldClient = useLDClient()
-    const showApprovals: boolean = ldClient?.variation(
-        featureFlags.SUBMISSION_APPROVALS.flag,
-        featureFlags.SUBMISSION_APPROVALS.defaultValue
-    )
-    const showWithdrawRate: boolean = ldClient?.variation(
-        featureFlags.WITHDRAW_RATE.flag,
-        featureFlags.WITHDRAW_RATE.defaultValue
-    )
     const showUndoWithdrawRate: boolean = ldClient?.variation(
         featureFlags.UNDO_WITHDRAW_RATE.flag,
         featureFlags.UNDO_WITHDRAW_RATE.defaultValue
@@ -280,16 +271,9 @@ const CMSUserRoutes = ({
                 />
 
                 <Route
-                    path={RoutesRecord.REPLACE_RATE}
-                    element={<ReplaceRate />}
+                    path={RoutesRecord.SUBMISSIONS_RELEASED_TO_STATE}
+                    element={<ReleasedToState />}
                 />
-
-                {showApprovals && (
-                    <Route
-                        path={RoutesRecord.SUBMISSIONS_RELEASED_TO_STATE}
-                        element={<ReleasedToState />}
-                    />
-                )}
 
                 {showWithdrawSubmission && (
                     <Route
@@ -298,12 +282,10 @@ const CMSUserRoutes = ({
                     />
                 )}
 
-                {showWithdrawRate && (
-                    <Route
-                        path={RoutesRecord.RATE_WITHDRAW}
-                        element={<RateWithdraw />}
-                    />
-                )}
+                <Route
+                    path={RoutesRecord.RATE_WITHDRAW}
+                    element={<RateWithdraw />}
+                />
 
                 {showUndoWithdrawRate && (
                     <Route

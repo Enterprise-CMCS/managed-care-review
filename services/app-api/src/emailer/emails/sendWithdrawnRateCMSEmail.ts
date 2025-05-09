@@ -71,13 +71,7 @@ export const validateAndParseWithdrawnRate = (
     }
 
     // These contracts will not include linked contracts that are unlocked or in draft
-    const withdrawnFromContracts = rate.withdrawnFromContracts
-
-    if (!withdrawnFromContracts || withdrawnFromContracts.length === 0) {
-        return new Error(
-            'Rate was withdrawn, but was not associated with any contracts'
-        )
-    }
+    const withdrawnFromContracts = rate.withdrawnFromContracts ?? []
 
     const latestRateRev = rate.packageSubmissions[0].rateRevision
     if (!latestRateRev) {
@@ -87,41 +81,59 @@ export const validateAndParseWithdrawnRate = (
     const withdrawnFromContractData: WithdrawnFromContractData[] = []
     const stateContactEmails: string[] = []
 
-    for (const contract of withdrawnFromContracts) {
-        // Get latest revision to generate package name. Use draft revision if contract is unlocked.
-        const latestContractRev =
-            contract.consolidatedStatus === 'UNLOCKED'
-                ? contract.draftRevision!
-                : contract.packageSubmissions[0].contractRevision
+    if (withdrawnFromContracts.length > 0) {
+        for (const contract of withdrawnFromContracts) {
+            // Get latest revision to generate package name. Use draft revision if contract is unlocked.
+            const latestContractRev =
+                contract.consolidatedStatus === 'UNLOCKED'
+                    ? contract.draftRevision!
+                    : contract.packageSubmissions[0].contractRevision
 
-        const pkgPrograms = findContractPrograms(
-            latestContractRev,
-            statePrograms
-        )
-
-        if (pkgPrograms instanceof Error) {
-            return new Error(
-                `Error parsing withdrawn from contract data for contract with ID: ${contract.id}. ${pkgPrograms.message}`
+            const pkgPrograms = findContractPrograms(
+                latestContractRev,
+                statePrograms
             )
-        }
 
-        const packageName = generatePackageName(
-            contract.stateCode,
-            contract.stateNumber,
-            latestContractRev.formData.programIDs,
-            pkgPrograms
+            if (pkgPrograms instanceof Error) {
+                return new Error(
+                    `Error parsing withdrawn from contract data for contract with ID: ${contract.id}. ${pkgPrograms.message}`
+                )
+            }
+
+            const packageName = generatePackageName(
+                contract.stateCode,
+                contract.stateNumber,
+                latestContractRev.formData.programIDs,
+                pkgPrograms
+            )
+
+            const submissionURL = submissionSummaryURL(
+                contract.id,
+                config.baseUrl
+            )
+
+            withdrawnFromContractData.push({
+                contractName: packageName,
+                submissionURL,
+            })
+
+            latestContractRev.formData.stateContacts.forEach((contact) => {
+                if (contact.email) stateContactEmails.push(contact.email)
+            })
+        }
+    } else {
+        // If rate was orphaned rate, then we use the last rate submission that had contracts to send the email to.
+        const latestSubmissionWithContracts = rate.packageSubmissions.find(
+            (pkg) => pkg.contractRevisions.length > 0
         )
 
-        const submissionURL = submissionSummaryURL(contract.id, config.baseUrl)
-
-        withdrawnFromContractData.push({
-            contractName: packageName,
-            submissionURL,
-        })
-
-        latestContractRev.formData.stateContacts.forEach((contact) => {
-            if (contact.email) stateContactEmails.push(contact.email)
-        })
+        if (latestSubmissionWithContracts) {
+            for (const cr of latestSubmissionWithContracts.contractRevisions) {
+                cr.formData.stateContacts.forEach((contact) => {
+                    if (contact.email) stateContactEmails.push(contact.email)
+                })
+            }
+        }
     }
 
     return {

@@ -145,9 +145,8 @@ export const SingleRateCert = ({
         useFocus()
 
     useEffect(() => {
-        if (focusNewActuaryContact) {
-            newActuaryContactNameRef.current &&
-                newActuaryContactNameRef.current.focus()
+        if (newActuaryContactNameRef.current) {
+            newActuaryContactNameRef.current.focus()
             setFocusNewActuaryContact(false)
             newActuaryContactNameRef.current = null
         }

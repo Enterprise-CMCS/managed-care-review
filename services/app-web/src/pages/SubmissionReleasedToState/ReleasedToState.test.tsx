@@ -100,9 +100,6 @@ describe('ReleasedToState', () => {
                 routerProvider: {
                     route: '/submissions/test-abc-123/released-to-state',
                 },
-                featureFlags: {
-                    'submission-approvals': true,
-                },
             }
         )
 
@@ -172,9 +169,6 @@ describe('ReleasedToState', () => {
                 routerProvider: {
                     route: '/submissions/test-abc-123/released-to-state',
                 },
-                featureFlags: {
-                    'submission-approvals': true,
-                },
             }
         )
 
@@ -243,9 +237,6 @@ describe('ReleasedToState', () => {
                 routerProvider: {
                     route: '/submissions/test-abc-123/released-to-state',
                 },
-                featureFlags: {
-                    'submission-approvals': true,
-                },
             }
         )
 
@@ -312,9 +303,6 @@ describe('ReleasedToState', () => {
                 },
                 routerProvider: {
                     route: '/submissions/test-abc-123/released-to-state',
-                },
-                featureFlags: {
-                    'submission-approvals': true,
                 },
             }
         )
@@ -385,9 +373,6 @@ describe('ReleasedToState', () => {
                 },
                 routerProvider: {
                     route: '/submissions/test-abc-123/released-to-state',
-                },
-                featureFlags: {
-                    'submission-approvals': true,
                 },
             }
         )

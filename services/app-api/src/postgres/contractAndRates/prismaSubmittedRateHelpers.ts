@@ -19,7 +19,6 @@ const includeLatestSubmittedRateRev = {
 
 // includeRateWithoutDraftContracts is the prisma includes block for a complete Rate
 const includeRateWithoutDraftContracts = {
-    withdrawInfo: includeUpdateInfo,
     revisions: {
         orderBy: {
             createdAt: 'asc',
@@ -95,7 +94,6 @@ type SubmissionPackageContractRevisionData =
     }>
 
 const includeStrippedRateWithoutDraftContracts = {
-    withdrawInfo: includeUpdateInfo,
     revisions: {
         orderBy: {
             createdAt: 'asc',
