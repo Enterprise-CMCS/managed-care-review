@@ -534,6 +534,7 @@ resources:
                   Action:
                     - s3:PutObject
                     - s3:PutObjectAcl
+                    - s3:ListBucket
                   Resource:
                     - !Sub 'arn:aws:s3:::${self:service}-${sls:stage}-data-export/*'
 
@@ -564,6 +565,7 @@ resources:
                 Action:
                   - s3:PutObject
                   - s3:PutObjectAcl
+                  - s3:ListBucket
                 Resource:
                   - !Sub '${DataExportBucket.Arn}/*'
               - !Ref AWS::NoValue
