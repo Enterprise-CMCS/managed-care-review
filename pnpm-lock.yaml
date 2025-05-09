@@ -335,8 +335,8 @@ importers:
         specifier: ^3.806.0
         version: 3.806.0
       '@launchdarkly/node-server-sdk':
-        specifier: 9.7.2
-        version: 9.7.2
+        specifier: 9.9.1
+        version: 9.9.1
       '@mc-review/common-code':
         specifier: workspace:*
         version: link:../../packages/common-code
@@ -4419,14 +4419,14 @@ packages:
     engines: {node: '>= 8.0.0'}
     deprecated: '**IMPORTANT 10x+ PERFORMANCE UPGRADE**: Please upgrade to v12.0.1+ as we have fixed an issue with debuglog causing 10x slower router benchmark performance, see https://github.com/koajs/router/pull/173'
 
-  '@launchdarkly/js-sdk-common@2.12.0':
-    resolution: {integrity: sha512-HIDxvgo1vksC9hsYy3517sgW0Ql+iW3fgwlq/CEigeBNmaa9/J1Pxo7LrKPzezEA0kaGedmt/DCzVVxVBmxSsQ==}
+  '@launchdarkly/js-sdk-common@2.17.0':
+    resolution: {integrity: sha512-HYQNc4xbE58hBOO1yZsqE+BHOC36AYrHPZ5hwvlHoZRSsaoYCPM+Q/n+O+N3JhWXTqGsu6SwUzqUzTyxg8prGg==}
 
-  '@launchdarkly/js-server-sdk-common@2.10.0':
-    resolution: {integrity: sha512-zbqpmEFQW/ZElZnRYX6N4gMZMpviE0F75/IyxcifLAFsjGNouxllpOOPbdtrLiJnJ0ixzt5vbtnem4tbhlYNOw==}
+  '@launchdarkly/js-server-sdk-common@2.15.1':
+    resolution: {integrity: sha512-dAp2Uvo4r8nmIXHEUaRvxspLBYJmwVX3ZTCBvgX128pDi+ucJoW0IT10r8hD/OQrN5UJA66LDxI6RMr0kgqwGA==}
 
-  '@launchdarkly/node-server-sdk@9.7.2':
-    resolution: {integrity: sha512-gcRarEh0yQrlwbWDORwbfTk19M/FtZje60EIo/c4298D/sqJ906MYq0J2MmyklEuIdQx/V4qPK+ss9LCCLpm/Q==}
+  '@launchdarkly/node-server-sdk@9.9.1':
+    resolution: {integrity: sha512-4XM5RpqgkFtbDrmwqjsh0/T7X1bgnq+ds1yjZLuB8F2O8z0UJvlneMs9UjcQDJ+yetiJExVqrq8LsJ3geNyiJQ==}
 
   '@luckycatfactory/esbuild-graphql-loader@3.8.1':
     resolution: {integrity: sha512-ovONIUSW6NAlCpiPMaVw4PpdFoO3Kqi8TGQ2hTtjKTQTdPpSOdekPI1ZRnwciTeUn0yCAQk7M2xdrbIZeTh6pw==}
@@ -6745,6 +6745,10 @@ packages:
 
   agent-base@7.1.1:
     resolution: {integrity: sha512-H0TSyFNDMomMNJQBn8wFV5YC/2eJ+VXECwOadZJT554xP6cODZHPX3H9QMQECxvrgiSOP1pHjy1sMWQVYJOUOA==}
+    engines: {node: '>= 14'}
+
+  agent-base@7.1.3:
+    resolution: {integrity: sha512-jRR5wdylq8CkOe6hei19GGZnxM6rBGwFl3Bg0YItGDimvjGtAvdZk4Pu6Cl4u4Igsws4a1fd1Vq3ezrhn4KmFw==}
     engines: {node: '>= 14'}
 
   aggregate-error@3.1.0:
@@ -9163,6 +9167,10 @@ packages:
     resolution: {integrity: sha512-1e4Wqeblerz+tMKPIq2EMGiiWW1dIjZOksyHWSUm1rmuvw/how9hBHZ38lAGj5ID4Ik6EdkOw7NmWPy6LAwalw==}
     engines: {node: '>= 14'}
 
+  https-proxy-agent@7.0.6:
+    resolution: {integrity: sha512-vK9P5/iUfdl95AI+JVyUuIcVtd4ofvtrOr3HNtM2yxC9bnMbEdp3x01OhQNnjb8IJYi38VlTE3mBXwcfvywuSw==}
+    engines: {node: '>= 14'}
+
   human-signals@1.1.1:
     resolution: {integrity: sha512-SEQu7vl8KjNL2eoGBLF3+wAjpsNfA9XMlXAYj/3EdaNfAlxKthD1xjEQfGOUhllCGGJVNY34bRr6lPINhNjyZw==}
     engines: {node: '>=8.12.0'}
@@ -10011,8 +10019,8 @@ packages:
     resolution: {integrity: sha512-MbjN408fEndfiQXbFQ1vnd+1NoLDsnQW41410oQBXiyXDMYH5z505juWa4KUE1LqxRC7DgOgZDbKLxHIwm27hA==}
     engines: {node: '>=0.10'}
 
-  launchdarkly-eventsource@2.0.3:
-    resolution: {integrity: sha512-VhFjppK7jXlcEKaS7bxdoibB5j01NKyeDR7a8XfssdDGNWCTsbF0/5IExSmPi44eDncPhkoPNxlSZhEZvrbD5w==}
+  launchdarkly-eventsource@2.1.0:
+    resolution: {integrity: sha512-1HigECOMYdqX6t1cLs21vYy8Cn4enx1uhVKI7ZgT3fY14x0e75xZGAJ+K2BrAkM6ldUQj2WvIHB9es4k3yaaTQ==}
     engines: {node: '>=0.12.0'}
 
   launchdarkly-js-client-sdk@3.5.0:
@@ -18760,7 +18768,7 @@ snapshots:
       graphql: 16.9.0
       graphql-request: 6.1.0(encoding@0.1.13)(graphql@16.9.0)
       http-proxy-agent: 7.0.2
-      https-proxy-agent: 7.0.5
+      https-proxy-agent: 7.0.6
       jose: 5.9.6
       js-yaml: 4.1.0
       json-stable-stringify: 1.0.1
@@ -19424,18 +19432,18 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@launchdarkly/js-sdk-common@2.12.0': {}
+  '@launchdarkly/js-sdk-common@2.17.0': {}
 
-  '@launchdarkly/js-server-sdk-common@2.10.0':
+  '@launchdarkly/js-server-sdk-common@2.15.1':
     dependencies:
-      '@launchdarkly/js-sdk-common': 2.12.0
+      '@launchdarkly/js-sdk-common': 2.17.0
       semver: 7.5.4
 
-  '@launchdarkly/node-server-sdk@9.7.2':
+  '@launchdarkly/node-server-sdk@9.9.1':
     dependencies:
-      '@launchdarkly/js-server-sdk-common': 2.10.0
+      '@launchdarkly/js-server-sdk-common': 2.15.1
       https-proxy-agent: 5.0.1
-      launchdarkly-eventsource: 2.0.3
+      launchdarkly-eventsource: 2.1.0
     transitivePeerDependencies:
       - supports-color
 
@@ -22053,7 +22061,7 @@ snapshots:
       debug: 4.4.0(supports-color@8.1.1)
       globby: 11.1.0
       is-glob: 4.0.3
-      semver: 7.7.1
+      semver: 7.6.3
       tsutils: 3.21.0(typescript@4.9.5)
     optionalDependencies:
       typescript: 4.9.5
@@ -22468,6 +22476,8 @@ snapshots:
       debug: 4.4.0(supports-color@8.1.1)
     transitivePeerDependencies:
       - supports-color
+
+  agent-base@7.1.3: {}
 
   aggregate-error@3.1.0:
     dependencies:
@@ -25470,6 +25480,13 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+  https-proxy-agent@7.0.6:
+    dependencies:
+      agent-base: 7.1.3
+      debug: 4.4.0(supports-color@8.1.1)
+    transitivePeerDependencies:
+      - supports-color
+
   human-signals@1.1.1: {}
 
   human-signals@2.1.0: {}
@@ -26752,7 +26769,7 @@ snapshots:
     dependencies:
       language-subtag-registry: 0.3.23
 
-  launchdarkly-eventsource@2.0.3: {}
+  launchdarkly-eventsource@2.1.0: {}
 
   launchdarkly-js-client-sdk@3.5.0:
     dependencies:
@@ -27767,11 +27784,11 @@ snapshots:
   pac-proxy-agent@7.0.1:
     dependencies:
       '@tootallnate/quickjs-emscripten': 0.23.0
-      agent-base: 7.1.1
+      agent-base: 7.1.3
       debug: 4.4.0(supports-color@8.1.1)
       get-uri: 6.0.3
       http-proxy-agent: 7.0.2
-      https-proxy-agent: 7.0.5
+      https-proxy-agent: 7.0.6
       pac-resolver: 7.0.1
       socks-proxy-agent: 8.0.3
     transitivePeerDependencies:
@@ -28169,7 +28186,7 @@ snapshots:
       agent-base: 7.1.1
       debug: 4.4.0(supports-color@8.1.1)
       http-proxy-agent: 7.0.2
-      https-proxy-agent: 7.0.5
+      https-proxy-agent: 7.0.6
       lru-cache: 7.18.3
       pac-proxy-agent: 7.0.1
       proxy-from-env: 1.1.0
@@ -29212,7 +29229,7 @@ snapshots:
 
   socks-proxy-agent@8.0.3:
     dependencies:
-      agent-base: 7.1.1
+      agent-base: 7.1.3
       debug: 4.4.0(supports-color@8.1.1)
       socks: 2.8.1
     transitivePeerDependencies:
