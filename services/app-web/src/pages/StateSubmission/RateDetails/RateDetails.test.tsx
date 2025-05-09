@@ -19,6 +19,8 @@ import {
     fetchDraftRateMockSuccess,
     indexRatesMockSuccess,
     mockWithdrawnRates,
+    mockContractPackageUnlockedWithUnlockedType,
+    mockMNState,
 } from '@mc-review/mocks'
 import { Route, Routes, Location } from 'react-router-dom'
 import { RoutesRecord } from '@mc-review/constants'
@@ -213,7 +215,7 @@ describe('RateDetails', () => {
                     expect(submitButton).not.toHaveAttribute('aria-disabled')
                 })
             })
-            // eslint-disable-next-line
+
             it('disabled with alert if previously submitted with more than one rate cert file', async () => {
                 const rateID = 'abc-123'
                 renderWithProviders(
@@ -560,6 +562,284 @@ describe('RateDetails', () => {
                 expect(rateCertsAfterAddAnother).toHaveLength(1)
             })
         }, 15000)
+
+        it('does not render remove certification button for UNLOCKED rates', async () => {
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_RATE_DETAILS}
+                        element={<RateDetails type="MULTI" />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    ...mockContractPackageUnlockedWithUnlockedType(
+                                        {
+                                            draftRates: [
+                                                {
+                                                    __typename: 'Rate',
+                                                    id: 'unlocked-rate-123',
+                                                    webURL: 'https://testmcreview.example/rates/unlocked-rate-123',
+                                                    createdAt: new Date(),
+                                                    updatedAt: new Date(),
+                                                    status: 'UNLOCKED',
+                                                    reviewStatus:
+                                                        'UNDER_REVIEW',
+                                                    consolidatedStatus:
+                                                        'UNLOCKED',
+                                                    reviewStatusActions: [],
+                                                    stateCode: 'MN',
+                                                    revisions: [],
+                                                    state: mockMNState(),
+                                                    stateNumber: 5,
+                                                    parentContractID:
+                                                        'test-abc-123',
+                                                    draftRevision: {
+                                                        __typename:
+                                                            'RateRevision',
+                                                        id: 'unlocked-rr-123',
+                                                        rateID: '456',
+                                                        createdAt: new Date(),
+                                                        updatedAt: new Date(),
+                                                        unlockInfo: {
+                                                            __typename:
+                                                                'UpdateInformation',
+                                                            updatedAt:
+                                                                new Date(),
+                                                            updatedBy: {
+                                                                email: 'cms@example.com',
+                                                                role: 'STATE_USER',
+                                                                givenName:
+                                                                    'John',
+                                                                familyName:
+                                                                    'Vila',
+                                                            },
+                                                            updatedReason:
+                                                                'unlocked for a test',
+                                                        },
+                                                        formData: {
+                                                            __typename:
+                                                                'RateFormData',
+                                                            rateType:
+                                                                'AMENDMENT',
+                                                            rateCapitationType:
+                                                                'RATE_CELL',
+                                                            rateDocuments: [
+                                                                {
+                                                                    s3URL: 's3://bucketname/key/rate',
+                                                                    sha256: 'fakesha',
+                                                                    name: 'rate',
+                                                                    dateAdded:
+                                                                        new Date(
+                                                                            '03/02/2023'
+                                                                        ),
+                                                                },
+                                                            ],
+                                                            supportingDocuments:
+                                                                [],
+                                                            rateDateStart:
+                                                                new Date(
+                                                                    '2020-02-02'
+                                                                ),
+                                                            rateDateEnd:
+                                                                new Date(
+                                                                    '2021-02-02'
+                                                                ),
+                                                            rateDateCertified:
+                                                                new Date(),
+                                                            amendmentEffectiveDateStart:
+                                                                new Date(),
+                                                            amendmentEffectiveDateEnd:
+                                                                new Date(),
+                                                            rateProgramIDs: [
+                                                                'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
+                                                            ],
+                                                            consolidatedRateProgramIDs:
+                                                                [
+                                                                    'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
+                                                                ],
+                                                            deprecatedRateProgramIDs:
+                                                                [
+                                                                    'd95394e5-44d1-45df-8151-1cc1ee66f10',
+                                                                ],
+                                                            certifyingActuaryContacts:
+                                                                [
+                                                                    {
+                                                                        actuarialFirm:
+                                                                            'DELOITTE',
+                                                                        name: 'Actuary Contact 1',
+                                                                        titleRole:
+                                                                            'Test Actuary Contact 1',
+                                                                        email: 'actuarycontact1@test.com',
+                                                                    },
+                                                                ],
+                                                            addtlActuaryContacts:
+                                                                [
+                                                                    {
+                                                                        actuarialFirm:
+                                                                            'DELOITTE',
+                                                                        name: 'Actuary Contact 1',
+                                                                        titleRole:
+                                                                            'Test Actuary Contact 1',
+                                                                        email: 'additionalactuarycontact1@test.com',
+                                                                    },
+                                                                ],
+                                                            actuaryCommunicationPreference:
+                                                                'OACT_TO_ACTUARY',
+                                                            packagesWithSharedRateCerts:
+                                                                [],
+                                                        },
+                                                    },
+                                                },
+                                                {
+                                                    __typename: 'Rate',
+                                                    id: 'unlocked-rate-1234',
+                                                    webURL: 'https://testmcreview.example/rates/unlocked-rate-123',
+                                                    createdAt: new Date(),
+                                                    updatedAt: new Date(),
+                                                    status: 'UNLOCKED',
+                                                    reviewStatus:
+                                                        'UNDER_REVIEW',
+                                                    consolidatedStatus:
+                                                        'UNLOCKED',
+                                                    reviewStatusActions: [],
+                                                    stateCode: 'MN',
+                                                    revisions: [],
+                                                    state: mockMNState(),
+                                                    stateNumber: 5,
+                                                    parentContractID:
+                                                        'test-abc-123',
+                                                    draftRevision: {
+                                                        __typename:
+                                                            'RateRevision',
+                                                        id: 'unlocked-rr-1234',
+                                                        rateID: '456',
+                                                        createdAt: new Date(),
+                                                        updatedAt: new Date(),
+                                                        unlockInfo: {
+                                                            __typename:
+                                                                'UpdateInformation',
+                                                            updatedAt:
+                                                                new Date(),
+                                                            updatedBy: {
+                                                                email: 'cms@example.com',
+                                                                role: 'STATE_USER',
+                                                                givenName:
+                                                                    'John',
+                                                                familyName:
+                                                                    'Vila',
+                                                            },
+                                                            updatedReason:
+                                                                'unlocked for a test',
+                                                        },
+                                                        formData: {
+                                                            __typename:
+                                                                'RateFormData',
+                                                            rateType:
+                                                                'AMENDMENT',
+                                                            rateCapitationType:
+                                                                'RATE_CELL',
+                                                            rateDocuments: [
+                                                                {
+                                                                    s3URL: 's3://bucketname/key/rate',
+                                                                    sha256: 'fakesha',
+                                                                    name: 'rate',
+                                                                    dateAdded:
+                                                                        new Date(
+                                                                            '03/02/2023'
+                                                                        ),
+                                                                },
+                                                            ],
+                                                            supportingDocuments:
+                                                                [],
+                                                            rateDateStart:
+                                                                new Date(
+                                                                    '2020-02-02'
+                                                                ),
+                                                            rateDateEnd:
+                                                                new Date(
+                                                                    '2021-02-02'
+                                                                ),
+                                                            rateDateCertified:
+                                                                new Date(),
+                                                            amendmentEffectiveDateStart:
+                                                                new Date(),
+                                                            amendmentEffectiveDateEnd:
+                                                                new Date(),
+                                                            rateProgramIDs: [
+                                                                'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
+                                                            ],
+                                                            consolidatedRateProgramIDs:
+                                                                [
+                                                                    'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
+                                                                ],
+                                                            deprecatedRateProgramIDs:
+                                                                [
+                                                                    'd95394e5-44d1-45df-8151-1cc1ee66f10',
+                                                                ],
+                                                            certifyingActuaryContacts:
+                                                                [
+                                                                    {
+                                                                        actuarialFirm:
+                                                                            'DELOITTE',
+                                                                        name: 'Actuary Contact 1',
+                                                                        titleRole:
+                                                                            'Test Actuary Contact 1',
+                                                                        email: 'actuarycontact1@test.com',
+                                                                    },
+                                                                ],
+                                                            addtlActuaryContacts:
+                                                                [
+                                                                    {
+                                                                        actuarialFirm:
+                                                                            'DELOITTE',
+                                                                        name: 'Actuary Contact 1',
+                                                                        titleRole:
+                                                                            'Test Actuary Contact 1',
+                                                                        email: 'additionalactuarycontact1@test.com',
+                                                                    },
+                                                                ],
+                                                            actuaryCommunicationPreference:
+                                                                'OACT_TO_ACTUARY',
+                                                            packagesWithSharedRateCerts:
+                                                                [],
+                                                        },
+                                                    },
+                                                },
+                                            ],
+                                        }
+                                    ),
+                                    id: 'test-abc-123',
+                                },
+                            }),
+                            updateDraftContractRatesMockSuccess({
+                                contract: {
+                                    id: 'test-abc-123',
+                                },
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: `/submissions/test-abc-123/edit/rate-details`,
+                    },
+                    featureFlags: {
+                        'rate-edit-unlock': false,
+                    },
+                }
+            )
+            await screen.findByText('Rate Details')
+            const rateCertsOnLoad = rateCertifications(screen)
+            expect(rateCertsOnLoad).toHaveLength(2)
+            expect(
+                screen.queryByRole('button', {
+                    name: /Remove rate certification/,
+                })
+            ).not.toBeInTheDocument()
+        })
 
         it('accepts documents on second rate', async () => {
             renderWithProviders(

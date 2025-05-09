@@ -533,7 +533,9 @@ const RateDetails = ({
                                                                     />
                                                                 )}
                                                                 {index >= 1 &&
-                                                                    !displayAsStandaloneRate && (
+                                                                    !displayAsStandaloneRate &&
+                                                                    rateForm.status !==
+                                                                        'UNLOCKED' && (
                                                                         <ButtonWithLogging
                                                                             type="button"
                                                                             unstyled
