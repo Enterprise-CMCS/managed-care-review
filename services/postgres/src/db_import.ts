@@ -212,96 +212,6 @@ function executeDbCommand(
 }
 
 /**
- * Prepare the database for import (create if needed, drop existing tables)
- * @param dbCredentials Database credentials
- */
-function prepareDatabase(dbCredentials: SecretDict): void {
-    const dbname = dbCredentials.dbname || 'postgres'
-    const port = dbCredentials.port || '5432'
-
-    console.info('Checking if database exists...')
-
-    // Check if database exists
-    const checkDbCmd = [
-        'psql',
-        `-h ${dbCredentials.host}`,
-        `-p ${port}`,
-        `-U ${dbCredentials.username}`,
-        `-d postgres`,
-        `-c "SELECT 1 FROM pg_database WHERE datname = '${dbname}';"`,
-    ].join(' ')
-
-    const dbCheckResult = executeDbCommand(
-        checkDbCmd,
-        'check if database exists',
-        dbCredentials
-    )
-
-    // If database doesn't exist, create it
-    if (!dbCheckResult.includes('(1 row)')) {
-        console.info(`Database ${dbname} does not exist, creating it...`)
-        const createDbCmd = [
-            'psql',
-            `-h ${dbCredentials.host}`,
-            `-p ${port}`,
-            `-U ${dbCredentials.username}`,
-            `-d postgres`,
-            `-c "CREATE DATABASE ${dbname};"`,
-        ].join(' ')
-
-        executeDbCommand(createDbCmd, 'create database', dbCredentials)
-        console.info(`Database ${dbname} created successfully`)
-    } else {
-        console.info(`Database ${dbname} already exists`)
-    }
-
-    // Check if database is empty or has tables already
-    const checkTablesCmd = [
-        'psql',
-        `-h ${dbCredentials.host}`,
-        `-p ${port}`,
-        `-U ${dbCredentials.username}`,
-        `-d ${dbname}`,
-        `-c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public';"`,
-    ].join(' ')
-
-    const tableCheckResult = executeDbCommand(
-        checkTablesCmd,
-        'check existing tables',
-        dbCredentials
-    )
-    const tableCount = parseInt(
-        tableCheckResult.trim().split('\n')[2].trim(),
-        10
-    )
-
-    if (tableCount > 0) {
-        console.info(
-            `Database ${dbname} has ${tableCount} existing tables. They will be replaced during import.`
-        )
-
-        // Drop all existing tables for a clean import
-        const dropAllTablesCmd = [
-            'psql',
-            `-h ${dbCredentials.host}`,
-            `-p ${port}`,
-            `-U ${dbCredentials.username}`,
-            `-d ${dbname}`,
-            `-c "DO $$ DECLARE r RECORD; BEGIN FOR r IN (SELECT tablename FROM pg_tables WHERE schemaname = 'public') LOOP EXECUTE 'DROP TABLE IF EXISTS ' || quote_ident(r.tablename) || ' CASCADE'; END LOOP; END $$;"`,
-        ].join(' ')
-
-        executeDbCommand(
-            dropAllTablesCmd,
-            'drop existing tables',
-            dbCredentials
-        )
-        console.info('Dropped all existing tables for clean import')
-    } else {
-        console.info(`Database ${dbname} is empty and ready for import`)
-    }
-}
-
-/**
  * Import the database dump file into PostgreSQL
  * @param dumpFilePath Path to the dump file
  * @param dbCredentials Database credentials
@@ -708,11 +618,9 @@ export const handler = async () => {
 
         // Download the dump file to the Lambda's temp directory
         await downloadS3File(latestDumpKey, dumpFilePath, S3_BUCKET)
+        ensureDatabaseExists(dbCredentials)
 
-        // Prepare the database for import
-        prepareDatabase(dbCredentials)
-
-        // Import the database dump
+        // Import the database dump directly
         importDatabase(dumpFilePath, dbCredentials)
 
         // Clean up temporary files
@@ -754,5 +662,46 @@ export const handler = async () => {
         if (prisma) {
             await prisma.$disconnect()
         }
+    }
+}
+
+function ensureDatabaseExists(dbCredentials: SecretDict): void {
+    const dbname = dbCredentials.dbname || 'postgres'
+    const port = dbCredentials.port || '5432'
+
+    console.info('Checking if database exists...')
+
+    // Check if database exists
+    const checkDbCmd = [
+        'psql',
+        `-h ${dbCredentials.host}`,
+        `-p ${port}`,
+        `-U ${dbCredentials.username}`,
+        `-d postgres`,
+        `-c "SELECT 1 FROM pg_database WHERE datname = '${dbname}';"`,
+    ].join(' ')
+
+    const dbCheckResult = executeDbCommand(
+        checkDbCmd,
+        'check if database exists',
+        dbCredentials
+    )
+
+    // If database doesn't exist, create it
+    if (!dbCheckResult.includes('(1 row)')) {
+        console.info(`Database ${dbname} does not exist, creating it...`)
+        const createDbCmd = [
+            'psql',
+            `-h ${dbCredentials.host}`,
+            `-p ${port}`,
+            `-U ${dbCredentials.username}`,
+            `-d postgres`,
+            `-c "CREATE DATABASE ${dbname};"`,
+        ].join(' ')
+
+        executeDbCommand(createDbCmd, 'create database', dbCredentials)
+        console.info(`Database ${dbname} created successfully`)
+    } else {
+        console.info(`Database ${dbname} already exists`)
     }
 }
