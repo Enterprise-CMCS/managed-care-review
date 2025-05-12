@@ -1,6 +1,5 @@
 import type { ExtendedPrismaClient } from '../prismaClient'
 import type { Prisma } from '@prisma/client'
-import { hash, compare } from 'bcrypt'
 
 type OAuthClientType = Prisma.OAuthClientGetPayload<Record<string, never>>
 
@@ -16,13 +15,10 @@ export async function createOAuthClient(
     }
 ): Promise<OAuthClientType | Error> {
     try {
-        // Hash the client secret before storing
-        const hashedSecret = await hash(data.clientSecret, 10)
-
         return await client.oAuthClient.create({
             data: {
                 clientId: data.clientId,
-                clientSecret: hashedSecret,
+                clientSecret: data.clientSecret,
                 grants: data.grants,
                 description: data.description,
                 contactEmail: data.contactEmail,
@@ -82,7 +78,7 @@ export async function verifyClientCredentials(
             data: { lastUsedAt: new Date() },
         })
 
-        return await compare(clientSecret, oauthClient.clientSecret)
+        return clientSecret === oauthClient.clientSecret
     } catch (error) {
         return error as Error
     }
@@ -100,14 +96,9 @@ export async function updateOAuthClient(
     }
 ): Promise<OAuthClientType | Error> {
     try {
-        const updateData: Prisma.OAuthClientUpdateInput = { ...data }
-        if (data.clientSecret) {
-            updateData.clientSecret = await hash(data.clientSecret, 10)
-        }
-
         return await client.oAuthClient.update({
             where: { id },
-            data: updateData,
+            data,
         })
     } catch (error) {
         return error as Error
