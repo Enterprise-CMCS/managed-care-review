@@ -141,51 +141,11 @@ async function replaceDocument(
         console.info(`Original S3 URL: ${s3Url}`)
         console.info(`Original filename: ${originalFilename}`)
 
-        // Extract the key (filename) from the s3URL
-        let s3Key: string
+        // Instead of trying to parse the S3 URL, let's just use a consistent approach
+        // Always put files in the allusers directory with the document ID as the filename
+        const s3Key = `allusers/${documentId}/${originalFilename}`
 
-        // Case 1: Full S3 URL - https://bucket-name.s3.amazonaws.com/path/to/file.pdf
-        if (s3Url.includes('s3.amazonaws.com')) {
-            try {
-                const url = new URL(s3Url)
-                s3Key = url.pathname.substring(1) // Remove leading slash
-            } catch (e) {
-                console.error(`Failed to parse URL: ${s3Url}`, e)
-                // Fallback - take everything after the bucket name
-                const bucketPart = `${DOCS_S3_BUCKET}.s3.amazonaws.com/`
-                const keyStart = s3Url.indexOf(bucketPart)
-                if (keyStart >= 0) {
-                    s3Key = s3Url.substring(keyStart + bucketPart.length)
-                } else {
-                    // Last resort fallback
-                    s3Key = `replacement-documents/${documentId}/${originalFilename}`
-                }
-            }
-        }
-        // Case 2: S3 URI format - s3://bucket-name/path/to/file.pdf
-        else if (s3Url.startsWith('s3://')) {
-            const parts = s3Url.substring(5).split('/')
-            s3Key = parts.join('/') // Remaining path is the key
-        }
-        // Case 3: Just the key itself
-        else {
-            s3Key = s3Url
-        }
-
-        // Clean up the key - ensure no double slashes, no trailing slashes on file paths
-        s3Key = s3Key.replace(/\/+/g, '/') // Replace multiple slashes with single slash
-
-        // If the key doesn't end with the original filename, append it
-        // But only if it looks like a directory path (ends with /)
-        if (s3Key.endsWith('/')) {
-            s3Key = `${s3Key}${originalFilename}`
-        } else if (!s3Key.includes('.')) {
-            // If no file extension is present in the key, assume it's a directory
-            // and append the original filename
-            s3Key = `${s3Key}/${originalFilename}`
-        }
-
-        console.info(`Final S3 Key: ${s3Key}`)
+        console.info(`Using standardized S3 Key: ${s3Key}`)
 
         // Get mock PDF path
         const mockPdfPath = getMockPDFPath(documentId)
@@ -463,21 +423,23 @@ async function getDatabaseCredentials(): Promise<SecretDict> {
 }
 
 /**
- * Ensure the database exists (create if needed)
+ * Prepare the database for import by dropping all existing tables
+ * @param dbCredentials Database credentials
  */
-async function ensureDatabaseExists(dbCredentials: SecretDict): Promise<void> {
+async function prepareDatabase(dbCredentials: SecretDict): Promise<void> {
     const dbname = dbCredentials.dbname || 'postgres'
     const port = dbCredentials.port || '5432'
 
     console.info('Checking if database exists...')
 
-    // Check if database exists
+    // When checking for existence or doing administrative tasks,
+    // we connect to the postgres database (not the target database)
     const checkDbCmd = [
         'psql',
         `-h ${dbCredentials.host}`,
         `-p ${port}`,
         `-U ${dbCredentials.username}`,
-        `-d postgres`,
+        `-d postgres`, // Connect to postgres admin database
         `-c "SELECT 1 FROM pg_database WHERE datname = '${dbname}';"`,
     ].join(' ')
 
@@ -491,15 +453,57 @@ async function ensureDatabaseExists(dbCredentials: SecretDict): Promise<void> {
             env: process.env,
         })
 
-        // If database doesn't exist, create it
-        if (!result.includes('(1 row)')) {
-            console.info(`Database ${dbname} does not exist, creating it...`)
+        let dbExists = result.includes('(1 row)')
+
+        // If database exists, drop it to ensure a clean slate
+        if (dbExists) {
+            console.info(
+                `Database ${dbname} exists, dropping it to ensure clean import...`
+            )
+
+            // Force disconnect all sessions first
+            const disconnectCmd = [
+                'psql',
+                `-h ${dbCredentials.host}`,
+                `-p ${port}`,
+                `-U ${dbCredentials.username}`,
+                `-d postgres`, // Connect to postgres admin database
+                `-c "SELECT pg_terminate_backend(pg_stat_activity.pid) FROM pg_stat_activity WHERE pg_stat_activity.datname = '${dbname}' AND pid <> pg_backend_pid();"`,
+            ].join(' ')
+
+            execSync(disconnectCmd, {
+                encoding: 'utf8',
+                env: process.env,
+            })
+
+            // Now drop the database
+            const dropDbCmd = [
+                'psql',
+                `-h ${dbCredentials.host}`,
+                `-p ${port}`,
+                `-U ${dbCredentials.username}`,
+                `-d postgres`, // Connect to postgres admin database
+                `-c "DROP DATABASE IF EXISTS ${dbname};"`,
+            ].join(' ')
+
+            execSync(dropDbCmd, {
+                encoding: 'utf8',
+                env: process.env,
+            })
+
+            dbExists = false
+            console.info(`Database ${dbname} dropped successfully`)
+        }
+
+        // Create database if it doesn't exist
+        if (!dbExists) {
+            console.info(`Creating database ${dbname}...`)
             const createDbCmd = [
                 'psql',
                 `-h ${dbCredentials.host}`,
                 `-p ${port}`,
                 `-U ${dbCredentials.username}`,
-                `-d postgres`,
+                `-d postgres`, // Connect to postgres admin database
                 `-c "CREATE DATABASE ${dbname};"`,
             ].join(' ')
 
@@ -508,15 +512,11 @@ async function ensureDatabaseExists(dbCredentials: SecretDict): Promise<void> {
                 env: process.env,
             })
             console.info(`Database ${dbname} created successfully`)
-        } else {
-            console.info(
-                `Database ${dbname} already exists and will be used for import`
-            )
         }
     } catch (error) {
-        console.error('Error checking/creating database:', error)
+        console.error('Error preparing database:', error)
         throw new Error(
-            `Failed to check/create database: ${error instanceof Error ? error.message : String(error)}`
+            `Failed to prepare database: ${error instanceof Error ? error.message : String(error)}`
         )
     } finally {
         // Clear password from environment
@@ -609,7 +609,6 @@ export const handler = async () => {
     try {
         // Get the database credentials
         const dbCredentials = await getDatabaseCredentials()
-        prisma = await initializePrisma(dbCredentials)
 
         // --- PHASE 1: DATABASE IMPORT ---
         console.info('Starting database import phase...')
@@ -622,8 +621,8 @@ export const handler = async () => {
         // Download the dump file to the Lambda's temp directory
         await downloadS3File(latestDumpKey, dumpFilePath, S3_BUCKET)
 
-        // Ensure database exists but skip complex dropping operations
-        await ensureDatabaseExists(dbCredentials)
+        // Drop the existing database and create a fresh one
+        await prepareDatabase(dbCredentials)
 
         // Import the database dump
         importDatabase(dumpFilePath, dbCredentials)
@@ -632,6 +631,10 @@ export const handler = async () => {
         if (fs.existsSync(dumpFilePath)) {
             fs.unlinkSync(dumpFilePath)
         }
+
+        // Initialize Prisma after the database is populated
+        prisma = await initializePrisma(dbCredentials)
+
         console.info('Database import phase completed successfully')
 
         // --- PHASE 2: DOCUMENT REPLACEMENT ---
