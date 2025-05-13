@@ -94,8 +94,8 @@ custom:
   publicSubnetA: ${env:SUBNET_PUBLIC_A_ID}
   iamPermissionsBoundary: ${env:IAM_PERMISSIONS_BOUNDARY}
   iamPath: ${env:IAM_PATH}
-  valAWSAccountID: ${env:VAL_AWS_ACCOUNT_ID}
-  prodAWSAccountID: ${env:PROD_AWS_ACCOUNT_ID}
+  valAWSAccountID: ${env:CF_CONFIG_IGNORED_LOCALLY, env:VAL_AWS_ACCOUNT_ID}
+  prodAWSAccountID: ${env:CF_CONFIG_IGNORED_LOCALLY, env:PROD_AWS_ACCOUNT_ID}
   crossAccountRoleArn:
     prod: !Sub 'arn:aws:iam::${self:custom.valAWSAccountID}:role/${self:service}-cross-account-upload-val'
     mttestexport: !Sub 'arn:aws:iam::${self:custom.valAWSAccountID}:role/${self:service}-cross-account-upload-val'

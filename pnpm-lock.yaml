@@ -1012,6 +1012,9 @@ importers:
       eslint-plugin-prettier:
         specifier: ^5.0.1
         version: 5.0.1(@types/eslint@9.6.1)(eslint-config-prettier@9.1.0(eslint@8.57.0))(eslint@8.57.0)(prettier@3.5.3)
+      fs-extra:
+        specifier: ^11.2.0
+        version: 11.3.0
       serverless:
         specifier: 4.2.3
         version: 4.2.3
@@ -29056,7 +29059,7 @@ snapshots:
   serverless-s3-local@0.8.4(serverless@4.2.3):
     dependencies:
       '@aws-sdk/client-s3': 3.806.0
-      fs-extra: 11.2.0
+      fs-extra: 11.3.0
       rxjs: 6.6.7
       rxjs-compat: 6.6.7
       s3rver: 3.7.1

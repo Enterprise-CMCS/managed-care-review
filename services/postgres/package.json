@@ -12,6 +12,7 @@
         "eslint": "^8.3.0",
         "eslint-config-prettier": "^9.1.0",
         "eslint-plugin-prettier": "^5.0.1",
+        "fs-extra": "^11.2.0",
         "serverless-esbuild": "^1.52.1",
         "serverless": "4.2.3",
         "serverless-iam-helper": "https://github.com/CMSgov/serverless-iam-helper",
