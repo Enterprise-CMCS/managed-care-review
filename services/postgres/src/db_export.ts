@@ -43,7 +43,6 @@ export const handler = async () => {
         const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
         const dumpFilename = `${dbCredentials.dbname || 'postgres'}_${timestamp}.sql`
         const dumpFilePath = path.join(TMP_DIR, dumpFilename)
-        const plainSqlPath = path.join(TMP_DIR, `plain_${dumpFilename}`)
         const sanitizedDumpPath = path.join(
             TMP_DIR,
             `sanitized_${dumpFilename}`
