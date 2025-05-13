@@ -158,7 +158,8 @@ functions:
     condition: IsProd
     handler: src/db_export.handler
     description: Exports data from the Postgres Aurora database
-    timeout: 60
+    timeout: 300
+    memorySize: 4096
     vpc:
       securityGroupIds: ${self:custom.sgId}
       subnetIds: ${self:custom.privateSubnets}
@@ -174,7 +175,8 @@ functions:
     condition: IsVal
     handler: src/db_import.handler
     description: Imports data from S3 into Postgres Aurora database and replaces documents with placeholders
-    timeout: 300 # 5 minutes, adjust as needed for your database size
+    timeout: 600
+    memorySize: 4096
     vpc:
       securityGroupIds: ${self:custom.sgId}
       subnetIds: ${self:custom.privateSubnets}
