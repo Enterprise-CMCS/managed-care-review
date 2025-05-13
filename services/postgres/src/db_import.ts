@@ -105,7 +105,7 @@ async function logSampleDocumentURLs(prisma: PrismaClient): Promise<void> {
         prisma.contractDocument.findFirst(),
         prisma.contractSupportingDocument.findFirst(),
         prisma.rateDocument.findFirst(),
-        prisma.rateQuestionDocument.findFirst(),
+        prisma.rateSupportingDocument.findFirst(),
     ])
 
     docs.forEach((doc, index) => {
@@ -114,12 +114,13 @@ async function logSampleDocumentURLs(prisma: PrismaClient): Promise<void> {
                 'ContractDocument',
                 'ContractSupportingDocument',
                 'RateDocument',
-                'RateQuestionDocument',
+                'RateSupportingDocument',
             ]
             console.info(`${types[index]} sample:
   id: ${doc.id}
   name: ${doc.name}
   s3URL: ${doc.s3URL}
+  ${Object.prototype.hasOwnProperty.call(doc, 'sha256') ? `sha256: ${doc.sha256}` : ''}
 `)
             // Debug the S3 URL structure
             debugS3Url(doc.s3URL)
@@ -347,87 +348,6 @@ async function processAllDocuments(prisma: PrismaClient): Promise<void> {
         } catch (error) {
             console.error(
                 `Error processing rate supporting document ${doc.id}:`,
-                error
-            )
-        }
-    }
-
-    // Process ContractQuestionDocument (no SHA update needed)
-    console.info('Processing ContractQuestionDocument files...')
-    const contractQuestionDocuments =
-        await prisma.contractQuestionDocument.findMany()
-    console.info(
-        `Found ${contractQuestionDocuments.length} contract question documents`
-    )
-
-    for (const doc of contractQuestionDocuments) {
-        try {
-            await replaceDocument(doc.id, doc.s3URL, doc.name)
-            console.info(`Updated contract question document ${doc.id}`)
-        } catch (error) {
-            console.error(
-                `Error processing contract question document ${doc.id}:`,
-                error
-            )
-        }
-    }
-
-    // Process ContractQuestionResponseDocument (no SHA update needed)
-    console.info('Processing ContractQuestionResponseDocument files...')
-    const contractQuestionResponseDocuments =
-        await prisma.contractQuestionResponseDocument.findMany()
-    console.info(
-        `Found ${contractQuestionResponseDocuments.length} contract question response documents`
-    )
-
-    for (const doc of contractQuestionResponseDocuments) {
-        try {
-            await replaceDocument(doc.id, doc.s3URL, doc.name)
-            console.info(
-                `Updated contract question response document ${doc.id}`
-            )
-        } catch (error) {
-            console.error(
-                `Error processing contract question response document ${doc.id}:`,
-                error
-            )
-        }
-    }
-
-    // Process RateQuestionDocument (no SHA update needed)
-    console.info('Processing RateQuestionDocument files...')
-    const rateQuestionDocuments = await prisma.rateQuestionDocument.findMany()
-    console.info(
-        `Found ${rateQuestionDocuments.length} rate question documents`
-    )
-
-    for (const doc of rateQuestionDocuments) {
-        try {
-            await replaceDocument(doc.id, doc.s3URL, doc.name)
-            console.info(`Updated rate question document ${doc.id}`)
-        } catch (error) {
-            console.error(
-                `Error processing rate question document ${doc.id}:`,
-                error
-            )
-        }
-    }
-
-    // Process RateQuestionResponseDocument (no SHA update needed)
-    console.info('Processing RateQuestionResponseDocument files...')
-    const rateQuestionResponseDocuments =
-        await prisma.rateQuestionResponseDocument.findMany()
-    console.info(
-        `Found ${rateQuestionResponseDocuments.length} rate question response documents`
-    )
-
-    for (const doc of rateQuestionResponseDocuments) {
-        try {
-            await replaceDocument(doc.id, doc.s3URL, doc.name)
-            console.info(`Updated rate question response document ${doc.id}`)
-        } catch (error) {
-            console.error(
-                `Error processing rate question response document ${doc.id}:`,
                 error
             )
         }
