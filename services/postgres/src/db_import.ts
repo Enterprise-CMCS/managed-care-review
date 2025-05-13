@@ -423,95 +423,150 @@ async function getDatabaseCredentials(): Promise<SecretDict> {
 }
 
 /**
- * Prepare the database for import by dropping all existing tables
+ * Prepare the database for import by truncating all existing tables
  * @param dbCredentials Database credentials
  */
 async function prepareDatabase(dbCredentials: SecretDict): Promise<void> {
     const dbname = dbCredentials.dbname || 'postgres'
     const port = dbCredentials.port || '5432'
 
-    console.info('Checking if database exists...')
-
-    // When checking for existence or doing administrative tasks,
-    // we connect to the postgres database (not the target database)
-    const checkDbCmd = [
-        'psql',
-        `-h ${dbCredentials.host}`,
-        `-p ${port}`,
-        `-U ${dbCredentials.username}`,
-        `-d postgres`, // Connect to postgres admin database
-        `-c "SELECT 1 FROM pg_database WHERE datname = '${dbname}';"`,
-    ].join(' ')
+    console.info(`Preparing database ${dbname} for import...`)
 
     try {
         // Set environment variables for psql
         process.env.PGPASSWORD = dbCredentials.password
 
-        // Execute the command
-        const result = execSync(checkDbCmd, {
-            encoding: 'utf8',
-            env: process.env,
-        })
+        // First, check if the database exists by connecting directly to it
+        // If it doesn't exist, this will fail
+        try {
+            const testConnectionCmd = [
+                'psql',
+                `-h ${dbCredentials.host}`,
+                `-p ${port}`,
+                `-U ${dbCredentials.username}`,
+                `-d ${dbname}`,
+                `-c "SELECT 1;"`,
+            ].join(' ')
 
-        let dbExists = result.includes('(1 row)')
+            execSync(testConnectionCmd, {
+                encoding: 'utf8',
+                env: process.env,
+            })
 
-        // If database exists, drop it to ensure a clean slate
-        if (dbExists) {
+            console.info(`Successfully connected to database ${dbname}`)
+
+            // Database exists, so truncate all tables
+            console.info(`Truncating all tables in database ${dbname}...`)
+
+            // First, get a list of all tables in the public schema
+            const listTablesCmd = [
+                'psql',
+                `-h ${dbCredentials.host}`,
+                `-p ${port}`,
+                `-U ${dbCredentials.username}`,
+                `-d ${dbname}`,
+                `-t`, // tuple only mode (no headers/footers)
+                `-c "SELECT tablename FROM pg_tables WHERE schemaname = 'public';"`,
+            ].join(' ')
+
+            const tableListResult = execSync(listTablesCmd, {
+                encoding: 'utf8',
+                env: process.env,
+            })
+
+            // Parse the table names
+            const tables = tableListResult
+                .split('\n')
+                .map((line) => line.trim())
+                .filter((line) => line.length > 0)
+
+            if (tables.length > 0) {
+                console.info(
+                    `Found ${tables.length} tables to truncate in database ${dbname}`
+                )
+
+                // Create a SQL statement to disable constraints, truncate all tables, and re-enable constraints
+                const truncateScript = `
+BEGIN;
+-- Disable all triggers temporarily
+SET session_replication_role = 'replica';
+
+-- Truncate all tables in one transaction
+TRUNCATE TABLE ${tables.join(', ')} CASCADE;
+
+-- Re-enable triggers
+SET session_replication_role = 'origin';
+COMMIT;
+`
+
+                // Write the script to a temporary file
+                const scriptPath = path.join(TMP_DIR, 'truncate_tables.sql')
+                fs.writeFileSync(scriptPath, truncateScript)
+
+                // Execute the script
+                const truncateCmd = [
+                    'psql',
+                    `-h ${dbCredentials.host}`,
+                    `-p ${port}`,
+                    `-U ${dbCredentials.username}`,
+                    `-d ${dbname}`,
+                    `-f ${scriptPath}`,
+                ]
+
+                // Adding logging to debug any issues
+                console.info(
+                    `Executing truncate command: ${truncateCmd.join(' ')}`
+                )
+
+                execSync(truncateCmd.join(' '), {
+                    encoding: 'utf8',
+                    env: process.env,
+                    stdio: 'inherit',
+                })
+
+                // Clean up the script file
+                fs.unlinkSync(scriptPath)
+                console.info(
+                    `Successfully truncated all tables in database ${dbname}`
+                )
+            } else {
+                console.info(
+                    `No tables found in database ${dbname}, nothing to truncate`
+                )
+            }
+        } catch (error) {
+            // If we can't connect, the database might not exist
+            console.error(
+                `Received ${error} when attempting to connect to ${dbname}`
+            )
             console.info(
-                `Database ${dbname} exists, dropping it to ensure clean import...`
+                `Could not connect to database ${dbname}, attempting to create it...`
             )
 
-            // Force disconnect all sessions first
-            const disconnectCmd = [
-                'psql',
-                `-h ${dbCredentials.host}`,
-                `-p ${port}`,
-                `-U ${dbCredentials.username}`,
-                `-d postgres`, // Connect to postgres admin database
-                `-c "SELECT pg_terminate_backend(pg_stat_activity.pid) FROM pg_stat_activity WHERE pg_stat_activity.datname = '${dbname}' AND pid <> pg_backend_pid();"`,
-            ].join(' ')
+            // Try connecting to the postgres database to create our target database
+            try {
+                const createDbCmd = [
+                    'psql',
+                    `-h ${dbCredentials.host}`,
+                    `-p ${port}`,
+                    `-U ${dbCredentials.username}`,
+                    `-d postgres`,
+                    `-c "CREATE DATABASE ${dbname};"`,
+                ].join(' ')
 
-            execSync(disconnectCmd, {
-                encoding: 'utf8',
-                env: process.env,
-            })
+                execSync(createDbCmd, {
+                    encoding: 'utf8',
+                    env: process.env,
+                })
 
-            // Now drop the database
-            const dropDbCmd = [
-                'psql',
-                `-h ${dbCredentials.host}`,
-                `-p ${port}`,
-                `-U ${dbCredentials.username}`,
-                `-d postgres`, // Connect to postgres admin database
-                `-c "DROP DATABASE IF EXISTS ${dbname};"`,
-            ].join(' ')
-
-            execSync(dropDbCmd, {
-                encoding: 'utf8',
-                env: process.env,
-            })
-
-            dbExists = false
-            console.info(`Database ${dbname} dropped successfully`)
-        }
-
-        // Create database if it doesn't exist
-        if (!dbExists) {
-            console.info(`Creating database ${dbname}...`)
-            const createDbCmd = [
-                'psql',
-                `-h ${dbCredentials.host}`,
-                `-p ${port}`,
-                `-U ${dbCredentials.username}`,
-                `-d postgres`, // Connect to postgres admin database
-                `-c "CREATE DATABASE ${dbname};"`,
-            ].join(' ')
-
-            execSync(createDbCmd, {
-                encoding: 'utf8',
-                env: process.env,
-            })
-            console.info(`Database ${dbname} created successfully`)
+                console.info(`Successfully created database ${dbname}`)
+            } catch (createError) {
+                // If we can't create the database either, log a warning but continue
+                // The import might still work if database exists but is empty
+                console.warn(
+                    `Could not create database ${dbname}. Continuing with import. Error: ${createError}`
+                )
+            }
         }
     } catch (error) {
         console.error('Error preparing database:', error)
@@ -544,6 +599,8 @@ function importDatabase(dumpFilePath: string, dbCredentials: SecretDict): void {
             `-U ${dbCredentials.username}`,
             `-d ${dbname}`,
             `-f ${dumpFilePath}`,
+            // Add the ON_ERROR_STOP flag to ensure psql stops on errors
+            `-v ON_ERROR_STOP=1`,
         ].join(' ')
 
         // Execute psql with specific options for import
