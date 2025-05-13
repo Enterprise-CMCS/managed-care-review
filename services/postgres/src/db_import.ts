@@ -12,7 +12,6 @@ import {
 import { SecretDict } from './types'
 import { createHash } from 'crypto'
 import { PrismaClient } from '@prisma/client'
-import axios from 'axios'
 
 // Environment variables
 const REGION = process.env.AWS_REGION || 'us-east-1'
@@ -29,318 +28,107 @@ const CONTENT_TYPES = {
 
 const s3Client = new S3Client({ region: REGION })
 
-// URLs to public domain PDFs
-const PUBLIC_DOMAIN_PDF_URLS = [
-    'https://www.postgresql.org/files/documentation/pdf/17/postgresql-17-A4.pdf',
-    'https://www.dhammatalks.org/Archive/Writings/Ebooks/Dhammapada200129.pdf',
-    'https://www.planetebook.com/free-ebooks/anna-karenina.pdf',
-    'https://www.planetebook.com/free-ebooks/the-iliad.pdf',
-    'https://www.planetebook.com/free-ebooks/dracula.pdf',
-]
-
-// Cache to track downloaded PDFs
-const pdfCache: Record<string, string> = {}
-
-/**
- * Download a file from a URL to a local path using Axios
- * @param url The URL to download
- * @param destPath The local path to save the file to
- * @returns Promise that resolves when download is complete
- */
-async function downloadFile(url: string, destPath: string): Promise<void> {
-    try {
-        console.info(`Downloading file from ${url}...`)
-
-        // Make a GET request with Axios, setting responseType to 'arraybuffer' for binary files
-        const response = await axios.get(url, {
-            responseType: 'arraybuffer',
-            timeout: 30000, // 30 second timeout
-            headers: {
-                'User-Agent': 'Mozilla/5.0 (Node.js Lambda Function)',
-            },
-        })
-
-        // Write the response data to the file
-        fs.writeFileSync(destPath, response.data)
-
-        console.info(`Successfully downloaded file to ${destPath}`)
-    } catch (error) {
-        // Clean up the partial file if it exists
-        if (fs.existsSync(destPath)) {
-            fs.unlinkSync(destPath)
-        }
-
-        // Re-throw the error with additional context
-        console.error(`Error downloading file from ${url}:`, error)
-        throw new Error(
-            `Failed to download file: ${error instanceof Error ? error.message : String(error)}`
-        )
-    }
+// Paths to local mock PDFs
+const MOCK_PDF_PATHS = {
+    small: path.join(__dirname, '../files/mock-s.pdf'),
+    medium: path.join(__dirname, '../files/mock-m.pdf'),
 }
 
-/**
- * Finds the most recent database dump file in the S3 bucket
- * @returns The S3 key of the latest dump file
- */
-async function findLatestDbDumpFile(): Promise<string> {
-    console.info(`Listing files in s3://${S3_BUCKET}/${S3_PREFIX}/...`)
-
-    const listResult = await s3Client.send(
-        new ListObjectsV2Command({
-            Bucket: S3_BUCKET,
-            Prefix: S3_PREFIX,
-        })
-    )
-
-    if (!listResult.Contents || listResult.Contents.length === 0) {
-        throw new Error(
-            `No dump files found in s3://${S3_BUCKET}/${S3_PREFIX}/`
-        )
-    }
-
-    // Sort by last modified date, newest first
-    const sortedFiles = listResult.Contents.sort((a: _Object, b: _Object) => {
-        return (
-            (b.LastModified?.getTime() || 0) - (a.LastModified?.getTime() || 0)
-        )
-    })
-
-    const latestDumpKey = sortedFiles[0].Key
-    if (!latestDumpKey) {
-        throw new Error('Failed to determine latest dump file key')
-    }
-
-    console.info(`Latest dump file: ${latestDumpKey}`)
-    return latestDumpKey
-}
-
-/**
- * Downloads a file from S3 to the local filesystem
- * @param s3Key The S3 key of the file to download
- * @param localPath The local path to save the file to
- */
-async function downloadS3File(
-    s3Key: string,
-    localPath: string,
-    bucket: string
-): Promise<void> {
-    console.info(`Downloading s3://${bucket}/${s3Key} to ${localPath}...`)
-
-    try {
-        const getObjectCommand = new GetObjectCommand({
-            Bucket: bucket,
-            Key: s3Key,
-        })
-
-        const response = await s3Client.send(getObjectCommand)
-
-        if (!response.Body) {
-            throw new Error(`Empty response body from S3 for key: ${s3Key}`)
-        }
-
-        // Create a write stream to the file
-        const fileStream = fs.createWriteStream(localPath)
-
-        // Pipe the response body to the file stream
-        // @ts-expect-error - AWS SDK types don't fully represent the pipe capability
-        response.Body.pipe(fileStream)
-
-        // Wait for the file to be fully written
-        await new Promise<void>((resolve, reject) => {
-            fileStream.on('finish', resolve)
-            fileStream.on('error', reject)
-        })
-
-        console.info(`File downloaded successfully to ${localPath}`)
-    } catch (error) {
-        console.error('Error downloading file from S3:', error)
-        throw new Error(
-            `Failed to download file: ${error instanceof Error ? error.message : String(error)}`
-        )
-    }
-}
-
-/**
- * Get database credentials from Secrets Manager
- */
-async function getDatabaseCredentials(): Promise<SecretDict> {
-    if (!DB_SECRET_ARN) {
-        throw new Error('DB_SECRET_ARN environment variable is not set')
-    }
-
-    console.info(`Getting secrets from ${DB_SECRET_ARN}...`)
-    const sm = new SecretsManager()
-    const dbCredentials: SecretDict = await sm.getSecretDict(
-        DB_SECRET_ARN,
-        'AWSCURRENT'
-    )
-
-    if (!dbCredentials || !dbCredentials.host) {
-        throw new Error(
-            `Invalid database credentials from secret ${DB_SECRET_ARN}`
-        )
-    }
-
-    return dbCredentials
-}
-
-/**
- * Execute a PostgreSQL command with proper error handling
- * @param command The command to execute
- * @param description Description of what the command does (for error messages)
- * @param dbCredentials Database credentials
- * @returns The output of the command
- */
-function executeDbCommand(
-    command: string,
-    description: string,
-    dbCredentials: SecretDict
-): string {
-    try {
-        // Set environment variables for psql
-        process.env.PGPASSWORD = dbCredentials.password
-
-        // Execute the command
-        const result = execSync(command, { encoding: 'utf8' })
-        return result
-    } catch (error) {
-        console.error(`Error ${description}:`, error)
-        throw new Error(
-            `Failed to ${description}: ${error instanceof Error ? error.message : String(error)}`
-        )
-    }
-}
-
-/**
- * Import the database dump file into PostgreSQL
- * @param dumpFilePath Path to the dump file
- * @param dbCredentials Database credentials
- */
-function importDatabase(dumpFilePath: string, dbCredentials: SecretDict): void {
-    const dbname = dbCredentials.dbname || 'postgres'
-    const port = dbCredentials.port || '5432'
-
-    console.info(`Importing database dump from ${dumpFilePath}...`)
-
-    try {
-        // Construct the psql command to import
-        const psqlCmd = [
-            'psql',
-            `-h ${dbCredentials.host}`,
-            `-p ${port}`,
-            `-U ${dbCredentials.username}`,
-            `-d ${dbname}`,
-            `-f ${dumpFilePath}`,
-        ].join(' ')
-
-        // Execute psql with specific options for import
-        process.env.PGPASSWORD = dbCredentials.password
-        execSync(psqlCmd, {
-            stdio: 'inherit',
-            env: {
-                ...process.env,
-                PGOPTIONS: '-c client_min_messages=warning', // Reduce verbose output
-            },
-        })
-
-        console.info('Database import completed successfully')
-    } catch (error) {
-        console.error('Error executing psql import:', error)
-        throw new Error(
-            `Database import failed: ${error instanceof Error ? error.message : String(error)}`
-        )
-    } finally {
-        // Clear password from environment
-        delete process.env.PGPASSWORD
-    }
-}
-
-/**
- * Initialize Prisma client with database credentials
- */
-async function initializePrisma(
-    dbCredentials: SecretDict
-): Promise<PrismaClient> {
-    // Set DATABASE_URL environment variable for Prisma
-    process.env.DATABASE_URL = `postgresql://${dbCredentials.username}:${encodeURIComponent(dbCredentials.password)}@${dbCredentials.host}:${dbCredentials.port}/${dbCredentials.dbname}`
-
-    // Initialize Prisma client
-    const prisma = new PrismaClient()
-
-    // Test connection
-    await prisma.$connect()
-    console.info('Prisma connected to database successfully')
-
-    return prisma
-}
+// Cache to keep track of SHA256 for our mock files (calculated once)
+const mockFileSha256Cache: Record<string, string> = {}
 
 /**
  * Calculate SHA-256 hash for a file
  */
 function calculateFileSha256(filePath: string): string {
+    // Check if we already calculated this file's hash
+    if (mockFileSha256Cache[filePath]) {
+        return mockFileSha256Cache[filePath]
+    }
+
     const fileBuffer = fs.readFileSync(filePath)
     const hashSum = createHash('sha256')
     hashSum.update(fileBuffer)
-    return hashSum.digest('hex')
+    const hash = hashSum.digest('hex')
+
+    // Cache the result
+    mockFileSha256Cache[filePath] = hash
+
+    return hash
 }
 
 /**
- * Get a replacement PDF URL based on document ID
+ * Get a mock PDF path based on document ID
+ * Uses deterministic selection to ensure consistent replacement
  */
-function getReplacementPDFUrl(documentId: string): string {
-    // Use the document ID to deterministically select a PDF URL
+function getMockPDFPath(documentId: string): string {
+    // Use the document ID to deterministically select a mock PDF
     const hash = createHash('md5').update(documentId).digest('hex')
     const hashNum = parseInt(hash.substring(0, 8), 16)
-    const selectedIndex = hashNum % PUBLIC_DOMAIN_PDF_URLS.length
 
-    return PUBLIC_DOMAIN_PDF_URLS[selectedIndex]
+    // 50% chance of small, 50% chance of medium
+    return hashNum % 2 === 0 ? MOCK_PDF_PATHS.small : MOCK_PDF_PATHS.medium
 }
 
 /**
- * Download a PDF from a URL to the Lambda's /tmp directory with caching
+ * Logs the S3 URL structure for debugging
  */
-async function downloadPDF(url: string): Promise<string> {
-    // Create a unique cache key for this PDF URL
-    const cacheKey = url
+function debugS3Url(s3Url: string): void {
+    console.info('Analyzing S3 URL structure:')
+    console.info(`Original URL: ${s3Url}`)
+    console.info(`URL length: ${s3Url.length}`)
+    console.info(`URL starts with s3://: ${s3Url.startsWith('s3://')}`)
+    console.info(`URL starts with https://: ${s3Url.startsWith('https://')}`)
+    console.info(
+        `URL includes s3.amazonaws.com: ${s3Url.includes('s3.amazonaws.com')}`
+    )
+    console.info(`URL contains slashes: ${s3Url.includes('/')}`)
+    console.info(`Number of slashes: ${(s3Url.match(/\//g) || []).length}`)
+    console.info(`URL ends with slash: ${s3Url.endsWith('/')}`)
 
-    // If we've already downloaded this PDF, return the cached path
-    if (pdfCache[cacheKey]) {
-        console.info(`Using cached PDF for ${url} at ${pdfCache[cacheKey]}`)
-        return pdfCache[cacheKey]
-    }
-
-    // Create a temporary filename for the PDF
-    const urlHash = createHash('md5').update(url).digest('hex').substring(0, 8)
-    const filename = `${urlHash}-${path.basename(url)}`
-    const filePath = path.join(TMP_DIR, filename)
-
-    // If the file already exists on disk (from a previous invocation that didn't set the cache)
-    if (fs.existsSync(filePath)) {
-        console.info(`PDF already exists at ${filePath}, using cached version`)
-        pdfCache[cacheKey] = filePath
-        return filePath
-    }
-
-    console.info(`Downloading PDF from ${url} to ${filePath}...`)
-
-    try {
-        await downloadFile(url, filePath)
-        console.info(`PDF downloaded successfully to ${filePath}`)
-
-        // Cache the file path
-        pdfCache[cacheKey] = filePath
-
-        return filePath
-    } catch (error) {
-        console.error(`Error downloading PDF from ${url}:`, error)
-        throw new Error(
-            `Failed to download PDF: ${error instanceof Error ? error.message : String(error)}`
-        )
-    }
+    // Split by slashes to see the components
+    const parts = s3Url.split('/')
+    console.info('URL parts:')
+    parts.forEach((part, i) => {
+        console.info(`  Part ${i}: "${part}"`)
+    })
 }
 
 /**
- * Replace a document in S3 with a public domain PDF
+ * Logs sample document URLs from the database for debugging
+ */
+async function logSampleDocumentURLs(prisma: PrismaClient): Promise<void> {
+    console.info('Logging sample document URLs from database...')
+
+    // Get one sample from each document type
+    const docs = await Promise.all([
+        prisma.contractDocument.findFirst(),
+        prisma.contractSupportingDocument.findFirst(),
+        prisma.rateDocument.findFirst(),
+        prisma.rateQuestionDocument.findFirst(),
+    ])
+
+    docs.forEach((doc, index) => {
+        if (doc) {
+            const types = [
+                'ContractDocument',
+                'ContractSupportingDocument',
+                'RateDocument',
+                'RateQuestionDocument',
+            ]
+            console.info(`${types[index]} sample:
+  id: ${doc.id}
+  name: ${doc.name}
+  s3URL: ${doc.s3URL}
+`)
+            // Debug the S3 URL structure
+            debugS3Url(doc.s3URL)
+        }
+    })
+}
+
+/**
+ * Replace a document in S3 with a mock PDF
  */
 async function replaceDocument(
     documentId: string,
@@ -357,8 +145,21 @@ async function replaceDocument(
 
         // Case 1: Full S3 URL - https://bucket-name.s3.amazonaws.com/path/to/file.pdf
         if (s3Url.includes('s3.amazonaws.com')) {
-            const url = new URL(s3Url)
-            s3Key = url.pathname.substring(1) // Remove leading slash
+            try {
+                const url = new URL(s3Url)
+                s3Key = url.pathname.substring(1) // Remove leading slash
+            } catch (e) {
+                console.error(`Failed to parse URL: ${s3Url}`, e)
+                // Fallback - take everything after the bucket name
+                const bucketPart = `${DOCS_S3_BUCKET}.s3.amazonaws.com/`
+                const keyStart = s3Url.indexOf(bucketPart)
+                if (keyStart >= 0) {
+                    s3Key = s3Url.substring(keyStart + bucketPart.length)
+                } else {
+                    // Last resort fallback
+                    s3Key = `replacement-documents/${documentId}/${originalFilename}`
+                }
+            }
         }
         // Case 2: S3 URI format - s3://bucket-name/path/to/file.pdf
         else if (s3Url.startsWith('s3://')) {
@@ -370,30 +171,30 @@ async function replaceDocument(
             s3Key = s3Url
         }
 
-        // If the key ends with a slash, it's being treated as a directory
-        // In this case, append the original filename
+        // Clean up the key - ensure no double slashes, no trailing slashes on file paths
+        s3Key = s3Key.replace(/\/+/g, '/') // Replace multiple slashes with single slash
+
+        // If the key doesn't end with the original filename, append it
+        // But only if it looks like a directory path (ends with /)
         if (s3Key.endsWith('/')) {
-            s3Key = s3Key + originalFilename
+            s3Key = `${s3Key}${originalFilename}`
+        } else if (!s3Key.includes('.')) {
+            // If no file extension is present in the key, assume it's a directory
+            // and append the original filename
+            s3Key = `${s3Key}/${originalFilename}`
         }
 
-        // If we have a path like file.pdf/ (with slash but no filename), remove trailing slash
-        if (s3Key.endsWith('/') && s3Key.includes('.')) {
-            s3Key = s3Key.replace(/\/$/, '')
-        }
+        console.info(`Final S3 Key: ${s3Key}`)
 
-        console.info(`Parsed S3 Key: ${s3Key}`)
+        // Get mock PDF path
+        const mockPdfPath = getMockPDFPath(documentId)
+        console.info(`Using mock PDF: ${mockPdfPath}`)
 
-        // Get replacement document URL
-        const replacementPDFUrl = getReplacementPDFUrl(documentId)
+        // Calculate SHA-256 of the mock file
+        const newSha256 = calculateFileSha256(mockPdfPath)
 
-        // Download the PDF (or get from cache)
-        const pdfPath = await downloadPDF(replacementPDFUrl)
-
-        // Calculate SHA-256 of the replacement file
-        const newSha256 = calculateFileSha256(pdfPath)
-
-        // Read the replacement file
-        const fileContent = fs.readFileSync(pdfPath)
+        // Read the mock file
+        const fileContent = fs.readFileSync(mockPdfPath)
 
         // Determine content type (always PDF for now)
         const contentType = CONTENT_TYPES.pdf
@@ -424,6 +225,22 @@ async function replaceDocument(
  * Process and replace all documents in the database using Prisma
  */
 async function processAllDocuments(prisma: PrismaClient): Promise<void> {
+    // Pre-check: Validate mock PDF files exist
+    Object.entries(MOCK_PDF_PATHS).forEach(([size, filePath]) => {
+        if (!fs.existsSync(filePath)) {
+            console.error(`ERROR: Mock PDF file not found at ${filePath}`)
+            throw new Error(`Mock PDF file missing: ${filePath}`)
+        } else {
+            console.info(`Verified mock ${size} PDF exists: ${filePath}`)
+            // Pre-calculate and cache SHA256
+            const sha256 = calculateFileSha256(filePath)
+            console.info(`${size} PDF SHA256: ${sha256}`)
+        }
+    })
+
+    // Log sample document URLs for debugging
+    await logSampleDocumentURLs(prisma)
+
     // Process ContractDocument
     console.info('Processing ContractDocument files...')
     const contractDocuments = await prisma.contractDocument.findMany()
@@ -620,6 +437,237 @@ async function processAllDocuments(prisma: PrismaClient): Promise<void> {
 }
 
 /**
+ * Finds the most recent database dump file in the S3 bucket
+ * @returns The S3 key of the latest dump file
+ */
+async function findLatestDbDumpFile(): Promise<string> {
+    console.info(`Listing files in s3://${S3_BUCKET}/${S3_PREFIX}/...`)
+
+    const listResult = await s3Client.send(
+        new ListObjectsV2Command({
+            Bucket: S3_BUCKET,
+            Prefix: S3_PREFIX,
+        })
+    )
+
+    if (!listResult.Contents || listResult.Contents.length === 0) {
+        throw new Error(
+            `No dump files found in s3://${S3_BUCKET}/${S3_PREFIX}/`
+        )
+    }
+
+    // Sort by last modified date, newest first
+    const sortedFiles = listResult.Contents.sort((a: _Object, b: _Object) => {
+        return (
+            (b.LastModified?.getTime() || 0) - (a.LastModified?.getTime() || 0)
+        )
+    })
+
+    const latestDumpKey = sortedFiles[0].Key
+    if (!latestDumpKey) {
+        throw new Error('Failed to determine latest dump file key')
+    }
+
+    console.info(`Latest dump file: ${latestDumpKey}`)
+    return latestDumpKey
+}
+
+/**
+ * Downloads a file from S3 to the local filesystem
+ * @param s3Key The S3 key of the file to download
+ * @param localPath The local path to save the file to
+ */
+async function downloadS3File(
+    s3Key: string,
+    localPath: string,
+    bucket: string
+): Promise<void> {
+    console.info(`Downloading s3://${bucket}/${s3Key} to ${localPath}...`)
+
+    try {
+        const getObjectCommand = new GetObjectCommand({
+            Bucket: bucket,
+            Key: s3Key,
+        })
+
+        const response = await s3Client.send(getObjectCommand)
+
+        if (!response.Body) {
+            throw new Error(`Empty response body from S3 for key: ${s3Key}`)
+        }
+
+        // Create a write stream to the file
+        const fileStream = fs.createWriteStream(localPath)
+
+        // Pipe the response body to the file stream
+        // @ts-expect-error - AWS SDK types don't fully represent the pipe capability
+        response.Body.pipe(fileStream)
+
+        // Wait for the file to be fully written
+        await new Promise<void>((resolve, reject) => {
+            fileStream.on('finish', resolve)
+            fileStream.on('error', reject)
+        })
+
+        console.info(`File downloaded successfully to ${localPath}`)
+    } catch (error) {
+        console.error('Error downloading file from S3:', error)
+        throw new Error(
+            `Failed to download file: ${error instanceof Error ? error.message : String(error)}`
+        )
+    }
+}
+
+/**
+ * Get database credentials from Secrets Manager
+ */
+async function getDatabaseCredentials(): Promise<SecretDict> {
+    if (!DB_SECRET_ARN) {
+        throw new Error('DB_SECRET_ARN environment variable is not set')
+    }
+
+    console.info(`Getting secrets from ${DB_SECRET_ARN}...`)
+    const sm = new SecretsManager()
+    const dbCredentials: SecretDict = await sm.getSecretDict(
+        DB_SECRET_ARN,
+        'AWSCURRENT'
+    )
+
+    if (!dbCredentials || !dbCredentials.host) {
+        throw new Error(
+            `Invalid database credentials from secret ${DB_SECRET_ARN}`
+        )
+    }
+
+    return dbCredentials
+}
+
+/**
+ * Ensure the database exists (create if needed)
+ */
+async function ensureDatabaseExists(dbCredentials: SecretDict): Promise<void> {
+    const dbname = dbCredentials.dbname || 'postgres'
+    const port = dbCredentials.port || '5432'
+
+    console.info('Checking if database exists...')
+
+    // Check if database exists
+    const checkDbCmd = [
+        'psql',
+        `-h ${dbCredentials.host}`,
+        `-p ${port}`,
+        `-U ${dbCredentials.username}`,
+        `-d postgres`,
+        `-c "SELECT 1 FROM pg_database WHERE datname = '${dbname}';"`,
+    ].join(' ')
+
+    try {
+        // Set environment variables for psql
+        process.env.PGPASSWORD = dbCredentials.password
+
+        // Execute the command
+        const result = execSync(checkDbCmd, {
+            encoding: 'utf8',
+            env: process.env,
+        })
+
+        // If database doesn't exist, create it
+        if (!result.includes('(1 row)')) {
+            console.info(`Database ${dbname} does not exist, creating it...`)
+            const createDbCmd = [
+                'psql',
+                `-h ${dbCredentials.host}`,
+                `-p ${port}`,
+                `-U ${dbCredentials.username}`,
+                `-d postgres`,
+                `-c "CREATE DATABASE ${dbname};"`,
+            ].join(' ')
+
+            execSync(createDbCmd, {
+                encoding: 'utf8',
+                env: process.env,
+            })
+            console.info(`Database ${dbname} created successfully`)
+        } else {
+            console.info(
+                `Database ${dbname} already exists and will be used for import`
+            )
+        }
+    } catch (error) {
+        console.error('Error checking/creating database:', error)
+        throw new Error(
+            `Failed to check/create database: ${error instanceof Error ? error.message : String(error)}`
+        )
+    } finally {
+        // Clear password from environment
+        delete process.env.PGPASSWORD
+    }
+}
+
+/**
+ * Import the database dump file into PostgreSQL
+ * @param dumpFilePath Path to the dump file
+ * @param dbCredentials Database credentials
+ */
+function importDatabase(dumpFilePath: string, dbCredentials: SecretDict): void {
+    const dbname = dbCredentials.dbname || 'postgres'
+    const port = dbCredentials.port || '5432'
+
+    console.info(`Importing database dump from ${dumpFilePath}...`)
+
+    try {
+        // Construct the psql command to import
+        const psqlCmd = [
+            'psql',
+            `-h ${dbCredentials.host}`,
+            `-p ${port}`,
+            `-U ${dbCredentials.username}`,
+            `-d ${dbname}`,
+            `-f ${dumpFilePath}`,
+        ].join(' ')
+
+        // Execute psql with specific options for import
+        process.env.PGPASSWORD = dbCredentials.password
+        execSync(psqlCmd, {
+            stdio: 'inherit',
+            env: {
+                ...process.env,
+                PGOPTIONS: '-c client_min_messages=warning', // Reduce verbose output
+            },
+        })
+
+        console.info('Database import completed successfully')
+    } catch (error) {
+        console.error('Error executing psql import:', error)
+        throw new Error(
+            `Database import failed: ${error instanceof Error ? error.message : String(error)}`
+        )
+    } finally {
+        // Clear password from environment
+        delete process.env.PGPASSWORD
+    }
+}
+
+/**
+ * Initialize Prisma client with database credentials
+ */
+async function initializePrisma(
+    dbCredentials: SecretDict
+): Promise<PrismaClient> {
+    // Set DATABASE_URL environment variable for Prisma
+    process.env.DATABASE_URL = `postgresql://${dbCredentials.username}:${encodeURIComponent(dbCredentials.password)}@${dbCredentials.host}:${dbCredentials.port}/${dbCredentials.dbname}`
+
+    // Initialize Prisma client
+    const prisma = new PrismaClient()
+
+    // Test connection
+    await prisma.$connect()
+    console.info('Prisma connected to database successfully')
+
+    return prisma
+}
+
+/**
  * Lambda handler function
  * Orchestrates the process of importing the database and replacing documents
  */
@@ -636,12 +684,15 @@ export const handler = async () => {
         throw new Error('DOCS_S3_BUCKET environment variable is not set')
     }
 
-    // Get the database credentials
-    const dbCredentials = await getDatabaseCredentials()
-    const prisma = await initializePrisma(dbCredentials)
+    let prisma: PrismaClient | null = null
 
     try {
+        // Get the database credentials
+        const dbCredentials = await getDatabaseCredentials()
+        prisma = await initializePrisma(dbCredentials)
+
         // --- PHASE 1: DATABASE IMPORT ---
+        console.info('Starting database import phase...')
 
         // Find the latest dump file in S3
         const latestDumpKey = await findLatestDbDumpFile()
@@ -650,16 +701,21 @@ export const handler = async () => {
 
         // Download the dump file to the Lambda's temp directory
         await downloadS3File(latestDumpKey, dumpFilePath, S3_BUCKET)
-        ensureDatabaseExists(dbCredentials)
 
-        // Import the database dump directly
+        // Ensure database exists but skip complex dropping operations
+        await ensureDatabaseExists(dbCredentials)
+
+        // Import the database dump
         importDatabase(dumpFilePath, dbCredentials)
 
         // Clean up temporary files
-        fs.unlinkSync(dumpFilePath)
+        if (fs.existsSync(dumpFilePath)) {
+            fs.unlinkSync(dumpFilePath)
+        }
         console.info('Database import phase completed successfully')
 
         // --- PHASE 2: DOCUMENT REPLACEMENT ---
+        console.info('Starting document replacement phase...')
 
         // Process and replace all documents
         await processAllDocuments(prisma)
@@ -694,46 +750,5 @@ export const handler = async () => {
         if (prisma) {
             await prisma.$disconnect()
         }
-    }
-}
-
-function ensureDatabaseExists(dbCredentials: SecretDict): void {
-    const dbname = dbCredentials.dbname || 'postgres'
-    const port = dbCredentials.port || '5432'
-
-    console.info('Checking if database exists...')
-
-    // Check if database exists
-    const checkDbCmd = [
-        'psql',
-        `-h ${dbCredentials.host}`,
-        `-p ${port}`,
-        `-U ${dbCredentials.username}`,
-        `-d postgres`,
-        `-c "SELECT 1 FROM pg_database WHERE datname = '${dbname}';"`,
-    ].join(' ')
-
-    const dbCheckResult = executeDbCommand(
-        checkDbCmd,
-        'check if database exists',
-        dbCredentials
-    )
-
-    // If database doesn't exist, create it
-    if (!dbCheckResult.includes('(1 row)')) {
-        console.info(`Database ${dbname} does not exist, creating it...`)
-        const createDbCmd = [
-            'psql',
-            `-h ${dbCredentials.host}`,
-            `-p ${port}`,
-            `-U ${dbCredentials.username}`,
-            `-d postgres`,
-            `-c "CREATE DATABASE ${dbname};"`,
-        ].join(' ')
-
-        executeDbCommand(createDbCmd, 'create database', dbCredentials)
-        console.info(`Database ${dbname} created successfully`)
-    } else {
-        console.info(`Database ${dbname} already exists`)
     }
 }
