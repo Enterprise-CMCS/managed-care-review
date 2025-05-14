@@ -584,7 +584,14 @@ type Mutation {
     """
     withdrawContract(
         input: WithdrawContractInput!
-    ): WithdrawContractPayload
+    ): WithdrawContractPayload!
+
+    """
+    unoWithdrawSubmission is a CMS user only action to undo a submission widthdrawal, which includes contract and and child rates withdrawn together.
+    """
+    undoWithdrawContract(
+        input: UndoWithdrawContractInput!
+    ): UndoWithdrawContractPayload!
 }
 
 input CreateHealthPlanPackageInput {
@@ -667,6 +674,10 @@ type WithdrawContractPayload {
     contract: Contract!
 }
 
+type UndoWithdrawContractPayload {
+    contract: Contract!
+}
+
 input WithdrawRateInput {
     rateID: ID!
     updatedReason: String!
@@ -678,6 +689,11 @@ input UndoWithdrawRateInput {
 }
 
 input WithdrawContractInput {
+    contractID: ID!
+    updatedReason: String!
+}
+
+input UndoWithdrawContractInput {
     contractID: ID!
     updatedReason: String!
 }
@@ -1370,6 +1386,31 @@ type GenericDocument {
     "The first date this document was added to submitted package - if still an initial draft, this date is last updated, otherwise it is the submitInfo lastUpdated"
     dateAdded: DateTime
 }
+
+input GenericDocumentInput {
+    "The user created name of the document"
+    name: String!
+    "The S3 URL of the document, generated on the FE currently in the FileUpload component"
+    s3URL: String!
+    "The sha256 is a unique string representing the file, generated on the FE currently in the FileUpload component"
+    sha256: String!
+    "The first date this document was added to submitted package - if still an initial draft, this date is last updated, otherwise it is the submitInfo lastUpdated"
+    dateAdded: DateTime
+}
+
+type GenericDocumentReturnData {
+    "The user created name of the document"
+    name: String!
+    "The S3 URL of the document, generated on the FE currently in the FileUpload component"
+    s3URL: String!
+    "The sha256 is a unique string representing the file, generated on the FE currently in the FileUpload component"
+    sha256: String!
+    "URL received from S3 for downloading the document"
+    downloadURL: String
+    "The first date this document was added to submitted package - if still an initial draft, this date is last updated, otherwise it is the submitInfo lastUpdated"
+    dateAdded: DateTime
+}
+
 
 """
 GenericDocument
@@ -2272,7 +2313,7 @@ input FetchRateInput {
 
 type FetchContractPayload {
     """
-    A rate that include contract and rate revisions
+    A contract that include contract and rate revisions
     """
     contract: Contract!
 }
