@@ -2,6 +2,55 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { CustomOAuth2Server } from '../oauth2Server'
 import type { ExtendedPrismaClient } from '../../postgres/prismaClient'
 import type { APIGatewayProxyEvent } from 'aws-lambda'
+import { InvalidClientError } from '@node-oauth/oauth2-server'
+import type { Client, Token, User } from '@node-oauth/oauth2-server'
+
+// Mock OAuth2Server
+vi.mock('@node-oauth/oauth2-server', () => {
+    const mockToken = vi.fn()
+    return {
+        OAuth2Server: vi.fn().mockImplementation(() => ({
+            token: mockToken,
+        })),
+        InvalidRequestError: class extends Error {
+            constructor(message: string) {
+                super(message)
+                this.name = 'InvalidRequestError'
+            }
+        },
+        InvalidClientError: class extends Error {
+            constructor(message: string) {
+                super(message)
+                this.name = 'InvalidClientError'
+            }
+        },
+        Request: class {
+            body: Record<string, unknown>
+            headers: Record<string, string>
+            method: string
+            query: Record<string, string>
+            constructor(options: {
+                body: Record<string, unknown>
+                headers: Record<string, string>
+                method: string
+                query: Record<string, string>
+            }) {
+                this.body = options.body
+                this.headers = options.headers
+                this.method = options.method
+                this.query = options.query
+            }
+        },
+        Response: class {
+            body: Record<string, unknown>
+            headers: Record<string, string>
+            constructor() {
+                this.body = {}
+                this.headers = {}
+            }
+        },
+    }
+})
 
 describe('CustomOAuth2Server', () => {
     let oauth2Server: CustomOAuth2Server
@@ -48,6 +97,20 @@ describe('CustomOAuth2Server', () => {
                 queryStringParameters: null,
             } as APIGatewayProxyEvent
 
+            // Mock OAuth2Server to throw InvalidClientError
+            const { OAuth2Server } = await import('@node-oauth/oauth2-server')
+            const mockInstance = new OAuth2Server({
+                model: {
+                    getClient: vi.fn(),
+                    validateScope: vi.fn(),
+                    saveToken: vi.fn(),
+                    getAccessToken: vi.fn(),
+                },
+            })
+            vi.spyOn(mockInstance, 'token').mockRejectedValueOnce(
+                new InvalidClientError('Invalid client credentials')
+            )
+
             const result = await oauth2Server.token(event)
 
             expect(result.statusCode).toBe(401)
@@ -69,20 +132,25 @@ describe('CustomOAuth2Server', () => {
                 queryStringParameters: null,
             } as APIGatewayProxyEvent
 
-            // Mock successful client validation
-            vi.spyOn(
-                mockPrisma.oAuthClient,
-                'findUnique'
-            ).mockResolvedValueOnce({
-                id: 'valid',
-                clientId: 'valid',
-                clientSecret: 'valid', // pragma: allowlist secret
-                grants: ['client_credentials'],
-                createdAt: new Date(),
-                lastUsedAt: null,
-                description: null,
-                contactEmail: null,
+            // Mock OAuth2Server to return valid token
+            const { OAuth2Server } = await import('@node-oauth/oauth2-server')
+            const mockInstance = new OAuth2Server({
+                model: {
+                    getClient: vi.fn(),
+                    validateScope: vi.fn(),
+                    saveToken: vi.fn(),
+                    getAccessToken: vi.fn(),
+                },
             })
+            vi.spyOn(mockInstance, 'token').mockResolvedValueOnce({
+                grantType: 'client_credentials',
+                client: {
+                    id: 'valid',
+                    grants: ['client_credentials'],
+                } as Client,
+                accessToken: 'mock.access.token',
+                user: { id: 'system' } as User,
+            } as Token)
 
             const result = await oauth2Server.token(event)
 
