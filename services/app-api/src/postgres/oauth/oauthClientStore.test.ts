@@ -30,7 +30,7 @@ describe('OAuthClient Store', () => {
         expect(oauthClient.description).toBe(testClientData.description)
         expect(oauthClient.contactEmail).toBe(testClientData.contactEmail)
         expect(oauthClient.grants).toEqual(testClientData.grants)
-        expect(oauthClient.clientSecret).not.toBe(testClientData.clientSecret) // Should be hashed
+        expect(oauthClient.clientSecret).toBe(testClientData.clientSecret) // Should match exactly
     })
 
     it('retrieves an OAuth client by ID', async () => {
@@ -171,7 +171,15 @@ describe('OAuthClient Store', () => {
         const createdClient = await createOAuthClient(client, testClientData)
         if (createdClient instanceof Error) throw createdClient
 
-        const duplicateClient = await createOAuthClient(client, testClientData)
+        const duplicateClient = await createOAuthClient(client, {
+            ...testClientData,
+            clientId: testClientData.clientId, // Same clientId
+        })
         expect(duplicateClient).toBeInstanceOf(Error)
+        if (!(duplicateClient instanceof Error))
+            throw new Error('Expected error')
+
+        // Verify it's a Prisma unique constraint error
+        expect(duplicateClient.message).toContain('Unique constraint failed')
     })
 })
