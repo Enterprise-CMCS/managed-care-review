@@ -388,10 +388,11 @@ const RateDetails = ({
 
     const displayRemoveRateBtn = (index: number, rateForm: FormikRateForm) => {
         if (index >= 1 && !displayAsStandaloneRate) {
-            //We expect to display the button regardless of status if the rate is a linked rate
+            //We expect to display the button regardless of status if the rate is a linked rate otherwise only display the button if it is a draft rate
             if (
                 rateForm.ratePreviouslySubmitted === 'YES' ||
-                rateForm.status !== 'UNLOCKED'
+                rateForm.status === 'DRAFT' ||
+                rateForm.status === undefined
             ) {
                 return true
             }
