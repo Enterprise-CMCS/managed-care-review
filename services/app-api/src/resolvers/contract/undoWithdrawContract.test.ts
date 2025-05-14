@@ -12,6 +12,8 @@ import {
     createAndSubmitTestContract,
     approveTestContract,
     contractHistoryToDescriptions,
+    unlockTestContract,
+    errorUndoWithdrawTestContract,
 } from '../../testHelpers/gqlContractHelpers'
 import { fetchTestRateById, must } from '../../testHelpers'
 import {
@@ -22,7 +24,7 @@ import {
     type RateFormDataInput,
     UpdateDraftContractRatesDocument,
 } from '../../gen/gqlClient'
-import { expect } from 'vitest'
+import { describe, expect } from 'vitest'
 
 const testRateFormInputData = (): RateFormDataInput => ({
     rateType: 'AMENDMENT',
@@ -103,8 +105,46 @@ describe('undoWithdrawContract', () => {
                 'CMS undid submission withdrawal. Undo submission withdraw done in error.',
             ])
         )
-    })
 
+        // expect withdraw again without errors
+        must(
+            await withdrawTestContract(
+                cmsServer,
+                undoWithdrawnContract.id,
+                'withdraw again'
+            )
+        )
+
+        // expect undo withdraw again without errors
+        must(
+            await undoWithdrawTestContract(
+                cmsServer,
+                undoWithdrawnContract.id,
+                'undo withdraw again'
+            )
+        )
+
+        // expect unlock without errors
+        must(
+            await unlockTestContract(
+                cmsServer,
+                undoWithdrawnContract.id,
+                'unlock after undo withdraw'
+            )
+        )
+
+        // expect resubmit without errors
+        must(
+            await submitTestContract(
+                stateServer,
+                undoWithdrawnContract.id,
+                'resubmit'
+            )
+        )
+
+        // expect approval without errors
+        must(await approveTestContract(cmsServer, undoWithdrawnContract.id))
+    })
     it('can undo a contract and rate submission withdrawal', async () => {
         const stateServer = await constructTestPostgresServer({
             context: {
@@ -160,8 +200,46 @@ describe('undoWithdrawContract', () => {
         expect(undoWithdrawnContract.consolidatedStatus).toBe('RESUBMITTED')
         expect(undoWithdrawnARate.consolidatedStatus).toBe('RESUBMITTED')
         expect(undoWithdrawnBRate.consolidatedStatus).toBe('RESUBMITTED')
-    })
 
+        // expect withdraw again without errors
+        must(
+            await withdrawTestContract(
+                cmsServer,
+                undoWithdrawnContract.id,
+                'withdraw again'
+            )
+        )
+
+        // expect undo withdraw again without errors
+        must(
+            await undoWithdrawTestContract(
+                cmsServer,
+                undoWithdrawnContract.id,
+                'undo withdraw again'
+            )
+        )
+
+        // expect unlock without errors
+        must(
+            await unlockTestContract(
+                cmsServer,
+                undoWithdrawnContract.id,
+                'unlock after undo withdraw'
+            )
+        )
+
+        // expect resubmit without errors
+        must(
+            await submitTestContract(
+                stateServer,
+                undoWithdrawnContract.id,
+                'resubmit'
+            )
+        )
+
+        // expect approval without errors
+        must(await approveTestContract(cmsServer, undoWithdrawnContract.id))
+    })
     it('can undo a submission withdrawal that had linked child rates', async () => {
         const stateServer = await constructTestPostgresServer({
             context: {
@@ -515,3 +593,85 @@ describe('undoWithdrawContract', () => {
         expect(rateB.parentContractID).toBe(draftContractB.id)
     })
 })
+
+describe('undoWithdrawContract error handling', () =>
+    it('returns an error if contract is in incorrect status', async () => {
+        const stateUser = testStateUser()
+        const cmsUser = testCMSUser()
+        const stateServer = await constructTestPostgresServer({
+            context: {
+                user: stateUser,
+            },
+        })
+
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: cmsUser,
+            },
+        })
+
+        const submittedContract = await createAndSubmitTestContract(
+            stateServer,
+            undefined,
+            {
+                submissionType: 'CONTRACT_ONLY',
+            }
+        )
+
+        const approvedContract = await createAndSubmitTestContract(
+            stateServer,
+            undefined,
+            {
+                submissionType: 'CONTRACT_ONLY',
+            }
+        )
+
+        await approveTestContract(cmsServer, approvedContract.id)
+
+        const unlockedContract = await createAndSubmitTestContract(
+            stateServer,
+            undefined,
+            {
+                submissionType: 'CONTRACT_ONLY',
+            }
+        )
+
+        await unlockTestContract(
+            cmsServer,
+            unlockedContract.id,
+            'unlock contract'
+        )
+
+        const submittedContractWithdrawErrors =
+            await errorUndoWithdrawTestContract(
+                cmsServer,
+                submittedContract.id,
+                'withdraw submission'
+            )
+
+        expect(submittedContractWithdrawErrors[0].message).toBe(
+            'Attempted to undo a submission withdrawal with invalid contract status of SUBMITTED'
+        )
+
+        const approvedContractWithdrawErrors =
+            await errorUndoWithdrawTestContract(
+                cmsServer,
+                approvedContract.id,
+                'withdraw submission'
+            )
+
+        expect(approvedContractWithdrawErrors[0].message).toBe(
+            'Attempted to undo a submission withdrawal with invalid contract status of APPROVED'
+        )
+
+        const unlockedContractWithdrawErrors =
+            await errorUndoWithdrawTestContract(
+                cmsServer,
+                unlockedContract.id,
+                'withdraw submission'
+            )
+
+        expect(unlockedContractWithdrawErrors[0].message).toBe(
+            'Attempted to undo a submission withdrawal with invalid contract status of UNLOCKED'
+        )
+    }))
