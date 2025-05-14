@@ -1,6 +1,13 @@
-import type { APIGatewayProxyHandler } from 'aws-lambda'
+import type {
+    APIGatewayProxyHandler,
+    APIGatewayProxyEvent,
+    APIGatewayProxyResult,
+} from 'aws-lambda'
 import { configurePostgres } from './configuration'
 import { CustomOAuth2Server } from '../oauth/oauth2Server'
+
+// Export types for use in tests and other modules
+export type { APIGatewayProxyEvent, APIGatewayProxyResult }
 
 const main: APIGatewayProxyHandler = async (event) => {
     // Get required environment variables

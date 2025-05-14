@@ -1,5 +1,4 @@
-import {
-    OAuth2Server,
+import OAuth2Server, {
     Request as OAuthRequest,
     Response as OAuthResponse,
     InvalidRequestError,

@@ -19,6 +19,55 @@ vi.mock('jsonwebtoken', () => ({
     sign: vi.fn().mockReturnValue('mock.jwt.token'),
 }))
 
+vi.mock('../../oauth/oauth2Server', () => ({
+    CustomOAuth2Server: vi.fn().mockImplementation(() => ({
+        token: vi
+            .fn()
+            .mockImplementation(async (event: APIGatewayProxyEvent) => {
+                if (!event.body) {
+                    return {
+                        statusCode: 400,
+                        body: JSON.stringify({
+                            error: 'invalid_request',
+                            error_description: 'Missing request body',
+                        }),
+                    }
+                }
+
+                const body = JSON.parse(event.body)
+                if (!body.client_id || !body.client_secret) {
+                    return {
+                        statusCode: 400,
+                        body: JSON.stringify({
+                            error: 'invalid_request',
+                            error_description: 'Missing client credentials',
+                        }),
+                    }
+                }
+
+                if (body.client_secret === 'wrong-secret') {
+                    // pragma: allowlist secret
+                    return {
+                        statusCode: 401,
+                        body: JSON.stringify({
+                            error: 'invalid_client',
+                            error_description: 'Invalid client credentials',
+                        }),
+                    }
+                }
+
+                return {
+                    statusCode: 200,
+                    body: JSON.stringify({
+                        access_token: 'mock.jwt.token',
+                        token_type: 'Bearer',
+                        expires_in: 3600,
+                    }),
+                }
+            }),
+    })),
+}))
+
 const noop: Callback<APIGatewayProxyResult> = () => {}
 
 describe('OAuth Token Handler', () => {
