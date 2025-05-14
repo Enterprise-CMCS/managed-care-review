@@ -19,8 +19,15 @@ describe('OAuthClient Store', () => {
         contactEmail: 'test@example.com',
     }
 
+    let client: Awaited<ReturnType<typeof sharedTestPrismaClient>>
+
+    beforeEach(async () => {
+        client = await sharedTestPrismaClient()
+        // Clean up any existing OAuth clients before each test
+        await client.oAuthClient.deleteMany()
+    })
+
     it('creates and retrieves an OAuth client', async () => {
-        const client = await sharedTestPrismaClient()
         const oauthClient = await createOAuthClient(client, testClientData)
 
         expect(oauthClient).not.toBeInstanceOf(Error)
@@ -34,7 +41,6 @@ describe('OAuthClient Store', () => {
     })
 
     it('retrieves an OAuth client by ID', async () => {
-        const client = await sharedTestPrismaClient()
         const createdClient = await createOAuthClient(client, testClientData)
         if (createdClient instanceof Error) throw createdClient
 
@@ -50,7 +56,6 @@ describe('OAuthClient Store', () => {
     })
 
     it('retrieves an OAuth client by client ID', async () => {
-        const client = await sharedTestPrismaClient()
         const createdClient = await createOAuthClient(client, testClientData)
         if (createdClient instanceof Error) throw createdClient
 
@@ -66,7 +71,6 @@ describe('OAuthClient Store', () => {
     })
 
     it('verifies client credentials', async () => {
-        const client = await sharedTestPrismaClient()
         const createdClient = await createOAuthClient(client, testClientData)
         if (createdClient instanceof Error) throw createdClient
 
@@ -92,7 +96,6 @@ describe('OAuthClient Store', () => {
     })
 
     it('updates an OAuth client', async () => {
-        const client = await sharedTestPrismaClient()
         const createdClient = await createOAuthClient(client, testClientData)
         if (createdClient instanceof Error) throw createdClient
 
@@ -114,7 +117,6 @@ describe('OAuthClient Store', () => {
     })
 
     it('deletes an OAuth client', async () => {
-        const client = await sharedTestPrismaClient()
         const createdClient = await createOAuthClient(client, testClientData)
         if (createdClient instanceof Error) throw createdClient
 
@@ -133,8 +135,6 @@ describe('OAuthClient Store', () => {
     })
 
     it('lists all OAuth clients', async () => {
-        const client = await sharedTestPrismaClient()
-
         // Create multiple clients
         const client1 = await createOAuthClient(client, {
             ...testClientData,
@@ -158,7 +158,6 @@ describe('OAuthClient Store', () => {
     })
 
     it('handles non-existent client ID', async () => {
-        const client = await sharedTestPrismaClient()
         const retrievedClient = await getOAuthClientById(client, uuidv4())
         expect(retrievedClient).not.toBeInstanceOf(Error)
         if (retrievedClient instanceof Error) throw retrievedClient
@@ -167,7 +166,6 @@ describe('OAuthClient Store', () => {
     })
 
     it('handles duplicate client ID', async () => {
-        const client = await sharedTestPrismaClient()
         const createdClient = await createOAuthClient(client, testClientData)
         if (createdClient instanceof Error) throw createdClient
 
