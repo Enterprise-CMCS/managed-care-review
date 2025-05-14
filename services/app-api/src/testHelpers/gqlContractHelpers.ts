@@ -3,12 +3,12 @@ import {
     SubmitContractDocument,
     UnlockContractDocument,
     UpdateDraftContractRatesDocument,
-    WithdrawAndReplaceRedundantRateDocument,
     UpdateContractDraftRevisionDocument,
     CreateContractDocument,
     FetchContractWithQuestionsDocument,
     ApproveContractDocument,
     WithdrawContractDocument,
+    UndoWithdrawContractDocument,
 } from '../gen/gqlClient'
 
 import { findStatePrograms } from '../postgres'
@@ -238,41 +238,6 @@ const fetchTestContractWithQuestions = async (
     return result.data.fetchContract.contract
 }
 
-async function updateTestContractToReplaceRate(
-    server: ApolloServer,
-    args: {
-        contractID: string
-        withdrawnRateID: string
-        replacementRateID: string
-        replaceReason: string
-    }
-): Promise<Contract> {
-    const { contractID, withdrawnRateID, replacementRateID, replaceReason } =
-        args
-    const result = await server.executeOperation({
-        query: WithdrawAndReplaceRedundantRateDocument,
-        variables: {
-            input: {
-                contractID,
-                withdrawnRateID,
-                replacementRateID,
-                replaceReason,
-            },
-        },
-    })
-
-    if (result.errors) {
-        throw new Error(
-            `updateContractToReplaceRate mutation failed with errors ${result.errors}`
-        )
-    }
-
-    if (!result.data) {
-        throw new Error('updateContractToReplaceRate returned nothing')
-    }
-
-    return result.data.withdrawAndReplaceRedundantRate.contract
-}
 const createTestContract = async (
     server: ApolloServer,
     stateCode?: StateCodeType,
@@ -524,6 +489,35 @@ const withdrawTestContract = async (
     return withdrawResult.data.withdrawContract.contract
 }
 
+const undoWithdrawTestContract = async (
+    server: ApolloServer,
+    contractID: string,
+    updatedReason: string
+): Promise<Contract> => {
+    const undoWithdrawResult = await server.executeOperation({
+        query: UndoWithdrawContractDocument,
+        variables: {
+            input: {
+                contractID,
+                updatedReason,
+            },
+        },
+    })
+
+    if (undoWithdrawResult.errors) {
+        console.info('errors', undoWithdrawResult.errors)
+    }
+
+    if (
+        undoWithdrawResult.data === undefined ||
+        undoWithdrawResult.data === null
+    ) {
+        throw new Error('undo withdraw contract returned nothing')
+    }
+
+    return undoWithdrawResult.data.undoWithdrawContract.contract
+}
+
 const contractHistoryToDescriptions = (contract: Contract): string[] => {
     return contract.packageSubmissions.reduce((history: string[], pkgSub) => {
         const updatedHistory = history
@@ -563,7 +557,7 @@ export {
     resubmitTestContract,
     updateTestContractDraftRevision,
     createTestContract,
-    updateTestContractToReplaceRate,
     withdrawTestContract,
+    undoWithdrawTestContract,
     contractHistoryToDescriptions,
 }
