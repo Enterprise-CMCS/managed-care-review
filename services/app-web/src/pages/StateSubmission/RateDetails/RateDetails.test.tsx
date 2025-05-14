@@ -19,6 +19,7 @@ import {
     fetchDraftRateMockSuccess,
     indexRatesMockSuccess,
     mockWithdrawnRates,
+    mockContractPackageUnlockedWithUnlockedType,
 } from '@mc-review/mocks'
 import { Route, Routes, Location } from 'react-router-dom'
 import { RoutesRecord } from '@mc-review/constants'
@@ -213,7 +214,7 @@ describe('RateDetails', () => {
                     expect(submitButton).not.toHaveAttribute('aria-disabled')
                 })
             })
-            // eslint-disable-next-line
+
             it('disabled with alert if previously submitted with more than one rate cert file', async () => {
                 const rateID = 'abc-123'
                 renderWithProviders(
@@ -560,6 +561,128 @@ describe('RateDetails', () => {
                 expect(rateCertsAfterAddAnother).toHaveLength(1)
             })
         }, 15000)
+
+        it('does not render remove certification button for non-draft rates', async () => {
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_RATE_DETAILS}
+                        element={<RateDetails type="MULTI" />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    ...mockContractPackageDraft({
+                                        draftRates: [
+                                            draftRateDataMock({
+                                                parentContractID:
+                                                    'test-abc-123',
+                                                status: 'SUBMITTED',
+                                                consolidatedStatus: 'SUBMITTED',
+                                            }),
+                                            draftRateDataMock({
+                                                parentContractID:
+                                                    'test-abc-123',
+                                                status: 'SUBMITTED',
+                                                consolidatedStatus: 'SUBMITTED',
+                                            }),
+                                        ],
+                                    }),
+                                    id: 'test-abc-123',
+                                },
+                            }),
+                            updateDraftContractRatesMockSuccess({
+                                contract: {
+                                    id: 'test-abc-123',
+                                },
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: `/submissions/test-abc-123/edit/rate-details`,
+                    },
+                    featureFlags: {
+                        'rate-edit-unlock': false,
+                    },
+                }
+            )
+            await screen.findByText('Rate Details')
+            const rateCertsOnLoad = rateCertifications(screen)
+            expect(rateCertsOnLoad).toHaveLength(2)
+            expect(
+                screen.queryByRole('button', {
+                    name: /Remove rate certification/,
+                })
+            ).not.toBeInTheDocument()
+        })
+
+        it('does render the remove certification button for a linked rate regardless of status', async () => {
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_RATE_DETAILS}
+                        element={<RateDetails type="MULTI" />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    ...mockContractPackageUnlockedWithUnlockedType(
+                                        {
+                                            draftRates: [
+                                                draftRateDataMock({
+                                                    parentContractID:
+                                                        'test-abc-123',
+                                                    status: 'SUBMITTED',
+                                                    consolidatedStatus:
+                                                        'SUBMITTED',
+                                                }),
+                                                //This will be considered a linked rate due to the mismatching parentContractID
+                                                //Expect the remove button to render eventhough this rate is a non-draft state
+                                                draftRateDataMock({
+                                                    parentContractID:
+                                                        'mismatched-id',
+                                                    status: 'SUBMITTED',
+                                                    consolidatedStatus:
+                                                        'SUBMITTED',
+                                                }),
+                                            ],
+                                        }
+                                    ),
+                                    id: 'test-abc-123',
+                                },
+                            }),
+                            updateDraftContractRatesMockSuccess({
+                                contract: {
+                                    id: 'test-abc-123',
+                                },
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: `/submissions/test-abc-123/edit/rate-details`,
+                    },
+                    featureFlags: {
+                        'rate-edit-unlock': false,
+                    },
+                }
+            )
+            await screen.findByText('Rate Details')
+            const rateCertsOnLoad = rateCertifications(screen)
+            expect(rateCertsOnLoad).toHaveLength(2)
+            expect(
+                screen.queryByRole('button', {
+                    name: /Remove rate certification/,
+                })
+            ).toBeInTheDocument()
+        })
 
         it('accepts documents on second rate', async () => {
             renderWithProviders(
