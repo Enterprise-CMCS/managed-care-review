@@ -62,6 +62,7 @@ import { undoWithdrawRate } from './rate/undoWithdrawRate'
 import { rateStrippedResolver } from './rate/rateResolver'
 import { indexRatesStripped } from './rate/indexRatesStripped'
 import { withdrawContract } from './contract/withdrawContract'
+import { undoWithdrawContract } from './contract/undoWithdrawContract'
 
 export function configureResolvers(
     store: Store,
@@ -112,6 +113,7 @@ export function configureResolvers(
             updateDraftContractRates: updateDraftContractRates(store),
             approveContract: approveContract(store),
             withdrawContract: withdrawContract(store, emailer),
+            undoWithdrawContract: undoWithdrawContract(store),
             withdrawRate: withdrawRate(store, emailer),
             undoWithdrawRate: undoWithdrawRate(store, emailer),
             updateDivisionAssignment: updateDivisionAssignment(store),
