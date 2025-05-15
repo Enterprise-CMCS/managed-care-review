@@ -432,6 +432,13 @@ function importDatabase(dumpFilePath: string, dbCredentials: SecretDict): void {
     const port = dbCredentials.port || '5432'
 
     console.info(`Importing database dump from ${dumpFilePath}...`)
+    // Check if pg_restore exists
+    try {
+        execSync('which pg_restore', { stdio: 'ignore' })
+        console.info('pg_restore command is available')
+    } catch (e) {
+        console.info(`pg_restore command is not available ${e}`)
+    }
 
     try {
         const importCmd = [
