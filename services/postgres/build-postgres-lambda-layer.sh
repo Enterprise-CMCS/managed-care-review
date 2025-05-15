@@ -49,6 +49,7 @@ docker run --rm \
     echo "Copied binaries:"
     ls -l /output/bin
     /output/bin/pg_dump --version
+    /output/bin/pg_restore --version
   '
 
 # Create the final layer archive
