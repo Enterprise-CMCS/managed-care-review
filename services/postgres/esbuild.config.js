@@ -33,31 +33,6 @@ module.exports = () => {
                     });
                 },
             },
-            {
-                name: 'copy-prisma-schema',
-                setup(build) {
-                    build.onStart(async () => {
-                        try {
-                            await fse.ensureDir('.esbuild/.build/prisma/');
-                        } catch (err) {
-                            console.error('Error making directory: ', err);
-                        }
-                    });
-
-                    build.onEnd(async () => {
-                        try {
-                            await fse.copy(
-                                '../app-api/prisma/schema.prisma',
-                                '.esbuild/.build/prisma/',
-                                { overwrite: true }
-                            );
-                            console.log('Copied prisma schema to build');
-                        } catch (err) {
-                            console.error('Error copying prisma schema:', err);
-                        }
-                    });
-                },
-            },
         ],
     };
 };
