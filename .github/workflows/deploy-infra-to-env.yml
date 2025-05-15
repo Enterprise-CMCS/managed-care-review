@@ -145,13 +145,13 @@ jobs:
 
       - uses: actions/download-artifact@v4
         with:
-          name: lambda-layers-prisma-migration-engine
-          path: ./services/postgres/lambda-layers-prisma-migration-engine
+          name: lambda-layers-prisma-client-migration
+          path: ./services/postgres/lambda-layers-prisma-client-migration
 
       - name: Unzip prisma migration engine layer
         run: |
-          tar -C ./services/postgres/lambda-layers-prisma-migration-engine -xf ./services/postgres/lambda-layers-prisma-migration-engine/nodejs.tar.gz
-          rm -rf ./services/postgres/lambda-layers-prisma-migration-engine/nodejs.tar.gz
+          tar -C ./services/postgres/lambda-layers-prisma-client-migration  -xf ./services/postgres/lambda-layers-prisma-client-migration/nodejs.tar.gz
+          rm -rf ./services/postgres/lambda-layers-prisma-client-migration/nodejs.tar.gz
 
       - name: deploy postgres
         id: deploy-postgres
