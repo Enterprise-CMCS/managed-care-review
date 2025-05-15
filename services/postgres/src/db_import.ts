@@ -432,31 +432,72 @@ function importDatabase(dumpFilePath: string, dbCredentials: SecretDict): void {
     const port = dbCredentials.port || '5432'
 
     console.info(`Importing database dump from ${dumpFilePath}...`)
-    // Check if pg_restore exists
-    try {
-        execSync('which pg_restore', { stdio: 'ignore' })
-        console.info('pg_restore command is available')
-    } catch (e) {
-        console.info(`pg_restore command is not available ${e}`)
-    }
 
     try {
+        // First, let's create a wrapper SQL script that drops everything and then imports the dump
+        const wrapperScriptPath = path.join(TMP_DIR, 'import_wrapper.sql')
+
+        // This wrapper script ensures we start with a clean database
+        const wrapperContent = `
+-- Disable triggers temporarily to avoid foreign key constraint issues during drop/import
+SET session_replication_role = 'replica';
+
+-- Drop all tables, views, functions, etc. in the public schema
+DO $$ DECLARE
+    r RECORD;
+BEGIN
+    -- Drop all tables (with cascade to handle dependencies)
+    FOR r IN (SELECT tablename FROM pg_tables WHERE schemaname = 'public') LOOP
+        EXECUTE 'DROP TABLE IF EXISTS public.' || quote_ident(r.tablename) || ' CASCADE';
+    END LOOP;
+    
+    -- Drop all views
+    FOR r IN (SELECT viewname FROM pg_views WHERE schemaname = 'public') LOOP
+        EXECUTE 'DROP VIEW IF EXISTS public.' || quote_ident(r.viewname) || ' CASCADE';
+    END LOOP;
+    
+    -- Drop all sequences
+    FOR r IN (SELECT sequence_name FROM information_schema.sequences WHERE sequence_schema = 'public') LOOP
+        EXECUTE 'DROP SEQUENCE IF EXISTS public.' || quote_ident(r.sequence_name) || ' CASCADE';
+    END LOOP;
+    
+    -- Drop all functions
+    FOR r IN (SELECT proname, oidvectortypes(proargtypes) FROM pg_proc INNER JOIN pg_namespace ns ON (pg_proc.pronamespace = ns.oid) WHERE ns.nspname = 'public') LOOP
+        EXECUTE 'DROP FUNCTION IF EXISTS public.' || quote_ident(r.proname) || '(' || r.oidvectortypes || ') CASCADE';
+    END LOOP;
+    
+    -- Drop all types
+    FOR r IN (SELECT typname FROM pg_type INNER JOIN pg_namespace ns ON (pg_type.typnamespace = ns.oid) WHERE ns.nspname = 'public' AND pg_type.typtype = 'c') LOOP
+        EXECUTE 'DROP TYPE IF EXISTS public.' || quote_ident(r.typname) || ' CASCADE';
+    END LOOP;
+END $$;
+
+-- Now import the dump file
+\\i '${dumpFilePath}'
+
+-- Re-enable triggers
+SET session_replication_role = 'origin';
+`
+
+        // Write the wrapper script to a file
+        fs.writeFileSync(wrapperScriptPath, wrapperContent)
+        console.info(`Created wrapper script at ${wrapperScriptPath}`)
+
+        // Use psql to execute the wrapper script
         const importCmd = [
-            'pg_restore',
+            'psql',
             `-h ${dbCredentials.host}`,
             `-p ${port}`,
             `-U ${dbCredentials.username}`,
             `-d ${dbname}`,
-            '--clean', // Clean (drop) database objects before recreating
-            '--if-exists', // Use IF EXISTS when dropping objects
-            '--no-owner', // Don't include commands to set ownership
-            '--no-acl', // Don't include access privileges (GRANT/REVOKE)
-            dumpFilePath,
+            '-v ON_ERROR_STOP=1', // Stop on first error
+            '-f',
+            wrapperScriptPath, // Execute our wrapper script instead
         ].join(' ')
 
         // Execute the import command
         process.env.PGPASSWORD = dbCredentials.password
-        console.info(`Executing import command: ${importCmd}`)
+        console.info(`Executing import command with wrapper script`)
 
         execSync(importCmd, {
             stdio: 'inherit',
@@ -467,6 +508,12 @@ function importDatabase(dumpFilePath: string, dbCredentials: SecretDict): void {
         })
 
         console.info('Database import completed successfully')
+
+        // Clean up the wrapper script
+        if (fs.existsSync(wrapperScriptPath)) {
+            fs.unlinkSync(wrapperScriptPath)
+            console.info(`Removed wrapper script ${wrapperScriptPath}`)
+        }
     } catch (error) {
         console.error('Error executing database import:', error)
         throw new Error(
