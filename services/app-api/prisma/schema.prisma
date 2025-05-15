@@ -582,6 +582,7 @@ model OAuthClient {
   clientSecret  String
   grants        String[]
   createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @default(now()) @updatedAt
   lastUsedAt    DateTime?
   description   String?
   contactEmail  String?
