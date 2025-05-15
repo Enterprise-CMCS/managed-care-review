@@ -2,16 +2,18 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { CustomOAuth2Server } from '../oauth2Server'
 import type { ExtendedPrismaClient } from '../../postgres/prismaClient'
 import type { APIGatewayProxyEvent } from 'aws-lambda'
-import { InvalidClientError } from '@node-oauth/oauth2-server'
 import type { Client, Token, User } from '@node-oauth/oauth2-server'
 
 // Mock OAuth2Server
 vi.mock('@node-oauth/oauth2-server', () => {
     const mockToken = vi.fn()
+    const mockOAuth2Server = vi.fn().mockImplementation(() => ({
+        token: mockToken,
+    }))
+
     return {
-        OAuth2Server: vi.fn().mockImplementation(() => ({
-            token: mockToken,
-        })),
+        default: mockOAuth2Server,
+        OAuth2Server: mockOAuth2Server,
         InvalidRequestError: class extends Error {
             constructor(message: string) {
                 super(message)
@@ -76,6 +78,22 @@ describe('CustomOAuth2Server', () => {
                 queryStringParameters: null,
             } as APIGatewayProxyEvent
 
+            // Mock OAuth2Server to throw InvalidRequestError
+            const { OAuth2Server } = await import('@node-oauth/oauth2-server')
+            const mockInstance = new OAuth2Server({
+                model: {
+                    getClient: vi.fn(),
+                    validateScope: vi.fn(),
+                    saveToken: vi.fn(),
+                    getAccessToken: vi.fn(),
+                },
+            })
+            vi.spyOn(mockInstance, 'token').mockRejectedValueOnce(
+                new (
+                    await import('@node-oauth/oauth2-server')
+                ).InvalidRequestError('Invalid request')
+            )
+
             const result = await oauth2Server.token(event)
 
             expect(result.statusCode).toBe(400)
@@ -108,7 +126,9 @@ describe('CustomOAuth2Server', () => {
                 },
             })
             vi.spyOn(mockInstance, 'token').mockRejectedValueOnce(
-                new InvalidClientError('Invalid client credentials')
+                new (
+                    await import('@node-oauth/oauth2-server')
+                ).InvalidClientError('Invalid client credentials')
             )
 
             const result = await oauth2Server.token(event)
