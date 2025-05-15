@@ -345,6 +345,16 @@ export const SubmissionType = ({
         return { ...errorObject, ...formikErrors }
     }
 
+    // Checks if any of the child rates in this submission were ever submitted
+    const hasPreviouslySubmittedRates = Boolean(
+        draftSubmission?.draftRates.some(
+            // A rate will be DRAFT if it had never been submitted before.
+            (dr) =>
+                dr.parentContractID === draftSubmission?.id &&
+                dr.consolidatedStatus !== 'DRAFT'
+        )
+    )
+
     // Handles population covered click. CHIP-only can only have submission type of CONTRACT_ONLY. This function
     // automatically resets the submission type radio selection when CONTRACT_ONLY is not selected and switching to
     // CHIP-only population coverage.
@@ -529,6 +539,9 @@ export const SubmissionType = ({
                                                     }
                                                     list_position={3}
                                                     list_options={3}
+                                                    disabled={
+                                                        hasPreviouslySubmittedRates
+                                                    }
                                                     parent_component_heading="Which populations does this contract action cover?"
                                                     radio_button_title={
                                                         PopulationCoveredRecord[
@@ -591,6 +604,9 @@ export const SubmissionType = ({
                                                 }
                                                 legend="Choose a submission type"
                                                 id="submissionType"
+                                                disabled={
+                                                    hasPreviouslySubmittedRates
+                                                }
                                             >
                                                 <span
                                                     className={
