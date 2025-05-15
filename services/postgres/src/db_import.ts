@@ -423,62 +423,6 @@ async function getDatabaseCredentials(): Promise<SecretDict> {
 }
 
 /**
- * Reset the database using the Prisma CLI
- */
-async function resetDatabase(dbCredentials: SecretDict): Promise<void> {
-    console.info('Resetting database...')
-
-    try {
-        // Set DATABASE_URL environment variable for Prisma
-        process.env.DATABASE_URL = `postgresql://${dbCredentials.username}:${encodeURIComponent(dbCredentials.password)}@${dbCredentials.host}:${dbCredentials.port}/${dbCredentials.dbname}`
-
-        // Use direct SQL to reset the schema instead of Prisma migrations
-        const dbname = dbCredentials.dbname || 'postgres'
-        const port = dbCredentials.port || '5432'
-
-        // Set environment variables for psql
-        process.env.PGPASSWORD = dbCredentials.password
-
-        // Create a SQL script that drops and recreates the schema
-        const sqlScript = `
-DROP SCHEMA public CASCADE;
-CREATE SCHEMA public;
-GRANT ALL ON SCHEMA public TO public;
-GRANT ALL ON SCHEMA public TO ${dbCredentials.username};
-`
-
-        // Write the script to a temporary file
-        const scriptPath = path.join(TMP_DIR, 'reset_schema.sql')
-        fs.writeFileSync(scriptPath, sqlScript)
-
-        // Execute the script
-        const psqlCmd = [
-            'psql',
-            `-h ${dbCredentials.host}`,
-            `-p ${port}`,
-            `-U ${dbCredentials.username}`,
-            `-d ${dbname}`,
-            `-f ${scriptPath}`,
-        ].join(' ')
-
-        console.info(`Executing schema reset command: ${psqlCmd}`)
-
-        execSync(psqlCmd, {
-            stdio: 'inherit',
-            env: process.env,
-        })
-
-        // Clean up
-        fs.unlinkSync(scriptPath)
-
-        console.info('Database schema reset successfully')
-    } catch (error) {
-        console.error('Error resetting database:', error)
-        throw error
-    }
-}
-
-/**
  * Import the database dump file into PostgreSQL
  * @param dumpFilePath Path to the dump file
  * @param dbCredentials Database credentials
@@ -490,21 +434,24 @@ function importDatabase(dumpFilePath: string, dbCredentials: SecretDict): void {
     console.info(`Importing database dump from ${dumpFilePath}...`)
 
     try {
-        // Construct the psql command to import
-        const psqlCmd = [
-            'psql',
+        const importCmd = [
+            'pg_restore',
             `-h ${dbCredentials.host}`,
             `-p ${port}`,
             `-U ${dbCredentials.username}`,
             `-d ${dbname}`,
-            `-f ${dumpFilePath}`,
-            // Add the ON_ERROR_STOP flag to ensure psql stops on errors
-            `-v ON_ERROR_STOP=1`,
+            '--clean', // Clean (drop) database objects before recreating
+            '--if-exists', // Use IF EXISTS when dropping objects
+            '--no-owner', // Don't include commands to set ownership
+            '--no-acl', // Don't include access privileges (GRANT/REVOKE)
+            dumpFilePath,
         ].join(' ')
 
-        // Execute psql with specific options for import
+        // Execute the import command
         process.env.PGPASSWORD = dbCredentials.password
-        execSync(psqlCmd, {
+        console.info(`Executing import command: ${importCmd}`)
+
+        execSync(importCmd, {
             stdio: 'inherit',
             env: {
                 ...process.env,
@@ -514,7 +461,7 @@ function importDatabase(dumpFilePath: string, dbCredentials: SecretDict): void {
 
         console.info('Database import completed successfully')
     } catch (error) {
-        console.error('Error executing psql import:', error)
+        console.error('Error executing database import:', error)
         throw new Error(
             `Database import failed: ${error instanceof Error ? error.message : String(error)}`
         )
@@ -577,10 +524,7 @@ export const handler = async () => {
         // Download the dump file to the Lambda's temp directory
         await downloadS3File(latestDumpKey, dumpFilePath, S3_BUCKET)
 
-        // Drop the existing database and create a fresh one
-        await resetDatabase(dbCredentials)
-
-        // Import the database dump
+        // Import the database dump using pg_restore
         importDatabase(dumpFilePath, dbCredentials)
 
         // Clean up temporary files
