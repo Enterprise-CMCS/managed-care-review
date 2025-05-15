@@ -196,7 +196,7 @@ layers:
   prismaClientEngine:
     path: lambda-layers-prisma-client-engine
   prismaClientMigration:
-    path: lambda-layers-prisma-migration-engine
+    path: lambda-layers-prisma-client-migration
 
 resources:
   Conditions:
