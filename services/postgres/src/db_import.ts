@@ -141,11 +141,45 @@ async function replaceDocument(
         console.info(`Original S3 URL: ${s3Url}`)
         console.info(`Original filename: ${originalFilename}`)
 
-        // Instead of trying to parse the S3 URL, let's just use a consistent approach
-        // Always put files in the allusers directory with the document ID as the filename
-        const s3Key = `allusers/${documentId}/${originalFilename}`
+        // Extract bucket and key from the S3 URL
+        let bucket: string
+        let key: string
 
-        console.info(`Using standardized S3 Key: ${s3Key}`)
+        if (s3Url.startsWith('s3://')) {
+            // Format: s3://bucket-name/key.pdf/filename.pdf (not sure why we store it like this?)
+            const parts = s3Url.substring(5).split('/', 1)
+            bucket = parts[0]
+
+            // Get the full path after the bucket
+            const fullPath = s3Url.substring(5 + bucket.length + 1)
+
+            // Fix the malformed URL by removing the filename at the end
+            // The proper key should be just the UUID.pdf part
+            const pathParts = fullPath.split('/')
+
+            if (pathParts.length >= 2) {
+                // Take only the first part (UUID.pdf) and ignore the rest
+                key = pathParts[0]
+                console.info(`Corrected key from malformed URL: ${key}`)
+            } else {
+                key = fullPath
+            }
+        } else {
+            // If it's not an s3:// URL, we cannot determine the bucket and key
+            console.error(`Cannot parse S3 URL: ${s3Url}`)
+            return { newSha256: '', replaced: false }
+        }
+
+        // Check if we've determined a valid bucket and key
+        if (!bucket || !key) {
+            console.error(`Invalid bucket or key: bucket=${bucket}, key=${key}`)
+            return { newSha256: '', replaced: false }
+        }
+
+        // Use DOCS_S3_BUCKET from environment for the target bucket
+        bucket = DOCS_S3_BUCKET ?? ''
+
+        console.info(`Target S3 location: bucket=${bucket}, key=${key}`)
 
         // Get mock PDF path
         const mockPdfPath = getMockPDFPath(documentId)
@@ -161,12 +195,12 @@ async function replaceDocument(
         const contentType = CONTENT_TYPES.pdf
 
         // Upload to S3
-        console.info(`Uploading to S3 bucket: ${DOCS_S3_BUCKET}, key: ${s3Key}`)
+        console.info(`Uploading to S3 bucket: ${bucket}, key: ${key}`)
 
         await s3Client.send(
             new PutObjectCommand({
-                Bucket: DOCS_S3_BUCKET,
-                Key: s3Key,
+                Bucket: bucket,
+                Key: key,
                 Body: fileContent,
                 ContentType: contentType,
                 ContentDisposition: `attachment; filename="${originalFilename}"`,
