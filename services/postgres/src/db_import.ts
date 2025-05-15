@@ -426,46 +426,55 @@ async function getDatabaseCredentials(): Promise<SecretDict> {
  * Reset the database using the Prisma CLI
  */
 async function resetDatabase(dbCredentials: SecretDict): Promise<void> {
-    console.info('Resetting database using Prisma CLI...')
+    console.info('Resetting database...')
 
     try {
         // Set DATABASE_URL environment variable for Prisma
         process.env.DATABASE_URL = `postgresql://${dbCredentials.username}:${encodeURIComponent(dbCredentials.password)}@${dbCredentials.host}:${dbCredentials.port}/${dbCredentials.dbname}`
 
-        const prismaBinary = '/opt/nodejs/node_modules/prisma/build/index.js'
+        // Use direct SQL to reset the schema instead of Prisma migrations
+        const dbname = dbCredentials.dbname || 'postgres'
+        const port = dbCredentials.port || '5432'
 
-        console.info(`Using Prisma CLI binary at: ${prismaBinary}`)
+        // Set environment variables for psql
+        process.env.PGPASSWORD = dbCredentials.password
 
-        // Make sure we have a schema.prisma file
-        const schemaPath = '/opt/nodejs/prisma/schema.prisma'
+        // Create a SQL script that drops and recreates the schema
+        const sqlScript = `
+DROP SCHEMA public CASCADE;
+CREATE SCHEMA public;
+GRANT ALL ON SCHEMA public TO public;
+GRANT ALL ON SCHEMA public TO ${dbCredentials.username};
+`
 
-        if (!fs.existsSync(schemaPath)) {
-            throw new Error('Prisma schema not found at: ' + schemaPath)
-        }
+        // Write the script to a temporary file
+        const scriptPath = path.join(TMP_DIR, 'reset_schema.sql')
+        fs.writeFileSync(scriptPath, sqlScript)
 
-        // Run Prisma CLI command to reset the database
-        // We need to use Node to execute the CLI since we may not have direct access to the binary
-        const command = `${prismaBinary} migrate reset --force --schema=${schemaPath}`
+        // Execute the script
+        const psqlCmd = [
+            'psql',
+            `-h ${dbCredentials.host}`,
+            `-p ${port}`,
+            `-U ${dbCredentials.username}`,
+            `-d ${dbname}`,
+            `-f ${scriptPath}`,
+        ].join(' ')
 
-        console.info(`Executing command: ${command}`)
-        const prismaResult = execSync(command, {
+        console.info(`Executing schema reset command: ${psqlCmd}`)
+
+        execSync(psqlCmd, {
             stdio: 'inherit',
-            env: {
-                ...process.env,
-                DATABASE_URL: process.env.DATABASE_URL,
-            },
+            env: process.env,
         })
 
-        console.info(
-            `Database reset successfully using Prisma CLI: ${prismaResult}`
-        )
+        // Clean up
+        fs.unlinkSync(scriptPath)
+
+        console.info('Database schema reset successfully')
     } catch (error) {
-        const err = new Error(
-            'Error resetting database with Prisma CLI:',
-            error
-        )
-        console.error(err)
-        throw err
+        console.error('Error resetting database:', error)
+        throw error
     }
 }
 
