@@ -423,104 +423,34 @@ async function getDatabaseCredentials(): Promise<SecretDict> {
 }
 
 /**
- * Import the database dump file into PostgreSQL
- * @param dumpFilePath Path to the dump file
- * @param dbCredentials Database credentials
+ * Import database from S3 dump file
  */
-function importDatabase(dumpFilePath: string, dbCredentials: SecretDict): void {
+async function importDatabase(
+    dumpFilePath: string,
+    dbCredentials: SecretDict
+): Promise<void> {
     const dbname = dbCredentials.dbname || 'postgres'
     const port = dbCredentials.port || '5432'
 
     console.info(`Importing database dump from ${dumpFilePath}...`)
 
     try {
-        // First, let's create a wrapper SQL script that drops everything and then imports the dump
-        const wrapperScriptPath = path.join(TMP_DIR, 'import_wrapper.sql')
+        const importCmd = `psql -h ${dbCredentials.host} -p ${port} -U ${dbCredentials.username} -d ${dbname} -f ${dumpFilePath}`
 
-        // This wrapper script ensures we start with a clean database
-        const wrapperContent = `
--- Disable triggers temporarily to avoid foreign key constraint issues during drop/import
-SET session_replication_role = 'replica';
-
--- Drop all tables, views, functions, etc. in the public schema
-DO $$ DECLARE
-    r RECORD;
-BEGIN
-    -- Drop all tables (with cascade to handle dependencies)
-    FOR r IN (SELECT tablename FROM pg_tables WHERE schemaname = 'public') LOOP
-        EXECUTE 'DROP TABLE IF EXISTS public.' || quote_ident(r.tablename) || ' CASCADE';
-    END LOOP;
-    
-    -- Drop all views
-    FOR r IN (SELECT viewname FROM pg_views WHERE schemaname = 'public') LOOP
-        EXECUTE 'DROP VIEW IF EXISTS public.' || quote_ident(r.viewname) || ' CASCADE';
-    END LOOP;
-    
-    -- Drop all sequences
-    FOR r IN (SELECT sequence_name FROM information_schema.sequences WHERE sequence_schema = 'public') LOOP
-        EXECUTE 'DROP SEQUENCE IF EXISTS public.' || quote_ident(r.sequence_name) || ' CASCADE';
-    END LOOP;
-    
-    -- Drop all functions
-    FOR r IN (SELECT proname, oidvectortypes(proargtypes) FROM pg_proc INNER JOIN pg_namespace ns ON (pg_proc.pronamespace = ns.oid) WHERE ns.nspname = 'public') LOOP
-        EXECUTE 'DROP FUNCTION IF EXISTS public.' || quote_ident(r.proname) || '(' || r.oidvectortypes || ') CASCADE';
-    END LOOP;
-    
-    -- Drop all types
-    FOR r IN (SELECT typname FROM pg_type INNER JOIN pg_namespace ns ON (pg_type.typnamespace = ns.oid) WHERE ns.nspname = 'public' AND pg_type.typtype = 'c') LOOP
-        EXECUTE 'DROP TYPE IF EXISTS public.' || quote_ident(r.typname) || ' CASCADE';
-    END LOOP;
-END $$;
-
--- Now import the dump file
-\\i '${dumpFilePath}'
-
--- Re-enable triggers
-SET session_replication_role = 'origin';
-`
-
-        // Write the wrapper script to a file
-        fs.writeFileSync(wrapperScriptPath, wrapperContent)
-        console.info(`Created wrapper script at ${wrapperScriptPath}`)
-
-        // Use psql to execute the wrapper script
-        const importCmd = [
-            'psql',
-            `-h ${dbCredentials.host}`,
-            `-p ${port}`,
-            `-U ${dbCredentials.username}`,
-            `-d ${dbname}`,
-            '-v ON_ERROR_STOP=1', // Stop on first error
-            '-f',
-            wrapperScriptPath, // Execute our wrapper script instead
-        ].join(' ')
-
-        // Execute the import command
+        // Execute the command
         process.env.PGPASSWORD = dbCredentials.password
-        console.info(`Executing import command with wrapper script`)
+        console.info(`Executing import command: ${importCmd}`)
 
         execSync(importCmd, {
             stdio: 'inherit',
-            env: {
-                ...process.env,
-                PGOPTIONS: '-c client_min_messages=warning', // Reduce verbose output
-            },
+            env: { ...process.env },
         })
 
         console.info('Database import completed successfully')
-
-        // Clean up the wrapper script
-        if (fs.existsSync(wrapperScriptPath)) {
-            fs.unlinkSync(wrapperScriptPath)
-            console.info(`Removed wrapper script ${wrapperScriptPath}`)
-        }
     } catch (error) {
         console.error('Error executing database import:', error)
-        throw new Error(
-            `Database import failed: ${error instanceof Error ? error.message : String(error)}`
-        )
+        throw new Error(`Database import failed: ${error.message}`)
     } finally {
-        // Clear password from environment
         delete process.env.PGPASSWORD
     }
 }
@@ -549,83 +479,62 @@ async function initializePrisma(
  * Orchestrates the process of importing the database and replacing documents
  */
 export const handler = async () => {
-    console.info(
-        'Starting combined database import and document replacement process...'
-    )
+    console.info('Starting database import and document replacement process...')
 
-    if (!S3_BUCKET) {
-        throw new Error('S3_BUCKET environment variable is not set')
-    }
-
-    if (!DOCS_S3_BUCKET) {
-        throw new Error('DOCS_S3_BUCKET environment variable is not set')
+    if (!S3_BUCKET || !DOCS_S3_BUCKET) {
+        throw new Error(
+            'S3_BUCKET or DOCS_S3_BUCKET environment variable is not set'
+        )
     }
 
     let prisma: PrismaClient | null = null
 
     try {
-        // Get the database credentials
+        // Get DB credentials
         const dbCredentials = await getDatabaseCredentials()
 
-        // --- PHASE 1: DATABASE IMPORT ---
-        console.info('Starting database import phase...')
-
-        // Find the latest dump file in S3
+        // Find latest dump file
         const latestDumpKey = await findLatestDbDumpFile()
         const dumpFilename = path.basename(latestDumpKey)
         const dumpFilePath = path.join(TMP_DIR, dumpFilename)
 
-        // Download the dump file to the Lambda's temp directory
+        // Download the dump file
         await downloadS3File(latestDumpKey, dumpFilePath, S3_BUCKET)
 
-        // Import the database dump using pg_restore
-        importDatabase(dumpFilePath, dbCredentials)
+        // Import database
+        await importDatabase(dumpFilePath, dbCredentials)
 
-        // Clean up temporary files
-        if (fs.existsSync(dumpFilePath)) {
-            fs.unlinkSync(dumpFilePath)
-        }
-
-        // Initialize Prisma after the database is populated
+        // Initialize Prisma for document processing
         prisma = await initializePrisma(dbCredentials)
-
-        console.info('Database import phase completed successfully')
-
-        // --- PHASE 2: DOCUMENT REPLACEMENT ---
-        console.info('Starting document replacement phase...')
 
         // Process and replace all documents
         await processAllDocuments(prisma)
 
-        console.info('Document replacement phase completed successfully')
+        // Cleanup
+        if (fs.existsSync(dumpFilePath)) {
+            fs.unlinkSync(dumpFilePath)
+        }
 
-        // Return success
         return {
             statusCode: 200,
             body: JSON.stringify({
                 message:
-                    'Combined database import and document replacement completed successfully',
+                    'Database import and document replacement completed successfully',
                 importedFile: dumpFilename,
-                databaseName: dbCredentials.dbname || 'postgres',
             }),
         }
     } catch (err) {
-        console.error('Error in combined import process:', err)
-
-        // Make sure we clean up the password from environment in case of error
+        console.error('Error in import process:', err)
         delete process.env.PGPASSWORD
 
         return {
             statusCode: 500,
             body: JSON.stringify({
-                message: 'Error during combined import process',
+                message: 'Error during import process',
                 error: err instanceof Error ? err.message : String(err),
             }),
         }
     } finally {
-        // Disconnect Prisma if connected
-        if (prisma) {
-            await prisma.$disconnect()
-        }
+        if (prisma) await prisma.$disconnect()
     }
 }

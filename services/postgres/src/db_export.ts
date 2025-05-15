@@ -63,6 +63,10 @@ export const handler = async () => {
                 `-U ${dbCredentials.username}`,
                 `-d ${dbCredentials.dbname || 'postgres'}`,
                 '--format=plain',
+                '--clean', // Add DROP statements before CREATE
+                '--if-exists', // Add IF EXISTS to DROP statements
+                '--no-owner', // Skip ownership commands
+                '--no-acl', // Skip privilege commands
                 `--file=${dumpFilePath}`,
             ].join(' ')
 
