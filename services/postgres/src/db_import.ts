@@ -131,6 +131,9 @@ async function logSampleDocumentURLs(prisma: PrismaClient): Promise<void> {
 /**
  * Replace a document in S3 with a mock PDF
  */
+/**
+ * Replace a document in S3 with a mock PDF
+ */
 async function replaceDocument(
     documentId: string,
     s3Url: string,
@@ -146,7 +149,7 @@ async function replaceDocument(
         let key: string
 
         if (s3Url.startsWith('s3://')) {
-            // Format: s3://bucket-name/key.pdf/filename.pdf (not sure why we store it like this?)
+            // Format: s3://bucket-name/key.pdf/filename.pdf (we use this weird format for some reason)
             const parts = s3Url.substring(5).split('/', 1)
             bucket = parts[0]
 
@@ -164,6 +167,9 @@ async function replaceDocument(
             } else {
                 key = fullPath
             }
+
+            // Add the allusers/ prefix to the key
+            key = `allusers/${key}`
         } else {
             // If it's not an s3:// URL, we cannot determine the bucket and key
             console.error(`Cannot parse S3 URL: ${s3Url}`)
@@ -207,7 +213,9 @@ async function replaceDocument(
             })
         )
 
-        console.info(`Successfully replaced document ${documentId}`)
+        console.info(
+            `Successfully replaced document ${documentId} at s3://${bucket}/${key}`
+        )
         return { newSha256, replaced: true }
     } catch (error) {
         console.error(`Error replacing document ${documentId}:`, error)
