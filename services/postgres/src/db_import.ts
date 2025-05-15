@@ -11,7 +11,7 @@ import {
 } from '@aws-sdk/client-s3'
 import { SecretDict } from './types'
 import { createHash } from 'crypto'
-import { Prisma, PrismaClient } from '@prisma/client'
+import { PrismaClient } from '@prisma/client'
 
 // Environment variables
 const REGION = process.env.AWS_REGION || 'us-east-1'
