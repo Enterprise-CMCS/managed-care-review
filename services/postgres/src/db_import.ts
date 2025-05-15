@@ -11,7 +11,7 @@ import {
 } from '@aws-sdk/client-s3'
 import { SecretDict } from './types'
 import { createHash } from 'crypto'
-import { PrismaClient } from '@prisma/client'
+import { Prisma, PrismaClient } from '@prisma/client'
 
 // Environment variables
 const REGION = process.env.AWS_REGION || 'us-east-1'
@@ -423,159 +423,61 @@ async function getDatabaseCredentials(): Promise<SecretDict> {
 }
 
 /**
- * Prepare the database for import by truncating all existing tables
- * @param dbCredentials Database credentials
+ * Reset the database by dynamically truncating all tables
  */
-async function prepareDatabase(dbCredentials: SecretDict): Promise<void> {
-    const dbname = dbCredentials.dbname || 'postgres'
-    const port = dbCredentials.port || '5432'
+async function resetDatabase(dbCredentials: SecretDict): Promise<void> {
+    console.info('Resetting database using dynamic truncation...')
 
-    console.info(`Preparing database ${dbname} for import...`)
+    // Set DATABASE_URL environment variable for Prisma
+    process.env.DATABASE_URL = `postgresql://${dbCredentials.username}:${encodeURIComponent(dbCredentials.password)}@${dbCredentials.host}:${dbCredentials.port}/${dbCredentials.dbname}`
+
+    // Initialize Prisma client
+    const prisma = new PrismaClient()
 
     try {
-        // Set environment variables for psql
-        process.env.PGPASSWORD = dbCredentials.password
+        // Connect to the database
+        await prisma.$connect()
+        console.info('Connected to database for dynamic truncation')
 
-        // First, check if the database exists by connecting directly to it
-        // If it doesn't exist, this will fail
-        try {
-            const testConnectionCmd = [
-                'psql',
-                `-h ${dbCredentials.host}`,
-                `-p ${port}`,
-                `-U ${dbCredentials.username}`,
-                `-d ${dbname}`,
-                `-c "SELECT 1;"`,
-            ].join(' ')
+        // Disable foreign key constraints
+        await prisma.$executeRaw`SET session_replication_role = 'replica';`
 
-            execSync(testConnectionCmd, {
-                encoding: 'utf8',
-                env: process.env,
-            })
+        // Get all tables in the public schema (excluding Prisma's own tables)
+        const tablesResult = await prisma.$queryRaw<
+            Array<{ tablename: string }>
+        >`
+            SELECT tablename 
+            FROM pg_tables 
+            WHERE schemaname = 'public' 
+            AND tablename NOT LIKE '_prisma_%';
+        `
 
-            console.info(`Successfully connected to database ${dbname}`)
+        console.info(`Found ${tablesResult.length} tables to truncate`)
 
-            // Database exists, so truncate all tables
-            console.info(`Truncating all tables in database ${dbname}...`)
-
-            // First, get a list of all tables in the public schema
-            const listTablesCmd = [
-                'psql',
-                `-h ${dbCredentials.host}`,
-                `-p ${port}`,
-                `-U ${dbCredentials.username}`,
-                `-d ${dbname}`,
-                `-t`, // tuple only mode (no headers/footers)
-                `-c "SELECT tablename FROM pg_tables WHERE schemaname = 'public';"`,
-            ].join(' ')
-
-            const tableListResult = execSync(listTablesCmd, {
-                encoding: 'utf8',
-                env: process.env,
-            })
-
-            // Parse the table names
-            const tables = tableListResult
-                .split('\n')
-                .map((line) => line.trim())
-                .filter((line) => line.length > 0)
-
-            if (tables.length > 0) {
-                console.info(
-                    `Found ${tables.length} tables to truncate in database ${dbname}`
-                )
-
-                // Create a SQL statement to disable constraints, truncate all tables, and re-enable constraints
-                const truncateScript = `
-BEGIN;
--- Disable all triggers temporarily
-SET session_replication_role = 'replica';
-
--- Truncate all tables in one transaction
-TRUNCATE TABLE ${tables.join(', ')} CASCADE;
-
--- Re-enable triggers
-SET session_replication_role = 'origin';
-COMMIT;
-`
-
-                // Write the script to a temporary file
-                const scriptPath = path.join(TMP_DIR, 'truncate_tables.sql')
-                fs.writeFileSync(scriptPath, truncateScript)
-
-                // Execute the script
-                const truncateCmd = [
-                    'psql',
-                    `-h ${dbCredentials.host}`,
-                    `-p ${port}`,
-                    `-U ${dbCredentials.username}`,
-                    `-d ${dbname}`,
-                    `-f ${scriptPath}`,
-                ]
-
-                // Adding logging to debug any issues
-                console.info(
-                    `Executing truncate command: ${truncateCmd.join(' ')}`
-                )
-
-                execSync(truncateCmd.join(' '), {
-                    encoding: 'utf8',
-                    env: process.env,
-                    stdio: 'inherit',
-                })
-
-                // Clean up the script file
-                fs.unlinkSync(scriptPath)
-                console.info(
-                    `Successfully truncated all tables in database ${dbname}`
-                )
-            } else {
-                console.info(
-                    `No tables found in database ${dbname}, nothing to truncate`
-                )
-            }
-        } catch (error) {
-            // If we can't connect, the database might not exist
-            console.error(
-                `Received ${error} when attempting to connect to ${dbname}`
-            )
-            console.info(
-                `Could not connect to database ${dbname}, attempting to create it...`
-            )
-
-            // Try connecting to the postgres database to create our target database
-            try {
-                const createDbCmd = [
-                    'psql',
-                    `-h ${dbCredentials.host}`,
-                    `-p ${port}`,
-                    `-U ${dbCredentials.username}`,
-                    `-d postgres`,
-                    `-c "CREATE DATABASE ${dbname};"`,
-                ].join(' ')
-
-                execSync(createDbCmd, {
-                    encoding: 'utf8',
-                    env: process.env,
-                })
-
-                console.info(`Successfully created database ${dbname}`)
-            } catch (createError) {
-                // If we can't create the database either, log a warning but continue
-                // The import might still work if database exists but is empty
-                console.warn(
-                    `Could not create database ${dbname}. Continuing with import. Error: ${createError}`
-                )
-            }
+        // Truncate each table
+        for (const { tablename } of tablesResult) {
+            console.info(`Truncating table: ${tablename}`)
+            await prisma.$executeRaw`TRUNCATE TABLE ${Prisma.raw(tablename)} CASCADE;`
         }
+
+        // Re-enable foreign key constraints
+        await prisma.$executeRaw`SET session_replication_role = 'origin';`
+
+        console.info('All tables truncated successfully')
     } catch (error) {
-        console.error('Error preparing database:', error)
-        throw new Error(
-            `Failed to prepare database: ${error instanceof Error ? error.message : String(error)}`
-        )
+        console.error('Error truncating tables:', error)
+
+        // Ensure we restore the replication role
+        try {
+            await prisma.$executeRaw`SET session_replication_role = 'origin';`
+        } catch (restoreError) {
+            console.error('Error restoring replication role:', restoreError)
+        }
+
+        throw error
     } finally {
-        // Clear password from environment
-        delete process.env.PGPASSWORD
+        // Disconnect from the database
+        await prisma.$disconnect()
     }
 }
 
@@ -679,7 +581,7 @@ export const handler = async () => {
         await downloadS3File(latestDumpKey, dumpFilePath, S3_BUCKET)
 
         // Drop the existing database and create a fresh one
-        await prepareDatabase(dbCredentials)
+        await resetDatabase(dbCredentials)
 
         // Import the database dump
         importDatabase(dumpFilePath, dbCredentials)
