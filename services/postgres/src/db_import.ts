@@ -423,61 +423,49 @@ async function getDatabaseCredentials(): Promise<SecretDict> {
 }
 
 /**
- * Reset the database by dynamically truncating all tables
+ * Reset the database using the Prisma CLI
  */
 async function resetDatabase(dbCredentials: SecretDict): Promise<void> {
-    console.info('Resetting database using dynamic truncation...')
-
-    // Set DATABASE_URL environment variable for Prisma
-    process.env.DATABASE_URL = `postgresql://${dbCredentials.username}:${encodeURIComponent(dbCredentials.password)}@${dbCredentials.host}:${dbCredentials.port}/${dbCredentials.dbname}`
-
-    // Initialize Prisma client
-    const prisma = new PrismaClient()
+    console.info('Resetting database using Prisma CLI...')
 
     try {
-        // Connect to the database
-        await prisma.$connect()
-        console.info('Connected to database for dynamic truncation')
+        // Set DATABASE_URL environment variable for Prisma
+        process.env.DATABASE_URL = `postgresql://${dbCredentials.username}:${encodeURIComponent(dbCredentials.password)}@${dbCredentials.host}:${dbCredentials.port}/${dbCredentials.dbname}`
 
-        // Disable foreign key constraints
-        await prisma.$executeRaw`SET session_replication_role = 'replica';`
+        const prismaBinary = '/opt/nodejs/node_modules/prisma/build/index.js'
 
-        // Get all tables in the public schema (excluding Prisma's own tables)
-        const tablesResult = await prisma.$queryRaw<
-            Array<{ tablename: string }>
-        >`
-            SELECT tablename 
-            FROM pg_tables 
-            WHERE schemaname = 'public' 
-            AND tablename NOT LIKE '_prisma_%';
-        `
+        console.info(`Using Prisma CLI binary at: ${prismaBinary}`)
 
-        console.info(`Found ${tablesResult.length} tables to truncate`)
+        // Make sure we have a schema.prisma file
+        const schemaPath = '/opt/nodejs/prisma/schema.prisma'
 
-        // Truncate each table
-        for (const { tablename } of tablesResult) {
-            console.info(`Truncating table: ${tablename}`)
-            await prisma.$executeRaw`TRUNCATE TABLE ${Prisma.raw(tablename)} CASCADE;`
+        if (!fs.existsSync(schemaPath)) {
+            throw new Error('Prisma schema not found at: ' + schemaPath)
         }
 
-        // Re-enable foreign key constraints
-        await prisma.$executeRaw`SET session_replication_role = 'origin';`
+        // Run Prisma CLI command to reset the database
+        // We need to use Node to execute the CLI since we may not have direct access to the binary
+        const command = `${prismaBinary} migrate reset --force --schema=${schemaPath}`
 
-        console.info('All tables truncated successfully')
+        console.info(`Executing command: ${command}`)
+        const prismaResult = execSync(command, {
+            stdio: 'inherit',
+            env: {
+                ...process.env,
+                DATABASE_URL: process.env.DATABASE_URL,
+            },
+        })
+
+        console.info(
+            `Database reset successfully using Prisma CLI: ${prismaResult}`
+        )
     } catch (error) {
-        console.error('Error truncating tables:', error)
-
-        // Ensure we restore the replication role
-        try {
-            await prisma.$executeRaw`SET session_replication_role = 'origin';`
-        } catch (restoreError) {
-            console.error('Error restoring replication role:', restoreError)
-        }
-
-        throw error
-    } finally {
-        // Disconnect from the database
-        await prisma.$disconnect()
+        const err = new Error(
+            'Error resetting database with Prisma CLI:',
+            error
+        )
+        console.error(err)
+        throw err
     }
 }
 
