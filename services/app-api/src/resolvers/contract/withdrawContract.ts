@@ -36,8 +36,8 @@ export function withdrawContract(
 
         if (contractWithHistory instanceof Error) {
             if (contractWithHistory instanceof NotFoundError) {
-                const errMessage = `A contract must exist to be unlocked: ${contractID}`
-                logError('unlockContract', errMessage)
+                const errMessage = `A contract must exist to be withdrawn: ${contractID}`
+                logError('withdrawContract', errMessage)
                 setErrorAttributesOnActiveSpan(errMessage, span)
                 throw new UserInputError(errMessage, {
                     argumentName: 'contractID',
@@ -45,7 +45,7 @@ export function withdrawContract(
             }
 
             const errMessage = `Issue finding a contract. Message: ${contractWithHistory.message}`
-            logError('unlockContract', errMessage)
+            logError('withdrawContract', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new GraphQLError(errMessage, {
                 extensions: {
