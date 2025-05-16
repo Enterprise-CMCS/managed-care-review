@@ -47,6 +47,7 @@ vi.mock('../../oauth/oauth2Server', () => ({
 
                 if (body.client_secret === 'wrong-secret') {
                     // pragma: allowlist secret
+                    // pragma: allowlist secret
                     return {
                         statusCode: 401,
                         body: JSON.stringify({
@@ -179,6 +180,97 @@ describe('OAuth Token Handler', () => {
             access_token: 'mock.jwt.token',
             token_type: 'Bearer',
             expires_in: 3600,
+        })
+    })
+
+    describe('Rate Limiting', () => {
+        it('should allow requests within rate limit', async () => {
+            const event = {
+                body: JSON.stringify({
+                    grant_type: 'client_credentials',
+                    client_id: 'rate-test-client',
+                    client_secret: 'test-secret', // pragma: allowlist secret
+                }),
+            } as APIGatewayProxyEvent
+
+            // Make 60 requests (rate limit)
+            for (let i = 0; i < 60; i++) {
+                const result = (await main(
+                    event,
+                    {} as Context,
+                    noop
+                )) as APIGatewayProxyResult
+                expect(result.statusCode).toBe(200)
+            }
+        })
+
+        it('should return 429 when rate limit is exceeded', async () => {
+            const event = {
+                body: JSON.stringify({
+                    grant_type: 'client_credentials',
+                    client_id: 'rate-limit-client',
+                    client_secret: 'test-secret', // pragma: allowlist secret
+                }),
+            } as APIGatewayProxyEvent
+
+            // Make 61 requests (exceed rate limit)
+            for (let i = 0; i < 60; i++) {
+                const result = (await main(
+                    event,
+                    {} as Context,
+                    noop
+                )) as APIGatewayProxyResult
+                expect(result.statusCode).toBe(200)
+            }
+
+            // 61st request should be rate limited
+            const rateLimitedResult = (await main(
+                event,
+                {} as Context,
+                noop
+            )) as APIGatewayProxyResult
+
+            expect(rateLimitedResult.statusCode).toBe(429)
+            expect(JSON.parse(rateLimitedResult.body)).toEqual({
+                error: 'rate_limit_exceeded',
+                error_description: 'Too many requests',
+            })
+            expect(
+                (rateLimitedResult.headers as Record<string, string>)[
+                    'Retry-After'
+                ]
+            ).toBe('60')
+        })
+
+        it('should reset rate limit after window expires', async () => {
+            const event = {
+                body: JSON.stringify({
+                    grant_type: 'client_credentials',
+                    client_id: 'window-test-client',
+                    client_secret: 'test-secret', // pragma: allowlist secret
+                }),
+            } as APIGatewayProxyEvent
+
+            // Make 60 requests
+            for (let i = 0; i < 60; i++) {
+                const result = (await main(
+                    event,
+                    {} as Context,
+                    noop
+                )) as APIGatewayProxyResult
+                expect(result.statusCode).toBe(200)
+            }
+
+            // Advance time by 1 minute
+            vi.advanceTimersByTime(60 * 1000)
+
+            // Should be able to make requests again
+            const result = (await main(
+                event,
+                {} as Context,
+                noop
+            )) as APIGatewayProxyResult
+            expect(result.statusCode).toBe(200)
         })
     })
 })
