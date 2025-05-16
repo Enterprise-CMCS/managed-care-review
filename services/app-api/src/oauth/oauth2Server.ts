@@ -39,18 +39,44 @@ export class CustomOAuth2Server {
         return { id: clientId, grants: ['client_credentials'] }
     }
 
-    async validateScope(user: User, client: Client, scope: string) {
+    /**
+     * Validates the requested scope for the client credentials flow.
+     * Since we don't use scopes in our implementation, this always returns true.
+     * @param user - The user making the request (system user for client credentials)
+     * @param client - The OAuth client making the request
+     * @param scope - The requested scope (unused in our implementation)
+     * @returns Always returns true as we don't use scopes
+     */
+    async validateScope(
+        user: User,
+        client: Client,
+        scope: string
+    ): Promise<boolean> {
         // For client credentials flow, we don't need to validate scopes
         return true
     }
 
-    async saveToken(token: Token, client: Client, user: User) {
+    /**
+     * Saves the generated token for the client credentials flow.
+     * Since we use JWTs, we don't need to store tokens in the database.
+     * @param token - The generated token
+     * @param client - The OAuth client
+     * @param user - The user (system user for client credentials)
+     * @returns The token as-is, since we don't store it
+     */
+    async saveToken(token: Token, client: Client, user: User): Promise<Token> {
         // For client credentials flow, we don't need to save tokens
         // as we're using JWTs
         return token
     }
 
-    async getAccessToken(accessToken: string) {
+    /**
+     * Retrieves an access token from storage.
+     * Since we use JWTs, we don't store tokens in the database.
+     * @param accessToken - The access token to retrieve
+     * @returns Always returns null as we don't store tokens
+     */
+    async getAccessToken(accessToken: string): Promise<Token | null> {
         // For client credentials flow, we don't need to retrieve tokens
         // as we're using JWTs
         return null
