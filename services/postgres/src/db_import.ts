@@ -171,7 +171,7 @@ async function replaceDocument(
         }
 
         // Set the target bucket from environment variable
-        bucket = DOCS_S3_BUCKET
+        bucket = DOCS_S3_BUCKET ?? ''
 
         // Create the final key with allusers/ prefix
         const finalKey = `allusers/${uuidPart}`
