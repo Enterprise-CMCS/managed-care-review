@@ -131,9 +131,6 @@ async function logSampleDocumentURLs(prisma: PrismaClient): Promise<void> {
 /**
  * Replace a document in S3 with a mock PDF
  */
-/**
- * Replace a document in S3 with a mock PDF
- */
 async function replaceDocument(
     documentId: string,
     s3Url: string,
@@ -144,48 +141,42 @@ async function replaceDocument(
         console.info(`Original S3 URL: ${s3Url}`)
         console.info(`Original filename: ${originalFilename}`)
 
-        // Extract bucket and key from the S3 URL
+        // Extract bucket and UUID part from the S3 URL
         let bucket: string
-        let key: string
+        let uuidPart: string
 
         if (s3Url.startsWith('s3://')) {
-            // Format: s3://bucket-name/key.pdf/filename.pdf (we use this weird format for some reason)
+            // Format: s3://bucket-name/uuid.pdf/filename.pdf (we should migrate this)
             const parts = s3Url.substring(5).split('/', 1)
-            bucket = parts[0]
+            bucket = parts[0] // Extract bucket name
 
-            // Get the full path after the bucket
+            // Get the path after the bucket
             const fullPath = s3Url.substring(5 + bucket.length + 1)
 
-            // Fix the malformed URL by removing the filename at the end
-            // The proper key should be just the UUID.pdf part
-            const pathParts = fullPath.split('/')
+            // Extract just the UUID.pdf part (the first segment of the path)
+            uuidPart = fullPath.split('/')[0]
 
-            if (pathParts.length >= 2) {
-                // Take only the first part (UUID.pdf) and ignore the rest
-                key = pathParts[0]
-                console.info(`Corrected key from malformed URL: ${key}`)
-            } else {
-                key = fullPath
-            }
-
-            // Add the allusers/ prefix to the key
-            key = `allusers/${key}`
+            console.info(`Extracted UUID part: ${uuidPart}`)
         } else {
-            // If it's not an s3:// URL, we cannot determine the bucket and key
             console.error(`Cannot parse S3 URL: ${s3Url}`)
             return { newSha256: '', replaced: false }
         }
 
-        // Check if we've determined a valid bucket and key
-        if (!bucket || !key) {
-            console.error(`Invalid bucket or key: bucket=${bucket}, key=${key}`)
+        // Check if we have valid components
+        if (!bucket || !uuidPart) {
+            console.error(
+                `Invalid bucket or UUID part: bucket=${bucket}, uuidPart=${uuidPart}`
+            )
             return { newSha256: '', replaced: false }
         }
 
-        // Use DOCS_S3_BUCKET from environment for the target bucket
-        bucket = DOCS_S3_BUCKET ?? ''
+        // Set the target bucket from environment variable
+        bucket = DOCS_S3_BUCKET
 
-        console.info(`Target S3 location: bucket=${bucket}, key=${key}`)
+        // Create the final key with allusers/ prefix
+        const finalKey = `allusers/${uuidPart}`
+
+        console.info(`Target S3 location: s3://${bucket}/${finalKey}`)
 
         // Get mock PDF path
         const mockPdfPath = getMockPDFPath(documentId)
@@ -200,13 +191,13 @@ async function replaceDocument(
         // Determine content type (always PDF for now)
         const contentType = CONTENT_TYPES.pdf
 
-        // Upload to S3
-        console.info(`Uploading to S3 bucket: ${bucket}, key: ${key}`)
+        // Upload to S3 with the exact right key
+        console.info(`Uploading to S3 bucket: ${bucket}, key: ${finalKey}`)
 
         await s3Client.send(
             new PutObjectCommand({
                 Bucket: bucket,
-                Key: key,
+                Key: finalKey, // This will be "allusers/uuid.pdf"
                 Body: fileContent,
                 ContentType: contentType,
                 ContentDisposition: `attachment; filename="${originalFilename}"`,
@@ -214,7 +205,7 @@ async function replaceDocument(
         )
 
         console.info(
-            `Successfully replaced document ${documentId} at s3://${bucket}/${key}`
+            `Successfully replaced document ${documentId} at s3://${bucket}/${finalKey}`
         )
         return { newSha256, replaced: true }
     } catch (error) {
