@@ -4,53 +4,65 @@ import type { ExtendedPrismaClient } from '../../postgres/prismaClient'
 import type { APIGatewayProxyEvent } from 'aws-lambda'
 import type { Client, Token, User } from '@node-oauth/oauth2-server'
 
-// Mock OAuth2Server
+// Mock OAuth2 server
 vi.mock('@node-oauth/oauth2-server', () => {
-    const mockToken = vi.fn()
-    const mockOAuth2Server = vi.fn().mockImplementation(() => ({
-        token: mockToken,
-    }))
+    class UnauthorizedClientError extends Error {
+        constructor(message: string) {
+            super(message)
+            this.name = 'UnauthorizedClientError'
+        }
+    }
 
-    return {
-        default: mockOAuth2Server,
-        OAuth2Server: mockOAuth2Server,
-        InvalidRequestError: class extends Error {
-            constructor(message: string) {
-                super(message)
-                this.name = 'InvalidRequestError'
-            }
-        },
-        InvalidClientError: class extends Error {
-            constructor(message: string) {
-                super(message)
-                this.name = 'InvalidClientError'
-            }
-        },
-        Request: class {
+    class InvalidRequestError extends Error {
+        constructor(message: string) {
+            super(message)
+            this.name = 'InvalidRequestError'
+        }
+    }
+
+    class InvalidClientError extends Error {
+        constructor(message: string) {
+            super(message)
+            this.name = 'InvalidClientError'
+        }
+    }
+
+    class Request {
+        body: Record<string, unknown>
+        headers: Record<string, string>
+        method: string
+        query: Record<string, string>
+        constructor(options: {
             body: Record<string, unknown>
             headers: Record<string, string>
             method: string
             query: Record<string, string>
-            constructor(options: {
-                body: Record<string, unknown>
-                headers: Record<string, string>
-                method: string
-                query: Record<string, string>
-            }) {
-                this.body = options.body
-                this.headers = options.headers
-                this.method = options.method
-                this.query = options.query
-            }
-        },
-        Response: class {
-            body: Record<string, unknown>
-            headers: Record<string, string>
-            constructor() {
-                this.body = {}
-                this.headers = {}
-            }
-        },
+        }) {
+            this.body = options.body
+            this.headers = options.headers
+            this.method = options.method
+            this.query = options.query
+        }
+    }
+
+    class Response {
+        body: Record<string, unknown>
+        headers: Record<string, string>
+        constructor() {
+            this.body = {}
+            this.headers = {}
+        }
+    }
+
+    return {
+        OAuth2Server: vi.fn().mockImplementation(() => ({
+            token: vi.fn(),
+        })),
+        UnauthorizedClientError,
+        InvalidRequestError,
+        InvalidClientError,
+        Request,
+        Response,
     }
 })
 
@@ -79,7 +91,9 @@ describe('CustomOAuth2Server', () => {
             } as APIGatewayProxyEvent
 
             // Mock OAuth2Server to throw InvalidRequestError
-            const { OAuth2Server } = await import('@node-oauth/oauth2-server')
+            const { OAuth2Server, InvalidRequestError } = await import(
+                '@node-oauth/oauth2-server'
+            )
             const mockInstance = new OAuth2Server({
                 model: {
                     getClient: vi.fn(),
@@ -89,9 +103,7 @@ describe('CustomOAuth2Server', () => {
                 },
             })
             vi.spyOn(mockInstance, 'token').mockRejectedValueOnce(
-                new (
-                    await import('@node-oauth/oauth2-server')
-                ).InvalidRequestError('Invalid request')
+                new InvalidRequestError('Invalid request')
             )
 
             const result = await oauth2Server.token(event)
@@ -116,7 +128,9 @@ describe('CustomOAuth2Server', () => {
             } as APIGatewayProxyEvent
 
             // Mock OAuth2Server to throw InvalidClientError
-            const { OAuth2Server } = await import('@node-oauth/oauth2-server')
+            const { OAuth2Server, InvalidClientError } = await import(
+                '@node-oauth/oauth2-server'
+            )
             const mockInstance = new OAuth2Server({
                 model: {
                     getClient: vi.fn(),
@@ -126,9 +140,7 @@ describe('CustomOAuth2Server', () => {
                 },
             })
             vi.spyOn(mockInstance, 'token').mockRejectedValueOnce(
-                new (
-                    await import('@node-oauth/oauth2-server')
-                ).InvalidClientError('Invalid client credentials')
+                new InvalidClientError('Invalid client credentials')
             )
 
             const result = await oauth2Server.token(event)

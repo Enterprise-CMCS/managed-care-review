@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { main } from '../oauth_token'
 import { configurePostgres } from '../configuration'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
@@ -46,7 +46,6 @@ vi.mock('../../oauth/oauth2Server', () => ({
                 }
 
                 if (body.client_secret === 'wrong-secret') {
-                    // pragma: allowlist secret
                     // pragma: allowlist secret
                     return {
                         statusCode: 401,
@@ -184,6 +183,14 @@ describe('OAuth Token Handler', () => {
     })
 
     describe('Rate Limiting', () => {
+        beforeEach(() => {
+            vi.useFakeTimers()
+        })
+
+        afterEach(() => {
+            vi.useRealTimers()
+        })
+
         it('should allow requests within rate limit', async () => {
             const event = {
                 body: JSON.stringify({
