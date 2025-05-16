@@ -7,6 +7,7 @@ CREATE TABLE "oauth_clients" (
     "clientSecret" TEXT NOT NULL,
     "grants" TEXT[],
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "lastUsedAt" TIMESTAMP(3),
     "description" TEXT,
     "contactEmail" TEXT,

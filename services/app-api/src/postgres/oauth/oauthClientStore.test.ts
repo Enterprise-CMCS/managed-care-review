@@ -30,7 +30,6 @@ describe('OAuthClient Store', () => {
     it('creates and retrieves an OAuth client', async () => {
         const oauthClient = await createOAuthClient(client, testClientData)
 
-        expect(oauthClient).not.toBeInstanceOf(Error)
         if (oauthClient instanceof Error) throw oauthClient
 
         expect(oauthClient.clientId).toBe(testClientData.clientId)
@@ -48,7 +47,6 @@ describe('OAuthClient Store', () => {
             client,
             createdClient.id
         )
-        expect(retrievedClient).not.toBeInstanceOf(Error)
         if (retrievedClient instanceof Error) throw retrievedClient
 
         expect(retrievedClient).not.toBeNull()
@@ -63,7 +61,6 @@ describe('OAuthClient Store', () => {
             client,
             testClientData.clientId
         )
-        expect(retrievedClient).not.toBeInstanceOf(Error)
         if (retrievedClient instanceof Error) throw retrievedClient
 
         expect(retrievedClient).not.toBeNull()
@@ -79,7 +76,6 @@ describe('OAuthClient Store', () => {
             testClientData.clientId,
             testClientData.clientSecret
         )
-        expect(isValid).not.toBeInstanceOf(Error)
         if (isValid instanceof Error) throw isValid
 
         expect(isValid).toBe(true)
@@ -89,7 +85,6 @@ describe('OAuthClient Store', () => {
             testClientData.clientId,
             'wrong-secret'
         )
-        expect(isInvalid).not.toBeInstanceOf(Error)
         if (isInvalid instanceof Error) throw isInvalid
 
         expect(isInvalid).toBe(false)
@@ -109,11 +104,14 @@ describe('OAuthClient Store', () => {
             createdClient.id,
             updateData
         )
-        expect(updatedClient).not.toBeInstanceOf(Error)
         if (updatedClient instanceof Error) throw updatedClient
 
         expect(updatedClient.description).toBe(updateData.description)
         expect(updatedClient.grants).toEqual(updateData.grants)
+        expect(updatedClient.updatedAt).toBeDefined()
+        expect(updatedClient.updatedAt.getTime()).toBeGreaterThan(
+            createdClient.updatedAt.getTime()
+        )
     })
 
     it('deletes an OAuth client', async () => {
@@ -121,14 +119,12 @@ describe('OAuthClient Store', () => {
         if (createdClient instanceof Error) throw createdClient
 
         const deletedClient = await deleteOAuthClient(client, createdClient.id)
-        expect(deletedClient).not.toBeInstanceOf(Error)
         if (deletedClient instanceof Error) throw deletedClient
 
         const retrievedClient = await getOAuthClientById(
             client,
             createdClient.id
         )
-        expect(retrievedClient).not.toBeInstanceOf(Error)
         if (retrievedClient instanceof Error) throw retrievedClient
 
         expect(retrievedClient).toBeNull()
@@ -149,7 +145,6 @@ describe('OAuthClient Store', () => {
         if (client2 instanceof Error) throw client2
 
         const clients = await listOAuthClients(client)
-        expect(clients).not.toBeInstanceOf(Error)
         if (clients instanceof Error) throw clients
 
         expect(clients.length).toBeGreaterThanOrEqual(2)
@@ -159,7 +154,6 @@ describe('OAuthClient Store', () => {
 
     it('handles non-existent client ID', async () => {
         const retrievedClient = await getOAuthClientById(client, uuidv4())
-        expect(retrievedClient).not.toBeInstanceOf(Error)
         if (retrievedClient instanceof Error) throw retrievedClient
 
         expect(retrievedClient).toBeNull()
