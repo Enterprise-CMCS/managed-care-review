@@ -1502,6 +1502,80 @@ describe('RateDetails', () => {
                 expect(options).toHaveLength(3)
             })
         })
+
+        it('link rate radio group should be disabled depending on the rate status', async () => {
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_RATE_DETAILS}
+                        element={<RateDetails type="MULTI" />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    ...mockContractPackageDraft({
+                                        draftRates: [
+                                            draftRateDataMock({
+                                                parentContractID:
+                                                    'test-abc-123',
+                                                status: 'UNLOCKED',
+                                                consolidatedStatus: 'UNLOCKED',
+                                            }),
+                                            draftRateDataMock({
+                                                parentContractID:
+                                                    'this-is-a-linked-rate',
+                                                status: 'SUBMITTED',
+                                                consolidatedStatus: 'SUBMITTED',
+                                            }),
+                                            draftRateDataMock({
+                                                parentContractID:
+                                                    'test-abc-123',
+                                                status: 'DRAFT',
+                                                consolidatedStatus: 'DRAFT',
+                                            }),
+                                        ],
+                                    }),
+                                    id: 'test-abc-123',
+                                },
+                            }),
+                            updateDraftContractRatesMockSuccess({
+                                contract: {
+                                    id: 'test-abc-123',
+                                },
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: `/submissions/test-abc-123/edit/rate-details`,
+                    },
+                    featureFlags: {
+                        'rate-edit-unlock': false,
+                    },
+                }
+            )
+
+            await screen.findByText('Rate Details')
+
+            const linkRateRadioGroup =
+                screen.getAllByTestId('linkRateRadioGroup')
+            //Unlocked rate should be disabled
+            expect(linkRateRadioGroup[0]).toBeDisabled()
+            //Linked rate should be enabled regardless of status
+            expect(linkRateRadioGroup[1]).not.toBeDisabled()
+            //Should be enabled since its a draft
+            expect(linkRateRadioGroup[2]).not.toBeDisabled()
+
+            //We only have one disabled radio group so expect to find only one message
+            expect(
+                screen.getAllByText(
+                    'If you need to change your response, contact CMS.'
+                )
+            ).toHaveLength(1)
+        })
     })
 
     describe('error summary displays as expected', () => {

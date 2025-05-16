@@ -401,6 +401,20 @@ const RateDetails = ({
         return false
     }
 
+    const disableRateLinkRadios = (rateForm: FormikRateForm) => {
+        //Expect the `Was this rate certification included with another submission?`
+        //radio buttons to be disabled for any rate that is not a linked rate or in a draft state
+        if (
+            rateForm.ratePreviouslySubmitted === 'YES' ||
+            rateForm.status === 'DRAFT' ||
+            rateForm.status === undefined
+        ) {
+            return false
+        }
+
+        return true
+    }
+
     return (
         <>
             <FormNotificationContainer>
@@ -516,6 +530,9 @@ const RateDetails = ({
                                                                         shouldValidate={
                                                                             shouldValidate
                                                                         }
+                                                                        disableRadioBtns={disableRateLinkRadios(
+                                                                            rateForm
+                                                                        )}
                                                                     />
                                                                 )}
                                                                 {!displayAsStandaloneRate &&
