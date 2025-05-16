@@ -53,7 +53,7 @@ export type WithdrawContractReturnType = {
 const withdrawContractInsideTransaction = async (
     tx: PrismaTransactionType,
     args: WithdrawContractArgsType
-): Promise<WithdrawContractReturnType | Error> => {
+): Promise<WithdrawContractReturnType> => {
     const { contract, updatedReason, updatedByID } = args
 
     const latestSubmission = contract.packageSubmissions[0]

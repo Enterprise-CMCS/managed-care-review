@@ -8,6 +8,7 @@ import {
     FetchContractWithQuestionsDocument,
     ApproveContractDocument,
     WithdrawContractDocument,
+    UndoWithdrawContractDocument,
 } from '../gen/gqlClient'
 
 import { findStatePrograms } from '../postgres'
@@ -33,6 +34,7 @@ import { addNewRateToTestContract } from './gqlRateHelpers'
 import type { ContractFormDataType } from '../domain-models'
 import type { CreateHealthPlanPackageInput } from '../gen/gqlServer'
 import { mockGqlContractDraftRevisionFormDataInput } from './gqlContractInputMocks'
+import type { GraphQLFormattedError } from 'graphql/index'
 
 const createAndSubmitTestContract = async (
     server: ApolloServer,
@@ -488,6 +490,59 @@ const withdrawTestContract = async (
     return withdrawResult.data.withdrawContract.contract
 }
 
+const undoWithdrawTestContract = async (
+    server: ApolloServer,
+    contractID: string,
+    updatedReason: string
+): Promise<Contract> => {
+    const undoWithdrawResult = await server.executeOperation({
+        query: UndoWithdrawContractDocument,
+        variables: {
+            input: {
+                contractID,
+                updatedReason,
+            },
+        },
+    })
+
+    if (undoWithdrawResult.errors) {
+        console.info('errors', undoWithdrawResult.errors)
+    }
+
+    if (
+        undoWithdrawResult.data === undefined ||
+        undoWithdrawResult.data === null
+    ) {
+        throw new Error('undo withdraw contract returned nothing')
+    }
+
+    return undoWithdrawResult.data.undoWithdrawContract.contract
+}
+
+const errorUndoWithdrawTestContract = async (
+    server: ApolloServer,
+    contractID: string,
+    updatedReason: string
+): Promise<ReadonlyArray<GraphQLFormattedError>> => {
+    const undoWithdrawResult = await server.executeOperation({
+        query: UndoWithdrawContractDocument,
+        variables: {
+            input: {
+                contractID,
+                updatedReason,
+            },
+        },
+    })
+
+    if (!undoWithdrawResult.errors) {
+        throw new Error(
+            'errorUndoWithdrawTestContract: expected errors to return'
+        )
+    }
+
+    return undoWithdrawResult.errors
+}
+
 const contractHistoryToDescriptions = (contract: Contract): string[] => {
     return contract.packageSubmissions.reduce((history: string[], pkgSub) => {
         const updatedHistory = history
@@ -528,5 +583,7 @@ export {
     updateTestContractDraftRevision,
     createTestContract,
     withdrawTestContract,
+    undoWithdrawTestContract,
     contractHistoryToDescriptions,
+    errorUndoWithdrawTestContract,
 }
