@@ -215,11 +215,9 @@ function generateFakeName(
 function sanitizeEmail(email: string): string {
     if (!email || email.indexOf('@') === -1) return email
 
-    // Hash the original username to create a deterministic but anonymized username
+    // Keep the username but change the domain to example.com
     const [username] = email.split('@')
-    const hashedUsername = hashString(username).substring(0, 8)
-
-    return `user_${hashedUsername}@example.com`
+    return `${username}@example.com`
 }
 
 /**
