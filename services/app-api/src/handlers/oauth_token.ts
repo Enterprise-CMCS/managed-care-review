@@ -43,7 +43,7 @@ const main: APIGatewayProxyHandler = async (event) => {
     const jwtSecret = process.env.JWT_SECRET
 
     if (!dbURL) {
-        return {
+        const response: APIGatewayProxyResult = {
             statusCode: 500,
             body: JSON.stringify({
                 error: 'server_error',
@@ -53,11 +53,13 @@ const main: APIGatewayProxyHandler = async (event) => {
                 'Access-Control-Allow-Origin': '*',
                 'Access-Control-Allow-Credentials': 'true',
             },
+            multiValueHeaders: {},
         }
+        return response
     }
 
     if (!jwtSecret) {
-        return {
+        const response: APIGatewayProxyResult = {
             statusCode: 500,
             body: JSON.stringify({
                 error: 'server_error',
@@ -67,7 +69,9 @@ const main: APIGatewayProxyHandler = async (event) => {
                 'Access-Control-Allow-Origin': '*',
                 'Access-Control-Allow-Credentials': 'true',
             },
+            multiValueHeaders: {},
         }
+        return response
     }
 
     try {
@@ -92,7 +96,7 @@ const main: APIGatewayProxyHandler = async (event) => {
 
         // Check rate limit if client_id is present
         if (clientId && !checkRateLimit(clientId)) {
-            return {
+            const response: APIGatewayProxyResult = {
                 statusCode: 429,
                 body: JSON.stringify({
                     error: 'rate_limit_exceeded',
@@ -103,7 +107,9 @@ const main: APIGatewayProxyHandler = async (event) => {
                     'Access-Control-Allow-Credentials': 'true',
                     'Retry-After': '60',
                 },
+                multiValueHeaders: {},
             }
+            return response
         }
 
         const oauth2Server = new CustomOAuth2Server(pgResult, jwtSecret)
@@ -111,17 +117,19 @@ const main: APIGatewayProxyHandler = async (event) => {
         // Handle the token request
         const result = await oauth2Server.token(event)
 
-        return {
+        const response: APIGatewayProxyResult = {
             ...result,
             headers: {
                 ...result.headers,
                 'Access-Control-Allow-Origin': '*',
                 'Access-Control-Allow-Credentials': 'true',
             },
+            multiValueHeaders: {},
         }
+        return response
     } catch (error) {
         console.error('Error processing token request:', error)
-        return {
+        const response: APIGatewayProxyResult = {
             statusCode: 500,
             body: JSON.stringify({
                 error: 'server_error',
@@ -131,7 +139,9 @@ const main: APIGatewayProxyHandler = async (event) => {
                 'Access-Control-Allow-Origin': '*',
                 'Access-Control-Allow-Credentials': 'true',
             },
+            multiValueHeaders: {},
         }
+        return response
     }
 }
 
