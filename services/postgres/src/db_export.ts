@@ -1,6 +1,7 @@
 import { SecretsManager } from './secrets'
 import * as path from 'path'
 import * as fs from 'fs'
+import * as crypto from 'crypto'
 import { execSync } from 'child_process'
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3'
 
@@ -76,7 +77,7 @@ export const handler = async () => {
             console.info('Database dump completed successfully')
 
             // Read, sanitize, and write back SQL content
-            console.info('Sanitizing email addresses...')
+            console.info('Sanitizing sensitive information...')
             const sqlContent = fs.readFileSync(dumpFilePath, 'utf8')
             const sanitizedContent = sanitizeSqlDump(sqlContent)
             fs.writeFileSync(sanitizedDumpPath, sanitizedContent)
@@ -119,13 +120,116 @@ export const handler = async () => {
     }
 }
 
-function sanitizeEmail(email: string): string {
-    // Keep the username  but change the domain to example.com
-    const [username] = email.split('@')
-    return `${username}@example.com`
+/**
+ * Generates a deterministic hash for a string
+ * @param input The string to hash
+ * @returns A hex string hash
+ */
+function hashString(input: string): string {
+    return crypto.createHash('sha256').update(input).digest('hex')
 }
 
+/**
+ * Generates a fake name based on the original name
+ * @param name The original name
+ * @param type The type of name (first, last, or full)
+ * @returns A fake name
+ */
+function generateFakeName(
+    name: string,
+    type: 'first' | 'last' | 'full' = 'full'
+): string {
+    if (!name) return name // Return as-is if empty
+
+    // Use hash to create deterministic fake names
+    const hash = hashString(name)
+    const firstNameOptions = [
+        'Aang',
+        'Katara',
+        'Sokka',
+        'Toph',
+        'Zuko',
+        'Iroh',
+        'Azula',
+        'Suki',
+        'Ty Lee',
+        'Mai',
+        'Jet',
+        'Yue',
+        'Haru',
+        'Hakoda',
+        'Bumi',
+        'Gyatso',
+        'Roku',
+        'Kyoshi',
+        'Korra',
+        'Mako',
+        'Asami',
+        'Tenzin',
+        'Lin',
+    ]
+    const lastNameOptions = [
+        'Beifong',
+        'Fire',
+        'Water',
+        'Air',
+        'Earth',
+        'Roku',
+        'Sozin',
+        'Kyoshi',
+        'Kuruk',
+        'Yangchen',
+        'Wan',
+        'Raava',
+        'Vaatu',
+        'Sato',
+        'Agni',
+        'Kai',
+        'Long',
+        'Lee',
+        'Bei',
+        'Fong',
+        'Watertribe',
+    ]
+
+    // Pick a name based on hash value to ensure consistency
+    const hashNum = parseInt(hash.substring(0, 8), 16)
+
+    if (type === 'first') {
+        return firstNameOptions[hashNum % firstNameOptions.length]
+    } else if (type === 'last') {
+        return lastNameOptions[hashNum % lastNameOptions.length]
+    } else {
+        const firstName = firstNameOptions[hashNum % firstNameOptions.length]
+        const lastName =
+            lastNameOptions[(hashNum >> 4) % lastNameOptions.length]
+        return `${firstName} ${lastName}`
+    }
+}
+
+/**
+ * Generates a deterministic but anonymized email address
+ * @param email The original email address
+ * @returns A sanitized email address
+ */
+function sanitizeEmail(email: string): string {
+    if (!email || email.indexOf('@') === -1) return email
+
+    // Hash the original username to create a deterministic but anonymized username
+    const [username] = email.split('@')
+    const hashedUsername = hashString(username).substring(0, 8)
+
+    return `user_${hashedUsername}@example.com`
+}
+
+/**
+ * Sanitizes all sensitive information in a SQL dump
+ * @param sqlContent The SQL dump content to sanitize
+ * @returns Sanitized SQL content
+ */
 function sanitizeSqlDump(sqlContent: string): string {
+    // ---- Email Sanitization -----
+
     // Replace individual email fields
     sqlContent = sqlContent.replace(
         /"email"\s*=\s*'([^']+)'/g,
@@ -160,6 +264,41 @@ function sanitizeSqlDump(sqlContent: string): string {
     sqlContent = sqlContent.replace(
         /"emailSource"\s*=\s*'([^']+)'/g,
         (match, email) => `"emailSource" = '${sanitizeEmail(email)}'`
+    )
+
+    // ----- Name Sanitization ------
+
+    // Sanitize User table names
+    sqlContent = sqlContent.replace(
+        /"givenName"\s*=\s*'([^']+)'/g,
+        (match, name) => `"givenName" = '${generateFakeName(name, 'first')}'`
+    )
+
+    sqlContent = sqlContent.replace(
+        /"familyName"\s*=\s*'([^']+)'/g,
+        (match, name) => `"familyName" = '${generateFakeName(name, 'last')}'`
+    )
+
+    // Sanitize names in StateContact table
+    sqlContent = sqlContent.replace(
+        /"name"\s*=\s*'([^']+)'/g,
+        (match, name, offset, string) => {
+            // Check if this name is in a StateContact or ActuaryContact context
+            const contextBefore = string.substring(
+                Math.max(0, offset - 200),
+                offset
+            )
+
+            if (
+                contextBefore.includes('StateContact') ||
+                contextBefore.includes('ActuaryContact')
+            ) {
+                return `"name" = '${generateFakeName(name)}'`
+            }
+
+            // If not in relevant context, return unchanged
+            return match
+        }
     )
 
     return sqlContent
