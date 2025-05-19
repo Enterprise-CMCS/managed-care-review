@@ -18,6 +18,7 @@ export type LinkYourRatesProps = {
     index: number
     shouldValidate: boolean
     autofill: (rateForm: FormikRateForm) => void // used for multi-rates, when called will FieldArray replace the existing form fields with new data
+    disableRadioBtns: boolean
 }
 
 export const LinkYourRates = ({
@@ -25,6 +26,7 @@ export const LinkYourRates = ({
     index,
     autofill,
     shouldValidate,
+    disableRadioBtns,
 }: LinkYourRatesProps): React.ReactElement | null => {
     const { values, errors } = useFormikContext<RateDetailFormConfig>()
     const { getKey } = useS3()
@@ -63,8 +65,14 @@ export const LinkYourRates = ({
                 legend={
                     'Was this rate certification included with another submission?'
                 }
+                data-testid="linkRateRadioGroup"
+                disabled={disableRadioBtns}
             >
-                <span className={styles.requiredOptionalText}>Required</span>
+                {!disableRadioBtns && (
+                    <span className={styles.requiredOptionalText}>
+                        Required
+                    </span>
+                )}
                 <PoliteErrorMessage formFieldLabel="Was this rate certification included with another submission?">
                     {showFieldErrors('ratePreviouslySubmitted')}
                 </PoliteErrorMessage>
@@ -102,6 +110,14 @@ export const LinkYourRates = ({
                     radio_button_title="Yes, this rate certification is part of another submission"
                     parent_component_heading="Was this rate certification included with another submission?"
                 />
+                {disableRadioBtns && (
+                    <span
+                        className={styles.requiredOptionalText}
+                        style={{ marginTop: '3%' }}
+                    >
+                        If you need to change your response, contact CMS.
+                    </span>
+                )}
             </Fieldset>
             {getIn(values, `${fieldNamePrefix}.ratePreviouslySubmitted`) ===
                 'YES' && (

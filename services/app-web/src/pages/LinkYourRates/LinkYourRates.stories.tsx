@@ -20,6 +20,7 @@ export const LinkRates = (): React.ReactElement => {
                     autofill={() => {
                         console.info('autofill rate')
                     }}
+                    disableRadioBtns={false}
                 />
             </form>
         </Formik>
