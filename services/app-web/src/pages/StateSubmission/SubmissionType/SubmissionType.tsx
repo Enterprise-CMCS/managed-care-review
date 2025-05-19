@@ -84,7 +84,6 @@ export const SubmissionType = ({
     const ldClient = useLDClient()
     const isNewSubmission = location.pathname === '/submissions/new'
     const { id } = useRouteParams()
-
     const hideSupportingDocs = ldClient?.variation(
         featureFlags.HIDE_SUPPORTING_DOCS_PAGE.flag,
         featureFlags.HIDE_SUPPORTING_DOCS_PAGE.defaultValue
@@ -598,7 +597,9 @@ export const SubmissionType = ({
                                             <Fieldset
                                                 className={styles.radioGroup}
                                                 role="radiogroup"
-                                                aria-required
+                                                aria-required={
+                                                    !hasPreviouslySubmittedRates
+                                                }
                                                 defaultValue={
                                                     values.submissionType
                                                 }
@@ -608,13 +609,15 @@ export const SubmissionType = ({
                                                     hasPreviouslySubmittedRates
                                                 }
                                             >
-                                                <span
-                                                    className={
-                                                        styles.requiredOptionalText
-                                                    }
-                                                >
-                                                    Required
-                                                </span>
+                                                {!hasPreviouslySubmittedRates && (
+                                                    <span
+                                                        className={
+                                                            styles.requiredOptionalText
+                                                        }
+                                                    >
+                                                        Required
+                                                    </span>
+                                                )}
                                                 {showFieldErrors(
                                                     errors.submissionType
                                                 ) && (
