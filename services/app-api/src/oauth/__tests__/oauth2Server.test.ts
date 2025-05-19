@@ -54,10 +54,53 @@ vi.mock('@node-oauth/oauth2-server', () => {
         }
     }
 
+    interface OAuth2ServerModel {
+        getClient: (clientId: string, clientSecret: string) => Promise<Client>
+        validateScope: (
+            user: User,
+            client: Client,
+            scope: string
+        ) => Promise<boolean>
+        saveToken: (token: Token, client: Client, user: User) => Promise<Token>
+        getAccessToken: (accessToken: string) => Promise<Token | null>
+    }
+
+    class OAuth2Server {
+        private model: OAuth2ServerModel
+
+        constructor(options: { model: OAuth2ServerModel }) {
+            this.model = options.model
+        }
+
+        async token(request: Request, response: Response) {
+            if (!request.body) {
+                throw new InvalidRequestError('Missing request body')
+            }
+
+            if (!request.body.client_id || !request.body.client_secret) {
+                throw new InvalidRequestError('Missing client credentials')
+            }
+
+            if (request.body.client_secret === 'invalid') {
+                // pragma: allowlist secret
+                throw new InvalidClientError('Invalid client credentials')
+            }
+
+            return {
+                grantType: 'client_credentials',
+                client: {
+                    id: request.body.client_id,
+                    grants: ['client_credentials'],
+                } as Client,
+                accessToken: 'mock.access.token',
+                user: { id: 'system' } as User,
+            } as Token
+        }
+    }
+
     return {
-        OAuth2Server: vi.fn().mockImplementation(() => ({
-            token: vi.fn(),
-        })),
+        default: OAuth2Server,
+        OAuth2Server,
         UnauthorizedClientError,
         InvalidRequestError,
         InvalidClientError,
@@ -90,22 +133,6 @@ describe('CustomOAuth2Server', () => {
                 queryStringParameters: null,
             } as APIGatewayProxyEvent
 
-            // Mock OAuth2Server to throw InvalidRequestError
-            const { OAuth2Server, InvalidRequestError } = await import(
-                '@node-oauth/oauth2-server'
-            )
-            const mockInstance = new OAuth2Server({
-                model: {
-                    getClient: vi.fn(),
-                    validateScope: vi.fn(),
-                    saveToken: vi.fn(),
-                    getAccessToken: vi.fn(),
-                },
-            })
-            vi.spyOn(mockInstance, 'token').mockRejectedValueOnce(
-                new InvalidRequestError('Invalid request')
-            )
-
             const result = await oauth2Server.token(event)
 
             expect(result.statusCode).toBe(400)
@@ -127,22 +154,6 @@ describe('CustomOAuth2Server', () => {
                 queryStringParameters: null,
             } as APIGatewayProxyEvent
 
-            // Mock OAuth2Server to throw InvalidClientError
-            const { OAuth2Server, InvalidClientError } = await import(
-                '@node-oauth/oauth2-server'
-            )
-            const mockInstance = new OAuth2Server({
-                model: {
-                    getClient: vi.fn(),
-                    validateScope: vi.fn(),
-                    saveToken: vi.fn(),
-                    getAccessToken: vi.fn(),
-                },
-            })
-            vi.spyOn(mockInstance, 'token').mockRejectedValueOnce(
-                new InvalidClientError('Invalid client credentials')
-            )
-
             const result = await oauth2Server.token(event)
 
             expect(result.statusCode).toBe(401)
@@ -163,26 +174,6 @@ describe('CustomOAuth2Server', () => {
                 httpMethod: 'POST',
                 queryStringParameters: null,
             } as APIGatewayProxyEvent
-
-            // Mock OAuth2Server to return valid token
-            const { OAuth2Server } = await import('@node-oauth/oauth2-server')
-            const mockInstance = new OAuth2Server({
-                model: {
-                    getClient: vi.fn(),
-                    validateScope: vi.fn(),
-                    saveToken: vi.fn(),
-                    getAccessToken: vi.fn(),
-                },
-            })
-            vi.spyOn(mockInstance, 'token').mockResolvedValueOnce({
-                grantType: 'client_credentials',
-                client: {
-                    id: 'valid',
-                    grants: ['client_credentials'],
-                } as Client,
-                accessToken: 'mock.access.token',
-                user: { id: 'system' } as User,
-            } as Token)
 
             const result = await oauth2Server.token(event)
 
