@@ -37,30 +37,19 @@ async function main() {
             process.exit(1)
         }
 
-        // eslint-disable-next-line no-console
-        console.log('Successfully created OAuth client:')
-        // eslint-disable-next-line no-console
-        console.log('Client ID:', clientId)
-        // eslint-disable-next-line no-console
-        console.log('Client Secret:', clientSecret)
-        // eslint-disable-next-line no-console
-        console.log(
+        logMessage('Successfully created OAuth client:')
+        logMessage('Client ID:', clientId)
+        logMessage('Client Secret:', clientSecret)
+        logMessage(
             '\nYou can now use these credentials to test the OAuth token endpoint:'
         )
-        // eslint-disable-next-line no-console
-        console.log('POST /oauth/token')
-        // eslint-disable-next-line no-console
-        console.log('Content-Type: application/json')
-        // eslint-disable-next-line no-console
-        console.log('{')
-        // eslint-disable-next-line no-console
-        console.log('  "grant_type": "client_credentials",')
-        // eslint-disable-next-line no-console
-        console.log(`  "client_id": "${clientId}",`)
-        // eslint-disable-next-line no-console
-        console.log(`  "client_secret": "${clientSecret}"`)
-        // eslint-disable-next-line no-console
-        console.log('}')
+        logMessage('POST /oauth/token')
+        logMessage('Content-Type: application/json')
+        logMessage('{')
+        logMessage('  "grant_type": "client_credentials",')
+        logMessage(`  "client_id": "${clientId}",`)
+        logMessage(`  "client_secret": "${clientSecret}"`)
+        logMessage('}')
     } catch (error) {
         console.error('Error:', error)
         process.exit(1)
