@@ -125,6 +125,23 @@ describe('CustomOAuth2Server', () => {
     })
 
     describe('token', () => {
+        it('should return 400 for invalid JSON payload', async () => {
+            const event = {
+                body: '{invalid json',
+                headers: {},
+                httpMethod: 'POST',
+                queryStringParameters: null,
+            } as APIGatewayProxyEvent
+
+            const result = await oauth2Server.token(event)
+
+            expect(result.statusCode).toBe(400)
+            expect(JSON.parse(result.body)).toEqual({
+                error: 'invalid_request',
+                error_description: 'Invalid JSON payload',
+            })
+        })
+
         it('should return 400 for invalid request', async () => {
             const event = {
                 body: JSON.stringify({}),

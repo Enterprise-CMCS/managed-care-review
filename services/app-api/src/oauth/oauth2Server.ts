@@ -94,8 +94,24 @@ export class CustomOAuth2Server {
 
     // Main method to handle token requests
     async token(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
+        let body: Record<string, unknown> = {}
+        try {
+            body = event.body ? JSON.parse(event.body) : {}
+        } catch {
+            return {
+                statusCode: 400,
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    error: 'invalid_request',
+                    error_description: 'Invalid JSON payload',
+                }),
+            }
+        }
+
         const request = new OAuthRequest({
-            body: event.body ? JSON.parse(event.body) : {},
+            body,
             headers: event.headers,
             method: event.httpMethod,
             query: event.queryStringParameters || {},
