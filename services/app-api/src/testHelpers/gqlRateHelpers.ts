@@ -520,13 +520,15 @@ const undoWithdrawTestRate = async (
 
 const fetchTestIndexRatesStripped = async (
     server: ApolloServer,
-    stateCode?: string
+    stateCode?: string,
+    rateIDs?: string[]
 ): Promise<IndexRatesStrippedPayload> => {
     const indexRatesStrippedResult = await server.executeOperation({
         query: IndexRatesStrippedDocument,
         variables: {
             input: {
-                stateCode: stateCode,
+                stateCode,
+                rateIDs,
             },
         },
     })

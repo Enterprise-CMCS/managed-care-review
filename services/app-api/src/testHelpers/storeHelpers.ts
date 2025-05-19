@@ -139,9 +139,6 @@ function mockStoreThatErrors(): Store {
         unlockRate: async (_ID) => {
             return genericError
         },
-        replaceRateOnContract: async (_ID) => {
-            return genericError
-        },
         findAllDocuments: async () => {
             return genericError
         },
@@ -155,6 +152,9 @@ function mockStoreThatErrors(): Store {
             return genericError
         },
         withdrawContract: async (_ID) => {
+            return genericError
+        },
+        undoWithdrawContract: async (_ID) => {
             return genericError
         },
         withdrawRate: async (_ID) => {
