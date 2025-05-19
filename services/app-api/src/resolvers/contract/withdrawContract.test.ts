@@ -332,7 +332,7 @@ describe('withdrawContract', () => {
         expect(rateC.parentContractID).toBe(draftContractC.id)
 
         const contractAHistory =
-            await contractHistoryToDescriptions(withdrawnContract)
+            contractHistoryToDescriptions(withdrawnContract)
 
         expect(contractAHistory).toStrictEqual(
             expect.arrayContaining([
@@ -659,7 +659,7 @@ describe('withdrawContract', () => {
 
         const rateA = await fetchTestRateById(cmsServer, rateARevision.rateID)
 
-        // expect rateA to be withdrawn with the original parent contract
+        // expect contract A to be withdrawn
         expect(withdrawnContract.consolidatedStatus).toBe('WITHDRAWN')
 
         // expect rate A to be resubmitted and its new parent contract is B.

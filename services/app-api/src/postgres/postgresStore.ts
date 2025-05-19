@@ -21,7 +21,7 @@ import type {
     AuditDocument,
     EmailSettingsType,
 } from '../domain-models'
-import { findPrograms, findStatePrograms } from '../postgres'
+import { findPrograms, findStatePrograms } from './'
 import type { InsertUserArgsType } from './user'
 import {
     findUser,
@@ -97,37 +97,40 @@ import type {
 import { withdrawContract } from './contractAndRates/withdrawContract'
 import { findRateRelatedContracts } from './contractAndRates/findRateRelatedContracts'
 import type { RelatedContractStripped } from '../gen/gqlClient'
+import {
+    undoWithdrawContract,
+    type UndoWithdrawContractArgsType,
+    type UndoWithdrawContractReturnType,
+} from './contractAndRates/undoWithdrawContract'
 
 type Store = {
+    /** Settings functions **/
+    findEmailSettings: () => Promise<EmailSettingsType | Error>
+    updateEmailSettings: (
+        emailSettings: EmailSettingsType
+    ) => Promise<EmailSettingsType | Error>
     findPrograms: (
         stateCode: string,
         programIDs: Array<string>
     ) => ProgramType[] | Error
-
     findStatePrograms: (stateCode: string) => ProgramType[] | Error
-
     findAllSupportedStates: () => Promise<StateType[] | Error>
 
-    findAllUsers: () => Promise<UserType[] | Error>
-
-    findUser: (id: string) => Promise<UserType | undefined | Error>
-
-    findStateAssignedUsers: (
-        stateCode: StateCodeType
-    ) => Promise<UserType[] | Error>
-
+    /** User functions **/
     insertUser: (user: InsertUserArgsType) => Promise<UserType | Error>
-
     insertManyUsers: (
         users: InsertUserArgsType[]
     ) => Promise<UserType[] | Error>
-
+    findAllUsers: () => Promise<UserType[] | Error>
+    findUser: (id: string) => Promise<UserType | undefined | Error>
+    findStateAssignedUsers: (
+        stateCode: StateCodeType
+    ) => Promise<UserType[] | Error>
     updateStateAssignedUsers: (
         idOfUserPerformingUpdate: string,
         stateCode: StateCodeType,
         assignedUserIDs: string[]
     ) => Promise<UserType[] | Error>
-
     updateCmsUserProperties: (
         userID: string,
         idOfUserPerformingUpdate: string,
@@ -136,128 +139,128 @@ type Store = {
         description?: string | null
     ) => Promise<CMSUsersUnionType | Error>
 
-    insertContractQuestion: (
-        questionInput: CreateContractQuestionInput,
-        user: CMSUsersUnionType
-    ) => Promise<ContractQuestionType | Error>
-
-    findAllQuestionsByContract: (
-        pkgID: string
-    ) => Promise<ContractQuestionType[] | Error>
-
-    insertContractQuestionResponse: (
-        questionInput: InsertQuestionResponseArgs,
-        user: StateUserType
-    ) => Promise<ContractQuestionType | Error>
-
-    insertRateQuestionResponse: (
-        questionInput: InsertQuestionResponseArgs,
-        user: StateUserType
-    ) => Promise<RateQuestionType | Error>
-
-    insertRateQuestion: (
-        questionInput: CreateRateQuestionInputType,
-        user: CMSUsersUnionType
-    ) => Promise<RateQuestionType | Error>
-
-    findAllQuestionsByRate: (
-        rateID: string
-    ) => Promise<RateQuestionType[] | Error>
-
+    /** Contract functions **/
     insertDraftContract: (
         args: InsertContractArgsType
     ) => Promise<ContractType | Error>
-
-    approveContract: (
-        args: ApproveContractArgsType
-    ) => Promise<ContractType | Error>
-
-    withdrawContract: (
-        args: WithdrawContractArgsType
-    ) => Promise<WithdrawContractReturnType | Error>
-
-    withdrawRate: (args: WithdrawRateArgsType) => Promise<RateType | Error>
-
-    undoWithdrawRate: (
-        args: UndoWithdrawRateArgsType
-    ) => Promise<RateType | Error>
-
     findContractWithHistory: (
         contractID: string
     ) => Promise<ContractType | Error>
-
-    findRateWithHistory: (rateID: string) => Promise<RateType | Error>
-    findRateRelatedContracts: (
-        rateID: string
-    ) => Promise<RelatedContractStripped[] | Error>
-
-    updateContract: (
-        args: UpdateMCCRSIDFormArgsType
-    ) => Promise<ContractType | Error>
-
-    updateDraftContract: (
-        args: UpdateContractArgsType
-    ) => Promise<ContractType | Error>
-
-    updateDraftContractWithRates: (
-        args: UpdateContractArgsType
-    ) => Promise<ContractType | Error>
-
-    updateDraftContractRates: (
-        args: UpdateDraftContractRatesArgsType
-    ) => Promise<ContractType | Error>
-
     findAllContractsWithHistoryByState: (
         stateCode: string
     ) => Promise<ContractOrErrorArrayType | Error>
-
     findAllContractsWithHistoryBySubmitInfo: (
         useZod?: boolean
     ) => Promise<ContractOrErrorArrayType | Error>
-
-    findAllRatesWithHistoryBySubmitInfo: (
-        args?: FindAllRatesWithHistoryBySubmitType
-    ) => Promise<RateOrErrorArrayType | Error>
-
-    findAllRatesStripped: (
-        args?: FindAllRatesStrippedType
-    ) => Promise<StrippedRateOrErrorArrayType | Error>
-
+    findContractRevision: (
+        contractRevID: string
+    ) => Promise<ContractRevisionTable | Error>
+    updateContract: (
+        args: UpdateMCCRSIDFormArgsType
+    ) => Promise<ContractType | Error>
+    updateDraftContract: (
+        args: UpdateContractArgsType
+    ) => Promise<ContractType | Error>
+    updateDraftContractWithRates: (
+        args: UpdateContractArgsType
+    ) => Promise<ContractType | Error>
+    updateDraftContractRates: (
+        args: UpdateDraftContractRatesArgsType
+    ) => Promise<ContractType | Error>
     submitContract: (
         args: SubmitContractArgsType
     ) => Promise<ContractType | Error>
-
-    submitRate: (args: SubmitRateArgsType) => Promise<RateType | Error>
-
     unlockContract: (
         args: UnlockContractArgsType,
         linkRatesFF?: boolean
     ) => Promise<UnlockedContractType | Error>
+    approveContract: (
+        args: ApproveContractArgsType
+    ) => Promise<ContractType | Error>
+    withdrawContract: (
+        args: WithdrawContractArgsType
+    ) => Promise<WithdrawContractReturnType | Error>
+    undoWithdrawContract: (
+        args: UndoWithdrawContractArgsType
+    ) => Promise<UndoWithdrawContractReturnType | Error>
 
-    unlockRate: (args: UnlockRateArgsType) => Promise<RateType | Error>
-
-    findAllDocuments: () => Promise<AuditDocument[] | Error>
-
-    findContractRevision: (
-        contractRevID: string
-    ) => Promise<ContractRevisionTable | Error>
-
+    /** Rate functions **/
+    findRateWithHistory: (rateID: string) => Promise<RateType | Error>
     findRateRevision: (
         rateRevisionID: string
     ) => Promise<RateRevisionTable | Error>
+    findRateRelatedContracts: (
+        rateID: string
+    ) => Promise<RelatedContractStripped[] | Error>
+    findAllRatesWithHistoryBySubmitInfo: (
+        args?: FindAllRatesWithHistoryBySubmitType
+    ) => Promise<RateOrErrorArrayType | Error>
+    findAllRatesStripped: (
+        args?: FindAllRatesStrippedType
+    ) => Promise<StrippedRateOrErrorArrayType | Error>
+    submitRate: (args: SubmitRateArgsType) => Promise<RateType | Error>
+    unlockRate: (args: UnlockRateArgsType) => Promise<RateType | Error>
+    withdrawRate: (args: WithdrawRateArgsType) => Promise<RateType | Error>
+    undoWithdrawRate: (
+        args: UndoWithdrawRateArgsType
+    ) => Promise<RateType | Error>
 
-    findEmailSettings: () => Promise<EmailSettingsType | Error>
-    updateEmailSettings: (
-        emailSettings: EmailSettingsType
-    ) => Promise<EmailSettingsType | Error>
+    /** Q&A functions **/
+    insertContractQuestion: (
+        questionInput: CreateContractQuestionInput,
+        user: CMSUsersUnionType
+    ) => Promise<ContractQuestionType | Error>
+    insertContractQuestionResponse: (
+        questionInput: InsertQuestionResponseArgs,
+        user: StateUserType
+    ) => Promise<ContractQuestionType | Error>
+    findAllQuestionsByContract: (
+        pkgID: string
+    ) => Promise<ContractQuestionType[] | Error>
+    insertRateQuestion: (
+        questionInput: CreateRateQuestionInputType,
+        user: CMSUsersUnionType
+    ) => Promise<RateQuestionType | Error>
+    insertRateQuestionResponse: (
+        questionInput: InsertQuestionResponseArgs,
+        user: StateUserType
+    ) => Promise<RateQuestionType | Error>
+    findAllQuestionsByRate: (
+        rateID: string
+    ) => Promise<RateQuestionType[] | Error>
+
+    /** Other **/
+    findAllDocuments: () => Promise<AuditDocument[] | Error>
 }
 
 function NewPostgresStore(client: ExtendedPrismaClient): Store {
     return {
+        /** Settings functions **/
+        findEmailSettings: () => findEmailSettings(client),
+        updateEmailSettings: (emailSettings) =>
+            updateEmailSettings(client, emailSettings),
         findPrograms: findPrograms,
-        findUser: (id) => findUser(client, id),
+        findStatePrograms: findStatePrograms,
+        findAllSupportedStates: () => findAllSupportedStates(client),
+
+        /** User functions **/
         insertUser: (args) => insertUser(client, args),
         insertManyUsers: (args) => insertManyUsers(client, args),
+        findAllUsers: () => findAllUsers(client),
+        findUser: (id) => findUser(client, id),
+        findStateAssignedUsers: (stateCode) =>
+            findStateAssignedUsers(client, stateCode),
+        updateStateAssignedUsers: (
+            idOfUserPerformingUpdate,
+            stateCode,
+            assignedUserIDs
+        ) =>
+            updateStateAssignedUsers(
+                client,
+                idOfUserPerformingUpdate,
+                stateCode,
+                assignedUserIDs
+            ),
         updateCmsUserProperties: (
             userID,
             stateCodes,
@@ -273,29 +276,48 @@ function NewPostgresStore(client: ExtendedPrismaClient): Store {
                 divisionAssignment,
                 description
             ),
-        updateStateAssignedUsers: (
-            idOfUserPerformingUpdate,
-            stateCode,
-            assignedUserIDs
-        ) =>
-            updateStateAssignedUsers(
-                client,
-                idOfUserPerformingUpdate,
-                stateCode,
-                assignedUserIDs
-            ),
-        findStatePrograms: findStatePrograms,
-        findAllSupportedStates: () => findAllSupportedStates(client),
-        findAllUsers: () => findAllUsers(client),
-        findStateAssignedUsers: (stateCode) =>
-            findStateAssignedUsers(client, stateCode),
 
+        /** Contract functions **/
+        insertDraftContract: (args) => insertDraftContract(client, args),
+        findContractWithHistory: (args) =>
+            findContractWithHistory(client, args),
+        findAllContractsWithHistoryByState: (args) =>
+            findAllContractsWithHistoryByState(client, args),
+        findAllContractsWithHistoryBySubmitInfo: (args) =>
+            findAllContractsWithHistoryBySubmitInfo(client, args),
+        findContractRevision: (args) => findContractRevision(client, args),
+        updateContract: (args) => updateMCCRSID(client, args),
+        updateDraftContract: (args) => updateDraftContract(client, args),
+        updateDraftContractWithRates: (args) =>
+            updateDraftContractWithRates(client, args),
+        updateDraftContractRates: (args) =>
+            updateDraftContractRates(client, args),
+        submitContract: (args) => submitContract(client, args),
+        unlockContract: (args) => unlockContract(client, args),
+        approveContract: (args) => approveContract(client, args),
+        withdrawContract: (args) => withdrawContract(client, args),
+        undoWithdrawContract: (args) => undoWithdrawContract(client, args),
+
+        /** Rate functions **/
+        findRateWithHistory: (args) => findRateWithHistory(client, args),
+        findRateRevision: (args) => findRateRevision(client, args),
+        findRateRelatedContracts: (args) =>
+            findRateRelatedContracts(client, args),
+        findAllRatesWithHistoryBySubmitInfo: (args) =>
+            findAllRatesWithHistoryBySubmitInfo(client, args),
+        findAllRatesStripped: (args) => findAllRatesStripped(client, args),
+        submitRate: (args) => submitRate(client, args),
+        unlockRate: (args) => unlockRate(client, args),
+        withdrawRate: (args) => withdrawRate(client, args),
+        undoWithdrawRate: (args) => undoWithdrawRate(client, args),
+
+        /** Q&A functions **/
         insertContractQuestion: (questionInput, user) =>
             insertContractQuestion(client, questionInput, user),
-        findAllQuestionsByContract: (pkgID) =>
-            findAllQuestionsByContract(client, pkgID),
         insertContractQuestionResponse: (questionInput, user) =>
             insertContractQuestionResponse(client, questionInput, user),
+        findAllQuestionsByContract: (pkgID) =>
+            findAllQuestionsByContract(client, pkgID),
         insertRateQuestion: (questionInput, user) =>
             insertRateQuestion(client, questionInput, user),
         insertRateQuestionResponse: (questionInput, user) =>
@@ -303,41 +325,8 @@ function NewPostgresStore(client: ExtendedPrismaClient): Store {
         findAllQuestionsByRate: (rateID) =>
             findAllQuestionsByRate(client, rateID),
 
-        insertDraftContract: (args) => insertDraftContract(client, args),
-        approveContract: (args) => approveContract(client, args),
-        withdrawContract: (args) => withdrawContract(client, args),
-        withdrawRate: (args) => withdrawRate(client, args),
-        undoWithdrawRate: (args) => undoWithdrawRate(client, args),
-        findContractWithHistory: (args) =>
-            findContractWithHistory(client, args),
-        findRateWithHistory: (args) => findRateWithHistory(client, args),
-        findRateRelatedContracts: (args) =>
-            findRateRelatedContracts(client, args),
-        updateDraftContractWithRates: (args) =>
-            updateDraftContractWithRates(client, args),
-        updateContract: (args) => updateMCCRSID(client, args),
-        updateDraftContract: (args) => updateDraftContract(client, args),
-        updateDraftContractRates: (args) =>
-            updateDraftContractRates(client, args),
-        findAllContractsWithHistoryByState: (args) =>
-            findAllContractsWithHistoryByState(client, args),
-        findAllContractsWithHistoryBySubmitInfo: (args) =>
-            findAllContractsWithHistoryBySubmitInfo(client, args),
-        findAllRatesWithHistoryBySubmitInfo: (args) =>
-            findAllRatesWithHistoryBySubmitInfo(client, args),
-        findAllRatesStripped: (args) => findAllRatesStripped(client, args),
-        submitContract: (args) => submitContract(client, args),
-        submitRate: (args) => submitRate(client, args),
-        unlockContract: (args) => unlockContract(client, args),
-        unlockRate: (args) => unlockRate(client, args),
-
+        /** Other **/
         findAllDocuments: () => findAllDocuments(client),
-        findContractRevision: (args) => findContractRevision(client, args),
-        findRateRevision: (args) => findRateRevision(client, args),
-
-        findEmailSettings: () => findEmailSettings(client),
-        updateEmailSettings: (emailSettings) =>
-            updateEmailSettings(client, emailSettings),
     }
 }
 
