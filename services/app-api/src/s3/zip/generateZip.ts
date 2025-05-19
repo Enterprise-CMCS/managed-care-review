@@ -1,7 +1,7 @@
 import {
-    type S3Client,
     GetObjectCommand,
     PutObjectCommand,
+    S3Client,
 } from '@aws-sdk/client-s3'
 import { Readable } from 'stream'
 import * as fs from 'fs'
@@ -11,6 +11,10 @@ import * as crypto from 'crypto'
 import Archiver from 'archiver'
 import { pipeline } from 'stream/promises'
 import { logError } from '../../logger'
+
+const s3Client = new S3Client({
+    region: process.env.AWS_REGION || 'us-east-1',
+})
 
 /**
  * Extracts bucket name from S3 URL
@@ -59,13 +63,11 @@ function extractS3Key(s3URL: string): string | Error {
  * Generates a zip file containing the provided documents and uploads it to S3
  * Reimplemented from our zip lambda handler, bulk_downloads.ts
  *
- * @param s3Client The S3 client to use for operations
  * @param documents Array of document information with s3URLs
  * @param outputPath The S3 path where the zip file should be stored
  * @returns Object with the S3 URL and SHA256 hash of the generated zip, or Error
  */
 export async function generateDocumentZip(
-    s3Client: S3Client,
     documents: Array<{ s3URL: string; name: string; sha256?: string }>,
     outputPath: string,
     options = {
