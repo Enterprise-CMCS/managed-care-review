@@ -665,6 +665,17 @@ export const SubmissionType = ({
                                                         ]
                                                     }
                                                 />
+                                                {hasPreviouslySubmittedRates && (
+                                                    <div
+                                                        role="note"
+                                                        aria-labelledby="submissionType"
+                                                        className="usa-hint padding-top-2"
+                                                    >
+                                                        If you need to change
+                                                        your response, contact
+                                                        CMS.
+                                                    </div>
+                                                )}
                                                 {values.populationCovered ===
                                                     'CHIP' && (
                                                     <div
