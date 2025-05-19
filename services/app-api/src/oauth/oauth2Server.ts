@@ -87,7 +87,7 @@ export class CustomOAuth2Server {
         const payload = {
             sub: clientId,
             iat: Math.floor(Date.now() / 1000),
-            exp: Math.floor(Date.now() / 1000) + 3600, // 1 hour expiration
+            exp: Math.floor(Date.now() / 1000) + JWT_EXPIRATION_SECONDS, // 1 hour expiration
         }
         return sign(payload, this.jwtSecret)
     }
