@@ -354,22 +354,45 @@ export function submitContract(
         if (submitContractResult.packageSubmissions[0]?.contractRevision) {
             const contractRevision =
                 submitContractResult.packageSubmissions[0].contractRevision
-            const zipResult = await generateContractDocumentsZip(
-                store,
-                contractRevision,
-                span
-            )
 
-            if (zipResult instanceof Error) {
-                logError(
-                    'submitContract - contract documents zip generation failed',
-                    zipResult
+            // Only attempt to generate zip if there are actually documents to zip
+            if (
+                contractRevision.formData.contractDocuments &&
+                contractRevision.formData.contractDocuments.length > 0
+            ) {
+                console.info(
+                    `Generating zip for ${contractRevision.formData.contractDocuments.length} contract documents for contract revision ${contractRevision.id}`
                 )
-                setErrorAttributesOnActiveSpan(
-                    'contract documents zip generation failed',
+
+                const zipResult = await generateContractDocumentsZip(
+                    store,
+                    contractRevision,
                     span
                 )
-                // TODO: do we want to abort the submit if zip generation fails?
+
+                if (zipResult instanceof Error) {
+                    // We're choosing to log the error but continue with submission
+                    // This way, a zip generation failure doesn't block the contract submission
+                    logError(
+                        'submitContract - contract documents zip generation failed',
+                        zipResult
+                    )
+                    setErrorAttributesOnActiveSpan(
+                        'contract documents zip generation failed',
+                        span
+                    )
+                    console.warn(
+                        `Contract document zip generation failed for revision ${contractRevision.id}, but continuing with submission process`
+                    )
+                } else {
+                    console.info(
+                        `Successfully generated contract document zip for revision ${contractRevision.id}`
+                    )
+                }
+            } else {
+                console.info(
+                    `No contract documents found for revision ${contractRevision.id}, skipping zip generation`
+                )
             }
         }
 
