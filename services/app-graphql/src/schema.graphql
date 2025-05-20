@@ -137,9 +137,7 @@ type Mutation {
     - ForbiddenError: A CMSUser calls this mutation
     - UserInputError: ProgramID not found in this state's programs
     """
-    createContract(
-        input: CreateContractInput!
-    ): CreateContractPayload!
+    createContract(input: CreateContractInput!): CreateContractPayload!
 
     """
     updateHealthPlanFormData updates a single package with the current
@@ -302,10 +300,7 @@ type Mutation {
         - EMAIL_ERROR
             - Sending state or CMS email failed.
     """
-    unlockContract(
-        input: UnlockContractInput!
-    ): UnlockContractPayload!
-
+    unlockContract(input: UnlockContractInput!): UnlockContractPayload!
 
     """
     updateDivisionAssignment updates CMS user division assignment.
@@ -320,7 +315,9 @@ type Mutation {
         - cmsUserID was not a CMSUser's ID
         - stateCodes included an invalid state code
     """
-    updateDivisionAssignment(input: UpdateDivisionAssignmentInput!): UpdateCMSUserPayload!
+    updateDivisionAssignment(
+        input: UpdateDivisionAssignmentInput!
+    ): UpdateCMSUserPayload!
 
     """
     updateStateAssignment updates an individual CMSUser state assignments.
@@ -336,7 +333,9 @@ type Mutation {
     - cmsUserID was not a CMSUser's ID
     - stateCodes included an invalid state code
     """
-    updateStateAssignment(input: UpdateStateAssignmentInput!): UpdateCMSUserPayload!
+    updateStateAssignment(
+        input: UpdateStateAssignmentInput!
+    ): UpdateCMSUserPayload!
 
     """
     updateStateAssignmentByState updates a group of CMSUsers to be assigned to a given state.
@@ -352,12 +351,16 @@ type Mutation {
     - cmsUserID was not a CMSUser's ID
     - stateCodes included an invalid state code
     """
-    updateStateAssignmentsByState(input: UpdateStateAssignmentsByStateInput!): UpdateStateAssignmentsByStatePayload!
+    updateStateAssignmentsByState(
+        input: UpdateStateAssignmentsByStateInput!
+    ): UpdateStateAssignmentsByStatePayload!
 
     """
     updateEmailSettings updates the email settings the MC Review app
     """
-    updateEmailSettings(input: UpdateEmailSettingsInput!): UpdateEmailSettingsPayload!
+    updateEmailSettings(
+        input: UpdateEmailSettingsInput!
+    ): UpdateEmailSettingsPayload!
 
     """
     createContractQuestion creates a new question for the given Contract
@@ -376,7 +379,9 @@ type Mutation {
         - The due date is in the past
         - The rateIDs are not associated with the package
     """
-    createContractQuestion(input: CreateContractQuestionInput!): CreateContractQuestionPayload!
+    createContractQuestion(
+        input: CreateContractQuestionInput!
+    ): CreateContractQuestionPayload!
 
     #    """
     #    updateQuestion updates a Question for the given HealthPlanPackage
@@ -512,9 +517,7 @@ type Mutation {
 
             - Sending state or CMS email failed.
     """
-    submitContract(
-        input: SubmitContractInput!
-    ): SubmitContractPayload!
+    submitContract(input: SubmitContractInput!): SubmitContractPayload!
 
     """
     approveContract is a CMS user only action
@@ -529,9 +532,7 @@ type Mutation {
         - DB_ERROR
             - A contract cannot be found by id
     """
-    approveContract(
-        input: ApproveContractInput!
-    ): ApproveContractPayload
+    approveContract(input: ApproveContractInput!): ApproveContractPayload
 
     """
     withdrawRate is CMS user only action to withdraw a rate from review
@@ -546,9 +547,7 @@ type Mutation {
     - DB_ERROR
     - A contract cannot be found by id
     """
-    withdrawRate(
-        input: WithdrawRateInput!
-    ): WithdrawRatePayload
+    withdrawRate(input: WithdrawRateInput!): WithdrawRatePayload
 
     """
     undoWithdrawRate is CMS user only action to undo a rate withdraw
@@ -565,9 +564,7 @@ type Mutation {
     - Contracts that rate was withdrawn from cannot be found
     - Issues restoring relationships between rate and contracts
     """
-    undoWithdrawRate(
-        input: UndoWithdrawRateInput!
-    ): UndoWithdrawRatePayload
+    undoWithdrawRate(input: UndoWithdrawRateInput!): UndoWithdrawRatePayload
 
     """
     withdrawSubmission is a CMS user only action to withdraw an entire submission package, which includes contract and child rates
@@ -582,9 +579,7 @@ type Mutation {
     - DB_ERROR
     - A contract cannot be found by id
     """
-    withdrawContract(
-        input: WithdrawContractInput!
-    ): WithdrawContractPayload!
+    withdrawContract(input: WithdrawContractInput!): WithdrawContractPayload!
 
     """
     unoWithdrawSubmission is a CMS user only action to undo a submission widthdrawal, which includes contract and and child rates withdrawn together.
@@ -966,7 +961,13 @@ scalar Date
 "DateTime is a moment in time with date and time information"
 scalar DateTime
 
-union User = StateUser | CMSUser | AdminUser | HelpdeskUser | BusinessOwnerUser | CMSApproverUser
+union User =
+    | StateUser
+    | CMSUser
+    | AdminUser
+    | HelpdeskUser
+    | BusinessOwnerUser
+    | CMSApproverUser
 
 "StateUser is a user that works for a state, submitting packages to be reviewed by CMSUsers"
 type StateUser {
@@ -1401,7 +1402,7 @@ input GenericDocumentInput {
     sha256: String!
     "The url used for downloading a file from S3"
     downloadURL: String
-     "The first date this document was added to submitted package - this is ignored on input and regenerated on return"
+    "The first date this document was added to submitted package - this is ignored on input and regenerated on return"
     dateAdded: DateTime
 }
 
@@ -1560,9 +1561,9 @@ type ContractFormData {
     "If contract includes modifications to the length of the contract period"
     modifiedLengthOfContract: Boolean
     "If contract includes modifications to the non-risk payment arrangements"
-    modifiedNonRiskPaymentArrangements: Boolean,
+    modifiedNonRiskPaymentArrangements: Boolean
     "If contract has statutory regulatory attestation"
-    statutoryRegulatoryAttestation: Boolean,
+    statutoryRegulatoryAttestation: Boolean
     "Description provided for if contract has statutory regulatory attestation"
     statutoryRegulatoryAttestationDescription: String
 }
@@ -1630,7 +1631,6 @@ input StateContactInput {
     titleRole: String
     email: String
 }
-
 
 """
 A package in the system
@@ -1860,6 +1860,10 @@ type RateRevision {
     submitInfo: UpdateInformation
     "The rate related form data that was inputed by the state"
     formData: RateFormData!
+    """
+    Pre-generated zip packages containing document collections for this revision
+    """
+    documentZipPackages: [DocumentZipPackage!]!
 }
 
 """
@@ -2036,6 +2040,10 @@ type ContractRevision {
     This value is auto generated based on contract state number, contract type, dates, and state program details"\
     """
     contractName: String!
+    """
+    Pre-generated zip packages containing document collections for this revision
+    """
+    documentZipPackages: [DocumentZipPackage!]!
 }
 
 "SubmittableRevision is what can appear in a submission"
@@ -2180,7 +2188,7 @@ type UnlockedContract {
     SUBMITTED and RESUBMITTED packages cannot be modified
     """
     status: UnlockedStatus!
-     """
+    """
     Where the contract is in the review submission flow
     Options are UNDER_REVIEW, APPROVED, WITHDRAWN
     """
@@ -2261,7 +2269,7 @@ type IndexRatesPayload {
     edges: [RateEdge!]!
 }
 
-type RateStrippedEdge{
+type RateStrippedEdge {
     node: RateStripped!
 }
 
@@ -2269,7 +2277,6 @@ type IndexRatesStrippedPayload {
     totalCount: Int
     edges: [RateStrippedEdge!]!
 }
-
 
 type FetchRatePayload {
     """
@@ -2437,9 +2444,9 @@ input ContractDraftRevisionFormDataInput {
     "If contract includes modifications to the length of the contract period"
     modifiedLengthOfContract: Boolean
     "If contract includes modifications to the non-risk payment arrangements"
-    modifiedNonRiskPaymentArrangements: Boolean,
+    modifiedNonRiskPaymentArrangements: Boolean
     "If contract has statutory regulatory attestation"
-    statutoryRegulatoryAttestation: Boolean,
+    statutoryRegulatoryAttestation: Boolean
     "Description provided for if contract has statutory regulatory attestation"
     statutoryRegulatoryAttestationDescription: String
 }
@@ -2533,4 +2540,42 @@ input SubmitRateInput {
     submittedReason: String
     "Rate related form data to be updated with submission"
     formData: RateFormDataInput
+}
+
+"""
+DocumentZipPackage represents a generated zip file containing multiple documents
+"""
+type DocumentZipPackage {
+    """
+    Unique identifier for this document zip package
+    """
+    id: ID!
+
+    """
+    S3 URL where the zip file is stored
+    """
+    s3URL: String!
+
+    """
+    SHA256 hash of the zip file for validation
+    """
+    sha256: String!
+
+    """
+    Type of documents contained in this zip package
+    """
+    documentType: DocumentZipType!
+
+    """
+    Creation timestamp
+    """
+    createdAt: DateTime!
+}
+
+"""
+Types of document zip packages
+"""
+enum DocumentZipType {
+    CONTRACT_DOCUMENTS
+    RATE_DOCUMENTS
 }

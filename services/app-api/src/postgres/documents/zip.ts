@@ -9,7 +9,7 @@ import { logError } from '../../logger'
 // Define types for function arguments
 export type CreateDocumentZipPackageArgsType = {
     s3URL: string
-    sha256?: string
+    sha256: string
     contractRevisionID?: string
     rateRevisionID?: string
     documentType: DocumentZipType

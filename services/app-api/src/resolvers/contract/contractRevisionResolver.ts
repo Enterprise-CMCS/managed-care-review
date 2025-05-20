@@ -2,6 +2,8 @@ import { packageName } from '@mc-review/hpp'
 import type { ContractRevisionType } from '../../domain-models'
 import type { Resolvers } from '../../gen/gqlServer'
 import type { Store } from '../../postgres'
+import { setErrorAttributesOnActiveSpan } from '../attributeHelper'
+import type { DocumentZipPackageType } from '../../domain-models/ZipType'
 
 export function contractRevisionResolver(
     store: Store
@@ -25,6 +27,41 @@ export function contractRevisionResolver(
             )
 
             return contractName
+        },
+        documentZipPackages: async (
+            parent,
+            _args,
+            context
+        ): Promise<DocumentZipPackageType[]> => {
+            const { ctx, tracer } = context
+            const span = tracer?.startSpan(
+                'fetchContractRevisionZipPackages',
+                {},
+                ctx
+            )
+
+            try {
+                const documentZipPackages =
+                    await store.findDocumentZipPackagesByContractRevision(
+                        parent.id
+                    )
+
+                if (documentZipPackages instanceof Error) {
+                    const errMessage = `Error fetching document zip packages for contract revision ${parent.id}: ${documentZipPackages.message}`
+                    setErrorAttributesOnActiveSpan(errMessage, span)
+                    console.warn(errMessage)
+                    return []
+                }
+
+                return documentZipPackages
+            } catch (error) {
+                const errorMessage =
+                    error instanceof Error ? error.message : String(error)
+                const errMessage = `Unexpected error fetching document zip packages: ${errorMessage}`
+                setErrorAttributesOnActiveSpan(errMessage, span)
+                console.error(errMessage)
+                return []
+            }
         },
     }
 }
