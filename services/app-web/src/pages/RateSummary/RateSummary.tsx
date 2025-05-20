@@ -21,7 +21,10 @@ import { SingleRateSummarySection } from '../../components/SubmissionSummarySect
 import { useAuth } from '../../contexts/AuthContext'
 import { ErrorForbiddenPage } from '../Errors/ErrorForbiddenPage'
 import { Error404 } from '../Errors/Error404Page'
-import { RateWithdrawBanner } from '../../components/Banner'
+import {
+    IncompleteSubmissionBanner,
+    RateWithdrawBanner,
+} from '../../components/Banner'
 import { hasCMSUserPermissions } from '@mc-review/helpers'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '@mc-review/common-code'
@@ -299,6 +302,9 @@ export const RateSummary = (): React.ReactElement => {
                 data-testid="rate-summary"
                 className={styles.container}
             >
+                {isOrphanedRate && (
+                    <IncompleteSubmissionBanner message="This rate is missing a contract action" />
+                )}
                 {showWithdrawBanner && (
                     <RateWithdrawBanner
                         updatedAt={latestRateAction.updatedAt}
