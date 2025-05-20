@@ -200,6 +200,10 @@ const CMSUserRoutes = ({
         featureFlags.WITHDRAW_SUBMISSION.flag,
         featureFlags.WITHDRAW_SUBMISSION.defaultValue
     )
+    const showUndoWithdrawSubmission: boolean = ldClient?.variation(
+        featureFlags.UNDO_WITHDRAW_SUBMISSION.flag,
+        featureFlags.UNDO_WITHDRAW_SUBMISSION.defaultValue
+    )
 
     return (
         <AuthenticatedRouteWrapper>
@@ -279,6 +283,13 @@ const CMSUserRoutes = ({
                     <Route
                         path={RoutesRecord.SUBMISSION_WITHDRAW}
                         element={<SubmissionWithdraw />}
+                    />
+                )}
+
+                {showUndoWithdrawSubmission && (
+                    <Route
+                        path={RoutesRecord.UNDO_SUBMISSION_WITHDRAW}
+                        element={<h1>UNDO_SUBMISSION_WITHDRAW</h1>}
                     />
                 )}
 
