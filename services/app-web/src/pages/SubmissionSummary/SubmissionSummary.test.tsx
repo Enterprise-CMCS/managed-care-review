@@ -569,7 +569,9 @@ describe('SubmissionSummary', () => {
                             routerProvider: {
                                 route: '/submissions/test-abc-123',
                             },
-                            featureFlags: {},
+                            featureFlags: {
+                                'undo-withdraw-submission': true,
+                            },
                         }
                     )
 
@@ -625,6 +627,9 @@ describe('SubmissionSummary', () => {
                             routerProvider: {
                                 route: '/submissions/test-abc-123',
                             },
+                            featureFlags: {
+                                'undo-withdraw-submission': true,
+                            },
                         }
                     )
 
@@ -664,7 +669,9 @@ describe('SubmissionSummary', () => {
                             routerProvider: {
                                 route: '/submissions/test-abc-123',
                             },
-                            featureFlags: {},
+                            featureFlags: {
+                                'undo-withdraw-submission': true,
+                            },
                         }
                     )
                     await waitFor(() => {
@@ -737,7 +744,9 @@ describe('SubmissionSummary', () => {
                             routerProvider: {
                                 route: '/submissions/test-abc-123',
                             },
-                            featureFlags: {},
+                            featureFlags: {
+                                'undo-withdraw-submission': true,
+                            },
                         }
                     )
 
@@ -783,6 +792,9 @@ describe('SubmissionSummary', () => {
                             },
                             routerProvider: {
                                 route: '/submissions/15',
+                            },
+                            featureFlags: {
+                                'undo-withdraw-submission': true,
                             },
                         }
                     )
@@ -842,7 +854,9 @@ describe('SubmissionSummary', () => {
                             routerProvider: {
                                 route: '/submissions/test-abc-123',
                             },
-                            featureFlags: {},
+                            featureFlags: {
+                                'undo-withdraw-submission': true,
+                            },
                         }
                     )
 
@@ -916,6 +930,9 @@ describe('SubmissionSummary', () => {
                             routerProvider: {
                                 route: '/submissions/test-abc-123',
                             },
+                            featureFlags: {
+                                'undo-withdraw-submission': true,
+                            },
                         }
                     )
 
@@ -973,6 +990,9 @@ describe('SubmissionSummary', () => {
                             },
                             routerProvider: {
                                 route: '/submissions/test-abc-123',
+                            },
+                            featureFlags: {
+                                'undo-withdraw-submission': true,
                             },
                         }
                     )
@@ -1039,6 +1059,9 @@ describe('SubmissionSummary', () => {
                             },
                             routerProvider: {
                                 route: '/submissions/test-abc-123',
+                            },
+                            featureFlags: {
+                                'undo-withdraw-submission': true,
                             },
                         }
                     )
@@ -1119,6 +1142,9 @@ describe('SubmissionSummary', () => {
                             routerProvider: {
                                 route: '/submissions/test-abc-123',
                             },
+                            featureFlags: {
+                                'undo-withdraw-submission': true,
+                            },
                         }
                     )
 
@@ -1164,6 +1190,9 @@ describe('SubmissionSummary', () => {
                             },
                             routerProvider: {
                                 route: '/submissions/test-abc-123',
+                            },
+                            featureFlags: {
+                                'undo-withdraw-submission': true,
                             },
                         }
                     )
@@ -1225,6 +1254,7 @@ describe('SubmissionSummary', () => {
                             },
                             featureFlags: {
                                 'withdraw-submission': true,
+                                'undo-withdraw-submission': true,
                             },
                         }
                     )
@@ -1253,7 +1283,7 @@ describe('SubmissionSummary', () => {
                     ).toHaveClass('usa-button')
                 })
 
-                it('does not render withdraw submission button for an withdrawn submission', async () => {
+                it('render undo withdraw button for a withdrawn submission', async () => {
                     const contract =
                         mockContractPackageSubmittedWithQuestions(
                             'test-abc-123'
@@ -1287,6 +1317,9 @@ describe('SubmissionSummary', () => {
                             routerProvider: {
                                 route: '/submissions/test-abc-123',
                             },
+                            featureFlags: {
+                                'undo-withdraw-submission': true,
+                            },
                         }
                     )
                     await waitFor(() => {
@@ -1310,9 +1343,16 @@ describe('SubmissionSummary', () => {
                     ).not.toBeInTheDocument()
 
                     expect(
-                        screen.getByText(
+                        screen.queryByText(
                             'No action can be taken on this submission in its current status.'
                         )
+                    ).not.toBeInTheDocument()
+
+                    //Expect undo withdraw button to render
+                    expect(
+                        screen.queryByRole('button', {
+                            name: 'Undo submission withdraw',
+                        })
                     ).toBeInTheDocument()
                 })
             })

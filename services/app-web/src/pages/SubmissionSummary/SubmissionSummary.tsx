@@ -65,6 +65,11 @@ export const SubmissionSummary = (): React.ReactElement => {
         featureFlags.WITHDRAW_SUBMISSION.defaultValue
     )
 
+    const undoWithdrawSubmissionFlag = ldClient?.variation(
+        featureFlags.UNDO_WITHDRAW_SUBMISSION.flag,
+        featureFlags.UNDO_WITHDRAW_SUBMISSION.defaultValue
+    )
+
     // API requests
     const { data, loading, error } = useFetchContractWithQuestionsQuery({
         variables: {
@@ -189,9 +194,15 @@ export const SubmissionSummary = (): React.ReactElement => {
         hasCMSPermissions &&
         withdrawSubmissionFlag &&
         ['SUBMITTED', 'RESUBMITTED'].includes(consolidatedStatus)
+    const showUndoWithdrawBtn =
+        hasCMSPermissions &&
+        undoWithdrawSubmissionFlag &&
+        consolidatedStatus === 'WITHDRAWN'
     const showNoActionsMsg =
-        !showApprovalBtn && !showUnlockBtn && !showWithdrawBtn
-
+        !showApprovalBtn &&
+        !showUnlockBtn &&
+        !showWithdrawBtn &&
+        !showUndoWithdrawBtn
     const showApprovalBanner =
         consolidatedStatus === 'APPROVED' && latestContractAction
     const showWithdrawnBanner =
@@ -289,7 +300,9 @@ export const SubmissionSummary = (): React.ReactElement => {
                                 current status.
                             </Grid>
                         ) : (
-                            <MultiColumnGrid columns={3}>
+                            <MultiColumnGrid
+                                columns={showUndoWithdrawBtn ? 2 : 3}
+                            >
                                 {showUnlockBtn && (
                                     <ModalOpenButton
                                         modalRef={modalRef}
@@ -327,6 +340,21 @@ export const SubmissionSummary = (): React.ReactElement => {
                                         link_url={`/submission-reviews/${contract.id}/withdraw-submission`}
                                     >
                                         Withdraw submission
+                                    </ButtonWithLogging>
+                                )}
+                                {showUndoWithdrawBtn && (
+                                    <ButtonWithLogging
+                                        className="usa-button usa-button--outline"
+                                        type="button"
+                                        outline
+                                        onClick={() =>
+                                            navigate(
+                                                `/submission-reviews/${contract.id}/undo-withdraw`
+                                            )
+                                        }
+                                        link_url={`/submission-reviews/${contract.id}/undo-withdraw`}
+                                    >
+                                        Undo submission withdraw
                                     </ButtonWithLogging>
                                 )}
                             </MultiColumnGrid>
