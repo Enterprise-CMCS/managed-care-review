@@ -104,7 +104,7 @@ const RoutesRecord: Record<RouteT, string> = {
         '/submissions/:id/rates/:rateID/question-and-answers/:division/:questionID/upload-response',
     SUBMISSIONS_RELEASED_TO_STATE: '/submissions/:id/released-to-state',
     SUBMISSION_WITHDRAW: '/submission-reviews/:id/withdraw-submission',
-    UNDO_SUBMISSION_WITHDRAW: '/submission-reviews/:id/undo-withdraw',
+    UNDO_SUBMISSION_WITHDRAW: '/submission-reviews/:id/undo-withdraw-submission',
 }
 
 // Constants for releated descendant routes
@@ -217,7 +217,7 @@ const PageTitlesRecord: Record<RouteT | 'UNKNOWN_ROUTE', string> = {
     SUBMISSIONS_RELEASED_TO_STATE: 'Released to state',
     UNKNOWN_ROUTE: 'Not found',
     SUBMISSION_WITHDRAW: 'Withdraw submission',
-    UNDO_SUBMISSION_WITHDRAW: 'Undo withdraw'
+    UNDO_SUBMISSION_WITHDRAW: 'Undo submission withdraw'
 }
 
 /*

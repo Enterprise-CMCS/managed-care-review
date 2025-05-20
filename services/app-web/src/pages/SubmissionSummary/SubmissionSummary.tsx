@@ -300,9 +300,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                                 current status.
                             </Grid>
                         ) : (
-                            <MultiColumnGrid
-                                columns={showUndoWithdrawBtn ? 2 : 3}
-                            >
+                            <MultiColumnGrid columns={3}>
                                 {showUnlockBtn && (
                                     <ModalOpenButton
                                         modalRef={modalRef}
@@ -349,10 +347,11 @@ export const SubmissionSummary = (): React.ReactElement => {
                                         outline
                                         onClick={() =>
                                             navigate(
-                                                `/submission-reviews/${contract.id}/undo-withdraw`
+                                                `/submission-reviews/${contract.id}/undo-withdraw-submission`
                                             )
                                         }
-                                        link_url={`/submission-reviews/${contract.id}/undo-withdraw`}
+                                        link_url={`/submission-reviews/${contract.id}/undo-withdraw-submission`}
+                                        style={{ width: '16rem' }}
                                     >
                                         Undo submission withdraw
                                     </ButtonWithLogging>
