@@ -52,7 +52,6 @@ describe('RateSummary', () => {
                                     parentContractID: contract.id,
                                 },
                             }),
-                            fetchContractMockSuccess({ contract }),
                         ],
                     },
                     routerProvider: {
@@ -380,7 +379,6 @@ describe('RateSummary', () => {
                             fetchRateWithQuestionsMockSuccess({
                                 rate,
                             }),
-                            fetchContractMockSuccess({ contract }),
                         ],
                     },
                     routerProvider: {
@@ -441,7 +439,6 @@ describe('RateSummary', () => {
                             fetchRateWithQuestionsMockSuccess({
                                 rate,
                             }),
-                            fetchContractMockSuccess({ contract }),
                         ],
                     },
                     routerProvider: {
@@ -501,7 +498,6 @@ describe('RateSummary', () => {
                                     ],
                                 },
                             }),
-                            fetchContractMockSuccess({ contract }),
                         ],
                     },
                     routerProvider: {
@@ -754,7 +750,7 @@ describe('RateSummary', () => {
                 ).toBeInTheDocument()
                 expect(
                     screen.queryByRole('button', { name: 'Undo withdraw' })
-                ).toBeNull()
+                ).not.toBeInTheDocument()
                 expect(
                     screen.queryByRole('button', { name: 'Unlock rate' })
                 ).toBeInTheDocument()
