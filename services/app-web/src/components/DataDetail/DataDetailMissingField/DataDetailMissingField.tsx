@@ -16,7 +16,7 @@ export const DataDetailMissingField = ({
 
     return (
         <span className={classnames(styles.missingInfo, classname)}>
-            <span>
+            <span className={styles.missingInfoIcon}>
                 <Icon.Error aria-label="An error icon" size={3} />
             </span>
             <span>{requiredFieldMissingText}</span>

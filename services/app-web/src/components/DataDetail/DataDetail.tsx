@@ -7,6 +7,7 @@ export type DataDetailProps = {
     label: string
     children?: React.ReactNode | string[]
     explainMissingData?: boolean // Display fallback text when data is undefined or null. Should be true on review-and-submit
+    explainMissingDataMsg?: string
 }
 
 /*
@@ -30,6 +31,7 @@ export const DataDetail = ({
     label,
     children,
     explainMissingData = false,
+    explainMissingDataMsg,
 }: DataDetailProps): React.ReactElement | null => {
     const handleArray = Array.isArray(children)
     const noData =
@@ -40,7 +42,9 @@ export const DataDetail = ({
             <dt id={id}>{label}</dt>
             <dd role="definition" aria-labelledby={id}>
                 {explainMissingData && noData ? (
-                    <DataDetailMissingField />
+                    <DataDetailMissingField
+                        requiredText={explainMissingDataMsg}
+                    />
                 ) : handleArray ? (
                     children.join(', ').toUpperCase()
                 ) : (

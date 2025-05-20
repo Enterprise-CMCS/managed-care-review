@@ -68,7 +68,10 @@ const rateCertificationType = (formData: RateFormData) => {
 
 const relatedSubmissions = (
     contractRevisions: ContractRevision[]
-): React.ReactElement => {
+): React.ReactElement | null => {
+    if (contractRevisions.length === 0) {
+        return null
+    }
     return (
         <ul className={styles.commaList}>
             {contractRevisions.map((contractRev) => (
@@ -351,6 +354,8 @@ export const SingleRateSummarySection = ({
                         <DataDetail
                             id="submittedWithContract"
                             label="Contract actions"
+                            explainMissingData
+                            explainMissingDataMsg="Missing contract action"
                             children={relatedSubmissions(contractActions)}
                         />
                     </Grid>
