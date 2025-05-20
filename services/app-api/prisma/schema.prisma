@@ -168,6 +168,8 @@ model ContractRevisionTable {
   inLieuServicesAndSettings                    Boolean?
   statutoryRegulatoryAttestation               Boolean?
   statutoryRegulatoryAttestationDescription    String?
+
+  documentZipPackage DocumentZipPackage[]
 }
 
 model RateRevisionTable {
@@ -201,6 +203,8 @@ model RateRevisionTable {
   addtlActuaryContacts            ActuaryContact[]         @relation(name: "AddtlActuaryOnRateRevision")
   actuaryCommunicationPreference  ActuaryCommunication?
   contractsWithSharedRateRevision ContractTable[]          @relation(name: "SharedRateRevisions")
+
+  documentZipPackage DocumentZipPackage[]
 }
 
 model ContractActionTable {
@@ -577,15 +581,36 @@ enum SubmissionType {
 }
 
 model OAuthClient {
-  id            String    @id @default(uuid())
-  clientId      String    @unique
-  clientSecret  String
-  grants        String[]
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @default(now()) @updatedAt
-  lastUsedAt    DateTime?
-  description   String?
-  contactEmail  String?
+  id           String    @id @default(uuid())
+  clientId     String    @unique
+  clientSecret String
+  grants       String[]
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @default(now()) @updatedAt
+  lastUsedAt   DateTime?
+  description  String?
+  contactEmail String?
 
   @@map("oauth_clients")
+}
+
+model DocumentZipPackage {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+  s3URL     String
+  sha256    String?
+
+  contractRevisionID String?
+  contractRevision   ContractRevisionTable? @relation(fields: [contractRevisionID], references: [id])
+
+  rateRevisionID String?
+  rateRevision   RateRevisionTable? @relation(fields: [rateRevisionID], references: [id])
+
+  documentType DocumentZipType
+}
+
+enum DocumentZipType {
+  CONTRACT_DOCUMENTS
+  RATE_DOCUMENTS
 }
