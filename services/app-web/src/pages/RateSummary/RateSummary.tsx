@@ -232,6 +232,7 @@ export const RateSummary = (): React.ReactElement => {
     ) {
         rateActions.push(
             <UnlockRateButton
+                key="unlock-rate-button"
                 disabled={unlockLoading}
                 onClick={handleUnlockRate}
             >
@@ -242,6 +243,7 @@ export const RateSummary = (): React.ReactElement => {
         rateActions.push(
             /* This second option is an interim state for unlock rate button (when linked rates is turned on but unlock and edit rate is not available yet). Remove when rate unlock is permanently on. */
             <UnlockRateButton
+                key="unlock-rate-button"
                 onClick={() => {
                     navigate(`/submissions/${parentContractSubmissionID}`)
                 }}
@@ -262,6 +264,7 @@ export const RateSummary = (): React.ReactElement => {
     ) {
         rateActions.push(
             <ButtonWithLogging
+                key="withdraw-rate-button"
                 className="usa-button usa-button--outline"
                 type="button"
                 onClick={() =>
@@ -283,6 +286,7 @@ export const RateSummary = (): React.ReactElement => {
     ) {
         rateActions.push(
             <ButtonWithLogging
+                key="undo-withdraw-rate-button"
                 className="usa-button usa-button--outline"
                 type="button"
                 onClick={() =>
