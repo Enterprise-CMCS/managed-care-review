@@ -1,7 +1,6 @@
 import { SecretsManager } from './secrets'
 import * as path from 'path'
 import * as fs from 'fs'
-import * as crypto from 'crypto'
 import { execSync } from 'child_process'
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3'
 
@@ -121,93 +120,6 @@ export const handler = async () => {
 }
 
 /**
- * Generates a deterministic hash for a string
- * @param input The string to hash
- * @returns A hex string hash
- */
-function hashString(input: string): string {
-    return crypto.createHash('sha256').update(input).digest('hex')
-}
-
-/**
- * Generates a fake name based on the original name
- * @param name The original name
- * @param type The type of name (first, last, or full)
- * @returns A fake name
- */
-function generateFakeName(
-    name: string,
-    type: 'first' | 'last' | 'full' = 'full'
-): string {
-    if (!name) return name // Return as-is if empty
-
-    // Use hash to create deterministic fake names
-    const hash = hashString(name)
-    const firstNameOptions = [
-        'Aang',
-        'Katara',
-        'Sokka',
-        'Toph',
-        'Zuko',
-        'Iroh',
-        'Azula',
-        'Suki',
-        'Ty Lee',
-        'Mai',
-        'Jet',
-        'Yue',
-        'Haru',
-        'Hakoda',
-        'Bumi',
-        'Gyatso',
-        'Roku',
-        'Kyoshi',
-        'Korra',
-        'Mako',
-        'Asami',
-        'Tenzin',
-        'Lin',
-    ]
-    const lastNameOptions = [
-        'Beifong',
-        'Fire',
-        'Water',
-        'Air',
-        'Earth',
-        'Roku',
-        'Sozin',
-        'Kyoshi',
-        'Kuruk',
-        'Yangchen',
-        'Wan',
-        'Raava',
-        'Vaatu',
-        'Sato',
-        'Agni',
-        'Kai',
-        'Long',
-        'Lee',
-        'Bei',
-        'Fong',
-        'Watertribe',
-    ]
-
-    // Pick a name based on hash value to ensure consistency
-    const hashNum = parseInt(hash.substring(0, 8), 16)
-
-    if (type === 'first') {
-        return firstNameOptions[hashNum % firstNameOptions.length]
-    } else if (type === 'last') {
-        return lastNameOptions[hashNum % lastNameOptions.length]
-    } else {
-        const firstName = firstNameOptions[hashNum % firstNameOptions.length]
-        const lastName =
-            lastNameOptions[(hashNum >> 4) % lastNameOptions.length]
-        return `${firstName} ${lastName}`
-    }
-}
-
-/**
  * Changes the email address to use example.com
  * @param email The original email address
  * @returns A sanitized email address
@@ -226,35 +138,18 @@ function sanitizeEmail(email: string): string {
  * @returns Sanitized SQL content
  */
 function sanitizeSqlDump(sqlContent: string): string {
-    console.info('Starting sanitization process...')
+    console.info('Starting email sanitization process...')
 
-    // ---- Email Sanitization -----
-    console.info('Sanitizing email addresses...')
+    // ---- Email Sanitization Only -----
+    console.info('Sanitizing email addresses to @example.com...')
 
-    // 1. Replace individual email fields across specific tables (avoid UserAudit)
-    const emailColumnTables = [
-        '"User"',
-        '"StateContact"',
-        '"ActuaryContact"',
-        '"EmailSettings"',
-    ]
+    // 1. Replace standard email fields
+    sqlContent = sqlContent.replace(
+        /"email"\s*=\s*'([^']+)'/g,
+        (match, email) => `"email" = '${sanitizeEmail(email)}'`
+    )
 
-    emailColumnTables.forEach((tableName) => {
-        // Match pattern that ensures we're targeting email columns in specific tables
-        const tableEmailPattern = new RegExp(
-            `(INSERT INTO ${tableName}|UPDATE ${tableName} SET)([\\s\\S]*?)"email"\\s*=\\s*'([^']+)'`,
-            'g'
-        )
-
-        sqlContent = sqlContent.replace(
-            tableEmailPattern,
-            (match, stmt, beforeEmail, email) => {
-                return `${stmt}${beforeEmail}"email" = '${sanitizeEmail(email)}'`
-            }
-        )
-    })
-
-    // 2. Replace array email fields (for EmailSettings model) - be specific
+    // 2. Replace array email fields (for EmailSettings model)
     const arrayEmailFields = [
         'devReviewTeamEmails',
         'cmsReviewHelpEmailAddress',
@@ -267,124 +162,23 @@ function sanitizeSqlDump(sqlContent: string): string {
     ]
 
     arrayEmailFields.forEach((field) => {
-        const pattern = new RegExp(
-            `(INSERT INTO "EmailSettings"|UPDATE "EmailSettings" SET)([\\s\\S]*?)"${field}"\\s*=\\s*'\\{([^}]+)\\}'`,
-            'g'
-        )
-
         sqlContent = sqlContent.replace(
-            pattern,
-            (match, stmt, beforeField, emails) => {
+            new RegExp(`"${field}"\\s*=\\s*'\\{([^}]+)\\}'`, 'g'),
+            (match, emails) => {
                 const emailArray = emails
                     .split(',')
                     .map((email: string) => sanitizeEmail(email.trim()))
-                return `${stmt}${beforeField}"${field}" = '{${emailArray.join(',')}}'`
+                return `"${field}" = '{${emailArray.join(',')}}'`
             }
         )
     })
 
-    // 3. Replace emailSource field - with specific targeting
+    // 3. Replace emailSource field
     sqlContent = sqlContent.replace(
-        /(INSERT INTO "EmailSettings"|UPDATE "EmailSettings" SET)([\s\S]*?)"emailSource"\s*=\s*'([^']+)'/g,
-        (match, stmt, beforeField, email) =>
-            `${stmt}${beforeField}"emailSource" = '${sanitizeEmail(email)}'`
+        /"emailSource"\s*=\s*'([^']+)'/g,
+        (match, email) => `"emailSource" = '${sanitizeEmail(email)}'`
     )
 
-    // ----- User Table Name Sanitization ------
-    console.info('Sanitizing User table names...')
-
-    // Find all User table inserts and sanitize the names - keep more context
-    const userInsertPattern =
-        /INSERT INTO "User" \(([^)]+)\) VALUES \(([^)]+)\)/g
-    sqlContent = sqlContent.replace(
-        userInsertPattern,
-        (match, columns, values) => {
-            const columnsList = columns
-                .split(',')
-                .map((col: string) => col.trim())
-            const valuesList = values.split(',')
-
-            // Find indexes of givenName and familyName columns
-            const givenNameIndex = columnsList.findIndex(
-                (col: string) => col === '"givenName"'
-            )
-            const familyNameIndex = columnsList.findIndex(
-                (col: string) => col === '"familyName"'
-            )
-            const emailIndex = columnsList.findIndex(
-                (col: string) => col === '"email"'
-            )
-
-            if (givenNameIndex !== -1 && valuesList[givenNameIndex]) {
-                // Extract the name (removing quotes) and sanitize it
-                const namePart = valuesList[givenNameIndex].trim()
-                if (namePart.startsWith("'") && namePart.endsWith("'")) {
-                    const name = namePart.substring(1, namePart.length - 1)
-                    valuesList[givenNameIndex] =
-                        `'${generateFakeName(name, 'first')}'`
-                }
-            }
-
-            if (familyNameIndex !== -1 && valuesList[familyNameIndex]) {
-                // Extract the name (removing quotes) and sanitize it
-                const namePart = valuesList[familyNameIndex].trim()
-                if (namePart.startsWith("'") && namePart.endsWith("'")) {
-                    const name = namePart.substring(1, namePart.length - 1)
-                    valuesList[familyNameIndex] =
-                        `'${generateFakeName(name, 'last')}'`
-                }
-            }
-
-            if (emailIndex !== -1 && valuesList[emailIndex]) {
-                // Extract the email (removing quotes) and sanitize it
-                const emailPart = valuesList[emailIndex].trim()
-                if (emailPart.startsWith("'") && emailPart.endsWith("'")) {
-                    const email = emailPart.substring(1, emailPart.length - 1)
-                    valuesList[emailIndex] = `'${sanitizeEmail(email)}'`
-                }
-            }
-
-            return `INSERT INTO "User" (${columns}) VALUES (${valuesList.join(',')})`
-        }
-    )
-
-    // Also catch UPDATE statements for User table - be specific to User table
-    sqlContent = sqlContent.replace(
-        /UPDATE "User" SET ([\s\S]*?)"givenName"\s*=\s*'([^']+)'/g,
-        (match, beforeName, name) =>
-            `UPDATE "User" SET ${beforeName}"givenName" = '${generateFakeName(name, 'first')}'`
-    )
-
-    sqlContent = sqlContent.replace(
-        /UPDATE "User" SET ([\s\S]*?)"familyName"\s*=\s*'([^']+)'/g,
-        (match, beforeName, name) =>
-            `UPDATE "User" SET ${beforeName}"familyName" = '${generateFakeName(name, 'last')}'`
-    )
-
-    // ----- Contact Tables Names and Emails ------
-    console.info('Sanitizing contact table data...')
-
-    // StateContact table - handle both INSERT and UPDATE patterns (more specific)
-    sqlContent = sqlContent.replace(
-        /(INSERT INTO|UPDATE) "StateContact"([\s\S]*?)"name"\s*=\s*'([^']+)'/g,
-        (match, stmt, beforeName, name) =>
-            `${stmt} "StateContact"${beforeName}"name" = '${generateFakeName(name)}'`
-    )
-
-    // ActuaryContact table - handle both INSERT and UPDATE patterns (more specific)
-    sqlContent = sqlContent.replace(
-        /(INSERT INTO|UPDATE) "ActuaryContact"([\s\S]*?)"name"\s*=\s*'([^']+)'/g,
-        (match, stmt, beforeName, name) =>
-            `${stmt} "ActuaryContact"${beforeName}"name" = '${generateFakeName(name)}'`
-    )
-
-    // Handle email fields in StateContact and ActuaryContact tables (more specific)
-    sqlContent = sqlContent.replace(
-        /(INSERT INTO|UPDATE) "(StateContact|ActuaryContact)"([\s\S]*?)"email"\s*=\s*'([^']+)'/g,
-        (match, stmt, table, beforeEmail, email) =>
-            `${stmt} "${table}"${beforeEmail}"email" = '${sanitizeEmail(email)}'`
-    )
-
-    console.info('Sanitization complete')
+    console.info('Email sanitization complete')
     return sqlContent
 }
