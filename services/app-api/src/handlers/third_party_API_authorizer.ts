@@ -25,12 +25,32 @@ const jwtLib = newJWTLib({
     expirationDurationS: 90 * 24 * 60 * 60, // 90 days
 })
 
-const main: APIGatewayTokenAuthorizerHandler = async (
+const oauthJwtLib = newJWTLib({
+    issuer: 'mcreview-oauth',
+    signingKey: Buffer.from(jwtSecret, 'hex'),
+    expirationDurationS: 3600, // 1 hour
+})
+
+export const main: APIGatewayTokenAuthorizerHandler = async (
     event
 ): Promise<APIGatewayAuthorizerResult> => {
     const authToken = event.authorizationToken.replace('Bearer ', '')
     try {
-        // authentication step for validating JWT token
+        // Try to validate as OAuth token first
+        const oauthResult = oauthJwtLib.validateOAuthToken(authToken)
+        if (!(oauthResult instanceof Error)) {
+            console.info({
+                message:
+                    'third_party_API_authorizer succeeded with OAuth token',
+                operation: 'third_party_API_authorizer',
+                status: 'SUCCESS',
+                clientId: oauthResult.clientId,
+            })
+
+            return generatePolicy(oauthResult.clientId, event)
+        }
+
+        // If not an OAuth token, try standard token
         const userId = jwtLib.userIDFromToken(authToken)
         if (userId instanceof Error) {
             console.error('Invalid auth token')
@@ -39,9 +59,10 @@ const main: APIGatewayTokenAuthorizerHandler = async (
         }
 
         console.info({
-            message: 'third_party_API_authorizer succeeded',
+            message: 'third_party_API_authorizer succeeded with standard token',
             operation: 'third_party_API_authorizer',
             status: 'SUCCESS',
+            userId,
         })
 
         return generatePolicy(userId, event)
