@@ -386,6 +386,35 @@ const RateDetails = ({
 
     const fieldNamePrefix = (idx: number) => `rateForms.${idx}`
 
+    const displayRemoveRateBtn = (index: number, rateForm: FormikRateForm) => {
+        if (index >= 1 && !displayAsStandaloneRate) {
+            //We expect to display the button regardless of status if the rate is a linked rate otherwise only display the button if it is a draft rate
+            if (
+                rateForm.ratePreviouslySubmitted === 'YES' ||
+                rateForm.status === 'DRAFT' ||
+                rateForm.status === undefined
+            ) {
+                return true
+            }
+        }
+
+        return false
+    }
+
+    const disableRateLinkRadios = (rateForm: FormikRateForm) => {
+        //Expect the `Was this rate certification included with another submission?`
+        //radio buttons to be disabled for any rate that is not a linked rate or in a draft state
+        if (
+            rateForm.ratePreviouslySubmitted === 'YES' ||
+            rateForm.status === 'DRAFT' ||
+            rateForm.status === undefined
+        ) {
+            return false
+        }
+
+        return true
+    }
+
     return (
         <>
             <FormNotificationContainer>
@@ -501,6 +530,9 @@ const RateDetails = ({
                                                                         shouldValidate={
                                                                             shouldValidate
                                                                         }
+                                                                        disableRadioBtns={disableRateLinkRadios(
+                                                                            rateForm
+                                                                        )}
                                                                     />
                                                                 )}
                                                                 {!displayAsStandaloneRate &&
@@ -532,26 +564,28 @@ const RateDetails = ({
                                                                         }
                                                                     />
                                                                 )}
-                                                                {index >= 1 &&
-                                                                    !displayAsStandaloneRate && (
-                                                                        <ButtonWithLogging
-                                                                            type="button"
-                                                                            unstyled
-                                                                            className={
-                                                                                styles.removeContactBtn
-                                                                            }
-                                                                            onClick={() => {
-                                                                                remove(
-                                                                                    index
-                                                                                )
-                                                                                setNewRateButtonFocus()
-                                                                            }}
-                                                                        >
-                                                                            Remove
-                                                                            rate
-                                                                            certification
-                                                                        </ButtonWithLogging>
-                                                                    )}
+                                                                {displayRemoveRateBtn(
+                                                                    index,
+                                                                    rateForm
+                                                                ) && (
+                                                                    <ButtonWithLogging
+                                                                        type="button"
+                                                                        unstyled
+                                                                        className={
+                                                                            styles.removeContactBtn
+                                                                        }
+                                                                        onClick={() => {
+                                                                            remove(
+                                                                                index
+                                                                            )
+                                                                            setNewRateButtonFocus()
+                                                                        }}
+                                                                    >
+                                                                        Remove
+                                                                        rate
+                                                                        certification
+                                                                    </ButtonWithLogging>
+                                                                )}
                                                             </Fieldset>
                                                         </SectionCard>
                                                     )

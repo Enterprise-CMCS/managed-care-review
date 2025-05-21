@@ -6,9 +6,13 @@ import {
     fetchCurrentUserMock,
     fetchContractMockSuccess,
     mockContractPackageDraft,
+    mockContractPackageUnlockedWithUnlockedType,
 } from '@mc-review/mocks'
 import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import { SubmissionType } from './'
+import { Routes } from 'react-router'
+import { Route } from 'react-router-dom'
+import { RoutesRecord } from '@mc-review/constants'
 
 describe('SubmissionType', () => {
     it('displays correct form guidance', async () => {
@@ -288,36 +292,6 @@ describe('SubmissionType', () => {
         // Contract only radio is still selected
         expect(contractOnlyRadio).toBeChecked()
     })
-    it('shows validation message when population coverage is not selected', async () => {
-        renderWithProviders(<SubmissionType />, {
-            apolloProvider: {
-                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-            },
-        })
-
-        // Expect population coverage question and radios
-        expect(
-            screen.getByText(
-                'Which populations does this contract action cover?'
-            )
-        ).toBeInTheDocument()
-        expect(
-            screen.getByRole('radio', { name: 'Medicaid' })
-        ).toBeInTheDocument()
-        expect(
-            screen.getByRole('radio', { name: 'CHIP-only' })
-        ).toBeInTheDocument()
-        expect(
-            screen.getByRole('radio', { name: 'Medicaid and CHIP' })
-        ).toBeInTheDocument()
-
-        // Test validations work.
-        await userEvent.click(screen.getByRole('button', { name: 'Continue' }))
-        await screen.findByTestId('error-summary')
-        await screen.findAllByText(
-            'You must select the population this contract covers'
-        )
-    })
 
     it('displays programs select dropdown', async () => {
         renderWithProviders(<SubmissionType />, {
@@ -471,6 +445,195 @@ describe('SubmissionType', () => {
         ).toBeInTheDocument()
     })
 
+    it('disables CHIP-only and Submission type radio options with at least 1 submitted child rate', async () => {
+        const unlockedContract = {
+            ...mockContractPackageUnlockedWithUnlockedType({
+                id: '15',
+            }),
+        }
+
+        // Add a linked rate
+        unlockedContract.draftRates.push({
+            ...unlockedContract.draftRates[0],
+            parentContractID: 'some-other-contract',
+        })
+
+        // Add a draft rate
+        unlockedContract.draftRates.push({
+            ...unlockedContract.draftRates[0],
+            status: 'DRAFT',
+            consolidatedStatus: 'DRAFT',
+        })
+
+        renderWithProviders(
+            <Routes>
+                <Route
+                    element={<SubmissionType />}
+                    path={RoutesRecord.SUBMISSIONS_TYPE}
+                />
+            </Routes>,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({ statusCode: 200 }),
+                        fetchContractMockSuccess({
+                            contract: unlockedContract,
+                        }),
+                    ],
+                },
+                routerProvider: { route: '/submissions/15/edit/type' },
+            }
+        )
+
+        await waitFor(() => {
+            // Submission type is disabled
+            expect(
+                screen.getByRole('radiogroup', {
+                    name: 'Choose a submission type',
+                })
+            ).toBeInTheDocument()
+            expect(
+                screen.getByRole('radio', { name: 'Contract action only' })
+            ).toBeDisabled()
+            expect(
+                screen.getByRole('radio', {
+                    name: 'Contract action and rate certification',
+                })
+            ).toBeDisabled()
+
+            // Population question disables CHIP-only radio
+            expect(
+                screen.getByRole('radiogroup', {
+                    name: 'Which populations does this contract action cover?',
+                })
+            ).toBeInTheDocument()
+            expect(
+                screen.getByRole('radio', { name: 'CHIP-only' })
+            ).toBeDisabled()
+            expect(
+                screen.queryByText(
+                    'If you need to change your response, contact CMS.'
+                )
+            ).toBeInTheDocument()
+        })
+    })
+
+    it('does not disable CHIP-only and Submission type radio options with only linked rates', async () => {
+        const unlockedContract = {
+            ...mockContractPackageUnlockedWithUnlockedType({
+                id: '15',
+            }),
+        }
+
+        // Change all rates to linked rates
+        unlockedContract.draftRates = unlockedContract.draftRates.map((dr) => ({
+            ...dr,
+            parentContractID: 'some-other-contract',
+        }))
+
+        renderWithProviders(
+            <Routes>
+                <Route
+                    element={<SubmissionType />}
+                    path={RoutesRecord.SUBMISSIONS_TYPE}
+                />
+            </Routes>,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({ statusCode: 200 }),
+                        fetchContractMockSuccess({
+                            contract: unlockedContract,
+                        }),
+                    ],
+                },
+                routerProvider: { route: '/submissions/15/edit/type' },
+            }
+        )
+
+        await waitFor(() => {
+            // Submission type is disabled
+            expect(
+                screen.getByRole('radiogroup', {
+                    name: 'Choose a submission type',
+                })
+            ).toBeInTheDocument()
+            expect(
+                screen.getByRole('radio', { name: 'Contract action only' })
+            ).not.toBeDisabled()
+            expect(
+                screen.getByRole('radio', {
+                    name: 'Contract action and rate certification',
+                })
+            ).not.toBeDisabled()
+
+            // Population question disables CHIP-only radio
+            expect(
+                screen.getByRole('radiogroup', {
+                    name: 'Which populations does this contract action cover?',
+                })
+            ).toBeInTheDocument()
+            expect(
+                screen.getByRole('radio', { name: 'CHIP-only' })
+            ).not.toBeDisabled()
+        })
+    })
+
+    it('does not disable CHIP-only and Submission type radio options with only draft rates', async () => {
+        const unlockedContract = {
+            ...mockContractPackageDraft({
+                id: '15',
+            }),
+        }
+
+        renderWithProviders(
+            <Routes>
+                <Route
+                    element={<SubmissionType />}
+                    path={RoutesRecord.SUBMISSIONS_TYPE}
+                />
+            </Routes>,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({ statusCode: 200 }),
+                        fetchContractMockSuccess({
+                            contract: unlockedContract,
+                        }),
+                    ],
+                },
+                routerProvider: { route: '/submissions/15/edit/type' },
+            }
+        )
+
+        await waitFor(() => {
+            // Submission type is disabled
+            expect(
+                screen.getByRole('radiogroup', {
+                    name: 'Choose a submission type',
+                })
+            ).toBeInTheDocument()
+            expect(
+                screen.getByRole('radio', { name: 'Contract action only' })
+            ).not.toBeDisabled()
+            expect(
+                screen.getByRole('radio', {
+                    name: 'Contract action and rate certification',
+                })
+            ).not.toBeDisabled()
+
+            // Population question disables CHIP-only radio
+            expect(
+                screen.getByRole('radiogroup', {
+                    name: 'Which populations does this contract action cover?',
+                })
+            ).toBeInTheDocument()
+            expect(
+                screen.getByRole('radio', { name: 'CHIP-only' })
+            ).not.toBeDisabled()
+        })
+    })
+
     describe('validations', () => {
         it('does not show error validations on initial load', async () => {
             renderWithProviders(<SubmissionType />, {
@@ -574,6 +737,39 @@ describe('SubmissionType', () => {
                     screen.queryByText('You must choose a submission type')
                 ).toBeNull()
             })
+        })
+
+        it('shows validation message when population coverage is not selected', async () => {
+            renderWithProviders(<SubmissionType />, {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            })
+
+            // Expect population coverage question and radios
+            expect(
+                screen.getByText(
+                    'Which populations does this contract action cover?'
+                )
+            ).toBeInTheDocument()
+            expect(
+                screen.getByRole('radio', { name: 'Medicaid' })
+            ).toBeInTheDocument()
+            expect(
+                screen.getByRole('radio', { name: 'CHIP-only' })
+            ).toBeInTheDocument()
+            expect(
+                screen.getByRole('radio', { name: 'Medicaid and CHIP' })
+            ).toBeInTheDocument()
+
+            // Test validations work.
+            await userEvent.click(
+                screen.getByRole('button', { name: 'Continue' })
+            )
+            await screen.findByTestId('error-summary')
+            await screen.findAllByText(
+                'You must select the population this contract covers'
+            )
         })
 
         it('if form fields are invalid, shows validation error messages when continue button is clicked', async () => {

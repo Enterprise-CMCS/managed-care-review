@@ -84,7 +84,6 @@ export const SubmissionType = ({
     const ldClient = useLDClient()
     const isNewSubmission = location.pathname === '/submissions/new'
     const { id } = useRouteParams()
-
     const hideSupportingDocs = ldClient?.variation(
         featureFlags.HIDE_SUPPORTING_DOCS_PAGE.flag,
         featureFlags.HIDE_SUPPORTING_DOCS_PAGE.defaultValue
@@ -345,6 +344,16 @@ export const SubmissionType = ({
         return { ...errorObject, ...formikErrors }
     }
 
+    // Checks if any of the child rates in this submission were ever submitted
+    const hasPreviouslySubmittedRates = Boolean(
+        draftSubmission?.draftRates.some(
+            // A rate will be DRAFT if it had never been submitted before.
+            (dr) =>
+                dr.parentContractID === draftSubmission?.id &&
+                dr.consolidatedStatus !== 'DRAFT'
+        )
+    )
+
     // Handles population covered click. CHIP-only can only have submission type of CONTRACT_ONLY. This function
     // automatically resets the submission type radio selection when CONTRACT_ONLY is not selected and switching to
     // CHIP-only population coverage.
@@ -529,6 +538,9 @@ export const SubmissionType = ({
                                                     }
                                                     list_position={3}
                                                     list_options={3}
+                                                    disabled={
+                                                        hasPreviouslySubmittedRates
+                                                    }
                                                     parent_component_heading="Which populations does this contract action cover?"
                                                     radio_button_title={
                                                         PopulationCoveredRecord[
@@ -585,20 +597,27 @@ export const SubmissionType = ({
                                             <Fieldset
                                                 className={styles.radioGroup}
                                                 role="radiogroup"
-                                                aria-required
+                                                aria-required={
+                                                    !hasPreviouslySubmittedRates
+                                                }
                                                 defaultValue={
                                                     values.submissionType
                                                 }
                                                 legend="Choose a submission type"
                                                 id="submissionType"
+                                                disabled={
+                                                    hasPreviouslySubmittedRates
+                                                }
                                             >
-                                                <span
-                                                    className={
-                                                        styles.requiredOptionalText
-                                                    }
-                                                >
-                                                    Required
-                                                </span>
+                                                {!hasPreviouslySubmittedRates && (
+                                                    <span
+                                                        className={
+                                                            styles.requiredOptionalText
+                                                        }
+                                                    >
+                                                        Required
+                                                    </span>
+                                                )}
                                                 {showFieldErrors(
                                                     errors.submissionType
                                                 ) && (
@@ -646,6 +665,17 @@ export const SubmissionType = ({
                                                         ]
                                                     }
                                                 />
+                                                {hasPreviouslySubmittedRates && (
+                                                    <div
+                                                        role="note"
+                                                        aria-labelledby="submissionType"
+                                                        className="usa-hint padding-top-2"
+                                                    >
+                                                        If you need to change
+                                                        your response, contact
+                                                        CMS.
+                                                    </div>
+                                                )}
                                                 {values.populationCovered ===
                                                     'CHIP' && (
                                                     <div

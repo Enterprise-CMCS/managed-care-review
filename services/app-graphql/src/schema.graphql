@@ -584,7 +584,14 @@ type Mutation {
     """
     withdrawContract(
         input: WithdrawContractInput!
-    ): WithdrawContractPayload
+    ): WithdrawContractPayload!
+
+    """
+    unoWithdrawSubmission is a CMS user only action to undo a submission widthdrawal, which includes contract and and child rates withdrawn together.
+    """
+    undoWithdrawContract(
+        input: UndoWithdrawContractInput!
+    ): UndoWithdrawContractPayload!
 }
 
 input CreateHealthPlanPackageInput {
@@ -667,6 +674,10 @@ type WithdrawContractPayload {
     contract: Contract!
 }
 
+type UndoWithdrawContractPayload {
+    contract: Contract!
+}
+
 input WithdrawRateInput {
     rateID: ID!
     updatedReason: String!
@@ -678,6 +689,11 @@ input UndoWithdrawRateInput {
 }
 
 input WithdrawContractInput {
+    contractID: ID!
+    updatedReason: String!
+}
+
+input UndoWithdrawContractInput {
     contractID: ID!
     updatedReason: String!
 }
@@ -2268,7 +2284,7 @@ input FetchRateInput {
 
 type FetchContractPayload {
     """
-    A rate that include contract and rate revisions
+    A contract that include contract and rate revisions
     """
     contract: Contract!
 }

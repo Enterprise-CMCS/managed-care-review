@@ -419,7 +419,7 @@ function mockContractPackageDraft(partial?: Partial<Contract>): Contract {
         createdAt: new Date('01/01/24'),
         updatedAt: new Date(),
         lastUpdatedForDisplay: new Date(),
-        id: 'test-abc-123',
+        id: partial?.id ?? 'test-abc-123',
         stateCode: 'MN',
         state: mockMNState(),
         stateNumber: 5,
@@ -451,7 +451,7 @@ function mockContractPackageDraft(partial?: Partial<Contract>): Contract {
                 revisions: [],
                 state: mockMNState(),
                 stateNumber: 5,
-                parentContractID: 'test-abc-123',
+                parentContractID: partial?.id ?? 'test-abc-123',
                 draftRevision: {
                     __typename: 'RateRevision',
                     id: '123',
