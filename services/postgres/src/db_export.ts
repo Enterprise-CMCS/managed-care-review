@@ -208,7 +208,7 @@ function generateFakeName(
 }
 
 /**
- * Generates a deterministic but anonymized email address
+ * Changes the email address to use example.com
  * @param email The original email address
  * @returns A sanitized email address
  */
@@ -226,16 +226,35 @@ function sanitizeEmail(email: string): string {
  * @returns Sanitized SQL content
  */
 function sanitizeSqlDump(sqlContent: string): string {
+    console.info('Starting sanitization process...')
+
     // ---- Email Sanitization -----
     console.info('Sanitizing email addresses...')
 
-    // Replace individual email fields across all tables
-    sqlContent = sqlContent.replace(
-        /"email"\s*=\s*'([^']+)'/g,
-        (match, email) => `"email" = '${sanitizeEmail(email)}'`
-    )
+    // 1. Replace individual email fields across specific tables (avoid UserAudit)
+    const emailColumnTables = [
+        '"User"',
+        '"StateContact"',
+        '"ActuaryContact"',
+        '"EmailSettings"',
+    ]
 
-    // Replace array email fields (for EmailSettings model)
+    emailColumnTables.forEach((tableName) => {
+        // Match pattern that ensures we're targeting email columns in specific tables
+        const tableEmailPattern = new RegExp(
+            `(INSERT INTO ${tableName}|UPDATE ${tableName} SET)([\\s\\S]*?)"email"\\s*=\\s*'([^']+)'`,
+            'g'
+        )
+
+        sqlContent = sqlContent.replace(
+            tableEmailPattern,
+            (match, stmt, beforeEmail, email) => {
+                return `${stmt}${beforeEmail}"email" = '${sanitizeEmail(email)}'`
+            }
+        )
+    })
+
+    // 2. Replace array email fields (for EmailSettings model) - be specific
     const arrayEmailFields = [
         'devReviewTeamEmails',
         'cmsReviewHelpEmailAddress',
@@ -248,27 +267,33 @@ function sanitizeSqlDump(sqlContent: string): string {
     ]
 
     arrayEmailFields.forEach((field) => {
+        const pattern = new RegExp(
+            `(INSERT INTO "EmailSettings"|UPDATE "EmailSettings" SET)([\\s\\S]*?)"${field}"\\s*=\\s*'\\{([^}]+)\\}'`,
+            'g'
+        )
+
         sqlContent = sqlContent.replace(
-            new RegExp(`"${field}"\\s*=\\s*'\\{([^}]+)\\}'`, 'g'),
-            (match, emails) => {
+            pattern,
+            (match, stmt, beforeField, emails) => {
                 const emailArray = emails
                     .split(',')
                     .map((email: string) => sanitizeEmail(email.trim()))
-                return `"${field}" = '{${emailArray.join(',')}}'`
+                return `${stmt}${beforeField}"${field}" = '{${emailArray.join(',')}}'`
             }
         )
     })
 
-    // Replace emailSource field
+    // 3. Replace emailSource field - with specific targeting
     sqlContent = sqlContent.replace(
-        /"emailSource"\s*=\s*'([^']+)'/g,
-        (match, email) => `"emailSource" = '${sanitizeEmail(email)}'`
+        /(INSERT INTO "EmailSettings"|UPDATE "EmailSettings" SET)([\s\S]*?)"emailSource"\s*=\s*'([^']+)'/g,
+        (match, stmt, beforeField, email) =>
+            `${stmt}${beforeField}"emailSource" = '${sanitizeEmail(email)}'`
     )
 
     // ----- User Table Name Sanitization ------
     console.info('Sanitizing User table names...')
 
-    // Find all User table inserts and sanitize the names
+    // Find all User table inserts and sanitize the names - keep more context
     const userInsertPattern =
         /INSERT INTO "User" \(([^)]+)\) VALUES \(([^)]+)\)/g
     sqlContent = sqlContent.replace(
@@ -323,58 +348,41 @@ function sanitizeSqlDump(sqlContent: string): string {
         }
     )
 
-    // Also catch UPDATE statements for User table
+    // Also catch UPDATE statements for User table - be specific to User table
     sqlContent = sqlContent.replace(
-        /"givenName"\s*=\s*'([^']+)'/g,
-        (match, name) => `"givenName" = '${generateFakeName(name, 'first')}'`
+        /UPDATE "User" SET ([\s\S]*?)"givenName"\s*=\s*'([^']+)'/g,
+        (match, beforeName, name) =>
+            `UPDATE "User" SET ${beforeName}"givenName" = '${generateFakeName(name, 'first')}'`
     )
 
     sqlContent = sqlContent.replace(
-        /"familyName"\s*=\s*'([^']+)'/g,
-        (match, name) => `"familyName" = '${generateFakeName(name, 'last')}'`
+        /UPDATE "User" SET ([\s\S]*?)"familyName"\s*=\s*'([^']+)'/g,
+        (match, beforeName, name) =>
+            `UPDATE "User" SET ${beforeName}"familyName" = '${generateFakeName(name, 'last')}'`
     )
 
     // ----- Contact Tables Names and Emails ------
     console.info('Sanitizing contact table data...')
 
-    // StateContact table - handle both INSERT and UPDATE patterns
+    // StateContact table - handle both INSERT and UPDATE patterns (more specific)
     sqlContent = sqlContent.replace(
-        /"name"\s*=\s*'([^']+)'(?=(?:(?!WHERE).)*"StateContact")/g,
-        (match, name) => `"name" = '${generateFakeName(name)}'`
+        /(INSERT INTO|UPDATE) "StateContact"([\s\S]*?)"name"\s*=\s*'([^']+)'/g,
+        (match, stmt, beforeName, name) =>
+            `${stmt} "StateContact"${beforeName}"name" = '${generateFakeName(name)}'`
     )
 
-    // ActuaryContact table - handle both INSERT and UPDATE patterns
+    // ActuaryContact table - handle both INSERT and UPDATE patterns (more specific)
     sqlContent = sqlContent.replace(
-        /"name"\s*=\s*'([^']+)'(?=(?:(?!WHERE).)*"ActuaryContact")/g,
-        (match, name) => `"name" = '${generateFakeName(name)}'`
+        /(INSERT INTO|UPDATE) "ActuaryContact"([\s\S]*?)"name"\s*=\s*'([^']+)'/g,
+        (match, stmt, beforeName, name) =>
+            `${stmt} "ActuaryContact"${beforeName}"name" = '${generateFakeName(name)}'`
     )
 
-    // Handle email fields in StateContact and ActuaryContact tables
+    // Handle email fields in StateContact and ActuaryContact tables (more specific)
     sqlContent = sqlContent.replace(
-        /"email"\s*=\s*'([^']+)'(?=(?:(?!WHERE).)*"(StateContact|ActuaryContact)")/g,
-        (match, email) => `"email" = '${sanitizeEmail(email)}'`
-    )
-
-    console.info('Final pass for any remaining emails...')
-
-    // Catch any array of emails that might have been missed (in any table)
-    sqlContent = sqlContent.replace(
-        /'?\{([^{}]*@[^{}]*)\}'?/g,
-        (match, emails) => {
-            if (emails.includes('@')) {
-                const emailArray = emails
-                    .split(',')
-                    .map((email: string) => email.trim())
-                    .map((email: string) => {
-                        if (email.includes('@')) {
-                            return sanitizeEmail(email)
-                        }
-                        return email
-                    })
-                return `'{${emailArray.join(',')}}'`
-            }
-            return match
-        }
+        /(INSERT INTO|UPDATE) "(StateContact|ActuaryContact)"([\s\S]*?)"email"\s*=\s*'([^']+)'/g,
+        (match, stmt, table, beforeEmail, email) =>
+            `${stmt} "${table}"${beforeEmail}"email" = '${sanitizeEmail(email)}'`
     )
 
     console.info('Sanitization complete')
