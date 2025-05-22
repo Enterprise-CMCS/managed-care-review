@@ -32,7 +32,12 @@ import {
     getVisibleLatestContractFormData,
     getVisibleLatestRateRevisions,
 } from '@mc-review/helpers'
-import { generatePath, Navigate, useNavigate } from 'react-router-dom'
+import {
+    generatePath,
+    Navigate,
+    useNavigate,
+    useSearchParams,
+} from 'react-router-dom'
 import { hasCMSUserPermissions } from '@mc-review/helpers'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '@mc-review/common-code'
@@ -42,6 +47,7 @@ import {
 } from '../../components/Banner'
 import { MultiColumnGrid } from '../../components/MultiColumnGrid/MultiColumnGrid'
 import { SubmissionWithdrawnBanner } from '../../components/Banner/SubmissionWithdrawnBanner/SubmissionWithdrawnBanner'
+import { StatusUpdatedBanner } from '../../components/Banner/StatusUpdatedBanner/StatusUpdatedBanner'
 
 export interface SubmissionSummaryFormValues {
     dateApprovalReleasedToState: string
@@ -52,6 +58,9 @@ export const SubmissionSummary = (): React.ReactElement => {
     const { updateHeading } = usePage()
     const modalRef = useRef<ModalRef>(null)
     const [documentError, setDocumentError] = useState(false)
+    const [showUndoWithdrawBanner, setShowUndoWithdrawBanner] =
+        useState<boolean>(false)
+    const [searchParams, setSearchParams] = useSearchParams()
     const { loggedInUser } = useAuth()
     const { id } = useRouteParams()
     const hasCMSPermissions = hasCMSUserPermissions(loggedInUser)
@@ -85,6 +94,16 @@ export const SubmissionSummary = (): React.ReactElement => {
         contract && contract?.packageSubmissions.length > 0
             ? contract.packageSubmissions[0].contractRevision.contractName
             : ''
+
+    useEffect(() => {
+        if (searchParams.get('showUndoWithdrawBanner') === 'true') {
+            setShowUndoWithdrawBanner(true)
+
+            //This ensures the banner goes away upon refresh or navigation
+            searchParams.delete('showUndoWithdrawBanner')
+            setSearchParams(searchParams, { replace: true })
+        }
+    }, [searchParams, setSearchParams])
 
     useEffect(() => {
         updateHeading({
@@ -289,6 +308,11 @@ export const SubmissionSummary = (): React.ReactElement => {
 
                 {documentError && (
                     <DocumentWarningBanner className={styles.banner} />
+                )}
+
+                {showUndoWithdrawBanner && (
+                    //Show status updated banner after undoing submission withdraw
+                    <StatusUpdatedBanner />
                 )}
 
                 {hasCMSPermissions && (
