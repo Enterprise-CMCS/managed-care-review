@@ -127,9 +127,9 @@ export const handler = async () => {
 function sanitizeEmail(email: string): string {
     if (!email || email.indexOf('@') === -1) return email
 
-    // Keep the username but change the domain to example.com
+    // Keep the username but change the domain to mc-review.example.com
     const [username] = email.split('@')
-    return `${username}@example.com`
+    return `${username}@mc-review.example.com`
 }
 
 /**
@@ -141,7 +141,7 @@ function sanitizeSqlDump(sqlContent: string): string {
     console.info('Starting email sanitization process...')
 
     // ---- Email Sanitization Only -----
-    console.info('Sanitizing email addresses to @example.com...')
+    console.info('Sanitizing email addresses to @mc-review.example.com...')
 
     // 1. Replace standard email fields
     sqlContent = sqlContent.replace(

@@ -453,9 +453,6 @@ const CONTENT_TYPES = {
     docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
     xls: 'application/vnd.ms-excel',
     xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    xlsm: 'application/vnd.ms-excel.sheet.macroEnabled.12',
-    xltm: 'application/vnd.ms-excel.template.macroEnabled.12',
-    xlam: 'application/vnd.ms-excel.addin.macroEnabled.12',
 }
 
 // Paths to local mock files for each supported type
