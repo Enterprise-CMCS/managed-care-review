@@ -21,17 +21,74 @@ const DB_SECRET_ARN = process.env.DB_SECRET_ARN
 const TMP_DIR = '/tmp'
 const S3_PREFIX = 'db_dump'
 
-// Content types for document uploads
-const CONTENT_TYPES = {
-    pdf: 'application/pdf',
-}
-
 const s3Client = new S3Client({ region: REGION })
 
-// Paths to local mock PDFs
-const MOCK_PDF_PATHS = {
-    small: path.join(__dirname, '../files/mock-s.pdf'),
-    medium: path.join(__dirname, '../files/mock-m.pdf'),
+/**
+ * Lambda handler function -- entry point for the lambd
+ * Orchestrates the process of importing the database and replacing documents
+ */
+export const handler = async () => {
+    console.info('Starting database import and document replacement process...')
+
+    if (!S3_BUCKET || !DOCS_S3_BUCKET) {
+        throw new Error(
+            'S3_BUCKET or DOCS_S3_BUCKET environment variable is not set'
+        )
+    }
+
+    let prisma: PrismaClient | null = null
+
+    try {
+        // Get DB credentials
+        const dbCredentials = await getDatabaseCredentials()
+
+        // Find latest dump file
+        const latestDumpKey = await findLatestDbDumpFile()
+        const dumpFilename = path.basename(latestDumpKey)
+        const dumpFilePath = path.join(TMP_DIR, dumpFilename)
+
+        // Download the dump file
+        await downloadS3File(latestDumpKey, dumpFilePath, S3_BUCKET)
+
+        // Import database
+        await importDatabase(dumpFilePath, dbCredentials)
+
+        // Initialize Prisma for document processing
+        prisma = await initializePrisma(dbCredentials)
+
+        // sanitize names
+        await sanitizeUserNames(prisma)
+
+        // Process and replace all documents
+        await processAllDocuments(prisma)
+
+        // Cleanup
+        if (fs.existsSync(dumpFilePath)) {
+            fs.unlinkSync(dumpFilePath)
+        }
+
+        return {
+            statusCode: 200,
+            body: JSON.stringify({
+                message:
+                    'Database import and document replacement completed successfully',
+                importedFile: dumpFilename,
+            }),
+        }
+    } catch (err) {
+        console.error('Error in import process:', err)
+        delete process.env.PGPASSWORD
+
+        return {
+            statusCode: 500,
+            body: JSON.stringify({
+                message: 'Error during import process',
+                error: err instanceof Error ? err.message : String(err),
+            }),
+        }
+    } finally {
+        if (prisma) await prisma.$disconnect()
+    }
 }
 
 // Cache to keep track of SHA256 for our mock files (calculated once)
@@ -55,19 +112,6 @@ function calculateFileSha256(filePath: string): string {
     mockFileSha256Cache[filePath] = hash
 
     return hash
-}
-
-/**
- * Get a mock PDF path based on document ID
- * Uses deterministic selection to ensure consistent replacement
- */
-function getMockPDFPath(documentId: string): string {
-    // Use the document ID to deterministically select a mock PDF
-    const hash = createHash('md5').update(documentId).digest('hex')
-    const hashNum = parseInt(hash.substring(0, 8), 16)
-
-    // 50% chance of small, 50% chance of medium
-    return hashNum % 2 === 0 ? MOCK_PDF_PATHS.small : MOCK_PDF_PATHS.medium
 }
 
 /**
@@ -126,227 +170,6 @@ async function logSampleDocumentURLs(prisma: PrismaClient): Promise<void> {
             debugS3Url(doc.s3URL)
         }
     })
-}
-
-/**
- * Replace a document in S3 with a mock PDF
- */
-async function replaceDocument(
-    documentId: string,
-    s3Url: string,
-    originalFilename: string
-): Promise<{ newSha256: string; replaced: boolean }> {
-    try {
-        console.info(`Processing document ID: ${documentId}`)
-        console.info(`Original S3 URL: ${s3Url}`)
-        console.info(`Original filename: ${originalFilename}`)
-
-        // Extract bucket and UUID part from the S3 URL
-        let bucket: string
-        let uuidPart: string
-
-        if (s3Url.startsWith('s3://')) {
-            // Format: s3://bucket-name/uuid.pdf/filename.pdf (we should migrate this)
-            const parts = s3Url.substring(5).split('/', 1)
-            bucket = parts[0] // Extract bucket name
-
-            // Get the path after the bucket
-            const fullPath = s3Url.substring(5 + bucket.length + 1)
-
-            // Extract just the UUID.pdf part (the first segment of the path)
-            uuidPart = fullPath.split('/')[0]
-
-            console.info(`Extracted UUID part: ${uuidPart}`)
-        } else {
-            console.error(`Cannot parse S3 URL: ${s3Url}`)
-            return { newSha256: '', replaced: false }
-        }
-
-        // Check if we have valid components
-        if (!bucket || !uuidPart) {
-            console.error(
-                `Invalid bucket or UUID part: bucket=${bucket}, uuidPart=${uuidPart}`
-            )
-            return { newSha256: '', replaced: false }
-        }
-
-        // Set the target bucket from environment variable
-        bucket = DOCS_S3_BUCKET ?? ''
-
-        // Create the final key with allusers/ prefix
-        const finalKey = `allusers/${uuidPart}`
-
-        console.info(`Target S3 location: s3://${bucket}/${finalKey}`)
-
-        // Get mock PDF path
-        const mockPdfPath = getMockPDFPath(documentId)
-        console.info(`Using mock PDF: ${mockPdfPath}`)
-
-        // Calculate SHA-256 of the mock file
-        const newSha256 = calculateFileSha256(mockPdfPath)
-
-        // Read the mock file
-        const fileContent = fs.readFileSync(mockPdfPath)
-
-        // Determine content type (always PDF for now)
-        const contentType = CONTENT_TYPES.pdf
-
-        // Upload to S3 with the exact right key
-        console.info(`Uploading to S3 bucket: ${bucket}, key: ${finalKey}`)
-
-        await s3Client.send(
-            new PutObjectCommand({
-                Bucket: bucket,
-                Key: finalKey, // This will be "allusers/uuid.pdf"
-                Body: fileContent,
-                ContentType: contentType,
-                ContentDisposition: `attachment; filename="${originalFilename}"`,
-            })
-        )
-
-        console.info(
-            `Successfully replaced document ${documentId} at s3://${bucket}/${finalKey}`
-        )
-        return { newSha256, replaced: true }
-    } catch (error) {
-        console.error(`Error replacing document ${documentId}:`, error)
-        console.error(`S3 URL was: ${s3Url}`)
-        return { newSha256: '', replaced: false }
-    }
-}
-
-/**
- * Process and replace all documents in the database using Prisma
- */
-async function processAllDocuments(prisma: PrismaClient): Promise<void> {
-    // Pre-check: Validate mock PDF files exist
-    Object.entries(MOCK_PDF_PATHS).forEach(([size, filePath]) => {
-        if (!fs.existsSync(filePath)) {
-            console.error(`ERROR: Mock PDF file not found at ${filePath}`)
-            throw new Error(`Mock PDF file missing: ${filePath}`)
-        } else {
-            console.info(`Verified mock ${size} PDF exists: ${filePath}`)
-            // Pre-calculate and cache SHA256
-            const sha256 = calculateFileSha256(filePath)
-            console.info(`${size} PDF SHA256: ${sha256}`)
-        }
-    })
-
-    // Log sample document URLs for debugging
-    await logSampleDocumentURLs(prisma)
-
-    // Process ContractDocument
-    console.info('Processing ContractDocument files...')
-    const contractDocuments = await prisma.contractDocument.findMany()
-    console.info(`Found ${contractDocuments.length} contract documents`)
-
-    for (const doc of contractDocuments) {
-        try {
-            const { newSha256, replaced } = await replaceDocument(
-                doc.id,
-                doc.s3URL,
-                doc.name
-            )
-            if (replaced) {
-                await prisma.contractDocument.update({
-                    where: { id: doc.id },
-                    data: { sha256: newSha256 },
-                })
-                console.info(`Updated contract document ${doc.id}`)
-            }
-        } catch (error) {
-            console.error(
-                `Error processing contract document ${doc.id}:`,
-                error
-            )
-        }
-    }
-
-    // Process ContractSupportingDocument
-    console.info('Processing ContractSupportingDocument files...')
-    const contractSupportingDocuments =
-        await prisma.contractSupportingDocument.findMany()
-    console.info(
-        `Found ${contractSupportingDocuments.length} contract supporting documents`
-    )
-
-    for (const doc of contractSupportingDocuments) {
-        try {
-            const { newSha256, replaced } = await replaceDocument(
-                doc.id,
-                doc.s3URL,
-                doc.name
-            )
-            if (replaced) {
-                await prisma.contractSupportingDocument.update({
-                    where: { id: doc.id },
-                    data: { sha256: newSha256 },
-                })
-                console.info(`Updated contract supporting document ${doc.id}`)
-            }
-        } catch (error) {
-            console.error(
-                `Error processing contract supporting document ${doc.id}:`,
-                error
-            )
-        }
-    }
-
-    // Process RateDocument
-    console.info('Processing RateDocument files...')
-    const rateDocuments = await prisma.rateDocument.findMany()
-    console.info(`Found ${rateDocuments.length} rate documents`)
-
-    for (const doc of rateDocuments) {
-        try {
-            const { newSha256, replaced } = await replaceDocument(
-                doc.id,
-                doc.s3URL,
-                doc.name
-            )
-            if (replaced) {
-                await prisma.rateDocument.update({
-                    where: { id: doc.id },
-                    data: { sha256: newSha256 },
-                })
-                console.info(`Updated rate document ${doc.id}`)
-            }
-        } catch (error) {
-            console.error(`Error processing rate document ${doc.id}:`, error)
-        }
-    }
-
-    // Process RateSupportingDocument
-    console.info('Processing RateSupportingDocument files...')
-    const rateSupportingDocuments =
-        await prisma.rateSupportingDocument.findMany()
-    console.info(
-        `Found ${rateSupportingDocuments.length} rate supporting documents`
-    )
-
-    for (const doc of rateSupportingDocuments) {
-        try {
-            const { newSha256, replaced } = await replaceDocument(
-                doc.id,
-                doc.s3URL,
-                doc.name
-            )
-            if (replaced) {
-                await prisma.rateSupportingDocument.update({
-                    where: { id: doc.id },
-                    data: { sha256: newSha256 },
-                })
-                console.info(`Updated rate supporting document ${doc.id}`)
-            }
-        } catch (error) {
-            console.error(
-                `Error processing rate supporting document ${doc.id}:`,
-                error
-            )
-        }
-    }
-
-    console.info('All document types processed successfully')
 }
 
 /**
@@ -622,70 +445,308 @@ async function sanitizeUserNames(prisma: PrismaClient): Promise<void> {
     console.info('User name sanitization completed')
 }
 
+// Content types for document uploads
+const CONTENT_TYPES = {
+    pdf: 'application/pdf',
+    csv: 'text/csv',
+    doc: 'application/msword',
+    docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    xls: 'application/vnd.ms-excel',
+    xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    xlsm: 'application/vnd.ms-excel.sheet.macroEnabled.12',
+    xltm: 'application/vnd.ms-excel.template.macroEnabled.12',
+    xlam: 'application/vnd.ms-excel.addin.macroEnabled.12',
+}
+
+// Paths to local mock files for each supported type
+const MOCK_FILE_PATHS = {
+    pdf: {
+        small: path.join(__dirname, '../files/mock-s.pdf'),
+        medium: path.join(__dirname, '../files/mock-m.pdf'),
+    },
+    csv: {
+        small: path.join(__dirname, '../files/mock-s.csv'),
+        medium: path.join(__dirname, '../files/mock-m.csv'),
+    },
+    doc: {
+        small: path.join(__dirname, '../files/mock-s.doc'),
+        medium: path.join(__dirname, '../files/mock-m.doc'),
+    },
+    docx: {
+        small: path.join(__dirname, '../files/mock-s.docx'),
+        medium: path.join(__dirname, '../files/mock-m.docx'),
+    },
+    xls: {
+        small: path.join(__dirname, '../files/mock-s.xls'),
+        medium: path.join(__dirname, '../files/mock-m.xls'),
+    },
+    xlsx: {
+        small: path.join(__dirname, '../files/mock-s.xlsx'),
+        medium: path.join(__dirname, '../files/mock-m.xlsx'),
+    },
+}
+
 /**
- * Lambda handler function
- * Orchestrates the process of importing the database and replacing documents
+ * Determine file type from filename or content type
  */
-export const handler = async () => {
-    console.info('Starting database import and document replacement process...')
+function getFileTypeFromName(filename: string): string {
+    const ext = path.extname(filename).toLowerCase()
+    const typeMap: Record<string, string> = {
+        '.pdf': 'pdf',
+        '.csv': 'csv',
+        '.doc': 'doc',
+        '.docx': 'docx',
+        '.xls': 'xls',
+        '.xlsx': 'xlsx',
+    }
+    return typeMap[ext] || 'pdf' // fallback to PDF
+}
 
-    if (!S3_BUCKET || !DOCS_S3_BUCKET) {
-        throw new Error(
-            'S3_BUCKET or DOCS_S3_BUCKET environment variable is not set'
+/**
+ * Get a mock file path based on document ID and file type
+ * Uses deterministic selection to ensure consistent replacement
+ */
+function getMockFilePath(documentId: string, fileType: string): string {
+    // Use the document ID to deterministically select a mock file size
+    const hash = createHash('md5').update(documentId).digest('hex')
+    const hashNum = parseInt(hash.substring(0, 8), 16)
+
+    // 50% chance of small, 50% chance of medium
+    const size = hashNum % 2 === 0 ? 'small' : 'medium'
+
+    // Get the file paths for this type
+    const filePaths = MOCK_FILE_PATHS[fileType as keyof typeof MOCK_FILE_PATHS]
+    if (!filePaths) {
+        console.warn(
+            `No mock files found for type ${fileType}, falling back to PDF`
         )
+        return MOCK_FILE_PATHS.pdf[size]
     }
 
-    let prisma: PrismaClient | null = null
+    return filePaths[size as keyof typeof filePaths]
+}
 
+/**
+ * Replace a document in S3 with a mock file of the appropriate type
+ */
+async function replaceDocument(
+    documentId: string,
+    s3Url: string,
+    originalFilename: string
+): Promise<{ newSha256: string; replaced: boolean }> {
     try {
-        // Get DB credentials
-        const dbCredentials = await getDatabaseCredentials()
+        console.info(`Processing document ID: ${documentId}`)
+        console.info(`Original S3 URL: ${s3Url}`)
+        console.info(`Original filename: ${originalFilename}`)
 
-        // Find latest dump file
-        const latestDumpKey = await findLatestDbDumpFile()
-        const dumpFilename = path.basename(latestDumpKey)
-        const dumpFilePath = path.join(TMP_DIR, dumpFilename)
+        // Determine file type from original filename
+        const fileType = getFileTypeFromName(originalFilename)
+        console.info(`Detected file type: ${fileType}`)
 
-        // Download the dump file
-        await downloadS3File(latestDumpKey, dumpFilePath, S3_BUCKET)
+        // Extract bucket and UUID part from the S3 URL
+        let bucket: string
+        let uuidPart: string
 
-        // Import database
-        await importDatabase(dumpFilePath, dbCredentials)
-
-        // Initialize Prisma for document processing
-        prisma = await initializePrisma(dbCredentials)
-
-        // sanitize names
-        await sanitizeUserNames(prisma)
-
-        // Process and replace all documents
-        await processAllDocuments(prisma)
-
-        // Cleanup
-        if (fs.existsSync(dumpFilePath)) {
-            fs.unlinkSync(dumpFilePath)
+        if (s3Url.startsWith('s3://')) {
+            const parts = s3Url.substring(5).split('/', 1)
+            bucket = parts[0]
+            const fullPath = s3Url.substring(5 + bucket.length + 1)
+            uuidPart = fullPath.split('/')[0]
+            console.info(`Extracted UUID part: ${uuidPart}`)
+        } else {
+            console.error(`Cannot parse S3 URL: ${s3Url}`)
+            return { newSha256: '', replaced: false }
         }
 
-        return {
-            statusCode: 200,
-            body: JSON.stringify({
-                message:
-                    'Database import and document replacement completed successfully',
-                importedFile: dumpFilename,
-            }),
+        if (!bucket || !uuidPart) {
+            console.error(
+                `Invalid bucket or UUID part: bucket=${bucket}, uuidPart=${uuidPart}`
+            )
+            return { newSha256: '', replaced: false }
         }
-    } catch (err) {
-        console.error('Error in import process:', err)
-        delete process.env.PGPASSWORD
 
-        return {
-            statusCode: 500,
-            body: JSON.stringify({
-                message: 'Error during import process',
-                error: err instanceof Error ? err.message : String(err),
-            }),
-        }
-    } finally {
-        if (prisma) await prisma.$disconnect()
+        bucket = DOCS_S3_BUCKET ?? ''
+        const finalKey = `allusers/${uuidPart}`
+
+        console.info(`Target S3 location: s3://${bucket}/${finalKey}`)
+
+        // Get mock file path for the appropriate type
+        const mockFilePath = getMockFilePath(documentId, fileType)
+        console.info(`Using mock file: ${mockFilePath}`)
+
+        // Calculate SHA-256 of the mock file
+        const newSha256 = calculateFileSha256(mockFilePath)
+
+        // Read the mock file
+        const fileContent = fs.readFileSync(mockFilePath)
+
+        // Determine content type
+        const contentType =
+            CONTENT_TYPES[fileType as keyof typeof CONTENT_TYPES] ||
+            CONTENT_TYPES.pdf
+
+        // Upload to S3
+        await s3Client.send(
+            new PutObjectCommand({
+                Bucket: bucket,
+                Key: finalKey,
+                Body: fileContent,
+                ContentType: contentType,
+                ContentDisposition: `attachment; filename="${originalFilename}"`,
+            })
+        )
+
+        console.info(
+            `Successfully replaced document ${documentId} at s3://${bucket}/${finalKey}`
+        )
+        return { newSha256, replaced: true }
+    } catch (error) {
+        console.error(`Error replacing document ${documentId}:`, error)
+        return { newSha256: '', replaced: false }
     }
+}
+
+/**
+ * Process and replace all documents in the database using Prisma
+ */
+async function processAllDocuments(prisma: PrismaClient): Promise<void> {
+    // Pre-check: Validate all mock files exist
+    Object.entries(MOCK_FILE_PATHS).forEach(([fileType, sizes]) => {
+        Object.entries(sizes).forEach(([size, filePath]) => {
+            if (!fs.existsSync(filePath)) {
+                console.error(
+                    `ERROR: Mock ${fileType} file not found at ${filePath}`
+                )
+                throw new Error(`Mock ${fileType} file missing: ${filePath}`)
+            } else {
+                console.info(
+                    `Verified mock ${fileType} (${size}) exists: ${filePath}`
+                )
+                const sha256 = calculateFileSha256(filePath)
+                console.info(`${fileType} (${size}) SHA256: ${sha256}`)
+            }
+        })
+    })
+
+    // Log sample document URLs for debugging
+    await logSampleDocumentURLs(prisma)
+
+    // Process ContractDocument
+    console.info('Processing ContractDocument files...')
+    const contractDocuments = await prisma.contractDocument.findMany()
+    console.info(`Found ${contractDocuments.length} contract documents`)
+
+    for (const doc of contractDocuments) {
+        try {
+            const { newSha256, replaced } = await replaceDocument(
+                doc.id,
+                doc.s3URL,
+                doc.name // Original filename determines file type
+            )
+            if (replaced) {
+                await prisma.contractDocument.update({
+                    where: { id: doc.id },
+                    data: { sha256: newSha256 },
+                })
+                console.info(
+                    `Updated contract document ${doc.id} (${doc.name})`
+                )
+            }
+        } catch (error) {
+            console.error(
+                `Error processing contract document ${doc.id}:`,
+                error
+            )
+        }
+    }
+
+    // Process ContractSupportingDocument
+    console.info('Processing ContractSupportingDocument files...')
+    const contractSupportingDocuments =
+        await prisma.contractSupportingDocument.findMany()
+    console.info(
+        `Found ${contractSupportingDocuments.length} contract supporting documents`
+    )
+
+    for (const doc of contractSupportingDocuments) {
+        try {
+            const { newSha256, replaced } = await replaceDocument(
+                doc.id,
+                doc.s3URL,
+                doc.name // Original filename determines file type
+            )
+            if (replaced) {
+                await prisma.contractSupportingDocument.update({
+                    where: { id: doc.id },
+                    data: { sha256: newSha256 },
+                })
+                console.info(
+                    `Updated contract supporting document ${doc.id} (${doc.name})`
+                )
+            }
+        } catch (error) {
+            console.error(
+                `Error processing contract supporting document ${doc.id}:`,
+                error
+            )
+        }
+    }
+
+    // Process RateDocument
+    console.info('Processing RateDocument files...')
+    const rateDocuments = await prisma.rateDocument.findMany()
+    console.info(`Found ${rateDocuments.length} rate documents`)
+
+    for (const doc of rateDocuments) {
+        try {
+            const { newSha256, replaced } = await replaceDocument(
+                doc.id,
+                doc.s3URL,
+                doc.name // Original filename determines file type
+            )
+            if (replaced) {
+                await prisma.rateDocument.update({
+                    where: { id: doc.id },
+                    data: { sha256: newSha256 },
+                })
+                console.info(`Updated rate document ${doc.id} (${doc.name})`)
+            }
+        } catch (error) {
+            console.error(`Error processing rate document ${doc.id}:`, error)
+        }
+    }
+
+    // Process RateSupportingDocument
+    console.info('Processing RateSupportingDocument files...')
+    const rateSupportingDocuments =
+        await prisma.rateSupportingDocument.findMany()
+    console.info(
+        `Found ${rateSupportingDocuments.length} rate supporting documents`
+    )
+
+    for (const doc of rateSupportingDocuments) {
+        try {
+            const { newSha256, replaced } = await replaceDocument(
+                doc.id,
+                doc.s3URL,
+                doc.name
+            )
+            if (replaced) {
+                await prisma.rateSupportingDocument.update({
+                    where: { id: doc.id },
+                    data: { sha256: newSha256 },
+                })
+                console.info(
+                    `Updated rate supporting document ${doc.id} (${doc.name})`
+                )
+            }
+        } catch (error) {
+            console.error(
+                `Error processing rate supporting document ${doc.id}:`,
+                error
+            )
+        }
+    }
+
+    console.info('All document types processed successfully')
 }
