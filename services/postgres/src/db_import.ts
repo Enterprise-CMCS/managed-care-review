@@ -507,6 +507,121 @@ async function initializePrisma(
     return prisma
 }
 
+// Predefined lists of fake names for generation
+const FIRST_NAMES = [
+    'Aang',
+    'Katara',
+    'Sokka',
+    'Toph',
+    'Zuko',
+    'Iroh',
+    'Azula',
+    'Mai',
+    'Ty Lee',
+    'Suki',
+    'Yue',
+    'Jet',
+    'Haru',
+    'Bumi',
+]
+
+const LAST_NAMES = [
+    'Beifong',
+    'Bei Fong',
+    'Fire Lord',
+    'Earth King',
+    'Chief',
+    'Avatar',
+    'Jasmine Dragon',
+    'Kyoshi Warrior',
+    'Equalist',
+    'Metal Clan',
+    'Earth Empire',
+    'Ba Sing Se',
+    'Omashu',
+    'Gaoling',
+]
+
+/**
+ * Generate a consistent fake name based on input string
+ * Same input will always produce same fake name
+ */
+function generateFakeName(originalName: string): string {
+    if (!originalName || originalName.trim() === '') {
+        return originalName
+    }
+
+    // Create hash from original name for consistency
+    const hash = createHash('md5')
+        .update(originalName.toLowerCase())
+        .digest('hex')
+
+    // Use hash to select first and last names deterministically
+    const firstIndex = parseInt(hash.substring(0, 4), 16) % FIRST_NAMES.length
+    const lastIndex = parseInt(hash.substring(4, 8), 16) % LAST_NAMES.length
+
+    return `${FIRST_NAMES[firstIndex]} ${LAST_NAMES[lastIndex]}`
+}
+
+/**
+ * Sanitize all user names in the database
+ */
+async function sanitizeUserNames(prisma: PrismaClient): Promise<void> {
+    console.info('Starting user name sanitization...')
+
+    // 1. User table - givenName and familyName
+    console.info('Sanitizing User table names...')
+    const users = await prisma.user.findMany()
+
+    for (const user of users) {
+        const fullName = `${user.givenName} ${user.familyName}`.trim()
+        const fakeName = generateFakeName(fullName)
+        const [fakeFirst, ...fakeLastParts] = fakeName.split(' ')
+        const fakeLast = fakeLastParts.join(' ') || 'Doe' // fallback
+
+        await prisma.user.update({
+            where: { id: user.id },
+            data: {
+                givenName: fakeFirst,
+                familyName: fakeLast,
+            },
+        })
+    }
+    console.info(`Updated ${users.length} user names`)
+
+    // 2. StateContact table - name field
+    console.info('Sanitizing StateContact names...')
+    const stateContacts = await prisma.stateContact.findMany()
+
+    for (const contact of stateContacts) {
+        if (contact.name) {
+            const fakeName = generateFakeName(contact.name)
+            await prisma.stateContact.update({
+                where: { id: contact.id },
+                data: { name: fakeName },
+            })
+        }
+    }
+    console.info(`Updated ${stateContacts.length} state contact names`)
+
+    // 3. ActuaryContact table - name field
+    console.info('Sanitizing ActuaryContact names...')
+    const actuaryContacts = await prisma.actuaryContact.findMany()
+
+    for (const contact of actuaryContacts) {
+        if (contact.name) {
+            const fakeName = generateFakeName(contact.name)
+            await prisma.actuaryContact.update({
+                where: { id: contact.id },
+                data: { name: fakeName },
+            })
+        }
+    }
+    console.info(`Updated ${actuaryContacts.length} actuary contact names`)
+
+    console.info('User name sanitization completed')
+}
+
 /**
  * Lambda handler function
  * Orchestrates the process of importing the database and replacing documents
@@ -539,6 +654,9 @@ export const handler = async () => {
 
         // Initialize Prisma for document processing
         prisma = await initializePrisma(dbCredentials)
+
+        // sanitize names
+        await sanitizeUserNames(prisma)
 
         // Process and replace all documents
         await processAllDocuments(prisma)
