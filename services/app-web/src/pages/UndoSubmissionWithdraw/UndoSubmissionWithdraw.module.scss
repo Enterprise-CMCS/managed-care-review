@@ -1,0 +1,16 @@
+@use '../../styles/custom.scss' as custom;
+@use '../../styles/uswdsImports.scss' as uswds;
+
+.undoSubmissionWithdrawContainer {
+    max-width: custom.$mcr-container-standard-width-fixed;
+    background-color: none;
+    @include uswds.at-media('tablet') {
+        min-width: 20rem;
+        max-width: 40rem;
+        margin: 0 auto;
+    }
+}
+
+.formContainer {
+    @include custom.form-fields;
+}
