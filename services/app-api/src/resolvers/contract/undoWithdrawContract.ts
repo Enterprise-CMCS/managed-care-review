@@ -10,9 +10,12 @@ import { logError, logSuccess } from '../../logger'
 import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
 import { GraphQLError } from 'graphql/index'
 import { hasCMSPermissions } from '../../domain-models'
+import type { StateCodeType } from '../../testHelpers'
+import type { Emailer } from '../../emailer'
 
 export function undoWithdrawContract(
-    store: Store
+    store: Store,
+    emailer: Emailer
 ): MutationResolvers['undoWithdrawContract'] {
     return async (_parent, { input }, context) => {
         const { user, ctx, tracer } = context
@@ -91,7 +94,62 @@ export function undoWithdrawContract(
             })
         }
 
-        const { contract } = undoWithdrawResult
+        const { contract, ratesForDisplay } = undoWithdrawResult
+
+        let stateAnalystsEmails: string[] = []
+        const stateAnalystsEmailsResult = await store.findStateAssignedUsers(
+            contract.stateCode as StateCodeType
+        )
+
+        if (stateAnalystsEmailsResult instanceof Error) {
+            logError(
+                'getStateAnalystsEmails',
+                stateAnalystsEmailsResult.message
+            )
+            setErrorAttributesOnActiveSpan(
+                stateAnalystsEmailsResult.message,
+                span
+            )
+        } else {
+            stateAnalystsEmails = stateAnalystsEmailsResult.map((u) => u.email)
+        }
+
+        const sendUndoWithdrawCMSEmail =
+            await emailer.sendUndoWithdrawnSubmissionCMSEmail(
+                contract,
+                ratesForDisplay,
+                stateAnalystsEmails
+            )
+
+        const sendUndoWithdrawStateEmail =
+            await emailer.sendUndoWithdrawnSubmissionStateEmail(
+                contract,
+                ratesForDisplay
+            )
+
+        if (
+            sendUndoWithdrawCMSEmail instanceof Error ||
+            sendUndoWithdrawStateEmail instanceof Error
+        ) {
+            let errMessage = ''
+
+            if (sendUndoWithdrawCMSEmail instanceof Error) {
+                errMessage = `CMS Email failed: ${sendUndoWithdrawCMSEmail.message}`
+            }
+
+            if (sendUndoWithdrawStateEmail instanceof Error) {
+                errMessage = `State Email failed: ${sendUndoWithdrawStateEmail.message}`
+            }
+
+            logError('undoWithdrawContract', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+            throw new GraphQLError(errMessage, {
+                extensions: {
+                    code: 'INTERNAL_SERVER_ERROR',
+                    cause: 'EMAIL_ERROR',
+                },
+            })
+        }
 
         logSuccess('undoWithdrawContract')
         setSuccessAttributesOnActiveSpan(span)
