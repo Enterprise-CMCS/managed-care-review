@@ -3,12 +3,25 @@ import {
     testEmailConfig,
     testStateAnalystsEmails,
 } from '../../testHelpers/emailerHelpers'
-import { sendWithdrawnSubmissionCMSEmail } from './sendWithdrawnSubmissionCMSEmail'
+import { sendUndoWithdrawnSubmissionCMSEmail } from './sendUndoWithdrawnSubmissionCMSEmail'
 
 const testContract = mockContract({
     id: 'test-contract-123',
-    consolidatedStatus: 'WITHDRAWN',
+    consolidatedStatus: 'RESUBMITTED',
     reviewStatusActions: [
+        {
+            updatedAt: new Date('2025-05-10'),
+            updatedBy: {
+                role: 'CMS_USER',
+                email: 'zuko@example.com',
+                givenName: 'Zuko',
+                familyName: 'Hotman',
+            },
+            updatedReason: 'Test Undo Withdraw',
+            dateApprovalReleasedToState: undefined,
+            actionType: 'UNDER_REVIEW',
+            contractID: 'test-contract-123',
+        },
         {
             updatedAt: new Date('2025-04-10'),
             updatedBy: {
@@ -37,9 +50,9 @@ const testRatesForDisplay = [
 ]
 const stateAnalystEmails = () => [...testStateAnalystsEmails]
 
-describe('sendWithdrawnSubmissionCMSEmail', () => {
+describe('sendUndoWithdrawnSubmissionCMSEmail', () => {
     it('CMS email contains correct toAddresses', async () => {
-        const template = await sendWithdrawnSubmissionCMSEmail(
+        const template = await sendUndoWithdrawnSubmissionCMSEmail(
             testContract,
             testRatesForDisplay,
             stateAnalystEmails(),
@@ -59,8 +72,8 @@ describe('sendWithdrawnSubmissionCMSEmail', () => {
         )
     })
 
-    it('renders overall email for withdrawn contract as expected', async () => {
-        const template = await sendWithdrawnSubmissionCMSEmail(
+    it('renders overall email for undo withdraw contract as expected', async () => {
+        const template = await sendUndoWithdrawnSubmissionCMSEmail(
             testContract,
             testRatesForDisplay,
             stateAnalystEmails(),
@@ -75,14 +88,14 @@ describe('sendWithdrawnSubmissionCMSEmail', () => {
     })
 })
 
-describe('sendWithdrawnSubmissionCMSEmail error handling', () => {
-    it('returns an error if contract consolidated status is not WITHDRAWN', async () => {
+describe('sendUndoWithdrawnSubmissionCMSEmail error handling', () => {
+    it('returns an error if contract consolidated status is not RESUBMITTED', async () => {
         const contractWithWrongStatus = {
             ...testContract,
-            consolidatedStatus: 'RESUBMITTED' as const,
+            consolidatedStatus: 'WITHDRAWN' as const,
         }
 
-        const template = await sendWithdrawnSubmissionCMSEmail(
+        const template = await sendUndoWithdrawnSubmissionCMSEmail(
             contractWithWrongStatus,
             testRatesForDisplay,
             stateAnalystEmails(),
@@ -91,7 +104,7 @@ describe('sendWithdrawnSubmissionCMSEmail error handling', () => {
 
         expect(template).toBeInstanceOf(Error)
         expect((template as Error).message).toBe(
-            'Contract consolidated status should be WITHDRAWN'
+            'Contract consolidated status should be RESUBMITTED'
         )
     })
 
@@ -101,7 +114,7 @@ describe('sendWithdrawnSubmissionCMSEmail error handling', () => {
             reviewStatusActions: [],
         }
 
-        const template = await sendWithdrawnSubmissionCMSEmail(
+        const template = await sendUndoWithdrawnSubmissionCMSEmail(
             contractWithMissingReviewActions,
             testRatesForDisplay,
             stateAnalystEmails(),
@@ -110,11 +123,11 @@ describe('sendWithdrawnSubmissionCMSEmail error handling', () => {
 
         expect(template).toBeInstanceOf(Error)
         expect((template as Error).message).toBe(
-            'Latest contract review action is not WITHDRAW'
+            'Latest contract review action is not UNDER_REVIEW'
         )
     })
 
-    it('returns an error if the latest contract review action is not WITHDRAW', async () => {
+    it('returns an error if the latest contract review action is not UNDER_REVIEW', async () => {
         const contractWithWrongActionType = {
             ...testContract,
             reviewStatusActions: [
@@ -128,13 +141,13 @@ describe('sendWithdrawnSubmissionCMSEmail error handling', () => {
                     },
                     updatedReason: 'Test Withdraw',
                     dateApprovalReleasedToState: undefined,
-                    actionType: 'UNDER_REVIEW' as const,
+                    actionType: 'WITHDRAW' as const,
                     contractID: 'test-contract-123',
                 },
             ],
         }
 
-        const template = await sendWithdrawnSubmissionCMSEmail(
+        const template = await sendUndoWithdrawnSubmissionCMSEmail(
             contractWithWrongActionType,
             testRatesForDisplay,
             stateAnalystEmails(),
@@ -143,7 +156,7 @@ describe('sendWithdrawnSubmissionCMSEmail error handling', () => {
 
         expect(template).toBeInstanceOf(Error)
         expect((template as Error).message).toBe(
-            'Latest contract review action is not WITHDRAW'
+            'Latest contract review action is not UNDER_REVIEW'
         )
     })
 })

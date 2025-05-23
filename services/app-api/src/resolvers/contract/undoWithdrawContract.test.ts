@@ -14,6 +14,7 @@ import {
     contractHistoryToDescriptions,
     unlockTestContract,
     errorUndoWithdrawTestContract,
+    createAndSubmitTestContractWithRate,
 } from '../../testHelpers/gqlContractHelpers'
 import { fetchTestRateById, must } from '../../testHelpers'
 import {
@@ -24,7 +25,7 @@ import {
     type RateFormDataInput,
     UpdateDraftContractRatesDocument,
 } from '../../gen/gqlClient'
-import { describe, expect } from 'vitest'
+import { testEmailConfig, testEmailer } from '../../testHelpers/emailerHelpers'
 
 const testRateFormInputData = (): RateFormDataInput => ({
     rateType: 'AMENDMENT',
@@ -592,9 +593,104 @@ describe('undoWithdrawContract', () => {
         expect(rateB.consolidatedStatus).toBe('SUBMITTED')
         expect(rateB.parentContractID).toBe(draftContractB.id)
     })
+
+    it('sends email to state and CMS when submission is withdrawn', async () => {
+        const emailConfig = testEmailConfig()
+        const mockEmailer = testEmailer()
+        const stateUser = testStateUser()
+        const cmsUser = testCMSUser()
+        const stateServer = await constructTestPostgresServer({
+            context: {
+                user: stateUser,
+            },
+        })
+
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: cmsUser,
+            },
+            emailer: mockEmailer,
+        })
+
+        const contract = await createAndSubmitTestContractWithRate(
+            stateServer,
+            undefined
+        )
+
+        await withdrawTestContract(
+            cmsServer,
+            contract.id,
+            'withdraw submission'
+        )
+
+        const unWithdrawnContract = await undoWithdrawTestContract(
+            cmsServer,
+            contract.id,
+            'Undo submission withdraw'
+        )
+
+        const contractName =
+            unWithdrawnContract.packageSubmissions[0].contractRevision
+                .contractName
+
+        const stateReceiverEmails =
+            unWithdrawnContract.packageSubmissions[0].contractRevision.formData.stateContacts.map(
+                (contact) => contact.email
+            )
+
+        const rateCertificationName =
+            unWithdrawnContract.packageSubmissions[0].rateRevisions?.[0]
+                .formData.rateCertificationName
+
+        if (!rateCertificationName)
+            throw new Error('Unexpected error: Expected rate to exist.')
+
+        // Expect CMS emails contain correct recipients, contract and rate names
+        expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
+            3,
+            expect.objectContaining({
+                subject: expect.stringContaining(
+                    `${contractName} status update`
+                ),
+                sourceEmail: emailConfig.emailSource,
+                toAddresses: expect.arrayContaining([
+                    ...testEmailConfig().dmcpSubmissionEmails,
+                    ...testEmailConfig().oactEmails,
+                ]),
+                bodyHTML: expect.stringContaining(contractName),
+            })
+        )
+
+        expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
+            3,
+            expect.objectContaining({
+                bodyHTML: expect.stringContaining(rateCertificationName),
+            })
+        )
+
+        // Expect State emails contain correct recipients, contract and rate names
+        expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
+            4,
+            expect.objectContaining({
+                subject: expect.stringContaining(
+                    `${contractName} status update`
+                ),
+                sourceEmail: emailConfig.emailSource,
+                toAddresses: expect.arrayContaining(stateReceiverEmails),
+                bodyHTML: expect.stringContaining(contractName),
+            })
+        )
+
+        expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
+            4,
+            expect.objectContaining({
+                bodyHTML: expect.stringContaining(contractName),
+            })
+        )
+    })
 })
 
-describe('undoWithdrawContract error handling', () =>
+describe('undoWithdrawContract error handling', () => {
     it('returns an error if contract is in incorrect status', async () => {
         const stateUser = testStateUser()
         const cmsUser = testCMSUser()
@@ -674,4 +770,5 @@ describe('undoWithdrawContract error handling', () =>
         expect(unlockedContractWithdrawErrors[0].message).toBe(
             'Attempted to undo a submission withdrawal with invalid contract status of UNLOCKED'
         )
-    }))
+    })
+})

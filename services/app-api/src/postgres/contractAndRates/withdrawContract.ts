@@ -14,6 +14,7 @@ import {
 } from './prismaSharedContractRateHelpers'
 import type { RatesToReassign } from './reassignParentContract'
 import { reassignParentContractInTransaction } from './reassignParentContract'
+import type { RateForDisplayType } from '../../emailer/templateHelpers'
 
 export type WithdrawContractArgsType = {
     contract: ContractType
@@ -21,14 +22,9 @@ export type WithdrawContractArgsType = {
     updatedReason: string
 }
 
-export type RateForDisplay = {
-    id: string
-    rateCertificationName: string
-}
-
 export type WithdrawContractReturnType = {
     withdrawnContract: ContractType
-    ratesForDisplay: RateForDisplay[]
+    ratesForDisplay: RateForDisplayType[]
 }
 
 /**
@@ -221,7 +217,7 @@ const withdrawContractInsideTransaction = async (
         },
     })
 
-    const ratesForDisplay: RateForDisplay[] = []
+    const ratesForDisplay: RateForDisplayType[] = []
     for (const rate of ratesToWithdraw) {
         // Grabbing necessary rate info to display in notif email
         ratesForDisplay.push({

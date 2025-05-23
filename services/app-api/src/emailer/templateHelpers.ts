@@ -19,6 +19,9 @@ import type {
 } from '../domain-models'
 import { logError } from '../logger'
 import { pruneDuplicateEmails } from './formatters'
+import { findStatePrograms, packageName } from '@mc-review/hpp'
+import { rateSummaryURL, submissionSummaryURL } from './generateURLs'
+import { formatCalendarDate } from '@mc-review/dates'
 
 // ETA SETUP
 Eta.configure({
@@ -469,6 +472,87 @@ const getRateStateContactEmails = (rate: RateType): string[] => {
     }, [])
 }
 
+export type RateForDisplayType = {
+    id: string
+    rateCertificationName: string
+}
+
+export type RateEtaDataType = {
+    rateCertificationName: string
+    rateSummaryURL: string
+}
+
+// Eta template type for both withdraw and undo withdraw
+export type WithdrawContractEtaDataType = {
+    contractName: string
+    contractSummaryURL: string
+    updatedBy: string
+    updatedAt: string
+    reason: string
+    formattedRates: RateEtaDataType[]
+}
+
+// Function to format ETA template data for both withdraw and undo withdraw submission
+const parseEmailDataWithdrawSubmission = (
+    contract: ContractType,
+    rates: RateForDisplayType[],
+    config: EmailConfiguration,
+    type: 'WITHDRAW' | 'UNDO_WITHDRAW'
+): WithdrawContractEtaDataType | Error => {
+    const validConsolidatedStatus =
+        type === 'WITHDRAW' ? 'WITHDRAWN' : 'RESUBMITTED'
+    const validReviewAction = type === 'WITHDRAW' ? type : 'UNDER_REVIEW'
+
+    if (contract.consolidatedStatus !== validConsolidatedStatus) {
+        return new Error(
+            `Contract consolidated status should be ${validConsolidatedStatus}`
+        )
+    }
+
+    // Latest review action should be UNDER_REVIEW
+    const latestStatusAction = contract.reviewStatusActions?.sort(
+        (a, b) =>
+            new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+    )[0]
+    if (latestStatusAction?.actionType !== validReviewAction) {
+        return new Error(
+            `Latest contract review action is not ${validReviewAction}`
+        )
+    }
+
+    // Contract Name
+    const contractName = packageName(
+        contract.stateCode,
+        contract.stateNumber,
+        contract.packageSubmissions[0].contractRevision.formData.programIDs,
+        findStatePrograms(contract.stateCode)
+    )
+
+    const contractSummaryURL = submissionSummaryURL(contract.id, config.baseUrl)
+
+    const updatedBy = latestStatusAction.updatedBy.email
+    const updatedAt = formatCalendarDate(
+        latestStatusAction.updatedAt,
+        'America/Los_Angeles'
+    )
+    const reason = latestStatusAction.updatedReason!
+
+    // Rates withdrawn with the submission that will be displayed in the email
+    const formattedRates: RateEtaDataType[] = rates.map((rate) => ({
+        rateCertificationName: rate.rateCertificationName,
+        rateSummaryURL: rateSummaryURL(rate.id, config.baseUrl),
+    }))
+
+    return {
+        contractName,
+        contractSummaryURL,
+        updatedBy,
+        updatedAt,
+        reason,
+        formattedRates,
+    }
+}
+
 export {
     stripHTMLFromTemplate,
     handleAsCHIPSubmission,
@@ -487,4 +571,5 @@ export {
     getActuaryContactEmails,
     getRateSubmitterEmails,
     getRateStateContactEmails,
+    parseEmailDataWithdrawSubmission,
 }

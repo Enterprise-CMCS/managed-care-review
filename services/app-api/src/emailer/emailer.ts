@@ -1,4 +1,4 @@
-import { sendSESEmail } from '../emailer'
+import { sendSESEmail, sendUndoWithdrawnSubmissionCMSEmail } from '../emailer'
 
 import {
     getSESEmailParams,
@@ -19,6 +19,12 @@ import {
     sendUndoWithdrawnRateCMSEmail,
     sendWithdrawnSubmissionCMSEmail,
     sendWithdrawnSubmissionStateEmail,
+    sendRateQuestionStateEmail,
+    sendRateQuestionResponseCMSEmail,
+    sendRateQuestionResponseStateEmail,
+    sendRateQuestionCMSEmail,
+    sendWithdrawnRateCMSEmail,
+    sendUndoWithdrawnSubmissionStateEmail,
 } from './'
 import type { UnlockedHealthPlanFormDataType } from '@mc-review/hpp'
 import type {
@@ -32,12 +38,7 @@ import type {
     RateQuestionType,
 } from '../domain-models'
 import { SESServiceException } from '@aws-sdk/client-ses'
-import { sendRateQuestionStateEmail } from './emails'
-import { sendRateQuestionCMSEmail } from './emails/sendRateQuestionCMSEmail'
-import { sendRateQuestionResponseCMSEmail } from './emails/sendRateQuestionResponseCMSEmail'
-import { sendRateQuestionResponseStateEmail } from './emails/sendRateQuestionResponseStateEmail'
-import { sendWithdrawnRateCMSEmail } from './emails/sendWithdrawnRateCMSEmail'
-import type { RateForDisplay } from '../postgres/contractAndRates/withdrawContract'
+import type { RateForDisplayType } from './templateHelpers'
 
 // See more discussion of configuration in docs/Configuration.md
 type EmailConfiguration = {
@@ -198,12 +199,21 @@ type Emailer = {
     ) => Promise<void | Error>
     sendWithdrawnSubmissionCMSEmail: (
         withdrawnContract: ContractType,
-        ratesForDisplay: RateForDisplay[],
+        ratesForDisplay: RateForDisplayType[],
         stateAnalystsEmails: StateAnalystsEmails
     ) => Promise<void | Error>
     sendWithdrawnSubmissionStateEmail: (
         withdrawnContract: ContractType,
-        ratesForDisplay: RateForDisplay[]
+        ratesForDisplay: RateForDisplayType[]
+    ) => Promise<void | Error>
+    sendUndoWithdrawnSubmissionStateEmail: (
+        contract: ContractType,
+        ratesForDisplay: RateForDisplayType[]
+    ) => Promise<void | Error>
+    sendUndoWithdrawnSubmissionCMSEmail: (
+        contract: ContractType,
+        ratesForDisplay: RateForDisplayType[],
+        stateAnalystsEmails: StateAnalystsEmails
     ) => Promise<void | Error>
 }
 const localEmailerLogger = (emailData: EmailData) =>
@@ -605,6 +615,40 @@ function emailer(
         ) {
             const emailData = await sendWithdrawnSubmissionStateEmail(
                 withdrawnContract,
+                ratesForDisplay,
+                config
+            )
+
+            if (emailData instanceof Error) {
+                return emailData
+            } else {
+                return await this.sendEmail(emailData)
+            }
+        },
+        sendUndoWithdrawnSubmissionCMSEmail: async function (
+            contract,
+            ratesForDisplay,
+            stateAnalystsEmails
+        ) {
+            const emailData = await sendUndoWithdrawnSubmissionCMSEmail(
+                contract,
+                ratesForDisplay,
+                stateAnalystsEmails,
+                config
+            )
+
+            if (emailData instanceof Error) {
+                return emailData
+            } else {
+                return await this.sendEmail(emailData)
+            }
+        },
+        sendUndoWithdrawnSubmissionStateEmail: async function (
+            contract,
+            ratesForDisplay
+        ) {
+            const emailData = await sendUndoWithdrawnSubmissionStateEmail(
+                contract,
                 ratesForDisplay,
                 config
             )

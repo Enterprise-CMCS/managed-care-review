@@ -10,5 +10,6 @@ exports[`sendWithdrawnSubmissionStateEmail > renders overall email for withdrawn
   <li>rate-name-123</li>
   <li>rate-name-321</li>
 </ul>
-<a href="http://localhost/submissions/test-contract-123">View submission in MC-Review</a>"
+<a href="http://localhost/submissions/test-contract-123">View submission in MC-Review</a>
+"
 `;

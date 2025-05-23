@@ -1,0 +1,15 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`sendUndoWithdrawnSubmissionStateEmail > renders overall email for undo withdraw contract as expected 1`] = `
+"<h1 style="font-weight: normal;">Submission MCR-MN-0004-SNBC status was updated to 'Submitted' by CMS</h1>
+<b>Updated by:</b> zuko@example.com<br />
+<b>Updated on:</b> 05/09/2025<br />
+<b>Reason:</b> Test Undo Withdraw<br />
+<b>Related rate certification(s):</b>
+<ul>
+  <li>rate-name-123</li>
+  <li>rate-name-321</li>
+</ul>
+<a href="http://localhost/submissions/test-contract-123">View submission in MC-Review</a>
+"
+`;
