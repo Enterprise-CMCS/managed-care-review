@@ -7,7 +7,7 @@ import {
     PoliteErrorMessage,
 } from '../../components'
 import { RoutesRecord } from '@mc-review/constants'
-import { useNavigate, useParams } from 'react-router-dom'
+import { generatePath, useNavigate, useParams } from 'react-router-dom'
 import {
     RateStripped,
     useFetchContractQuery,
@@ -227,8 +227,10 @@ export const SubmissionWithdraw = (): React.ReactElement => {
                         text: contractName || '',
                     },
                     {
+                        link: generatePath(RoutesRecord.SUBMISSION_WITHDRAW, {
+                            id,
+                        }),
                         text: 'Withdraw submission',
-                        link: RoutesRecord.SUBMISSION_WITHDRAW,
                     },
                 ]}
             />

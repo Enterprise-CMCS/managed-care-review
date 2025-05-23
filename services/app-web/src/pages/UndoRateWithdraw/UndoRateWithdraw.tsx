@@ -13,7 +13,7 @@ import {
 import { ErrorOrLoadingPage } from '../StateSubmission'
 import { handleAndReturnErrorState } from '../StateSubmission/ErrorOrLoadingPage'
 import { RoutesRecord } from '@mc-review/constants'
-import { useNavigate, useParams } from 'react-router-dom'
+import { generatePath, useNavigate, useParams } from 'react-router-dom'
 import {
     ButtonGroup,
     Form,
@@ -125,7 +125,9 @@ export const UndoRateWithdraw = () => {
                     { link: `/rates/${id}`, text: rateCertificationName || '' },
                     {
                         text: 'Undo withdraw',
-                        link: RoutesRecord.UNDO_RATE_WITHDRAW,
+                        link: generatePath(RoutesRecord.UNDO_RATE_WITHDRAW, {
+                            id,
+                        }),
                     },
                 ]}
             />
