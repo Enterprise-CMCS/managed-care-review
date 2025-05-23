@@ -511,10 +511,10 @@ describe('SubmissionType', () => {
                 screen.getByRole('radio', { name: 'CHIP-only' })
             ).toBeDisabled()
             expect(
-                screen.queryByText(
+                screen.queryAllByText(
                     'If you need to change your response, contact CMS.'
                 )
-            ).toBeInTheDocument()
+            ).toHaveLength(2)
         })
     })
 
