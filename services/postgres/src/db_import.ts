@@ -12,28 +12,67 @@ import {
 import { SecretDict } from './types'
 import { createHash } from 'crypto'
 import { PrismaClient } from '@prisma/client'
+import { parseDomainUsersFromPrismaUsers } from '../../app-api/src/postgres/user/prismaDomainUser'
+import { UserType } from '../../app-api/src/domain-models'
 
-// Environment variables
+// Define a type for our required environment variables
+interface RequiredEnvVars {
+    S3_BUCKET: string
+    DOCS_S3_BUCKET: string
+    DB_SECRET_ARN: string
+}
+
+/**
+ * Validate and return required environment variables with type safety
+ */
+function getValidatedEnvironment(): RequiredEnvVars {
+    const s3Bucket = process.env.S3_BUCKET
+    const docsS3Bucket = process.env.DOCS_S3_BUCKET
+    const dbSecretArn = process.env.DB_SECRET_ARN
+
+    if (!s3Bucket) {
+        throw new Error('Missing required environment variable: S3_BUCKET')
+    }
+    if (!docsS3Bucket) {
+        throw new Error('Missing required environment variable: DOCS_S3_BUCKET')
+    }
+    if (!dbSecretArn) {
+        throw new Error('Missing required environment variable: DB_SECRET_ARN')
+    }
+
+    return {
+        S3_BUCKET: s3Bucket,
+        DOCS_S3_BUCKET: docsS3Bucket,
+        DB_SECRET_ARN: dbSecretArn,
+    }
+}
+
+const ENV = getValidatedEnvironment()
+
+// Update the constants to use the validated environment
 const REGION = process.env.AWS_REGION || 'us-east-1'
-const S3_BUCKET = process.env.S3_BUCKET // For DB dumps
-const DOCS_S3_BUCKET = process.env.DOCS_S3_BUCKET // For documents
-const DB_SECRET_ARN = process.env.DB_SECRET_ARN
+const S3_BUCKET = ENV.S3_BUCKET
+const DOCS_S3_BUCKET = ENV.DOCS_S3_BUCKET
+const DB_SECRET_ARN = ENV.DB_SECRET_ARN
 const TMP_DIR = '/tmp'
 const S3_PREFIX = 'db_dump'
+const DRY_RUN = process.env.DRY_RUN === 'true'
 
 const s3Client = new S3Client({ region: REGION })
 
+// Cache to keep track of SHA256 for our mock files (calculated once)
+const mockFileSha256Cache: Record<string, string> = {}
+let mockFilesVerified = false
+
 /**
- * Lambda handler function -- entry point for the lambd
+ * Lambda handler function -- entry point for the lambda
  * Orchestrates the process of importing the database and replacing documents
  */
 export const handler = async () => {
     console.info('Starting database import and document replacement process...')
 
-    if (!S3_BUCKET || !DOCS_S3_BUCKET) {
-        throw new Error(
-            'S3_BUCKET or DOCS_S3_BUCKET environment variable is not set'
-        )
+    if (DRY_RUN) {
+        console.info('DRY RUN MODE - No changes will be made')
     }
 
     let prisma: PrismaClient | null = null
@@ -41,6 +80,9 @@ export const handler = async () => {
     try {
         // Get DB credentials
         const dbCredentials = await getDatabaseCredentials()
+
+        // Initialize Prisma
+        prisma = await initializePrisma(dbCredentials)
 
         // Find latest dump file
         const latestDumpKey = await findLatestDbDumpFile()
@@ -50,14 +92,20 @@ export const handler = async () => {
         // Download the dump file
         await downloadS3File(latestDumpKey, dumpFilePath, S3_BUCKET)
 
+        // Save existing users before import
+        const valUsers = await saveExistingUsers(prisma)
+
         // Import database
         await importDatabase(dumpFilePath, dbCredentials)
 
-        // Initialize Prisma for document processing
-        prisma = await initializePrisma(dbCredentials)
+        // Restore val users
+        await restoreValUsers(prisma, valUsers)
 
-        // sanitize names
+        // Sanitize names
         await sanitizeUserNames(prisma)
+
+        // Validate the import
+        await validateImport(prisma)
 
         // Process and replace all documents
         await processAllDocuments(prisma)
@@ -91,8 +139,75 @@ export const handler = async () => {
     }
 }
 
-// Cache to keep track of SHA256 for our mock files (calculated once)
-const mockFileSha256Cache: Record<string, string> = {}
+/**
+ * Save existing val users before import
+ */
+async function saveExistingUsers(prisma: PrismaClient): Promise<UserType[]> {
+    console.info('Backing up existing val users...')
+    const existingUsers = await prisma.user.findMany({
+        include: {
+            stateAssignments: true,
+        },
+    })
+    console.info(`Found ${existingUsers.length} users to preserve`)
+
+    const valUsers = parseDomainUsersFromPrismaUsers(existingUsers)
+    if (valUsers instanceof Error) {
+        console.error(
+            `Could not parse domain users from existing users: ${valUsers}`
+        )
+        throw valUsers
+    }
+
+    // Log user breakdown by role
+    const usersByRole = valUsers.reduce(
+        (acc, user) => {
+            acc[user.role] = (acc[user.role] || 0) + 1
+            return acc
+        },
+        {} as Record<string, number>
+    )
+    console.info('Users by role:', usersByRole)
+
+    return valUsers
+}
+
+/**
+ * Validate the import was successful
+ */
+async function validateImport(prisma: PrismaClient): Promise<void> {
+    console.info('Validating import...')
+
+    // Check that we have at least some users
+    const userCount = await prisma.user.count()
+    if (userCount === 0) {
+        throw new Error('Import validation failed: No users found')
+    }
+
+    // Check that we have states
+    const stateCount = await prisma.state.count()
+    if (stateCount === 0) {
+        throw new Error('Import validation failed: No states found')
+    }
+
+    // Verify test users exist
+    const testUserCount = await prisma.user.count({
+        where: {
+            OR: [
+                { email: { contains: '@example.com' } },
+                { email: { contains: '@truss.works' } },
+            ],
+        },
+    })
+
+    if (testUserCount === 0) {
+        throw new Error('Import validation failed: No test users found')
+    }
+
+    console.info(
+        `Validation passed: ${userCount} users, ${stateCount} states, ${testUserCount} test users`
+    )
+}
 
 /**
  * Calculate SHA-256 hash for a file
@@ -279,7 +394,7 @@ async function getDatabaseCredentials(): Promise<SecretDict> {
 }
 
 /**
- * Import database from S3 dump file
+ * Import database from dump file
  */
 async function importDatabase(
     dumpFilePath: string,
@@ -290,10 +405,14 @@ async function importDatabase(
 
     console.info(`Importing database dump from ${dumpFilePath}...`)
 
+    if (DRY_RUN) {
+        console.info('DRY RUN: Skipping actual database import')
+        return
+    }
+
     try {
         const importCmd = `psql -h ${dbCredentials.host} -p ${port} -U ${dbCredentials.username} -d ${dbname} -f ${dumpFilePath}`
 
-        // Execute the command
         process.env.PGPASSWORD = dbCredentials.password
         console.info(`Executing import command: ${importCmd}`)
 
@@ -309,6 +428,135 @@ async function importDatabase(
     } finally {
         delete process.env.PGPASSWORD
     }
+}
+
+/**
+ * Restore a single user
+ */
+async function restoreUser(
+    prisma: PrismaClient,
+    user: UserType
+): Promise<void> {
+    // Base user data that all users have
+    const baseUserData = {
+        id: user.id,
+        email: user.email,
+        givenName: user.givenName,
+        familyName: user.familyName,
+        role: user.role,
+    }
+
+    switch (user.role) {
+        case 'STATE_USER':
+            await prisma.user.upsert({
+                where: { id: user.id },
+                update: {
+                    ...baseUserData,
+                    stateCode: user.stateCode,
+                },
+                create: {
+                    ...baseUserData,
+                    stateCode: user.stateCode,
+                },
+            })
+            break
+
+        case 'CMS_USER':
+        case 'CMS_APPROVER_USER':
+            // For CMS users, we need to handle state assignments
+            await prisma.user.upsert({
+                where: { id: user.id },
+                update: {
+                    ...baseUserData,
+                    divisionAssignment: user.divisionAssignment || null,
+                    stateCode: null, // CMS users don't have stateCode
+                },
+                create: {
+                    ...baseUserData,
+                    divisionAssignment: user.divisionAssignment || null,
+                    stateCode: null,
+                },
+            })
+
+            // Update state assignments separately to ensure they're set correctly
+            if (user.stateAssignments && user.stateAssignments.length > 0) {
+                try {
+                    await prisma.user.update({
+                        where: { id: user.id },
+                        data: {
+                            stateAssignments: {
+                                set: [], // Clear any existing
+                                connect: user.stateAssignments.map((state) => ({
+                                    stateCode: state.stateCode,
+                                })),
+                            },
+                        },
+                    })
+                } catch (connectError) {
+                    console.warn(
+                        `Failed to connect state assignments for user ${user.email}: ${connectError}`
+                    )
+                    // User still exists, just without all state assignments
+                }
+            }
+            break
+
+        case 'ADMIN_USER':
+        case 'HELPDESK_USER':
+        case 'BUSINESSOWNER_USER':
+            // These users only have base fields
+            await prisma.user.upsert({
+                where: { id: user.id },
+                update: baseUserData,
+                create: baseUserData,
+            })
+            break
+
+        default:
+            console.warn(`Unhandled user type: ${JSON.stringify(user)}`)
+    }
+}
+
+/**
+ * Restore val users after import
+ */
+async function restoreValUsers(
+    prisma: PrismaClient,
+    users: UserType[]
+): Promise<void> {
+    if (DRY_RUN) {
+        console.info('DRY RUN: Skipping user restoration')
+        return
+    }
+
+    let restored = 0
+    let failed = 0
+
+    // Use Promise.all with chunks to speed up restoration
+    const chunkSize = 10
+    for (let i = 0; i < users.length; i += chunkSize) {
+        const chunk = users.slice(i, i + chunkSize)
+
+        await Promise.all(
+            chunk.map(async (user) => {
+                try {
+                    await restoreUser(prisma, user)
+                    restored++
+                    console.info(`Restored user: ${user.email} (${user.role})`)
+                } catch (error) {
+                    failed++
+                    console.error(
+                        `Failed to restore user ${user.email}:`,
+                        error
+                    )
+                }
+            })
+        )
+    }
+
+    console.info(
+        `User restoration completed: ${restored} restored, ${failed} failed`
+    )
 }
 
 /**
@@ -387,59 +635,92 @@ function generateFakeName(originalName: string): string {
 }
 
 /**
- * Sanitize all user names in the database
+ * Sanitize user names, state contacts, and actuary contacts
  */
 async function sanitizeUserNames(prisma: PrismaClient): Promise<void> {
+    if (DRY_RUN) {
+        console.info('DRY RUN: Skipping name sanitization')
+        return
+    }
+
     console.info('Starting user name sanitization...')
 
-    // 1. User table - givenName and familyName
-    console.info('Sanitizing User table names...')
-    const users = await prisma.user.findMany()
+    // Get all val user emails to exclude from sanitization
+    const valUserEmails = await prisma.user.findMany({
+        where: {
+            OR: [
+                { email: { contains: '@example.com' } },
+                { email: { contains: '@truss.works' } },
+                { email: { contains: 'test' } },
+                { email: { contains: 'mc-review-qa' } },
+            ],
+        },
+        select: { email: true },
+    })
 
-    for (const user of users) {
+    const valEmailSet = new Set(valUserEmails.map((u) => u.email))
+    console.info(`Excluding ${valEmailSet.size} val users from sanitization`)
+
+    // Get all users to sanitize
+    const users = await prisma.user.findMany({
+        where: {
+            NOT: {
+                email: { in: Array.from(valEmailSet) },
+            },
+        },
+    })
+
+    // Batch update users using transaction
+    const userUpdates = users.map((user) => {
         const fullName = `${user.givenName} ${user.familyName}`.trim()
         const fakeName = generateFakeName(fullName)
         const [fakeFirst, ...fakeLastParts] = fakeName.split(' ')
-        const fakeLast = fakeLastParts.join(' ') || 'Doe' // fallback
+        const fakeLast = fakeLastParts.join(' ') || 'Doe'
 
-        await prisma.user.update({
+        return prisma.user.update({
             where: { id: user.id },
             data: {
                 givenName: fakeFirst,
                 familyName: fakeLast,
             },
         })
-    }
-    console.info(`Updated ${users.length} user names`)
+    })
+
+    await prisma.$transaction(userUpdates)
+    console.info(`Updated ${users.length} production user names`)
 
     // 2. StateContact table - name field
     console.info('Sanitizing StateContact names...')
-    const stateContacts = await prisma.stateContact.findMany()
+    const stateContacts = await prisma.stateContact.findMany({
+        where: { name: { not: null } },
+    })
 
-    for (const contact of stateContacts) {
-        if (contact.name) {
-            const fakeName = generateFakeName(contact.name)
-            await prisma.stateContact.update({
-                where: { id: contact.id },
-                data: { name: fakeName },
-            })
-        }
-    }
+    const stateContactUpdates = stateContacts.map((contact) => {
+        const fakeName = generateFakeName(contact.name!)
+        return prisma.stateContact.update({
+            where: { id: contact.id },
+            data: { name: fakeName },
+        })
+    })
+
+    await prisma.$transaction(stateContactUpdates)
     console.info(`Updated ${stateContacts.length} state contact names`)
 
     // 3. ActuaryContact table - name field
     console.info('Sanitizing ActuaryContact names...')
-    const actuaryContacts = await prisma.actuaryContact.findMany()
+    const actuaryContacts = await prisma.actuaryContact.findMany({
+        where: { name: { not: null } },
+    })
 
-    for (const contact of actuaryContacts) {
-        if (contact.name) {
-            const fakeName = generateFakeName(contact.name)
-            await prisma.actuaryContact.update({
-                where: { id: contact.id },
-                data: { name: fakeName },
-            })
-        }
-    }
+    const actuaryContactUpdates = actuaryContacts.map((contact) => {
+        const fakeName = generateFakeName(contact.name!)
+        return prisma.actuaryContact.update({
+            where: { id: contact.id },
+            data: { name: fakeName },
+        })
+    })
+
+    await prisma.$transaction(actuaryContactUpdates)
     console.info(`Updated ${actuaryContacts.length} actuary contact names`)
 
     console.info('User name sanitization completed')
@@ -481,6 +762,32 @@ const MOCK_FILE_PATHS = {
         small: path.join(__dirname, '../files/mock-s.xlsx'),
         medium: path.join(__dirname, '../files/mock-m.xlsx'),
     },
+}
+
+/**
+ * Verify all mock files exist
+ */
+async function verifyMockFiles(): Promise<void> {
+    if (mockFilesVerified) return
+
+    Object.entries(MOCK_FILE_PATHS).forEach(([fileType, sizes]) => {
+        Object.entries(sizes).forEach(([size, filePath]) => {
+            if (!fs.existsSync(filePath)) {
+                console.error(
+                    `ERROR: Mock ${fileType} file not found at ${filePath}`
+                )
+                throw new Error(`Mock ${fileType} file missing: ${filePath}`)
+            } else {
+                console.info(
+                    `Verified mock ${fileType} (${size}) exists: ${filePath}`
+                )
+                const sha256 = calculateFileSha256(filePath)
+                console.info(`${fileType} (${size}) SHA256: ${sha256}`)
+            }
+        })
+    })
+
+    mockFilesVerified = true
 }
 
 /**
@@ -531,6 +838,11 @@ async function replaceDocument(
     s3Url: string,
     originalFilename: string
 ): Promise<{ newSha256: string; replaced: boolean }> {
+    if (DRY_RUN) {
+        console.info(`DRY RUN: Would replace document ${documentId}`)
+        return { newSha256: 'dry-run-hash', replaced: true }
+    }
+
     try {
         console.info(`Processing document ID: ${documentId}`)
         console.info(`Original S3 URL: ${s3Url}`)
@@ -607,23 +919,13 @@ async function replaceDocument(
  * Process and replace all documents in the database using Prisma
  */
 async function processAllDocuments(prisma: PrismaClient): Promise<void> {
-    // Pre-check: Validate all mock files exist
-    Object.entries(MOCK_FILE_PATHS).forEach(([fileType, sizes]) => {
-        Object.entries(sizes).forEach(([size, filePath]) => {
-            if (!fs.existsSync(filePath)) {
-                console.error(
-                    `ERROR: Mock ${fileType} file not found at ${filePath}`
-                )
-                throw new Error(`Mock ${fileType} file missing: ${filePath}`)
-            } else {
-                console.info(
-                    `Verified mock ${fileType} (${size}) exists: ${filePath}`
-                )
-                const sha256 = calculateFileSha256(filePath)
-                console.info(`${fileType} (${size}) SHA256: ${sha256}`)
-            }
-        })
-    })
+    if (DRY_RUN) {
+        console.info('DRY RUN: Skipping document processing')
+        return
+    }
+
+    // Verify mock files exist
+    await verifyMockFiles()
 
     // Log sample document URLs for debugging
     await logSampleDocumentURLs(prisma)
