@@ -50,7 +50,7 @@ function createOAuthJWT(
 
     return {
         key: token,
-        expiresAt: new Date(Date.now() + config.expirationDurationS),
+        expiresAt: new Date(Date.now() + config.expirationDurationS * 1000),
     }
 }
 
