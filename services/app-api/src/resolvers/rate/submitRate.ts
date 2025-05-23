@@ -4,7 +4,7 @@ import {
     setErrorAttributesOnActiveSpan,
     setResolverDetailsOnActiveSpan,
 } from '../attributeHelper'
-import { isStateUser } from '../../domain-models'
+import { isStateUser, type RateRevisionType } from '../../domain-models'
 import { logError } from '../../logger'
 import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
 import { NotFoundError } from '../../postgres'
@@ -13,6 +13,8 @@ import type { LDService } from '../../launchDarkly/launchDarkly'
 import { generateRateCertificationName } from './generateRateCertificationName'
 import { findStatePrograms } from '@mc-review/hpp'
 import { nullsToUndefined } from '../../domain-models/nullstoUndefined'
+import { generateDocumentZip } from '../../s3/zip'
+import { type Span } from '@opentelemetry/api'
 
 /*
     Submit rate will change a draft revision to submitted and generate a rate name if one is missing
@@ -202,8 +204,149 @@ export function submitRate(
             })
         }
 
+        // Generate zip files for rate docs
+        if (submittedRate.packageSubmissions[0]?.rateRevision) {
+            const rateRevision =
+                submittedRate.packageSubmissions[0].rateRevision
+
+            // Check if there are documents to zip
+            // Adapt the field names as needed based on your actual data structure
+            const hasRateDocuments =
+                rateRevision.formData.rateDocuments &&
+                rateRevision.formData.rateDocuments.length > 0
+            const hasSupportingDocuments =
+                rateRevision.formData.supportingDocuments &&
+                rateRevision.formData.supportingDocuments.length > 0
+
+            if (hasRateDocuments || hasSupportingDocuments) {
+                console.info(
+                    `Generating zip for rate documents for rate revision ${rateRevision.id}`
+                )
+
+                const zipResult = await generateRateDocumentsZip(
+                    store,
+                    rateRevision,
+                    span
+                )
+
+                if (zipResult instanceof Error) {
+                    // Log the error but continue with submission
+                    logError(
+                        'submitRate - rate documents zip generation failed',
+                        zipResult
+                    )
+                    setErrorAttributesOnActiveSpan(
+                        'rate documents zip generation failed',
+                        span
+                    )
+                    console.warn(
+                        `Rate document zip generation failed for revision ${rateRevision.id}, but continuing with submission process`
+                    )
+                } else {
+                    console.info(
+                        `Successfully generated rate document zip for revision ${rateRevision.id}`
+                    )
+                }
+            } else {
+                console.info(
+                    `No rate documents found for revision ${rateRevision.id}, skipping zip generation`
+                )
+            }
+        }
+
         return {
             rate: submittedRate,
         }
+    }
+}
+
+/**
+ * Helper function to generate and store zip files for rate documents
+ *
+ * @param store Prisma store instance
+ * @param rateRevision The rate revision with documents to zip
+ * @param span Optional OpenTelemetry span for tracing
+ * @returns void if successful, Error if something failed
+ */
+export async function generateRateDocumentsZip(
+    store: Store,
+    rateRevision: RateRevisionType,
+    span?: Span
+): Promise<void | Error> {
+    const rateRevisionID = rateRevision.id
+
+    // Get all rate-related documents
+    // Adapt these field names as needed based on your actual data structure
+    const rateDocuments = [
+        ...(rateRevision.formData.rateDocuments || []),
+        ...(rateRevision.formData.supportingDocuments || []),
+    ]
+
+    if (!rateDocuments || rateDocuments.length === 0) {
+        // No documents to zip
+        return
+    }
+
+    try {
+        // Create an S3 key (destination path) for the zip file
+        const s3DestinationKey = `zips/rates/${rateRevisionID}/rate-documents.zip`
+
+        // Generate the zip file and upload it to S3
+        const zipResult = await generateDocumentZip(
+            rateDocuments,
+            s3DestinationKey
+        )
+
+        if (zipResult instanceof Error) {
+            logError('generateRateDocumentsZip', zipResult)
+            if (span) {
+                setErrorAttributesOnActiveSpan(
+                    'rate documents zip generation failed',
+                    span
+                )
+            }
+            return zipResult
+        }
+
+        // Store zip information in database
+        const createResult = await store.createDocumentZipPackage({
+            s3URL: zipResult.s3URL,
+            sha256: zipResult.sha256,
+            rateRevisionID,
+            documentType: 'RATE_DOCUMENTS',
+        })
+
+        if (createResult instanceof Error) {
+            logError(
+                'generateRateDocumentsZip - database storage failed',
+                createResult
+            )
+            if (span) {
+                setErrorAttributesOnActiveSpan(
+                    'rate documents zip database storage failed',
+                    span
+                )
+            }
+            return createResult
+        }
+
+        console.info(
+            `Successfully generated zip for rate documents: ${zipResult.s3URL}`
+        )
+        return
+    } catch (error: unknown) {
+        const errorMessage =
+            error instanceof Error ? error.message : String(error)
+        const err = new Error(
+            `Unexpected error in generateRateDocumentsZip: ${errorMessage}`
+        )
+        logError('generateRateDocumentsZip', err)
+        if (span) {
+            setErrorAttributesOnActiveSpan(
+                'rate documents zip generation failed',
+                span
+            )
+        }
+        return err
     }
 }

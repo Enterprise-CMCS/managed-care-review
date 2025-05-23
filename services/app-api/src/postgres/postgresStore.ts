@@ -2,6 +2,8 @@ import type {
     Division,
     RateRevisionTable,
     ContractRevisionTable,
+    DocumentZipPackage,
+    DocumentZipType,
 } from '@prisma/client'
 import type { StateCodeType } from '@mc-review/hpp'
 import type {
@@ -75,7 +77,10 @@ import type { UpdateDraftContractRatesArgsType } from './contractAndRates/update
 import { updateStateAssignedUsers } from './state/updateStateAssignedUsers'
 import { findStateAssignedUsers } from './state/findStateAssignedUsers'
 
-import { findAllDocuments } from './documents'
+import {
+    type CreateDocumentZipPackageArgsType,
+    findAllDocuments,
+} from './documents'
 import type { WithdrawRateArgsType } from './contractAndRates/withdrawRate'
 import { withdrawRate } from './contractAndRates/withdrawRate'
 import { findEmailSettings } from './settings/findEmailSettings'
@@ -102,6 +107,12 @@ import {
     type UndoWithdrawContractArgsType,
     type UndoWithdrawContractReturnType,
 } from './contractAndRates/undoWithdrawContract'
+
+import {
+    createDocumentZipPackage,
+    findDocumentZipPackagesByContractRevision,
+    findDocumentZipPackagesByRateRevision,
+} from './documents'
 
 type Store = {
     /** Settings functions **/
@@ -229,8 +240,19 @@ type Store = {
         rateID: string
     ) => Promise<RateQuestionType[] | Error>
 
-    /** Other **/
+    /** Documents **/
     findAllDocuments: () => Promise<AuditDocument[] | Error>
+    createDocumentZipPackage: (
+        args: CreateDocumentZipPackageArgsType
+    ) => Promise<DocumentZipPackage | Error>
+    findDocumentZipPackagesByContractRevision: (
+        contractRevisionID: string,
+        documentType?: DocumentZipType
+    ) => Promise<DocumentZipPackage[] | Error>
+    findDocumentZipPackagesByRateRevision: (
+        rateRevisionID: string,
+        documentType?: DocumentZipType
+    ) => Promise<DocumentZipPackage[] | Error>
 }
 
 function NewPostgresStore(client: ExtendedPrismaClient): Store {
@@ -325,8 +347,25 @@ function NewPostgresStore(client: ExtendedPrismaClient): Store {
         findAllQuestionsByRate: (rateID) =>
             findAllQuestionsByRate(client, rateID),
 
-        /** Other **/
+        /** Documents **/
         findAllDocuments: () => findAllDocuments(client),
+        createDocumentZipPackage: (args) =>
+            createDocumentZipPackage(client, args),
+        findDocumentZipPackagesByContractRevision: (
+            contractRevisionID,
+            documentType
+        ) =>
+            findDocumentZipPackagesByContractRevision(
+                client,
+                contractRevisionID,
+                documentType
+            ),
+        findDocumentZipPackagesByRateRevision: (rateRevisionID, documentType) =>
+            findDocumentZipPackagesByRateRevision(
+                client,
+                rateRevisionID,
+                documentType
+            ),
     }
 }
 
