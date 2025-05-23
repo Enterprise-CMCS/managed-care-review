@@ -1,13 +1,16 @@
 import type { ContractType } from '../../domain-models'
-import type { RateForDisplay } from '../../postgres/contractAndRates/withdrawContract'
 import type { EmailConfiguration, EmailData } from '../emailer'
 import { pruneDuplicateEmails } from '../formatters'
-import { renderTemplate, stripHTMLFromTemplate } from '../templateHelpers'
-import { parseAndValidateContractsAndRates } from './sendWithdrawnSubmissionCMSEmail'
+import {
+    renderTemplate,
+    stripHTMLFromTemplate,
+    parseEmailDataWithdrawSubmission,
+    type RateForDisplayType,
+} from '../templateHelpers'
 
 export const sendWithdrawnSubmissionStateEmail = async (
     withdrawnContract: ContractType,
-    ratesForDisplay: RateForDisplay[],
+    ratesForDisplay: RateForDisplayType[],
     config: EmailConfiguration
 ): Promise<EmailData | Error> => {
     const stateContactEmails: string[] = []
@@ -21,10 +24,11 @@ export const sendWithdrawnSubmissionStateEmail = async (
         ...config.devReviewTeamEmails,
     ])
 
-    const etaData = parseAndValidateContractsAndRates(
+    const etaData = parseEmailDataWithdrawSubmission(
         withdrawnContract,
         ratesForDisplay,
-        config
+        config,
+        'WITHDRAW'
     )
     if (etaData instanceof Error) {
         return etaData

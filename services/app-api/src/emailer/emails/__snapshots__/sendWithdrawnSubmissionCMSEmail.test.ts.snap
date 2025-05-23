@@ -10,5 +10,6 @@ exports[`sendWithdrawnSubmissionCMSEmail > renders overall email for withdrawn c
   <li><a href="http://localhost/rates/rate-123">rate-name-123</a></li>
   <li><a href="http://localhost/rates/rate-321">rate-name-321</a></li>
 </ul>
-<a href="http://localhost/submissions/test-contract-123">View submission in MC-Review</a>"
+<a href="http://localhost/submissions/test-contract-123">View submission in MC-Review</a>
+"
 `;

@@ -1,16 +1,16 @@
 <h1 style=<%~'"font-weight: normal;"'%>>Submission <%= it.contractName %> was withdrawn by CMS</h1>
-<b>Withdrawn by:</b> <%= it.withdrawnBy %><br />
-<b>Withdrawn on:</b> <%= it.withdrawnOn %><br />
-<b>Reason for withdrawal:</b> <%= it.withdrawReason %><br />
-<% if (it.formattedRateDisplayData && it.formattedRateDisplayData.length > 0) { %>
+<b>Withdrawn by:</b> <%= it.updatedBy %><br />
+<b>Withdrawn on:</b> <%= it.updatedAt %><br />
+<b>Reason for withdrawal:</b> <%= it.reason %><br />
+<% if (it.formattedRates && it.formattedRates.length > 0) { %>
 <b>Related rate certification(s):</b>
 <ul>
-<% it.formattedRateDisplayData.forEach(function(rate) { %>
+<% it.formattedRates.forEach(function(rate) { %>
   <li><a href="<%= rate.rateSummaryURL %>"><%= rate.rateCertificationName %></a></li>
 <% }) %>
 </ul>
 <% } %>
-<% if (it.formattedRateDisplayData.length === 0) { %>
+<% if (it.formattedRates.length === 0) { %>
 <br />
 <% } %>
 <a href="<%= it.contractSummaryURL %>">View submission in MC-Review</a>

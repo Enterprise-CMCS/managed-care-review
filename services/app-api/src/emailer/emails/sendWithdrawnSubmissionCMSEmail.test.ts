@@ -110,7 +110,7 @@ describe('sendWithdrawnSubmissionCMSEmail error handling', () => {
 
         expect(template).toBeInstanceOf(Error)
         expect((template as Error).message).toBe(
-            'Contract does not have any review status actions'
+            'Latest contract review action is not WITHDRAW'
         )
     })
 
