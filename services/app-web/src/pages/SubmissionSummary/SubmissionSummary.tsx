@@ -242,6 +242,10 @@ export const SubmissionSummary = (): React.ReactElement => {
             )
         }
 
+        if (showUndoWithdrawBanner) {
+            return <StatusUpdatedBanner />
+        }
+
         if (showWithdrawnBanner) {
             return (
                 <SubmissionWithdrawnBanner
@@ -304,16 +308,11 @@ export const SubmissionSummary = (): React.ReactElement => {
                     />
                 )}
 
-                {renderStatusAlerts()}
-
                 {documentError && (
                     <DocumentWarningBanner className={styles.banner} />
                 )}
 
-                {showUndoWithdrawBanner && (
-                    //Show status updated banner after undoing submission withdraw
-                    <StatusUpdatedBanner />
-                )}
+                {renderStatusAlerts()}
 
                 {hasCMSPermissions && (
                     <SectionCard className={styles.actionsSection}>
