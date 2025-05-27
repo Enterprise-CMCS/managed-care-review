@@ -975,7 +975,7 @@ describe('withdrawContract', () => {
         )
     })
 
-    it('sends emails to state and CMS when a rate is withdrawn', async () => {
+    it('sends emails to state and CMS when a submission is withdrawn', async () => {
         const emailConfig = testEmailConfig()
         const mockEmailer = testEmailer()
         const stateUser = testStateUser()
