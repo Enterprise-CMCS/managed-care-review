@@ -269,6 +269,7 @@ export const SubmissionSummary = (): React.ReactElement => {
         if (
             submissionStatus === 'RESUBMITTED' &&
             consolidatedStatus !== 'WITHDRAWN' &&
+            latestContractAction?.actionType !== 'UNDER_REVIEW' &&
             updateInfo
         ) {
             return (
