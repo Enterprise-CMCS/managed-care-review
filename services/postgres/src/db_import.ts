@@ -196,7 +196,6 @@ async function validateImport(prisma: PrismaClient): Promise<void> {
         throw new Error('Import validation failed: No users found')
     }
 
-    // Check that we have states
     const stateCount = await prisma.state.count()
     if (stateCount === 0) {
         throw new Error('Import validation failed: No states found')
