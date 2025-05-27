@@ -7,7 +7,7 @@ import {
     PoliteErrorMessage,
 } from '../../components'
 import { RoutesRecord } from '@mc-review/constants'
-import { useNavigate, useParams } from 'react-router-dom'
+import { generatePath, useNavigate, useParams } from 'react-router-dom'
 import { useFetchRateQuery, useWithdrawRateMutation } from '../../gen/gqlClient'
 import { ErrorOrLoadingPage } from '../StateSubmission'
 import { handleAndReturnErrorState } from '../StateSubmission/ErrorOrLoadingPage'
@@ -120,7 +120,7 @@ export const RateWithdraw = () => {
                     { link: `/rates/${id}`, text: rateCertificationName || '' },
                     {
                         text: 'Withdraw rate',
-                        link: RoutesRecord.RATE_WITHDRAW,
+                        link: generatePath(RoutesRecord.RATE_WITHDRAW, { id }),
                     },
                 ]}
             />

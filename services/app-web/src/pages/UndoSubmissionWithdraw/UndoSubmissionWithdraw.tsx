@@ -28,6 +28,7 @@ import {
 } from '@trussworks/react-uswds'
 import { PageActionsContainer } from '../StateSubmission/PageActions'
 import { recordJSException } from '@mc-review/otel'
+import { generatePath } from 'react-router-dom'
 
 type UndoSubmissionWithdrawValues = {
     undoSubmissionWithdrawReason: string
@@ -124,7 +125,10 @@ export const UndoSubmissionWithdraw = (): React.ReactElement => {
                         text: contractName || '',
                     },
                     {
-                        link: '',
+                        link: generatePath(
+                            RoutesRecord.UNDO_SUBMISSION_WITHDRAW,
+                            { id }
+                        ),
                         text: 'Undo submission withdraw',
                     },
                 ]}
@@ -208,7 +212,7 @@ export const UndoSubmissionWithdraw = (): React.ReactElement => {
                                     type="submit"
                                     variant="default"
                                     data-testid="page-actions-right-primary"
-                                    parent_component_heading="page body"
+                                    parent_component_type="page body"
                                     link_url={`/submissions/${id}`}
                                     animationTimeout={1000}
                                     disabled={showFieldErrors(
