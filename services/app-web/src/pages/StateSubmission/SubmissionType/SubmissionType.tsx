@@ -548,6 +548,17 @@ export const SubmissionType = ({
                                                         ]
                                                     }
                                                 />
+                                                {hasPreviouslySubmittedRates && (
+                                                    <div
+                                                        role="note"
+                                                        aria-labelledby="populationCovered"
+                                                        className="usa-hint padding-top-2"
+                                                    >
+                                                        If you need to change
+                                                        your response, contact
+                                                        CMS.
+                                                    </div>
+                                                )}
                                             </Fieldset>
                                         </FormGroup>
 
