@@ -212,7 +212,7 @@ export const UndoSubmissionWithdraw = (): React.ReactElement => {
                                     type="submit"
                                     variant="default"
                                     data-testid="page-actions-right-primary"
-                                    parent_component_heading="page body"
+                                    parent_component_type="page body"
                                     link_url={`/submissions/${id}`}
                                     animationTimeout={1000}
                                     disabled={showFieldErrors(
