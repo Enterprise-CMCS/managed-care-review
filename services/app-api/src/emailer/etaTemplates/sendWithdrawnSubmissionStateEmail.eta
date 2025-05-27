@@ -9,8 +9,8 @@
   <li><%= rate.rateCertificationName %></li>
 <% }) %>
 </ul>
-<% } %>
-<% if (it.formattedRates.length === 0) { %>
+<% } else { %>
 <br />
 <% } %>
+<div>If you have any questions, please reach out to your CMS point of contact.</div><br />
 <a href="<%= it.contractSummaryURL %>">View submission in MC-Review</a>
