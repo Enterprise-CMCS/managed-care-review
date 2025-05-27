@@ -228,6 +228,10 @@ export const SubmissionSummary = (): React.ReactElement => {
         withdrawSubmissionFlag &&
         consolidatedStatus === 'WITHDRAWN' &&
         latestContractAction
+    const showSubmissionUpdateBannerForUndo =
+        latestContractAction?.actionType !== 'UNDER_REVIEW' &&
+        undoWithdrawSubmissionFlag &&
+        isStateUser
 
     const renderStatusAlerts = () => {
         if (showApprovalBanner) {
@@ -267,10 +271,10 @@ export const SubmissionSummary = (): React.ReactElement => {
         }
 
         if (
-            submissionStatus === 'RESUBMITTED' &&
-            consolidatedStatus !== 'WITHDRAWN' &&
-            latestContractAction?.actionType !== 'UNDER_REVIEW' &&
-            updateInfo
+            (submissionStatus === 'RESUBMITTED' &&
+                consolidatedStatus !== 'WITHDRAWN' &&
+                updateInfo) ||
+            showSubmissionUpdateBannerForUndo
         ) {
             return (
                 <SubmissionUpdatedBanner
