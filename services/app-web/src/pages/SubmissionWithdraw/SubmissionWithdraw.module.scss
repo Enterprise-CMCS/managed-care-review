@@ -6,11 +6,10 @@
     background-color: none;
     @include uswds.at-media('tablet') {
         min-width: 40rem;
-        max-width: 40rem;
         margin: 0 auto;
     }
 }
 
 .formContainer {
-    @include custom.form-fields
+    @include custom.form-fields;
 }
