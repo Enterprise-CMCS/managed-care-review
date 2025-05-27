@@ -8,6 +8,7 @@ import {
     GetObjectCommand,
     PutObjectCommand,
     _Object,
+    DeleteObjectCommand,
 } from '@aws-sdk/client-s3'
 import { SecretDict } from './types'
 import { createHash } from 'crypto'
@@ -76,6 +77,7 @@ export const handler = async () => {
     }
 
     let prisma: PrismaClient | null = null
+    let latestDumpKey: string | null = null
 
     try {
         // Get DB credentials
@@ -85,7 +87,7 @@ export const handler = async () => {
         prisma = await initializePrisma(dbCredentials)
 
         // Find latest dump file
-        const latestDumpKey = await findLatestDbDumpFile()
+        latestDumpKey = await findLatestDbDumpFile()
         const dumpFilename = path.basename(latestDumpKey)
         const dumpFilePath = path.join(TMP_DIR, dumpFilename)
 
@@ -110,7 +112,12 @@ export const handler = async () => {
         // Process and replace all documents
         await processAllDocuments(prisma)
 
-        // Cleanup
+        // Clean up the S3 export file after successful import
+        if (latestDumpKey && !DRY_RUN) {
+            await cleanupS3Export(latestDumpKey)
+        }
+
+        // Cleanup local temp file
         if (fs.existsSync(dumpFilePath)) {
             fs.unlinkSync(dumpFilePath)
         }
@@ -121,17 +128,22 @@ export const handler = async () => {
                 message:
                     'Database import and document replacement completed successfully',
                 importedFile: dumpFilename,
+                cleanedUpS3File: latestDumpKey,
             }),
         }
     } catch (err) {
         console.error('Error in import process:', err)
         delete process.env.PGPASSWORD
 
+        // Don't clean up S3 file if import failed - might need it for debugging
+        console.info('Import failed - preserving S3 export file for debugging')
+
         return {
             statusCode: 500,
             body: JSON.stringify({
                 message: 'Error during import process',
                 error: err instanceof Error ? err.message : String(err),
+                preservedS3File: latestDumpKey,
             }),
         }
     } finally {
@@ -1048,4 +1060,26 @@ async function processAllDocuments(prisma: PrismaClient): Promise<void> {
     }
 
     console.info('All document types processed successfully')
+}
+
+/**
+ * Clean up the S3 export file after successful import
+ */
+async function cleanupS3Export(s3Key: string): Promise<void> {
+    try {
+        console.info(`Cleaning up S3 export file: s3://${S3_BUCKET}/${s3Key}`)
+
+        await s3Client.send(
+            new DeleteObjectCommand({
+                Bucket: S3_BUCKET,
+                Key: s3Key,
+            })
+        )
+
+        console.info(`Successfully deleted S3 export file: ${s3Key}`)
+    } catch (error) {
+        // Log the error but don't fail the whole import process
+        console.error(`Failed to delete S3 export file ${s3Key}:`, error)
+        console.info('Import completed successfully despite cleanup failure')
+    }
 }
