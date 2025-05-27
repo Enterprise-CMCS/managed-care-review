@@ -8,13 +8,13 @@ import {
     type RateForDisplayType,
 } from '../templateHelpers'
 
-export const sendWithdrawnSubmissionStateEmail = async (
-    withdrawnContract: ContractType,
+export const sendUndoWithdrawnSubmissionStateEmail = async (
+    contract: ContractType,
     ratesForDisplay: RateForDisplayType[],
     config: EmailConfiguration
 ): Promise<EmailData | Error> => {
     const stateContactEmails: string[] = []
-    const contractRev = withdrawnContract.packageSubmissions[0].contractRevision
+    const contractRev = contract.packageSubmissions[0].contractRevision
     contractRev.formData.stateContacts.forEach((contact) => {
         if (contact.email) stateContactEmails.push(contact.email)
     })
@@ -25,17 +25,17 @@ export const sendWithdrawnSubmissionStateEmail = async (
     ])
 
     const etaData = parseEmailDataWithdrawSubmission(
-        withdrawnContract,
+        contract,
         ratesForDisplay,
         config,
-        'WITHDRAW'
+        'UNDO_WITHDRAW'
     )
     if (etaData instanceof Error) {
         return etaData
     }
 
     const template = await renderTemplate(
-        'sendWithdrawnSubmissionStateEmail',
+        'sendUndoWithdrawnSubmissionStateEmail',
         etaData
     )
 
@@ -48,7 +48,7 @@ export const sendWithdrawnSubmissionStateEmail = async (
             sourceEmail: config.emailSource,
             subject: `${
                 config.stage !== 'prod' ? `[${config.stage}] ` : ''
-            }${etaData.contractName} was withdrawn by CMS`,
+            }${etaData.contractName} status update`,
             bodyText: stripHTMLFromTemplate(template),
             bodyHTML: template,
         }
