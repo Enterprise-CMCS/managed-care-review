@@ -5,13 +5,13 @@ import type { APIGatewayTokenAuthorizerEvent, Context } from 'aws-lambda'
 describe('third_party_API_authorizer', () => {
     const config = {
         issuer: 'mcreview-test',
-        signingKey: Buffer.from('123af', 'hex'),
+        signingKey: Buffer.from('123abc', 'hex'),
         expirationDurationS: 1000,
     }
 
     const oauthConfig = {
         issuer: 'mcreview-oauth',
-        signingKey: Buffer.from('123af', 'hex'),
+        signingKey: Buffer.from('123abc', 'hex'),
         expirationDurationS: 3600,
     }
 
