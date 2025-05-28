@@ -1,5 +1,5 @@
-process.env.JWT_SECRET = '123af' // pragma: allowlist secret
-process.env.OAUTH_JWT_SECRET = '123af' // pragma: allowlist secret
+globalThis.JWT_SECRET = '123af' // pragma: allowlist secret
+globalThis.OAUTH_JWT_SECRET = '123af' // pragma: allowlist secret
 
 import { main } from '../third_party_API_authorizer'
 import { newJWTLib } from '../../jwt'

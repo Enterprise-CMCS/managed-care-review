@@ -28,7 +28,7 @@ const jwtLib = newJWTLib({
 const oauthJwtLib = newJWTLib({
     issuer: 'mcreview-oauth',
     signingKey: Buffer.from(jwtSecret, 'hex'),
-    expirationDurationS: 3600, // 1 hour
+    expirationDurationS: 90 * 24 * 60 * 60, // 90 days
 })
 
 export const main: APIGatewayTokenAuthorizerHandler = async (
