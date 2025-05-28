@@ -1,7 +1,3 @@
-process.env.stage = 'test'
-process.env.JWT_SECRET = '123af' // pragma: allowlist secret
-process.env.OAUTH_JWT_SECRET = '123af' // pragma: allowlist secret
-
 import { main } from '../third_party_API_authorizer'
 import { newJWTLib } from '../../jwt'
 import type { APIGatewayTokenAuthorizerEvent, Context } from 'aws-lambda'
