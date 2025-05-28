@@ -52,7 +52,6 @@ describe('RateSummary', () => {
                                     parentContractID: contract.id,
                                 },
                             }),
-                            fetchContractMockSuccess({ contract }),
                         ],
                     },
                     routerProvider: {
@@ -352,6 +351,173 @@ describe('RateSummary', () => {
                     ).not.toBeInTheDocument()
                 })
             })
+
+            it('renders missing contract action text on orphaned rate', async () => {
+                const rate = rateWithHistoryMock()
+                const latestPkgSub = rate.packageSubmissions?.[0]
+                if (!latestPkgSub)
+                    throw new Error(
+                        'Unexpected error: Expected rate to have a package submission.'
+                    )
+                rate.id = '7a'
+                rate.parentContractID = contract.id
+                rate.withdrawnFromContracts = []
+                rate.packageSubmissions = [
+                    {
+                        ...latestPkgSub,
+                        contractRevisions: [],
+                    },
+                ]
+                renderWithProviders(wrapInRoutes(<RateSummary />), {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                user: mockUser(),
+                                statusCode: 200,
+                            }),
+                            fetchContractMockSuccess({ contract }),
+                            fetchRateWithQuestionsMockSuccess({
+                                rate,
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/rates/7a',
+                    },
+                })
+
+                await waitFor(() => {
+                    expect(
+                        screen.getByTestId('error-alert')
+                    ).toBeInTheDocument()
+                    expect(
+                        screen.getByText('Missing contract action')
+                    ).toBeInTheDocument()
+                })
+            })
+
+            it('renders missing contract action text on withdrawn orphaned rate', async () => {
+                const rate = rateWithHistoryMock()
+                const latestPkgSub = rate.packageSubmissions?.[0]
+                if (!latestPkgSub)
+                    throw new Error(
+                        'Unexpected error: Expected rate to have a package submission.'
+                    )
+
+                rate.id = '7a'
+                rate.parentContractID = contract.id
+                rate.withdrawnFromContracts = []
+                rate.consolidatedStatus = 'WITHDRAWN'
+                rate.packageSubmissions = [
+                    {
+                        ...latestPkgSub,
+                        contractRevisions: [],
+                    },
+                ]
+                rate.reviewStatusActions = [
+                    {
+                        rateID: '7a',
+                        actionType: 'WITHDRAW',
+                        updatedAt: new Date('2024-01-01'),
+                        updatedReason: 'Withdraw only the rate',
+                        updatedBy: {
+                            email: 'someone@example.com',
+                            familyName: 'one',
+                            givenName: 'some',
+                            role: 'CMS_USER',
+                        },
+                    },
+                ]
+                renderWithProviders(wrapInRoutes(<RateSummary />), {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                user: mockUser(),
+                                statusCode: 200,
+                            }),
+                            fetchContractMockSuccess({ contract }),
+                            fetchRateWithQuestionsMockSuccess({
+                                rate,
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/rates/7a',
+                    },
+                })
+
+                await waitFor(() => {
+                    expect(
+                        screen.getByTestId('error-alert')
+                    ).toBeInTheDocument()
+                    expect(
+                        screen.getByTestId('rateWithdrawBanner')
+                    ).toBeInTheDocument()
+                    expect(
+                        screen.getByText('Missing contract action')
+                    ).toBeInTheDocument()
+                })
+            })
+
+            it('does not render missing contract action text on withdrawn rate', async () => {
+                const rate = rateWithHistoryMock()
+                const latestPkgSub = rate.packageSubmissions?.[0]
+                if (!latestPkgSub)
+                    throw new Error(
+                        'Unexpected error: Expected rate to have a package submission.'
+                    )
+                renderWithProviders(wrapInRoutes(<RateSummary />), {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                user: mockUser(),
+                                statusCode: 200,
+                            }),
+                            fetchContractMockSuccess({ contract }),
+                            fetchRateWithQuestionsMockSuccess({
+                                rate: {
+                                    id: '7a',
+                                    status: 'SUBMITTED',
+                                    consolidatedStatus: 'WITHDRAWN',
+                                    parentContractID: contract.id,
+                                    withdrawnFromContracts: [contract],
+                                    reviewStatusActions: [
+                                        {
+                                            rateID: '1337',
+                                            actionType: 'WITHDRAW',
+                                            updatedAt: new Date('2024-01-01'),
+                                            updatedReason:
+                                                'Withdraw only the rate',
+                                            updatedBy: {
+                                                email: 'someone@example.com',
+                                                familyName: 'one',
+                                                givenName: 'some',
+                                                role: 'CMS_USER',
+                                            },
+                                        },
+                                    ],
+                                },
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/rates/7a',
+                    },
+                })
+
+                await waitFor(() => {
+                    expect(
+                        screen.getByTestId('rateWithdrawBanner')
+                    ).toBeInTheDocument()
+                })
+
+                expect(
+                    screen.queryByTestId('error-alert')
+                ).not.toBeInTheDocument()
+                expect(
+                    screen.queryByText('Missing contract action')
+                ).not.toBeInTheDocument()
+            })
         }
     )
 
@@ -584,7 +750,7 @@ describe('RateSummary', () => {
                 ).toBeInTheDocument()
                 expect(
                     screen.queryByRole('button', { name: 'Undo withdraw' })
-                ).toBeNull()
+                ).not.toBeInTheDocument()
                 expect(
                     screen.queryByRole('button', { name: 'Unlock rate' })
                 ).toBeInTheDocument()

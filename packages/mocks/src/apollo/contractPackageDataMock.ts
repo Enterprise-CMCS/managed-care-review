@@ -1119,10 +1119,12 @@ function mockContractPackageSubmitted(partial?: Partial<Contract>): Contract {
         status: 'SUBMITTED',
         reviewStatus: 'UNDER_REVIEW',
         consolidatedStatus: 'SUBMITTED',
+        reviewStatusActions: [],
         __typename: 'Contract',
         createdAt: new Date(),
         updatedAt: new Date(),
         lastUpdatedForDisplay: new Date(),
+        dateContractDocsExecuted: new Date(),
         webURL: 'https://testmcreview.example/submissions/test-abc-123',
         initiallySubmittedAt: new Date('2024-11-27'),
         id: contractID,
@@ -1236,6 +1238,18 @@ function mockContractPackageSubmitted(partial?: Partial<Contract>): Contract {
                         rateID: '123',
                         createdAt: new Date('01/01/2023'),
                         updatedAt: new Date('01/01/2023'),
+                        submitInfo: {
+                            __typename: 'UpdateInformation',
+                            updatedAt: new Date(),
+                            updatedBy: {
+                                email: 'example@state.com',
+                                role: 'STATE_USER',
+                                givenName: 'John',
+                                familyName: 'Vila',
+                            },
+                            updatedReason: 'contract submit',
+                        },
+                        unlockInfo: null,
                         rate: null,
                         formData: {
                             __typename: 'RateFormData',
@@ -1281,18 +1295,22 @@ function mockContractPackageSubmitted(partial?: Partial<Contract>): Contract {
                             deprecatedRateProgramIDs: [],
                             certifyingActuaryContacts: [
                                 {
+                                    id: 'certifyingActuaryContacts1',
                                     actuarialFirm: 'DELOITTE',
                                     name: 'Actuary Contact 1',
                                     titleRole: 'Test Actuary Contact 1',
                                     email: 'actuarycontact1@test.com',
+                                    actuarialFirmOther: null
                                 },
                             ],
                             addtlActuaryContacts: [
                                 {
+                                    id: 'addtlActuaryContacts1',
                                     actuarialFirm: 'DELOITTE',
                                     name: 'Actuary Contact 1',
                                     titleRole: 'Test Actuary Contact 1',
                                     email: 'actuarycontact1@test.com',
+                                    actuarialFirmOther: null
                                 },
                             ],
                             actuaryCommunicationPreference: 'OACT_TO_ACTUARY',

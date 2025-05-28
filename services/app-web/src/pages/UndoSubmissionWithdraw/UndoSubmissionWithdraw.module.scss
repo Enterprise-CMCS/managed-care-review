@@ -1,7 +1,7 @@
 @use '../../styles/custom.scss' as custom;
 @use '../../styles/uswdsImports.scss' as uswds;
 
-.undoRateWithdrawContainer {
+.undoSubmissionWithdrawContainer {
     max-width: custom.$mcr-container-standard-width-fixed;
     background-color: none;
     @include uswds.at-media('tablet') {
