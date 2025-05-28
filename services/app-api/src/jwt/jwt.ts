@@ -91,7 +91,7 @@ function validateOAuthToken(
             grantType: decoded.grant_type,
         }
     } catch (err) {
-        console.info('Error decoding OAuth JWT', err)
+        console.error('Error decoding OAuth JWT', err)
         return err
     }
 }
