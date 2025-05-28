@@ -40,7 +40,7 @@ function extractBucketName(s3URL: string): string | Error {
 /**
  * Extracts key from S3 URL
  */
-function extractS3Key(s3URL: string): string | Error {
+export function extractS3Key(s3URL: string): string | Error {
     try {
         if (s3URL.startsWith('s3://')) {
             // Format: s3://bucket-name/key

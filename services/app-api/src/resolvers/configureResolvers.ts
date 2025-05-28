@@ -63,6 +63,7 @@ import { rateStrippedResolver } from './rate/rateResolver'
 import { indexRatesStripped } from './rate/indexRatesStripped'
 import { withdrawContract } from './contract/withdrawContract'
 import { undoWithdrawContract } from './contract/undoWithdrawContract'
+import { documentZipPackageResolver } from './documents'
 
 export function configureResolvers(
     store: Store,
@@ -187,6 +188,7 @@ export function configureResolvers(
         ContractRevision: contractRevisionResolver(store),
         GenericDocument: genericDocumentResolver(s3Client),
         Document: questionResponseDocumentResolver(s3Client),
+        DocumentZipPackage: documentZipPackageResolver(s3Client),
     }
 
     return resolvers
