@@ -138,6 +138,7 @@ async function buildApolloServer() {
 })();
 
 // Lambda handler for aws-serverless-express
-const serverlessExpressInstance = createServer(app)
-export const handler = (event: APIGatewayProxyEvent, context: LambdaContext) =>
-    proxy(serverlessExpressInstance, event, context)
+export const handler = async (event: APIGatewayProxyEvent, context: LambdaContext) => {
+    await initializationPromise; // Ensure initialization is complete
+    return proxy(serverlessExpressInstance, event, context);
+};
