@@ -1,10 +1,9 @@
 import React, { useEffect } from 'react'
-import { Alert } from '@trussworks/react-uswds'
-
 import classnames from 'classnames'
 import { useTealium } from '../../../hooks'
 import { ContactSupportLink } from '../../ErrorAlert/ContactSupportLink'
 import styles from '../Banner.module.scss'
+import { AccessibleAlertBanner } from '../AccessibleAlertBanner/AccessibleAlertBanner'
 
 export const DocumentWarningBanner = ({
     className,
@@ -22,10 +21,10 @@ export const DocumentWarningBanner = ({
     }, [logAlertImpressionEvent])
 
     return (
-        <Alert
+        <AccessibleAlertBanner
             role="alert"
             type="warning"
-            heading={`Document download unavailable`}
+            heading="Document download unavailable"
             headingLevel="h4"
             data-testid="warning-alert"
             className={classnames(className, 'usa-alert__text')}
@@ -39,6 +38,6 @@ export const DocumentWarningBanner = ({
                     <ContactSupportLink />
                 </p>
             </div>
-        </Alert>
+        </AccessibleAlertBanner>
     )
 }

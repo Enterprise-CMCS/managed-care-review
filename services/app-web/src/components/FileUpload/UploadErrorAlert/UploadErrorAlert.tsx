@@ -1,6 +1,6 @@
-import { Alert } from '@trussworks/react-uswds'
 import { useTealium } from '../../../hooks'
 import { useEffect } from 'react'
+import { AccessibleAlertBanner } from '../../Banner/AccessibleAlertBanner/AccessibleAlertBanner'
 
 export const UploadErrorAlert = ({
     hasNoDocuments = false,
@@ -21,22 +21,24 @@ export const UploadErrorAlert = ({
     }, [logAlertImpressionEvent, hasNoDocuments])
 
     return hasNoDocuments ? (
-        <Alert
+        <AccessibleAlertBanner
+            role="alert"
             type="error"
             heading="Missing documents"
             headingLevel="h4"
             className="margin-bottom-2"
         >
             You must upload at least one document
-        </Alert>
+        </AccessibleAlertBanner>
     ) : (
-        <Alert
+        <AccessibleAlertBanner
+            role="alert"
             type="error"
             heading="Remove files with errors"
             headingLevel="h4"
             className="margin-bottom-2"
         >
             You must remove all documents with error messages before continuing
-        </Alert>
+        </AccessibleAlertBanner>
     )
 }

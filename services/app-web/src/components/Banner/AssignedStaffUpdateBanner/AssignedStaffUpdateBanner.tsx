@@ -1,8 +1,8 @@
 import React from 'react'
 import styles from '../Banner.module.scss'
-import { Alert } from '@trussworks/react-uswds'
 import { LastUpdatedAnalystsType } from '../../../pages/Settings/Settings'
 import { recordJSException } from '@mc-review/otel'
+import { AccessibleAlertBanner } from '../AccessibleAlertBanner/AccessibleAlertBanner'
 
 export const AssignedStaffUpdateBanner = ({
     className,
@@ -18,8 +18,8 @@ export const AssignedStaffUpdateBanner = ({
         return null
     }
     return (
-        <Alert
-            role="alert"
+        <AccessibleAlertBanner
+            role="status"
             type="success"
             heading={`${state}'s assigned staff has been updated`}
             headingLevel="h4"
@@ -45,6 +45,6 @@ export const AssignedStaffUpdateBanner = ({
                         ))}
                 </ul>
             </div>
-        </Alert>
+        </AccessibleAlertBanner>
     )
 }

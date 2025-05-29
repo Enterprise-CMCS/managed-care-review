@@ -1,8 +1,8 @@
 import React from 'react'
-import { Alert } from '@trussworks/react-uswds'
 import styles from '../Banner.module.scss'
 import { RatesToNotBeWithdrawn } from '../../../pages/SubmissionWithdraw/SubmissionWithdraw'
 import { NavLinkWithLogging } from '../../TealiumLogging'
+import { AccessibleAlertBanner } from '../AccessibleAlertBanner/AccessibleAlertBanner'
 
 interface SubmissionWithdrawWarningBannerProps
     extends React.HTMLAttributes<HTMLDivElement> {
@@ -14,7 +14,7 @@ export const SubmissionWithdrawWarningBanner = ({
     rates,
 }: SubmissionWithdrawWarningBannerProps) => {
     return (
-        <Alert
+        <AccessibleAlertBanner
             role="alert"
             type="warning"
             heading="Rate on multiple contract actions"
@@ -37,6 +37,6 @@ export const SubmissionWithdrawWarningBanner = ({
                     ))}
                 </ul>
             </div>
-        </Alert>
+        </AccessibleAlertBanner>
     )
 }

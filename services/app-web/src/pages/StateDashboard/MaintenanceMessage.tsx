@@ -1,7 +1,6 @@
 import React from 'react'
-import { Alert } from '@trussworks/react-uswds'
-
 import styles from './StateDashboard.module.scss'
+import { AccessibleAlertBanner } from '../../components/Banner/AccessibleAlertBanner/AccessibleAlertBanner'
 
 export function MaintenanceMessage({
     message,
@@ -10,7 +9,8 @@ export function MaintenanceMessage({
 }): React.ReactElement {
     return (
         <div className={styles.alertContainer}>
-            <Alert
+            <AccessibleAlertBanner
+                role="status"
                 headingLevel="h4"
                 type="info"
                 heading={message}
