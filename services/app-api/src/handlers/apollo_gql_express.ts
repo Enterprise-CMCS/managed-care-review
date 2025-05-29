@@ -126,7 +126,14 @@ async function buildApolloServer() {
 }
 
 // Start Apollo Server and mount middleware
-void buildApolloServer()
+(async () => {
+    try {
+        await buildApolloServer();
+    } catch (error) {
+        console.error('Error starting Apollo Server:', error);
+        process.exit(1); // Exit the process with a failure code
+    }
+})();
 
 // Lambda handler for aws-serverless-express
 const serverlessExpressInstance = createServer(app)
