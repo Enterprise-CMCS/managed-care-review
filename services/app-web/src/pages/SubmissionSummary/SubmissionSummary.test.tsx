@@ -1525,6 +1525,18 @@ describe('SubmissionSummary', () => {
                                 },
                                 updatedReason: 'Some undo reason',
                             },
+                            {
+                                actionType: 'WITHDRAW',
+                                contractID: 'test-abc-123',
+                                updatedAt: new Date(),
+                                updatedBy: {
+                                    email: 'cmsapprover@example.com',
+                                    familyName: 'Smith',
+                                    givenName: 'John',
+                                    role: 'CMS_APPROVER_USER',
+                                },
+                                updatedReason: 'Some undo reason',
+                            },
                         ],
                     }
                 )
@@ -1553,7 +1565,7 @@ describe('SubmissionSummary', () => {
                             ],
                         },
                         routerProvider: {
-                            route: '/submissions/test-abc-123?showUndoWithdrawBanner=true',
+                            route: '/submissions/test-abc-123?showTempUndoWithdrawBanner=true',
                         },
                         featureFlags: {
                             'undo-withdraw-submission': true,

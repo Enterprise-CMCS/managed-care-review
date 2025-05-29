@@ -46,7 +46,6 @@ import {
     IncompleteSubmissionBanner,
     SubmissionWithdrawnBanner,
     StatusUpdatedBanner,
-    UndoSubmissionWithdrawBanner,
 } from '../../components/Banner'
 import { MultiColumnGrid } from '../../components/MultiColumnGrid/MultiColumnGrid'
 
@@ -59,7 +58,7 @@ export const SubmissionSummary = (): React.ReactElement => {
     const { updateHeading } = usePage()
     const modalRef = useRef<ModalRef>(null)
     const [documentError, setDocumentError] = useState(false)
-    const [showUndoWithdrawBanner, setShowUndoWithdrawBanner] =
+    const [showTempUndoWithdrawBanner, setShowTempUndoWithdrawBanner] =
         useState<boolean>(false)
     const [searchParams, setSearchParams] = useSearchParams()
     const { loggedInUser } = useAuth()
@@ -97,15 +96,14 @@ export const SubmissionSummary = (): React.ReactElement => {
             : ''
 
     useEffect(() => {
-        if (searchParams.get('showUndoWithdrawBanner') === 'true') {
-            setShowUndoWithdrawBanner(true)
+        if (searchParams.get('showTempUndoWithdrawBanner') === 'true') {
+            setShowTempUndoWithdrawBanner(true)
 
             //This ensures the banner goes away upon refresh or navigation
-            searchParams.delete('showUndoWithdrawBanner')
+            searchParams.delete('showTempUndoWithdrawBanner')
             setSearchParams(searchParams, { replace: true })
         }
     }, [searchParams, setSearchParams])
-
     useEffect(() => {
         updateHeading({
             customHeading: name,
@@ -229,11 +227,11 @@ export const SubmissionSummary = (): React.ReactElement => {
         withdrawSubmissionFlag &&
         consolidatedStatus === 'WITHDRAWN' &&
         latestContractAction
-    const showSubmissionUpdateBannerForUndo =
+    const undoWithdrawAction =
         latestContractAction?.actionType === 'UNDER_REVIEW' &&
-        contract.reviewStatusActions?.[1].actionType === 'WITHDRAW' &&
-        undoWithdrawSubmissionFlag &&
-        isStateUser
+        contract.reviewStatusActions?.[1].actionType === 'WITHDRAW'
+    const showPermUndoWithdrawBanner =
+        undoWithdrawAction && undoWithdrawSubmissionFlag && isStateUser
 
     const renderStatusAlerts = () => {
         if (showApprovalBanner) {
@@ -248,7 +246,7 @@ export const SubmissionSummary = (): React.ReactElement => {
             )
         }
 
-        if (showUndoWithdrawBanner) {
+        if (showTempUndoWithdrawBanner) {
             return <StatusUpdatedBanner />
         }
 
@@ -266,18 +264,8 @@ export const SubmissionSummary = (): React.ReactElement => {
             )
         }
 
-        if (showSubmissionUpdateBannerForUndo) {
-            return (
-                <UndoSubmissionWithdrawBanner
-                    className={styles.banner}
-                    undoWithdrawInfo={{
-                        updatedReason:
-                            latestContractAction?.updatedReason ?? '',
-                        updatedAt: latestContractAction?.updatedAt,
-                        updatedBy: latestContractAction!.updatedBy,
-                    }}
-                />
-            )
+        if (showPermUndoWithdrawBanner) {
+            return <StatusUpdatedBanner />
         }
 
         if (submissionStatus === 'UNLOCKED' && updateInfo) {
@@ -293,7 +281,7 @@ export const SubmissionSummary = (): React.ReactElement => {
         if (
             submissionStatus === 'RESUBMITTED' &&
             consolidatedStatus !== 'WITHDRAWN' &&
-            contract.reviewStatus !== 'UNDER_REVIEW' &&
+            !undoWithdrawAction &&
             updateInfo
         ) {
             return (
