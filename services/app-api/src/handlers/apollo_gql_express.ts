@@ -38,7 +38,6 @@ app.use(express.json({ limit: '10mb' }))
 async function buildApolloServer() {
     // These env vars and config mirror your current handler
     const stageName = process.env.stage || 'local'
-    // const authMode = process.env.VITE_APP_AUTH_MODE || 'LOCAL'; // Removed unused variable
     const dbURL = process.env.DATABASE_URL || ''
     const secretsManagerSecret = process.env.SECRETS_MANAGER_SECRET || ''
     const applicationEndpoint = process.env.APPLICATION_ENDPOINT || ''
