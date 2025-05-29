@@ -1,0 +1,37 @@
+import { Alert } from '@trussworks/react-uswds'
+import { useId } from 'react'
+
+type AccessibleAlertProps = React.ComponentProps<typeof Alert>
+
+/**
+ * Accessible wrapper for the React-USWDS Alert component that automatically manages
+ * aria-labelledby relationships between the alert and its heading.
+ *
+ * Use this instead of the base Alert component when you need accessible
+ * heading associations for colorblind users.
+ */
+export const AccessibleAlertBanner = ({
+    heading,
+    headingLevel,
+    role,
+    children,
+    ...rest
+}: AccessibleAlertProps): React.ReactElement => {
+    const Heading = headingLevel
+    const headerID = useId()
+    return (
+        <Alert
+            role={role}
+            headingLevel={headingLevel}
+            aria-labelledby={heading ? headerID : undefined}
+            {...rest}
+        >
+            {heading && (
+                <Heading id={headerID} className="usa-alert__heading">
+                    {heading}
+                </Heading>
+            )}
+            {children}
+        </Alert>
+    )
+}
