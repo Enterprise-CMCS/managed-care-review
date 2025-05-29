@@ -9,7 +9,7 @@ import {
     FetchContractWithQuestionsDocument,
 } from '../../gen/gqlClient'
 import { useFormik } from 'formik'
-import { usePrevious } from '../../hooks/usePrevious'
+import { usePrevious } from '../../hooks'
 import { Modal } from './Modal'
 import { PoliteErrorMessage } from '../PoliteErrorMessage'
 import * as Yup from 'yup'
@@ -21,37 +21,21 @@ import {
 } from '@mc-review/helpers'
 import { useTealium } from '../../hooks'
 
-const RATE_UNLOCK_SUBMIT_TYPES = [
-    'SUBMIT_RATE',
-    'RESUBMIT_RATE',
-    'UNLOCK_RATE',
-] as const
-const CONTRACT_UNLOCK_SUBMIT_TYPES = [
-    'SUBMIT_CONTRACT',
-    'RESUBMIT_CONTRACT',
-    'UNLOCK_CONTRACT',
-] as const
+type ModalTypes =
+    | 'SUBMIT_RATE'
+    | 'RESUBMIT_RATE'
+    | 'UNLOCK_RATE'
+    | 'SUBMIT_CONTRACT'
+    | 'RESUBMIT_CONTRACT'
+    | 'UNLOCK_CONTRACT'
 
-type RateModalType = (typeof RATE_UNLOCK_SUBMIT_TYPES)[number]
-type ContractModalType = (typeof CONTRACT_UNLOCK_SUBMIT_TYPES)[number]
-type SharedModalType = ContractModalType & RateModalType
-type SharedAdditionalProps = {
+type UnlockSubmitModalProps = {
+    submissionData: Rate | Contract
+    modalType: ModalTypes
     submissionName?: string
     modalRef: React.RefObject<ModalRef>
     setIsSubmitting?: React.Dispatch<React.SetStateAction<boolean>>
 }
-
-type RateModalProps = {
-    submissionData: Rate
-    modalType: RateModalType
-} & SharedAdditionalProps
-
-type ContractModalProps = {
-    submissionData: Contract
-    modalType: ContractModalType
-} & SharedAdditionalProps
-
-type UnlockSubmitModalProps = RateModalProps | ContractModalProps
 
 type ModalValueType = {
     modalHeading?: string
@@ -63,61 +47,60 @@ type ModalValueType = {
     errorSuggestion?: string
 }
 
-const modalValueDictionary: { [Property in SharedModalType]: ModalValueType } =
-    {
-        RESUBMIT_RATE: {
-            modalHeading: 'Summarize changes',
-            onSubmitText: 'Resubmit',
-            modalDescription:
-                'Once you submit, this rate will be sent to CMS for review and you will no longer be able to make changes.',
-            inputHint: 'Provide summary of all changes made to this rate',
-            unlockSubmitModalInputValidation:
-                'You must provide a summary of changes',
-            errorHeading: ERROR_MESSAGES.resubmit_error_heading,
-        },
-        RESUBMIT_CONTRACT: {
-            modalHeading: 'Summarize changes',
-            onSubmitText: 'Resubmit',
-            modalDescription:
-                'Once you submit, this contract will be sent to CMS for review and you will no longer be able to make changes.',
-            inputHint: 'Provide summary of all changes made to this contract',
-            unlockSubmitModalInputValidation:
-                'You must provide a summary of changes',
-            errorHeading: ERROR_MESSAGES.resubmit_error_heading,
-        },
-        UNLOCK_RATE: {
-            modalHeading: 'Reason for unlocking rate',
-            onSubmitText: 'Unlock',
-            inputHint: 'Provide reason for unlocking',
-            unlockSubmitModalInputValidation:
-                'You must provide a reason for unlocking this rate',
-            errorHeading: ERROR_MESSAGES.unlock_error_heading,
-        },
-        UNLOCK_CONTRACT: {
-            modalHeading: 'Reason for unlocking submission',
-            onSubmitText: 'Unlock',
-            inputHint: 'Provide reason for unlocking',
-            unlockSubmitModalInputValidation:
-                'You must provide a reason for unlocking this submission',
-            errorHeading: ERROR_MESSAGES.unlock_error_heading,
-        },
-        SUBMIT_RATE: {
-            modalHeading: 'Ready to submit?',
-            onSubmitText: 'Submit',
-            modalDescription:
-                'Submitting this rate will send it to CMS to begin their review.',
-            errorHeading: ERROR_MESSAGES.submit_error_heading,
-            errorSuggestion: ERROR_MESSAGES.submit_error_suggestion,
-        },
-        SUBMIT_CONTRACT: {
-            modalHeading: 'Ready to submit?',
-            onSubmitText: 'Submit',
-            modalDescription:
-                'Submitting this contract will send it to CMS to begin their review.',
-            errorHeading: ERROR_MESSAGES.submit_error_heading,
-            errorSuggestion: ERROR_MESSAGES.submit_error_suggestion,
-        },
-    }
+const modalValueDictionary: Record<ModalTypes, ModalValueType> = {
+    RESUBMIT_RATE: {
+        modalHeading: 'Summarize changes',
+        onSubmitText: 'Resubmit',
+        modalDescription:
+            'Once you submit, this rate will be sent to CMS for review and you will no longer be able to make changes.',
+        inputHint: 'Provide summary of all changes made to this rate',
+        unlockSubmitModalInputValidation:
+            'You must provide a summary of changes',
+        errorHeading: ERROR_MESSAGES.resubmit_error_heading,
+    },
+    RESUBMIT_CONTRACT: {
+        modalHeading: 'Summarize changes',
+        onSubmitText: 'Resubmit',
+        modalDescription:
+            'Once you submit, this contract will be sent to CMS for review and you will no longer be able to make changes.',
+        inputHint: 'Provide summary of all changes made to this contract',
+        unlockSubmitModalInputValidation:
+            'You must provide a summary of changes',
+        errorHeading: ERROR_MESSAGES.resubmit_error_heading,
+    },
+    UNLOCK_RATE: {
+        modalHeading: 'Reason for unlocking rate',
+        onSubmitText: 'Unlock',
+        inputHint: 'Provide reason for unlocking',
+        unlockSubmitModalInputValidation:
+            'You must provide a reason for unlocking this rate',
+        errorHeading: ERROR_MESSAGES.unlock_error_heading,
+    },
+    UNLOCK_CONTRACT: {
+        modalHeading: 'Reason for unlocking submission',
+        onSubmitText: 'Unlock',
+        inputHint: 'Provide reason for unlocking',
+        unlockSubmitModalInputValidation:
+            'You must provide a reason for unlocking this submission',
+        errorHeading: ERROR_MESSAGES.unlock_error_heading,
+    },
+    SUBMIT_RATE: {
+        modalHeading: 'Ready to submit?',
+        onSubmitText: 'Submit',
+        modalDescription:
+            'Submitting this rate will send it to CMS to begin their review.',
+        errorHeading: ERROR_MESSAGES.submit_error_heading,
+        errorSuggestion: ERROR_MESSAGES.submit_error_suggestion,
+    },
+    SUBMIT_CONTRACT: {
+        modalHeading: 'Ready to submit?',
+        onSubmitText: 'Submit',
+        modalDescription:
+            'Submitting this contract will send it to CMS to begin their review.',
+        errorHeading: ERROR_MESSAGES.submit_error_heading,
+        errorSuggestion: ERROR_MESSAGES.submit_error_suggestion,
+    },
+} satisfies Record<ModalTypes, ModalValueType>
 
 export const UnlockSubmitModal = ({
     submissionData,
@@ -133,8 +116,7 @@ export const UnlockSubmitModal = ({
     >(undefined)
     const navigate = useNavigate()
 
-    const modalValues: ModalValueType =
-        modalValueDictionary[modalType as SharedModalType]
+    const modalValues: ModalValueType = modalValueDictionary[modalType]
 
     const modalFormInitialValues = {
         unlockSubmitModalInput: '',
@@ -163,11 +145,9 @@ export const UnlockSubmitModal = ({
             : submitContractLoading
 
     const isSubmitting = mutationLoading || formik.isSubmitting
-    const includesFormInput =
-        modalType === 'UNLOCK_CONTRACT' ||
-        modalType === 'RESUBMIT_CONTRACT' ||
-        modalType === 'UNLOCK_RATE' ||
-        modalType === 'RESUBMIT_RATE'
+    const includesFormInput = !['SUBMIT_CONTRACT', 'SUBMIT_RATE'].includes(
+        modalType
+    )
 
     const prevSubmitting = usePrevious(isSubmitting)
 
@@ -223,7 +203,7 @@ export const UnlockSubmitModal = ({
                         unlockSubmitModalInput
                     )
                 } else {
-                    console.info('error has occured with unlocking contract')
+                    console.info('error has occurred with unlocking contract')
                 }
 
                 break
@@ -248,15 +228,12 @@ export const UnlockSubmitModal = ({
                 message: result.message,
                 // When we have generic/unknown errors override any suggestions and display the fallback "please refresh text"
                 validationFail:
-                    result.message === ERROR_MESSAGES.submit_missing_field
-                        ? true
-                        : false,
+                    result.message === ERROR_MESSAGES.submit_missing_field,
             })
         } else {
             modalRef.current?.toggleModal(undefined, false)
             if (
-                (modalType === 'RESUBMIT_CONTRACT' ||
-                    modalType === 'SUBMIT_CONTRACT') &&
+                ['RESUBMIT_CONTRACT', 'SUBMIT_CONTRACT'].includes(modalType) &&
                 submissionName
             ) {
                 navigate(
@@ -306,7 +283,8 @@ export const UnlockSubmitModal = ({
             modalAlert={modalAlert}
         >
             {includesFormInput ? (
-                <form>
+                // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
+                <form tabIndex={0}>
                     {modalValues.modalDescription && (
                         <p>{modalValues.modalDescription}</p>
                     )}
@@ -332,7 +310,7 @@ export const UnlockSubmitModal = ({
                             id="unlockSubmitModalInput"
                             name="unlockSubmitModalInput"
                             data-testid="unlockSubmitModalInput"
-                            aria-labelledby="unlock-submit-modal-input-hint"
+                            aria-labelledby="modal-input-hint"
                             aria-required
                             error={!!formik.errors.unlockSubmitModalInput}
                             onChange={formik.handleChange}
