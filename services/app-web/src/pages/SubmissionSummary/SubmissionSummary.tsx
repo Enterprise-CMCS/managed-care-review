@@ -44,10 +44,11 @@ import { featureFlags } from '@mc-review/common-code'
 import {
     SubmissionApprovedBanner,
     IncompleteSubmissionBanner,
+    SubmissionWithdrawnBanner,
+    StatusUpdatedBanner,
+    UndoSubmissionWithdrawBanner,
 } from '../../components/Banner'
 import { MultiColumnGrid } from '../../components/MultiColumnGrid/MultiColumnGrid'
-import { SubmissionWithdrawnBanner } from '../../components/Banner/SubmissionWithdrawnBanner/SubmissionWithdrawnBanner'
-import { StatusUpdatedBanner } from '../../components/Banner/StatusUpdatedBanner/StatusUpdatedBanner'
 
 export interface SubmissionSummaryFormValues {
     dateApprovalReleasedToState: string
@@ -229,7 +230,8 @@ export const SubmissionSummary = (): React.ReactElement => {
         consolidatedStatus === 'WITHDRAWN' &&
         latestContractAction
     const showSubmissionUpdateBannerForUndo =
-        latestContractAction?.actionType !== 'UNDER_REVIEW' &&
+        latestContractAction?.actionType === 'UNDER_REVIEW' &&
+        contract.reviewStatusActions?.[1].actionType === 'WITHDRAW' &&
         undoWithdrawSubmissionFlag &&
         isStateUser
 
@@ -264,6 +266,20 @@ export const SubmissionSummary = (): React.ReactElement => {
             )
         }
 
+        if (showSubmissionUpdateBannerForUndo) {
+            return (
+                <UndoSubmissionWithdrawBanner
+                    className={styles.banner}
+                    undoWithdrawInfo={{
+                        updatedReason:
+                            latestContractAction?.updatedReason ?? '',
+                        updatedAt: latestContractAction?.updatedAt,
+                        updatedBy: latestContractAction!.updatedBy,
+                    }}
+                />
+            )
+        }
+
         if (submissionStatus === 'UNLOCKED' && updateInfo) {
             return (
                 <SubmissionUnlockedBanner
@@ -275,10 +291,10 @@ export const SubmissionSummary = (): React.ReactElement => {
         }
 
         if (
-            (submissionStatus === 'RESUBMITTED' &&
-                consolidatedStatus !== 'WITHDRAWN' &&
-                updateInfo) ||
-            showSubmissionUpdateBannerForUndo
+            submissionStatus === 'RESUBMITTED' &&
+            consolidatedStatus !== 'WITHDRAWN' &&
+            contract.reviewStatus !== 'UNDER_REVIEW' &&
+            updateInfo
         ) {
             return (
                 <SubmissionUpdatedBanner
