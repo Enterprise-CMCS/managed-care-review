@@ -44,7 +44,10 @@ async function buildApolloServer() {
     const emailerMode = process.env.EMAILER_MODE || 'LOCAL'
     const parameterStoreMode = process.env.PARAMETER_STORE_MODE || 'LOCAL'
     const ldSDKKey = process.env.LD_SDK_KEY || ''
-    const jwtSecret = process.env.JWT_SECRET || '123af'
+    if (!process.env.JWT_SECRET) {
+        throw new Error('JWT_SECRET environment variable is required but not set.')
+    }
+    const jwtSecret = process.env.JWT_SECRET
 
     // Postgres
     const pgResult = await configurePostgres(dbURL, secretsManagerSecret)
