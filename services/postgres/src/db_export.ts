@@ -43,10 +43,6 @@ export const handler = async () => {
         const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
         const dumpFilename = `${dbCredentials.dbname || 'postgres'}_${timestamp}.sql`
         const dumpFilePath = path.join(TMP_DIR, dumpFilename)
-        const sanitizedDumpPath = path.join(
-            TMP_DIR,
-            `sanitized_${dumpFilename}`
-        )
 
         // Use pg_dump from the Lambda layer to dump the database
         console.info(`Dumping database to ${dumpFilePath}...`)
@@ -74,12 +70,6 @@ export const handler = async () => {
             execSync(pgDumpCmd, { stdio: 'inherit' })
 
             console.info('Database dump completed successfully')
-
-            // Read, sanitize, and write back SQL content
-            console.info('Sanitizing sensitive information...')
-            const sqlContent = fs.readFileSync(dumpFilePath, 'utf8')
-            const sanitizedContent = sanitizeSqlDump(sqlContent)
-            fs.writeFileSync(sanitizedDumpPath, sanitizedContent)
         } catch (error) {
             console.error('Error executing pg_dump:', error)
             throw new Error(`pg_dump execution failed: ${error}`)
@@ -88,10 +78,10 @@ export const handler = async () => {
             delete process.env.PGPASSWORD
         }
 
-        // Upload the sanitized dump to S3
+        // Upload the dump to S3
         const s3Key = `${S3_PREFIX}/${dumpFilename}`
         console.info(`Uploading dump to S3: s3://${S3_BUCKET}/${s3Key}`)
-        const fileContent = fs.readFileSync(sanitizedDumpPath)
+        const fileContent = fs.readFileSync(dumpFilePath)
         await s3Client.send(
             new PutObjectCommand({
                 Bucket: S3_BUCKET,
@@ -105,8 +95,16 @@ export const handler = async () => {
 
         // Clean up temporary files
         fs.unlinkSync(dumpFilePath)
-        fs.unlinkSync(sanitizedDumpPath)
         console.info('Temporary files cleaned up')
+
+        return {
+            statusCode: 200,
+            body: JSON.stringify({
+                message: 'Database export completed successfully',
+                exportedFile: dumpFilename,
+                s3Location: `s3://${S3_BUCKET}/${s3Key}`,
+            }),
+        }
     } catch (err) {
         console.error('Error in db export process:', err)
         return {
@@ -117,68 +115,4 @@ export const handler = async () => {
             }),
         }
     }
-}
-
-/**
- * Changes the email address to use example.com
- * @param email The original email address
- * @returns A sanitized email address
- */
-function sanitizeEmail(email: string): string {
-    if (!email || email.indexOf('@') === -1) return email
-
-    // Keep the username but change the domain to mc-review.example.com
-    const [username] = email.split('@')
-    return `${username}@mc-review.example.com`
-}
-
-/**
- * Sanitizes all sensitive information in a SQL dump
- * @param sqlContent The SQL dump content to sanitize
- * @returns Sanitized SQL content
- */
-function sanitizeSqlDump(sqlContent: string): string {
-    console.info('Starting email sanitization process...')
-
-    // ---- Email Sanitization Only -----
-    console.info('Sanitizing email addresses to @mc-review.example.com...')
-
-    // 1. Replace standard email fields
-    sqlContent = sqlContent.replace(
-        /"email"\s*=\s*'([^']+)'/g,
-        (match, email) => `"email" = '${sanitizeEmail(email)}'`
-    )
-
-    // 2. Replace array email fields (for EmailSettings model)
-    const arrayEmailFields = [
-        'devReviewTeamEmails',
-        'cmsReviewHelpEmailAddress',
-        'cmsRateHelpEmailAddress',
-        'oactEmails',
-        'dmcpReviewEmails',
-        'dmcpSubmissionEmails',
-        'dmcoEmails',
-        'helpDeskEmail',
-    ]
-
-    arrayEmailFields.forEach((field) => {
-        sqlContent = sqlContent.replace(
-            new RegExp(`"${field}"\\s*=\\s*'\\{([^}]+)\\}'`, 'g'),
-            (match, emails) => {
-                const emailArray = emails
-                    .split(',')
-                    .map((email: string) => sanitizeEmail(email.trim()))
-                return `"${field}" = '{${emailArray.join(',')}}'`
-            }
-        )
-    })
-
-    // 3. Replace emailSource field
-    sqlContent = sqlContent.replace(
-        /"emailSource"\s*=\s*'([^']+)'/g,
-        (match, email) => `"emailSource" = '${sanitizeEmail(email)}'`
-    )
-
-    console.info('Email sanitization complete')
-    return sqlContent
 }

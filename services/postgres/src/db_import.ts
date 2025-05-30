@@ -7,14 +7,12 @@ import {
     ListObjectsV2Command,
     GetObjectCommand,
     PutObjectCommand,
-    _Object,
     DeleteObjectCommand,
+    _Object,
 } from '@aws-sdk/client-s3'
 import { SecretDict } from './types'
 import { createHash } from 'crypto'
 import { PrismaClient } from '@prisma/client'
-import { parseDomainUsersFromPrismaUsers } from '../../app-api/src/postgres/user/prismaDomainUser'
-import { UserType } from '../../app-api/src/domain-models'
 
 // Define a type for our required environment variables
 interface RequiredEnvVars {
@@ -94,17 +92,17 @@ export const handler = async () => {
         // Download the dump file
         await downloadS3File(latestDumpKey, dumpFilePath, S3_BUCKET)
 
-        // Save existing users before import
-        const valUsers = await saveExistingUsers(prisma)
-
-        // Import database
+        // Import database (this will overwrite all existing data)
         await importDatabase(dumpFilePath, dbCredentials)
 
-        // Restore val users
-        await restoreValUsers(prisma, valUsers)
+        // Sanitize email addresses
+        await sanitizeEmailAddresses(prisma)
 
         // Sanitize names
         await sanitizeUserNames(prisma)
+
+        // Validate email sanitization
+        await validateEmailSanitization(prisma)
 
         // Validate the import
         await validateImport(prisma)
@@ -126,7 +124,7 @@ export const handler = async () => {
             statusCode: 200,
             body: JSON.stringify({
                 message:
-                    'Database import and document replacement completed successfully',
+                    'Database import and document replacement completed successfully. Val users will be created automatically on first login.',
                 importedFile: dumpFilename,
                 cleanedUpS3File: latestDumpKey,
             }),
@@ -152,71 +150,26 @@ export const handler = async () => {
 }
 
 /**
- * Save existing val users before import
- */
-async function saveExistingUsers(prisma: PrismaClient): Promise<UserType[]> {
-    console.info('Backing up existing val users...')
-    const existingUsers = await prisma.user.findMany({
-        include: {
-            stateAssignments: true,
-        },
-    })
-    console.info(`Found ${existingUsers.length} users to preserve`)
-
-    const valUsers = parseDomainUsersFromPrismaUsers(existingUsers)
-    if (valUsers instanceof Error) {
-        console.error(
-            `Could not parse domain users from existing users: ${valUsers}`
-        )
-        throw valUsers
-    }
-
-    // Log user breakdown by role
-    const usersByRole = valUsers.reduce(
-        (acc, user) => {
-            acc[user.role] = (acc[user.role] || 0) + 1
-            return acc
-        },
-        {} as Record<string, number>
-    )
-    console.info('Users by role:', usersByRole)
-
-    return valUsers
-}
-
-/**
  * Validate the import was successful
  */
 async function validateImport(prisma: PrismaClient): Promise<void> {
     console.info('Validating import...')
 
-    // Check that we have at least some users
-    const userCount = await prisma.user.count()
-    if (userCount === 0) {
-        throw new Error('Import validation failed: No users found')
-    }
-
+    // Check that we have states
     const stateCount = await prisma.state.count()
     if (stateCount === 0) {
         throw new Error('Import validation failed: No states found')
     }
 
-    // Verify test users exist
-    const testUserCount = await prisma.user.count({
-        where: {
-            OR: [
-                { email: { contains: '@example.com' } },
-                { email: { contains: '@truss.works' } },
-            ],
-        },
-    })
-
-    if (testUserCount === 0) {
-        throw new Error('Import validation failed: No test users found')
-    }
+    // Check that we have some data (contracts, rates, etc.)
+    const contractCount = await prisma.contractTable.count()
+    const rateCount = await prisma.rateTable.count()
 
     console.info(
-        `Validation passed: ${userCount} users, ${stateCount} states, ${testUserCount} test users`
+        `Validation passed: ${stateCount} states, ${contractCount} contracts, ${rateCount} rates`
+    )
+    console.info(
+        'Note: Val users will be created automatically when they first log in'
     )
 }
 
@@ -442,135 +395,6 @@ async function importDatabase(
 }
 
 /**
- * Restore a single user
- */
-async function restoreUser(
-    prisma: PrismaClient,
-    user: UserType
-): Promise<void> {
-    // Base user data that all users have
-    const baseUserData = {
-        id: user.id,
-        email: user.email,
-        givenName: user.givenName,
-        familyName: user.familyName,
-        role: user.role,
-    }
-
-    switch (user.role) {
-        case 'STATE_USER':
-            await prisma.user.upsert({
-                where: { id: user.id },
-                update: {
-                    ...baseUserData,
-                    stateCode: user.stateCode,
-                },
-                create: {
-                    ...baseUserData,
-                    stateCode: user.stateCode,
-                },
-            })
-            break
-
-        case 'CMS_USER':
-        case 'CMS_APPROVER_USER':
-            // For CMS users, we need to handle state assignments
-            await prisma.user.upsert({
-                where: { id: user.id },
-                update: {
-                    ...baseUserData,
-                    divisionAssignment: user.divisionAssignment || null,
-                    stateCode: null, // CMS users don't have stateCode
-                },
-                create: {
-                    ...baseUserData,
-                    divisionAssignment: user.divisionAssignment || null,
-                    stateCode: null,
-                },
-            })
-
-            // Update state assignments separately to ensure they're set correctly
-            if (user.stateAssignments && user.stateAssignments.length > 0) {
-                try {
-                    await prisma.user.update({
-                        where: { id: user.id },
-                        data: {
-                            stateAssignments: {
-                                set: [], // Clear any existing
-                                connect: user.stateAssignments.map((state) => ({
-                                    stateCode: state.stateCode,
-                                })),
-                            },
-                        },
-                    })
-                } catch (connectError) {
-                    console.warn(
-                        `Failed to connect state assignments for user ${user.email}: ${connectError}`
-                    )
-                    // User still exists, just without all state assignments
-                }
-            }
-            break
-
-        case 'ADMIN_USER':
-        case 'HELPDESK_USER':
-        case 'BUSINESSOWNER_USER':
-            // These users only have base fields
-            await prisma.user.upsert({
-                where: { id: user.id },
-                update: baseUserData,
-                create: baseUserData,
-            })
-            break
-
-        default:
-            console.warn(`Unhandled user type: ${JSON.stringify(user)}`)
-    }
-}
-
-/**
- * Restore val users after import
- */
-async function restoreValUsers(
-    prisma: PrismaClient,
-    users: UserType[]
-): Promise<void> {
-    if (DRY_RUN) {
-        console.info('DRY RUN: Skipping user restoration')
-        return
-    }
-
-    let restored = 0
-    let failed = 0
-
-    // Use Promise.all with chunks to speed up restoration
-    const chunkSize = 10
-    for (let i = 0; i < users.length; i += chunkSize) {
-        const chunk = users.slice(i, i + chunkSize)
-
-        await Promise.all(
-            chunk.map(async (user) => {
-                try {
-                    await restoreUser(prisma, user)
-                    restored++
-                    console.info(`Restored user: ${user.email} (${user.role})`)
-                } catch (error) {
-                    failed++
-                    console.error(
-                        `Failed to restore user ${user.email}:`,
-                        error
-                    )
-                }
-            })
-        )
-    }
-
-    console.info(
-        `User restoration completed: ${restored} restored, ${failed} failed`
-    )
-}
-
-/**
  * Initialize Prisma client with database credentials
  */
 async function initializePrisma(
@@ -656,30 +480,9 @@ async function sanitizeUserNames(prisma: PrismaClient): Promise<void> {
 
     console.info('Starting user name sanitization...')
 
-    // Get all val user emails to exclude from sanitization
-    const valUserEmails = await prisma.user.findMany({
-        where: {
-            OR: [
-                { email: { contains: '@example.com' } },
-                { email: { contains: '@truss.works' } },
-                { email: { contains: 'test' } },
-                { email: { contains: 'mc-review-qa' } },
-            ],
-        },
-        select: { email: true },
-    })
-
-    const valEmailSet = new Set(valUserEmails.map((u) => u.email))
-    console.info(`Excluding ${valEmailSet.size} val users from sanitization`)
-
-    // Get all users to sanitize
-    const users = await prisma.user.findMany({
-        where: {
-            NOT: {
-                email: { in: Array.from(valEmailSet) },
-            },
-        },
-    })
+    // 1. Sanitize all User names (val users will be recreated on first login)
+    console.info('Sanitizing User names...')
+    const users = await prisma.user.findMany()
 
     // Batch update users using transaction
     const userUpdates = users.map((user) => {
@@ -698,7 +501,7 @@ async function sanitizeUserNames(prisma: PrismaClient): Promise<void> {
     })
 
     await prisma.$transaction(userUpdates)
-    console.info(`Updated ${users.length} production user names`)
+    console.info(`Updated ${users.length} user names`)
 
     // 2. StateContact table - name field
     console.info('Sanitizing StateContact names...')
@@ -1172,4 +975,295 @@ async function processAllDocuments(prisma: PrismaClient): Promise<void> {
     }
 
     console.info('All document types processed successfully')
+}
+
+/**
+ * Sanitize email addresses to use example.com domain
+ */
+function sanitizeEmail(email: string): string {
+    if (!email || email.indexOf('@') === -1) return email
+
+    // Keep the username but change the domain to mc-review.example.com
+    const [username] = email.split('@')
+    return `${username}@mc-review.example.com`
+}
+
+/**
+ * Sanitize all email addresses in the database
+ */
+async function sanitizeEmailAddresses(prisma: PrismaClient): Promise<void> {
+    if (DRY_RUN) {
+        console.info('DRY RUN: Skipping email sanitization')
+        return
+    }
+
+    console.info('Starting email address sanitization...')
+
+    // Get all val user emails to exclude from sanitization
+    const valUserEmails = await prisma.user.findMany({
+        where: {
+            OR: [
+                { email: { contains: '@example.com' } },
+                { email: { contains: '@truss.works' } },
+                { email: { contains: 'test' } },
+                { email: { contains: 'mc-review-qa' } },
+            ],
+        },
+        select: { email: true },
+    })
+
+    const valEmailSet = new Set(valUserEmails.map((u) => u.email))
+    console.info(
+        `Excluding ${valEmailSet.size} val users from email sanitization`
+    )
+
+    // 1. Sanitize User emails
+    console.info('Sanitizing User emails...')
+    const users = await prisma.user.findMany({
+        where: {
+            NOT: {
+                email: { in: Array.from(valEmailSet) },
+            },
+        },
+    })
+
+    const userEmailUpdates = users.map((user) => {
+        const sanitizedEmail = sanitizeEmail(user.email)
+        return prisma.user.update({
+            where: { id: user.id },
+            data: { email: sanitizedEmail },
+        })
+    })
+
+    await prisma.$transaction(userEmailUpdates)
+    console.info(`Updated ${users.length} user emails`)
+
+    // 2. Sanitize StateContact emails
+    console.info('Sanitizing StateContact emails...')
+    const stateContacts = await prisma.stateContact.findMany({
+        where: { email: { not: null } },
+    })
+
+    const stateContactEmailUpdates = stateContacts.map((contact) => {
+        const sanitizedEmail = sanitizeEmail(contact.email!)
+        return prisma.stateContact.update({
+            where: { id: contact.id },
+            data: { email: sanitizedEmail },
+        })
+    })
+
+    await prisma.$transaction(stateContactEmailUpdates)
+    console.info(`Updated ${stateContacts.length} state contact emails`)
+
+    // 3. Sanitize ActuaryContact emails
+    console.info('Sanitizing ActuaryContact emails...')
+    const actuaryContacts = await prisma.actuaryContact.findMany({
+        where: { email: { not: null } },
+    })
+
+    const actuaryContactEmailUpdates = actuaryContacts.map((contact) => {
+        const sanitizedEmail = sanitizeEmail(contact.email!)
+        return prisma.actuaryContact.update({
+            where: { id: contact.id },
+            data: { email: sanitizedEmail },
+        })
+    })
+
+    await prisma.$transaction(actuaryContactEmailUpdates)
+    console.info(`Updated ${actuaryContacts.length} actuary contact emails`)
+
+    // 4. Sanitize EmailSettings
+    console.info('Sanitizing EmailSettings...')
+    const emailSettings = await prisma.emailSettings.findMany()
+
+    for (const settings of emailSettings) {
+        const updates: Partial<{
+            emailSource: string
+            devReviewTeamEmails: string[]
+            cmsReviewHelpEmailAddress: string[]
+            cmsRateHelpEmailAddress: string[]
+            oactEmails: string[]
+            dmcpReviewEmails: string[]
+            dmcpSubmissionEmails: string[]
+            dmcoEmails: string[]
+            helpDeskEmail: string[]
+        }> = {}
+
+        // Sanitize single email fields
+        if (settings.emailSource) {
+            updates.emailSource = sanitizeEmail(settings.emailSource)
+        }
+
+        // Sanitize array email fields
+        if (
+            settings.devReviewTeamEmails &&
+            settings.devReviewTeamEmails.length > 0
+        ) {
+            updates.devReviewTeamEmails =
+                settings.devReviewTeamEmails.map(sanitizeEmail)
+        }
+
+        if (
+            settings.cmsReviewHelpEmailAddress &&
+            settings.cmsReviewHelpEmailAddress.length > 0
+        ) {
+            updates.cmsReviewHelpEmailAddress =
+                settings.cmsReviewHelpEmailAddress.map(sanitizeEmail)
+        }
+
+        if (
+            settings.cmsRateHelpEmailAddress &&
+            settings.cmsRateHelpEmailAddress.length > 0
+        ) {
+            updates.cmsRateHelpEmailAddress =
+                settings.cmsRateHelpEmailAddress.map(sanitizeEmail)
+        }
+
+        if (settings.oactEmails && settings.oactEmails.length > 0) {
+            updates.oactEmails = settings.oactEmails.map(sanitizeEmail)
+        }
+
+        if (settings.dmcpReviewEmails && settings.dmcpReviewEmails.length > 0) {
+            updates.dmcpReviewEmails =
+                settings.dmcpReviewEmails.map(sanitizeEmail)
+        }
+
+        if (
+            settings.dmcpSubmissionEmails &&
+            settings.dmcpSubmissionEmails.length > 0
+        ) {
+            updates.dmcpSubmissionEmails =
+                settings.dmcpSubmissionEmails.map(sanitizeEmail)
+        }
+
+        if (settings.dmcoEmails && settings.dmcoEmails.length > 0) {
+            updates.dmcoEmails = settings.dmcoEmails.map(sanitizeEmail)
+        }
+
+        if (settings.helpDeskEmail && settings.helpDeskEmail.length > 0) {
+            updates.helpDeskEmail = settings.helpDeskEmail.map(sanitizeEmail)
+        }
+
+        // Only update if we have changes
+        if (Object.keys(updates).length > 0) {
+            await prisma.emailSettings.update({
+                where: { id: settings.id },
+                data: updates,
+            })
+            console.info(`Updated EmailSettings ${settings.id}`)
+        }
+    }
+
+    console.info('Email address sanitization completed')
+}
+
+/**
+ * Validate that all emails have been properly sanitized
+ */
+async function validateEmailSanitization(prisma: PrismaClient): Promise<void> {
+    console.info('Validating email sanitization...')
+
+    const allowedDomains = [
+        '@mc-review.example.com',
+        '@example.com',
+        '@truss.works',
+    ]
+
+    // Check User emails
+    const invalidUserEmails = await prisma.user.findMany({
+        where: {
+            AND: allowedDomains.map((domain) => ({
+                email: { not: { contains: domain } },
+            })),
+        },
+        select: { email: true, id: true },
+    })
+
+    if (invalidUserEmails.length > 0) {
+        console.error(
+            `Found ${invalidUserEmails.length} users with invalid email domains:`
+        )
+        invalidUserEmails.forEach((user) =>
+            console.error(`  User ${user.id}: ${user.email}`)
+        )
+        throw new Error(
+            'Email sanitization validation failed: Users with invalid domains found'
+        )
+    }
+
+    // Check StateContact emails
+    const invalidStateContactEmails = await prisma.stateContact.findMany({
+        where: {
+            AND: [
+                { email: { not: null } },
+                ...allowedDomains.map((domain) => ({
+                    email: { not: { contains: domain } },
+                })),
+            ],
+        },
+        select: { email: true, id: true },
+    })
+
+    if (invalidStateContactEmails.length > 0) {
+        console.error(
+            `Found ${invalidStateContactEmails.length} state contacts with invalid email domains:`
+        )
+        invalidStateContactEmails.forEach((contact) =>
+            console.error(`  StateContact ${contact.id}: ${contact.email}`)
+        )
+        throw new Error(
+            'Email sanitization validation failed: StateContacts with invalid domains found'
+        )
+    }
+
+    // Check ActuaryContact emails
+    const invalidActuaryContactEmails = await prisma.actuaryContact.findMany({
+        where: {
+            AND: [
+                { email: { not: null } },
+                ...allowedDomains.map((domain) => ({
+                    email: { not: { contains: domain } },
+                })),
+            ],
+        },
+        select: { email: true, id: true },
+    })
+
+    if (invalidActuaryContactEmails.length > 0) {
+        console.error(
+            `Found ${invalidActuaryContactEmails.length} actuary contacts with invalid email domains:`
+        )
+        invalidActuaryContactEmails.forEach((contact) =>
+            console.error(`  ActuaryContact ${contact.id}: ${contact.email}`)
+        )
+        throw new Error(
+            'Email sanitization validation failed: ActuaryContacts with invalid domains found'
+        )
+    }
+
+    console.info(
+        'Email sanitization validation passed - all emails use allowed domains'
+    )
+}
+
+/**
+ * Clean up the S3 export file after successful import
+ */
+async function cleanupS3Export(s3Key: string): Promise<void> {
+    try {
+        console.info(`Cleaning up S3 export file: s3://${S3_BUCKET}/${s3Key}`)
+
+        await s3Client.send(
+            new DeleteObjectCommand({
+                Bucket: S3_BUCKET,
+                Key: s3Key,
+            })
+        )
+
+        console.info(`Successfully deleted S3 export file: ${s3Key}`)
+    } catch (error) {
+        // Log the error but don't fail the whole import process
+        console.error(`Failed to delete S3 export file ${s3Key}:`, error)
+        console.info('Import completed successfully despite cleanup failure')
+    }
 }
