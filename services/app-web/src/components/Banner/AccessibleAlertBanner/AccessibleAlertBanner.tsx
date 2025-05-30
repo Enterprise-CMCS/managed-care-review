@@ -1,9 +1,7 @@
 import { Alert } from '@trussworks/react-uswds'
 import { useId } from 'react'
 
-type AccessibleAlertProps = React.ComponentProps<typeof Alert> & {
-    role?: 'status' | 'alert'
-}
+type AccessibleAlertProps = React.ComponentProps<typeof Alert>
 
 /**
  * Accessible wrapper for the React-USWDS Alert component that adds in a screen reader
