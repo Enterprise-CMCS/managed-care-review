@@ -1,7 +1,7 @@
-<h1 style=<%~'"font-weight: normal;"'%>>Submission <%= it.contractName %> was withdrawn by CMS</h1>
-<b>Withdrawn by:</b> <%= it.updatedBy %><br />
-<b>Withdrawn on:</b> <%= it.updatedAt %><br />
-<b>Reason for withdrawal:</b> <%= it.reason %><br />
+<h1 style=<%~'"font-weight: normal;"'%>>Submission <%= it.contractName %> status was updated to 'Submitted' by CMS</h1>
+<b>Updated by:</b> <%= it.updatedBy %><br />
+<b>Updated on:</b> <%= it.updatedAt %><br />
+<b>Reason:</b> <%= it.reason %><br />
 <% if (it.formattedRates && it.formattedRates.length > 0) { %>
 <b>Related rate certification(s):</b>
 <ul>

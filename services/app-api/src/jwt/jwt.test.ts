@@ -1,12 +1,14 @@
 import { newJWTLib } from './jwt'
 
 describe('jwtLib', () => {
+    const config = {
+        issuer: 'mctest',
+        signingKey: Buffer.from('123af', 'hex'),
+        expirationDurationS: 1000,
+    }
+
     it('works symmetricly', () => {
-        const jwt = newJWTLib({
-            issuer: 'mctest',
-            signingKey: Buffer.from('123af', 'hex'),
-            expirationDurationS: 1000,
-        })
+        const jwt = newJWTLib(config)
 
         const userID = 'bar'
 
@@ -21,6 +23,42 @@ describe('jwtLib', () => {
 
         expect(token.expiresAt.getTime()).toBeLessThan(higherDate.getTime())
         expect(token.expiresAt.getTime()).toBeGreaterThan(lowerDate.getTime())
+    })
+
+    describe('OAuth tokens', () => {
+        it('creates and validates OAuth tokens', () => {
+            const jwt = newJWTLib(config)
+            const clientId = 'test-client'
+            const grantType = 'client_credentials'
+
+            const token = jwt.createOAuthJWT(clientId, grantType)
+            const result = jwt.validateOAuthToken(token.key)
+
+            expect(result).not.toBeInstanceOf(Error)
+            const validatedToken = result as {
+                clientId: string
+                grantType: string
+            }
+            expect(validatedToken.clientId).toBe(clientId)
+            expect(validatedToken.grantType).toBe(grantType)
+        })
+
+        it('fails validation for standard tokens', () => {
+            const jwt = newJWTLib(config)
+            const userID = 'bar'
+
+            const token = jwt.createValidJWT(userID)
+            const result = jwt.validateOAuthToken(token.key)
+
+            expect(result).toBeInstanceOf(Error)
+        })
+
+        it('fails validation for invalid OAuth tokens', () => {
+            const jwt = newJWTLib(config)
+            const result = jwt.validateOAuthToken('invalid.token.here')
+
+            expect(result).toBeInstanceOf(Error)
+        })
     })
 
     // error cases

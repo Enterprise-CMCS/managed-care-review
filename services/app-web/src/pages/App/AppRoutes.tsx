@@ -57,6 +57,7 @@ import { ReleasedToState } from '../SubmissionReleasedToState/ReleasedToState'
 import { RateWithdraw } from '../RateWithdraw/RateWithdraw'
 import { UndoRateWithdraw } from '../UndoRateWithdraw/UndoRateWithdraw'
 import { SubmissionWithdraw } from '../SubmissionWithdraw/SubmissionWithdraw'
+import { UndoSubmissionWithdraw } from '../UndoSubmissionWithdraw/UndoSubmissionWithdraw'
 
 function componentForAuthMode(
     authMode: AuthModeType
@@ -289,7 +290,7 @@ const CMSUserRoutes = ({
                 {showUndoWithdrawSubmission && (
                     <Route
                         path={RoutesRecord.UNDO_SUBMISSION_WITHDRAW}
-                        element={<h1>UNDO_SUBMISSION_WITHDRAW</h1>}
+                        element={<UndoSubmissionWithdraw />}
                     />
                 )}
 

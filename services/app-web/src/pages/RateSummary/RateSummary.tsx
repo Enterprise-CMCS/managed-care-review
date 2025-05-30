@@ -21,7 +21,10 @@ import { SingleRateSummarySection } from '../../components/SubmissionSummarySect
 import { useAuth } from '../../contexts/AuthContext'
 import { ErrorForbiddenPage } from '../Errors/ErrorForbiddenPage'
 import { Error404 } from '../Errors/Error404Page'
-import { RateWithdrawBanner } from '../../components/Banner'
+import {
+    IncompleteSubmissionBanner,
+    RateWithdrawBanner,
+} from '../../components/Banner'
 import { hasCMSUserPermissions } from '@mc-review/helpers'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '@mc-review/common-code'
@@ -229,6 +232,7 @@ export const RateSummary = (): React.ReactElement => {
     ) {
         rateActions.push(
             <UnlockRateButton
+                key="unlock-rate-button"
                 disabled={unlockLoading}
                 onClick={handleUnlockRate}
             >
@@ -239,6 +243,7 @@ export const RateSummary = (): React.ReactElement => {
         rateActions.push(
             /* This second option is an interim state for unlock rate button (when linked rates is turned on but unlock and edit rate is not available yet). Remove when rate unlock is permanently on. */
             <UnlockRateButton
+                key="unlock-rate-button"
                 onClick={() => {
                     navigate(`/submissions/${parentContractSubmissionID}`)
                 }}
@@ -259,6 +264,7 @@ export const RateSummary = (): React.ReactElement => {
     ) {
         rateActions.push(
             <ButtonWithLogging
+                key="withdraw-rate-button"
                 className="usa-button usa-button--outline"
                 type="button"
                 onClick={() =>
@@ -280,6 +286,7 @@ export const RateSummary = (): React.ReactElement => {
     ) {
         rateActions.push(
             <ButtonWithLogging
+                key="undo-withdraw-rate-button"
                 className="usa-button usa-button--outline"
                 type="button"
                 onClick={() =>
@@ -299,6 +306,9 @@ export const RateSummary = (): React.ReactElement => {
                 data-testid="rate-summary"
                 className={styles.container}
             >
+                {isOrphanedRate && (
+                    <IncompleteSubmissionBanner message="This rate is missing a contract action" />
+                )}
                 {showWithdrawBanner && (
                     <RateWithdrawBanner
                         updatedAt={latestRateAction.updatedAt}

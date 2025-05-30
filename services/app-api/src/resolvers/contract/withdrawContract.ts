@@ -139,8 +139,8 @@ export function withdrawContract(
                 errMessage = `CMS Email failed: ${sendWithdrawCMSEmail.message}`
             }
 
-            if (sendWithdrawCMSEmail instanceof Error) {
-                errMessage = `State Email failed: ${sendWithdrawCMSEmail.message}`
+            if (sendWithdrawStateEmail instanceof Error) {
+                errMessage = `State Email failed: ${sendWithdrawStateEmail.message}`
             }
 
             logError('withdrawContract', errMessage)
