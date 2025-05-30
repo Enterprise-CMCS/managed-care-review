@@ -58,4 +58,12 @@ fragment rateRevisionFragment on RateRevision {
             packageStatus
         }
     }
+
+    documentZipPackages {
+        id
+        s3URL
+        sha256
+        documentType
+        downloadUrl
+    }
 }

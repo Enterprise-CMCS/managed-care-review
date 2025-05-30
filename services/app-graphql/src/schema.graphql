@@ -1863,7 +1863,7 @@ type RateRevision {
     """
     Pre-generated zip packages containing document collections for this revision
     """
-    documentZipPackages: [DocumentZipPackage!]!
+    documentZipPackages: [DocumentZipPackage!]
 }
 
 """
@@ -2043,7 +2043,7 @@ type ContractRevision {
     """
     Pre-generated zip packages containing document collections for this revision
     """
-    documentZipPackages: [DocumentZipPackage!]!
+    documentZipPackages: [DocumentZipPackage!]
 }
 
 "SubmittableRevision is what can appear in a submission"
@@ -2570,6 +2570,11 @@ type DocumentZipPackage {
     Creation timestamp
     """
     createdAt: DateTime!
+
+    """
+    Signed download URL for the zip file (expires in 1 hour)
+    """
+    downloadUrl: String
 }
 
 """

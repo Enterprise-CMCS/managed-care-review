@@ -1,1 +1,1 @@
-export { documentZipPackageResolver } from './documentZipResolver'
+export { documentZipPackageResolver } from './documentZipPackageResolver'
