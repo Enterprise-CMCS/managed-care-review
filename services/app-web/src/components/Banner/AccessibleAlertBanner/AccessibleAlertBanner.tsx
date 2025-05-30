@@ -29,7 +29,6 @@ export const AccessibleAlertBanner = ({
         >
             {heading && (
                 <Heading id={headerID} className="usa-alert__heading">
-                    {/*/!*Hidden element for the screen reader when navigating by headers, This will announce what this header is for.*!/*/}
                     <span className="srOnly">{`${role}, `}</span>
                     {heading}
                 </Heading>
