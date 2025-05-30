@@ -1,9 +1,9 @@
 import React, { useEffect } from 'react'
 import classnames from 'classnames'
-import { Alert } from '@trussworks/react-uswds'
 import { useTealium } from '../../../hooks'
 import { extractText } from '../../TealiumLogging/tealiamLoggingHelpers'
 import styles from '../../ErrorAlert/ErrorAlert.module.scss'
+import { AccessibleAlertBanner } from '../AccessibleAlertBanner/AccessibleAlertBanner'
 
 export type IncompleteSubmissionProps = {
     message?: string
@@ -30,7 +30,7 @@ export const IncompleteSubmissionBanner = ({
     }, [loggingErrorMessage, logAlertImpressionEvent])
 
     return (
-        <Alert
+        <AccessibleAlertBanner
             role="alert"
             type="error"
             heading={heading || 'Validation error'}
@@ -41,8 +41,8 @@ export const IncompleteSubmissionBanner = ({
             {...divProps}
         >
             <div className={styles.messageBodyText}>
-                <p className="usa-alert__text">{message}&nbsp;</p>
+                <p className="usa-alert__text">{message}</p>
             </div>
-        </Alert>
+        </AccessibleAlertBanner>
     )
 }

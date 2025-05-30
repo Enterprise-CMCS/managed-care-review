@@ -1,11 +1,11 @@
 import React from 'react'
 import styles from '../Banner.module.scss'
-import { Alert } from '@trussworks/react-uswds'
 import { formatBannerDate } from '@mc-review/dates'
 import { ExpandableText } from '../../ExpandableText'
 import { UpdateInformation, User } from '../../../gen/gqlClient'
 import { getUpdatedByDisplayName } from '@mc-review/helpers'
 import { hasCMSUserPermissions } from '@mc-review/helpers'
+import { AccessibleAlertBanner } from '../AccessibleAlertBanner/AccessibleAlertBanner'
 
 export type UnlockedProps = {
     loggedInUser?: User
@@ -19,8 +19,8 @@ export const SubmissionUnlockedBanner = ({
 }: UnlockedProps &
     React.HTMLAttributes<HTMLDivElement>): React.ReactElement => {
     return (
-        <Alert
-            role="alert"
+        <AccessibleAlertBanner
+            role="status"
             type={hasCMSUserPermissions(loggedInUser) ? 'warning' : 'info'}
             heading="Submission unlocked"
             headingLevel="h4"
@@ -44,6 +44,6 @@ export const SubmissionUnlockedBanner = ({
                     </>
                 </ExpandableText>
             </div>
-        </Alert>
+        </AccessibleAlertBanner>
     )
 }

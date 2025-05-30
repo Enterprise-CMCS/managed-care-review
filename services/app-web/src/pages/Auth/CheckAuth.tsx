@@ -1,8 +1,8 @@
 import React, { useState } from 'react'
-import { Alert, GridContainer } from '@trussworks/react-uswds'
-
+import { GridContainer } from '@trussworks/react-uswds'
 import { useFetchCurrentUserLazyQuery } from '../../gen/gqlClient'
 import { ButtonWithLogging } from '../../components'
+import { AccessibleAlertBanner } from '../../components/Banner/AccessibleAlertBanner/AccessibleAlertBanner'
 
 type AuthStatus = 'Unknown' | 'Authenticated' | 'Unauthenticated'
 
@@ -50,7 +50,8 @@ export function CheckAuth(): React.ReactElement {
 
     return (
         <GridContainer>
-            <Alert
+            <AccessibleAlertBanner
+                role="status"
                 headingLevel="h4"
                 style={{ width: '600px', marginBottom: '5px' }}
                 type={alertType()}
@@ -64,7 +65,7 @@ export function CheckAuth(): React.ReactElement {
                 >
                     Check Auth
                 </ButtonWithLogging>
-            </Alert>
+            </AccessibleAlertBanner>
         </GridContainer>
     )
 }

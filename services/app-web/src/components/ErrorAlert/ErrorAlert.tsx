@@ -1,10 +1,10 @@
 import classnames from 'classnames'
 import React, { useEffect } from 'react'
 import styles from './ErrorAlert.module.scss'
-import { Alert } from '@trussworks/react-uswds'
 import { useTealium } from '../../hooks'
 import { extractText } from '../TealiumLogging/tealiamLoggingHelpers'
 import { ErrorRemediation, RemediationType } from './ErrorRemediations'
+import { AccessibleAlertBanner } from '../Banner/AccessibleAlertBanner/AccessibleAlertBanner'
 
 export type ErrorAlertProps = {
     heading?: string // Has a default for generic error
@@ -47,7 +47,7 @@ export const ErrorAlert = ({
     }, [loggingErrorMessage, logAlertImpressionEvent])
 
     return (
-        <Alert
+        <AccessibleAlertBanner
             role="alert"
             type="error"
             heading={heading || 'System error'}
@@ -74,6 +74,6 @@ export const ErrorAlert = ({
                     </p>
                 )}
             </div>
-        </Alert>
+        </AccessibleAlertBanner>
     )
 }

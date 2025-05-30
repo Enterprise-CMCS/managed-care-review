@@ -140,7 +140,7 @@ describe('Auth', () => {
                 expect(loginSpy).toHaveBeenCalledTimes(1)
                 expect(testLocation.pathname).toBe('/auth')
                 expect(
-                    screen.getByRole('heading', { name: 'Sign in error' })
+                    screen.getByRole('heading', { name: /Sign in error/ })
                 ).toBeInTheDocument()
             })
         })
@@ -277,7 +277,7 @@ describe('Auth', () => {
             await waitFor(() => {
                 expect(testLocation.pathname).toBe('/auth')
                 expect(
-                    screen.getByRole('heading', { name: 'Sign in error' })
+                    screen.getByRole('heading', { name: /Sign in error/ })
                 ).toBeInTheDocument()
             })
         })

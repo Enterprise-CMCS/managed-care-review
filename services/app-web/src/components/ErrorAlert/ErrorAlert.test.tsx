@@ -7,7 +7,7 @@ test('renders default content when no props present', () => {
     renderWithProviders(<ErrorAlert />)
     expect(
         screen.getByRole('heading', {
-            name: 'System error',
+            name: /System error/,
         })
     ).toBeInTheDocument()
     expect(
@@ -17,8 +17,9 @@ test('renders default content when no props present', () => {
 
 test('renders custom heading', () => {
     renderWithProviders(<ErrorAlert heading="Cool error" />)
-    const testText = 'Cool error'
-    expect(screen.getByRole('heading', { name: testText })).toBeInTheDocument()
+    expect(
+        screen.getByRole('heading', { name: /Cool error/ })
+    ).toBeInTheDocument()
     expect(
         screen.getByText(/We're having trouble loading this page/)
     ).toBeInTheDocument()

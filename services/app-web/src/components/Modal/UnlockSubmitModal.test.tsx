@@ -9,7 +9,7 @@ import {
     unlockHealthPlanPackageMockError,
 } from '@mc-review/mocks'
 import { UnlockSubmitModal } from './UnlockSubmitModal'
-import { renderWithProviders } from '../../testHelpers/jestHelpers'
+import { renderWithProviders } from '../../testHelpers'
 import { Location } from 'react-router-dom'
 import {
     submitContractMockError,
@@ -188,10 +188,11 @@ describe('UnlockSubmitModal', () => {
             expect(
                 await screen.findByText('Error attempting to submit.')
             ).toBeInTheDocument()
-            const errorHeading = screen.queryByRole('heading', {
-                name: 'Submission error',
-            })
-            expect(errorHeading).toBeInTheDocument()
+            expect(
+                screen.queryByRole('heading', {
+                    name: /Submission error/,
+                })
+            ).toBeInTheDocument()
             await waitFor(() =>
                 expect(mockSetIsSubmitting).toHaveBeenCalledTimes(2)
             )
@@ -376,14 +377,14 @@ describe('UnlockSubmitModal', () => {
             )
 
             await waitFor(() => {
-                const errorHeading = screen.queryByRole('heading', {
-                    name: 'Unlock error',
-                })
-                const errorMessage = screen.queryByText(
-                    'Error attempting to unlock.'
-                )
-                expect(errorHeading).toBeInTheDocument()
-                expect(errorMessage).toBeInTheDocument()
+                expect(
+                    screen.queryByRole('heading', {
+                        name: /Unlock error/,
+                    })
+                ).toBeInTheDocument()
+                expect(
+                    screen.queryByText('Error attempting to unlock.')
+                ).toBeInTheDocument()
             })
         })
         it('does not display modal alert banner error if unlock succeeds, but fails sending emails', async () => {
@@ -425,14 +426,14 @@ describe('UnlockSubmitModal', () => {
             )
 
             await waitFor(() => {
-                const errorHeading = screen.queryByRole('heading', {
-                    name: 'Unlock error',
-                })
-                const errorMessage = screen.queryByText(
-                    'Error attempting to unlock.'
-                )
-                expect(errorHeading).not.toBeInTheDocument()
-                expect(errorMessage).not.toBeInTheDocument()
+                expect(
+                    screen.queryByRole('heading', {
+                        name: /Unlock error/,
+                    })
+                ).not.toBeInTheDocument()
+                expect(
+                    screen.queryByText('Error attempting to unlock.')
+                ).not.toBeInTheDocument()
             })
 
             await waitFor(() => expect(dialog).toHaveClass('is-hidden'))
@@ -572,11 +573,11 @@ describe('UnlockSubmitModal', () => {
             )
 
             await waitFor(() => {
-                const errorHeading = screen.queryByRole('heading', {
-                    name: 'Resubmission error',
-                })
-
-                expect(errorHeading).toBeInTheDocument()
+                expect(
+                    screen.queryByRole('heading', {
+                        name: /Resubmission error/,
+                    })
+                ).toBeInTheDocument()
             })
         })
 

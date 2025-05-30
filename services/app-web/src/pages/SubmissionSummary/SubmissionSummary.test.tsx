@@ -1323,37 +1323,33 @@ describe('SubmissionSummary', () => {
                         }
                     )
                     await waitFor(() => {
+                        // expect submission released to state link to not exist
                         expect(
-                            screen.getByTestId('submission-side-nav')
+                            screen.queryByRole('link', {
+                                name: 'Withdrawn submission',
+                            })
+                        ).toBeNull()
+
+                        // expect unlock button to be not on the page
+                        expect(
+                            screen.queryByRole('button', {
+                                name: 'Unlock submission',
+                            })
+                        ).not.toBeInTheDocument()
+
+                        expect(
+                            screen.queryByText(
+                                'No action can be taken on this submission in its current status.'
+                            )
+                        ).not.toBeInTheDocument()
+
+                        //Expect undo withdraw button to render
+                        expect(
+                            screen.queryByRole('button', {
+                                name: 'Undo submission withdraw',
+                            })
                         ).toBeInTheDocument()
                     })
-
-                    // expect submission released to state link to not exist
-                    expect(
-                        screen.queryByRole('link', {
-                            name: 'Withdrawn submission',
-                        })
-                    ).toBeNull()
-
-                    // expect unlock button to be not on the page
-                    expect(
-                        screen.queryByRole('button', {
-                            name: 'Unlock submission',
-                        })
-                    ).not.toBeInTheDocument()
-
-                    expect(
-                        screen.queryByText(
-                            'No action can be taken on this submission in its current status.'
-                        )
-                    ).not.toBeInTheDocument()
-
-                    //Expect undo withdraw button to render
-                    expect(
-                        screen.queryByRole('button', {
-                            name: 'Undo submission withdraw',
-                        })
-                    ).toBeInTheDocument()
                 })
             })
         }

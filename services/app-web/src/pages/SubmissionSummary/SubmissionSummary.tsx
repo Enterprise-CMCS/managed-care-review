@@ -193,8 +193,11 @@ export const SubmissionSummary = (): React.ReactElement => {
         isContractActionAndRateCertification &&
         rateRevisions.length === 0
 
-    const handleDocumentDownloadError = (error: boolean) =>
-        setDocumentError(error)
+    const handleDocumentDownloadError = (error: boolean) => {
+        if (!documentError) {
+            setDocumentError(error)
+        }
+    }
 
     const editOrAddMCCRSID = contract.mccrsID
         ? 'Edit MC-CRS number'

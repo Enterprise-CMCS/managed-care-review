@@ -1,10 +1,10 @@
-import { Alert } from '@trussworks/react-uswds'
 import React from 'react'
 import styles from '../Banner.module.scss'
 import { getUpdatedByDisplayName } from '@mc-review/helpers'
 import { formatBannerDate } from '@mc-review/dates'
 import { UpdatedBy } from '../../../gen/gqlClient'
 import { ExpandableText } from '../../ExpandableText'
+import { AccessibleAlertBanner } from '../AccessibleAlertBanner/AccessibleAlertBanner'
 
 export type WithdrawProps = {
     updatedBy: UpdatedBy | undefined
@@ -19,8 +19,8 @@ export const RateWithdrawBanner = ({
     reasonForWithdraw,
 }: WithdrawProps & React.HTMLAttributes<HTMLDivElement>) => {
     return (
-        <Alert
-            role="alert"
+        <AccessibleAlertBanner
+            role="status"
             type="success"
             heading="Status updated"
             headingLevel="h4"
@@ -45,6 +45,6 @@ export const RateWithdrawBanner = ({
                     {reasonForWithdraw}
                 </ExpandableText>
             </div>
-        </Alert>
+        </AccessibleAlertBanner>
     )
 }

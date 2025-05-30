@@ -144,7 +144,7 @@ describe('AppBody', () => {
                 },
             })
             expect(
-                await screen.findByRole('heading', { name: 'Site unavailable' })
+                await screen.findByRole('heading', { name: /Site unavailable/ })
             ).toBeInTheDocument()
             expect(
                 await screen.findByText(
