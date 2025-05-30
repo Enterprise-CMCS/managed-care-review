@@ -41,7 +41,7 @@ export const IncompleteSubmissionBanner = ({
             {...divProps}
         >
             <div className={styles.messageBodyText}>
-                <p className="usa-alert__text">{message}&nbsp;</p>
+                <p className="usa-alert__text">{message}</p>
             </div>
         </AccessibleAlertBanner>
     )
