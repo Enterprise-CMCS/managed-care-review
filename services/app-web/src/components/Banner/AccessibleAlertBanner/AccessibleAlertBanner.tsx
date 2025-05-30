@@ -1,6 +1,5 @@
 import React from 'react'
 import { Alert } from '@trussworks/react-uswds'
-import { useId } from 'react'
 
 type AccessibleAlertProps = React.ComponentProps<typeof Alert>
 
@@ -18,38 +17,21 @@ export const AccessibleAlertBanner = ({
     children,
     ...rest
 }: AccessibleAlertProps): React.ReactElement => {
-    const Heading = headingLevel
-    const headerID = useId()
-
-    // Using JAWS screen reader, the screen reader only span is being focused, this refocuses to the whole header instead
-    const headingRef = React.useRef<HTMLHeadingElement>(null)
-    const handleSpanFocus = () => {
-        if (headingRef.current) {
-            headingRef.current.focus()
-        }
-    }
+    const headingContent = (
+        <>
+            <span className="srOnly">{`${role}, `}</span>
+            {heading}
+        </>
+    )
 
     return (
         <Alert
             role={role}
+            heading={heading && headingContent}
             headingLevel={headingLevel}
             {...rest}
             aria-live={'polite'}
-            aria-label={role}
         >
-            {heading && (
-                <Heading
-                    ref={headingRef}
-                    id={headerID}
-                    className="usa-alert__heading"
-                >
-                    <span
-                        className="srOnly"
-                        onFocus={handleSpanFocus}
-                    >{`${role}, `}</span>
-                    {heading}
-                </Heading>
-            )}
             {children}
         </Alert>
     )
