@@ -348,7 +348,7 @@ describe('EditStateAssign', () => {
         await user.click(saveButton)
 
         expect(
-            await screen.findByRole('heading', { name: 'System error' })
+            await screen.findByRole('heading', { name: /System error/ })
         ).toBeInTheDocument()
     })
 })

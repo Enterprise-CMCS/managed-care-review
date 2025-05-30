@@ -27,11 +27,7 @@ export const AccessibleAlertBanner = ({
             {...rest}
         >
             {heading && (
-                <Heading
-                    id={headerID}
-                    className="usa-alert__heading"
-                    aria-describedby={`${headerID}-alert-context`}
-                >
+                <>
                     {/*Hidden element for the screen reader when navigating by headers, This will announce what this header is for.*/}
                     <span
                         tabIndex={-1}
@@ -39,10 +35,16 @@ export const AccessibleAlertBanner = ({
                         id={`${headerID}-alert-context`}
                         className="usa-sr-only"
                     >
-                        {role}
+                        {`${role}: ${heading}`}
                     </span>
-                    {heading}
-                </Heading>
+                    <Heading
+                        id={headerID}
+                        className="usa-alert__heading"
+                        aria-labelledby={`${headerID}-alert-context`}
+                    >
+                        {heading}
+                    </Heading>
+                </>
             )}
             {children}
         </Alert>
