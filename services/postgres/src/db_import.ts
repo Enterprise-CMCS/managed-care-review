@@ -1058,27 +1058,118 @@ async function processAllDocuments(prisma: PrismaClient): Promise<void> {
         }
     }
 
-    console.info('All document types processed successfully')
-}
+    // Process ContractQuestionDocument
+    // Note: Q&A documents don't have a sha256 field
+    console.info('Processing ContractQuestionDocument files...')
+    const contractQuestionDocuments =
+        await prisma.contractQuestionDocument.findMany()
+    console.info(
+        `Found ${contractQuestionDocuments.length} contract question documents`
+    )
 
-/**
- * Clean up the S3 export file after successful import
- */
-async function cleanupS3Export(s3Key: string): Promise<void> {
-    try {
-        console.info(`Cleaning up S3 export file: s3://${S3_BUCKET}/${s3Key}`)
-
-        await s3Client.send(
-            new DeleteObjectCommand({
-                Bucket: S3_BUCKET,
-                Key: s3Key,
-            })
-        )
-
-        console.info(`Successfully deleted S3 export file: ${s3Key}`)
-    } catch (error) {
-        // Log the error but don't fail the whole import process
-        console.error(`Failed to delete S3 export file ${s3Key}:`, error)
-        console.info('Import completed successfully despite cleanup failure')
+    for (const doc of contractQuestionDocuments) {
+        try {
+            const { replaced } = await replaceDocument(
+                doc.id,
+                doc.s3URL,
+                doc.name
+            )
+            if (replaced) {
+                // No SHA256 update needed for question documents
+                console.info(
+                    `Replaced contract question document ${doc.id} (${doc.name})`
+                )
+            }
+        } catch (error) {
+            console.error(
+                `Error processing contract question document ${doc.id}:`,
+                error
+            )
+        }
     }
+
+    // Process ContractQuestionResponseDocument
+    console.info('Processing ContractQuestionResponseDocument files...')
+    const contractQuestionResponseDocuments =
+        await prisma.contractQuestionResponseDocument.findMany()
+    console.info(
+        `Found ${contractQuestionResponseDocuments.length} contract question response documents`
+    )
+
+    for (const doc of contractQuestionResponseDocuments) {
+        try {
+            const { replaced } = await replaceDocument(
+                doc.id,
+                doc.s3URL,
+                doc.name
+            )
+            if (replaced) {
+                console.info(
+                    `Replaced contract question response document ${doc.id} (${doc.name})`
+                )
+            }
+        } catch (error) {
+            console.error(
+                `Error processing contract question response document ${doc.id}:`,
+                error
+            )
+        }
+    }
+
+    // Process RateQuestionDocument
+    console.info('Processing RateQuestionDocument files...')
+    const rateQuestionDocuments = await prisma.rateQuestionDocument.findMany()
+    console.info(
+        `Found ${rateQuestionDocuments.length} rate question documents`
+    )
+
+    for (const doc of rateQuestionDocuments) {
+        try {
+            const { replaced } = await replaceDocument(
+                doc.id,
+                doc.s3URL,
+                doc.name
+            )
+            if (replaced) {
+                console.info(
+                    `Replaced rate question document ${doc.id} (${doc.name})`
+                )
+            }
+        } catch (error) {
+            console.error(
+                `Error processing rate question document ${doc.id}:`,
+                error
+            )
+        }
+    }
+
+    // Process RateQuestionResponseDocument
+    console.info('Processing RateQuestionResponseDocument files...')
+    const rateQuestionResponseDocuments =
+        await prisma.rateQuestionResponseDocument.findMany()
+    console.info(
+        `Found ${rateQuestionResponseDocuments.length} rate question response documents`
+    )
+
+    for (const doc of rateQuestionResponseDocuments) {
+        try {
+            const { replaced } = await replaceDocument(
+                doc.id,
+                doc.s3URL,
+                doc.name
+            )
+            if (replaced) {
+                console.info(
+                    `Replaced rate question response document ${doc.id} (${doc.name})`
+                )
+            }
+        } catch (error) {
+            console.error(
+                `Error processing rate question response document ${doc.id}:`,
+                error
+            )
+        }
+    }
+
+    console.info('All document types processed successfully')
 }
