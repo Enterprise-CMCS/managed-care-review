@@ -1,14 +1,16 @@
 import { Alert } from '@trussworks/react-uswds'
 import { useId } from 'react'
 
-type AccessibleAlertProps = React.ComponentProps<typeof Alert>
+type AccessibleAlertProps = React.ComponentProps<typeof Alert> & {
+    role?: 'status' | 'alert'
+}
 
 /**
- * Accessible wrapper for the React-USWDS Alert component that automatically manages
- * aria-labelledby relationships between the alert and its heading.
+ * Accessible wrapper for the React-USWDS Alert component that adds in a screen reader
+ * only text of the element's role, prepended to the header text.
  *
- * Use this instead of the base Alert component when you need accessible
- * heading associations for colorblind users.
+ * Use this instead of the base Alert component when the heading needs more context on the
+ * type of alert being shown.
  */
 export const AccessibleAlertBanner = ({
     heading,
@@ -23,13 +25,14 @@ export const AccessibleAlertBanner = ({
         <Alert
             role={role}
             headingLevel={headingLevel}
-            aria-labelledby={heading ? headerID : undefined}
             {...rest}
+            aria-live={'polite'}
+            aria-label={role}
         >
             {heading && (
                 <Heading id={headerID} className="usa-alert__heading">
-                    {/*Hidden element for the screen reader when navigating by headers, This will announce what this header is for.*/}
-                    <span className="usa-sr-only">{`${role}, `}</span>
+                    {/*/!*Hidden element for the screen reader when navigating by headers, This will announce what this header is for.*!/*/}
+                    <span className="srOnly">{`${role}, `}</span>
                     {heading}
                 </Heading>
             )}
