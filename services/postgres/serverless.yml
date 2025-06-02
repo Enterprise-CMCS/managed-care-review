@@ -132,6 +132,16 @@ custom:
     hooks:
       before:package:createDeploymentArtifacts: pnpm build
       before:deploy:finalize: node scripts/uploadScripts.js ${self:custom.stage}
+  exportRole:
+    prod: !GetAtt ProdExportLambdaRole.Arn
+    other: !GetAtt IamRoleLambdaExecution.Arn
+  exportBucket:
+    val: !Ref DataExportBucket
+    prod: !Ref DataExportBucket
+    other: 'postgres-${sls:stage}-dummy-export'
+  importBucket:
+    val: !Ref DataExportBucket
+    other: 'postgres-${sls:stage}-dummy-import'
 
 package:
   individually: true
@@ -156,7 +166,6 @@ functions:
     environment:
       SECRETS_MANAGER_ENDPOINT: !Sub 'https://secretsmanager.${AWS::Region}.amazonaws.com'
   dbExport:
-    condition: IsProd
     handler: src/db_export.handler
     description: Exports data from the Postgres Aurora database
     timeout: 300
@@ -164,16 +173,15 @@ functions:
     vpc:
       securityGroupIds: ${self:custom.sgId}
       subnetIds: ${self:custom.privateSubnets}
-    role: !GetAtt ProdExportLambdaRole.Arn
+    role: ${self:custom.exportRole.${opt:stage}, self:custom.exportRole.other}
     environment:
-      S3_BUCKET: !Ref DataExportBucket
+      S3_BUCKET: ${self:custom.exportBucket.${opt:stage}, self:custom.exportBucket.other}
       DB_SECRET_ARN: !Ref PostgresSecret
       VAL_ROLE_ARN: !Sub 'arn:aws:iam::${self:custom.valAWSAccountID}:role/${self:service}-cross-account-upload-val'
       SECRETS_MANAGER_ENDPOINT: !Sub 'https://secretsmanager.${AWS::Region}.amazonaws.com'
     layers:
       - !Ref PgToolsLambdaLayer
   dbImport:
-    condition: IsVal
     handler: src/db_import.handler
     description: Imports data from S3 into Postgres Aurora database and replaces documents with placeholders
     timeout: 600
@@ -182,7 +190,7 @@ functions:
       securityGroupIds: ${self:custom.sgId}
       subnetIds: ${self:custom.privateSubnets}
     environment:
-      S3_BUCKET: !Ref DataExportBucket
+      S3_BUCKET: ${self:custom.importBucket.${opt:stage}, self:custom.importBucket.other}
       DOCS_S3_BUCKET: ${self:custom.documentUploadsBucketName}
       DB_SECRET_ARN: !Ref PostgresSecret
       SECRETS_MANAGER_ENDPOINT: !Sub 'https://secretsmanager.${AWS::Region}.amazonaws.com'
