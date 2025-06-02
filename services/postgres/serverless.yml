@@ -543,7 +543,7 @@ resources:
                     - !Sub 'arn:aws:iam::${self:custom.valAWSAccountID}:role/${self:service}-cross-account-upload-val'
                 - Effect: Allow
                   Action:
-                    - secretsmanager:GetSecretValue
+                    - secretsmanager:GetSecretValue #pragma: allowlist secret
                   Resource:
                     - !Ref PostgresSecret
                 - Effect: Allow
