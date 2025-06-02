@@ -1,7 +1,24 @@
 const fse = require('fs-extra');
 
 module.exports = () => {
-    const stage = serverless.service.provider.stage;
+    // Parse stage from command line arguments
+    const stageArg = process.argv.find((arg) => arg.startsWith('--stage'));
+    let stage;
+
+    if (stageArg) {
+        if (stageArg.includes('=')) {
+            stage = stageArg.split('=')[1];
+        } else {
+            const stageIndex = process.argv.indexOf(stageArg);
+            stage = process.argv[stageIndex + 1];
+        }
+    }
+
+    if (!stage) {
+        throw new Error(
+            'Stage not found in command line arguments. Please specify --stage'
+        );
+    }
 
     // Base entry points that always exist
     let entryPoints = ['src/rotator.ts', 'src/logicalDatabaseManager.ts'];
@@ -13,6 +30,9 @@ module.exports = () => {
     if (stage === 'val') {
         entryPoints.push('src/db_import.ts');
     }
+
+    console.log(`Building for stage: ${stage}, entry points:`, entryPoints);
+
     return {
         packager: 'pnpm',
         bundle: true,
