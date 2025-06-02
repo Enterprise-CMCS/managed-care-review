@@ -59,6 +59,29 @@ provider:
             - ec2:DeleteNetworkInterface
             - ec2:DescribeNetworkInterfaces
           Resource: '*'
+        - Effect: Allow
+          Action:
+            - s3:PutObject
+            - s3:PutObjectAcl
+            - 's3:GetObject'
+            - 's3:ListObjects'
+            - 's3:ListObjectsV2'
+            - 's3:DeleteObject'
+          Resource:
+            - !Sub 'arn:aws:s3:::${self:service}-${sls:stage}-data-export/*'
+        - Effect: 'Allow'
+          Action:
+            - 's3:GetObject'
+            - 's3:PutObject'
+            - 's3:ListObjects'
+            - 's3:ListObjectsV2'
+          Resource:
+            - !Sub 'arn:aws:s3:::${self:custom.documentUploadsBucketName}/*'
+        - Effect: Allow
+          Action:
+            - 's3:ListBucket'
+          Resource:
+            - !Sub 'arn:aws:s3:::${self:service}-${sls:stage}-data-export'
 
 custom:
   stage: ${opt:stage, self:provider.stage}
@@ -72,11 +95,18 @@ custom:
   publicSubnetA: ${env:SUBNET_PUBLIC_A_ID}
   iamPermissionsBoundary: ${env:IAM_PERMISSIONS_BOUNDARY}
   iamPath: ${env:IAM_PATH}
+  valAWSAccountID: ${env:CF_CONFIG_IGNORED_LOCALLY, env:VAL_AWS_ACCOUNT_ID}
+  prodAWSAccountID: ${env:CF_CONFIG_IGNORED_LOCALLY, env:PROD_AWS_ACCOUNT_ID}
+  crossAccountRoleArn:
+    prod: !Sub 'arn:aws:iam::${self:custom.valAWSAccountID}:role/${self:service}-cross-account-upload-val'
+    mttestexport: !Sub 'arn:aws:iam::${self:custom.valAWSAccountID}:role/${self:service}-cross-account-upload-val'
+    other: !Sub 'arn:aws:iam::${AWS::AccountId}:role/fallback-role-${self:service}'
   rotatorArn: !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${self:service}-${sls:stage}-rotator'
   dbManagerArn: !Sub 'arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:aurora_${self:service}_*' # pragma: allowlist secret
   auroraArn: ${env:CF_CONFIG_IGNORED_LOCALLY, env:AURORA_ARN}
   dbSecretsArn: ${env:CF_CONFIG_IGNORED_LOCALLY, env:DB_SM_ARN}
   slackWebhookUrl: ${env:SLACK_WEBHOOK}
+  documentUploadsBucketName: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:uploads-${sls:stage}.DocumentUploadsBucketName}
   serverlessTerminationProtection:
     stages:
       - dev
@@ -125,6 +155,49 @@ functions:
       subnetIds: ${self:custom.privateSubnets}
     environment:
       SECRETS_MANAGER_ENDPOINT: !Sub 'https://secretsmanager.${AWS::Region}.amazonaws.com'
+  dbExport:
+    condition: IsProd
+    handler: src/db_export.handler
+    description: Exports data from the Postgres Aurora database
+    timeout: 300
+    memorySize: 4096
+    vpc:
+      securityGroupIds: ${self:custom.sgId}
+      subnetIds: ${self:custom.privateSubnets}
+    role: !GetAtt ProdExportLambdaRole.Arn
+    environment:
+      S3_BUCKET: !Ref DataExportBucket
+      DB_SECRET_ARN: !Ref PostgresSecret
+      VAL_ROLE_ARN: !Sub 'arn:aws:iam::${self:custom.valAWSAccountID}:role/${self:service}-cross-account-upload-val'
+      SECRETS_MANAGER_ENDPOINT: !Sub 'https://secretsmanager.${AWS::Region}.amazonaws.com'
+    layers:
+      - !Ref PgToolsLambdaLayer
+  dbImport:
+    condition: IsVal
+    handler: src/db_import.handler
+    description: Imports data from S3 into Postgres Aurora database and replaces documents with placeholders
+    timeout: 600
+    memorySize: 4096
+    vpc:
+      securityGroupIds: ${self:custom.sgId}
+      subnetIds: ${self:custom.privateSubnets}
+    environment:
+      S3_BUCKET: !Ref DataExportBucket
+      DOCS_S3_BUCKET: ${self:custom.documentUploadsBucketName}
+      DB_SECRET_ARN: !Ref PostgresSecret
+      SECRETS_MANAGER_ENDPOINT: !Sub 'https://secretsmanager.${AWS::Region}.amazonaws.com'
+    layers:
+      - !Ref PgToolsLambdaLayer
+      - !Ref PrismaClientEngineLambdaLayer
+      - !Ref PrismaClientMigrationLambdaLayer
+
+layers:
+  PgTools:
+    path: lambda-layers-postgres-tools
+  prismaClientEngine:
+    path: lambda-layers-prisma-client-engine
+  prismaClientMigration:
+    path: lambda-layers-prisma-client-migration
 
 resources:
   Conditions:
@@ -133,10 +206,16 @@ resources:
       - !Equals ['${sls:stage}', 'val']
       - !Equals ['${sls:stage}', 'prod']
     IsReviewEnvironment: !Not [!Condition IsDevValProd]
+    IsVal: !Or
+      - !Equals ['${sls:stage}', 'val']
+      - !Equals ['${sls:stage}', 'mttestexport']
+    IsProd: !Or
+      - !Equals ['${sls:stage}', 'prod']
+      - !Equals ['${sls:stage}', 'mttestexport']
     IsValOrProd: !Or
       - !Equals ['${sls:stage}', 'val']
       - !Equals ['${sls:stage}', 'prod']
-      - !Equals ['${sls:stage}', 'mtvalprodinfra']
+      - !Equals ['${sls:stage}', 'mttestexport']
 
   Resources:
     # VPC endpoint for rotation lambda
@@ -431,6 +510,44 @@ resources:
               NoncurrentVersionExpiration:
                 NoncurrentDays: 30
 
+    ProdExportLambdaRole:
+      Type: AWS::IAM::Role
+      Condition: IsProd
+      Properties:
+        Path: ${self:custom.iamPath}
+        PermissionsBoundary: ${self:custom.iamPermissionsBoundary}
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service: lambda.amazonaws.com
+              Action: sts:AssumeRole
+        ManagedPolicyArns:
+          - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+          - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+        Policies:
+          - PolicyName: 'ProdExportPermissions'
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - sts:AssumeRole
+                  Resource:
+                    - !Sub 'arn:aws:iam::${self:custom.valAWSAccountID}:role/${self:service}-cross-account-upload-val'
+                - Effect: Allow
+                  Action:
+                    - secretsmanager:GetSecretValue
+                  Resource:
+                    - !Ref PostgresSecret
+                - Effect: Allow
+                  Action:
+                    - s3:PutObject
+                    - s3:PutObjectAcl
+                  Resource:
+                    - !Sub 'arn:aws:s3:::${self:service}-${sls:stage}-data-export/*'
+
     DataExportBucketPolicy:
       Type: AWS::S3::BucketPolicy
       Condition: IsValOrProd
@@ -449,6 +566,42 @@ resources:
               Condition:
                 Bool:
                   aws:SecureTransport: false
+            - !If
+              - IsVal
+              - Sid: AllowCrossAccountAccess
+                Effect: Allow
+                Principal:
+                  AWS: !GetAtt CrossAccountUploadRole.Arn
+                Action:
+                  - s3:PutObject
+                  - s3:PutObjectAcl
+                Resource:
+                  - !Sub '${DataExportBucket.Arn}/*'
+              - !Ref AWS::NoValue
+
+    CrossAccountUploadRole:
+      Type: AWS::IAM::Role
+      Condition: IsVal
+      Properties:
+        RoleName: !Sub '${self:service}-cross-account-upload-val'
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Principal:
+                AWS: !Sub 'arn:aws:iam::${self:custom.prodAWSAccountID}:root'
+              Action: sts:AssumeRole
+        Policies:
+          - PolicyName: 'S3Upload'
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - s3:PutObject
+                    - s3:PutObjectAcl
+                  Resource:
+                    - !Sub '${DataExportBucket.Arn}/*'
 
   Outputs:
     PostgresAuroraV2Arn:

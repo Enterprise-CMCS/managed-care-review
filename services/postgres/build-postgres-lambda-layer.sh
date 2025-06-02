@@ -1,31 +1,60 @@
 #!/bin/bash
+# PostgreSQL tools Lambda layer build script for Amazon Linux 2023
 
-function preparePostgresToolsLayer() {
-    echo "Cleaning up workspace ..."
-    rm -rf lambda-layer-postgres-tools
+# Clean workspace
+rm -rf lambda-layers-postgres-tools
+mkdir -p lambda-layers-postgres-tools
 
-    echo "Creating postgres tools layer directory ..."
-    mkdir -p lambda-layer-postgres-tools/bin
+# Run build in Amazon Linux 2023 container
+docker run --rm \
+  -v "$(pwd)/lambda-layers-postgres-tools:/output" \
+  amazonlinux:2023 bash -c '
+    # Update and install packages
+    dnf update -y
+    dnf install -y postgresql16 tar gzip
 
-    echo "Installing PostgreSQL client tools ..."
-    sudo apt-get update
-    sudo apt-get install -y postgresql-client
+    # Create layer directories
+    mkdir -p /output/bin /output/lib
 
-    # Copy binaries to the layer
-    cp "$(which pg_dump)" lambda-layer-postgres-tools/bin/
-    cp "$(which pg_restore)" lambda-layer-postgres-tools/bin/
-    cp "$(which psql)" lambda-layer-postgres-tools/bin/
-    cp "$(which pg_basebackup)" lambda-layer-postgres-tools/bin/ 2>/dev/null || true
+    # Copy PostgreSQL binaries
+    cp /usr/bin/pg_dump /output/bin/
+    cp /usr/bin/pg_restore /output/bin/
+    cp /usr/bin/psql /output/bin/
 
-    # Check if binaries were copied
+    # Function to copy library dependencies
+    copy_lib_deps() {
+      local binary="$1"
+      ldd "$binary" | grep "=> /" | awk "{print \$3}" | sort | uniq | while read -r lib; do
+        if [ -f "$lib" ]; then
+          cp "$lib" "/output/lib/$(basename "$lib")"
+        fi
+      done
+    }
+
+    # Copy library dependencies for each binary
+    for bin in /output/bin/*; do
+      if [ -f "$bin" ]; then
+        copy_lib_deps "$bin"
+      fi
+    done
+
+    # Copy additional PostgreSQL libraries
+    for lib in /usr/lib64/libpq*.so*; do
+      if [ -f "$lib" ]; then
+        cp "$lib" "/output/lib/$(basename "$lib")"
+      fi
+    done
+
+    # Verify copied files and version
     echo "Copied binaries:"
-    ls -l lambda-layer-postgres-tools/bin/
+    ls -l /output/bin
+    /output/bin/pg_dump --version
+    /output/bin/pg_restore --version
+  '
 
-    echo "Compressing postgres tools layer..."
-    pushd lambda-layer-postgres-tools && tar -zcf /tmp/bin.tar.gz . && mv /tmp/bin.tar.gz ./bin.tar.gz
-    rm -rf bin
-    ls -lh bin.tar.gz
-    popd || exit
-}
-
-preparePostgresToolsLayer
+# Create the final layer archive
+cd lambda-layers-postgres-tools || exit
+tar -zcf ../postgres-tools-layer.tar.gz .
+cd ..
+echo "Done! Lambda layer created: postgres-tools-layer.tar.gz"
+ls -lh postgres-tools-layer.tar.gz
