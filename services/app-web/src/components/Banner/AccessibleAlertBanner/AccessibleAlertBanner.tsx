@@ -30,7 +30,6 @@ export const AccessibleAlertBanner = ({
             heading={heading && headingContent}
             headingLevel={headingLevel}
             {...rest}
-            aria-live={'polite'}
         >
             {children}
         </Alert>
