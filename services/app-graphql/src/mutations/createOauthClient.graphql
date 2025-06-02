@@ -1,0 +1,13 @@
+mutation createOauthClient($input: CreateOauthClientInput!) {
+  createOauthClient(input: $input) {
+    oauthClient {
+      id
+      clientId
+      description
+      contactEmail
+      grants
+      createdAt
+      updatedAt
+    }
+  }
+} 

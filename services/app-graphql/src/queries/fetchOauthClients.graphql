@@ -1,0 +1,16 @@
+query fetchOauthClients($input: FetchOauthClientsInput) {
+  fetchOauthClients(input: $input) {
+    totalCount
+    edges {
+      node {
+        id
+        clientId
+        description
+        contactEmail
+        grants
+        createdAt
+        updatedAt
+      }
+    }
+  }
+} 
