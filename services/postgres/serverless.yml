@@ -206,10 +206,8 @@ resources:
       - !Equals ['${sls:stage}', 'val']
       - !Equals ['${sls:stage}', 'prod']
     IsReviewEnvironment: !Not [!Condition IsDevValProd]
-    IsVal: !Or
-      - !Equals ['${sls:stage}', 'val']
-    IsProd: !Or
-      - !Equals ['${sls:stage}', 'prod']
+    IsVal: !Equals ['${sls:stage}', 'val']
+    IsProd: !Equals ['${sls:stage}', 'prod']
     IsValOrProd: !Or
       - !Equals ['${sls:stage}', 'val']
       - !Equals ['${sls:stage}', 'prod']
