@@ -34,20 +34,55 @@ const app = express()
 app.use(cors({ origin: true, credentials: true }))
 app.use(express.json({ limit: '10mb' }))
 
+let serverlessExpressInstance: ReturnType<typeof createServer>
+
 // --- Apollo Server setup ---
 async function buildApolloServer() {
     // These env vars and config mirror your current handler
-    const stageName = process.env.stage || 'local'
-    const dbURL = process.env.DATABASE_URL || ''
-    const secretsManagerSecret = process.env.SECRETS_MANAGER_SECRET || ''
-    const applicationEndpoint = process.env.APPLICATION_ENDPOINT || ''
-    const emailerMode = process.env.EMAILER_MODE || 'LOCAL'
-    const parameterStoreMode = process.env.PARAMETER_STORE_MODE || 'LOCAL'
-    const ldSDKKey = process.env.LD_SDK_KEY || ''
-    if (!process.env.JWT_SECRET) {
-        throw new Error('JWT_SECRET environment variable is required but not set.')
-    }
+    const stageName = process.env.stage
+    const dbURL = process.env.DATABASE_URL
+    const secretsManagerSecret = process.env.SECRETS_MANAGER_SECRET
+    const applicationEndpoint = process.env.APPLICATION_ENDPOINT
+    const emailerMode = process.env.EMAILER_MODE
+    const parameterStoreMode = process.env.PARAMETER_STORE_MODE
+    const ldSDKKey = process.env.LD_SDK_KEY
     const jwtSecret = process.env.JWT_SECRET
+
+    // START Assert configuration is valid (mirroring apollo_gql.ts)
+    if (emailerMode !== 'LOCAL' && emailerMode !== 'SES')
+        throw new Error(
+            'Configuration Error: EMAILER_MODE is not valid. Current value: ' +
+                emailerMode
+        )
+
+    if (applicationEndpoint === undefined || applicationEndpoint === '')
+        throw new Error('Configuration Error: APPLICATION_ENDPOINT is required')
+
+    if (stageName === undefined)
+        throw new Error('Configuration Error: stage is required')
+
+    if (!dbURL) {
+        throw new Error('Init Error: DATABASE_URL is required to run app-api')
+    }
+
+    if (parameterStoreMode !== 'LOCAL' && parameterStoreMode !== 'AWS') {
+        throw new Error(
+            'Configuration Error: PARAMETER_STORE_MODE is not valid. Current value: ' +
+                parameterStoreMode
+        )
+    }
+    if (ldSDKKey === undefined || ldSDKKey === '') {
+        throw new Error(
+            'Configuration Error: LD_SDK_KEY is required to run app-api.'
+        )
+    }
+
+    if (jwtSecret === undefined || jwtSecret === '') {
+        throw new Error(
+            'Configuration Error: JWT_SECRET is required to run app-api.'
+        )
+    }
+    // END
 
     // Postgres
     const pgResult = await configurePostgres(dbURL, secretsManagerSecret)
@@ -128,17 +163,21 @@ async function buildApolloServer() {
 }
 
 // Start Apollo Server and mount middleware
-(async () => {
+const initializationPromise = (async () => {
     try {
-        await buildApolloServer();
+        await buildApolloServer()
+        serverlessExpressInstance = createServer(app)
     } catch (error) {
-        console.error('Error starting Apollo Server:', error);
-        process.exit(1); // Exit the process with a failure code
+        console.error('Error starting Apollo Server:', error)
+        process.exit(1) // Exit the process with a failure code
     }
-})();
+})()
 
 // Lambda handler for aws-serverless-express
-export const handler = async (event: APIGatewayProxyEvent, context: LambdaContext) => {
-    await initializationPromise; // Ensure initialization is complete
-    return proxy(serverlessExpressInstance, event, context);
-};
+export const handler = async (
+    event: APIGatewayProxyEvent,
+    context: LambdaContext
+) => {
+    await initializationPromise // Ensure initialization is complete
+    return proxy(serverlessExpressInstance, event, context)
+}
