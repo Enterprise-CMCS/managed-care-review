@@ -1,4 +1,5 @@
 const fse = require('fs-extra');
+const path = require('path');
 
 module.exports = () => {
     return {
@@ -6,7 +7,6 @@ module.exports = () => {
         bundle: true,
         exclude: ['aws-sdk', 'prisma', '@prisma/client'],
         sourcemap: true,
-        entryPoints: ['src/rotator.ts'],
         plugins: [
             {
                 name: 'copy-dummy-docs',
@@ -18,15 +18,40 @@ module.exports = () => {
                             console.error('Error making directory: ', err);
                         }
                     });
-
                     build.onEnd(async () => {
                         try {
+                            // Use a lock-like approach to prevent race conditions
+                            const lockFile = '.esbuild/.build/files/.copying';
+
+                            if (await fse.pathExists(lockFile)) {
+                                console.log(
+                                    'Another build is copying files, skipping...'
+                                );
+                                return;
+                            }
+
+                            await fse.writeFile(lockFile, 'copying');
+
+                            if (
+                                await fse.pathExists(
+                                    '.esbuild/.build/files/mock-m.csv'
+                                )
+                            ) {
+                                console.log(
+                                    'Files already copied, skipping...'
+                                );
+                                await fse.remove(lockFile);
+                                return;
+                            }
+
                             await fse.copy(
                                 './files/',
                                 '.esbuild/.build/files/',
                                 { overwrite: true }
                             );
                             console.log('Dummy files for replacements copied.');
+
+                            await fse.remove(lockFile);
                         } catch (err) {
                             console.error('Error copying dummy files:', err);
                         }
