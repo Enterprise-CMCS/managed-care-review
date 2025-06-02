@@ -1,5 +1,5 @@
 import { GridContainer, Link, ModalRef, Grid } from '@trussworks/react-uswds'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
 import { ContractDetailsSummarySection } from '../StateSubmission/ReviewSubmit/ContractDetailsSummarySection'
 import { ContactsSummarySection } from '../StateSubmission/ReviewSubmit/ContactsSummarySection'
@@ -78,6 +78,18 @@ export const SubmissionSummary = (): React.ReactElement => {
         featureFlags.UNDO_WITHDRAW_SUBMISSION.flag,
         featureFlags.UNDO_WITHDRAW_SUBMISSION.defaultValue
     )
+
+    const incompleteMessage = useMemo(() => {
+        if (isStateUser) {
+            return 'You must contact your CMS point of contact and request an unlock to complete the submission.'
+        }
+
+        if (hasCMSPermissions) {
+            return 'You must unlock the submission so the state can add a rate certification.'
+        }
+
+        return 'CMS must unlock the submission so the state can add a rate certification.'
+    }, [isStateUser, hasCMSPermissions])
 
     // API requests
     const { data, loading, error } = useFetchContractWithQuestionsQuery({
@@ -287,18 +299,6 @@ export const SubmissionSummary = (): React.ReactElement => {
         }
     }
 
-    const incompleteSubmissionMessage = () => {
-        if (isStateUser) {
-            return 'You must contact your CMS point of contact and request an unlock to complete the submission.'
-        }
-
-        if (hasCMSPermissions) {
-            return 'You must unlock the submission so the state can add a rate certification.'
-        }
-
-        return 'CMS must unlock the submission so the state can add a rate certification.'
-    }
-
     return (
         <div className={styles.background}>
             <GridContainer
@@ -306,9 +306,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                 className={styles.container}
             >
                 {showIncompleteRateError && (
-                    <IncompleteSubmissionBanner
-                        message={incompleteSubmissionMessage()}
-                    />
+                    <IncompleteSubmissionBanner message={incompleteMessage} />
                 )}
 
                 {documentError && (
