@@ -132,6 +132,14 @@ custom:
     hooks:
       before:package:createDeploymentArtifacts: pnpm build
       before:deploy:finalize: node scripts/uploadScripts.js ${self:custom.stage}
+  skipDbExport:
+    prod: false
+    mttestexport: false
+    other: true # Skip in all other stages
+  skipDbImport:
+    val: false
+    mttestexport: false
+    other: true # Skip in all other stages
 
 package:
   individually: true
@@ -158,6 +166,7 @@ functions:
   dbExport:
     condition: IsProd
     handler: src/db_export.handler
+    skipEsbuild: ${self:custom.skipDbExport.${opt:stage}, self:custom.skipDbExport.other}
     description: Exports data from the Postgres Aurora database
     timeout: 300
     memorySize: 4096
@@ -175,6 +184,7 @@ functions:
   dbImport:
     condition: IsVal
     handler: src/db_import.handler
+    skipEsbuild: ${self:custom.skipDbImport.${opt:stage}, self:custom.skipDbImport.other}
     description: Imports data from S3 into Postgres Aurora database and replaces documents with placeholders
     timeout: 600
     memorySize: 4096
