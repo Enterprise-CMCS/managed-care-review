@@ -29,15 +29,13 @@ export const DocumentWarningBanner = ({
             data-testid="warning-alert"
             className={classnames(className, 'usa-alert__text')}
         >
-            <div className={styles.bannerBodyText}>
-                <p className="usa-alert__text">
-                    <span>
-                        Some documents aren’t available right now. Refresh the
-                        page to try again. If you still see this message,&nbsp;
-                    </span>
-                    <ContactSupportLink />
-                </p>
-            </div>
+            <span className={styles.bannerBodyText}>
+                <span>
+                    Some documents aren’t available right now. Refresh the page
+                    to try again. If you still see this message,&nbsp;
+                </span>
+                <ContactSupportLink />
+            </span>
         </AccessibleAlertBanner>
     )
 }

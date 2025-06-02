@@ -27,7 +27,7 @@ export const AssignedStaffUpdateBanner = ({
             data-testid="assignedStaffUpdate"
             className={className}
         >
-            <div className={styles.bannerBodyText}>
+            <span className={styles.bannerBodyText}>
                 <span>
                     {' '}
                     The following changes have been made for {state} analysts:
@@ -44,7 +44,7 @@ export const AssignedStaffUpdateBanner = ({
                             </li>
                         ))}
                 </ul>
-            </div>
+            </span>
         </AccessibleAlertBanner>
     )
 }

@@ -1,4 +1,3 @@
-import styles from '../Banner.module.scss'
 import React, { useEffect } from 'react'
 import { useTealium } from '../../../hooks'
 import { extractText } from '../../TealiumLogging/tealiamLoggingHelpers'
@@ -43,7 +42,7 @@ const UserAccountWarningBanner = ({
             headingLevel="h4"
             heading={header}
         >
-            <div className={styles.bannerBodyText}>{message}</div>
+            {message}
         </AccessibleAlertBanner>
     )
 }

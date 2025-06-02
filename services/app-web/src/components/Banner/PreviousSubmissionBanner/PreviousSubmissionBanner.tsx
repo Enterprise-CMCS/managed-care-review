@@ -1,6 +1,5 @@
 import React from 'react'
 import { LinkWithLogging } from '../../TealiumLogging/Link'
-import styles from '../Banner.module.scss'
 import { AccessibleAlertBanner } from '../AccessibleAlertBanner/AccessibleAlertBanner'
 
 export type UnlockedProps = {
@@ -19,22 +18,18 @@ export const PreviousSubmissionBanner = ({
             data-testid="previousSubmissionBanner"
             validation
         >
-            <div className={styles.bannerBodyText}>
-                <p
-                    className="usa-alert__text"
-                    data-testid="previous-submission-banner"
+            <p
+                className="usa-alert__text"
+                data-testid="previous-submission-banner"
+            >
+                <span>This is a past version of this submission.&nbsp;</span>
+                <LinkWithLogging
+                    href={link}
+                    data-testid="currentSubmissionLink"
                 >
-                    <span>
-                        This is a past version of this submission.&nbsp;
-                    </span>
-                    <LinkWithLogging
-                        href={link}
-                        data-testid="currentSubmissionLink"
-                    >
-                        View most recent version of this submission
-                    </LinkWithLogging>
-                </p>
-            </div>
+                    View most recent version of this submission
+                </LinkWithLogging>
+            </p>
         </AccessibleAlertBanner>
     )
 }

@@ -1,4 +1,3 @@
-import styles from '../Banner.module.scss'
 import { AccessibleAlertBanner } from '../AccessibleAlertBanner/AccessibleAlertBanner'
 
 type SubmitType = 'question' | 'response'
@@ -25,9 +24,7 @@ const QuestionResponseSubmitBanner = ({
             headingLevel="h4"
             heading={heading}
         >
-            <div className={styles.bannerBodyText}>
-                <p>{message}</p>
-            </div>
+            <p>{message}</p>
         </AccessibleAlertBanner>
     )
 }

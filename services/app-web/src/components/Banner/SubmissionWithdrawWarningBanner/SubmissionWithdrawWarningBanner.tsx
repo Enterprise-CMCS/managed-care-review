@@ -22,11 +22,11 @@ export const SubmissionWithdrawWarningBanner = ({
             data-testid="withdrawSubmissionBanner"
             className={className}
         >
-            <div className={styles.bannerBodyText}>
-                <p className="usa-alert__text">
+            <span className={styles.bannerBodyText}>
+                <span>
                     Withdrawing this submission will not withdraw the following
                     rate(s) that are on multiple contract actions:
-                </p>
+                </span>
                 <ul>
                     {rates.map((rate: RatesToNotBeWithdrawn) => (
                         <li>
@@ -36,7 +36,7 @@ export const SubmissionWithdrawWarningBanner = ({
                         </li>
                     ))}
                 </ul>
-            </div>
+            </span>
         </AccessibleAlertBanner>
     )
 }
