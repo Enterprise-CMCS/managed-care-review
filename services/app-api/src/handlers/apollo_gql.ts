@@ -365,7 +365,10 @@ const gqlHandler: Handler = async (event, context, completion) => {
     const initializedHandler = await handlerPromise
 
     const response = await initializedHandler(event, context, completion)
-
+    const payloadSize = Buffer.from(event.body).length
+    if (payloadSize > 5.5 * 1024 * 1024) {
+        console.warn(`Large payload detected: ${payloadSize} bytes`)
+    }
     // Log response size metrics without modifying the response
     if (response && response.body) {
         const bodySize = Buffer.from(response.body).length
