@@ -23,8 +23,8 @@ export function fetchOauthClientsResolver(store: Store): QueryResolvers['fetchOa
       throw new ForbiddenError('user not authorized to fetch oauth clients')
     }
 
-    // TEMP: Use sharedTestPrismaClient directly
-    const prismaClient = await sharedTestPrismaClient()
+    // Use the injected store parameter to access the database client
+    const prismaClient = store.prisma
     let clients
     if (input && input.clientIds && input.clientIds.length > 0) {
       clients = await Promise.all(
