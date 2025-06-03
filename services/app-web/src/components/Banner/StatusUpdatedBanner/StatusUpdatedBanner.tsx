@@ -13,7 +13,7 @@ export const StatusUpdatedBanner = ({
             data-testid="statusUpdatedBanner"
             className={className}
         >
-            Submission status updated to "Submitted"
+            Submission status updated to "Submitted".
         </AccessibleAlertBanner>
     )
 }
