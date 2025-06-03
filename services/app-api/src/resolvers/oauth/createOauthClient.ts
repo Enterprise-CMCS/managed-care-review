@@ -28,9 +28,7 @@ export function createOauthClientResolver(store: Store): MutationResolvers['crea
     const clientSecret = uuidv4()
     const { description, contactEmail, grants } = input
 
-    // TEMP: Use sharedTestPrismaClient directly
-    const prismaClient = await sharedTestPrismaClient()
-    const result = await createOAuthClient(prismaClient, {
+    const result = await createOAuthClient(store, {
       clientId,
       clientSecret,
       description,
