@@ -8,6 +8,6 @@ test('renders status updated banner with no errors', () => {
     expect(screen.getByTestId('statusUpdatedBanner')).toBeInTheDocument()
     expect(screen.getByText('Status updated')).toBeInTheDocument()
     expect(
-        screen.getByText('Submission status updated to "Submitted"')
+        screen.getByText('Submission status updated to "Submitted".')
     ).toBeInTheDocument()
 })
