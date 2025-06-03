@@ -10,7 +10,7 @@ import OAuth2Server, {
 } from '@node-oauth/oauth2-server'
 import type { ExtendedPrismaClient } from '../postgres/prismaClient'
 import { verifyClientCredentials } from '../postgres/oauth/oauthClientStore'
-import { sign } from 'jsonwebtoken'
+import { newJWTLib } from '../jwt'
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
 
 const JWT_EXPIRATION_SECONDS = 3600 // 1 hour
@@ -18,11 +18,15 @@ const JWT_EXPIRATION_SECONDS = 3600 // 1 hour
 export class CustomOAuth2Server {
     private oauth2Server: InstanceType<typeof OAuth2Server>
     private prisma: ExtendedPrismaClient
-    private jwtSecret: string
+    private jwtLib: ReturnType<typeof newJWTLib>
 
     constructor(prisma: ExtendedPrismaClient, jwtSecret: string) {
         this.prisma = prisma
-        this.jwtSecret = jwtSecret
+        this.jwtLib = newJWTLib({
+            issuer: 'mcreview-oauth',
+            signingKey: Buffer.from(jwtSecret, 'hex'),
+            expirationDurationS: JWT_EXPIRATION_SECONDS,
+        })
         this.oauth2Server = new OAuth2Server({
             model: this,
         })
@@ -86,12 +90,8 @@ export class CustomOAuth2Server {
 
     // Helper method to generate JWT
     private generateJWT(clientId: string): string {
-        const payload = {
-            sub: clientId,
-            iat: Math.floor(Date.now() / 1000),
-            exp: Math.floor(Date.now() / 1000) + JWT_EXPIRATION_SECONDS,
-        }
-        return sign(payload, this.jwtSecret) // pragma: allowlist secret
+        const token = this.jwtLib.createOAuthJWT(clientId, 'client_credentials')
+        return token.key
     }
 
     // Main method to handle token requests
