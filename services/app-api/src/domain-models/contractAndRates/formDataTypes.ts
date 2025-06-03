@@ -14,6 +14,7 @@ import { statusSchema } from './statusType'
 import type { RawCreateParams, ZodTypeAny } from 'zod/lib/types'
 
 const documentSchema = z.object({
+    id: z.string(),
     name: z.string(),
     s3URL: z.string(),
     sha256: z.string(),

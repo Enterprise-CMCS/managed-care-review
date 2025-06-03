@@ -13,6 +13,7 @@ fragment rateRevisionFragment on RateRevision {
         rateType
         rateCapitationType
         rateDocuments {
+            id
             name
             s3URL
             sha256
@@ -20,6 +21,7 @@ fragment rateRevisionFragment on RateRevision {
             downloadURL
         }
         supportingDocuments {
+            id
             name
             s3URL
             sha256

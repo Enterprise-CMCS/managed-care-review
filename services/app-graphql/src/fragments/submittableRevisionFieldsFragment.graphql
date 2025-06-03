@@ -1,4 +1,4 @@
-fragment submittableRevisionsFieldsFragement on SubmittableRevision {
+fragment submittableRevisionsFieldsFragment on SubmittableRevision {
     ... on ContractRevision {
         id
         createdAt

@@ -78,6 +78,11 @@ const cache = new InMemoryCache({
                 },
             },
         },
+        // GenericDocument: {
+        //     keyFields: (doc, context) => {
+        //         console.log(doc)
+        //     }
+        // }
     },
 })
 const defaultOptions: DefaultOptions = {

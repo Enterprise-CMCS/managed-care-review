@@ -1375,6 +1375,7 @@ GenericDocument
 This document type should be used (or extended) everywhere we pass documents through GraphQL regardless of domain
 """
 type GenericDocument {
+    id: ID!
     "The user created name of the document"
     name: String!
     "The S3 URL of the document, generated on the FE currently in the FileUpload component"
@@ -1858,7 +1859,7 @@ type RateRevision {
     unlockInfo: UpdateInformation
     "Information on who, when, and why this revision was submitted."
     submitInfo: UpdateInformation
-    "The rate related form data that was inputed by the state"
+    "The rate related form data that was inputted by the state"
     formData: RateFormData!
 }
 
@@ -1913,7 +1914,7 @@ type Rate {
     """
     Synthesized field that represents if a rate's status or
     reviewStatus should take precedence
-    Options are DRAFT, SUBMITTED, RESUBMITTED UNLOCKED, UNDER_REVIEW, WITHDRAWN
+    Options are DRAFT, SUBMITTED, RESUBMITTED, UNLOCKED, WITHDRAWN
     """
     consolidatedStatus: ConsolidatedRateStatus!
     "The initial date this rate was submitted at. Is not changed by unlock or resubmission."

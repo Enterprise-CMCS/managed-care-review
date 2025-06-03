@@ -42,6 +42,7 @@ fragment contractRevisionFragment on ContractRevision {
         }
 
         supportingDocuments {
+            id
             name
             s3URL
             sha256
@@ -52,6 +53,7 @@ fragment contractRevisionFragment on ContractRevision {
         contractType
         contractExecutionStatus
         contractDocuments {
+            id
             name
             s3URL
             sha256
