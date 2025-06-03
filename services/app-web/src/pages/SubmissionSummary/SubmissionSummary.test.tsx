@@ -1569,7 +1569,7 @@ describe('SubmissionSummary', () => {
                     }
                 )
                 await waitFor(() => {
-                    expect(screen.queryByRole('alert')).toBeInTheDocument()
+                    expect(screen.queryByRole('status')).toBeInTheDocument()
                 })
                 await waitFor(() => {
                     expect(
