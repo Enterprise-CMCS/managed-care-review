@@ -1,6 +1,8 @@
 export { SubmissionUnlockedBanner } from './SubmissionUnlockedBanner/SubmissionUnlockedBanner'
 export { PreviousSubmissionBanner } from './PreviousSubmissionBanner/PreviousSubmissionBanner'
 export { SubmissionUpdatedBanner } from './SubmissionUpdatedBanner/SubmissionUpdatedBanner'
+export { SubmissionWithdrawnBanner } from './SubmissionWithdrawnBanner/SubmissionWithdrawnBanner'
+export { StatusUpdatedBanner } from './StatusUpdatedBanner/StatusUpdatedBanner'
 export { GenericApiErrorBanner } from './GenericApiErrorBanner/GenericApiErrorBanner'
 export { QuestionResponseSubmitBanner } from './QuestionResponseSubmitBanner'
 export { UserAccountWarningBanner } from './UserAccountWarningBanner/UserAccountWarningBanner'
