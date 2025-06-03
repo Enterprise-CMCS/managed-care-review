@@ -16,7 +16,7 @@ export const StatusUpdatedBanner = ({
         >
             <div className={styles.bannerBodyText}>
                 <p className="usa-alert__text">
-                    Submission status updated to "Submitted"
+                    Submission status updated to "Submitted".
                 </p>
             </div>
         </Alert>
