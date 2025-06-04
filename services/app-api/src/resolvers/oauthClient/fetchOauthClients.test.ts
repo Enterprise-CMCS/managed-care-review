@@ -1,6 +1,9 @@
 import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
 import { testAdminUser, testStateUser } from '../../testHelpers/userHelpers'
-import { FetchOauthClientsDocument } from '../../gen/gqlClient'
+import {
+    CreateOauthClientDocument,
+    FetchOauthClientsDocument,
+} from '../../gen/gqlClient'
 
 describe('fetchOauthClients', () => {
     it('fetches all OAuth clients as ADMIN', async () => {
@@ -9,7 +12,7 @@ describe('fetchOauthClients', () => {
         })
         // Create two clients
         await server.executeOperation({
-            query: FetchOauthClientsDocument, // Should be createOauthClient, but we just want to ensure fetch works
+            query: CreateOauthClientDocument,
             variables: {
                 input: {
                     description: 'Client 1',
