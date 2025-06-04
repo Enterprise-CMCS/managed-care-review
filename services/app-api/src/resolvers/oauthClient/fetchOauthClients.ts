@@ -12,8 +12,8 @@ export function fetchOauthClientsResolver(
             )
         }
         let oauthClients = []
+        // If input is omitted or empty, fetch all
         if (!input || !input.clientIds || input.clientIds.length === 0) {
-            // Fetch all
             const all = await store.listOAuthClients()
             if (all instanceof Error) throw all
             oauthClients = all

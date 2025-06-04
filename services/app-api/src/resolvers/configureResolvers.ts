@@ -91,7 +91,7 @@ export function configureResolvers(
             indexRatesStripped: indexRatesStripped(store),
             fetchRate: fetchRateResolver(store),
             fetchContract: fetchContractResolver(store),
-            fetchOauthClients: fetchOauthClientsResolver(store.prismaClient),
+            fetchOauthClients: fetchOauthClientsResolver(store),
         },
         Mutation: {
             createHealthPlanPackage: createHealthPlanPackageResolver(store),
@@ -139,7 +139,7 @@ export function configureResolvers(
             unlockRate: unlockRate(store),
             submitRate: submitRate(store, launchDarkly),
             updateEmailSettings: updateEmailSettings(store),
-            createOauthClient: createOauthClientResolver(store.prismaClient),
+            createOauthClient: createOauthClientResolver(store),
         },
         User: {
             // resolveType is required to differentiate Unions
