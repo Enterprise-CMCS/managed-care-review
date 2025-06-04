@@ -163,7 +163,25 @@ describe('undoWithdrawRate', () => {
         // Expect un-withdrawn rate formData to equal formData before it was withdrawn
         expect(
             unwithdrawnRate.packageSubmissions[0].rateRevision.formData
-        ).toEqual(formData)
+        ).toEqual({
+            ...formData,
+            rateDocuments: expect.arrayContaining(
+                formData.rateDocuments.map((doc) =>
+                    expect.objectContaining({
+                        ...doc,
+                        id: expect.any(String),
+                    })
+                )
+            ),
+            supportingDocuments: expect.arrayContaining(
+                formData.supportingDocuments.map((doc) =>
+                    expect.objectContaining({
+                        ...doc,
+                        id: expect.any(String),
+                    })
+                )
+            ),
+        })
         expect(unwithdrawnRate.withdrawnFromContracts).toHaveLength(0)
         expect(unwithdrawnRate.consolidatedStatus).toBe('RESUBMITTED')
         expect(unwithdrawnRate.parentContractID).toBe(contractA.id)
@@ -316,7 +334,25 @@ describe('undoWithdrawRate', () => {
         // Expect un-withdrawn rate formData to equal formData before it was withdrawn
         expect(
             unwithdrawnRate.packageSubmissions[0].rateRevision.formData
-        ).toEqual(formData)
+        ).toEqual({
+            ...formData,
+            rateDocuments: expect.arrayContaining(
+                formData.rateDocuments.map((doc) =>
+                    expect.objectContaining({
+                        ...doc,
+                        id: expect.any(String),
+                    })
+                )
+            ),
+            supportingDocuments: expect.arrayContaining(
+                formData.supportingDocuments.map((doc) =>
+                    expect.objectContaining({
+                        ...doc,
+                        id: expect.any(String),
+                    })
+                )
+            ),
+        })
         expect(unwithdrawnRate.withdrawnFromContracts).toHaveLength(0)
         expect(unwithdrawnRate.consolidatedStatus).toBe('RESUBMITTED')
         expect(unwithdrawnRate.parentContractID).toBe(contractA.id)
