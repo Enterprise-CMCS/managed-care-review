@@ -29,7 +29,6 @@ describe('fetchOauthClients', () => {
                 },
             },
         })
-
         const res = await server.executeOperation({
             query: FetchOauthClientsDocument,
         })
@@ -50,8 +49,8 @@ describe('fetchOauthClients', () => {
             variables: { input: {} },
         })
         expect(res.errors).toBeUndefined()
-        const edges = res.data?.fetchOauthClients.edges
-        expect(Array.isArray(edges)).toBe(true)
+        const oauthClients = res.data?.fetchOauthClients.oauthClients
+        expect(Array.isArray(oauthClients)).toBe(true)
     })
 
     it('fetches only specified clientIds', async () => {
