@@ -21,7 +21,7 @@ describe('fetchOauthClients', () => {
             },
         })
         await server.executeOperation({
-            query: FetchOauthClientsDocument, // Should be createOauthClient, but we just want to ensure fetch works
+            query: CreateOauthClientDocument,
             variables: {
                 input: {
                     description: 'Client 2',
@@ -45,7 +45,7 @@ describe('fetchOauthClients', () => {
         })
         // Create a client
         const createRes = await server.executeOperation({
-            query: FetchOauthClientsDocument, // Should be createOauthClient, but we just want to ensure fetch works
+            query: CreateOauthClientDocument,
             variables: {
                 input: {
                     description: 'Client 3',
