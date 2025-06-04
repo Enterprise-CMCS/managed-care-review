@@ -29,14 +29,29 @@ describe('fetchOauthClients', () => {
                 },
             },
         })
-        // Fetch all
+        // Fetch all (no input)
         const res = await server.executeOperation({
             query: FetchOauthClientsDocument,
         })
         expect(res.errors).toBeUndefined()
-        const oauthClients = res.data?.fetchOauthClients.oauthClients
-        expect(Array.isArray(oauthClients)).toBe(true)
-        expect(oauthClients.length).toBeGreaterThanOrEqual(2)
+        const edges = res.data?.fetchOauthClients.edges
+        expect(Array.isArray(edges)).toBe(true)
+        expect(edges.length).toBeGreaterThanOrEqual(2)
+        expect(typeof res.data?.fetchOauthClients.totalCount).toBe('number')
+    })
+
+    it('fetches all OAuth clients as ADMIN with empty input', async () => {
+        const server = await constructTestPostgresServer({
+            context: { user: testAdminUser() },
+        })
+        // Fetch all (empty input)
+        const res = await server.executeOperation({
+            query: FetchOauthClientsDocument,
+            variables: { input: {} },
+        })
+        expect(res.errors).toBeUndefined()
+        const edges = res.data?.fetchOauthClients.edges
+        expect(Array.isArray(edges)).toBe(true)
     })
 
     it('fetches only specified clientIds', async () => {
@@ -53,17 +68,16 @@ describe('fetchOauthClients', () => {
                 },
             },
         })
-        const clientId =
-            createRes.data?.fetchOauthClients.oauthClients[0]?.clientId
+        const clientId = createRes.data?.createOauthClient.oauthClient.clientId
         // Fetch by clientId
         const res = await server.executeOperation({
             query: FetchOauthClientsDocument,
             variables: { input: { clientIds: [clientId] } },
         })
         expect(res.errors).toBeUndefined()
-        const oauthClients = res.data?.fetchOauthClients.oauthClients
-        expect(oauthClients).toHaveLength(1)
-        expect(oauthClients[0].clientId).toBe(clientId)
+        const edges = res.data?.fetchOauthClients.edges
+        expect(edges).toHaveLength(1)
+        expect(edges[0].node.clientId).toBe(clientId)
     })
 
     it('errors if not ADMIN', async () => {
