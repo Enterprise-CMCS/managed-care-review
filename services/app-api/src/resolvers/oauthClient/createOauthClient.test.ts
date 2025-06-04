@@ -71,4 +71,39 @@ describe('createOauthClient', () => {
         })
         expect(res.errors?.[0].message).toMatch(/db fail/i)
     })
+
+    it('throws UserInputError if grants is missing', async () => {
+        const server = await constructTestPostgresServer({
+            context: { user: testAdminUser() },
+        })
+        const res = await server.executeOperation({
+            query: CreateOauthClientDocument,
+            variables: {
+                input: {
+                    description: 'No grants',
+                    contactEmail: 'no@grants.com',
+                    // grants is intentionally omitted
+                },
+            },
+        })
+        expect(res.errors).toBeDefined()
+        expect(res.errors?.[0].message).toMatch(/grants/)
+    })
+
+    it('creates an oauth client with required fields', async () => {
+        const server = await constructTestPostgresServer({
+            context: { user: testAdminUser() },
+        })
+        const res = await server.executeOperation({
+            query: CreateOauthClientDocument,
+            variables: {
+                input: {
+                    description: 'Test client',
+                    grants: ['client_credentials'],
+                },
+            },
+        })
+        expect(res.errors).toBeUndefined()
+        expect(res.data?.createOauthClient.oauthClient).toBeDefined()
+    })
 })

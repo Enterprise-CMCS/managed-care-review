@@ -29,15 +29,13 @@ describe('fetchOauthClients', () => {
                 },
             },
         })
-        // Fetch all (no input)
         const res = await server.executeOperation({
             query: FetchOauthClientsDocument,
         })
         expect(res.errors).toBeUndefined()
-        const edges = res.data?.fetchOauthClients.edges
-        expect(Array.isArray(edges)).toBe(true)
-        expect(edges.length).toBeGreaterThanOrEqual(2)
-        expect(typeof res.data?.fetchOauthClients.totalCount).toBe('number')
+        const oauthClients = res.data?.fetchOauthClients.oauthClients
+        expect(Array.isArray(oauthClients)).toBe(true)
+        expect(oauthClients.length).toBeGreaterThanOrEqual(2)
     })
 
     it('fetches all OAuth clients as ADMIN with empty input', async () => {
@@ -63,21 +61,36 @@ describe('fetchOauthClients', () => {
             query: CreateOauthClientDocument,
             variables: {
                 input: {
-                    description: 'Client 3',
+                    description: 'Specific client',
                     grants: ['client_credentials'],
                 },
             },
         })
+        expect(createRes.errors).toBeUndefined()
         const clientId = createRes.data?.createOauthClient.oauthClient.clientId
-        // Fetch by clientId
         const res = await server.executeOperation({
             query: FetchOauthClientsDocument,
             variables: { input: { clientIds: [clientId] } },
         })
         expect(res.errors).toBeUndefined()
-        const edges = res.data?.fetchOauthClients.edges
-        expect(edges).toHaveLength(1)
-        expect(edges[0].node.clientId).toBe(clientId)
+        const oauthClients = res.data?.fetchOauthClients.oauthClients
+        expect(Array.isArray(oauthClients)).toBe(true)
+        expect(oauthClients).toHaveLength(1)
+        expect(oauthClients[0].clientId).toBe(clientId)
+    })
+
+    it('returns empty array if no clients match', async () => {
+        const server = await constructTestPostgresServer({
+            context: { user: testAdminUser() },
+        })
+        const res = await server.executeOperation({
+            query: FetchOauthClientsDocument,
+            variables: { input: { clientIds: ['nonexistent'] } },
+        })
+        expect(res.errors).toBeUndefined()
+        const oauthClients = res.data?.fetchOauthClients.oauthClients
+        expect(Array.isArray(oauthClients)).toBe(true)
+        expect(oauthClients).toHaveLength(0)
     })
 
     it('errors if not ADMIN', async () => {

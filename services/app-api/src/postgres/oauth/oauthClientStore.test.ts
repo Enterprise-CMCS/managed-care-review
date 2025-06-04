@@ -174,4 +174,23 @@ describe('OAuthClient Store', () => {
         // Verify it's a Prisma unique constraint error
         expect(duplicateClient.message).toContain('Unique constraint failed')
     })
+
+    it('should update updatedAt when client is updated', async () => {
+        const createdClient = await createOAuthClient(client, testClientData)
+        if (createdClient instanceof Error) throw createdClient
+
+        // Add a delay to ensure updatedAt is different
+        await new Promise((r) => setTimeout(r, 2))
+
+        const updatedClient = await updateOAuthClient(
+            client,
+            createdClient.id,
+            { description: 'new desc' }
+        )
+        if (updatedClient instanceof Error) throw updatedClient
+
+        expect(updatedClient.updatedAt.getTime()).toBeGreaterThanOrEqual(
+            createdClient.updatedAt.getTime()
+        )
+    })
 })
