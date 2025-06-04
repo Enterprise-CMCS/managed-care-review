@@ -1,9 +1,8 @@
-import styles from '../Banner.module.scss'
-import { Alert } from '@trussworks/react-uswds'
 import React, { useEffect } from 'react'
 import { useTealium } from '../../../hooks'
 import { extractText } from '../../TealiumLogging/tealiamLoggingHelpers'
 import { ContactSupportLink } from '../../ErrorAlert/ContactSupportLink'
+import { AccessibleAlertBanner } from '../AccessibleAlertBanner/AccessibleAlertBanner'
 
 export type AccountWarningBannerProps = {
     header?: string
@@ -37,9 +36,14 @@ const UserAccountWarningBanner = ({
         })
     }, [logAlertImpressionEvent, message])
     return (
-        <Alert type="warning" headingLevel="h4" heading={header}>
-            <div className={styles.bannerBodyText}>{message}</div>
-        </Alert>
+        <AccessibleAlertBanner
+            role="alert"
+            type="warning"
+            headingLevel="h4"
+            heading={header}
+        >
+            {message}
+        </AccessibleAlertBanner>
     )
 }
 

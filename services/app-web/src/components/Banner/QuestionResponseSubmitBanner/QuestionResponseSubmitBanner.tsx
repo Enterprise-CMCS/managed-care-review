@@ -1,5 +1,4 @@
-import { Alert } from '@trussworks/react-uswds'
-import styles from '../Banner.module.scss'
+import { AccessibleAlertBanner } from '../AccessibleAlertBanner/AccessibleAlertBanner'
 
 type SubmitType = 'question' | 'response'
 export type QuestionResponseSubmitBannerProps = {
@@ -19,11 +18,14 @@ const QuestionResponseSubmitBanner = ({
         ? 'Your questions were sent to the state.'
         : 'Your response was submitted to CMS.'
     return (
-        <Alert type="success" headingLevel="h4" heading={heading}>
-            <div className={styles.bannerBodyText}>
-                <p>{message}</p>
-            </div>
-        </Alert>
+        <AccessibleAlertBanner
+            role="status"
+            type="success"
+            headingLevel="h4"
+            heading={heading}
+        >
+            <p>{message}</p>
+        </AccessibleAlertBanner>
     )
 }
 

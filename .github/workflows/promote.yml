@@ -139,6 +139,15 @@ jobs:
           name: lambda-layers-prisma-client-engine
           path: ./services/app-api/lambda-layers-prisma-client-engine
 
+      - name: Prepare postgres tools lambda layer
+        working-directory: services/postgres
+        run: ./build-postgres-lambda-layer.sh
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: lambda-layers-postgres-tools
+          path: ./services/postgres/lambda-layers-postgres-tools
+
   build-clamav-layer:
     name: build - clamav layer
     runs-on: ubuntu-24.04

@@ -12,8 +12,8 @@ export const ExpandableText = ({
 }: ExpandableTextProps &
     React.HTMLAttributes<HTMLParagraphElement>): React.ReactElement => {
     //We are using React.useRef because jest spyOn useRef only works like this.
-    const textRef = React.useRef<HTMLSpanElement>(null)
-    const [showMore, setShowMore] = useState<boolean>(false)
+    const textRef = React.useRef<HTMLParagraphElement>(null)
+    const [expanded, setExpanded] = useState<boolean>(false)
     const [showMoreButton, setShowMoreButton] = useState<boolean>(false)
 
     useLayoutEffect(() => {
@@ -32,31 +32,31 @@ export const ExpandableText = ({
     }, [clampedLines, setShowMoreButton])
 
     return (
-        <p className={styles.expandableBlock}>
-            <span
+        <div className={styles.expandableBlock} aria-live="off">
+            <p
                 ref={textRef}
                 data-testid="clampElement"
                 id="expandable-text"
-                aria-expanded={showMore}
+                aria-expanded={expanded}
                 className={`usa-alert__text ${
-                    showMore ? styles.textExpanded : styles.textContracted
+                    expanded ? styles.textExpanded : styles.textContracted
                 }`}
             >
                 {children}
-            </span>
+            </p>
             {showMoreButton && (
                 <ButtonWithLogging
-                    aria-hidden // hide from screenreaders, they will read all the content by default and users can choose to skip ahead
                     type="button"
                     unstyled
-                    tabIndex={-1}
                     parent_component_type="toggle"
                     className={`${styles.showMoreButton} usa-link`}
-                    onClick={() => setShowMore(!showMore)}
+                    onClick={() => setExpanded(!expanded)}
+                    aria-expanded={expanded}
+                    aria-controls="expandable-text"
                 >
-                    {showMore ? 'Show Less' : 'Show More'}
+                    {expanded ? 'Show Less' : 'Show More'}
                 </ButtonWithLogging>
             )}
-        </p>
+        </div>
     )
 }
