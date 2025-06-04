@@ -2553,7 +2553,7 @@ type OauthClient {
 input CreateOauthClientInput {
     description: String
     contactEmail: String
-    grants: [String!]!
+    grants: [String!]
 }
 
 type CreateOauthClientPayload {
