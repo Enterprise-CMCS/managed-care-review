@@ -102,6 +102,9 @@ import {
     type UndoWithdrawContractArgsType,
     type UndoWithdrawContractReturnType,
 } from './contractAndRates/undoWithdrawContract'
+import { createOAuthClient, listOAuthClients, getOAuthClientByClientId } from './oauth/oauthClientStore'
+import type { Prisma } from '@prisma/client'
+export type OAuthClientType = Prisma.OAuthClientGetPayload<Record<string, never>>
 
 type Store = {
     /** Settings functions **/
@@ -231,6 +234,16 @@ type Store = {
 
     /** Other **/
     findAllDocuments: () => Promise<AuditDocument[] | Error>
+
+    createOauthClient: (
+        data: {
+            description?: string
+            contactEmail?: string
+            grants?: string[]
+        }
+    ) => Promise<OAuthClientType | Error>
+    listOauthClients: () => Promise<OAuthClientType[] | Error>
+    getOAuthClientByClientId: (clientId: string) => Promise<OAuthClientType | null | Error>
 }
 
 function NewPostgresStore(client: ExtendedPrismaClient): Store {
@@ -327,6 +340,10 @@ function NewPostgresStore(client: ExtendedPrismaClient): Store {
 
         /** Other **/
         findAllDocuments: () => findAllDocuments(client),
+
+        createOauthClient: (data) => createOAuthClient(client, data),
+        listOauthClients: () => listOAuthClients(client),
+        getOAuthClientByClientId: (clientId) => getOAuthClientByClientId(client, clientId),
     }
 }
 

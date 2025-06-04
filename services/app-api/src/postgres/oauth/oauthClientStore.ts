@@ -1,5 +1,6 @@
 import type { ExtendedPrismaClient } from '../prismaClient'
 import type { Prisma } from '@prisma/client'
+import { v4 as uuidv4 } from 'uuid'
 
 type OAuthClientType = Prisma.OAuthClientGetPayload<Record<string, never>>
 
@@ -7,19 +8,20 @@ type OAuthClientType = Prisma.OAuthClientGetPayload<Record<string, never>>
 export async function createOAuthClient(
     client: ExtendedPrismaClient,
     data: {
-        clientId: string
-        clientSecret: string
-        grants: string[]
         description?: string
         contactEmail?: string
+        grants?: string[]
     }
 ): Promise<OAuthClientType | Error> {
     try {
+        const clientId = uuidv4()
+        const clientSecret = uuidv4()
+        const grants = data.grants ?? ['client_credentials']
         return await client.oAuthClient.create({
             data: {
-                clientId: data.clientId,
-                clientSecret: data.clientSecret,
-                grants: data.grants,
+                clientId,
+                clientSecret,
+                grants,
                 description: data.description,
                 contactEmail: data.contactEmail,
             },

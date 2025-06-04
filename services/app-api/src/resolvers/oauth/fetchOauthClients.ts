@@ -1,19 +1,12 @@
 import { ForbiddenError } from 'apollo-server-core'
 import { GraphQLError } from 'graphql'
 import { hasAdminPermissions } from '../../domain-models/user'
-import { getOAuthClientByClientId, listOAuthClients } from '../../postgres/oauth/oauthClientStore'
 import { setErrorAttributesOnActiveSpan, setResolverDetailsOnActiveSpan, setSuccessAttributesOnActiveSpan } from '../attributeHelper'
 import type { QueryResolvers } from '../../gen/gqlServer'
 import type { Store } from '../../postgres'
-import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
-// TODO: Replace 'any' with generated input/context types when available
 
 export function fetchOauthClientsResolver(store: Store): QueryResolvers['fetchOauthClients'] {
-  return async (
-    _parent: unknown,
-    { input }: any,
-    context: any
-  ) => {
+  return async (_parent, { input }, context) => {
     const { user, ctx, tracer } = context
     const span = tracer?.startSpan('fetchOauthClients', {}, ctx)
     setResolverDetailsOnActiveSpan('fetchOauthClients', user, span)
@@ -23,13 +16,11 @@ export function fetchOauthClientsResolver(store: Store): QueryResolvers['fetchOa
       throw new ForbiddenError('user not authorized to fetch oauth clients')
     }
 
-    // TEMP: Use sharedTestPrismaClient directly
-    const prismaClient = await sharedTestPrismaClient()
     let clients
     if (input && input.clientIds && input.clientIds.length > 0) {
-      clients = await Promise.all(
+      const foundClients = await Promise.all(
         input.clientIds.map(async (clientId: string) => {
-          const result = await getOAuthClientByClientId(prismaClient, clientId)
+          const result = await store.getOAuthClientByClientId(clientId)
           if (result instanceof Error) {
             setErrorAttributesOnActiveSpan(result.message, span)
             throw new GraphQLError('Failed to fetch OAuth client', {
@@ -42,22 +33,23 @@ export function fetchOauthClientsResolver(store: Store): QueryResolvers['fetchOa
           return result
         })
       )
-      clients = clients.filter((c) => c !== null)
+      clients = foundClients.filter((c) => c !== null)
     } else {
-      clients = await listOAuthClients(prismaClient)
-      if (clients instanceof Error) {
-        setErrorAttributesOnActiveSpan(clients.message, span)
+      const allClients = await store.listOauthClients()
+      if (allClients instanceof Error) {
+        setErrorAttributesOnActiveSpan(allClients.message, span)
         throw new GraphQLError('Failed to fetch OAuth clients', {
           extensions: {
             code: 'INTERNAL_SERVER_ERROR',
-            cause: clients.message,
+            cause: allClients.message,
           },
         })
       }
+      clients = allClients
     }
 
     setSuccessAttributesOnActiveSpan(span)
-    const edges = clients.map((client: any) => ({ node: client }))
+    const edges = clients.map((client) => ({ node: client }))
     return { totalCount: edges.length, edges }
   }
 } 
