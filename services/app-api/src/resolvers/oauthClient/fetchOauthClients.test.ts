@@ -33,10 +33,9 @@ describe('fetchOauthClients', () => {
             query: FetchOauthClientsDocument,
         })
         expect(res.errors).toBeUndefined()
-        const edges = res.data?.fetchOauthClients.edges
-        expect(Array.isArray(edges)).toBe(true)
-        expect(edges.length).toBeGreaterThanOrEqual(2)
-        expect(typeof res.data?.fetchOauthClients.totalCount).toBe('number')
+        const oauthClients = res.data?.fetchOauthClients.oauthClients
+        expect(Array.isArray(oauthClients)).toBe(true)
+        expect(oauthClients.length).toBeGreaterThanOrEqual(2)
     })
 
     it('fetches all OAuth clients as ADMIN with empty input', async () => {
