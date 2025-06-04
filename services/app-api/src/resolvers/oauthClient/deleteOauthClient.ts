@@ -1,0 +1,42 @@
+import type { MutationResolvers } from '../../gen/gqlServer'
+import type { Store } from '../../postgres'
+import type { Context } from '../../handlers/apollo_gql'
+
+export function deleteOauthClientResolver(
+    store: Store
+): MutationResolvers['deleteOauthClient'] {
+    return async (
+        _parent: unknown,
+        args: { input: MutationResolvers['DeleteOauthClientInput'] },
+        context: Context
+    ) => {
+        const { user } = context
+        const { input } = args
+        if (!user || user.role !== 'ADMIN_USER') {
+            throw new Error(
+                'Forbidden: Only ADMIN users can delete OAuth clients'
+            )
+        }
+        // Must provide id or clientId
+        if (!input.id && !input.clientId) {
+            throw new Error('Must provide id or clientId')
+        }
+        // Fetch the client
+        let oauthClient
+        if (input.id) {
+            oauthClient = await store.getOAuthClientById(input.id)
+        } else if (input.clientId) {
+            oauthClient = await store.getOAuthClientByClientId(input.clientId)
+        }
+        if (!oauthClient || oauthClient instanceof Error) {
+            throw new Error('OAuth client not found')
+        }
+        // TODO: Call lambda to deactivate token if needed
+        // Delete from DB
+        const deleted = await store.deleteOAuthClient(oauthClient.id)
+        if (!deleted || deleted instanceof Error) {
+            throw new Error('Failed to delete OAuth client')
+        }
+        return { oauthClient: deleted }
+    }
+}
