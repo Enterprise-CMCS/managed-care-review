@@ -1375,7 +1375,7 @@ GenericDocument
 This document type should be used (or extended) everywhere we pass documents through GraphQL regardless of domain
 """
 type GenericDocument {
-    id: ID!
+    id: ID
     "The user created name of the document"
     name: String!
     "The S3 URL of the document, generated on the FE currently in the FileUpload component"
