@@ -33,8 +33,7 @@ export function fetchOauthClientsResolver(
             })
         }
         return {
-            edges: oauthClients.map((c) => ({ node: c })),
-            totalCount: oauthClients.length,
+            oauthClients,
         }
     }
 }
