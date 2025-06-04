@@ -18,9 +18,12 @@ export function createOauthClientResolver(store: Store): MutationResolvers['crea
 
     // Only pass description, contactEmail, and optionally grants
     const { description, contactEmail, grants } = input
-    const result = await store.createOauthClient({
-      description: description ?? undefined,
-      contactEmail: contactEmail ?? undefined,
+
+    const result = await createOAuthClient(store, {
+      clientId,
+      clientSecret,
+      description,
+      contactEmail,
       grants,
     })
 
