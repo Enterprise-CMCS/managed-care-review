@@ -29,10 +29,7 @@ describe('fetchOauthClients', () => {
                 },
             },
         })
-<<<<<<< HEAD
-        // Fetch all (no input)
-=======
->>>>>>> shamoons-mcr-5334-create-fetch-oauth-gql
+
         const res = await server.executeOperation({
             query: FetchOauthClientsDocument,
         })
@@ -41,20 +38,6 @@ describe('fetchOauthClients', () => {
         expect(Array.isArray(edges)).toBe(true)
         expect(edges.length).toBeGreaterThanOrEqual(2)
         expect(typeof res.data?.fetchOauthClients.totalCount).toBe('number')
-    })
-
-    it('fetches all OAuth clients as ADMIN with empty input', async () => {
-        const server = await constructTestPostgresServer({
-            context: { user: testAdminUser() },
-        })
-        // Fetch all (empty input)
-        const res = await server.executeOperation({
-            query: FetchOauthClientsDocument,
-            variables: { input: {} },
-        })
-        expect(res.errors).toBeUndefined()
-        const edges = res.data?.fetchOauthClients.edges
-        expect(Array.isArray(edges)).toBe(true)
     })
 
     it('fetches all OAuth clients as ADMIN with empty input', async () => {
