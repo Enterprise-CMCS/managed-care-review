@@ -7,6 +7,7 @@ import type {
     APIGatewayProxyHandler,
     Handler,
 } from 'aws-lambda'
+
 import typeDefs from '../../../app-graphql/src/schema.graphql'
 import { assertIsAuthMode } from '@mc-review/common-code'
 import type { UserType } from '../domain-models'
@@ -376,7 +377,7 @@ const gqlHandler: Handler = async (event, context, completion) => {
     }
     initTracer(serviceName, otelCollectorUrl)
     if (payloadSize > 5.5 * 1024 * 1024) {
-        const errMsg = `Large payload detected: ${payloadSize} bytes`
+        const errMsg = `Large request payload detected: ${payloadSize} bytes`
         console.warn(errMsg)
         recordException(errMsg, serviceName, 'requestPayload')
     }
