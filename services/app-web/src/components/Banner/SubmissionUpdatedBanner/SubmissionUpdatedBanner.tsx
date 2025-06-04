@@ -1,10 +1,10 @@
 import React from 'react'
 import styles from '../Banner.module.scss'
-import { Alert } from '@trussworks/react-uswds'
 import { ExpandableText } from '../../ExpandableText'
 import { UpdateInformation, User } from '../../../gen/gqlClient'
 import { getUpdatedByDisplayName } from '@mc-review/helpers'
 import { formatBannerDate } from '@mc-review/dates'
+import { AccessibleAlertBanner } from '../AccessibleAlertBanner/AccessibleAlertBanner'
 
 export type UpdatedProps = {
     loggedInUser?: User
@@ -16,8 +16,8 @@ export const SubmissionUpdatedBanner = ({
     updateInfo,
 }: UpdatedProps & React.HTMLAttributes<HTMLDivElement>): React.ReactElement => {
     return (
-        <Alert
-            role="alert"
+        <AccessibleAlertBanner
+            role="status"
             type="info"
             heading="Submission updated"
             headingLevel="h4"
@@ -41,6 +41,6 @@ export const SubmissionUpdatedBanner = ({
                     </>
                 </ExpandableText>
             </div>
-        </Alert>
+        </AccessibleAlertBanner>
     )
 }

@@ -110,13 +110,13 @@ describe('RateSummary', () => {
                 })
 
                 await waitFor(() => {
-                    expect(screen.queryByRole('alert')).toBeInTheDocument()
+                    expect(screen.queryByRole('status')).toBeInTheDocument()
                 })
 
-                expect(screen.queryByRole('alert')).toHaveTextContent(
+                expect(screen.queryByRole('status')).toHaveTextContent(
                     /Status: Withdrawn/
                 )
-                expect(screen.queryByRole('alert')).toHaveTextContent(
+                expect(screen.queryByRole('status')).toHaveTextContent(
                     /Updated by: someone@example.com/
                 )
                 // API returns UTC timezone, we display timestamped dates in PT timezone so 1 day before on these tests.
@@ -192,13 +192,13 @@ describe('RateSummary', () => {
                 })
 
                 await waitFor(() => {
-                    expect(screen.queryByRole('alert')).toBeInTheDocument()
+                    expect(screen.queryByRole('status')).toBeInTheDocument()
                 })
 
-                expect(screen.queryByRole('alert')).toHaveTextContent(
+                expect(screen.queryByRole('status')).toHaveTextContent(
                     /Status: Withdrawn/
                 )
-                expect(screen.queryByRole('alert')).toHaveTextContent(
+                expect(screen.queryByRole('status')).toHaveTextContent(
                     /Updated by: someone@example.com/
                 )
                 // API returns UTC timezone, we display timestamped dates in PT timezone so 1 day before on these tests.
@@ -1031,8 +1031,8 @@ describe('RateSummary', () => {
             })
 
             await waitFor(() => {
-                expect(screen.queryByRole('alert')).toBeInTheDocument()
-                expect(screen.queryByRole('alert')).toHaveTextContent(
+                expect(screen.queryByRole('status')).toBeInTheDocument()
+                expect(screen.queryByRole('status')).toHaveTextContent(
                     /Status: Withdrawn/
                 )
 
@@ -1161,8 +1161,8 @@ describe('RateSummary', () => {
             })
 
             await waitFor(() => {
-                expect(screen.queryByRole('alert')).toBeInTheDocument()
-                expect(screen.queryByRole('alert')).toHaveTextContent(
+                expect(screen.queryByRole('status')).toBeInTheDocument()
+                expect(screen.queryByRole('status')).toHaveTextContent(
                     /Status: Withdrawn/
                 )
             })
