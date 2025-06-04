@@ -23,11 +23,11 @@ describe('UndoRateWithdraw', () => {
     it('can undo rate withdraw', async () => {
         let testLocation: Location
         const contract = mockContractPackageSubmitted({
-            id: 'test-abc-123',
+            id: 'test-contract-123',
         })
         const rate = mockRateSubmittedWithQuestions({
-            id: 'test-abc-123',
-            parentContractID: 'test-abc-123',
+            id: 'test-rate-123',
+            parentContractID: 'test-contract-123',
             reviewStatus: 'WITHDRAWN',
             consolidatedStatus: 'WITHDRAWN',
             reviewStatusActions: [
@@ -105,21 +105,22 @@ describe('UndoRateWithdraw', () => {
                             statusCode: 200,
                         }),
                         fetchRateWithQuestionsMockSuccess({ rate }),
-                        fetchRateMockSuccess({ id: 'test-abc-123' }),
+                        fetchRateWithQuestionsMockSuccess({ rate }),
+                        fetchRateMockSuccess(rate),
                         undoWithdrawRateMockSuccess({
-                            rateID: 'test-abc-123',
+                            rateID: 'test-rate-123',
                             updatedReason: 'Undo withdraw rate',
-                        }),
-                        fetchContractMockSuccess({
-                            contract,
                         }),
                         fetchRateWithQuestionsMockSuccess({
                             rate: undoWithdrawnRate,
                         }),
+                        fetchContractMockSuccess({
+                            contract,
+                        }),
                     ],
                 },
                 routerProvider: {
-                    route: '/rate-reviews/test-abc-123/undo-withdraw',
+                    route: '/rate-reviews/test-rate-123/undo-withdraw',
                 },
                 featureFlags: {
                     'undo-withdraw-rate': true,
@@ -147,7 +148,7 @@ describe('UndoRateWithdraw', () => {
 
         await waitFor(() => {
             // expect redirect
-            expect(testLocation.pathname).toBe(`/rates/${contract.id}`)
+            expect(testLocation.pathname).toBe(`/rates/${rate.id}`)
             // expect unlock rate button to exist
             expect(
                 screen.getByRole('button', {
