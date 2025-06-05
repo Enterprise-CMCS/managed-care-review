@@ -1,5 +1,4 @@
 import { FetchRateDocument } from '../../gen/gqlClient'
-import { createAndSubmitTestRateOnContract } from '../../testHelpers/gqlRateHelpers'
 import { createTestContract, testS3Client } from '../../testHelpers'
 import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
 import { testLDService } from '../../testHelpers/launchDarklyHelpers'

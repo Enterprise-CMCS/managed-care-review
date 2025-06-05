@@ -106,5 +106,17 @@ export function newLocalS3Client(
             const signedUrl = await getSignedUrl(s3Client, command)
             return signedUrl
         },
+        generateDocumentZip: async (
+            documents: Array<{ s3URL: string; name: string; sha256?: string }>,
+            outputPath: string,
+            options = {
+                batchSize: 50,
+                maxTotalSize: 1024 * 1024 * 1024, // 1GB default limit
+                baseTimeout: 120000,
+                timeoutPerMB: 1000,
+            }
+        ): Promise<{ s3URL: string; sha256: string } | Error> => {
+            return new Error('not yet')
+        },
     }
 }
