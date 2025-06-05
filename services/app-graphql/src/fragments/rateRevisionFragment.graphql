@@ -13,20 +13,10 @@ fragment rateRevisionFragment on RateRevision {
         rateType
         rateCapitationType
         rateDocuments {
-            id
-            name
-            s3URL
-            sha256
-            dateAdded
-            downloadURL
+            ...genericDocumentFragment
         }
         supportingDocuments {
-            id
-            name
-            s3URL
-            sha256
-            dateAdded
-            downloadURL
+            ...genericDocumentFragment
         }
         rateDateStart
         rateDateEnd

@@ -43,21 +43,14 @@ fragment submittableRevisionsFieldsFragment on SubmittableRevision {
             }
 
             supportingDocuments {
-                name
-                s3URL
-                sha256
-                dateAdded
-                downloadURL
+                ...genericDocumentFragment
             }
 
             contractType
             contractExecutionStatus
             contractDocuments {
-                name
-                s3URL
-                sha256
-                dateAdded
-                downloadURL
+                ...genericDocumentFragment
+
             }
 
             contractDateStart
@@ -101,18 +94,12 @@ fragment submittableRevisionsFieldsFragment on SubmittableRevision {
             rateType
             rateCapitationType
             rateDocuments {
-                name
-                s3URL
-                sha256
-                dateAdded
-                downloadURL
+                ...genericDocumentFragment
+
             }
             supportingDocuments {
-                name
-                s3URL
-                sha256
-                dateAdded
-                downloadURL
+                ...genericDocumentFragment
+
             }
             rateDateStart
             rateDateEnd

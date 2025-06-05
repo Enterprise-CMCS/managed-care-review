@@ -42,23 +42,13 @@ fragment contractRevisionFragment on ContractRevision {
         }
 
         supportingDocuments {
-            id
-            name
-            s3URL
-            sha256
-            dateAdded
-            downloadURL
+            ...genericDocumentFragment
         }
 
         contractType
         contractExecutionStatus
         contractDocuments {
-            id
-            name
-            s3URL
-            sha256
-            dateAdded
-            downloadURL
+            ...genericDocumentFragment
         }
 
         contractDateStart
