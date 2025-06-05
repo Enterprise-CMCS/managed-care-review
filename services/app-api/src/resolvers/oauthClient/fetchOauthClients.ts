@@ -7,6 +7,7 @@ import {
     setResolverDetailsOnActiveSpan,
     setSuccessAttributesOnActiveSpan,
 } from '../attributeHelper'
+import { GraphQLError } from 'graphql'
 
 export function fetchOauthClientsResolver(
     store: Store
@@ -25,13 +26,33 @@ export function fetchOauthClientsResolver(
         // If input is omitted or empty, fetch all
         if (!input || !input.clientIds || input.clientIds.length === 0) {
             const all = await store.listOAuthClients()
-            if (all instanceof Error) throw all
+            if (all instanceof Error) {
+                const errMessage = `Error fetching all OAuth clients. Message: ${all.message}`
+                logError('fetchOauthClients', errMessage)
+                setErrorAttributesOnActiveSpan(errMessage, span)
+                throw new GraphQLError(errMessage, {
+                    extensions: {
+                        code: 'INTERNAL_SERVER_ERROR',
+                        cause: 'DB_ERROR',
+                    },
+                })
+            }
             oauthClients = all
         } else {
             // Fetch by clientIds
             for (const clientId of input.clientIds) {
                 const client = await store.getOAuthClientByClientId(clientId)
-                if (client instanceof Error) throw client
+                if (client instanceof Error) {
+                    const errMessage = `Error fetching OAuth client by clientId: ${clientId}. Message: ${client.message}`
+                    logError('fetchOauthClients', errMessage)
+                    setErrorAttributesOnActiveSpan(errMessage, span)
+                    throw new GraphQLError(errMessage, {
+                        extensions: {
+                            code: 'INTERNAL_SERVER_ERROR',
+                            cause: 'DB_ERROR',
+                        },
+                    })
+                }
                 if (client) oauthClients.push(client)
             }
             // Remove duplicates by id

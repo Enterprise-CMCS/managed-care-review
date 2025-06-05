@@ -51,7 +51,7 @@ export function createOauthClientResolver(
         }
         // Generate credentials
         const creds = await callOauthLambdaToCreateCredentials({
-            grants: input.grants,
+            grants: input.grants ?? undefined,
             description: input.description ?? undefined,
             contactEmail: input.contactEmail ?? undefined,
         })
@@ -59,7 +59,7 @@ export function createOauthClientResolver(
         const oauthClient = await store.createOAuthClient({
             clientId: creds.clientId,
             clientSecret: creds.clientSecret,
-            grants: creds.grants,
+            grants: creds.grants ?? undefined,
             description: input.description ?? undefined,
             contactEmail: input.contactEmail ?? undefined,
         })
