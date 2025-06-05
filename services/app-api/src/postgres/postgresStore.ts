@@ -345,6 +345,7 @@ function NewPostgresStore(client: ExtendedPrismaClient): Store {
         /** Other **/
         findAllDocuments: () => findAllDocuments(client),
 
+        /** Oauth **/
         createOAuthClient: (data) => _createOAuthClient(client, data),
         listOAuthClients: () => _listOAuthClients(client),
         getOAuthClientById: (id) => _getOAuthClientById(client, id),
