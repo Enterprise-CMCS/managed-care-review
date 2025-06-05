@@ -10,6 +10,7 @@ import type { BucketShortName, S3BucketConfigType } from './helpers'
 
 import type { S3ClientT } from './s3Client'
 import type { S3Error } from './s3Error'
+import { generateDocumentZip } from './zip'
 
 // newDeployedS3Client is used for calling S3 from app-api
 // app-api does not use amplify for interfacing with S3
@@ -103,5 +104,6 @@ export function newDeployedS3Client(
             const signedUrl = await getSignedUrl(s3Client, command)
             return signedUrl
         },
+        generateDocumentZip: generateDocumentZip,
     }
 }
