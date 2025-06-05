@@ -17,7 +17,11 @@ import {
 } from '../attributeHelper'
 import type { MutationResolvers, State } from '../../gen/gqlServer'
 import { parseContract } from '../../domain-models/contractAndRates/dataValidatorHelpers'
-import type { UpdateInfoType, PackageStatusType } from '../../domain-models'
+import type {
+    UpdateInfoType,
+    PackageStatusType,
+    ContractType,
+} from '../../domain-models'
 import type { UpdateDraftContractRatesArgsType } from '../../postgres/contractAndRates/updateDraftContractRates'
 import type { StateCodeType } from '@mc-review/hpp'
 import type { Span } from '@opentelemetry/api'
@@ -29,6 +33,7 @@ import {
 import type { GeneralizedModifiedProvisions } from '@mc-review/hpp'
 import { generateDocumentZip } from '../../s3/zip'
 import type { ContractRevisionType } from '../../domain-models'
+import { createRateZips } from '../rate/submitRate'
 
 const validateStatusAndUpdateInfo = (
     status: PackageStatusType,
@@ -351,49 +356,27 @@ export function submitContract(
         }
 
         // Generate zips!
-        if (submitContractResult.packageSubmissions[0]?.contractRevision) {
-            const contractRevision =
-                submitContractResult.packageSubmissions[0].contractRevision
+        const contractZipRes = await createContractZips(
+            store,
+            submitContractResult,
+            span
+        )
+        if (contractZipRes instanceof Error) {
+            const errMessage = `Failed to zip files for contract revision with ID: ${contractRevisionID}: ${contractZipRes}`
+            logError('submitContract', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+        }
 
-            // Only attempt to generate zip if there are actually documents to zip
-            if (
-                contractRevision.formData.contractDocuments &&
-                contractRevision.formData.contractDocuments.length > 0
-            ) {
-                console.info(
-                    `Generating zip for ${contractRevision.formData.contractDocuments.length} contract documents for contract revision ${contractRevision.id}`
-                )
+        const rateZipRes = await createRateZips(
+            store,
+            submitContractResult,
+            span
+        )
 
-                const zipResult = await generateContractDocumentsZip(
-                    store,
-                    contractRevision,
-                    span
-                )
-
-                if (zipResult instanceof Error) {
-                    // We're choosing to log the error but continue with submission
-                    // This way, a zip generation failure doesn't block the contract submission
-                    logError(
-                        'submitContract - contract documents zip generation failed',
-                        zipResult
-                    )
-                    setErrorAttributesOnActiveSpan(
-                        'contract documents zip generation failed',
-                        span
-                    )
-                    console.warn(
-                        `Contract document zip generation failed for revision ${contractRevision.id}, but continuing with submission process`
-                    )
-                } else {
-                    console.info(
-                        `Successfully generated contract document zip for revision ${contractRevision.id}`
-                    )
-                }
-            } else {
-                console.info(
-                    `No contract documents found for revision ${contractRevision.id}, skipping zip generation`
-                )
-            }
+        if (rateZipRes instanceof Error) {
+            const errMessage = `Failed to zip files for rates on contract revision with ID: ${contractRevisionID}: ${contractZipRes}`
+            logError('submitContract', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
         }
 
         // Send emails!
@@ -581,5 +564,57 @@ export async function generateContractDocumentsZip(
             )
         }
         return err
+    }
+}
+
+export async function createContractZips(
+    store: Store,
+    submitContractResult: ContractType,
+    span?: Span
+): Promise<void | Error> {
+    if (submitContractResult.packageSubmissions[0]?.contractRevision) {
+        const contractRevision =
+            submitContractResult.packageSubmissions[0].contractRevision
+
+        // Only attempt to generate zip if there are actually documents to zip
+        if (
+            contractRevision.formData.contractDocuments &&
+            contractRevision.formData.contractDocuments.length > 0
+        ) {
+            console.info(
+                `Generating zip for ${contractRevision.formData.contractDocuments.length} contract documents for contract revision ${contractRevision.id}`
+            )
+
+            const zipResult = await generateContractDocumentsZip(
+                store,
+                contractRevision,
+                span
+            )
+
+            if (zipResult instanceof Error) {
+                // We're choosing to log the error but continue with submission
+                // This way, a zip generation failure doesn't block the contract submission
+                logError(
+                    'submitContract - contract documents zip generation failed',
+                    zipResult
+                )
+                setErrorAttributesOnActiveSpan(
+                    'contract documents zip generation failed',
+                    span
+                )
+                console.warn(
+                    `Contract document zip generation failed for revision ${contractRevision.id}, but continuing with submission process`
+                )
+                return zipResult
+            } else {
+                console.info(
+                    `Successfully generated contract document zip for revision ${contractRevision.id}`
+                )
+            }
+        } else {
+            console.info(
+                `No contract documents found for revision ${contractRevision.id}, skipping zip generation`
+            )
+        }
     }
 }

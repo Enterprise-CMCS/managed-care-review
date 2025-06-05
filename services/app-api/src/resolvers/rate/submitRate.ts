@@ -4,7 +4,11 @@ import {
     setErrorAttributesOnActiveSpan,
     setResolverDetailsOnActiveSpan,
 } from '../attributeHelper'
-import { isStateUser, type RateRevisionType } from '../../domain-models'
+import {
+    type ContractType,
+    isStateUser,
+    type RateRevisionType,
+} from '../../domain-models'
 import { logError } from '../../logger'
 import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
 import { NotFoundError } from '../../postgres'
@@ -348,5 +352,59 @@ export async function generateRateDocumentsZip(
             )
         }
         return err
+    }
+}
+
+export async function createRateZips(
+    store: Store,
+    submitContractResult: ContractType,
+    span?: Span
+): Promise<void | Error> {
+    if (submitContractResult.packageSubmissions[0]?.rateRevisions) {
+        const rateRevisions =
+            submitContractResult.packageSubmissions[0].rateRevisions
+
+        rateRevisions.forEach(async (rateRev) => {
+            // Only attempt to generate a zip if there are actually documents to zip
+            if (
+                rateRev.formData.rateDocuments &&
+                rateRev.formData.rateDocuments.length > 0
+            ) {
+                console.info(
+                    `Generating zip for ${rateRev.formData.rateDocuments.length} rate documents for rate revision ${rateRevisions[0].id}`
+                )
+
+                const zipResult = await generateRateDocumentsZip(
+                    store,
+                    rateRev,
+                    span
+                )
+
+                if (zipResult instanceof Error) {
+                    // We're choosing to log the error but continue with submission
+                    // This way, a zip generation failure doesn't block the contract submission
+                    logError(
+                        'submitRate- rate documents zip generation failed',
+                        zipResult
+                    )
+                    setErrorAttributesOnActiveSpan(
+                        'rate documents zip generation failed',
+                        span
+                    )
+                    console.warn(
+                        `Rate document zip generation failed for revision ${rateRev.id}, but continuing with submission process`
+                    )
+                    return zipResult
+                } else {
+                    console.info(
+                        `Successfully generated rate document zip for revision ${rateRev.id}`
+                    )
+                }
+            } else {
+                console.info(
+                    `No rate documents found for rate revision ${rateRev.id}, skipping zip generation`
+                )
+            }
+        })
     }
 }
