@@ -1,15 +1,25 @@
+import { ForbiddenError } from 'apollo-server-core'
+import { logError, logSuccess } from '../../logger'
 import type { QueryResolvers } from '../../gen/gqlServer'
 import type { Store } from '../../postgres'
+import {
+    setErrorAttributesOnActiveSpan,
+    setResolverDetailsOnActiveSpan,
+    setSuccessAttributesOnActiveSpan,
+} from '../attributeHelper'
 
 export function fetchOauthClientsResolver(
     store: Store
 ): QueryResolvers['fetchOauthClients'] {
     return async (_parent, { input }, context) => {
-        const { user } = context
+        const { user, ctx, tracer } = context
+        const span = tracer?.startSpan('fetchOauthClients', {}, ctx)
+        setResolverDetailsOnActiveSpan('fetchOauthClients', user, span)
         if (!user || user.role !== 'ADMIN_USER') {
-            throw new Error(
-                'Forbidden: Only ADMIN users can fetch OAuth clients'
-            )
+            const msg = 'User not authorized to fetch OAuth clients'
+            logError('fetchOauthClients', msg)
+            setErrorAttributesOnActiveSpan(msg, span)
+            throw new ForbiddenError(msg)
         }
         let oauthClients = []
         // If input is omitted or empty, fetch all
@@ -32,6 +42,8 @@ export function fetchOauthClientsResolver(
                 return true
             })
         }
+        logSuccess('fetchOauthClients')
+        setSuccessAttributesOnActiveSpan(span)
         return {
             oauthClients,
         }

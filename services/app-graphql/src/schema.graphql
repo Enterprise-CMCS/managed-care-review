@@ -2552,7 +2552,7 @@ type OauthClient {
 
 input CreateOauthClientInput {
     description: String
-    contactEmail: String
+    contactEmail: String!
     grants: [String!]
 }
 
@@ -2561,7 +2561,6 @@ type CreateOauthClientPayload {
 }
 
 input FetchOauthClientsInput {
-    ids: [ID!]
     clientIds: [String!]
 }
 

@@ -2,6 +2,14 @@ import type { MutationResolvers } from '../../gen/gqlServer'
 import type { Store } from '../../postgres'
 import { v4 as uuidv4 } from 'uuid'
 import { randomBytes } from 'crypto'
+import {
+    setErrorAttributesOnActiveSpan,
+    setResolverDetailsOnActiveSpan,
+    setSuccessAttributesOnActiveSpan,
+} from '../attributeHelper'
+import { logError, logSuccess } from '../../logger'
+import { ForbiddenError } from 'apollo-server-core'
+import { GraphQLError } from 'graphql'
 
 /**
  * Generates a secure OAuth clientId and clientSecret.
@@ -32,11 +40,14 @@ export function createOauthClientResolver(
     store: Store
 ): MutationResolvers['createOauthClient'] {
     return async (_parent, { input }, context) => {
-        const { user } = context
+        const { user, ctx, tracer } = context
+        const span = tracer?.startSpan('createOauthClient', {}, ctx)
+        setResolverDetailsOnActiveSpan('createOauthClient', user, span)
         if (!user || user.role !== 'ADMIN_USER') {
-            throw new Error(
-                'Forbidden: Only ADMIN users can create OAuth clients'
-            )
+            const msg = 'User not authorized to create OAuth clients'
+            logError('createOauthClient', msg)
+            setErrorAttributesOnActiveSpan(msg, span)
+            throw new ForbiddenError(msg)
         }
         // Generate credentials
         const creds = await callOauthLambdaToCreateCredentials({
@@ -53,8 +64,19 @@ export function createOauthClientResolver(
             contactEmail: input.contactEmail ?? undefined,
         })
         if (oauthClient instanceof Error) {
-            throw oauthClient
+            const errMessage = `Error creating Oauth client. Message: ${oauthClient.message}`
+            logError('createOauthClient', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+            throw new GraphQLError(errMessage, {
+                extensions: {
+                    code: 'INTERNAL_SERVER_ERROR',
+                    cause: 'DB_ERROR',
+                },
+            })
         }
+
+        logSuccess('createOauthClient')
+        setSuccessAttributesOnActiveSpan(span)
         return { oauthClient }
     }
 }
