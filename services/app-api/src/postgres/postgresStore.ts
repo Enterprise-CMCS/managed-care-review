@@ -246,8 +246,6 @@ type Store = {
     getOAuthClientByClientId: (
         clientId: string
     ) => ReturnType<typeof _getOAuthClientByClientId>
-
-    prismaClient: ExtendedPrismaClient
 }
 
 function NewPostgresStore(client: ExtendedPrismaClient): Store {
@@ -351,8 +349,6 @@ function NewPostgresStore(client: ExtendedPrismaClient): Store {
         getOAuthClientById: (id) => _getOAuthClientById(client, id),
         getOAuthClientByClientId: (clientId) =>
             _getOAuthClientByClientId(client, clientId),
-
-        prismaClient: client,
     }
 }
 
