@@ -90,6 +90,7 @@ describe('createOauthClient', () => {
                 input: {
                     description: 'Test client',
                     grants: ['client_credentials'],
+                    contactEmail: 'test@example.com',
                 },
             },
         })
