@@ -806,13 +806,11 @@ describe('undo withdraw rate error handling', async () => {
         })
 
         const contractA = await createAndSubmitTestContractWithRate(stateServer)
-        const rate = contractA.packageSubmissions[0].rateRevisions[0].rate
+        const rateID = contractA.packageSubmissions[0].rateRevisions[0].rateID
 
-        if (!rate) {
+        if (!rateID) {
             throw new Error('Unexpected error: rate not found')
         }
-
-        const rateID = contractA.packageSubmissions[0].rateRevisions[0].rateID
 
         const unwithdrawnRate = await cmsServer.executeOperation({
             query: UndoWithdrawnRateDocument,
@@ -827,7 +825,7 @@ describe('undo withdraw rate error handling', async () => {
         // expect error for attempting to withdraw rate in postgres
         expect(unwithdrawnRate.errors?.[0]).toBeDefined()
         expect(unwithdrawnRate.errors?.[0].message).toBe(
-            `Attempted to undo rate withdrawal with wrong status. Rate: ${rate.consolidatedStatus}`
+            `Attempted to undo rate withdrawal with wrong status. Rate: SUBMITTED`
         )
     })
 })
