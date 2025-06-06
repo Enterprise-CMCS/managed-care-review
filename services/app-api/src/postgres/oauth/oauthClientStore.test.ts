@@ -12,8 +12,6 @@ import {
 
 describe('OAuthClient Store', () => {
     const testClientData = {
-        clientId: 'test-client',
-        clientSecret: 'test-secret', // pragma: allowlist secret
         grants: ['client_credentials'],
         description: 'Test client',
         contactEmail: 'test@example.com',
@@ -29,14 +27,12 @@ describe('OAuthClient Store', () => {
 
     it('creates and retrieves an OAuth client', async () => {
         const oauthClient = await createOAuthClient(client, testClientData)
-
         if (oauthClient instanceof Error) throw oauthClient
-
-        expect(oauthClient.clientId).toBe(testClientData.clientId)
+        expect(oauthClient.clientId).toMatch(/^oauth-client-/)
+        expect(oauthClient.clientSecret).toHaveLength(86)
         expect(oauthClient.description).toBe(testClientData.description)
         expect(oauthClient.contactEmail).toBe(testClientData.contactEmail)
         expect(oauthClient.grants).toEqual(testClientData.grants)
-        expect(oauthClient.clientSecret).toBe(testClientData.clientSecret) // Should match exactly
     })
 
     it('retrieves an OAuth client by ID', async () => {
@@ -50,7 +46,7 @@ describe('OAuthClient Store', () => {
         if (retrievedClient instanceof Error) throw retrievedClient
 
         expect(retrievedClient).not.toBeNull()
-        expect(retrievedClient?.clientId).toBe(testClientData.clientId)
+        expect(retrievedClient?.clientId).toBe(createdClient.clientId)
     })
 
     it('retrieves an OAuth client by client ID', async () => {
@@ -59,7 +55,7 @@ describe('OAuthClient Store', () => {
 
         const retrievedClient = await getOAuthClientByClientId(
             client,
-            testClientData.clientId
+            createdClient.clientId
         )
         if (retrievedClient instanceof Error) throw retrievedClient
 
@@ -73,8 +69,8 @@ describe('OAuthClient Store', () => {
 
         const isValid = await verifyClientCredentials(
             client,
-            testClientData.clientId,
-            testClientData.clientSecret
+            createdClient.clientId,
+            createdClient.clientSecret
         )
         if (isValid instanceof Error) throw isValid
 
@@ -82,7 +78,7 @@ describe('OAuthClient Store', () => {
 
         const isInvalid = await verifyClientCredentials(
             client,
-            testClientData.clientId,
+            createdClient.clientId,
             'wrong-secret'
         )
         if (isInvalid instanceof Error) throw isInvalid
@@ -132,24 +128,15 @@ describe('OAuthClient Store', () => {
 
     it('lists all OAuth clients', async () => {
         // Create multiple clients
-        const client1 = await createOAuthClient(client, {
-            ...testClientData,
-            clientId: 'test-client-1',
-        })
+        const client1 = await createOAuthClient(client, testClientData)
         if (client1 instanceof Error) throw client1
-
-        const client2 = await createOAuthClient(client, {
-            ...testClientData,
-            clientId: 'test-client-2',
-        })
+        const client2 = await createOAuthClient(client, testClientData)
         if (client2 instanceof Error) throw client2
-
         const clients = await listOAuthClients(client)
         if (clients instanceof Error) throw clients
-
         expect(clients.length).toBeGreaterThanOrEqual(2)
-        expect(clients.some((c) => c.clientId === 'test-client-1')).toBe(true)
-        expect(clients.some((c) => c.clientId === 'test-client-2')).toBe(true)
+        expect(clients.some((c) => c.clientId === client1.clientId)).toBe(true)
+        expect(clients.some((c) => c.clientId === client2.clientId)).toBe(true)
     })
 
     it('handles non-existent client ID', async () => {
@@ -157,22 +144,6 @@ describe('OAuthClient Store', () => {
         if (retrievedClient instanceof Error) throw retrievedClient
 
         expect(retrievedClient).toBeNull()
-    })
-
-    it('handles duplicate client ID', async () => {
-        const createdClient = await createOAuthClient(client, testClientData)
-        if (createdClient instanceof Error) throw createdClient
-
-        const duplicateClient = await createOAuthClient(client, {
-            ...testClientData,
-            clientId: testClientData.clientId, // Same clientId
-        })
-        expect(duplicateClient).toBeInstanceOf(Error)
-        if (!(duplicateClient instanceof Error))
-            throw new Error('Expected error')
-
-        // Verify it's a Prisma unique constraint error
-        expect(duplicateClient.message).toContain('Unique constraint failed')
     })
 
     it('should update updatedAt when client is updated', async () => {
