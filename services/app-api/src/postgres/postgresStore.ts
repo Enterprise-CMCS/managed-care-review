@@ -248,8 +248,6 @@ type Store = {
         clientId: string
     ) => ReturnType<typeof _getOAuthClientByClientId>
     deleteOAuthClient: (id: string) => ReturnType<typeof _deleteOAuthClient>
-
-    prismaClient: ExtendedPrismaClient
 }
 
 function NewPostgresStore(client: ExtendedPrismaClient): Store {
@@ -347,13 +345,13 @@ function NewPostgresStore(client: ExtendedPrismaClient): Store {
         /** Other **/
         findAllDocuments: () => findAllDocuments(client),
 
+        /** Oauth **/
         createOAuthClient: (data) => _createOAuthClient(client, data),
         listOAuthClients: () => _listOAuthClients(client),
         getOAuthClientById: (id) => _getOAuthClientById(client, id),
         getOAuthClientByClientId: (clientId) =>
             _getOAuthClientByClientId(client, clientId),
         deleteOAuthClient: (id) => _deleteOAuthClient(client, id),
-
     }
 }
 

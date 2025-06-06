@@ -17,6 +17,7 @@ describe('fetchOauthClients', () => {
                 input: {
                     description: 'Client 1',
                     grants: ['client_credentials'],
+                    contactEmail: 'client1@example.com',
                 },
             },
         })
@@ -26,6 +27,7 @@ describe('fetchOauthClients', () => {
                 input: {
                     description: 'Client 2',
                     grants: ['client_credentials'],
+                    contactEmail: 'client2@example.com',
                 },
             },
         })
@@ -63,6 +65,7 @@ describe('fetchOauthClients', () => {
                 input: {
                     description: 'Specific client',
                     grants: ['client_credentials'],
+                    contactEmail: 'specific@example.com',
                 },
             },
         })
@@ -100,7 +103,7 @@ describe('fetchOauthClients', () => {
         const res = await server.executeOperation({
             query: FetchOauthClientsDocument,
         })
-        expect(res.errors?.[0].message).toMatch(/forbidden/i)
+        expect(res.errors?.[0].message).toMatch(/not authorized/i)
     })
 
     it('errors on DB failure', async () => {

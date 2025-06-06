@@ -47,12 +47,16 @@ describe('createOauthClient', () => {
         const server = await constructTestPostgresServer({
             context: { user: testStateUser() },
         })
-        const input = { grants: ['client_credentials'] }
+        const input = {
+            grants: ['client_credentials'],
+            contactEmail: 'test@fail.com',
+            description: 'Should fail',
+        }
         const res = await server.executeOperation({
             query: CreateOauthClientDocument,
             variables: { input },
         })
-        expect(res.errors?.[0].message).toMatch(/forbidden/i)
+        expect(res.errors?.[0].message).toMatch(/only admin users/i)
     })
 
     it('errors on DB failure', async () => {
@@ -64,7 +68,11 @@ describe('createOauthClient', () => {
                 createOAuthClient: async () => new Error('DB fail'),
             },
         })
-        const input = { grants: ['client_credentials'] }
+        const input = {
+            grants: ['client_credentials'],
+            contactEmail: 'fail@db.com',
+            description: 'DB fail',
+        }
         const res = await server.executeOperation({
             query: CreateOauthClientDocument,
             variables: { input },
@@ -82,6 +90,7 @@ describe('createOauthClient', () => {
                 input: {
                     description: 'Test client',
                     grants: ['client_credentials'],
+                    contactEmail: 'test@example.com',
                 },
             },
         })
