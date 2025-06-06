@@ -17,6 +17,7 @@ describe('deleteOauthClient', () => {
                 input: {
                     description: 'To delete',
                     grants: ['client_credentials'],
+                    contactEmail: 'test@example.com',
                 },
             },
         })
@@ -41,7 +42,9 @@ describe('deleteOauthClient', () => {
             query: DeleteOauthClientDocument,
             variables: { input: { clientId: 'fake' } },
         })
-        expect(res.errors?.[0].message).toMatch(/forbidden/i)
+        expect(res.errors?.[0].message).toBe(
+            'user not authorized to delete OAuth clients'
+        )
     })
 
     it('errors if client not found', async () => {
@@ -64,7 +67,7 @@ describe('deleteOauthClient', () => {
                     id: '1',
                     clientId: 'fail',
                     clientSecret: '',
-                    grants: [] as string[],
+                    grants: [],
                     createdAt: new Date(),
                     updatedAt: new Date(),
                     lastUsedAt: null,
