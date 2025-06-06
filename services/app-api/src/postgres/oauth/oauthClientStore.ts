@@ -117,6 +117,14 @@ export async function deleteOAuthClient(
     clientId: string
 ): Promise<OAuthClientType | Error> {
     try {
+        // Check if client exists first
+        const existingClient = await client.oAuthClient.findUnique({
+            where: { clientId },
+        })
+        if (!existingClient) {
+            return new Error('OAuth client not found')
+        }
+
         return await client.oAuthClient.delete({
             where: { clientId },
         })
