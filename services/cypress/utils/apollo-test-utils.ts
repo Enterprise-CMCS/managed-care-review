@@ -207,8 +207,7 @@ const adminUser = (): AdminUserType => ({
     role: 'ADMIN_USER',
 })
 
-// Configure Amplify using envs set in cypress.config.ts
-Amplify.configure({
+const amplifyConfig = {
     Auth: {
         mandatorySignIn: true,
         region: Cypress.env('COGNITO_REGION'),
@@ -224,19 +223,13 @@ Amplify.configure({
             },
         ],
     },
-})
+}
+
+// Configure Amplify using envs set in cypress.config.ts
+Amplify.configure(amplifyConfig)
 
 // Configure the API to make api requests
-API.configure({
-    API: {
-        endpoints: [
-            {
-                name: 'api',
-                endpoint: Cypress.env('API_URL'),
-            },
-        ],
-    },
-})
+API.configure(amplifyConfig)
 
 function fetchResponseFromAxios(axiosResponse: AxiosResponse): Response {
     const fakeFetchResponse: Response = {
