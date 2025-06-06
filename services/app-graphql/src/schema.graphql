@@ -102,6 +102,8 @@ type Query {
     - ForbiddenError: A State user requests a contract that belongs to another state
     """
     fetchMcReviewSettings: FetchMcReviewSettingsPayload!
+
+    fetchOauthClients(input: FetchOauthClientsInput): FetchOauthClientsPayload!
 }
 
 type Mutation {
@@ -592,6 +594,8 @@ type Mutation {
     undoWithdrawContract(
         input: UndoWithdrawContractInput!
     ): UndoWithdrawContractPayload!
+
+    createOauthClient(input: CreateOauthClientInput!): CreateOauthClientPayload!
 }
 
 input CreateHealthPlanPackageInput {
@@ -2533,4 +2537,33 @@ input SubmitRateInput {
     submittedReason: String
     "Rate related form data to be updated with submission"
     formData: RateFormDataInput
+}
+
+type OauthClient {
+    id: ID!
+    clientId: String!
+    clientSecret: String!
+    grants: [String!]!
+    description: String
+    contactEmail: String
+    createdAt: DateTime!
+    updatedAt: DateTime!
+}
+
+input CreateOauthClientInput {
+    description: String
+    contactEmail: String!
+    grants: [String!]
+}
+
+type CreateOauthClientPayload {
+    oauthClient: OauthClient!
+}
+
+input FetchOauthClientsInput {
+    clientIds: [String!]
+}
+
+type FetchOauthClientsPayload {
+    oauthClients: [OauthClient!]!
 }

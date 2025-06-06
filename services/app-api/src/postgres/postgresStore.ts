@@ -102,6 +102,12 @@ import {
     type UndoWithdrawContractArgsType,
     type UndoWithdrawContractReturnType,
 } from './contractAndRates/undoWithdrawContract'
+import {
+    createOAuthClient as _createOAuthClient,
+    listOAuthClients as _listOAuthClients,
+    getOAuthClientById as _getOAuthClientById,
+    getOAuthClientByClientId as _getOAuthClientByClientId,
+} from './oauth/oauthClientStore'
 
 type Store = {
     /** Settings functions **/
@@ -231,6 +237,15 @@ type Store = {
 
     /** Other **/
     findAllDocuments: () => Promise<AuditDocument[] | Error>
+
+    createOAuthClient: (
+        data: Parameters<typeof _createOAuthClient>[1]
+    ) => ReturnType<typeof _createOAuthClient>
+    listOAuthClients: () => ReturnType<typeof _listOAuthClients>
+    getOAuthClientById: (id: string) => ReturnType<typeof _getOAuthClientById>
+    getOAuthClientByClientId: (
+        clientId: string
+    ) => ReturnType<typeof _getOAuthClientByClientId>
 }
 
 function NewPostgresStore(client: ExtendedPrismaClient): Store {
@@ -327,6 +342,13 @@ function NewPostgresStore(client: ExtendedPrismaClient): Store {
 
         /** Other **/
         findAllDocuments: () => findAllDocuments(client),
+
+        /** Oauth **/
+        createOAuthClient: (data) => _createOAuthClient(client, data),
+        listOAuthClients: () => _listOAuthClients(client),
+        getOAuthClientById: (id) => _getOAuthClientById(client, id),
+        getOAuthClientByClientId: (clientId) =>
+            _getOAuthClientByClientId(client, clientId),
     }
 }
 

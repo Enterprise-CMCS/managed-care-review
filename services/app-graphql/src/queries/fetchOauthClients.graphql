@@ -1,0 +1,14 @@
+query fetchOauthClients($input: FetchOauthClientsInput) {
+    fetchOauthClients(input: $input) {
+        oauthClients {
+            id
+            clientId
+            clientSecret
+            grants
+            description
+            contactEmail
+            createdAt
+            updatedAt
+        }
+    }
+} 
