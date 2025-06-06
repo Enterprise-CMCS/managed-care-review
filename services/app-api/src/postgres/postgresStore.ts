@@ -248,7 +248,9 @@ type Store = {
     getOAuthClientByClientId: (
         clientId: string
     ) => ReturnType<typeof _getOAuthClientByClientId>
-    deleteOAuthClient: (id: string) => ReturnType<typeof _deleteOAuthClient>
+    deleteOAuthClient: (
+        clientId: string
+    ) => ReturnType<typeof _deleteOAuthClient>
     updateOAuthClient: (data: {
         id: string
         description?: string
@@ -358,7 +360,7 @@ function NewPostgresStore(client: ExtendedPrismaClient): Store {
         getOAuthClientById: (id) => _getOAuthClientById(client, id),
         getOAuthClientByClientId: (clientId) =>
             _getOAuthClientByClientId(client, clientId),
-        deleteOAuthClient: (id) => _deleteOAuthClient(client, id),
+        deleteOAuthClient: (clientId) => _deleteOAuthClient(client, clientId),
         updateOAuthClient: (data) => {
             const { id, ...updateData } = data
             return _updateOAuthClient(client, id, updateData)

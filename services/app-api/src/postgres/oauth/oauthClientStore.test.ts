@@ -114,12 +114,15 @@ describe('OAuthClient Store', () => {
         const createdClient = await createOAuthClient(client, testClientData)
         if (createdClient instanceof Error) throw createdClient
 
-        const deletedClient = await deleteOAuthClient(client, createdClient.id)
+        const deletedClient = await deleteOAuthClient(
+            client,
+            createdClient.clientId
+        )
         if (deletedClient instanceof Error) throw deletedClient
 
-        const retrievedClient = await getOAuthClientById(
+        const retrievedClient = await getOAuthClientByClientId(
             client,
-            createdClient.id
+            createdClient.clientId
         )
         if (retrievedClient instanceof Error) throw retrievedClient
 

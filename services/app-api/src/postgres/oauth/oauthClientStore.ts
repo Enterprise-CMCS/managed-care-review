@@ -114,11 +114,11 @@ export async function updateOAuthClient(
 // Delete an OAuth client
 export async function deleteOAuthClient(
     client: ExtendedPrismaClient,
-    id: string
+    clientId: string
 ): Promise<OAuthClientType | Error> {
     try {
         return await client.oAuthClient.delete({
-            where: { id },
+            where: { clientId },
         })
     } catch (error) {
         return error as Error
