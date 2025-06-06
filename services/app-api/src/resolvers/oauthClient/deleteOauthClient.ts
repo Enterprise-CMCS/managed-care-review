@@ -29,7 +29,10 @@ export function deleteOauthClientResolver(
         }
         // Must provide id or clientId
         if (!input.id && !input.clientId) {
-            throw new Error('Must provide id or clientId')
+            const message = 'Must provide id or clientId'
+            logError('deleteOauthClient', message)
+            setErrorAttributesOnActiveSpan(message, span)
+            throw new Error(message)
         }
         // Fetch the client
         let oauthClient
@@ -44,7 +47,10 @@ export function deleteOauthClientResolver(
         // Delete from DB
         const deleted = await store.deleteOAuthClient(oauthClient.id)
         if (!deleted || deleted instanceof Error) {
-            throw new Error('Failed to delete OAuth client')
+            const message = 'Failed to delete OAuth client'
+            logError('deleteOauthClient', message)
+            setErrorAttributesOnActiveSpan(message, span)
+            throw new Error(message)
         }
 
         logSuccess('deleteOauthClient')
