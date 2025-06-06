@@ -55,7 +55,9 @@ describe('deleteOauthClient', () => {
             query: DeleteOauthClientDocument,
             variables: { input: { clientId: 'nonexistent' } },
         })
-        expect(res.errors?.[0].message).toMatch(/not found/i)
+        expect(res.errors?.[0].message).toBe('Failed to delete OAuth client')
+        expect(res.errors?.[0].extensions?.code).toBe('INTERNAL_SERVER_ERROR')
+        expect(res.errors?.[0].extensions?.cause).toBe('DB_ERROR')
     })
 
     it('errors on DB failure', async () => {
