@@ -14,7 +14,7 @@ export function deleteOauthClientResolver(
 ): MutationResolvers['deleteOauthClient'] {
     return async (
         _parent: unknown,
-        { input }: { input: { id?: string; clientId?: string } },
+        { input }: { input: { clientId: string } },
         context: Context
     ) => {
         const { user, ctx, tracer } = context
@@ -27,25 +27,9 @@ export function deleteOauthClientResolver(
             setErrorAttributesOnActiveSpan(message, span)
             throw new ForbiddenError(message)
         }
-        // Must provide id or clientId
-        if (!input.id && !input.clientId) {
-            const message = 'Must provide id or clientId'
-            logError('deleteOauthClient', message)
-            setErrorAttributesOnActiveSpan(message, span)
-            throw new Error(message)
-        }
-        // Fetch the client
-        let oauthClient
-        if (input.id) {
-            oauthClient = await store.getOAuthClientById(input.id)
-        } else if (input.clientId) {
-            oauthClient = await store.getOAuthClientByClientId(input.clientId)
-        }
-        if (!oauthClient || oauthClient instanceof Error) {
-            throw new Error('OAuth client not found')
-        }
+
         // Delete from DB
-        const deleted = await store.deleteOAuthClient(oauthClient.clientId)
+        const deleted = await store.deleteOAuthClient(input.clientId)
         if (!deleted || deleted instanceof Error) {
             const message = 'Failed to delete OAuth client'
             logError('deleteOauthClient', message)

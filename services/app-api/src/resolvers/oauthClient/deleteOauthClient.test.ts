@@ -63,17 +63,6 @@ describe('deleteOauthClient', () => {
             context: { user: testAdminUser() },
             store: {
                 ...{},
-                getOAuthClientByClientId: async () => ({
-                    id: '1',
-                    clientId: 'fail',
-                    clientSecret: '',
-                    grants: [],
-                    createdAt: new Date(),
-                    updatedAt: new Date(),
-                    lastUsedAt: null,
-                    description: null,
-                    contactEmail: null,
-                }),
                 deleteOAuthClient: async () => new Error('DB fail'),
             },
         })
