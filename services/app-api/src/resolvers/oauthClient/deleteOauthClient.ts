@@ -45,7 +45,7 @@ export function deleteOauthClientResolver(
             throw new Error('OAuth client not found')
         }
         // Delete from DB
-        const deleted = await store.deleteOAuthClient(oauthClient.id)
+        const deleted = await store.deleteOAuthClient(oauthClient.clientId)
         if (!deleted || deleted instanceof Error) {
             const message = 'Failed to delete OAuth client'
             logError('deleteOauthClient', message)
