@@ -226,6 +226,18 @@ Amplify.configure({
     },
 })
 
+// Configure the API to make api requests
+API.configure({
+    API: {
+        endpoints: [
+            {
+                name: 'api',
+                endpoint: Cypress.env('API_URL'),
+            },
+        ],
+    },
+})
+
 function fetchResponseFromAxios(axiosResponse: AxiosResponse): Response {
     const fakeFetchResponse: Response = {
         headers: new Headers({
@@ -362,19 +374,19 @@ const apolloClientWrapper = async <T>(
 
     const apolloClient: ApolloClient<NormalizedCacheObject> = new ApolloClient({
         link: new HttpLink(httpLinkConfig),
-        cache: new InMemoryCache({
-            possibleTypes: {
-                Submission: ['DraftSubmission', 'StateSubmission'],
-            },
-        }),
+        cache: new InMemoryCache(),
         typeDefs: schema,
         defaultOptions: {
             watchQuery: {
                 fetchPolicy: 'no-cache',
             },
+            query: {
+                fetchPolicy: 'no-cache',
+            },
         },
     })
 
+    // For non-local deployments we need to get authorized by cognito before we can make requests.
     if (!isLocalAuth) {
         await AmplifyAuth.signIn(authUser.email, Cypress.env('TEST_USERS_PASS'))
     }
