@@ -8,6 +8,7 @@ import {
     setResolverDetailsOnActiveSpan,
     setErrorAttributesOnActiveSpan,
 } from '../attributeHelper'
+import { GraphQLError } from 'graphql'
 
 export function deleteOauthClientResolver(
     store: Store
@@ -34,7 +35,12 @@ export function deleteOauthClientResolver(
             const message = 'Failed to delete OAuth client'
             logError('deleteOauthClient', message)
             setErrorAttributesOnActiveSpan(message, span)
-            throw new Error(message)
+            throw new GraphQLError(message, {
+                extensions: {
+                    code: 'INTERNAL_SERVER_ERROR',
+                    cause: 'DB_ERROR',
+                },
+            })
         }
 
         logSuccess('deleteOauthClient')
