@@ -207,8 +207,7 @@ const adminUser = (): AdminUserType => ({
     role: 'ADMIN_USER',
 })
 
-// Configure Amplify using envs set in cypress.config.ts
-Amplify.configure({
+const amplifyConfig = {
     Auth: {
         mandatorySignIn: true,
         region: Cypress.env('COGNITO_REGION'),
@@ -224,7 +223,13 @@ Amplify.configure({
             },
         ],
     },
-})
+}
+
+// Configure Amplify using envs set in cypress.config.ts
+Amplify.configure(amplifyConfig)
+
+// Configure the API to make api requests
+API.configure(amplifyConfig)
 
 function fetchResponseFromAxios(axiosResponse: AxiosResponse): Response {
     const fakeFetchResponse: Response = {
@@ -362,19 +367,19 @@ const apolloClientWrapper = async <T>(
 
     const apolloClient: ApolloClient<NormalizedCacheObject> = new ApolloClient({
         link: new HttpLink(httpLinkConfig),
-        cache: new InMemoryCache({
-            possibleTypes: {
-                Submission: ['DraftSubmission', 'StateSubmission'],
-            },
-        }),
+        cache: new InMemoryCache(),
         typeDefs: schema,
         defaultOptions: {
             watchQuery: {
                 fetchPolicy: 'no-cache',
             },
+            query: {
+                fetchPolicy: 'no-cache',
+            },
         },
     })
 
+    // For non-local deployments we need to get authorized by cognito before we can make requests.
     if (!isLocalAuth) {
         await AmplifyAuth.signIn(authUser.email, Cypress.env('TEST_USERS_PASS'))
     }
