@@ -385,8 +385,10 @@ const gqlHandler: Handler = async (event, context, completion) => {
     if (response && response.body) {
         const bodySize = Buffer.from(response.body).length
         console.info(`Response size: ${bodySize} bytes`)
-        if (bodySize > 4 * 1024 * 1024) {
-            console.warn(`Large response detected: ${bodySize} bytes`)
+        if (bodySize > 5.5 * 1024 * 1024) {
+            const errMsg = `Large response detected: ${bodySize} bytes`
+            console.warn(errMsg)
+            recordException(errMsg, serviceName, 'responsePayload')
         }
     }
 
