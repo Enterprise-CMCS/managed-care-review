@@ -2574,7 +2574,7 @@ type FetchOauthClientsPayload {
 }
 
 input DeleteOauthClientInput {
-    clientId: String
+    clientId: String!
 }
 
 type DeleteOauthClientPayload {
