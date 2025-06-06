@@ -12,6 +12,9 @@ export function deleteOauthClientResolver(
     ) => {
         const { user } = context
         const { input } = args
+        const span = tracer?.startSpan('deleteOauthClient', {}, ctx)
+        setResolverDetailsOnActiveSpan('deleteOauthClient', user, span)
+
         if (!user || user.role !== 'ADMIN_USER') {
             throw new Error(
                 'Forbidden: Only ADMIN users can delete OAuth clients'
