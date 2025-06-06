@@ -354,7 +354,6 @@ function NewPostgresStore(client: ExtendedPrismaClient): Store {
             _getOAuthClientByClientId(client, clientId),
         deleteOAuthClient: (id) => _deleteOAuthClient(client, id),
 
-        prismaClient: client,
     }
 }
 
