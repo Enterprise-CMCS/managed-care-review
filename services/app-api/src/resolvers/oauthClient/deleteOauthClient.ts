@@ -7,7 +7,7 @@ export function deleteOauthClientResolver(
 ): MutationResolvers['deleteOauthClient'] {
     return async (
         _parent,
-        args: { input: MutationResolvers['DeleteOauthClientInput'] },
+       { input },
         context: Context
     ) => {
         const { user } = context
