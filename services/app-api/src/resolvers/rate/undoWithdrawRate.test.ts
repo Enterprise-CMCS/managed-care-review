@@ -25,7 +25,7 @@ import {
     UndoWithdrawnRateDocument,
     UpdateDraftContractRatesDocument,
 } from '../../gen/gqlClient'
-import { describe } from 'vitest'
+import { describe, expect } from 'vitest'
 import { mockStoreThatErrors } from '../../testHelpers/storeHelpers'
 import { testEmailConfig, testEmailer } from '../../testHelpers/emailerHelpers'
 
@@ -474,7 +474,48 @@ describe('undoWithdrawRate', () => {
             'unlock to prep for withdraw rate'
         )
 
-        await withdrawTestRate(cmsServer, rateID, 'Withdraw invalid rate')
+        const withdrawnRate = await withdrawTestRate(
+            cmsServer,
+            rateID,
+            'Withdraw invalid rate'
+        )
+
+        expect(withdrawnRate.consolidatedStatus).toBe('WITHDRAWN')
+        expect(withdrawnRate.withdrawnFromContracts?.length).toBe(2)
+        expect(withdrawnRate.withdrawnFromContracts).toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({
+                    id: contractA.id,
+                }),
+                expect.objectContaining({
+                    id: contractB.id,
+                }),
+            ])
+        )
+
+        const validateContractA = await fetchTestContract(
+            cmsServer,
+            contractA.id
+        )
+        expect(validateContractA.withdrawnRates).toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({
+                    id: rateID,
+                }),
+            ])
+        )
+
+        const validateContractB = await fetchTestContract(
+            cmsServer,
+            contractB.id
+        )
+        expect(validateContractB.withdrawnRates).toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({
+                    id: rateID,
+                }),
+            ])
+        )
 
         await unlockTestContract(
             cmsServer,
