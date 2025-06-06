@@ -56,7 +56,7 @@ describe('createOauthClient', () => {
             query: CreateOauthClientDocument,
             variables: { input },
         })
-        expect(res.errors?.[0].message).toMatch(/forbidden/i)
+        expect(res.errors?.[0].message).toMatch(/only admin users/i)
     })
 
     it('errors on DB failure', async () => {
