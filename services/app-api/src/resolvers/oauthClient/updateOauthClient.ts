@@ -8,6 +8,7 @@ import {
     setResolverDetailsOnActiveSpan,
     setErrorAttributesOnActiveSpan,
 } from '../attributeHelper'
+import { GraphQLError } from 'graphql'
 
 export function updateOauthClientResolver(
     store: Store
@@ -18,10 +19,10 @@ export function updateOauthClientResolver(
             input,
         }: {
             input: {
-                id: string
-                description?: string
-                contactEmail?: string
-                grants?: string[]
+                clientId: string
+                description?: string | null
+                contactEmail?: string | null
+                grants?: string[] | null
             }
         },
         context: Context
@@ -38,7 +39,7 @@ export function updateOauthClientResolver(
         }
 
         // Fetch the client
-        const oauthClient = await store.getOAuthClientById(input.id)
+        const oauthClient = await store.getOAuthClientByClientId(input.clientId)
         if (!oauthClient || oauthClient instanceof Error) {
             const message = 'OAuth client not found'
             logError('updateOauthClient', message)
@@ -48,17 +49,22 @@ export function updateOauthClientResolver(
 
         // Update the client
         const updated = await store.updateOAuthClient({
-            id: input.id,
-            description: input.description,
-            contactEmail: input.contactEmail,
-            grants: input.grants,
+            id: oauthClient.id,
+            description: input.description ?? undefined,
+            contactEmail: input.contactEmail ?? undefined,
+            grants: input.grants ?? undefined,
         })
 
         if (!updated || updated instanceof Error) {
             const message = 'Failed to update OAuth client'
             logError('updateOauthClient', message)
             setErrorAttributesOnActiveSpan(message, span)
-            throw new Error(message)
+            throw new GraphQLError(message, {
+                extensions: {
+                    code: 'INTERNAL_SERVER_ERROR',
+                    cause: 'DB_ERROR',
+                },
+            })
         }
 
         logSuccess('updateOauthClient')

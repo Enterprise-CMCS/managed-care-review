@@ -2581,7 +2581,7 @@ type DeleteOauthClientPayload {
 }
 
 input UpdateOauthClientInput {
-    id: ID!
+    clientId: String!
     description: String
     contactEmail: String
     grants: [String!]
