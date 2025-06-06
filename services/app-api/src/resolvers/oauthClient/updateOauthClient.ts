@@ -10,37 +10,54 @@ import {
 } from '../attributeHelper'
 import { GraphQLError } from 'graphql'
 
-export function deleteOauthClientResolver(
+export function updateOauthClientResolver(
     store: Store
-): MutationResolvers['deleteOauthClient'] {
+): MutationResolvers['updateOauthClient'] {
     return async (
         _parent: unknown,
-        { input }: { input: { clientId: string } },
+        {
+            input,
+        }: {
+            input: {
+                clientId: string
+                description?: string | null
+                contactEmail?: string | null
+                grants?: string[] | null
+            }
+        },
         context: Context
     ) => {
         const { user, ctx, tracer } = context
-        const span = tracer?.startSpan('deleteOauthClient', {}, ctx)
-        setResolverDetailsOnActiveSpan('deleteOauthClient', user, span)
+        const span = tracer?.startSpan('updateOauthClient', {}, ctx)
+        setResolverDetailsOnActiveSpan('updateOauthClient', user, span)
 
         if (!user || user.role !== 'ADMIN_USER') {
-            const message = 'user not authorized to delete OAuth clients'
-            logError('deleteOauthClient', message)
+            const message = 'user not authorized to update OAuth clients'
+            logError('updateOauthClient', message)
             setErrorAttributesOnActiveSpan(message, span)
             throw new ForbiddenError(message)
         }
 
-        // Delete from DB
+        // Fetch the client
         const oauthClient = await store.getOAuthClientByClientId(input.clientId)
         if (!oauthClient || oauthClient instanceof Error) {
             const message = 'OAuth client not found'
-            logError('deleteOauthClient', message)
+            logError('updateOauthClient', message)
             setErrorAttributesOnActiveSpan(message, span)
             throw new Error(message)
         }
-        const deleted = await store.deleteOAuthClient(input.clientId)
-        if (!deleted || deleted instanceof Error) {
-            const message = 'Failed to delete OAuth client'
-            logError('deleteOauthClient', message)
+
+        // Update the client
+        const updated = await store.updateOAuthClient({
+            id: oauthClient.id,
+            description: input.description ?? undefined,
+            contactEmail: input.contactEmail ?? undefined,
+            grants: input.grants ?? undefined,
+        })
+
+        if (!updated || updated instanceof Error) {
+            const message = 'Failed to update OAuth client'
+            logError('updateOauthClient', message)
             setErrorAttributesOnActiveSpan(message, span)
             throw new GraphQLError(message, {
                 extensions: {
@@ -50,9 +67,9 @@ export function deleteOauthClientResolver(
             })
         }
 
-        logSuccess('deleteOauthClient')
+        logSuccess('updateOauthClient')
         setSuccessAttributesOnActiveSpan(span)
 
-        return { oauthClient: deleted }
+        return { oauthClient: updated }
     }
 }
