@@ -16,7 +16,10 @@ export function deleteOauthClientResolver(
         setResolverDetailsOnActiveSpan('deleteOauthClient', user, span)
 
         if (!user || user.role !== 'ADMIN_USER') {
-            throw new Error(
+            const message = 'user not authorized to delete OAuth clients'
+            logError('deleteOauthClient', message)
+            setErrorAttributesOnActiveSpan(message, span)
+            throw new ForbiddenError(message)
                 'Forbidden: Only ADMIN users can delete OAuth clients'
             )
         }
