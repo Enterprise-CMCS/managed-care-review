@@ -43,6 +43,10 @@ export function deleteOauthClientResolver(
         if (!deleted || deleted instanceof Error) {
             throw new Error('Failed to delete OAuth client')
         }
+
+        logSuccess('deleteOauthClient')
+        setSuccessAttributesOnActiveSpan(span)
+        
         return { oauthClient: deleted }
     }
 }
