@@ -596,11 +596,8 @@ type Mutation {
     ): UndoWithdrawContractPayload!
 
     createOauthClient(input: CreateOauthClientInput!): CreateOauthClientPayload!
-<<<<<<< HEAD
 
     deleteOauthClient(input: DeleteOauthClientInput!): DeleteOauthClientPayload!
-=======
->>>>>>> 7d321b5817987d09bea53f450c76c4399ce21a7a
 }
 
 input CreateHealthPlanPackageInput {
