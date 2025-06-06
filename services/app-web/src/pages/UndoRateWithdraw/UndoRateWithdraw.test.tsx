@@ -91,11 +91,11 @@ describe('UndoRateWithdraw', () => {
                         path={RoutesRecord.RATES_SUMMARY}
                         element={<RateSummary />}
                     />
-                    <Route
-                        path={RoutesRecord.UNDO_RATE_WITHDRAW}
-                        element={<UndoRateWithdraw />}
-                    />
                 </Route>
+                <Route
+                    path={RoutesRecord.UNDO_RATE_WITHDRAW}
+                    element={<UndoRateWithdraw />}
+                />
             </Routes>,
             {
                 apolloProvider: {
@@ -104,12 +104,13 @@ describe('UndoRateWithdraw', () => {
                             user: mockValidCMSUser(),
                             statusCode: 200,
                         }),
-                        fetchRateWithQuestionsMockSuccess({ rate }),
-                        fetchRateWithQuestionsMockSuccess({ rate }),
                         fetchRateMockSuccess(rate),
                         undoWithdrawRateMockSuccess({
                             rateID: 'test-rate-123',
                             updatedReason: 'Undo withdraw rate',
+                        }),
+                        fetchRateWithQuestionsMockSuccess({
+                            rate: undoWithdrawnRate,
                         }),
                         fetchRateWithQuestionsMockSuccess({
                             rate: undoWithdrawnRate,
@@ -151,13 +152,13 @@ describe('UndoRateWithdraw', () => {
             expect(testLocation.pathname).toBe(`/rates/${rate.id}`)
             // expect unlock rate button to exist
             expect(
-                screen.getByRole('button', {
+                screen.queryByRole('button', {
                     name: 'Unlock rate',
                 })
             ).toBeInTheDocument()
             // expect withdraw rate button to exist
             expect(
-                screen.getByRole('button', {
+                screen.queryByRole('button', {
                     name: 'Withdraw rate',
                 })
             ).toBeInTheDocument()
@@ -165,41 +166,12 @@ describe('UndoRateWithdraw', () => {
     })
 
     it('renders generic API banner error on failed undo rate withdraw', async () => {
-        const rate = mockRateSubmittedWithQuestions({
-            id: 'test-abc-123',
-            parentContractID: 'test-abc-123',
-            reviewStatus: 'WITHDRAWN',
-            consolidatedStatus: 'WITHDRAWN',
-            reviewStatusActions: [
-                {
-                    __typename: 'RateReviewStatusActions',
-                    actionType: 'WITHDRAW',
-                    rateID: 'test-abc-123',
-                    updatedReason: 'a valid note',
-                    updatedAt: new Date(),
-                    updatedBy: {
-                        __typename: 'UpdatedBy',
-                        email: 'cmsapprover@example.com',
-                        familyName: 'Smith',
-                        givenName: 'John',
-                        role: 'CMS_APPROVER_USER',
-                    },
-                },
-            ],
-        })
-
         const { user } = renderWithProviders(
             <Routes>
-                <Route element={<RateSummarySideNav />}>
-                    <Route
-                        path={RoutesRecord.RATES_SUMMARY}
-                        element={<RateSummary />}
-                    />
-                    <Route
-                        path={RoutesRecord.UNDO_RATE_WITHDRAW}
-                        element={<UndoRateWithdraw />}
-                    />
-                </Route>
+                <Route
+                    path={RoutesRecord.UNDO_RATE_WITHDRAW}
+                    element={<UndoRateWithdraw />}
+                />
             </Routes>,
             {
                 apolloProvider: {
@@ -208,7 +180,6 @@ describe('UndoRateWithdraw', () => {
                             user: mockValidCMSUser(),
                             statusCode: 200,
                         }),
-                        fetchRateWithQuestionsMockSuccess({ rate }),
                         fetchRateMockSuccess({ id: 'test-abc-123' }),
                         undoWithdrawRateMockFailure(),
                     ],
@@ -245,23 +216,12 @@ describe('UndoRateWithdraw', () => {
     })
 
     it('renders form validation error when required reason field is missing', async () => {
-        const rate = mockRateSubmittedWithQuestions({
-            id: 'test-abc-123',
-            parentContractID: 'test-abc-123',
-        })
-
         const { user } = renderWithProviders(
             <Routes>
-                <Route element={<RateSummarySideNav />}>
-                    <Route
-                        path={RoutesRecord.RATES_SUMMARY}
-                        element={<RateSummary />}
-                    />
-                    <Route
-                        path={RoutesRecord.UNDO_RATE_WITHDRAW}
-                        element={<UndoRateWithdraw />}
-                    />
-                </Route>
+                <Route
+                    path={RoutesRecord.UNDO_RATE_WITHDRAW}
+                    element={<UndoRateWithdraw />}
+                />
             </Routes>,
             {
                 apolloProvider: {
@@ -270,7 +230,6 @@ describe('UndoRateWithdraw', () => {
                             user: mockValidCMSUser(),
                             statusCode: 200,
                         }),
-                        fetchRateWithQuestionsMockSuccess({ rate }),
                         fetchRateMockSuccess({ id: 'test-abc-123' }),
                     ],
                 },
