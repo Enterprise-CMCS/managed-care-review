@@ -66,6 +66,7 @@ import { undoWithdrawContract } from './contract/undoWithdrawContract'
 import {
     createOauthClientResolver,
     fetchOauthClientsResolver,
+    deleteOauthClientResolver,
 } from './oauthClient'
 
 export function configureResolvers(
@@ -140,6 +141,7 @@ export function configureResolvers(
             submitRate: submitRate(store, launchDarkly),
             updateEmailSettings: updateEmailSettings(store),
             createOauthClient: createOauthClientResolver(store),
+            deleteOauthClient: deleteOauthClientResolver(store),
         },
         User: {
             // resolveType is required to differentiate Unions
