@@ -50,7 +50,7 @@ const withdrawRateMockSuccess = (
             query: WithdrawRateDocument,
             variables: {
                 input: {
-                    rateID: 'test-abc-123',
+                    rateID: rateData?.id || rateID,
                     updatedReason,
                 },
             },
@@ -120,7 +120,7 @@ const undoWithdrawRateMockSuccess = (
             query: UndoWithdrawnRateDocument,
             variables: {
                 input: {
-                    rateID: 'test-abc-123',
+                    rateID: rateData?.id || rateID,
                     updatedReason,
                 },
             },

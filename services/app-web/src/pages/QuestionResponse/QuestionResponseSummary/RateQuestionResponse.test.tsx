@@ -327,8 +327,17 @@ describe('RateQuestionResponse', () => {
                             user: mockValidCMSUser(),
                             statusCode: 200,
                         }),
-                        fetchRateMockSuccess({
-                            id: 'test-rate-id',
+                        fetchRateWithQuestionsMockSuccess({
+                            rate: {
+                                id: 'test-rate-id',
+                                questions: indexRateQuestions,
+                            },
+                        }),
+                        fetchRateWithQuestionsMockSuccess({
+                            rate: {
+                                id: 'test-rate-id',
+                                questions: indexRateQuestions,
+                            },
                         }),
                         fetchRateWithQuestionsMockSuccess({
                             rate: {
@@ -361,8 +370,15 @@ describe('RateQuestionResponse', () => {
                             user: mockValidCMSUser(),
                             statusCode: 200,
                         }),
-                        fetchRateMockSuccess({
-                            id: 'test-rate-id',
+                        fetchRateWithQuestionsMockSuccess({
+                            rate: {
+                                id: 'test-rate-id',
+                            },
+                        }),
+                        fetchRateWithQuestionsMockSuccess({
+                            rate: {
+                                id: 'test-rate-id',
+                            },
                         }),
                         fetchRateWithQuestionsMockSuccess({
                             rate: {
@@ -539,6 +555,7 @@ describe('RateQuestionResponse', () => {
                             }),
                             statusCode: 200,
                         }),
+                        fetchRateWithQuestionsMockSuccess({ rate }),
                         fetchRateWithQuestionsMockSuccess({ rate }),
                         fetchRateWithQuestionsMockSuccess({ rate }),
                     ],

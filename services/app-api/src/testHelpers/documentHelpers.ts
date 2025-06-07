@@ -10,7 +10,9 @@ import type {
 const clearDocMetadata = (documents?: GenericDocument[]): GenericDocument[] => {
     if (!documents) return []
     return documents.map((doc) => {
-        // clear out metadata fields
+        // ID is metadata used on the frontend for caching, otherwise apollo client has no unique identifier for docs
+        // it is not needed on the BE.
+        delete doc['id']
         delete doc['dateAdded']
         return doc
     })

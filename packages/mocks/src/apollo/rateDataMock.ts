@@ -40,6 +40,7 @@ const rateRevisionDataMock = (data?: Partial<RateRevision>): RateRevision => {
             rateCapitationType: 'RATE_CELL',
             rateDocuments: [
                 {
+                    id: 'rate-document.pdf',
                     __typename: 'GenericDocument',
                     name: 'rate-document.pdf',
                     s3URL: 's3://bucketname/key/rate-document',
@@ -50,6 +51,7 @@ const rateRevisionDataMock = (data?: Partial<RateRevision>): RateRevision => {
             ],
             supportingDocuments: [
                 {
+                    id: 'rate-supporting-document.pdf',
                     __typename: 'GenericDocument',
                     name: 'rate-supporting-document.pdf',
                     s3URL: 's3://bucketname/key/rate-supporting-document',
@@ -401,6 +403,8 @@ function mockRateSubmittedWithQuestions(
                 rateCapitationType: 'RATE_CELL',
                 rateDocuments: [
                     {
+                        __typename: 'GenericDocument',
+                        id: 'rate',
                         s3URL: 's3://bucketname/key/rate',
                         sha256: 'fakesha',
                         name: 'rate',
@@ -410,6 +414,8 @@ function mockRateSubmittedWithQuestions(
                 ],
                 supportingDocuments: [
                     {
+                        __typename: 'GenericDocument',
+                        id: 'rate supporting 1',
                         s3URL: 's3://bucketname/key/rateSupporting1',
                         sha256: 'fakesha',
                         name: 'rate supporting 1',
@@ -417,6 +423,8 @@ function mockRateSubmittedWithQuestions(
                         downloadURL: s3DlUrl,
                     },
                     {
+                        __typename: 'GenericDocument',
+                        id: 'rate supporting 2',
                         s3URL: 's3://bucketname/key/rateSupporting1',
                         sha256: 'fakesha',
                         name: 'rate supporting 2',
@@ -524,6 +532,8 @@ function mockRateSubmittedWithQuestions(
                             submissionDescription: 'A real submission',
                             supportingDocuments: [
                                 {
+                                    __typename: 'GenericDocument',
+                                    id: 'contractSupporting1',
                                     s3URL: 's3://bucketname/key/contractsupporting1',
                                     sha256: 'fakesha',
                                     name: 'contractSupporting1',
@@ -531,6 +541,8 @@ function mockRateSubmittedWithQuestions(
                                     downloadURL: s3DlUrl,
                                 },
                                 {
+                                    __typename: 'GenericDocument',
+                                    id: 'contractSupporting2',
                                     s3URL: 's3://bucketname/key/contractSupporting2',
                                     sha256: 'fakesha',
                                     name: 'contractSupporting2',
@@ -543,6 +555,8 @@ function mockRateSubmittedWithQuestions(
                             contractExecutionStatus: 'EXECUTED',
                             contractDocuments: [
                                 {
+                                    __typename: 'GenericDocument',
+                                    id: 'contract',
                                     s3URL: 's3://bucketname/key/contract',
                                     sha256: 'fakesha',
                                     name: 'contract',

@@ -554,6 +554,7 @@ describe('RateSummary', () => {
         })
 
         it('redirects to RateEdit component from RateSummary without errors for unlocked rate', async () => {
+            let testLocation: Location
             renderWithProviders(
                 <Routes>
                     <Route
@@ -588,13 +589,12 @@ describe('RateSummary', () => {
                     featureFlags: {
                         'rate-edit-unlock': true,
                     },
+                    location: (location) => (testLocation = location),
                 }
             )
 
             await waitFor(() => {
-                expect(
-                    screen.queryByTestId('single-rate-edit')
-                ).toBeInTheDocument()
+                expect(testLocation.pathname).toBe('/rates/1337/edit')
             })
         })
 

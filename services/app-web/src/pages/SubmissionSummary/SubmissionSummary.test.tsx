@@ -675,7 +675,7 @@ describe('SubmissionSummary', () => {
                         }
                     )
                     await waitFor(() => {
-                        const rows = screen.getAllByRole('row')
+                        const rows = screen.queryAllByRole('row')
                         expect(rows).toHaveLength(10)
                         expect(
                             within(rows[0]).getByText('Date added')

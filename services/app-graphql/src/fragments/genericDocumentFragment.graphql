@@ -1,0 +1,8 @@
+fragment genericDocumentFragment on GenericDocument {
+    id
+    name
+    s3URL
+    sha256
+    dateAdded
+    downloadURL
+}

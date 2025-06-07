@@ -88,7 +88,25 @@ describe('submitContract', () => {
         expect(submittedFormData.contractDocuments[0].dateAdded).toBeTruthy()
         submittedFormData.contractDocuments[0].dateAdded = null
 
-        expect(submittedFormData).toEqual(draftFormData)
+        expect(submittedFormData).toEqual({
+            ...draftFormData,
+            contractDocuments: expect.arrayContaining(
+                draftFormData.contractDocuments.map((doc) =>
+                    expect.objectContaining({
+                        ...doc,
+                        id: expect.any(String),
+                    })
+                )
+            ),
+            supportingDocuments: expect.arrayContaining(
+                draftFormData.supportingDocuments.map((doc) =>
+                    expect.objectContaining({
+                        ...doc,
+                        id: expect.any(String),
+                    })
+                )
+            ),
+        })
     })
 
     it('submits a contract and removes existing rates on the contract', async () => {

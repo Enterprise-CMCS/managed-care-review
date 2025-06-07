@@ -25,7 +25,7 @@ import {
     UndoWithdrawnRateDocument,
     UpdateDraftContractRatesDocument,
 } from '../../gen/gqlClient'
-import { describe } from 'vitest'
+import { describe, expect } from 'vitest'
 import { mockStoreThatErrors } from '../../testHelpers/storeHelpers'
 import { testEmailConfig, testEmailer } from '../../testHelpers/emailerHelpers'
 
@@ -163,7 +163,25 @@ describe('undoWithdrawRate', () => {
         // Expect un-withdrawn rate formData to equal formData before it was withdrawn
         expect(
             unwithdrawnRate.packageSubmissions[0].rateRevision.formData
-        ).toEqual(formData)
+        ).toEqual({
+            ...formData,
+            rateDocuments: expect.arrayContaining(
+                formData.rateDocuments.map((doc) =>
+                    expect.objectContaining({
+                        ...doc,
+                        id: expect.any(String),
+                    })
+                )
+            ),
+            supportingDocuments: expect.arrayContaining(
+                formData.supportingDocuments.map((doc) =>
+                    expect.objectContaining({
+                        ...doc,
+                        id: expect.any(String),
+                    })
+                )
+            ),
+        })
         expect(unwithdrawnRate.withdrawnFromContracts).toHaveLength(0)
         expect(unwithdrawnRate.consolidatedStatus).toBe('RESUBMITTED')
         expect(unwithdrawnRate.parentContractID).toBe(contractA.id)
@@ -316,7 +334,25 @@ describe('undoWithdrawRate', () => {
         // Expect un-withdrawn rate formData to equal formData before it was withdrawn
         expect(
             unwithdrawnRate.packageSubmissions[0].rateRevision.formData
-        ).toEqual(formData)
+        ).toEqual({
+            ...formData,
+            rateDocuments: expect.arrayContaining(
+                formData.rateDocuments.map((doc) =>
+                    expect.objectContaining({
+                        ...doc,
+                        id: expect.any(String),
+                    })
+                )
+            ),
+            supportingDocuments: expect.arrayContaining(
+                formData.supportingDocuments.map((doc) =>
+                    expect.objectContaining({
+                        ...doc,
+                        id: expect.any(String),
+                    })
+                )
+            ),
+        })
         expect(unwithdrawnRate.withdrawnFromContracts).toHaveLength(0)
         expect(unwithdrawnRate.consolidatedStatus).toBe('RESUBMITTED')
         expect(unwithdrawnRate.parentContractID).toBe(contractA.id)
@@ -438,7 +474,48 @@ describe('undoWithdrawRate', () => {
             'unlock to prep for withdraw rate'
         )
 
-        await withdrawTestRate(cmsServer, rateID, 'Withdraw invalid rate')
+        const withdrawnRate = await withdrawTestRate(
+            cmsServer,
+            rateID,
+            'Withdraw invalid rate'
+        )
+
+        expect(withdrawnRate.consolidatedStatus).toBe('WITHDRAWN')
+        expect(withdrawnRate.withdrawnFromContracts?.length).toBe(2)
+        expect(withdrawnRate.withdrawnFromContracts).toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({
+                    id: contractA.id,
+                }),
+                expect.objectContaining({
+                    id: contractB.id,
+                }),
+            ])
+        )
+
+        const validateContractA = await fetchTestContract(
+            cmsServer,
+            contractA.id
+        )
+        expect(validateContractA.withdrawnRates).toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({
+                    id: rateID,
+                }),
+            ])
+        )
+
+        const validateContractB = await fetchTestContract(
+            cmsServer,
+            contractB.id
+        )
+        expect(validateContractB.withdrawnRates).toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({
+                    id: rateID,
+                }),
+            ])
+        )
 
         await unlockTestContract(
             cmsServer,
@@ -770,13 +847,11 @@ describe('undo withdraw rate error handling', async () => {
         })
 
         const contractA = await createAndSubmitTestContractWithRate(stateServer)
-        const rate = contractA.packageSubmissions[0].rateRevisions[0].rate
+        const rateID = contractA.packageSubmissions[0].rateRevisions[0].rateID
 
-        if (!rate) {
+        if (!rateID) {
             throw new Error('Unexpected error: rate not found')
         }
-
-        const rateID = contractA.packageSubmissions[0].rateRevisions[0].rateID
 
         const unwithdrawnRate = await cmsServer.executeOperation({
             query: UndoWithdrawnRateDocument,
@@ -791,7 +866,7 @@ describe('undo withdraw rate error handling', async () => {
         // expect error for attempting to withdraw rate in postgres
         expect(unwithdrawnRate.errors?.[0]).toBeDefined()
         expect(unwithdrawnRate.errors?.[0].message).toBe(
-            `Attempted to undo rate withdrawal with wrong status. Rate: ${rate.consolidatedStatus}`
+            `Attempted to undo rate withdrawal with wrong status. Rate: SUBMITTED`
         )
     })
 })

@@ -2,14 +2,14 @@ import type {
     ContractFormEditableType,
     RateFormEditableType,
 } from '../../domain-models/contractAndRates'
-import type { GenericDocument } from '../../gen/gqlServer'
+import type { GenericDocumentInput } from '../../gen/gqlServer'
 import { emptify, nullify } from '../prismaDomainAdaptors'
 
 // ADD RETURN TYPES FROM PRISMA SEE "includes" "satifies"
 // contractTableFullPayload - contractTableCreateArgs / contract
 
 // Generic helpers
-const formatDocsForPrisma = (docs: GenericDocument[]) => {
+const formatDocsForPrisma = (docs: GenericDocumentInput[]) => {
     return docs.map((d, idx) => {
         delete d['dateAdded']
         delete d['downloadURL']
