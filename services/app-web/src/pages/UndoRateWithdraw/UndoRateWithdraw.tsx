@@ -3,8 +3,8 @@ import styles from './UndoRateWithdraw.module.scss'
 import {
     ActionButton,
     Breadcrumbs,
+    FieldTextarea,
     GenericApiErrorBanner,
-    PoliteErrorMessage,
 } from '../../components'
 import {
     useFetchRateQuery,
@@ -14,13 +14,7 @@ import { ErrorOrLoadingPage } from '../StateSubmission'
 import { handleAndReturnErrorState } from '../StateSubmission/ErrorOrLoadingPage'
 import { RoutesRecord } from '@mc-review/constants'
 import { generatePath, useNavigate, useParams } from 'react-router-dom'
-import {
-    ButtonGroup,
-    Form,
-    FormGroup,
-    Label,
-    Textarea,
-} from '@trussworks/react-uswds'
+import { ButtonGroup, Form } from '@trussworks/react-uswds'
 import { PageActionsContainer } from '../StateSubmission/PageActions'
 import { usePage } from '../../contexts/PageContext'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
@@ -49,7 +43,7 @@ export const UndoRateWithdraw = () => {
     const navigate = useNavigate()
     const [shouldValidate, setShouldValidate] = React.useState(false)
     const [rateName, setRateName] = useState<string | undefined>(undefined)
-    const showFieldErrors = (error?: FormError): boolean | undefined =>
+    const showFieldErrors = (error?: FormError): boolean =>
         shouldValidate && Boolean(error)
     const [
         undoWithdrawRate,
@@ -150,44 +144,18 @@ export const UndoRateWithdraw = () => {
                         {undoWithdrawError && <GenericApiErrorBanner />}
                         <fieldset className="usa-fieldset">
                             <h2>Undo withdraw</h2>
-                            <FormGroup
-                                error={showFieldErrors(
+                            <FieldTextarea
+                                label="Reason for change"
+                                id="undoWithdrawReason"
+                                data-testid="undoWithdrawReason"
+                                name="undoWithdrawReason"
+                                onChange={handleChange}
+                                aria-required
+                                hint="Provide a reason for this change. Clicking 'Undo withdraw' will move the rate back to he status of Submitted."
+                                showError={showFieldErrors(
                                     errors.undoWithdrawReason
                                 )}
-                                className="margin-top-0"
-                            >
-                                <Label
-                                    htmlFor="rateWithdrawReason"
-                                    className="margin-bottom-0 text-bold"
-                                >
-                                    Reason for change
-                                </Label>
-                                <p className="margin-bottom-0 margin-top-05 usa-hint">
-                                    Required
-                                </p>
-                                <p className="margin-bottom-0 margin-top-05 usa-hint">
-                                    Provide a reason for this change. Clicking
-                                    'Undo withdraw' will move the rate back to
-                                    the status of Submitted.
-                                </p>
-                                {showFieldErrors(errors.undoWithdrawReason) && (
-                                    <PoliteErrorMessage formFieldLabel="Reason for withdrawing">
-                                        {errors.undoWithdrawReason}
-                                    </PoliteErrorMessage>
-                                )}
-                                <Textarea
-                                    name="undoWithdrawReason"
-                                    id="undoWithdrawReason"
-                                    data-testid="undoWithdrawReason"
-                                    aria-labelledby="undoWithdrawReason"
-                                    error={showFieldErrors(
-                                        errors.undoWithdrawReason
-                                    )}
-                                    onChange={handleChange}
-                                    defaultValue={values.undoWithdrawReason}
-                                    aria-required
-                                ></Textarea>
-                            </FormGroup>
+                            />
                         </fieldset>
                         <PageActionsContainer>
                             <ButtonGroup type="default">
