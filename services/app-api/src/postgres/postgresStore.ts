@@ -108,6 +108,7 @@ import {
     getOAuthClientById as _getOAuthClientById,
     getOAuthClientByClientId as _getOAuthClientByClientId,
     deleteOAuthClient as _deleteOAuthClient,
+    updateOAuthClient as _updateOAuthClient,
 } from './oauth/oauthClientStore'
 
 type Store = {
@@ -250,6 +251,12 @@ type Store = {
     deleteOAuthClient: (
         clientId: string
     ) => ReturnType<typeof _deleteOAuthClient>
+    updateOAuthClient: (data: {
+        id: string
+        description?: string
+        contactEmail?: string
+        grants?: string[]
+    }) => ReturnType<typeof _updateOAuthClient>
 }
 
 function NewPostgresStore(client: ExtendedPrismaClient): Store {
@@ -354,6 +361,10 @@ function NewPostgresStore(client: ExtendedPrismaClient): Store {
         getOAuthClientByClientId: (clientId) =>
             _getOAuthClientByClientId(client, clientId),
         deleteOAuthClient: (clientId) => _deleteOAuthClient(client, clientId),
+        updateOAuthClient: (data) => {
+            const { id, ...updateData } = data
+            return _updateOAuthClient(client, id, updateData)
+        },
     }
 }
 

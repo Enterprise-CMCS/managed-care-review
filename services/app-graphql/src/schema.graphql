@@ -598,6 +598,8 @@ type Mutation {
     createOauthClient(input: CreateOauthClientInput!): CreateOauthClientPayload!
 
     deleteOauthClient(input: DeleteOauthClientInput!): DeleteOauthClientPayload!
+
+    updateOauthClient(input: UpdateOauthClientInput!): UpdateOauthClientPayload!
 }
 
 input CreateHealthPlanPackageInput {
@@ -2576,5 +2578,16 @@ input DeleteOauthClientInput {
 }
 
 type DeleteOauthClientPayload {
+    oauthClient: OauthClient!
+}
+
+input UpdateOauthClientInput {
+    clientId: String!
+    description: String
+    contactEmail: String
+    grants: [String!]
+}
+
+type UpdateOauthClientPayload {
     oauthClient: OauthClient!
 }
