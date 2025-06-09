@@ -157,7 +157,7 @@ const ReleasedToState = () => {
                         id="ReleasedToStateForm"
                         className={styles.formContainer}
                         aria-label="Mark this submission as Released to the state?"
-                        aria-describedby="form-guidance"
+                        aria-describedby="ReleasedToStateForm"
                         onSubmit={(e) => {
                             setShouldValidate(true)
                             return handleSubmit(e)

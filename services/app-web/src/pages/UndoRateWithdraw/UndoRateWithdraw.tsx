@@ -141,7 +141,7 @@ export const UndoRateWithdraw = () => {
                         id="UndoRateWithdrawForm"
                         className={styles.formContainer}
                         aria-label="Undo rate withdraw"
-                        aria-describedby="form-guidance"
+                        aria-describedby="UndoRateWithdrawForm"
                         onSubmit={(e) => {
                             setShouldValidate(true)
                             return handleSubmit(e)

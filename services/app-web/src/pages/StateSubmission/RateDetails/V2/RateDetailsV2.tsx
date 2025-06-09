@@ -467,7 +467,7 @@ const RateDetails = ({
                                 className={styles.formContainer}
                                 id="RateDetailsForm"
                                 aria-label="Rate Details Form"
-                                aria-describedby="form-guidance"
+                                aria-describedby="RateDetailsForm"
                                 onSubmit={(e) => {
                                     setShouldValidate(true)
                                     setFocusErrorSummaryHeading(true)

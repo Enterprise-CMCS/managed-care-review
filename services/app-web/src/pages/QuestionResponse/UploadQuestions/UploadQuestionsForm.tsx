@@ -82,7 +82,7 @@ const UploadQuestionsForm = ({
             className={styles.formContainer}
             id={`${type}AddQuestionsForm`}
             aria-label="Add Questions Form"
-            aria-describedby="form-guidance"
+            aria-describedby={`${type}AddQuestionsForm`}
             onSubmit={onSubmit}
         >
             {apiError && <GenericApiErrorBanner />}

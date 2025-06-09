@@ -238,7 +238,7 @@ const Contacts = ({
                                 className={styles.formContainer}
                                 id="ContactsForm"
                                 aria-label="Contacts Form"
-                                aria-describedby="form-guidance"
+                                aria-describedby="ContactsForm"
                                 onSubmit={handleSubmit}
                             >
                                 <SectionCard>

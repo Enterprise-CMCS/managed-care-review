@@ -575,7 +575,7 @@ export const ContractDetails = ({
                                 className={styles.formContainer}
                                 id="ContractDetailsForm"
                                 aria-label={formHeading}
-                                aria-describedby="form-guidance"
+                                aria-describedby="ContractDetailsForm"
                                 onSubmit={(e) => {
                                     setShouldValidate(true)
                                     setFocusErrorSummaryHeading(true)

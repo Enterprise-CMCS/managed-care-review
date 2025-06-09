@@ -143,7 +143,7 @@ export const UndoSubmissionWithdraw = (): React.ReactElement => {
                         id="undoSubmissionWithdrawForm"
                         className={styles.formContainer}
                         aria-label="Undo submission withdraw"
-                        aria-describedby="form-guidance"
+                        aria-describedby="undoSubmissionWithdrawForm"
                         onSubmit={(e) => {
                             setShouldValidate(true)
                             return handleSubmit(e)
