@@ -58,6 +58,7 @@ describe('updateOauthClient', () => {
             variables: { input },
         })
         expect(res.errors?.[0].message).toMatch(/not authorized/i)
+        expect(res.errors?.[0].extensions?.code).toBe('FORBIDDEN')
     })
 
     it('errors if client not found', async () => {
@@ -73,6 +74,7 @@ describe('updateOauthClient', () => {
             variables: { input },
         })
         expect(res.errors?.[0].message).toMatch(/not found/i)
+        expect(res.errors?.[0].extensions?.code).toBe('NOT_FOUND')
     })
 
     it('errors on DB failure', async () => {
@@ -103,5 +105,6 @@ describe('updateOauthClient', () => {
             variables: { input },
         })
         expect(res.errors?.[0].message).toMatch(/fail/i)
+        expect(res.errors?.[0].extensions?.code).toBe('INTERNAL_SERVER_ERROR')
     })
 })

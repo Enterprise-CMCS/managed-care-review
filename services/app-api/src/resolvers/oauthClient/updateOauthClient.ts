@@ -44,7 +44,11 @@ export function updateOauthClientResolver(
             const message = 'OAuth client not found'
             logError('updateOauthClient', message)
             setErrorAttributesOnActiveSpan(message, span)
-            throw new Error(message)
+            throw new GraphQLError(message, {
+                extensions: {
+                    code: 'NOT_FOUND',
+                },
+            })
         }
 
         // Update the client
@@ -62,7 +66,6 @@ export function updateOauthClientResolver(
             throw new GraphQLError(message, {
                 extensions: {
                     code: 'INTERNAL_SERVER_ERROR',
-                    cause: 'DB_ERROR',
                 },
             })
         }
