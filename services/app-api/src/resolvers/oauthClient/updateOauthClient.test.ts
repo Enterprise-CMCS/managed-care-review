@@ -75,6 +75,7 @@ describe('updateOauthClient', () => {
         })
         expect(res.errors?.[0].message).toMatch(/not found/i)
         expect(res.errors?.[0].extensions?.code).toBe('NOT_FOUND')
+        expect(res.errors?.[0].extensions?.cause).toBe('CLIENT_NOT_FOUND')
     })
 
     it('errors on DB failure', async () => {
@@ -106,5 +107,6 @@ describe('updateOauthClient', () => {
         })
         expect(res.errors?.[0].message).toMatch(/fail/i)
         expect(res.errors?.[0].extensions?.code).toBe('INTERNAL_SERVER_ERROR')
+        expect(res.errors?.[0].extensions?.cause).toBe('DB_ERROR')
     })
 })

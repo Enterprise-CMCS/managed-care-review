@@ -47,6 +47,7 @@ export function updateOauthClientResolver(
             throw new GraphQLError(message, {
                 extensions: {
                     code: 'NOT_FOUND',
+                    cause: 'CLIENT_NOT_FOUND',
                 },
             })
         }
@@ -66,6 +67,7 @@ export function updateOauthClientResolver(
             throw new GraphQLError(message, {
                 extensions: {
                     code: 'INTERNAL_SERVER_ERROR',
+                    cause: 'DB_ERROR',
                 },
             })
         }
