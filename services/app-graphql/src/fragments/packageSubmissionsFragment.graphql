@@ -5,7 +5,7 @@ fragment packageSubmissionsFragment on ContractPackageSubmission {
     }
 
     submittedRevisions {
-        ...submittableRevisionsFieldsFragement
+        ...submittableRevisionsFieldsFragment
     }
 
     contractRevision {
@@ -13,14 +13,5 @@ fragment packageSubmissionsFragment on ContractPackageSubmission {
     }
     rateRevisions {
         ...rateRevisionFragment
-        rate {
-            ...rateFieldsFragment
-            revisions {
-                ...rateRevisionFragment
-            }
-            packageSubmissions {
-                ...ratePackageSubmissionsFragment
-            }
-        }
     }
 }

@@ -13,6 +13,7 @@ import { hasCMSUserPermissions } from '@mc-review/helpers'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '@mc-review/common-code'
 import { formatCalendarDate } from '@mc-review/dates'
+import { usePreviousSubmission } from '../../../hooks'
 // This is used to convert from deprecated FE domain types from protos to GQL GenericDocuments by added in a dateAdded
 export const convertFromSubmissionDocumentsToGenericDocuments = (
     deprecatedDocs: SubmissionDocument[],
@@ -66,15 +67,18 @@ export const UploadedDocumentsTable = ({
         featureFlags.HIDE_SUPPORTING_DOCS_PAGE.flag,
         featureFlags.HIDE_SUPPORTING_DOCS_PAGE.defaultValue
     )
+    const isPrevSubmission = usePreviousSubmission()
     const shouldShowEditButton =
         !hideDynamicFeedback && isSupportingDocuments && !hideSupportingDocs // at this point only contract supporting documents need the inline EDIT button - this can be deleted when we move supporting docs to ContractDetails page
     // canDisplayDateForDocument -  guards against passing in null or undefined to dayjs
     // don't display prior to the initial submission
     const canDisplayDateAddedForDocument = (doc: DocumentWithS3Data) => {
         return (
-            (doc.dateAdded && previousSubmissionDate) ||
-            (doc.dateAdded && isInitialSubmission) ||
-            (doc.dateAdded && isLinkedRate)
+            doc.dateAdded &&
+            (previousSubmissionDate ||
+                isInitialSubmission ||
+                isLinkedRate ||
+                isPrevSubmission)
         )
     }
 

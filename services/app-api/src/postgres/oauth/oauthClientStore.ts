@@ -114,11 +114,19 @@ export async function updateOAuthClient(
 // Delete an OAuth client
 export async function deleteOAuthClient(
     client: ExtendedPrismaClient,
-    id: string
+    clientId: string
 ): Promise<OAuthClientType | Error> {
     try {
+        // Check if client exists first
+        const existingClient = await client.oAuthClient.findUnique({
+            where: { clientId },
+        })
+        if (!existingClient) {
+            return new Error('OAuth client not found')
+        }
+
         return await client.oAuthClient.delete({
-            where: { id },
+            where: { clientId },
         })
     } catch (error) {
         return error as Error

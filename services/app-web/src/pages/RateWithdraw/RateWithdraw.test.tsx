@@ -21,11 +21,11 @@ import { Rate } from '../../gen/gqlClient'
 describe('RateWithdraw', () => {
     it('can withdraw a rate', async () => {
         const contract = mockContractPackageSubmitted({
-            id: 'test-abc-123',
+            id: 'test-contract-123',
         })
         const rate = mockRateSubmittedWithQuestions({
-            id: 'test-abc-123',
-            parentContractID: 'test-abc-123',
+            id: 'test-rate-123',
+            parentContractID: 'test-contract-123',
         })
         const withdrawnRate: Rate = {
             ...rate,
@@ -56,11 +56,11 @@ describe('RateWithdraw', () => {
                         path={RoutesRecord.RATES_SUMMARY}
                         element={<RateSummary />}
                     />
-                    <Route
-                        path={RoutesRecord.RATE_WITHDRAW}
-                        element={<RateWithdraw />}
-                    />
                 </Route>
+                <Route
+                    path={RoutesRecord.RATE_WITHDRAW}
+                    element={<RateWithdraw />}
+                />
             </Routes>,
             {
                 apolloProvider: {
@@ -69,18 +69,21 @@ describe('RateWithdraw', () => {
                             user: mockValidCMSUser(),
                             statusCode: 200,
                         }),
+                        fetchRateMockSuccess(rate),
+                        withdrawRateMockSuccess({ rateData: rate }),
                         fetchRateWithQuestionsMockSuccess({
                             rate: withdrawnRate,
                         }),
-                        fetchRateMockSuccess(rate),
-                        withdrawRateMockSuccess({ rateData: rate }),
+                        fetchRateWithQuestionsMockSuccess({
+                            rate: withdrawnRate,
+                        }),
                         fetchContractMockSuccess({
                             contract,
                         }),
                     ],
                 },
                 routerProvider: {
-                    route: '/rate-reviews/test-abc-123/withdraw-rate',
+                    route: '/rate-reviews/test-rate-123/withdraw-rate',
                 },
             }
         )
@@ -119,16 +122,10 @@ describe('RateWithdraw', () => {
 
         const { user } = renderWithProviders(
             <Routes>
-                <Route element={<RateSummarySideNav />}>
-                    <Route
-                        path={RoutesRecord.RATES_SUMMARY}
-                        element={<RateSummary />}
-                    />
-                    <Route
-                        path={RoutesRecord.RATE_WITHDRAW}
-                        element={<RateWithdraw />}
-                    />
-                </Route>
+                <Route
+                    path={RoutesRecord.RATE_WITHDRAW}
+                    element={<RateWithdraw />}
+                />
             </Routes>,
             {
                 apolloProvider: {
@@ -137,7 +134,6 @@ describe('RateWithdraw', () => {
                             user: mockValidCMSUser(),
                             statusCode: 200,
                         }),
-                        fetchRateWithQuestionsMockSuccess({ rate }),
                         fetchRateMockSuccess(rate),
                         withdrawRateMockFailure(),
                     ],
@@ -167,22 +163,12 @@ describe('RateWithdraw', () => {
     })
 
     it('renders form validation error when required withdraw reason field is missing', async () => {
-        const rate = mockRateSubmittedWithQuestions({
-            id: 'test-abc-123',
-            parentContractID: 'test-abc-123',
-        })
         const { user } = renderWithProviders(
             <Routes>
-                <Route element={<RateSummarySideNav />}>
-                    <Route
-                        path={RoutesRecord.RATES_SUMMARY}
-                        element={<RateSummary />}
-                    />
-                    <Route
-                        path={RoutesRecord.RATE_WITHDRAW}
-                        element={<RateWithdraw />}
-                    />
-                </Route>
+                <Route
+                    path={RoutesRecord.RATE_WITHDRAW}
+                    element={<RateWithdraw />}
+                />
             </Routes>,
             {
                 apolloProvider: {
@@ -191,7 +177,6 @@ describe('RateWithdraw', () => {
                             user: mockValidCMSUser(),
                             statusCode: 200,
                         }),
-                        fetchRateWithQuestionsMockSuccess({ rate }),
                         fetchRateMockSuccess({ id: 'test-abc-123' }),
                     ],
                 },
