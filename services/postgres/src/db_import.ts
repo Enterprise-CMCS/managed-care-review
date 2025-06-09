@@ -990,6 +990,7 @@ function sanitizeEmail(email: string): string {
 
 /**
  * Sanitize all email addresses in the database
+ * No need to preserve val users - they'll be recreated on first login
  */
 async function sanitizeEmailAddresses(prisma: PrismaClient): Promise<void> {
     if (DRY_RUN) {
@@ -999,33 +1000,9 @@ async function sanitizeEmailAddresses(prisma: PrismaClient): Promise<void> {
 
     console.info('Starting email address sanitization...')
 
-    // Get all val user emails to exclude from sanitization
-    const valUserEmails = await prisma.user.findMany({
-        where: {
-            OR: [
-                { email: { contains: '@example.com' } },
-                { email: { contains: '@truss.works' } },
-                { email: { contains: 'test' } },
-                { email: { contains: 'mc-review-qa' } },
-            ],
-        },
-        select: { email: true },
-    })
-
-    const valEmailSet = new Set(valUserEmails.map((u) => u.email))
-    console.info(
-        `Excluding ${valEmailSet.size} val users from email sanitization`
-    )
-
-    // 1. Sanitize User emails
+    // 1. Sanitize ALL User emails (no exclusions needed)
     console.info('Sanitizing User emails...')
-    const users = await prisma.user.findMany({
-        where: {
-            NOT: {
-                email: { in: Array.from(valEmailSet) },
-            },
-        },
-    })
+    const users = await prisma.user.findMany()
 
     const userEmailUpdates = users.map((user) => {
         const sanitizedEmail = sanitizeEmail(user.email)
@@ -1192,7 +1169,7 @@ async function validateEmailSanitization(prisma: PrismaClient): Promise<void> {
             console.error(`  User ${user.id}: ${user.email}`)
         )
         throw new Error(
-            'Email sanitization validation failed: Users with invalid domains found'
+            `Email sanitization validation failed: ${invalidUserEmails.length} Users with invalid domains found`
         )
     }
 
