@@ -10,7 +10,7 @@ describe('updateOauthClient', () => {
         const server = await constructTestPostgresServer({
             context: { user: testAdminUser() },
         })
-        // Create a client first
+
         const createRes = await server.executeOperation({
             query: CreateOauthClientDocument,
             variables: {

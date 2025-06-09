@@ -11,7 +11,7 @@ export async function createOAuthClient(
     data: {
         grants?: string[]
         description?: string
-        contactEmail?: string
+        contactEmail: string
     }
 ): Promise<OAuthClientType | Error> {
     try {

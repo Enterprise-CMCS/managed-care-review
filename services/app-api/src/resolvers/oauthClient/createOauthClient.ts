@@ -12,7 +12,7 @@ export function createOauthClientResolver(
                 'Only ADMIN users can create OAuth clients'
             )
         }
-        // Store in DB (store function now generates credentials)
+
         const oauthClient = await store.createOAuthClient({
             grants: input.grants ?? undefined,
             description: input.description ?? undefined,
