@@ -1159,22 +1159,27 @@ async function sanitizeEmailAddresses(prisma: PrismaClient): Promise<void> {
 
 /**
  * Validate that all emails have been properly sanitized
+ * Excludes null, empty strings, and whitespace-only emails (legitimate "no contact" cases)
  */
 async function validateEmailSanitization(prisma: PrismaClient): Promise<void> {
     console.info('Validating email sanitization...')
 
-    const allowedDomains = [
-        '@mc-review.example.com',
-        '@example.com',
-        '@truss.works',
-    ]
-
-    // Check User emails
+    // Check User emails - User.email is required (String), so no null check needed
     const invalidUserEmails = await prisma.user.findMany({
         where: {
-            AND: allowedDomains.map((domain) => ({
-                email: { not: { contains: domain } },
-            })),
+            AND: [
+                { email: { not: '' } },
+                { email: { contains: '@' } }, // Must contain @ to be a valid email
+                {
+                    NOT: {
+                        OR: [
+                            { email: { contains: '@mc-review.example.com' } },
+                            { email: { contains: '@example.com' } },
+                            { email: { contains: '@truss.works' } },
+                        ],
+                    },
+                },
+            ],
         },
         select: { email: true, id: true },
     })
@@ -1191,14 +1196,22 @@ async function validateEmailSanitization(prisma: PrismaClient): Promise<void> {
         )
     }
 
-    // Check StateContact emails
+    // Check StateContact emails - StateContact.email is optional (String?), so need null check
     const invalidStateContactEmails = await prisma.stateContact.findMany({
         where: {
             AND: [
                 { email: { not: null } },
-                ...allowedDomains.map((domain) => ({
-                    email: { not: { contains: domain } },
-                })),
+                { email: { not: '' } },
+                { email: { contains: '@' } }, // Must contain @ to be a valid email
+                {
+                    NOT: {
+                        OR: [
+                            { email: { contains: '@mc-review.example.com' } },
+                            { email: { contains: '@example.com' } },
+                            { email: { contains: '@truss.works' } },
+                        ],
+                    },
+                },
             ],
         },
         select: { email: true, id: true },
@@ -1216,14 +1229,22 @@ async function validateEmailSanitization(prisma: PrismaClient): Promise<void> {
         )
     }
 
-    // Check ActuaryContact emails
+    // Check ActuaryContact emails - ActuaryContact.email is optional (String?), so need null check
     const invalidActuaryContactEmails = await prisma.actuaryContact.findMany({
         where: {
             AND: [
                 { email: { not: null } },
-                ...allowedDomains.map((domain) => ({
-                    email: { not: { contains: domain } },
-                })),
+                { email: { not: '' } },
+                { email: { contains: '@' } }, // Must contain @ to be a valid email
+                {
+                    NOT: {
+                        OR: [
+                            { email: { contains: '@mc-review.example.com' } },
+                            { email: { contains: '@example.com' } },
+                            { email: { contains: '@truss.works' } },
+                        ],
+                    },
+                },
             ],
         },
         select: { email: true, id: true },
