@@ -110,13 +110,13 @@ describe('RateSummary', () => {
                 })
 
                 await waitFor(() => {
-                    expect(screen.queryByRole('alert')).toBeInTheDocument()
+                    expect(screen.queryByRole('status')).toBeInTheDocument()
                 })
 
-                expect(screen.queryByRole('alert')).toHaveTextContent(
+                expect(screen.queryByRole('status')).toHaveTextContent(
                     /Status: Withdrawn/
                 )
-                expect(screen.queryByRole('alert')).toHaveTextContent(
+                expect(screen.queryByRole('status')).toHaveTextContent(
                     /Updated by: someone@example.com/
                 )
                 // API returns UTC timezone, we display timestamped dates in PT timezone so 1 day before on these tests.
@@ -192,13 +192,13 @@ describe('RateSummary', () => {
                 })
 
                 await waitFor(() => {
-                    expect(screen.queryByRole('alert')).toBeInTheDocument()
+                    expect(screen.queryByRole('status')).toBeInTheDocument()
                 })
 
-                expect(screen.queryByRole('alert')).toHaveTextContent(
+                expect(screen.queryByRole('status')).toHaveTextContent(
                     /Status: Withdrawn/
                 )
-                expect(screen.queryByRole('alert')).toHaveTextContent(
+                expect(screen.queryByRole('status')).toHaveTextContent(
                     /Updated by: someone@example.com/
                 )
                 // API returns UTC timezone, we display timestamped dates in PT timezone so 1 day before on these tests.
@@ -554,6 +554,7 @@ describe('RateSummary', () => {
         })
 
         it('redirects to RateEdit component from RateSummary without errors for unlocked rate', async () => {
+            let testLocation: Location
             renderWithProviders(
                 <Routes>
                     <Route
@@ -588,13 +589,12 @@ describe('RateSummary', () => {
                     featureFlags: {
                         'rate-edit-unlock': true,
                     },
+                    location: (location) => (testLocation = location),
                 }
             )
 
             await waitFor(() => {
-                expect(
-                    screen.queryByTestId('single-rate-edit')
-                ).toBeInTheDocument()
+                expect(testLocation.pathname).toBe('/rates/1337/edit')
             })
         })
 
@@ -1031,8 +1031,8 @@ describe('RateSummary', () => {
             })
 
             await waitFor(() => {
-                expect(screen.queryByRole('alert')).toBeInTheDocument()
-                expect(screen.queryByRole('alert')).toHaveTextContent(
+                expect(screen.queryByRole('status')).toBeInTheDocument()
+                expect(screen.queryByRole('status')).toHaveTextContent(
                     /Status: Withdrawn/
                 )
 
@@ -1161,8 +1161,8 @@ describe('RateSummary', () => {
             })
 
             await waitFor(() => {
-                expect(screen.queryByRole('alert')).toBeInTheDocument()
-                expect(screen.queryByRole('alert')).toHaveTextContent(
+                expect(screen.queryByRole('status')).toBeInTheDocument()
+                expect(screen.queryByRole('status')).toHaveTextContent(
                     /Status: Withdrawn/
                 )
             })

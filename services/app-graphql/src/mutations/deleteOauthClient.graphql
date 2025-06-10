@@ -1,0 +1,14 @@
+mutation deleteOauthClient($input: DeleteOauthClientInput!) {
+  deleteOauthClient(input: $input) {
+    oauthClient {
+      id
+      clientId
+      clientSecret
+      grants
+      description
+      contactEmail
+      createdAt
+      updatedAt
+    }
+  }
+} 

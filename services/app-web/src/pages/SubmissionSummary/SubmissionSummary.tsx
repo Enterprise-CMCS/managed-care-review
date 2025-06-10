@@ -1,5 +1,5 @@
 import { GridContainer, Link, ModalRef, Grid } from '@trussworks/react-uswds'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
 import { ContractDetailsSummarySection } from '../StateSubmission/ReviewSubmit/ContractDetailsSummarySection'
 import { ContactsSummarySection } from '../StateSubmission/ReviewSubmit/ContactsSummarySection'
@@ -44,10 +44,10 @@ import { featureFlags } from '@mc-review/common-code'
 import {
     SubmissionApprovedBanner,
     IncompleteSubmissionBanner,
+    SubmissionWithdrawnBanner,
+    StatusUpdatedBanner,
 } from '../../components/Banner'
 import { MultiColumnGrid } from '../../components/MultiColumnGrid/MultiColumnGrid'
-import { SubmissionWithdrawnBanner } from '../../components/Banner/SubmissionWithdrawnBanner/SubmissionWithdrawnBanner'
-import { StatusUpdatedBanner } from '../../components/Banner/StatusUpdatedBanner/StatusUpdatedBanner'
 
 export interface SubmissionSummaryFormValues {
     dateApprovalReleasedToState: string
@@ -58,7 +58,7 @@ export const SubmissionSummary = (): React.ReactElement => {
     const { updateHeading } = usePage()
     const modalRef = useRef<ModalRef>(null)
     const [documentError, setDocumentError] = useState(false)
-    const [showUndoWithdrawBanner, setShowUndoWithdrawBanner] =
+    const [showTempUndoWithdrawBanner, setShowTempUndoWithdrawBanner] =
         useState<boolean>(false)
     const [searchParams, setSearchParams] = useSearchParams()
     const { loggedInUser } = useAuth()
@@ -79,6 +79,18 @@ export const SubmissionSummary = (): React.ReactElement => {
         featureFlags.UNDO_WITHDRAW_SUBMISSION.defaultValue
     )
 
+    const incompleteMessage = useMemo(() => {
+        if (isStateUser) {
+            return 'You must contact your CMS point of contact and request an unlock to complete the submission.'
+        }
+
+        if (hasCMSPermissions) {
+            return 'You must unlock the submission so the state can add a rate certification.'
+        }
+
+        return 'CMS must unlock the submission so the state can add a rate certification.'
+    }, [isStateUser, hasCMSPermissions])
+
     // API requests
     const { data, loading, error } = useFetchContractWithQuestionsQuery({
         variables: {
@@ -96,15 +108,14 @@ export const SubmissionSummary = (): React.ReactElement => {
             : ''
 
     useEffect(() => {
-        if (searchParams.get('showUndoWithdrawBanner') === 'true') {
-            setShowUndoWithdrawBanner(true)
+        if (searchParams.get('showTempUndoWithdrawBanner') === 'true') {
+            setShowTempUndoWithdrawBanner(true)
 
             //This ensures the banner goes away upon refresh or navigation
-            searchParams.delete('showUndoWithdrawBanner')
+            searchParams.delete('showTempUndoWithdrawBanner')
             setSearchParams(searchParams, { replace: true })
         }
     }, [searchParams, setSearchParams])
-
     useEffect(() => {
         updateHeading({
             customHeading: name,
@@ -193,8 +204,11 @@ export const SubmissionSummary = (): React.ReactElement => {
         isContractActionAndRateCertification &&
         rateRevisions.length === 0
 
-    const handleDocumentDownloadError = (error: boolean) =>
-        setDocumentError(error)
+    const handleDocumentDownloadError = (error: boolean) => {
+        if (!documentError) {
+            setDocumentError(error)
+        }
+    }
 
     const editOrAddMCCRSID = contract.mccrsID
         ? 'Edit MC-CRS number'
@@ -228,6 +242,11 @@ export const SubmissionSummary = (): React.ReactElement => {
         withdrawSubmissionFlag &&
         consolidatedStatus === 'WITHDRAWN' &&
         latestContractAction
+    const undoWithdrawAction =
+        latestContractAction?.actionType === 'UNDER_REVIEW' &&
+        contract.reviewStatusActions?.[1].actionType === 'WITHDRAW'
+    const showPermUndoWithdrawBanner =
+        undoWithdrawAction && undoWithdrawSubmissionFlag && isStateUser
 
     const renderStatusAlerts = () => {
         if (showApprovalBanner) {
@@ -242,7 +261,7 @@ export const SubmissionSummary = (): React.ReactElement => {
             )
         }
 
-        if (showUndoWithdrawBanner) {
+        if (showTempUndoWithdrawBanner) {
             return <StatusUpdatedBanner />
         }
 
@@ -260,6 +279,10 @@ export const SubmissionSummary = (): React.ReactElement => {
             )
         }
 
+        if (showPermUndoWithdrawBanner) {
+            return <StatusUpdatedBanner />
+        }
+
         if (submissionStatus === 'UNLOCKED' && updateInfo) {
             return (
                 <SubmissionUnlockedBanner
@@ -273,6 +296,7 @@ export const SubmissionSummary = (): React.ReactElement => {
         if (
             submissionStatus === 'RESUBMITTED' &&
             consolidatedStatus !== 'WITHDRAWN' &&
+            !undoWithdrawAction &&
             updateInfo
         ) {
             return (
@@ -284,18 +308,6 @@ export const SubmissionSummary = (): React.ReactElement => {
         }
     }
 
-    const incompleteSubmissionMessage = () => {
-        if (isStateUser) {
-            return 'You must contact your CMS point of contact and request an unlock to complete the submission.'
-        }
-
-        if (hasCMSPermissions) {
-            return 'You must unlock the submission so the state can add a rate certification.'
-        }
-
-        return 'CMS must unlock the submission so the state can add a rate certification.'
-    }
-
     return (
         <div className={styles.background}>
             <GridContainer
@@ -303,9 +315,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                 className={styles.container}
             >
                 {showIncompleteRateError && (
-                    <IncompleteSubmissionBanner
-                        message={incompleteSubmissionMessage()}
-                    />
+                    <IncompleteSubmissionBanner message={incompleteMessage} />
                 )}
 
                 {documentError && (

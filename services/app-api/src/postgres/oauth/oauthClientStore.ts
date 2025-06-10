@@ -1,5 +1,7 @@
 import type { ExtendedPrismaClient } from '../prismaClient'
 import type { Prisma } from '@prisma/client'
+import { v4 as uuidv4 } from 'uuid'
+import { randomBytes } from 'crypto'
 
 type OAuthClientType = Prisma.OAuthClientGetPayload<Record<string, never>>
 
@@ -7,19 +9,23 @@ type OAuthClientType = Prisma.OAuthClientGetPayload<Record<string, never>>
 export async function createOAuthClient(
     client: ExtendedPrismaClient,
     data: {
-        clientId: string
-        clientSecret: string
-        grants: string[]
+        grants?: string[]
         description?: string
-        contactEmail?: string
+        contactEmail: string
     }
 ): Promise<OAuthClientType | Error> {
     try {
+        const clientId = `oauth-client-${uuidv4()}`
+        const clientSecret = randomBytes(64).toString('base64url')
+        const grants =
+            data.grants && data.grants.length > 0
+                ? data.grants
+                : ['client_credentials']
         return await client.oAuthClient.create({
             data: {
-                clientId: data.clientId,
-                clientSecret: data.clientSecret,
-                grants: data.grants,
+                clientId,
+                clientSecret,
+                grants,
                 description: data.description,
                 contactEmail: data.contactEmail,
             },
@@ -87,7 +93,7 @@ export async function verifyClientCredentials(
 // Update an OAuth client
 export async function updateOAuthClient(
     client: ExtendedPrismaClient,
-    id: string,
+    clientId: string,
     data: {
         clientSecret?: string
         grants?: string[]
@@ -96,10 +102,11 @@ export async function updateOAuthClient(
     }
 ): Promise<OAuthClientType | Error> {
     try {
-        return await client.oAuthClient.update({
-            where: { id },
+        const result = await client.oAuthClient.update({
+            where: { clientId },
             data,
         })
+        return result
     } catch (error) {
         return error as Error
     }
@@ -108,11 +115,19 @@ export async function updateOAuthClient(
 // Delete an OAuth client
 export async function deleteOAuthClient(
     client: ExtendedPrismaClient,
-    id: string
+    clientId: string
 ): Promise<OAuthClientType | Error> {
     try {
+        // Check if client exists first
+        const existingClient = await client.oAuthClient.findUnique({
+            where: { clientId },
+        })
+        if (!existingClient) {
+            return new Error('OAuth client not found')
+        }
+
         return await client.oAuthClient.delete({
-            where: { id },
+            where: { clientId },
         })
     } catch (error) {
         return error as Error

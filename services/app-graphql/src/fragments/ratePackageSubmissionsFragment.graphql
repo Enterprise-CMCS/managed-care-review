@@ -5,7 +5,7 @@ fragment ratePackageSubmissionsFragment on RatePackageSubmission {
     }
 
     submittedRevisions {
-        ...submittableRevisionsFieldsFragement
+        ...submittableRevisionsFieldsFragment
     }
 
     rateRevision {

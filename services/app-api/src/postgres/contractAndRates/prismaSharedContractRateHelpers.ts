@@ -585,10 +585,6 @@ function ratesRevisionsToDomainModel(
     for (const revision of rateRevisions) {
         const domainRevision = rateRevisionToDomainModel(revision)
 
-        if (domainRevision instanceof Error) {
-            return domainRevision
-        }
-
         domainRevisions.push(domainRevision)
     }
 
