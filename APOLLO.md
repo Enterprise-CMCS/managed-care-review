@@ -74,23 +74,39 @@ The following files contain direct instantiations of `ApolloError` that need to 
      - Preserved error metadata in GraphQLError extensions
      - Updated return types to use GraphQLError
 
-4. `packages/mocks/src/apollo/mcReviewSettingsGQLMocks.ts`
+4. ✅ `packages/mocks/src/apollo/mcReviewSettingsGQLMocks.ts`
    - Change: Update settings error mock
    - Note: Verify settings-related error handling in tests
-   - Status: In Progress - Attempted update but needs review
+   - Status: Completed - Removed ApolloError wrapper, using GraphQLError directly
    - Changes:
      - Removed ApolloError import
      - Updated return type to use GraphQLError
+     - Removed ApolloError wrapper
      - Added errors array to result object
+     - Maintained error metadata (code, cause, message)
+   - Test Impact:
+     - Settings.test.tsx - No changes needed
+     - EditStateAssign.test.tsx - No changes needed
+     - Error handling remains compatible with existing tests
 
-5. `packages/mocks/src/apollo/healthPlanPackageGQLMock.ts` (3 instances)
+5. ✅ `packages/mocks/src/apollo/healthPlanPackageGQLMock.ts` (3 instances)
    - Change: Update health plan package error mocks
    - Note: These are critical for health plan package testing
-   - Status: Pending
-   - Required Changes:
-     - Update submitHealthPlanPackageMockError
-     - Update unlockHealthPlanPackageMockError
-     - Update unlockContractMockError
+   - Status: Completed - Removed ApolloError wrapper, using GraphQLError directly
+   - Changes:
+     - Removed ApolloError import
+     - Updated all three mock functions to use GraphQLError:
+       - submitHealthPlanPackageMockError
+       - unlockHealthPlanPackageMockError
+       - unlockContractMockError
+     - Updated return types to use GraphQLError
+     - Removed ApolloError wrappers
+     - Added errors array to result objects
+     - Maintained error metadata (code, cause, message)
+   - Test Impact:
+     - UnlockSubmitModal.test.tsx - No changes needed
+     - Error handling remains compatible with existing tests
+     - Error messages and structure preserved
 
 ### Type References
 The following files need type updates but don't create new instances:
@@ -99,11 +115,16 @@ The following files need type updates but don't create new instances:
 - Test files that expect `ApolloError` instances
 
 ## Documentation Updates
-- [ ] Update `docs/technical-design/error-handling.md` to reflect Apollo Server 4 error handling patterns
-  - Remove references to `ApolloError`
-  - Update examples to use `GraphQLError`
-  - Update error code documentation
-  - Update import statements
+- [x] Update `docs/technical-design/error-handling.md` to reflect Apollo Server 4 error handling patterns
+  - Removed references to `ApolloError`
+  - Updated examples to use `GraphQLError`
+  - Updated error code documentation
+  - Updated import statements
+  - Added new sections:
+    - Error Handling in Tests
+    - Frontend Error Handling
+  - Added custom error class examples
+  - Updated links to Apollo v4 documentation
 
 ## Files to Update
 
@@ -220,8 +241,8 @@ The following files need type updates but don't create new instances:
 - [x] `packages/mocks/src/apollo/approveContractMocks.ts`
 - [x] `packages/mocks/src/apollo/userGQLMock.ts`
 - [x] `packages/mocks/src/apollo/contractGQLMock.ts`
-- [ ] `packages/mocks/src/apollo/healthPlanPackageGQLMock.ts`
-- [ ] `packages/mocks/src/apollo/mcReviewSettingsGQLMocks.ts`
+- [x] `packages/mocks/src/apollo/mcReviewSettingsGQLMocks.ts`
+- [x] `packages/mocks/src/apollo/healthPlanPackageGQLMock.ts`
 
 ## Migration Steps
 1. Create new error handling utilities using `GraphQLError`

@@ -495,7 +495,7 @@ const submitHealthPlanPackageMockError = ({
         code: GraphQLErrorCodeTypes
         cause: GraphQLErrorCauseTypes
     }
-}): MockedResponse<SubmitHealthPlanPackageMutation | ApolloError> => {
+}): MockedResponse<SubmitHealthPlanPackageMutation | GraphQLError> => {
     const graphQLError = new GraphQLError(
         error
             ? GRAPHQL_ERROR_CAUSE_MESSAGES[error.cause]
@@ -513,9 +513,7 @@ const submitHealthPlanPackageMockError = ({
             query: SubmitHealthPlanPackageDocument,
             variables: { input: { pkgID: id } },
         },
-        error: new ApolloError({
-            graphQLErrors: [graphQLError],
-        }),
+        error: graphQLError,
         result: {
             data: null,
             errors: [graphQLError],
@@ -584,7 +582,7 @@ const unlockHealthPlanPackageMockError = ({
         code: GraphQLErrorCodeTypes
         cause: GraphQLErrorCauseTypes
     }
-}): MockedResponse<UnlockHealthPlanPackageMutation> => {
+}): MockedResponse<UnlockHealthPlanPackageMutation | GraphQLError> => {
     const graphQLError = new GraphQLError(
         error
             ? GRAPHQL_ERROR_CAUSE_MESSAGES[error.cause]
@@ -602,9 +600,7 @@ const unlockHealthPlanPackageMockError = ({
             query: UnlockHealthPlanPackageDocument,
             variables: { input: { pkgID: id, unlockedReason: reason } },
         },
-        error: new ApolloError({
-            graphQLErrors: [graphQLError],
-        }),
+        error: graphQLError,
         result: {
             data: null,
             errors: [graphQLError],
@@ -623,7 +619,7 @@ const unlockContractMockError = ({
         code: GraphQLErrorCodeTypes
         cause: GraphQLErrorCauseTypes
     }
-}): MockedResponse<UnlockContractMutation> => {
+}): MockedResponse<UnlockContractMutation | GraphQLError> => {
     const graphQLError = new GraphQLError(
         error
             ? GRAPHQL_ERROR_CAUSE_MESSAGES[error.cause]
@@ -641,9 +637,7 @@ const unlockContractMockError = ({
             query: UnlockContractDocument,
             variables: { input: { contractID: id, unlockedReason: reason } },
         },
-        error: new ApolloError({
-            graphQLErrors: [graphQLError],
-        }),
+        error: graphQLError,
         result: {
             data: null,
             errors: [graphQLError],
