@@ -17,7 +17,7 @@ import {
     FilterSelect,
     FilterSelectedOptionsType,
 } from '../../../components/FilterAccordion'
-import { MultiColumnGrid, Loading } from '../../../components'
+import { MultiColumnGrid, Loading, RowCellElement } from '../../../components'
 import { GridContainer, Table } from '@trussworks/react-uswds'
 
 import styles from '../Settings.module.scss'
@@ -320,20 +320,26 @@ const StateAssignmentTable = () => {
                     ))}
                 </thead>
                 <tbody>
-                    {filteredRows.map((row) => {
-                        return (
-                            <tr key={row.id}>
-                                {row.getVisibleCells().map((cell) => (
-                                    <td key={cell.id}>
-                                        {flexRender(
-                                            cell.column.columnDef.cell,
-                                            cell.getContext()
-                                        )}
-                                    </td>
-                                ))}
-                            </tr>
-                        )
-                    })}
+                    {filteredRows.map((row) => (
+                        <tr key={row.id}>
+                            {row.getVisibleCells().map((cell) => (
+                                // stateCode column must be th for table accessibility with cell associations.
+                                <RowCellElement
+                                    key={cell.id}
+                                    element={
+                                        cell.column.id === 'stateCode'
+                                            ? 'th'
+                                            : 'td'
+                                    }
+                                >
+                                    {flexRender(
+                                        cell.column.columnDef.cell,
+                                        cell.getContext()
+                                    )}
+                                </RowCellElement>
+                            ))}
+                        </tr>
+                    ))}
                 </tbody>
             </Table>
         </>
