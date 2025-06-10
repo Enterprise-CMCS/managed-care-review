@@ -217,8 +217,8 @@ export const EditStateAssign = (): React.ReactElement => {
                             }}
                         >
                             <div id="formInnerContainer">
-                                <h2>Edit state assignment</h2>
                                 <fieldset>
+                                    <h2>Edit state assignment</h2>
                                     <legend className="srOnly">
                                         Update DMCO staff
                                     </legend>

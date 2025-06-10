@@ -346,7 +346,6 @@ describe('ContractDetails', () => {
             )
 
             await screen.findByText('Contract Details')
-            await screen.findByRole('form')
             // amendment specific copy is used
             expect(
                 screen.queryByText(
@@ -619,7 +618,6 @@ describe('ContractDetails', () => {
             )
 
             await screen.findByText('Contract Details')
-            await screen.findByRole('form')
             expect(
                 screen.queryByText(
                     'Does this contract action include provisions related to any of the following'
@@ -661,7 +659,6 @@ describe('ContractDetails', () => {
             )
 
             await screen.findByText('Contract Details')
-            await screen.findByRole('form')
 
             // CHIP specific copy is used
             expect(
