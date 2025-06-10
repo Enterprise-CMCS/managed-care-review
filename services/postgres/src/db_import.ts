@@ -57,17 +57,58 @@ const TMP_DIR = '/tmp'
 const S3_PREFIX = 'db_dump'
 const DRY_RUN = process.env.DRY_RUN === 'true'
 
+// Document processing constants
+const PROCESSING_STATE_KEY = 'document_processing_state.json'
+const TIME_BUFFER = 60000 // Stop processing 1 minute before timeout
+
 const s3Client = new S3Client({ region: REGION })
 
 // Cache to keep track of SHA256 for our mock files (calculated once)
 const mockFileSha256Cache: Record<string, string> = {}
 let mockFilesVerified = false
 
+// Document processing state interface
+interface DocumentProcessingState {
+    contractDocuments: { completed: boolean; total: number; processed: number }
+    contractSupportingDocuments: {
+        completed: boolean
+        total: number
+        processed: number
+    }
+    rateDocuments: { completed: boolean; total: number; processed: number }
+    rateSupportingDocuments: {
+        completed: boolean
+        total: number
+        processed: number
+    }
+    contractQuestionDocuments: {
+        completed: boolean
+        total: number
+        processed: number
+    }
+    contractQuestionResponseDocuments: {
+        completed: boolean
+        total: number
+        processed: number
+    }
+    rateQuestionDocuments: {
+        completed: boolean
+        total: number
+        processed: number
+    }
+    rateQuestionResponseDocuments: {
+        completed: boolean
+        total: number
+        processed: number
+    }
+    allCompleted: boolean
+}
+
 /**
  * Lambda handler function -- entry point for the lambda
  * Orchestrates the process of importing the database and replacing documents
  */
-export const handler = async () => {
+export const handler = async (event?: { skipMainProcessing?: boolean }) => {
     console.info('Starting database import and document replacement process...')
 
     if (DRY_RUN) {
@@ -84,57 +125,73 @@ export const handler = async () => {
         // Initialize Prisma
         prisma = await initializePrisma(dbCredentials)
 
-        // Find latest dump file
-        latestDumpKey = await findLatestDbDumpFile()
-        const dumpFilename = path.basename(latestDumpKey)
-        const dumpFilePath = path.join(TMP_DIR, dumpFilename)
+        // Check if we should skip the main processing (for document-only runs)
+        if (!event?.skipMainProcessing) {
+            // Find latest dump file
+            latestDumpKey = await findLatestDbDumpFile()
+            const dumpFilename = path.basename(latestDumpKey)
+            const dumpFilePath = path.join(TMP_DIR, dumpFilename)
 
-        // Download the dump file
-        await downloadS3File(latestDumpKey, dumpFilePath, S3_BUCKET)
+            // Download the dump file
+            await downloadS3File(latestDumpKey, dumpFilePath, S3_BUCKET)
 
-        // Import database (this will overwrite all existing data)
-        await importDatabase(dumpFilePath, dbCredentials)
+            // Import database (this will overwrite all existing data)
+            await importDatabase(dumpFilePath, dbCredentials)
 
-        // Sanitize email addresses
-        await sanitizeEmailAddresses(prisma)
+            // Sanitize email addresses
+            await sanitizeEmailAddresses(prisma)
 
-        // Sanitize names
-        await sanitizeUserNames(prisma)
+            // Sanitize names
+            await sanitizeUserNames(prisma)
 
-        // Validate email sanitization
-        await validateEmailSanitization(prisma)
+            // Validate email sanitization
+            await validateEmailSanitization(prisma)
 
-        // Validate the import
-        await validateImport(prisma)
+            // Validate the import
+            await validateImport(prisma)
 
-        // Process and replace all documents
-        await processAllDocuments(prisma)
-
-        // Clean up the S3 export file after successful import
-        if (latestDumpKey && !DRY_RUN) {
-            await cleanupS3Export(latestDumpKey)
+            // Cleanup local temp file
+            if (fs.existsSync(dumpFilePath)) {
+                fs.unlinkSync(dumpFilePath)
+            }
         }
 
-        // Cleanup local temp file
-        if (fs.existsSync(dumpFilePath)) {
-            fs.unlinkSync(dumpFilePath)
-        }
+        // Process documents (resumable)
+        const { completed, shouldContinue } =
+            await processAllDocumentsResumable(prisma)
 
-        return {
-            statusCode: 200,
-            body: JSON.stringify({
-                message:
-                    'Database import and document replacement completed successfully. Val users will be created automatically on first login.',
-                importedFile: dumpFilename,
-                cleanedUpS3File: latestDumpKey,
-            }),
+        if (completed) {
+            // Clean up the S3 export file after successful completion
+            if (latestDumpKey && !DRY_RUN) {
+                await cleanupS3Export(latestDumpKey)
+            }
+
+            return {
+                statusCode: 200,
+                body: JSON.stringify({
+                    message:
+                        'Database import and document replacement completed successfully. Val users will be created automatically on first login.',
+                    importedFile: latestDumpKey
+                        ? path.basename(latestDumpKey)
+                        : 'resumed',
+                    cleanedUpS3File: latestDumpKey,
+                    documentsCompleted: true,
+                }),
+            }
+        } else {
+            return {
+                statusCode: 202, // Accepted but not complete
+                body: JSON.stringify({
+                    message:
+                        'Document processing in progress. Run lambda again to continue.',
+                    documentsCompleted: false,
+                    shouldContinue: shouldContinue,
+                }),
+            }
         }
     } catch (err) {
         console.error('Error in import process:', err)
         delete process.env.PGPASSWORD
-
-        // Don't clean up S3 file if import failed - might need it for debugging
-        console.info('Import failed - preserving S3 export file for debugging')
 
         return {
             statusCode: 500,
@@ -147,6 +204,386 @@ export const handler = async () => {
     } finally {
         if (prisma) await prisma.$disconnect()
     }
+}
+
+/**
+ * Save processing state to S3
+ */
+async function saveProcessingState(
+    state: DocumentProcessingState
+): Promise<void> {
+    try {
+        await s3Client.send(
+            new PutObjectCommand({
+                Bucket: S3_BUCKET,
+                Key: PROCESSING_STATE_KEY,
+                Body: JSON.stringify(
+                    {
+                        ...state,
+                        lastUpdated: new Date().toISOString(),
+                    },
+                    null,
+                    2
+                ),
+                ContentType: 'application/json',
+            })
+        )
+        console.info('Saved processing state to S3')
+    } catch (error) {
+        console.warn('Failed to save processing state:', error)
+    }
+}
+
+/**
+ * Load processing state from S3
+ */
+async function loadProcessingState(): Promise<DocumentProcessingState | null> {
+    try {
+        const response = await s3Client.send(
+            new GetObjectCommand({
+                Bucket: S3_BUCKET,
+                Key: PROCESSING_STATE_KEY,
+            })
+        )
+
+        if (response.Body) {
+            const stateJson = await response.Body.transformToString()
+            return JSON.parse(stateJson) as DocumentProcessingState
+        }
+    } catch (error) {
+        console.info(
+            `No existing processing state found, starting fresh: ${error}`
+        )
+    }
+    return null
+}
+
+/**
+ * Initialize processing state
+ */
+async function initializeProcessingState(
+    prisma: PrismaClient
+): Promise<DocumentProcessingState> {
+    const [
+        contractDocs,
+        contractSupportingDocs,
+        rateDocs,
+        rateSupportingDocs,
+        contractQuestionDocs,
+        contractQuestionResponseDocs,
+        rateQuestionDocs,
+        rateQuestionResponseDocs,
+    ] = await Promise.all([
+        prisma.contractDocument.count(),
+        prisma.contractSupportingDocument.count(),
+        prisma.rateDocument.count(),
+        prisma.rateSupportingDocument.count(),
+        prisma.contractQuestionDocument.count(),
+        prisma.contractQuestionResponseDocument.count(),
+        prisma.rateQuestionDocument.count(),
+        prisma.rateQuestionResponseDocument.count(),
+    ])
+
+    return {
+        contractDocuments: {
+            completed: false,
+            total: contractDocs,
+            processed: 0,
+        },
+        contractSupportingDocuments: {
+            completed: false,
+            total: contractSupportingDocs,
+            processed: 0,
+        },
+        rateDocuments: { completed: false, total: rateDocs, processed: 0 },
+        rateSupportingDocuments: {
+            completed: false,
+            total: rateSupportingDocs,
+            processed: 0,
+        },
+        contractQuestionDocuments: {
+            completed: false,
+            total: contractQuestionDocs,
+            processed: 0,
+        },
+        contractQuestionResponseDocuments: {
+            completed: false,
+            total: contractQuestionResponseDocs,
+            processed: 0,
+        },
+        rateQuestionDocuments: {
+            completed: false,
+            total: rateQuestionDocs,
+            processed: 0,
+        },
+        rateQuestionResponseDocuments: {
+            completed: false,
+            total: rateQuestionResponseDocs,
+            processed: 0,
+        },
+        allCompleted: false,
+    }
+}
+
+/**
+ * Process documents with timeout checking - simplified version
+ */
+async function processDocuments<
+    T extends { id: string; s3URL: string; name: string },
+>(
+    documents: T[],
+    updateFunction: (doc: T, newSha256: string) => Promise<void>,
+    startTime: number,
+    hassha256: boolean = true
+): Promise<{ processed: number; shouldStop: boolean }> {
+    let processed = 0
+
+    for (const doc of documents) {
+        // Check if we're running out of time
+        const elapsed = Date.now() - startTime
+        if (elapsed > 900000 - TIME_BUFFER) {
+            // 900000ms = 15 minutes
+            console.info(
+                `Stopping due to time limit. Processed ${processed}/${documents.length}`
+            )
+            return { processed, shouldStop: true }
+        }
+
+        try {
+            const { newSha256, replaced } = await replaceDocument(
+                doc.id,
+                doc.s3URL,
+                doc.name
+            )
+
+            if (replaced && hassha256) {
+                await updateFunction(doc, newSha256)
+            }
+
+            processed++
+
+            if (processed % 100 === 0) {
+                console.info(`Progress: ${processed}/${documents.length}`)
+            }
+        } catch (error) {
+            console.error(`Error processing document ${doc.id}:`, error)
+        }
+    }
+
+    return { processed, shouldStop: false }
+}
+
+/**
+ * Enhanced document processing with resumability
+ */
+async function processAllDocumentsResumable(
+    prisma: PrismaClient
+): Promise<{ completed: boolean; shouldContinue: boolean }> {
+    if (DRY_RUN) {
+        console.info('DRY RUN: Skipping document processing')
+        return { completed: true, shouldContinue: false }
+    }
+
+    const startTime = Date.now()
+
+    // Load or initialize processing state
+    let state = await loadProcessingState()
+    if (!state) {
+        state = await initializeProcessingState(prisma)
+        console.info('Initialized new processing state:', state)
+    } else {
+        console.info('Resuming from saved processing state:', state)
+    }
+
+    // Verify mock files exist
+    await verifyMockFiles()
+
+    // Process each document type in order
+    const documentTypes = [
+        {
+            name: 'contractDocuments',
+            query: () =>
+                prisma.contractDocument.findMany({
+                    skip: state!.contractDocuments.processed,
+                    orderBy: { id: 'asc' },
+                }),
+            update: async (
+                doc: { id: string; s3URL: string; name: string },
+                newSha256: string
+            ) => {
+                await prisma.contractDocument.update({
+                    where: { id: doc.id },
+                    data: { sha256: newSha256 },
+                })
+            },
+            hassha256: true,
+        },
+        {
+            name: 'contractSupportingDocuments',
+            query: () =>
+                prisma.contractSupportingDocument.findMany({
+                    skip: state!.contractSupportingDocuments.processed,
+                    orderBy: { id: 'asc' },
+                }),
+            update: async (
+                doc: { id: string; s3URL: string; name: string },
+                newSha256: string
+            ) => {
+                await prisma.contractSupportingDocument.update({
+                    where: { id: doc.id },
+                    data: { sha256: newSha256 },
+                })
+            },
+            hassha256: true,
+        },
+        {
+            name: 'rateDocuments',
+            query: () =>
+                prisma.rateDocument.findMany({
+                    skip: state!.rateDocuments.processed,
+                    orderBy: { id: 'asc' },
+                }),
+            update: async (
+                doc: { id: string; s3URL: string; name: string },
+                newSha256: string
+            ) => {
+                await prisma.rateDocument.update({
+                    where: { id: doc.id },
+                    data: { sha256: newSha256 },
+                })
+            },
+            hassha256: true,
+        },
+        {
+            name: 'rateSupportingDocuments',
+            query: () =>
+                prisma.rateSupportingDocument.findMany({
+                    skip: state!.rateSupportingDocuments.processed,
+                    orderBy: { id: 'asc' },
+                }),
+            update: async (
+                doc: { id: string; s3URL: string; name: string },
+                newSha256: string
+            ) => {
+                await prisma.rateSupportingDocument.update({
+                    where: { id: doc.id },
+                    data: { sha256: newSha256 },
+                })
+            },
+            hassha256: true,
+        },
+        {
+            name: 'contractQuestionDocuments',
+            query: () =>
+                prisma.contractQuestionDocument.findMany({
+                    skip: state!.contractQuestionDocuments.processed,
+                    orderBy: { id: 'asc' },
+                }),
+            update: async () => {
+                // No SHA256 update needed
+            },
+            hassha256: false,
+        },
+        {
+            name: 'contractQuestionResponseDocuments',
+            query: () =>
+                prisma.contractQuestionResponseDocument.findMany({
+                    skip: state!.contractQuestionResponseDocuments.processed,
+                    orderBy: { id: 'asc' },
+                }),
+            update: async () => {
+                // No SHA256 update needed
+            },
+            hassha256: false,
+        },
+        {
+            name: 'rateQuestionDocuments',
+            query: () =>
+                prisma.rateQuestionDocument.findMany({
+                    skip: state!.rateQuestionDocuments.processed,
+                    orderBy: { id: 'asc' },
+                }),
+            update: async () => {
+                // No SHA256 update needed
+            },
+            hassha256: false,
+        },
+        {
+            name: 'rateQuestionResponseDocuments',
+            query: () =>
+                prisma.rateQuestionResponseDocument.findMany({
+                    skip: state!.rateQuestionResponseDocuments.processed,
+                    orderBy: { id: 'asc' },
+                }),
+            update: async () => {
+                // No SHA256 update needed
+            },
+            hassha256: false,
+        },
+    ]
+
+    // Process each document type
+    for (const docType of documentTypes) {
+        const stateKey = docType.name as keyof Omit<
+            DocumentProcessingState,
+            'allCompleted'
+        >
+
+        if (state[stateKey].completed) {
+            console.info(`${docType.name} already completed, skipping...`)
+            continue
+        }
+
+        console.info(
+            `Processing ${docType.name}... (${state[stateKey].processed}/${state[stateKey].total} completed)`
+        )
+
+        // Get remaining documents for this type
+        const documents = await docType.query()
+
+        if (documents.length === 0) {
+            state[stateKey].completed = true
+            console.info(`✅ ${docType.name} completed!`)
+            await saveProcessingState(state)
+            continue
+        }
+
+        // Process all remaining documents for this type
+        const { processed, shouldStop } = await processDocuments(
+            documents,
+            docType.update,
+            startTime,
+            docType.hassha256
+        )
+
+        state[stateKey].processed += processed
+        console.info(
+            `${docType.name}: ${state[stateKey].processed}/${state[stateKey].total} completed`
+        )
+
+        // Save progress
+        await saveProcessingState(state)
+
+        if (shouldStop) {
+            console.info('Stopping due to time limit - progress saved')
+            return { completed: false, shouldContinue: true }
+        }
+
+        if (state[stateKey].processed >= state[stateKey].total) {
+            state[stateKey].completed = true
+            console.info(`✅ ${docType.name} completed!`)
+        } else {
+            // If we didn't finish this type, we'll continue next time
+            return { completed: false, shouldContinue: true }
+        }
+    }
+
+    // Mark all as completed
+    state.allCompleted = true
+    await saveProcessingState(state)
+
+    console.info('🎉 All document types processed successfully!')
+    return { completed: true, shouldContinue: false }
 }
 
 /**
@@ -191,64 +628,6 @@ function calculateFileSha256(filePath: string): string {
     mockFileSha256Cache[filePath] = hash
 
     return hash
-}
-
-/**
- * Logs the S3 URL structure for debugging
- */
-function debugS3Url(s3Url: string): void {
-    console.info('Analyzing S3 URL structure:')
-    console.info(`Original URL: ${s3Url}`)
-    console.info(`URL length: ${s3Url.length}`)
-    console.info(`URL starts with s3://: ${s3Url.startsWith('s3://')}`)
-    console.info(`URL starts with https://: ${s3Url.startsWith('https://')}`)
-    console.info(
-        `URL includes s3.amazonaws.com: ${s3Url.includes('s3.amazonaws.com')}`
-    )
-    console.info(`URL contains slashes: ${s3Url.includes('/')}`)
-    console.info(`Number of slashes: ${(s3Url.match(/\//g) || []).length}`)
-    console.info(`URL ends with slash: ${s3Url.endsWith('/')}`)
-
-    // Split by slashes to see the components
-    const parts = s3Url.split('/')
-    console.info('URL parts:')
-    parts.forEach((part, i) => {
-        console.info(`  Part ${i}: "${part}"`)
-    })
-}
-
-/**
- * Logs sample document URLs from the database for debugging
- */
-async function logSampleDocumentURLs(prisma: PrismaClient): Promise<void> {
-    console.info('Logging sample document URLs from database...')
-
-    // Get one sample from each document type
-    const docs = await Promise.all([
-        prisma.contractDocument.findFirst(),
-        prisma.contractSupportingDocument.findFirst(),
-        prisma.rateDocument.findFirst(),
-        prisma.rateSupportingDocument.findFirst(),
-    ])
-
-    docs.forEach((doc, index) => {
-        if (doc) {
-            const types = [
-                'ContractDocument',
-                'ContractSupportingDocument',
-                'RateDocument',
-                'RateSupportingDocument',
-            ]
-            console.info(`${types[index]} sample:
-  id: ${doc.id}
-  name: ${doc.name}
-  s3URL: ${doc.s3URL}
-  ${Object.prototype.hasOwnProperty.call(doc, 'sha256') ? `sha256: ${doc.sha256}` : ''}
-`)
-            // Debug the S3 URL structure
-            debugS3Url(doc.s3URL)
-        }
-    })
 }
 
 /**
@@ -730,254 +1109,6 @@ async function replaceDocument(
 }
 
 /**
- * Process and replace all documents in the database using Prisma
- */
-async function processAllDocuments(prisma: PrismaClient): Promise<void> {
-    if (DRY_RUN) {
-        console.info('DRY RUN: Skipping document processing')
-        return
-    }
-
-    // Verify mock files exist
-    await verifyMockFiles()
-
-    // Log sample document URLs for debugging
-    await logSampleDocumentURLs(prisma)
-
-    // Process ContractDocument
-    console.info('Processing ContractDocument files...')
-    const contractDocuments = await prisma.contractDocument.findMany()
-    console.info(`Found ${contractDocuments.length} contract documents`)
-
-    for (const doc of contractDocuments) {
-        try {
-            const { newSha256, replaced } = await replaceDocument(
-                doc.id,
-                doc.s3URL,
-                doc.name // Original filename determines file type
-            )
-            if (replaced) {
-                await prisma.contractDocument.update({
-                    where: { id: doc.id },
-                    data: { sha256: newSha256 },
-                })
-                console.info(
-                    `Updated contract document ${doc.id} (${doc.name})`
-                )
-            }
-        } catch (error) {
-            console.error(
-                `Error processing contract document ${doc.id}:`,
-                error
-            )
-        }
-    }
-
-    // Process ContractSupportingDocument
-    console.info('Processing ContractSupportingDocument files...')
-    const contractSupportingDocuments =
-        await prisma.contractSupportingDocument.findMany()
-    console.info(
-        `Found ${contractSupportingDocuments.length} contract supporting documents`
-    )
-
-    for (const doc of contractSupportingDocuments) {
-        try {
-            const { newSha256, replaced } = await replaceDocument(
-                doc.id,
-                doc.s3URL,
-                doc.name // Original filename determines file type
-            )
-            if (replaced) {
-                await prisma.contractSupportingDocument.update({
-                    where: { id: doc.id },
-                    data: { sha256: newSha256 },
-                })
-                console.info(
-                    `Updated contract supporting document ${doc.id} (${doc.name})`
-                )
-            }
-        } catch (error) {
-            console.error(
-                `Error processing contract supporting document ${doc.id}:`,
-                error
-            )
-        }
-    }
-
-    // Process RateDocument
-    console.info('Processing RateDocument files...')
-    const rateDocuments = await prisma.rateDocument.findMany()
-    console.info(`Found ${rateDocuments.length} rate documents`)
-
-    for (const doc of rateDocuments) {
-        try {
-            const { newSha256, replaced } = await replaceDocument(
-                doc.id,
-                doc.s3URL,
-                doc.name // Original filename determines file type
-            )
-            if (replaced) {
-                await prisma.rateDocument.update({
-                    where: { id: doc.id },
-                    data: { sha256: newSha256 },
-                })
-                console.info(`Updated rate document ${doc.id} (${doc.name})`)
-            }
-        } catch (error) {
-            console.error(`Error processing rate document ${doc.id}:`, error)
-        }
-    }
-
-    // Process RateSupportingDocument
-    console.info('Processing RateSupportingDocument files...')
-    const rateSupportingDocuments =
-        await prisma.rateSupportingDocument.findMany()
-    console.info(
-        `Found ${rateSupportingDocuments.length} rate supporting documents`
-    )
-
-    for (const doc of rateSupportingDocuments) {
-        try {
-            const { newSha256, replaced } = await replaceDocument(
-                doc.id,
-                doc.s3URL,
-                doc.name
-            )
-            if (replaced) {
-                await prisma.rateSupportingDocument.update({
-                    where: { id: doc.id },
-                    data: { sha256: newSha256 },
-                })
-                console.info(
-                    `Updated rate supporting document ${doc.id} (${doc.name})`
-                )
-            }
-        } catch (error) {
-            console.error(
-                `Error processing rate supporting document ${doc.id}:`,
-                error
-            )
-        }
-    }
-
-    // Process ContractQuestionDocument
-    // Note: Q&A documents don't have a sha256 field
-    console.info('Processing ContractQuestionDocument files...')
-    const contractQuestionDocuments =
-        await prisma.contractQuestionDocument.findMany()
-    console.info(
-        `Found ${contractQuestionDocuments.length} contract question documents`
-    )
-
-    for (const doc of contractQuestionDocuments) {
-        try {
-            const { replaced } = await replaceDocument(
-                doc.id,
-                doc.s3URL,
-                doc.name
-            )
-            if (replaced) {
-                // No SHA256 update needed for question documents
-                console.info(
-                    `Replaced contract question document ${doc.id} (${doc.name})`
-                )
-            }
-        } catch (error) {
-            console.error(
-                `Error processing contract question document ${doc.id}:`,
-                error
-            )
-        }
-    }
-
-    // Process ContractQuestionResponseDocument
-    console.info('Processing ContractQuestionResponseDocument files...')
-    const contractQuestionResponseDocuments =
-        await prisma.contractQuestionResponseDocument.findMany()
-    console.info(
-        `Found ${contractQuestionResponseDocuments.length} contract question response documents`
-    )
-
-    for (const doc of contractQuestionResponseDocuments) {
-        try {
-            const { replaced } = await replaceDocument(
-                doc.id,
-                doc.s3URL,
-                doc.name
-            )
-            if (replaced) {
-                console.info(
-                    `Replaced contract question response document ${doc.id} (${doc.name})`
-                )
-            }
-        } catch (error) {
-            console.error(
-                `Error processing contract question response document ${doc.id}:`,
-                error
-            )
-        }
-    }
-
-    // Process RateQuestionDocument
-    console.info('Processing RateQuestionDocument files...')
-    const rateQuestionDocuments = await prisma.rateQuestionDocument.findMany()
-    console.info(
-        `Found ${rateQuestionDocuments.length} rate question documents`
-    )
-
-    for (const doc of rateQuestionDocuments) {
-        try {
-            const { replaced } = await replaceDocument(
-                doc.id,
-                doc.s3URL,
-                doc.name
-            )
-            if (replaced) {
-                console.info(
-                    `Replaced rate question document ${doc.id} (${doc.name})`
-                )
-            }
-        } catch (error) {
-            console.error(
-                `Error processing rate question document ${doc.id}:`,
-                error
-            )
-        }
-    }
-
-    // Process RateQuestionResponseDocument
-    console.info('Processing RateQuestionResponseDocument files...')
-    const rateQuestionResponseDocuments =
-        await prisma.rateQuestionResponseDocument.findMany()
-    console.info(
-        `Found ${rateQuestionResponseDocuments.length} rate question response documents`
-    )
-
-    for (const doc of rateQuestionResponseDocuments) {
-        try {
-            const { replaced } = await replaceDocument(
-                doc.id,
-                doc.s3URL,
-                doc.name
-            )
-            if (replaced) {
-                console.info(
-                    `Replaced rate question response document ${doc.id} (${doc.name})`
-                )
-            }
-        } catch (error) {
-            console.error(
-                `Error processing rate question response document ${doc.id}:`,
-                error
-            )
-        }
-    }
-
-    console.info('All document types processed successfully')
-}
-
-/**
  * Sanitize email addresses to use example.com domain
  */
 function sanitizeEmail(email: string): string {
@@ -1169,7 +1300,7 @@ async function validateEmailSanitization(prisma: PrismaClient): Promise<void> {
             console.error(`  User ${user.id}: ${user.email}`)
         )
         throw new Error(
-            `Email sanitization validation failed: ${invalidUserEmails.length} Users with invalid domains found`
+            'Email sanitization validation failed: Users with invalid domains found'
         )
     }
 
