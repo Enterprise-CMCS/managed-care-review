@@ -211,8 +211,6 @@ export const EditStateAssign = (): React.ReactElement => {
                         )}
                         <UswdsForm
                             id="EditStateAssignForm"
-                            aria-label={'Edit state assignment'}
-                            aria-describedby="EditStateAssignForm"
                             onSubmit={(e) => {
                                 setShouldValidate(true)
                                 return handleSubmit(e)

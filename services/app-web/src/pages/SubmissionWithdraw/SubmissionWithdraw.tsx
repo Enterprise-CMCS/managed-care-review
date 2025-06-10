@@ -248,8 +248,6 @@ export const SubmissionWithdraw = (): React.ReactElement => {
                     <Form
                         id="SubmissionWithdrawForm"
                         className={styles.formContainer}
-                        aria-label="Withdraw submission"
-                        aria-describedby="SubmissionWithdrawForm"
                         onSubmit={(e) => {
                             setShouldValidate(true)
                             return handleSubmit(e)
