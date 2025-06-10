@@ -1,5 +1,5 @@
 import { MockedResponse } from '@apollo/client/testing'
-import { ApolloError, ServerError } from '@apollo/client'
+import { ServerError } from '@apollo/client'
 import {
     CmsUser,
     FetchCurrentUserDocument,
@@ -132,7 +132,7 @@ const fetchCurrentUserMock = ({
     user = mockValidUser(), // defaults to logged in state user, we can override though from test
     statusCode,
 }: // eslint-disable-next-line @typescript-eslint/no-explicit-any
-fetchCurrentUserMockProps): MockedResponse<Record<string, any>> => {
+    fetchCurrentUserMockProps): MockedResponse<Record<string, any>> => {
     const mockError = (message: string, statusCode?: number) => {
         const error = new Error(message) as ServerError
         error.statusCode = statusCode || 400
@@ -167,34 +167,34 @@ const indexUsersQueryMock = (
 ): MockedResponse<IndexUsersQuery> => {
     const indexUsers: IndexUsersPayload | undefined = users
         ? {
-              totalCount: users.length,
-              __typename: 'IndexUsersPayload',
-              edges: users.map((user) => ({
-                  __typename: 'UserEdge',
-                  node: {
-                      ...user,
-                  },
-              })),
-          }
+            totalCount: users.length,
+            __typename: 'IndexUsersPayload',
+            edges: users.map((user) => ({
+                __typename: 'UserEdge',
+                node: {
+                    ...user,
+                },
+            })),
+        }
         : {
-              totalCount: 1,
-              __typename: 'IndexUsersPayload',
-              edges: [
-                  {
-                      __typename: 'UserEdge',
-                      node: {
-                          __typename: 'CMSUser',
-                          role: 'CMS_USER',
-                          id: '1',
-                          familyName: 'Hotman',
-                          givenName: 'Zuko',
-                          divisionAssignment: null,
-                          email: 'zuko@example.com',
-                          stateAssignments: [],
-                      },
-                  },
-              ],
-          }
+            totalCount: 1,
+            __typename: 'IndexUsersPayload',
+            edges: [
+                {
+                    __typename: 'UserEdge',
+                    node: {
+                        __typename: 'CMSUser',
+                        role: 'CMS_USER',
+                        id: '1',
+                        familyName: 'Hotman',
+                        givenName: 'Zuko',
+                        divisionAssignment: null,
+                        email: 'zuko@example.com',
+                        stateAssignments: [],
+                    },
+                },
+            ],
+        }
 
     return {
         request: {
@@ -208,7 +208,7 @@ const indexUsersQueryMock = (
     }
 }
 
-const indexUsersQueryFailMock = (): MockedResponse<ApolloError> => {
+const indexUsersQueryFailMock = (): MockedResponse<GraphQLError> => {
     const graphQLError = new GraphQLError(
         'Error fetching email settings data.',
         {
@@ -222,11 +222,10 @@ const indexUsersQueryFailMock = (): MockedResponse<ApolloError> => {
         request: {
             query: IndexUsersDocument,
         },
-        error: new ApolloError({
-            graphQLErrors: [graphQLError],
-        }),
+        error: graphQLError,
         result: {
             data: null,
+            errors: [graphQLError],
         },
     }
 }
@@ -281,9 +280,9 @@ function updateStateAssignmentsMutationMockSuccess(
 function updateStateAssignmentsMutationMockFailure(
     stateCode: string = 'CA',
     userIDs: string[] = ['1', '2']
-): MockedResponse<ApolloError> {
+): MockedResponse<GraphQLError> {
     const graphQLError = new GraphQLError(
-        'Error fetching email settings data.',
+        'Error updating state assignments.',
         {
             extensions: {
                 code: 'INTERNAL_SERVER_ERROR',
@@ -301,11 +300,10 @@ function updateStateAssignmentsMutationMockFailure(
                 },
             },
         },
-        error: new ApolloError({
-            graphQLErrors: [graphQLError],
-        }),
+        error: graphQLError,
         result: {
             data: null,
+            errors: [graphQLError],
         },
     }
 }
@@ -314,15 +312,15 @@ const iterableCmsUsersMockData: {
     userRole: 'CMS_USER' | 'CMS_APPROVER_USER'
     mockUser: <T>(userData?: Partial<T>) => CmsUser | CmsApproverUser
 }[] = [
-    {
-        userRole: 'CMS_USER',
-        mockUser: mockValidCMSUser,
-    },
-    {
-        userRole: 'CMS_APPROVER_USER',
-        mockUser: mockValidCMSApproverUser,
-    },
-]
+        {
+            userRole: 'CMS_USER',
+            mockUser: mockValidCMSUser,
+        },
+        {
+            userRole: 'CMS_APPROVER_USER',
+            mockUser: mockValidCMSApproverUser,
+        },
+    ]
 
 const iterableAdminUsersMockData: {
     userRole: 'HELPDESK_USER' | 'BUSINESSOWNER_USER' | 'ADMIN_USER'
@@ -330,47 +328,47 @@ const iterableAdminUsersMockData: {
         userData?: Partial<T>
     ) => AdminUser | BusinessOwnerUser | HelpdeskUser
 }[] = [
-    {
-        userRole: 'ADMIN_USER',
-        mockUser: mockValidAdminUser,
-    },
-    {
-        userRole: 'BUSINESSOWNER_USER',
-        mockUser: mockValidBusinessOwnerUser,
-    },
-    {
-        userRole: 'HELPDESK_USER',
-        mockUser: mockValidHelpDeskUser,
-    },
-]
+        {
+            userRole: 'ADMIN_USER',
+            mockUser: mockValidAdminUser,
+        },
+        {
+            userRole: 'BUSINESSOWNER_USER',
+            mockUser: mockValidBusinessOwnerUser,
+        },
+        {
+            userRole: 'HELPDESK_USER',
+            mockUser: mockValidHelpDeskUser,
+        },
+    ]
 
 const iterableNonCMSUsersMockData: {
     userRole:
-        | 'HELPDESK_USER'
-        | 'BUSINESSOWNER_USER'
-        | 'ADMIN_USER'
-        | 'STATE_USER'
+    | 'HELPDESK_USER'
+    | 'BUSINESSOWNER_USER'
+    | 'ADMIN_USER'
+    | 'STATE_USER'
     mockUser: <T>(
         userData?: Partial<T>
     ) => AdminUser | BusinessOwnerUser | HelpdeskUser | StateUser
 }[] = [
-    {
-        userRole: 'ADMIN_USER',
-        mockUser: mockValidAdminUser,
-    },
-    {
-        userRole: 'BUSINESSOWNER_USER',
-        mockUser: mockValidBusinessOwnerUser,
-    },
-    {
-        userRole: 'HELPDESK_USER',
-        mockUser: mockValidHelpDeskUser,
-    },
-    {
-        userRole: 'STATE_USER',
-        mockUser: mockValidStateUser,
-    },
-]
+        {
+            userRole: 'ADMIN_USER',
+            mockUser: mockValidAdminUser,
+        },
+        {
+            userRole: 'BUSINESSOWNER_USER',
+            mockUser: mockValidBusinessOwnerUser,
+        },
+        {
+            userRole: 'HELPDESK_USER',
+            mockUser: mockValidHelpDeskUser,
+        },
+        {
+            userRole: 'STATE_USER',
+            mockUser: mockValidStateUser,
+        },
+    ]
 
 export {
     fetchCurrentUserMock,
