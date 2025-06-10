@@ -1,10 +1,9 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import * as Yup from 'yup'
 import { Form as UswdsForm, Fieldset } from '@trussworks/react-uswds'
 import {
     Formik,
     FormikErrors,
-    FormikHelpers,
     FieldArray,
     getIn,
     FieldArrayRenderProps,
@@ -40,6 +39,7 @@ import { ErrorOrLoadingPage } from '../ErrorOrLoadingPage'
 import { PageBannerAlerts } from '../PageBannerAlerts'
 import { useErrorSummary } from '../../../hooks/useErrorSummary'
 import { featureFlags } from '@mc-review/common-code'
+import { SaveAsDraftSuccessBanner } from '../../../components/Banner/DraftSavedBanner/SaveAsDraftSuccessBanner'
 
 export interface ContactsFormValues {
     stateContacts: StateContact[]
@@ -71,10 +71,10 @@ const flattenErrors = (
 const Contacts = ({
     showValidations = false,
 }: ContractFormPageProps): React.ReactElement => {
-    const [shouldValidate, setShouldValidate] = React.useState(showValidations)
-    const [focusNewContact, setFocusNewContact] = React.useState(false)
-    const [focusNewActuaryContact, setFocusNewActuaryContact] =
-        React.useState(false)
+    const [shouldValidate, setShouldValidate] = useState(showValidations)
+    const [draftSaved, setDraftSaved] = useState(false)
+    const [focusNewContact, setFocusNewContact] = useState(false)
+    const [focusNewActuaryContact, setFocusNewActuaryContact] = useState(false)
     const ldClient = useLDClient()
     const { setFocusErrorSummaryHeading, errorSummaryHeadingRef } =
         useErrorSummary()
@@ -86,8 +86,6 @@ const Contacts = ({
     const { id } = useRouteParams()
     const { draftSubmission, interimState, updateDraft, showPageErrorMessage } =
         useContractForm(id)
-
-    const redirectToDashboard = React.useRef(false)
     const newStateContactNameRef = React.useRef<HTMLInputElement | null>(null) // This ref.current is reset to the newest contact name field each time new contact is added
     const [newStateContactButtonRef, setNewStateContactButtonFocus] = useFocus() // This ref.current is always the same element
 
@@ -106,12 +104,14 @@ const Contacts = ({
     */
     useEffect(() => {
         if (focusNewContact) {
+            // eslint-disable-next-line @typescript-eslint/no-unused-expressions
             newStateContactNameRef.current &&
                 newStateContactNameRef.current.focus()
             setFocusNewContact(false)
             newStateContactNameRef.current = null
         }
         if (focusNewActuaryContact) {
+            // eslint-disable-next-line @typescript-eslint/no-unused-expressions
             newActuaryContactNameRef.current &&
                 newActuaryContactNameRef.current.focus()
             setFocusNewActuaryContact(false)
@@ -157,7 +157,8 @@ const Contacts = ({
 
     const handleFormSubmit = async (
         values: ContactsFormValues,
-        formikHelpers: FormikHelpers<ContactsFormValues>
+        setSubmitting: (isSubmitting: boolean) => void, // formik setSubmitting
+        savingAsDraft?: boolean
     ) => {
         draftSubmission.draftRevision.formData.stateContacts =
             values.stateContacts
@@ -171,20 +172,18 @@ const Contacts = ({
 
         const updatedSubmission = await updateDraft(updatedContractInput)
         if (updatedSubmission instanceof Error) {
-            formikHelpers.setSubmitting(false)
-            redirectToDashboard.current = false
+            setSubmitting(false)
             const msg = `Error updating draft submission: ${updatedSubmission}`
             console.info(msg)
             recordJSException(msg)
-        } else if (updatedSubmission) {
-            if (redirectToDashboard.current) {
-                navigate(RoutesRecord.DASHBOARD_SUBMISSIONS)
+        } else if (savingAsDraft && updatedSubmission) {
+            setDraftSaved(true)
+            setSubmitting(false)
+        } else {
+            if (hideSupportingDocs) {
+                navigate(`../review-and-submit`)
             } else {
-                if (hideSupportingDocs) {
-                    navigate(`../review-and-submit`)
-                } else {
-                    navigate(`../documents`)
-                }
+                navigate(`../documents`)
             }
         }
     }
@@ -219,19 +218,24 @@ const Contacts = ({
                     unlockedInfo={draftSubmission.draftRevision.unlockInfo}
                     showPageErrorMessage={showPageErrorMessage ?? false}
                 />
+                {!showPageErrorMessage && draftSaved && (
+                    <SaveAsDraftSuccessBanner />
+                )}
             </FormNotificationContainer>
             <FormContainer id="Contacts">
                 <Formik
                     initialValues={contactsInitialValues}
-                    onSubmit={handleFormSubmit}
+                    onSubmit={(values, { setSubmitting }) => {
+                        return handleFormSubmit(values, setSubmitting)
+                    }}
                     validationSchema={contactSchema}
                 >
                     {({
                         values,
                         errors,
-                        dirty,
                         handleSubmit,
                         isSubmitting,
+                        setSubmitting,
                     }) => (
                         <>
                             <UswdsForm
@@ -421,17 +425,13 @@ const Contacts = ({
                                     </fieldset>
                                 </SectionCard>
                                 <PageActions
-                                    saveAsDraftOnClick={() => {
-                                        if (!dirty) {
-                                            navigate(
-                                                RoutesRecord.DASHBOARD_SUBMISSIONS
-                                            )
-                                        } else {
-                                            setShouldValidate(true)
-                                            setFocusErrorSummaryHeading(true)
-                                            redirectToDashboard.current = true
-                                            handleSubmit()
-                                        }
+                                    saveAsDraftOnClick={async () => {
+                                        setFocusErrorSummaryHeading(true)
+                                        await handleFormSubmit(
+                                            values,
+                                            setSubmitting,
+                                            true
+                                        )
                                     }}
                                     backOnClick={() =>
                                         navigate(
@@ -443,7 +443,6 @@ const Contacts = ({
                                         )
                                     }
                                     continueOnClick={() => {
-                                        redirectToDashboard.current = false
                                         setShouldValidate(true)
                                         setFocusErrorSummaryHeading(true)
                                     }}
@@ -459,9 +458,6 @@ const Contacts = ({
                                                   RoutesRecord.SUBMISSIONS_RATE_DETAILS,
                                                   { id }
                                               )
-                                    }
-                                    saveAsDraftOnClickUrl={
-                                        RoutesRecord.DASHBOARD_SUBMISSIONS
                                     }
                                     continueOnClickUrl="/edit/documents"
                                 />

@@ -54,6 +54,7 @@ import { useContractForm } from '../../../hooks/useContractForm'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '@mc-review/common-code'
 import { ContactSupportLink } from '../../../components/ErrorAlert/ContactSupportLink'
+import { SaveAsDraftSuccessBanner } from '../../../components/Banner/DraftSavedBanner/SaveAsDraftSuccessBanner'
 
 export interface SubmissionTypeFormValues {
     populationCovered?: PopulationCoveredType
@@ -73,6 +74,7 @@ export const SubmissionType = ({
     const { loggedInUser } = useAuth()
     const { currentRoute } = useCurrentRoute()
     const [shouldValidate, setShouldValidate] = useState(showValidations)
+    const [draftSaved, setDraftSaved] = useState(false)
     const [showAPIErrorBanner, setShowAPIErrorBanner] = useState<
         boolean | string
     >(false) // string is a custom error message, defaults to generic message when true
@@ -126,7 +128,7 @@ export const SubmissionType = ({
     const handleFormSubmit = async (
         values: SubmissionTypeFormValues,
         setSubmitting: (isSubmitting: boolean) => void, // formik setSubmitting
-        redirectPath?: string
+        savingAsDraft?: boolean
     ) => {
         if (isNewSubmission) {
             if (!values.populationCovered) {
@@ -192,6 +194,7 @@ export const SubmissionType = ({
             }
             navigate(`/submissions/${draftSubmission.id}/edit/contract-details`)
         } else {
+            setSubmitting(true)
             if (draftSubmission === undefined || !updateDraft) {
                 console.info(draftSubmission, updateDraft)
                 console.info(
@@ -322,8 +325,11 @@ export const SubmissionType = ({
             const updatedDraft = await updateDraft(updatedContractInput)
             if (updatedDraft instanceof Error) {
                 setSubmitting(false)
+            } else if (savingAsDraft && updatedDraft) {
+                setDraftSaved(true)
+                setSubmitting(false)
             } else {
-                navigate(redirectPath || `../contract-details`)
+                navigate(`../contract-details`)
             }
         }
     }
@@ -391,8 +397,11 @@ export const SubmissionType = ({
                 <PageBannerAlerts
                     loggedInUser={loggedInUser}
                     unlockedInfo={draftSubmission?.draftRevision.unlockInfo}
-                    showPageErrorMessage={showPageErrorMessage ?? false}
+                    showPageErrorMessage={showPageErrorMessage}
                 />
+                {!showPageErrorMessage && draftSaved && (
+                    <SaveAsDraftSuccessBanner />
+                )}
             </FormNotificationContainer>
             <FormContainer id="SubmissionType">
                 <Formik
@@ -823,14 +832,11 @@ export const SubmissionType = ({
                                             await handleFormSubmit(
                                                 values,
                                                 setSubmitting,
-                                                RoutesRecord.DASHBOARD_SUBMISSIONS
+                                                true
                                             )
                                         }}
                                         actionInProgress={isSubmitting}
                                         backOnClickUrl={
-                                            RoutesRecord.DASHBOARD_SUBMISSIONS
-                                        }
-                                        saveAsDraftOnClickUrl={
                                             RoutesRecord.DASHBOARD_SUBMISSIONS
                                         }
                                         continueOnClickUrl="/edit/contract-details"

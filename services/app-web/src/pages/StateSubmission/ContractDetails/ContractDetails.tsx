@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import dayjs from 'dayjs'
 import {
     Form as UswdsForm,
@@ -86,6 +86,7 @@ import {
     UpdateContractDraftRevisionInput,
     ContractDraftRevisionFormDataInput,
 } from '../../../gen/gqlClient'
+import { SaveAsDraftSuccessBanner } from '../../../components/Banner/DraftSavedBanner/SaveAsDraftSuccessBanner'
 
 function formattedDatePlusOneDay(initialValue: string): string {
     const dayjsValue = dayjs(initialValue)
@@ -151,7 +152,8 @@ export type FormError =
 export const ContractDetails = ({
     showValidations = false,
 }: ContractFormPageProps): React.ReactElement => {
-    const [shouldValidate, setShouldValidate] = React.useState(showValidations)
+    const [shouldValidate, setShouldValidate] = useState(showValidations)
+    const [draftSaved, setDraftSaved] = useState(false)
     const navigate = useNavigate()
     const ldClient = useLDClient()
     const { setFocusErrorSummaryHeading, errorSummaryHeadingRef } =
@@ -190,6 +192,7 @@ export const ContractDetails = ({
                 docType === 'supporting' &&
                 !draftSubmission.draftRevision.formData.supportingDocuments)
         )
+            // eslint-disable-next-line @typescript-eslint/no-unused-expressions
             undefined
         const docs =
             docType === 'contract'
@@ -390,9 +393,7 @@ export const ContractDetails = ({
     const handleFormSubmit = async (
         values: ContractDetailsFormValues,
         setSubmitting: (isSubmitting: boolean) => void, // formik setSubmitting
-        options: {
-            redirectPath: string
-        }
+        savingAsDraft?: boolean
     ) => {
         const updatedDraftSubmissionFormData: ContractDraftRevisionFormDataInput =
             {
@@ -520,8 +521,16 @@ export const ContractDetails = ({
         if (updatedSubmission instanceof Error) {
             setSubmitting(false)
             console.info('Error updating draft submission: ', updatedSubmission)
-        } else if (updatedSubmission) {
-            navigate(options.redirectPath)
+        } else if (savingAsDraft && updatedSubmission) {
+            setDraftSaved(true)
+            setSubmitting(false)
+        } else {
+            const redirectPath =
+                updatedSubmission.draftRevision!.formData.submissionType ===
+                'CONTRACT_ONLY'
+                    ? `../contacts`
+                    : `../rate-details`
+            navigate(redirectPath)
         }
     }
 
@@ -542,18 +551,15 @@ export const ContractDetails = ({
                     unlockedInfo={draftSubmission.draftRevision.unlockInfo}
                     showPageErrorMessage={showPageErrorMessage ?? false}
                 />
+                {!showPageErrorMessage && draftSaved && (
+                    <SaveAsDraftSuccessBanner />
+                )}
             </FormNotificationContainer>
             <FormContainer id="ContactDetails">
                 <Formik
                     initialValues={contractDetailsInitialValues}
                     onSubmit={(values, { setSubmitting }) => {
-                        return handleFormSubmit(values, setSubmitting, {
-                            redirectPath:
-                                draftSubmission.draftRevision.formData
-                                    .submissionType === 'CONTRACT_ONLY'
-                                    ? `../contacts`
-                                    : `../rate-details`,
-                        })
+                        return handleFormSubmit(values, setSubmitting)
                     }}
                     validationSchema={() =>
                         ContractDetailsFormSchema(
@@ -1307,12 +1313,10 @@ export const ContractDetails = ({
                                 <PageActions
                                     saveAsDraftOnClick={async () => {
                                         await handleFormSubmit(
+                                            //juan
                                             values,
                                             setSubmitting,
-                                            {
-                                                redirectPath:
-                                                    RoutesRecord.DASHBOARD_SUBMISSIONS,
-                                            }
+                                            true
                                         )
                                     }}
                                     backOnClick={async () => {
@@ -1325,11 +1329,9 @@ export const ContractDetails = ({
                                         } else {
                                             await handleFormSubmit(
                                                 values,
-                                                setSubmitting,
-                                                {
-                                                    redirectPath: '../type',
-                                                }
+                                                setSubmitting
                                             )
+                                            navigate('../type')
                                         }
                                     }}
                                     disableContinue={
@@ -1341,9 +1343,6 @@ export const ContractDetails = ({
                                         RoutesRecord.SUBMISSIONS_TYPE,
                                         { id }
                                     )}
-                                    saveAsDraftOnClickUrl={
-                                        RoutesRecord.DASHBOARD_SUBMISSIONS
-                                    }
                                     continueOnClickUrl={
                                         draftSubmission.draftRevision.formData
                                             .submissionType === 'CONTRACT_ONLY'
