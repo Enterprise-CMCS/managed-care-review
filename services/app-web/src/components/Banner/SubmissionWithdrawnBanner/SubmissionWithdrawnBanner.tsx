@@ -1,10 +1,10 @@
 import React from 'react'
-import { Alert } from '@trussworks/react-uswds'
 import styles from '../Banner.module.scss'
 import { getUpdatedByDisplayName } from '@mc-review/helpers'
 import { formatBannerDate } from '@mc-review/dates'
 import { ExpandableText } from '../../ExpandableText'
 import { UpdatedBy } from '../../../gen/gqlClient'
+import { AccessibleAlertBanner } from '../AccessibleAlertBanner/AccessibleAlertBanner'
 
 interface SubmissionWithdrawnBannerProps
     extends React.HTMLAttributes<HTMLDivElement> {
@@ -20,8 +20,8 @@ export const SubmissionWithdrawnBanner = ({
     withdrawInfo,
 }: SubmissionWithdrawnBannerProps): React.ReactElement => {
     return (
-        <Alert
-            role="alert"
+        <AccessibleAlertBanner
+            role="status"
             type="success"
             heading="Status Updated"
             headingLevel="h4"
@@ -46,6 +46,6 @@ export const SubmissionWithdrawnBanner = ({
                     {withdrawInfo.updatedReason}
                 </ExpandableText>
             </div>
-        </Alert>
+        </AccessibleAlertBanner>
     )
 }

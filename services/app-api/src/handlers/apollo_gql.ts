@@ -1,11 +1,13 @@
 import type { Context as OTELContext, Span, Tracer } from '@opentelemetry/api'
 import { propagation, ROOT_CONTEXT } from '@opentelemetry/api'
 import { ApolloServer } from 'apollo-server-lambda'
+import { initTracer, recordException } from '../../../uploads/src/lib/otel'
 import type {
     APIGatewayProxyEvent,
     APIGatewayProxyHandler,
     Handler,
 } from 'aws-lambda'
+
 import typeDefs from '../../../app-graphql/src/schema.graphql'
 import { assertIsAuthMode } from '@mc-review/common-code'
 import type { UserType } from '../domain-models'
@@ -365,13 +367,28 @@ const gqlHandler: Handler = async (event, context, completion) => {
     const initializedHandler = await handlerPromise
 
     const response = await initializedHandler(event, context, completion)
-
+    const payloadSize = Buffer.from(event.body).length
+    const serviceName = 'gql-handler'
+    const otelCollectorUrl = process.env.API_APP_OTEL_COLLECTOR_URL
+    if (otelCollectorUrl === undefined || otelCollectorUrl === '') {
+        throw new Error(
+            'Configuration Error: API_APP_OTEL_COLLECTOR_URL is required to run app-api'
+        )
+    }
+    initTracer(serviceName, otelCollectorUrl)
+    if (payloadSize > 5.5 * 1024 * 1024) {
+        const errMsg = `Large request payload detected: ${payloadSize} bytes`
+        console.warn(errMsg)
+        recordException(errMsg, serviceName, 'requestPayload')
+    }
     // Log response size metrics without modifying the response
     if (response && response.body) {
         const bodySize = Buffer.from(response.body).length
         console.info(`Response size: ${bodySize} bytes`)
-        if (bodySize > 4 * 1024 * 1024) {
-            console.warn(`Large response detected: ${bodySize} bytes`)
+        if (bodySize > 5.5 * 1024 * 1024) {
+            const errMsg = `Large response detected: ${bodySize} bytes`
+            console.warn(errMsg)
+            recordException(errMsg, serviceName, 'responsePayload')
         }
     }
 

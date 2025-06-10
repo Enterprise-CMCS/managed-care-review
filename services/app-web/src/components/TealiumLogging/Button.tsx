@@ -1,7 +1,6 @@
 import React from 'react'
 import { Button } from '@trussworks/react-uswds'
 import type { ButtonEventStyle, TealiumButtonEventObject } from '../../tealium'
-import { ButtonProps } from '@trussworks/react-uswds/lib/components/Button/Button'
 import { extractText } from './tealiamLoggingHelpers'
 import { useTealium } from '../../hooks'
 
@@ -11,8 +10,7 @@ type TealiumDataType = Omit<
 >
 
 type ButtonWithLoggingType = TealiumDataType &
-    ButtonProps &
-    React.ButtonHTMLAttributes<HTMLButtonElement>
+    React.ComponentProps<typeof Button>
 
 const ButtonWithLogging = (props: ButtonWithLoggingType) => {
     const { logButtonEvent } = useTealium()

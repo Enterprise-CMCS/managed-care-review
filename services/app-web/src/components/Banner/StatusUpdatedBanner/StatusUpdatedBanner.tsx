@@ -1,24 +1,19 @@
 import React from 'react'
-import { Alert } from '@trussworks/react-uswds'
-import styles from '../Banner.module.scss'
+import { AccessibleAlertBanner } from '../AccessibleAlertBanner/AccessibleAlertBanner'
 
 export const StatusUpdatedBanner = ({
     className,
 }: React.HTMLAttributes<HTMLDivElement>) => {
     return (
-        <Alert
-            role="alert"
+        <AccessibleAlertBanner
+            role="status"
             type="success"
             heading="Status updated"
             headingLevel="h4"
             data-testid="statusUpdatedBanner"
             className={className}
         >
-            <div className={styles.bannerBodyText}>
-                <p className="usa-alert__text">
-                    Submission status updated to "Submitted".
-                </p>
-            </div>
-        </Alert>
+            Submission status updated to "Submitted".
+        </AccessibleAlertBanner>
     )
 }
