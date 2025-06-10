@@ -217,7 +217,14 @@ async function saveProcessingState(
             new PutObjectCommand({
                 Bucket: S3_BUCKET,
                 Key: PROCESSING_STATE_KEY,
-                Body: JSON.stringify(state, null, 2),
+                Body: JSON.stringify(
+                    {
+                        ...state,
+                        lastUpdated: new Date().toISOString(),
+                    },
+                    null,
+                    2
+                ),
                 ContentType: 'application/json',
             })
         )
