@@ -3,6 +3,7 @@ import type {
     RateRevisionType,
     StrippedRateType,
     StrippedRateRevisionType,
+    ContractRevisionType,
 } from '../../domain-models/contractAndRates'
 import { rateSchema } from '../../domain-models/contractAndRates'
 import type {
@@ -27,6 +28,8 @@ import {
     rateFormDataToDomainModel,
     getParentContractID,
     DRAFT_PARENT_PLACEHOLDER,
+    setDateAddedForContractRevisions,
+    setDateAddedForRateRevisions,
 } from './prismaSharedContractRateHelpers'
 import type {
     RateTableWithoutDraftContractsPayload,
@@ -137,13 +140,10 @@ function rateWithoutDraftContractsToDomainModel(
                 submitedRevs.push(contractRev)
             }
             for (const rateRev of submittedRates) {
-                if (rateRev instanceof Error) {
-                    return rateRev
-                }
                 submitedRevs.push(rateRev)
             }
 
-            const reatedContractRevisions = submission.submissionPackages
+            const relatedContractRevisions = submission.submissionPackages
                 .filter((p) => p.rateRevisionID === revision.id)
                 .sort(
                     (a, b) =>
@@ -153,11 +153,8 @@ function rateWithoutDraftContractsToDomainModel(
                 .map((p) => p.contractRevision)
 
             const rateRevision = rateRevisionToDomainModel(revision)
-            if (rateRevision instanceof Error) {
-                return rateRevision
-            }
 
-            const contractRevisions = reatedContractRevisions.map((c) =>
+            const contractRevisions = relatedContractRevisions.map((c) =>
                 contractRevisionToDomainModel(c)
             )
 
@@ -180,29 +177,24 @@ function rateWithoutDraftContractsToDomainModel(
         return parentContractID
     }
 
-    // TODO: why are we handling this differently from how we're doing dates in parseContractWithHistory
-    // handle legacy revisions dateAdded  on documents
-    // get references to rate revision in submission order and
-    // reset the document dateAdded dates accordingly.
-    const firstSeenDate: { [sha: string]: Date } = {}
-    for (const rateRev of submittedRevisions) {
-        const sinceDate = rateRev.submitInfo?.updatedAt || rateRev.updatedAt
-        if (rateRev.formData.rateDocuments) {
-            for (const doc of rateRev.formData.rateDocuments) {
-                if (!firstSeenDate[doc.sha256]) {
-                    firstSeenDate[doc.sha256] = sinceDate
-                }
-                doc.dateAdded = firstSeenDate[doc.sha256]
+    // Set the document date added
+    setDateAddedForRateRevisions(submittedRevisions)
+
+    // Add contract date added
+    //NOTE: This will not display the actual date added for linked contracts because we do not query all the linked contract revisions
+    const packageContractRevisions: { [id: string]: ContractRevisionType[] } =
+        {}
+    for (const pkg of packageSubmissions) {
+        for (const cRev of pkg.contractRevisions) {
+            if (!packageContractRevisions[cRev.contract.id]) {
+                packageContractRevisions[cRev.contract.id] = []
             }
+            packageContractRevisions[cRev.contract.id].push(cRev)
         }
-        if (rateRev.formData.supportingDocuments) {
-            for (const doc of rateRev.formData.supportingDocuments) {
-                if (!firstSeenDate[doc.sha256]) {
-                    firstSeenDate[doc.sha256] = sinceDate
-                }
-                doc.dateAdded = firstSeenDate[doc.sha256]
-            }
-        }
+    }
+
+    for (const cRevs of Object.values(packageContractRevisions)) {
+        setDateAddedForContractRevisions(cRevs)
     }
 
     const status = getContractRateStatus(rateRevisions)

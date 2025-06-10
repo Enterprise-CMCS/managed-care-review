@@ -1,0 +1,14 @@
+mutation UpdateOauthClient($input: UpdateOauthClientInput!) {
+    updateOauthClient(input: $input) {
+        oauthClient {
+            id
+            clientId
+            clientSecret
+            description
+            contactEmail
+            grants
+            createdAt
+            updatedAt
+        }
+    }
+} 

@@ -63,6 +63,12 @@ import { rateStrippedResolver } from './rate/rateResolver'
 import { indexRatesStripped } from './rate/indexRatesStripped'
 import { withdrawContract } from './contract/withdrawContract'
 import { undoWithdrawContract } from './contract/undoWithdrawContract'
+import {
+    createOauthClientResolver,
+    fetchOauthClientsResolver,
+    deleteOauthClientResolver,
+    updateOauthClientResolver,
+} from './oauthClient'
 
 export function configureResolvers(
     store: Store,
@@ -87,6 +93,7 @@ export function configureResolvers(
             indexRatesStripped: indexRatesStripped(store),
             fetchRate: fetchRateResolver(store),
             fetchContract: fetchContractResolver(store),
+            fetchOauthClients: fetchOauthClientsResolver(store),
         },
         Mutation: {
             createHealthPlanPackage: createHealthPlanPackageResolver(store),
@@ -134,6 +141,9 @@ export function configureResolvers(
             unlockRate: unlockRate(store),
             submitRate: submitRate(store, launchDarkly),
             updateEmailSettings: updateEmailSettings(store),
+            createOauthClient: createOauthClientResolver(store),
+            deleteOauthClient: deleteOauthClientResolver(store),
+            updateOauthClient: updateOauthClientResolver(store),
         },
         User: {
             // resolveType is required to differentiate Unions
