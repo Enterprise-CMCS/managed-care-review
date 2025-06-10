@@ -16,7 +16,7 @@ import { Loading } from '../../components'
 import { useAuth } from '../../contexts/AuthContext'
 import { Breadcrumbs } from '../../components/Breadcrumbs/Breadcrumbs'
 import { RoutesRecord } from '@mc-review/constants'
-import { ApolloError } from '@apollo/client'
+import { GraphQLError } from 'graphql'
 import { handleApolloError } from '@mc-review/helpers'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import { Error404 } from '../Errors/Error404Page'
@@ -63,10 +63,10 @@ export const MccrsId = (): React.ReactElement => {
     if (fetchResult.status === 'ERROR') {
         const err = fetchResult.error
         console.error('Error from API fetch', fetchResult.error)
-        if (err instanceof ApolloError) {
+        if (err instanceof GraphQLError) {
             handleApolloError(err, true)
 
-            if (err.graphQLErrors[0]?.extensions?.code === 'NOT_FOUND') {
+            if (err.extensions?.code === 'NOT_FOUND') {
                 return <Error404 />
             }
         }

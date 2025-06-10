@@ -126,26 +126,31 @@ The following files need type updates but don't create new instances:
   - Added custom error class examples
   - Updated links to Apollo v4 documentation
 
-## Files to Update
+## Frontend
 
-### Frontend (app-web)
-1. [ ] `src/pages/MccrsId/MccrsId.tsx`
-   - Change: Update error handling to use GraphQLError
-   - Note: Used in MCCRS ID page error states
-   - Required Changes:
-     - Remove ApolloError imports
-     - Update error type checking
-     - Update error message display logic
+1. ✅ `src/pages/MccrsId/MccrsId.tsx`
+   - Removed `ApolloError` import
+   - Updated error handling to use `GraphQLError`
+   - Updated error type checking and message display
+   - Preserved error handling compatibility with tests
+   - Updated error code access to use `extensions.code` directly
 
-2. [ ] `src/pages/APIAccess/APIAccess.tsx`
-   - Change: Update API access error handling
-   - Note: Handles API key management errors
-   - Required Changes:
-     - Update error type imports
-     - Modify error handling logic
-     - Update error display components
+2. ✅ `src/pages/SubmissionSummary/SubmissionSummary.tsx`
+   - Removed `ApolloError` import
+   - Updated error handling to use `GraphQLError`
+   - Updated error type checking to use `instanceof GraphQLError`
+   - Updated error code access to use `extensions.code` directly
+   - Simplified error message access
+   - Maintained error page routing logic
 
-3. [ ] `src/pages/StateSubmission/ErrorOrLoadingPage.tsx`
+3. ✅ `src/pages/APIAccess/APIAccess.tsx`
+   - Removed `ApolloError` import
+   - Updated error handling to use `GraphQLError`
+   - Updated error type checking to use `instanceof GraphQLError`
+   - Maintained error handling compatibility with tests
+   - Preserved error page display logic
+
+4. `src/pages/StateSubmission/ErrorOrLoadingPage.tsx`
    - Change: Update submission error handling
    - Note: Critical for state submission workflow
    - Required Changes:
@@ -153,15 +158,7 @@ The following files need type updates but don't create new instances:
      - Modify error state handling
      - Update error message formatting
 
-4. [ ] `src/pages/Errors/ErrorFailedRequestPage.tsx`
-   - Change: Update general error handling
-   - Note: Used across multiple error scenarios
-   - Required Changes:
-     - Update error type checking
-     - Modify error message extraction
-     - Update error display logic
-
-5. [ ] `src/pages/SubmissionSideNav/SubmissionSideNav.tsx`
+5. `src/pages/SubmissionSideNav/SubmissionSideNav.tsx`
    - Change: Update navigation error handling
    - Note: Handles submission navigation errors
    - Required Changes:
@@ -169,7 +166,7 @@ The following files need type updates but don't create new instances:
      - Modify error state management
      - Update error display components
 
-6. [ ] `src/pages/SubmissionSideNav/RateSummarySideNav.tsx`
+6. `src/pages/SubmissionSideNav/RateSummarySideNav.tsx`
    - Change: Update rate summary error handling
    - Note: Handles rate-related navigation errors
    - Required Changes:
@@ -177,7 +174,7 @@ The following files need type updates but don't create new instances:
      - Modify error handling logic
      - Update error display components
 
-7. [ ] `src/pages/Settings/SettingsErrorAlert.tsx`
+7. `src/pages/Settings/SettingsErrorAlert.tsx`
    - Change: Update settings error handling
    - Note: Critical for settings management
    - Required Changes:
@@ -185,7 +182,7 @@ The following files need type updates but don't create new instances:
      - Modify error message formatting
      - Update error display logic
 
-8. [ ] `src/pages/Settings/Settings.tsx`
+8. `src/pages/Settings/Settings.tsx`
    - Change: Update main settings error handling
    - Note: Core settings page error management
    - Required Changes:
@@ -193,15 +190,15 @@ The following files need type updates but don't create new instances:
      - Modify error state handling
      - Update error display components
 
-9. [ ] `src/pages/Settings/SettingsTables/DivisionAssignmentTable.tsx`
-   - Change: Update division assignment error handling
-   - Note: Handles division-related errors
-   - Required Changes:
-     - Update error type definitions
-     - Modify error handling logic
-     - Update error display components
+9. `src/pages/Settings/SettingsTables/DivisionAssignmentTable.tsx`
+    - Change: Update division assignment error handling
+    - Note: Handles division-related errors
+    - Required Changes:
+      - Update error type definitions
+      - Modify error handling logic
+      - Update error display components
 
-10. [ ] `src/hooks/useHealthPlanPackageForm.ts`
+10. `src/hooks/useHealthPlanPackageForm.ts`
     - Change: Update form error handling
     - Note: Critical for health plan package forms
     - Required Changes:
@@ -209,7 +206,7 @@ The following files need type updates but don't create new instances:
       - Modify error state management
       - Update error handling utilities
 
-11. [ ] `src/hooks/useContractForm.ts`
+11. `src/hooks/useContractForm.ts`
     - Change: Update contract form error handling
     - Note: Essential for contract management
     - Required Changes:
@@ -218,87 +215,39 @@ The following files need type updates but don't create new instances:
       - Update error state management
 
 ### Helpers Package
-- [ ] `packages/helpers/src/gql/apolloErrors.ts`
+- [x] `packages/helpers/src/gql/apolloErrors.ts`
   - Change: Update error handling utilities
   - Note: Core error handling utilities
   - Required Changes:
-    - Remove ApolloError imports
-    - Update error type definitions
-    - Create new GraphQLError utilities
-    - Update error code mappings
-    - Add error message formatters
+    - Removed ApolloError imports
+    - Updated error type definitions to use GraphQLError
+    - Updated error handling to work with GraphQLError directly
+    - Added error code extraction from extensions
+    - Improved error message formatting
+  - Changes:
+    - Removed ApolloError and GraphQLErrors imports
+    - Added GraphQLError import from graphql
+    - Updated handleApolloError to work with GraphQLError
+    - Updated handleGQLErrors to include error codes
+    - Simplified error type checking
+    - Maintained backward compatibility with existing error handling
 
-- [ ] `packages/helpers/src/gql/mutationWrappersForUserFriendlyErrors.ts`
+- [x] `packages/helpers/src/gql/mutationWrappersForUserFriendlyErrors.ts`
   - Change: Update mutation error wrappers
   - Note: Critical for user-friendly error handling
   - Required Changes:
-    - Update error type imports
-    - Modify error wrapping logic
-    - Update error message formatting
-    - Add GraphQLError specific handling
-
-### Mocks Package
-- [x] `packages/mocks/src/apollo/approveContractMocks.ts`
-- [x] `packages/mocks/src/apollo/userGQLMock.ts`
-- [x] `packages/mocks/src/apollo/contractGQLMock.ts`
-- [x] `packages/mocks/src/apollo/mcReviewSettingsGQLMocks.ts`
-- [x] `packages/mocks/src/apollo/healthPlanPackageGQLMock.ts`
+    - Removed ApolloError imports
+    - Updated error type definitions to use GraphQLError
+    - Updated error handling to work with GraphQLError directly
+    - Updated return types to use GraphQLError
+    - Simplified error message extraction
+  - Changes:
+    - Removed ApolloError and GraphQLErrors imports
+    - Added GraphQLError import from graphql
+    - Updated handleApolloErrorsAndAddUserFriendlyMessages to use GraphQLError
+    - Updated all mutation wrapper return types
+    - Simplified error code and message extraction
+    - Maintained error handling compatibility with existing code
 
 ## Migration Steps
-1. Create new error handling utilities using `GraphQLError`
-2. Update backend resolvers to use new error handling
-3. Update frontend error handling to work with new error format
-4. Update mocks to reflect new error structure
-5. Remove `apollo-server-lambda` dependency
-6. Test all error scenarios thoroughly
-7. Update documentation and examples
-8. Perform end-to-end testing
-9. Deploy changes in stages
-10. Monitor error handling in production
-
-## Testing Strategy
-1. Unit Tests
-   - Test individual error handling components
-   - Verify error message formatting
-   - Check error type conversions
-   - Validate error code mappings
-
-2. Integration Tests
-   - Test error handling across components
-   - Verify error propagation
-   - Check error state management
-   - Validate error recovery
-
-3. End-to-End Tests
-   - Test complete error scenarios
-   - Verify user experience
-   - Check error message clarity
-   - Validate error handling flow
-
-## Rollout Plan
-1. Development
-   - Update mocks and utilities
-   - Modify frontend components
-   - Update test files
-   - Perform local testing
-
-2. Staging
-   - Deploy changes to staging
-   - Run full test suite
-   - Verify error handling
-   - Check error messages
-
-3. Production
-   - Deploy in phases
-   - Monitor error rates
-   - Check error handling
-   - Gather user feedback
-
-## Success Criteria
-1. All ApolloError instances replaced with GraphQLError
-2. Error handling works consistently across the application
-3. Error messages are clear and user-friendly
-4. Tests pass with new error format
-5. No regression in error handling functionality
-6. Improved error tracking and debugging
-7. Better alignment with GraphQL specification 
+1. Create new error handling utilities using `
