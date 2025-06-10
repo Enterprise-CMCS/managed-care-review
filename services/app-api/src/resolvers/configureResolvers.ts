@@ -67,6 +67,7 @@ import {
     createOauthClientResolver,
     fetchOauthClientsResolver,
     deleteOauthClientResolver,
+    updateOauthClientResolver,
 } from './oauthClient'
 
 export function configureResolvers(
@@ -142,6 +143,7 @@ export function configureResolvers(
             updateEmailSettings: updateEmailSettings(store),
             createOauthClient: createOauthClientResolver(store),
             deleteOauthClient: deleteOauthClientResolver(store),
+            updateOauthClient: updateOauthClientResolver(store),
         },
         User: {
             // resolveType is required to differentiate Unions

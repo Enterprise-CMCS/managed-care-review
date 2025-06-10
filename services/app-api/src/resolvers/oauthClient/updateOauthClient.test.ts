@@ -31,10 +31,12 @@ describe('updateOauthClient', () => {
             contactEmail: 'updated@example.com',
             grants: ['client_credentials', 'refresh_token'],
         }
+
         const res = await server.executeOperation({
             query: UpdateOauthClientDocument,
             variables: { input: updateInput },
         })
+
         expect(res.errors).toBeUndefined()
         const oauthClient = res.data?.updateOauthClient.oauthClient
         expect(oauthClient).toBeDefined()
@@ -43,6 +45,45 @@ describe('updateOauthClient', () => {
         expect(oauthClient.grants).toEqual(
             expect.arrayContaining(updateInput.grants)
         )
+    })
+
+    it('ignores empty string values', async () => {
+        const server = await constructTestPostgresServer({
+            context: { user: testAdminUser() },
+        })
+
+        const createRes = await server.executeOperation({
+            query: CreateOauthClientDocument,
+            variables: {
+                input: {
+                    description: 'Initial description',
+                    grants: ['client_credentials'],
+                    contactEmail: 'initial@example.com',
+                },
+            },
+        })
+        expect(createRes.errors).toBeUndefined()
+        const clientId = createRes.data?.createOauthClient.oauthClient.clientId
+
+        // Update with empty strings
+        const updateInput = {
+            clientId,
+            description: '',
+            contactEmail: '',
+            grants: [],
+        }
+
+        const res = await server.executeOperation({
+            query: UpdateOauthClientDocument,
+            variables: { input: updateInput },
+        })
+
+        expect(res.errors).toBeUndefined()
+        const oauthClient = res.data?.updateOauthClient.oauthClient
+        expect(oauthClient).toBeDefined()
+        expect(oauthClient.description).toBe('Initial description')
+        expect(oauthClient.contactEmail).toBe('initial@example.com')
+        expect(oauthClient.grants).toEqual(['client_credentials'])
     })
 
     it('errors if not ADMIN', async () => {
@@ -83,17 +124,6 @@ describe('updateOauthClient', () => {
             context: { user: testAdminUser() },
             store: {
                 ...{},
-                getOAuthClientByClientId: async () => ({
-                    id: '1',
-                    clientId: 'fail',
-                    clientSecret: '',
-                    grants: [],
-                    createdAt: new Date(),
-                    updatedAt: new Date(),
-                    lastUsedAt: null,
-                    description: null,
-                    contactEmail: null,
-                }),
                 updateOAuthClient: async () => new Error('DB fail'),
             },
         })

@@ -181,6 +181,12 @@ function mockStoreThatErrors(): Store {
         getOAuthClientByClientId: async (_clientId) => {
             return genericError
         },
+        deleteOAuthClient: async (_clientId) => {
+            return genericError
+        },
+        updateOAuthClient: async (_clientId, _data) => {
+            return genericError
+        },
     }
 }
 
