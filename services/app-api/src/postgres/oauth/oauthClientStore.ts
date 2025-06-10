@@ -11,7 +11,7 @@ export async function createOAuthClient(
     data: {
         grants?: string[]
         description?: string
-        contactEmail?: string
+        contactEmail: string
     }
 ): Promise<OAuthClientType | Error> {
     try {
@@ -93,7 +93,7 @@ export async function verifyClientCredentials(
 // Update an OAuth client
 export async function updateOAuthClient(
     client: ExtendedPrismaClient,
-    id: string,
+    clientId: string,
     data: {
         clientSecret?: string
         grants?: string[]
@@ -102,10 +102,11 @@ export async function updateOAuthClient(
     }
 ): Promise<OAuthClientType | Error> {
     try {
-        return await client.oAuthClient.update({
-            where: { id },
+        const result = await client.oAuthClient.update({
+            where: { clientId },
             data,
         })
+        return result
     } catch (error) {
         return error as Error
     }

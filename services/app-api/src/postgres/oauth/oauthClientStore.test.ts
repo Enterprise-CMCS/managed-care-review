@@ -97,7 +97,7 @@ describe('OAuthClient Store', () => {
 
         const updatedClient = await updateOAuthClient(
             client,
-            createdClient.id,
+            createdClient.clientId,
             updateData
         )
         if (updatedClient instanceof Error) throw updatedClient
@@ -158,7 +158,7 @@ describe('OAuthClient Store', () => {
 
         const updatedClient = await updateOAuthClient(
             client,
-            createdClient.id,
+            createdClient.clientId,
             { description: 'new desc' }
         )
         if (updatedClient instanceof Error) throw updatedClient
