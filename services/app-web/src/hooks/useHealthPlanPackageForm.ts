@@ -13,7 +13,7 @@ import { UnlockedHealthPlanFormDataType, packageName } from '@mc-review/hpp'
 import { domainToBase64 } from '@mc-review/hpp'
 import { recordJSException } from '@mc-review/otel'
 import { handleApolloError } from '@mc-review/helpers'
-import { ApolloError } from '@apollo/client'
+import { GraphQLError } from 'graphql'
 import { makeDocumentDateTable } from '@mc-review/helpers'
 import { DocumentDateLookupTableType } from '@mc-review/helpers'
 import type { InterimState } from '../pages/StateSubmission/ErrorOrLoadingPage'
@@ -159,9 +159,9 @@ const useHealthPlanPackageForm = (
 
     if (fetchResult.status === 'ERROR') {
         const err = fetchResult.error
-        if (err instanceof ApolloError) {
+        if (err instanceof GraphQLError) {
             handleApolloError(err, true)
-            if (err.graphQLErrors[0]?.extensions?.code === 'NOT_FOUND') {
+            if (err.extensions?.code === 'NOT_FOUND') {
                 interimState = 'NOT_FOUND'
                 return {
                     interimState,

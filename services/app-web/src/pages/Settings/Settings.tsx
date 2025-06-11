@@ -11,7 +11,7 @@ import {
 } from '../../gen/gqlClient'
 import { StateAnalystsInDashboardType } from './SettingsTables'
 import { RoutesRecord } from '@mc-review/constants'
-import { ApolloError } from '@apollo/client'
+import { GraphQLError } from 'graphql'
 import { AssignedStaffUpdateBanner } from '../../components/Banner/AssignedStaffUpdateBanner/AssignedStaffUpdateBanner'
 import { useCurrentRoute } from '../../hooks'
 import { SETTINGS_HIDE_SIDEBAR_ROUTES } from '@mc-review/constants'
@@ -40,12 +40,12 @@ export type MCReviewSettingsContextType = {
     emailConfig: {
         data?: EmailConfiguration
         loading: boolean
-        error: ApolloError | Error | undefined
+        error: GraphQLError | Error | undefined
     }
     stateAnalysts: {
         data: StateAnalystsInDashboardType[]
         loading: boolean
-        error: ApolloError | Error | undefined
+        error: GraphQLError | Error | undefined
         lastUpdated: LastUpdatedAnalystsType | null
         setLastUpdated: React.Dispatch<
             React.SetStateAction<LastUpdatedAnalystsType | null>

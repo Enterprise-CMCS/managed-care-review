@@ -31,7 +31,6 @@ import {
     mockUnlockedHealthPlanPackageWithDocuments,
     mockUnlockedHealthPlanPackage,
 } from './healthPlanFormDataMock'
-import { ApolloError } from '@apollo/client'
 import {
     GRAPHQL_ERROR_CAUSE_MESSAGES,
     GraphQLErrorCauseTypes,

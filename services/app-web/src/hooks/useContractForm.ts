@@ -19,7 +19,7 @@ import {
 import { wrapApolloResult } from '@mc-review/helpers'
 import { recordJSException } from '@mc-review/otel'
 import { handleApolloError } from '@mc-review/helpers'
-import { ApolloError } from '@apollo/client'
+import { GraphQLError } from 'graphql'
 import type { InterimState } from '../pages/StateSubmission/ErrorOrLoadingPage'
 
 type UseContractForm = {
@@ -222,9 +222,9 @@ const useContractForm = (contractID?: string): UseContractForm => {
     // do not trip skipped as an error
     if (result.status === 'ERROR' && result.error.name !== 'SKIPPED') {
         const err = result.error
-        if (err instanceof ApolloError) {
+        if (err instanceof GraphQLError) {
             handleApolloError(err, true)
-            if (err.graphQLErrors[0]?.extensions?.code === 'NOT_FOUND') {
+            if (err.extensions?.code === 'NOT_FOUND') {
                 interimState = 'NOT_FOUND'
                 return {
                     interimState,

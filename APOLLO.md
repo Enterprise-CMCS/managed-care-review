@@ -197,63 +197,61 @@ The following files need type updates but don't create new instances:
      - SupportEmailsTable
      - DivisionAssignmentTable
 
-9. `src/pages/Settings/Settings.tsx`
-   - Change: Update main settings error handling
-   - Note: Core settings page error management
-   - Required Changes:
-     - Update error type imports
-     - Modify error state handling
-     - Update error display components
+9. ✅ `src/pages/Settings/Settings.tsx`
+   - Removed `ApolloError` import
+   - Updated error handling to use `GraphQLError`
+   - Updated MCReviewSettingsContextType to use `GraphQLError`
+   - Updated error type definitions in context
+   - Maintained error handling functionality
+   - Used by multiple components:
+     - AutomatedEmailsTable
+     - StateAssignmentTable
+     - SupportEmailsTable
+     - EditStateAssign
+   - Preserved error state management
+   - Maintained error logging with recordJSException
 
-10. `src/pages/Settings/SettingsTables/DivisionAssignmentTable.tsx`
-    - Change: Update division assignment error handling
-    - Note: Handles division-related errors
-    - Required Changes:
-      - Update error type definitions
-      - Modify error handling logic
-      - Update error display components
+10. ✅ `src/pages/Settings/SettingsTables/DivisionAssignmentTable.tsx`
+    - Removed `ApolloError` import
+    - Updated error handling to use `GraphQLError`
+    - Updated error type checking in setDivisionCallback
+    - Maintained error handling with handleApolloError
+    - Preserved error logging and display
+    - No test file exists, but component is used in Settings.tsx
+    - Maintained compatibility with SettingsErrorAlert
 
-11. `src/hooks/useHealthPlanPackageForm.ts`
-    - Change: Update form error handling
-    - Note: Critical for health plan package forms
-    - Required Changes:
-      - Update error type checking
-      - Modify error state management
-      - Update error handling utilities
+11. ✅ `src/pages/Settings/SettingsTables/AutomatedEmailsTable.tsx`
+    - No changes required
+    - Already compatible with GraphQLError through:
+      - MCReviewSettingsContextType (updated in Settings.tsx)
+      - SettingsErrorAlert (already updated)
+    - No direct ApolloError usage
+    - Error handling inherited from context
 
-12. `src/hooks/useContractForm.ts`
-    - Change: Update contract form error handling
-    - Note: Essential for contract management
-    - Required Changes:
-      - Update error type definitions
-      - Modify error handling logic
-      - Update error state management
+12. ✅ `src/hooks/useHealthPlanPackageForm.ts`
+    - Removed `ApolloError` import
+    - Updated error handling to use `GraphQLError`
+    - Updated error type checking in fetchResult error handling
+    - Updated error code access to use `extensions.code` directly
+    - Maintained error handling with handleApolloError
+    - Preserved error logging with recordJSException
+    - Maintained interim state handling for errors
+    - No test file exists, but hook is used in form pages
 
-13. `src/pages/StateDashboard/StateDashboard.tsx`
-    - Change: Update dashboard error handling
-    - Note: Handles state dashboard errors
-    - Required Changes:
-      - Update error type checking
-      - Modify error handling logic
-      - Update error display components
+13. ✅ `src/hooks/useContractForm.ts`
+    - Removed `ApolloError` import
+    - Updated error handling to use `GraphQLError`
+    - Updated error type checking in result error handling
+    - Updated error code access to use `extensions.code` directly
+    - Maintained error handling with handleApolloError
+    - Preserved error logging with recordJSException
+    - Maintained interim state handling for errors
+    - Preserved cache management for new contracts
+    - No test file exists, but hook is used in contract form pages
 
-14. `src/pages/RateSummary/RateSummary.tsx`
-    - Change: Update rate summary error handling
-    - Note: Handles rate summary errors
-    - Required Changes:
-      - Update error type checking
-      - Modify error handling logic
-      - Update error display components
+14. `src/pages/StateDashboard/StateDashboard.tsx`
 
-15. `src/contexts/AuthContext.tsx`
-    - Change: Update authentication error handling
-    - Note: Critical for auth flow
-    - Required Changes:
-      - Update error type checking
-      - Modify error handling logic
-      - Update error display components
-
-### Helpers Package
+## Helpers Package
 - [x] `packages/helpers/src/gql/apolloErrors.ts`
   - Change: Update error handling utilities
   - Note: Core error handling utilities
@@ -288,55 +286,6 @@ The following files need type updates but don't create new instances:
     - Simplified error code and message extraction
     - Maintained error handling compatibility with existing code
 
-## Migration Steps
-1. Create new error handling utilities using `GraphQLError`
-2. Update backend resolvers to use new error handling
-3. Update frontend error handling to work with new error format
-4. Update mocks to reflect new error structure
-5. Remove `apollo-server-lambda` dependency
-6. Test all error scenarios thoroughly
-7. Update documentation and examples
-8. Perform end-to-end testing
-9. Deploy changes in stages
-10. Monitor error handling in production
-
-## Testing Strategy
-1. Unit Tests
-   - Test individual error handling components
-   - Verify error message formatting
-   - Check error type conversions
-   - Validate error code mappings
-
-2. Integration Tests
-   - Test error handling across components
-   - Verify error propagation
-   - Check error state management
-   - Validate error recovery
-
-3. End-to-End Tests
-   - Test complete error scenarios
-   - Verify user experience
-   - Check error message clarity
-   - Validate error handling flow
-
-## Rollout Plan
-1. Development
-   - Update mocks and utilities
-   - Modify frontend components
-   - Update test files
-   - Perform local testing
-
-2. Staging
-   - Deploy changes to staging
-   - Run full test suite
-   - Verify error handling
-   - Check error messages
-
-3. Production
-   - Deploy in phases
-   - Monitor error rates
-   - Check error handling
-   - Gather user feedback
 
 ## Success Criteria
 1. All ApolloError instances replaced with GraphQLError
