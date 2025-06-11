@@ -5,8 +5,6 @@ import { mkdtemp, rm } from 'fs/promises'
 import { NewTestS3UploadsClient } from '../deps/s3'
 import { generateVirusScanTagSet, virusScanStatus } from '../lib/tags'
 
-// Import the new function from your consolidated lambda file
-// Assuming you export rescanFailedFiles from your main lambda file
 import { rescanFailedFiles } from '../lambdas/rescanFailedFiles' // adjust path as needed
 
 describe('rescanFailedFiles', () => {
