@@ -166,29 +166,36 @@ The following files need type updates but don't create new instances:
    - Maintained error alert display logic
    - Preserved authentication error handling
 
-6. `src/pages/SubmissionSideNav/SubmissionSideNav.tsx`
-   - Change: Update navigation error handling
-   - Note: Handles submission navigation errors
-   - Required Changes:
-     - Update error type imports
-     - Modify error state management
-     - Update error display components
+6. ✅ `src/pages/SubmissionSideNav/SubmissionSideNav.tsx`
+   - Removed `ApolloError` import
+   - Updated error handling to use `GraphQLError`
+   - Updated error type checking to use `instanceof GraphQLError`
+   - Simplified error code access to use `extensions.code` directly
+   - Maintained error page routing logic
+   - Preserved error logging functionality
 
-7. `src/pages/SubmissionSideNav/RateSummarySideNav.tsx`
-   - Change: Update rate summary error handling
-   - Note: Handles rate-related navigation errors
-   - Required Changes:
-     - Update error type definitions
-     - Modify error handling logic
-     - Update error display components
+7. ✅ `src/pages/SubmissionSideNav/RateSummarySideNav.tsx`
+   - Removed `ApolloError` import
+   - Updated error handling to use `GraphQLError`
+   - Updated error type checking to use `instanceof GraphQLError`
+   - Simplified error code access to use `extensions.code` directly
+   - Maintained error page routing logic
+   - Preserved error logging functionality
+   - Maintained rate status validation
 
-8. `src/pages/Settings/SettingsErrorAlert.tsx`
-   - Change: Update settings error handling
-   - Note: Critical for settings management
-   - Required Changes:
-     - Update error type checking
-     - Modify error message formatting
-     - Update error display logic
+8. ✅ `src/pages/Settings/SettingsErrorAlert.tsx`
+   - Removed `ApolloError` import
+   - Updated error handling to use `GraphQLError`
+   - Updated error type checking to use `instanceof GraphQLError`
+   - Updated component props type definition
+   - Maintained error alert display logic
+   - Preserved admin and authentication checks
+   - Used in multiple settings components:
+     - EditStateAssign
+     - AutomatedEmailsTable
+     - StateAssignmentTable
+     - SupportEmailsTable
+     - DivisionAssignmentTable
 
 9. `src/pages/Settings/Settings.tsx`
    - Change: Update main settings error handling
@@ -221,6 +228,30 @@ The following files need type updates but don't create new instances:
       - Update error type definitions
       - Modify error handling logic
       - Update error state management
+
+13. `src/pages/StateDashboard/StateDashboard.tsx`
+    - Change: Update dashboard error handling
+    - Note: Handles state dashboard errors
+    - Required Changes:
+      - Update error type checking
+      - Modify error handling logic
+      - Update error display components
+
+14. `src/pages/RateSummary/RateSummary.tsx`
+    - Change: Update rate summary error handling
+    - Note: Handles rate summary errors
+    - Required Changes:
+      - Update error type checking
+      - Modify error handling logic
+      - Update error display components
+
+15. `src/contexts/AuthContext.tsx`
+    - Change: Update authentication error handling
+    - Note: Critical for auth flow
+    - Required Changes:
+      - Update error type checking
+      - Modify error handling logic
+      - Update error display components
 
 ### Helpers Package
 - [x] `packages/helpers/src/gql/apolloErrors.ts`
