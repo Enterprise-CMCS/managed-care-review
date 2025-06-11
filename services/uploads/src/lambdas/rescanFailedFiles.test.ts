@@ -5,7 +5,7 @@ import { mkdtemp, rm } from 'fs/promises'
 import { NewTestS3UploadsClient } from '../deps/s3'
 import { generateVirusScanTagSet, virusScanStatus } from '../lib/tags'
 
-import { rescanFailedFiles } from '../lambdas/rescanFailedFiles' // adjust path as needed
+import { rescanFailedFiles } from '../lambdas/rescanFailedFiles'
 
 describe('rescanFailedFiles', () => {
     it('will rescan files with ERROR status and missing scan tags', async () => {
@@ -68,8 +68,7 @@ describe('rescanFailedFiles', () => {
                     'testData',
                     'freshclam.conf'
                 ),
-                // Use system virus definitions instead of empty tmpDefsDir
-                pathToDefintions: '/opt/homebrew/var/lib/clamav', // or '/usr/local/share/clamav' on some systems
+                pathToDefintions: tmpDefsDir,
                 isLocal: true,
             },
             s3Client
@@ -241,9 +240,6 @@ describe('rescanFailedFiles', () => {
         console.info(
             `Expected ${infectedFilesWithErrorStatus.length} infected files, got ${infectedFiles.length}`
         )
-
-        // Temporarily comment out the failing assertion to see other results
-        // expect(infectedFiles).toHaveLength(infectedFilesWithErrorStatus.length)
 
         // Let's see if the expected infected files are in the results
         for (const expectedInfectedKey of infectedFilesWithErrorStatus) {
