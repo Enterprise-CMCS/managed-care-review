@@ -11,7 +11,7 @@ describe('UploadErrorAlert component', () => {
         render(<UploadErrorAlert hasNoDocuments={true} />)
 
         expect(
-            screen.getByRole('heading', { name: 'Missing documents' })
+            screen.getByRole('heading', { name: /Missing documents/ })
         ).toBeInTheDocument()
         expect(
             screen.getByText('You must upload at least one document')

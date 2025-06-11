@@ -1,10 +1,10 @@
-import { Alert } from '@trussworks/react-uswds'
 import React from 'react'
 import styles from '../Banner.module.scss'
 import { getUpdatedByDisplayName } from '@mc-review/helpers'
 import { formatBannerDate, formatCalendarDate } from '@mc-review/dates'
 import { UpdatedBy } from '../../../gen/gqlClient'
 import { ExpandableText } from '../../ExpandableText'
+import { AccessibleAlertBanner } from '../AccessibleAlertBanner/AccessibleAlertBanner'
 
 export type ApprovalProps = {
     updatedBy: UpdatedBy
@@ -19,8 +19,8 @@ export const SubmissionApprovedBanner = ({
     dateReleasedToState,
 }: ApprovalProps & React.HTMLAttributes<HTMLDivElement>) => {
     return (
-        <Alert
-            role="alert"
+        <AccessibleAlertBanner
+            role="status"
             type="success"
             heading="Status updated"
             headingLevel="h4"
@@ -47,6 +47,6 @@ export const SubmissionApprovedBanner = ({
                     </ExpandableText>
                 )}
             </div>
-        </Alert>
+        </AccessibleAlertBanner>
     )
 }

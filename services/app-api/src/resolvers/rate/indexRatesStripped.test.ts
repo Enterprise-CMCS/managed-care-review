@@ -47,6 +47,11 @@ describe('indexRatesStripped', () => {
         // index rates
         const result = await cmsServer.executeOperation({
             query: IndexRatesStrippedWithRelatedContractsDocument,
+            variables: {
+                input: {
+                    rateIDs: [submit1ID, submit2ID],
+                },
+            },
         })
 
         expect(result.data).toBeDefined()
