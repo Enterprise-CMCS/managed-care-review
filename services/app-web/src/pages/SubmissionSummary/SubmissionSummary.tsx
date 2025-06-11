@@ -48,6 +48,7 @@ import {
     StatusUpdatedBanner,
 } from '../../components/Banner'
 import { MultiColumnGrid } from '../../components/MultiColumnGrid/MultiColumnGrid'
+import { GraphQLError } from 'graphql'
 
 export interface SubmissionSummaryFormValues {
     dateApprovalReleasedToState: string
@@ -130,15 +131,14 @@ export const SubmissionSummary = (): React.ReactElement => {
             </GridContainer>
         )
     } else if (!data && error) {
-        if (error?.graphQLErrors[0]?.extensions?.code === 'FORBIDDEN') {
-            return (
-                <ErrorForbiddenPage errorMsg={error.graphQLErrors[0].message} />
-            )
-        } else if (error?.graphQLErrors[0]?.extensions?.code === 'NOT_FOUND') {
-            return <Error404 />
-        } else {
-            return <GenericErrorPage />
+        if (error instanceof GraphQLError) {
+            if (error.extensions?.code === 'FORBIDDEN') {
+                return <ErrorForbiddenPage errorMsg={error.message} />
+            } else if (error.extensions?.code === 'NOT_FOUND') {
+                return <Error404 />
+            }
         }
+        return <GenericErrorPage />
     } else if (!contract) {
         return <GenericErrorPage />
     }

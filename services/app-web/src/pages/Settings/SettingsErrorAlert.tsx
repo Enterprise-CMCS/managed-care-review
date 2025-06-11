@@ -1,4 +1,4 @@
-import { ApolloError } from '@apollo/client'
+import { GraphQLError } from 'graphql'
 import { GridContainer } from '@trussworks/react-uswds'
 import {
     ErrorAlertFailedRequest,
@@ -14,13 +14,13 @@ export const SettingsErrorAlert = ({
     isAuthenticated = true, // By default, assume user is valid because Settings are within wrapped auth routes. We only want to check for authentication when the prop passed in.
     isAdmin = true, // By default, assume user is admin because this error mainly used in settings subcomponents. We only want to check for authentication when the prop passed in.
 }: {
-    error?: ApolloError | Error
+    error?: GraphQLError | Error
     isAuthenticated?: boolean
     isAdmin?: boolean
 }): React.ReactElement | null => {
     if (error) {
         recordJSException(error)
-        if (error instanceof ApolloError) {
+        if (error instanceof GraphQLError) {
             handleApolloError(error, true)
         }
     }

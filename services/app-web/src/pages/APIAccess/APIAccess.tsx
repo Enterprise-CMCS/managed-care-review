@@ -1,4 +1,3 @@
-import { ApolloError } from '@apollo/client'
 import { Grid, GridContainer, Link } from '@trussworks/react-uswds'
 import path from 'path-browserify'
 import { useState } from 'react'
@@ -12,6 +11,7 @@ import { recordJSException } from '@mc-review/otel'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import styles from './APIAccess.module.scss'
 import { ButtonWithLogging, LinkWithLogging } from '../../components'
+import { GraphQLError } from 'graphql'
 
 function APIAccess(): React.ReactElement {
     const apiURL = import.meta.env.VITE_APP_API_URL
@@ -34,7 +34,7 @@ function APIAccess(): React.ReactElement {
             setAPIKey(result.data?.createAPIKey)
         } catch (err) {
             console.error('unexpected error generating a new API Key', err)
-            if (err instanceof ApolloError) {
+            if (err instanceof GraphQLError) {
                 handleApolloError(err, true)
             }
             recordJSException(err)

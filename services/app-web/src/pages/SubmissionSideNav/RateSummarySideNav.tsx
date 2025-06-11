@@ -11,7 +11,7 @@ import {
 import { useAuth } from '../../contexts/AuthContext'
 import { getRouteName } from '../../routeHelpers'
 import { useFetchRateWithQuestionsQuery } from '../../gen/gqlClient'
-import { ApolloError } from '@apollo/client'
+import { GraphQLError } from 'graphql'
 import { handleApolloError } from '@mc-review/helpers'
 import { Error404 } from '../Errors/Error404Page'
 import { recordJSException } from '@mc-review/otel'
@@ -79,10 +79,10 @@ export const RateSummarySideNav = () => {
     } else if (!data && error) {
         const err = error
         console.error('Error from API fetch', error)
-        if (err instanceof ApolloError) {
+        if (err instanceof GraphQLError) {
             handleApolloError(err, true)
 
-            if (err.graphQLErrors[0]?.extensions?.code === 'NOT_FOUND') {
+            if (err.extensions?.code === 'NOT_FOUND') {
                 return <Error404 />
             }
         }
