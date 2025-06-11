@@ -132,7 +132,6 @@ functions:
       AUDIT_BUCKET_NAME: !Ref DocumentUploadsBucket
       CLAMAV_BUCKET_NAME: !Ref ClamDefsBucket
       PATH_TO_AV_DEFINITIONS: 'lambda/s3-antivirus/av-definitions'
-      LIST_INFECTED_FILES_LAMBDA_NAME: ${self:functions.avAuditFiles.name}
       AWS_LAMBDA_EXEC_WRAPPER: /opt/otel-handler
       OPENTELEMETRY_COLLECTOR_CONFIG_FILE: /var/task/collector.yml
       VITE_APP_OTEL_COLLECTOR_URL: ${self:custom.reactAppOtelCollectorUrl}
