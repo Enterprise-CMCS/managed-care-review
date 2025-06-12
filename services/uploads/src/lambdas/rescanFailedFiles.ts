@@ -297,4 +297,4 @@ async function main(_event: unknown, _context: Context): Promise<string> {
     return message
 }
 
-export { main }
+module.exports = { main }
