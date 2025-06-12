@@ -1313,7 +1313,6 @@ export const ContractDetails = ({
                                 <PageActions
                                     saveAsDraftOnClick={async () => {
                                         await handleFormSubmit(
-                                            //juan
                                             values,
                                             setSubmitting,
                                             true
