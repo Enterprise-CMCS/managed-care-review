@@ -33,13 +33,17 @@ export const QuestionResponseRound = ({
     })
 
     return (
-        <div data-testid="questionResponseRound">
+        <section
+            data-testid="questionResponseRound"
+            id={`${question.id}-section`}
+        >
             <div className={styles.tableHeader}>
-                <h4>{roundTitle}</h4>
+                <h4 id={`${question.id}-header`}>{roundTitle}</h4>
                 {isStateUser && !isApprovedContract && (
                     <NavLinkWithLogging
                         className={classes}
                         variant="unstyled"
+                        aria-describedby={`${question.id}-table ${question.id}-header`}
                         to={`./${question.division.toLowerCase()}/${question.id}/upload-response`}
                     >
                         Upload response
@@ -47,10 +51,11 @@ export const QuestionResponseRound = ({
                 )}
             </div>
             <QuestionDisplayTable
+                id={`${question.id}-table`}
                 documents={extractDocumentsFromQuestion(question)}
                 user={currentUser}
                 onlyDisplayInitial={false}
             />
-        </div>
+        </section>
     )
 }
