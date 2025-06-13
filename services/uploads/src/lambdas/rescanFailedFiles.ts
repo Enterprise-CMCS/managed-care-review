@@ -1,16 +1,76 @@
 import { Context } from 'aws-lambda'
 import { NewS3UploadsClient, S3UploadsClient } from '../deps/s3'
-import { NewClamAV, ClamAV } from '../deps/clamAV'
-import { virusScanStatus, generateVirusScanTagSet } from '../lib/tags'
+import { virusScanStatus } from '../lib/tags'
 import { _Object } from '@aws-sdk/client-s3'
-import { mkdtemp, rm } from 'fs/promises'
-import crypto from 'crypto'
-import path from 'path'
+import { InvokeCommand, LambdaClient } from '@aws-sdk/client-lambda'
+import { fromUtf8, toUtf8 } from '@aws-sdk/util-utf8-node'
 
-// Chunk the objects by file size. Prevent chunks from having more than 20 objects in them,
-// or from being greater than 500 megs.
+interface ScanFilesInput {
+    bucket: string
+    keys: string[]
+}
+
+export interface ScanFilesOutput {
+    infectedKeys: string[]
+}
+
+// Generic function type that scans a list of s3 objects and returns any infected keys.
+export type listInfectedFilesFn = (
+    input: ScanFilesInput
+) => Promise<ScanFilesOutput | Error>
+
+// NewLambdaInfectedFilesLister returns an async function that will invoke a lambda
+// to scan a set of files for viruses.
+function NewLambdaInfectedFilesLister(lambdaName: string): listInfectedFilesFn {
+    return async (input: ScanFilesInput): Promise<ScanFilesOutput | Error> => {
+        const lambdaClient = new LambdaClient({})
+
+        console.info('Invoking Worker Lambda: ', lambdaName)
+
+        const payloadJSON = fromUtf8(JSON.stringify(input))
+        const invocation = new InvokeCommand({
+            FunctionName: lambdaName,
+            Payload: payloadJSON,
+        })
+
+        try {
+            const res = await lambdaClient.send(invocation)
+            if (res.Payload) {
+                const lambdaResult = JSON.parse(toUtf8(res.Payload))
+
+                if (lambdaResult.errorType) {
+                    const errMsg = `Got an error back from the worker lambda: ${JSON.stringify(
+                        lambdaResult
+                    )}`
+                    console.error(errMsg)
+                    return new Error(errMsg)
+                }
+
+                if (!lambdaResult.infectedKeys) {
+                    const errMsg = `Didn't get back a list of keys from the lambda: ${JSON.stringify(
+                        lambdaResult
+                    )}`
+                    console.error(errMsg)
+                    return new Error(errMsg)
+                }
+
+                return lambdaResult as ScanFilesOutput
+            }
+            return new Error(
+                `Failed to get correct results out of lambda: ${JSON.stringify(res)}`
+            )
+        } catch (err) {
+            console.error('Error invoking worker lambda', err)
+            return err instanceof Error
+                ? err
+                : new Error('Unknown error occurred')
+        }
+    }
+}
+
+// Chunk the objects by file size. Process files in small batches for parallel processing
 function chunkS3Objects(objects: _Object[]): _Object[][] {
-    const maxChunkSize = 500_000_000 // 500 MB in bytes
+    const maxChunkSize = 100_000_000 // 100 MB in bytes
 
     const chunks: _Object[][] = []
     let currentChunk: _Object[] = []
@@ -20,7 +80,7 @@ function chunkS3Objects(objects: _Object[]): _Object[][] {
         const size = obj.Size || maxChunkSize
         if (
             size + currentChunkSize > maxChunkSize ||
-            currentChunk.length === 20
+            currentChunk.length === 5 // Process 5 files per chunk
         ) {
             chunks.push(currentChunk)
             currentChunk = []
@@ -38,68 +98,10 @@ function chunkS3Objects(objects: _Object[]): _Object[][] {
     return chunks
 }
 
-// Scan a chunk of files and return the infected keys (virus scanning only, skip MIME validation)
-async function scanFileChunk(
-    s3Client: S3UploadsClient,
-    clamAV: ClamAV,
-    keys: string[],
-    bucketName: string
-): Promise<string[] | Error> {
-    const tmpScanDir = await mkdtemp('/tmp/scanFiles-')
-
-    try {
-        // Download files for scanning
-        const filemap: { [filename: string]: string } = {}
-
-        for (const key of keys) {
-            console.info('Downloading file to be scanned', key)
-            const scanFileName = `${crypto.randomUUID()}.tmp`
-            const scanFilePath = path.join(tmpScanDir, scanFileName)
-
-            filemap[scanFileName] = key
-
-            const err = await s3Client.downloadFileFromS3(
-                key,
-                bucketName,
-                scanFilePath
-            )
-            if (err instanceof Error) {
-                console.error('failed to download one of the scan files', err)
-                return err
-            }
-        }
-
-        // Perform ONLY virus scan (skip MIME type validation for rescan)
-        console.info('Scanning Files for viruses')
-        const virusScanResult = clamAV.scanForInfectedFiles(tmpScanDir)
-        console.info('VIRUS SCAN RESULT', virusScanResult)
-        console.info('Files in scan directory:', Object.keys(filemap))
-        console.info('File mapping:', filemap)
-
-        if (virusScanResult instanceof Error) {
-            return virusScanResult
-        }
-
-        // Map infected filenames back to S3 keys
-        const infectedKeys = virusScanResult.map((filename) => {
-            console.info(
-                `Mapping infected file ${filename} to key ${filemap[filename]}`
-            )
-            return filemap[filename]
-        })
-
-        console.info('Final infected keys:', infectedKeys)
-        return infectedKeys
-    } finally {
-        // Always clean up the temp directory
-        await rm(tmpScanDir, { force: true, recursive: true })
-    }
-}
-
 // Re-scan files that have problematic scan statuses (ERROR or no scan tag)
 export async function rescanFailedFiles(
     s3Client: S3UploadsClient,
-    clamAV: ClamAV,
+    fileScanner: listInfectedFilesFn,
     bucketName: string
 ): Promise<string[] | Error> {
     console.info('Starting rescan of failed files...')
@@ -165,134 +167,81 @@ export async function rescanFailedFiles(
     )
 
     let allInfectedFiles: string[] = []
-    let totalFilesProcessed = 0
 
-    // Process each chunk sequentially to avoid overwhelming the system
-    for (let i = 0; i < chunks.length; i++) {
-        const chunk = chunks[i]
+    // Process chunks in parallel by invoking worker lambdas
+    const scanPromises: Promise<ScanFilesOutput | Error>[] = []
+    for (const chunk of chunks) {
         const keys = chunk
             .map((obj) => obj.Key)
             .filter((key): key is string => key !== undefined)
 
         console.info(
-            `Scanning chunk ${i + 1}/${chunks.length} with ${keys.length} files`
+            `Queuing chunk with ${keys.length} files for parallel processing`
         )
 
-        const chunkResult = await scanFileChunk(
-            s3Client,
-            clamAV,
-            keys,
-            bucketName
+        scanPromises.push(
+            fileScanner({
+                bucket: bucketName,
+                keys,
+            })
         )
-
-        if (chunkResult instanceof Error) {
-            console.error(`Failed to scan chunk ${i + 1}:`, chunkResult)
-            return chunkResult
-        }
-
-        // Tag all files in this chunk with their scan results
-        for (const key of keys) {
-            const isInfected = chunkResult.includes(key)
-            const scanStatus = isInfected ? 'INFECTED' : 'CLEAN'
-
-            console.info(`Tagging ${key} as ${scanStatus}`)
-
-            try {
-                const newTags = generateVirusScanTagSet(scanStatus)
-                const currentTags = await s3Client.getObjectTags(
-                    key,
-                    bucketName
-                )
-                if (currentTags instanceof Error) {
-                    console.error(
-                        `Failed to get current tags for ${key}:`,
-                        currentTags
-                    )
-                    continue
-                }
-
-                // Filter out existing virus scan tags and add the new ones
-                const nonVirusScanTags = currentTags.filter(
-                    (tag) =>
-                        tag.Key !== 'virusScanStatus' &&
-                        tag.Key !== 'virusScanTimestamp'
-                )
-                const updatedTags = {
-                    TagSet: nonVirusScanTags.concat(newTags.TagSet),
-                }
-
-                console.info(`Updating tags for ${key}:`, updatedTags)
-                const tagResult = await s3Client.tagObject(
-                    key,
-                    bucketName,
-                    updatedTags
-                )
-                if (tagResult instanceof Error) {
-                    console.error(`Failed to tag ${key}:`, tagResult)
-                } else {
-                    console.info(`Successfully tagged ${key} as ${scanStatus}`)
-                }
-            } catch (error) {
-                console.error(`Exception while tagging ${key}:`, error)
-            }
-        }
-
-        totalFilesProcessed += keys.length
-        console.info(
-            `Processed ${totalFilesProcessed}/${filesToRescan.length} files`
-        )
-
-        console.info(`Infected files in chunk ${i + 1}:`, chunkResult)
-        allInfectedFiles = allInfectedFiles.concat(chunkResult)
     }
 
     console.info(
-        `Rescan complete! Processed ${totalFilesProcessed} files, found ${allInfectedFiles.length} infected files`
+        `Starting parallel processing of ${scanPromises.length} chunks`
+    )
+    const chunkResults = await Promise.all(scanPromises)
+
+    // Compile results
+    for (const chunkRes of chunkResults) {
+        if (chunkRes instanceof Error) {
+            console.error('Failed to scan chunk of files', chunkRes)
+            return chunkRes
+        }
+
+        console.info('Infected files in chunk:', chunkRes.infectedKeys)
+        allInfectedFiles = allInfectedFiles.concat(chunkRes.infectedKeys)
+    }
+
+    console.info(
+        `Rescan complete! Processed ${filesToRescan.length} files in parallel, found ${allInfectedFiles.length} infected files`
     )
 
     return allInfectedFiles
 }
 
 async function main(_event: unknown, _context: Context): Promise<string> {
-    console.info('-----Start Rescan Failed Files function-----')
+    console.info('-----Start Rescan Coordinator function-----')
 
     // Check required environment variables
-    const clamAVBucketName = process.env.CLAMAV_BUCKET_NAME
-    if (!clamAVBucketName || clamAVBucketName === '') {
-        throw new Error('Configuration Error: CLAMAV_BUCKET_NAME must be set')
-    }
-
-    const clamAVDefinitionsPath = process.env.PATH_TO_AV_DEFINITIONS
-    if (!clamAVDefinitionsPath || clamAVDefinitionsPath === '') {
-        throw new Error(
-            'Configuration Error: PATH_TO_AV_DEFINITIONS must be set'
-        )
-    }
-
     const auditBucketName = process.env.AUDIT_BUCKET_NAME
     if (!auditBucketName || auditBucketName === '') {
         throw new Error('Configuration Error: AUDIT_BUCKET_NAME must be set')
     }
 
-    // Initialize clients
+    const workerLambdaName = process.env.RESCAN_WORKER_LAMBDA_NAME
+    if (!workerLambdaName || workerLambdaName === '') {
+        throw new Error(
+            'Configuration Error: RESCAN_WORKER_LAMBDA_NAME must be set'
+        )
+    }
+
     const s3Client = NewS3UploadsClient()
-    const clamAV = NewClamAV(
-        {
-            bucketName: clamAVBucketName,
-            definitionsPath: clamAVDefinitionsPath,
-        },
-        s3Client
-    )
+    const fileScanner = NewLambdaInfectedFilesLister(workerLambdaName)
 
     console.info(`Rescanning failed files in bucket: ${auditBucketName}`)
 
-    const result = await rescanFailedFiles(s3Client, clamAV, auditBucketName)
+    const result = await rescanFailedFiles(
+        s3Client,
+        fileScanner,
+        auditBucketName
+    )
 
     if (result instanceof Error) {
         throw result
     }
 
-    const message = `RESCAN COMPLETE - Processed files with failed/missing scan status. Found ${result.length} infected files.`
+    const message = `RESCAN COMPLETE - Processed files with failed/missing scan status using parallel workers. Found ${result.length} infected files.`
     console.info(message)
     return message
 }
