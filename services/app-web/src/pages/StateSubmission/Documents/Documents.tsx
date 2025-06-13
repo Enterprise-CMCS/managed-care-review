@@ -255,7 +255,6 @@ export const Documents = (): React.ReactElement => {
                         styles.formContainer
                     )}
                     id="DocumentsForm"
-                    aria-label="Documents Form"
                     onSubmit={async (e) => {
                         await handleFormSubmit({
                             shouldValidateDocuments: true,

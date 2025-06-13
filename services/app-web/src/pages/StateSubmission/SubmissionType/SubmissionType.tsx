@@ -420,7 +420,6 @@ export const SubmissionType = ({
                                             ? 'New Submission Form'
                                             : 'Submission Type Form'
                                     }
-                                    aria-describedby="form-guidance"
                                     onSubmit={handleSubmit}
                                 >
                                     <fieldset className="usa-fieldset">

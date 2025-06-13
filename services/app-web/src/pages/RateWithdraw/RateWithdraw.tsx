@@ -133,8 +133,6 @@ export const RateWithdraw = () => {
                     <Form
                         id="RateWithdrawForm"
                         className={styles.formContainer}
-                        aria-label="Withdraw rate review"
-                        aria-describedby="form-guidance"
                         onSubmit={(e) => {
                             setShouldValidate(true)
                             return handleSubmit(e)
