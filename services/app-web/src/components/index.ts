@@ -88,3 +88,4 @@ export { SectionCard } from './SectionCard'
 export { NavLinkWithLogging, LinkWithLogging, ReactRouterLinkWithLogging, ButtonWithLogging } from './TealiumLogging'
 
 export { FormContainer, FormNotificationContainer} from './FormContainer'
+export { RowCellElement } from './Tables'
