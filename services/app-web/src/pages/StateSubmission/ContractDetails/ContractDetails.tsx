@@ -86,7 +86,6 @@ import {
     UpdateContractDraftRevisionInput,
     ContractDraftRevisionFormDataInput,
 } from '../../../gen/gqlClient'
-import { SaveAsDraftSuccessBanner } from '../../../components/Banner/DraftSavedBanner/SaveAsDraftSuccessBanner'
 
 function formattedDatePlusOneDay(initialValue: string): string {
     const dayjsValue = dayjs(initialValue)
@@ -192,8 +191,7 @@ export const ContractDetails = ({
                 docType === 'supporting' &&
                 !draftSubmission.draftRevision.formData.supportingDocuments)
         )
-            // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-            undefined
+            return undefined
         const docs =
             docType === 'contract'
                 ? draftSubmission.draftRevision.formData.contractDocuments
@@ -550,10 +548,8 @@ export const ContractDetails = ({
                     loggedInUser={loggedInUser}
                     unlockedInfo={draftSubmission.draftRevision.unlockInfo}
                     showPageErrorMessage={showPageErrorMessage ?? false}
+                    draftSaved={draftSaved}
                 />
-                {!showPageErrorMessage && draftSaved && (
-                    <SaveAsDraftSuccessBanner />
-                )}
             </FormNotificationContainer>
             <FormContainer id="ContactDetails">
                 <Formik

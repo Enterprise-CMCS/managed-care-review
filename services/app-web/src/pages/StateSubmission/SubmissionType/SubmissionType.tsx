@@ -54,7 +54,6 @@ import { useContractForm } from '../../../hooks/useContractForm'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '@mc-review/common-code'
 import { ContactSupportLink } from '../../../components/ErrorAlert/ContactSupportLink'
-import { SaveAsDraftSuccessBanner } from '../../../components/Banner/DraftSavedBanner/SaveAsDraftSuccessBanner'
 
 export interface SubmissionTypeFormValues {
     populationCovered?: PopulationCoveredType
@@ -398,10 +397,8 @@ export const SubmissionType = ({
                     loggedInUser={loggedInUser}
                     unlockedInfo={draftSubmission?.draftRevision.unlockInfo}
                     showPageErrorMessage={showPageErrorMessage}
+                    draftSaved={draftSaved}
                 />
-                {!showPageErrorMessage && draftSaved && (
-                    <SaveAsDraftSuccessBanner />
-                )}
             </FormNotificationContainer>
             <FormContainer id="SubmissionType">
                 <Formik

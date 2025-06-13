@@ -55,7 +55,6 @@ import { LinkYourRates } from '../../../LinkYourRates/LinkYourRates'
 import { LinkedRateSummary } from '../LinkedRateSummary'
 import { usePage } from '../../../../contexts/PageContext'
 import { InfoTag } from '../../../../components/InfoTag/InfoTag'
-import { SaveAsDraftSuccessBanner } from '../../../../components/Banner/DraftSavedBanner/SaveAsDraftSuccessBanner'
 
 export type FormikRateForm = {
     id?: string // no id if its a new rate
@@ -451,10 +450,8 @@ const RateDetails = ({
                                 ?.unlockInfo
                         }
                         showPageErrorMessage={showAPIErrorBanner}
+                        draftSaved={draftSaved}
                     />
-                )}
-                {!showAPIErrorBanner && draftSaved && (
-                    <SaveAsDraftSuccessBanner />
                 )}
             </FormNotificationContainer>
 

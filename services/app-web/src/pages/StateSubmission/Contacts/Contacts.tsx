@@ -39,7 +39,6 @@ import { ErrorOrLoadingPage } from '../ErrorOrLoadingPage'
 import { PageBannerAlerts } from '../PageBannerAlerts'
 import { useErrorSummary } from '../../../hooks/useErrorSummary'
 import { featureFlags } from '@mc-review/common-code'
-import { SaveAsDraftSuccessBanner } from '../../../components/Banner/DraftSavedBanner/SaveAsDraftSuccessBanner'
 
 export interface ContactsFormValues {
     stateContacts: StateContact[]
@@ -104,15 +103,13 @@ const Contacts = ({
     */
     useEffect(() => {
         if (focusNewContact) {
-            // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-            newStateContactNameRef.current &&
+            if (newStateContactNameRef.current)
                 newStateContactNameRef.current.focus()
             setFocusNewContact(false)
             newStateContactNameRef.current = null
         }
         if (focusNewActuaryContact) {
-            // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-            newActuaryContactNameRef.current &&
+            if (newActuaryContactNameRef.current)
                 newActuaryContactNameRef.current.focus()
             setFocusNewActuaryContact(false)
             newActuaryContactNameRef.current = null
@@ -217,10 +214,8 @@ const Contacts = ({
                     loggedInUser={loggedInUser}
                     unlockedInfo={draftSubmission.draftRevision.unlockInfo}
                     showPageErrorMessage={showPageErrorMessage ?? false}
+                    draftSaved={draftSaved}
                 />
-                {!showPageErrorMessage && draftSaved && (
-                    <SaveAsDraftSuccessBanner />
-                )}
             </FormNotificationContainer>
             <FormContainer id="Contacts">
                 <Formik
