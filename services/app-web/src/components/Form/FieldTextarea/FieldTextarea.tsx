@@ -49,9 +49,7 @@ export const FieldTextarea = ({
 
     return (
         <FormGroup error={showError}>
-            <Label htmlFor={id} error={showError}>
-                {label}
-            </Label>
+            <Label htmlFor={id}>{label}</Label>
             <span className={styles.requiredOptionalText}>
                 {isRequired ? 'Required' : 'Optional'}
             </span>
@@ -61,18 +59,19 @@ export const FieldTextarea = ({
                 </PoliteErrorMessage>
             )}
             {hint && (
-                <div
+                <p
                     role="note"
-                    aria-labelledby={id}
+                    id={`${id}-hint`}
                     className="usa-hint margin-top-1"
                 >
                     {hint}
-                </div>
+                </p>
             )}
             <Textarea
                 {...field}
                 {...inputProps}
                 id={id}
+                aria-describedby={hint ? `${id}-hint` : undefined}
                 name={name}
                 error={showError}
                 onBlur={customOnBlur}

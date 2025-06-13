@@ -786,7 +786,8 @@ export const SubmissionType = ({
                                                         submission that
                                                         highlights any important
                                                         changes CMS reviewers
-                                                        will need to be aware of
+                                                        will need to be aware
+                                                        of.
                                                     </p>
                                                     <ReactRouterLinkWithLogging
                                                         variant="external"
