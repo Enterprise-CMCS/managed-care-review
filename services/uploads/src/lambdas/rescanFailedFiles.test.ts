@@ -1,11 +1,111 @@
 import path from 'path'
 import crypto from 'crypto'
-import { NewClamAV } from '../deps/clamAV'
+import { NewClamAV, ClamAV } from '../deps/clamAV'
 import { mkdtemp, rm } from 'fs/promises'
-import { NewTestS3UploadsClient } from '../deps/s3'
+import { NewTestS3UploadsClient, S3UploadsClient } from '../deps/s3'
 import { generateVirusScanTagSet, virusScanStatus } from '../lib/tags'
+import {
+    rescanFailedFiles,
+    type listInfectedFilesFn,
+} from '../lambdas/rescanFailedFiles'
 
-import { rescanFailedFiles } from '../lambdas/rescanFailedFiles'
+// Mock worker function that uses local ClamAV instead of invoking lambda
+function createMockFileScanner(
+    clamAV: ClamAV,
+    s3Client: S3UploadsClient
+): listInfectedFilesFn {
+    return async (input: { bucket: string; keys: string[] }) => {
+        console.info(`Mock worker processing ${input.keys.length} files`)
+
+        const infectedKeys: string[] = []
+
+        // Process each file individually (same logic as worker lambda)
+        for (const key of input.keys) {
+            console.info('Mock worker scanning file:', key)
+
+            const individualScanDir = await mkdtemp('/tmp/individual-scan-')
+            const scanFileName = `${crypto.randomUUID()}.tmp`
+            const scanFilePath = path.join(individualScanDir, scanFileName)
+
+            try {
+                // Download the file
+                const downloadErr = await s3Client.downloadFileFromS3(
+                    key,
+                    input.bucket,
+                    scanFilePath
+                )
+                if (downloadErr instanceof Error) {
+                    console.error(`Failed to download ${key}:`, downloadErr)
+                    continue
+                }
+
+                // Scan the file
+                const virusScanResult =
+                    clamAV.scanForInfectedFiles(individualScanDir)
+
+                if (virusScanResult instanceof Error) {
+                    console.error(`Failed to scan ${key}:`, virusScanResult)
+                    continue
+                }
+
+                // Determine scan status and tag the file
+                let scanStatus: 'CLEAN' | 'INFECTED'
+                if (
+                    Array.isArray(virusScanResult) &&
+                    virusScanResult.length > 0
+                ) {
+                    console.info(`File ${key} is infected:`, virusScanResult)
+                    scanStatus = 'INFECTED'
+                    infectedKeys.push(key)
+                } else {
+                    console.info(`File ${key} is clean`)
+                    scanStatus = 'CLEAN'
+                }
+
+                // Tag the file (same as worker lambda)
+                const tags = generateVirusScanTagSet(scanStatus)
+                const currentTags = await s3Client.getObjectTags(
+                    key,
+                    input.bucket
+                )
+                if (currentTags instanceof Error) {
+                    console.error(
+                        `Failed to get current tags for ${key}:`,
+                        currentTags
+                    )
+                    continue
+                }
+
+                const nonVirusScanTags = currentTags.filter(
+                    (tag) =>
+                        tag.Key !== 'virusScanStatus' &&
+                        tag.Key !== 'virusScanTimestamp'
+                )
+                const updatedTags = {
+                    TagSet: nonVirusScanTags.concat(tags.TagSet),
+                }
+
+                const tagResult = await s3Client.tagObject(
+                    key,
+                    input.bucket,
+                    updatedTags
+                )
+                if (tagResult instanceof Error) {
+                    console.error(`Failed to tag ${key}:`, tagResult)
+                } else {
+                    console.info(`Successfully tagged ${key} as ${scanStatus}`)
+                }
+            } catch (fileError) {
+                console.error(`Error processing file ${key}:`, fileError)
+                continue
+            } finally {
+                await rm(individualScanDir, { force: true, recursive: true })
+            }
+        }
+
+        return { infectedKeys }
+    }
+}
 
 describe('rescanFailedFiles', () => {
     it('will rescan files with ERROR status and missing scan tags', async () => {
@@ -68,7 +168,7 @@ describe('rescanFailedFiles', () => {
                     'testData',
                     'freshclam.conf'
                 ),
-                pathToDefintions: tmpDefsDir,
+                pathToDefintions: '/opt/homebrew/var/lib/clamav',
                 isLocal: true,
             },
             s3Client
@@ -197,7 +297,8 @@ describe('rescanFailedFiles', () => {
         }
 
         // TEST
-        // run the rescan function
+        const mockFileScanner = createMockFileScanner(clamAV, s3Client)
+
         console.info('=== BEFORE RESCAN ===')
         console.info('Files with ERROR status:', filesWithErrorStatus)
         console.info('Files with no tags:', filesWithNoTags)
@@ -208,7 +309,7 @@ describe('rescanFailedFiles', () => {
 
         const infectedFiles = await rescanFailedFiles(
             s3Client,
-            clamAV,
+            mockFileScanner,
             testBucketName
         )
 
