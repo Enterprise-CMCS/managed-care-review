@@ -5,20 +5,26 @@ import { formatCalendarDate } from '@mc-review/dates'
 import { getAddedByName } from '../QuestionResponseHelpers'
 import { QuestionDisplayDocument } from '../QuestionResponseHelpers/questionResponseHelpers'
 
+type QuestionDisplayTablePropType = {
+    documents: QuestionDisplayDocument[]
+    user: User
+    onlyDisplayInitial: boolean
+} & React.HtmlHTMLAttributes<HTMLTableElement>
+
 export const QuestionDisplayTable = ({
     documents,
     user,
     onlyDisplayInitial, // used when we only care about initial question
-}: {
-    documents: QuestionDisplayDocument[]
-    user: User
-    onlyDisplayInitial: boolean
-}) => {
+    ...rest
+}: QuestionDisplayTablePropType) => {
     const displayDocuments = onlyDisplayInitial
         ? [documents[documents.length - 1]]
         : documents
     return (
-        <table className={`borderTopLinearGradient ${styles.qaDocumentTable}`}>
+        <table
+            className={`borderTopLinearGradient ${styles.qaDocumentTable}`}
+            {...rest}
+        >
             <thead>
                 <tr>
                     <th scope="col">Document name</th>
