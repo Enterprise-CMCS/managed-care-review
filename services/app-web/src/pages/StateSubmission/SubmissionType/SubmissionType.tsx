@@ -6,7 +6,7 @@ import {
 } from '@trussworks/react-uswds'
 import { Formik, FormikErrors, FormikHelpers } from 'formik'
 import React, { useState } from 'react'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useNavigate, useLocation, generatePath } from 'react-router-dom'
 import {
     DynamicStepIndicator,
     ErrorSummary,
@@ -40,6 +40,7 @@ import {
 import { SubmissionTypeFormSchema } from './SubmissionTypeSchema'
 import {
     RoutesRecord,
+    RouteT,
     STATE_SUBMISSION_FORM_ROUTES,
     STATE_SUBMISSION_FORM_ROUTES_WITHOUT_SUPPORTING_DOCS,
 } from '@mc-review/constants'
@@ -127,7 +128,10 @@ export const SubmissionType = ({
     const handleFormSubmit = async (
         values: SubmissionTypeFormValues,
         setSubmitting: (isSubmitting: boolean) => void, // formik setSubmitting
-        savingAsDraft?: boolean
+        options: {
+            type: 'SAVE_AS_DRAFT' | 'CANCEL' | 'CONTINUE'
+            redirectPath?: RouteT
+        }
     ) => {
         if (isNewSubmission) {
             if (!values.populationCovered) {
@@ -191,7 +195,13 @@ export const SubmissionType = ({
                 )
                 return
             }
-            navigate(`/submissions/${draftSubmission.id}/edit/contract-details`)
+            if (options.redirectPath) {
+                navigate(
+                    generatePath(RoutesRecord[options.redirectPath], {
+                        id: id,
+                    })
+                )
+            }
         } else {
             setSubmitting(true)
             if (draftSubmission === undefined || !updateDraft) {
@@ -324,11 +334,18 @@ export const SubmissionType = ({
             const updatedDraft = await updateDraft(updatedContractInput)
             if (updatedDraft instanceof Error) {
                 setSubmitting(false)
-            } else if (savingAsDraft && updatedDraft) {
+            } else if (options.type === 'SAVE_AS_DRAFT' && updatedDraft) {
                 setDraftSaved(true)
                 setSubmitting(false)
             } else {
-                navigate(`../contract-details`)
+                //Can assume it was a 'CONTINUE' type at this point
+                if (options.redirectPath) {
+                    navigate(
+                        generatePath(RoutesRecord[options.redirectPath], {
+                            id: id,
+                        })
+                    )
+                }
             }
         }
     }
@@ -404,7 +421,10 @@ export const SubmissionType = ({
                 <Formik
                     initialValues={submissionTypeInitialValues}
                     onSubmit={(values, { setSubmitting }) => {
-                        return handleFormSubmit(values, setSubmitting)
+                        return handleFormSubmit(values, setSubmitting, {
+                            type: 'CONTINUE',
+                            redirectPath: 'SUBMISSIONS_CONTRACT_DETAILS',
+                        })
                     }}
                     validationSchema={SubmissionTypeFormSchema()}
                 >
@@ -829,7 +849,9 @@ export const SubmissionType = ({
                                             await handleFormSubmit(
                                                 values,
                                                 setSubmitting,
-                                                true
+                                                {
+                                                    type: 'SAVE_AS_DRAFT',
+                                                }
                                             )
                                         }}
                                         actionInProgress={isSubmitting}

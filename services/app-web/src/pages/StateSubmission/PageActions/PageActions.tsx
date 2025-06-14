@@ -40,7 +40,7 @@ export const PageActions = (props: PageActionProps): React.ReactElement => {
     const leftElement =
         isFirstPage || !saveAsDraftOnClick ? undefined : (
             <ActionButton
-                type="submit"
+                type="button"
                 variant="linkStyle"
                 disabled={actionInProgress}
                 onClick={actionInProgress ? undefined : saveAsDraftOnClick}

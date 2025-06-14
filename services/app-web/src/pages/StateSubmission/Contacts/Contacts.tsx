@@ -24,7 +24,7 @@ import {
     activeFormPages,
     type ContractFormPageProps,
 } from '../StateSubmissionForm'
-import { RoutesRecord } from '@mc-review/constants'
+import { RoutesRecord, RouteT } from '@mc-review/constants'
 import {
     ButtonWithLogging,
     DynamicStepIndicator,
@@ -155,7 +155,10 @@ const Contacts = ({
     const handleFormSubmit = async (
         values: ContactsFormValues,
         setSubmitting: (isSubmitting: boolean) => void, // formik setSubmitting
-        savingAsDraft?: boolean
+        options: {
+            type: 'SAVE_AS_DRAFT' | 'BACK' | 'CONTINUE'
+            redirectPath?: RouteT
+        }
     ) => {
         draftSubmission.draftRevision.formData.stateContacts =
             values.stateContacts
@@ -173,12 +176,18 @@ const Contacts = ({
             const msg = `Error updating draft submission: ${updatedSubmission}`
             console.info(msg)
             recordJSException(msg)
-        } else if (savingAsDraft && updatedSubmission) {
+        } else if (options.type === 'SAVE_AS_DRAFT' && updatedSubmission) {
             setDraftSaved(true)
             setSubmitting(false)
         } else {
             if (hideSupportingDocs) {
-                navigate(`../review-and-submit`)
+                if (options.redirectPath) {
+                    navigate(
+                        generatePath(RoutesRecord[options.redirectPath], {
+                            id: id,
+                        })
+                    )
+                }
             } else {
                 navigate(`../documents`)
             }
@@ -221,7 +230,10 @@ const Contacts = ({
                 <Formik
                     initialValues={contactsInitialValues}
                     onSubmit={(values, { setSubmitting }) => {
-                        return handleFormSubmit(values, setSubmitting)
+                        return handleFormSubmit(values, setSubmitting, {
+                            type: 'CONTINUE',
+                            redirectPath: 'SUBMISSIONS_REVIEW_SUBMIT',
+                        })
                     }}
                     validationSchema={contactSchema}
                 >
@@ -425,7 +437,9 @@ const Contacts = ({
                                         await handleFormSubmit(
                                             values,
                                             setSubmitting,
-                                            true
+                                            {
+                                                type: 'SAVE_AS_DRAFT',
+                                            }
                                         )
                                     }}
                                     backOnClick={() =>
@@ -433,8 +447,14 @@ const Contacts = ({
                                             draftSubmission.draftRevision
                                                 .formData.submissionType ===
                                                 'CONTRACT_ONLY'
-                                                ? '../contract-details'
-                                                : '../rate-details'
+                                                ? generatePath(
+                                                      RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS,
+                                                      { id }
+                                                  )
+                                                : generatePath(
+                                                      RoutesRecord.SUBMISSIONS_RATE_DETAILS,
+                                                      { id }
+                                                  )
                                         )
                                     }
                                     continueOnClick={() => {

@@ -63,7 +63,7 @@ import {
     isContractAmendment,
     isContractWithProvisions,
 } from '@mc-review/common-code'
-import { RoutesRecord } from '@mc-review/constants'
+import { RoutesRecord, RouteT } from '@mc-review/constants'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '@mc-review/common-code'
 import {
@@ -391,7 +391,10 @@ export const ContractDetails = ({
     const handleFormSubmit = async (
         values: ContractDetailsFormValues,
         setSubmitting: (isSubmitting: boolean) => void, // formik setSubmitting
-        savingAsDraft?: boolean
+        options: {
+            type: 'SAVE_AS_DRAFT' | 'BACK' | 'CONTINUE'
+            redirectPath?: RouteT
+        }
     ) => {
         const updatedDraftSubmissionFormData: ContractDraftRevisionFormDataInput =
             {
@@ -519,16 +522,18 @@ export const ContractDetails = ({
         if (updatedSubmission instanceof Error) {
             setSubmitting(false)
             console.info('Error updating draft submission: ', updatedSubmission)
-        } else if (savingAsDraft && updatedSubmission) {
+        } else if (options.type === 'SAVE_AS_DRAFT' && updatedSubmission) {
             setDraftSaved(true)
             setSubmitting(false)
         } else {
-            const redirectPath =
-                updatedSubmission.draftRevision!.formData.submissionType ===
-                'CONTRACT_ONLY'
-                    ? `../contacts`
-                    : `../rate-details`
-            navigate(redirectPath)
+            //Can assume back or continue was clicked at this point
+            if (options.redirectPath) {
+                navigate(
+                    generatePath(RoutesRecord[options.redirectPath], {
+                        id: id,
+                    })
+                )
+            }
         }
     }
 
@@ -555,7 +560,14 @@ export const ContractDetails = ({
                 <Formik
                     initialValues={contractDetailsInitialValues}
                     onSubmit={(values, { setSubmitting }) => {
-                        return handleFormSubmit(values, setSubmitting)
+                        return handleFormSubmit(values, setSubmitting, {
+                            type: 'CONTINUE',
+                            redirectPath:
+                                draftSubmission.draftRevision.formData
+                                    .submissionType === 'CONTRACT_ONLY'
+                                    ? 'SUBMISSIONS_CONTACTS'
+                                    : 'SUBMISSIONS_RATE_DETAILS',
+                        })
                     }}
                     validationSchema={() =>
                         ContractDetailsFormSchema(
@@ -1311,7 +1323,9 @@ export const ContractDetails = ({
                                         await handleFormSubmit(
                                             values,
                                             setSubmitting,
-                                            true
+                                            {
+                                                type: 'SAVE_AS_DRAFT',
+                                            }
                                         )
                                     }}
                                     backOnClick={async () => {
@@ -1324,9 +1338,13 @@ export const ContractDetails = ({
                                         } else {
                                             await handleFormSubmit(
                                                 values,
-                                                setSubmitting
+                                                setSubmitting,
+                                                {
+                                                    type: 'BACK',
+                                                    redirectPath:
+                                                        'SUBMISSIONS_TYPE',
+                                                }
                                             )
-                                            navigate('../type')
                                         }
                                     }}
                                     disableContinue={
@@ -1341,8 +1359,14 @@ export const ContractDetails = ({
                                     continueOnClickUrl={
                                         draftSubmission.draftRevision.formData
                                             .submissionType === 'CONTRACT_ONLY'
-                                            ? '/edit/contacts'
-                                            : '/edit/rate-details'
+                                            ? generatePath(
+                                                  RoutesRecord.SUBMISSIONS_RATE_DETAILS,
+                                                  { id }
+                                              )
+                                            : generatePath(
+                                                  RoutesRecord.SUBMISSIONS_CONTACTS,
+                                                  { id }
+                                              )
                                     }
                                 />
                             </UswdsForm>
