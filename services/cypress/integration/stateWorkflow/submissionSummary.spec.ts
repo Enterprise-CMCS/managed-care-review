@@ -10,6 +10,7 @@ describe('State user can view submissions', () => {
         // add a draft contract only submission
         cy.startNewContractOnlySubmissionWithBaseContract()
         cy.navigateContractForm('SAVE_DRAFT')
+        cy.get('._bannerLogo_qcskr_2347').click()
 
         // add a submitted contract and rates submission
         cy.startNewContractAndRatesSubmission()

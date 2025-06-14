@@ -8,7 +8,6 @@ import { ActionButton } from '../../../../../components/ActionButton'
 import { useRouteParams, useStatePrograms } from '../../../../../hooks'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 
-import { RoutesRecord } from '@mc-review/constants'
 import { UnlockSubmitModal } from '../../../../../components/Modal/UnlockSubmitModal'
 import { getVisibleLatestContractFormData } from '@mc-review/helpers'
 import { useAuth } from '../../../../../contexts/AuthContext'
@@ -150,22 +149,7 @@ export const ReviewSubmit = (): React.ReactElement => {
                     explainMissingData
                 />
 
-                <PageActionsContainer
-                    left={
-                        <ActionButton
-                            type="button"
-                            variant="linkStyle"
-                            link_url={RoutesRecord.DASHBOARD_SUBMISSIONS}
-                            parent_component_type="page body"
-                            onClick={() =>
-                                navigate(RoutesRecord.DASHBOARD_SUBMISSIONS)
-                            }
-                            disabled={isSubmitting}
-                        >
-                            Save as draft
-                        </ActionButton>
-                    }
-                >
+                <PageActionsContainer>
                     <ActionButton
                         type="button"
                         variant="outline"

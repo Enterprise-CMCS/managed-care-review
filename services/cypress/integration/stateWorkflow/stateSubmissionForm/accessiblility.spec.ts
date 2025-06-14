@@ -94,7 +94,7 @@ describe('state user in state submission form', () => {
             cy.checkA11yWithWcag22aa()
 
             //Check the dashboard
-            cy.navigateContractRatesForm('SAVE_DRAFT', false)
+            cy.get('._bannerLogo_qcskr_2347').click()
             cy.checkA11yWithWcag22aa()
         })
     })
