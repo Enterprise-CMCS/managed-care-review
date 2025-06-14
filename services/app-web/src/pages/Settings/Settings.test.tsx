@@ -26,6 +26,7 @@ import {
     DivisionAssignmentTable,
     SupportEmailsTable,
     AutomatedEmailsTable,
+    OauthClientsTable,
 } from './SettingsTables'
 import { fetchMcReviewSettingsFailMock } from '@mc-review/mocks'
 import { indexUsersQueryFailMock } from '@mc-review/mocks'
@@ -70,6 +71,10 @@ const CommonSettingsRoute = () => (
             <Route
                 path={RoutesRecord.SUPPORT_EMAILS}
                 element={<SupportEmailsTable />}
+            />
+            <Route
+                path={RoutesRecord.OAUTH_CLIENTS}
+                element={<OauthClientsTable />}
             />
         </Route>
     </Routes>
@@ -621,6 +626,33 @@ describe('Admin only settings page tests', () => {
         await userEvent.click(oact)
 
         expect(within(zukRow).getByText('OACT')).toBeInTheDocument()
+    })
+    it('renders Oauth clients combobox for admin user', async () => {
+        const { user } = renderWithProviders(<CommonSettingsRoute />, {
+            apolloProvider: {
+                mocks: [
+                    indexUsersQueryMock(),
+                    fetchCurrentUserMock({
+                        user: mockValidAdminUser(),
+                        statusCode: 200,
+                    }),
+                    fetchMcReviewSettingsMock(),
+                    //oactclients mock TODO
+                ],
+            },
+            routerProvider: {
+                route: '/mc-review-settings',
+            },
+        })
+
+        const oauthClientsLink = await screen.findByRole('link', {
+            name: 'Oauth clients',
+        })
+        expect(oauthClientsLink).toBeInTheDocument()
+
+        await user.click(oauthClientsLink)
+
+        expect(screen.findByText('Oauth clients')).toBeInTheDocument()
     })
     it('should display an error if updateUser fails', async () => {
         renderWithProviders(<CommonSettingsRoute />, {
