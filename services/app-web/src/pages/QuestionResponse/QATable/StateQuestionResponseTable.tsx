@@ -36,12 +36,12 @@ export const StateQuestionResponseTable = ({
         Array.from([...questionsList.edges]).forEach(({ node }, index) => {
             if (node.responses.length > 0) {
                 answeredQuestions.push({
-                    roundTitle: `Asked by: ${divisionFullNames[node.division]}`,
+                    roundTitle: `Asked by: ${divisionFullNames[node.division]} - Round ${node.round}`,
                     questionData: node,
                 })
             } else {
                 unansweredQuestions.push({
-                    roundTitle: `Asked by: ${divisionFullNames[node.division]}`,
+                    roundTitle: `Asked by: ${divisionFullNames[node.division]} - Round ${node.round}`,
                     questionData: node,
                 })
             }
