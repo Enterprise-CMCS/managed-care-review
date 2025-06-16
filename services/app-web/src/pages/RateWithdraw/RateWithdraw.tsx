@@ -3,21 +3,15 @@ import styles from './RateWithdraw.module.scss'
 import {
     ActionButton,
     Breadcrumbs,
+    FieldTextarea,
     GenericApiErrorBanner,
-    PoliteErrorMessage,
 } from '../../components'
 import { RoutesRecord } from '@mc-review/constants'
 import { generatePath, useNavigate, useParams } from 'react-router-dom'
 import { useFetchRateQuery, useWithdrawRateMutation } from '../../gen/gqlClient'
 import { ErrorOrLoadingPage } from '../StateSubmission'
 import { handleAndReturnErrorState } from '../StateSubmission/ErrorOrLoadingPage'
-import {
-    ButtonGroup,
-    Form,
-    FormGroup,
-    Label,
-    Textarea,
-} from '@trussworks/react-uswds'
+import { ButtonGroup, Form } from '@trussworks/react-uswds'
 import * as Yup from 'yup'
 import { PageActionsContainer } from '../StateSubmission/PageActions'
 import { Formik, FormikErrors } from 'formik'
@@ -48,7 +42,7 @@ export const RateWithdraw = () => {
     const [shouldValidate, setShouldValidate] = React.useState(false)
     const [withdrawRate, { error: withdrawError, loading: withdrawLoading }] =
         useWithdrawRateMutation()
-    const showFieldErrors = (error?: FormError): boolean | undefined =>
+    const showFieldErrors = (error?: FormError): boolean =>
         shouldValidate && Boolean(error)
 
     const formInitialValues: RateWithdrawValues = {
@@ -141,43 +135,18 @@ export const RateWithdraw = () => {
                         {withdrawError && <GenericApiErrorBanner />}
                         <fieldset className="usa-fieldset">
                             <h2>Withdraw a rate</h2>
-                            <FormGroup
-                                error={showFieldErrors(
+                            <FieldTextarea
+                                label="Reason for withdrawing"
+                                id="rateWithdrawReason"
+                                data-testid="rateWithdrawReason"
+                                showError={showFieldErrors(
                                     errors.rateWithdrawReason
                                 )}
-                                className="margin-top-0"
-                            >
-                                <Label
-                                    htmlFor="rateWithdrawReason"
-                                    className="margin-bottom-0 text-bold"
-                                >
-                                    Reason for withdrawing
-                                </Label>
-                                <p className="margin-bottom-0 margin-top-05 usa-hint">
-                                    Required
-                                </p>
-                                <p className="margin-bottom-0 margin-top-05 usa-hint">
-                                    Provide a reason for withdrawing the rate
-                                    review.
-                                </p>
-                                {showFieldErrors(errors.rateWithdrawReason) && (
-                                    <PoliteErrorMessage formFieldLabel="Reason for withdrawing">
-                                        {errors.rateWithdrawReason}
-                                    </PoliteErrorMessage>
-                                )}
-                                <Textarea
-                                    name="rateWithdrawReason"
-                                    id="rateWithdrawReason"
-                                    data-testid="rateWithdrawReason"
-                                    aria-labelledby="rateWithdrawReason"
-                                    aria-required
-                                    error={showFieldErrors(
-                                        errors.rateWithdrawReason
-                                    )}
-                                    onChange={handleChange}
-                                    defaultValue={values.rateWithdrawReason}
-                                ></Textarea>
-                            </FormGroup>
+                                name="rateWithdrawReason"
+                                aria-required
+                                hint="Provide a reason for withdrawing the rate review."
+                                onChange={handleChange}
+                            />
                         </fieldset>
                         <PageActionsContainer>
                             <ButtonGroup type="default">
