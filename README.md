@@ -9,6 +9,7 @@ Managed Care Review is an application that accepts Managed Care contract and rat
 
 - [Managed Care Review Confluence page](https://qmacbis.atlassian.net/wiki/spaces/OY2/pages/2465300483/Managed+Care+Review). Includes an overview of the project, information about planned features, and ADRs (architectural decision records).
 - [`./docs`](./docs) folder. Includes architectural decision records and technical design documents.
+  - [OAuth Implementation](./docs/technical-design/oauth.md) - Details our OAuth 2.0 implementation for API authentication.
 - [`./services`](./services) README files. Includes brief summary of the service and key dependencies.
 
 ## Application Requirements
@@ -302,7 +303,7 @@ There are technical design docs about [when to add and remove feature flags](doc
 
 ## Contributing
 
-We welcome contributions to this project. MC Review is an internal CMS tool for facilitating the review of state Medicaid contracts. It is developed by a federal contracting team under contract with CMS and is deployed internally for that purpose. MC Review is built using agile development processes and accepts both issues and feature requests via GitHub issues on this repository. If you’d like to contribute back any changes to this code base, please create a Pull Request and a team member will review your work. While this repository is dedicated primarily to delivering MC Review to the government, if you find any parts of it useful or find any errors in the code we would love your contributions and feedback. All contributors are required to follow our [Code of Conduct](./CODE_OF_CONDUCT.md)
+We welcome contributions to this project. MC Review is an internal CMS tool for facilitating the review of state Medicaid contracts. It is developed by a federal contracting team under contract with CMS and is deployed internally for that purpose. MC Review is built using agile development processes and accepts both issues and feature requests via GitHub issues on this repository. If you'd like to contribute back any changes to this code base, please create a Pull Request and a team member will review your work. While this repository is dedicated primarily to delivering MC Review to the government, if you find any parts of it useful or find any errors in the code we would love your contributions and feedback. All contributors are required to follow our [Code of Conduct](./CODE_OF_CONDUCT.md)
 
 ## License
 
