@@ -254,13 +254,11 @@ The following files need type updates but don't create new instances:
 ## Helpers Package
 - [x] `packages/helpers/src/gql/apolloErrors.ts`
   - Change: Update error handling utilities
-  - Note: Core error handling utilities
+  - Note: Added `graphql` package as a dependency to fix CI build errors
   - Required Changes:
-    - Removed ApolloError imports
-    - Updated error type definitions to use GraphQLError
-    - Updated error handling to work with GraphQLError directly
-    - Added error code extraction from extensions
-    - Improved error message formatting
+    - Update error type definitions
+    - Modify error handling logic
+    - Update error display components
   - Changes:
     - Removed ApolloError and GraphQLErrors imports
     - Added GraphQLError import from graphql
