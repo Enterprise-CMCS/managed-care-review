@@ -69,7 +69,10 @@ export const StateQuestionResponseTable = ({
                 className={styles.questionSection}
                 data-testid={'outstandingQuestions'}
             >
-                <SectionHeader header="Outstanding questions" />
+                <SectionHeader
+                    header="Outstanding questions"
+                    headerId="outsandingContractQuestions"
+                />
                 {sortedUnansweredQuestions.length ? (
                     sortedUnansweredQuestions.map(
                         ({ roundTitle, questionData }) => (
@@ -79,6 +82,7 @@ export const StateQuestionResponseTable = ({
                                 roundTitle={roundTitle}
                                 currentUser={loggedInUser!}
                                 contractStatus={contractStatus}
+                                qaSectionHeaderId="outsandingContractQuestions"
                             />
                         )
                     )
@@ -90,7 +94,10 @@ export const StateQuestionResponseTable = ({
                 className={styles.questionSection}
                 data-testid={'answeredQuestions'}
             >
-                <SectionHeader header="Answered questions" />
+                <SectionHeader
+                    header="Answered questions"
+                    headerId="answeredContractQuestions"
+                />
                 {sortedAnsweredQuestions.length ? (
                     sortedAnsweredQuestions.map(
                         ({ roundTitle, questionData }) => (
@@ -100,6 +107,7 @@ export const StateQuestionResponseTable = ({
                                 roundTitle={roundTitle}
                                 currentUser={loggedInUser!}
                                 contractStatus={contractStatus}
+                                qaSectionHeaderId="answeredContractQuestions"
                             />
                         )
                     )
