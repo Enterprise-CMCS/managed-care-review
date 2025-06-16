@@ -22,26 +22,6 @@ The system automatically generates:
 - A unique client ID (format: `oauth-client-{uuid}`)
 - A secure client secret (64 bytes, base64url encoded)
 
-### Example: Creating a Client
-
-```graphql
-mutation {
-  createOauthClient(input: {
-    description: "Test API Client",
-    contactEmail: "admin@example.com",
-    grants: ["client_credentials"]
-  }) {
-    oauthClient {
-      clientId
-      clientSecret
-      grants
-      description
-      contactEmail
-    }
-  }
-}
-```
-
 ## Token Lifecycle
 
 1. **Token Generation**
@@ -84,18 +64,18 @@ Content-Type: application/json
 }
 ```
 
-**Response (200 OK):**
+**Response Examples:**
+
+Success (200 OK):
 ```json
 {
-  "access_token": "eyJhbGciOiJIUzI1NiIs...",
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJvYXV0aC1jbGllbnQtMTIzIiwiY2xpZW50X2lkIjoib2F1dGgtY2xpZW50LTEyMyIsImdyYW50X3R5cGUiOiJjbGllbnRfY3JlZGVudGlhbHMiLCJpYXQiOjE2MTUxMjM0NTYsImV4cCI6MTY0NjY1OTQ1Nn0.signature", // pragma: allowlist secret
   "token_type": "Bearer",
   "expires_in": 7776000
 }
 ```
 
-**Error Responses:**
-
-400 Bad Request:
+Missing Credentials (400 Bad Request):
 ```json
 {
   "error": "invalid_request",
@@ -103,7 +83,15 @@ Content-Type: application/json
 }
 ```
 
-401 Unauthorized:
+Invalid JSON (400 Bad Request):
+```json
+{
+  "error": "invalid_request",
+  "error_description": "Invalid JSON payload"
+}
+```
+
+Invalid Credentials (401 Unauthorized):
 ```json
 {
   "error": "invalid_client",
@@ -111,11 +99,19 @@ Content-Type: application/json
 }
 ```
 
-401 Unauthorized (Client not authorized):
+Unauthorized Client (401 Unauthorized):
 ```json
 {
   "error": "unauthorized_client",
   "error_description": "Client is not authorized to use this grant type"
+}
+```
+
+Server Error (500 Internal Server Error):
+```json
+{
+  "error": "server_error",
+  "error_description": "Internal server error"
 }
 ```
 
@@ -125,6 +121,33 @@ Include the token in the `Authorization` header for all API requests:
 
 ```
 Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
+```
+
+**Response Examples:**
+
+Success (200 OK):
+```json
+{
+  "data": {
+    // API response data
+  }
+}
+```
+
+Invalid Token (401 Unauthorized):
+```json
+{
+  "error": "unauthorized",
+  "error_description": "Invalid or expired token"
+}
+```
+
+Missing Token (401 Unauthorized):
+```json
+{
+  "error": "unauthorized",
+  "error_description": "Missing authorization token"
+}
 ```
 
 ## Security Considerations
@@ -142,15 +165,4 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
 3. **Access Control**
    - Only admin users can create/update/delete OAuth clients
    - Client credentials are required for all token requests
-   - Invalid credentials are rejected immediately
-
-## Management Endpoints
-
-OAuth clients can be managed through GraphQL mutations:
-
-- `createOauthClient`: Create a new client
-- `updateOauthClient`: Update client details
-- `deleteOauthClient`: Remove a client
-- `fetchOauthClients`: List all clients
-
-All management operations require admin privileges. 
+   - Invalid credentials are rejected immediately 
