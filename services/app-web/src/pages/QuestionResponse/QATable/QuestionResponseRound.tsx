@@ -60,7 +60,7 @@ export const QuestionResponseRound = ({
                     <NavLinkWithLogging
                         className={classes}
                         variant="unstyled"
-                        aria-describedby={`${qaSectionHeaderId} ${question.id}-table ${question.id}-header`}
+                        aria-describedby={`${qaSectionHeaderId} ${question.id}-header`}
                         to={`./${question.division.toLowerCase()}/${question.id}/upload-response`}
                     >
                         Upload response
