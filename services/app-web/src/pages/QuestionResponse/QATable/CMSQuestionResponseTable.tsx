@@ -47,7 +47,7 @@ export const CMSQuestionResponseTable = ({
             }
 
             rounds[index].push({
-                roundTitle: `Round ${divisionQuestions.edges.length - index}`,
+                roundTitle: `Round ${node.round}`,
                 questionData: node,
             })
         })
@@ -78,7 +78,7 @@ export const CMSQuestionResponseTable = ({
                         }
 
                         rounds[index].push({
-                            roundTitle: `${node.division} - ${node.round}`,
+                            roundTitle: `${node.division} - Round ${node.round}`,
                             questionData: node,
                         })
                     })
