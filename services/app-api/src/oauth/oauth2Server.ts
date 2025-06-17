@@ -148,193 +148,12 @@ export class CustomOAuth2Server {
                         }),
                     }
                 }
-                // Transform the JSON body to match OAuth2 expected format
-                const transformedBody = {
-                    grant_type: body.grantType,
-                    client_id: body.clientId,
-                    client_secret: body.clientSecret,
-                }
-
-                // Create a new request with the transformed body
-                const request = new OAuthRequest({
-                    body: transformedBody,
-                    headers: {
-                        ...event.headers,
-                        'content-type': 'application/x-www-form-urlencoded',
-                    },
-                    method: event.httpMethod,
-                    query: event.queryStringParameters || {},
-                })
-                const response = new OAuthResponse()
-
-                try {
-                    const token = await this.oauth2Server.token(
-                        request,
-                        response
-                    )
-                    return {
-                        statusCode: 200,
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            access_token: token.accessToken,
-                            token_type: 'Bearer',
-                            expires_in: JWT_EXPIRATION_SECONDS,
-                        }),
-                    }
-                } catch (error) {
-                    if (error instanceof InvalidRequestError) {
-                        return {
-                            statusCode: 400,
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({
-                                error: 'invalid_request',
-                                error_description: error.message,
-                                error_details: error.stack,
-                            }),
-                        }
-                    }
-                    if (error instanceof InvalidClientError) {
-                        return {
-                            statusCode: 401,
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({
-                                error: 'invalid_client',
-                                error_description: error.message,
-                                error_details: error.stack,
-                            }),
-                        }
-                    }
-                    if (error instanceof UnauthorizedClientError) {
-                        return {
-                            statusCode: 401,
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({
-                                error: 'unauthorized_client',
-                                error_description: error.message,
-                                error_details: error.stack,
-                            }),
-                        }
-                    }
-                    // For any other error, return a more detailed error response
-                    return {
-                        statusCode: 500,
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            error: 'server_error',
-                            error_description:
-                                error.message || 'Internal server error',
-                            error_type: error.name,
-                            error_details: error.stack,
-                        }),
-                    }
-                }
             } else if (
                 contentType?.includes('application/x-www-form-urlencoded')
             ) {
                 // Parse form-urlencoded data
                 const params = new URLSearchParams(event.body || '')
                 body = Object.fromEntries(params.entries())
-                const request = new OAuthRequest({
-                    body,
-                    headers: event.headers,
-                    method: event.httpMethod,
-                    query: event.queryStringParameters || {},
-                })
-                const response = new OAuthResponse()
-
-                try {
-                    const token = await this.oauth2Server.token(
-                        request,
-                        response
-                    )
-
-                    // Generate JWT for client credentials flow
-                    if (token.grantType === 'client_credentials') {
-                        const jwt = this.generateJWT(token.client.id)
-                        return {
-                            statusCode: 200,
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({
-                                access_token: jwt,
-                                token_type: 'Bearer',
-                                expires_in: 3600,
-                            }),
-                        }
-                    }
-
-                    return {
-                        statusCode: 200,
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(token),
-                    }
-                } catch (error) {
-                    if (error instanceof InvalidRequestError) {
-                        return {
-                            statusCode: 400,
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({
-                                error: 'invalid_request',
-                                error_description: error.message,
-                                error_details: error.stack,
-                            }),
-                        }
-                    }
-                    if (error instanceof InvalidClientError) {
-                        return {
-                            statusCode: 401,
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({
-                                error: 'invalid_client',
-                                error_description: error.message,
-                                error_details: error.stack,
-                            }),
-                        }
-                    }
-                    if (error instanceof UnauthorizedClientError) {
-                        return {
-                            statusCode: 401,
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({
-                                error: 'unauthorized_client',
-                                error_description: error.message,
-                                error_details: error.stack,
-                            }),
-                        }
-                    }
-                    return {
-                        statusCode: 500,
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            error: 'server_error',
-                            error_description:
-                                error.message || 'Internal server error',
-                            error_type: error.name,
-                            error_details: error.stack,
-                        }),
-                    }
-                }
             } else {
                 return {
                     statusCode: 400,
@@ -345,6 +164,89 @@ export class CustomOAuth2Server {
                         error: 'invalid_request',
                         error_description:
                             'Content-Type must be application/json or application/x-www-form-urlencoded',
+                    }),
+                }
+            }
+
+            // Transform the body to match OAuth2 expected format
+            const transformedBody = {
+                grant_type: body.grant_type || body.grantType,
+                client_id: body.client_id || body.clientId,
+                client_secret: body.client_secret || body.clientSecret,
+            }
+
+            // Create a new request with the transformed body
+            const request = new OAuthRequest({
+                body: transformedBody,
+                headers: {
+                    ...event.headers,
+                    'content-type': 'application/x-www-form-urlencoded',
+                },
+                method: event.httpMethod,
+                query: event.queryStringParameters || {},
+            })
+            const response = new OAuthResponse()
+
+            try {
+                const token = await this.oauth2Server.token(request, response)
+                return {
+                    statusCode: 200,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        access_token: token.accessToken,
+                        token_type: 'Bearer',
+                        expires_in: JWT_EXPIRATION_SECONDS,
+                    }),
+                }
+            } catch (error) {
+                if (error instanceof InvalidRequestError) {
+                    return {
+                        statusCode: 400,
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            error: 'invalid_request',
+                            error_description: error.message,
+                        }),
+                    }
+                }
+                if (error instanceof InvalidClientError) {
+                    return {
+                        statusCode: 401,
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            error: 'invalid_client',
+                            error_description: error.message,
+                        }),
+                    }
+                }
+                if (error instanceof UnauthorizedClientError) {
+                    return {
+                        statusCode: 401,
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            error: 'unauthorized_client',
+                            error_description: error.message,
+                        }),
+                    }
+                }
+                return {
+                    statusCode: 500,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        error: 'server_error',
+                        error_description:
+                            error.message || 'Internal server error',
+                        error_type: error.name,
                     }),
                 }
             }
@@ -360,8 +262,6 @@ export class CustomOAuth2Server {
                         error instanceof Error
                             ? error.message
                             : 'Invalid request body',
-                    error_details:
-                        error instanceof Error ? error.stack : undefined,
                 }),
             }
         }
