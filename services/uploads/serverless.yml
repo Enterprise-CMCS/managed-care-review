@@ -51,6 +51,7 @@ provider:
             - lambda:InvokeFunction
           Resource:
             - !Sub arn:aws:lambda:${self:provider.region}:${AWS::AccountId}:function:${self:service}-${sls:stage}-avAuditFiles
+            - !Sub arn:aws:lambda:${self:provider.region}:${AWS::AccountId}:function:${self:service}-${sls:stage}-rescanWorker
 
 custom:
   region: us-east-1
@@ -120,29 +121,9 @@ functions:
       OPENTELEMETRY_COLLECTOR_CONFIG_FILE: /var/task/collector.yml
       VITE_APP_OTEL_COLLECTOR_URL: ${self:custom.reactAppOtelCollectorUrl}
 
-  avAuditUploads:
-    handler: src/lambdas/avAuditUploads.main
+  rescanFailedFiles:
+    handler: src/lambdas/rescanFailedFiles.main
     timeout: 300 # 300 seconds = 5 minutes. Average scan is 25 seconds.
-    maximumRetryAttempts: 0
-    layers:
-      - !Ref ClamAvLambdaLayer
-      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-18-1:4
-    environment:
-      stage: ${sls:stage}
-      AUDIT_BUCKET_NAME: !Ref DocumentUploadsBucket
-      CLAMAV_BUCKET_NAME: !Ref ClamDefsBucket
-      PATH_TO_AV_DEFINITIONS: 'lambda/s3-antivirus/av-definitions'
-      LIST_INFECTED_FILES_LAMBDA_NAME: ${self:functions.avAuditFiles.name}
-      AWS_LAMBDA_EXEC_WRAPPER: /opt/otel-handler
-      OPENTELEMETRY_COLLECTOR_CONFIG_FILE: /var/task/collector.yml
-      VITE_APP_OTEL_COLLECTOR_URL: ${self:custom.reactAppOtelCollectorUrl}
-
-  avAuditFiles:
-    handler: src/lambdas/avAuditFiles.main
-    name: ${self:service}-${sls:stage}-avAuditFiles
-    timeout: 300 # 300 seconds = 5 minutes. Average scan is 25 seconds.
-    memorySize: 2048
-    ephemeralStorageSize: 1024
     maximumRetryAttempts: 0
     layers:
       - !Ref ClamAvLambdaLayer
@@ -155,6 +136,26 @@ functions:
       AWS_LAMBDA_EXEC_WRAPPER: /opt/otel-handler
       OPENTELEMETRY_COLLECTOR_CONFIG_FILE: /var/task/collector.yml
       VITE_APP_OTEL_COLLECTOR_URL: ${self:custom.reactAppOtelCollectorUrl}
+
+  rescanWorker:
+    handler: src/lambdas/rescanWorker.main
+    timeout: 300 # 300 seconds = 5 minutes. Average scan is 25 seconds.
+    maximumRetryAttempts: 0
+    layers:
+      - !Ref ClamAvLambdaLayer
+      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-18-1:4
+    vpc:
+      securityGroupIds: ${self:custom.sgId}
+      subnetIds: ${self:custom.privateSubnets}
+    environment:
+      stage: ${sls:stage}
+      AUDIT_BUCKET_NAME: !Ref DocumentUploadsBucket
+      CLAMAV_BUCKET_NAME: !Ref ClamDefsBucket
+      PATH_TO_AV_DEFINITIONS: 'lambda/s3-antivirus/av-definitions'
+      AWS_LAMBDA_EXEC_WRAPPER: /opt/otel-handler
+      OPENTELEMETRY_COLLECTOR_CONFIG_FILE: /var/task/collector.yml
+      VITE_APP_OTEL_COLLECTOR_URL: ${self:custom.reactAppOtelCollectorUrl}
+      RESCAN_WORKER_LAMBDA_NAME: ${self:service}-${sls:stage}-rescanWorker
 
 resources:
   Conditions:

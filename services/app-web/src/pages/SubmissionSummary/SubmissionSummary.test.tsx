@@ -675,7 +675,7 @@ describe('SubmissionSummary', () => {
                         }
                     )
                     await waitFor(() => {
-                        const rows = screen.getAllByRole('row')
+                        const rows = screen.queryAllByRole('row')
                         expect(rows).toHaveLength(10)
                         expect(
                             within(rows[0]).getByText('Date added')
@@ -1278,6 +1278,13 @@ describe('SubmissionSummary', () => {
                     // expect unlock button
                     expect(
                         screen.getByRole('button', {
+                            name: 'Unlock submission',
+                        })
+                    ).toHaveClass('usa-button')
+
+                    // expect withdraw button
+                    expect(
+                        screen.getByRole('button', {
                             name: 'Withdraw submission',
                         })
                     ).toHaveClass('usa-button')
@@ -1323,36 +1330,257 @@ describe('SubmissionSummary', () => {
                         }
                     )
                     await waitFor(() => {
+                        // expect submission released to state link to not exist
+                        expect(
+                            screen.queryByRole('link', {
+                                name: 'Withdrawn submission',
+                            })
+                        ).toBeNull()
+
+                        // expect unlock button to be not on the page
+                        expect(
+                            screen.queryByRole('button', {
+                                name: 'Unlock submission',
+                            })
+                        ).not.toBeInTheDocument()
+
+                        expect(
+                            screen.queryByText(
+                                'No action can be taken on this submission in its current status.'
+                            )
+                        ).not.toBeInTheDocument()
+
+                        //Expect undo withdraw button to render
+                        expect(
+                            screen.queryByRole('button', {
+                                name: 'Undo submission withdraw',
+                            })
+                        ).toBeInTheDocument()
+                    })
+                })
+            })
+
+            describe('undo withdrawal submission tests', () => {
+                it('renders undo withdraw submission button', async () => {
+                    const contract =
+                        mockContractPackageSubmittedWithQuestions(
+                            'test-abc-123'
+                        )
+                    contract.reviewStatus = 'WITHDRAWN'
+                    contract.consolidatedStatus = 'WITHDRAWN'
+                    renderWithProviders(
+                        <Routes>
+                            <Route element={<SubmissionSideNav />}>
+                                <Route
+                                    path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                                    element={<SubmissionSummary />}
+                                />
+                            </Route>
+                        </Routes>,
+                        {
+                            apolloProvider: {
+                                mocks: [
+                                    fetchCurrentUserMock({
+                                        user: mockUser(),
+                                        statusCode: 200,
+                                    }),
+                                    fetchContractWithQuestionsMockSuccess({
+                                        contract,
+                                    }),
+                                    fetchContractWithQuestionsMockSuccess({
+                                        contract,
+                                    }),
+                                ],
+                            },
+                            routerProvider: {
+                                route: '/submissions/test-abc-123',
+                            },
+                            featureFlags: {
+                                'withdraw-submission': true,
+                                'undo-withdraw-submission': true,
+                            },
+                        }
+                    )
+
+                    await waitFor(() => {
+                        expect(
+                            screen.getByTestId('submission-side-nav')
+                        ).toBeInTheDocument()
+                        expect(
+                            screen.getByText('MCR-MN-0005-SNBC')
+                        ).toBeInTheDocument()
+                    })
+
+                    // expect undo button
+                    expect(
+                        screen.getByRole('button', {
+                            name: 'Undo submission withdraw',
+                        })
+                    ).toHaveClass('usa-button')
+                })
+
+                it('render withdraw and other action buttons for a submission thats withdraw has been undone', async () => {
+                    const contract =
+                        mockContractPackageSubmittedWithQuestions(
+                            'test-abc-123'
+                        )
+                    contract.reviewStatus = 'UNDER_REVIEW'
+                    contract.consolidatedStatus = 'RESUBMITTED'
+                    renderWithProviders(
+                        <Routes>
+                            <Route element={<SubmissionSideNav />}>
+                                <Route
+                                    path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                                    element={<SubmissionSummary />}
+                                />
+                            </Route>
+                        </Routes>,
+                        {
+                            apolloProvider: {
+                                mocks: [
+                                    fetchCurrentUserMock({
+                                        user: mockValidCMSUser(),
+                                        statusCode: 200,
+                                    }),
+                                    fetchContractWithQuestionsMockSuccess({
+                                        contract: contract,
+                                    }),
+                                    fetchContractWithQuestionsMockSuccess({
+                                        contract: contract,
+                                    }),
+                                ],
+                            },
+                            routerProvider: {
+                                route: '/submissions/test-abc-123',
+                            },
+                            featureFlags: {
+                                'withdraw-submission': true,
+                                'undo-withdraw-submission': true,
+                            },
+                        }
+                    )
+                    await waitFor(() => {
                         expect(
                             screen.getByTestId('submission-side-nav')
                         ).toBeInTheDocument()
                     })
 
-                    // expect submission released to state link to not exist
+                    // expect submission released to state button to be on the screen
                     expect(
                         screen.queryByRole('link', {
-                            name: 'Withdrawn submission',
+                            name: 'Released to state',
+                        })
+                    ).toBeInTheDocument()
+
+                    // expect undo withdraw button
+                    expect(
+                        screen.getByRole('button', {
+                            name: 'Withdraw submission',
+                        })
+                    ).toHaveClass('usa-button')
+
+                    // expect unlock button
+                    expect(
+                        screen.getByRole('button', {
+                            name: 'Unlock submission',
+                        })
+                    ).toHaveClass('usa-button')
+
+                    // expect undow withdraw button to not exist
+                    expect(
+                        screen.queryByRole('link', {
+                            name: 'Undo submission withdraw',
                         })
                     ).toBeNull()
 
-                    // expect unlock button to be not on the page
-                    expect(
-                        screen.queryByRole('button', {
-                            name: 'Unlock submission',
-                        })
-                    ).not.toBeInTheDocument()
-
-                    expect(
-                        screen.queryByText(
-                            'No action can be taken on this submission in its current status.'
-                        )
-                    ).not.toBeInTheDocument()
-
-                    //Expect undo withdraw button to render
+                    //Expect undo withdraw button to not exist
                     expect(
                         screen.queryByRole('button', {
                             name: 'Undo submission withdraw',
                         })
+                    ).not.toBeInTheDocument()
+                })
+            })
+            it('renders status update banner on undo submission', async () => {
+                const contract = mockContractPackageSubmittedWithQuestions(
+                    'test-abc-123',
+                    {
+                        status: 'RESUBMITTED',
+                        reviewStatus: 'UNDER_REVIEW',
+                        consolidatedStatus: 'RESUBMITTED',
+                        reviewStatusActions: [
+                            {
+                                actionType: 'UNDER_REVIEW',
+                                contractID: 'test-abc-123',
+                                updatedAt: new Date(),
+                                updatedBy: {
+                                    email: 'cmsapprover@example.com',
+                                    familyName: 'Smith',
+                                    givenName: 'John',
+                                    role: 'CMS_APPROVER_USER',
+                                },
+                                updatedReason: 'Some undo reason',
+                            },
+                            {
+                                actionType: 'WITHDRAW',
+                                contractID: 'test-abc-123',
+                                updatedAt: new Date(),
+                                updatedBy: {
+                                    email: 'cmsapprover@example.com',
+                                    familyName: 'Smith',
+                                    givenName: 'John',
+                                    role: 'CMS_APPROVER_USER',
+                                },
+                                updatedReason: 'Some undo reason',
+                            },
+                        ],
+                    }
+                )
+                renderWithProviders(
+                    <Routes>
+                        <Route element={<SubmissionSideNav />}>
+                            <Route
+                                path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                                element={<SubmissionSummary />}
+                            />
+                        </Route>
+                    </Routes>,
+                    {
+                        apolloProvider: {
+                            mocks: [
+                                fetchCurrentUserMock({
+                                    user: mockValidCMSUser(),
+                                    statusCode: 200,
+                                }),
+                                fetchContractWithQuestionsMockSuccess({
+                                    contract,
+                                }),
+                                fetchContractWithQuestionsMockSuccess({
+                                    contract,
+                                }),
+                            ],
+                        },
+                        routerProvider: {
+                            route: '/submissions/test-abc-123?showTempUndoWithdrawBanner=true',
+                        },
+                        featureFlags: {
+                            'undo-withdraw-submission': true,
+                        },
+                    }
+                )
+                await waitFor(() => {
+                    expect(screen.queryByRole('status')).toBeInTheDocument()
+                })
+                await waitFor(() => {
+                    expect(
+                        screen.getByTestId('submission-side-nav')
+                    ).toBeInTheDocument()
+                    expect(
+                        screen.getByText('MCR-MN-0005-SNBC')
+                    ).toBeInTheDocument()
+                    // expect status update banner to be on screen
+                    expect(
+                        screen.getByTestId('statusUpdatedBanner')
                     ).toBeInTheDocument()
                 })
             })

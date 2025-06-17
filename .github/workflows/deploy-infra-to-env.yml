@@ -20,6 +20,10 @@ on:
         required: true
       aws_account_id:
         required: true
+      prod_aws_account_id:
+        required: true
+      val_aws_account_id:
+        required: true
       nr_license_key:
         required: true
       serverless_license_key:
@@ -105,7 +109,7 @@ jobs:
 
   postgres:
     # for this and subsequent jobs, wait for the OIDC service to deploy (unless it was skipped)
-    needs: github-oidc
+    needs: [github-oidc, uploads]
     if: ${{ always() && contains(inputs.changed_services, 'postgres') }}
     environment: ${{ inputs.environment }}
     runs-on: ubuntu-24.04
@@ -124,6 +128,31 @@ jobs:
           stage-name: ${{ inputs.stage_name }}
           changed-services: ${{ inputs.changed_services }}
 
+      - uses: actions/download-artifact@v4
+        with:
+          name: lambda-layers-postgres-tools
+          path: ./services/postgres/lambda-layers-postgres-tools
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: lambda-layers-prisma-client-engine
+          path: ./services/postgres/lambda-layers-prisma-client-engine
+
+      - name: Unzip prisma client engine layer
+        run: |
+          tar -C ./services/postgres/lambda-layers-prisma-client-engine -xf ./services/postgres/lambda-layers-prisma-client-engine/nodejs.tar.gz
+          rm -rf ./services/postgres/lambda-layers-prisma-client-engine/nodejs.tar.gz
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: lambda-layers-prisma-client-migration
+          path: ./services/postgres/lambda-layers-prisma-client-migration
+
+      - name: Unzip prisma migration engine layer
+        run: |
+          tar -C ./services/postgres/lambda-layers-prisma-client-migration  -xf ./services/postgres/lambda-layers-prisma-client-migration/nodejs.tar.gz
+          rm -rf ./services/postgres/lambda-layers-prisma-client-migration/nodejs.tar.gz
+
       - name: deploy postgres
         id: deploy-postgres
         env:
@@ -139,6 +168,8 @@ jobs:
           IAM_PATH: ${{ secrets.iam_path }}
           AURORA_ARN: ${{ secrets.aurora_arn }}
           DB_SM_ARN: ${{ secrets.db_sm_arn }}
+          VAL_AWS_ACCOUNT_ID: ${{ secrets.val_aws_account_id}}
+          PROD_AWS_ACCOUNT_ID: ${{ secrets.prod_aws_account_id}}
         run: |
           pushd services/postgres && npx serverless deploy --stage ${{ inputs.stage_name }}
 

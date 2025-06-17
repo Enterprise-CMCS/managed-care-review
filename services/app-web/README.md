@@ -36,7 +36,7 @@ Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 Launches the test runner in the interactive watch mode.\
 See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
 
-### `pnpm test: once`
+### `pnpm test:once`
 
 Launches the test runner and runs through once,running all tests serially in the current process. Used in CI.
 

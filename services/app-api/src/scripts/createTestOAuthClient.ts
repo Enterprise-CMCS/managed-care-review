@@ -1,6 +1,7 @@
 import { configurePostgres } from '../handlers/configuration'
 import { createOAuthClient } from '../postgres/oauth/oauthClientStore'
 import { v4 as uuidv4 } from 'uuid'
+import { logError, logSuccess } from '../logger'
 
 async function main() {
     const dbURL = process.env.DATABASE_URL
@@ -22,11 +23,8 @@ async function main() {
         // Generate a random client ID and secret
         const clientId = `test-client-${uuidv4().slice(0, 8)}`
         const clientSecret = uuidv4()
-
         // Create the OAuth client
         const result = await createOAuthClient(pgResult, {
-            clientId,
-            clientSecret,
             grants: ['client_credentials'],
             description: 'Test client for OAuth token endpoint',
             contactEmail: 'test@example.com',
@@ -37,21 +35,21 @@ async function main() {
             process.exit(1)
         }
 
-        logMessage('Successfully created OAuth client:')
-        logMessage('Client ID:', clientId)
-        logMessage('Client Secret:', clientSecret)
-        logMessage(
+        logSuccess('Successfully created OAuth client:')
+        logSuccess(`Client ID: ${clientId}`)
+        logSuccess(`Client Secret: ${clientSecret}`)
+        logSuccess(
             '\nYou can now use these credentials to test the OAuth token endpoint:'
         )
-        logMessage('POST /oauth/token')
-        logMessage('Content-Type: application/json')
-        logMessage('{')
-        logMessage('  "grant_type": "client_credentials",')
-        logMessage(`  "client_id": "${clientId}",`)
-        logMessage(`  "client_secret": "${clientSecret}"`)
-        logMessage('}')
+        logSuccess('POST /oauth/token')
+        logSuccess('Content-Type: application/json')
+        logSuccess('{')
+        logSuccess('  "grant_type": "client_credentials",')
+        logSuccess(`  "client_id": "${clientId}",`)
+        logSuccess(`  "client_secret": "${clientSecret}"`)
+        logSuccess('}')
     } catch (error) {
-        console.error('Error:', error)
+        logError('Error creating OAuth client:', error)
         process.exit(1)
     }
 }

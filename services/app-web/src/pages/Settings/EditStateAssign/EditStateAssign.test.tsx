@@ -110,15 +110,11 @@ describe('EditStateAssign', () => {
             },
         })
 
-        await screen.findByRole('form')
+        await screen.findByTestId('EditStateAssign')
         expect(
             screen.getByRole('heading', { name: 'Edit state assignment' })
         ).toBeInTheDocument()
-        expect(
-            screen.getByRole('form', {
-                name: 'Edit state assignment',
-            })
-        ).toBeInTheDocument()
+        expect(screen.getByTestId('form')).toBeInTheDocument()
         expect(screen.getAllByText('Update DMCO staff')).not.toBeNull()
         expect(
             screen.getByRole('button', { name: 'Save changes' })
@@ -171,7 +167,8 @@ describe('EditStateAssign', () => {
                 location: (location) => (testLocation = location),
             }
         )
-        await screen.findByRole('form')
+        await screen.findByTestId('EditStateAssign')
+
         await user.click(screen.getByText('Cancel'))
         await waitFor(() => {
             expect(testLocation.pathname).toBe(
@@ -348,7 +345,7 @@ describe('EditStateAssign', () => {
         await user.click(saveButton)
 
         expect(
-            await screen.findByRole('heading', { name: 'System error' })
+            await screen.findByRole('heading', { name: /System error/ })
         ).toBeInTheDocument()
     })
 })

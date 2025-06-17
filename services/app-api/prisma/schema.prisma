@@ -589,7 +589,7 @@ model OAuthClient {
   updatedAt    DateTime  @default(now()) @updatedAt
   lastUsedAt   DateTime?
   description  String?
-  contactEmail String?
+  contactEmail String
 
   @@map("oauth_clients")
 }
