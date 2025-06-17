@@ -134,7 +134,20 @@ export class CustomOAuth2Server {
 
         try {
             if (contentType?.includes('application/json')) {
-                body = event.body ? JSON.parse(event.body) : {}
+                try {
+                    body = event.body ? JSON.parse(event.body) : {}
+                } catch {
+                    return {
+                        statusCode: 400,
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            error: 'invalid_request',
+                            error_description: 'Invalid JSON payload',
+                        }),
+                    }
+                }
                 // Transform the JSON body to match OAuth2 expected format
                 const transformedBody = {
                     grant_type: body.grantType,
@@ -180,6 +193,7 @@ export class CustomOAuth2Server {
                             body: JSON.stringify({
                                 error: 'invalid_request',
                                 error_description: error.message,
+                                error_details: error.stack,
                             }),
                         }
                     }
@@ -192,6 +206,7 @@ export class CustomOAuth2Server {
                             body: JSON.stringify({
                                 error: 'invalid_client',
                                 error_description: error.message,
+                                error_details: error.stack,
                             }),
                         }
                     }
@@ -204,6 +219,7 @@ export class CustomOAuth2Server {
                             body: JSON.stringify({
                                 error: 'unauthorized_client',
                                 error_description: error.message,
+                                error_details: error.stack,
                             }),
                         }
                     }
@@ -218,6 +234,7 @@ export class CustomOAuth2Server {
                             error_description:
                                 error.message || 'Internal server error',
                             error_type: error.name,
+                            error_details: error.stack,
                         }),
                     }
                 }
@@ -274,6 +291,7 @@ export class CustomOAuth2Server {
                             body: JSON.stringify({
                                 error: 'invalid_request',
                                 error_description: error.message,
+                                error_details: error.stack,
                             }),
                         }
                     }
@@ -286,6 +304,7 @@ export class CustomOAuth2Server {
                             body: JSON.stringify({
                                 error: 'invalid_client',
                                 error_description: error.message,
+                                error_details: error.stack,
                             }),
                         }
                     }
@@ -298,6 +317,7 @@ export class CustomOAuth2Server {
                             body: JSON.stringify({
                                 error: 'unauthorized_client',
                                 error_description: error.message,
+                                error_details: error.stack,
                             }),
                         }
                     }
@@ -308,7 +328,10 @@ export class CustomOAuth2Server {
                         },
                         body: JSON.stringify({
                             error: 'server_error',
-                            error_description: 'Internal server error',
+                            error_description:
+                                error.message || 'Internal server error',
+                            error_type: error.name,
+                            error_details: error.stack,
                         }),
                     }
                 }
@@ -325,7 +348,7 @@ export class CustomOAuth2Server {
                     }),
                 }
             }
-        } catch {
+        } catch (error) {
             return {
                 statusCode: 400,
                 headers: {
@@ -333,7 +356,12 @@ export class CustomOAuth2Server {
                 },
                 body: JSON.stringify({
                     error: 'invalid_request',
-                    error_description: 'Invalid request body',
+                    error_description:
+                        error instanceof Error
+                            ? error.message
+                            : 'Invalid request body',
+                    error_details:
+                        error instanceof Error ? error.stack : undefined,
                 }),
             }
         }
