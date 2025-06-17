@@ -40,6 +40,7 @@ const PageBannerAlerts = ({
                     headingLevel="h4"
                     data-testid="saveAsDraftSuccessBanner"
                     children={<>Draft was saved successfully.</>}
+                    tabIndex={-1}
                 />
             )}
         </>

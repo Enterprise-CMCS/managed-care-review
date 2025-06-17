@@ -55,6 +55,7 @@ import { LinkYourRates } from '../../../LinkYourRates/LinkYourRates'
 import { LinkedRateSummary } from '../LinkedRateSummary'
 import { usePage } from '../../../../contexts/PageContext'
 import { InfoTag } from '../../../../components/InfoTag/InfoTag'
+import { useFocusOnRender } from '../../../../hooks/useFocusOnRender'
 
 export type FormikRateForm = {
     id?: string // no id if its a new rate
@@ -112,6 +113,7 @@ const RateDetails = ({
         boolean | string
     >(false) // string is a custom error message, defaults to generic message when true
     const [draftSaved, setDraftSaved] = useState(false)
+    useFocusOnRender(draftSaved, '[data-testid="saveAsDraftSuccessBanner"]')
 
     // Form validation
     const [shouldValidate, setShouldValidate] = useState(showValidations)

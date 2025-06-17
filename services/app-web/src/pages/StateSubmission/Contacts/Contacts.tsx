@@ -39,6 +39,7 @@ import { ErrorOrLoadingPage } from '../ErrorOrLoadingPage'
 import { PageBannerAlerts } from '../PageBannerAlerts'
 import { useErrorSummary } from '../../../hooks/useErrorSummary'
 import { featureFlags } from '@mc-review/common-code'
+import { useFocusOnRender } from '../../../hooks/useFocusOnRender'
 
 export interface ContactsFormValues {
     stateContacts: StateContact[]
@@ -72,6 +73,7 @@ const Contacts = ({
 }: ContractFormPageProps): React.ReactElement => {
     const [shouldValidate, setShouldValidate] = useState(showValidations)
     const [draftSaved, setDraftSaved] = useState(false)
+    useFocusOnRender(draftSaved, '[data-testid="saveAsDraftSuccessBanner"]')
     const [focusNewContact, setFocusNewContact] = useState(false)
     const [focusNewActuaryContact, setFocusNewActuaryContact] = useState(false)
     const ldClient = useLDClient()

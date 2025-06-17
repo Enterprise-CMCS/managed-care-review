@@ -55,6 +55,7 @@ import { useContractForm } from '../../../hooks/useContractForm'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '@mc-review/common-code'
 import { ContactSupportLink } from '../../../components/ErrorAlert/ContactSupportLink'
+import { useFocusOnRender } from '../../../hooks/useFocusOnRender'
 
 export interface SubmissionTypeFormValues {
     populationCovered?: PopulationCoveredType
@@ -75,6 +76,7 @@ export const SubmissionType = ({
     const { currentRoute } = useCurrentRoute()
     const [shouldValidate, setShouldValidate] = useState(showValidations)
     const [draftSaved, setDraftSaved] = useState(false)
+    useFocusOnRender(draftSaved, '[data-testid="saveAsDraftSuccessBanner"]')
     const [showAPIErrorBanner, setShowAPIErrorBanner] = useState<
         boolean | string
     >(false) // string is a custom error message, defaults to generic message when true

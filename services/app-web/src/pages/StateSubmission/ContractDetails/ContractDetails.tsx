@@ -86,6 +86,7 @@ import {
     UpdateContractDraftRevisionInput,
     ContractDraftRevisionFormDataInput,
 } from '../../../gen/gqlClient'
+import { useFocusOnRender } from '../../../hooks/useFocusOnRender'
 
 function formattedDatePlusOneDay(initialValue: string): string {
     const dayjsValue = dayjs(initialValue)
@@ -153,6 +154,7 @@ export const ContractDetails = ({
 }: ContractFormPageProps): React.ReactElement => {
     const [shouldValidate, setShouldValidate] = useState(showValidations)
     const [draftSaved, setDraftSaved] = useState(false)
+    useFocusOnRender(draftSaved, '[data-testid="saveAsDraftSuccessBanner"]')
     const navigate = useNavigate()
     const ldClient = useLDClient()
     const { setFocusErrorSummaryHeading, errorSummaryHeadingRef } =
