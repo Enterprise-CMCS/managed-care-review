@@ -18,6 +18,63 @@ type CMSQuestionResponseTableProps = {
     userDivision?: Division
 }
 
+// Reusable function for sorting rounds by createdAt and reversing
+export const sortRoundsByDate = (rounds: QuestionRounds): QuestionRounds =>
+    rounds
+        .map((round) =>
+            round.sort(
+                (a, b) =>
+                    new Date(b.questionData.createdAt).getTime() -
+                    new Date(a.questionData.createdAt).getTime()
+            )
+        )
+        .reverse()
+
+// Collects questions into rounds by users division and other divisions. Then sorted by created at date.
+const sortQuestionRounds = (
+    indexQuestions: IndexQuestionType,
+    userDivision?: Division
+) => {
+    const usersRounds: QuestionRounds = []
+    const otherRounds: QuestionRounds = []
+
+    Object.entries(indexQuestions).forEach(([key, value]) => {
+        // skip iterating on typename.
+        if (key === '__typename') return
+        const currentUserDivision = key === `${userDivision}Questions`
+        // set reference to add question to
+        const rounds = currentUserDivision ? usersRounds : otherRounds
+        // only pull out questions from other divisions
+        const questionsList: RateQuestionList | ContractQuestionList = value
+
+        // Reverse each division question so that we start at round 1 for each question, otherwise we get
+        // mismatching rounds.
+        Array.from([...questionsList.edges])
+            .sort(
+                (a, b) =>
+                    new Date(a.node.createdAt).getTime() -
+                    new Date(b.node.createdAt).getTime()
+            )
+            .forEach(({ node }, index) => {
+                if (!rounds[index]) {
+                    rounds[index] = []
+                }
+
+                rounds[index].push({
+                    roundTitle: currentUserDivision
+                        ? `Round ${node.round}`
+                        : `${node.division} - Round ${node.round}`,
+                    questionData: node,
+                })
+            })
+    })
+
+    return {
+        usersRounds: sortRoundsByDate(usersRounds),
+        otherRounds: sortRoundsByDate(otherRounds),
+    }
+}
+
 export const CMSQuestionResponseTable = ({
     indexQuestions,
     consolidatedStatus,
@@ -26,76 +83,11 @@ export const CMSQuestionResponseTable = ({
     const { loggedInUser } = useAuth()
     const canAddQuestions =
         !['APPROVED', 'WITHDRAWN'].includes(consolidatedStatus!) && userDivision
-    const currentDivisionRounds = (): QuestionRounds => {
-        if (!userDivision) {
-            return []
-        }
 
-        const divisionQuestions = indexQuestions[`${userDivision}Questions`]
-        const rounds: QuestionRounds = []
-
-        const sortedQuestions = [...divisionQuestions.edges]
-        sortedQuestions.sort(
-            (a, b) =>
-                new Date(b.node.createdAt).getTime() -
-                new Date(a.node.createdAt).getTime()
-        )
-
-        sortedQuestions.forEach(({ node }, index) => {
-            if (!rounds[index]) {
-                rounds[index] = []
-            }
-
-            rounds[index].push({
-                roundTitle: `Round ${node.round}`,
-                questionData: node,
-            })
-        })
-
-        return rounds
-    }
-
-    // Sorts questions from divisions other than current user into rounds, then sorting those rounds by the createdAt date.
-    const otherDivisionRounds = () => {
-        const rounds: QuestionRounds = []
-        Object.entries(indexQuestions).forEach(([key, value]) => {
-            // only pull out questions from other divisions
-            if (key !== `${userDivision}Questions` && key !== '__typename') {
-                const questionsList: RateQuestionList | ContractQuestionList =
-                    value
-
-                // Reverse each division question so that we start at round 1 for each question, otherwise we get
-                // mismatching rounds.
-                Array.from([...questionsList.edges])
-                    .sort(
-                        (a, b) =>
-                            new Date(a.node.createdAt).getTime() -
-                            new Date(b.node.createdAt).getTime()
-                    )
-                    .forEach(({ node }, index) => {
-                        if (!rounds[index]) {
-                            rounds[index] = []
-                        }
-
-                        rounds[index].push({
-                            roundTitle: `${node.division} - Round ${node.round}`,
-                            questionData: node,
-                        })
-                    })
-            }
-        })
-
-        // return the round questions sorted to latest questions first and reverse rounds to latest round first
-        return rounds
-            .map((round) =>
-                round.sort(
-                    (a, b) =>
-                        new Date(b.questionData.createdAt).getTime() -
-                        new Date(a.questionData.createdAt).getTime()
-                )
-            )
-            .reverse()
-    }
+    const { usersRounds, otherRounds } = sortQuestionRounds(
+        indexQuestions,
+        userDivision
+    )
 
     return (
         <>
@@ -114,8 +106,8 @@ export const CMSQuestionResponseTable = ({
                         </NavLinkWithLogging>
                     )}
                 </SectionHeader>
-                {currentDivisionRounds().length ? (
-                    currentDivisionRounds().map((questionRound, index) =>
+                {usersRounds.length ? (
+                    usersRounds.map((questionRound, index) =>
                         questionRound.map(({ roundTitle, questionData }) => (
                             <QuestionResponseRound
                                 key={questionData.id}
@@ -134,8 +126,8 @@ export const CMSQuestionResponseTable = ({
                 data-testid={'otherDivisionQuestions'}
             >
                 <SectionHeader header="Other divisions' questions" />
-                {otherDivisionRounds().length ? (
-                    otherDivisionRounds().map((questionRound, index) =>
+                {otherRounds.length ? (
+                    otherRounds.map((questionRound, index) =>
                         questionRound.map(({ roundTitle, questionData }) => (
                             <QuestionResponseRound
                                 key={questionData.id}
