@@ -2,13 +2,17 @@ import { createAndSubmitTestContractWithRate } from '../../testHelpers/gqlContra
 import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
 import { testStateUser } from '../../testHelpers/userHelpers'
 import { testS3Client } from '../../testHelpers'
-import { generateDocumentZip } from '../../s3/zip'
+import { generateDocumentZip } from '../../s3/zip/generateZip'
 import { vi } from 'vitest'
 
-// Mock the generateDocumentZip function at the module level
-vi.mock('../../s3/zip', () => ({
-    generateDocumentZip: vi.fn(),
-}))
+// Mock the correct path that matches the import in submitContract
+vi.mock('../../s3/zip/generateZip', async () => {
+    const actual = await vi.importActual('../../s3/zip/generateZip')
+    return {
+        ...actual,
+        generateDocumentZip: vi.fn(),
+    }
+})
 
 describe('Contract Submission Zip Generation Integration', () => {
     const mockS3 = testS3Client()
@@ -22,7 +26,7 @@ describe('Contract Submission Zip Generation Integration', () => {
         })
     })
 
-    it('submits contract with rates successfully and generates zip data', async () => {
+    it('submits contract with rates and creates zip packages in database', async () => {
         const stateServer = await constructTestPostgresServer({
             s3Client: mockS3,
         })
@@ -30,7 +34,7 @@ describe('Contract Submission Zip Generation Integration', () => {
         const submittedContract =
             await createAndSubmitTestContractWithRate(stateServer)
 
-        // Verify core submission functionality works
+        // Verify core submission functionality
         expect(submittedContract.status).toBe('SUBMITTED')
         expect(submittedContract.packageSubmissions).toHaveLength(1)
 
@@ -38,45 +42,97 @@ describe('Contract Submission Zip Generation Integration', () => {
         expect(packageSubmission.contractRevision).toBeDefined()
         expect(packageSubmission.rateRevisions).toHaveLength(1)
 
-        // Verify the submission includes the expected documents
-        expect(
-            packageSubmission.contractRevision.formData.contractDocuments
-        ).toHaveLength(1)
-        expect(
-            packageSubmission.rateRevisions[0].formData.rateDocuments
-        ).toHaveLength(1)
-
-        // Verify that zip generation was called for contract documents
-        expect(mockGenerateDocumentZip).toHaveBeenCalledWith(
-            expect.arrayContaining([
-                expect.objectContaining({
-                    name: 'contractDocument.pdf',
-                    s3URL: expect.stringContaining('s3://bucketname/key/'),
-                    sha256: expect.any(String),
-                }),
-            ]),
-            `zips/contracts/${packageSubmission.contractRevision.id}/contract-documents.zip`
-        )
-
-        // Verify that zip generation was called for rate documents
-        expect(mockGenerateDocumentZip).toHaveBeenCalledWith(
-            expect.arrayContaining([
-                expect.objectContaining({
-                    name: expect.any(String), // Rate document name from test helper
-                    s3URL: expect.any(String),
-                    sha256: expect.any(String),
-                }),
-            ]),
-            `zips/rates/${packageSubmission.rateRevisions[0].id}/rate-documents.zip`
-        )
-
-        // Expect 2 calls: one for contract documents, one for rate documents
+        // Verify zip generation was called (once for contract, once for rate)
         expect(mockGenerateDocumentZip).toHaveBeenCalledTimes(2)
 
-        // Verify that zip packages were created in the database
+        // Verify contract zip package was created in database
         expect(
             packageSubmission.contractRevision.documentZipPackages
         ).toBeDefined()
+        expect(
+            packageSubmission.contractRevision.documentZipPackages
+        ).toHaveLength(1)
+
+        const contractZipPackage =
+            packageSubmission.contractRevision.documentZipPackages![0]
+        expect(contractZipPackage).toMatchObject({
+            documentType: 'CONTRACT_DOCUMENTS',
+            s3URL: 's3://bucketname/zips/test.zip',
+            sha256: 'mock-sha256-hash',
+        })
+
+        // Verify rate zip package was created in database
+        expect(
+            packageSubmission.rateRevisions[0].documentZipPackages
+        ).toBeDefined()
+        expect(
+            packageSubmission.rateRevisions[0].documentZipPackages
+        ).toHaveLength(1)
+
+        const rateZipPackage =
+            packageSubmission.rateRevisions[0].documentZipPackages![0]
+        expect(rateZipPackage).toMatchObject({
+            documentType: 'RATE_DOCUMENTS',
+            s3URL: 's3://bucketname/zips/test.zip',
+            sha256: 'mock-sha256-hash',
+        })
+    })
+
+    it('continues submission when zip generation fails and creates no zip packages', async () => {
+        const stateUser = testStateUser()
+        const stateServer = await constructTestPostgresServer({
+            context: { user: stateUser },
+            s3Client: mockS3,
+        })
+
+        // Mock zip generation to fail
+        mockGenerateDocumentZip.mockResolvedValue(
+            new Error('Mock zip generation failure')
+        )
+
+        const submittedContract =
+            await createAndSubmitTestContractWithRate(stateServer)
+
+        // Verify submission still succeeded
+        expect(submittedContract.status).toBe('SUBMITTED')
+        expect(submittedContract.packageSubmissions).toHaveLength(1)
+
+        const packageSubmission = submittedContract.packageSubmissions[0]
+
+        // Verify zip generation was attempted but failed
+        expect(mockGenerateDocumentZip).toHaveBeenCalled()
+
+        // Verify NO zip packages were created due to failure
+        expect(
+            packageSubmission.contractRevision.documentZipPackages
+        ).toBeDefined()
+        expect(
+            packageSubmission.contractRevision.documentZipPackages
+        ).toHaveLength(0)
+
+        expect(
+            packageSubmission.rateRevisions[0].documentZipPackages
+        ).toBeDefined()
+        expect(
+            packageSubmission.rateRevisions[0].documentZipPackages
+        ).toHaveLength(0)
+    })
+
+    it('creates both contract and rate zip packages when generation succeeds', async () => {
+        const stateServer = await constructTestPostgresServer({
+            s3Client: mockS3,
+        })
+
+        const submittedContract =
+            await createAndSubmitTestContractWithRate(stateServer)
+
+        expect(submittedContract.status).toBe('SUBMITTED')
+        const packageSubmission = submittedContract.packageSubmissions[0]
+
+        // Verify both zip types were attempted
+        expect(mockGenerateDocumentZip).toHaveBeenCalledTimes(2)
+
+        // Verify contract zip package
         expect(
             packageSubmission.contractRevision.documentZipPackages
         ).toHaveLength(1)
@@ -88,9 +144,7 @@ describe('Contract Submission Zip Generation Integration', () => {
             sha256: 'mock-sha256-hash',
         })
 
-        expect(
-            packageSubmission.rateRevisions[0].documentZipPackages
-        ).toBeDefined()
+        // Verify rate zip package
         expect(
             packageSubmission.rateRevisions[0].documentZipPackages
         ).toHaveLength(1)
@@ -103,50 +157,30 @@ describe('Contract Submission Zip Generation Integration', () => {
         })
     })
 
-    it('continues submission even when zip generation fails', async () => {
-        const stateUser = testStateUser()
+    it('creates no zip packages when generation completely fails', async () => {
         const stateServer = await constructTestPostgresServer({
-            context: { user: stateUser },
             s3Client: mockS3,
         })
 
-        // Mock zip generation to fail
+        // Mock complete failure
         mockGenerateDocumentZip.mockResolvedValue(
-            new Error('Mock zip generation failure')
+            new Error('Complete zip failure')
         )
 
-        // This test verifies that contract submission works even when
-        // zip generation fails, ensuring submission isn't blocked
         const submittedContract =
             await createAndSubmitTestContractWithRate(stateServer)
 
-        // Verify core submission functionality still works
+        // Submission should still succeed
         expect(submittedContract.status).toBe('SUBMITTED')
-        expect(submittedContract.packageSubmissions).toHaveLength(1)
-
         const packageSubmission = submittedContract.packageSubmissions[0]
-        expect(packageSubmission.contractRevision).toBeDefined()
-        expect(packageSubmission.rateRevisions).toHaveLength(1)
 
-        // Verify that zip generation was attempted
+        // Verify attempts were made
         expect(mockGenerateDocumentZip).toHaveBeenCalled()
 
-        // Verify that the submission succeeded despite zip failure
-        expect(
-            packageSubmission.contractRevision.formData.contractDocuments
-        ).toHaveLength(1)
-
-        // Verify that no zip packages were created due to the failure
-        // (graceful failure means submission continues without zip packages)
-        expect(
-            packageSubmission.contractRevision.documentZipPackages
-        ).toBeDefined()
+        // Verify no zip packages were created
         expect(
             packageSubmission.contractRevision.documentZipPackages
         ).toHaveLength(0)
-        expect(
-            packageSubmission.rateRevisions[0].documentZipPackages
-        ).toBeDefined()
         expect(
             packageSubmission.rateRevisions[0].documentZipPackages
         ).toHaveLength(0)

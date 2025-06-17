@@ -21,6 +21,8 @@ import type {
     UpdateInfoType,
     PackageStatusType,
     ContractType,
+    ContractRevisionType,
+    RateRevisionType,
 } from '../../domain-models'
 import type { UpdateDraftContractRatesArgsType } from '../../postgres/contractAndRates/updateDraftContractRates'
 import type { StateCodeType } from '@mc-review/hpp'
@@ -32,8 +34,6 @@ import {
 } from '../../domain-models/contractAndRates'
 import type { GeneralizedModifiedProvisions } from '@mc-review/hpp'
 import { generateDocumentZip } from '../../s3/zip'
-import type { ContractRevisionType } from '../../domain-models'
-import { createRateZips } from '../rate/submitRate'
 
 const validateStatusAndUpdateInfo = (
     status: PackageStatusType,
@@ -629,4 +629,165 @@ export async function createContractZips(
         )
     }
     return
+}
+
+export async function createRateZips(
+    store: Store,
+    submitContractResult: ContractType,
+    span?: Span
+): Promise<void | Error[]> {
+    if (!submitContractResult.packageSubmissions[0]?.rateRevisions) {
+        return
+    }
+
+    const rateRevisions =
+        submitContractResult.packageSubmissions[0].rateRevisions
+    const errors: Error[] = []
+
+    for (const rateRev of rateRevisions) {
+        // Only attempt to generate a zip if there are actually documents to zip
+        const hasRateDocuments =
+            rateRev.formData.rateDocuments &&
+            rateRev.formData.rateDocuments.length > 0
+        const hasSupportingDocuments =
+            rateRev.formData.supportingDocuments &&
+            rateRev.formData.supportingDocuments.length > 0
+
+        if (hasRateDocuments || hasSupportingDocuments) {
+            const totalDocs =
+                (rateRev.formData.rateDocuments?.length || 0) +
+                (rateRev.formData.supportingDocuments?.length || 0)
+
+            console.info(
+                `Generating zip for ${totalDocs} rate documents for rate revision ${rateRev.id}`
+            )
+
+            const zipResult = await generateRateDocumentsZip(
+                store,
+                rateRev,
+                span
+            )
+
+            if (zipResult instanceof Error) {
+                const errorWithContext = new Error(
+                    `Rate document zip generation failed for revision ${rateRev.id}: ${zipResult.message}`
+                )
+                errors.push(errorWithContext)
+
+                logError(
+                    'createRateZips - rate documents zip generation failed',
+                    errorWithContext
+                )
+                setErrorAttributesOnActiveSpan(
+                    'rate documents zip generation failed',
+                    span
+                )
+                console.warn(
+                    `Rate document zip generation failed for revision ${rateRev.id}, but continuing with other revisions`
+                )
+            } else {
+                console.info(
+                    `Successfully generated rate document zip for revision ${rateRev.id}`
+                )
+            }
+        } else {
+            console.info(
+                `No rate documents found for rate revision ${rateRev.id}, skipping zip generation`
+            )
+        }
+    }
+
+    // Return errors if any occurred, otherwise return void
+    return errors.length > 0 ? errors : undefined
+}
+
+/**
+ * Helper function to generate and store zip files for rate documents
+ *
+ * @param store Prisma store instance
+ * @param rateRevision The rate revision with documents to zip
+ * @param span Optional OpenTelemetry span for tracing
+ * @returns void if successful, Error if something failed
+ */
+export async function generateRateDocumentsZip(
+    store: Store,
+    rateRevision: RateRevisionType,
+    span?: Span
+): Promise<void | Error> {
+    const rateRevisionID = rateRevision.id
+
+    // Get all rate-related documents
+    // Adapt these field names as needed based on your actual data structure
+    const rateDocuments = [
+        ...(rateRevision.formData.rateDocuments || []),
+        ...(rateRevision.formData.supportingDocuments || []),
+    ]
+
+    if (!rateDocuments || rateDocuments.length === 0) {
+        // No documents to zip
+        return
+    }
+
+    try {
+        // Create an S3 key (destination path) for the zip file
+        const s3DestinationKey = `zips/rates/${rateRevisionID}/rate-documents.zip`
+
+        // Generate the zip file and upload it to S3
+        const zipResult = await generateDocumentZip(
+            rateDocuments,
+            s3DestinationKey
+        )
+
+        if (zipResult instanceof Error) {
+            logError('generateRateDocumentsZip', zipResult)
+            if (span) {
+                setErrorAttributesOnActiveSpan(
+                    'rate documents zip generation failed',
+                    span
+                )
+            }
+            return zipResult
+        }
+
+        // Store zip information in database
+        const createResult = await store.createDocumentZipPackage({
+            s3URL: zipResult.s3URL,
+            sha256: zipResult.sha256,
+            rateRevisionID,
+            documentType: 'RATE_DOCUMENTS',
+        })
+
+        if (createResult instanceof Error) {
+            logError(
+                'generateRateDocumentsZip - database storage failed',
+                createResult
+            )
+            if (span) {
+                setErrorAttributesOnActiveSpan(
+                    'rate documents zip database storage failed',
+                    span
+                )
+            }
+            return createResult
+        }
+
+        console.info(
+            `Successfully generated zip for rate documents: ${zipResult.s3URL}`
+        )
+        return
+    } catch (error: unknown) {
+        const errorMessage =
+            error instanceof Error ? error.message : String(error)
+        const err = new Error(
+            `Unexpected error in generateRateDocumentsZip: ${errorMessage}`
+        )
+        logError('generateRateDocumentsZip', err)
+        if (span) {
+            setErrorAttributesOnActiveSpan(
+                'rate documents zip generation failed',
+                span
+            )
+        }
+        return err
+    }
 }
