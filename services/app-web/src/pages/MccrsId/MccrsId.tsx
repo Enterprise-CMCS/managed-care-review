@@ -58,7 +58,7 @@ export const MccrsId = (): React.ReactElement => {
     } = useFetchContractQuery({
         variables: {
             input: {
-                contractID: id ?? 'unknown-contract',
+                contractID: id,
             },
         },
         fetchPolicy: 'cache-and-network',
