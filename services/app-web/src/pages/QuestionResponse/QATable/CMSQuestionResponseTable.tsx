@@ -55,6 +55,7 @@ export const CMSQuestionResponseTable = ({
         return rounds
     }
 
+    // Sorts questions from divisions other than current user into rounds, then sorting those rounds by the createdAt date.
     const otherDivisionRounds = () => {
         const rounds: QuestionRounds = []
         Object.entries(indexQuestions).forEach(([key, value]) => {
@@ -77,7 +78,7 @@ export const CMSQuestionResponseTable = ({
                         }
 
                         rounds[index].push({
-                            roundTitle: `${node.division} - Round ${index + 1}`,
+                            roundTitle: `${node.division} - ${node.round}`,
                             questionData: node,
                         })
                     })
