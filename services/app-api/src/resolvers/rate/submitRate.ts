@@ -359,52 +359,68 @@ export async function createRateZips(
     store: Store,
     submitContractResult: ContractType,
     span?: Span
-): Promise<void | Error> {
-    if (submitContractResult.packageSubmissions[0]?.rateRevisions) {
-        const rateRevisions =
-            submitContractResult.packageSubmissions[0].rateRevisions
+): Promise<void | Error[]> {
+    if (!submitContractResult.packageSubmissions[0]?.rateRevisions) {
+        return
+    }
 
-        rateRevisions.forEach(async (rateRev) => {
-            // Only attempt to generate a zip if there are actually documents to zip
-            if (
-                rateRev.formData.rateDocuments &&
-                rateRev.formData.rateDocuments.length > 0
-            ) {
-                console.info(
-                    `Generating zip for ${rateRev.formData.rateDocuments.length} rate documents for rate revision ${rateRevisions[0].id}`
+    const rateRevisions =
+        submitContractResult.packageSubmissions[0].rateRevisions
+    const errors: Error[] = []
+
+    for (const rateRev of rateRevisions) {
+        // Only attempt to generate a zip if there are actually documents to zip
+        const hasRateDocuments =
+            rateRev.formData.rateDocuments &&
+            rateRev.formData.rateDocuments.length > 0
+        const hasSupportingDocuments =
+            rateRev.formData.supportingDocuments &&
+            rateRev.formData.supportingDocuments.length > 0
+
+        if (hasRateDocuments || hasSupportingDocuments) {
+            const totalDocs =
+                (rateRev.formData.rateDocuments?.length || 0) +
+                (rateRev.formData.supportingDocuments?.length || 0)
+
+            console.info(
+                `Generating zip for ${totalDocs} rate documents for rate revision ${rateRev.id}`
+            )
+
+            const zipResult = await generateRateDocumentsZip(
+                store,
+                rateRev,
+                span
+            )
+
+            if (zipResult instanceof Error) {
+                const errorWithContext = new Error(
+                    `Rate document zip generation failed for revision ${rateRev.id}: ${zipResult.message}`
                 )
+                errors.push(errorWithContext)
 
-                const zipResult = await generateRateDocumentsZip(
-                    store,
-                    rateRev,
+                logError(
+                    'createRateZips - rate documents zip generation failed',
+                    errorWithContext
+                )
+                setErrorAttributesOnActiveSpan(
+                    'rate documents zip generation failed',
                     span
                 )
-
-                if (zipResult instanceof Error) {
-                    // We're choosing to log the error but continue with submission
-                    // This way, a zip generation failure doesn't block the contract submission
-                    logError(
-                        'submitRate- rate documents zip generation failed',
-                        zipResult
-                    )
-                    setErrorAttributesOnActiveSpan(
-                        'rate documents zip generation failed',
-                        span
-                    )
-                    console.warn(
-                        `Rate document zip generation failed for revision ${rateRev.id}, but continuing with submission process`
-                    )
-                    return zipResult
-                } else {
-                    console.info(
-                        `Successfully generated rate document zip for revision ${rateRev.id}`
-                    )
-                }
+                console.warn(
+                    `Rate document zip generation failed for revision ${rateRev.id}, but continuing with other revisions`
+                )
             } else {
                 console.info(
-                    `No rate documents found for rate revision ${rateRev.id}, skipping zip generation`
+                    `Successfully generated rate document zip for revision ${rateRev.id}`
                 )
             }
-        })
+        } else {
+            console.info(
+                `No rate documents found for rate revision ${rateRev.id}, skipping zip generation`
+            )
+        }
     }
+
+    // Return errors if any occurred, otherwise return void
+    return errors.length > 0 ? errors : undefined
 }
