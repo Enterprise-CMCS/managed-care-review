@@ -211,16 +211,14 @@ export const EditStateAssign = (): React.ReactElement => {
                         )}
                         <UswdsForm
                             id="EditStateAssignForm"
-                            aria-label={'Edit state assignment'}
-                            aria-describedby="form-guidance"
                             onSubmit={(e) => {
                                 setShouldValidate(true)
                                 return handleSubmit(e)
                             }}
                         >
                             <div id="formInnerContainer">
-                                <h2>Edit state assignment</h2>
                                 <fieldset>
+                                    <h2>Edit state assignment</h2>
                                     <legend className="srOnly">
                                         Update DMCO staff
                                     </legend>

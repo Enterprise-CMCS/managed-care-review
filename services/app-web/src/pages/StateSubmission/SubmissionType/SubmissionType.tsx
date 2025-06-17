@@ -420,7 +420,6 @@ export const SubmissionType = ({
                                             ? 'New Submission Form'
                                             : 'Submission Type Form'
                                     }
-                                    aria-describedby="form-guidance"
                                     onSubmit={handleSubmit}
                                 >
                                     <fieldset className="usa-fieldset">
@@ -778,17 +777,18 @@ export const SubmissionType = ({
                                             )}
                                             hint={
                                                 <>
-                                                    <p
+                                                    <span
                                                         id="submissionDescriptionHelp"
-                                                        role="note"
+                                                        className="margin-bottom-2"
                                                     >
                                                         Provide a 1-2 paragraph
                                                         summary of your
                                                         submission that
                                                         highlights any important
                                                         changes CMS reviewers
-                                                        will need to be aware of
-                                                    </p>
+                                                        will need to be aware
+                                                        of.
+                                                    </span>
                                                     <ReactRouterLinkWithLogging
                                                         variant="external"
                                                         to={{

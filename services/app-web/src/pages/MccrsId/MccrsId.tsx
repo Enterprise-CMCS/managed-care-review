@@ -181,8 +181,6 @@ export const MccrsId = (): React.ReactElement => {
                         <UswdsForm
                             className={styles.formContainer}
                             id="MCCRSIDForm"
-                            aria-label="MCCRS ID Form"
-                            aria-describedby="form-guidance"
                             onSubmit={(e) => {
                                 setShouldValidate(true)
                                 handleSubmit(e)

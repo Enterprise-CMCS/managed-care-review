@@ -230,7 +230,7 @@ export const Documents = (): React.ReactElement => {
                 } else if (updatedSubmission) {
                     navigate(redirectPath)
                 }
-            } catch (error) {
+            } catch {
                 onUpdateDraftSubmissionError()
             }
         }
@@ -255,7 +255,6 @@ export const Documents = (): React.ReactElement => {
                         styles.formContainer
                     )}
                     id="DocumentsForm"
-                    aria-label="Documents Form"
                     onSubmit={async (e) => {
                         await handleFormSubmit({
                             shouldValidateDocuments: true,
