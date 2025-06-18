@@ -574,8 +574,6 @@ export const ContractDetails = ({
                             <UswdsForm
                                 className={styles.formContainer}
                                 id="ContractDetailsForm"
-                                aria-label={formHeading}
-                                aria-describedby="form-guidance"
                                 onSubmit={(e) => {
                                     setShouldValidate(true)
                                     setFocusErrorSummaryHeading(true)

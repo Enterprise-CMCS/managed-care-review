@@ -106,8 +106,6 @@ const UploadResponseForm = ({
         <UswdsForm
             className={styles.formContainer}
             id={`${type}AddQuestionsResponseForm`}
-            aria-label="Add Response Form"
-            aria-describedby="form-guidance"
             onSubmit={onSubmit}
         >
             {apiError && <GenericApiErrorBanner />}
