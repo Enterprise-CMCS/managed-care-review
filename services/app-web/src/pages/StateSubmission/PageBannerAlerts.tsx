@@ -34,7 +34,7 @@ const PageBannerAlerts = ({
             )}
             {draftSaved && (
                 <AccessibleAlertBanner
-                    role="alert"
+                    role="status"
                     type="success"
                     heading="Draft Saved"
                     headingLevel="h4"
