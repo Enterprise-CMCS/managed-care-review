@@ -6,10 +6,10 @@ import {
     setResolverDetailsOnActiveSpan,
 } from '../attributeHelper'
 import { logError } from '../../logger'
-import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
+import { createForbiddenError, createUserInputError } from '../errorUtils'
 import { hasAdminPermissions, hasCMSPermissions } from '../../domain-models'
 import { isValidStateCode } from '@mc-review/hpp'
-import { NotFoundError } from '../../postgres'
+import { NotFoundError, handleNotFoundError, handleUserInputPostgresError } from '../../postgres'
 import { GraphQLError } from 'graphql/index'
 
 // Update cms users assigned to a specific state
@@ -33,9 +33,7 @@ export function updateStateAssignmentsByState(
             const msg = 'user not authorized to modify assignments'
             logError('updateStateAssignmentsByState', msg)
             setErrorAttributesOnActiveSpan(msg, span)
-            throw new ForbiddenError(msg, {
-                cause: 'NOT_AUTHORIZED',
-            })
+            throw createForbiddenError(msg)
         }
 
         const { stateCode, assignedUsers } = input
@@ -44,22 +42,14 @@ export function updateStateAssignmentsByState(
             const errMsg = 'cannot update state assignments for invalid state'
             logError('updateStateAssignmentsByState', errMsg)
             setErrorAttributesOnActiveSpan(errMsg, span)
-            throw new UserInputError(errMsg, {
-                argumentName: 'stateCode',
-                argumentValues: stateCode,
-                cause: 'INVALID_STATE_CODE',
-            })
+            throw createUserInputError(errMsg, 'stateCode')
         }
 
         if (assignedUsers.length === 0) {
             const msg = 'cannot update state assignments with no assignments'
             logError('updateStateAssignmentsByState', msg)
             setErrorAttributesOnActiveSpan(msg, span)
-            throw new UserInputError(msg, {
-                argumentName: 'assignedUsers',
-                argumentValues: assignedUsers,
-                cause: 'NO_ASSIGNED_USERS',
-            })
+            throw createUserInputError(msg, 'assignedUsers')
         }
 
         const result = await store.updateStateAssignedUsers(
@@ -73,22 +63,14 @@ export function updateStateAssignmentsByState(
                 const errMsg = 'state does not exist'
                 logError('updateStateAssignmentsByState', errMsg)
                 setErrorAttributesOnActiveSpan(errMsg, span)
-                throw new UserInputError(errMsg, {
-                    argumentName: 'stateCode',
-                    argumentValues: stateCode,
-                    cause: 'STATE_DOES_NOT_EXIST',
-                })
+                throw handleNotFoundError(result)
             }
 
             if (result instanceof UserInputPostgresError) {
                 const errMsg = result.message
                 logError('updateStateAssignmentsByState', errMsg)
                 setErrorAttributesOnActiveSpan(errMsg, span)
-                throw new UserInputError(errMsg, {
-                    argumentName: 'assignedUsers',
-                    argumentValues: assignedUsers,
-                    cause: 'BAD_ASSIGNED_USERS',
-                })
+                throw handleUserInputPostgresError(result, 'assignedUsers')
             }
 
             const errMsg = `Issue assigning states to user. Message: ${result.message}`

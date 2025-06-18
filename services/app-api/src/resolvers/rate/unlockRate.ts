@@ -1,8 +1,8 @@
-import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
+import { createForbiddenError, createUserInputError } from '../errorUtils'
 import type { RateType } from '../../domain-models'
 import type { MutationResolvers } from '../../gen/gqlServer'
 import { logError, logSuccess } from '../../logger'
-import { NotFoundError } from '../../postgres'
+import { NotFoundError } from '../../postgres/postgresErrors'
 import type { Store } from '../../postgres'
 import {
     setErrorAttributesOnActiveSpan,
@@ -28,7 +28,7 @@ export function unlockRate(store: Store): MutationResolvers['unlockRate'] {
                 'user not authorized to unlock rate',
                 span
             )
-            throw new ForbiddenError('user not authorized to unlock rate')
+            throw createForbiddenError('user not authorized to unlock rate')
         }
 
         const initialRateResult = await store.findRateWithHistory(rateID)
@@ -38,9 +38,7 @@ export function unlockRate(store: Store): MutationResolvers['unlockRate'] {
                 const errMessage = `A rate must exist to be unlocked: ${rateID}`
                 logError('unlockRate', errMessage)
                 setErrorAttributesOnActiveSpan(errMessage, span)
-                throw new UserInputError(errMessage, {
-                    argumentName: 'rateID',
-                })
+                throw createUserInputError(errMessage, 'rateID')
             }
 
             const errMessage = `Issue finding a rate. Message: ${initialRateResult.message}`
@@ -60,10 +58,7 @@ export function unlockRate(store: Store): MutationResolvers['unlockRate'] {
             const errMessage = `Attempted to unlock rate with wrong status: ${rate.consolidatedStatus}`
             logError('unlockRate', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
-            throw new UserInputError(errMessage, {
-                argumentName: 'rateID',
-                cause: 'INVALID_PACKAGE_STATUS',
-            })
+            throw createUserInputError(errMessage, 'rateID')
         }
 
         const contractResult = await store.findContractWithHistory(
@@ -74,9 +69,7 @@ export function unlockRate(store: Store): MutationResolvers['unlockRate'] {
                 const errMessage = `A contract must exist that is associated with the rate: ${rate.id}`
                 logError('unlockRate', errMessage)
                 setErrorAttributesOnActiveSpan(errMessage, span)
-                throw new UserInputError(errMessage, {
-                    argumentName: 'rateID',
-                })
+                throw createUserInputError(errMessage, 'rateID')
             }
 
             const errMessage = `Issue finding a contract. Message: ${contractResult.message}`
@@ -98,10 +91,7 @@ export function unlockRate(store: Store): MutationResolvers['unlockRate'] {
             const errMessage = `Attempted to unlock a rate that is associated with a contract with wrong status: ${contractResult.consolidatedStatus}`
             logError('unlockRate', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
-            throw new UserInputError(errMessage, {
-                argumentName: 'rateID',
-                cause: 'INVALID_PACKAGE_STATUS',
-            })
+            throw createUserInputError(errMessage, 'rateID')
         }
 
         const unlockRateResult = await store.unlockRate({

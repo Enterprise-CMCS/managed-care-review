@@ -1,5 +1,5 @@
 import type { Store } from '../../postgres'
-import { NotFoundError } from '../../postgres'
+import { NotFoundError } from '../../postgres/postgresErrors'
 import type { MutationResolvers } from '../../gen/gqlServer'
 import {
     setErrorAttributesOnActiveSpan,
@@ -8,7 +8,7 @@ import {
 } from '../attributeHelper'
 import { hasCMSPermissions } from '../../domain-models'
 import { logError, logSuccess } from '../../logger'
-import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
+import { createForbiddenError, createUserInputError } from '../errorUtils'
 import { GraphQLError } from 'graphql/index'
 import type { Emailer } from '../../emailer'
 import type { StateCodeType } from '../../testHelpers'
@@ -29,7 +29,7 @@ export function withdrawRate(
             const message = 'user not authorized to withdraw a rate'
             logError('withdrawRate', message)
             setErrorAttributesOnActiveSpan(message, span)
-            throw new ForbiddenError(message)
+            throw createForbiddenError(message)
         }
 
         const rateWithHistory = await store.findRateWithHistory(rateID)
@@ -101,10 +101,7 @@ export function withdrawRate(
             const errMessage = `Attempted to withdraw rate with wrong status. Rate: ${rateWithHistory.consolidatedStatus}, Parent contract: ${parentContract.consolidatedStatus}`
             logError('withdrawRate', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
-            throw new UserInputError(errMessage, {
-                argumentName: 'rateID',
-                cause: 'INVALID_PACKAGE_STATUS',
-            })
+            throw createUserInputError(errMessage, 'rateID')
         }
 
         const withdrawnRate = await store.withdrawRate({
