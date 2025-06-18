@@ -22,6 +22,42 @@ The system automatically generates:
 - A unique client ID (format: `oauth-client-{uuid}`)
 - A secure client secret (64 bytes, base64url encoded)
 
+### Creating an OAuth Client (for ADMIN_USER)
+
+Only users with the `ADMIN_USER` role can create OAuth clients. This is done via a GraphQL mutation.
+
+**GraphQL Mutation Example:**
+
+```graphql
+mutation CreateOauthClient($input: CreateOauthClientInput!) {
+  createOauthClient(input: $input) {
+    oauthClient {
+      clientId
+      clientSecret
+      grants
+      description
+      contactEmail
+      createdAt
+      updatedAt
+    }
+  }
+}
+```
+
+**Example Input:**
+
+```json
+{
+  "input": {
+    "contactEmail": "admin@example.com",
+    "description": "My API client",
+    "grants": ["client_credentials"]
+  }
+}
+```
+
+> The `clientSecret` is only shown once at creation—be sure to save it securely.
+
 ## Token Lifecycle
 
 1. **Token Generation**
@@ -41,8 +77,11 @@ The system automatically generates:
    ```
 
 3. **Token Refresh**
-   - Currently, we don't support token refresh
-   - Clients must request a new token when the current one expires
+   - **Note:** In the `client_credentials` (machine-to-machine) flow, refresh tokens are not used. When a token expires, the client should simply request a new access token using its client credentials. This is standard practice for M2M OAuth 2.0 implementations.
+   - **Example:**
+     If your access token expires, just repeat the `/oauth/token` request with your `client_id` and `client_secret` to obtain a new token.
+   - Currently, we don't support token refresh.
+   - Clients must request a new token when the current one expires.
 
 ## API Endpoints
 
