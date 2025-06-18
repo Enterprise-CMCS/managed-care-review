@@ -106,14 +106,12 @@ const Contacts = ({
     */
     useEffect(() => {
         if (focusNewContact) {
-            newStateContactNameRef.current &&
-                newStateContactNameRef.current.focus()
+            newStateContactNameRef.current?.focus()
             setFocusNewContact(false)
             newStateContactNameRef.current = null
         }
         if (focusNewActuaryContact) {
-            newActuaryContactNameRef.current &&
-                newActuaryContactNameRef.current.focus()
+            newActuaryContactNameRef.current?.focus()
             setFocusNewActuaryContact(false)
             newActuaryContactNameRef.current = null
         }
@@ -237,8 +235,6 @@ const Contacts = ({
                             <UswdsForm
                                 className={styles.formContainer}
                                 id="ContactsForm"
-                                aria-label="Contacts Form"
-                                aria-describedby="form-guidance"
                                 onSubmit={handleSubmit}
                             >
                                 <SectionCard>
