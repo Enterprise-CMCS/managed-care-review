@@ -230,7 +230,7 @@ export const Documents = (): React.ReactElement => {
                 } else if (updatedSubmission) {
                     navigate(redirectPath)
                 }
-            } catch (error) {
+            } catch {
                 onUpdateDraftSubmissionError()
             }
         }

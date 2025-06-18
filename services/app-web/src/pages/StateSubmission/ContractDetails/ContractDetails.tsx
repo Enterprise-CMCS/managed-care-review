@@ -190,7 +190,7 @@ export const ContractDetails = ({
                 docType === 'supporting' &&
                 !draftSubmission.draftRevision.formData.supportingDocuments)
         )
-            undefined
+            return undefined
         const docs =
             docType === 'contract'
                 ? draftSubmission.draftRevision.formData.contractDocuments

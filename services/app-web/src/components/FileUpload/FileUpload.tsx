@@ -225,7 +225,7 @@ export const FileUpload = ({
                                 })
                             })
                             return
-                        } catch (e) {
+                        } catch {
                             setFileItems((prevItems) => {
                                 const newItems = [...prevItems]
                                 return newItems.map((item) => {
@@ -388,7 +388,9 @@ export const FileUpload = ({
                 id={id}
                 name={`${name}${inputRequired ? ' (required)' : ''}`}
                 className={styles.fileInput}
-                aria-describedby={error ? `${id}-error ${id}-hint` : `${id}-hint`}
+                aria-describedby={
+                    error ? `${id}-error ${id}-hint` : `${id}-hint`
+                }
                 multiple={allowMultipleUploads}
                 onChange={handleOnChange}
                 onDrop={handleOnDrop}
