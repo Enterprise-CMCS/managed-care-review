@@ -250,8 +250,6 @@ const Contacts = ({
                             <UswdsForm
                                 className={styles.formContainer}
                                 id="ContactsForm"
-                                aria-label="Contacts Form"
-                                aria-describedby="form-guidance"
                                 onSubmit={handleSubmit}
                             >
                                 <SectionCard>

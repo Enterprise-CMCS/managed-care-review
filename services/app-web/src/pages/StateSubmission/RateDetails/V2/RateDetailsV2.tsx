@@ -482,8 +482,6 @@ const RateDetails = ({
                             <UswdsForm
                                 className={styles.formContainer}
                                 id="RateDetailsForm"
-                                aria-label="Rate Details Form"
-                                aria-describedby="form-guidance"
                                 onSubmit={(e) => {
                                     setShouldValidate(true)
                                     setFocusErrorSummaryHeading(true)
