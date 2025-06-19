@@ -5,7 +5,6 @@ import {
 } from '../gen/gqlClient'
 import { mockMNState } from './stateMock'
 import { v4 as uuidv4 } from 'uuid'
-import { ApolloError } from '@apollo/client'
 import { GraphQLError } from 'graphql/index'
 
 const fetchMcReviewSettingsMock =
@@ -122,7 +121,7 @@ const fetchMcReviewSettingsMock =
         }
     }
 
-const fetchMcReviewSettingsFailMock = (): MockedResponse<ApolloError> => {
+const fetchMcReviewSettingsFailMock = (): MockedResponse<GraphQLError> => {
     const graphQLError = new GraphQLError(
         'Error fetching mc-review settings data.',
         {
@@ -137,9 +136,7 @@ const fetchMcReviewSettingsFailMock = (): MockedResponse<ApolloError> => {
             query: FetchMcReviewSettingsDocument,
             variables: {},
         },
-        error: new ApolloError({
-            graphQLErrors: [graphQLError],
-        }),
+        error: graphQLError,
         result: {
             data: null,
         },

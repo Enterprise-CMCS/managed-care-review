@@ -34,7 +34,7 @@ function APIAccess(): React.ReactElement {
         } catch (err) {
             console.error('unexpected error generating a new API Key', err)
             if (err instanceof Error) {
-                handleGraphQLError(err as any, true)
+                handleGraphQLError(err, true)
             }
             recordJSException(err)
             setDisplayErrorPage(true)
