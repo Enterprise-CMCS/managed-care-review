@@ -16,8 +16,7 @@ import { Loading } from '../../components'
 import { useAuth } from '../../contexts/AuthContext'
 import { Breadcrumbs } from '../../components/Breadcrumbs/Breadcrumbs'
 import { RoutesRecord } from '@mc-review/constants'
-import { ApolloError } from '@apollo/client'
-import { handleApolloError } from '@mc-review/helpers'
+import { handleGraphQLError } from '@mc-review/helpers'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import { Error404 } from '../Errors/Error404Page'
 import {
@@ -63,10 +62,10 @@ export const MccrsId = (): React.ReactElement => {
     if (fetchResult.status === 'ERROR') {
         const err = fetchResult.error
         console.error('Error from API fetch', fetchResult.error)
-        if (err instanceof ApolloError) {
-            handleApolloError(err, true)
+        if (err instanceof Error) {
+            handleGraphQLError(err as any, true)
 
-            if (err.graphQLErrors[0]?.extensions?.code === 'NOT_FOUND') {
+            if ((err as any).graphQLErrors?.[0]?.extensions?.code === 'NOT_FOUND') {
                 return <Error404 />
             }
         }
@@ -137,7 +136,7 @@ export const MccrsId = (): React.ReactElement => {
 
                 console.info('Failed to update form data', updateResult)
                 recordJSException(
-                    `MCCRSIDForm: Apollo error reported. Error message: Failed to update form data ${updateResult}`
+                    `MCCRSIDForm: GraphQL error reported. Error message: Failed to update form data ${updateResult}`
                 )
                 return new Error('Failed to update form data')
             }
@@ -145,7 +144,7 @@ export const MccrsId = (): React.ReactElement => {
         } catch (serverError) {
             setShowPageErrorMessage(true)
             recordJSException(
-                `MCCRSIDForm: Apollo error reported. Error message: ${serverError.message}`
+                `MCCRSIDForm: GraphQL error reported. Error message: ${serverError.message}`
             )
             return new Error(serverError)
         }

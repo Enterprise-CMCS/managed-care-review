@@ -15,8 +15,7 @@ import {
     useFetchContractWithQuestionsQuery,
 } from '../../gen/gqlClient'
 import { Loading, NavLinkWithLogging } from '../../components'
-import { ApolloError } from '@apollo/client'
-import { handleApolloError } from '@mc-review/helpers'
+import { handleGraphQLError } from '@mc-review/helpers'
 import { recordJSException } from '@mc-review/otel'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import { Error404 } from '../Errors/Error404Page'
@@ -77,10 +76,10 @@ export const SubmissionSideNav = () => {
     } else if (!data && error) {
         const err = error
         console.error('Error from API fetch', error)
-        if (err instanceof ApolloError) {
-            handleApolloError(err, true)
+        if (err instanceof Error) {
+            handleGraphQLError(err as any, true)
 
-            if (err.graphQLErrors[0]?.extensions?.code === 'NOT_FOUND') {
+            if ((err as any).graphQLErrors?.[0]?.extensions?.code === 'NOT_FOUND') {
                 return <Error404 />
             }
         }

@@ -11,7 +11,7 @@ import {
 import { logoutLocalUser } from '../localAuth'
 import { signOut as cognitoSignOut } from '../pages/Auth/cognitoAuth'
 import { recordJSException } from '@mc-review/otel'
-import { handleApolloError } from '@mc-review/helpers'
+import { handleGraphQLError } from '@mc-review/helpers'
 import { ApolloQueryResult } from '@apollo/client'
 
 // Constants and types
@@ -101,7 +101,7 @@ function AuthProvider({
 
     if (!loading) {
         if (error) {
-            handleApolloError(error, isAuthenticated)
+            handleGraphQLError(error, isAuthenticated)
             if (isAuthenticated) {
                 setLoggedInUser(undefined)
                 setLoginStatus('LOGGED_OUT')
