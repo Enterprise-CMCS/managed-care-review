@@ -83,7 +83,6 @@ vi.mock('@node-oauth/oauth2-server', () => {
 
             if (request.body.client_secret === 'invalid') {
                 // pragma: allowlist secret
-                // pragma: allowlist secret
                 throw new InvalidClientError('Invalid client credentials')
             }
 
@@ -355,7 +354,7 @@ describe('CustomOAuth2Server', () => {
             const response = JSON.parse(result.body)
             expect(response).toHaveProperty('access_token')
             expect(response).toHaveProperty('token_type', 'Bearer')
-            expect(response).toHaveProperty('expires_in', 3600)
+            expect(response).toHaveProperty('expires_in', 7776000)
         })
     })
 })

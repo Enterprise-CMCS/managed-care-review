@@ -13,7 +13,7 @@ import { verifyClientCredentials } from '../postgres/oauth/oauthClientStore'
 import { newJWTLib } from '../jwt'
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
 
-const JWT_EXPIRATION_SECONDS = 3600 // 1 hour
+const JWT_EXPIRATION_SECONDS = 60 * 60 * 24 * 90 // 90 days
 
 export class CustomOAuth2Server {
     private oauth2Server: InstanceType<typeof OAuth2Server>

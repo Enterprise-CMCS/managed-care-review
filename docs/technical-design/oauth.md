@@ -1,5 +1,29 @@
 # OAuth Implementation
 
+## TL;DR: Quick Start for Integrators
+
+1. **Get your credentials:**  
+   You will be provided a `client_id` and `client_secret` by an admin. Save these securely; the secret is only shown once.
+
+2. **Request a token:**  
+   Make a POST request to `/oauth/token` with your credentials:
+   ```json
+   {
+     "grant_type": "client_credentials",
+     "client_id": "your-client-id",
+     "client_secret": "your-client-secret" // pragma: allowlist secret
+   }
+   ```
+
+3. **Use the token:**  
+   Add the returned `access_token` as a Bearer token in the `Authorization` header for all API requests:
+   ```
+   Authorization: Bearer <access_token>
+   ```
+
+4. **Token expiration:**  
+   Tokens expire every 90 days. When expired, repeat step 2 to get a new token using the same credentials.
+
 ## Overview
 
 Our OAuth implementation uses the OAuth 2.0 protocol with the Client Credentials grant type. This is designed for server-to-server authentication where the client application needs to access protected resources on behalf of itself.

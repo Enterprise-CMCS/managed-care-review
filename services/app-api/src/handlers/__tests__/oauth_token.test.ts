@@ -57,7 +57,7 @@ vi.mock('../../oauth/oauth2Server', () => ({
                     body: JSON.stringify({
                         access_token: 'mock.jwt.token',
                         token_type: 'Bearer',
-                        expires_in: 3600,
+                        expires_in: 7776000,
                     }),
                 }
             }),
@@ -133,8 +133,6 @@ describe('OAuth Token Handler', () => {
     it('should return JWT token for valid client credentials', async () => {
         // Create a test client
         await createOAuthClient(mockPrisma, {
-            clientId: 'test-client',
-            clientSecret: 'test-secret', // pragma: allowlist secret
             grants: ['client_credentials'],
             description: 'Test client',
             contactEmail: 'test@example.com',
@@ -152,7 +150,7 @@ describe('OAuth Token Handler', () => {
         expect(JSON.parse(result.body)).toEqual({
             access_token: 'mock.jwt.token',
             token_type: 'Bearer',
-            expires_in: 3600,
+            expires_in: 7776000,
         })
     })
 })
