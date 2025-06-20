@@ -2553,6 +2553,7 @@ type OauthClient {
     contactEmail: String
     createdAt: DateTime!
     updatedAt: DateTime!
+    user: User!
 }
 
 input CreateOauthClientInput {
