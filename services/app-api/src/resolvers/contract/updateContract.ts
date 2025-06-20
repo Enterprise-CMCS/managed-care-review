@@ -1,4 +1,4 @@
-import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
+import { createForbiddenError, createUserInputError } from '../errorUtils'
 import {
     convertContractWithRatesToUnlockedHPP,
     hasCMSPermissions,
@@ -28,7 +28,7 @@ export function updateContract(
                 'user not authorized to update contract',
                 span
             )
-            throw new ForbiddenError('user not authorized to update contract')
+            throw createForbiddenError('user not authorized to update contract')
         }
 
         const contractWithHistory = await store.findContractWithHistory(
@@ -69,10 +69,7 @@ export function updateContract(
             const errMessage = `Can not update a contract has not been submitted or unlocked. Fails for contract with ID: ${contractWithHistory.id}`
             logError('updateContract', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
-            throw new UserInputError(errMessage, {
-                argumentName: 'contractID',
-                cause: 'INVALID_PACKAGE_STATUS',
-            })
+            throw createUserInputError(errMessage, 'contractID')
         }
 
         const updatedContract = await store.updateContract({

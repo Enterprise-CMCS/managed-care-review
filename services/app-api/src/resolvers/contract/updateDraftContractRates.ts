@@ -1,6 +1,6 @@
 import type { MutationResolvers } from '../../gen/gqlServer'
 import { logError, logSuccess } from '../../logger'
-import { NotFoundError } from '../../postgres'
+import { NotFoundError, handleNotFoundError } from '../../postgres'
 import type { Store } from '../../postgres'
 import {
     setErrorAttributesOnActiveSpan,
@@ -10,7 +10,7 @@ import {
 import { GraphQLError } from 'graphql'
 import { isStateUser } from '../../domain-models'
 import { rateFormDataSchema } from '../../domain-models/contractAndRates'
-import { ForbiddenError, UserInputError } from 'apollo-server-core'
+import { createForbiddenError, createUserInputError } from '../errorUtils'
 import { z } from 'zod'
 import type { UpdateDraftContractRatesArgsType } from '../../postgres/contractAndRates/updateDraftContractRates'
 import { generateRateCertificationName } from '../rate/generateRateCertificationName'
@@ -61,7 +61,7 @@ function updateDraftContractRates(
             const errMsg = `updatedRates not correctly formatted: ${parsedRatesResult.error}`
             logError('updateDraftContractRates', errMsg)
             setErrorAttributesOnActiveSpan(errMsg, span)
-            throw new UserInputError(errMsg)
+            throw createUserInputError(errMsg)
         }
 
         const parsedUpdates = parsedRatesResult.data
@@ -70,14 +70,7 @@ function updateDraftContractRates(
         const contract = await store.findContractWithHistory(contractID)
         if (contract instanceof Error) {
             if (contract instanceof NotFoundError) {
-                const notFoundMsg = `contract with ID ${contractID} not found`
-                console.info(notFoundMsg)
-                throw new GraphQLError(notFoundMsg, {
-                    extensions: {
-                        code: 'NOT_FOUND',
-                        cause: 'DB_ERROR',
-                    },
-                })
+                throw handleNotFoundError(contract)
             }
             const errMessage = `Issue finding a contract with history with id ${contractID}. Message: ${contract.message}`
             logError('updateDraftContractRates', errMessage)
@@ -118,7 +111,7 @@ function updateDraftContractRates(
                     'user not authorized to update a draft from a different state',
                     span
                 )
-                throw new ForbiddenError(
+                throw createForbiddenError(
                     'user not authorized to update a draft from a different state'
                 )
             }
@@ -133,7 +126,7 @@ function updateDraftContractRates(
                 'user not authorized to update a draft',
                 span
             )
-            throw new ForbiddenError('user not authorized to update a draft')
+            throw createForbiddenError('user not authorized to update a draft')
         }
         // state user is authorized
 
@@ -148,7 +141,7 @@ function updateDraftContractRates(
                 'you cannot update a contract that is not DRAFT or UNLOCKED'
             logError('updateDraftContractRates', errMsg)
             setErrorAttributesOnActiveSpan(errMsg, span)
-            throw new UserInputError(errMsg)
+            throw createUserInputError(errMsg)
         }
 
         // If updatedAt does not match concurrent editing occurred.
@@ -159,7 +152,7 @@ function updateDraftContractRates(
             const errMessage = `Concurrent update error: The data you are trying to modify has changed since you last retrieved it. Please refresh the page to continue.`
             logError('updateDraftContractRates', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
-            throw new UserInputError(errMessage)
+            throw createUserInputError(errMessage)
         }
 
         // The Request is Valid!
@@ -205,7 +198,7 @@ function updateDraftContractRates(
                         rateUpdate.rateID
                     logError('updateDraftContractRates', errmsg)
                     setErrorAttributesOnActiveSpan(errmsg, span)
-                    throw new UserInputError(errmsg)
+                    throw createUserInputError(errmsg)
                 }
                 knownRateIDs.splice(knownRateIDX, 1)
 
@@ -231,7 +224,7 @@ function updateDraftContractRates(
                         rateUpdate.rateID
                     logError('updateDraftContractRates', errmsg)
                     setErrorAttributesOnActiveSpan(errmsg, span)
-                    throw new UserInputError(errmsg)
+                    throw createUserInputError(errmsg)
                 }
 
                 if (rateToUpdate.parentContractID !== contract.id) {
@@ -240,7 +233,7 @@ function updateDraftContractRates(
                         rateUpdate.rateID
                     logError('updateDraftContractRates', errmsg)
                     setErrorAttributesOnActiveSpan(errmsg, span)
-                    throw new UserInputError(errmsg)
+                    throw createUserInputError(errmsg)
                 }
 
                 // set rateName for now https://jiraent.cms.gov/browse/MCR-4012
@@ -276,12 +269,7 @@ function updateDraftContractRates(
                     )
                     if (rateToLink instanceof Error) {
                         if (rateToLink instanceof NotFoundError) {
-                            const errmsg =
-                                'Attempting to link a rate that does not exist: ' +
-                                rateUpdate.rateID
-                            logError('updateDraftContractRates', errmsg)
-                            setErrorAttributesOnActiveSpan(errmsg, span)
-                            throw new UserInputError(errmsg)
+                            throw handleNotFoundError(rateToLink)
                         }
 
                         const errmsg =
@@ -300,7 +288,7 @@ function updateDraftContractRates(
                         const errmsg = `Attempted to link a rate with an invalid status. Status: ${rateToLink.consolidatedStatus}. RateID: ${rateUpdate.rateID}`
                         logError('updateDraftContractRates', errmsg)
                         setErrorAttributesOnActiveSpan(errmsg, span)
-                        throw new UserInputError(errmsg)
+                        throw createUserInputError(errmsg)
                     }
 
                     // this is a new link, actually link them.

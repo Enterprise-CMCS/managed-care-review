@@ -272,7 +272,7 @@ const RateDetails = ({
                 )
             } catch (err) {
                 recordJSException(
-                    `RateDetails: Apollo error reported. Error message: Failed to create form data ${err}`
+                    `RateDetails: GraphQL error reported. Error message: Failed to create form data ${err}`
                 )
                 setShowAPIErrorBanner(true)
             } finally {
@@ -306,7 +306,7 @@ const RateDetails = ({
                 )
             } catch (err) {
                 recordJSException(
-                    `RateDetails: Apollo error reported. Error message: Failed to create form data ${err}`
+                    `RateDetails: GraphQL error reported. Error message: Failed to create form data ${err}`
                 )
                 setShowAPIErrorBanner(true)
             } finally {

@@ -1,9 +1,9 @@
-import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
+import { createForbiddenError, createUserInputError } from '../errorUtils'
 import { GraphQLError } from 'graphql'
 import { isValidCmsDivison, hasAdminPermissions } from '../../domain-models'
 import type { MutationResolvers } from '../../gen/gqlServer'
 import { logError, logSuccess } from '../../logger'
-import { NotFoundError } from '../../postgres'
+import { NotFoundError, handleNotFoundError } from '../../postgres'
 import type { Store } from '../../postgres'
 import {
     setErrorAttributesOnActiveSpan,
@@ -32,12 +32,8 @@ export function updateDivisionAssignment(
                 'user not authorized to modify assignments',
                 span
             )
-            throw new ForbiddenError(
-                'user not authorized to modify assignments',
-                {
-                    code: 'FORBIDDEN',
-                    cause: 'NOT_ADMIN',
-                }
+            throw createForbiddenError(
+                'user not authorized to modify assignments'
             )
         }
         const { cmsUserID } = input
@@ -52,11 +48,7 @@ export function updateDivisionAssignment(
                 const errMsg = 'Invalid division assignment'
                 logError('updateDivisionAssignment', errMsg)
                 setErrorAttributesOnActiveSpan(errMsg, span)
-                throw new UserInputError(errMsg, {
-                    argumentName: 'divisionAssignment',
-                    argumentValues: divisionAssignment,
-                    cause: 'INVALID_DIVISION_ASSIGNMENT',
-                })
+                throw createUserInputError(errMsg, 'divisionAssignment')
             }
         }
 
@@ -72,11 +64,7 @@ export function updateDivisionAssignment(
                 const errMsg = 'cmsUserID does not exist'
                 logError('updateDivisionAssignment', errMsg)
                 setErrorAttributesOnActiveSpan(errMsg, span)
-                throw new UserInputError(errMsg, {
-                    argumentName: 'cmsUserID',
-                    argumentValues: cmsUserID,
-                    cause: 'CMSUSERID_NOT_EXIST',
-                })
+                throw handleNotFoundError(result)
             }
 
             const errMsg = `Issue assigning states to user. Message: ${result.message}`

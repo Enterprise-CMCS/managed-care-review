@@ -2,9 +2,9 @@
 
 ## Apollo Server Handling
 
-[Apollo v3 - Error Handling](https://www.apollographql.com/docs/apollo-server/v3/data/errors)
+[Apollo v4 - Error Handling](https://www.apollographql.com/docs/apollo-server/data/errors)
 
-When throwing errors from resolvers we should always throw `GraphQLError` or `ApolloError`. If a resolver throws an error that is not an `ApolloError` it gets converted to a generic `ApolloError` anyway. [Apollo Docs - Throwing errors](https://www.apollographql.com/docs/apollo-server/v3/data/errors#throwing-errors).
+When throwing errors from resolvers we should always throw `GraphQLError` from the `graphql` package. Apollo Server v4 has deprecated Apollo-specific error classes like `ApolloError`, `ForbiddenError`, and `UserInputError` in favor of the standard `GraphQLError`. [Apollo Docs - Throwing errors](https://www.apollographql.com/docs/apollo-server/data/errors#throwing-errors).
 
 We also want to be including details about our error when we throw, this allows our front end to handle returned errors more specifically.
 
@@ -19,10 +19,10 @@ throw new GraphQLError('Email failed.', {
 })
 ```
 
-The above error is for `INTERNAL_SERVER_ERROR` codes, other codes are predefined classes in `'apollo-server-lambda'` and we can import them directly. These classes will have the `code` field already set, so we just need to pass in a message and extra details in the `extension` object.
+For other error codes, we now use helper functions from our `errorUtils.ts` file instead of Apollo Server v3 predefined classes. These helper functions create `GraphQLError` instances with the appropriate `code` field already set.
 
 ```typescript
-import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
+import { createForbiddenError, createUserInputError } from '../errorUtils'
 
 if (planPackage.stateCode !== stateFromCurrentUser) {
     logError(
@@ -33,11 +33,8 @@ if (planPackage.stateCode !== stateFromCurrentUser) {
         'user not authorized to fetch data from a different state',
         span
     )
-    throw new ForbiddenError(
-        'user not authorized to fetch data from a different state',
-        {
-            cause: 'USER_STATE_INVALID',
-        }
+    throw createForbiddenError(
+        'user not authorized to fetch data from a different state'
     )
 }
 
@@ -45,9 +42,18 @@ if (result === undefined) {
     const errMessage = `A draft must exist to be submitted: ${input.pkgID}`
     logError('submitHealthPlanPackage', errMessage)
     setErrorAttributesOnActiveSpan(errMessage, span)
-    throw new UserInputError(errMessage, {
-        argumentName: 'pkgID',
-        cause: 'DRAFT_NOT_FOUND',
-    })
+    throw createUserInputError(errMessage, 'pkgID')
 }
 ```
+
+## Available Error Helper Functions
+
+We provide helper functions in `/services/app-api/src/resolvers/errorUtils.ts`:
+
+- `createForbiddenError(message)` → `GraphQLError` with `FORBIDDEN` code
+- `createUserInputError(message, argumentName?)` → `GraphQLError` with `BAD_USER_INPUT` code  
+- `createNotFoundError(message)` → `GraphQLError` with `NOT_FOUND` code
+- `createInternalServerError(message, cause?)` → `GraphQLError` with `INTERNAL_SERVER_ERROR` code
+- `createAuthenticationError(message)` → `GraphQLError` with `UNAUTHENTICATED` code
+
+These maintain the same error behavior for frontend consumers while using the standard `GraphQLError` class.

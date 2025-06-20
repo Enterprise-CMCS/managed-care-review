@@ -4,8 +4,7 @@ import { GridContainer } from '@trussworks/react-uswds'
 import { Loading } from '../../components'
 import { ErrorInvalidSubmissionStatus } from '../Errors/ErrorInvalidSubmissionStatusPage'
 import { Error404 } from '../Errors/Error404Page'
-import { handleApolloError } from '@mc-review/helpers'
-import { ApolloError } from '@apollo/client'
+import { handleGraphQLError } from '@mc-review/helpers'
 import { ErrorForbiddenPage } from '../Errors/ErrorForbiddenPage'
 
 type InterimState =
@@ -18,11 +17,11 @@ type ErrorOrLoadingPageProps = {
     state?: InterimState
 }
 
-const handleAndReturnErrorState = (error: ApolloError): InterimState => {
-    handleApolloError(error, true)
-    if (error.graphQLErrors[0]?.extensions?.code === 'NOT_FOUND') {
+const handleAndReturnErrorState = (error: Error): InterimState => {
+    handleGraphQLError(error as any, true)
+    if ((error as any).graphQLErrors?.[0]?.extensions?.code === 'NOT_FOUND') {
         return 'NOT_FOUND'
-    } else if (error.graphQLErrors[0]?.extensions?.code === 'FORBIDDEN_ERROR') {
+    } else if ((error as any).graphQLErrors?.[0]?.extensions?.code === 'FORBIDDEN_ERROR') {
         return 'FORBIDDEN'
     } else {
         return 'GENERIC_ERROR'

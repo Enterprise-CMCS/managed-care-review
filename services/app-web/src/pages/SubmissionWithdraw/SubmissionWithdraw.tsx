@@ -202,7 +202,7 @@ export const SubmissionWithdraw = (): React.ReactElement => {
             navigate(`/submissions/${id}`)
         } catch (err) {
             recordJSException(
-                `WithdrawContract: Apollo error reported. Error message: Failed to create form data ${err}`
+                `WithdrawContract: GraphQL error reported. Error message: Failed to create form data ${err}`
             )
         }
     }

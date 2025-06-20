@@ -1,5 +1,5 @@
 import { MockedResponse } from '@apollo/client/testing'
-import { ApolloError, ServerError } from '@apollo/client'
+import { ServerError } from '@apollo/client'
 import {
     CmsUser,
     FetchCurrentUserDocument,
@@ -208,7 +208,7 @@ const indexUsersQueryMock = (
     }
 }
 
-const indexUsersQueryFailMock = (): MockedResponse<ApolloError> => {
+const indexUsersQueryFailMock = (): MockedResponse<GraphQLError> => {
     const graphQLError = new GraphQLError(
         'Error fetching email settings data.',
         {
@@ -222,9 +222,7 @@ const indexUsersQueryFailMock = (): MockedResponse<ApolloError> => {
         request: {
             query: IndexUsersDocument,
         },
-        error: new ApolloError({
-            graphQLErrors: [graphQLError],
-        }),
+        error: graphQLError,
         result: {
             data: null,
         },
@@ -281,7 +279,7 @@ function updateStateAssignmentsMutationMockSuccess(
 function updateStateAssignmentsMutationMockFailure(
     stateCode: string = 'CA',
     userIDs: string[] = ['1', '2']
-): MockedResponse<ApolloError> {
+): MockedResponse<GraphQLError> {
     const graphQLError = new GraphQLError(
         'Error fetching email settings data.',
         {
@@ -301,9 +299,7 @@ function updateStateAssignmentsMutationMockFailure(
                 },
             },
         },
-        error: new ApolloError({
-            graphQLErrors: [graphQLError],
-        }),
+        error: graphQLError,
         result: {
             data: null,
         },
