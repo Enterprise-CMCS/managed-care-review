@@ -582,17 +582,17 @@ enum SubmissionType {
 }
 
 model OAuthClient {
-  id              String    @id @default(uuid())
-  clientId        String    @unique
-  clientSecret    String
-  grants          String[]
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @default(now()) @updatedAt
-  lastUsedAt      DateTime?
-  description     String?
-  contactEmail    String
-  createdByUserID String
-  createdBy       User      @relation(fields: [createdByUserID], references: [id], onDelete: Cascade)
+  id           String    @id @default(uuid())
+  clientId     String    @unique
+  clientSecret String
+  grants       String[]
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @default(now()) @updatedAt
+  lastUsedAt   DateTime?
+  description  String?
+  contactEmail String
+  userID       String
+  user         User      @relation(fields: [userID], references: [id], onDelete: Cascade)
 }
 
 model DocumentZipPackage {

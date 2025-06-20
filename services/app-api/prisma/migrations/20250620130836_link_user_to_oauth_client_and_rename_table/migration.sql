@@ -14,7 +14,7 @@ CREATE TABLE "OAuthClient" (
     "lastUsedAt" TIMESTAMP(3),
     "description" TEXT,
     "contactEmail" TEXT NOT NULL,
-    "createdByUserID" TEXT NOT NULL,
+    "userID" TEXT NOT NULL,
 
     CONSTRAINT "OAuthClient_pkey" PRIMARY KEY ("id")
 );
@@ -23,6 +23,6 @@ CREATE TABLE "OAuthClient" (
 CREATE UNIQUE INDEX "OAuthClient_clientId_key" ON "OAuthClient"("clientId");
 
 -- AddForeignKey
-ALTER TABLE "OAuthClient" ADD CONSTRAINT "OAuthClient_createdByUserID_fkey" FOREIGN KEY ("createdByUserID") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "OAuthClient" ADD CONSTRAINT "OAuthClient_userID_fkey" FOREIGN KEY ("userID") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 COMMIT;
