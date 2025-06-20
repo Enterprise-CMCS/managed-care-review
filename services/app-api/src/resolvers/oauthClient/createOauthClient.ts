@@ -16,7 +16,8 @@ export function createOauthClientResolver(
         const oauthClient = await store.createOAuthClient({
             grants: input.grants ?? undefined,
             description: input.description ?? undefined,
-            contactEmail: input.contactEmail ?? undefined,
+            contactEmail: input.contactEmail,
+            userID: user.id,
         })
         if (oauthClient instanceof Error) {
             throw oauthClient
