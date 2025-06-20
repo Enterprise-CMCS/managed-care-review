@@ -24,20 +24,28 @@ describe('OAuthClient Store', () => {
 
     beforeEach(async () => {
         client = await sharedTestPrismaClient()
-        // Clean up any existing OAuth clients and users before each test
+        // Clean up any existing OAuth clients before each test
         await client.oAuthClient.deleteMany()
-        await client.user.deleteMany()
 
-        // Create a test user
-        const testUser = await client.user.create({
-            data: {
-                id: uuidv4(),
-                givenName: 'Test',
-                familyName: 'User',
+        // Find or create a test user
+        let testUser = await client.user.findFirst({
+            where: {
                 email: 'testuser@example.com',
                 role: 'ADMIN_USER',
             },
         })
+
+        if (!testUser) {
+            testUser = await client.user.create({
+                data: {
+                    id: uuidv4(),
+                    givenName: 'Test',
+                    familyName: 'User',
+                    email: 'testuser@example.com',
+                    role: 'ADMIN_USER',
+                },
+            })
+        }
         testUserId = testUser.id
 
         testClientData = {
@@ -202,16 +210,25 @@ describe('OAuthClient Store', () => {
         })
         if (client2 instanceof Error) throw client2
 
-        // Create another user and client
-        const otherUser = await client.user.create({
-            data: {
-                id: uuidv4(),
-                givenName: 'Other',
-                familyName: 'User',
+        // Find or create another user and client
+        let otherUser = await client.user.findFirst({
+            where: {
                 email: 'otheruser@example.com',
                 role: 'STATE_USER',
             },
         })
+
+        if (!otherUser) {
+            otherUser = await client.user.create({
+                data: {
+                    id: uuidv4(),
+                    givenName: 'Other',
+                    familyName: 'User',
+                    email: 'otheruser@example.com',
+                    role: 'STATE_USER',
+                },
+            })
+        }
 
         const otherUserClient = await createOAuthClient(client, {
             ...testClientData,
