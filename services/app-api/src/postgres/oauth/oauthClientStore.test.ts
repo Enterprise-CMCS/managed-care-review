@@ -8,21 +8,44 @@ import {
     updateOAuthClient,
     deleteOAuthClient,
     listOAuthClients,
+    getOAuthClientsByUserId,
 } from './oauthClientStore'
 
 describe('OAuthClient Store', () => {
-    const testClientData = {
-        grants: ['client_credentials'],
-        description: 'Test client',
-        contactEmail: 'test@example.com',
+    let testUserId: string
+    let testClientData: {
+        grants: string[]
+        description: string
+        contactEmail: string
+        userID: string
     }
 
     let client: Awaited<ReturnType<typeof sharedTestPrismaClient>>
 
     beforeEach(async () => {
         client = await sharedTestPrismaClient()
-        // Clean up any existing OAuth clients before each test
+        // Clean up any existing OAuth clients and users before each test
         await client.oAuthClient.deleteMany()
+        await client.user.deleteMany()
+
+        // Create a test user
+        const testUser = await client.user.create({
+            data: {
+                id: uuidv4(),
+                givenName: 'Test',
+                familyName: 'User',
+                email: 'testuser@example.com',
+                role: 'ADMIN_USER',
+            },
+        })
+        testUserId = testUser.id
+
+        testClientData = {
+            grants: ['client_credentials'],
+            description: 'Test client',
+            contactEmail: 'test@example.com',
+            userID: testUserId,
+        }
     })
 
     it('creates and retrieves an OAuth client', async () => {
@@ -166,5 +189,48 @@ describe('OAuthClient Store', () => {
         expect(updatedClient.updatedAt.getTime()).toBeGreaterThanOrEqual(
             createdClient.updatedAt.getTime()
         )
+    })
+
+    it('retrieves OAuth clients by user ID', async () => {
+        // Create two clients for the same user
+        const client1 = await createOAuthClient(client, testClientData)
+        if (client1 instanceof Error) throw client1
+
+        const client2 = await createOAuthClient(client, {
+            ...testClientData,
+            description: 'Second test client',
+        })
+        if (client2 instanceof Error) throw client2
+
+        // Create another user and client
+        const otherUser = await client.user.create({
+            data: {
+                id: uuidv4(),
+                givenName: 'Other',
+                familyName: 'User',
+                email: 'otheruser@example.com',
+                role: 'STATE_USER',
+            },
+        })
+
+        const otherUserClient = await createOAuthClient(client, {
+            ...testClientData,
+            userID: otherUser.id,
+            description: 'Other user client',
+        })
+        if (otherUserClient instanceof Error) throw otherUserClient
+
+        // Get clients for first user
+        const userClients = await getOAuthClientsByUserId(client, testUserId)
+        if (userClients instanceof Error) throw userClients
+
+        expect(userClients).toHaveLength(2)
+        expect(userClients.map((c) => c.id)).toContain(client1.id)
+        expect(userClients.map((c) => c.id)).toContain(client2.id)
+        expect(userClients.map((c) => c.id)).not.toContain(otherUserClient.id)
+
+        // Verify user relationship is included
+        expect(userClients[0].user).toBeDefined()
+        expect(userClients[0].user.id).toBe(testUserId)
     })
 })

@@ -4,6 +4,9 @@ import { v4 as uuidv4 } from 'uuid'
 import { randomBytes } from 'crypto'
 
 type OAuthClientType = Prisma.OAuthClientGetPayload<Record<string, never>>
+type OAuthClientWithUserType = Prisma.OAuthClientGetPayload<{
+    include: { user: true }
+}>
 
 // Create a new OAuth client
 export async function createOAuthClient(
@@ -12,6 +15,7 @@ export async function createOAuthClient(
         grants?: string[]
         description?: string
         contactEmail: string
+        userID: string
     }
 ): Promise<OAuthClientType | Error> {
     try {
@@ -28,6 +32,7 @@ export async function createOAuthClient(
                 grants,
                 description: data.description,
                 contactEmail: data.contactEmail,
+                userID: data.userID,
             },
         })
     } catch (error) {
@@ -39,10 +44,11 @@ export async function createOAuthClient(
 export async function getOAuthClientById(
     client: ExtendedPrismaClient,
     id: string
-): Promise<OAuthClientType | null | Error> {
+): Promise<OAuthClientWithUserType | null | Error> {
     try {
         return await client.oAuthClient.findUnique({
             where: { id },
+            include: { user: true },
         })
     } catch (error) {
         return error as Error
@@ -53,10 +59,11 @@ export async function getOAuthClientById(
 export async function getOAuthClientByClientId(
     client: ExtendedPrismaClient,
     clientId: string
-): Promise<OAuthClientType | null | Error> {
+): Promise<OAuthClientWithUserType | null | Error> {
     try {
         return await client.oAuthClient.findUnique({
             where: { clientId },
+            include: { user: true },
         })
     } catch (error) {
         return error as Error
@@ -137,9 +144,26 @@ export async function deleteOAuthClient(
 // List all OAuth clients
 export async function listOAuthClients(
     client: ExtendedPrismaClient
-): Promise<OAuthClientType[] | Error> {
+): Promise<OAuthClientWithUserType[] | Error> {
     try {
-        return await client.oAuthClient.findMany()
+        return await client.oAuthClient.findMany({
+            include: { user: true },
+        })
+    } catch (error) {
+        return error as Error
+    }
+}
+
+// Get OAuth clients by user ID
+export async function getOAuthClientsByUserId(
+    client: ExtendedPrismaClient,
+    userID: string
+): Promise<OAuthClientWithUserType[] | Error> {
+    try {
+        return await client.oAuthClient.findMany({
+            where: { userID },
+            include: { user: true },
+        })
     } catch (error) {
         return error as Error
     }
