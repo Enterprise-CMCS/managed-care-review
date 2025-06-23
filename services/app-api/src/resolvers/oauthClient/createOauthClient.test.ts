@@ -1,17 +1,31 @@
 import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
-import { testAdminUser, testStateUser } from '../../testHelpers/userHelpers'
+import {
+    testAdminUser,
+    testStateUser,
+    testCMSUser,
+} from '../../testHelpers/userHelpers'
 import { CreateOauthClientDocument } from '../../gen/gqlClient'
+import { insertUserToLocalAurora } from '../../authn'
+import { NewPostgresStore } from '../../postgres'
+import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 
 describe('createOauthClient', () => {
     it('creates a new OAuth client as ADMIN', async () => {
         const adminUser = testAdminUser()
+        const cmsUser = testCMSUser()
+
+        // Create a store manually to insert the CMS user
+        const prismaClient = await sharedTestPrismaClient()
+        const store = NewPostgresStore(prismaClient)
+        await insertUserToLocalAurora(store, cmsUser)
+
         const server = await constructTestPostgresServer({
             context: { user: adminUser },
         })
         const input = {
             grants: ['client_credentials', 'refresh_token'],
             description: 'Test client',
-            userID: adminUser.id,
+            userID: cmsUser.id,
         }
         const res = await server.executeOperation({
             query: CreateOauthClientDocument,
@@ -25,17 +39,24 @@ describe('createOauthClient', () => {
         expect(oauthClient.grants).toEqual(expect.arrayContaining(input.grants))
         expect(oauthClient.description).toBe(input.description)
         expect(oauthClient.user).toBeDefined()
-        expect(oauthClient.user.id).toBe(adminUser.id)
+        expect(oauthClient.user.id).toBe(cmsUser.id)
     })
 
     it('defaults to ["client_credentials"] if no grants provided', async () => {
         const adminUser = testAdminUser()
+        const cmsUser = testCMSUser()
+
+        // Create a store manually to insert the CMS user
+        const prismaClient = await sharedTestPrismaClient()
+        const store = NewPostgresStore(prismaClient)
+        await insertUserToLocalAurora(store, cmsUser)
+
         const server = await constructTestPostgresServer({
             context: { user: adminUser },
         })
         const input = {
             description: 'No grants',
-            userID: adminUser.id,
+            userID: cmsUser.id,
         }
         const res = await server.executeOperation({
             query: CreateOauthClientDocument,
@@ -66,17 +87,18 @@ describe('createOauthClient', () => {
     it('errors on DB failure', async () => {
         const adminUser = testAdminUser()
         // Use a mock store that throws
+        const cmsUser = testCMSUser()
         const server = await constructTestPostgresServer({
             context: { user: adminUser },
             store: {
                 ...{},
-                findUser: async () => adminUser,
+                findUser: async () => cmsUser,
                 createOAuthClient: async () => new Error('DB fail'),
             },
         })
         const input = {
             grants: ['client_credentials'],
-            userID: adminUser.id,
+            userID: cmsUser.id,
             description: 'DB fail',
         }
         const res = await server.executeOperation({
@@ -104,11 +126,20 @@ describe('createOauthClient', () => {
             query: CreateOauthClientDocument,
             variables: { input },
         })
-        expect(res.errors?.[0].message).toMatch(/User with ID invalid-user-id does not exist/)
+        expect(res.errors?.[0].message).toMatch(
+            /User with ID invalid-user-id does not exist/
+        )
     })
 
     it('creates an oauth client with required fields', async () => {
         const adminUser = testAdminUser()
+        const cmsUser = testCMSUser()
+
+        // Create a store manually to insert the CMS user
+        const prismaClient = await sharedTestPrismaClient()
+        const store = NewPostgresStore(prismaClient)
+        await insertUserToLocalAurora(store, cmsUser)
+
         const server = await constructTestPostgresServer({
             context: { user: adminUser },
         })
@@ -118,11 +149,37 @@ describe('createOauthClient', () => {
                 input: {
                     description: 'Test client',
                     grants: ['client_credentials'],
-                    userID: adminUser.id,
+                    userID: cmsUser.id,
                 },
             },
         })
         expect(res.errors).toBeUndefined()
         expect(res.data?.createOauthClient.oauthClient).toBeDefined()
+    })
+
+    it('errors when trying to associate OAuth client with non-CMS user', async () => {
+        const adminUser = testAdminUser()
+        const stateUser = testStateUser()
+
+        // Create a store manually to insert the state user
+        const prismaClient = await sharedTestPrismaClient()
+        const store = NewPostgresStore(prismaClient)
+        await insertUserToLocalAurora(store, stateUser)
+
+        const server = await constructTestPostgresServer({
+            context: { user: adminUser },
+        })
+        const input = {
+            description: 'Should fail with state user',
+            grants: ['client_credentials'],
+            userID: stateUser.id,
+        }
+        const res = await server.executeOperation({
+            query: CreateOauthClientDocument,
+            variables: { input },
+        })
+        expect(res.errors?.[0].message).toMatch(
+            /OAuth clients can only be associated with CMS users/
+        )
     })
 })

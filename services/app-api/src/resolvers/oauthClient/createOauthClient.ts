@@ -15,11 +15,22 @@ export function createOauthClientResolver(
             )
         }
 
-        // Validate that the provided userID exists and is a valid user
+        // Validate that the provided userID exists and is a valid CMS user
         const targetUser = await store.findUser(input.userID)
         if (targetUser instanceof Error) {
             throw new UserInputError(
                 `User with ID ${input.userID} does not exist`,
+                { argumentName: 'userID' }
+            )
+        }
+
+        // Ensure the target user is a CMS user (CMSUser or CMSApproverUser)
+        if (
+            targetUser.role !== 'CMS_USER' &&
+            targetUser.role !== 'CMS_APPROVER_USER'
+        ) {
+            throw new UserInputError(
+                `OAuth clients can only be associated with CMS users`,
                 { argumentName: 'userID' }
             )
         }

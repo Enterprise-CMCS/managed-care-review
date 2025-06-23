@@ -2553,7 +2553,7 @@ type OauthClient {
     description: String
     createdAt: DateTime!
     updatedAt: DateTime!
-    user: User!
+    user: CMSUsersUnion!
 }
 
 input CreateOauthClientInput {

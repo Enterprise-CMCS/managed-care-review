@@ -1,5 +1,9 @@
 import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
-import { testAdminUser, testStateUser } from '../../testHelpers/userHelpers'
+import {
+    testAdminUser,
+    testStateUser,
+    testCMSUser,
+} from '../../testHelpers/userHelpers'
 import {
     CreateOauthClientDocument,
     FetchOauthClientsDocument,
@@ -8,6 +12,7 @@ import {
 describe('fetchOauthClients', () => {
     it('fetches all OAuth clients as ADMIN', async () => {
         const adminUser = testAdminUser()
+        const cmsUser = testCMSUser()
         const server = await constructTestPostgresServer({
             context: { user: adminUser },
         })
@@ -18,7 +23,7 @@ describe('fetchOauthClients', () => {
                 input: {
                     description: 'Client 1',
                     grants: ['client_credentials'],
-                    userID: adminUser.id,
+                    userID: cmsUser.id,
                 },
             },
         })
@@ -28,7 +33,7 @@ describe('fetchOauthClients', () => {
                 input: {
                     description: 'Client 2',
                     grants: ['client_credentials'],
-                    userID: adminUser.id,
+                    userID: cmsUser.id,
                 },
             },
         })
@@ -45,7 +50,7 @@ describe('fetchOauthClients', () => {
                 user: { id: string; email: string; role: string }
             }
             expect(typedClient.user).toBeDefined()
-            expect(typedClient.user.id).toBeDefined()
+            expect(typedClient.user.id).toBe(cmsUser.id)
             expect(typedClient.user.email).toBeDefined()
             expect(typedClient.user.role).toBeDefined()
         })
@@ -67,6 +72,7 @@ describe('fetchOauthClients', () => {
 
     it('fetches only specified clientIds', async () => {
         const adminUser = testAdminUser()
+        const cmsUser = testCMSUser()
         const server = await constructTestPostgresServer({
             context: { user: adminUser },
         })
@@ -77,7 +83,7 @@ describe('fetchOauthClients', () => {
                 input: {
                     description: 'Specific client',
                     grants: ['client_credentials'],
-                    userID: adminUser.id,
+                    userID: cmsUser.id,
                 },
             },
         })
@@ -93,7 +99,7 @@ describe('fetchOauthClients', () => {
         expect(oauthClients).toHaveLength(1)
         expect(oauthClients[0].clientId).toBe(clientId)
         expect(oauthClients[0].user).toBeDefined()
-        expect(oauthClients[0].user.id).toBe(adminUser.id)
+        expect(oauthClients[0].user.id).toBe(cmsUser.id)
     })
 
     it('returns empty array if no clients match', async () => {

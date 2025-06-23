@@ -1,11 +1,4 @@
-fragment oauthUserFragment on User {
-    ... on AdminUser {
-        id
-        email
-        givenName
-        familyName
-        role
-    }
+fragment oauthUserFragment on CMSUsersUnion {
     ... on CMSUser {
         id
         email
@@ -14,27 +7,6 @@ fragment oauthUserFragment on User {
         role
     }
     ... on CMSApproverUser {
-        id
-        email
-        givenName
-        familyName
-        role
-    }
-    ... on StateUser {
-        id
-        email
-        givenName
-        familyName
-        role
-    }
-    ... on BusinessOwnerUser {
-        id
-        email
-        givenName
-        familyName
-        role
-    }
-    ... on HelpdeskUser {
         id
         email
         givenName
