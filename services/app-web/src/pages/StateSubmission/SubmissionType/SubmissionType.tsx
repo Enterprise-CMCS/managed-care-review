@@ -187,7 +187,6 @@ export const SubmissionType = ({
             }
 
             const draftSubmission = await createDraft(input)
-
             if (draftSubmission instanceof Error) {
                 setShowAPIErrorBanner(true)
                 setSubmitting(false) // unblock submit button to allow resubmit
@@ -200,7 +199,7 @@ export const SubmissionType = ({
             if (options.redirectPath) {
                 navigate(
                     generatePath(RoutesRecord[options.redirectPath], {
-                        id: id,
+                        id: draftSubmission.id,
                     })
                 )
             }
