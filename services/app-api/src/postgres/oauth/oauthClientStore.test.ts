@@ -16,7 +16,6 @@ describe('OAuthClient Store', () => {
     let testClientData: {
         grants: string[]
         description: string
-        contactEmail: string
         userID: string
     }
 
@@ -42,7 +41,6 @@ describe('OAuthClient Store', () => {
         testClientData = {
             grants: ['client_credentials'],
             description: 'Test client',
-            contactEmail: 'test@example.com',
             userID: testUserId,
         }
     })
@@ -53,7 +51,6 @@ describe('OAuthClient Store', () => {
         expect(oauthClient.clientId).toMatch(/^oauth-client-/)
         expect(oauthClient.clientSecret).toHaveLength(86)
         expect(oauthClient.description).toBe(testClientData.description)
-        expect(oauthClient.contactEmail).toBe(testClientData.contactEmail)
         expect(oauthClient.grants).toEqual(testClientData.grants)
     })
 

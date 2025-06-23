@@ -14,7 +14,6 @@ export async function createOAuthClient(
     data: {
         grants?: string[]
         description?: string
-        contactEmail: string
         userID: string
     }
 ): Promise<OAuthClientType | Error> {
@@ -31,7 +30,6 @@ export async function createOAuthClient(
                 clientSecret,
                 grants,
                 description: data.description,
-                contactEmail: data.contactEmail,
                 userID: data.userID,
             },
         })
@@ -105,7 +103,6 @@ export async function updateOAuthClient(
         clientSecret?: string
         grants?: string[]
         description?: string
-        contactEmail?: string
     }
 ): Promise<OAuthClientType | Error> {
     try {
