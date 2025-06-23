@@ -4,13 +4,14 @@ import { CreateOauthClientDocument } from '../../gen/gqlClient'
 
 describe('createOauthClient', () => {
     it('creates a new OAuth client as ADMIN', async () => {
+        const adminUser = testAdminUser()
         const server = await constructTestPostgresServer({
-            context: { user: testAdminUser() },
+            context: { user: adminUser },
         })
         const input = {
             grants: ['client_credentials', 'refresh_token'],
             description: 'Test client',
-            contactEmail: 'test@example.com',
+            userID: adminUser.id,
         }
         const res = await server.executeOperation({
             query: CreateOauthClientDocument,
@@ -23,16 +24,18 @@ describe('createOauthClient', () => {
         expect(oauthClient.clientSecret).toHaveLength(86) // 64 bytes base64url
         expect(oauthClient.grants).toEqual(expect.arrayContaining(input.grants))
         expect(oauthClient.description).toBe(input.description)
-        expect(oauthClient.contactEmail).toBe(input.contactEmail)
+        expect(oauthClient.user).toBeDefined()
+        expect(oauthClient.user.id).toBe(adminUser.id)
     })
 
     it('defaults to ["client_credentials"] if no grants provided', async () => {
+        const adminUser = testAdminUser()
         const server = await constructTestPostgresServer({
-            context: { user: testAdminUser() },
+            context: { user: adminUser },
         })
         const input = {
             description: 'No grants',
-            contactEmail: 'no@grants.com',
+            userID: adminUser.id,
         }
         const res = await server.executeOperation({
             query: CreateOauthClientDocument,
@@ -44,12 +47,13 @@ describe('createOauthClient', () => {
     })
 
     it('errors if not ADMIN', async () => {
+        const stateUser = testStateUser()
         const server = await constructTestPostgresServer({
-            context: { user: testStateUser() },
+            context: { user: stateUser },
         })
         const input = {
             grants: ['client_credentials'],
-            contactEmail: 'test@fail.com',
+            userID: stateUser.id,
             description: 'Should fail',
         }
         const res = await server.executeOperation({
@@ -60,17 +64,19 @@ describe('createOauthClient', () => {
     })
 
     it('errors on DB failure', async () => {
+        const adminUser = testAdminUser()
         // Use a mock store that throws
         const server = await constructTestPostgresServer({
-            context: { user: testAdminUser() },
+            context: { user: adminUser },
             store: {
                 ...{},
+                findUser: async () => adminUser,
                 createOAuthClient: async () => new Error('DB fail'),
             },
         })
         const input = {
             grants: ['client_credentials'],
-            contactEmail: 'fail@db.com',
+            userID: adminUser.id,
             description: 'DB fail',
         }
         const res = await server.executeOperation({
@@ -80,9 +86,31 @@ describe('createOauthClient', () => {
         expect(res.errors?.[0].message).toMatch(/db fail/i)
     })
 
-    it('creates an oauth client with required fields', async () => {
+    it('errors with invalid userID', async () => {
+        const adminUser = testAdminUser()
         const server = await constructTestPostgresServer({
-            context: { user: testAdminUser() },
+            context: { user: adminUser },
+            store: {
+                ...{},
+                findUser: async () => new Error('User not found'),
+            },
+        })
+        const input = {
+            grants: ['client_credentials'],
+            userID: 'invalid-user-id',
+            description: 'Should fail',
+        }
+        const res = await server.executeOperation({
+            query: CreateOauthClientDocument,
+            variables: { input },
+        })
+        expect(res.errors?.[0].message).toMatch(/User with ID invalid-user-id does not exist/)
+    })
+
+    it('creates an oauth client with required fields', async () => {
+        const adminUser = testAdminUser()
+        const server = await constructTestPostgresServer({
+            context: { user: adminUser },
         })
         const res = await server.executeOperation({
             query: CreateOauthClientDocument,
@@ -90,7 +118,7 @@ describe('createOauthClient', () => {
                 input: {
                     description: 'Test client',
                     grants: ['client_credentials'],
-                    contactEmail: 'test@example.com',
+                    userID: adminUser.id,
                 },
             },
         })

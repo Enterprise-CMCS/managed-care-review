@@ -7,8 +7,9 @@ import {
 
 describe('fetchOauthClients', () => {
     it('fetches all OAuth clients as ADMIN', async () => {
+        const adminUser = testAdminUser()
         const server = await constructTestPostgresServer({
-            context: { user: testAdminUser() },
+            context: { user: adminUser },
         })
         // Create two clients
         await server.executeOperation({
@@ -17,7 +18,7 @@ describe('fetchOauthClients', () => {
                 input: {
                     description: 'Client 1',
                     grants: ['client_credentials'],
-                    contactEmail: 'client1@example.com',
+                    userID: adminUser.id,
                 },
             },
         })
@@ -27,7 +28,7 @@ describe('fetchOauthClients', () => {
                 input: {
                     description: 'Client 2',
                     grants: ['client_credentials'],
-                    contactEmail: 'client2@example.com',
+                    userID: adminUser.id,
                 },
             },
         })
@@ -38,6 +39,11 @@ describe('fetchOauthClients', () => {
         const oauthClients = res.data?.fetchOauthClients.oauthClients
         expect(Array.isArray(oauthClients)).toBe(true)
         expect(oauthClients.length).toBeGreaterThanOrEqual(2)
+        // Verify user objects are included
+        oauthClients.forEach(client => {
+            expect(client.user).toBeDefined()
+            expect(client.user.id).toBe(adminUser.id)
+        })
     })
 
     it('fetches all OAuth clients as ADMIN with empty input', async () => {
@@ -55,8 +61,9 @@ describe('fetchOauthClients', () => {
     })
 
     it('fetches only specified clientIds', async () => {
+        const adminUser = testAdminUser()
         const server = await constructTestPostgresServer({
-            context: { user: testAdminUser() },
+            context: { user: adminUser },
         })
         // Create a client
         const createRes = await server.executeOperation({
@@ -65,7 +72,7 @@ describe('fetchOauthClients', () => {
                 input: {
                     description: 'Specific client',
                     grants: ['client_credentials'],
-                    contactEmail: 'specific@example.com',
+                    userID: adminUser.id,
                 },
             },
         })
@@ -80,6 +87,8 @@ describe('fetchOauthClients', () => {
         expect(Array.isArray(oauthClients)).toBe(true)
         expect(oauthClients).toHaveLength(1)
         expect(oauthClients[0].clientId).toBe(clientId)
+        expect(oauthClients[0].user).toBeDefined()
+        expect(oauthClients[0].user.id).toBe(adminUser.id)
     })
 
     it('returns empty array if no clients match', async () => {

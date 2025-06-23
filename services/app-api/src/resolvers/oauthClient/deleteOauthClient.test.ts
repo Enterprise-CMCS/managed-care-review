@@ -7,8 +7,9 @@ import {
 
 describe('deleteOauthClient', () => {
     it('deletes an OAuth client as ADMIN', async () => {
+        const adminUser = testAdminUser()
         const server = await constructTestPostgresServer({
-            context: { user: testAdminUser() },
+            context: { user: adminUser },
         })
         // Create a client first
         const createRes = await server.executeOperation({
@@ -17,7 +18,7 @@ describe('deleteOauthClient', () => {
                 input: {
                     description: 'To delete',
                     grants: ['client_credentials'],
-                    contactEmail: 'test@example.com',
+                    userID: adminUser.id,
                 },
             },
         })
@@ -32,6 +33,8 @@ describe('deleteOauthClient', () => {
         expect(deleteRes.data?.deleteOauthClient.oauthClient.clientId).toBe(
             clientId
         )
+        expect(deleteRes.data?.deleteOauthClient.oauthClient.user).toBeDefined()
+        expect(deleteRes.data?.deleteOauthClient.oauthClient.user.id).toBe(adminUser.id)
     })
 
     it('errors if not ADMIN', async () => {

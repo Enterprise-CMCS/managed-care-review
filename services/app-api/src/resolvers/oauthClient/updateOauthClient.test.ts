@@ -7,8 +7,9 @@ import {
 
 describe('updateOauthClient', () => {
     it('updates an OAuth client as ADMIN', async () => {
+        const adminUser = testAdminUser()
         const server = await constructTestPostgresServer({
-            context: { user: testAdminUser() },
+            context: { user: adminUser },
         })
 
         const createRes = await server.executeOperation({
@@ -17,7 +18,7 @@ describe('updateOauthClient', () => {
                 input: {
                     description: 'Initial description',
                     grants: ['client_credentials'],
-                    contactEmail: 'initial@example.com',
+                    userID: adminUser.id,
                 },
             },
         })
@@ -28,7 +29,6 @@ describe('updateOauthClient', () => {
         const updateInput = {
             clientId,
             description: 'Updated description',
-            contactEmail: 'updated@example.com',
             grants: ['client_credentials', 'refresh_token'],
         }
 
@@ -41,15 +41,17 @@ describe('updateOauthClient', () => {
         const oauthClient = res.data?.updateOauthClient.oauthClient
         expect(oauthClient).toBeDefined()
         expect(oauthClient.description).toBe(updateInput.description)
-        expect(oauthClient.contactEmail).toBe(updateInput.contactEmail)
+        expect(oauthClient.user).toBeDefined()
+        expect(oauthClient.user.id).toBe(adminUser.id)
         expect(oauthClient.grants).toEqual(
             expect.arrayContaining(updateInput.grants)
         )
     })
 
     it('ignores empty string values', async () => {
+        const adminUser = testAdminUser()
         const server = await constructTestPostgresServer({
-            context: { user: testAdminUser() },
+            context: { user: adminUser },
         })
 
         const createRes = await server.executeOperation({
@@ -58,7 +60,7 @@ describe('updateOauthClient', () => {
                 input: {
                     description: 'Initial description',
                     grants: ['client_credentials'],
-                    contactEmail: 'initial@example.com',
+                    userID: adminUser.id,
                 },
             },
         })
@@ -69,7 +71,6 @@ describe('updateOauthClient', () => {
         const updateInput = {
             clientId,
             description: '',
-            contactEmail: '',
             grants: [],
         }
 
@@ -82,7 +83,7 @@ describe('updateOauthClient', () => {
         const oauthClient = res.data?.updateOauthClient.oauthClient
         expect(oauthClient).toBeDefined()
         expect(oauthClient.description).toBe('Initial description')
-        expect(oauthClient.contactEmail).toBe('initial@example.com')
+        expect(oauthClient.user.email).toContain('@example.com')
         expect(oauthClient.grants).toEqual(['client_credentials'])
     })
 

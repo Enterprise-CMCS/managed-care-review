@@ -147,7 +147,6 @@ describe('OAuth Token Handler', () => {
         await createOAuthClient(mockPrisma, {
             grants: ['client_credentials'],
             description: 'Test client',
-            contactEmail: 'test@example.com',
             userID: testUser.id,
         })
 
