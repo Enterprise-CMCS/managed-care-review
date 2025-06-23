@@ -35,7 +35,8 @@ import {
 } from 'apollo-server-core'
 import { newDeployedS3Client, newLocalS3Client } from '../s3'
 import type { S3ClientT, S3BucketConfigType } from '../s3'
-import { setErrorAttributesOnActiveSpan } from '../resolvers/attributeHelper'
+
+import { trace, SpanStatusCode } from '@opentelemetry/api'
 
 let ldClient: LDClient
 let s3Client: S3ClientT
@@ -368,6 +369,7 @@ const gqlHandler: Handler = async (event, context, completion) => {
 
     const stageName = process.env.stage
     const serviceName = 'app-api-' + stageName
+    console.info(`Using service name: ${serviceName}`)
 
     // Debug incoming request
     console.info(`Incoming event.body type: ${typeof event.body}`)
@@ -394,6 +396,9 @@ const gqlHandler: Handler = async (event, context, completion) => {
     )
 
     const thresholdBytes = 5.5 * 1024 * 1024
+    console.info(
+        `Size threshold: ${thresholdBytes} bytes (${(thresholdBytes / 1024 / 1024).toFixed(2)} MB)`
+    )
 
     // Check incoming payload size (before processing)
     if (payloadSize > thresholdBytes) {
@@ -401,23 +406,39 @@ const gqlHandler: Handler = async (event, context, completion) => {
         console.warn(errMsg)
         console.info('Recording exception for large request payload...')
 
-        // Create a new span for payload monitoring using local OTEL lib
-        const tracer = createTracer(serviceName)
-        const span = tracer.startSpan('payload-size-check')
-        span.setAttributes({
-            'payload.type': 'request',
-            'payload.size.bytes': payloadSize,
-            'payload.size.mb': parseFloat(
-                (payloadSize / 1024 / 1024).toFixed(2)
-            ),
-            'payload.threshold.exceeded': true,
+        const tracer = trace.getTracer(serviceName)
+        console.info(`Standard OTEL tracer obtained: ${!!tracer}`)
+
+        const span = tracer.startSpan('large-request-payload-detected', {
+            attributes: {
+                'payload.type': 'request',
+                'payload.size.bytes': payloadSize,
+                'payload.size.mb': parseFloat(
+                    (payloadSize / 1024 / 1024).toFixed(2)
+                ),
+                'payload.threshold.exceeded': true,
+                'service.name': serviceName,
+            },
         })
-        setErrorAttributesOnActiveSpan(errMsg, span)
-        console.info('Exception recorded for request payload')
+        console.info(
+            `Span created: ${!!span}, span ID: ${span.spanContext().spanId}`
+        )
+
+        span.recordException(new Error(errMsg))
+        span.setStatus({
+            code: SpanStatusCode.ERROR,
+            message: errMsg,
+        })
+        span.end()
+        console.info('Standard OTEL span ended for request payload')
     }
 
+    // Once initialized, future awaits will return immediately
     const initializedHandler = await handlerPromise
+    console.info('Handler initialized successfully')
+
     const response = await initializedHandler(event, context, completion)
+    console.info('Handler execution completed')
 
     // Debug response structure
     console.info(`Response type: ${typeof response}`)
@@ -440,17 +461,25 @@ const gqlHandler: Handler = async (event, context, completion) => {
         console.info('Processing response body size calculation...')
 
         let bodySize = 0
+        let sizeCalculationMethod = ''
 
         if (typeof response.body === 'string') {
             bodySize = Buffer.from(response.body).length
+            sizeCalculationMethod = 'string -> Buffer'
         } else if (Buffer.isBuffer(response.body)) {
             bodySize = response.body.length
+            sizeCalculationMethod = 'Buffer.length'
         } else if (response.body !== null && response.body !== undefined) {
+            // For objects, measure the JSON string size
             const jsonString = JSON.stringify(response.body)
             bodySize = Buffer.from(jsonString).length
+            sizeCalculationMethod = 'object -> JSON.stringify -> Buffer'
             console.info(`JSON string length: ${jsonString.length} chars`)
         }
 
+        console.info(
+            `Response size calculation method: ${sizeCalculationMethod}`
+        )
         console.info(
             `Calculated response size: ${bodySize} bytes (${(bodySize / 1024 / 1024).toFixed(2)} MB)`
         )
@@ -466,19 +495,32 @@ const gqlHandler: Handler = async (event, context, completion) => {
             console.warn(errMsg)
             console.info('Recording exception for large response payload...')
 
-            // Create a new span for response payload monitoring
-            const tracer = createTracer(serviceName)
-            const span = tracer.startSpan('payload-size-check')
-            span.setAttributes({
-                'payload.type': 'response',
-                'payload.size.bytes': bodySize,
-                'payload.size.mb': parseFloat(
-                    (bodySize / 1024 / 1024).toFixed(2)
-                ),
-                'payload.threshold.exceeded': true,
+            // Use standard OTEL APIs for response payload monitoring
+            const tracer = trace.getTracer(serviceName)
+            console.info(`Standard OTEL tracer obtained: ${!!tracer}`)
+
+            const span = tracer.startSpan('large-response-payload-detected', {
+                attributes: {
+                    'payload.type': 'response',
+                    'payload.size.bytes': bodySize,
+                    'payload.size.mb': parseFloat(
+                        (bodySize / 1024 / 1024).toFixed(2)
+                    ),
+                    'payload.threshold.exceeded': true,
+                    'service.name': serviceName,
+                },
             })
-            setErrorAttributesOnActiveSpan(errMsg, span)
-            console.info('Exception recorded for response payload')
+            console.info(
+                `Span created: ${!!span}, span ID: ${span.spanContext().spanId}`
+            )
+
+            span.recordException(new Error(errMsg))
+            span.setStatus({
+                code: SpanStatusCode.ERROR,
+                message: errMsg,
+            })
+            span.end()
+            console.info('Standard OTEL span ended for response payload')
         }
     } else {
         console.warn('No response body found to measure')
