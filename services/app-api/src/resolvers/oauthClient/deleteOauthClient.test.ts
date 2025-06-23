@@ -1,14 +1,34 @@
 import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
-import { testAdminUser, testStateUser } from '../../testHelpers/userHelpers'
+import {
+    testAdminUser,
+    testStateUser,
+    testCMSUser,
+} from '../../testHelpers/userHelpers'
 import {
     CreateOauthClientDocument,
     DeleteOauthClientDocument,
 } from '../../gen/gqlClient'
+import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 
 describe('deleteOauthClient', () => {
     it('deletes an OAuth client as ADMIN', async () => {
+        const adminUser = testAdminUser()
+        const cmsUser = testCMSUser()
+
+        // Create CMS user in database
+        const client = await sharedTestPrismaClient()
+        await client.user.create({
+            data: {
+                id: cmsUser.id,
+                givenName: cmsUser.givenName,
+                familyName: cmsUser.familyName,
+                email: cmsUser.email,
+                role: cmsUser.role,
+            },
+        })
+
         const server = await constructTestPostgresServer({
-            context: { user: testAdminUser() },
+            context: { user: adminUser },
         })
         // Create a client first
         const createRes = await server.executeOperation({
@@ -17,7 +37,7 @@ describe('deleteOauthClient', () => {
                 input: {
                     description: 'To delete',
                     grants: ['client_credentials'],
-                    contactEmail: 'test@example.com',
+                    userID: cmsUser.id,
                 },
             },
         })
@@ -31,6 +51,10 @@ describe('deleteOauthClient', () => {
         expect(deleteRes.errors).toBeUndefined()
         expect(deleteRes.data?.deleteOauthClient.oauthClient.clientId).toBe(
             clientId
+        )
+        expect(deleteRes.data?.deleteOauthClient.oauthClient.user).toBeDefined()
+        expect(deleteRes.data?.deleteOauthClient.oauthClient.user.id).toBe(
+            cmsUser.id
         )
     })
 

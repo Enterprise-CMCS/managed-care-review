@@ -2551,14 +2551,14 @@ type OauthClient {
     clientSecret: String!
     grants: [String!]!
     description: String
-    contactEmail: String
     createdAt: DateTime!
     updatedAt: DateTime!
+    user: CMSUsersUnion!
 }
 
 input CreateOauthClientInput {
     description: String
-    contactEmail: String!
+    userID: String!
     grants: [String!]
 }
 
@@ -2585,7 +2585,6 @@ type DeleteOauthClientPayload {
 input UpdateOauthClientInput {
     clientId: String!
     description: String
-    contactEmail: String
     grants: [String!]
 }
 

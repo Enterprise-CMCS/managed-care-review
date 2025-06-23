@@ -4,6 +4,7 @@ import { configurePostgres } from '../configuration'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 import { createOAuthClient } from '../../postgres/oauth/oauthClientStore'
 import type { APIGatewayProxyEvent } from 'aws-lambda'
+import { v4 as uuidv4 } from 'uuid'
 
 // Mock dependencies
 vi.mock('../configuration', () => ({
@@ -131,11 +132,22 @@ describe('OAuth Token Handler', () => {
     })
 
     it('should return JWT token for valid client credentials', async () => {
+        // Create a test user first
+        const testUser = await mockPrisma.user.create({
+            data: {
+                id: uuidv4(),
+                givenName: 'Test',
+                familyName: 'User',
+                email: 'testuser@example.com',
+                role: 'ADMIN_USER',
+            }
+        })
+        
         // Create a test client
         await createOAuthClient(mockPrisma, {
             grants: ['client_credentials'],
             description: 'Test client',
-            contactEmail: 'test@example.com',
+            userID: testUser.id,
         })
 
         const result = await main({
