@@ -36,7 +36,11 @@ import {
 import { newDeployedS3Client, newLocalS3Client } from '../s3'
 import type { S3ClientT, S3BucketConfigType } from '../s3'
 
-import { trace, SpanStatusCode } from '@opentelemetry/api'
+import {
+    trace,
+    SpanStatusCode,
+    context as otelContext,
+} from '@opentelemetry/api'
 
 let ldClient: LDClient
 let s3Client: S3ClientT
@@ -367,6 +371,7 @@ const gqlHandler: Handler = async (event, context, completion) => {
     console.info('=== gqlHandler DEBUG START ===')
     console.info(`Lambda request ID: ${context.awsRequestId}`)
 
+    // Use the same service name pattern as the existing tracer (no re-initialization needed)
     const stageName = process.env.stage
     const serviceName = 'app-api-' + stageName
     console.info(`Using service name: ${serviceName}`)
@@ -406,6 +411,7 @@ const gqlHandler: Handler = async (event, context, completion) => {
         console.warn(errMsg)
         console.info('Recording exception for large request payload...')
 
+        // Use standard OTEL APIs for request payload monitoring
         const tracer = trace.getTracer(serviceName)
         console.info(`Standard OTEL tracer obtained: ${!!tracer}`)
 
@@ -495,9 +501,31 @@ const gqlHandler: Handler = async (event, context, completion) => {
             console.warn(errMsg)
             console.info('Recording exception for large response payload...')
 
-            // Use standard OTEL APIs for response payload monitoring
+            console.info('Checking OTEL state...')
+            const activeContext = otelContext.active()
+            console.info(`Active context exists: ${!!activeContext}`)
+            console.info(
+                `Global tracer provider: ${!!trace.getTracerProvider()}`
+            )
+
             const tracer = trace.getTracer(serviceName)
             console.info(`Standard OTEL tracer obtained: ${!!tracer}`)
+            console.info(`Tracer constructor name: ${tracer.constructor.name}`)
+
+            // Try getting the active span first
+            const activeSpan = trace.getActiveSpan()
+            console.info(`Active span exists: ${!!activeSpan}`)
+            if (activeSpan) {
+                console.info(
+                    `Active span ID: ${activeSpan.spanContext().spanId}`
+                )
+                console.info(
+                    `Active span trace ID: ${activeSpan.spanContext().traceId}`
+                )
+                console.info(
+                    `Active span is recording: ${activeSpan.isRecording()}`
+                )
+            }
 
             const span = tracer.startSpan('large-response-payload-detected', {
                 attributes: {
@@ -510,9 +538,46 @@ const gqlHandler: Handler = async (event, context, completion) => {
                     'service.name': serviceName,
                 },
             })
-            console.info(
-                `Span created: ${!!span}, span ID: ${span.spanContext().spanId}`
-            )
+            console.info(`Span created: ${!!span}`)
+            console.info(`Span context: ${JSON.stringify(span.spanContext())}`)
+            console.info(`Span is recording: ${span.isRecording()}`)
+            console.info(`Span constructor name: ${span.constructor.name}`)
+
+            // If we have an active span, try creating a child span instead
+            if (activeSpan && activeSpan.isRecording()) {
+                console.info('Creating child span from active span...')
+                const activeSpanContext = otelContext.active()
+                const childSpan = tracer.startSpan(
+                    'large-response-payload-detected',
+                    {
+                        attributes: {
+                            'payload.type': 'response',
+                            'payload.size.bytes': bodySize,
+                            'payload.size.mb': parseFloat(
+                                (bodySize / 1024 / 1024).toFixed(2)
+                            ),
+                            'payload.threshold.exceeded': true,
+                        },
+                    },
+                    activeSpanContext
+                )
+                console.info(`Child span ID: ${childSpan.spanContext().spanId}`)
+                console.info(
+                    `Child span is recording: ${childSpan.isRecording()}`
+                )
+
+                if (childSpan.isRecording()) {
+                    childSpan.recordException(new Error(errMsg))
+                    childSpan.setStatus({
+                        code: SpanStatusCode.ERROR,
+                        message: errMsg,
+                    })
+                    childSpan.end()
+                    console.info('Child span successfully recorded')
+                } else {
+                    console.warn('Child span is not recording')
+                }
+            }
 
             span.recordException(new Error(errMsg))
             span.setStatus({
