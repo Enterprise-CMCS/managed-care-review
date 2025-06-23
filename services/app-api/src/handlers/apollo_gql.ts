@@ -1,7 +1,6 @@
 import type { Context as OTELContext, Span, Tracer } from '@opentelemetry/api'
 import { propagation, ROOT_CONTEXT } from '@opentelemetry/api'
 import { ApolloServer } from 'apollo-server-lambda'
-import { initTracer, recordException } from '../../../uploads/src/lib/otel'
 import type {
     APIGatewayProxyEvent,
     APIGatewayProxyHandler,
@@ -36,6 +35,7 @@ import {
 } from 'apollo-server-core'
 import { newDeployedS3Client, newLocalS3Client } from '../s3'
 import type { S3ClientT, S3BucketConfigType } from '../s3'
+import { setErrorAttributesOnActiveSpan } from '../resolvers/attributeHelper'
 
 let ldClient: LDClient
 let s3Client: S3ClientT
@@ -363,36 +363,132 @@ async function initializeGQLHandler(): Promise<Handler> {
 const handlerPromise = initializeGQLHandler()
 
 const gqlHandler: Handler = async (event, context, completion) => {
-    // Once initialized, future awaits will return immediately
-    const initializedHandler = await handlerPromise
+    console.info('=== gqlHandler DEBUG START ===')
+    console.info(`Lambda request ID: ${context.awsRequestId}`)
 
-    const response = await initializedHandler(event, context, completion)
-    const payloadSize = Buffer.from(event.body).length
-    const serviceName = 'gql-handler'
-    const otelCollectorUrl = process.env.API_APP_OTEL_COLLECTOR_URL
-    if (otelCollectorUrl === undefined || otelCollectorUrl === '') {
-        throw new Error(
-            'Configuration Error: API_APP_OTEL_COLLECTOR_URL is required to run app-api'
+    const stageName = process.env.stage
+    const serviceName = 'app-api-' + stageName
+
+    // Debug incoming request
+    console.info(`Incoming event.body type: ${typeof event.body}`)
+    console.info(`Incoming event.body is null/undefined: ${event.body == null}`)
+    if (event.body) {
+        console.info(
+            `Incoming event.body sample: ${JSON.stringify(event.body).substring(0, 200)}...`
         )
     }
-    initTracer(serviceName, otelCollectorUrl)
-    if (payloadSize > 5.5 * 1024 * 1024) {
+
+    // Calculate incoming payload size
+    let payloadSize = 0
+    if (event.body) {
+        if (typeof event.body === 'string') {
+            payloadSize = Buffer.from(event.body).length
+        } else if (Buffer.isBuffer(event.body)) {
+            payloadSize = event.body.length
+        } else {
+            payloadSize = Buffer.from(JSON.stringify(event.body)).length
+        }
+    }
+    console.info(
+        `Calculated incoming payload size: ${payloadSize} bytes (${(payloadSize / 1024 / 1024).toFixed(2)} MB)`
+    )
+
+    const thresholdBytes = 5.5 * 1024 * 1024
+
+    // Check incoming payload size (before processing)
+    if (payloadSize > thresholdBytes) {
         const errMsg = `Large request payload detected: ${payloadSize} bytes`
         console.warn(errMsg)
-        recordException(errMsg, serviceName, 'requestPayload')
+        console.info('Recording exception for large request payload...')
+
+        // Create a new span for payload monitoring using local OTEL lib
+        const tracer = createTracer(serviceName)
+        const span = tracer.startSpan('payload-size-check')
+        span.setAttributes({
+            'payload.type': 'request',
+            'payload.size.bytes': payloadSize,
+            'payload.size.mb': parseFloat(
+                (payloadSize / 1024 / 1024).toFixed(2)
+            ),
+            'payload.threshold.exceeded': true,
+        })
+        setErrorAttributesOnActiveSpan(errMsg, span)
+        console.info('Exception recorded for request payload')
     }
-    // Log response size metrics without modifying the response
-    if (response && response.body) {
-        const bodySize = Buffer.from(response.body).length
-        console.info(`Response size: ${bodySize} bytes`)
-        if (bodySize > 5.5 * 1024 * 1024) {
-            const errMsg = `Large response detected: ${bodySize} bytes`
-            console.warn(errMsg)
-            recordException(errMsg, serviceName, 'responsePayload')
+
+    const initializedHandler = await handlerPromise
+    const response = await initializedHandler(event, context, completion)
+
+    // Debug response structure
+    console.info(`Response type: ${typeof response}`)
+    console.info(`Response is null/undefined: ${response == null}`)
+    if (response) {
+        console.info(`Response keys: ${Object.keys(response)}`)
+        console.info(`Response.body type: ${typeof response.body}`)
+        console.info(
+            `Response.body is null/undefined: ${response.body == null}`
+        )
+        if (response.body) {
+            console.info(
+                `Response.body sample: ${JSON.stringify(response.body).substring(0, 200)}...`
+            )
         }
     }
 
+    // Log response size metrics without modifying the response
+    if (response && response.body) {
+        console.info('Processing response body size calculation...')
+
+        let bodySize = 0
+
+        if (typeof response.body === 'string') {
+            bodySize = Buffer.from(response.body).length
+        } else if (Buffer.isBuffer(response.body)) {
+            bodySize = response.body.length
+        } else if (response.body !== null && response.body !== undefined) {
+            const jsonString = JSON.stringify(response.body)
+            bodySize = Buffer.from(jsonString).length
+            console.info(`JSON string length: ${jsonString.length} chars`)
+        }
+
+        console.info(
+            `Calculated response size: ${bodySize} bytes (${(bodySize / 1024 / 1024).toFixed(2)} MB)`
+        )
+
+        const thresholdBytes = 5.5 * 1024 * 1024
+        console.info(
+            `Response size threshold: ${thresholdBytes} bytes (${(thresholdBytes / 1024 / 1024).toFixed(2)} MB)`
+        )
+        console.info(`Response exceeds threshold: ${bodySize > thresholdBytes}`)
+
+        if (bodySize > thresholdBytes) {
+            const errMsg = `Large response detected: ${bodySize} bytes`
+            console.warn(errMsg)
+            console.info('Recording exception for large response payload...')
+
+            // Create a new span for response payload monitoring
+            const tracer = createTracer(serviceName)
+            const span = tracer.startSpan('payload-size-check')
+            span.setAttributes({
+                'payload.type': 'response',
+                'payload.size.bytes': bodySize,
+                'payload.size.mb': parseFloat(
+                    (bodySize / 1024 / 1024).toFixed(2)
+                ),
+                'payload.threshold.exceeded': true,
+            })
+            setErrorAttributesOnActiveSpan(errMsg, span)
+            console.info('Exception recorded for response payload')
+        }
+    } else {
+        console.warn('No response body found to measure')
+        console.info(`Response exists: ${!!response}`)
+        if (response) {
+            console.info(`Response.body exists: ${!!response.body}`)
+        }
+    }
+
+    console.info('=== gqlHandler DEBUG END ===')
     return response
 }
-
 module.exports = { gqlHandler }
