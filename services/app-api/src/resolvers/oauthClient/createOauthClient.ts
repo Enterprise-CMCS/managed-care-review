@@ -24,6 +24,13 @@ export function createOauthClientResolver(
             )
         }
 
+        if (!targetUser) {
+            throw new UserInputError(
+                `User with ID ${input.userID} does not exist`,
+                { argumentName: 'userID' }
+            )
+        }
+
         // Ensure the target user is a CMS user (CMSUser or CMSApproverUser)
         if (
             targetUser.role !== 'CMS_USER' &&
