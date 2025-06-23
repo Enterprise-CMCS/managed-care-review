@@ -8,8 +8,6 @@ import {
     CreateOauthClientDocument,
     FetchOauthClientsDocument,
 } from '../../gen/gqlClient'
-import { insertUserToLocalAurora } from '../../authn'
-import { NewPostgresStore } from '../../postgres'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 
 describe('fetchOauthClients', () => {
@@ -17,10 +15,17 @@ describe('fetchOauthClients', () => {
         const adminUser = testAdminUser()
         const cmsUser = testCMSUser()
 
-        // Create a store manually to insert the CMS user
-        const prismaClient = await sharedTestPrismaClient()
-        const store = NewPostgresStore(prismaClient)
-        await insertUserToLocalAurora(store, cmsUser)
+        // Create CMS user in database
+        const client = await sharedTestPrismaClient()
+        await client.user.create({
+            data: {
+                id: cmsUser.id,
+                givenName: cmsUser.givenName,
+                familyName: cmsUser.familyName,
+                email: cmsUser.email,
+                role: cmsUser.role,
+            },
+        })
 
         const server = await constructTestPostgresServer({
             context: { user: adminUser },
@@ -92,10 +97,17 @@ describe('fetchOauthClients', () => {
         const adminUser = testAdminUser()
         const cmsUser = testCMSUser()
 
-        // Create a store manually to insert the CMS user
-        const prismaClient = await sharedTestPrismaClient()
-        const store = NewPostgresStore(prismaClient)
-        await insertUserToLocalAurora(store, cmsUser)
+        // Create CMS user in database
+        const client = await sharedTestPrismaClient()
+        await client.user.create({
+            data: {
+                id: cmsUser.id,
+                givenName: cmsUser.givenName,
+                familyName: cmsUser.familyName,
+                email: cmsUser.email,
+                role: cmsUser.role,
+            },
+        })
 
         const server = await constructTestPostgresServer({
             context: { user: adminUser },

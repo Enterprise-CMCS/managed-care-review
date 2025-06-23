@@ -5,8 +5,6 @@ import {
     testCMSUser,
 } from '../../testHelpers/userHelpers'
 import { CreateOauthClientDocument } from '../../gen/gqlClient'
-import { insertUserToLocalAurora } from '../../authn'
-import { NewPostgresStore } from '../../postgres'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 
 describe('createOauthClient', () => {
@@ -14,10 +12,17 @@ describe('createOauthClient', () => {
         const adminUser = testAdminUser()
         const cmsUser = testCMSUser()
 
-        // Create a store manually to insert the CMS user
-        const prismaClient = await sharedTestPrismaClient()
-        const store = NewPostgresStore(prismaClient)
-        await insertUserToLocalAurora(store, cmsUser)
+        // Create CMS user in database
+        const client = await sharedTestPrismaClient()
+        await client.user.create({
+            data: {
+                id: cmsUser.id,
+                givenName: cmsUser.givenName,
+                familyName: cmsUser.familyName,
+                email: cmsUser.email,
+                role: cmsUser.role,
+            },
+        })
 
         const server = await constructTestPostgresServer({
             context: { user: adminUser },
@@ -46,10 +51,17 @@ describe('createOauthClient', () => {
         const adminUser = testAdminUser()
         const cmsUser = testCMSUser()
 
-        // Create a store manually to insert the CMS user
-        const prismaClient = await sharedTestPrismaClient()
-        const store = NewPostgresStore(prismaClient)
-        await insertUserToLocalAurora(store, cmsUser)
+        // Create CMS user in database
+        const client = await sharedTestPrismaClient()
+        await client.user.create({
+            data: {
+                id: cmsUser.id,
+                givenName: cmsUser.givenName,
+                familyName: cmsUser.familyName,
+                email: cmsUser.email,
+                role: cmsUser.role,
+            },
+        })
 
         const server = await constructTestPostgresServer({
             context: { user: adminUser },
@@ -135,10 +147,17 @@ describe('createOauthClient', () => {
         const adminUser = testAdminUser()
         const cmsUser = testCMSUser()
 
-        // Create a store manually to insert the CMS user
-        const prismaClient = await sharedTestPrismaClient()
-        const store = NewPostgresStore(prismaClient)
-        await insertUserToLocalAurora(store, cmsUser)
+        // Create CMS user in database
+        const client = await sharedTestPrismaClient()
+        await client.user.create({
+            data: {
+                id: cmsUser.id,
+                givenName: cmsUser.givenName,
+                familyName: cmsUser.familyName,
+                email: cmsUser.email,
+                role: cmsUser.role,
+            },
+        })
 
         const server = await constructTestPostgresServer({
             context: { user: adminUser },
@@ -161,10 +180,18 @@ describe('createOauthClient', () => {
         const adminUser = testAdminUser()
         const stateUser = testStateUser()
 
-        // Create a store manually to insert the state user
-        const prismaClient = await sharedTestPrismaClient()
-        const store = NewPostgresStore(prismaClient)
-        await insertUserToLocalAurora(store, stateUser)
+        // Create state user in database
+        const client = await sharedTestPrismaClient()
+        await client.user.create({
+            data: {
+                id: stateUser.id,
+                givenName: stateUser.givenName,
+                familyName: stateUser.familyName,
+                email: stateUser.email,
+                role: stateUser.role,
+                stateCode: stateUser.stateCode,
+            },
+        })
 
         const server = await constructTestPostgresServer({
             context: { user: adminUser },
