@@ -590,7 +590,6 @@ model OAuthClient {
   updatedAt    DateTime  @default(now()) @updatedAt
   lastUsedAt   DateTime?
   description  String?
-  contactEmail String
   userID       String
   user         User      @relation(fields: [userID], references: [id], onDelete: Cascade)
 }
