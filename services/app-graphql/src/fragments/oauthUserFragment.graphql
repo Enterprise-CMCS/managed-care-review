@@ -1,0 +1,44 @@
+fragment oauthUserFragment on User {
+    ... on AdminUser {
+        id
+        email
+        givenName
+        familyName
+        role
+    }
+    ... on CMSUser {
+        id
+        email
+        givenName
+        familyName
+        role
+    }
+    ... on CMSApproverUser {
+        id
+        email
+        givenName
+        familyName
+        role
+    }
+    ... on StateUser {
+        id
+        email
+        givenName
+        familyName
+        role
+    }
+    ... on BusinessOwnerUser {
+        id
+        email
+        givenName
+        familyName
+        role
+    }
+    ... on HelpdeskUser {
+        id
+        email
+        givenName
+        familyName
+        role
+    }
+}
