@@ -68,4 +68,3 @@ services/uploads/src/avLayer/build/*.zip
 tests/cypress/fixtures/stores/featureFlagStore.json
 
 packages/*/build
-.claude/

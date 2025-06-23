@@ -1,6 +1,6 @@
 import type { MutationResolvers } from '../../gen/gqlServer'
 import type { Store } from '../../postgres'
-import { createForbiddenError, createUserInputError } from '../errorUtils'
+import { ForbiddenError, UserInputError } from 'apollo-server-core'
 import { GraphQLError } from 'graphql'
 
 export function createOauthClientResolver(
@@ -9,7 +9,7 @@ export function createOauthClientResolver(
     return async (_parent, { input }, context) => {
         const { user } = context
         if (!user || user.role !== 'ADMIN_USER') {
-            throw createForbiddenError(
+            throw new ForbiddenError(
                 'Only ADMIN users can create OAuth clients'
             )
         }
@@ -17,9 +17,9 @@ export function createOauthClientResolver(
         // Validate that the provided userID exists and is a valid user
         const targetUser = await store.findUser(input.userID)
         if (targetUser instanceof Error) {
-            throw createUserInputError(
+            throw new UserInputError(
                 `User with ID ${input.userID} does not exist`,
-                'userID'
+                { argumentName: 'userID' }
             )
         }
 

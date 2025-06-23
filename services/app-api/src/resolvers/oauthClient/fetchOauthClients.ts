@@ -1,4 +1,4 @@
-import { createForbiddenError } from '../errorUtils'
+import { ForbiddenError } from 'apollo-server-core'
 import { logError, logSuccess } from '../../logger'
 import type { QueryResolvers } from '../../gen/gqlServer'
 import type { Store } from '../../postgres'
@@ -20,7 +20,7 @@ export function fetchOauthClientsResolver(
             const msg = 'User not authorized to fetch OAuth clients'
             logError('fetchOauthClients', msg)
             setErrorAttributesOnActiveSpan(msg, span)
-            throw createForbiddenError(msg)
+            throw new ForbiddenError(msg)
         }
         let oauthClients = []
         // If input is omitted or empty, fetch all
