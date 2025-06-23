@@ -11,3 +11,6 @@
 ## QA guidance
 
 <!---These are developer instructions on how to test or validate the work -->
+
+## PR Reminders
+[ ] Updated the API Changelog (if this PR changes the API schema)
