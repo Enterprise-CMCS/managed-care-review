@@ -193,6 +193,7 @@ export function configureResolvers(
         RateRevision: rateRevisionResolver(store),
         RateFormData: rateFormDataResolver(),
         ContractQuestion: questionResolver(store),
+        RateQuestion: questionResolver(store),
         Contract: contractResolver(store, applicationEndpoint),
         UnlockedContract: unlockedContractResolver(store, applicationEndpoint),
         ContractRevision: contractRevisionResolver(store),

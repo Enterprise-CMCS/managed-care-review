@@ -961,7 +961,7 @@ input UpdateContractInput {
 }
 
 type UpdateContractPayload {
-    pkg: HealthPlanPackage!
+    contract: Contract!
 }
 
 type CreateAPIKeyPayload {
@@ -1322,6 +1322,7 @@ type RateQuestion {
     addedBy: CMSUsersUnion!
     documents: [Document!]!
     division: Division!
+    round: Int!
     #    noteText: String
     #    dueDate: Date
     #    rateIDs: [String!]
