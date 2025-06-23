@@ -8,16 +8,25 @@ import {
     CreateOauthClientDocument,
     FetchOauthClientsDocument,
 } from '../../gen/gqlClient'
+import { insertUserToLocalAurora } from '../../authn'
+import { NewPostgresStore } from '../../postgres'
+import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 
 describe('fetchOauthClients', () => {
     it('fetches all OAuth clients as ADMIN', async () => {
         const adminUser = testAdminUser()
         const cmsUser = testCMSUser()
+
+        // Create a store manually to insert the CMS user
+        const prismaClient = await sharedTestPrismaClient()
+        const store = NewPostgresStore(prismaClient)
+        await insertUserToLocalAurora(store, cmsUser)
+
         const server = await constructTestPostgresServer({
             context: { user: adminUser },
         })
         // Create two clients
-        await server.executeOperation({
+        const client1Res = await server.executeOperation({
             query: CreateOauthClientDocument,
             variables: {
                 input: {
@@ -27,7 +36,11 @@ describe('fetchOauthClients', () => {
                 },
             },
         })
-        await server.executeOperation({
+        expect(client1Res.errors).toBeUndefined()
+        const client1Id =
+            client1Res.data?.createOauthClient.oauthClient.clientId
+
+        const client2Res = await server.executeOperation({
             query: CreateOauthClientDocument,
             variables: {
                 input: {
@@ -37,13 +50,18 @@ describe('fetchOauthClients', () => {
                 },
             },
         })
+        expect(client2Res.errors).toBeUndefined()
+        const client2Id =
+            client2Res.data?.createOauthClient.oauthClient.clientId
+
         const res = await server.executeOperation({
             query: FetchOauthClientsDocument,
+            variables: { input: { clientIds: [client1Id, client2Id] } },
         })
         expect(res.errors).toBeUndefined()
         const oauthClients = res.data?.fetchOauthClients.oauthClients
         expect(Array.isArray(oauthClients)).toBe(true)
-        expect(oauthClients.length).toBeGreaterThanOrEqual(2)
+        expect(oauthClients).toHaveLength(2)
         // Verify user objects are included
         oauthClients.forEach((client: unknown) => {
             const typedClient = client as {
@@ -73,6 +91,12 @@ describe('fetchOauthClients', () => {
     it('fetches only specified clientIds', async () => {
         const adminUser = testAdminUser()
         const cmsUser = testCMSUser()
+
+        // Create a store manually to insert the CMS user
+        const prismaClient = await sharedTestPrismaClient()
+        const store = NewPostgresStore(prismaClient)
+        await insertUserToLocalAurora(store, cmsUser)
+
         const server = await constructTestPostgresServer({
             context: { user: adminUser },
         })

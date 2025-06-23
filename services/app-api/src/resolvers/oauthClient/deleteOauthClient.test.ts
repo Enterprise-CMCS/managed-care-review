@@ -1,13 +1,27 @@
 import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
-import { testAdminUser, testStateUser } from '../../testHelpers/userHelpers'
+import {
+    testAdminUser,
+    testStateUser,
+    testCMSUser,
+} from '../../testHelpers/userHelpers'
 import {
     CreateOauthClientDocument,
     DeleteOauthClientDocument,
 } from '../../gen/gqlClient'
+import { insertUserToLocalAurora } from '../../authn'
+import { NewPostgresStore } from '../../postgres'
+import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 
 describe('deleteOauthClient', () => {
     it('deletes an OAuth client as ADMIN', async () => {
         const adminUser = testAdminUser()
+        const cmsUser = testCMSUser()
+
+        // Create a store manually to insert the CMS user
+        const prismaClient = await sharedTestPrismaClient()
+        const store = NewPostgresStore(prismaClient)
+        await insertUserToLocalAurora(store, cmsUser)
+
         const server = await constructTestPostgresServer({
             context: { user: adminUser },
         })
@@ -18,7 +32,7 @@ describe('deleteOauthClient', () => {
                 input: {
                     description: 'To delete',
                     grants: ['client_credentials'],
-                    userID: adminUser.id,
+                    userID: cmsUser.id,
                 },
             },
         })
@@ -34,7 +48,9 @@ describe('deleteOauthClient', () => {
             clientId
         )
         expect(deleteRes.data?.deleteOauthClient.oauthClient.user).toBeDefined()
-        expect(deleteRes.data?.deleteOauthClient.oauthClient.user.id).toBe(adminUser.id)
+        expect(deleteRes.data?.deleteOauthClient.oauthClient.user.id).toBe(
+            cmsUser.id
+        )
     })
 
     it('errors if not ADMIN', async () => {
