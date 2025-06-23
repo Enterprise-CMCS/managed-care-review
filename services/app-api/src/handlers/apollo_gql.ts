@@ -36,11 +36,7 @@ import {
 import { newDeployedS3Client, newLocalS3Client } from '../s3'
 import type { S3ClientT, S3BucketConfigType } from '../s3'
 
-import {
-    trace,
-    SpanStatusCode,
-    context as otelContext,
-} from '@opentelemetry/api'
+import { SpanStatusCode } from '@opentelemetry/api'
 
 let ldClient: LDClient
 let s3Client: S3ClientT
@@ -368,234 +364,73 @@ async function initializeGQLHandler(): Promise<Handler> {
 const handlerPromise = initializeGQLHandler()
 
 const gqlHandler: Handler = async (event, context, completion) => {
-    console.info('=== gqlHandler DEBUG START ===')
-    console.info(`Lambda request ID: ${context.awsRequestId}`)
+    const initializedHandler = await handlerPromise
+    const response = await initializedHandler(event, context, completion)
 
-    // Use the same service name pattern as the existing tracer (no re-initialization needed)
+    // Use the same service name pattern as the existing tracer
     const stageName = process.env.stage
     const serviceName = 'app-api-' + stageName
-    console.info(`Using service name: ${serviceName}`)
-
-    // Debug incoming request
-    console.info(`Incoming event.body type: ${typeof event.body}`)
-    console.info(`Incoming event.body is null/undefined: ${event.body == null}`)
-    if (event.body) {
-        console.info(
-            `Incoming event.body sample: ${JSON.stringify(event.body).substring(0, 200)}...`
-        )
-    }
-
-    // Calculate incoming payload size
-    let payloadSize = 0
-    if (event.body) {
-        if (typeof event.body === 'string') {
-            payloadSize = Buffer.from(event.body).length
-        } else if (Buffer.isBuffer(event.body)) {
-            payloadSize = event.body.length
-        } else {
-            payloadSize = Buffer.from(JSON.stringify(event.body)).length
-        }
-    }
-    console.info(
-        `Calculated incoming payload size: ${payloadSize} bytes (${(payloadSize / 1024 / 1024).toFixed(2)} MB)`
-    )
-
     const thresholdBytes = 5.5 * 1024 * 1024
-    console.info(
-        `Size threshold: ${thresholdBytes} bytes (${(thresholdBytes / 1024 / 1024).toFixed(2)} MB)`
-    )
 
-    // Check incoming payload size (before processing)
-    if (payloadSize > thresholdBytes) {
-        const errMsg = `Large request payload detected: ${payloadSize} bytes`
-        console.warn(errMsg)
-        console.info('Recording exception for large request payload...')
+    // Check incoming payload size
+    if (event.body) {
+        const payloadSize =
+            typeof event.body === 'string'
+                ? Buffer.from(event.body).length
+                : Buffer.from(JSON.stringify(event.body)).length
 
-        // Use standard OTEL APIs for request payload monitoring
-        const tracer = trace.getTracer(serviceName)
-        console.info(`Standard OTEL tracer obtained: ${!!tracer}`)
+        if (payloadSize > thresholdBytes) {
+            const errMsg = `Large request payload detected: ${payloadSize} bytes`
+            console.warn(errMsg)
 
-        const span = tracer.startSpan('large-request-payload-detected', {
-            attributes: {
-                'payload.type': 'request',
-                'payload.size.bytes': payloadSize,
-                'payload.size.mb': parseFloat(
-                    (payloadSize / 1024 / 1024).toFixed(2)
-                ),
-                'payload.threshold.exceeded': true,
-                'service.name': serviceName,
-            },
-        })
-        console.info(
-            `Span created: ${!!span}, span ID: ${span.spanContext().spanId}`
-        )
-
-        span.recordException(new Error(errMsg))
-        span.setStatus({
-            code: SpanStatusCode.ERROR,
-            message: errMsg,
-        })
-        span.end()
-        console.info('Standard OTEL span ended for request payload')
-    }
-
-    // Once initialized, future awaits will return immediately
-    const initializedHandler = await handlerPromise
-    console.info('Handler initialized successfully')
-
-    const response = await initializedHandler(event, context, completion)
-    console.info('Handler execution completed')
-
-    // Debug response structure
-    console.info(`Response type: ${typeof response}`)
-    console.info(`Response is null/undefined: ${response == null}`)
-    if (response) {
-        console.info(`Response keys: ${Object.keys(response)}`)
-        console.info(`Response.body type: ${typeof response.body}`)
-        console.info(
-            `Response.body is null/undefined: ${response.body == null}`
-        )
-        if (response.body) {
-            console.info(
-                `Response.body sample: ${JSON.stringify(response.body).substring(0, 200)}...`
+            const tracer = createTracer(serviceName)
+            const ctx = propagation.extract(ROOT_CONTEXT, event.headers)
+            const span = tracer?.startSpan(
+                'large-request-payload-detected',
+                {},
+                ctx
             )
+
+            if (span?.isRecording()) {
+                span.recordException(new Error(errMsg))
+                span.setStatus({ code: SpanStatusCode.ERROR, message: errMsg })
+                span.end()
+                console.info('Request payload span recorded')
+            }
         }
     }
 
-    // Log response size metrics without modifying the response
-    if (response && response.body) {
-        console.info('Processing response body size calculation...')
+    // Check response payload size
+    if (response?.body) {
+        const bodySize =
+            typeof response.body === 'string'
+                ? Buffer.from(response.body).length
+                : Buffer.from(JSON.stringify(response.body)).length
 
-        let bodySize = 0
-        let sizeCalculationMethod = ''
-
-        if (typeof response.body === 'string') {
-            bodySize = Buffer.from(response.body).length
-            sizeCalculationMethod = 'string -> Buffer'
-        } else if (Buffer.isBuffer(response.body)) {
-            bodySize = response.body.length
-            sizeCalculationMethod = 'Buffer.length'
-        } else if (response.body !== null && response.body !== undefined) {
-            // For objects, measure the JSON string size
-            const jsonString = JSON.stringify(response.body)
-            bodySize = Buffer.from(jsonString).length
-            sizeCalculationMethod = 'object -> JSON.stringify -> Buffer'
-            console.info(`JSON string length: ${jsonString.length} chars`)
-        }
-
-        console.info(
-            `Response size calculation method: ${sizeCalculationMethod}`
-        )
-        console.info(
-            `Calculated response size: ${bodySize} bytes (${(bodySize / 1024 / 1024).toFixed(2)} MB)`
-        )
-
-        const thresholdBytes = 5.5 * 1024 * 1024
-        console.info(
-            `Response size threshold: ${thresholdBytes} bytes (${(thresholdBytes / 1024 / 1024).toFixed(2)} MB)`
-        )
-        console.info(`Response exceeds threshold: ${bodySize > thresholdBytes}`)
+        console.info(`Response size: ${bodySize} bytes`)
 
         if (bodySize > thresholdBytes) {
             const errMsg = `Large response detected: ${bodySize} bytes`
             console.warn(errMsg)
-            console.info('Recording exception for large response payload...')
 
-            console.info('Checking OTEL state...')
-            const activeContext = otelContext.active()
-            console.info(`Active context exists: ${!!activeContext}`)
-            console.info(
-                `Global tracer provider: ${!!trace.getTracerProvider()}`
+            // Use the same pattern as the resolvers
+            const tracer = createTracer(serviceName)
+            const ctx = propagation.extract(ROOT_CONTEXT, event.headers)
+            const span = tracer?.startSpan(
+                'large-response-payload-detected',
+                {},
+                ctx
             )
 
-            const tracer = trace.getTracer(serviceName)
-            console.info(`Standard OTEL tracer obtained: ${!!tracer}`)
-            console.info(`Tracer constructor name: ${tracer.constructor.name}`)
-
-            // Try getting the active span first
-            const activeSpan = trace.getActiveSpan()
-            console.info(`Active span exists: ${!!activeSpan}`)
-            if (activeSpan) {
-                console.info(
-                    `Active span ID: ${activeSpan.spanContext().spanId}`
-                )
-                console.info(
-                    `Active span trace ID: ${activeSpan.spanContext().traceId}`
-                )
-                console.info(
-                    `Active span is recording: ${activeSpan.isRecording()}`
-                )
+            if (span?.isRecording()) {
+                span.recordException(new Error(errMsg))
+                span.setStatus({ code: SpanStatusCode.ERROR, message: errMsg })
+                span.end()
+                console.info('Response payload span recorded')
             }
-
-            const span = tracer.startSpan('large-response-payload-detected', {
-                attributes: {
-                    'payload.type': 'response',
-                    'payload.size.bytes': bodySize,
-                    'payload.size.mb': parseFloat(
-                        (bodySize / 1024 / 1024).toFixed(2)
-                    ),
-                    'payload.threshold.exceeded': true,
-                    'service.name': serviceName,
-                },
-            })
-            console.info(`Span created: ${!!span}`)
-            console.info(`Span context: ${JSON.stringify(span.spanContext())}`)
-            console.info(`Span is recording: ${span.isRecording()}`)
-            console.info(`Span constructor name: ${span.constructor.name}`)
-
-            // If we have an active span, try creating a child span instead
-            if (activeSpan && activeSpan.isRecording()) {
-                console.info('Creating child span from active span...')
-                const activeSpanContext = otelContext.active()
-                const childSpan = tracer.startSpan(
-                    'large-response-payload-detected',
-                    {
-                        attributes: {
-                            'payload.type': 'response',
-                            'payload.size.bytes': bodySize,
-                            'payload.size.mb': parseFloat(
-                                (bodySize / 1024 / 1024).toFixed(2)
-                            ),
-                            'payload.threshold.exceeded': true,
-                        },
-                    },
-                    activeSpanContext
-                )
-                console.info(`Child span ID: ${childSpan.spanContext().spanId}`)
-                console.info(
-                    `Child span is recording: ${childSpan.isRecording()}`
-                )
-
-                if (childSpan.isRecording()) {
-                    childSpan.recordException(new Error(errMsg))
-                    childSpan.setStatus({
-                        code: SpanStatusCode.ERROR,
-                        message: errMsg,
-                    })
-                    childSpan.end()
-                    console.info('Child span successfully recorded')
-                } else {
-                    console.warn('Child span is not recording')
-                }
-            }
-
-            span.recordException(new Error(errMsg))
-            span.setStatus({
-                code: SpanStatusCode.ERROR,
-                message: errMsg,
-            })
-            span.end()
-            console.info('Standard OTEL span ended for response payload')
-        }
-    } else {
-        console.warn('No response body found to measure')
-        console.info(`Response exists: ${!!response}`)
-        if (response) {
-            console.info(`Response.body exists: ${!!response.body}`)
         }
     }
 
-    console.info('=== gqlHandler DEBUG END ===')
     return response
 }
 module.exports = { gqlHandler }
