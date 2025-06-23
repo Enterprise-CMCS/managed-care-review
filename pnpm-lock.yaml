@@ -271,8 +271,8 @@ importers:
         specifier: ^3.830.0
         version: 3.830.0
       '@aws-sdk/client-s3':
-        specifier: ^3.830.0
-        version: 3.830.0
+        specifier: ^3.832.0
+        version: 3.832.0
       '@types/papaparse':
         specifier: ^5.3.15
         version: 5.3.15
@@ -317,8 +317,8 @@ importers:
         specifier: ^3.830.0
         version: 3.830.0
       '@aws-sdk/client-s3':
-        specifier: ^3.830.0
-        version: 3.830.0
+        specifier: ^3.832.0
+        version: 3.832.0
       '@aws-sdk/client-secrets-manager':
         specifier: ^3.830.0
         version: 3.830.0
@@ -329,11 +329,11 @@ importers:
         specifier: ^3.830.0
         version: 3.830.0
       '@aws-sdk/lib-storage':
-        specifier: ^3.830.0
-        version: 3.830.0(@aws-sdk/client-s3@3.830.0)
+        specifier: ^3.832.0
+        version: 3.832.0(@aws-sdk/client-s3@3.832.0)
       '@aws-sdk/s3-request-presigner':
-        specifier: ^3.830.0
-        version: 3.830.0
+        specifier: ^3.832.0
+        version: 3.832.0
       '@launchdarkly/node-server-sdk':
         specifier: 9.9.1
         version: 9.9.1
@@ -732,11 +732,11 @@ importers:
         specifier: ^3.830.0
         version: 3.830.0
       '@aws-sdk/client-s3':
-        specifier: ^3.830.0
-        version: 3.830.0
+        specifier: ^3.832.0
+        version: 3.832.0
       '@aws-sdk/s3-request-presigner':
-        specifier: ^3.830.0
-        version: 3.830.0
+        specifier: ^3.832.0
+        version: 3.832.0
       '@chromatic-com/storybook':
         specifier: ^3.2.6
         version: 3.2.6(react@18.3.1)(storybook@8.6.7(prettier@3.5.3))
@@ -985,8 +985,8 @@ importers:
         specifier: ^3.830.0
         version: 3.830.0
       '@aws-sdk/client-s3':
-        specifier: ^3.830.0
-        version: 3.830.0
+        specifier: ^3.832.0
+        version: 3.832.0
       '@aws-sdk/client-secrets-manager':
         specifier: ^3.830.0
         version: 3.830.0
@@ -1082,11 +1082,11 @@ importers:
   services/uploads:
     dependencies:
       '@aws-sdk/client-lambda':
-        specifier: ^3.830.0
-        version: 3.830.0
+        specifier: ^3.833.0
+        version: 3.833.0
       '@aws-sdk/client-s3':
-        specifier: ^3.830.0
-        version: 3.830.0
+        specifier: ^3.832.0
+        version: 3.832.0
       '@aws-sdk/util-utf8-node':
         specifier: ^3.259.0
         version: 3.259.0
@@ -1467,8 +1467,8 @@ packages:
     resolution: {integrity: sha512-lSfKdMBXaSQOh48hleRJEKuVO1wQBOgPIonRkCPU5bpagZckWyeD8p8XSgdF6p22lZZUPuasS6+PEJ6knSYNDQ==}
     engines: {node: '>=18.0.0'}
 
-  '@aws-sdk/client-lambda@3.830.0':
-    resolution: {integrity: sha512-rdZPFteEN4Tw8vNVKh5rwPhf2zJz3cazx2gf1NSB8+GtleefY6bsAqyOQueSMSkE6fGZw7kmaPJBvWDxzMX4nQ==}
+  '@aws-sdk/client-lambda@3.833.0':
+    resolution: {integrity: sha512-m56p1MB+/t+QFfZZzQoqlVcITn8PRYa7yzvuO2LbR9YsQ97uZyVCu970RAPSkW6/SjyWTUvXtQw3x/1KITcrvw==}
     engines: {node: '>=18.0.0'}
 
   '@aws-sdk/client-lex-runtime-service@3.186.3':
@@ -1499,8 +1499,8 @@ packages:
     resolution: {integrity: sha512-Ia4FEog9RrI0IoDRbOJO6djwhVAAaEZutxEKrWbjrVz4bgib28L+V+yAio2SUneeirj8pNYXwBKPfoYOUqGHhA==}
     engines: {node: '>=10.0.0'}
 
-  '@aws-sdk/client-s3@3.830.0':
-    resolution: {integrity: sha512-Cti+zj1lqvQIScXFQv8/t1xo3pvcvk/ObmGIbyLzfgcYpKMHaIWhzhi6aN+z4dYEv1EwrukC9tNoqScyShc5tw==}
+  '@aws-sdk/client-s3@3.832.0':
+    resolution: {integrity: sha512-S+md1zCe71SEuaRDuLHq4mzhYYkVxR1ENa8NwrgInfYoC4xo8/pESoR6i0ZZpcLs0Jw4EyVInWYs4GgDHW70qQ==}
     engines: {node: '>=18.0.0'}
 
   '@aws-sdk/client-secrets-manager@3.830.0':
@@ -1733,11 +1733,11 @@ packages:
     resolution: {integrity: sha512-qm2iDJmCrxlQE2dsFG+TujPe7jw4DF+4RTrsFMhk/e3lOl3MAzQ6Fc2kXtgeUcVrZVFTL8fQvXE1ByYyI6WbCw==}
     engines: {node: '>= 10.0.0'}
 
-  '@aws-sdk/lib-storage@3.830.0':
-    resolution: {integrity: sha512-jHNM1HhOmwMB5sguttXozL1HiDPf0yovu2o2L3ijMvexSUlrtqE2b2JjevMfVq7xZ5RYhBnQ+T8Q4MUclI8GnQ==}
+  '@aws-sdk/lib-storage@3.832.0':
+    resolution: {integrity: sha512-NM+q0WD8TCreo+tvKy0AZytHQQC19zXVG8iapDhafLNs1W72zAQ659pTfVzsC00Zvwtsp0LI/b2FWTjkjTAAdA==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
-      '@aws-sdk/client-s3': ^3.830.0
+      '@aws-sdk/client-s3': ^3.832.0
 
   '@aws-sdk/md5-js@3.6.1':
     resolution: {integrity: sha512-lzCqkZF1sbzGFDyq1dI+lR3AmlE33rbC/JhZ5fzw3hJZvfZ6Beq3Su7YwDo65IWEu0zOKYaNywTeOloXP/CkxQ==}
@@ -1946,8 +1946,8 @@ packages:
     resolution: {integrity: sha512-t8og+lRCIIy5nlId0bScNpCkif8sc0LhmtaKsbm0ZPm3sCa/WhCbSZibjbZ28FNjVCV+p0D9RYZx0VDDbtWyjw==}
     engines: {node: '>=18.0.0'}
 
-  '@aws-sdk/s3-request-presigner@3.830.0':
-    resolution: {integrity: sha512-IEiSJfuf/hcf9WvCmvV35ci1yGcV3IYKS0e6l5xPRLYDNBrAWao9j8mrp0N4WCD3Nr+3xZRY5JglEFAH6CN3OQ==}
+  '@aws-sdk/s3-request-presigner@3.832.0':
+    resolution: {integrity: sha512-zXuwfaAYu99LUF7/6iBr3UlKCMaMImBwfmLXJQlvtE3ebrERXQuISME9Vjd2oG+hJ6XcX6RJqkeIvZBytMzvRw==}
     engines: {node: '>=18.0.0'}
 
   '@aws-sdk/service-error-classification@3.186.0':
@@ -14602,7 +14602,7 @@ snapshots:
     transitivePeerDependencies:
       - aws-crt
 
-  '@aws-sdk/client-lambda@3.830.0':
+  '@aws-sdk/client-lambda@3.833.0':
     dependencies:
       '@aws-crypto/sha256-browser': 5.2.0
       '@aws-crypto/sha256-js': 5.2.0
@@ -14928,7 +14928,7 @@ snapshots:
     transitivePeerDependencies:
       - react-native
 
-  '@aws-sdk/client-s3@3.830.0':
+  '@aws-sdk/client-s3@3.832.0':
     dependencies:
       '@aws-crypto/sha1-browser': 5.2.0
       '@aws-crypto/sha256-browser': 5.2.0
@@ -14985,7 +14985,9 @@ snapshots:
       '@smithy/util-stream': 4.2.2
       '@smithy/util-utf8': 4.0.0
       '@smithy/util-waiter': 4.0.5
+      '@types/uuid': 9.0.8
       tslib: 2.8.1
+      uuid: 9.0.1
     transitivePeerDependencies:
       - aws-crt
 
@@ -15808,9 +15810,9 @@ snapshots:
     dependencies:
       tslib: 1.14.1
 
-  '@aws-sdk/lib-storage@3.830.0(@aws-sdk/client-s3@3.830.0)':
+  '@aws-sdk/lib-storage@3.832.0(@aws-sdk/client-s3@3.832.0)':
     dependencies:
-      '@aws-sdk/client-s3': 3.830.0
+      '@aws-sdk/client-s3': 3.832.0
       '@smithy/abort-controller': 4.0.4
       '@smithy/middleware-endpoint': 4.1.11
       '@smithy/smithy-client': 4.4.3
@@ -16265,7 +16267,7 @@ snapshots:
       '@smithy/util-middleware': 4.0.4
       tslib: 2.8.1
 
-  '@aws-sdk/s3-request-presigner@3.830.0':
+  '@aws-sdk/s3-request-presigner@3.832.0':
     dependencies:
       '@aws-sdk/signature-v4-multi-region': 3.826.0
       '@aws-sdk/types': 3.821.0
@@ -16429,7 +16431,7 @@ snapshots:
   '@aws-sdk/util-buffer-from@3.208.0':
     dependencies:
       '@aws-sdk/is-array-buffer': 3.201.0
-      tslib: 2.8.1
+      tslib: 2.6.3
 
   '@aws-sdk/util-buffer-from@3.6.1':
     dependencies:
@@ -19171,7 +19173,7 @@ snapshots:
       '@graphql-tools/optimize': 2.0.0(graphql@16.9.0)
       '@graphql-tools/webpack-loader-runtime': 7.0.0(graphql@16.9.0)
       graphql: 16.9.0
-      tslib: 2.8.1
+      tslib: 2.6.3
 
   '@graphql-tools/wrap@10.0.1(graphql@16.9.0)':
     dependencies:
@@ -29336,7 +29338,7 @@ snapshots:
 
   serverless-offline@13.9.0(serverless@4.2.3):
     dependencies:
-      '@aws-sdk/client-lambda': 3.830.0
+      '@aws-sdk/client-lambda': 3.833.0
       '@hapi/boom': 10.0.1
       '@hapi/h2o2': 10.0.4
       '@hapi/hapi': 21.3.12
@@ -29408,7 +29410,7 @@ snapshots:
 
   serverless-s3-local@0.8.4(serverless@4.2.3):
     dependencies:
-      '@aws-sdk/client-s3': 3.830.0
+      '@aws-sdk/client-s3': 3.832.0
       fs-extra: 11.3.0
       rxjs: 6.6.7
       rxjs-compat: 6.6.7
