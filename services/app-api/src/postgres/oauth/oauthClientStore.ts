@@ -3,7 +3,6 @@ import type { Prisma } from '@prisma/client'
 import { v4 as uuidv4 } from 'uuid'
 import { randomBytes } from 'crypto'
 
-type OAuthClientType = Prisma.OAuthClientGetPayload<Record<string, never>>
 type OAuthClientWithUserType = Prisma.OAuthClientGetPayload<{
     include: { user: true }
 }>
@@ -16,7 +15,7 @@ export async function createOAuthClient(
         description?: string
         userID: string
     }
-): Promise<OAuthClientType | Error> {
+): Promise<OAuthClientWithUserType | Error> {
     try {
         const clientId = `oauth-client-${uuidv4()}`
         const clientSecret = randomBytes(64).toString('base64url')
@@ -31,6 +30,9 @@ export async function createOAuthClient(
                 grants,
                 description: data.description,
                 userID: data.userID,
+            },
+            include: {
+                user: true,
             },
         })
     } catch (error) {
@@ -104,11 +106,14 @@ export async function updateOAuthClient(
         grants?: string[]
         description?: string
     }
-): Promise<OAuthClientType | Error> {
+): Promise<OAuthClientWithUserType | Error> {
     try {
         const result = await client.oAuthClient.update({
             where: { clientId },
             data,
+            include: {
+                user: true,
+            },
         })
         return result
     } catch (error) {
@@ -120,7 +125,7 @@ export async function updateOAuthClient(
 export async function deleteOAuthClient(
     client: ExtendedPrismaClient,
     clientId: string
-): Promise<OAuthClientType | Error> {
+): Promise<OAuthClientWithUserType | Error> {
     try {
         // Check if client exists first
         const existingClient = await client.oAuthClient.findUnique({
@@ -132,6 +137,9 @@ export async function deleteOAuthClient(
 
         return await client.oAuthClient.delete({
             where: { clientId },
+            include: {
+                user: true,
+            },
         })
     } catch (error) {
         return error as Error

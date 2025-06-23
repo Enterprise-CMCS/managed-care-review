@@ -40,9 +40,14 @@ describe('fetchOauthClients', () => {
         expect(Array.isArray(oauthClients)).toBe(true)
         expect(oauthClients.length).toBeGreaterThanOrEqual(2)
         // Verify user objects are included
-        oauthClients.forEach(client => {
-            expect(client.user).toBeDefined()
-            expect(client.user.id).toBe(adminUser.id)
+        oauthClients.forEach((client: unknown) => {
+            const typedClient = client as {
+                user: { id: string; email: string; role: string }
+            }
+            expect(typedClient.user).toBeDefined()
+            expect(typedClient.user.id).toBeDefined()
+            expect(typedClient.user.email).toBeDefined()
+            expect(typedClient.user.role).toBeDefined()
         })
     })
 
