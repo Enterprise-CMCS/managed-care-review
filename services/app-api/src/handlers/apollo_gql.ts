@@ -1,7 +1,7 @@
 import type { Context as OTELContext, Span, Tracer } from '@opentelemetry/api'
 import { propagation, ROOT_CONTEXT } from '@opentelemetry/api'
 import { ApolloServer } from 'apollo-server-lambda'
-import { initTracer, recordException } from '@mc-review/otel'
+import { initTracer, recordException } from '../../../uploads/src/lib/otel'
 import type {
     APIGatewayProxyEvent,
     APIGatewayProxyHandler,
