@@ -58,6 +58,7 @@ import { RateWithdraw } from '../RateWithdraw/RateWithdraw'
 import { UndoRateWithdraw } from '../UndoRateWithdraw/UndoRateWithdraw'
 import { SubmissionWithdraw } from '../SubmissionWithdraw/SubmissionWithdraw'
 import { UndoSubmissionWithdraw } from '../UndoSubmissionWithdraw/UndoSubmissionWithdraw'
+import { CreateOauthClient } from '../Settings/Oauth/CreateOauthClient'
 
 function componentForAuthMode(
     authMode: AuthModeType
@@ -342,6 +343,10 @@ const CMSUserRoutes = ({
                     <Route
                         path={RoutesRecord.EDIT_STATE_ASSIGNMENTS}
                         element={<EditStateAssign />}
+                    />
+                    <Route
+                        path={RoutesRecord.CREATE_OAUTH_CLIENT}
+                        element={<CreateOauthClient />}
                     />
                 </Route>
                 <Route
