@@ -59,7 +59,7 @@ describe('third_party_API_authorizer', () => {
     it('allows access with valid OAuth token', async () => {
         const jwt = newJWTLib(oauthConfig)
         const clientId = 'test-client'
-        const token = jwt.createOAuthJWT(clientId, 'client_credentials')
+        const token = jwt.createOAuthJWT(clientId, 'client_credentials', 'user-id', ['read'])
 
         const result = await main(
             {
