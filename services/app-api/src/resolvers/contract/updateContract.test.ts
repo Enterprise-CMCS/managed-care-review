@@ -1,11 +1,10 @@
 import { UpdateContractDocument } from '../../gen/gqlClient'
-import {
-    constructTestPostgresServer,
-    createAndSubmitTestHealthPlanPackage,
-    createTestHealthPlanPackage,
-} from '../../testHelpers/gqlHelpers'
+import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
 import { iterableCmsUsersMockData } from '../../testHelpers/userHelpers'
-
+import {
+    createAndSubmitTestContractWithRate,
+    createTestContract,
+} from '../../testHelpers/gqlContractHelpers'
 describe('updateContract', () => {
     describe.each(iterableCmsUsersMockData)(
         '$userRole tests',
@@ -14,9 +13,9 @@ describe('updateContract', () => {
             it('updates the contract', async () => {
                 const stateServer = await constructTestPostgresServer()
 
-                // First, create a new submitted submission
-                const stateSubmission =
-                    await createAndSubmitTestHealthPlanPackage(stateServer)
+                // First, create a new submitted contract
+                const contract =
+                    await createAndSubmitTestContractWithRate(stateServer)
 
                 const cmsServer = await constructTestPostgresServer({
                     context: {
@@ -29,14 +28,14 @@ describe('updateContract', () => {
                     query: UpdateContractDocument,
                     variables: {
                         input: {
-                            id: stateSubmission.id,
+                            id: contract.id,
                             mccrsID: '1234',
                         },
                     },
                 })
 
                 expect(updateResult.errors).toBeUndefined()
-                const updatedSub = updateResult?.data?.updateContract.pkg
+                const updatedSub = updateResult?.data?.updateContract.contract
                 expect(updatedSub.mccrsID).toBe('1234')
 
                 // Remove MCCRSID number
@@ -45,14 +44,14 @@ describe('updateContract', () => {
                         query: UpdateContractDocument,
                         variables: {
                             input: {
-                                id: stateSubmission.id,
+                                id: contract.id,
                             },
                         },
                     })
 
                 expect(updateResult.errors).toBeUndefined()
                 const updatedSubWithNoMCCRSID =
-                    updateResultWithNoMCCRSID?.data?.updateContract.pkg
+                    updateResultWithNoMCCRSID?.data?.updateContract.contract
 
                 expect(updatedSubWithNoMCCRSID.mccrsID).toBeNull()
             })
@@ -61,8 +60,7 @@ describe('updateContract', () => {
                 const stateServer = await constructTestPostgresServer()
 
                 // First, create a draft submission
-                const draftSubmission =
-                    await createTestHealthPlanPackage(stateServer)
+                const draftContract = await createTestContract(stateServer)
                 const cmsServer = await constructTestPostgresServer({
                     context: {
                         user: cmsUser,
@@ -74,7 +72,7 @@ describe('updateContract', () => {
                     query: UpdateContractDocument,
                     variables: {
                         input: {
-                            id: draftSubmission.id,
+                            id: draftContract.id,
                             mccrsID: '1234',
                         },
                     },
@@ -88,22 +86,22 @@ describe('updateContract', () => {
                     'BAD_USER_INPUT'
                 )
                 expect(updateResult.errors[0].message).toBe(
-                    `Can not update a contract has not been submitted or unlocked. Fails for contract with ID: ${draftSubmission.id}`
+                    `Can not update a contract has not been submitted or unlocked. Fails for contract with ID: ${draftContract.id}`
                 )
             })
 
             it('errors if a State user calls it', async () => {
                 const stateServer = await constructTestPostgresServer()
 
-                // First, create a new submitted submission
-                const stateSubmission =
-                    await createAndSubmitTestHealthPlanPackage(stateServer)
+                // First, create a new submitted contract
+                const contract =
+                    await createAndSubmitTestContractWithRate(stateServer)
                 // Update
                 const updateResult = await stateServer.executeOperation({
                     query: UpdateContractDocument,
                     variables: {
                         input: {
-                            id: stateSubmission.id,
+                            id: contract.id,
                             mccrsID: '1234',
                         },
                     },

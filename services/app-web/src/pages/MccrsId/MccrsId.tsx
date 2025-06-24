@@ -16,16 +16,14 @@ import { Loading } from '../../components'
 import { useAuth } from '../../contexts/AuthContext'
 import { Breadcrumbs } from '../../components/Breadcrumbs/Breadcrumbs'
 import { RoutesRecord } from '@mc-review/constants'
-import { ApolloError } from '@apollo/client'
-import { handleApolloError } from '@mc-review/helpers'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import { Error404 } from '../Errors/Error404Page'
+import { ErrorForbiddenPage } from '../Errors/ErrorForbiddenPage'
 import {
-    HealthPlanPackage,
     useUpdateContractMutation,
+    useFetchContractQuery,
+    Contract,
 } from '../../gen/gqlClient'
-import { useFetchHealthPlanPackageWithQuestionsWrapper } from '@mc-review/helpers'
-import { packageName } from '@mc-review/hpp'
 import styles from './MccrsId.module.scss'
 
 export interface MccrsIdFormValues {
@@ -48,68 +46,75 @@ export const MccrsId = (): React.ReactElement => {
 
     // page context
     const { updateHeading } = usePage()
-    const [pkgName, setPkgName] = useState<string | undefined>(undefined)
-
-    useEffect(() => {
-        updateHeading({ customHeading: pkgName })
-    }, [pkgName, updateHeading])
 
     const [showPageErrorMessage, setShowPageErrorMessage] = useState<
         boolean | string
     >(false) // string is a custom error message, defaults to generic of true
-    const [updateFormData] = useUpdateContractMutation()
-    const { result: fetchResult } =
-        useFetchHealthPlanPackageWithQuestionsWrapper(id)
-    if (fetchResult.status === 'ERROR') {
-        const err = fetchResult.error
-        console.error('Error from API fetch', fetchResult.error)
-        if (err instanceof ApolloError) {
-            handleApolloError(err, true)
+    const [updateContract] = useUpdateContractMutation()
+    const {
+        data: fetchContractData,
+        loading: fetchContractLoading,
+        error: fetchContractError,
+    } = useFetchContractQuery({
+        variables: {
+            input: {
+                contractID: id,
+            },
+        },
+        fetchPolicy: 'cache-and-network',
+    })
 
-            if (err.graphQLErrors[0]?.extensions?.code === 'NOT_FOUND') {
-                return <Error404 />
-            }
-        }
+    const contract = fetchContractData?.fetchContract.contract
+    const contractName =
+        contract && contract?.packageSubmissions.length > 0
+            ? contract.packageSubmissions[0].contractRevision.contractName
+            : ''
 
-        recordJSException(err)
-        return <GenericErrorPage /> // api failure or protobuf decode failure
-    }
+    useEffect(() => {
+        updateHeading({
+            customHeading: contractName,
+        })
+    }, [contractName, updateHeading])
 
-    if (fetchResult.status === 'LOADING') {
+    // Handle loading and error states for fetching data while using cached data
+    if (!fetchContractData && fetchContractLoading) {
         return (
             <GridContainer>
                 <Loading />
             </GridContainer>
         )
-    }
-
-    const { data, revisionsLookup } = fetchResult
-    const pkg = data.fetchHealthPlanPackage.pkg
-
-    // Display generic error page if getting logged in user returns undefined.
-    if (!loggedInUser) {
+    } else if (fetchContractError && !fetchContractData) {
+        //error handling for a state user that tries to access contracts for a different state
+        if (
+            fetchContractError?.graphQLErrors[0]?.extensions?.code ===
+            'FORBIDDEN'
+        ) {
+            return (
+                <ErrorForbiddenPage
+                    errorMsg={fetchContractError.graphQLErrors[0].message}
+                />
+            )
+        } else if (
+            fetchContractError?.graphQLErrors[0]?.extensions?.code ===
+            'NOT_FOUND'
+        ) {
+            return <Error404 />
+        } else {
+            return <GenericErrorPage />
+        }
+    } else if (!contract || !loggedInUser) {
         return <GenericErrorPage />
     }
-    const edge = pkg.revisions.find((rEdge) => rEdge.node.submitInfo)
-    if (!edge) {
-        const errMsg = `No currently submitted revision for this package: ${pkg.id}, programming error. `
+
+    const submitInfo = contract.packageSubmissions[0].submitInfo
+    if (!submitInfo) {
+        const errMsg = `No currently submitted revision for this package: ${contract.id}, programming error. `
         recordJSException(errMsg)
         return <GenericErrorPage />
     }
-    const currentRevision = edge.node
-    const packageData = revisionsLookup[currentRevision.id].formData
-    const healthPkgName = packageName(
-        packageData.stateCode,
-        packageData.stateNumber,
-        packageData.programIDs,
-        pkg.state.programs
-    )
-    if (pkgName !== healthPkgName) {
-        setPkgName(healthPkgName)
-    }
 
     const mccrsIDInitialValues: MccrsIdFormValues = {
-        mccrsId: pkg.mccrsID ? Number(pkg.mccrsID) : undefined,
+        mccrsId: contract.mccrsID ? Number(contract.mccrsID) : undefined,
     }
 
     const showFieldErrors = (error?: FormError) =>
@@ -118,7 +123,7 @@ export const MccrsId = (): React.ReactElement => {
     const handleFormSubmit = async (values: MccrsIdFormValues) => {
         setShowPageErrorMessage(false)
         try {
-            const updateResult = await updateFormData({
+            const updateResult = await updateContract({
                 variables: {
                     input: {
                         mccrsID:
@@ -129,8 +134,8 @@ export const MccrsId = (): React.ReactElement => {
                 },
             })
 
-            const updatedSubmission: HealthPlanPackage | undefined =
-                updateResult?.data?.updateContract.pkg
+            const updatedSubmission: Contract | undefined =
+                updateResult?.data?.updateContract.contract
 
             if (!updatedSubmission) {
                 setShowPageErrorMessage(true)
@@ -170,7 +175,7 @@ export const MccrsId = (): React.ReactElement => {
                                 },
                                 {
                                     link: `/submissions/${id}`,
-                                    text: pkgName || '',
+                                    text: contractName || '',
                                 },
                                 {
                                     text: 'MC-CRS record number',

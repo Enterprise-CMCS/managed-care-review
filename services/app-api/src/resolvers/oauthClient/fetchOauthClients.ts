@@ -8,6 +8,7 @@ import {
     setSuccessAttributesOnActiveSpan,
 } from '../attributeHelper'
 import { GraphQLError } from 'graphql'
+import { mapPrismaUserToGraphQLUser } from './userMapping'
 
 export function fetchOauthClientsResolver(
     store: Store
@@ -66,7 +67,10 @@ export function fetchOauthClientsResolver(
         logSuccess('fetchOauthClients')
         setSuccessAttributesOnActiveSpan(span)
         return {
-            oauthClients,
+            oauthClients: oauthClients.map((client) => ({
+                ...client,
+                user: mapPrismaUserToGraphQLUser(client.user),
+            })),
         }
     }
 }

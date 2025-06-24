@@ -2,6 +2,7 @@ import { GraphQLDate, GraphQLDateTime } from 'graphql-scalars'
 import type { Emailer } from '../emailer'
 import type { Resolvers } from '../gen/gqlServer'
 import type { Store } from '../postgres'
+import { toDomainUser } from '../domain-models'
 import {
     createHealthPlanPackageResolver,
     fetchHealthPlanPackageResolver,
@@ -193,12 +194,16 @@ export function configureResolvers(
         RateRevision: rateRevisionResolver(store),
         RateFormData: rateFormDataResolver(),
         ContractQuestion: questionResolver(store),
+        RateQuestion: questionResolver(store),
         Contract: contractResolver(store, applicationEndpoint),
         UnlockedContract: unlockedContractResolver(store, applicationEndpoint),
         ContractRevision: contractRevisionResolver(store),
         GenericDocument: genericDocumentResolver(s3Client),
         Document: questionResponseDocumentResolver(s3Client),
         DocumentZipPackage: documentZipPackageResolver(s3Client),
+        OauthClient: {
+            user: (parent) => toDomainUser(parent.user),
+        },
     }
 
     return resolvers

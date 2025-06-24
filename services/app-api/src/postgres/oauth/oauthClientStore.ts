@@ -3,7 +3,9 @@ import type { Prisma } from '@prisma/client'
 import { v4 as uuidv4 } from 'uuid'
 import { randomBytes } from 'crypto'
 
-type OAuthClientType = Prisma.OAuthClientGetPayload<Record<string, never>>
+type OAuthClientWithUserType = Prisma.OAuthClientGetPayload<{
+    include: { user: true }
+}>
 
 // Create a new OAuth client
 export async function createOAuthClient(
@@ -11,9 +13,9 @@ export async function createOAuthClient(
     data: {
         grants?: string[]
         description?: string
-        contactEmail: string
+        userID: string
     }
-): Promise<OAuthClientType | Error> {
+): Promise<OAuthClientWithUserType | Error> {
     try {
         const clientId = `oauth-client-${uuidv4()}`
         const clientSecret = randomBytes(64).toString('base64url')
@@ -27,7 +29,10 @@ export async function createOAuthClient(
                 clientSecret,
                 grants,
                 description: data.description,
-                contactEmail: data.contactEmail,
+                userID: data.userID,
+            },
+            include: {
+                user: true,
             },
         })
     } catch (error) {
@@ -39,10 +44,11 @@ export async function createOAuthClient(
 export async function getOAuthClientById(
     client: ExtendedPrismaClient,
     id: string
-): Promise<OAuthClientType | null | Error> {
+): Promise<OAuthClientWithUserType | null | Error> {
     try {
         return await client.oAuthClient.findUnique({
             where: { id },
+            include: { user: true },
         })
     } catch (error) {
         return error as Error
@@ -53,10 +59,11 @@ export async function getOAuthClientById(
 export async function getOAuthClientByClientId(
     client: ExtendedPrismaClient,
     clientId: string
-): Promise<OAuthClientType | null | Error> {
+): Promise<OAuthClientWithUserType | null | Error> {
     try {
         return await client.oAuthClient.findUnique({
             where: { clientId },
+            include: { user: true },
         })
     } catch (error) {
         return error as Error
@@ -98,13 +105,15 @@ export async function updateOAuthClient(
         clientSecret?: string
         grants?: string[]
         description?: string
-        contactEmail?: string
     }
-): Promise<OAuthClientType | Error> {
+): Promise<OAuthClientWithUserType | Error> {
     try {
         const result = await client.oAuthClient.update({
             where: { clientId },
             data,
+            include: {
+                user: true,
+            },
         })
         return result
     } catch (error) {
@@ -116,7 +125,7 @@ export async function updateOAuthClient(
 export async function deleteOAuthClient(
     client: ExtendedPrismaClient,
     clientId: string
-): Promise<OAuthClientType | Error> {
+): Promise<OAuthClientWithUserType | Error> {
     try {
         // Check if client exists first
         const existingClient = await client.oAuthClient.findUnique({
@@ -128,6 +137,9 @@ export async function deleteOAuthClient(
 
         return await client.oAuthClient.delete({
             where: { clientId },
+            include: {
+                user: true,
+            },
         })
     } catch (error) {
         return error as Error
@@ -137,9 +149,26 @@ export async function deleteOAuthClient(
 // List all OAuth clients
 export async function listOAuthClients(
     client: ExtendedPrismaClient
-): Promise<OAuthClientType[] | Error> {
+): Promise<OAuthClientWithUserType[] | Error> {
     try {
-        return await client.oAuthClient.findMany()
+        return await client.oAuthClient.findMany({
+            include: { user: true },
+        })
+    } catch (error) {
+        return error as Error
+    }
+}
+
+// Get OAuth clients by user ID
+export async function getOAuthClientsByUserId(
+    client: ExtendedPrismaClient,
+    userID: string
+): Promise<OAuthClientWithUserType[] | Error> {
+    try {
+        return await client.oAuthClient.findMany({
+            where: { userID },
+            include: { user: true },
+        })
     } catch (error) {
         return error as Error
     }

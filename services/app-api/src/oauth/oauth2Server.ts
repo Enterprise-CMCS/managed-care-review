@@ -13,7 +13,7 @@ import { verifyClientCredentials } from '../postgres/oauth/oauthClientStore'
 import { newJWTLib } from '../jwt'
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
 
-const JWT_EXPIRATION_SECONDS = 3600 // 1 hour
+const JWT_EXPIRATION_SECONDS = 60 * 60 * 24 * 90 // 90 days
 
 export class CustomOAuth2Server {
     private oauth2Server: InstanceType<typeof OAuth2Server>
@@ -42,7 +42,30 @@ export class CustomOAuth2Server {
         if (!isValid) {
             throw new InvalidClientError('Invalid client credentials')
         }
-        return { id: clientId, grants: ['client_credentials'] }
+        // Return a complete client object with all required properties
+        return {
+            id: clientId,
+            clientId: clientId,
+            clientSecret: clientSecret,
+            grants: ['client_credentials'],
+            redirectUris: [], // Not used for client credentials flow
+            accessTokenLifetime: JWT_EXPIRATION_SECONDS,
+            refreshTokenLifetime: 0, // Not used for client credentials flow
+        }
+    }
+
+    /**
+     * Required method for client credentials flow.
+     * Since we don't have a user in client credentials flow, we return a system user.
+     * @param client - The OAuth client
+     * @returns A system user object
+     */
+    async getUserFromClient(client: Client): Promise<User> {
+        // For client credentials flow, we return a system user
+        return {
+            id: 'system',
+            username: 'system',
+        }
     }
 
     /**
@@ -73,7 +96,16 @@ export class CustomOAuth2Server {
     async saveToken(token: Token, client: Client, user: User): Promise<Token> {
         // For client credentials flow, we don't need to save tokens
         // as we're using JWTs
-        return token
+        return {
+            ...token,
+            accessToken: this.generateJWT(client.id),
+            accessTokenExpiresAt: new Date(
+                Date.now() + JWT_EXPIRATION_SECONDS * 1000
+            ),
+            client,
+            user,
+            scope: [], // Empty array since we don't use scopes
+        }
     }
 
     /**
@@ -97,57 +129,32 @@ export class CustomOAuth2Server {
     // Main method to handle token requests
     async token(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
         let body: Record<string, unknown> = {}
-        try {
-            body = event.body ? JSON.parse(event.body) : {}
-        } catch {
-            return {
-                statusCode: 400,
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    error: 'invalid_request',
-                    error_description: 'Invalid JSON payload',
-                }),
-            }
-        }
-
-        const request = new OAuthRequest({
-            body,
-            headers: event.headers,
-            method: event.httpMethod,
-            query: event.queryStringParameters || {},
-        })
-        const response = new OAuthResponse()
+        const contentType =
+            event.headers['Content-Type'] || event.headers['content-type']
 
         try {
-            const token = await this.oauth2Server.token(request, response)
-
-            // Generate JWT for client credentials flow
-            if (token.grantType === 'client_credentials') {
-                const jwt = this.generateJWT(token.client.id)
-                return {
-                    statusCode: 200,
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        access_token: jwt,
-                        token_type: 'Bearer',
-                        expires_in: 3600,
-                    }),
+            if (contentType?.includes('application/json')) {
+                try {
+                    body = event.body ? JSON.parse(event.body) : {}
+                } catch {
+                    return {
+                        statusCode: 400,
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            error: 'invalid_request',
+                            error_description: 'Invalid JSON payload',
+                        }),
+                    }
                 }
-            }
-
-            return {
-                statusCode: 200,
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(token),
-            }
-        } catch (error) {
-            if (error instanceof InvalidRequestError) {
+            } else if (
+                contentType?.includes('application/x-www-form-urlencoded')
+            ) {
+                // Parse form-urlencoded data
+                const params = new URLSearchParams(event.body || '')
+                body = Object.fromEntries(params.entries())
+            } else {
                 return {
                     statusCode: 400,
                     headers: {
@@ -155,42 +162,106 @@ export class CustomOAuth2Server {
                     },
                     body: JSON.stringify({
                         error: 'invalid_request',
-                        error_description: error.message,
+                        error_description:
+                            'Content-Type must be application/json or application/x-www-form-urlencoded',
                     }),
                 }
             }
-            if (error instanceof InvalidClientError) {
+
+            // Transform the body to match OAuth2 expected format
+            const transformedBody = {
+                grant_type: body.grant_type || body.grantType,
+                client_id: body.client_id || body.clientId,
+                client_secret: body.client_secret || body.clientSecret,
+            }
+
+            // Create a new request with the transformed body
+            const request = new OAuthRequest({
+                body: transformedBody,
+                headers: {
+                    ...event.headers,
+                    'content-type': 'application/x-www-form-urlencoded',
+                },
+                method: event.httpMethod,
+                query: event.queryStringParameters || {},
+            })
+            const response = new OAuthResponse()
+
+            try {
+                const token = await this.oauth2Server.token(request, response)
                 return {
-                    statusCode: 401,
+                    statusCode: 200,
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        error: 'invalid_client',
-                        error_description: error.message,
+                        access_token: token.accessToken,
+                        token_type: 'Bearer',
+                        expires_in: JWT_EXPIRATION_SECONDS,
                     }),
                 }
-            }
-            if (error instanceof UnauthorizedClientError) {
+            } catch (error) {
+                if (error instanceof InvalidRequestError) {
+                    return {
+                        statusCode: 400,
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            error: 'invalid_request',
+                            error_description: error.message,
+                        }),
+                    }
+                }
+                if (error instanceof InvalidClientError) {
+                    return {
+                        statusCode: 401,
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            error: 'invalid_client',
+                            error_description: error.message,
+                        }),
+                    }
+                }
+                if (error instanceof UnauthorizedClientError) {
+                    return {
+                        statusCode: 401,
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            error: 'unauthorized_client',
+                            error_description: error.message,
+                        }),
+                    }
+                }
                 return {
-                    statusCode: 401,
+                    statusCode: 500,
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        error: 'unauthorized_client',
-                        error_description: error.message,
+                        error: 'server_error',
+                        error_description:
+                            error.message || 'Internal server error',
+                        error_type: error.name,
                     }),
                 }
             }
+        } catch (error) {
             return {
-                statusCode: 500,
+                statusCode: 400,
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    error: 'server_error',
-                    error_description: 'Internal server error',
+                    error: 'invalid_request',
+                    error_description:
+                        error instanceof Error
+                            ? error.message
+                            : 'Invalid request body',
                 }),
             }
         }
