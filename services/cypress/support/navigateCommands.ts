@@ -26,8 +26,7 @@ Cypress.Commands.add(
             if(waitForLoad) {
                 cy.wait('@updateHealthPlanFormDataMutation', { timeout: 50_000})
              }
-            cy.findByTestId('state-dashboard-page').should('exist')
-            cy.findByRole('heading',{name:'Submissions'}).should('exist')
+             cy.get('[data-testid="saveAsDraftSuccessBanner"]').should('exist')
         } else if (buttonKey === 'CONTINUE_FROM_START_NEW') {
             if (waitForLoad) {
                 // cy.wait('@createHealthPlanPackageMutation', { timeout: 50_000 })
@@ -60,8 +59,7 @@ Cypress.Commands.add(
             if(waitForLoad) {
                 cy.wait('@updateDraftContractRatesMutation', { timeout: 50_000})
             }
-            cy.findByTestId('state-dashboard-page').should('exist')
-            cy.findByRole('heading',{name:'Submissions'}).should('exist')
+            cy.get('[data-testid="saveAsDraftSuccessBanner"]').should('exist')
         } else if (buttonKey === 'CONTINUE_FROM_START_NEW') {
             if (waitForLoad) {
                 // cy.wait('@createContractMutation', { timeout: 50_000 })
@@ -95,8 +93,7 @@ Cypress.Commands.add(
             if(waitForLoad) {
                 cy.wait('@updateContractDraftRevisionMutation', { timeout: 50_000})
             }
-            cy.findByTestId('state-dashboard-page').should('exist')
-            cy.findByRole('heading',{name:'Submissions'}).should('exist')
+            cy.get('[data-testid="saveAsDraftSuccessBanner"]').should('exist')
         } else if (buttonKey === 'CONTINUE_FROM_START_NEW') {
             if (waitForLoad) {
                 // cy.wait('@createContractMutation', { timeout: 50_000 })
