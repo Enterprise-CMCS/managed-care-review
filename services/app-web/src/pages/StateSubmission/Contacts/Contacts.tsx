@@ -172,6 +172,10 @@ const Contacts = ({
             lastSeenUpdatedAt: draftSubmission.draftRevision.updatedAt,
         }
 
+        if (options.type === 'SAVE_AS_DRAFT' && draftSaved) {
+            setDraftSaved(false)
+        }
+
         const updatedSubmission = await updateDraft(updatedContractInput)
         if (updatedSubmission instanceof Error) {
             setSubmitting(false)

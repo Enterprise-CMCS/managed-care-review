@@ -398,6 +398,9 @@ export const ContractDetails = ({
             redirectPath?: RouteT
         }
     ) => {
+        if (options.type === 'SAVE_AS_DRAFT' && draftSaved) {
+            setDraftSaved(false)
+        }
         const updatedDraftSubmissionFormData: ContractDraftRevisionFormDataInput =
             {
                 contractExecutionStatus: values.contractExecutionStatus,

@@ -24,9 +24,9 @@ describe('rate details', () => {
             cy.navigateFormByDirectLink(
                 `/submissions/${draftSubmissionId}/edit/rate-details`
             )
+            cy.navigateContractRatesForm('SAVE_DRAFT')
+            cy.get('[data-testid="saveAsDraftSuccessBanner"]').should('exist')
         })
-        cy.navigateContractRatesForm('SAVE_DRAFT')
-        cy.get('[data-testid="saveAsDraftSuccessBanner"]').should('exist')
     })
 
     it('can add and remove multiple rate certifications and navigate to and from rate details page', () => {

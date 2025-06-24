@@ -135,6 +135,9 @@ export const SubmissionType = ({
             redirectPath?: RouteT
         }
     ) => {
+        if (options.type === 'SAVE_AS_DRAFT' && draftSaved) {
+            setDraftSaved(false)
+        }
         if (isNewSubmission) {
             if (!values.populationCovered) {
                 console.info(

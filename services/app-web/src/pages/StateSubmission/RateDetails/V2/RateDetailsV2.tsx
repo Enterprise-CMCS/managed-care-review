@@ -241,6 +241,9 @@ const RateDetails = ({
         }
     ) => {
         setShowAPIErrorBanner(false)
+        if (options.type === 'SAVE_AS_DRAFT' && draftSaved) {
+            setDraftSaved(false)
+        }
         if (options.type === 'CONTINUE') {
             const fileErrorsNeedAttention = rateForms.some((rateForm) =>
                 isLoadingOrHasFileErrors(
