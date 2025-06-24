@@ -47,7 +47,15 @@ export const main: APIGatewayTokenAuthorizerHandler = async (
                 clientId: oauthResult.clientId,
             })
 
-            return generatePolicy(oauthResult.clientId, event)
+            return generatePolicy(
+                oauthResult.clientId, 
+                event,
+                {
+                    userId: oauthResult.userId,
+                    grants: oauthResult.grants.join(','),
+                    isOAuthClient: 'true'
+                }
+            )
         }
 
         // If not an OAuth token, try standard token
@@ -77,7 +85,8 @@ export const main: APIGatewayTokenAuthorizerHandler = async (
 
 const generatePolicy = function (
     userId: string | undefined,
-    event: APIGatewayTokenAuthorizerEvent
+    event: APIGatewayTokenAuthorizerEvent,
+    context?: Record<string, string>
 ): APIGatewayAuthorizerResult {
     // If the JWT is verified as valid, send an Allow policy
     // this will allow the request to go through
@@ -96,6 +105,7 @@ const generatePolicy = function (
     const response: APIGatewayAuthorizerResult = {
         principalId: userId || '',
         policyDocument,
+        ...(context && { context }),
     }
 
     return response

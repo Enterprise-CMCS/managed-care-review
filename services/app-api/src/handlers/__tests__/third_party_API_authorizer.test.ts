@@ -73,6 +73,11 @@ describe('third_party_API_authorizer', () => {
         expect(result).toBeDefined()
         expect(result!.policyDocument.Statement[0].Effect).toBe('Allow')
         expect(result!.principalId).toBe(clientId)
+        expect(result!.context).toEqual({
+            userId: 'user-id',
+            grants: 'read',
+            isOAuthClient: 'true'
+        })
     })
 
     it('denies access with invalid token', async () => {
