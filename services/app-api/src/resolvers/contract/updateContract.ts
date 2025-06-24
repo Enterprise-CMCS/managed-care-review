@@ -1,8 +1,5 @@
 import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
-import {
-    convertContractWithRatesToUnlockedHPP,
-    hasCMSPermissions,
-} from '../../domain-models'
+import { hasCMSPermissions } from '../../domain-models'
 import type { MutationResolvers } from '../../gen/gqlServer'
 import { logError } from '../../logger'
 import type { Store } from '../../postgres'
@@ -92,22 +89,8 @@ export function updateContract(
             })
         }
 
-        const convertedPkg =
-            convertContractWithRatesToUnlockedHPP(updatedContract)
-
-        if (convertedPkg instanceof Error) {
-            const errMessage = `Issue converting contract. Message: ${convertedPkg.message}`
-            logError('updateContract', errMessage)
-            setErrorAttributesOnActiveSpan(errMessage, span)
-            throw new GraphQLError(errMessage, {
-                extensions: {
-                    code: 'INTERNAL_SERVER_ERROR',
-                    cause: 'PROTO_DECODE_ERROR',
-                },
-            })
-        }
         return {
-            pkg: convertedPkg,
+            contract: updatedContract,
         }
     }
 }

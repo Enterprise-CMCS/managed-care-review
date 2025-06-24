@@ -55,6 +55,7 @@ import { LinkYourRates } from '../../../LinkYourRates/LinkYourRates'
 import { LinkedRateSummary } from '../LinkedRateSummary'
 import { usePage } from '../../../../contexts/PageContext'
 import { InfoTag } from '../../../../components/InfoTag/InfoTag'
+import { useFocusOnRender } from '../../../../hooks/useFocusOnRender'
 
 export type FormikRateForm = {
     id?: string // no id if its a new rate
@@ -111,9 +112,11 @@ const RateDetails = ({
     const [showAPIErrorBanner, setShowAPIErrorBanner] = useState<
         boolean | string
     >(false) // string is a custom error message, defaults to generic message when true
+    const [draftSaved, setDraftSaved] = useState(false)
+    useFocusOnRender(draftSaved, '[data-testid="saveAsDraftSuccessBanner"]')
 
     // Form validation
-    const [shouldValidate, setShouldValidate] = React.useState(showValidations)
+    const [shouldValidate, setShouldValidate] = useState(showValidations)
     const rateDetailsFormSchema = RateDetailsFormSchema(
         {
             'rate-edit-unlock': useEditUnlockRate,
@@ -125,7 +128,7 @@ const RateDetails = ({
         useErrorSummary()
 
     // Multi-rates state management
-    const [focusNewRate, setFocusNewRate] = React.useState(false)
+    const [focusNewRate, setFocusNewRate] = useState(false)
     const newRateNameRef = React.useRef<HTMLElement | null>(null)
     const [newRateButtonRef, setNewRateButtonFocus] = useFocus() // This ref.current is always the same element
     const { id } = useRouteParams()
@@ -234,10 +237,13 @@ const RateDetails = ({
         setSubmitting: (isSubmitting: boolean) => void, // formik setSubmitting
         options: {
             type: 'SAVE_AS_DRAFT' | 'CANCEL' | 'CONTINUE'
-            redirectPath: RouteT
+            redirectPath?: RouteT
         }
     ) => {
         setShowAPIErrorBanner(false)
+        if (options.type === 'SAVE_AS_DRAFT' && draftSaved) {
+            setDraftSaved(false)
+        }
         if (options.type === 'CONTINUE') {
             const fileErrorsNeedAttention = rateForms.some((rateForm) =>
                 isLoadingOrHasFileErrors(
@@ -267,9 +273,14 @@ const RateDetails = ({
                     },
                     fetchPolicy: 'network-only',
                 })
-                navigate(
-                    generatePath(RoutesRecord[options.redirectPath], { id: id })
-                )
+
+                if (options.redirectPath) {
+                    navigate(
+                        generatePath(RoutesRecord[options.redirectPath], {
+                            id: id,
+                        })
+                    )
+                }
             } catch (err) {
                 recordJSException(
                     `RateDetails: Apollo error reported. Error message: Failed to create form data ${err}`
@@ -301,9 +312,12 @@ const RateDetails = ({
                     },
                     fetchPolicy: 'network-only',
                 })
-                navigate(
-                    generatePath(RoutesRecord[options.redirectPath], { id })
-                )
+                if (options.type !== 'SAVE_AS_DRAFT' && options.redirectPath) {
+                    navigate(
+                        generatePath(RoutesRecord[options.redirectPath], { id })
+                    )
+                }
+                setDraftSaved(true)
             } catch (err) {
                 recordJSException(
                     `RateDetails: Apollo error reported. Error message: Failed to create form data ${err}`
@@ -314,7 +328,11 @@ const RateDetails = ({
             }
             // At this point know there was a back or cancel page action - we are just redirecting
         } else {
-            navigate(generatePath(RoutesRecord[options.redirectPath], { id }))
+            if (options.redirectPath) {
+                navigate(
+                    generatePath(RoutesRecord[options.redirectPath], { id })
+                )
+            }
         }
     }
 
@@ -437,6 +455,7 @@ const RateDetails = ({
                                 ?.unlockInfo
                         }
                         showPageErrorMessage={showAPIErrorBanner}
+                        draftSaved={draftSaved}
                     />
                 )}
             </FormNotificationContainer>
@@ -466,8 +485,6 @@ const RateDetails = ({
                             <UswdsForm
                                 className={styles.formContainer}
                                 id="RateDetailsForm"
-                                aria-label="Rate Details Form"
-                                aria-describedby="form-guidance"
                                 onSubmit={(e) => {
                                     setShouldValidate(true)
                                     setFocusErrorSummaryHeading(true)
@@ -685,8 +702,6 @@ const RateDetails = ({
                                                       setSubmitting,
                                                       {
                                                           type: 'SAVE_AS_DRAFT',
-                                                          redirectPath:
-                                                              'DASHBOARD_SUBMISSIONS',
                                                       }
                                                   )
                                               }

@@ -80,11 +80,15 @@ async function checkMimeTypes(
             }
 
             const declaredContentType = lookup(path.extname(originalFilename))
+            if (declaredContentType === false) {
+                const err = new Error(`Could not lookup ${originalFilename}`)
+                return err
+            }
+
             const isValid = await validateFileContent(
                 scanFilePath,
                 declaredContentType
             )
-
             if (isValid instanceof Error) {
                 return isValid
             }

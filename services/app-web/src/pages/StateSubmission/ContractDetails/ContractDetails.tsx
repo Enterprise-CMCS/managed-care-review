@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import dayjs from 'dayjs'
 import {
     Form as UswdsForm,
@@ -63,7 +63,7 @@ import {
     isContractAmendment,
     isContractWithProvisions,
 } from '@mc-review/common-code'
-import { RoutesRecord } from '@mc-review/constants'
+import { RoutesRecord, RouteT } from '@mc-review/constants'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '@mc-review/common-code'
 import {
@@ -86,6 +86,7 @@ import {
     UpdateContractDraftRevisionInput,
     ContractDraftRevisionFormDataInput,
 } from '../../../gen/gqlClient'
+import { useFocusOnRender } from '../../../hooks/useFocusOnRender'
 
 function formattedDatePlusOneDay(initialValue: string): string {
     const dayjsValue = dayjs(initialValue)
@@ -151,7 +152,9 @@ export type FormError =
 export const ContractDetails = ({
     showValidations = false,
 }: ContractFormPageProps): React.ReactElement => {
-    const [shouldValidate, setShouldValidate] = React.useState(showValidations)
+    const [shouldValidate, setShouldValidate] = useState(showValidations)
+    const [draftSaved, setDraftSaved] = useState(false)
+    useFocusOnRender(draftSaved, '[data-testid="saveAsDraftSuccessBanner"]')
     const navigate = useNavigate()
     const ldClient = useLDClient()
     const { setFocusErrorSummaryHeading, errorSummaryHeadingRef } =
@@ -190,7 +193,7 @@ export const ContractDetails = ({
                 docType === 'supporting' &&
                 !draftSubmission.draftRevision.formData.supportingDocuments)
         )
-            undefined
+            return undefined
         const docs =
             docType === 'contract'
                 ? draftSubmission.draftRevision.formData.contractDocuments
@@ -391,9 +394,13 @@ export const ContractDetails = ({
         values: ContractDetailsFormValues,
         setSubmitting: (isSubmitting: boolean) => void, // formik setSubmitting
         options: {
-            redirectPath: string
+            type: 'SAVE_AS_DRAFT' | 'BACK' | 'CONTINUE'
+            redirectPath?: RouteT
         }
     ) => {
+        if (options.type === 'SAVE_AS_DRAFT' && draftSaved) {
+            setDraftSaved(false)
+        }
         const updatedDraftSubmissionFormData: ContractDraftRevisionFormDataInput =
             {
                 contractExecutionStatus: values.contractExecutionStatus,
@@ -520,8 +527,18 @@ export const ContractDetails = ({
         if (updatedSubmission instanceof Error) {
             setSubmitting(false)
             console.info('Error updating draft submission: ', updatedSubmission)
-        } else if (updatedSubmission) {
-            navigate(options.redirectPath)
+        } else if (options.type === 'SAVE_AS_DRAFT' && updatedSubmission) {
+            setDraftSaved(true)
+            setSubmitting(false)
+        } else {
+            //Can assume back or continue was clicked at this point
+            if (options.redirectPath) {
+                navigate(
+                    generatePath(RoutesRecord[options.redirectPath], {
+                        id: id,
+                    })
+                )
+            }
         }
     }
 
@@ -541,6 +558,7 @@ export const ContractDetails = ({
                     loggedInUser={loggedInUser}
                     unlockedInfo={draftSubmission.draftRevision.unlockInfo}
                     showPageErrorMessage={showPageErrorMessage ?? false}
+                    draftSaved={draftSaved}
                 />
             </FormNotificationContainer>
             <FormContainer id="ContactDetails">
@@ -548,11 +566,12 @@ export const ContractDetails = ({
                     initialValues={contractDetailsInitialValues}
                     onSubmit={(values, { setSubmitting }) => {
                         return handleFormSubmit(values, setSubmitting, {
+                            type: 'CONTINUE',
                             redirectPath:
                                 draftSubmission.draftRevision.formData
                                     .submissionType === 'CONTRACT_ONLY'
-                                    ? `../contacts`
-                                    : `../rate-details`,
+                                    ? 'SUBMISSIONS_CONTACTS'
+                                    : 'SUBMISSIONS_RATE_DETAILS',
                         })
                     }}
                     validationSchema={() =>
@@ -574,8 +593,6 @@ export const ContractDetails = ({
                             <UswdsForm
                                 className={styles.formContainer}
                                 id="ContractDetailsForm"
-                                aria-label={formHeading}
-                                aria-describedby="form-guidance"
                                 onSubmit={(e) => {
                                     setShouldValidate(true)
                                     setFocusErrorSummaryHeading(true)
@@ -1310,8 +1327,7 @@ export const ContractDetails = ({
                                             values,
                                             setSubmitting,
                                             {
-                                                redirectPath:
-                                                    RoutesRecord.DASHBOARD_SUBMISSIONS,
+                                                type: 'SAVE_AS_DRAFT',
                                             }
                                         )
                                     }}
@@ -1327,7 +1343,9 @@ export const ContractDetails = ({
                                                 values,
                                                 setSubmitting,
                                                 {
-                                                    redirectPath: '../type',
+                                                    type: 'BACK',
+                                                    redirectPath:
+                                                        'SUBMISSIONS_TYPE',
                                                 }
                                             )
                                         }
@@ -1341,14 +1359,17 @@ export const ContractDetails = ({
                                         RoutesRecord.SUBMISSIONS_TYPE,
                                         { id }
                                     )}
-                                    saveAsDraftOnClickUrl={
-                                        RoutesRecord.DASHBOARD_SUBMISSIONS
-                                    }
                                     continueOnClickUrl={
                                         draftSubmission.draftRevision.formData
                                             .submissionType === 'CONTRACT_ONLY'
-                                            ? '/edit/contacts'
-                                            : '/edit/rate-details'
+                                            ? generatePath(
+                                                  RoutesRecord.SUBMISSIONS_RATE_DETAILS,
+                                                  { id }
+                                              )
+                                            : generatePath(
+                                                  RoutesRecord.SUBMISSIONS_CONTACTS,
+                                                  { id }
+                                              )
                                     }
                                 />
                             </UswdsForm>

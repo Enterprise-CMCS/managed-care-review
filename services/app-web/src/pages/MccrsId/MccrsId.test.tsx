@@ -4,12 +4,12 @@ import { Route, Routes } from 'react-router'
 import { RoutesRecord } from '@mc-review/constants'
 import {
     fetchCurrentUserMock,
-    fetchStateHealthPlanPackageWithQuestionsMockSuccess,
+    fetchContractMockSuccess,
+    mockContractPackageSubmitted,
     iterableCmsUsersMockData,
 } from '@mc-review/mocks'
 import { renderWithProviders } from '../../testHelpers/jestHelpers'
 import { MccrsId } from './MccrsId'
-import { mockSubmittedHealthPlanPackage } from '@mc-review/mocks'
 
 describe('MCCRSID', () => {
     afterEach(() => {
@@ -19,6 +19,8 @@ describe('MCCRSID', () => {
     describe.each(iterableCmsUsersMockData)(
         '$userRole MCCRSID tests',
         ({ userRole, mockUser }) => {
+            const contract = mockContractPackageSubmitted()
+            contract.id = '15'
             it('renders without errors', async () => {
                 renderWithProviders(
                     <Routes>
@@ -34,11 +36,7 @@ describe('MCCRSID', () => {
                                     user: mockUser(),
                                     statusCode: 200,
                                 }),
-                                fetchStateHealthPlanPackageWithQuestionsMockSuccess(
-                                    {
-                                        id: '15',
-                                    }
-                                ),
+                                fetchContractMockSuccess({ contract }),
                             ],
                         },
                         routerProvider: {
@@ -72,11 +70,7 @@ describe('MCCRSID', () => {
                                     user: mockUser(),
                                     statusCode: 200,
                                 }),
-                                fetchStateHealthPlanPackageWithQuestionsMockSuccess(
-                                    {
-                                        id: '15',
-                                    }
-                                ),
+                                fetchContractMockSuccess({ contract }),
                             ],
                         },
                         routerProvider: {
@@ -105,11 +99,7 @@ describe('MCCRSID', () => {
                                     user: mockUser(),
                                     statusCode: 200,
                                 }),
-                                fetchStateHealthPlanPackageWithQuestionsMockSuccess(
-                                    {
-                                        id: '15',
-                                    }
-                                ),
+                                fetchContractMockSuccess({ contract }),
                             ],
                         },
                         routerProvider: {
@@ -138,6 +128,7 @@ describe('MCCRSID', () => {
             })
 
             it('edit - prepopulates the mccrs id when a submission has one', async () => {
+                contract.mccrsID = '3333'
                 renderWithProviders(
                     <Routes>
                         <Route
@@ -152,15 +143,7 @@ describe('MCCRSID', () => {
                                     user: mockUser(),
                                     statusCode: 200,
                                 }),
-                                fetchStateHealthPlanPackageWithQuestionsMockSuccess(
-                                    {
-                                        id: '15',
-                                        stateSubmission: {
-                                            ...mockSubmittedHealthPlanPackage(),
-                                            mccrsID: '3333',
-                                        },
-                                    }
-                                ),
+                                fetchContractMockSuccess({ contract }),
                             ],
                         },
                         routerProvider: {

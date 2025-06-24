@@ -3,8 +3,8 @@ import styles from './SubmissionWithdraw.module.scss'
 import {
     ActionButton,
     Breadcrumbs,
+    FieldTextarea,
     GenericApiErrorBanner,
-    PoliteErrorMessage,
 } from '../../components'
 import { RoutesRecord } from '@mc-review/constants'
 import { generatePath, useNavigate, useParams } from 'react-router-dom'
@@ -15,13 +15,7 @@ import {
     useWithdrawContractMutation,
 } from '../../gen/gqlClient'
 import { Formik, FormikErrors } from 'formik'
-import {
-    ButtonGroup,
-    Form,
-    FormGroup,
-    Label,
-    Textarea,
-} from '@trussworks/react-uswds'
+import { ButtonGroup, Form } from '@trussworks/react-uswds'
 import { PageActionsContainer } from '../StateSubmission/PageActions'
 import * as Yup from 'yup'
 import { ErrorOrLoadingPage } from '../StateSubmission'
@@ -104,7 +98,7 @@ export const SubmissionWithdraw = (): React.ReactElement => {
         withdrawContract,
         { error: withdrawError, loading: withdrawLoading },
     ] = useWithdrawContractMutation()
-    const showFieldErrors = (error?: FormError): boolean | undefined =>
+    const showFieldErrors = (error?: FormError): boolean =>
         shouldValidate && Boolean(error)
     const formInitialValues: SubmissionWithdrawValues = {
         submissionWithdrawReason: '',
@@ -248,8 +242,6 @@ export const SubmissionWithdraw = (): React.ReactElement => {
                     <Form
                         id="SubmissionWithdrawForm"
                         className={styles.formContainer}
-                        aria-label="Withdraw submission"
-                        aria-describedby="form-guidance"
                         onSubmit={(e) => {
                             setShouldValidate(true)
                             return handleSubmit(e)
@@ -258,43 +250,18 @@ export const SubmissionWithdraw = (): React.ReactElement => {
                         {withdrawError && <GenericApiErrorBanner />}
                         <fieldset className="usa-fieldset">
                             <h2>Withdraw submission</h2>
-                            <FormGroup
-                                error={showFieldErrors(
+                            <FieldTextarea
+                                label="Reason for withdrawing the submission."
+                                name="submissionWithdrawReason"
+                                id="submissionWithdrawReason"
+                                data-testid="submissionWithdrawReason"
+                                onChange={handleChange}
+                                aria-required
+                                hint="Provide a reason for withdrawing the submission review."
+                                showError={showFieldErrors(
                                     errors.submissionWithdrawReason
                                 )}
-                                className="margin-top-0"
-                            >
-                                <Label
-                                    htmlFor="submissionWithdrawReason"
-                                    className="margin-bottom-0 text-bold"
-                                >
-                                    Reason for withdrawing the submission.
-                                </Label>
-                                <p className="margin-bottom-0 margin-top-05 usa-hint">
-                                    Required
-                                </p>
-                                {showFieldErrors(
-                                    errors.submissionWithdrawReason
-                                ) && (
-                                    <PoliteErrorMessage formFieldLabel="">
-                                        {errors.submissionWithdrawReason}
-                                    </PoliteErrorMessage>
-                                )}
-                                <Textarea
-                                    name="submissionWithdrawReason"
-                                    id="submissionWithdrawReason"
-                                    data-testid="submissionWithdrawReason"
-                                    aria-labelledby="submissionWithdrawReason"
-                                    aria-required
-                                    defaultValue={
-                                        values.submissionWithdrawReason
-                                    }
-                                    onChange={handleChange}
-                                    error={showFieldErrors(
-                                        errors.submissionWithdrawReason
-                                    )}
-                                />
-                            </FormGroup>
+                            />
                         </fieldset>
                         <PageActionsContainer>
                             <ButtonGroup type="default">

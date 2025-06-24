@@ -128,9 +128,48 @@ describe('CustomOAuth2Server', () => {
         it('should return 400 for invalid JSON payload', async () => {
             const event = {
                 body: '{invalid json',
-                headers: {},
+                headers: {
+                    'Content-Type': 'application/json',
+                },
                 httpMethod: 'POST',
                 queryStringParameters: null,
+                multiValueHeaders: {},
+                multiValueQueryStringParameters: null,
+                isBase64Encoded: false,
+                path: '/token',
+                pathParameters: null,
+                stageVariables: null,
+                requestContext: {
+                    accountId: '',
+                    apiId: '',
+                    authorizer: null,
+                    protocol: '',
+                    httpMethod: 'POST',
+                    identity: {
+                        accessKey: null,
+                        accountId: null,
+                        apiKey: null,
+                        apiKeyId: null,
+                        caller: null,
+                        clientCert: null,
+                        cognitoAuthenticationProvider: null,
+                        cognitoAuthenticationType: null,
+                        cognitoIdentityId: null,
+                        cognitoIdentityPoolId: null,
+                        principalOrgId: null,
+                        sourceIp: '',
+                        user: null,
+                        userAgent: null,
+                        userArn: null,
+                    },
+                    path: '/token',
+                    stage: '',
+                    requestId: '',
+                    requestTimeEpoch: 0,
+                    resourceId: '',
+                    resourcePath: '',
+                },
+                resource: '',
             } as APIGatewayProxyEvent
 
             const result = await oauth2Server.token(event)
@@ -145,9 +184,48 @@ describe('CustomOAuth2Server', () => {
         it('should return 400 for invalid request', async () => {
             const event = {
                 body: JSON.stringify({}),
-                headers: {},
+                headers: {
+                    'Content-Type': 'application/json',
+                },
                 httpMethod: 'POST',
                 queryStringParameters: null,
+                multiValueHeaders: {},
+                multiValueQueryStringParameters: null,
+                isBase64Encoded: false,
+                path: '/token',
+                pathParameters: null,
+                stageVariables: null,
+                requestContext: {
+                    accountId: '',
+                    apiId: '',
+                    authorizer: null,
+                    protocol: '',
+                    httpMethod: 'POST',
+                    identity: {
+                        accessKey: null,
+                        accountId: null,
+                        apiKey: null,
+                        apiKeyId: null,
+                        caller: null,
+                        clientCert: null,
+                        cognitoAuthenticationProvider: null,
+                        cognitoAuthenticationType: null,
+                        cognitoIdentityId: null,
+                        cognitoIdentityPoolId: null,
+                        principalOrgId: null,
+                        sourceIp: '',
+                        user: null,
+                        userAgent: null,
+                        userArn: null,
+                    },
+                    path: '/token',
+                    stage: '',
+                    requestId: '',
+                    requestTimeEpoch: 0,
+                    resourceId: '',
+                    resourcePath: '',
+                },
+                resource: '',
             } as APIGatewayProxyEvent
 
             const result = await oauth2Server.token(event)
@@ -166,9 +244,48 @@ describe('CustomOAuth2Server', () => {
                     client_id: 'invalid',
                     client_secret: 'invalid', // pragma: allowlist secret
                 }),
-                headers: {},
+                headers: {
+                    'Content-Type': 'application/json',
+                },
                 httpMethod: 'POST',
                 queryStringParameters: null,
+                multiValueHeaders: {},
+                multiValueQueryStringParameters: null,
+                isBase64Encoded: false,
+                path: '/token',
+                pathParameters: null,
+                stageVariables: null,
+                requestContext: {
+                    accountId: '',
+                    apiId: '',
+                    authorizer: null,
+                    protocol: '',
+                    httpMethod: 'POST',
+                    identity: {
+                        accessKey: null,
+                        accountId: null,
+                        apiKey: null,
+                        apiKeyId: null,
+                        caller: null,
+                        clientCert: null,
+                        cognitoAuthenticationProvider: null,
+                        cognitoAuthenticationType: null,
+                        cognitoIdentityId: null,
+                        cognitoIdentityPoolId: null,
+                        principalOrgId: null,
+                        sourceIp: '',
+                        user: null,
+                        userAgent: null,
+                        userArn: null,
+                    },
+                    path: '/token',
+                    stage: '',
+                    requestId: '',
+                    requestTimeEpoch: 0,
+                    resourceId: '',
+                    resourcePath: '',
+                },
+                resource: '',
             } as APIGatewayProxyEvent
 
             const result = await oauth2Server.token(event)
@@ -187,9 +304,48 @@ describe('CustomOAuth2Server', () => {
                     client_id: 'valid',
                     client_secret: 'valid', // pragma: allowlist secret
                 }),
-                headers: {},
+                headers: {
+                    'Content-Type': 'application/json',
+                },
                 httpMethod: 'POST',
                 queryStringParameters: null,
+                multiValueHeaders: {},
+                multiValueQueryStringParameters: null,
+                isBase64Encoded: false,
+                path: '/token',
+                pathParameters: null,
+                stageVariables: null,
+                requestContext: {
+                    accountId: '',
+                    apiId: '',
+                    authorizer: null,
+                    protocol: '',
+                    httpMethod: 'POST',
+                    identity: {
+                        accessKey: null,
+                        accountId: null,
+                        apiKey: null,
+                        apiKeyId: null,
+                        caller: null,
+                        clientCert: null,
+                        cognitoAuthenticationProvider: null,
+                        cognitoAuthenticationType: null,
+                        cognitoIdentityId: null,
+                        cognitoIdentityPoolId: null,
+                        principalOrgId: null,
+                        sourceIp: '',
+                        user: null,
+                        userAgent: null,
+                        userArn: null,
+                    },
+                    path: '/token',
+                    stage: '',
+                    requestId: '',
+                    requestTimeEpoch: 0,
+                    resourceId: '',
+                    resourcePath: '',
+                },
+                resource: '',
             } as APIGatewayProxyEvent
 
             const result = await oauth2Server.token(event)
@@ -198,7 +354,7 @@ describe('CustomOAuth2Server', () => {
             const response = JSON.parse(result.body)
             expect(response).toHaveProperty('access_token')
             expect(response).toHaveProperty('token_type', 'Bearer')
-            expect(response).toHaveProperty('expires_in', 3600)
+            expect(response).toHaveProperty('expires_in', 7776000)
         })
     })
 })

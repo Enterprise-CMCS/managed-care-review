@@ -1,33 +1,36 @@
 mutation updateContract($input: UpdateContractInput!) {
     updateContract(input: $input) {
-        pkg {
-            id
-            stateCode
-            mccrsID
-            state {
-                code
-                name
-                programs {
-                    id
-                    name
-                    fullName
-                    isRateProgram
+        contract {
+            ...contractFieldsFragment
+
+            draftRevision {
+                ...contractRevisionFragment
+            }
+
+            draftRates {
+                ...rateFieldsFragment
+
+                draftRevision {
+                    ...rateRevisionFragment
+                }
+
+                revisions {
+                    ...rateRevisionFragment
                 }
             }
-            status
-            initiallySubmittedAt
-            revisions {
-                node {
-                    id
-                    unlockInfo {
-                        ...updateInformationFields
-                    }
-                    submitInfo {
-                        ...updateInformationFields
-                    }
-                    createdAt
-                    formDataProto
+
+            withdrawnRates {
+                ...rateFieldsFragment,
+                revisions {
+                    ...rateRevisionFragment
                 }
+                packageSubmissions {
+                    ...ratePackageSubmissionsFragment
+                }
+            }
+
+            packageSubmissions {
+                ...packageSubmissionsFragment
             }
         }
     }

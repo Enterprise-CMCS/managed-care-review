@@ -9,6 +9,7 @@ import {
     setErrorAttributesOnActiveSpan,
 } from '../attributeHelper'
 import { GraphQLError } from 'graphql'
+import { mapPrismaUserToGraphQLUser } from './userMapping'
 
 export function updateOauthClientResolver(
     store: Store
@@ -28,15 +29,11 @@ export function updateOauthClientResolver(
         // Build update data object with only provided fields
         const updateData: {
             description?: string
-            contactEmail?: string
             grants?: string[]
         } = {}
 
         if (input.description) {
             updateData.description = input.description
-        }
-        if (input.contactEmail) {
-            updateData.contactEmail = input.contactEmail
         }
         if (input.grants && input.grants.length > 0) {
             updateData.grants = input.grants
@@ -74,6 +71,11 @@ export function updateOauthClientResolver(
         logSuccess('updateOauthClient')
         setSuccessAttributesOnActiveSpan(span)
 
-        return { oauthClient: updated }
+        return {
+            oauthClient: {
+                ...updated,
+                user: mapPrismaUserToGraphQLUser(updated.user),
+            },
+        }
     }
 }

@@ -961,7 +961,7 @@ input UpdateContractInput {
 }
 
 type UpdateContractPayload {
-    pkg: HealthPlanPackage!
+    contract: Contract!
 }
 
 type CreateAPIKeyPayload {
@@ -1322,6 +1322,7 @@ type RateQuestion {
     addedBy: CMSUsersUnion!
     documents: [Document!]!
     division: Division!
+    round: Int!
     #    noteText: String
     #    dueDate: Date
     #    rateIDs: [String!]
@@ -2550,14 +2551,14 @@ type OauthClient {
     clientSecret: String!
     grants: [String!]!
     description: String
-    contactEmail: String
     createdAt: DateTime!
     updatedAt: DateTime!
+    user: CMSUsersUnion!
 }
 
 input CreateOauthClientInput {
     description: String
-    contactEmail: String!
+    userID: String!
     grants: [String!]
 }
 
@@ -2584,7 +2585,6 @@ type DeleteOauthClientPayload {
 input UpdateOauthClientInput {
     clientId: String!
     description: String
-    contactEmail: String
     grants: [String!]
 }
 
