@@ -1,6 +1,6 @@
 import type { Resolvers } from '../../gen/gqlServer'
-import { parseKey } from '../../s3'
 import type { S3ClientT } from '../../s3'
+import { extractS3Key } from '../../s3/zip/generateZip'
 
 export function documentZipPackageResolver(
     s3Client: S3ClientT
@@ -8,7 +8,7 @@ export function documentZipPackageResolver(
     return {
         downloadUrl: async (parent) => {
             const s3URL = parent.s3URL ?? ''
-            const key = parseKey(s3URL)
+            const key = extractS3Key(s3URL)
 
             if (key instanceof Error) {
                 throw new Error('S3 needs to be provided a valid key')

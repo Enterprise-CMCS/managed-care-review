@@ -352,6 +352,9 @@ importers:
       '@mc-review/hpp':
         specifier: workspace:*
         version: link:../../packages/hpp
+      '@mc-review/otel':
+        specifier: workspace:*
+        version: link:../../packages/otel
       '@node-oauth/oauth2-server':
         specifier: ^5.2.0
         version: 5.2.0
