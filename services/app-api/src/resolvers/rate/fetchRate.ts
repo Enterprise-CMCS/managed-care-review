@@ -10,6 +10,7 @@ import { GraphQLError } from 'graphql'
 import { isStateUser } from '../../domain-models'
 import { logError } from '../../logger'
 import { ForbiddenError } from 'apollo-server-core'
+import { canRead, canAccessState, getAuthContextInfo } from '../../authorization/oauthAuthorization'
 
 export function fetchRateResolver(store: Store): QueryResolvers['fetchRate'] {
     return async (_parent, { input }, context) => {
@@ -39,21 +40,24 @@ export function fetchRateResolver(store: Store): QueryResolvers['fetchRate'] {
             })
         }
 
-        if (isStateUser(user)) {
-            const stateForCurrentUser: State['code'] = user.stateCode
-            if (rateWithHistory.stateCode !== stateForCurrentUser) {
-                logError(
-                    'fetchRate',
-                    'State users are not authorized to fetch rate data from a different state.'
-                )
-                setErrorAttributesOnActiveSpan(
-                    'State users are not authorized to fetch rate data from a different state.',
-                    span
-                )
-                throw new ForbiddenError(
-                    'State users are not authorized to fetch rate data from a different state.'
-                )
-            }
+        // Check OAuth client permissions first
+        if (!canRead(context)) {
+            const authInfo = getAuthContextInfo(context)
+            const errMessage = `OAuth client ${authInfo.clientId} does not have read permissions`
+            logError('fetchRate', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+            throw new ForbiddenError(errMessage)
+        }
+
+        // Check state-based access (works for both OAuth clients and regular users)
+        if (!canAccessState(context, rateWithHistory.stateCode)) {
+            const authInfo = getAuthContextInfo(context)
+            const errMessage = authInfo.isOAuthClient 
+                ? `OAuth client ${authInfo.clientId} not authorized to fetch rate data from ${rateWithHistory.stateCode}`
+                : 'State users are not authorized to fetch rate data from a different state.'
+            logError('fetchRate', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+            throw new ForbiddenError(errMessage)
         }
 
         setSuccessAttributesOnActiveSpan(span)

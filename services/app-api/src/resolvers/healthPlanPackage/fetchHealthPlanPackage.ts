@@ -16,6 +16,7 @@ import {
 } from '../attributeHelper'
 import { GraphQLError } from 'graphql/index'
 import { NotFoundError } from '../../postgres'
+import { canRead, canAccessState, hasCMSPermissions as hasOAuthCMSPermissions, getAuthContextInfo } from '../../authorization/oauthAuthorization'
 
 export function fetchHealthPlanPackageResolver(
     store: Store
@@ -68,38 +69,39 @@ export function fetchHealthPlanPackageResolver(
 
         const pkg = convertedPkg
 
-        // Authorization CMS users can view, state users can only view if the state matches
-        if (isStateUser(user)) {
-            const stateFromCurrentUser: State['code'] = user.stateCode
-            if (pkg.stateCode !== stateFromCurrentUser) {
-                logError(
-                    'fetchHealthPlanPackage',
-                    'user not authorized to fetch data from a different state'
-                )
-                setErrorAttributesOnActiveSpan(
-                    'user not authorized to fetch data from a different state',
-                    span
-                )
-                throw new ForbiddenError(
-                    'user not authorized to fetch data from a different state'
-                )
-            }
-        } else if (hasCMSPermissions(user) || hasAdminPermissions(user)) {
+        // Check OAuth client permissions first
+        if (!canRead(context)) {
+            const authInfo = getAuthContextInfo(context)
+            const errMessage = `OAuth client ${authInfo.clientId} does not have read permissions`
+            logError('fetchHealthPlanPackage', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+            throw new ForbiddenError(errMessage)
+        }
+
+        // Check state-based access (works for both OAuth clients and regular users)
+        if (!canAccessState(context, pkg.stateCode)) {
+            const authInfo = getAuthContextInfo(context)
+            const errMessage = authInfo.isOAuthClient 
+                ? `OAuth client ${authInfo.clientId} not authorized to fetch data from ${pkg.stateCode}`
+                : 'user not authorized to fetch data from a different state'
+            logError('fetchHealthPlanPackage', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+            throw new ForbiddenError(errMessage)
+        }
+
+        // Check draft access - OAuth clients inherit CMS permissions from their associated user
+        if (hasOAuthCMSPermissions(context)) {
+            // OAuth clients with CMS users can access non-draft packages
+            // Regular CMS/Admin users can access non-draft packages
             if (packageStatus(pkg) === 'DRAFT') {
-                logError(
-                    'fetchHealthPlanPackage',
-                    'user not authorized to fetch a draft'
-                )
-                setErrorAttributesOnActiveSpan(
-                    'user not authorized to fetch a draft',
-                    span
-                )
-                throw new ForbiddenError('user not authorized to fetch a draft')
+                const authInfo = getAuthContextInfo(context)
+                const errMessage = authInfo.isOAuthClient
+                    ? `OAuth client ${authInfo.clientId} not authorized to fetch a draft`
+                    : 'user not authorized to fetch a draft'
+                logError('fetchHealthPlanPackage', errMessage)
+                setErrorAttributesOnActiveSpan(errMessage, span)
+                throw new ForbiddenError(errMessage)
             }
-        } else {
-            logError('fetchHealthPlanPackage', 'unknown user type')
-            setErrorAttributesOnActiveSpan('unknown user type', span)
-            throw new ForbiddenError(`unknown user type`)
         }
 
         logSuccess('fetchHealthPlanPackage')

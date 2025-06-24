@@ -17,6 +17,7 @@ import type { RateOrErrorArrayType } from '../../postgres/contractAndRates'
 import { logError } from '../../logger'
 import { GraphQLError } from 'graphql'
 import type { RateType } from '../../domain-models/contractAndRates'
+import { canRead, hasCMSPermissions as hasOAuthCMSPermissions, getAuthContextInfo, isOAuthClientCredentials } from '../../authorization/oauthAuthorization'
 
 const validateAndReturnRates = (
     results: RateOrErrorArrayType,
@@ -50,8 +51,17 @@ export function indexRatesResolver(store: Store): QueryResolvers['indexRates'] {
         const span = tracer?.startSpan('indexRates', {}, ctx)
         setResolverDetailsOnActiveSpan('indexRates', user, span)
 
+        // Check OAuth client permissions first
+        if (!canRead(context)) {
+            const authInfo = getAuthContextInfo(context)
+            const errMessage = `OAuth client ${authInfo.clientId} does not have read permissions`
+            logError('indexRates', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+            throw new ForbiddenError(errMessage)
+        }
+
         const adminPermissions = hasAdminPermissions(user)
-        const cmsUser = hasCMSPermissions(user)
+        const cmsUser = hasCMSPermissions(user) || hasOAuthCMSPermissions(context)
         const stateUser = isStateUser(user)
 
         if (adminPermissions || cmsUser || stateUser) {

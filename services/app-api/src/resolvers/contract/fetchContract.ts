@@ -7,6 +7,7 @@ import {
     setSuccessAttributesOnActiveSpan,
 } from '../attributeHelper'
 import { isStateUser } from '../../domain-models'
+import { canRead, canAccessState, getAuthContextInfo } from '../../authorization/oauthAuthorization'
 
 export function fetchContractResolver(
     store: Store
@@ -42,19 +43,34 @@ export function fetchContractResolver(
             })
         }
 
-        // A state user cannot access contracts that don't belong to their state
-        if (isStateUser(user)) {
-            if (contractWithHistory.stateCode !== user.stateCode) {
-                const errMessage = `User from state ${user.stateCode} not allowed to access contract from ${contractWithHistory.stateCode}`
-                setErrorAttributesOnActiveSpan(errMessage, span)
+        // Check OAuth client permissions first
+        if (!canRead(context)) {
+            const authInfo = getAuthContextInfo(context)
+            const errMessage = `OAuth client ${authInfo.clientId} does not have read permissions`
+            setErrorAttributesOnActiveSpan(errMessage, span)
 
-                throw new GraphQLError(errMessage, {
-                    extensions: {
-                        code: 'FORBIDDEN',
-                        cause: 'INVALID_STATE_REQUESTER',
-                    },
-                })
-            }
+            throw new GraphQLError(errMessage, {
+                extensions: {
+                    code: 'FORBIDDEN',
+                    cause: 'INSUFFICIENT_OAUTH_GRANTS',
+                },
+            })
+        }
+
+        // Check state-based access (works for both OAuth clients and regular users)
+        if (!canAccessState(context, contractWithHistory.stateCode)) {
+            const authInfo = getAuthContextInfo(context)
+            const errMessage = authInfo.isOAuthClient 
+                ? `OAuth client ${authInfo.clientId} not allowed to access contract from ${contractWithHistory.stateCode}`
+                : `User from state ${user.stateCode} not allowed to access contract from ${contractWithHistory.stateCode}`
+            setErrorAttributesOnActiveSpan(errMessage, span)
+
+            throw new GraphQLError(errMessage, {
+                extensions: {
+                    code: 'FORBIDDEN',
+                    cause: 'INVALID_STATE_REQUESTER',
+                },
+            })
         }
 
         setSuccessAttributesOnActiveSpan(span)

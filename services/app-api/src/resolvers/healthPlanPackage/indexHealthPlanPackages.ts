@@ -17,6 +17,7 @@ import {
 } from '../attributeHelper'
 import { GraphQLError } from 'graphql/index'
 import { validateContractsAndConvert } from './contractAndRates/resolverHelpers'
+import { canRead, hasCMSPermissions as hasOAuthCMSPermissions, getAuthContextInfo } from '../../authorization/oauthAuthorization'
 
 const validateAndReturnHealthPlanPackages = (
     results: HealthPlanPackageType[],
@@ -44,6 +45,15 @@ export function indexHealthPlanPackagesResolver(
         const { user, ctx, tracer } = context
         const span = tracer?.startSpan('indexHealthPlanPackages', {}, ctx)
         setResolverDetailsOnActiveSpan('indexHealthPlanPackages', user, span)
+
+        // Check OAuth client permissions first
+        if (!canRead(context)) {
+            const authInfo = getAuthContextInfo(context)
+            const errMessage = `OAuth client ${authInfo.clientId} does not have read permissions`
+            logError('indexHealthPlanPackages', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+            throw new ForbiddenError(errMessage)
+        }
 
         if (isStateUser(user)) {
             const contractsWithHistory =
@@ -74,7 +84,7 @@ export function indexHealthPlanPackagesResolver(
             const results = validateContractsAndConvert(contractsWithHistory)
 
             return validateAndReturnHealthPlanPackages(results, span)
-        } else if (hasCMSPermissions(user) || hasAdminPermissions(user)) {
+        } else if (hasCMSPermissions(user) || hasAdminPermissions(user) || hasOAuthCMSPermissions(context)) {
             const contractsWithHistory =
                 await store.findAllContractsWithHistoryBySubmitInfo()
 

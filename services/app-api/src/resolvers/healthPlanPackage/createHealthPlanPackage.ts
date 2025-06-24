@@ -11,6 +11,7 @@ import {
 } from '../attributeHelper'
 import { GraphQLError } from 'graphql/index'
 import { convertContractWithRatesToUnlockedHPP } from '../../domain-models'
+import { canWrite, getAuthContextInfo } from '../../authorization/oauthAuthorization'
 
 export function createHealthPlanPackageResolver(
     store: Store
@@ -19,6 +20,15 @@ export function createHealthPlanPackageResolver(
         const { user, ctx, tracer } = context
         const span = tracer?.startSpan('createHealthPlanPackage', {}, ctx)
         setResolverDetailsOnActiveSpan('createHealthPlanPackage', user, span)
+
+        // OAuth clients cannot perform write operations
+        if (!canWrite(context)) {
+            const authInfo = getAuthContextInfo(context)
+            const errMessage = `OAuth client ${authInfo.clientId} not authorized to create health plan packages`
+            logError('createHealthPlanPackage', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+            throw new ForbiddenError(errMessage)
+        }
 
         // This resolver is only callable by state users
         if (!isStateUser(user)) {
