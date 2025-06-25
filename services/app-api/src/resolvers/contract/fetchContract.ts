@@ -75,6 +75,7 @@ export function fetchContractResolver(
             })
         }
 
+        logSuccess('fetchContract')
         setSuccessAttributesOnActiveSpan(span)
         return { contract: contractWithHistory }
     }
