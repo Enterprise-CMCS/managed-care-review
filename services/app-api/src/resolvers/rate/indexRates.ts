@@ -17,7 +17,12 @@ import type { RateOrErrorArrayType } from '../../postgres/contractAndRates'
 import { logError } from '../../logger'
 import { GraphQLError } from 'graphql'
 import type { RateType } from '../../domain-models/contractAndRates'
-import { canRead, hasCMSPermissions as hasOAuthCMSPermissions, getAuthContextInfo, isOAuthClientCredentials } from '../../authorization/oauthAuthorization'
+import {
+    canRead,
+    hasCMSPermissions as hasOAuthCMSPermissions,
+    getAuthContextInfo,
+    isOAuthClientCredentials,
+} from '../../authorization/oauthAuthorization'
 
 const validateAndReturnRates = (
     results: RateOrErrorArrayType,
@@ -51,17 +56,99 @@ export function indexRatesResolver(store: Store): QueryResolvers['indexRates'] {
         const span = tracer?.startSpan('indexRates', {}, ctx)
         setResolverDetailsOnActiveSpan('indexRates', user, span)
 
-        // Check OAuth client permissions first
-        if (!canRead(context)) {
-            const authInfo = getAuthContextInfo(context)
-            const errMessage = `OAuth client ${authInfo.clientId} does not have read permissions`
-            logError('indexRates', errMessage)
-            setErrorAttributesOnActiveSpan(errMessage, span)
-            throw new ForbiddenError(errMessage)
+        // Handle OAuth clients separately from regular users
+        if (isOAuthClientCredentials(context)) {
+            // Check OAuth client permissions
+            if (!canRead(context)) {
+                const authInfo = getAuthContextInfo(context)
+                const errMessage = `OAuth client ${authInfo.clientId} does not have read permissions`
+                logError('indexRates', errMessage)
+                setErrorAttributesOnActiveSpan(errMessage, span)
+                throw new ForbiddenError(errMessage)
+            }
+
+            // OAuth clients inherit the permissions of their associated user
+            const adminPermissions = hasAdminPermissions(user)
+            const cmsUser = hasOAuthCMSPermissions(context)
+            const stateUser = isStateUser(user)
+
+            if (adminPermissions || cmsUser || stateUser) {
+                let ratesWithHistory
+                if (stateUser) {
+                    ratesWithHistory =
+                        await store.findAllRatesWithHistoryBySubmitInfo({
+                            stateCode: user.stateCode,
+                            useZod: true,
+                        })
+                } else if (input && input.stateCode) {
+                    ratesWithHistory =
+                        await store.findAllRatesWithHistoryBySubmitInfo({
+                            stateCode: input.stateCode,
+                            useZod: true,
+                        })
+                } else {
+                    ratesWithHistory =
+                        await store.findAllRatesWithHistoryBySubmitInfo({
+                            useZod: false,
+                        })
+                }
+                if (ratesWithHistory instanceof Error) {
+                    const errMessage = `Issue finding rates with history Message: ${ratesWithHistory.message}`
+                    setErrorAttributesOnActiveSpan(errMessage, span)
+
+                    if (ratesWithHistory instanceof NotFoundError) {
+                        throw new GraphQLError(errMessage, {
+                            extensions: {
+                                code: 'NOT_FOUND',
+                                cause: 'DB_ERROR',
+                            },
+                        })
+                    }
+
+                    throw new GraphQLError(errMessage, {
+                        extensions: {
+                            code: 'INTERNAL_SERVER_ERROR',
+                            cause: 'DB_ERROR',
+                        },
+                    })
+                }
+                const rates: RateType[] = validateAndReturnRates(
+                    ratesWithHistory,
+                    span
+                )
+                const edges: object[] = []
+                if (stateUser) {
+                    rates.forEach((rate) => {
+                        if (user.stateCode === rate.stateCode) {
+                            edges.push({
+                                node: {
+                                    ...rate,
+                                },
+                            })
+                        }
+                    })
+                } else {
+                    rates.forEach((rate) => {
+                        edges.push({
+                            node: {
+                                ...rate,
+                            },
+                        })
+                    })
+                }
+                setSuccessAttributesOnActiveSpan(span)
+                return { totalCount: edges.length, edges }
+            } else {
+                const authInfo = getAuthContextInfo(context)
+                const errMsg = `OAuth client ${authInfo.clientId} not authorized to fetch rate reviews data`
+                setErrorAttributesOnActiveSpan(errMsg, span)
+                throw new ForbiddenError(errMsg)
+            }
         }
 
+        // Regular user authorization (non-OAuth)
         const adminPermissions = hasAdminPermissions(user)
-        const cmsUser = hasCMSPermissions(user) || hasOAuthCMSPermissions(context)
+        const cmsUser = hasCMSPermissions(user)
         const stateUser = isStateUser(user)
 
         if (adminPermissions || cmsUser || stateUser) {

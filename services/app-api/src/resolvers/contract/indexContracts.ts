@@ -17,7 +17,12 @@ import {
 } from '../attributeHelper'
 import { GraphQLError } from 'graphql/index'
 import type { ContractOrErrorArrayType } from '../../postgres/contractAndRates/findAllContractsWithHistoryByState'
-import { canRead, hasCMSPermissions as hasOAuthCMSPermissions, getAuthContextInfo, isOAuthClientCredentials } from '../../authorization/oauthAuthorization'
+import {
+    canRead,
+    hasCMSPermissions as hasOAuthCMSPermissions,
+    getAuthContextInfo,
+    isOAuthClientCredentials,
+} from '../../authorization/oauthAuthorization'
 
 const parseContracts = (
     contractsWithHistory: ContractOrErrorArrayType,
@@ -70,22 +75,24 @@ export function indexContractsResolver(
         const span = tracer?.startSpan('indexContracts', {}, ctx)
         setResolverDetailsOnActiveSpan('indexContracts', user, span)
 
-        // Check OAuth client permissions first
-        if (!canRead(context)) {
-            const authInfo = getAuthContextInfo(context)
-            const errMessage = `OAuth client ${authInfo.clientId} does not have read permissions`
-            logError('indexContracts', errMessage)
-            setErrorAttributesOnActiveSpan(errMessage, span)
-            throw new ForbiddenError(errMessage)
-        }
-
-        // Handle OAuth clients - they inherit the permissions of their associated user
+        // Handle OAuth clients separately from regular users
         if (isOAuthClientCredentials(context)) {
-            // OAuth clients follow the same logic as their associated user
+            // Check OAuth client permissions first
+            if (!canRead(context)) {
+                const authInfo = getAuthContextInfo(context)
+                const errMessage = `OAuth client ${authInfo.clientId} does not have read permissions`
+                logError('indexContracts', errMessage)
+                setErrorAttributesOnActiveSpan(errMessage, span)
+                throw new ForbiddenError(errMessage)
+            }
+
+            // OAuth clients inherit the permissions of their associated user
             if (isStateUser(user)) {
                 // OAuth client with state user - list contracts from user's state only
                 const contractsWithHistory =
-                    await store.findAllContractsWithHistoryByState(user.stateCode)
+                    await store.findAllContractsWithHistoryByState(
+                        user.stateCode
+                    )
 
                 if (contractsWithHistory instanceof Error) {
                     const errMessage = `Issue finding contracts with history by stateCode: ${user.stateCode}. Message: ${contractsWithHistory.message}`
@@ -110,7 +117,10 @@ export function indexContractsResolver(
                 }
                 logSuccess('indexContracts')
                 setSuccessAttributesOnActiveSpan(span)
-                const parsedContracts = parseContracts(contractsWithHistory, span)
+                const parsedContracts = parseContracts(
+                    contractsWithHistory,
+                    span
+                )
                 return formatContracts(parsedContracts)
             } else if (hasOAuthCMSPermissions(context)) {
                 // OAuth client with CMS user - list all submitted contracts
@@ -140,7 +150,10 @@ export function indexContractsResolver(
                 }
                 logSuccess('indexContracts')
                 setSuccessAttributesOnActiveSpan(span)
-                const parsedContracts = parseContracts(contractsWithHistory, span)
+                const parsedContracts = parseContracts(
+                    contractsWithHistory,
+                    span
+                )
                 return formatContracts(parsedContracts)
             } else {
                 const authInfo = getAuthContextInfo(context)
@@ -151,7 +164,7 @@ export function indexContractsResolver(
             }
         }
 
-        // Regular user logic (non-OAuth)
+        // Regular user authorization (non-OAuth)
         if (isStateUser(user)) {
             const contractsWithHistory =
                 await store.findAllContractsWithHistoryByState(user.stateCode)
