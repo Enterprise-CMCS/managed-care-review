@@ -11,6 +11,7 @@ Managed Care Review is an application that accepts Managed Care contract and rat
 - [`./docs`](./docs) folder. Includes architectural decision records and technical design documents.
   - [OAuth Implementation](./docs/technical-design/oauth.md) - Details our OAuth 2.0 implementation for API authentication.
 - [`./services`](./services) README files. Includes brief summary of the service and key dependencies.
+- [API Changelog](./API_Changelog.md) includes API schema changes that have entered the codebase since June 2025
 
 ## Application Requirements
 
