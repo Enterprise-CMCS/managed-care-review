@@ -1,6 +1,6 @@
 import type { Resolvers } from '../../gen/gqlServer'
 import type { S3ClientT } from '../../s3'
-import { extractS3Key } from '../../s3/zip/generateZip'
+import { extractS3Key } from '../../zip/generateZip'
 
 export function documentZipPackageResolver(
     s3Client: S3ClientT

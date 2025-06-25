@@ -2,12 +2,12 @@ import { createAndSubmitTestContractWithRate } from '../../testHelpers/gqlContra
 import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
 import { testStateUser } from '../../testHelpers/userHelpers'
 import { testS3Client } from '../../testHelpers'
-import { generateDocumentZip } from '../../s3/zip/generateZip'
+import { generateDocumentZip } from '../../zip/generateZip'
 import { vi } from 'vitest'
 
 // Mock the correct path that matches the import in submitContract
-vi.mock('../../s3/zip/generateZip', async () => {
-    const actual = await vi.importActual('../../s3/zip/generateZip')
+vi.mock('../../zip/generateZip', async () => {
+    const actual = await vi.importActual('../../zip/generateZip')
     return {
         ...actual,
         generateDocumentZip: vi.fn(),

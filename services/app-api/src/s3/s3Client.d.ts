@@ -19,14 +19,4 @@ export type S3ClientT = {
         filename: string,
         bucket: BucketShortName
     ) => Promise<string | Error>
-    generateDocumentZip: (
-        documents: Array<{ s3URL: string; name: string; sha256?: string }>,
-        outputPath: string,
-        options = {
-            batchSize: number,
-            maxTotalSize: number,
-            baseTimeout: number,
-            timeoutPerMB: number,
-        }
-    ) => Promise<{ s3URL: string; sha256: string } | Error>
 }
