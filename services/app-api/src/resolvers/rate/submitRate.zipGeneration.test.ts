@@ -10,7 +10,7 @@ import { generateDocumentZip } from '../../zip'
 import { vi } from 'vitest'
 
 // Mock the zip generation function
-vi.mock('../../s3/zip')
+vi.mock('../../zip')
 const mockGenerateDocumentZip = generateDocumentZip as vi.MockedFunction<
     typeof generateDocumentZip
 >
