@@ -15,7 +15,6 @@ import {
     canRead,
     canAccessState,
     getAuthContextInfo,
-    isOAuthClientCredentials,
 } from '../../authorization/oauthAuthorization'
 import { logError, logSuccess } from '../../logger'
 
@@ -54,7 +53,7 @@ export function fetchContractResolver(
         }
 
         // Handle OAuth clients separately from regular users
-        if (isOAuthClientCredentials(context)) {
+        if (context.oauthClient?.isOAuthClient) {
             // Check OAuth client permissions
             if (!canRead(context)) {
                 const authInfo = getAuthContextInfo(context)

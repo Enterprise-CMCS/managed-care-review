@@ -18,7 +18,6 @@ import {
     canRead,
     canAccessState,
     getAuthContextInfo,
-    isOAuthClientCredentials,
 } from '../../authorization/oauthAuthorization'
 
 export function fetchRateResolver(store: Store): QueryResolvers['fetchRate'] {
@@ -50,7 +49,7 @@ export function fetchRateResolver(store: Store): QueryResolvers['fetchRate'] {
         }
 
         // Handle OAuth clients separately from regular users
-        if (isOAuthClientCredentials(context)) {
+        if (context.oauthClient?.isOAuthClient) {
             // Check OAuth client permissions
             if (!canRead(context)) {
                 const authInfo = getAuthContextInfo(context)

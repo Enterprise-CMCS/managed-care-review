@@ -21,7 +21,6 @@ import {
     canRead,
     hasCMSPermissions as hasOAuthCMSPermissions,
     getAuthContextInfo,
-    isOAuthClientCredentials,
 } from '../../authorization/oauthAuthorization'
 
 const parseContracts = (
@@ -76,7 +75,7 @@ export function indexContractsResolver(
         setResolverDetailsOnActiveSpan('indexContracts', user, span)
 
         // Handle OAuth clients separately from regular users
-        if (isOAuthClientCredentials(context)) {
+        if (context.oauthClient?.isOAuthClient) {
             // Check OAuth client permissions first
             if (!canRead(context)) {
                 const authInfo = getAuthContextInfo(context)

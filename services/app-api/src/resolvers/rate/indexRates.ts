@@ -21,7 +21,6 @@ import {
     canRead,
     hasCMSPermissions as hasOAuthCMSPermissions,
     getAuthContextInfo,
-    isOAuthClientCredentials,
 } from '../../authorization/oauthAuthorization'
 
 const validateAndReturnRates = (
@@ -57,7 +56,7 @@ export function indexRatesResolver(store: Store): QueryResolvers['indexRates'] {
         setResolverDetailsOnActiveSpan('indexRates', user, span)
 
         // Handle OAuth clients separately from regular users
-        if (isOAuthClientCredentials(context)) {
+        if (context.oauthClient?.isOAuthClient) {
             // Check OAuth client permissions
             if (!canRead(context)) {
                 const authInfo = getAuthContextInfo(context)
