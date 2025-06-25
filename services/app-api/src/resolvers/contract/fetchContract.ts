@@ -64,6 +64,7 @@ export function fetchContractResolver(
             const errMessage = authInfo.isOAuthClient 
                 ? `OAuth client ${authInfo.clientId} not allowed to access contract from ${contractWithHistory.stateCode}`
                 : `User from state ${user.stateCode} not allowed to access contract from ${contractWithHistory.stateCode}`
+            logError('fetchContract', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
 
             throw new GraphQLError(errMessage, {
