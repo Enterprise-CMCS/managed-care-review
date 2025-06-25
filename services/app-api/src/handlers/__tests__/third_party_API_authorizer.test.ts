@@ -59,7 +59,12 @@ describe('third_party_API_authorizer', () => {
     it('allows access with valid OAuth token', async () => {
         const jwt = newJWTLib(oauthConfig)
         const clientId = 'test-client'
-        const token = jwt.createOAuthJWT(clientId, 'client_credentials', 'user-id', ['read'])
+        const token = jwt.createOAuthJWT(
+            clientId,
+            'client_credentials',
+            'user-id',
+            ['read']
+        )
 
         const result = await main(
             {
@@ -72,11 +77,11 @@ describe('third_party_API_authorizer', () => {
 
         expect(result).toBeDefined()
         expect(result!.policyDocument.Statement[0].Effect).toBe('Allow')
-        expect(result!.principalId).toBe(clientId)
+        expect(result!.principalId).toBe('user-id')
         expect(result!.context).toEqual({
-            userId: 'user-id',
+            clientId: clientId,
             grants: 'read',
-            isOAuthClient: 'true'
+            isOAuthClient: 'true',
         })
     })
 

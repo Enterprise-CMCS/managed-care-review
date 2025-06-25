@@ -98,19 +98,19 @@ function contextForRequestForFetcher(userFetcher: userFromAuthProvider): ({
                 const authorizerContext = event.requestContext.authorizer
 
                 // Extract OAuth context if present
-                const isOAuthClient = authorizerContext?.isOAuthClient === 'true'
-                const oauthUserId = authorizerContext?.userId
+                const isOAuthClient =
+                    authorizerContext?.isOAuthClient === 'true'
+                const oauthClientId = authorizerContext?.clientId
                 const oauthGrants = authorizerContext?.grants?.split(',') || []
 
                 let userResult
                 if (authProvider && !fromThirdPartyAuthorizer) {
                     userResult = await userFetcher(authProvider, store)
                 } else if (fromThirdPartyAuthorizer && principalId) {
-                    // For OAuth clients, use the userId from context, not the principalId (which is clientId)
-                    const userIdToFetch = isOAuthClient ? oauthUserId : principalId
+                    // principalId is now always the user ID for both OAuth and regular tokens
                     userResult = await userFromThirdPartyAuthorizer(
                         store,
-                        userIdToFetch
+                        principalId
                     )
                 }
 
@@ -123,16 +123,16 @@ function contextForRequestForFetcher(userFetcher: userFromAuthProvider): ({
                         tracer: tracer,
                         ctx: ctx,
                     }
-                    
+
                     // Add OAuth client info if present
-                    if (isOAuthClient && principalId) {
+                    if (isOAuthClient && oauthClientId) {
                         context.oauthClient = {
-                            clientId: principalId,
+                            clientId: oauthClientId,
                             grants: oauthGrants,
                             isOAuthClient: true,
                         }
                     }
-                    
+
                     return context
                 } else {
                     throw new Error(

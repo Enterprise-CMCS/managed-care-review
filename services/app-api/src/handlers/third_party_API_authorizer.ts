@@ -47,15 +47,11 @@ export const main: APIGatewayTokenAuthorizerHandler = async (
                 clientId: oauthResult.clientId,
             })
 
-            return generatePolicy(
-                oauthResult.clientId, 
-                event,
-                {
-                    userId: oauthResult.userId,
-                    grants: oauthResult.grants.join(','),
-                    isOAuthClient: 'true'
-                }
-            )
+            return generatePolicy(oauthResult.userId, event, {
+                clientId: oauthResult.clientId,
+                grants: oauthResult.grants.join(','),
+                isOAuthClient: 'true',
+            })
         }
 
         // If not an OAuth token, try standard token

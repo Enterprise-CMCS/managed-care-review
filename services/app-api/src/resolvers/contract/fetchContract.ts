@@ -7,7 +7,12 @@ import {
     setSuccessAttributesOnActiveSpan,
 } from '../attributeHelper'
 import { isStateUser } from '../../domain-models'
-import { canRead, canAccessState, getAuthContextInfo } from '../../authorization/oauthAuthorization'
+import {
+    canRead,
+    canAccessState,
+    getAuthContextInfo,
+} from '../../authorization/oauthAuthorization'
+import { logError, logSuccess } from '../../logger'
 
 export function fetchContractResolver(
     store: Store
@@ -61,9 +66,11 @@ export function fetchContractResolver(
         // Check state-based access (works for both OAuth clients and regular users)
         if (!canAccessState(context, contractWithHistory.stateCode)) {
             const authInfo = getAuthContextInfo(context)
-            const errMessage = authInfo.isOAuthClient 
+            const errMessage = authInfo.isOAuthClient
                 ? `OAuth client ${authInfo.clientId} not allowed to access contract from ${contractWithHistory.stateCode}`
-                : `User from state ${user.stateCode} not allowed to access contract from ${contractWithHistory.stateCode}`
+                : isStateUser(user)
+                  ? `User from state ${user.stateCode} not allowed to access contract from ${contractWithHistory.stateCode}`
+                  : `User not allowed to access contract from ${contractWithHistory.stateCode}`
             logError('fetchContract', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
 
