@@ -47,6 +47,7 @@ export function fetchContractResolver(
         if (!canRead(context)) {
             const authInfo = getAuthContextInfo(context)
             const errMessage = `OAuth client ${authInfo.clientId} does not have read permissions`
+            logError('fetchContract', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
 
             throw new GraphQLError(errMessage, {
