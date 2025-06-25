@@ -33,7 +33,7 @@ import {
     generateApplicableProvisionsList,
 } from '../../domain-models/contractAndRates'
 import type { GeneralizedModifiedProvisions } from '@mc-review/hpp'
-import { generateDocumentZip } from '../../s3/zip'
+import { generateDocumentZip } from '../../zip'
 
 const validateStatusAndUpdateInfo = (
     status: PackageStatusType,

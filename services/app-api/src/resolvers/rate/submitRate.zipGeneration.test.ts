@@ -6,7 +6,7 @@ import {
     createSubmitAndUnlockTestRate,
     submitTestRate,
 } from '../../testHelpers/gqlRateHelpers'
-import { generateDocumentZip } from '../../s3/zip'
+import { generateDocumentZip } from '../../zip'
 import { vi } from 'vitest'
 
 // Mock the zip generation function
