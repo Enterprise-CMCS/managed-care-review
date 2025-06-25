@@ -14,3 +14,4 @@
 
 ## PR Reminders
 - [ ] Updated the API Changelog (if this PR changes the API schema)
+- [ ] Checked accessibility with ANDI and Wave tools as needed
