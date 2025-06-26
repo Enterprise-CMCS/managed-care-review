@@ -79,6 +79,15 @@ export const main: APIGatewayTokenAuthorizerHandler = async (
     }
 }
 
+/**
+ * Generates an AWS API Gateway authorization policy
+ * @param userId - The user ID from the JWT token (undefined for invalid tokens)
+ * @param event - The API Gateway authorizer event
+ * @param context - Optional context object containing OAuth client information.
+ *                  When present, includes: clientId, grants, and isOAuthClient flag.
+ *                  This context is passed through to the GraphQL resolver for authorization.
+ *                  If missing, the request is treated as a regular user request.
+ */
 const generatePolicy = function (
     userId: string | undefined,
     event: APIGatewayTokenAuthorizerEvent,
