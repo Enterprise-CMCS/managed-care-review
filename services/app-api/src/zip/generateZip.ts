@@ -135,7 +135,7 @@ export async function generateDocumentZip(
                 const downloadResult = await downloadFile(
                     s3Client,
                     bucket,
-                    docInfo.key,
+                    'allusers/' + docInfo.key,
                     tempDir,
                     timeout
                 )
