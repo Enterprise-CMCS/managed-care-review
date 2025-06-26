@@ -104,7 +104,12 @@ export async function generateDocumentZip(
         // Prepare document keys for download
         const documentKeys = []
         for (const doc of documents) {
-            const keyResult = extractS3Key(doc.s3URL)
+            // NOTE: for some reason we don't store the actual s3 URL, we store some
+            // weird s3URL concatenated with the original filename. We have to drop the
+            // last /original.pdf off of the url to get the real s3URL[].
+            const urlParts = doc.s3URL.split('/')
+            const realS3URL = urlParts.slice(0, -1).join('/')
+            const keyResult = extractS3Key(realS3URL)
             if (keyResult instanceof Error) {
                 return keyResult
             }
