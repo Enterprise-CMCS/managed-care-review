@@ -82,6 +82,7 @@ fragment contractRevisionFragment on ContractRevision {
         s3URL
         sha256
         documentType
+        createdAt
         downloadUrl
     }
 }
