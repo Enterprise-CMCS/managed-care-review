@@ -25,7 +25,7 @@ Cypress.Commands.add('logInAsStateUser', () => {
     // Set up gql intercept for requests on app load
 
     cy.visit('/')
-    cy.findByText('Medicaid and CHIP Managed Care Reporting and Review System')
+    cy.findByText('Medicaid and CHIP Managed Care Reporting and Review System', { timeout: 20_000})
     cy.findByRole('link', { name: 'Sign In', timeout: 20_000 }).click()
     const authMode = Cypress.env('AUTH_MODE')
     console.info(authMode, 'authmode')
