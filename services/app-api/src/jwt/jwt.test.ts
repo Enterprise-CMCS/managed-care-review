@@ -30,17 +30,23 @@ describe('jwtLib', () => {
             const jwt = newJWTLib(config)
             const clientId = 'test-client'
             const grantType = 'client_credentials'
+            const userId = 'test-user-id'
+            const grants = ['read', 'write']
 
-            const token = jwt.createOAuthJWT(clientId, grantType)
+            const token = jwt.createOAuthJWT(clientId, grantType, userId, grants)
             const result = jwt.validateOAuthToken(token.key)
 
             expect(result).not.toBeInstanceOf(Error)
             const validatedToken = result as {
                 clientId: string
                 grantType: string
+                userId: string
+                grants: string[]
             }
             expect(validatedToken.clientId).toBe(clientId)
             expect(validatedToken.grantType).toBe(grantType)
+            expect(validatedToken.userId).toBe(userId)
+            expect(validatedToken.grants).toEqual(grants)
         })
 
         it('fails validation for standard tokens', () => {

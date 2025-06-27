@@ -9,7 +9,6 @@ import {
     setErrorAttributesOnActiveSpan,
 } from '../attributeHelper'
 import { GraphQLError } from 'graphql'
-import { mapPrismaUserToGraphQLUser } from './userMapping'
 
 export function updateOauthClientResolver(
     store: Store
@@ -72,10 +71,7 @@ export function updateOauthClientResolver(
         setSuccessAttributesOnActiveSpan(span)
 
         return {
-            oauthClient: {
-                ...updated,
-                user: mapPrismaUserToGraphQLUser(updated.user),
-            },
+            oauthClient: updated,
         }
     }
 }

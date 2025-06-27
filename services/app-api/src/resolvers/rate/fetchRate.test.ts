@@ -700,4 +700,92 @@ describe('fetchRate', () => {
             expect.objectContaining(dmcoCmsUser)
         )
     })
+
+    it('allows OAuth client with client_credentials to fetch rate', async () => {
+        const stateServer = await constructTestPostgresServer({
+            ldService,
+            s3Client: mockS3,
+        })
+
+        // Create contract and rate
+        const contract =
+            await createAndUpdateTestContractWithoutRates(stateServer)
+        const updatedContract = await addNewRateToTestContract(
+            stateServer,
+            contract
+        )
+        const rateID = updatedContract.draftRates?.[0]?.id
+
+        // Create OAuth client context
+        const oauthServer = await constructTestPostgresServer({
+            context: {
+                user: testCMSUser(), // CMS user for wider access
+                oauthClient: {
+                    clientId: 'test-oauth-client',
+                    grants: ['client_credentials'],
+                    isOAuthClient: true,
+                },
+            },
+            ldService,
+            s3Client: mockS3,
+        })
+
+        const fetchResult = await oauthServer.executeOperation({
+            query: FetchRateDocument,
+            variables: {
+                input: {
+                    rateID,
+                },
+            },
+        })
+
+        expect(fetchResult.errors).toBeUndefined()
+        expect(fetchResult.data?.fetchRate.rate).toBeDefined()
+        expect(fetchResult.data?.fetchRate.rate.id).toBe(rateID)
+    })
+
+    it('denies OAuth client without read permissions', async () => {
+        const stateServer = await constructTestPostgresServer({
+            ldService,
+            s3Client: mockS3,
+        })
+
+        // Create contract and rate
+        const contract =
+            await createAndUpdateTestContractWithoutRates(stateServer)
+        const updatedContract = await addNewRateToTestContract(
+            stateServer,
+            contract
+        )
+        const rateID = updatedContract.draftRates?.[0]?.id
+
+        // Create OAuth client context without client_credentials grant
+        const oauthServer = await constructTestPostgresServer({
+            context: {
+                user: testCMSUser(),
+                oauthClient: {
+                    clientId: 'test-oauth-client',
+                    grants: ['some_other_grant'],
+                    isOAuthClient: true,
+                },
+            },
+            ldService,
+            s3Client: mockS3,
+        })
+
+        const fetchResult = await oauthServer.executeOperation({
+            query: FetchRateDocument,
+            variables: {
+                input: {
+                    rateID,
+                },
+            },
+        })
+
+        expect(fetchResult.errors).toBeDefined()
+        expect(fetchResult.errors?.[0].extensions?.code).toBe('FORBIDDEN')
+        expect(fetchResult.errors?.[0].message).toBe(
+            'OAuth client test-oauth-client does not have read permissions'
+        )
+    })
 })

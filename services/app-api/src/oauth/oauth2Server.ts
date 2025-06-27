@@ -9,7 +9,7 @@ import OAuth2Server, {
     type User,
 } from '@node-oauth/oauth2-server'
 import type { ExtendedPrismaClient } from '../postgres/prismaClient'
-import { verifyClientCredentials } from '../postgres/oauth/oauthClientStore'
+import { verifyClientCredentials, getOAuthClientByClientId } from '../postgres/oauth/oauthClientStore'
 import { newJWTLib } from '../jwt'
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
 
@@ -98,7 +98,7 @@ export class CustomOAuth2Server {
         // as we're using JWTs
         return {
             ...token,
-            accessToken: this.generateJWT(client.id),
+            accessToken: await this.generateJWT(client.id),
             accessTokenExpiresAt: new Date(
                 Date.now() + JWT_EXPIRATION_SECONDS * 1000
             ),
@@ -121,8 +121,18 @@ export class CustomOAuth2Server {
     }
 
     // Helper method to generate JWT
-    private generateJWT(clientId: string): string {
-        const token = this.jwtLib.createOAuthJWT(clientId, 'client_credentials')
+    private async generateJWT(clientId: string): Promise<string> {
+        const clientResult = await getOAuthClientByClientId(this.prisma, clientId)
+        if (clientResult instanceof Error || !clientResult) {
+            throw new InvalidClientError('Client not found')
+        }
+        
+        const token = this.jwtLib.createOAuthJWT(
+            clientId, 
+            'client_credentials',
+            clientResult.user.id,
+            clientResult.grants
+        )
         return token.key
     }
 

@@ -4,12 +4,21 @@ import {
     setSuccessAttributesOnActiveSpan,
 } from '../attributeHelper'
 import { NotFoundError } from '../../postgres'
-import type { QueryResolvers, State } from '../../gen/gqlServer'
+import type { QueryResolvers } from '../../gen/gqlServer'
 import type { Store } from '../../postgres'
 import { GraphQLError } from 'graphql'
-import { isStateUser } from '../../domain-models'
+import {
+    isStateUser,
+    hasCMSPermissions,
+    hasAdminPermissions,
+} from '../../domain-models'
 import { logError } from '../../logger'
 import { ForbiddenError } from 'apollo-server-core'
+import {
+    canRead,
+    canAccessState,
+    getAuthContextInfo,
+} from '../../authorization/oauthAuthorization'
 
 export function fetchRateResolver(store: Store): QueryResolvers['fetchRate'] {
     return async (_parent, { input }, context) => {
@@ -39,20 +48,40 @@ export function fetchRateResolver(store: Store): QueryResolvers['fetchRate'] {
             })
         }
 
-        if (isStateUser(user)) {
-            const stateForCurrentUser: State['code'] = user.stateCode
-            if (rateWithHistory.stateCode !== stateForCurrentUser) {
-                logError(
-                    'fetchRate',
-                    'State users are not authorized to fetch rate data from a different state.'
-                )
-                setErrorAttributesOnActiveSpan(
-                    'State users are not authorized to fetch rate data from a different state.',
-                    span
-                )
-                throw new ForbiddenError(
-                    'State users are not authorized to fetch rate data from a different state.'
-                )
+        // Handle OAuth clients separately from regular users
+        if (context.oauthClient?.isOAuthClient) {
+            // Check OAuth client permissions
+            if (!canRead(context)) {
+                const authInfo = getAuthContextInfo(context)
+                const errMessage = `OAuth client ${authInfo.clientId} does not have read permissions`
+                logError('fetchRate', errMessage)
+                setErrorAttributesOnActiveSpan(errMessage, span)
+                throw new ForbiddenError(errMessage)
+            }
+
+            // Check OAuth client state access
+            if (!canAccessState(context, rateWithHistory.stateCode)) {
+                const authInfo = getAuthContextInfo(context)
+                const errMessage = `OAuth client ${authInfo.clientId} not authorized to fetch rate data from ${rateWithHistory.stateCode}`
+                logError('fetchRate', errMessage)
+                setErrorAttributesOnActiveSpan(errMessage, span)
+                throw new ForbiddenError(errMessage)
+            }
+        } else {
+            // Regular user authorization
+            if (isStateUser(user)) {
+                if (user.stateCode !== rateWithHistory.stateCode) {
+                    const errMessage =
+                        'State users are not authorized to fetch rate data from a different state.'
+                    logError('fetchRate', errMessage)
+                    setErrorAttributesOnActiveSpan(errMessage, span)
+                    throw new ForbiddenError(errMessage)
+                }
+            } else if (!hasCMSPermissions(user) && !hasAdminPermissions(user)) {
+                const errMessage = 'User not authorized to fetch rate data'
+                logError('fetchRate', errMessage)
+                setErrorAttributesOnActiveSpan(errMessage, span)
+                throw new ForbiddenError(errMessage)
             }
         }
 

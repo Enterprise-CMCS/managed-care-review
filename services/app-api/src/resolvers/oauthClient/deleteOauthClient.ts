@@ -9,7 +9,6 @@ import {
     setErrorAttributesOnActiveSpan,
 } from '../attributeHelper'
 import { GraphQLError } from 'graphql'
-import { mapPrismaUserToGraphQLUser } from './userMapping'
 
 export function deleteOauthClientResolver(
     store: Store
@@ -48,10 +47,7 @@ export function deleteOauthClientResolver(
         setSuccessAttributesOnActiveSpan(span)
 
         return {
-            oauthClient: {
-                ...deleted,
-                user: mapPrismaUserToGraphQLUser(deleted.user),
-            },
+            oauthClient: deleted,
         }
     }
 }

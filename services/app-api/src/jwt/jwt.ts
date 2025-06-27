@@ -12,6 +12,8 @@ interface OAuthTokenPayload {
     sub: string
     client_id: string
     grant_type: string
+    user_id: string
+    grants: string[]
     iat: number
     exp: number
 }
@@ -33,12 +35,16 @@ function createValidJWT(config: JWTConfig, userID: string): APIKeyType {
 function createOAuthJWT(
     config: JWTConfig,
     clientId: string,
-    grantType: string
+    grantType: string,
+    userId: string,
+    grants: string[]
 ): APIKeyType {
     const payload: OAuthTokenPayload = {
         sub: clientId,
         client_id: clientId,
         grant_type: grantType,
+        user_id: userId,
+        grants: grants,
         iat: Math.floor(Date.now() / 1000),
         exp: Math.floor(Date.now() / 1000) + config.expirationDurationS,
     }
@@ -75,20 +81,22 @@ function userIDFromToken(config: JWTConfig, token: string): string | Error {
 function validateOAuthToken(
     config: JWTConfig,
     token: string
-): { clientId: string; grantType: string } | Error {
+): { clientId: string; grantType: string; userId: string; grants: string[] } | Error {
     try {
         const decoded = verify(token, config.signingKey, {
             issuer: config.issuer,
             algorithms: ['HS256'],
         }) as OAuthTokenPayload
 
-        if (!decoded.client_id || !decoded.grant_type) {
+        if (!decoded.client_id || !decoded.grant_type || !decoded.user_id || !decoded.grants) {
             return new Error('Missing required OAuth claims')
         }
 
         return {
             clientId: decoded.client_id,
             grantType: decoded.grant_type,
+            userId: decoded.user_id,
+            grants: decoded.grants,
         }
     } catch (err) {
         console.error('Error decoding OAuth JWT', err)
@@ -96,13 +104,13 @@ function validateOAuthToken(
     }
 }
 
-interface JWTLib {
+export interface JWTLib {
     createValidJWT(userID: string): APIKeyType
-    createOAuthJWT(clientId: string, grantType: string): APIKeyType
+    createOAuthJWT(clientId: string, grantType: string, userId: string, grants: string[]): APIKeyType
     userIDFromToken(token: string): string | Error
     validateOAuthToken(
         token: string
-    ): { clientId: string; grantType: string } | Error
+    ): { clientId: string; grantType: string; userId: string; grants: string[] } | Error
 }
 
 export function newJWTLib(config: JWTConfig): JWTLib {
