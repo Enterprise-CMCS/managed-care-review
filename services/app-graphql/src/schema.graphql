@@ -612,6 +612,8 @@ input CreateHealthPlanPackageInput {
     programIDs: [ID!]!
     "Whether or not this contract is risk based"
     riskBasedContract: Boolean
+    "Whether or not this contract is associated with a Dual-Eligible Special Needs Plan (D-SNP) that covers Medicaid benefits"
+    dsnpContract: Boolean
     """
     The submission type of this package
     Options are CONTRACT_ONLY and CONTRACT_AND_RATES
@@ -641,6 +643,8 @@ input CreateContractInput {
     programIDs: [String!]!
     "Whether or not this contract is risk based"
     riskBasedContract: Boolean
+    "Whether or not this contract is associated with a Dual-Eligible Special Needs Plan (D-SNP) that covers Medicaid benefits"
+    dsnpContract: Boolean
     """
     The submission type of this package
     Options are CONTRACT_ONLY and CONTRACT_AND_RATES
@@ -1482,6 +1486,11 @@ type ContractFormData {
     non-risk based contracts do not have
     """
     riskBasedContract: Boolean
+    """
+    Whether or not this contract is associated with a Dual-Eligible Special Needs Plan (D-SNP)
+    that covers Medicaid benefits
+    """
+    dsnpContract: Boolean
     "State provided summary of the contract being submitted"
     submissionDescription: String!
     """
@@ -2359,6 +2368,8 @@ input ContractDraftRevisionFormDataInput {
     non-risk based contracts do not have
     """
     riskBasedContract: Boolean
+    "Whether or not this contract is associated with a Dual-Eligible Special Needs Plan (D-SNP) that covers Medicaid benefits"
+    dsnpContract: Boolean
     "State provided summary of the contract being submitted"
     submissionDescription: String
     """
