@@ -79,6 +79,14 @@ async function checkMimeTypes(
                 )
             }
 
+            // Skip MIME type validation for .zip files
+            if (originalFilename.toLowerCase().endsWith('.zip')) {
+                console.info(
+                    `Skipping MIME type validation for zip file: ${originalFilename}`
+                )
+                continue
+            }
+
             const declaredContentType = lookup(path.extname(originalFilename))
             if (declaredContentType === false) {
                 const err = new Error(`Could not lookup ${originalFilename}`)
