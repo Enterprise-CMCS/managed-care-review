@@ -26,6 +26,7 @@ async function insertDraftContract(
         programIDs,
         populationCovered,
         riskBasedContract,
+        dsnpContract,
         stateContacts,
         supportingDocuments,
         contractType,
@@ -74,6 +75,7 @@ async function insertDraftContract(
                         create: {
                             populationCovered: populationCovered,
                             programIDs: programIDs,
+                            dsnpContract: dsnpContract,
                             riskBasedContract: riskBasedContract,
                             submissionType: submissionType,
                             submissionDescription: submissionDescription,
