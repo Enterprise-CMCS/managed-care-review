@@ -137,8 +137,7 @@ export const OauthClientsTable = () => {
         (a, b) =>
             new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
     )
-    // console.log(data.fetchOauthClients.oauthClients[0])
-    // console.log(fetchOauthClientsResult.data.fetchOauthClients.oauthClients[0])
+
     return (
         <>
             <h2>Oauth clients</h2>

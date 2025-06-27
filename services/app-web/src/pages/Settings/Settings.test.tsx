@@ -10,6 +10,8 @@ import {
     mockValidAdminUser,
     updateDivisionMockSuccess,
     mockValidCMSUser,
+    fetchOauthClientsMockSuccess,
+    fetchOauthClientsMockFail,
 } from '@mc-review/mocks'
 import { renderWithProviders } from '../../testHelpers'
 import {
@@ -627,7 +629,7 @@ describe('Admin only settings page tests', () => {
 
         expect(within(zukRow).getByText('OACT')).toBeInTheDocument()
     })
-    it('renders Oauth clients combobox for admin user', async () => {
+    it('renders Oauth clients combobox and page for admin user', async () => {
         const { user } = renderWithProviders(<CommonSettingsRoute />, {
             apolloProvider: {
                 mocks: [
@@ -637,7 +639,7 @@ describe('Admin only settings page tests', () => {
                         statusCode: 200,
                     }),
                     fetchMcReviewSettingsMock(),
-                    //oactclients mock TODO
+                    fetchOauthClientsMockSuccess(),
                 ],
             },
             routerProvider: {
@@ -652,7 +654,93 @@ describe('Admin only settings page tests', () => {
 
         await user.click(oauthClientsLink)
 
-        expect(screen.findByText('Oauth clients')).toBeInTheDocument()
+        const clientTable = await screen.getByRole('table', {
+            name: 'Oauth clients',
+        })
+        const clientTableRows = await within(clientTable).findAllByRole('row')
+
+        await waitFor(() => {
+            expect(
+                screen.getByRole('heading', { name: 'Oauth clients' })
+            ).toBeInTheDocument()
+            expect(
+                screen.getByText(
+                    'The table below lists all Oauth clients and their assigned keys'
+                )
+            ).toBeInTheDocument()
+            expect(clientTable).toBeInTheDocument()
+            expect(clientTableRows).toHaveLength(2)
+            expect(
+                within(clientTable).getByRole('columnheader', {
+                    name: 'Contact email',
+                })
+            ).toBeInTheDocument()
+            expect(
+                within(clientTable).getByRole('columnheader', {
+                    name: 'Client ID',
+                })
+            ).toBeInTheDocument()
+            expect(
+                within(clientTable).getByRole('columnheader', {
+                    name: 'Client secret',
+                })
+            ).toBeInTheDocument()
+            expect(
+                within(clientTable).getByRole('columnheader', {
+                    name: 'Description',
+                })
+            ).toBeInTheDocument()
+            expect(
+                within(clientTable).getByRole('columnheader', {
+                    name: 'Grants',
+                })
+            ).toBeInTheDocument()
+            expect(
+                within(clientTable).getByText('oauth-client-123')
+            ).toBeInTheDocument()
+            expect(
+                within(clientTable).getByText('description placeholder test')
+            ).toBeInTheDocument()
+            expect(
+                within(clientTable).getByText('client_credentials')
+            ).toBeInTheDocument()
+            expect(
+                within(clientTable).getByText('refresh_token')
+            ).toBeInTheDocument()
+            expect(
+                within(clientTable).getByText('client-key-123')
+            ).toBeInTheDocument()
+        })
+    })
+    it('renders expected error page when Oauth Clients fails', async () => {
+        const { user } = renderWithProviders(<CommonSettingsRoute />, {
+            apolloProvider: {
+                mocks: [
+                    indexUsersQueryMock(),
+                    fetchCurrentUserMock({
+                        user: mockValidAdminUser(),
+                        statusCode: 200,
+                    }),
+                    fetchMcReviewSettingsMock(),
+                    fetchOauthClientsMockFail(),
+                ],
+            },
+            routerProvider: {
+                route: '/mc-review-settings',
+            },
+        })
+
+        const oauthClientsLink = await screen.findByRole('link', {
+            name: 'Oauth clients',
+        })
+        expect(oauthClientsLink).toBeInTheDocument()
+
+        await user.click(oauthClientsLink)
+
+        await waitFor(() => {
+            expect(screen.getByTestId('error-alert')).toBeInTheDocument()
+            expect(screen.queryByTestId('table')).not.toBeInTheDocument()
+        })
     })
     it('should display an error if updateUser fails', async () => {
         renderWithProviders(<CommonSettingsRoute />, {
