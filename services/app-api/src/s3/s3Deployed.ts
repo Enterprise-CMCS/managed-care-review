@@ -88,7 +88,9 @@ export function newDeployedS3Client(
             })
 
             // Create the presigned URL.
-            const signedUrl = await getSignedUrl(s3Client, command)
+            const signedUrl = await getSignedUrl(s3Client, command, {
+                expiresIn: 3600,
+            })
             return signedUrl
         },
         getBulkDlURL: async (
