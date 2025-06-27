@@ -68,11 +68,10 @@ async function checkMimeTypes(
 
     for (const [scanFileName, key] of Object.entries(filemap)) {
         try {
-            console.info(`scanfilename: ${scanFileName}, key: ${key}`)
             // Skip MIME type validation for .zip files
             if (key.toLowerCase().endsWith('.zip')) {
                 console.info(
-                    `Skipping MIME type validation for zip file: ${scanFileName}`
+                    `Skipping MIME type validation for zip file: ${key}`
                 )
                 continue
             }
