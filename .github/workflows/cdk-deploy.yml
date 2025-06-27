@@ -1,0 +1,415 @@
+name: CDK Deploy Pipeline
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'services/infra-cdk/**'
+      - '.github/workflows/cdk-deploy.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'services/infra-cdk/**'
+      - '.github/workflows/cdk-deploy.yml'
+
+env:
+  AWS_REGION: us-east-1
+  NODE_VERSION: '20.x'
+  CDK_DEFAULT_REGION: us-east-1
+
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: write
+
+jobs:
+  # Job 1: Run CDK diff on PR
+  cdk-diff:
+    name: CDK Diff
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        stage: [dev]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+          run_install: false
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          role-session-name: GitHubActions-CDK-Diff
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Install dependencies
+        working-directory: services/infra-cdk
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm run build
+
+      - name: Install AWS CDK
+        run: pnpm add -g aws-cdk@latest
+
+      - name: Load environment variables
+        working-directory: services/infra-cdk
+        run: |
+          # Load stage-specific environment variables
+          if [ -f ".env.${{ matrix.stage }}" ]; then
+            echo "Loading .env.${{ matrix.stage }}"
+            export $(cat .env.${{ matrix.stage }} | grep -v '^#' | xargs)
+          fi
+
+      - name: CDK Bootstrap check
+        working-directory: services/infra-cdk
+        env:
+          CDK_DEFAULT_ACCOUNT: ${{ secrets.AWS_ACCOUNT_ID }}
+        run: |
+          # Check if CDK is bootstrapped
+          cdk bootstrap --context stage=${{ matrix.stage }} || echo "Bootstrap check completed"
+
+      - name: CDK Synth
+        working-directory: services/infra-cdk
+        env:
+          CDK_DEFAULT_ACCOUNT: ${{ secrets.AWS_ACCOUNT_ID }}
+        run: |
+          cdk synth --context stage=${{ matrix.stage }} --quiet
+
+      - name: CDK Diff
+        id: cdk_diff
+        working-directory: services/infra-cdk
+        env:
+          CDK_DEFAULT_ACCOUNT: ${{ secrets.AWS_ACCOUNT_ID }}
+        run: |
+          # Run CDK diff and capture output
+          echo "## CDK Diff for stage: ${{ matrix.stage }}" >> diff_output.txt
+          echo '```' >> diff_output.txt
+          cdk diff --context stage=${{ matrix.stage }} 2>&1 | tee -a diff_output.txt || true
+          echo '```' >> diff_output.txt
+          
+          # Check if there are actual changes
+          if grep -q "There were no differences" diff_output.txt; then
+            echo "no_changes=true" >> $GITHUB_OUTPUT
+          else
+            echo "no_changes=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Comment PR with diff
+        uses: actions/github-script@v7
+        if: steps.cdk_diff.outputs.no_changes == 'false'
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const diffOutput = fs.readFileSync('services/infra-cdk/diff_output.txt', 'utf8');
+            
+            // Find existing comment
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            
+            const botComment = comments.find(comment => 
+              comment.user.type === 'Bot' && 
+              comment.body.includes(`CDK Diff for stage: ${{ matrix.stage }}`)
+            );
+            
+            const commentBody = `### 🔍 CDK Diff Results - ${{ matrix.stage }}\n\n${diffOutput}\n\n<details>\n<summary>Stack deployment order</summary>\n\n1. Foundation Stack\n2. Network Stack\n3. Data Stack & Auth Stack (parallel)\n4. Compute Stack\n5. API Stack\n6. Database Operations Stack & Virus Scanning Stack (parallel)\n7. Monitoring Stack\n\n</details>`;
+            
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: commentBody,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: commentBody,
+              });
+            }
+
+  # Job 2: Deploy on merge to main
+  cdk-deploy:
+    name: CDK Deploy
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        stage: [dev]
+      max-parallel: 1 # Deploy stages sequentially
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+          run_install: false
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          role-session-name: GitHubActions-CDK-Deploy
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Install dependencies
+        working-directory: services/infra-cdk
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm run build
+
+      - name: Install AWS CDK
+        run: pnpm add -g aws-cdk@latest
+
+      - name: Load environment variables
+        working-directory: services/infra-cdk
+        run: |
+          # Load stage-specific environment variables
+          if [ -f ".env.${{ matrix.stage }}" ]; then
+            echo "Loading .env.${{ matrix.stage }}"
+            export $(cat .env.${{ matrix.stage }} | grep -v '^#' | xargs)
+          fi
+          
+          # Set environment variables from GitHub secrets
+          echo "IAM_PERMISSIONS_BOUNDARY=${{ secrets.IAM_PERMISSIONS_BOUNDARY }}" >> $GITHUB_ENV
+          echo "IAM_PATH=${{ secrets.IAM_PATH }}" >> $GITHUB_ENV
+          echo "SAML_METADATA_URL=${{ secrets.SAML_METADATA_URL }}" >> $GITHUB_ENV
+          echo "VIRUS_SCAN_ALERT_EMAIL=${{ secrets.VIRUS_SCAN_ALERT_EMAIL }}" >> $GITHUB_ENV
+          echo "SLACK_WEBHOOK=${{ secrets.SLACK_WEBHOOK }}" >> $GITHUB_ENV
+
+      - name: CDK Bootstrap
+        working-directory: services/infra-cdk
+        env:
+          CDK_DEFAULT_ACCOUNT: ${{ secrets.AWS_ACCOUNT_ID }}
+        run: |
+          cdk bootstrap --context stage=${{ matrix.stage }}
+
+      - name: CDK Synth
+        working-directory: services/infra-cdk
+        env:
+          CDK_DEFAULT_ACCOUNT: ${{ secrets.AWS_ACCOUNT_ID }}
+        run: |
+          cdk synth --context stage=${{ matrix.stage }}
+
+      - name: Deploy Foundation Stack
+        working-directory: services/infra-cdk
+        env:
+          CDK_DEFAULT_ACCOUNT: ${{ secrets.AWS_ACCOUNT_ID }}
+        run: |
+          echo "🚀 Deploying Foundation Stack for ${{ matrix.stage }}..."
+          cdk deploy MCR-Foundation-${{ matrix.stage }} \
+            --context stage=${{ matrix.stage }} \
+            --require-approval never \
+            --ci
+
+      - name: Deploy Network Stack
+        working-directory: services/infra-cdk
+        env:
+          CDK_DEFAULT_ACCOUNT: ${{ secrets.AWS_ACCOUNT_ID }}
+        run: |
+          echo "🚀 Deploying Network Stack for ${{ matrix.stage }}..."
+          cdk deploy MCR-Network-${{ matrix.stage }} \
+            --context stage=${{ matrix.stage }} \
+            --require-approval never \
+            --ci
+
+      - name: Deploy Data and Auth Stacks (Parallel)
+        working-directory: services/infra-cdk
+        env:
+          CDK_DEFAULT_ACCOUNT: ${{ secrets.AWS_ACCOUNT_ID }}
+        run: |
+          echo "🚀 Deploying Data and Auth Stacks in parallel for ${{ matrix.stage }}..."
+          cdk deploy MCR-Data-${{ matrix.stage }} MCR-Auth-${{ matrix.stage }} \
+            --context stage=${{ matrix.stage }} \
+            --require-approval never \
+            --ci \
+            --concurrency 2
+
+      - name: Deploy Compute Stack
+        working-directory: services/infra-cdk
+        env:
+          CDK_DEFAULT_ACCOUNT: ${{ secrets.AWS_ACCOUNT_ID }}
+        run: |
+          echo "🚀 Deploying Compute Stack for ${{ matrix.stage }}..."
+          cdk deploy MCR-Compute-${{ matrix.stage }} \
+            --context stage=${{ matrix.stage }} \
+            --require-approval never \
+            --ci
+
+      - name: Deploy API Stack
+        working-directory: services/infra-cdk
+        env:
+          CDK_DEFAULT_ACCOUNT: ${{ secrets.AWS_ACCOUNT_ID }}
+        run: |
+          echo "🚀 Deploying API Stack for ${{ matrix.stage }}..."
+          cdk deploy MCR-Api-${{ matrix.stage }} \
+            --context stage=${{ matrix.stage }} \
+            --require-approval never \
+            --ci
+
+      - name: Deploy Database Operations and Virus Scanning Stacks (Parallel)
+        working-directory: services/infra-cdk
+        env:
+          CDK_DEFAULT_ACCOUNT: ${{ secrets.AWS_ACCOUNT_ID }}
+        run: |
+          echo "🚀 Deploying Database Operations and Virus Scanning Stacks in parallel for ${{ matrix.stage }}..."
+          cdk deploy MCR-DatabaseOps-${{ matrix.stage }} MCR-VirusScanning-${{ matrix.stage }} \
+            --context stage=${{ matrix.stage }} \
+            --require-approval never \
+            --ci \
+            --concurrency 2
+
+      - name: Deploy Monitoring Stack
+        working-directory: services/infra-cdk
+        env:
+          CDK_DEFAULT_ACCOUNT: ${{ secrets.AWS_ACCOUNT_ID }}
+        run: |
+          echo "🚀 Deploying Monitoring Stack for ${{ matrix.stage }}..."
+          cdk deploy MCR-Monitoring-${{ matrix.stage }} \
+            --context stage=${{ matrix.stage }} \
+            --require-approval never \
+            --ci
+
+      - name: Run CDK Validation Tests
+        working-directory: services/infra-cdk
+        run: |
+          echo "🧪 Running validation tests..."
+          pnpm run test:integration -- --stage=${{ matrix.stage }}
+
+      - name: Notify Slack on Success
+        if: success()
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          payload: |
+            {
+              "text": "✅ CDK Deployment Successful",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*✅ CDK Deployment Successful*\n*Stage:* `${{ matrix.stage }}`\n*Branch:* `${{ github.ref_name }}`\n*Commit:* `${{ github.sha }}`"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+
+      - name: Notify Slack on Failure
+        if: failure()
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          payload: |
+            {
+              "text": "❌ CDK Deployment Failed",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*❌ CDK Deployment Failed*\n*Stage:* `${{ matrix.stage }}`\n*Branch:* `${{ github.ref_name }}`\n*Commit:* `${{ github.sha }}`\n*Error:* Check GitHub Actions logs"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+
+  # Job 3: Cleanup on failure
+  cleanup:
+    name: Cleanup Failed Stacks
+    if: failure()
+    needs: [cdk-deploy]
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          role-session-name: GitHubActions-CDK-Cleanup
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Check for failed stacks
+        run: |
+          # List stacks in ROLLBACK_COMPLETE or CREATE_FAILED state
+          aws cloudformation list-stacks \
+            --stack-status-filter CREATE_FAILED ROLLBACK_COMPLETE \
+            --query "StackSummaries[?contains(StackName, 'MCR-')].[StackName,StackStatus]" \
+            --output table
+
+      - name: Notify about manual cleanup
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          payload: |
+            {
+              "text": "⚠️ CDK Stack Cleanup Required",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*⚠️ Failed stacks may require manual cleanup*\nPlease check CloudFormation console for stacks in ROLLBACK_COMPLETE or CREATE_FAILED state"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
