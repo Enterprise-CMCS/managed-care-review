@@ -140,6 +140,7 @@ model ContractRevisionTable {
   programIDs                                   String[]
   populationCovered                            PopulationCoverageType?
   riskBasedContract                            Boolean?
+  dsnpContract                                 Boolean?
   stateContacts                                StateContact[]
   supportingDocuments                          ContractSupportingDocument[]
   contractType                                 ContractType

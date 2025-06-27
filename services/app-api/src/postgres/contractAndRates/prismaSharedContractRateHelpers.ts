@@ -625,6 +625,10 @@ function contractFormDataToDomainModel(
             contractRevision.riskBasedContract !== null
                 ? contractRevision.riskBasedContract
                 : undefined,
+        dsnpContract:
+            contractRevision.dsnpContract !== null
+                ? contractRevision.dsnpContract
+                : undefined,
         stateContacts: contractRevision.stateContacts
             ? contractRevision.stateContacts.map((contact) => ({
                   name: contact.name ?? undefined,

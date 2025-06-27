@@ -33,6 +33,7 @@ fragment contractRevisionFragment on ContractRevision {
         submissionType
 
         riskBasedContract
+        dsnpContract
         submissionDescription
 
         stateContacts {
