@@ -15,6 +15,7 @@ import { ApolloError } from '@apollo/client'
 import { AssignedStaffUpdateBanner } from '../../components/Banner/AssignedStaffUpdateBanner/AssignedStaffUpdateBanner'
 import { useCurrentRoute } from '../../hooks'
 import { SETTINGS_HIDE_SIDEBAR_ROUTES } from '@mc-review/constants'
+import { useAuth } from '../../contexts/AuthContext'
 
 export const TestMonitoring = (): null => {
     const location = useLocation()
@@ -73,6 +74,8 @@ const mapStateAnalystFromDB = (
 }
 
 export const Settings = (): React.ReactElement => {
+    const { loggedInUser } = useAuth()
+    const isAdminUser = loggedInUser?.role === 'ADMIN_USER'
     const { currentRoute } = useCurrentRoute()
     const { pathname } = useLocation()
     const [lastUpdatedAnalysts, setLastUpdatedAnalysts] =
@@ -189,6 +192,16 @@ export const Settings = (): React.ReactElement => {
                             >
                                 Support emails
                             </NavLinkWithLogging>,
+                            isAdminUser && (
+                                <NavLinkWithLogging
+                                    to={RoutesRecord.OAUTH_CLIENTS}
+                                    className={isSelectedLink(
+                                        RoutesRecord.OAUTH_CLIENTS
+                                    )}
+                                >
+                                    Oauth clients
+                                </NavLinkWithLogging>
+                            ),
                         ]}
                     />
                 </div>
