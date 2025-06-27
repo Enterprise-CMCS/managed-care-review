@@ -1,0 +1,1 @@
+export { generateDocumentZip } from './generateZip'

@@ -140,9 +140,9 @@ describe('OAuth Token Handler', () => {
                 familyName: 'User',
                 email: 'testuser@example.com',
                 role: 'ADMIN_USER',
-            }
+            },
         })
-        
+
         // Create a test client
         await createOAuthClient(mockPrisma, {
             grants: ['client_credentials'],

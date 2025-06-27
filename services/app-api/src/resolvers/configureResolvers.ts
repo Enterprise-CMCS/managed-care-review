@@ -64,6 +64,7 @@ import { rateStrippedResolver } from './rate/rateResolver'
 import { indexRatesStripped } from './rate/indexRatesStripped'
 import { withdrawContract } from './contract/withdrawContract'
 import { undoWithdrawContract } from './contract/undoWithdrawContract'
+import { documentZipPackageResolver } from './documents'
 import {
     createOauthClientResolver,
     fetchOauthClientsResolver,
@@ -199,6 +200,7 @@ export function configureResolvers(
         ContractRevision: contractRevisionResolver(store),
         GenericDocument: genericDocumentResolver(s3Client),
         Document: questionResponseDocumentResolver(s3Client),
+        DocumentZipPackage: documentZipPackageResolver(s3Client),
         OauthClient: {
             user: (parent) => toDomainUser(parent.user),
         },
