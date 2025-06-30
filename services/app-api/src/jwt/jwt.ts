@@ -81,14 +81,21 @@ function userIDFromToken(config: JWTConfig, token: string): string | Error {
 function validateOAuthToken(
     config: JWTConfig,
     token: string
-): { clientId: string; grantType: string; userId: string; grants: string[] } | Error {
+):
+    | { clientId: string; grantType: string; userId: string; grants: string[] }
+    | Error {
     try {
         const decoded = verify(token, config.signingKey, {
             issuer: config.issuer,
             algorithms: ['HS256'],
         }) as OAuthTokenPayload
 
-        if (!decoded.client_id || !decoded.grant_type || !decoded.user_id || !decoded.grants) {
+        if (
+            !decoded.client_id ||
+            !decoded.grant_type ||
+            !decoded.user_id ||
+            !decoded.grants
+        ) {
             return new Error('Missing required OAuth claims')
         }
 
@@ -106,11 +113,23 @@ function validateOAuthToken(
 
 export interface JWTLib {
     createValidJWT(userID: string): APIKeyType
-    createOAuthJWT(clientId: string, grantType: string, userId: string, grants: string[]): APIKeyType
+    createOAuthJWT(
+        clientId: string,
+        grantType: string,
+        userId: string,
+        grants: string[]
+    ): APIKeyType
     userIDFromToken(token: string): string | Error
     validateOAuthToken(
         token: string
-    ): { clientId: string; grantType: string; userId: string; grants: string[] } | Error
+    ):
+        | {
+              clientId: string
+              grantType: string
+              userId: string
+              grants: string[]
+          }
+        | Error
 }
 
 export function newJWTLib(config: JWTConfig): JWTLib {

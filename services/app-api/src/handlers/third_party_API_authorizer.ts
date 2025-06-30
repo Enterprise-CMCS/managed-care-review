@@ -35,9 +35,11 @@ export const main: APIGatewayTokenAuthorizerHandler = async (
     event
 ): Promise<APIGatewayAuthorizerResult> => {
     const authToken = event.authorizationToken.replace('Bearer ', '')
+
     try {
         // Try to validate as OAuth token first
         const oauthResult = oauthJwtLib.validateOAuthToken(authToken)
+
         if (!(oauthResult instanceof Error)) {
             console.info({
                 message:

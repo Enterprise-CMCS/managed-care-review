@@ -9,7 +9,10 @@ import OAuth2Server, {
     type User,
 } from '@node-oauth/oauth2-server'
 import type { ExtendedPrismaClient } from '../postgres/prismaClient'
-import { verifyClientCredentials, getOAuthClientByClientId } from '../postgres/oauth/oauthClientStore'
+import {
+    verifyClientCredentials,
+    getOAuthClientByClientId,
+} from '../postgres/oauth/oauthClientStore'
 import { newJWTLib } from '../jwt'
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
 
@@ -60,7 +63,7 @@ export class CustomOAuth2Server {
      * @param client - The OAuth client
      * @returns A system user object
      */
-    async getUserFromClient(client: Client): Promise<User> {
+    async getUserFromClient(_client: Client): Promise<User> {
         // For client credentials flow, we return a system user
         return {
             id: 'system',
@@ -77,9 +80,9 @@ export class CustomOAuth2Server {
      * @returns Always returns true as we don't use scopes
      */
     async validateScope(
-        user: User,
-        client: Client,
-        scope: string
+        _user: User,
+        _client: Client,
+        _scope: string
     ): Promise<boolean> {
         // For client credentials flow, we don't need to validate scopes
         return true
@@ -114,7 +117,7 @@ export class CustomOAuth2Server {
      * @param accessToken - The access token to retrieve
      * @returns Always returns null as we don't store tokens
      */
-    async getAccessToken(accessToken: string): Promise<Token | null> {
+    async getAccessToken(_accessToken: string): Promise<Token | null> {
         // For client credentials flow, we don't need to retrieve tokens
         // as we're using JWTs
         return null
@@ -122,13 +125,16 @@ export class CustomOAuth2Server {
 
     // Helper method to generate JWT
     private async generateJWT(clientId: string): Promise<string> {
-        const clientResult = await getOAuthClientByClientId(this.prisma, clientId)
+        const clientResult = await getOAuthClientByClientId(
+            this.prisma,
+            clientId
+        )
         if (clientResult instanceof Error || !clientResult) {
             throw new InvalidClientError('Client not found')
         }
-        
+
         const token = this.jwtLib.createOAuthJWT(
-            clientId, 
+            clientId,
             'client_credentials',
             clientResult.user.id,
             clientResult.grants
