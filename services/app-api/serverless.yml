@@ -238,6 +238,19 @@ functions:
       - !Ref PrismaClientMigrationLambdaLayer
       - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-18-1:4
 
+  migrate_document_zips:
+    handler: src/handlers/migrate_document_zips.main
+    timeout: 900 # 15 minutes - zip generation can take time
+    memorySize: ${self:custom.lambdaMemory.${sls:stage}, self:custom.lambdaMemory.default}
+    ephemeralStorageSize: ${self:custom.lambdaTmp.${sls:stage}, self:custom.lambdaTmp.default}
+    vpc:
+      securityGroupIds:
+        - ${self:custom.sgId}
+      subnetIds: ${self:custom.privateSubnets}
+    layers:
+      - !Ref PrismaClientEngineLambdaLayer
+      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-18-1:4
+
   zip_keys:
     handler: src/handlers/bulk_download.main
     events:
