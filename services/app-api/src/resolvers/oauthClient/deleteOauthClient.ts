@@ -2,7 +2,7 @@ import type { MutationResolvers } from '../../gen/gqlServer'
 import type { Store } from '../../postgres'
 import type { Context } from '../../handlers/apollo_gql'
 import { logSuccess, logError } from '../../logger'
-import { ForbiddenError } from 'apollo-server-core'
+import { createForbiddenError } from '../errorUtils'
 import {
     setSuccessAttributesOnActiveSpan,
     setResolverDetailsOnActiveSpan,
@@ -26,7 +26,7 @@ export function deleteOauthClientResolver(
             const message = 'user not authorized to delete OAuth clients'
             logError('deleteOauthClient', message)
             setErrorAttributesOnActiveSpan(message, span)
-            throw new ForbiddenError(message)
+            throw createForbiddenError(message)
         }
 
         // Delete from DB

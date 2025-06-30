@@ -15,9 +15,8 @@ import {
 } from '../../../gen/gqlClient'
 
 import styles from '../Settings.module.scss'
-import { handleApolloError } from '@mc-review/helpers'
+import { handleGraphQLError } from '@mc-review/helpers'
 import { updateDivisionAssignment } from '@mc-review/helpers'
-import { ApolloError } from '@apollo/client'
 import { useTealium } from '../../../hooks'
 import { useAuth } from '../../../contexts/AuthContext'
 import { hasAdminUserPermissions } from '@mc-review/helpers'
@@ -217,8 +216,8 @@ export const DivisionAssignmentTable = (): React.ReactElement => {
 
             if (res instanceof Error) {
                 console.error('Errored attempting to update user: ', res)
-                if (res instanceof ApolloError) {
-                    handleApolloError(res, true)
+                if (res instanceof Error) {
+                    handleGraphQLError(res as any, true)
                 }
                 return res
             }

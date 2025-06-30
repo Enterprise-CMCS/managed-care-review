@@ -1,6 +1,6 @@
 import type { MutationResolvers } from '../../gen/gqlServer'
 import type { Store } from '../../postgres'
-import { ForbiddenError } from 'apollo-server-core'
+import { createForbiddenError } from '../errorUtils'
 
 export function createOauthClientResolver(
     store: Store
@@ -8,7 +8,7 @@ export function createOauthClientResolver(
     return async (_parent, { input }, context) => {
         const { user } = context
         if (!user || user.role !== 'ADMIN_USER') {
-            throw new ForbiddenError(
+            throw createForbiddenError(
                 'Only ADMIN users can create OAuth clients'
             )
         }

@@ -6,8 +6,8 @@ import {
     setErrorAttributesOnActiveSpan,
     setSuccessAttributesOnActiveSpan,
 } from '../attributeHelper'
-import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
-import { NotFoundError } from '../../postgres'
+import { createForbiddenError, createUserInputError } from '../errorUtils'
+import { NotFoundError, handleNotFoundError } from '../../postgres/postgresErrors'
 import { GraphQLError } from 'graphql/index'
 import type { Emailer } from '../../emailer'
 import type { StateCodeType } from '../../testHelpers'
@@ -24,7 +24,7 @@ export function createRateQuestionResolver(
             const msg = 'user not authorized to create a question'
             logError('createRateQuestion', msg)
             setErrorAttributesOnActiveSpan(msg, span)
-            throw new ForbiddenError(msg)
+            throw createForbiddenError(msg)
         }
 
         if (
@@ -36,14 +36,14 @@ export function createRateQuestionResolver(
                 'users without an assigned division are not authorized to create a question'
             logError('createRateQuestion', msg)
             setErrorAttributesOnActiveSpan(msg, span)
-            throw new ForbiddenError(msg)
+            throw createForbiddenError(msg)
         }
 
         if (input.documents.length === 0) {
             const msg = 'question documents are required'
             logError('createRateQuestion', msg)
             setErrorAttributesOnActiveSpan(msg, span)
-            throw new UserInputError(msg)
+            throw createUserInputError(msg)
         }
 
         const rate = await store.findRateWithHistory(input.rateID)
@@ -73,7 +73,7 @@ export function createRateQuestionResolver(
             const errMessage = `Issue creating question for rate. Message: Rate is in a invalid statius: ${rate.consolidatedStatus}`
             logError('createRateQuestion', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
-            throw new UserInputError(errMessage)
+            throw createUserInputError(errMessage)
         }
 
         const inputFormatted = {

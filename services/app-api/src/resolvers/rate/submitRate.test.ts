@@ -557,7 +557,7 @@ describe('submitRate', () => {
         })
 
         expect(result.errors).toBeDefined()
-        expect(result.errors?.[0].extensions?.message).toBe(
+        expect(result.errors?.[0].message).toBe(
             `Not authorized to edit and submit a rate independently, the feature is disabled`
         )
     })

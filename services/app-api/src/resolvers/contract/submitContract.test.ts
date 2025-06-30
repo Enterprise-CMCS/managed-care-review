@@ -1150,7 +1150,7 @@ describe('submitContract', () => {
                 path: ['submitContract'],
                 extensions: expect.objectContaining({
                     argumentName: 'contractID',
-                    cause: 'BAD_USER_INPUT',
+                    argumentValues: draft.id,
                     code: 'BAD_USER_INPUT',
                 }),
             }),
@@ -1726,9 +1726,7 @@ describe('submitContract', () => {
             })
 
             expect(submitResult.errors).toBeDefined()
-            expect(submitResult.errors?.[0].extensions?.message).toContain(
-                'Required'
-            )
+            expect(submitResult.errors?.[0].message).toContain('Required')
         }, 20000)
 
         it('successfully submits when contract 4348 attestation question is valid', async () => {
