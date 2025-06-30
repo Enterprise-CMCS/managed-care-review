@@ -900,7 +900,7 @@ importers:
         specifier: workspace:*
         version: link:../../packages/hpp
       aws-amplify:
-        specifier: ^5.3.1
+        specifier: 5.3.1
         version: 5.3.1(encoding@0.1.13)(react-native@0.74.3(@babel/core@7.24.7)(@babel/preset-env@7.24.8(@babel/core@7.24.7))(@types/react@18.3.3)(encoding@0.1.13)(react@18.3.1))
       axios:
         specifier: ^1.9.0
