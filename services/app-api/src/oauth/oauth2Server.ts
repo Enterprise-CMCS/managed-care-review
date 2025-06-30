@@ -145,8 +145,11 @@ export class CustomOAuth2Server {
     // Main method to handle token requests
     async token(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
         let body: Record<string, unknown> = {}
+        console.log('SHAMOON1 event', JSON.stringify(event, null, 2))
         const contentType =
             event.headers['Content-Type'] || event.headers['content-type']
+
+        console.log('SHAMOON1 ContentType', contentType)
 
         try {
             if (contentType?.includes('application/json')) {
