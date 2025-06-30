@@ -702,10 +702,9 @@ describe('Admin only settings page tests', () => {
                 within(clientTable).getByText('description placeholder test')
             ).toBeInTheDocument()
             expect(
-                within(clientTable).getByText('client_credentials')
-            ).toBeInTheDocument()
-            expect(
-                within(clientTable).getByText('refresh_token')
+                within(clientTable).getByText(
+                    'client_credentials, refresh_token'
+                )
             ).toBeInTheDocument()
             expect(
                 within(clientTable).getByText('client-key-123')
