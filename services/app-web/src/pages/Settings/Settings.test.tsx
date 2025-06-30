@@ -672,7 +672,7 @@ describe('Admin only settings page tests', () => {
             expect(clientTableRows).toHaveLength(2)
             expect(
                 within(clientTable).getByRole('columnheader', {
-                    name: 'Contact email',
+                    name: 'Client email',
                 })
             ).toBeInTheDocument()
             expect(
