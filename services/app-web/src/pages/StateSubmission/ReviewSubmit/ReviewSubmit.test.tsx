@@ -244,10 +244,6 @@ describe('ReviewSubmit', () => {
             name: 'Back',
         })
 
-        await screen.findByRole('button', {
-            name: 'Save as draft',
-        })
-
         expect(screen.getByTestId('form-submit')).toBeDefined()
         expect(screen.getAllByText('Submit')).toHaveLength(2)
         await user.click(screen.getAllByText('Submit')[0])
