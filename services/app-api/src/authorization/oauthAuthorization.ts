@@ -1,5 +1,4 @@
 import type { Context } from '../handlers/apollo_gql'
-import { isStateUser, isCMSUser, hasAdminPermissions } from '../domain-models'
 
 /**
  * Checks if the context represents an OAuth client with client_credentials grant
@@ -12,7 +11,8 @@ export function isOAuthClientCredentials(context: Context): boolean {
 }
 
 /**
- * Checks if the current context can read data (either regular user or OAuth client with credentials)
+ * Checks if the current context can read data
+ * OAuth clients must have client_credentials grant to read
  */
 export function canRead(context: Context): boolean {
     // If this is an OAuth client, check if it has client_credentials
@@ -20,63 +20,22 @@ export function canRead(context: Context): boolean {
         return isOAuthClientCredentials(context)
     }
 
-    // Regular authenticated users can read based on their role permissions
-    return true // All authenticated users can read something, role-specific restrictions apply per resolver
+    // Regular authenticated users can read
+    return true
 }
 
 /**
- * Checks if the current context can write data (OAuth clients cannot write)
+ * Checks if the current context can write data
+ * OAuth clients cannot write, only read
  */
 export function canWrite(context: Context): boolean {
-    // OAuth clients cannot write, only read
-    if (isOAuthClientCredentials(context)) {
+    // OAuth clients cannot write
+    if (context.oauthClient?.isOAuthClient) {
         return false
     }
 
-    // Regular users can write based on their role
-    return true // Role-specific write restrictions apply per resolver
-}
-
-/**
- * Enhanced state access check that considers OAuth client permissions
- * OAuth clients inherit the state access of their associated user
- */
-export function canAccessState(context: Context, stateCode: string): boolean {
-    const { user } = context
-
-    // For OAuth clients, check if their associated user can access the state
-    if (isOAuthClientCredentials(context)) {
-        // OAuth client inherits the state access permissions of its associated user
-        if (isStateUser(user)) {
-            return user.stateCode === stateCode
-        }
-        // CMS users and admins can access all states
-        return isCMSUser(user) || hasAdminPermissions(user)
-    }
-
-    // Regular user state access logic
-    if (isStateUser(user)) {
-        return user.stateCode === stateCode
-    }
-
-    // CMS users and admins can access all states
-    return isCMSUser(user) || hasAdminPermissions(user)
-}
-
-/**
- * Checks if the context has CMS-level permissions
- * OAuth clients inherit CMS permissions from their associated user
- */
-export function hasCMSPermissions(context: Context): boolean {
-    const { user } = context
-
-    // OAuth clients inherit permissions from their associated user
-    if (isOAuthClientCredentials(context)) {
-        return isCMSUser(user) || hasAdminPermissions(user)
-    }
-
-    // Regular user CMS permission check
-    return isCMSUser(user) || hasAdminPermissions(user)
+    // Regular users can write (subject to role-specific restrictions in resolvers)
+    return true
 }
 
 /**

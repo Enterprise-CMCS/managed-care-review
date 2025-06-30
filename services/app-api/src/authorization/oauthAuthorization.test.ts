@@ -5,8 +5,6 @@ import {
     isOAuthClientCredentials,
     canRead,
     canWrite,
-    canAccessState,
-    hasCMSPermissions,
     getAuthContextInfo,
 } from './oauthAuthorization'
 
@@ -18,8 +16,6 @@ const mockStateUser: UserType = {
     familyName: 'User',
     role: 'STATE_USER',
     stateCode: 'MN',
-    divisionAssignment: null,
-    stateAssignments: [],
 }
 
 const mockCMSUser: UserType = {
@@ -28,19 +24,7 @@ const mockCMSUser: UserType = {
     givenName: 'CMS',
     familyName: 'User',
     role: 'CMS_USER',
-    stateCode: null,
     divisionAssignment: 'DMCO',
-    stateAssignments: [],
-}
-
-const mockAdminUser: UserType = {
-    id: 'admin-user-1',
-    email: 'admin@example.com',
-    givenName: 'Admin',
-    familyName: 'User',
-    role: 'ADMIN_USER',
-    stateCode: null,
-    divisionAssignment: null,
     stateAssignments: [],
 }
 
@@ -55,7 +39,7 @@ describe('OAuth Authorization', () => {
                     isOAuthClient: true,
                 },
             }
-            
+
             expect(isOAuthClientCredentials(context)).toBe(true)
         })
 
@@ -63,7 +47,7 @@ describe('OAuth Authorization', () => {
             const context: Context = {
                 user: mockStateUser,
             }
-            
+
             expect(isOAuthClientCredentials(context)).toBe(false)
         })
 
@@ -76,7 +60,7 @@ describe('OAuth Authorization', () => {
                     isOAuthClient: true,
                 },
             }
-            
+
             expect(isOAuthClientCredentials(context)).toBe(false)
         })
     })
@@ -91,7 +75,7 @@ describe('OAuth Authorization', () => {
                     isOAuthClient: true,
                 },
             }
-            
+
             expect(canRead(context)).toBe(true)
         })
 
@@ -99,7 +83,7 @@ describe('OAuth Authorization', () => {
             const context: Context = {
                 user: mockStateUser,
             }
-            
+
             expect(canRead(context)).toBe(true)
         })
     })
@@ -114,7 +98,7 @@ describe('OAuth Authorization', () => {
                     isOAuthClient: true,
                 },
             }
-            
+
             expect(canWrite(context)).toBe(false)
         })
 
@@ -122,88 +106,8 @@ describe('OAuth Authorization', () => {
             const context: Context = {
                 user: mockStateUser,
             }
-            
+
             expect(canWrite(context)).toBe(true)
-        })
-    })
-
-    describe('canAccessState', () => {
-        it('allows OAuth client to access state based on associated user permissions', () => {
-            const context: Context = {
-                user: mockStateUser, // MN state user
-                oauthClient: {
-                    clientId: 'test-client',
-                    grants: ['client_credentials'],
-                    isOAuthClient: true,
-                },
-            }
-            
-            expect(canAccessState(context, 'MN')).toBe(true)
-            expect(canAccessState(context, 'CA')).toBe(false)
-        })
-
-        it('allows OAuth client with CMS user to access all states', () => {
-            const context: Context = {
-                user: mockCMSUser,
-                oauthClient: {
-                    clientId: 'test-client',
-                    grants: ['client_credentials'],
-                    isOAuthClient: true,
-                },
-            }
-            
-            expect(canAccessState(context, 'MN')).toBe(true)
-            expect(canAccessState(context, 'CA')).toBe(true)
-        })
-
-        it('follows normal state access rules for regular users', () => {
-            const context: Context = {
-                user: mockStateUser,
-            }
-            
-            expect(canAccessState(context, 'MN')).toBe(true)
-            expect(canAccessState(context, 'CA')).toBe(false)
-        })
-    })
-
-    describe('hasCMSPermissions', () => {
-        it('returns true for OAuth client with CMS user', () => {
-            const context: Context = {
-                user: mockCMSUser,
-                oauthClient: {
-                    clientId: 'test-client',
-                    grants: ['client_credentials'],
-                    isOAuthClient: true,
-                },
-            }
-            
-            expect(hasCMSPermissions(context)).toBe(true)
-        })
-
-        it('returns false for OAuth client with state user', () => {
-            const context: Context = {
-                user: mockStateUser,
-                oauthClient: {
-                    clientId: 'test-client',
-                    grants: ['client_credentials'],
-                    isOAuthClient: true,
-                },
-            }
-            
-            expect(hasCMSPermissions(context)).toBe(false)
-        })
-
-        it('returns true for OAuth client with admin user', () => {
-            const context: Context = {
-                user: mockAdminUser,
-                oauthClient: {
-                    clientId: 'test-client',
-                    grants: ['client_credentials'],
-                    isOAuthClient: true,
-                },
-            }
-            
-            expect(hasCMSPermissions(context)).toBe(true)
         })
     })
 
@@ -217,7 +121,7 @@ describe('OAuth Authorization', () => {
                     isOAuthClient: true,
                 },
             }
-            
+
             const info = getAuthContextInfo(context)
             expect(info).toEqual({
                 isOAuthClient: true,
@@ -232,7 +136,7 @@ describe('OAuth Authorization', () => {
             const context: Context = {
                 user: mockCMSUser,
             }
-            
+
             const info = getAuthContextInfo(context)
             expect(info).toEqual({
                 isOAuthClient: false,

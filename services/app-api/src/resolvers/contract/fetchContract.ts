@@ -13,7 +13,6 @@ import {
 } from '../../domain-models'
 import {
     canRead,
-    canAccessState,
     getAuthContextInfo,
 } from '../../authorization/oauthAuthorization'
 import { logError, logSuccess } from '../../logger'
@@ -52,27 +51,33 @@ export function fetchContractResolver(
             })
         }
 
-        // Handle OAuth clients separately from regular users
+        // Check OAuth client read permissions
+        if (!canRead(context)) {
+            const authInfo = getAuthContextInfo(context)
+            const errMessage = `OAuth client ${authInfo.clientId} does not have read permissions`
+            logError('fetchContract', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+
+            throw new GraphQLError(errMessage, {
+                extensions: {
+                    code: 'FORBIDDEN',
+                    cause: 'INSUFFICIENT_OAUTH_GRANTS',
+                },
+            })
+        }
+
+        // Log OAuth client access for audit trail
         if (context.oauthClient?.isOAuthClient) {
-            // Check OAuth client permissions
-            if (!canRead(context)) {
-                const authInfo = getAuthContextInfo(context)
-                const errMessage = `OAuth client ${authInfo.clientId} does not have read permissions`
-                logError('fetchContract', errMessage)
-                setErrorAttributesOnActiveSpan(errMessage, span)
+            logSuccess('fetchContract')
+        }
 
-                throw new GraphQLError(errMessage, {
-                    extensions: {
-                        code: 'FORBIDDEN',
-                        cause: 'INSUFFICIENT_OAUTH_GRANTS',
-                    },
-                })
-            }
-
-            // Check OAuth client state access
-            if (!canAccessState(context, contractWithHistory.stateCode)) {
+        // Authorization check (same for both OAuth clients and regular users)
+        if (isStateUser(user)) {
+            if (user.stateCode !== contractWithHistory.stateCode) {
                 const authInfo = getAuthContextInfo(context)
-                const errMessage = `OAuth client ${authInfo.clientId} not allowed to access contract from ${contractWithHistory.stateCode}`
+                const errMessage = authInfo.isOAuthClient
+                    ? `OAuth client ${authInfo.clientId} not allowed to access contract from ${contractWithHistory.stateCode}`
+                    : `User from state ${user.stateCode} not allowed to access contract from ${contractWithHistory.stateCode}`
                 logError('fetchContract', errMessage)
                 setErrorAttributesOnActiveSpan(errMessage, span)
 
@@ -83,33 +88,17 @@ export function fetchContractResolver(
                     },
                 })
             }
-        } else {
-            // Regular user authorization
-            if (isStateUser(user)) {
-                if (user.stateCode !== contractWithHistory.stateCode) {
-                    const errMessage = `User from state ${user.stateCode} not allowed to access contract from ${contractWithHistory.stateCode}`
-                    logError('fetchContract', errMessage)
-                    setErrorAttributesOnActiveSpan(errMessage, span)
+        } else if (!hasCMSPermissions(user) && !hasAdminPermissions(user)) {
+            const errMessage = 'User not allowed to access contract'
+            logError('fetchContract', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
 
-                    throw new GraphQLError(errMessage, {
-                        extensions: {
-                            code: 'FORBIDDEN',
-                            cause: 'INVALID_STATE_REQUESTER',
-                        },
-                    })
-                }
-            } else if (!hasCMSPermissions(user) && !hasAdminPermissions(user)) {
-                const errMessage = 'User not allowed to access contract'
-                logError('fetchContract', errMessage)
-                setErrorAttributesOnActiveSpan(errMessage, span)
-
-                throw new GraphQLError(errMessage, {
-                    extensions: {
-                        code: 'FORBIDDEN',
-                        cause: 'INVALID_STATE_REQUESTER',
-                    },
-                })
-            }
+            throw new GraphQLError(errMessage, {
+                extensions: {
+                    code: 'FORBIDDEN',
+                    cause: 'INVALID_STATE_REQUESTER',
+                },
+            })
         }
 
         logSuccess('fetchContract')

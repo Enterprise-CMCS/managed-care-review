@@ -19,7 +19,6 @@ import { GraphQLError } from 'graphql/index'
 import type { ContractOrErrorArrayType } from '../../postgres/contractAndRates/findAllContractsWithHistoryByState'
 import {
     canRead,
-    hasCMSPermissions as hasOAuthCMSPermissions,
     getAuthContextInfo,
 } from '../../authorization/oauthAuthorization'
 
@@ -74,96 +73,21 @@ export function indexContractsResolver(
         const span = tracer?.startSpan('indexContracts', {}, ctx)
         setResolverDetailsOnActiveSpan('indexContracts', user, span)
 
-        // Handle OAuth clients separately from regular users
-        if (context.oauthClient?.isOAuthClient) {
-            // Check OAuth client permissions first
-            if (!canRead(context)) {
-                const authInfo = getAuthContextInfo(context)
-                const errMessage = `OAuth client ${authInfo.clientId} does not have read permissions`
-                logError('indexContracts', errMessage)
-                setErrorAttributesOnActiveSpan(errMessage, span)
-                throw new ForbiddenError(errMessage)
-            }
-
-            // OAuth clients inherit the permissions of their associated user
-            if (isStateUser(user)) {
-                // OAuth client with state user - list contracts from user's state only
-                const contractsWithHistory =
-                    await store.findAllContractsWithHistoryByState(
-                        user.stateCode
-                    )
-
-                if (contractsWithHistory instanceof Error) {
-                    const errMessage = `Issue finding contracts with history by stateCode: ${user.stateCode}. Message: ${contractsWithHistory.message}`
-                    logError('indexContracts', errMessage)
-                    setErrorAttributesOnActiveSpan(errMessage, span)
-
-                    if (contractsWithHistory instanceof NotFoundError) {
-                        throw new GraphQLError(errMessage, {
-                            extensions: {
-                                code: 'NOT_FOUND',
-                                cause: 'DB_ERROR',
-                            },
-                        })
-                    }
-
-                    throw new GraphQLError(errMessage, {
-                        extensions: {
-                            code: 'INTERNAL_SERVER_ERROR',
-                            cause: 'DB_ERROR',
-                        },
-                    })
-                }
-                logSuccess('indexContracts')
-                setSuccessAttributesOnActiveSpan(span)
-                const parsedContracts = parseContracts(
-                    contractsWithHistory,
-                    span
-                )
-                return formatContracts(parsedContracts)
-            } else if (hasOAuthCMSPermissions(context)) {
-                // OAuth client with CMS user - list all submitted contracts
-                const contractsWithHistory =
-                    await store.findAllContractsWithHistoryBySubmitInfo(false)
-
-                if (contractsWithHistory instanceof Error) {
-                    const errMessage = `Issue finding contracts with history by submit info. Message: ${contractsWithHistory.message}`
-                    logError('indexContracts', errMessage)
-                    setErrorAttributesOnActiveSpan(errMessage, span)
-
-                    if (contractsWithHistory instanceof NotFoundError) {
-                        throw new GraphQLError(errMessage, {
-                            extensions: {
-                                code: 'NOT_FOUND',
-                                cause: 'DB_ERROR',
-                            },
-                        })
-                    }
-
-                    throw new GraphQLError(errMessage, {
-                        extensions: {
-                            code: 'INTERNAL_SERVER_ERROR',
-                            cause: 'DB_ERROR',
-                        },
-                    })
-                }
-                logSuccess('indexContracts')
-                setSuccessAttributesOnActiveSpan(span)
-                const parsedContracts = parseContracts(
-                    contractsWithHistory,
-                    span
-                )
-                return formatContracts(parsedContracts)
-            } else {
-                const authInfo = getAuthContextInfo(context)
-                const errMsg = `OAuth client ${authInfo.clientId} not authorized to fetch contract data`
-                logError('indexContracts', errMsg)
-                setErrorAttributesOnActiveSpan(errMsg, span)
-                throw new ForbiddenError(errMsg)
-            }
+        // Check OAuth client read permissions
+        if (!canRead(context)) {
+            const authInfo = getAuthContextInfo(context)
+            const errMessage = `OAuth client ${authInfo.clientId} does not have read permissions`
+            logError('indexContracts', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+            throw new ForbiddenError(errMessage)
         }
 
-        // Regular user authorization (non-OAuth)
+        // Log OAuth client access for audit trail
+        if (context.oauthClient?.isOAuthClient) {
+            logSuccess('indexContracts')
+        }
+
+        // Authorization check (same for both OAuth clients and regular users)
         if (isStateUser(user)) {
             const contractsWithHistory =
                 await store.findAllContractsWithHistoryByState(user.stateCode)
@@ -224,7 +148,10 @@ export function indexContractsResolver(
 
             return formatContracts(parsedContracts)
         } else {
-            const errMsg = 'user not authorized to fetch state data'
+            const authInfo = getAuthContextInfo(context)
+            const errMsg = authInfo.isOAuthClient
+                ? `OAuth client ${authInfo.clientId} not authorized to fetch contract data`
+                : 'user not authorized to fetch state data'
             logError('indexContracts', errMsg)
             setErrorAttributesOnActiveSpan(errMsg, span)
             throw new ForbiddenError(errMsg)
