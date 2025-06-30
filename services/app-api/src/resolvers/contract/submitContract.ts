@@ -85,7 +85,9 @@ export function submitContract(
                 'user not authorized to fetch state data',
                 span
             )
-            throw createForbiddenError('user not authorized to fetch state data')
+            throw createForbiddenError(
+                'user not authorized to fetch state data'
+            )
         }
         const stateFromCurrentUser: State['code'] = user.stateCode
 
@@ -258,7 +260,7 @@ export function submitContract(
                 const errMessage = `Attempted to submit a contract and rates contract without rates: ${parsedContract.id}`
                 logError('submitContract', errMessage)
                 setErrorAttributesOnActiveSpan(errMessage, span)
-                throw createUserInputError(errMessage, 'contractID')
+                throw createUserInputError(errMessage, 'contractID', contractID)
             }
 
             //Ensure included rates are in a valid state
@@ -271,7 +273,11 @@ export function submitContract(
                         const errMessage = `Attempted to submit a contract with a withdrawn rate. Rate id: ${draftRate.id}`
                         logError('submitContract', errMessage)
                         setErrorAttributesOnActiveSpan(errMessage, span)
-                        throw createUserInputError(errMessage, 'rateID')
+                        throw createUserInputError(
+                            errMessage,
+                            'rateID',
+                            draftRate.id
+                        )
                     }
                 }
             }

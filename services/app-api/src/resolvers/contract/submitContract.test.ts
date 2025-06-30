@@ -1150,7 +1150,7 @@ describe('submitContract', () => {
                 path: ['submitContract'],
                 extensions: expect.objectContaining({
                     argumentName: 'contractID',
-                    cause: 'BAD_USER_INPUT',
+                    argumentValues: draft.id,
                     code: 'BAD_USER_INPUT',
                 }),
             }),
