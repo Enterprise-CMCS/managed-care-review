@@ -3,7 +3,7 @@
 
 ### June 27, 2025
 #### Added
-- `dsnpContract` field (`boolean` type) added to `ContractRevision`. This affects, `CreateContract`, `FetchContract`, `UpdateContractDraftRevision` and `SubmitContract` endpoints
+- `dsnpContract` optional field (`boolean` type) added to `ContractRevision`. This affects, `CreateContract`, `FetchContract`, `UpdateContractDraftRevision` and `SubmitContract` endpoints
 
 ### June 20, 2025
 #### Added

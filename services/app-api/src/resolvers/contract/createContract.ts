@@ -62,7 +62,6 @@ export function createContract(
             populationCovered: input.populationCovered,
             programIDs: input.programIDs,
             riskBasedContract: input.riskBasedContract ?? undefined,
-            dsnpContract: input.dsnpContract ?? undefined,
             submissionDescription: input.submissionDescription,
             submissionType: input.submissionType,
             contractType: input.contractType,
