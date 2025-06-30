@@ -3,7 +3,7 @@ import { GraphQLError } from 'graphql'
 import { isValidCmsDivison, hasAdminPermissions } from '../../domain-models'
 import type { MutationResolvers } from '../../gen/gqlServer'
 import { logError, logSuccess } from '../../logger'
-import { NotFoundError, handleNotFoundError } from '../../postgres'
+import { NotFoundError } from '../../postgres'
 import type { Store } from '../../postgres'
 import {
     setErrorAttributesOnActiveSpan,
@@ -68,7 +68,7 @@ export function updateDivisionAssignment(
                 const errMsg = 'cmsUserID does not exist'
                 logError('updateDivisionAssignment', errMsg)
                 setErrorAttributesOnActiveSpan(errMsg, span)
-                throw handleNotFoundError(result)
+                throw createUserInputError(errMsg, 'cmsUserID', cmsUserID)
             }
 
             const errMsg = `Issue assigning states to user. Message: ${result.message}`

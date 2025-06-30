@@ -9,7 +9,7 @@ import { createForbiddenError, createUserInputError } from '../errorUtils'
 import { hasAdminPermissions, hasCMSPermissions } from '../../domain-models'
 import type { StateCodeType } from '@mc-review/hpp'
 import { isValidStateCode } from '@mc-review/hpp'
-import { NotFoundError, handleNotFoundError } from '../../postgres'
+import { NotFoundError } from '../../postgres'
 import { GraphQLError } from 'graphql/index'
 
 export function updateStateAssignment(
@@ -90,7 +90,7 @@ export function updateStateAssignment(
                 const errMsg = 'cmsUserID does not exist'
                 logError('updateStateAssignment', errMsg)
                 setErrorAttributesOnActiveSpan(errMsg, span)
-                throw handleNotFoundError(result)
+                throw createUserInputError(errMsg, 'cmsUserID', cmsUserID)
             }
 
             const errMsg = `Issue assigning states to user. Message: ${result.message}`
