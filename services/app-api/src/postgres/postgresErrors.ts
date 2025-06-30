@@ -33,17 +33,30 @@ export const handleNotFoundError = (error: NotFoundError): GraphQLError => {
 
 /**
  * Converts UserInputPostgresError to GraphQLError with appropriate extensions
+ * @param error - The UserInputPostgresError to convert
+ * @param argumentName - The name of the invalid argument
+ * @param argumentValues - The actual invalid values (optional)
  */
 export const handleUserInputPostgresError = (
     error: UserInputPostgresError,
-    argumentName?: string
+    argumentName?: string,
+    argumentValues?: unknown
 ): GraphQLError => {
+    const extensions: Record<string, unknown> = {
+        code: 'BAD_USER_INPUT',
+        cause: 'BAD_USER_INPUT',
+    }
+
+    if (argumentName) {
+        extensions.argumentName = argumentName
+    }
+
+    if (argumentValues !== undefined) {
+        extensions.argumentValues = argumentValues
+    }
+
     return new GraphQLError(error.message, {
-        extensions: {
-            code: 'BAD_USER_INPUT',
-            argumentName,
-            cause: 'BAD_USER_INPUT',
-        },
+        extensions,
     })
 }
 

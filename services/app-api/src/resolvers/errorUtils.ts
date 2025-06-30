@@ -11,14 +11,21 @@ export function createForbiddenError(message: string): GraphQLError {
 
 /**
  * Creates a GraphQLError with BAD_USER_INPUT code for form validation errors
+ * @param message - The error message
+ * @param argumentName - The name of the invalid argument
+ * @param argumentValues - The actual invalid values (optional)
  */
 export function createUserInputError(
     message: string,
-    argumentName?: string
+    argumentName?: string,
+    argumentValues?: unknown
 ): GraphQLError {
     const extensions: Record<string, unknown> = { code: 'BAD_USER_INPUT' }
     if (argumentName) {
         extensions.argumentName = argumentName
+    }
+    if (argumentValues !== undefined) {
+        extensions.argumentValues = argumentValues
     }
     return new GraphQLError(message, {
         extensions,
