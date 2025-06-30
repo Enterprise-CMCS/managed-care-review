@@ -44,7 +44,7 @@ import {
     AutomatedEmailsTable,
     SupportEmailsTable,
     DivisionAssignmentTable,
-    OauthClientsTable,
+    OauthClients,
 } from '../Settings/SettingsTables'
 import { EditStateAssign } from '../Settings/EditStateAssign/EditStateAssign'
 import {
@@ -342,7 +342,7 @@ const CMSUserRoutes = ({
                     />
                     <Route
                         path={RoutesRecord.OAUTH_CLIENTS}
-                        element={<OauthClientsTable />}
+                        element={<OauthClients />}
                     />
                     <Route
                         path={RoutesRecord.EDIT_STATE_ASSIGNMENTS}

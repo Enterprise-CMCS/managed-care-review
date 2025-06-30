@@ -13,7 +13,7 @@ import { Table } from '@trussworks/react-uswds'
 import styles from '../Settings.module.scss'
 import { wrapApolloResult } from '@mc-review/helpers'
 
-const OauthClientTableWithData = ({
+const OauthClientTable = ({
     authClients,
 }: {
     authClients: OauthClient[]
@@ -21,15 +21,15 @@ const OauthClientTableWithData = ({
     const columns = useMemo(() => {
         const columnHelper = createColumnHelper<OauthClient>()
         return [
-            columnHelper.accessor('user.email', {
-                id: 'contactEmail',
-                cell: (info) => info.getValue(),
-                header: 'Contact email',
-            }),
             columnHelper.accessor('clientId', {
                 id: 'clientId',
                 cell: (info) => info.getValue(),
                 header: 'Client ID',
+            }),
+            columnHelper.accessor('user.email', {
+                id: 'contactEmail',
+                cell: (info) => info.getValue(),
+                header: 'Client email',
             }),
             columnHelper.accessor('clientSecret', {
                 id: 'clientSecret',
@@ -52,19 +52,7 @@ const OauthClientTableWithData = ({
             }),
             columnHelper.accessor('grants', {
                 id: 'grants',
-                cell: (info) => {
-                    const grantsArray = info.getValue()
-
-                    return (
-                        grantsArray.length && (
-                            <div>
-                                {grantsArray.map((grant, index) => (
-                                    <div key={index}>{grant}</div>
-                                ))}
-                            </div>
-                        )
-                    )
-                },
+                cell: (info) => info.getValue().join(', '),
                 header: 'Grants',
             }),
         ]
@@ -87,7 +75,7 @@ const OauthClientTableWithData = ({
                 {table.getHeaderGroups().map((headerGroup) => (
                     <tr key={headerGroup.id}>
                         {headerGroup.headers.map((header) => (
-                            <th key={header.id}>
+                            <th key={header.id} scope="col">
                                 {header.isPlaceholder
                                     ? null
                                     : flexRender(
@@ -117,7 +105,7 @@ const OauthClientTableWithData = ({
     )
 }
 
-export const OauthClientsTable = () => {
+export const OauthClients = () => {
     const { result: fetchOauthClientsResult } = wrapApolloResult(
         useFetchOauthClientsQuery({
             fetchPolicy: 'cache-and-network',
@@ -145,7 +133,7 @@ export const OauthClientsTable = () => {
                 The table below lists all Oauth clients and their assigned keys
             </p>
             {clientsArray.length ? (
-                <OauthClientTableWithData authClients={clientsArray} />
+                <OauthClientTable authClients={clientsArray} />
             ) : (
                 <div>
                     <p>No Oauth clients to display</p>

@@ -28,7 +28,7 @@ import {
     DivisionAssignmentTable,
     SupportEmailsTable,
     AutomatedEmailsTable,
-    OauthClientsTable,
+    OauthClients,
 } from './SettingsTables'
 import { fetchMcReviewSettingsFailMock } from '@mc-review/mocks'
 import { indexUsersQueryFailMock } from '@mc-review/mocks'
@@ -76,7 +76,7 @@ const CommonSettingsRoute = () => (
             />
             <Route
                 path={RoutesRecord.OAUTH_CLIENTS}
-                element={<OauthClientsTable />}
+                element={<OauthClients />}
             />
         </Route>
     </Routes>
