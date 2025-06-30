@@ -54,7 +54,11 @@ export function createContract(
             )} not exist in state ${stateFromCurrentUser}`
             logError('createContract', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
-            throw createUserInputError(errMessage, 'programIDs')
+            throw createUserInputError(
+                errMessage,
+                'programIDs',
+                input.programIDs
+            )
         }
 
         const insertArgs: InsertContractArgsType = {

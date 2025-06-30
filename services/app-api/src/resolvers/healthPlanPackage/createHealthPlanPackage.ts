@@ -53,7 +53,11 @@ export function createHealthPlanPackageResolver(
             )} not exist in state ${stateFromCurrentUser}`
             logError('createHealthPlanPackage', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
-            throw createUserInputError(errMessage, 'programIDs')
+            throw createUserInputError(
+                errMessage,
+                'programIDs',
+                input.programIDs
+            )
         }
 
         // Why do we need to do this? I feel like I don't understand Maybe here exactly.

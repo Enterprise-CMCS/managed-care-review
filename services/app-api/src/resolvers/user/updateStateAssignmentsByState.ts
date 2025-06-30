@@ -9,7 +9,11 @@ import { logError } from '../../logger'
 import { createForbiddenError, createUserInputError } from '../errorUtils'
 import { hasAdminPermissions, hasCMSPermissions } from '../../domain-models'
 import { isValidStateCode } from '@mc-review/hpp'
-import { NotFoundError, handleNotFoundError, handleUserInputPostgresError } from '../../postgres'
+import {
+    NotFoundError,
+    handleNotFoundError,
+    handleUserInputPostgresError,
+} from '../../postgres'
 import { GraphQLError } from 'graphql/index'
 
 // Update cms users assigned to a specific state
@@ -42,14 +46,14 @@ export function updateStateAssignmentsByState(
             const errMsg = 'cannot update state assignments for invalid state'
             logError('updateStateAssignmentsByState', errMsg)
             setErrorAttributesOnActiveSpan(errMsg, span)
-            throw createUserInputError(errMsg, 'stateCode')
+            throw createUserInputError(errMsg, 'stateCode', stateCode)
         }
 
         if (assignedUsers.length === 0) {
             const msg = 'cannot update state assignments with no assignments'
             logError('updateStateAssignmentsByState', msg)
             setErrorAttributesOnActiveSpan(msg, span)
-            throw createUserInputError(msg, 'assignedUsers')
+            throw createUserInputError(msg, 'assignedUsers', assignedUsers)
         }
 
         const result = await store.updateStateAssignedUsers(
@@ -70,7 +74,11 @@ export function updateStateAssignmentsByState(
                 const errMsg = result.message
                 logError('updateStateAssignmentsByState', errMsg)
                 setErrorAttributesOnActiveSpan(errMsg, span)
-                throw handleUserInputPostgresError(result, 'assignedUsers')
+                throw handleUserInputPostgresError(
+                    result,
+                    'assignedUsers',
+                    assignedUsers
+                )
             }
 
             const errMsg = `Issue assigning states to user. Message: ${result.message}`

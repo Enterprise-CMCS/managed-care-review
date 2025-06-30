@@ -60,13 +60,21 @@ export function updateStateAssignment(
                     'cannot update state assignments with invalid assignments'
                 logError('updateStateAssignment', errMsg)
                 setErrorAttributesOnActiveSpan(errMsg, span)
-                throw createUserInputError(errMsg, 'stateAssignments')
+                throw createUserInputError(
+                    errMsg,
+                    'stateAssignments',
+                    invalidStateCodes
+                )
             }
         } else {
             const msg = 'cannot update state assignments with no assignments'
             logError('updateStateAssignment', msg)
             setErrorAttributesOnActiveSpan(msg, span)
-            throw createUserInputError(msg, 'stateAssignments')
+            throw createUserInputError(
+                msg,
+                'stateAssignments',
+                stateAssignments
+            )
         }
 
         const result = await store.updateCmsUserProperties(

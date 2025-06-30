@@ -70,7 +70,11 @@ export function updateEmailSettings(
             const msg = `Invalid email settings: ${validatedEmailSettings.error}`
             logError('updateEmailSettings', msg)
             setErrorAttributesOnActiveSpan(msg, span)
-            throw createUserInputError(msg, 'emailConfiguration')
+            throw createUserInputError(
+                msg,
+                'emailConfiguration',
+                emailConfiguration
+            )
         }
 
         const updatedEmailSettings =

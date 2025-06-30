@@ -48,7 +48,11 @@ export function updateDivisionAssignment(
                 const errMsg = 'Invalid division assignment'
                 logError('updateDivisionAssignment', errMsg)
                 setErrorAttributesOnActiveSpan(errMsg, span)
-                throw createUserInputError(errMsg, 'divisionAssignment')
+                throw createUserInputError(
+                    errMsg,
+                    'divisionAssignment',
+                    divisionAssignment
+                )
             }
         }
 
