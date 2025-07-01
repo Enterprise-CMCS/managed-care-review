@@ -258,7 +258,9 @@ export const EditStateAssign = (): React.ReactElement => {
                                         <Label htmlFor={'dmcoAssignmentsByID'}>
                                             Update DMCO staff
                                         </Label>
-                                        <span>Required</span>
+                                        <span className="usa-hint">
+                                            Required
+                                        </span>
                                         {showFieldErrors(
                                             errors.dmcoAssignmentsByID
                                         ) && (
