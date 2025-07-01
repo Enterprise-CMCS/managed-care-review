@@ -76,7 +76,7 @@ const RoutesRecord: Record<RouteT, string> = {
     AUTOMATED_EMAILS: '/mc-review-settings/automated-emails',
     SUPPORT_EMAILS: '/mc-review-settings/support-emails',
     OAUTH_CLIENTS: '/mc-review-settings/oauth-clients',
-    CREATE_OAUTH_CLIENT: '/mc-review-settings/oauth-client/create-oauth-client',
+    CREATE_OAUTH_CLIENT: '/mc-review-settings/oauth-clients/create-oauth-client',
     RATES_SUMMARY: '/rates/:id',
     RATES_SUMMARY_QUESTIONS_AND_ANSWERS: '/rates/:id/question-and-answers',
     RATE_EDIT: '/rates/:id/edit',
