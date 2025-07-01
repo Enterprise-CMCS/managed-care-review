@@ -13,3 +13,7 @@ export type {
 export {
     FieldSelect
 } from './FieldSelect/FieldSelect'
+
+export {
+    AccessibleSelect
+} from './AccessibleSelect/AccessibleSelect'
