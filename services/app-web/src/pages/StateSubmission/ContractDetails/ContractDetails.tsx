@@ -649,7 +649,7 @@ export const ContractDetails = ({
                                                         Document definitions and
                                                         requirements
                                                     </LinkWithLogging>
-                                                    <span className="padding-top-05">
+                                                    <span className="mcr-note padding-top-05">
                                                         Supporting documents can
                                                         be added later. If you
                                                         have additional contract
@@ -657,7 +657,7 @@ export const ContractDetails = ({
                                                         them in a separate
                                                         submission.
                                                     </span>
-                                                    <span className="padding-top-1">
+                                                    <span className="usa-hint padding-top-1">
                                                         This input only accepts
                                                         PDF, CSV, DOC, DOCX,
                                                         XLS, XLSX files.
@@ -726,13 +726,13 @@ export const ContractDetails = ({
                                                             Document definitions
                                                             and requirements
                                                         </LinkWithLogging>
-                                                        <span className="padding-top-05">
+                                                        <span className="mcr-note padding-top-05">
                                                             Upload any
                                                             supporting documents
                                                             related to the
                                                             contract.
                                                         </span>
-                                                        <span className="padding-top-1">
+                                                        <span className="usa-hint padding-top-1">
                                                             This input only
                                                             accepts PDF, CSV,
                                                             DOC, DOCX, XLS, XLSX
