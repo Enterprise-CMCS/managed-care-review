@@ -92,6 +92,10 @@ describe('fetchOauthClients', () => {
 
         // Create CMS user in database with state assignments
         const client = await sharedTestPrismaClient()
+
+        // Clean up any existing OAuth clients to ensure test isolation
+        await client.oAuthClient.deleteMany()
+
         await client.user.create({
             data: {
                 id: cmsUser.id,
@@ -136,15 +140,17 @@ describe('fetchOauthClients', () => {
         expect(res.errors).toBeUndefined()
         const oauthClients = res.data?.fetchOauthClients.oauthClients
         expect(Array.isArray(oauthClients)).toBe(true)
+        expect(oauthClients).toHaveLength(1) // Since we cleaned up before creating one
 
         // Verify our created client is in the results
-        const ourClient = oauthClients.find(
-            (c: { clientId: string }) => c.clientId === createdClientId
-        )
-        expect(ourClient).toBeDefined()
+        const ourClient = oauthClients[0]
+        expect(ourClient.clientId).toBe(createdClientId)
+        expect(ourClient.user).toBeDefined()
         expect(ourClient.user.id).toBe(cmsUser.id)
         expect(ourClient.user.stateAssignments).toBeDefined()
         expect(Array.isArray(ourClient.user.stateAssignments)).toBe(true)
+        expect(ourClient.user.stateAssignments).toHaveLength(1)
+        expect(ourClient.user.stateAssignments[0].code).toBe('FL')
     })
 
     it('fetches only specified clientIds', async () => {
