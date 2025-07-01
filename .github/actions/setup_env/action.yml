@@ -46,10 +46,10 @@ runs:
       shell: bash
       run: PRISMA_CLI_BINARY_TARGETS=rhel-openssl-3.0.x pnpm install --frozen-lockfile
 
-    - name: Show aws-amplify version
+    - name: Check installed version in cypress
       shell: bash
-      run: node -p "require('./services/cypress/package.json').dependencies['aws-amplify']"
-
+      run: pnpm --filter ./services/cypress list aws-amplify --depth=0
+    
     - name: Set PATH for project binaries
       shell: bash
       run: |
