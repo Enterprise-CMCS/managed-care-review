@@ -6,7 +6,7 @@ import {
     Label,
     Grid,
 } from '@trussworks/react-uswds'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useOutletContext } from 'react-router-dom'
 import { Form as UswdsForm } from '@trussworks/react-uswds'
 import { Formik, FormikErrors } from 'formik'
 import {
@@ -31,6 +31,7 @@ import { FilterOptionType } from '../../../components/FilterAccordion'
 import styles from './CreateOauthClient.module.scss'
 import * as Yup from 'yup'
 import { recordJSException } from '@mc-review/otel'
+import { MCReviewSettingsContextType } from '../Settings'
 
 const CreateOauthClientSchema = Yup.object().shape({
     cmsUser: Yup.object().shape({
@@ -54,6 +55,8 @@ type FormError =
 
 export const CreateOauthClient = (): React.ReactElement => {
     // Page level state
+    const settingsContext = useOutletContext<MCReviewSettingsContextType>()
+    const setNewOauthClient = settingsContext?.oauthClients.setNewOauthClient
     const [shouldValidate, setShouldValidate] = React.useState(false)
     const navigate = useNavigate()
 
@@ -84,8 +87,9 @@ export const CreateOauthClient = (): React.ReactElement => {
         if (oauthClient instanceof Error) {
             recordJSException(oauthClient)
         } else {
+            setNewOauthClient(oauthClient.data?.createOauthClient.oauthClient)
             navigate(
-                `${RoutesRecord.STATE_ASSIGNMENTS}/?submit=create-oauth-client`
+                `${RoutesRecord.OAUTH_CLIENTS}/?submit=create-oauth-client`
             )
         }
     }
@@ -137,9 +141,8 @@ export const CreateOauthClient = (): React.ReactElement => {
                         link: RoutesRecord.MCR_SETTINGS,
                         text: 'MC-Review settings',
                     },
-                    //TODO: update this to OAUTH route
                     {
-                        link: RoutesRecord.STATE_ASSIGNMENTS,
+                        link: RoutesRecord.OAUTH_CLIENTS,
                         text: 'State assignments',
                     },
                     {
@@ -212,14 +215,9 @@ export const CreateOauthClient = (): React.ReactElement => {
                                         variant="outline"
                                         data-testid="page-actions-left-secondary"
                                         parent_component_type="page body"
-                                        //TODO: Route back to ouath client page
-                                        link_url={
-                                            RoutesRecord.STATE_ASSIGNMENTS
-                                        }
+                                        link_url={RoutesRecord.OAUTH_CLIENTS}
                                         onClick={() =>
-                                            navigate(
-                                                RoutesRecord.STATE_ASSIGNMENTS
-                                            )
+                                            navigate(RoutesRecord.OAUTH_CLIENTS)
                                         }
                                     >
                                         Cancel
