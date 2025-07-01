@@ -24,3 +24,5 @@ export * from './mcReviewSettingsGQLMocks'
 export * from './oauthGQLMocks'
 
 export * from './approveContractMocks'
+
+export * from './oauthGQLMocks'

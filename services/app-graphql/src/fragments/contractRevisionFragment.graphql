@@ -76,4 +76,13 @@ fragment contractRevisionFragment on ContractRevision {
         statutoryRegulatoryAttestation
         statutoryRegulatoryAttestationDescription
     }
+
+    documentZipPackages {
+        id
+        s3URL
+        sha256
+        documentType
+        createdAt
+        downloadUrl
+    }
 }

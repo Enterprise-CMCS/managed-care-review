@@ -9,7 +9,7 @@
         "test": "vitest --watch",
         "test:once": "vitest --runInBand --ci",
         "test:coverage": "vitest --coverage",
-        "lint": "tsc --noEmit && eslint . --max-warnings=0",
+        "lint": "eslint . --max-warnings=0",
         "generate": "pnpm prisma generate",
         "prisma:reset": "pnpm prisma migrate reset --force",
         "build": "tsc --noEmit",

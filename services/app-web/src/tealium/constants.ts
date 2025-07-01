@@ -17,6 +17,7 @@ const TEALIUM_CONTENT_TYPE_BY_ROUTE: Record<RouteT | 'UNKNOWN_ROUTE', string> =
         DIVISION_ASSIGNMENTS: 'table',
         AUTOMATED_EMAILS: 'table',
         SUPPORT_EMAILS: 'table',
+        OAUTH_CLIENTS: 'table',
         CREATE_OAUTH_CLIENT: 'form',
         RATES_SUMMARY: 'summary',
         RATES_SUMMARY_QUESTIONS_AND_ANSWERS: 'summary',
