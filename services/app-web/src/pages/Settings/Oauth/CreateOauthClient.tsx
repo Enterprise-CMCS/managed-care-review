@@ -168,9 +168,9 @@ export const CreateOauthClient = (): React.ReactElement => {
                         >
                             <div id="formInnerContainer">
                                 <fieldset>
-                                    <h2>Create OAuth Client</h2>
+                                    <h2>Create OAuth client</h2>
                                     <legend className="srOnly">
-                                        Create OAuth Client
+                                        Create OAuth client
                                     </legend>
                                     <FormGroup
                                         error={showFieldErrors(errors.cmsUser)}
