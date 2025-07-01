@@ -13,6 +13,7 @@ import type { LDService } from '../../launchDarkly/launchDarkly'
 import { generateRateCertificationName } from './generateRateCertificationName'
 import { findStatePrograms } from '@mc-review/hpp'
 import { nullsToUndefined } from '../../domain-models/nullstoUndefined'
+import { generateRateDocumentsZip } from '../contract/submitContract'
 
 /*
     Submit rate will change a draft revision to submitted and generate a rate name if one is missing
@@ -200,6 +201,33 @@ export function submitRate(
                     cause: 'DB_ERROR',
                 },
             })
+        }
+
+        // generate zips
+        const rateRevision = submittedRate.revisions[0]
+        if (rateRevision) {
+            const zipResult = await generateRateDocumentsZip(
+                store,
+                rateRevision
+            )
+            if (zipResult instanceof Error) {
+                // Log the error but don't fail the submission
+                logError(
+                    'submitRate - rate documents zip generation failed',
+                    zipResult
+                )
+                setErrorAttributesOnActiveSpan(
+                    'rate documents zip generation failed',
+                    span
+                )
+                console.warn(
+                    `Rate document zip generation failed for revision ${rateRevision.id}, but continuing with submission process`
+                )
+            } else {
+                console.info(
+                    `Successfully generated rate document zip for revision ${rateRevision.id}`
+                )
+            }
         }
 
         return {

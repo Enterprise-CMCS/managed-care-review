@@ -275,12 +275,12 @@ describe('OAuthClient Store', () => {
         if (client1 instanceof Error) throw client1
         const client2 = await createOAuthClient(client, testClientData)
         if (client2 instanceof Error) throw client2
-        
+
         const clients = await listOAuthClients(client)
         if (clients instanceof Error) throw clients
-        
+
         expect(clients.length).toBeGreaterThanOrEqual(2)
-        
+
         // Verify all clients have user objects
         clients.forEach((oauthClient) => {
             expect(oauthClient.user).toBeDefined()
@@ -290,9 +290,9 @@ describe('OAuthClient Store', () => {
             expect(oauthClient.user.familyName).toBeDefined()
             expect(oauthClient.user.role).toBeDefined()
         })
-        
+
         // Verify at least some clients belong to our test user
-        const testUserClients = clients.filter(c => c.user.id === testUserId)
+        const testUserClients = clients.filter((c) => c.user.id === testUserId)
         expect(testUserClients.length).toBeGreaterThanOrEqual(2)
     })
 })
