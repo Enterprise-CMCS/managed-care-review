@@ -576,7 +576,9 @@ jobs:
           NODE_V8_COVERAGE: ./coverage-cypress
 
       - name: Echo app api url
-      - run: echo "app api url is: $VITE_APP_API_URL"
+      - shell: bash
+      - run: | 
+        echo "app api url is: $VITE_APP_API_URL"
 
       - name: Check coverage directory
         if: always()
