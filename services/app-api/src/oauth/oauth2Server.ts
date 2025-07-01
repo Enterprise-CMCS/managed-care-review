@@ -191,21 +191,37 @@ export class CustomOAuth2Server {
                 client_secret: body.client_secret || body.clientSecret,
             }
 
-            const normalizedHeaders: { [key: string]: string } = {}
-            Object.keys(event.headers).forEach((key) => {
-                const value = event.headers[key]
-                if (value !== undefined) {
-                    normalizedHeaders[key.toLowerCase()] = value
-                }
-            })
-
             // Create a new request with the transformed body
             const request = new OAuthRequest({
                 body: transformedBody,
-                headers: normalizedHeaders,
+                headers: event.headers,
                 method: event.httpMethod,
                 query: event.queryStringParameters || {},
             })
+
+            // Custom is method to get content-type correctly.
+            request.is = function (types: string | string[]): string | false {
+                const contentType =
+                    this.get('content-type') || this.get('Content-Type') || ''
+
+                if (Array.isArray(types)) {
+                    for (const type of types) {
+                        if (
+                            contentType
+                                .toLowerCase()
+                                .includes(type.toLowerCase())
+                        ) {
+                            return type // Return the matching type
+                        }
+                    }
+                    return false
+                }
+
+                // Single type
+                return contentType.toLowerCase().includes(types.toLowerCase())
+                    ? types
+                    : false
+            }
 
             const response = new OAuthResponse()
 
