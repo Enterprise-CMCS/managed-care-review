@@ -191,16 +191,22 @@ export class CustomOAuth2Server {
                 client_secret: body.client_secret || body.clientSecret,
             }
 
+            const normalizedHeaders: { [key: string]: string } = {}
+            Object.keys(event.headers).forEach((key) => {
+                const value = event.headers[key]
+                if (value !== undefined) {
+                    normalizedHeaders[key.toLowerCase()] = value
+                }
+            })
+
             // Create a new request with the transformed body
             const request = new OAuthRequest({
                 body: transformedBody,
-                headers: {
-                    ...event.headers,
-                    'content-type': 'application/x-www-form-urlencoded',
-                },
+                headers: normalizedHeaders,
                 method: event.httpMethod,
                 query: event.queryStringParameters || {},
             })
+
             const response = new OAuthResponse()
 
             try {
