@@ -26,6 +26,16 @@ runs:
       run: |
         echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
 
+    - uses: actions/cache@v4
+      name: Setup pnpm cache
+      with:
+        path: |
+          ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          /root/.cache/Cypress
+          /github/home/.cache/Cypress
+        key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml', '**/package.json') }}
+        restore-keys: |
+          ${{ runner.os }}-pnpm-store-
 
     - uses: actions/setup-node@v4
       with:
@@ -36,9 +46,9 @@ runs:
       shell: bash
       run: PRISMA_CLI_BINARY_TARGETS=rhel-openssl-3.0.x pnpm install --frozen-lockfile
 
-    - name: Check installed version
+    - name: Show aws-amplify version
       shell: bash
-      run: pnpm list "aws-amplify"
+      run: node -p "require('./services/cypress/package.json').dependencies['aws-amplify']"
 
     - name: Set PATH for project binaries
       shell: bash
