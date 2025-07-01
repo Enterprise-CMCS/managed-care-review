@@ -5,6 +5,16 @@ fragment oauthUserFragment on CMSUsersUnion {
         givenName
         familyName
         role
+        stateAssignments {
+            code
+            name
+            programs {
+                id
+                name
+                fullName
+                isRateProgram
+            }
+        }
     }
     ... on CMSApproverUser {
         id
@@ -12,5 +22,15 @@ fragment oauthUserFragment on CMSUsersUnion {
         givenName
         familyName
         role
+        stateAssignments {
+        code
+        name
+        programs {
+            id
+            name
+            fullName
+            isRateProgram
+        }
+    }
     }
 }
