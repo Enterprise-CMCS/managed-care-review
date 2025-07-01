@@ -178,7 +178,9 @@ export const CreateOauthClient = (): React.ReactElement => {
                                         <Label htmlFor={'cmsUserEmail'}>
                                             OAuth client user
                                         </Label>
-                                        <span>Required</span>
+                                        <span className="usa-hint">
+                                            Required
+                                        </span>
                                         {showFieldErrors(errors.cmsUser) && (
                                             <PoliteErrorMessage formFieldLabel="OAuth client user">
                                                 {
