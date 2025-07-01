@@ -46,10 +46,6 @@ runs:
       shell: bash
       run: PRISMA_CLI_BINARY_TARGETS=rhel-openssl-3.0.x pnpm install --frozen-lockfile
 
-    - name: Check installed version in cypress
-      shell: bash
-      run: pnpm --filter ./services/cypress list aws-amplify --depth=0
-    
     - name: Set PATH for project binaries
       shell: bash
       run: |
