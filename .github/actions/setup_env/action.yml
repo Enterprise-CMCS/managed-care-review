@@ -33,7 +33,7 @@ runs:
           ${{ steps.pnpm-cache.outputs.STORE_PATH }}
           /root/.cache/Cypress
           /github/home/.cache/Cypress
-        key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+        key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml', '**/package.json') }}
         restore-keys: |
           ${{ runner.os }}-pnpm-store-
 
@@ -45,6 +45,9 @@ runs:
     - name: Install dependencies
       shell: bash
       run: PRISMA_CLI_BINARY_TARGETS=rhel-openssl-3.0.x pnpm install --frozen-lockfile
+
+    - name: Check installed version
+      run: pnpm list "aws-amplify"
 
     - name: Set PATH for project binaries
       shell: bash
