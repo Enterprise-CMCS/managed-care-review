@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react'
 import { OauthClient, useFetchOauthClientsQuery } from '../../../gen/gqlClient'
-import { LinkWithLogging, Loading } from '../../../components'
+import { Loading, NavLinkWithLogging } from '../../../components'
 import { SettingsErrorAlert } from '../SettingsErrorAlert'
 import { GenericErrorPage } from '../../Errors/GenericErrorPage'
 import {
@@ -137,13 +137,13 @@ export const OauthClients = () => {
                     </p>
                 </Grid>
                 <Grid>
-                    <LinkWithLogging
-                        href={RoutesRecord.CREATE_OAUTH_CLIENT}
+                    <NavLinkWithLogging
+                        to={RoutesRecord.CREATE_OAUTH_CLIENT}
                         className="usa-button"
                         variant="unstyled"
                     >
                         Create OAuth client
-                    </LinkWithLogging>
+                    </NavLinkWithLogging>
                 </Grid>
             </Grid>
             {clientsArray.length ? (

@@ -143,7 +143,7 @@ export const CreateOauthClient = (): React.ReactElement => {
                     },
                     {
                         link: RoutesRecord.OAUTH_CLIENTS,
-                        text: 'State assignments',
+                        text: 'OAuth clients',
                     },
                     {
                         link: RoutesRecord.CREATE_OAUTH_CLIENT,
