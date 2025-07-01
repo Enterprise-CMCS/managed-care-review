@@ -9,7 +9,10 @@ import OAuth2Server, {
     type User,
 } from '@node-oauth/oauth2-server'
 import type { ExtendedPrismaClient } from '../postgres/prismaClient'
-import { verifyClientCredentials } from '../postgres/oauth/oauthClientStore'
+import {
+    verifyClientCredentials,
+    getOAuthClientByClientId,
+} from '../postgres/oauth/oauthClientStore'
 import { newJWTLib } from '../jwt'
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
 
@@ -60,7 +63,7 @@ export class CustomOAuth2Server {
      * @param client - The OAuth client
      * @returns A system user object
      */
-    async getUserFromClient(client: Client): Promise<User> {
+    async getUserFromClient(_client: Client): Promise<User> {
         // For client credentials flow, we return a system user
         return {
             id: 'system',
@@ -77,9 +80,9 @@ export class CustomOAuth2Server {
      * @returns Always returns true as we don't use scopes
      */
     async validateScope(
-        user: User,
-        client: Client,
-        scope: string
+        _user: User,
+        _client: Client,
+        _scope: string
     ): Promise<boolean> {
         // For client credentials flow, we don't need to validate scopes
         return true
@@ -98,7 +101,7 @@ export class CustomOAuth2Server {
         // as we're using JWTs
         return {
             ...token,
-            accessToken: this.generateJWT(client.id),
+            accessToken: await this.generateJWT(client.id),
             accessTokenExpiresAt: new Date(
                 Date.now() + JWT_EXPIRATION_SECONDS * 1000
             ),
@@ -114,15 +117,28 @@ export class CustomOAuth2Server {
      * @param accessToken - The access token to retrieve
      * @returns Always returns null as we don't store tokens
      */
-    async getAccessToken(accessToken: string): Promise<Token | null> {
+    async getAccessToken(_accessToken: string): Promise<Token | null> {
         // For client credentials flow, we don't need to retrieve tokens
         // as we're using JWTs
         return null
     }
 
     // Helper method to generate JWT
-    private generateJWT(clientId: string): string {
-        const token = this.jwtLib.createOAuthJWT(clientId, 'client_credentials')
+    private async generateJWT(clientId: string): Promise<string> {
+        const clientResult = await getOAuthClientByClientId(
+            this.prisma,
+            clientId
+        )
+        if (clientResult instanceof Error || !clientResult) {
+            throw new InvalidClientError('Client not found')
+        }
+
+        const token = this.jwtLib.createOAuthJWT(
+            clientId,
+            'client_credentials',
+            clientResult.user.id,
+            clientResult.grants
+        )
         return token.key
     }
 
@@ -178,13 +194,35 @@ export class CustomOAuth2Server {
             // Create a new request with the transformed body
             const request = new OAuthRequest({
                 body: transformedBody,
-                headers: {
-                    ...event.headers,
-                    'content-type': 'application/x-www-form-urlencoded',
-                },
+                headers: event.headers,
                 method: event.httpMethod,
                 query: event.queryStringParameters || {},
             })
+
+            // Custom is method to get content-type correctly.
+            request.is = function (types: string | string[]): string | false {
+                const contentType =
+                    this.get('content-type') || this.get('Content-Type') || ''
+
+                if (Array.isArray(types)) {
+                    for (const type of types) {
+                        if (
+                            contentType
+                                .toLowerCase()
+                                .includes(type.toLowerCase())
+                        ) {
+                            return type // Return the matching type
+                        }
+                    }
+                    return false
+                }
+
+                // Single type
+                return contentType.toLowerCase().includes(types.toLowerCase())
+                    ? types
+                    : false
+            }
+
             const response = new OAuthResponse()
 
             try {

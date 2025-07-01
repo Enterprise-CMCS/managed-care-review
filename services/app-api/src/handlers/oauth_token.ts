@@ -2,7 +2,7 @@ import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
 import { configurePostgres } from './configuration'
 import { CustomOAuth2Server } from '../oauth/oauth2Server'
 
-export async function main(
+async function main(
     event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> {
     // Check for required environment variables
@@ -56,3 +56,5 @@ export async function main(
     // Handle token request
     return oauth2Server.token(event)
 }
+
+module.exports = { main }
