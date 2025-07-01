@@ -70,7 +70,7 @@ export const FieldYesNo = ({
                 <div
                     role="note"
                     aria-labelledby={id}
-                    className="usa-hint margin-top-1"
+                    className="mcr-note margin-top-1"
                 >
                     {hint}
                 </div>
