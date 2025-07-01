@@ -63,14 +63,12 @@ const fetchOauthClientsMockFail = (): MockedResponse<ApolloError> => {
   )
   return {
     request: {
-      query: FetchOauthClientsDocument,
-      variables: {},
+        query: FetchOauthClientsDocument,
+        variables: {},
     },
-    error: new ApolloError ({
-      graphQLErrors: [graphQLError],
-    }),
     result: {
-      data: null
+        data: null,
+        errors: [graphQLError]
     },
   }
 }

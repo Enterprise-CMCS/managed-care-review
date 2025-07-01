@@ -18,15 +18,19 @@ import {
 } from '@mc-review/mocks'
 import { renderWithProviders } from '../../../testHelpers'
 import { CreateOauthClient } from './CreateOauthClient'
-import { screen, waitFor } from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
 
 const wrapInRoutes = (children: React.ReactNode) => {
     return (
         <Routes>
             <Route path={RoutesRecord.MCR_SETTINGS} element={<Settings />}>
                 <Route
-                    path={RoutesRecord.STATE_ASSIGNMENTS} //TODO: Replace this with OAuth client page
-                    element={<div>State Assignments Table</div>}
+                    path={RoutesRecord.OAUTH_CLIENTS}
+                    element={
+                        <div>
+                            <h2>Oauth clients</h2>
+                        </div>
+                    }
                 />
                 <Route
                     path={RoutesRecord.CREATE_OAUTH_CLIENT}
@@ -113,7 +117,7 @@ describe('CreateOauthClient', () => {
                     ],
                 },
                 routerProvider: {
-                    route: `/mc-review-settings/oauth-client/create-oauth-client`,
+                    route: `/mc-review-settings/oauth-clients/create-oauth-client`,
                 },
             }
         )
@@ -137,7 +141,7 @@ describe('CreateOauthClient', () => {
         expect(screen.queryByText('cmsUser4@example.com')).toBeInTheDocument()
     })
 
-    it('creates OAuth client and redirects user', async () => {
+    it('creates OAuth client, redirects user and shows banner', async () => {
         const selectedUser = mockValidCMSUser({
             id: 'jim-bob-1',
             givenName: 'Jim',
@@ -145,7 +149,6 @@ describe('CreateOauthClient', () => {
             familyName: 'Bob',
             divisionAssignment: 'OACT',
         })
-        const description = 'new OAuth client'
         const { user } = renderWithProviders(
             wrapInRoutes(<CreateOauthClient />),
             {
@@ -159,7 +162,7 @@ describe('CreateOauthClient', () => {
                         createOauthClientMockSuccess({
                             input: {
                                 userID: selectedUser.id,
-                                description: description,
+                                description: 'This is a new oauth client',
                             },
                             user: {
                                 ...selectedUser,
@@ -168,7 +171,7 @@ describe('CreateOauthClient', () => {
                     ],
                 },
                 routerProvider: {
-                    route: `/mc-review-settings/oauth-client/create-oauth-client`,
+                    route: `/mc-review-settings/oauth-clients/create-oauth-client`,
                 },
             }
         )
@@ -192,7 +195,7 @@ describe('CreateOauthClient', () => {
         })
         expect(descriptionInput).toBeInTheDocument()
 
-        await user.type(descriptionInput, description)
+        await user.type(descriptionInput, 'This is a new oauth client')
 
         const createButton = screen.getByRole('button', {
             name: /Create client/,
@@ -200,13 +203,25 @@ describe('CreateOauthClient', () => {
         await user.click(createButton)
 
         await waitFor(async () => {
-            //TODO: Replace this with the OAuth client page
             expect(
-                screen.getByText('State Assignments Table')
+                screen.getByRole('heading', { name: 'Oauth clients' })
             ).toBeInTheDocument()
-            //TODO: Look for a banner
-            //TODO: Look for new client on the table
+            expect(screen.getByTestId('newOauthUserBanner')).toBeInTheDocument()
         })
+
+        const banner = screen.getByTestId('newOauthUserBanner')
+
+        expect(
+            within(banner).getByRole('heading', {
+                name: /New OAuth client created/,
+            })
+        ).toBeInTheDocument()
+        expect(
+            within(banner).getByText(/jim.bob@example.com/)
+        ).toBeInTheDocument()
+        expect(
+            within(banner).getByText(/This is a new oauth client/)
+        ).toBeInTheDocument()
     })
 })
 
@@ -225,7 +240,7 @@ describe('CreateOauthClient error handling', () => {
                     ],
                 },
                 routerProvider: {
-                    route: `/mc-review-settings/oauth-client/create-oauth-client`,
+                    route: `/mc-review-settings/oauth-clients/create-oauth-client`,
                 },
             }
         )
@@ -279,7 +294,7 @@ describe('CreateOauthClient error handling', () => {
                     ],
                 },
                 routerProvider: {
-                    route: `/mc-review-settings/oauth-client/create-oauth-client`,
+                    route: `/mc-review-settings/oauth-clients/create-oauth-client`,
                 },
             }
         )
