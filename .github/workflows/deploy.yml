@@ -539,6 +539,10 @@ jobs:
       - name: Generate Code
         run: pnpm -r generate
 
+      - name: Clean Cypress cache
+        shell: bash
+        run: rm -rf ~/.cache/Cypress
+        
       - name: Build packages
         shell: bash
         run: pnpm build:packages
