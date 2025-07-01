@@ -14,9 +14,13 @@ import { NotFoundError } from '../../postgres'
 import type { QueryResolvers } from '../../gen/gqlServer'
 import type { Store } from '../../postgres'
 import type { RateOrErrorArrayType } from '../../postgres/contractAndRates'
-import { logError } from '../../logger'
+import { logError, logSuccess } from '../../logger'
 import { GraphQLError } from 'graphql'
 import type { RateType } from '../../domain-models/contractAndRates'
+import {
+    canRead,
+    getAuthContextInfo,
+} from '../../authorization/oauthAuthorization'
 
 const validateAndReturnRates = (
     results: RateOrErrorArrayType,
@@ -50,6 +54,21 @@ export function indexRatesResolver(store: Store): QueryResolvers['indexRates'] {
         const span = tracer?.startSpan('indexRates', {}, ctx)
         setResolverDetailsOnActiveSpan('indexRates', user, span)
 
+        // Check OAuth client read permissions
+        if (!canRead(context)) {
+            const authInfo = getAuthContextInfo(context)
+            const errMessage = `OAuth client ${authInfo.clientId} does not have read permissions`
+            logError('indexRates', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+            throw new ForbiddenError(errMessage)
+        }
+
+        // Log OAuth client access for audit trail
+        if (context.oauthClient?.isOAuthClient) {
+            logSuccess('indexRates')
+        }
+
+        // Authorization check (same for both OAuth clients and regular users)
         const adminPermissions = hasAdminPermissions(user)
         const cmsUser = hasCMSPermissions(user)
         const stateUser = isStateUser(user)
@@ -121,7 +140,10 @@ export function indexRatesResolver(store: Store): QueryResolvers['indexRates'] {
             setSuccessAttributesOnActiveSpan(span)
             return { totalCount: edges.length, edges }
         } else {
-            const errMsg = 'user not authorized to fetch rate reviews data'
+            const authInfo = getAuthContextInfo(context)
+            const errMsg = authInfo.isOAuthClient
+                ? `OAuth client ${authInfo.clientId} not authorized to fetch rate reviews data`
+                : 'user not authorized to fetch rate reviews data'
             setErrorAttributesOnActiveSpan(errMsg, span)
             throw new ForbiddenError(errMsg)
         }
