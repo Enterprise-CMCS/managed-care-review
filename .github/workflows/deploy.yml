@@ -539,10 +539,6 @@ jobs:
       - name: Generate Code
         run: pnpm -r generate
 
-      - name: Clean Cypress cache
-        shell: bash
-        run: rm -rf ~/.cache/Cypress
-        
       - name: Build packages
         shell: bash
         run: pnpm build:packages
@@ -578,6 +574,9 @@ jobs:
           # Test coverage
           CYPRESS_COVERAGE: true
           NODE_V8_COVERAGE: ./coverage-cypress
+
+      - name: Echo app api url
+      - run: echo "app api url is: $VITE_APP_API_URL"
 
       - name: Check coverage directory
         if: always()
