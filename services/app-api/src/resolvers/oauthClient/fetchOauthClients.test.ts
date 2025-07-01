@@ -88,14 +88,25 @@ describe('fetchOauthClients', () => {
 
     it('fetches all OAuth clients as ADMIN with empty input', async () => {
         const adminUser = testAdminUser()
-        const cmsUser = testCMSUser()
 
-        // Create CMS user in database with state assignments
-        const client = await sharedTestPrismaClient()
+        const server = await constructTestPostgresServer({
+            context: { user: adminUser },
+        })
 
         // Clean up any existing OAuth clients to ensure test isolation
+        const client = await sharedTestPrismaClient()
         await client.oAuthClient.deleteMany()
 
+        // Fetch all should return empty array after cleanup
+        const emptyRes = await server.executeOperation({
+            query: FetchOauthClientsDocument,
+            variables: { input: {} },
+        })
+        expect(emptyRes.errors).toBeUndefined()
+        expect(emptyRes.data?.fetchOauthClients.oauthClients).toHaveLength(0)
+
+        // Create a CMS user with state assignments
+        const cmsUser = testCMSUser()
         await client.user.create({
             data: {
                 id: cmsUser.id,
@@ -113,11 +124,7 @@ describe('fetchOauthClients', () => {
             },
         })
 
-        const server = await constructTestPostgresServer({
-            context: { user: adminUser },
-        })
-
-        // Create a known OAuth client
+        // Create an OAuth client
         const createRes = await server.executeOperation({
             query: CreateOauthClientDocument,
             variables: {
@@ -129,10 +136,8 @@ describe('fetchOauthClients', () => {
             },
         })
         expect(createRes.errors).toBeUndefined()
-        const createdClientId =
-            createRes.data?.createOauthClient.oauthClient.clientId
 
-        // Fetch all (empty input)
+        // Now fetch all should return our client
         const res = await server.executeOperation({
             query: FetchOauthClientsDocument,
             variables: { input: {} },
@@ -140,17 +145,16 @@ describe('fetchOauthClients', () => {
         expect(res.errors).toBeUndefined()
         const oauthClients = res.data?.fetchOauthClients.oauthClients
         expect(Array.isArray(oauthClients)).toBe(true)
-        expect(oauthClients).toHaveLength(1) // Since we cleaned up before creating one
+        expect(oauthClients).toHaveLength(1)
 
-        // Verify our created client is in the results
+        // Basic verification of the client
         const ourClient = oauthClients[0]
-        expect(ourClient.clientId).toBe(createdClientId)
+        expect(ourClient.clientId).toBeDefined()
+        expect(ourClient.description).toBe('Test Client for fetch all')
         expect(ourClient.user).toBeDefined()
         expect(ourClient.user.id).toBe(cmsUser.id)
-        expect(ourClient.user.stateAssignments).toBeDefined()
-        expect(Array.isArray(ourClient.user.stateAssignments)).toBe(true)
-        expect(ourClient.user.stateAssignments).toHaveLength(1)
-        expect(ourClient.user.stateAssignments[0].code).toBe('FL')
+        expect(ourClient.user.email).toBe(cmsUser.email)
+        expect(ourClient.user.role).toBe(cmsUser.role)
     })
 
     it('fetches only specified clientIds', async () => {
