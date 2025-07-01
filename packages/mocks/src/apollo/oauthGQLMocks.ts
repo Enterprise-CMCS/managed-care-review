@@ -37,7 +37,6 @@ const fetchOauthClientsMockSuccess = (): MockedResponse<FetchOauthClientsQuery> 
                   givenName: "Roku",
                   familyName: "Hotman",
                   role: "CMS_USER",
-                  stateAssignments: [],
                   __typename: "CMSUser"
               },
               createdAt: "2025-06-25T22:56:09.407Z",
