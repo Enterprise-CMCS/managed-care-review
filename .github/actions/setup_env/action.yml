@@ -47,6 +47,7 @@ runs:
       run: PRISMA_CLI_BINARY_TARGETS=rhel-openssl-3.0.x pnpm install --frozen-lockfile
 
     - name: Check installed version
+      shell: bash
       run: pnpm list "aws-amplify"
 
     - name: Set PATH for project binaries
