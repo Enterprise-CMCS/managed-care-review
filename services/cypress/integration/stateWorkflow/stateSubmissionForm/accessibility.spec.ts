@@ -94,7 +94,8 @@ describe('state user in state submission form', () => {
             cy.checkA11yWithWcag22aa()
 
             //Check the dashboard
-            cy.get('._bannerLogo_qcskr_2347').click()
+            cy.navigateToDashboard()
+            cy.injectAxe()
             cy.checkA11yWithWcag22aa()
         })
     })

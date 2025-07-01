@@ -93,7 +93,7 @@ Cypress.Commands.add(
             if(waitForLoad) {
                 cy.wait('@updateContractDraftRevisionMutation', { timeout: 50_000})
             }
-            cy.get('[data-testid="saveAsDraftSuccessBanner"]').should('exist')
+            cy.findByTestId('saveAsDraftSuccessBanner').should('exist')
         } else if (buttonKey === 'CONTINUE_FROM_START_NEW') {
             if (waitForLoad) {
                 // cy.wait('@createContractMutation', { timeout: 50_000 })
@@ -119,5 +119,14 @@ Cypress.Commands.add(
         if (waitForLoad) {
             cy.wait('@fetchContractWithQuestionsQuery', { timeout: 50_000 })
         }
+    }
+)
+
+Cypress.Commands.add(
+    'navigateToDashboard',
+    () => {
+        cy.visit('/')
+        cy.wait('@fetchCurrentUserQuery', { timeout: 50_000 })
+        cy.wait('@indexContractsForDashboardQuery', { timeout: 50_000 })
     }
 )
