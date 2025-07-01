@@ -1,5 +1,5 @@
 import styles from '../Select.module.scss'
-import Select, {
+import {
     ActionMeta,
     AriaOnFocus,
     OnChangeValue,
@@ -8,6 +8,7 @@ import Select, {
 import type {} from 'react-select/base'
 import { useField } from 'formik'
 import { useTealium } from '../../../hooks'
+import { AccessibleSelect } from '../AccessibleSelect/AccessibleSelect'
 
 type FieldSelectOptionType = {
     readonly label: string
@@ -93,7 +94,7 @@ const FieldSelect = ({
     }
 
     return (
-        <Select
+        <AccessibleSelect
             defaultValue={initialValues}
             placeholder={
                 isLoading

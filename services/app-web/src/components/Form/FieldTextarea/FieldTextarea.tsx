@@ -62,7 +62,7 @@ export const FieldTextarea = ({
                 <p
                     role="note"
                     id={`${id}-hint`}
-                    className="usa-hint margin-top-1"
+                    className="mcr-note margin-top-1"
                 >
                     {hint}
                 </p>
