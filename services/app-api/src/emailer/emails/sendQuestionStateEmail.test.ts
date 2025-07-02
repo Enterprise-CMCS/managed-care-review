@@ -48,6 +48,7 @@ const formData: ContractFormDataType = {
     populationCovered: 'CHIP',
     submissionType: 'CONTRACT_AND_RATES',
     riskBasedContract: false,
+    dsnpContract: false,
     submissionDescription: 'A submitted submission',
     supportingDocuments: [
         {

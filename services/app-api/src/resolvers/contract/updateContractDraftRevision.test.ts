@@ -66,6 +66,7 @@ describe(`Tests UpdateHealthPlanFormData`, () => {
 
         expect(updatedFormData).toEqual({
             ...updateFormData,
+            dsnpContract: null,
             modifiedNetworkAdequacyStandards: null,
             modifiedLengthOfContract: null,
             modifiedNonRiskPaymentArrangements: null,

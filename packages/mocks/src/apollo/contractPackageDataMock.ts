@@ -254,6 +254,7 @@ function mockContractRevision(
             populationCovered: 'MEDICAID',
             submissionType: 'CONTRACT_AND_RATES',
             riskBasedContract: true,
+            dsnpContract: true,
             submissionDescription: `Submission ${name}`,
             supportingDocuments: [
                 {
@@ -603,6 +604,7 @@ function mockContractPackageSubmittedWithQuestions(
                         populationCovered: 'MEDICAID',
                         submissionType: 'CONTRACT_AND_RATES',
                         riskBasedContract: true,
+                        dsnpContract: true,
                         submissionDescription: 'A real submission',
                         supportingDocuments: [
                             {
@@ -776,6 +778,7 @@ function mockContractWithLinkedRateDraft(
                 populationCovered: 'MEDICAID',
                 submissionType: 'CONTRACT_AND_RATES',
                 riskBasedContract: true,
+                dsnpContract: true,
                 submissionDescription: 'A real submission',
                 supportingDocuments: [],
                 stateContacts: [
@@ -1033,6 +1036,7 @@ function mockContractWithLinkedRateSubmitted(
                         populationCovered: 'MEDICAID',
                         submissionType: 'CONTRACT_AND_RATES',
                         riskBasedContract: true,
+                        dsnpContract: true,
                         submissionDescription: 'A real submission',
                         supportingDocuments: [
                             {
@@ -1212,6 +1216,7 @@ function mockContractPackageSubmitted(partial?: Partial<Contract>): Contract {
                         populationCovered: 'MEDICAID',
                         submissionType: 'CONTRACT_AND_RATES',
                         riskBasedContract: true,
+                        dsnpContract: true,
                         submissionDescription: 'A real submission',
                         supportingDocuments: [
                             {
@@ -1453,6 +1458,7 @@ function mockContractPackageApproved(
                         populationCovered: 'MEDICAID',
                         submissionType: 'CONTRACT_AND_RATES',
                         riskBasedContract: true,
+                        dsnpContract: true,
                         submissionDescription: 'A real submission',
                         supportingDocuments: [
                             {
@@ -1831,6 +1837,7 @@ function mockContractPackageWithDifferentProgramsInRevisions(): Contract {
                             populationCovered: 'CHIP',
                             submissionType: 'CONTRACT_ONLY',
                             riskBasedContract: true,
+                            dsnpContract: true,
                             submissionDescription:
                                 'This amendment revises calendar year (CY) 2019 capitation rates, adds new language concerning capitation payments related to a program no longer authorized by law, and changes the requirement that the MCO pay or deny clean paper claims within thirty (30), rather than twenty-one (21) calendar days of receipt.',
                             stateContacts: [
@@ -1922,6 +1929,7 @@ function mockContractPackageWithDifferentProgramsInRevisions(): Contract {
                         populationCovered: 'CHIP',
                         submissionType: 'CONTRACT_ONLY',
                         riskBasedContract: true,
+                        dsnpContract: true,
                         submissionDescription:
                             'This amendment revises calendar year (CY) 2019 capitation rates, adds new language concerning capitation payments related to a program no longer authorized by law, and changes the requirement that the MCO pay or deny clean paper claims within thirty (30), rather than twenty-one (21) calendar days of receipt.',
                         stateContacts: [
@@ -2021,6 +2029,7 @@ function mockContractPackageWithDifferentProgramsInRevisions(): Contract {
                             populationCovered: 'CHIP',
                             submissionType: 'CONTRACT_ONLY',
                             riskBasedContract: true,
+                            dsnpContract: true,
                             submissionDescription: 'test',
                             stateContacts: [
                                 {
@@ -2092,6 +2101,7 @@ function mockContractPackageWithDifferentProgramsInRevisions(): Contract {
                         populationCovered: 'CHIP',
                         submissionType: 'CONTRACT_ONLY',
                         riskBasedContract: true,
+                        dsnpContract: true,
                         submissionDescription: 'test',
                         stateContacts: [
                             {
@@ -2191,6 +2201,7 @@ function mockContractPackageUnlockedWithUnlockedType(
                 populationCovered: 'MEDICAID',
                 submissionType: 'CONTRACT_AND_RATES',
                 riskBasedContract: true,
+                dsnpContract: true,
                 submissionDescription: 'An updated submission',
                 supportingDocuments: [],
                 stateContacts: [
@@ -2366,6 +2377,7 @@ function mockContractPackageUnlockedWithUnlockedType(
                             populationCovered: 'MEDICAID',
                             submissionType: 'CONTRACT_AND_RATES',
                             riskBasedContract: true,
+                            dsnpContract: true,
                             submissionDescription: 'An initial submission',
                             supportingDocuments: [],
                             stateContacts: [],
@@ -2433,6 +2445,7 @@ function mockContractPackageUnlockedWithUnlockedType(
                         populationCovered: 'MEDICAID',
                         submissionType: 'CONTRACT_AND_RATES',
                         riskBasedContract: true,
+                        dsnpContract: true,
                         submissionDescription: 'An initial submission',
                         supportingDocuments: [],
                         stateContacts: [],
@@ -2578,6 +2591,7 @@ function mockContractFormData(
         populationCovered: 'MEDICAID',
         submissionType: 'CONTRACT_AND_RATES',
         riskBasedContract: true,
+        dsnpContract: true,
         submissionDescription: 'A real submission',
         supportingDocuments: [
             {
@@ -2664,6 +2678,7 @@ const mockEmptyDraftContractAndRate = (): Contract =>
                 // @ts-ignore
                 submissionType: null,
                 riskBasedContract: null,
+                dsnpContract: null,
                 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                 // @ts-ignore
                 submissionDescription: null,

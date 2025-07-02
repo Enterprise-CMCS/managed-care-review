@@ -404,9 +404,9 @@ export const FileUpload = ({
                 // eslint-disable-next-line @typescript-eslint/no-empty-function
                 onPointerLeaveCapture={() => {}}
             />
-            <h5 tabIndex={-1} ref={summaryRef} className={styles.fileSummary}>
+            <p tabIndex={-1} ref={summaryRef} className={styles.fileSummary}>
                 {`${summary} ${summaryDetailText}`}
-            </h5>
+            </p>
             <FileItemsList
                 retryItem={retryFile}
                 deleteItem={deleteItem}
