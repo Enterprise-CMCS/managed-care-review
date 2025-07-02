@@ -67,6 +67,7 @@ const genericContractFormDataSchema = z.object({
 
     populationCovered: populationCoveredSchema,
     riskBasedContract: z.boolean(),
+    dsnpContract: z.boolean(),
     stateContacts: z.array(stateContactSchema),
     supportingDocuments: z.array(documentSchema),
     contractExecutionStatus: contractExecutionStatusSchema,
@@ -111,6 +112,9 @@ const contractFormDataSchema = genericContractFormDataSchema.extend({
     ),
     riskBasedContract: preprocessNulls(
         genericContractFormDataSchema.shape.riskBasedContract.optional()
+    ),
+    dsnpContract: preprocessNulls(
+        genericContractFormDataSchema.shape.dsnpContract.optional()
     ),
     contractExecutionStatus: preprocessNulls(
         genericContractFormDataSchema.shape.contractExecutionStatus.optional()
