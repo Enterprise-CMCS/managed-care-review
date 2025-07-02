@@ -67,7 +67,7 @@ const genericContractFormDataSchema = z.object({
 
     populationCovered: populationCoveredSchema,
     riskBasedContract: z.boolean(),
-    dsnpContract: z.boolean(),
+    dsnpContract: z.boolean().optional(),
     stateContacts: z.array(stateContactSchema),
     supportingDocuments: z.array(documentSchema),
     contractExecutionStatus: contractExecutionStatusSchema,
