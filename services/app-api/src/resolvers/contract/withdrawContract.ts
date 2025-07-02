@@ -11,10 +11,7 @@ import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
 import { GraphQLError } from 'graphql/index'
 import type { Emailer } from '../../emailer'
 import type { StateCodeType } from '../../testHelpers'
-import {
-    canWrite,
-    getAuthContextInfo,
-} from '../../authorization/oauthAuthorization'
+import { canWrite } from '../../authorization/oauthAuthorization'
 
 export function withdrawContract(
     store: Store,
@@ -27,8 +24,7 @@ export function withdrawContract(
 
         // Check OAuth client read permissions
         if (!canWrite(context)) {
-            const authInfo = getAuthContextInfo(context)
-            const errMessage = `OAuth client ${authInfo.clientId} does not have write permissions`
+            const errMessage = `OAuth client does not have write permissions`
             logError('withdrawContract', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
 

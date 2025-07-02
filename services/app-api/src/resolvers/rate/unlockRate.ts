@@ -11,10 +11,7 @@ import {
 } from '../attributeHelper'
 import { GraphQLError } from 'graphql'
 import { hasCMSPermissions } from '../../domain-models'
-import {
-    canWrite,
-    getAuthContextInfo,
-} from '../../authorization/oauthAuthorization'
+import { canWrite } from '../../authorization/oauthAuthorization'
 
 export function unlockRate(store: Store): MutationResolvers['unlockRate'] {
     return async (_parent, { input }, context) => {
@@ -27,8 +24,7 @@ export function unlockRate(store: Store): MutationResolvers['unlockRate'] {
 
         // Check OAuth client read permissions
         if (!canWrite(context)) {
-            const authInfo = getAuthContextInfo(context)
-            const errMessage = `OAuth client ${authInfo.clientId} does not have write permissions`
+            const errMessage = `OAuth client does not have write permissions`
             logError('unlockRate', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
 

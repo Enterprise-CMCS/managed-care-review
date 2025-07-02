@@ -8,10 +8,7 @@ import {
     setResolverDetailsOnActiveSpan,
     setSuccessAttributesOnActiveSpan,
 } from '../attributeHelper'
-import {
-    canWrite,
-    getAuthContextInfo,
-} from '../../authorization/oauthAuthorization'
+import { canWrite } from '../../authorization/oauthAuthorization'
 
 export function createOauthClientResolver(
     store: Store
@@ -23,8 +20,7 @@ export function createOauthClientResolver(
 
         // Check OAuth client read permissions
         if (!canWrite(context)) {
-            const authInfo = getAuthContextInfo(context)
-            const errMessage = `OAuth client ${authInfo.clientId} does not have write permissions`
+            const errMessage = `OAuth client does not have write permissions`
             logError('createOauthClient', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
 

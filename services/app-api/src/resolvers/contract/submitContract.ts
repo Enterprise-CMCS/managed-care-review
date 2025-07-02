@@ -34,10 +34,7 @@ import {
 } from '../../domain-models/contractAndRates'
 import type { GeneralizedModifiedProvisions } from '@mc-review/hpp'
 import { generateDocumentZip } from '../../zip'
-import {
-    canWrite,
-    getAuthContextInfo,
-} from '../../authorization/oauthAuthorization'
+import { canWrite } from '../../authorization/oauthAuthorization'
 
 const validateStatusAndUpdateInfo = (
     status: PackageStatusType,
@@ -79,8 +76,7 @@ export function submitContract(
 
         // Check OAuth client read permissions
         if (!canWrite(context)) {
-            const authInfo = getAuthContextInfo(context)
-            const errMessage = `OAuth client ${authInfo.clientId} does not have write permissions`
+            const errMessage = `OAuth client does not have write permissions`
             logError('submitContract', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
 

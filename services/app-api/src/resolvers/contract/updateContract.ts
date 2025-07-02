@@ -9,10 +9,7 @@ import {
 } from '../attributeHelper'
 import { GraphQLError } from 'graphql'
 import { NotFoundError } from '../../postgres'
-import {
-    canWrite,
-    getAuthContextInfo,
-} from '../../authorization/oauthAuthorization'
+import { canWrite } from '../../authorization/oauthAuthorization'
 
 export function updateContract(
     store: Store
@@ -24,8 +21,7 @@ export function updateContract(
 
         // Check OAuth client read permissions
         if (!canWrite(context)) {
-            const authInfo = getAuthContextInfo(context)
-            const errMessage = `OAuth client ${authInfo.clientId} does not have write permissions`
+            const errMessage = `OAuth client does not have write permissions`
             logError('updateContract', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
 

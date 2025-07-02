@@ -11,10 +11,7 @@ import { hasAdminPermissions, hasCMSPermissions } from '../../domain-models'
 import { isValidStateCode } from '@mc-review/hpp'
 import { NotFoundError } from '../../postgres'
 import { GraphQLError } from 'graphql/index'
-import {
-    canWrite,
-    getAuthContextInfo,
-} from '../../authorization/oauthAuthorization'
+import { canWrite } from '../../authorization/oauthAuthorization'
 
 // Update cms users assigned to a specific state
 export function updateStateAssignmentsByState(
@@ -31,8 +28,7 @@ export function updateStateAssignmentsByState(
 
         // Check OAuth client read permissions
         if (!canWrite(context)) {
-            const authInfo = getAuthContextInfo(context)
-            const errMessage = `OAuth client ${authInfo.clientId} does not have write permissions`
+            const errMessage = `OAuth client does not have write permissions`
             logError('updateStateAssignmentsByState', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
 

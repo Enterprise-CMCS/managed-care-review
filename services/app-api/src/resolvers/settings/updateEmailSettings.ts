@@ -10,10 +10,7 @@ import { setErrorAttributesOnActiveSpan } from '../attributeHelper'
 import { ForbiddenError, UserInputError } from 'apollo-server-core'
 import { GraphQLError } from 'graphql'
 import type { EmailConfiguration } from '../../gen/gqlClient'
-import {
-    canWrite,
-    getAuthContextInfo,
-} from '../../authorization/oauthAuthorization'
+import { canWrite } from '../../authorization/oauthAuthorization'
 
 // Both these functions are temporary until we get around to aligning the types
 const emailConfigToEmailSettings = (
@@ -60,8 +57,7 @@ export function updateEmailSettings(
 
         // Check OAuth client read permissions
         if (!canWrite(context)) {
-            const authInfo = getAuthContextInfo(context)
-            const errMessage = `OAuth client ${authInfo.clientId} does not have write permissions`
+            const errMessage = `OAuth client does not have write permissions`
             logError('updateEmailSettings', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
 

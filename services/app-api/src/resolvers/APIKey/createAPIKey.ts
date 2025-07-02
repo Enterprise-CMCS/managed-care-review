@@ -1,9 +1,6 @@
 import type { MutationResolvers } from '../../gen/gqlServer'
 import type { JWTLib } from '../../jwt'
-import {
-    canWrite,
-    getAuthContextInfo,
-} from '../../authorization/oauthAuthorization'
+import { canWrite } from '../../authorization/oauthAuthorization'
 import { logError } from '../../logger'
 import {
     setErrorAttributesOnActiveSpan,
@@ -19,8 +16,7 @@ function createAPIKeyResolver(jwt: JWTLib): MutationResolvers['createAPIKey'] {
 
         // Check OAuth client read permissions
         if (!canWrite(context)) {
-            const authInfo = getAuthContextInfo(context)
-            const errMessage = `OAuth client ${authInfo.clientId} does not have write permissions`
+            const errMessage = `OAuth client does not have write permissions`
             logError('createAPIKey', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
 

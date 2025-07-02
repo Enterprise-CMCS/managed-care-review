@@ -14,10 +14,7 @@ import { generateRateCertificationName } from './generateRateCertificationName'
 import { findStatePrograms } from '@mc-review/hpp'
 import { nullsToUndefined } from '../../domain-models/nullstoUndefined'
 import { generateRateDocumentsZip } from '../contract/submitContract'
-import {
-    canWrite,
-    getAuthContextInfo,
-} from '../../authorization/oauthAuthorization'
+import { canWrite } from '../../authorization/oauthAuthorization'
 
 /*
     Submit rate will change a draft revision to submitted and generate a rate name if one is missing
@@ -41,8 +38,7 @@ export function submitRate(
 
         // Check OAuth client read permissions
         if (!canWrite(context)) {
-            const authInfo = getAuthContextInfo(context)
-            const errMessage = `OAuth client ${authInfo.clientId} does not have write permissions`
+            const errMessage = `OAuth client does not have write permissions`
             logError('submitRate', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
 

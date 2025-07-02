@@ -11,10 +11,7 @@ import type { Store } from '../../postgres'
 import { GraphQLError } from 'graphql/index'
 import type { Emailer } from '../../emailer'
 import type { StateCodeType } from '@mc-review/hpp'
-import {
-    canWrite,
-    getAuthContextInfo,
-} from '../../authorization/oauthAuthorization'
+import { canWrite } from '../../authorization/oauthAuthorization'
 
 export function createContractQuestionResponseResolver(
     store: Store,
@@ -30,8 +27,7 @@ export function createContractQuestionResponseResolver(
 
         // Check OAuth client read permissions
         if (!canWrite(context)) {
-            const authInfo = getAuthContextInfo(context)
-            const errMessage = `OAuth client ${authInfo.clientId} does not have write permissions`
+            const errMessage = `OAuth client does not have write permissions`
             logError('createContractQuestionResponse', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
 
