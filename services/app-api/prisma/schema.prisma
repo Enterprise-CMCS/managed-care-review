@@ -140,6 +140,7 @@ model ContractRevisionTable {
   programIDs                                   String[]
   populationCovered                            PopulationCoverageType?
   riskBasedContract                            Boolean?
+  dsnpContract                                 Boolean?
   stateContacts                                StateContact[]
   supportingDocuments                          ContractSupportingDocument[]
   contractType                                 ContractType
@@ -599,7 +600,7 @@ model DocumentZipPackage {
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
   s3URL     String
-  sha256    String
+  sha256    String?
 
   contractRevisionID String?
   contractRevision   ContractRevisionTable? @relation(fields: [contractRevisionID], references: [id])
