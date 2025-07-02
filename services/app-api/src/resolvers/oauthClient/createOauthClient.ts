@@ -2,7 +2,6 @@ import type { MutationResolvers } from '../../gen/gqlServer'
 import type { Store } from '../../postgres'
 import { ForbiddenError, UserInputError } from 'apollo-server-core'
 import { GraphQLError } from 'graphql'
-import { mapPrismaUserToGraphQLUser } from './userMapping'
 import { logError, logSuccess } from '../../logger'
 import {
     setErrorAttributesOnActiveSpan,
@@ -80,10 +79,7 @@ export function createOauthClientResolver(
         setSuccessAttributesOnActiveSpan(span)
 
         return {
-            oauthClient: {
-                ...oauthClient,
-                user: mapPrismaUserToGraphQLUser(oauthClient.user),
-            },
+            oauthClient,
         }
     }
 }
