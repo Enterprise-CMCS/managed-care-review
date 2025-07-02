@@ -86,7 +86,7 @@ export const Settings = (): React.ReactElement => {
     const { loggedInUser } = useAuth()
     const isAdminUser = loggedInUser?.role === 'ADMIN_USER'
     const { currentRoute } = useCurrentRoute()
-    const { pathname } = useLocation()
+    const { pathname, search } = useLocation()
     const [lastUpdatedAnalysts, setLastUpdatedAnalysts] =
         useState<LastUpdatedAnalystsType | null>(null)
     const [newOauthClient, setNewOauthClient] = useState<
@@ -94,8 +94,9 @@ export const Settings = (): React.ReactElement => {
     >(null)
 
     // determine if we should display a recent submit success banner
-    const submitType = new URLSearchParams(location.search).get('submit')
+    const submitType = new URLSearchParams(search).get('submit')
     const showAnalystsUpdatedBanner = submitType == 'state-assignments'
+    const showCreatedOauthBanner = submitType == 'create-oauth-client'
 
     const isSelectedLink = (route: string): string => {
         return matchPath(route, pathname) ? 'usa-current' : ''
@@ -231,7 +232,7 @@ export const Settings = (): React.ReactElement => {
                             removed={lastUpdatedAnalysts.removed}
                         />
                     )}
-                    {newOauthClient && (
+                    {newOauthClient && showCreatedOauthBanner && (
                         <NewOauthClientBanner {...newOauthClient} />
                     )}
                     <Outlet context={context} />
