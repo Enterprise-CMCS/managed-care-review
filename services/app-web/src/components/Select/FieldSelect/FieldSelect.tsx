@@ -19,7 +19,7 @@ type FieldSelectOptionType = {
 
 type FieldSelectType = {
     name: string
-    initialValues: FieldSelectOptionType[]
+    initialValues: FieldSelectOptionType[] | FieldSelectOptionType
     dropdownOptions: FieldSelectOptionType[]
     label: string
     optionDescriptionSingular?: string
@@ -34,7 +34,6 @@ type FieldSelectType = {
  */
 const FieldSelect = ({
     name,
-    isMulti = true,
     isSearchable = true,
     initialValues,
     dropdownOptions,
@@ -110,7 +109,6 @@ const FieldSelect = ({
             name={name}
             options={error || isLoading ? undefined : dropdownOptions}
             isSearchable
-            isMulti
             maxMenuHeight={200} // using this to limit size of the display to ~ 5 options with no font zooming
             aria-label={`${optionDescriptionSingular} (required)`}
             ariaLiveMessages={{

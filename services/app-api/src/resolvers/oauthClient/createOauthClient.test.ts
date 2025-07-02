@@ -126,7 +126,6 @@ describe('createOauthClient', () => {
             context: { user: adminUser },
             store: {
                 ...{},
-                findUser: async () => new Error('User not found'),
             },
         })
         const input = {
@@ -141,6 +140,27 @@ describe('createOauthClient', () => {
         expect(res.errors?.[0].message).toMatch(
             /User with ID invalid-user-id does not exist/
         )
+    })
+
+    it('returns errors when postgres fails', async () => {
+        const adminUser = testAdminUser()
+        const server = await constructTestPostgresServer({
+            context: { user: adminUser },
+            store: {
+                ...{},
+                findUser: async () => new Error('Generic postgres error'),
+            },
+        })
+        const input = {
+            grants: ['client_credentials'],
+            userID: 'invalid-user-id',
+            description: 'Should fail',
+        }
+        const res = await server.executeOperation({
+            query: CreateOauthClientDocument,
+            variables: { input },
+        })
+        expect(res.errors?.[0].message).toMatch(/Generic postgres error/)
     })
 
     it('creates an oauth client with required fields', async () => {

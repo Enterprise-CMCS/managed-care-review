@@ -21,6 +21,7 @@ export * from './rateGQLMocks'
 export * from './withdrawRateGQLMock'
 export * from './withdrawContractGQLMock'
 export * from './mcReviewSettingsGQLMocks'
+export * from './oauthGQLMocks'
 
 export * from './approveContractMocks'
 
