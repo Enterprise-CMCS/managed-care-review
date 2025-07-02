@@ -12,6 +12,10 @@ import { GraphQLError } from 'graphql'
 import { isValidCmsDivison } from '../../domain-models'
 import type { Emailer } from '../../emailer'
 import type { StateCodeType } from '../../testHelpers'
+import {
+    canWrite,
+    getAuthContextInfo,
+} from '../../authorization/oauthAuthorization'
 
 export function createContractQuestionResolver(
     store: Store,
@@ -20,6 +24,21 @@ export function createContractQuestionResolver(
     return async (_parent, { input }, context) => {
         const { user, ctx, tracer } = context
         const span = tracer?.startSpan('createContractQuestion', {}, ctx)
+
+        // Check OAuth client read permissions
+        if (!canWrite(context)) {
+            const authInfo = getAuthContextInfo(context)
+            const errMessage = `OAuth client ${authInfo.clientId} does not have write permissions`
+            logError('createContractQuestion', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+
+            throw new GraphQLError(errMessage, {
+                extensions: {
+                    code: 'FORBIDDEN',
+                    cause: 'INSUFFICIENT_OAUTH_GRANTS',
+                },
+            })
+        }
 
         if (!hasCMSPermissions(user)) {
             const msg = 'user not authorized to create a question'

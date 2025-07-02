@@ -12,6 +12,10 @@ import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
 import { NotFoundError } from '../../postgres'
 import { GraphQLError } from 'graphql/index'
 import type { StateCodeType } from '../../testHelpers'
+import {
+    canWrite,
+    getAuthContextInfo,
+} from '../../authorization/oauthAuthorization'
 
 export function undoWithdrawRate(
     store: Store,
@@ -24,6 +28,21 @@ export function undoWithdrawRate(
 
         const { rateID, updatedReason } = input
         span?.setAttribute('mcreview.package_id', rateID)
+
+        // Check OAuth client read permissions
+        if (!canWrite(context)) {
+            const authInfo = getAuthContextInfo(context)
+            const errMessage = `OAuth client ${authInfo.clientId} does not have write permissions`
+            logError('undoWithdrawRate', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+
+            throw new GraphQLError(errMessage, {
+                extensions: {
+                    code: 'FORBIDDEN',
+                    cause: 'INSUFFICIENT_OAUTH_GRANTS',
+                },
+            })
+        }
 
         if (!hasCMSPermissions(user)) {
             const message = 'user not authorized to undo withdraw rate'

@@ -11,6 +11,10 @@ import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
 import { GraphQLError } from 'graphql/index'
 import type { Emailer } from '../../emailer'
 import type { StateCodeType } from '../../testHelpers'
+import {
+    canWrite,
+    getAuthContextInfo,
+} from '../../authorization/oauthAuthorization'
 
 export function withdrawContract(
     store: Store,
@@ -20,6 +24,21 @@ export function withdrawContract(
         const { user, ctx, tracer } = context
         const span = tracer?.startSpan('withdrawContract', {}, ctx)
         setResolverDetailsOnActiveSpan('withdrawContract', user, span)
+
+        // Check OAuth client read permissions
+        if (!canWrite(context)) {
+            const authInfo = getAuthContextInfo(context)
+            const errMessage = `OAuth client ${authInfo.clientId} does not have write permissions`
+            logError('withdrawContract', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+
+            throw new GraphQLError(errMessage, {
+                extensions: {
+                    code: 'FORBIDDEN',
+                    cause: 'INSUFFICIENT_OAUTH_GRANTS',
+                },
+            })
+        }
 
         const { contractID, updatedReason } = input
         span?.setAttribute('mcreview.package_id', contractID)

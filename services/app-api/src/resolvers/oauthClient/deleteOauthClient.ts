@@ -9,6 +9,10 @@ import {
     setErrorAttributesOnActiveSpan,
 } from '../attributeHelper'
 import { GraphQLError } from 'graphql'
+import {
+    canWrite,
+    getAuthContextInfo,
+} from '../../authorization/oauthAuthorization'
 
 export function deleteOauthClientResolver(
     store: Store
@@ -21,6 +25,21 @@ export function deleteOauthClientResolver(
         const { user, ctx, tracer } = context
         const span = tracer?.startSpan('deleteOauthClient', {}, ctx)
         setResolverDetailsOnActiveSpan('deleteOauthClient', user, span)
+
+        // Check OAuth client read permissions
+        if (!canWrite(context)) {
+            const authInfo = getAuthContextInfo(context)
+            const errMessage = `OAuth client ${authInfo.clientId} does not have write permissions`
+            logError('deleteOauthClient', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+
+            throw new GraphQLError(errMessage, {
+                extensions: {
+                    code: 'FORBIDDEN',
+                    cause: 'INSUFFICIENT_OAUTH_GRANTS',
+                },
+            })
+        }
 
         if (!user || user.role !== 'ADMIN_USER') {
             const message = 'user not authorized to delete OAuth clients'

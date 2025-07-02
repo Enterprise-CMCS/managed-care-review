@@ -11,6 +11,10 @@ import {
 } from '../attributeHelper'
 import { GraphQLError } from 'graphql'
 import { hasCMSPermissions } from '../../domain-models'
+import {
+    canWrite,
+    getAuthContextInfo,
+} from '../../authorization/oauthAuthorization'
 
 export function unlockRate(store: Store): MutationResolvers['unlockRate'] {
     return async (_parent, { input }, context) => {
@@ -20,6 +24,21 @@ export function unlockRate(store: Store): MutationResolvers['unlockRate'] {
 
         const { unlockedReason, rateID } = input
         span?.setAttribute('mcreview.rate_id', rateID)
+
+        // Check OAuth client read permissions
+        if (!canWrite(context)) {
+            const authInfo = getAuthContextInfo(context)
+            const errMessage = `OAuth client ${authInfo.clientId} does not have write permissions`
+            logError('unlockRate', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+
+            throw new GraphQLError(errMessage, {
+                extensions: {
+                    code: 'FORBIDDEN',
+                    cause: 'INSUFFICIENT_OAUTH_GRANTS',
+                },
+            })
+        }
 
         // This resolver is only callable by CMS users
         if (!hasCMSPermissions(user)) {

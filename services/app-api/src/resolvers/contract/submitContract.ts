@@ -34,6 +34,10 @@ import {
 } from '../../domain-models/contractAndRates'
 import type { GeneralizedModifiedProvisions } from '@mc-review/hpp'
 import { generateDocumentZip } from '../../zip'
+import {
+    canWrite,
+    getAuthContextInfo,
+} from '../../authorization/oauthAuthorization'
 
 const validateStatusAndUpdateInfo = (
     status: PackageStatusType,
@@ -72,6 +76,21 @@ export function submitContract(
         const { user, ctx, tracer } = context
         const span = tracer?.startSpan('submitContract', {}, ctx)
         setResolverDetailsOnActiveSpan('submitContract', user, span)
+
+        // Check OAuth client read permissions
+        if (!canWrite(context)) {
+            const authInfo = getAuthContextInfo(context)
+            const errMessage = `OAuth client ${authInfo.clientId} does not have write permissions`
+            logError('submitContract', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+
+            throw new GraphQLError(errMessage, {
+                extensions: {
+                    code: 'FORBIDDEN',
+                    cause: 'INSUFFICIENT_OAUTH_GRANTS',
+                },
+            })
+        }
 
         const { submittedReason, contractID } = input
         span?.setAttribute('mcreview.contract_id', contractID)

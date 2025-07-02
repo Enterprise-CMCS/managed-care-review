@@ -11,6 +11,10 @@ import type { StateCodeType } from '@mc-review/hpp'
 import { isValidStateCode } from '@mc-review/hpp'
 import { NotFoundError } from '../../postgres'
 import { GraphQLError } from 'graphql/index'
+import {
+    canWrite,
+    getAuthContextInfo,
+} from '../../authorization/oauthAuthorization'
 
 export function updateStateAssignment(
     store: Store
@@ -23,6 +27,21 @@ export function updateStateAssignment(
             currentUser,
             span
         )
+
+        // Check OAuth client read permissions
+        if (!canWrite(context)) {
+            const authInfo = getAuthContextInfo(context)
+            const errMessage = `OAuth client ${authInfo.clientId} does not have write permissions`
+            logError('updateStateAssignment', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+
+            throw new GraphQLError(errMessage, {
+                extensions: {
+                    code: 'FORBIDDEN',
+                    cause: 'INSUFFICIENT_OAUTH_GRANTS',
+                },
+            })
+        }
 
         // Only Admin and all CMS users can call this resolver
         if (

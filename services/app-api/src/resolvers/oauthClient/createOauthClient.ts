@@ -8,6 +8,10 @@ import {
     setResolverDetailsOnActiveSpan,
     setSuccessAttributesOnActiveSpan,
 } from '../attributeHelper'
+import {
+    canWrite,
+    getAuthContextInfo,
+} from '../../authorization/oauthAuthorization'
 
 export function createOauthClientResolver(
     store: Store
@@ -16,6 +20,21 @@ export function createOauthClientResolver(
         const { user, ctx, tracer } = context
         const span = tracer?.startSpan('createOauthClient', {}, ctx)
         setResolverDetailsOnActiveSpan('createOauthClient', user, span)
+
+        // Check OAuth client read permissions
+        if (!canWrite(context)) {
+            const authInfo = getAuthContextInfo(context)
+            const errMessage = `OAuth client ${authInfo.clientId} does not have write permissions`
+            logError('createOauthClient', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+
+            throw new GraphQLError(errMessage, {
+                extensions: {
+                    code: 'FORBIDDEN',
+                    cause: 'INSUFFICIENT_OAUTH_GRANTS',
+                },
+            })
+        }
 
         if (!user || user.role !== 'ADMIN_USER') {
             const msg = 'Only ADMIN users can create OAuth clients'

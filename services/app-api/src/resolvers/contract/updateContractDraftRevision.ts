@@ -12,6 +12,10 @@ import {
 import type { LDService } from '../../launchDarkly/launchDarkly'
 import { GraphQLError } from 'graphql/index'
 import { validateContractDraftRevisionInput } from '../../domain-models/contractAndRates'
+import {
+    canWrite,
+    getAuthContextInfo,
+} from '../../authorization/oauthAuthorization'
 
 export function updateContractDraftRevision(
     store: Store,
@@ -25,6 +29,22 @@ export function updateContractDraftRevision(
             user,
             span
         )
+
+        // Check OAuth client read permissions
+        if (!canWrite(context)) {
+            const authInfo = getAuthContextInfo(context)
+            const errMessage = `OAuth client ${authInfo.clientId} does not have write permissions`
+            logError('updateContractDraftRevision', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+
+            throw new GraphQLError(errMessage, {
+                extensions: {
+                    code: 'FORBIDDEN',
+                    cause: 'INSUFFICIENT_OAUTH_GRANTS',
+                },
+            })
+        }
+
         const featureFlags = await launchDarkly.allFlags({
             key: context.user.email,
         })

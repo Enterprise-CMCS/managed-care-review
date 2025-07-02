@@ -12,6 +12,10 @@ import type { State } from '../../gen/gqlServer'
 import { pluralize } from '@mc-review/common-code'
 import type { InsertContractArgsType } from '../../postgres'
 import { GraphQLError } from 'graphql/index'
+import {
+    canWrite,
+    getAuthContextInfo,
+} from '../../authorization/oauthAuthorization'
 
 export function createContract(
     store: Store
@@ -20,6 +24,21 @@ export function createContract(
         const { user, ctx, tracer } = context
         const span = tracer?.startSpan('createContract', {}, ctx)
         setResolverDetailsOnActiveSpan('createContract', user, span)
+
+        // Check OAuth client read permissions
+        if (!canWrite(context)) {
+            const authInfo = getAuthContextInfo(context)
+            const errMessage = `OAuth client ${authInfo.clientId} does not have write permissions`
+            logError('createContract', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+
+            throw new GraphQLError(errMessage, {
+                extensions: {
+                    code: 'FORBIDDEN',
+                    cause: 'INSUFFICIENT_OAUTH_GRANTS',
+                },
+            })
+        }
 
         // This resolver is only callable by state users
         if (!isStateUser(user)) {

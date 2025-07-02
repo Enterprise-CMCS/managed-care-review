@@ -10,6 +10,10 @@ import { setErrorAttributesOnActiveSpan } from '../attributeHelper'
 import { ForbiddenError, UserInputError } from 'apollo-server-core'
 import { GraphQLError } from 'graphql'
 import type { EmailConfiguration } from '../../gen/gqlClient'
+import {
+    canWrite,
+    getAuthContextInfo,
+} from '../../authorization/oauthAuthorization'
 
 // Both these functions are temporary until we get around to aligning the types
 const emailConfigToEmailSettings = (
@@ -53,6 +57,21 @@ export function updateEmailSettings(
         const { user, ctx, tracer } = context
         const { emailConfiguration } = input
         const span = tracer?.startSpan('updateEmailSettings', {}, ctx)
+
+        // Check OAuth client read permissions
+        if (!canWrite(context)) {
+            const authInfo = getAuthContextInfo(context)
+            const errMessage = `OAuth client ${authInfo.clientId} does not have write permissions`
+            logError('updateEmailSettings', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+
+            throw new GraphQLError(errMessage, {
+                extensions: {
+                    code: 'FORBIDDEN',
+                    cause: 'INSUFFICIENT_OAUTH_GRANTS',
+                },
+            })
+        }
 
         // Only users with the role ADMIN_USER can update email settings, excluding the help desk user
         if (!isAdminUser(user)) {

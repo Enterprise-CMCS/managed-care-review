@@ -14,6 +14,10 @@ import {
 } from '../attributeHelper'
 import { GraphQLError } from 'graphql'
 import type { StateCodeType } from '../../testHelpers'
+import {
+    canWrite,
+    getAuthContextInfo,
+} from '../../authorization/oauthAuthorization'
 
 export function unlockContractResolver(
     store: Store,
@@ -26,6 +30,20 @@ export function unlockContractResolver(
 
         const { unlockedReason, contractID } = input
         span?.setAttribute('mcreview.package_id', contractID)
+
+        if (!canWrite(context)) {
+            const authInfo = getAuthContextInfo(context)
+            const errMessage = `OAuth client ${authInfo.clientId} does not have write permissions`
+            logError('unlockContract', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+
+            throw new GraphQLError(errMessage, {
+                extensions: {
+                    code: 'FORBIDDEN',
+                    cause: 'INSUFFICIENT_OAUTH_GRANTS',
+                },
+            })
+        }
 
         // This resolver is only callable by CMS users
         if (!hasCMSPermissions(user)) {

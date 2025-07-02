@@ -14,6 +14,10 @@ import { generateRateCertificationName } from './generateRateCertificationName'
 import { findStatePrograms } from '@mc-review/hpp'
 import { nullsToUndefined } from '../../domain-models/nullstoUndefined'
 import { generateRateDocumentsZip } from '../contract/submitContract'
+import {
+    canWrite,
+    getAuthContextInfo,
+} from '../../authorization/oauthAuthorization'
 
 /*
     Submit rate will change a draft revision to submitted and generate a rate name if one is missing
@@ -34,6 +38,21 @@ export function submitRate(
         })
 
         span?.setAttribute('mcreview.rate_id', rateID)
+
+        // Check OAuth client read permissions
+        if (!canWrite(context)) {
+            const authInfo = getAuthContextInfo(context)
+            const errMessage = `OAuth client ${authInfo.clientId} does not have write permissions`
+            logError('submitRate', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+
+            throw new GraphQLError(errMessage, {
+                extensions: {
+                    code: 'FORBIDDEN',
+                    cause: 'INSUFFICIENT_OAUTH_GRANTS',
+                },
+            })
+        }
 
         // throw error if the feature flag is off
         if (!featureFlags?.['rate-edit-unlock']) {

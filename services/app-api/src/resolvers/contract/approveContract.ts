@@ -10,6 +10,10 @@ import {
 } from '../attributeHelper'
 import { GraphQLError } from 'graphql'
 import { hasCMSPermissions } from '../../domain-models/user'
+import {
+    canWrite,
+    getAuthContextInfo,
+} from '../../authorization/oauthAuthorization'
 
 export function approveContract(
     store: Store
@@ -18,6 +22,21 @@ export function approveContract(
         const { user, ctx, tracer } = context
         const span = tracer?.startSpan('approveContract', {}, ctx)
         setResolverDetailsOnActiveSpan('approveContract', user, span)
+
+        // Check OAuth client read permissions
+        if (!canWrite(context)) {
+            const authInfo = getAuthContextInfo(context)
+            const errMessage = `OAuth client ${authInfo.clientId} does not have write permissions`
+            logError('approveContract', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+
+            throw new GraphQLError(errMessage, {
+                extensions: {
+                    code: 'FORBIDDEN',
+                    cause: 'INSUFFICIENT_OAUTH_GRANTS',
+                },
+            })
+        }
 
         const { contractID, dateApprovalReleasedToState } = input
         span?.setAttribute('mcreview.package_id', contractID)
