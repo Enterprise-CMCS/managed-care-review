@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { DataDetail } from '../../../components/DataDetail'
 import { SectionHeader } from '../../../components/SectionHeader'
 import { UploadedDocumentsTable } from '../../../components/SubmissionSummarySection'
@@ -7,7 +7,7 @@ import {
     FederalAuthorityRecord,
     ManagedCareEntityRecord,
 } from '@mc-review/hpp'
-import { useS3 } from '../../../contexts/S3Context'
+import { getContractZipDownloadUrl } from '../../../helpers/zipHelpers'
 import { formatCalendarDate } from '@mc-review/dates'
 import { MultiColumnGrid } from '../../../components/MultiColumnGrid'
 import { DownloadButton } from '../../../components/DownloadButton'
@@ -30,8 +30,6 @@ import {
     federalAuthorityKeysForCHIP,
     CHIPFederalAuthority,
 } from '@mc-review/hpp'
-import { recordJSException } from '@mc-review/otel'
-import useDeepCompareEffect from 'use-deep-compare-effect'
 import { InlineDocumentWarning } from '../../../components/DocumentWarning'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '@mc-review/common-code'
@@ -87,11 +85,6 @@ export const ContractDetailsSummarySection = ({
 }: ContractDetailsSummarySectionProps): React.ReactElement => {
     // Checks if submission is a previous submission
     const isPreviousSubmission = usePreviousSubmission()
-    // Get the zip file for the contract
-    const { getKey, getBulkDlURL } = useS3()
-    const [zippedFilesURL, setZippedFilesURL] = useState<
-        string | undefined | Error
-    >(undefined)
     const ldClient = useLDClient()
     const { loggedInUser } = useAuth()
     const { revisionVersion } = useParams()
@@ -128,54 +121,19 @@ export const ContractDetailsSummarySection = ({
         sortModifiedProvisions(contract)
     const provisionsAreInvalid = isMissingProvisions(contract) && isEditing
 
-    useDeepCompareEffect(() => {
-        // skip getting urls of this if this is a previous contract or draft
-        if (!isSubmittedOrCMSUser || isPreviousSubmission) return
+    // Get the zip download URL from the pre-generated zip packages
+    // Only for submitted contracts, not drafts or previous submissions
+    const currentRevision =
+        contractRev ||
+        contract.draftRevision ||
+        contract.packageSubmissions[0]?.contractRevision
+    const zippedFilesURL =
+        isSubmittedOrCMSUser && !isPreviousSubmission && currentRevision
+            ? getContractZipDownloadUrl(
+                  currentRevision.documentZipPackages || undefined
+              )
+            : undefined
 
-        // get all the keys for the documents we want to zip
-        async function fetchZipUrl() {
-            const keysFromDocs =
-                contractSupportingDocuments &&
-                contractFormData?.contractDocuments
-                    .concat(contractSupportingDocuments)
-                    .map((doc) => {
-                        const key = getKey(doc.s3URL)
-                        if (!key) return ''
-                        return key
-                    })
-                    .filter((key) => key !== '')
-
-            // call the lambda to zip the files and get the url
-            const zippedURL =
-                keysFromDocs &&
-                (await getBulkDlURL(
-                    keysFromDocs,
-                    submissionName + '-contract-details.zip',
-                    'HEALTH_PLAN_DOCS'
-                ))
-            if (zippedURL instanceof Error) {
-                const msg = `ERROR: getBulkDlURL failed to generate contract document URL. ID: ${contract.id} Message: ${zippedURL}`
-                console.info(msg)
-
-                if (onDocumentError) {
-                    onDocumentError(true)
-                }
-
-                recordJSException(msg)
-            }
-
-            setZippedFilesURL(zippedURL)
-        }
-
-        void fetchZipUrl()
-    }, [
-        getKey,
-        getBulkDlURL,
-        contract,
-        contractSupportingDocuments,
-        submissionName,
-        isPreviousSubmission,
-    ])
     // Calculate last submitted data for document upload tables
     const lastSubmittedIndex = getIndexFromRevisionVersion(
         contract,

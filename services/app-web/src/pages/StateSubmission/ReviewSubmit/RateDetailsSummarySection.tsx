@@ -11,9 +11,9 @@ import { usePreviousSubmission } from '../../../hooks/usePreviousSubmission'
 import styles from '../../../components/SubmissionSummarySection/SubmissionSummarySection.module.scss'
 import { GenericErrorPage } from '../../Errors/GenericErrorPage'
 
-import { recordJSException } from '@mc-review/otel'
 import { DataDetailMissingField } from '../../../components/DataDetail/DataDetailMissingField'
 import { DataDetailContactField } from '../../../components/DataDetail/DataDetailContactField/DataDetailContactField'
+import { recordJSException } from '@mc-review/otel'
 import useDeepCompareEffect from 'use-deep-compare-effect'
 import { InlineDocumentWarning } from '../../../components/DocumentWarning'
 import { SectionCard } from '../../../components/SectionCard'
@@ -227,6 +227,7 @@ export const RateDetailsSummarySection = ({
         }
         return true
     }
+
     useDeepCompareEffect(() => {
         // skip getting urls of this if this is a previous submission or draft
         if (!isSubmittedOrCMSUser || isPreviousSubmission) return
