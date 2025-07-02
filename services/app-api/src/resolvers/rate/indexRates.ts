@@ -56,8 +56,7 @@ export function indexRatesResolver(store: Store): QueryResolvers['indexRates'] {
 
         // Check OAuth client read permissions
         if (!canRead(context)) {
-            const authInfo = getAuthContextInfo(context)
-            const errMessage = `OAuth client ${authInfo.clientId} does not have read permissions`
+            const errMessage = `OAuth client does not have read permissions`
             logError('indexRates', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new ForbiddenError(errMessage)
@@ -142,7 +141,7 @@ export function indexRatesResolver(store: Store): QueryResolvers['indexRates'] {
         } else {
             const authInfo = getAuthContextInfo(context)
             const errMsg = authInfo.isOAuthClient
-                ? `OAuth client ${authInfo.clientId} not authorized to fetch rate reviews data`
+                ? `OAuth client not authorized to fetch rate reviews data`
                 : 'user not authorized to fetch rate reviews data'
             setErrorAttributesOnActiveSpan(errMsg, span)
             throw new ForbiddenError(errMsg)

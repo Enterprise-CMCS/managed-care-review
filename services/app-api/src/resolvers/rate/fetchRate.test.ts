@@ -785,7 +785,7 @@ describe('fetchRate', () => {
         expect(fetchResult.errors).toBeDefined()
         expect(fetchResult.errors?.[0].extensions?.code).toBe('FORBIDDEN')
         expect(fetchResult.errors?.[0].message).toBe(
-            'OAuth client test-oauth-client does not have read permissions'
+            'OAuth client does not have read permissions'
         )
     })
 })

@@ -26,6 +26,20 @@ export function fetchContractResolver(
         const span = tracer?.startSpan('fetchContractResolver', {}, ctx)
         setResolverDetailsOnActiveSpan('fetchContract', user, span)
 
+        // Check OAuth client read permissions
+        if (!canRead(context)) {
+            const errMessage = `OAuth client does not have read permissions`
+            logError('fetchContract', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+
+            throw new GraphQLError(errMessage, {
+                extensions: {
+                    code: 'FORBIDDEN',
+                    cause: 'INSUFFICIENT_OAUTH_GRANTS',
+                },
+            })
+        }
+
         const contractWithHistory = await store.findContractWithHistory(
             input.contractID
         )
@@ -51,21 +65,6 @@ export function fetchContractResolver(
             })
         }
 
-        // Check OAuth client read permissions
-        if (!canRead(context)) {
-            const authInfo = getAuthContextInfo(context)
-            const errMessage = `OAuth client ${authInfo.clientId} does not have read permissions`
-            logError('fetchContract', errMessage)
-            setErrorAttributesOnActiveSpan(errMessage, span)
-
-            throw new GraphQLError(errMessage, {
-                extensions: {
-                    code: 'FORBIDDEN',
-                    cause: 'INSUFFICIENT_OAUTH_GRANTS',
-                },
-            })
-        }
-
         // Log OAuth client access for audit trail
         if (context.oauthClient?.isOAuthClient) {
             logSuccess('fetchContract')
@@ -76,7 +75,7 @@ export function fetchContractResolver(
             if (user.stateCode !== contractWithHistory.stateCode) {
                 const authInfo = getAuthContextInfo(context)
                 const errMessage = authInfo.isOAuthClient
-                    ? `OAuth client ${authInfo.clientId} not allowed to access contract from ${contractWithHistory.stateCode}`
+                    ? `OAuth client not allowed to access contract from ${contractWithHistory.stateCode}`
                     : `User from state ${user.stateCode} not allowed to access contract from ${contractWithHistory.stateCode}`
                 logError('fetchContract', errMessage)
                 setErrorAttributesOnActiveSpan(errMessage, span)

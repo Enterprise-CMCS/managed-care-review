@@ -9,6 +9,7 @@ import {
     setErrorAttributesOnActiveSpan,
 } from '../attributeHelper'
 import { GraphQLError } from 'graphql'
+import { canWrite } from '../../authorization/oauthAuthorization'
 
 export function updateOauthClientResolver(
     store: Store
@@ -17,6 +18,20 @@ export function updateOauthClientResolver(
         const { user, ctx, tracer } = context
         const span = tracer?.startSpan('updateOauthClient', {}, ctx)
         setResolverDetailsOnActiveSpan('updateOauthClient', user, span)
+
+        // Check OAuth client read permissions
+        if (!canWrite(context)) {
+            const errMessage = `OAuth client does not have write permissions`
+            logError('updateOauthClient', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+
+            throw new GraphQLError(errMessage, {
+                extensions: {
+                    code: 'FORBIDDEN',
+                    cause: 'INSUFFICIENT_OAUTH_GRANTS',
+                },
+            })
+        }
 
         if (!user || user.role !== 'ADMIN_USER') {
             const message = 'user not authorized to update OAuth clients'

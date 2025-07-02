@@ -417,7 +417,7 @@ describe('fetchContract', () => {
 
         expect(fetchResult.errors[0].extensions?.code).toBe('FORBIDDEN')
         expect(fetchResult.errors[0].message).toBe(
-            'OAuth client test-oauth-client-va not allowed to access contract from FL'
+            'OAuth client not allowed to access contract from FL'
         )
     })
 
@@ -459,7 +459,7 @@ describe('fetchContract', () => {
 
         expect(fetchResult.errors[0].extensions?.code).toBe('FORBIDDEN')
         expect(fetchResult.errors[0].message).toBe(
-            'OAuth client test-oauth-client does not have read permissions'
+            'OAuth client does not have read permissions'
         )
     })
 })
