@@ -1,50 +1,143 @@
 import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
-import { testAdminUser, testStateUser } from '../../testHelpers/userHelpers'
+import {
+    testAdminUser,
+    testStateUser,
+    testCMSUser,
+} from '../../testHelpers/userHelpers'
 import {
     CreateOauthClientDocument,
     FetchOauthClientsDocument,
 } from '../../gen/gqlClient'
+import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 
 describe('fetchOauthClients', () => {
     it('fetches all OAuth clients as ADMIN', async () => {
+        const adminUser = testAdminUser()
+        const cmsUser = testCMSUser()
+
+        // Create CMS user in database with state assignments
+        const client = await sharedTestPrismaClient()
+        await client.user.create({
+            data: {
+                id: cmsUser.id,
+                givenName: cmsUser.givenName,
+                familyName: cmsUser.familyName,
+                email: cmsUser.email,
+                role: cmsUser.role,
+                stateAssignments: {
+                    connect: [
+                        {
+                            stateCode: 'FL',
+                        },
+                    ],
+                },
+            },
+        })
+
         const server = await constructTestPostgresServer({
-            context: { user: testAdminUser() },
+            context: { user: adminUser },
         })
         // Create two clients
-        await server.executeOperation({
+        const client1Res = await server.executeOperation({
             query: CreateOauthClientDocument,
             variables: {
                 input: {
                     description: 'Client 1',
                     grants: ['client_credentials'],
-                    contactEmail: 'client1@example.com',
+                    userID: cmsUser.id,
                 },
             },
         })
-        await server.executeOperation({
+        expect(client1Res.errors).toBeUndefined()
+        const client1Id =
+            client1Res.data?.createOauthClient.oauthClient.clientId
+
+        const client2Res = await server.executeOperation({
             query: CreateOauthClientDocument,
             variables: {
                 input: {
                     description: 'Client 2',
                     grants: ['client_credentials'],
-                    contactEmail: 'client2@example.com',
+                    userID: cmsUser.id,
                 },
             },
         })
+        expect(client2Res.errors).toBeUndefined()
+        const client2Id =
+            client2Res.data?.createOauthClient.oauthClient.clientId
+
         const res = await server.executeOperation({
             query: FetchOauthClientsDocument,
+            variables: { input: { clientIds: [client1Id, client2Id] } },
         })
         expect(res.errors).toBeUndefined()
         const oauthClients = res.data?.fetchOauthClients.oauthClients
         expect(Array.isArray(oauthClients)).toBe(true)
-        expect(oauthClients.length).toBeGreaterThanOrEqual(2)
+        expect(oauthClients).toHaveLength(2)
+        // Verify user objects are included
+        oauthClients.forEach((client: unknown) => {
+            const typedClient = client as {
+                user: { id: string; email: string; role: string }
+            }
+            expect(typedClient.user).toBeDefined()
+            expect(typedClient.user.id).toBe(cmsUser.id)
+            expect(typedClient.user.email).toBeDefined()
+            expect(typedClient.user.role).toBeDefined()
+        })
     })
 
     it('fetches all OAuth clients as ADMIN with empty input', async () => {
+        const adminUser = testAdminUser()
+
         const server = await constructTestPostgresServer({
-            context: { user: testAdminUser() },
+            context: { user: adminUser },
         })
-        // Fetch all (empty input)
+
+        // Clean up any existing OAuth clients to ensure test isolation
+        const client = await sharedTestPrismaClient()
+        await client.oAuthClient.deleteMany()
+
+        // Fetch all should return empty array after cleanup
+        const emptyRes = await server.executeOperation({
+            query: FetchOauthClientsDocument,
+            variables: { input: {} },
+        })
+        expect(emptyRes.errors).toBeUndefined()
+        expect(emptyRes.data?.fetchOauthClients.oauthClients).toHaveLength(0)
+
+        // Create a CMS user with state assignments
+        const cmsUser = testCMSUser()
+        await client.user.create({
+            data: {
+                id: cmsUser.id,
+                givenName: cmsUser.givenName,
+                familyName: cmsUser.familyName,
+                email: cmsUser.email,
+                role: cmsUser.role,
+                stateAssignments: {
+                    connect: [
+                        {
+                            stateCode: 'FL',
+                        },
+                    ],
+                },
+            },
+        })
+
+        // Create an OAuth client
+        const createRes = await server.executeOperation({
+            query: CreateOauthClientDocument,
+            variables: {
+                input: {
+                    description: 'Test Client for fetch all',
+                    grants: ['client_credentials'],
+                    userID: cmsUser.id,
+                },
+            },
+        })
+        expect(createRes.errors).toBeUndefined()
+
+        // Now fetch all should return our client
         const res = await server.executeOperation({
             query: FetchOauthClientsDocument,
             variables: { input: {} },
@@ -52,11 +145,43 @@ describe('fetchOauthClients', () => {
         expect(res.errors).toBeUndefined()
         const oauthClients = res.data?.fetchOauthClients.oauthClients
         expect(Array.isArray(oauthClients)).toBe(true)
+        expect(oauthClients).toHaveLength(1)
+
+        // Basic verification of the client
+        const ourClient = oauthClients[0]
+        expect(ourClient.clientId).toBeDefined()
+        expect(ourClient.description).toBe('Test Client for fetch all')
+        expect(ourClient.user).toBeDefined()
+        expect(ourClient.user.id).toBe(cmsUser.id)
+        expect(ourClient.user.email).toBe(cmsUser.email)
+        expect(ourClient.user.role).toBe(cmsUser.role)
     })
 
     it('fetches only specified clientIds', async () => {
+        const adminUser = testAdminUser()
+        const cmsUser = testCMSUser()
+
+        // Create CMS user in database with state assignments
+        const client = await sharedTestPrismaClient()
+        await client.user.create({
+            data: {
+                id: cmsUser.id,
+                givenName: cmsUser.givenName,
+                familyName: cmsUser.familyName,
+                email: cmsUser.email,
+                role: cmsUser.role,
+                stateAssignments: {
+                    connect: [
+                        {
+                            stateCode: 'FL',
+                        },
+                    ],
+                },
+            },
+        })
+
         const server = await constructTestPostgresServer({
-            context: { user: testAdminUser() },
+            context: { user: adminUser },
         })
         // Create a client
         const createRes = await server.executeOperation({
@@ -65,7 +190,7 @@ describe('fetchOauthClients', () => {
                 input: {
                     description: 'Specific client',
                     grants: ['client_credentials'],
-                    contactEmail: 'specific@example.com',
+                    userID: cmsUser.id,
                 },
             },
         })
@@ -80,6 +205,8 @@ describe('fetchOauthClients', () => {
         expect(Array.isArray(oauthClients)).toBe(true)
         expect(oauthClients).toHaveLength(1)
         expect(oauthClients[0].clientId).toBe(clientId)
+        expect(oauthClients[0].user).toBeDefined()
+        expect(oauthClients[0].user.id).toBe(cmsUser.id)
     })
 
     it('returns empty array if no clients match', async () => {

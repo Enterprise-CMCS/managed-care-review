@@ -63,6 +63,9 @@ Amplify.configure({
 const authMode: string = import.meta.env.VITE_APP_AUTH_MODE
 assertIsAuthMode(authMode)
 const cache = new InMemoryCache({
+    possibleTypes: {
+        CMSUsersUnion: ['CMSUser', 'CMSApproverUser'],
+    },
     typePolicies: {
         ContractRevision: {
             fields: {

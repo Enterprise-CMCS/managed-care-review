@@ -4,18 +4,34 @@ import {
     setSuccessAttributesOnActiveSpan,
 } from '../attributeHelper'
 import { NotFoundError } from '../../postgres'
-import type { QueryResolvers, State } from '../../gen/gqlServer'
+import type { QueryResolvers } from '../../gen/gqlServer'
 import type { Store } from '../../postgres'
 import { GraphQLError } from 'graphql'
-import { isStateUser } from '../../domain-models'
-import { logError } from '../../logger'
+import {
+    isStateUser,
+    hasCMSPermissions,
+    hasAdminPermissions,
+} from '../../domain-models'
+import { logError, logSuccess } from '../../logger'
 import { ForbiddenError } from 'apollo-server-core'
+import {
+    canRead,
+    getAuthContextInfo,
+} from '../../authorization/oauthAuthorization'
 
 export function fetchRateResolver(store: Store): QueryResolvers['fetchRate'] {
     return async (_parent, { input }, context) => {
         const { user, ctx, tracer } = context
         const span = tracer?.startSpan('fetchRate', {}, ctx)
         setResolverDetailsOnActiveSpan('fetchRate', user, span)
+
+        // Check OAuth client read permissions
+        if (!canRead(context)) {
+            const errMessage = `OAuth client does not have read permissions`
+            logError('fetchRate', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+            throw new ForbiddenError(errMessage)
+        }
 
         const rateWithHistory = await store.findRateWithHistory(input.rateID)
         if (rateWithHistory instanceof Error) {
@@ -39,21 +55,27 @@ export function fetchRateResolver(store: Store): QueryResolvers['fetchRate'] {
             })
         }
 
+        // Log OAuth client access for audit trail
+        if (context.oauthClient?.isOAuthClient) {
+            logSuccess('fetchRate')
+        }
+
+        // Authorization check (same for both OAuth clients and regular users)
         if (isStateUser(user)) {
-            const stateForCurrentUser: State['code'] = user.stateCode
-            if (rateWithHistory.stateCode !== stateForCurrentUser) {
-                logError(
-                    'fetchRate',
-                    'State users are not authorized to fetch rate data from a different state.'
-                )
-                setErrorAttributesOnActiveSpan(
-                    'State users are not authorized to fetch rate data from a different state.',
-                    span
-                )
-                throw new ForbiddenError(
-                    'State users are not authorized to fetch rate data from a different state.'
-                )
+            if (user.stateCode !== rateWithHistory.stateCode) {
+                const authInfo = getAuthContextInfo(context)
+                const errMessage = authInfo.isOAuthClient
+                    ? `OAuth client not authorized to fetch rate data from ${rateWithHistory.stateCode}`
+                    : 'State users are not authorized to fetch rate data from a different state.'
+                logError('fetchRate', errMessage)
+                setErrorAttributesOnActiveSpan(errMessage, span)
+                throw new ForbiddenError(errMessage)
             }
+        } else if (!hasCMSPermissions(user) && !hasAdminPermissions(user)) {
+            const errMessage = 'User not authorized to fetch rate data'
+            logError('fetchRate', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+            throw new ForbiddenError(errMessage)
         }
 
         setSuccessAttributesOnActiveSpan(span)

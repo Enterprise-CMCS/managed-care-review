@@ -52,6 +52,7 @@ describe('FieldSelect', () => {
                 name="fieldSelect"
                 initialValues={[]}
                 dropdownOptions={dropdownOptions}
+                isMulti
                 onChange={mockOnChange}
                 label={'fieldSelect'}
             />
@@ -76,6 +77,7 @@ describe('FieldSelect', () => {
             <FieldSelect
                 name="fieldSelect"
                 initialValues={[]}
+                isMulti
                 dropdownOptions={dropdownOptions}
                 onChange={mockOnChange}
                 label={'fieldSelect'}
@@ -122,7 +124,7 @@ describe('FieldSelect', () => {
                     { value: 'test-id-126', label: 'MCR-MN-0007-SNBC' },
                     { value: 'test-id-127', label: 'MCR-MN-0008-MSC+' },
                 ]}
-                //initialValues={['test-id-127', 'test-id-126']}
+                isMulti
                 dropdownOptions={dropdownOptions}
                 onChange={mockOnChange}
                 label={'fieldSelect'}

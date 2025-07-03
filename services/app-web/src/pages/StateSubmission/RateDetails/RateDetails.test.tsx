@@ -871,10 +871,14 @@ describe('RateDetails', () => {
             })
 
             await user.click(saveButton)
+
+            //Expect the user to remain on the same page and render success banner
             await waitFor(() => {
-                expect(testLocation.pathname).toBe(`/dashboard/submissions`)
+                expect(testLocation.pathname).toBe(
+                    `/submissions/test-abc-123/edit/rate-details`
+                )
                 expect(
-                    screen.getByText('Dashboard page placeholder')
+                    screen.getByTestId('saveAsDraftSuccessBanner')
                 ).toBeInTheDocument()
             })
         })

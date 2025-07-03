@@ -1,4 +1,4 @@
-import Select, {
+import {
     ActionMeta,
     AriaOnFocus,
     Props,
@@ -18,6 +18,7 @@ import { useS3 } from '../../../contexts/S3Context'
 import { useTealium } from '../../../hooks'
 import { useField } from 'formik'
 import { convertIndexRatesGQLRateToRateForm } from '../../StateSubmission/RateDetails/rateDetailsHelpers'
+import { AccessibleSelect } from '../../../components/Select'
 
 export interface LinkRateOptionType {
     readonly value: string
@@ -193,7 +194,7 @@ export const LinkRateSelect = ({
     }
 
     return (
-        <Select
+        <AccessibleSelect
             value={defaultValue}
             className={styles.rateMultiSelect}
             options={

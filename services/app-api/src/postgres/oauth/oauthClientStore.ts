@@ -1,9 +1,18 @@
 import type { ExtendedPrismaClient } from '../prismaClient'
 import type { Prisma } from '@prisma/client'
+import type { UserType } from '../../domain-models'
 import { v4 as uuidv4 } from 'uuid'
 import { randomBytes } from 'crypto'
+import { domainUserFromPrismaUser } from '../user/prismaDomainUser'
 
-type OAuthClientType = Prisma.OAuthClientGetPayload<Record<string, never>>
+type OAuthClientWithUser = Omit<
+    Prisma.OAuthClientGetPayload<{
+        include: { user: { include: { stateAssignments: true } } }
+    }>,
+    'user'
+> & {
+    user: UserType
+}
 
 // Create a new OAuth client
 export async function createOAuthClient(
@@ -11,9 +20,9 @@ export async function createOAuthClient(
     data: {
         grants?: string[]
         description?: string
-        contactEmail: string
+        userID: string
     }
-): Promise<OAuthClientType | Error> {
+): Promise<OAuthClientWithUser | Error> {
     try {
         const clientId = `oauth-client-${uuidv4()}`
         const clientSecret = randomBytes(64).toString('base64url')
@@ -21,15 +30,28 @@ export async function createOAuthClient(
             data.grants && data.grants.length > 0
                 ? data.grants
                 : ['client_credentials']
-        return await client.oAuthClient.create({
+        const prismaResult = await client.oAuthClient.create(
             data: {
                 clientId,
                 clientSecret,
                 grants,
                 description: data.description,
-                contactEmail: data.contactEmail,
+                userID: data.userID,
+            },
+            include: {
+                user: { include: { stateAssignments: true } },
             },
         })
+
+        const domainUser = domainUserFromPrismaUser(prismaResult.user)
+        if (domainUser instanceof Error) {
+            return domainUser
+        }
+
+        return {
+            ...prismaResult,
+            user: domainUser,
+        }
     } catch (error) {
         return error as Error
     }
@@ -39,11 +61,25 @@ export async function createOAuthClient(
 export async function getOAuthClientById(
     client: ExtendedPrismaClient,
     id: string
-): Promise<OAuthClientType | null | Error> {
+): Promise<OAuthClientWithUser | null | Error> {
     try {
-        return await client.oAuthClient.findUnique({
+        const prismaResult = await client.oAuthClient.findUnique({
             where: { id },
+            include: { user: { include: { stateAssignments: true } } },
         })
+        if (!prismaResult) {
+            return null
+        }
+
+        const domainUser = domainUserFromPrismaUser(prismaResult.user)
+        if (domainUser instanceof Error) {
+            return domainUser
+        }
+
+        return {
+            ...prismaResult,
+            user: domainUser,
+        }
     } catch (error) {
         return error as Error
     }
@@ -53,11 +89,24 @@ export async function getOAuthClientById(
 export async function getOAuthClientByClientId(
     client: ExtendedPrismaClient,
     clientId: string
-): Promise<OAuthClientType | null | Error> {
+): Promise<OAuthClientWithUser | null | Error> {
     try {
-        return await client.oAuthClient.findUnique({
+        const prismaResult = await client.oAuthClient.findUnique({
             where: { clientId },
+            include: { user: { include: { stateAssignments: true } } },
         })
+        if (!prismaResult) {
+            return null
+        }
+        const domainUser = domainUserFromPrismaUser(prismaResult.user)
+        if (domainUser instanceof Error) {
+            return domainUser
+        }
+
+        return {
+            ...prismaResult,
+            user: domainUser,
+        }
     } catch (error) {
         return error as Error
     }
@@ -98,15 +147,25 @@ export async function updateOAuthClient(
         clientSecret?: string
         grants?: string[]
         description?: string
-        contactEmail?: string
     }
-): Promise<OAuthClientType | Error> {
+): Promise<OAuthClientWithUser | Error> {
     try {
-        const result = await client.oAuthClient.update({
+        const prismaResult = await client.oAuthClient.update(
             where: { clientId },
             data,
+            include: {
+                user: { include: { stateAssignments: true } },
+            },
         })
-        return result
+        const domainUser = domainUserFromPrismaUser(prismaResult.user)
+        if (domainUser instanceof Error) {
+            return domainUser
+        }
+
+        return {
+            ...prismaResult,
+            user: domainUser,
+        }
     } catch (error) {
         return error as Error
     }
@@ -116,7 +175,7 @@ export async function updateOAuthClient(
 export async function deleteOAuthClient(
     client: ExtendedPrismaClient,
     clientId: string
-): Promise<OAuthClientType | Error> {
+): Promise<OAuthClientWithUser | Error> {
     try {
         // Check if client exists first
         const existingClient = await client.oAuthClient.findUnique({
@@ -126,9 +185,21 @@ export async function deleteOAuthClient(
             return new Error('OAuth client not found')
         }
 
-        return await client.oAuthClient.delete({
+        const prismaResult = await client.oAuthClient.delete({
             where: { clientId },
+            include: {
+                user: { include: { stateAssignments: true } },
+            },
         })
+        const domainUser = domainUserFromPrismaUser(prismaResult.user)
+        if (domainUser instanceof Error) {
+            return domainUser
+        }
+
+        return {
+            ...prismaResult,
+            user: domainUser,
+        }
     } catch (error) {
         return error as Error
     }
@@ -137,10 +208,57 @@ export async function deleteOAuthClient(
 // List all OAuth clients
 export async function listOAuthClients(
     client: ExtendedPrismaClient
-): Promise<OAuthClientType[] | Error> {
+): Promise<OAuthClientWithUser[] | Error> {
     try {
-        return await client.oAuthClient.findMany()
+        const prismaResults = await client.oAuthClient.findMany({
+            include: { user: { include: { stateAssignments: true } } },
+        })
+        const domainResults: OAuthClientWithUser[] = []
+
+        for (const prismaResult of prismaResults) {
+            const domainUser = domainUserFromPrismaUser(prismaResult.user)
+            if (domainUser instanceof Error) {
+                return domainUser
+            }
+            domainResults.push({
+                ...prismaResult,
+                user: domainUser,
+            })
+        }
+
+        return domainResults
     } catch (error) {
         return error as Error
     }
 }
+
+// Get OAuth clients by user ID
+export async function getOAuthClientsByUserId(
+    client: ExtendedPrismaClient,
+    userID: string
+): Promise<OAuthClientWithUser[] | Error> {
+    try {
+        const prismaResults = await client.oAuthClient.findMany({
+            where: { userID },
+            include: { user: { include: { stateAssignments: true } } },
+        })
+        const domainResults: OAuthClientWithUser[] = []
+
+        for (const prismaResult of prismaResults) {
+            const domainUser = domainUserFromPrismaUser(prismaResult.user)
+            if (domainUser instanceof Error) {
+                return domainUser
+            }
+            domainResults.push({
+                ...prismaResult,
+                user: domainUser,
+            })
+        }
+
+        return domainResults
+    } catch (error) {
+        return error as Error
+    }
+}
+
+export type { OAuthClientWithUser }

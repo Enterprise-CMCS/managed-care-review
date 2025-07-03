@@ -95,6 +95,7 @@ declare global {
                 waitForLoad?: boolean
             ): void
             navigateFormByDirectLink(url: string, waitForLoad?: boolean): void
+            navigateToDashboard(): void
 
             // dashboard commands
             clickSubmissionLink(testId: string): void

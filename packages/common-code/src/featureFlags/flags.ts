@@ -26,6 +26,13 @@ const featureFlags = {
         defaultValue: false,
     },
     /**
+     * Enables D-SNP functionality for state and CMS
+     */
+    DSNP: {
+        flag: 'dsnp',
+        defaultValue: false,
+    },
+    /**
      * Enables undo withdraw rate feature
      */
     UNDO_WITHDRAW_RATE: {
