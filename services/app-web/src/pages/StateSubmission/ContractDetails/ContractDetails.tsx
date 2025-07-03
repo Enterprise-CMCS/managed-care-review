@@ -126,6 +126,7 @@ export type ContractDetailsFormValues = {
     contractDateEnd: string
     managedCareEntities: ManagedCareEntity[]
     federalAuthorities: FederalAuthority[]
+    dsnpContract: string | undefined
     inLieuServicesAndSettings: string | undefined
     modifiedBenefitsProvided: string | undefined
     modifiedGeoAreaServed: string | undefined
@@ -257,6 +258,10 @@ export const ContractDetails = ({
                 .managedCareEntities as ManagedCareEntity[]) ?? [],
         federalAuthorities:
             draftSubmission.draftRevision.formData.federalAuthorities ?? [],
+        dsnpContract:
+            booleanAsYesNoFormValue(
+                draftSubmission.draftRevision.formData.dsnpContract
+            ) ?? '',
         inLieuServicesAndSettings:
             booleanAsYesNoFormValue(
                 draftSubmission.draftRevision.formData.inLieuServicesAndSettings
@@ -401,6 +406,7 @@ export const ContractDetails = ({
         if (options.type === 'SAVE_AS_DRAFT' && draftSaved) {
             setDraftSaved(false)
         }
+        //TODO: will have to use yesNoFormValueAsBoolean here for the dsnp field
         const updatedDraftSubmissionFormData: ContractDraftRevisionFormDataInput =
             {
                 contractExecutionStatus: values.contractExecutionStatus,
@@ -543,6 +549,13 @@ export const ContractDetails = ({
     }
 
     const formHeading = 'Contract Details Form'
+
+    const dsnpTriggers = [
+        'STATE_PLAN',
+        'WAIVER_1915B',
+        'WAIVER_1115',
+        'VOLUNTARY',
+    ]
 
     return (
         <>
@@ -1265,6 +1278,59 @@ export const ContractDetails = ({
                                                     )}
                                                 </Fieldset>
                                             </FormGroup>
+                                            {values.federalAuthorities.some(
+                                                (type) =>
+                                                    dsnpTriggers.includes(type)
+                                            ) && (
+                                                <FormGroup
+                                                    error={Boolean(
+                                                        showFieldErrors(
+                                                            'dsnpContract',
+                                                            errors
+                                                        )
+                                                    )}
+                                                >
+                                                    <Fieldset
+                                                        aria-required
+                                                        legend="Is this contract associated with a Dual-Eligible Special Needs Plan (D-SNP) that covers Medicaid benefits?"
+                                                    >
+                                                        <span
+                                                            className={
+                                                                styles.requiredOptionalText
+                                                            }
+                                                        >
+                                                            Required
+                                                        </span>
+                                                        <span
+                                                            className={
+                                                                styles.requiredOptionalText
+                                                            }
+                                                        >
+                                                            See 42 CFR § 422.2
+                                                        </span>
+                                                        <LinkWithLogging
+                                                            variant="external"
+                                                            href={
+                                                                'https://mc-review-dev.onemac.cms.gov/help#dual-eligible-special-needs-plans'
+                                                            }
+                                                            target="_blank"
+                                                        >
+                                                            D-SNP guidance
+                                                        </LinkWithLogging>
+                                                        <FieldYesNo
+                                                            id="dsnpContract"
+                                                            name="dsnpContract"
+                                                            label=""
+                                                            showError={Boolean(
+                                                                showFieldErrors(
+                                                                    'dsnpContract',
+                                                                    errors
+                                                                )
+                                                            )}
+                                                        />
+                                                    </Fieldset>
+                                                </FormGroup>
+                                            )}
                                             {isContractWithProvisions(
                                                 draftSubmission
                                             ) && (
