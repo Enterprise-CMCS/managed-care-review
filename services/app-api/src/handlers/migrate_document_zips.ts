@@ -9,11 +9,13 @@ import { createDocumentZipPackage } from '../postgres/documents/zip'
 import { getPostgresURL } from './configuration'
 import { initTracer, recordException } from '../../../uploads/src/lib/otel'
 import type { Prisma } from '@prisma/client'
+import { S3Client, DeleteObjectCommand } from '@aws-sdk/client-s3'
 
 interface MigrationConfig {
     dryRun: boolean
     batchSize: number
     stateCode?: string
+    maxRuntimeMs?: number
 }
 
 interface MigrationStats {
@@ -23,6 +25,7 @@ interface MigrationStats {
     skippedRates: number
     erroredContracts: number
     erroredRates: number
+    timeoutExceeded: boolean
 }
 
 // Types that match our Prisma query results
@@ -84,8 +87,16 @@ const main: Handler = async (
 
     const dbConnectionURL = dbConnResult + `&connect_timeout=${connectTimeout}`
 
+    // Initialize S3 client for potential cleanup
+    const s3Client = new S3Client({
+        region: process.env.AWS_REGION || 'us-east-1',
+    })
+
     // Parse configuration from query parameters
     const config = parseConfig(event.queryStringParameters || {})
+
+    // Track start time for timeout monitoring
+    const startTime = Date.now()
 
     console.info('Starting document zip migration')
     console.info('Configuration:', JSON.stringify(config))
@@ -99,7 +110,7 @@ const main: Handler = async (
     })
 
     try {
-        const stats = await runMigration(prisma, config)
+        const stats = await runMigration(prisma, config, startTime, s3Client)
 
         const result = {
             success: true,
@@ -137,12 +148,17 @@ function parseConfig(
             ? parseInt(queryParams.batchSize, 10)
             : 10,
         stateCode: queryParams.stateCode || undefined,
+        maxRuntimeMs: queryParams.maxRuntimeMs
+            ? parseInt(queryParams.maxRuntimeMs, 10)
+            : 13 * 60 * 1000, // 13 minutes default
     }
 }
 
 async function runMigration(
     prisma: PrismaClient,
-    config: MigrationConfig
+    config: MigrationConfig,
+    startTime: number,
+    s3Client: S3Client
 ): Promise<MigrationStats> {
     const stats: MigrationStats = {
         processedContracts: 0,
@@ -151,6 +167,20 @@ async function runMigration(
         skippedRates: 0,
         erroredContracts: 0,
         erroredRates: 0,
+        timeoutExceeded: false,
+    }
+
+    // Helper function to check if we should continue processing
+    const shouldContinue = (): boolean => {
+        const elapsedTime = Date.now() - startTime
+        const shouldStop = elapsedTime > config.maxRuntimeMs!
+        if (shouldStop) {
+            stats.timeoutExceeded = true
+            console.warn(
+                `Stopping migration - elapsed time: ${elapsedTime}ms exceeds max: ${config.maxRuntimeMs}ms`
+            )
+        }
+        return !shouldStop
     }
 
     // Get all submitted contract revisions that don't have zip packages yet
@@ -199,18 +229,25 @@ async function runMigration(
 
     // Process contract revisions in batches
     console.info('Processing contract revisions...')
-    for (let i = 0; i < contractRevisions.length; i += config.batchSize) {
+    for (
+        let i = 0;
+        i < contractRevisions.length && shouldContinue();
+        i += config.batchSize
+    ) {
         const batch = contractRevisions.slice(i, i + config.batchSize)
         console.info(
             `Processing contract batch ${Math.floor(i / config.batchSize) + 1}/${Math.ceil(contractRevisions.length / config.batchSize)}`
         )
 
         for (const contractRev of batch) {
+            if (!shouldContinue()) break
+
             try {
                 const result = await processContractRevision(
                     prisma,
                     contractRev,
-                    config.dryRun
+                    config.dryRun,
+                    s3Client
                 )
                 if (result === 'processed') stats.processedContracts++
                 else if (result === 'skipped') stats.skippedContracts++
@@ -226,18 +263,25 @@ async function runMigration(
 
     // Process rate revisions in batches
     console.info('Processing rate revisions...')
-    for (let i = 0; i < rateRevisions.length; i += config.batchSize) {
+    for (
+        let i = 0;
+        i < rateRevisions.length && shouldContinue();
+        i += config.batchSize
+    ) {
         const batch = rateRevisions.slice(i, i + config.batchSize)
         console.info(
             `Processing rate batch ${Math.floor(i / config.batchSize) + 1}/${Math.ceil(rateRevisions.length / config.batchSize)}`
         )
 
         for (const rateRev of batch) {
+            if (!shouldContinue()) break
+
             try {
                 const result = await processRateRevision(
                     prisma,
                     rateRev,
-                    config.dryRun
+                    config.dryRun,
+                    s3Client
                 )
                 if (result === 'processed') stats.processedRates++
                 else if (result === 'skipped') stats.skippedRates++
@@ -254,10 +298,36 @@ async function runMigration(
     return stats
 }
 
+// Helper function to extract S3 key from URL and delete object
+async function cleanupS3Object(
+    s3Client: S3Client,
+    s3URL: string
+): Promise<void> {
+    try {
+        // Extract bucket and key from S3 URL
+        const url = new URL(s3URL)
+        const bucket = url.hostname.split('.')[0]
+        const key = url.pathname.substring(1) // Remove leading slash
+
+        await s3Client.send(
+            new DeleteObjectCommand({
+                Bucket: bucket,
+                Key: key,
+            })
+        )
+
+        console.info(`Cleaned up S3 object: ${s3URL}`)
+    } catch (error) {
+        console.error(`Failed to cleanup S3 object ${s3URL}:`, error)
+        // Don't throw - cleanup is best effort
+    }
+}
+
 async function processContractRevision(
     prisma: PrismaClient,
     contractRev: ContractRevisionWithRelations,
-    dryRun: boolean
+    dryRun: boolean,
+    s3Client: S3Client
 ): Promise<'processed' | 'skipped'> {
     const contractDocuments = contractRev.contractDocuments || []
     const supportingDocuments = contractRev.supportingDocuments || []
@@ -279,34 +349,62 @@ async function processContractRevision(
         return 'processed'
     }
 
-    // Generate zip
-    const s3DestinationKey = `zips/contracts/${contractRev.id}/contract-documents.zip`
-    const zipResult = await generateDocumentZip(allDocuments, s3DestinationKey)
+    // Use transaction to ensure atomicity
+    return await prisma.$transaction(async (tx) => {
+        // Check if zip already exists (in case of retry)
+        const existingZip = await tx.documentZipPackage.findFirst({
+            where: {
+                contractRevisionID: contractRev.id,
+                documentType: 'CONTRACT_DOCUMENTS',
+            },
+        })
 
-    if (zipResult instanceof Error) {
-        throw zipResult
-    }
+        if (existingZip) {
+            console.info(
+                `Contract ${contractRev.id} already has zip package, skipping`
+            )
+            return 'skipped'
+        }
 
-    // Store in database
-    const createResult = await createDocumentZipPackage(prisma, {
-        s3URL: zipResult.s3URL,
-        sha256: zipResult.sha256,
-        contractRevisionID: contractRev.id,
-        documentType: 'CONTRACT_DOCUMENTS',
+        // Generate zip
+        const s3DestinationKey = `zips/contracts/${contractRev.id}/contract-documents.zip`
+        const zipResult = await generateDocumentZip(
+            allDocuments,
+            s3DestinationKey
+        )
+
+        if (zipResult instanceof Error) {
+            throw zipResult
+        }
+
+        try {
+            // Store in database within transaction
+            const createResult = await createDocumentZipPackage(tx, {
+                s3URL: zipResult.s3URL,
+                sha256: zipResult.sha256,
+                contractRevisionID: contractRev.id,
+                documentType: 'CONTRACT_DOCUMENTS',
+            })
+
+            if (createResult instanceof Error) {
+                throw createResult
+            }
+
+            console.info(`Created contract zip: ${zipResult.s3URL}`)
+            return 'processed'
+        } catch (dbError) {
+            // If database operation fails, cleanup the S3 object
+            await cleanupS3Object(s3Client, zipResult.s3URL)
+            throw dbError
+        }
     })
-
-    if (createResult instanceof Error) {
-        throw createResult
-    }
-
-    console.info(`Created contract zip: ${zipResult.s3URL}`)
-    return 'processed'
 }
 
 async function processRateRevision(
     prisma: PrismaClient,
     rateRev: RateRevisionWithRelations,
-    dryRun: boolean
+    dryRun: boolean,
+    s3Client: S3Client
 ): Promise<'processed' | 'skipped'> {
     // Access documents directly from Prisma relations
     const rateDocuments = rateRev.rateDocuments || []
@@ -329,28 +427,53 @@ async function processRateRevision(
         return 'processed'
     }
 
-    // Generate zip
-    const s3DestinationKey = `zips/rates/${rateRev.id}/rate-documents.zip`
-    const zipResult = await generateDocumentZip(allDocuments, s3DestinationKey)
+    // Use transaction to ensure atomicity
+    return await prisma.$transaction(async (tx) => {
+        // Check if zip already exists (in case of retry)
+        const existingZip = await tx.documentZipPackage.findFirst({
+            where: {
+                rateRevisionID: rateRev.id,
+                documentType: 'RATE_DOCUMENTS',
+            },
+        })
 
-    if (zipResult instanceof Error) {
-        throw zipResult
-    }
+        if (existingZip) {
+            console.info(`Rate ${rateRev.id} already has zip package, skipping`)
+            return 'skipped'
+        }
 
-    // Store in database
-    const createResult = await createDocumentZipPackage(prisma, {
-        s3URL: zipResult.s3URL,
-        sha256: zipResult.sha256,
-        rateRevisionID: rateRev.id,
-        documentType: 'RATE_DOCUMENTS',
+        // Generate zip
+        const s3DestinationKey = `zips/rates/${rateRev.id}/rate-documents.zip`
+        const zipResult = await generateDocumentZip(
+            allDocuments,
+            s3DestinationKey
+        )
+
+        if (zipResult instanceof Error) {
+            throw zipResult
+        }
+
+        try {
+            // Store in database within transaction
+            const createResult = await createDocumentZipPackage(tx, {
+                s3URL: zipResult.s3URL,
+                sha256: zipResult.sha256,
+                rateRevisionID: rateRev.id,
+                documentType: 'RATE_DOCUMENTS',
+            })
+
+            if (createResult instanceof Error) {
+                throw createResult
+            }
+
+            console.info(`Created rate zip: ${zipResult.s3URL}`)
+            return 'processed'
+        } catch (dbError) {
+            // If database operation fails, cleanup the S3 object
+            await cleanupS3Object(s3Client, zipResult.s3URL)
+            throw dbError
+        }
     })
-
-    if (createResult instanceof Error) {
-        throw createResult
-    }
-
-    console.info(`Created rate zip: ${zipResult.s3URL}`)
-    return 'processed'
 }
 
 function fmtError(error: string): APIGatewayProxyResultV2 {
