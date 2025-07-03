@@ -1311,7 +1311,7 @@ export const ContractDetails = ({
                                                         <LinkWithLogging
                                                             variant="external"
                                                             href={
-                                                                'https://mc-review-dev.onemac.cms.gov/help#dual-eligible-special-needs-plans'
+                                                                '/help#dual-eligible-special-needs-plans'
                                                             }
                                                             target="_blank"
                                                         >
