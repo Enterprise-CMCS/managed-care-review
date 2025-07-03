@@ -190,6 +190,7 @@ model RateRevisionTable {
 
   rateType                        RateType?
   rateCapitationType              RateCapitationType?
+  rateMedicaidPopulations         RateMedicaidPopulations[]
   rateDocuments                   RateDocument[]
   supportingDocuments             RateSupportingDocument[]
   rateDateStart                   DateTime?                @db.Date
@@ -559,6 +560,12 @@ enum ContractType {
 enum ActuaryCommunication {
   OACT_TO_ACTUARY
   OACT_TO_STATE
+}
+
+enum RateMedicaidPopulations {
+  MEDICARE_MEDICAID_WITH_DSNP
+  MEDICAID_ONLY
+  MEDICARE_MEDICAID_WITHOUT_DSNP
 }
 
 enum ActuarialFirm {
