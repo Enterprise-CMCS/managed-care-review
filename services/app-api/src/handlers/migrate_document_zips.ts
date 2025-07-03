@@ -3,12 +3,11 @@ import type {
     APIGatewayProxyResultV2,
     APIGatewayProxyEventV2,
 } from 'aws-lambda'
-import { PrismaClient } from '@prisma/client'
 import { generateDocumentZip } from '../zip'
 import { createDocumentZipPackage } from '../postgres/documents/zip'
 import { getPostgresURL } from './configuration'
 import { initTracer, recordException } from '../../../uploads/src/lib/otel'
-import type { Prisma } from '@prisma/client'
+import { PrismaClient, type Prisma } from '@prisma/client'
 import { S3Client, DeleteObjectCommand } from '@aws-sdk/client-s3'
 
 interface MigrationConfig {
@@ -349,7 +348,7 @@ async function processContractRevision(
         return 'processed'
     }
 
-    // Check if zip already exists
+    // Check if zip already exists before generating
     const existingZip = await prisma.documentZipPackage.findFirst({
         where: {
             contractRevisionID: contractRev.id,
@@ -364,7 +363,7 @@ async function processContractRevision(
         return 'skipped'
     }
 
-    // Generate zip
+    // Generate zip only if it doesn't exist
     const s3DestinationKey = `zips/contracts/${contractRev.id}/contract-documents.zip`
     const zipResult = await generateDocumentZip(allDocuments, s3DestinationKey)
     if (zipResult instanceof Error) {
@@ -372,21 +371,22 @@ async function processContractRevision(
     }
 
     try {
-        const createResult = await createDocumentZipPackage(prisma, {
-            s3URL: zipResult.s3URL,
-            sha256: zipResult.sha256,
-            contractRevisionID: contractRev.id,
-            documentType: 'CONTRACT_DOCUMENTS',
+        // Use transaction only for the database write
+        return await prisma.$transaction(async (tx): Promise<'processed'> => {
+            const createResult = await createDocumentZipPackage(tx, {
+                s3URL: zipResult.s3URL,
+                sha256: zipResult.sha256,
+                contractRevisionID: contractRev.id,
+                documentType: 'CONTRACT_DOCUMENTS',
+            })
+
+            if (createResult instanceof Error) {
+                throw createResult
+            }
+
+            console.info(`Created contract zip: ${zipResult.s3URL}`)
+            return 'processed'
         })
-
-        if (createResult instanceof Error) {
-            // If database operation fails, cleanup the S3 object
-            await cleanupS3Object(s3Client, zipResult.s3URL)
-            throw createResult
-        }
-
-        console.info(`Created contract zip: ${zipResult.s3URL}`)
-        return 'processed'
     } catch (dbError) {
         // If database operation fails, cleanup the S3 object
         await cleanupS3Object(s3Client, zipResult.s3URL)
@@ -421,7 +421,7 @@ async function processRateRevision(
         return 'processed'
     }
 
-    // Check if zip already exists
+    // Check if zip already exists before generating
     const existingZip = await prisma.documentZipPackage.findFirst({
         where: {
             rateRevisionID: rateRev.id,
@@ -433,7 +433,7 @@ async function processRateRevision(
         return 'skipped'
     }
 
-    // Generate zip
+    // Generate zip only if it doesn't exist
     const s3DestinationKey = `zips/rates/${rateRev.id}/rate-documents.zip`
     const zipResult = await generateDocumentZip(allDocuments, s3DestinationKey)
     if (zipResult instanceof Error) {
@@ -441,21 +441,22 @@ async function processRateRevision(
     }
 
     try {
-        const createResult = await createDocumentZipPackage(prisma, {
-            s3URL: zipResult.s3URL,
-            sha256: zipResult.sha256,
-            rateRevisionID: rateRev.id,
-            documentType: 'RATE_DOCUMENTS',
+        // Use transaction only for the database write
+        return await prisma.$transaction(async (tx): Promise<'processed'> => {
+            const createResult = await createDocumentZipPackage(tx, {
+                s3URL: zipResult.s3URL,
+                sha256: zipResult.sha256,
+                rateRevisionID: rateRev.id,
+                documentType: 'RATE_DOCUMENTS',
+            })
+
+            if (createResult instanceof Error) {
+                throw createResult
+            }
+
+            console.info(`Created rate zip: ${zipResult.s3URL}`)
+            return 'processed'
         })
-
-        if (createResult instanceof Error) {
-            // If database operation fails, cleanup the S3 object
-            await cleanupS3Object(s3Client, zipResult.s3URL)
-            throw createResult
-        }
-
-        console.info(`Created rate zip: ${zipResult.s3URL}`)
-        return 'processed'
     } catch (dbError) {
         // If database operation fails, cleanup the S3 object
         await cleanupS3Object(s3Client, zipResult.s3URL)
