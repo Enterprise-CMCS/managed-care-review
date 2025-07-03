@@ -7,18 +7,41 @@
 
 2. **Request a token:**  
    Make a POST request to `/oauth/token` with your credentials:
-   ```json
-   {
-     "grant_type": "client_credentials",
-     "client_id": "your-client-id",
-     "client_secret": "your-client-secret" // pragma: allowlist secret
-   }
+   ```
+   curl --location 'https://<DEPLOYMENT_API_DOMAIN>/oauth/token' \
+   --header 'Content-Type: application/x-www-form-urlencoded' \
+   --data-urlencode 'grant_type=client_credentials' \
+   --data-urlencode 'client_id=<CLIENT_ID>' \
+   --data-urlencode 'client_secret=<CLIENT_SECRET>'
    ```
 
 3. **Use the token:**  
    Add the returned `access_token` as a Bearer token in the `Authorization` header for all API requests:
    ```
-   Authorization: Bearer <access_token>
+   curl --location 'https://<DEPLOYMENT_API_DOMAIN>/v1/graphql/external' \
+   --header 'Content-Type: application/json' \
+   --header 'Authorization: Bearer <YOUR_ACCESS_TOKEN>' \
+   --data-raw '{
+      "query": "query FetchContract {
+         fetchContract(input: { contractID: \"5b301a2b-b778-4b1a-81ca-6269e5325429\" }) {
+            contract {
+               id
+               createdAt
+               updatedAt
+               status
+               reviewStatus
+               consolidatedStatus
+               initiallySubmittedAt
+               lastUpdatedForDisplay
+               stateCode
+               stateNumber
+               mccrsID
+               webURL
+               dateContractDocsExecuted
+            }
+         }
+      }"
+   }'
    ```
 
 4. **Token expiration:**  
@@ -38,7 +61,7 @@ Currently, we only support the `client_credentials` grant type. This is suitable
 ## Client Registration
 
 OAuth clients can only be created by users with the `ADMIN_USER` role. Each client requires:
-- A contact email (required)
+- A CMS user to be attached to the client(required)
 - An optional description
 - Optional grants array (defaults to `['client_credentials']`)
 
@@ -48,39 +71,7 @@ The system automatically generates:
 
 ### Creating an OAuth Client (for ADMIN_USER)
 
-Only users with the `ADMIN_USER` role can create OAuth clients. This is done via a GraphQL mutation.
-
-**GraphQL Mutation Example:**
-
-```graphql
-mutation CreateOauthClient($input: CreateOauthClientInput!) {
-  createOauthClient(input: $input) {
-    oauthClient {
-      clientId
-      clientSecret
-      grants
-      description
-      contactEmail
-      createdAt
-      updatedAt
-    }
-  }
-}
-```
-
-**Example Input:**
-
-```json
-{
-  "input": {
-    "contactEmail": "admin@example.com",
-    "description": "My API client",
-    "grants": ["client_credentials"]
-  }
-}
-```
-
-> The `clientSecret` is only shown once at creation—be sure to save it securely.
+Only users with the `ADMIN_USER` role can create OAuth clients. This is done via the MC-Review setting page in the state portal.
 
 ## Token Lifecycle
 
@@ -111,20 +102,25 @@ mutation CreateOauthClient($input: CreateOauthClientInput!) {
 
 ### 1. Request Token
 
-**Endpoint:** `POST /oauth/token`
+**Endpoint:** `POST https://<DEPLOYMENT_API_DOMAIN>/oauth/token`
 
 **Headers:**
 ```
-Content-Type: application/json
+Content-Type: application/x-www-form-urlencoded
 ```
 
 **Request Body:**
-```json
-{
-  "grant_type": "client_credentials",
-  "client_id": "oauth-client-123",
-  "client_secret": "your-client-secret" // pragma: allowlist secret
-}
+```application/x-www-form-urlencoded
+grant_type=client_credentials&client_id=oauth-client-123&client_secret=your-client-secret
+```
+
+**Request Example:**
+```
+curl --location 'https://<DEPLOYMENT_API_DOMAIN>/oauth/token' \
+--header 'Content-Type: application/x-www-form-urlencoded' \
+--data-urlencode 'grant_type=client_credentials' \
+--data-urlencode 'client_id=<CLIENT_ID>' \
+--data-urlencode 'client_secret=<CLIENT_SECRET>'
 ```
 
 **Response Examples:**
@@ -180,10 +176,35 @@ Server Error (500 Internal Server Error):
 
 ### 2. Using the Token
 
+**Endpoint:** `POST https://<DEPLOYMENT_API_DOMAIN>/v1/graphql/external`
+
 Include the token in the `Authorization` header for all API requests:
 
 ```
-Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
+curl --location 'https://<DEPLOYMENT_API_DOMAIN>/v1/graphql/external' \
+--header 'Content-Type: application/json' \
+--header 'Authorization: Bearer <YOUR_ACCESS_TOKEN>' \
+--data-raw '{
+   "query": "query FetchContract {
+      fetchContract(input: { contractID: \"5b301a2b-b778-4b1a-81ca-6269e5325429\" }) {
+         contract {
+            id
+            createdAt
+            updatedAt
+            status
+            reviewStatus
+            consolidatedStatus
+            initiallySubmittedAt
+            lastUpdatedForDisplay
+            stateCode
+            stateNumber
+            mccrsID
+            webURL
+            dateContractDocsExecuted
+         }
+      }
+   }"
+}'
 ```
 
 **Response Examples:**
@@ -217,8 +238,7 @@ Missing Token (401 Unauthorized):
 
 1. **Client Secret Storage**
    - Client secrets are stored securely in the database
-   - They are only shown once during client creation
-   - They cannot be retrieved later
+   - Client id and secrets are displayed in a secure table on the state portal accessible only to admin users
 
 2. **Token Security**
    - Tokens expire after 90 days
@@ -226,6 +246,6 @@ Missing Token (401 Unauthorized):
    - All API requests must use HTTPS
 
 3. **Access Control**
-   - Only admin users can create/update/delete OAuth clients
+   - Only admin users can create/update/view/delete OAuth clients
    - Client credentials are required for all token requests
    - Invalid credentials are rejected immediately 

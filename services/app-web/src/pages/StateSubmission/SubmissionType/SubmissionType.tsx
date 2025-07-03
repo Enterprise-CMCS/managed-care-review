@@ -581,7 +581,7 @@ export const SubmissionType = ({
                                                     <div
                                                         role="note"
                                                         aria-labelledby="populationCovered"
-                                                        className="usa-hint padding-top-2"
+                                                        className="mcr-note padding-top-2"
                                                     >
                                                         If you need to change
                                                         your response, contact
@@ -709,7 +709,7 @@ export const SubmissionType = ({
                                                     <div
                                                         role="note"
                                                         aria-labelledby="submissionType"
-                                                        className="usa-hint padding-top-2"
+                                                        className="mcr-note padding-top-2"
                                                     >
                                                         If you need to change
                                                         your response, contact
@@ -721,7 +721,7 @@ export const SubmissionType = ({
                                                     <div
                                                         role="note"
                                                         aria-labelledby="submissionType"
-                                                        className="usa-hint padding-top-2"
+                                                        className="mcr-note padding-top-2"
                                                     >
                                                         States are not required
                                                         to submit rates with

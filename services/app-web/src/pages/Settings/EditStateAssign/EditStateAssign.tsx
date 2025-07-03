@@ -195,7 +195,6 @@ export const EditStateAssign = (): React.ReactElement => {
                     },
                 ]}
             />
-            {editError && <GenericApiErrorBanner />}
             <Formik
                 initialValues={formInitialValues}
                 onSubmit={(values) => onSubmit(values)}
@@ -203,6 +202,7 @@ export const EditStateAssign = (): React.ReactElement => {
             >
                 {({ errors, values, handleSubmit }) => (
                     <Grid className={styles.maxWidthContainer}>
+                        {editError && <GenericApiErrorBanner />}
                         {showFieldErrors(errors.dmcoAssignmentsByID) && (
                             <ErrorAlert
                                 heading="Assign a DMCO analyst"
@@ -258,7 +258,9 @@ export const EditStateAssign = (): React.ReactElement => {
                                         <Label htmlFor={'dmcoAssignmentsByID'}>
                                             Update DMCO staff
                                         </Label>
-                                        <span>Required</span>
+                                        <span className="usa-hint">
+                                            Required
+                                        </span>
                                         {showFieldErrors(
                                             errors.dmcoAssignmentsByID
                                         ) && (
@@ -273,6 +275,7 @@ export const EditStateAssign = (): React.ReactElement => {
                                             name="dmcoAssignmentsByID"
                                             optionDescriptionSingular="user"
                                             dropdownOptions={dropdownOptions}
+                                            isMulti
                                             initialValues={
                                                 values.dmcoAssignmentsByID
                                             }

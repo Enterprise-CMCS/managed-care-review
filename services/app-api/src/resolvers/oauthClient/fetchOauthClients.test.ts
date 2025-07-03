@@ -15,7 +15,7 @@ describe('fetchOauthClients', () => {
         const adminUser = testAdminUser()
         const cmsUser = testCMSUser()
 
-        // Create CMS user in database
+        // Create CMS user in database with state assignments
         const client = await sharedTestPrismaClient()
         await client.user.create({
             data: {
@@ -24,6 +24,13 @@ describe('fetchOauthClients', () => {
                 familyName: cmsUser.familyName,
                 email: cmsUser.email,
                 role: cmsUser.role,
+                stateAssignments: {
+                    connect: [
+                        {
+                            stateCode: 'FL',
+                        },
+                    ],
+                },
             },
         })
 
@@ -80,10 +87,57 @@ describe('fetchOauthClients', () => {
     })
 
     it('fetches all OAuth clients as ADMIN with empty input', async () => {
+        const adminUser = testAdminUser()
+
         const server = await constructTestPostgresServer({
-            context: { user: testAdminUser() },
+            context: { user: adminUser },
         })
-        // Fetch all (empty input)
+
+        // Clean up any existing OAuth clients to ensure test isolation
+        const client = await sharedTestPrismaClient()
+        await client.oAuthClient.deleteMany()
+
+        // Fetch all should return empty array after cleanup
+        const emptyRes = await server.executeOperation({
+            query: FetchOauthClientsDocument,
+            variables: { input: {} },
+        })
+        expect(emptyRes.errors).toBeUndefined()
+        expect(emptyRes.data?.fetchOauthClients.oauthClients).toHaveLength(0)
+
+        // Create a CMS user with state assignments
+        const cmsUser = testCMSUser()
+        await client.user.create({
+            data: {
+                id: cmsUser.id,
+                givenName: cmsUser.givenName,
+                familyName: cmsUser.familyName,
+                email: cmsUser.email,
+                role: cmsUser.role,
+                stateAssignments: {
+                    connect: [
+                        {
+                            stateCode: 'FL',
+                        },
+                    ],
+                },
+            },
+        })
+
+        // Create an OAuth client
+        const createRes = await server.executeOperation({
+            query: CreateOauthClientDocument,
+            variables: {
+                input: {
+                    description: 'Test Client for fetch all',
+                    grants: ['client_credentials'],
+                    userID: cmsUser.id,
+                },
+            },
+        })
+        expect(createRes.errors).toBeUndefined()
+
+        // Now fetch all should return our client
         const res = await server.executeOperation({
             query: FetchOauthClientsDocument,
             variables: { input: {} },
@@ -91,13 +145,23 @@ describe('fetchOauthClients', () => {
         expect(res.errors).toBeUndefined()
         const oauthClients = res.data?.fetchOauthClients.oauthClients
         expect(Array.isArray(oauthClients)).toBe(true)
+        expect(oauthClients).toHaveLength(1)
+
+        // Basic verification of the client
+        const ourClient = oauthClients[0]
+        expect(ourClient.clientId).toBeDefined()
+        expect(ourClient.description).toBe('Test Client for fetch all')
+        expect(ourClient.user).toBeDefined()
+        expect(ourClient.user.id).toBe(cmsUser.id)
+        expect(ourClient.user.email).toBe(cmsUser.email)
+        expect(ourClient.user.role).toBe(cmsUser.role)
     })
 
     it('fetches only specified clientIds', async () => {
         const adminUser = testAdminUser()
         const cmsUser = testCMSUser()
 
-        // Create CMS user in database
+        // Create CMS user in database with state assignments
         const client = await sharedTestPrismaClient()
         await client.user.create({
             data: {
@@ -106,6 +170,13 @@ describe('fetchOauthClients', () => {
                 familyName: cmsUser.familyName,
                 email: cmsUser.email,
                 role: cmsUser.role,
+                stateAssignments: {
+                    connect: [
+                        {
+                            stateCode: 'FL',
+                        },
+                    ],
+                },
             },
         })
 

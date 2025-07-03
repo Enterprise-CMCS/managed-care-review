@@ -25,10 +25,10 @@
 .fileInput {
     max-width: none;
 }
-.fileInputHint {
+.fileInputNote {
     display: flex;
     flex-direction: column;
-    color: custom.$mcr-foundation-hint;
+    color: custom.$mcr-foundation-note;
     margin-bottom: 0.5rem;
 }
 

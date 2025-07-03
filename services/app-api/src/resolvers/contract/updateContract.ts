@@ -9,6 +9,7 @@ import {
 } from '../attributeHelper'
 import { GraphQLError } from 'graphql'
 import { NotFoundError } from '../../postgres'
+import { canWrite } from '../../authorization/oauthAuthorization'
 
 export function updateContract(
     store: Store
@@ -17,6 +18,20 @@ export function updateContract(
         const { user, ctx, tracer } = context
         const span = tracer?.startSpan('updateContract', {}, ctx)
         setResolverDetailsOnActiveSpan('updateContract', user, span)
+
+        // Check OAuth client read permissions
+        if (!canWrite(context)) {
+            const errMessage = `OAuth client does not have write permissions`
+            logError('updateContract', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+
+            throw new GraphQLError(errMessage, {
+                extensions: {
+                    code: 'FORBIDDEN',
+                    cause: 'INSUFFICIENT_OAUTH_GRANTS',
+                },
+            })
+        }
 
         // This resolver is only callable by CMS users
         if (!hasCMSPermissions(user)) {
