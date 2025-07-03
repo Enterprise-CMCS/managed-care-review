@@ -53,7 +53,7 @@ export const ContractDetailsFormSchema = (
         }
     }
 
-    // Errors in the error summary is ordered by the position of each ket in the yup object.
+    // Errors in the error summary is ordered by the position of each key in the yup object.
     return Yup.object().shape({
         statutoryRegulatoryAttestation: activeFeatureFlags['438-attestation']
             ? Yup.string().defined('You must select yes or no')
@@ -120,6 +120,11 @@ export const ContractDetailsFormSchema = (
                     : Boolean(value && value.length > 0)
             }
         ),
+        dsnpContract: Yup.string().when('federalAuthorities', {
+            is: (authorities: string[]) => authorities.some(type => ['VOLUNTARY', 'WAIVER_1115', 'WAIVER_1915B', 'STATE_PLAN'].includes(type)),
+            then: schema => schema.required('You must select yes or no'),
+            otherwise: schema => schema.notRequired()
+        }),
         inLieuServicesAndSettings: yesNoError('inLieuServicesAndSettings'),
         modifiedBenefitsProvided: yesNoError('modifiedBenefitsProvided'),
         modifiedGeoAreaServed: yesNoError('modifiedGeoAreaServed'),
