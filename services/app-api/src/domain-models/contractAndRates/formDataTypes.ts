@@ -9,6 +9,7 @@ import {
     rateCapitationTypeSchema,
     rateTypeSchema,
     submissionTypeSchema,
+    rateMedicaidPopulationsSchema,
 } from '@mc-review/hpp'
 import { statusSchema } from './statusType'
 import type { RawCreateParams, ZodTypeAny } from 'zod/lib/types'
@@ -208,6 +209,7 @@ const genericRateFormDataSchema = z.object({
     rateDateStart: z.date(),
     rateDateEnd: z.date(),
     rateDateCertified: z.date(),
+    rateMedicaidPopulations: z.array(rateMedicaidPopulationsSchema).optional(),
     amendmentEffectiveDateStart: preprocessNulls(z.date().optional()),
     amendmentEffectiveDateEnd: preprocessNulls(z.date().optional()),
     deprecatedRateProgramIDs: z.array(z.string()),
@@ -248,6 +250,9 @@ const rateFormDataSchema = genericRateFormDataSchema.extend({
     ),
     rateProgramIDs: preprocessNulls(
         genericRateFormDataSchema.shape.rateProgramIDs.optional()
+    ),
+    rateMedicaidPopulations: preprocessNulls(
+        genericRateFormDataSchema.shape.rateMedicaidPopulations.optional()
     ),
     rateCertificationName: preprocessNulls(
         genericRateFormDataSchema.shape.rateCertificationName.optional()
