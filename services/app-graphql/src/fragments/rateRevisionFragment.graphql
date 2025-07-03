@@ -24,6 +24,7 @@ fragment rateRevisionFragment on RateRevision {
         amendmentEffectiveDateStart
         amendmentEffectiveDateEnd
         rateProgramIDs
+        rateMedicaidPopulations
         deprecatedRateProgramIDs
         consolidatedRateProgramIDs
         rateCertificationName
