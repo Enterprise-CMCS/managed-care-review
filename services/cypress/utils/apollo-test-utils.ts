@@ -184,7 +184,7 @@ const cognitoIdentity = new CognitoIdentityClient({
 const Auth = {
     async signIn(email: string, password: string) {
         const command = new InitiateAuthCommand({
-            AuthFlow: AuthFlowType.USER_AUTH,
+            AuthFlow: AuthFlowType.ADMIN_NO_SRP_AUTH,
             ClientId: Cypress.env('COGNITO_USER_POOL_WEB_CLIENT_ID'),
             AuthParameters: {
                 USERNAME: email,
