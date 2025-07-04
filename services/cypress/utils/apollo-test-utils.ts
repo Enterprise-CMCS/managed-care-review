@@ -17,7 +17,7 @@ import {
 // Replace aws-amplify imports with AWS SDK
 import {
     CognitoIdentityProviderClient,
-    InitiateAuthCommand,
+    AdminInitiateAuthCommand,
     AuthFlowType,
 } from '@aws-sdk/client-cognito-identity-provider'
 import {
@@ -183,8 +183,9 @@ const cognitoIdentity = new CognitoIdentityClient({
 
 const Auth = {
     async signIn(email: string, password: string) {
-        const command = new InitiateAuthCommand({
+        const command = new AdminInitiateAuthCommand({
             AuthFlow: AuthFlowType.ADMIN_NO_SRP_AUTH,
+            UserPoolId: Cypress.env('COGNITO_USER_POOL_ID'),
             ClientId: Cypress.env('COGNITO_USER_POOL_WEB_CLIENT_ID'),
             AuthParameters: {
                 USERNAME: email,
