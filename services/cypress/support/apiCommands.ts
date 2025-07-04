@@ -10,16 +10,14 @@ import {
     SubmitContractDocument,
     CreateContractDocument,
     UpdateContractDraftRevisionDocument,
-    UpdateContractDraftRevisionInput,
+    UpdateContractDraftRevisionInput, CmsUsersUnion, Division,
 } from '../gen/gqlClient'
 import {
     apolloClientWrapper,
-    DivisionType,
     adminUser,
     newSubmissionInput,
     rateFormData,
     contractFormData,
-    CMSUserType, 
     minnesotaStatePrograms,
 } from '../utils/apollo-test-utils'
 import { ApolloClient, DocumentNode, NormalizedCacheObject } from '@apollo/client'
@@ -144,8 +142,8 @@ const createAndSubmitContractWithRates = async (
 
 const assignCmsDivision = async (
     apolloClient: ApolloClient<NormalizedCacheObject>,
-    cmsUser: CMSUserType,
-    division: DivisionType
+    cmsUser: CmsUsersUnion,
+    division: Division
 ): Promise<void> => {
     // get all users query
     const result = await apolloClient.query({
