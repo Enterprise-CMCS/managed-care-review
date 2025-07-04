@@ -28,7 +28,6 @@ import {
 import { SignatureV4 } from '@aws-sdk/signature-v4'
 import { HttpRequest } from '@aws-sdk/protocol-http'
 import { Sha256 } from '@aws-crypto/sha256-js'
-import fetch from 'node-fetch'
 import { findStatePrograms } from '@mc-review/hpp';
 
 // programs for state used in tests
@@ -270,23 +269,22 @@ const API = {
 
         const signedRequest = await signer.sign(request)
 
-        const response = await fetch(url.toString(), {
-            method: 'POST',
-            headers: signedRequest.headers,
-            body,
+        return new Promise((resolve) => {
+            cy.request({
+                method: 'POST',
+                headers: signedRequest.headers,
+                body,
+            }).then(response => {
+                resolve({
+                    data: response.body,
+                    status: response.status,
+                    statusText: response.statusText,
+                    headers: response.headers,
+                    config: {},
+                    request: { url: `${apiUrl}${path}` },
+                } as AxiosResponse)
+            })
         })
-
-        const data = await response.json()
-
-        // Convert fetch response to axios-like response
-        return {
-            data,
-            status: response.status,
-            statusText: response.statusText,
-            headers: Object.fromEntries(response.headers.entries()),
-            config: {},
-            request: { url: url.toString() },
-        } as AxiosResponse
     }
 }
 

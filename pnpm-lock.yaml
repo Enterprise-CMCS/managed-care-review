@@ -926,9 +926,6 @@ importers:
       graphql:
         specifier: ^16.9.0
         version: 16.9.0
-      node-fetch:
-        specifier: ^3.3.2
-        version: 3.3.2
     devDependencies:
       '@bahmutov/cypress-esbuild-preprocessor':
         specifier: ^2.2.4
