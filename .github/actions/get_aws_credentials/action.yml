@@ -24,6 +24,15 @@ outputs:
   oidc-role-arn:
     description: 'ARN of the OIDC role to assume'
     value: ${{ steps.format-oidc-role-arn.outputs.arn }}
+  aws-access-key-id:
+    description: 'AWS Access Key ID'
+    value: ${{ steps.export-credentials.outputs.aws-access-key-id }}
+  aws-secret-access-key:
+    description: 'AWS Secret Access Key'
+    value: ${{ steps.export-credentials.outputs.aws-secret-access-key }}
+  aws-session-token:
+    description: 'AWS Session Token'
+    value: ${{ steps.export-credentials.outputs.aws-session-token }}
 
 runs:
   using: 'composite'
@@ -49,4 +58,11 @@ runs:
       with:
         aws-region: ${{ inputs.region }}
         role-to-assume: ${{ steps.format-oidc-role-arn.outputs.arn }}
-        output-credentials: true
+    - name: Export credentials as outputs
+      id: export-credentials
+      if: ${{ inputs.dry-run != 'true' }}
+      shell: bash
+      run: |
+        echo "aws-access-key-id=$AWS_ACCESS_KEY_ID" >> $GITHUB_OUTPUT
+        echo "aws-secret-access-key=$AWS_SECRET_ACCESS_KEY" >> $GITHUB_OUTPUT 
+        echo "aws-session-token=$AWS_SESSION_TOKEN" >> $GITHUB_OUTPUT
