@@ -33,44 +33,21 @@ function validateEnvVariable(name: string, defaultValue?: string): string {
   return value;
 }
 
-// Clean Secrets Manager implementation for CDK synthesizer config
+// Load CDK synthesizer config from Secrets Manager (required)
 async function getSynthesizerConfig(): Promise<any> {
-  // Try Secrets Manager first when using custom synthesizer
-  if (process.env.USE_CUSTOM_SYNTHESIZER === 'true') {
-    try {
-      const client = new SecretsManagerClient({ 
-        region: process.env.AWS_REGION || process.env.CDK_DEFAULT_REGION || 'us-east-1' 
-      });
-      
-      const response = await client.send(new GetSecretValueCommand({
-        SecretId: 'cdkSynthesizerConfig'
-      }));
-      
-      if (response.SecretString) {
-        console.log('Loaded synthesizer config from Secrets Manager: cdkSynthesizerConfig');
-        return JSON.parse(response.SecretString);
-      }
-    } catch (error: any) {
-      console.log(`Failed to load from Secrets Manager: ${error.message}`);
-      // Continue to fallback options
-    }
+  const client = new SecretsManagerClient({ 
+    region: process.env.AWS_REGION || process.env.CDK_DEFAULT_REGION || 'us-east-1' 
+  });
+  
+  const response = await client.send(new GetSecretValueCommand({
+    SecretId: 'cdkSynthesizerConfig'
+  }));
+  
+  if (!response.SecretString) {
+    throw new Error('cdkSynthesizerConfig secret not found in Secrets Manager');
   }
   
-  // Fallback to environment variable
-  if (process.env.CDK_SYNTHESIZER_CONFIG) {
-    try {
-      console.log('Using synthesizer config from CDK_SYNTHESIZER_CONFIG env var');
-      return JSON.parse(process.env.CDK_SYNTHESIZER_CONFIG);
-    } catch (error) {
-      console.error('Failed to parse CDK_SYNTHESIZER_CONFIG:', error);
-    }
-  }
-  
-  // Default config
-  console.log('Using default synthesizer config');
-  return {
-    qualifier: process.env.CDK_QUALIFIER || 'hnb659fds'
-  };
+  return JSON.parse(response.SecretString);
 }
 
 // Main async function to initialize app with custom synthesizer
@@ -87,26 +64,13 @@ async function main() {
     // Load environment variables
     loadEnvironment(stage);
     
-    // Initialize CDK app
-    let app: cdk.App;
+    // Get CDK synthesizer config (required)
+    const synthConfig = await getSynthesizerConfig();
     
-    // Check if we should use custom synthesizer
-    if (process.env.USE_CUSTOM_SYNTHESIZER === 'true') {
-      console.log('Using custom CDK synthesizer configuration...');
-      
-      // Get CDK synthesizer config
-      const synthConfig = await getSynthesizerConfig();
-      
-      // Create CDK app with custom synthesizer
-      app = new cdk.App({
-        defaultStackSynthesizer: new cdk.DefaultStackSynthesizer(synthConfig),
-      });
-    } else {
-      console.log('Using default CDK synthesizer configuration');
-      
-      // Use default CDK app initialization
-      app = new cdk.App();
-    }
+    // Create CDK app with custom synthesizer
+    const app = new cdk.App({
+      defaultStackSynthesizer: new cdk.DefaultStackSynthesizer(synthConfig),
+    });
     
     // Set stage context
     app.node.setContext('stage', stage);

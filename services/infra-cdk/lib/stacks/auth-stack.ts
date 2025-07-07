@@ -1,4 +1,4 @@
-import { BaseStack, BaseStackProps } from '@constructs/base';
+import { BaseStack, BaseStackProps, ServiceRegistry } from '@constructs/base';
 import { CognitoAuth } from '@constructs/auth';
 import { Construct } from 'constructs';
 import * as cognito from 'aws-cdk-lib/aws-cognito';
@@ -55,9 +55,6 @@ export class AuthStack extends BaseStack {
 
     // Add custom attributes and groups
     this.configureUserPoolExtensions();
-
-    // Create SSM parameters for resources that other services might need
-    this.createSsmParameters();
   }
 
   /**
@@ -76,6 +73,7 @@ export class AuthStack extends BaseStack {
       allowedLogoutUrls: this.allowedLogoutUrls,
       identityPoolName: SERVICES.UI_AUTH,
       s3Buckets: this.getS3BucketsForIdentityPool()
+      // Note: API Gateway ID will be added by api-compute-stack after it's created
     });
 
     // Set public properties
@@ -88,10 +86,15 @@ export class AuthStack extends BaseStack {
   /**
    * Get SAML metadata URL based on stage
    */
-  private getSamlMetadataUrl(): string {
-    // In production, this would be the actual Okta metadata URL
-    // Using SSM parameter reference for flexibility
-    return `{{/${this.stage}/okta/metadata-url}}`;
+  private getSamlMetadataUrl(): string | undefined {
+    // Only use SAML for production environments
+    // Development environments can test without external SAML dependencies
+    if (this.stage === 'prod') {
+      return `{{/configuration/okta_metadata_url}}`;
+    }
+    
+    // For dev/val, skip SAML provider to avoid external dependencies
+    return undefined;
   }
 
   /**
@@ -238,33 +241,5 @@ export class AuthStack extends BaseStack {
 
     // Note: In a real implementation, these would be more granular
     // and resources would be specific rather than wildcards
-  }
-
-  /**
-   * Create SSM parameters for auth resources that other stacks/services need
-   */
-  private createSsmParameters(): void {
-    // Create SSM parameter for User Pool ID
-    new ssm.StringParameter(this, 'UserPoolIdParameter', {
-      parameterName: `/mcr/${this.stage}/auth/user-pool-id`,
-      stringValue: this.userPool.userPoolId,
-      description: 'Cognito User Pool ID for MCR application'
-    });
-
-    // Create SSM parameter for User Pool Client ID (often needed together)
-    new ssm.StringParameter(this, 'UserPoolClientIdParameter', {
-      parameterName: `/mcr/${this.stage}/auth/user-pool-client-id`,
-      stringValue: this.userPoolClient.userPoolClientId,
-      description: 'Cognito User Pool Client ID for MCR application'
-    });
-
-    // Create SSM parameter for Identity Pool ID if it exists
-    if (this.identityPool) {
-      new ssm.StringParameter(this, 'IdentityPoolIdParameter', {
-        parameterName: `/mcr/${this.stage}/auth/identity-pool-id`,
-        stringValue: this.identityPool.ref,
-        description: 'Cognito Identity Pool ID for MCR application'
-      });
-    }
   }
 }

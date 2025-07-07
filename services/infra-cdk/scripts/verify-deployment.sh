@@ -55,7 +55,6 @@ done
 echo -e "\n${YELLOW}S3 Buckets:${NC}"
 check_resource "S3 Bucket" "uploads-$STAGE-uploads" "aws s3api head-bucket --bucket uploads-$STAGE-uploads"
 check_resource "S3 Bucket" "uploads-$STAGE-qa" "aws s3api head-bucket --bucket uploads-$STAGE-qa"
-check_resource "S3 Bucket" "uploads-$STAGE-avscan" "aws s3api head-bucket --bucket uploads-$STAGE-avscan"
 
 # Check Auto Scaling Group
 echo -e "\n${YELLOW}Auto Scaling Group:${NC}"

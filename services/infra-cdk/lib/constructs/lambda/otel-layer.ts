@@ -42,9 +42,9 @@ export class OtelLayer extends Construct {
     const region = 'us-east-1'; // Based on your serverless config
     
     if (architecture === Architecture.ARM_64) {
-      return `arn:aws:lambda:${region}:901920570463:layer:aws-otel-nodejs-arm64-ver-1-18-1:4`;
+      return `arn:aws:lambda:${region}:901920570463:layer:aws-otel-nodejs-arm64-ver-1-30-2:1`;
     } else {
-      return `arn:aws:lambda:${region}:901920570463:layer:aws-otel-nodejs-amd64-ver-1-18-1:4`;
+      return `arn:aws:lambda:${region}:901920570463:layer:aws-otel-nodejs-amd64-ver-1-30-2:1`;
     }
   }
 

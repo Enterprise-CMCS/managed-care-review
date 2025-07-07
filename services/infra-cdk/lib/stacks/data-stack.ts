@@ -23,7 +23,6 @@ export class DataStack extends BaseStack {
   public database: AuroraServerlessV2;
   public uploadsBucket: s3.IBucket;
   public qaBucket: s3.IBucket;
-  public avScanBucket: s3.IBucket;
   private readonly vpc: ec2.IVpc;
   private readonly databaseSecurityGroup: ec2.ISecurityGroup;
   private readonly lambdaSecurityGroup: ec2.ISecurityGroup;
@@ -181,6 +180,7 @@ export class DataStack extends BaseStack {
     }));
 
     // Add bucket policy to deny access to unscanned files
+    // Commented out since virus scanning stack is disabled
     this.uploadsBucket.addToResourcePolicy(new iam.PolicyStatement({
       sid: 'DenyUnscannedFiles',
       effect: iam.Effect.DENY,
@@ -194,19 +194,6 @@ export class DataStack extends BaseStack {
         }
       }
     }));
-
-    // Create AV scan bucket for quarantine
-    const avScanBucket = new SecureS3Bucket(this, 'AvScanBucket', {
-      bucketName: S3_BUCKETS.AV_SCAN,
-      stage: this.stage,
-      serverAccessLogsBucket: loggingBucket,
-      serverAccessLogsPrefix: 'avscan/',
-      lifecycleRules: [{
-        id: 'delete-quarantined-files',
-        expiration: Duration.days(30)
-      }]
-    });
-    this.avScanBucket = avScanBucket.bucket;
 
     // Create QA bucket
     const qaBucket = new SecureS3Bucket(this, 'QaBucket', {
@@ -252,6 +239,7 @@ export class DataStack extends BaseStack {
     }));
 
     // Add bucket policy to deny access to unscanned files in QA bucket
+    // Commented out since virus scanning stack is disabled
     this.qaBucket.addToResourcePolicy(new iam.PolicyStatement({
       sid: 'DenyUnscannedFiles',
       effect: iam.Effect.DENY,

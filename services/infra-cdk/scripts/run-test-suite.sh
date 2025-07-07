@@ -156,7 +156,7 @@ echo "======================================" >> "$RESULTS_FILE"
 
 # Test 1: Check S3 bucket policies
 echo -e "\n1. S3 Bucket Security:" >> "$RESULTS_FILE"
-for bucket in uploads-$STAGE-uploads uploads-$STAGE-qa uploads-$STAGE-avscan; do
+for bucket in uploads-$STAGE-uploads uploads-$STAGE-qa; do
     # Check if bucket blocks public access
     PUBLIC_BLOCK=$(aws s3api get-public-access-block --bucket "$bucket" 2>/dev/null)
     if [ $? -eq 0 ]; then

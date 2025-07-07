@@ -456,7 +456,6 @@ main() {
     test_database_connection
     test_s3_bucket "uploads-$STAGE-uploads"
     test_s3_bucket "uploads-$STAGE-qa"
-    test_s3_bucket "uploads-$STAGE-avscan"
     
     # Lambda Function Tests
     echo -e "\n${YELLOW}=== Lambda Function Tests ===${NC}"

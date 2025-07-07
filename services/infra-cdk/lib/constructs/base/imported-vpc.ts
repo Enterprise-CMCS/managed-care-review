@@ -16,8 +16,6 @@ export interface ImportedVpcProps {
 export class ImportedVpc extends Construct {
   public readonly vpc: ec2.IVpc;
   public readonly privateSubnets: ec2.ISubnet[];
-  public readonly lambdaSecurityGroup: ec2.ISecurityGroup;
-  public readonly databaseSecurityGroup: ec2.ISecurityGroup;
 
   constructor(scope: Construct, id: string, props: ImportedVpcProps) {
     super(scope, id);
@@ -68,18 +66,6 @@ export class ImportedVpc extends Construct {
 
     // Get the private subnets from the imported VPC
     this.privateSubnets = this.vpc.privateSubnets;
-
-    // Note: Security groups will be created by NetworkStack, not imported
-    // For now, create placeholder security groups that will be replaced
-    this.lambdaSecurityGroup = new ec2.SecurityGroup(this, 'TempLambdaSG', {
-      vpc: this.vpc,
-      description: 'Temporary Lambda security group - will be replaced by NetworkStack'
-    });
-
-    this.databaseSecurityGroup = new ec2.SecurityGroup(this, 'TempDatabaseSG', {
-      vpc: this.vpc,
-      description: 'Temporary Database security group - will be replaced by NetworkStack'
-    });
   }
 
   /**

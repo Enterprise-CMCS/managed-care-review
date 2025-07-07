@@ -1,4 +1,4 @@
-import { BaseStack, BaseStackProps } from '@constructs/base';
+import { BaseStack, BaseStackProps, ServiceRegistry } from '@constructs/base';
 import { WafProtectedApi, ApiEndpointFactory } from '@constructs/api';
 import { OtelLayer, LambdaFactory, PrismaLayer, type BaseLambdaFunction, type CreateFunctionProps } from '@constructs/lambda';
 import { Construct } from 'constructs';
@@ -21,8 +21,9 @@ export interface ApiComputeStackProps extends BaseStackProps {
   databaseSecretArn: string;
   uploadsBucketName: string;
   qaBucketName: string;
-  // From API Stack
+  // From Auth Stack
   userPool: cognito.IUserPool;
+  authenticatedRole?: iam.IRole;
 }
 
 /**
@@ -58,6 +59,7 @@ export class ApiComputeStack extends BaseStack {
   private readonly uploadsBucketName: string;
   private readonly qaBucketName: string;
   private readonly userPool: cognito.IUserPool;
+  private readonly authenticatedRole?: iam.IRole;
 
   /**
    * Function configurations defining VPC usage and permission requirements
@@ -107,6 +109,7 @@ export class ApiComputeStack extends BaseStack {
     this.uploadsBucketName = props.uploadsBucketName;
     this.qaBucketName = props.qaBucketName;
     this.userPool = props.userPool;
+    this.authenticatedRole = props.authenticatedRole;
     
     // Initialize functions map
     this.functions = new Map<string, BaseLambdaFunction>();
@@ -168,6 +171,12 @@ export class ApiComputeStack extends BaseStack {
 
     // Create API endpoints
     this.createApiEndpoints();
+
+    // Store API ID in ServiceRegistry for cross-stack reference
+    ServiceRegistry.putApiId(this, this.stage, this.api.restApiId);
+
+    // Grant API Gateway permissions to authenticated role from auth stack
+    this.grantApiPermissionsToAuthenticatedRole();
   }
 
   /**
@@ -505,5 +514,21 @@ export class ApiComputeStack extends BaseStack {
       throw new Error(`Lambda function ${functionName} not found`);
     }
     return func.function;
+  }
+
+  /**
+   * Grant API Gateway permissions to authenticated role from auth stack
+   */
+  private grantApiPermissionsToAuthenticatedRole(): void {
+    if (!this.authenticatedRole) return;
+
+    // Grant execute-api:Invoke permission matching serverless ui-auth
+    if (this.authenticatedRole instanceof iam.Role) {
+      this.authenticatedRole.addToPolicy(new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: ['execute-api:Invoke'],
+        resources: [`arn:aws:execute-api:${this.region}:${this.account}:${this.api.restApiId}/*`]
+      }));
+    }
   }
 }

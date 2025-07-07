@@ -65,8 +65,7 @@ export const LAMBDA_FUNCTIONS = {
 // S3 bucket names (from existing uploads service)
 export const S3_BUCKETS = {
   UPLOADS: 'uploads',
-  QA: 'qa-uploads',
-  AV_SCAN: 'avscan'
+  QA: 'qa-uploads'
 } as const;
 
 // Parameter Store paths

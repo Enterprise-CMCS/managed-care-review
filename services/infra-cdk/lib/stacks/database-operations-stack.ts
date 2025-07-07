@@ -288,7 +288,7 @@ export class DatabaseOperationsStack extends BaseStack {
         subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS
       },
       securityGroups: [this.lambdaSecurityGroup],
-      privateDnsEnabled: true
+      privateDnsEnabled: false
     });
   }
 

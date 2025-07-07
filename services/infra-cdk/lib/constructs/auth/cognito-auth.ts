@@ -19,6 +19,7 @@ export interface CognitoAuthProps {
   allowedCallbackUrls?: string[];
   allowedLogoutUrls?: string[];
   s3Buckets?: string[];
+  apiGatewayId?: string;
 }
 
 /**
@@ -101,7 +102,7 @@ export class CognitoAuth extends Construct {
         : RemovalPolicy.DESTROY
     });
 
-    // Add SAML provider if URL provided
+    // Add SAML provider if URL provided and valid
     if (props.samlMetadataUrl) {
       this.samlProvider = this.addSamlProvider(props.samlMetadataUrl);
     }
@@ -204,14 +205,17 @@ export class CognitoAuth extends Construct {
         metadataContent: metadata
       },
       attributeMapping: {
+        // Standard attributes
         email: cognito.ProviderAttribute.other('email'),
         givenName: cognito.ProviderAttribute.other('firstName'),
         familyName: cognito.ProviderAttribute.other('lastName'),
+        
+        // Custom attributes - CDK requires them in a 'custom' object
         custom: {
-          state_code: cognito.ProviderAttribute.other('stateCode'),
-          role: cognito.ProviderAttribute.other('role')
+          'custom:state_code': cognito.ProviderAttribute.other('stateCode'),
+          'custom:role': cognito.ProviderAttribute.other('role')
         }
-      },
+      } as cognito.AttributeMapping,
       name: 'Okta'
     });
   }
@@ -220,13 +224,23 @@ export class CognitoAuth extends Construct {
    * Create Identity Pool with roles
    */
   private createIdentityPool(props: CognitoAuthProps): void {
-    // Create authenticated role
+    // Create Identity Pool first
+    this.identityPool = new cognito.CfnIdentityPool(this, 'IdentityPool', {
+      identityPoolName: ResourceNames.resourceName(props.identityPoolName!, 'identity-pool', props.stage),
+      allowUnauthenticatedIdentities: false,
+      cognitoIdentityProviders: [{
+        clientId: this.userPoolClient.userPoolClientId,
+        providerName: this.userPool.userPoolProviderName
+      }]
+    });
+
+    // Create authenticated role with proper identity pool reference
     this.authenticatedRole = new iam.Role(this, 'AuthenticatedRole', {
       assumedBy: new iam.FederatedPrincipal(
         'cognito-identity.amazonaws.com',
         {
           StringEquals: {
-            'cognito-identity.amazonaws.com:aud': this.identityPool?.ref || ''
+            'cognito-identity.amazonaws.com:aud': this.identityPool.ref
           },
           'ForAnyValue:StringLike': {
             'cognito-identity.amazonaws.com:amr': 'authenticated'
@@ -238,13 +252,24 @@ export class CognitoAuth extends Construct {
       description: 'Default role for authenticated users'
     });
 
-    // Create unauthenticated role
+    // Add base Cognito permissions (matching serverless)
+    this.authenticatedRole.addToPolicy(new iam.PolicyStatement({
+      effect: iam.Effect.ALLOW,
+      actions: [
+        'mobileanalytics:PutEvents',
+        'cognito-sync:*',
+        'cognito-identity:*'
+      ],
+      resources: ['*']
+    }));
+
+    // Create unauthenticated role (not used but required by Identity Pool)
     this.unauthenticatedRole = new iam.Role(this, 'UnauthenticatedRole', {
       assumedBy: new iam.FederatedPrincipal(
         'cognito-identity.amazonaws.com',
         {
           StringEquals: {
-            'cognito-identity.amazonaws.com:aud': this.identityPool?.ref || ''
+            'cognito-identity.amazonaws.com:aud': this.identityPool.ref
           },
           'ForAnyValue:StringLike': {
             'cognito-identity.amazonaws.com:amr': 'unauthenticated'
@@ -254,16 +279,6 @@ export class CognitoAuth extends Construct {
       ),
       roleName: ResourceNames.resourceName(props.identityPoolName!, 'unauthenticated-role', props.stage),
       description: 'Default role for unauthenticated users'
-    });
-
-    // Create Identity Pool
-    this.identityPool = new cognito.CfnIdentityPool(this, 'IdentityPool', {
-      identityPoolName: ResourceNames.resourceName(props.identityPoolName!, 'identity-pool', props.stage),
-      allowUnauthenticatedIdentities: false,
-      cognitoIdentityProviders: [{
-        clientId: this.userPoolClient.userPoolClientId,
-        providerName: this.userPool.userPoolProviderName
-      }]
     });
 
     // Attach roles to Identity Pool
@@ -279,38 +294,50 @@ export class CognitoAuth extends Construct {
     if (props.s3Buckets && props.s3Buckets.length > 0) {
       this.grantS3Permissions(props.s3Buckets);
     }
+
+    // Grant API Gateway permissions if API ID provided
+    if (props.apiGatewayId) {
+      this.grantApiGatewayPermissions(props.apiGatewayId);
+    }
   }
 
   /**
-   * Grant S3 permissions to authenticated role
+   * Grant S3 permissions to authenticated role (matching serverless ui-auth)
    */
   private grantS3Permissions(bucketNames: string[]): void {
     if (!this.authenticatedRole) return;
 
-    this.authenticatedRole.addToPolicy(new iam.PolicyStatement({
-      effect: iam.Effect.ALLOW,
-      actions: [
-        's3:GetObject',
-        's3:PutObject',
-        's3:DeleteObject'
-      ],
-      resources: bucketNames.map(name => `arn:aws:s3:::${name}/*`),
-      conditions: {
-        StringLike: {
-          's3:prefix': ['${cognito-identity.amazonaws.com:sub}/*']
-        }
-      }
-    }));
+    // Build resources array matching serverless pattern
+    const s3Resources: string[] = [];
+    
+    bucketNames.forEach(bucketName => {
+      // Add /allusers/* path for shared access
+      s3Resources.push(`arn:aws:s3:::${bucketName}/allusers/*`);
+      
+      // Add /private/${cognito-identity.amazonaws.com:sub}/* for user-specific access
+      // Note: Using Fn::Join to properly interpolate the cognito sub
+      s3Resources.push(`arn:aws:s3:::${bucketName}/private/\${cognito-identity.amazonaws.com:sub}/*`);
+    });
 
+    // Grant S3 permissions matching serverless configuration
     this.authenticatedRole.addToPolicy(new iam.PolicyStatement({
       effect: iam.Effect.ALLOW,
-      actions: ['s3:ListBucket'],
-      resources: bucketNames.map(name => `arn:aws:s3:::${name}`),
-      conditions: {
-        StringLike: {
-          's3:prefix': ['${cognito-identity.amazonaws.com:sub}/*']
-        }
-      }
+      actions: ['s3:*'],
+      resources: s3Resources
+    }));
+  }
+
+  /**
+   * Grant API Gateway permissions to authenticated role (matching serverless ui-auth)
+   */
+  private grantApiGatewayPermissions(apiGatewayId: string): void {
+    if (!this.authenticatedRole) return;
+
+    // Grant execute-api:Invoke permission matching serverless
+    this.authenticatedRole.addToPolicy(new iam.PolicyStatement({
+      effect: iam.Effect.ALLOW,
+      actions: ['execute-api:Invoke'],
+      resources: [`arn:aws:execute-api:${Stack.of(this).region}:${Stack.of(this).account}:${apiGatewayId}/*`]
     }));
   }
 

@@ -27,7 +27,7 @@ export function getBundlingConfig(
   };
   
   return {
-    minify: stage === 'prod',
+    minify: true,
     sourceMap: true,
     sourcesContent: false,
     target: 'node20',
@@ -49,6 +49,8 @@ export function getBundlingConfig(
       '--platform': 'node',
       '--keep-names': 'true',
       '--tree-shaking': 'true',
+      '--drop:debugger': true,
+      ...(stage === 'prod' && { '--drop:console': true })
     },
     commandHooks,
     // Include only AWS SDK modules (workspace packages will be bundled)
@@ -94,10 +96,8 @@ export function needsPrismaLayer(functionName: string): boolean {
     'CREATE_QUESTION_RESPONSE',
     'SEND_REVIEW_ACTION_EMAILS',
     'SEND_EMAILS_FOR_CMS_RATE_REVIEWS',
-    'EMAIL_SUBMIT',
     'OAUTH_TOKEN',
     'MIGRATE',
-    'CLEANUP',
   ];
   
   return prismaFunctions.includes(functionName);
