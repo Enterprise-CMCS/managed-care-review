@@ -230,7 +230,7 @@ class AuthAPIManager {
         return Promise.resolve()
     }
 
-    async post(apiName: string, path: string, options: any): Promise<AxiosResponse> {
+    async post(path: string, options: any): Promise<AxiosResponse> {
         if (!this.tokens) {
             throw new Error('Not authenticated. Please call signIn first.')
         }
@@ -285,23 +285,30 @@ class AuthAPIManager {
 
         const signedRequest = await signer.sign(request)
 
-        return new Promise((resolve) => {
-            cy.request({
-                method: 'POST',
-                url: `${apiUrl}${path}`,
-                headers: signedRequest.headers,
-                body,
-            }).then(response => {
-                resolve({
-                    data: response.body,
-                    status: response.status,
-                    statusText: response.statusText,
-                    headers: response.headers,
-                    config: {},
-                    request: { url: `${apiUrl}${path}` },
-                } as AxiosResponse)
-            })
+        // Use native fetch instead of cy.request to avoid Cypress command queue issues
+        const response = await fetch(`${apiUrl}${path}`, {
+            method: 'POST',
+            headers: signedRequest.headers,
+            body,
         })
+
+        const responseData = await response.json()
+
+        // Convert fetch Response to AxiosResponse format
+        const headers: { [key: string]: string } = {}
+        response.headers.forEach((value, key) => {
+            headers[key] = value
+        })
+
+        // Convert fetch Response to AxiosResponse format
+        return {
+            data: responseData,
+            status: response.status,
+            statusText: response.statusText,
+            headers: headers,
+            config: {},
+            request: { url: `${apiUrl}${path}` },
+        } as AxiosResponse
     }
 }
 
@@ -398,7 +405,7 @@ async function fakeAmplifyFetch(
     }
 
     return new Promise<Response>((resolve, reject) => {
-        AuthAPI.post('api', uri, apiOptions)
+        AuthAPI.post(uri, apiOptions)
             .then((apiResponse: AxiosResponse) => {
                 // The Apollo Link wants a fetch.Response shaped response,
                 // not the axios shaped response that Amplify.API returns
