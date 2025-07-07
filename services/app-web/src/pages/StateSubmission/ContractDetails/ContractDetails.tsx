@@ -406,7 +406,6 @@ export const ContractDetails = ({
         if (options.type === 'SAVE_AS_DRAFT' && draftSaved) {
             setDraftSaved(false)
         }
-        //TODO: will have to use yesNoFormValueAsBoolean here for the dsnp field
         const updatedDraftSubmissionFormData: ContractDraftRevisionFormDataInput =
             {
                 contractExecutionStatus: values.contractExecutionStatus,
@@ -428,6 +427,7 @@ export const ContractDetails = ({
                     formatDocumentsForGQL(values.supportingDocuments) || [],
                 managedCareEntities: values.managedCareEntities,
                 federalAuthorities: values.federalAuthorities,
+                dsnpContract: yesNoFormValueAsBoolean(values.dsnpContract),
                 submissionType:
                     draftSubmission.draftRevision.formData.submissionType,
                 statutoryRegulatoryAttestation: formatYesNoForProto(
@@ -1314,6 +1314,7 @@ export const ContractDetails = ({
                                                                 '/help#dual-eligible-special-needs-plans'
                                                             }
                                                             target="_blank"
+                                                            data-testid="dsnpGuidanceLink"
                                                         >
                                                             D-SNP guidance
                                                         </LinkWithLogging>
