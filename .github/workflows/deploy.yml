@@ -507,7 +507,7 @@ jobs:
   cypress:
     name: cypress-run
     timeout-minutes: 25
-    needs: [deploy-app, finishing-prep]
+    needs: [ begin-deployment, deploy-app, finishing-prep]
     if: always() && needs.finishing-prep.result == 'success'
     runs-on: ubuntu-24.04
     container:
@@ -546,10 +546,10 @@ jobs:
       - name: Get AWS credentials
         uses: ./.github/actions/get_aws_credentials
         with:
-          region: ${{ inputs.aws_default_region }}
+          region: ${{ vars.AWS_DEFAULT_REGION }}
           account-id: ${{ secrets.aws_account_id }}
-          stage-name: ${{ inputs.stage_name }}
-          changed-services: ${{ inputs.changed_services }}
+          stage-name: ${{ needs.begin-deployment.outputs.stage-name }}
+          changed-services: ${{ needs.begin-deployment.outputs.changed-services }}
 
       - name: Cypress -- Chrome
         id: cypress
