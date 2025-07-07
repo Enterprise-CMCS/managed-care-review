@@ -373,6 +373,9 @@ jobs:
       cognito-region: ${{ steps.save-cognito-region.outputs.value }}
       cognito-identity-pool-id: ${{ steps.save-cognito-identity-pool-id.outputs.value }}
       cognito-user-pool-web-client-id: ${{ steps.save-cognito-user-pool-web-client-id.outputs.value }}
+      aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
+      aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
+      aws-session-token: ${{ env.AWS_SESSION_TOKEN }}
 
     steps:
       - uses: actions/checkout@v4
@@ -507,7 +510,7 @@ jobs:
   cypress:
     name: cypress-run
     timeout-minutes: 25
-    needs: [ begin-deployment, deploy-app, finishing-prep]
+    needs: [begin-deployment, deploy-app, finishing-prep]
     environment: dev
     if: always() && needs.finishing-prep.result == 'success'
     runs-on: ubuntu-24.04
@@ -526,14 +529,6 @@ jobs:
 
       - name: Setup env
         uses: ./.github/actions/setup_env
-
-      - name: Get AWS credentials
-        uses: ./.github/actions/get_aws_credentials
-        with:
-          region: ${{ vars.AWS_DEFAULT_REGION }}
-          account-id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
-          stage-name: ${{ needs.begin-deployment.outputs.stage-name }}
-          changed-services: ${{ needs.begin-deployment.outputs.changed-services }}
 
       - uses: actions/download-artifact@v4
         with:
@@ -574,9 +569,9 @@ jobs:
           COGNITO_REGION: ${{ needs.finishing-prep.outputs.cognito-region }}
           COGNITO_IDENTITY_POOL_ID: ${{ needs.finishing-prep.outputs.cognito-identity-pool-id }}
           COGNITO_USER_POOL_WEB_CLIENT_ID: ${{ needs.finishing-prep.outputs.cognito-user-pool-web-client-id }}
-          AWS_ACCESS_KEY_ID: ${{ env.AWS_ACCESS_KEY_ID }}
-          CYPRESS_AWS_SECRET_ACCESS_KEY: ${{ env.AWS_SECRET_ACCESS_KEY }}
-          AWS_SESSION_TOKEN: ${{ env.AWS_SESSION_TOKEN }}
+          CYPRESS_AWS_ACCESS_KEY_ID: ${{ needs.finishing-prep.outputs.aws-access-key-id }}
+          CYPRESS_AWS_SECRET_ACCESS_KEY: ${{ needs.finishing-prep.outputs.aws-secret-access-key }}
+          CYPRESS_AWS_SESSION_TOKEN: ${{ needs.finishing-prep.outputs.aws-session-token }}
           # Overwrites folder directories in cypress config because in CI we run from root
           CYPRESS_SUPPORT_FILE: services/cypress/support/index.ts
           CYPRESS_FIXTURES_FOLDER: services/cypress/fixtures
