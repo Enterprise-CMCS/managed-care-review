@@ -526,6 +526,14 @@ jobs:
       - name: Setup env
         uses: ./.github/actions/setup_env
 
+      - name: Get AWS credentials
+        uses: ./.github/actions/get_aws_credentials
+        with:
+          region: ${{ vars.AWS_DEFAULT_REGION }}
+          account-id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
+          stage-name: ${{ needs.begin-deployment.outputs.stage-name }}
+          changed-services: ${{ needs.begin-deployment.outputs.changed-services }}
+
       - uses: actions/download-artifact@v4
         with:
           name: app-web-gen
@@ -542,14 +550,6 @@ jobs:
       - name: Build packages
         shell: bash
         run: pnpm build:packages
-
-      - name: Get AWS credentials
-        uses: ./.github/actions/get_aws_credentials
-        with:
-          region: ${{ vars.AWS_DEFAULT_REGION }}
-          account-id: ${{ secrets.aws_account_id }}
-          stage-name: ${{ needs.begin-deployment.outputs.stage-name }}
-          changed-services: ${{ needs.begin-deployment.outputs.changed-services }}
 
       - name: Cypress -- Chrome
         id: cypress
