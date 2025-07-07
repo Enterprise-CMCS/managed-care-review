@@ -508,6 +508,7 @@ jobs:
     name: cypress-run
     timeout-minutes: 25
     needs: [ begin-deployment, deploy-app, finishing-prep]
+    environment: dev
     if: always() && needs.finishing-prep.result == 'success'
     runs-on: ubuntu-24.04
     container:
