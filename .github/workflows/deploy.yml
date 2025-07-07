@@ -569,9 +569,9 @@ jobs:
           COGNITO_REGION: ${{ needs.finishing-prep.outputs.cognito-region }}
           COGNITO_IDENTITY_POOL_ID: ${{ needs.finishing-prep.outputs.cognito-identity-pool-id }}
           COGNITO_USER_POOL_WEB_CLIENT_ID: ${{ needs.finishing-prep.outputs.cognito-user-pool-web-client-id }}
-          CYPRESS_AWS_ACCESS_KEY_ID: ${{ needs.finishing-prep.outputs.aws-access-key-id }}
-          CYPRESS_AWS_SECRET_ACCESS_KEY: ${{ needs.finishing-prep.outputs.aws-secret-access-key }}
-          CYPRESS_AWS_SESSION_TOKEN: ${{ needs.finishing-prep.outputs.aws-session-token }}
+          AWS_ACCESS_KEY_ID: ${{ needs.finishing-prep.outputs.aws-access-key-id }}
+          AWS_SECRET_ACCESS_KEY: ${{ needs.finishing-prep.outputs.aws-secret-access-key }}
+          AWS_SESSION_TOKEN: ${{ needs.finishing-prep.outputs.aws-session-token }}
           # Overwrites folder directories in cypress config because in CI we run from root
           CYPRESS_SUPPORT_FILE: services/cypress/support/index.ts
           CYPRESS_FIXTURES_FOLDER: services/cypress/fixtures
