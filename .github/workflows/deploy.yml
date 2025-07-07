@@ -373,9 +373,9 @@ jobs:
       cognito-region: ${{ steps.save-cognito-region.outputs.value }}
       cognito-identity-pool-id: ${{ steps.save-cognito-identity-pool-id.outputs.value }}
       cognito-user-pool-web-client-id: ${{ steps.save-cognito-user-pool-web-client-id.outputs.value }}
-      aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
-      aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
-      aws-session-token: ${{ env.AWS_SESSION_TOKEN }}
+      aws-access-key-id: ${{ steps.save-aws-credentials.outputs.aws-access-key-id }}
+      aws-secret-access-key: ${{ steps.save-aws-credentials.outputs.aws-secret-access-key }}
+      aws-session-token: ${{ steps.save-aws-credentials.outputs.aws-session-token }}
 
     steps:
       - uses: actions/checkout@v4
@@ -390,6 +390,13 @@ jobs:
           account-id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
           stage-name: ${{ needs.begin-deployment.outputs.stage-name }}
           changed-services: ${{ needs.begin-deployment.outputs.changed-services }}
+
+      - name: Save AWS credentials as outputs
+        id: save-aws-credentials
+        run: |
+          echo "aws-access-key-id=$AWS_ACCESS_KEY_ID" >> "$GITHUB_OUTPUT"
+          echo "aws-secret-access-key=$AWS_SECRET_ACCESS_KEY" >> "$GITHUB_OUTPUT"
+          echo "aws-session-token=$AWS_SESSION_TOKEN" >> "$GITHUB_OUTPUT"
 
       - name: Create Test Users
         env:
