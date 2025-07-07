@@ -48,6 +48,9 @@ module.exports = defineConfig({
                 process.env.COGNITO_IDENTITY_POOL_ID
             newConfig.env.COGNITO_USER_POOL_WEB_CLIENT_ID =
                 process.env.COGNITO_USER_POOL_WEB_CLIENT_ID
+            newConfig.env.AWS_ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID
+            newConfig.env.AWS_SECRET_ACCESS_KEY = process.env.AWS_SECRET_ACCESS_KEY
+            newConfig.env.AWS_SESSION_TOKEN = process.env.AWS_SESSION_TOKEN
 
             // Reads graphql schema and converts it to gql for apollo client.
             on('task', {

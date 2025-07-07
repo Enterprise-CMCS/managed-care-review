@@ -175,6 +175,11 @@ const adminUser = (): AdminUser => ({
 
 const cognitoIdentityProvider = new CognitoIdentityProviderClient({
     region: Cypress.env('COGNITO_REGION'),
+    credentials: {
+        accessKeyId: Cypress.env('AWS_ACCESS_KEY_ID'),
+        secretAccessKey: Cypress.env('AWS_SECRET_ACCESS_KEY'),
+        sessionToken: Cypress.env('AWS_SESSION_TOKEN')
+    }
 })
 
 const cognitoIdentity = new CognitoIdentityClient({

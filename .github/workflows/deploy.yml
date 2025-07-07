@@ -543,6 +543,14 @@ jobs:
         shell: bash
         run: pnpm build:packages
 
+      - name: Get AWS credentials
+        uses: ./.github/actions/get_aws_credentials
+        with:
+          region: ${{ inputs.aws_default_region }}
+          account-id: ${{ secrets.aws_account_id }}
+          stage-name: ${{ inputs.stage_name }}
+          changed-services: ${{ inputs.changed_services }}
+
       - name: Cypress -- Chrome
         id: cypress
         uses: cypress-io/github-action@v6
@@ -565,6 +573,9 @@ jobs:
           COGNITO_REGION: ${{ needs.finishing-prep.outputs.cognito-region }}
           COGNITO_IDENTITY_POOL_ID: ${{ needs.finishing-prep.outputs.cognito-identity-pool-id }}
           COGNITO_USER_POOL_WEB_CLIENT_ID: ${{ needs.finishing-prep.outputs.cognito-user-pool-web-client-id }}
+          AWS_ACCESS_KEY_ID: ${{ env.AWS_ACCESS_KEY_ID }}
+          CYPRESS_AWS_SECRET_ACCESS_KEY: ${{ env.AWS_SECRET_ACCESS_KEY }}
+          AWS_SESSION_TOKEN: ${{ env.AWS_SESSION_TOKEN }}
           # Overwrites folder directories in cypress config because in CI we run from root
           CYPRESS_SUPPORT_FILE: services/cypress/support/index.ts
           CYPRESS_FIXTURES_FOLDER: services/cypress/fixtures
