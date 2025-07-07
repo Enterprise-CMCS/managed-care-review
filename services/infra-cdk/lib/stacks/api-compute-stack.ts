@@ -163,7 +163,11 @@ export class ApiComputeStack extends BaseStack {
     this.api = wafApi.api;
     this.apiUrl = wafApi.url;
 
-    // Create Cognito authorizer
+    // Store API ID in ServiceRegistry for cross-stack reference first
+    // This prevents circular dependencies when creating authorizer
+    ServiceRegistry.putApiId(this, this.stage, this.api.restApiId);
+
+    // Create Cognito authorizer after storing API info
     this.authorizer = new apigateway.CognitoUserPoolsAuthorizer(this, 'Authorizer', {
       cognitoUserPools: [this.userPool],
       authorizerName: `${SERVICES.INFRA_API}-${this.stage}-authorizer`
@@ -171,9 +175,6 @@ export class ApiComputeStack extends BaseStack {
 
     // Create API endpoints
     this.createApiEndpoints();
-
-    // Store API ID in ServiceRegistry for cross-stack reference
-    ServiceRegistry.putApiId(this, this.stage, this.api.restApiId);
 
     // Grant API Gateway permissions to authenticated role from auth stack
     this.grantApiPermissionsToAuthenticatedRole();
@@ -523,11 +524,12 @@ export class ApiComputeStack extends BaseStack {
     if (!this.authenticatedRole) return;
 
     // Grant execute-api:Invoke permission matching serverless ui-auth
+    // Use stage-scoped wildcard to avoid circular dependency
     if (this.authenticatedRole instanceof iam.Role) {
       this.authenticatedRole.addToPolicy(new iam.PolicyStatement({
         effect: iam.Effect.ALLOW,
         actions: ['execute-api:Invoke'],
-        resources: [`arn:aws:execute-api:${this.region}:${this.account}:${this.api.restApiId}/*`]
+        resources: [`arn:aws:execute-api:${this.region}:${this.account}:*/${this.stage}/*`]
       }));
     }
   }

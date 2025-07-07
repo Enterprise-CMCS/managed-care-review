@@ -1,4 +1,4 @@
-import { BaseStack, BaseStackProps, ServiceRegistry } from '@constructs/base';
+import { BaseStack, BaseStackProps } from '@constructs/base';
 import { CognitoAuth } from '@constructs/auth';
 import { Construct } from 'constructs';
 import * as cognito from 'aws-cdk-lib/aws-cognito';

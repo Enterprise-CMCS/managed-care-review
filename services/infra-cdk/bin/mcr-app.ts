@@ -13,7 +13,8 @@ import {
   ApiComputeStack,
   DatabaseOperationsStack,
   GuardDutyMalwareProtectionStack,
-  MonitoringStack
+  MonitoringStack,
+  FrontendStack
 } from '../lib/stacks';
 import {
   loadEnvironment,
@@ -154,7 +155,8 @@ async function main() {
       databaseSecretArn: dataStack.database.secret.secretArn,
       uploadsBucketName: dataStack.uploadsBucket.bucketName,
       qaBucketName: dataStack.qaBucket.bucketName,
-      userPool: authStack.userPool
+      userPool: authStack.userPool,
+      authenticatedRole: authStack.authenticatedRole
     });
     apiComputeStack.addDependency(networkStack);
     apiComputeStack.addDependency(dataStack);
@@ -201,6 +203,21 @@ async function main() {
     });
     monitoringStack.addDependency(foundationStack);
 
+    // 9. Frontend Stack (depends on API+Compute and Auth for configuration)
+    const frontendStack = new FrontendStack(app, `MCR-Frontend-${stage}`, {
+      env,
+      stage,
+      stageConfig,
+      serviceName: 'frontend',
+      appDomainName: process.env.APP_DOMAIN_NAME,
+      appCertificateArn: process.env.APP_CERTIFICATE_ARN,
+      storybookDomainName: process.env.STORYBOOK_DOMAIN_NAME,
+      storybookCertificateArn: process.env.STORYBOOK_CERTIFICATE_ARN,
+      enableHsts: true
+    });
+    frontendStack.addDependency(apiComputeStack);
+    frontendStack.addDependency(authStack);
+
     // Apply IAM aspects
     const iamPath = process.env.IAM_PATH || '/delegatedadmin/developer/';
     
@@ -238,6 +255,7 @@ async function main() {
     console.log('6. Database Operations Stack (parallel with Virus Scanning)');
     console.log('7. Virus Scanning Stack [GuardDuty] (parallel with Database Operations)');
     console.log('8. Monitoring Stack (can run in parallel)');
+    console.log('9. Frontend Stack (depends on API+Compute and Auth)');
     console.log('\nTo deploy all stacks:');
     console.log(`cdk deploy --all --context stage=${stage}`);
     console.log('\nTo deploy a specific stack:');

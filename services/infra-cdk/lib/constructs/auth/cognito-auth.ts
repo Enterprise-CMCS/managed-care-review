@@ -19,7 +19,6 @@ export interface CognitoAuthProps {
   allowedCallbackUrls?: string[];
   allowedLogoutUrls?: string[];
   s3Buckets?: string[];
-  apiGatewayId?: string;
 }
 
 /**
@@ -294,11 +293,6 @@ export class CognitoAuth extends Construct {
     if (props.s3Buckets && props.s3Buckets.length > 0) {
       this.grantS3Permissions(props.s3Buckets);
     }
-
-    // Grant API Gateway permissions if API ID provided
-    if (props.apiGatewayId) {
-      this.grantApiGatewayPermissions(props.apiGatewayId);
-    }
   }
 
   /**
@@ -324,20 +318,6 @@ export class CognitoAuth extends Construct {
       effect: iam.Effect.ALLOW,
       actions: ['s3:*'],
       resources: s3Resources
-    }));
-  }
-
-  /**
-   * Grant API Gateway permissions to authenticated role (matching serverless ui-auth)
-   */
-  private grantApiGatewayPermissions(apiGatewayId: string): void {
-    if (!this.authenticatedRole) return;
-
-    // Grant execute-api:Invoke permission matching serverless
-    this.authenticatedRole.addToPolicy(new iam.PolicyStatement({
-      effect: iam.Effect.ALLOW,
-      actions: ['execute-api:Invoke'],
-      resources: [`arn:aws:execute-api:${Stack.of(this).region}:${Stack.of(this).account}:${apiGatewayId}/*`]
     }));
   }
 

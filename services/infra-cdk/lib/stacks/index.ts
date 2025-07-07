@@ -7,3 +7,4 @@ export * from './api-compute-stack';
 export * from './database-operations-stack';
 export * from './monitoring-stack';
 export * from './guardduty-malware-protection-stack';
+export * from './frontend-stack';
