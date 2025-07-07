@@ -178,7 +178,7 @@ const cognitoIdentityProvider = new CognitoIdentityProviderClient({
     credentials: {
         accessKeyId: Cypress.env('AWS_ACCESS_KEY_ID'),
         secretAccessKey: Cypress.env('AWS_SECRET_ACCESS_KEY'),
-        //sessionToken: Cypress.env('AWS_SESSION_TOKEN')
+        sessionToken: Cypress.env('AWS_SESSION_TOKEN')
     }
 })
 

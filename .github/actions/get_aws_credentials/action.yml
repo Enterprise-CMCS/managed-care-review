@@ -49,3 +49,4 @@ runs:
       with:
         aws-region: ${{ inputs.region }}
         role-to-assume: ${{ steps.format-oidc-role-arn.outputs.arn }}
+        output-credentials: true
