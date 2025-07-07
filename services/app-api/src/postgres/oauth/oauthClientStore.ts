@@ -30,7 +30,7 @@ export async function createOAuthClient(
             data.grants && data.grants.length > 0
                 ? data.grants
                 : ['client_credentials']
-        const prismaResult = await client.oAuthClient.create(
+        const prismaResult = await client.oAuthClient.create({
             data: {
                 clientId,
                 clientSecret,
@@ -150,7 +150,7 @@ export async function updateOAuthClient(
     }
 ): Promise<OAuthClientWithUser | Error> {
     try {
-        const prismaResult = await client.oAuthClient.update(
+        const prismaResult = await client.oAuthClient.update({
             where: { clientId },
             data,
             include: {
