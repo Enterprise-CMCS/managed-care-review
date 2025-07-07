@@ -292,6 +292,9 @@ importers:
       '@octokit/action':
         specifier: ^5.0.2
         version: 5.0.6(encoding@0.1.13)
+      '@octokit/openapi-types':
+        specifier: ^25.1.0
+        version: 25.1.0
       csv-parser:
         specifier: ^3.0.0
         version: 3.0.0
