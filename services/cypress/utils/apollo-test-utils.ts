@@ -173,20 +173,31 @@ const adminUser = (): AdminUser => ({
     role: 'ADMIN_USER',
 })
 
-const cognitoIdentityProvider = new CognitoIdentityProviderClient({
-    region: Cypress.env('COGNITO_REGION'),
-    credentials: {
-        accessKeyId: Cypress.env('AWS_ACCESS_KEY_ID'),
-        secretAccessKey: Cypress.env('AWS_SECRET_ACCESS_KEY'),
-        sessionToken: Cypress.env('AWS_SESSION_TOKEN')
+class AuthAPIManager {
+    private tokens: {
+        accessToken: string
+        idToken: string
+        refreshToken: string
+    } | null = null
+
+    private cognitoIdentityProvider: CognitoIdentityProviderClient
+    private cognitoIdentity: CognitoIdentityClient
+
+    constructor() {
+        this.cognitoIdentityProvider = new CognitoIdentityProviderClient({
+            region: Cypress.env('COGNITO_REGION'),
+            credentials: {
+                accessKeyId: Cypress.env('AWS_ACCESS_KEY_ID'),
+                secretAccessKey: Cypress.env('AWS_SECRET_ACCESS_KEY'),
+                sessionToken: Cypress.env('AWS_SESSION_TOKEN')
+            }
+        })
+
+        this.cognitoIdentity = new CognitoIdentityClient({
+            region: Cypress.env('COGNITO_REGION'),
+        })
     }
-})
 
-const cognitoIdentity = new CognitoIdentityClient({
-    region: Cypress.env('COGNITO_REGION'),
-})
-
-const Auth = {
     async signIn(email: string, password: string) {
         const command = new AdminInitiateAuthCommand({
             AuthFlow: AuthFlowType.ADMIN_NO_SRP_AUTH,
@@ -198,53 +209,52 @@ const Auth = {
             },
         })
 
-        const response = await cognitoIdentityProvider.send(command)
+        const response = await this.cognitoIdentityProvider.send(command)
 
         if (!response.AuthenticationResult) {
             throw new Error('Auth: Authentication failed')
         }
 
-        return {
+        this.tokens = {
             accessToken: response.AuthenticationResult.AccessToken!,
             idToken: response.AuthenticationResult.IdToken!,
             refreshToken: response.AuthenticationResult.RefreshToken!,
         }
-    },
+
+        return this.tokens
+    }
 
     async signOut() {
+        // Clear tokens and sessions
+        this.tokens = null
         return Promise.resolve()
     }
-}
 
-// Replace API.post with signed fetch
-const API = {
     async post(apiName: string, path: string, options: any): Promise<AxiosResponse> {
+        if (!this.tokens) {
+            throw new Error('Not authenticated. Please call signIn first.')
+        }
+
         const apiUrl = Cypress.env('API_URL')
 
-        // For AWS auth, get credentials and sign the request
-        const tokens = await Auth.signIn(
-            Cypress.env('TEST_USER_EMAIL'),
-            Cypress.env('TEST_USERS_PASS')
-        )
-
-        // Get AWS credentials
+        // Get AWS credentials using stored tokens
         const getIdCommand = new GetIdCommand({
             IdentityPoolId: Cypress.env('COGNITO_IDENTITY_POOL_ID'),
             Logins: {
-                [`cognito-idp.${Cypress.env('COGNITO_REGION')}.amazonaws.com/${Cypress.env('COGNITO_USER_POOL_ID')}`]: tokens.idToken,
+                [`cognito-idp.${Cypress.env('COGNITO_REGION')}.amazonaws.com/${Cypress.env('COGNITO_USER_POOL_ID')}`]: this.tokens.idToken,
             },
         })
 
-        const { IdentityId } = await cognitoIdentity.send(getIdCommand)
+        const { IdentityId } = await this.cognitoIdentity.send(getIdCommand)
 
         const getCredsCommand = new GetCredentialsForIdentityCommand({
             IdentityId,
             Logins: {
-                [`cognito-idp.${Cypress.env('COGNITO_REGION')}.amazonaws.com/${Cypress.env('COGNITO_USER_POOL_ID')}`]: tokens.idToken,
+                [`cognito-idp.${Cypress.env('COGNITO_REGION')}.amazonaws.com/${Cypress.env('COGNITO_USER_POOL_ID')}`]: this.tokens.idToken,
             },
         })
 
-        const { Credentials } = await cognitoIdentity.send(getCredsCommand)
+        const { Credentials } = await this.cognitoIdentity.send(getCredsCommand)
 
         // Sign the request
         const signer = new SignatureV4({
@@ -278,6 +288,7 @@ const API = {
         return new Promise((resolve) => {
             cy.request({
                 method: 'POST',
+                url: `${apiUrl}${path}`,
                 headers: signedRequest.headers,
                 body,
             }).then(response => {
@@ -293,6 +304,8 @@ const API = {
         })
     }
 }
+
+const AuthAPI = new AuthAPIManager()
 
 function fetchResponseFromAxios(axiosResponse: AxiosResponse): Response {
     const fakeFetchResponse: Response = {
@@ -385,7 +398,7 @@ async function fakeAmplifyFetch(
     }
 
     return new Promise<Response>((resolve, reject) => {
-        API.post('api', uri, apiOptions)
+        AuthAPI.post('api', uri, apiOptions)
             .then((apiResponse: AxiosResponse) => {
                 // The Apollo Link wants a fetch.Response shaped response,
                 // not the axios shaped response that Amplify.API returns
@@ -440,13 +453,13 @@ const apolloClientWrapper = async <T>(
     })
 
     if (!isLocalAuth) {
-        await Auth.signIn(authUser.email, Cypress.env('TEST_USERS_PASS'))
+        await AuthAPI.signIn(authUser.email, Cypress.env('TEST_USERS_PASS'))
     }
 
     const result = await callback(apolloClient)
 
     if (!isLocalAuth) {
-        await Auth.signOut()
+        await AuthAPI.signOut()
     }
 
     return result
