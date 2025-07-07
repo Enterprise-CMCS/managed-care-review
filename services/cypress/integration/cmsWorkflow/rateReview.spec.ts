@@ -11,11 +11,6 @@ describe('CMS user can view rate reviews', () => {
             'undo-withdraw-rate': true
         })
 
-        cy.log('Logging AWS config')
-        cy.log('AWS_ACCESS_KEY_ID', Cypress.env('AWS_ACCESS_KEY_ID'))
-        cy.log('AWS_SECRET_ACCESS_KEY', Cypress.env('AWS_SECRET_ACCESS_KEY'))
-        cy.log('AWS_SESSION_TOKEN', Cypress.env('AWS_SESSION_TOKEN'))
-
         cy.apiAssignDivisionToCMSUser(cmsUser(), 'DMCO').then(() => {
             // Create a new contract and rates submission with two attached rates
             cy.apiCreateAndSubmitContractWithRates(stateUser()).then(
