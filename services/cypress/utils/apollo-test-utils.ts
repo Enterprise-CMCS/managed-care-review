@@ -237,6 +237,12 @@ class AuthAPIManager {
 
         const apiUrl = Cypress.env('API_URL')
 
+        if (path) {
+            throw new Error(`Full URL: ${apiUrl}${path}`)
+        }
+        console.log('Request path:', path)
+        console.log('Full URL:', `${apiUrl}${path}`)
+
         // Get AWS credentials using stored tokens
         const getIdCommand = new GetIdCommand({
             IdentityPoolId: Cypress.env('COGNITO_IDENTITY_POOL_ID'),
@@ -308,6 +314,9 @@ class AuthAPIManager {
         if (contentType && contentType.includes('application/json')) {
             const responseText = await response.text()
             console.log('Raw response text:', responseText)
+            console.log('Signed request headers:', signedRequest.headers)
+            console.log('Request path:', path)
+            console.log('Full URL:', `${apiUrl}${path}`)
 
             try {
                 responseData = JSON.parse(responseText)
