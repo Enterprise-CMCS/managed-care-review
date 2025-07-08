@@ -237,9 +237,6 @@ class AuthAPIManager {
 
         const apiUrl = Cypress.env('API_URL')
 
-        if (path) {
-            throw new Error(`Full URL: ${apiUrl}${path}`)
-        }
         console.log('Request path:', path)
         console.log('Full URL:', `${apiUrl}${path}`)
 
