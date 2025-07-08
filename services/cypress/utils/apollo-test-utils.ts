@@ -287,6 +287,8 @@ class AuthAPIManager {
 
         console.info('Send API.post fetch')
         console.log(request)
+        cy.log('Send API.post fetch')
+        cy.log(JSON.stringify(request))
 
         // Use native fetch instead of cy.request to avoid Cypress command queue issues
         const response = await fetch(`${apiUrl}${path}`, {
@@ -295,10 +297,39 @@ class AuthAPIManager {
             body,
         })
 
-        const responseData = await response.json()
+        // const responseData = await response.json()
 
-        console.info(`POST response data`)
-        console.info(responseData)
+        // Add debugging and error handling
+        console.log('Response status:', response.status)
+        console.log('Response content-type:', response.headers.get('content-type'))
+        cy.log(`Response status: ${response.status}`)
+        cy.log(`Response content-type: ${response.headers.get('content-type')}`)
+
+// Handle response safely
+        let responseData
+        const contentType = response.headers.get('content-type')
+
+        if (contentType && contentType.includes('application/json')) {
+            const responseText = await response.text()
+            console.log('Raw response text:', responseText)
+            cy.log(`Raw response text: ${responseText}`)
+
+            try {
+                responseData = JSON.parse(responseText)
+                console.info('JSON parsed successfully')
+                cy.log('JSON parsed successfully')
+            } catch (jsonError) {
+                console.error('JSON parse error:', jsonError)
+                console.error('Failed response text:', responseText)
+                cy.log(`JSON parse error: ${jsonError}`)
+                cy.log(`Failed response text: ${responseText}`)
+                responseData = responseText  // Return raw text if JSON fails
+            }
+        } else {
+            responseData = await response.text()
+            console.log('Non-JSON response:', responseData)
+            cy.log(`Non-JSON response: ${responseData}`)
+        }
 
         // Convert fetch Response to AxiosResponse format
         const headers: { [key: string]: string } = {}

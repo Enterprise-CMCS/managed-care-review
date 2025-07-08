@@ -188,11 +188,11 @@ Cypress.Commands.add(
     'apiCreateAndSubmitContractOnlySubmission',
     (stateUser): Cypress.Chainable<Contract> =>
         cy.task<DocumentNode>('readGraphQLSchema').then({ timeout: 30000 },(schema) =>
-            apolloClientWrapper(
+            cy.wrap(apolloClientWrapper(
                 schema,
                 stateUser,
                 createAndSubmitContractOnlyPackage
-            )
+            ))
         )
 )
 
@@ -200,23 +200,23 @@ Cypress.Commands.add(
     'apiCreateAndSubmitContractWithRates',
     (stateUser): Cypress.Chainable<Contract> =>
         cy.task<DocumentNode>('readGraphQLSchema').then({ timeout: 30000 },(schema) =>
-            apolloClientWrapper(
+            cy.wrap(apolloClientWrapper(
                 schema,
                 stateUser,
                 createAndSubmitContractWithRates
             )
-        )
+        ))
 )
 
 Cypress.Commands.add(
     'apiCreateAndSubmitBaseContract',
     (stateUser): Cypress.Chainable<Contract> =>
         cy.task<DocumentNode>('readGraphQLSchema').then({ timeout: 30000 },(schema) =>
-            apolloClientWrapper(
+            cy.wrap(apolloClientWrapper(
                 schema,
                 stateUser,
                 createAndSubmitContractOnlyPackage
-            )
+            ))
         )
 )
 
