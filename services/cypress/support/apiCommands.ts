@@ -188,11 +188,11 @@ Cypress.Commands.add(
     'apiCreateAndSubmitContractOnlySubmission',
     (stateUser): Cypress.Chainable<Contract> =>
         cy.task<DocumentNode>('readGraphQLSchema').then({ timeout: 30000 },(schema) =>
-            cy.wrap(apolloClientWrapper(
+            apolloClientWrapper(
                 schema,
                 stateUser,
                 createAndSubmitContractOnlyPackage
-            ))
+            )
         )
 )
 
@@ -200,34 +200,33 @@ Cypress.Commands.add(
     'apiCreateAndSubmitContractWithRates',
     (stateUser): Cypress.Chainable<Contract> =>
         cy.task<DocumentNode>('readGraphQLSchema').then({ timeout: 30000 },(schema) =>
-            cy.wrap(apolloClientWrapper(
+            apolloClientWrapper(
                 schema,
                 stateUser,
                 createAndSubmitContractWithRates
             )
-        ))
+        )
 )
 
 Cypress.Commands.add(
     'apiCreateAndSubmitBaseContract',
     (stateUser): Cypress.Chainable<Contract> =>
         cy.task<DocumentNode>('readGraphQLSchema').then({ timeout: 30000 },(schema) =>
-            cy.wrap(apolloClientWrapper(
+            apolloClientWrapper(
                 schema,
                 stateUser,
                 createAndSubmitContractOnlyPackage
-            ))
+            )
         )
 )
 
 Cypress.Commands.add(
     'apiAssignDivisionToCMSUser',
     (cmsUser, division): Cypress.Chainable<void> =>
-        cy.task<DocumentNode>('readGraphQLSchema').then((schema) =>
-            cy.wrap(apolloClientWrapper(schema, cmsUser, seedUserIntoDB)).then(() =>
-                cy.wrap(apolloClientWrapper(schema, adminUser(), (apolloClient) =>
-                        assignCmsDivision(apolloClient, cmsUser, division)
-                    )
+        cy.task<DocumentNode>('readGraphQLSchema').then( { timeout: 30000 },(schema) =>
+            cy.wrap(apolloClientWrapper(schema, cmsUser, seedUserIntoDB), { timeout: 30000 } ).then(() =>
+                apolloClientWrapper(schema, adminUser(), (apolloClient) =>
+                    assignCmsDivision(apolloClient, cmsUser, division)
                 )
             )
         )
