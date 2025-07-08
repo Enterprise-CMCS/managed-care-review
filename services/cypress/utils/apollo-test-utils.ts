@@ -291,8 +291,15 @@ class AuthAPIManager {
 
         const signedRequest = await signer.sign(request)
 
-        console.info('Send API.post fetch')
-        console.info(request)
+        console.log('Original signed headers:', signedRequest.headers)
+
+// Convert headers to ensure proper format for fetch
+        const fetchHeaders: { [key: string]: string } = {}
+        Object.entries(signedRequest.headers).forEach(([key, value]) => {
+            fetchHeaders[key] = String(value)
+        })
+
+        console.log('Headers being sent to fetch:', fetchHeaders)
 
         // Use native fetch instead of cy.request to avoid Cypress command queue issues
         const response = await fetch(`${apiUrl}${path}`, {
@@ -315,8 +322,6 @@ class AuthAPIManager {
             const responseText = await response.text()
             console.log('Raw response text:', responseText)
             console.log('Signed request headers:', signedRequest.headers)
-            console.log('Request path:', path)
-            console.log('Full URL:', `${apiUrl}${path}`)
 
             try {
                 responseData = JSON.parse(responseText)
