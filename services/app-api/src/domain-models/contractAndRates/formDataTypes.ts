@@ -209,7 +209,7 @@ const genericRateFormDataSchema = z.object({
     rateDateStart: z.date(),
     rateDateEnd: z.date(),
     rateDateCertified: z.date(),
-    rateMedicaidPopulations: z.array(rateMedicaidPopulationsSchema).optional(),
+    rateMedicaidPopulations: z.array(rateMedicaidPopulationsSchema),
     amendmentEffectiveDateStart: preprocessNulls(z.date().optional()),
     amendmentEffectiveDateEnd: preprocessNulls(z.date().optional()),
     deprecatedRateProgramIDs: z.array(z.string()),

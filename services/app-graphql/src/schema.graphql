@@ -2508,7 +2508,7 @@ input RateFormDataInput {
     Covers the possible Medicaid populations associated with a rate cert
     This field only relates to rates associated with D-SNP contracts
     """
-    rateMedicaidPopulations: [RateMedicaidPopulations]
+    rateMedicaidPopulations: [RateMedicaidPopulations!]!
     """
     Signed certification documents the state uploads
     Files can be PDF, DOC, or DOCX format
