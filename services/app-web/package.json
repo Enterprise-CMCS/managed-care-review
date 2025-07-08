@@ -101,8 +101,8 @@
         "@trussworks/react-uswds": "^4.0.0",
         "@vitejs/plugin-react": "^4.3.0",
         "amazon-cognito-identity-js": "^6.3.12",
-        "aws-amplify": "^5.0.10",
-        "axios": "^1.9.0",
+        "aws-amplify": "5.3.1",
+        "axios": "^1.10.0",
         "dayjs": "^1.11.12",
         "formik": "^2.4.6",
         "graphql": "^16.9.0",
@@ -131,9 +131,9 @@
         "yup": "^0.32.9"
     },
     "devDependencies": {
-        "@aws-sdk/client-amplify": "^3.835.0",
-        "@aws-sdk/client-s3": "^3.837.0",
-        "@aws-sdk/s3-request-presigner": "^3.837.0",
+        "@aws-sdk/client-amplify": "^3.840.0",
+        "@aws-sdk/client-s3": "^3.842.0",
+        "@aws-sdk/s3-request-presigner": "^3.842.0",
         "@chromatic-com/storybook": "^3.2.6",
         "@peculiar/webcrypto": "^1.5.0",
         "@storybook/addon-a11y": "^8.6.7",
