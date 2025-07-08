@@ -11,6 +11,9 @@ describe('State user can view submissions', () => {
         cy.startNewContractOnlySubmissionWithBaseContract()
         cy.navigateContractForm('SAVE_DRAFT')
 
+        // navigate back to dashboard
+        cy.navigateToDashboard()
+
         // add a submitted contract and rates submission
         cy.startNewContractAndRatesSubmission()
 

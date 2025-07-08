@@ -28,5 +28,15 @@ export const testS3Client: () => S3ClientT = () => {
             const s3Key = keys[0]
             return `https://fakes3.com/${s3Key}.zip`
         },
+        generateDocumentZip: async (
+            documents,
+            outputPath,
+            options
+        ): Promise<{ s3URL: string; sha256: string } | Error> => {
+            return {
+                s3URL: `s3://fake-bucket/${outputPath}`,
+                sha256: 'fake sha',
+            }
+        },
     }
 }

@@ -94,7 +94,8 @@ describe('state user in state submission form', () => {
             cy.checkA11yWithWcag22aa()
 
             //Check the dashboard
-            cy.navigateContractRatesForm('SAVE_DRAFT', false)
+            cy.navigateToDashboard()
+            cy.injectAxe()
             cy.checkA11yWithWcag22aa()
         })
     })

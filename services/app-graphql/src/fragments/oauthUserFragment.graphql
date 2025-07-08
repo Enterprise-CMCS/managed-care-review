@@ -1,0 +1,36 @@
+fragment oauthUserFragment on CMSUsersUnion {
+    ... on CMSUser {
+        id
+        email
+        givenName
+        familyName
+        role
+        stateAssignments {
+            code
+            name
+            programs {
+                id
+                name
+                fullName
+                isRateProgram
+            }
+        }
+    }
+    ... on CMSApproverUser {
+        id
+        email
+        givenName
+        familyName
+        role
+        stateAssignments {
+            code
+            name
+            programs {
+                id
+                name
+                fullName
+                isRateProgram
+            }
+        }
+    }
+}

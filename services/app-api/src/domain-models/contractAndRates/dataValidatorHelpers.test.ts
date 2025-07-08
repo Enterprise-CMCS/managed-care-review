@@ -73,6 +73,7 @@ describe('validateContractDraftRevisionInput', () => {
             submissionDescription: null,
             contractType: null,
             riskBasedContract: null,
+            dsnpContract: null,
             contractDateStart: null,
             contractDateEnd: null,
             contractExecutionStatus: null,
@@ -102,6 +103,7 @@ describe('validateContractDraftRevisionInput', () => {
             submissionDescription: undefined,
             contractType: undefined,
             riskBasedContract: undefined,
+            dsnpContract: undefined,
             contractDateStart: undefined,
             contractDateEnd: undefined,
             contractExecutionStatus: undefined,
@@ -219,6 +221,7 @@ describe('parseContract', () => {
                     populationCovered: 'MEDICAID',
                     submissionType: 'CONTRACT_AND_RATES',
                     riskBasedContract: true,
+                    dsnpContract: true,
                     submissionDescription: 'A real submission',
                     supportingDocuments: [
                         {
@@ -388,6 +391,7 @@ describe('parseContract', () => {
                     populationCovered: 'CHIP',
                     submissionType: 'CONTRACT_AND_RATES',
                     riskBasedContract: true,
+                    dsnpContract: true,
                     submissionDescription: 'A real submission',
                     supportingDocuments: [
                         {
