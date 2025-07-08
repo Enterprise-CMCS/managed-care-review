@@ -286,6 +286,7 @@ class AuthAPIManager {
         const signedRequest = await signer.sign(request)
 
         console.info('Send API.post fetch')
+        console.log(request)
 
         // Use native fetch instead of cy.request to avoid Cypress command queue issues
         const response = await fetch(`${apiUrl}${path}`, {
