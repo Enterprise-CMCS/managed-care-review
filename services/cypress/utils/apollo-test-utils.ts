@@ -10,11 +10,7 @@ import {
     RateFormDataInput,
     ContractFormData,
     CreateContractInput,
-    AdminUser,
-    StateUser,
-    CmsUsersUnion, User, Division
 } from '../gen/gqlClient'
-// Replace aws-amplify imports with AWS SDK
 import {
     CognitoIdentityProviderClient,
     AdminInitiateAuthCommand,
@@ -143,20 +139,42 @@ const newSubmissionInput = (
     )
 }
 
-const stateUser = (): StateUser => ({
+export type StateUserType = {
+    id: string
+    email: string
+    givenName: string
+    familyName: string
+    role: 'STATE_USER'
+    stateCode: string
+}
+
+export type CMSUserType = {
+    id: string
+    email: string
+    givenName: string
+    familyName: string
+    role: 'CMS_USER'
+    stateAssignments: []
+}
+
+export type AdminUserType = {
+    id: string
+    email: string
+    givenName: string
+    familyName: string
+    role: 'ADMIN_USER'
+}
+
+const stateUser = (): StateUserType => ({
     id: 'user1',
     email: 'aang@example.com',
     givenName: 'Aang',
     familyName: 'Avatar',
     role: 'STATE_USER',
-    state: {
-        code: 'MN',
-        name: 'Minnesota',
-        programs: []
-    },
+    stateCode: 'MN',
 })
 
-const cmsUser = (): CmsUsersUnion => ({
+const cmsUser = (): CMSUserType => ({
     id: 'user3',
     email: 'zuko@example.com',
     givenName: 'Zuko',
@@ -165,7 +183,7 @@ const cmsUser = (): CmsUsersUnion => ({
     stateAssignments: [],
 })
 
-const adminUser = (): AdminUser => ({
+const adminUser = (): AdminUserType => ({
     id: 'user4',
     email: 'iroh@example.com',
     givenName: 'Iroh',
@@ -231,10 +249,6 @@ class AuthAPIManager {
     }
 
     async post(path: string, options: any): Promise<AxiosResponse> {
-        if (!this.tokens) {
-            throw new Error('Not authenticated. Please call signIn first.')
-        }
-
         const apiUrl = Cypress.env('API_URL')
 
         // Parse API URL to get domain and full path
@@ -242,26 +256,7 @@ class AuthAPIManager {
         const apiDomain = `${parsedApiUrl.protocol}//${parsedApiUrl.host}`
         const fullPath = `${parsedApiUrl.pathname.replace(/\/$/, '')}${path}`
 
-        // Get AWS credentials from stored tokens
-        const getIdCommand = new GetIdCommand({
-            IdentityPoolId: Cypress.env('COGNITO_IDENTITY_POOL_ID'),
-            Logins: {
-                [`cognito-idp.${Cypress.env('COGNITO_REGION')}.amazonaws.com/${Cypress.env('COGNITO_USER_POOL_ID')}`]: this.tokens.idToken,
-            },
-        })
-
-        const { IdentityId } = await this.cognitoIdentity.send(getIdCommand)
-
-        const getCredsCommand = new GetCredentialsForIdentityCommand({
-            IdentityId,
-            Logins: {
-                [`cognito-idp.${Cypress.env('COGNITO_REGION')}.amazonaws.com/${Cypress.env('COGNITO_USER_POOL_ID')}`]: this.tokens.idToken,
-            },
-        })
-
-        const { Credentials } = await this.cognitoIdentity.send(getCredsCommand)
-
-        // Create and sign the request
+        // Create request body and headers
         const body = JSON.stringify(options.body)
 
         const request = new HttpRequest({
@@ -276,25 +271,51 @@ class AuthAPIManager {
             body,
         })
 
-        const signer = new SignatureV4({
-            service: 'execute-api',
-            region: Cypress.env('COGNITO_REGION'),
-            credentials: {
-                accessKeyId: Credentials!.AccessKeyId!,
-                secretAccessKey: Credentials!.SecretKey!,
-                sessionToken: Credentials!.SessionToken!,
-            },
-            sha256: Sha256,
-        })
+        let response
 
-        const signedRequest = await signer.sign(request)
+        // If token is provided we sign the request headers
+        if (this.tokens) {
+            // Get AWS credentials from stored tokens
+            const getIdCommand = new GetIdCommand({
+                IdentityPoolId: Cypress.env('COGNITO_IDENTITY_POOL_ID'),
+                Logins: {
+                    [`cognito-idp.${Cypress.env('COGNITO_REGION')}.amazonaws.com/${Cypress.env('COGNITO_USER_POOL_ID')}`]: this.tokens.idToken,
+                },
+            })
 
-        // Make the request
-        const response = await fetch(`${apiDomain}${fullPath}`, {
-            method: 'POST',
-            headers: signedRequest.headers,
-            body,
-        })
+            const { IdentityId } = await this.cognitoIdentity.send(getIdCommand)
+
+            const getCredsCommand = new GetCredentialsForIdentityCommand({
+                IdentityId,
+                Logins: {
+                    [`cognito-idp.${Cypress.env('COGNITO_REGION')}.amazonaws.com/${Cypress.env('COGNITO_USER_POOL_ID')}`]: this.tokens.idToken,
+                },
+            })
+
+            const { Credentials } = await this.cognitoIdentity.send(getCredsCommand)
+
+            const signer = new SignatureV4({
+                service: 'execute-api',
+                region: Cypress.env('COGNITO_REGION') ?? 'us-east-1',
+                credentials: {
+                    accessKeyId: Credentials!.AccessKeyId!,
+                    secretAccessKey: Credentials!.SecretKey!,
+                    sessionToken: Credentials!.SessionToken!,
+                },
+                sha256: Sha256,
+            })
+
+            const signedRequest = await signer.sign(request)
+
+            response = await fetch(`${apiDomain}${fullPath}`, {
+                method: 'POST',
+                headers: signedRequest.headers,
+                body,
+            })
+        } else {
+            // fetch with unsigned request headers
+            response = await fetch(`${apiDomain}${fullPath}`, request)
+        }
 
         // Parse response safely
         let responseData
@@ -447,7 +468,7 @@ async function fakeAmplifyFetch(
 // Provides Amplify auth and apollo client to callback function.
 const apolloClientWrapper = async <T>(
     schema: DocumentNode,
-    authUser: User,
+    authUser: StateUserType | CMSUserType | AdminUserType,
     callback: (apolloClient: ApolloClient<NormalizedCacheObject>) => Promise<T>
 ): Promise<T> => {
     const isLocalAuth = Cypress.env('AUTH_MODE') === 'LOCAL'
@@ -456,7 +477,7 @@ const apolloClientWrapper = async <T>(
         uri: '/graphql',
         headers: isLocalAuth
             ? {
-                  'cognito-authentication-provider': JSON.stringify(authUser),
+                  'Cognito-Authentication-Provider': JSON.stringify(authUser),
               }
             : undefined,
         fetch: fakeAmplifyFetch,
@@ -497,5 +518,5 @@ export {
     stateUser,
     rateFormData,
     contractFormData,
-    minnesotaStatePrograms,
+    minnesotaStatePrograms
 }
