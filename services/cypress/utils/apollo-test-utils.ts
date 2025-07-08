@@ -237,8 +237,17 @@ class AuthAPIManager {
 
         const apiUrl = Cypress.env('API_URL')
 
-        console.log('Request path:', path)
-        console.log('Full URL:', `${apiUrl}${path}`)
+        // Parse the API URL to extract domain and base path
+        const parsedApiUrl = new URL(apiUrl)
+        const apiDomain = `${parsedApiUrl.protocol}//${parsedApiUrl.host}`
+        const apiBasePath = parsedApiUrl.pathname.replace(/\/$/, '')
+
+        // Combine the API base path with the incoming path
+        const fullPath = `${apiBasePath}${path}`
+
+        console.log('API domain:', apiDomain)
+        console.log('API base path:', apiBasePath)
+        console.log('Full path:', fullPath)
 
         // Get AWS credentials using stored tokens
         const getIdCommand = new GetIdCommand({
@@ -271,16 +280,15 @@ class AuthAPIManager {
             sha256: Sha256,
         })
 
-        const url = new URL(path, apiUrl)
         const body = JSON.stringify(options.body)
 
         const request = new HttpRequest({
             method: 'POST',
-            hostname: url.hostname,
-            path: url.pathname,
+            hostname: parsedApiUrl.hostname,
+            path: fullPath,
             headers: {
-                'content-type': 'application/json',
-                'host': url.hostname,
+                'Content-Type': 'application/json',
+                'Host': parsedApiUrl.hostname,
                 ...options.headers,
             },
             body,
@@ -299,7 +307,7 @@ class AuthAPIManager {
         console.log('Headers being sent to fetch:', fetchHeaders)
 
         // Use native fetch instead of cy.request to avoid Cypress command queue issues
-        const response = await fetch(`${apiUrl}${path}`, {
+        const response = await fetch(`${apiDomain}${fullPath}`, {
             method: 'POST',
             headers: signedRequest.headers,
             body,
@@ -319,6 +327,8 @@ class AuthAPIManager {
             const responseText = await response.text()
             console.log('Raw response text:', responseText)
             console.log('Signed request headers:', signedRequest.headers)
+            console.log('Request path:', path)
+            console.log('Full URL:', `${apiUrl}${path}`)
 
             try {
                 responseData = JSON.parse(responseText)
