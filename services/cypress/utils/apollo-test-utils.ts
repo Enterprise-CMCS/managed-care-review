@@ -285,6 +285,8 @@ class AuthAPIManager {
 
         const signedRequest = await signer.sign(request)
 
+        console.info('Send API.post fetch')
+
         // Use native fetch instead of cy.request to avoid Cypress command queue issues
         const response = await fetch(`${apiUrl}${path}`, {
             method: 'POST',
@@ -293,6 +295,9 @@ class AuthAPIManager {
         })
 
         const responseData = await response.json()
+
+        console.info(`POST response data`)
+        console.info(responseData)
 
         // Convert fetch Response to AxiosResponse format
         const headers: { [key: string]: string } = {}
@@ -336,6 +341,7 @@ function fetchResponseFromAxios(axiosResponse: AxiosResponse): Response {
         // this appears to actually be called by apollo-client and matter
         text: () => {
             return new Promise<string>((resolve) => {
+                console.info('FAKE TEXT')
                 resolve(JSON.stringify(axiosResponse.data))
             })
         },
