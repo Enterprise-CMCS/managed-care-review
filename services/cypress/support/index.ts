@@ -27,7 +27,8 @@ import {
 } from '@mc-review/common-code'
 import './apiCommands'
 import './accessibilityCommands'
-import {CmsUsersUnion, Contract, HealthPlanPackage, StateUser, Division} from '../gen/gqlClient'
+import { Contract, HealthPlanPackage, Division} from '../gen/gqlClient'
+import { CMSUserType, StateUserType } from '../utils/apollo-test-utils'
 import { UnlockedHealthPlanFormDataType } from '@mc-review/hpp'
 import { CMSUserLoginNames } from './loginCommands'
 
@@ -120,24 +121,24 @@ declare global {
 
             // Direct API commands
             apiCreateAndSubmitContractOnlySubmission(
-                stateUser: StateUser
+                stateUser: StateUserType
             ): Cypress.Chainable<Contract>
             apiCreateAndSubmitContractWithRates(
-                stateUser: StateUser
+                stateUser: StateUserType
             ): Cypress.Chainable<Contract>
             apiDeprecatedCreateSubmitHPP(
-                stateUser: StateUser,
+                stateUser: StateUserType,
                 formData?: Partial<UnlockedHealthPlanFormDataType>
             ): Cypress.Chainable<HealthPlanPackage>
             apiCreateAndSubmitBaseContract(
-                stateUser: StateUser
+                stateUser: StateUserType
             ): Cypress.Chainable<Contract>
             apiAssignDivisionToCMSUser(
-                cmsUser: CmsUsersUnion,
+                cmsUser: CMSUserType,
                 division: Division
             ): Cypress.Chainable<void>
             apiCreateAndSubmitContractWithRates(
-                stateUser: StateUser
+                stateUser: StateUserType
             ): Cypress.Chainable<Contract>
 
             // GraphQL intercept commands

@@ -39,7 +39,7 @@ module.exports = defineConfig({
             newConfig.env.AUTH_MODE = process.env.VITE_APP_AUTH_MODE
             newConfig.env.TEST_USERS_PASS = process.env.TEST_USERS_PASS
 
-            // Configure env for Amplify authorization
+            // Configure env for cognito authorization
             newConfig.env.API_URL = process.env.VITE_APP_API_URL
             newConfig.env.COGNITO_USER_POOL_ID =
                 process.env.COGNITO_USER_POOL_ID
