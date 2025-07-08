@@ -282,8 +282,8 @@ class AuthAPIManager {
             hostname: url.hostname,
             path: url.pathname,
             headers: {
-                'Content-Type': 'application/json',
-                'Host': url.hostname,
+                'content-type': 'application/json',
+                'host': url.hostname,
                 ...options.headers,
             },
             body,
