@@ -406,6 +406,11 @@ export const ContractDetails = ({
         if (options.type === 'SAVE_AS_DRAFT' && draftSaved) {
             setDraftSaved(false)
         }
+
+        const dsnpTrigger = values.federalAuthorities.some((type) =>
+            dsnpTriggers.includes(type)
+        )
+
         const updatedDraftSubmissionFormData: ContractDraftRevisionFormDataInput =
             {
                 contractExecutionStatus: values.contractExecutionStatus,
@@ -427,7 +432,11 @@ export const ContractDetails = ({
                     formatDocumentsForGQL(values.supportingDocuments) || [],
                 managedCareEntities: values.managedCareEntities,
                 federalAuthorities: values.federalAuthorities,
-                dsnpContract: yesNoFormValueAsBoolean(values.dsnpContract),
+                // Clear dsnpContract if all dsnp trigger federalAuthorities are removed after a value was previously selected for dsnpContract
+                dsnpContract:
+                    values.dsnpContract && dsnpTrigger
+                        ? yesNoFormValueAsBoolean(values.dsnpContract)
+                        : undefined,
                 submissionType:
                     draftSubmission.draftRevision.formData.submissionType,
                 statutoryRegulatoryAttestation: formatYesNoForProto(
