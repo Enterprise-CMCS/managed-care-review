@@ -1314,6 +1314,9 @@ export const ContractDetails = ({
                                                             className={
                                                                 styles.requiredOptionalText
                                                             }
+                                                            style={{
+                                                                color: '#1B1B1B',
+                                                            }}
                                                         >
                                                             See 42 CFR § 422.2
                                                         </span>
