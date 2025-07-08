@@ -237,19 +237,12 @@ class AuthAPIManager {
 
         const apiUrl = Cypress.env('API_URL')
 
-        // Parse the API URL to extract domain and base path
+        // Parse API URL to get domain and full path
         const parsedApiUrl = new URL(apiUrl)
         const apiDomain = `${parsedApiUrl.protocol}//${parsedApiUrl.host}`
-        const apiBasePath = parsedApiUrl.pathname.replace(/\/$/, '')
+        const fullPath = `${parsedApiUrl.pathname.replace(/\/$/, '')}${path}`
 
-        // Combine the API base path with the incoming path
-        const fullPath = `${apiBasePath}${path}`
-
-        console.log('API domain:', apiDomain)
-        console.log('API base path:', apiBasePath)
-        console.log('Full path:', fullPath)
-
-        // Get AWS credentials using stored tokens
+        // Get AWS credentials from stored tokens
         const getIdCommand = new GetIdCommand({
             IdentityPoolId: Cypress.env('COGNITO_IDENTITY_POOL_ID'),
             Logins: {
@@ -268,18 +261,7 @@ class AuthAPIManager {
 
         const { Credentials } = await this.cognitoIdentity.send(getCredsCommand)
 
-        // Sign the request
-        const signer = new SignatureV4({
-            service: 'execute-api',
-            region: Cypress.env('COGNITO_REGION'),
-            credentials: {
-                accessKeyId: Credentials!.AccessKeyId!,
-                secretAccessKey: Credentials!.SecretKey!,
-                sessionToken: Credentials!.SessionToken!,
-            },
-            sha256: Sha256,
-        })
-
+        // Create and sign the request
         const body = JSON.stringify(options.body)
 
         const request = new HttpRequest({
@@ -294,69 +276,55 @@ class AuthAPIManager {
             body,
         })
 
-        const signedRequest = await signer.sign(request)
-
-        console.log('Original signed headers:', signedRequest.headers)
-
-// Convert headers to ensure proper format for fetch
-        const fetchHeaders: { [key: string]: string } = {}
-        Object.entries(signedRequest.headers).forEach(([key, value]) => {
-            fetchHeaders[key] = String(value)
+        const signer = new SignatureV4({
+            service: 'execute-api',
+            region: Cypress.env('COGNITO_REGION'),
+            credentials: {
+                accessKeyId: Credentials!.AccessKeyId!,
+                secretAccessKey: Credentials!.SecretKey!,
+                sessionToken: Credentials!.SessionToken!,
+            },
+            sha256: Sha256,
         })
 
-        console.log('Headers being sent to fetch:', fetchHeaders)
+        const signedRequest = await signer.sign(request)
 
-        // Use native fetch instead of cy.request to avoid Cypress command queue issues
+        // Make the request
         const response = await fetch(`${apiDomain}${fullPath}`, {
             method: 'POST',
             headers: signedRequest.headers,
             body,
         })
 
-        // const responseData = await response.json()
-
-        // Add debugging and error handling
-        console.log('Response status:', response.status)
-        console.log('Response content-type:', response.headers.get('content-type'))
-
-// Handle response safely
+        // Parse response safely
         let responseData
         const contentType = response.headers.get('content-type')
 
-        if (contentType && contentType.includes('application/json')) {
+        if (contentType?.includes('application/json')) {
             const responseText = await response.text()
-            console.log('Raw response text:', responseText)
-            console.log('Signed request headers:', signedRequest.headers)
-            console.log('Request path:', path)
-            console.log('Full URL:', `${apiUrl}${path}`)
-
             try {
                 responseData = JSON.parse(responseText)
-                console.info('JSON parsed successfully')
             } catch (jsonError) {
-                console.error('JSON parse error:', jsonError)
-                console.error('Failed response text:', responseText)
-                responseData = responseText  // Return raw text if JSON fails
+                console.error('JSON parse error:', jsonError, 'Response:', responseText)
+                responseData = responseText
             }
         } else {
             responseData = await response.text()
-            console.log('Non-JSON response:', responseData)
         }
 
-        // Convert fetch Response to AxiosResponse format
+        // Convert to AxiosResponse format
         const headers: { [key: string]: string } = {}
         response.headers.forEach((value, key) => {
             headers[key] = value
         })
 
-        // Convert fetch Response to AxiosResponse format
         return {
             data: responseData,
             status: response.status,
             statusText: response.statusText,
-            headers: headers,
+            headers,
             config: {},
-            request: { url: `${apiUrl}${path}` },
+            request: { url: `${apiDomain}${fullPath}` },
         } as AxiosResponse
     }
 }
@@ -385,7 +353,6 @@ function fetchResponseFromAxios(axiosResponse: AxiosResponse): Response {
         // this appears to actually be called by apollo-client and matter
         text: () => {
             return new Promise<string>((resolve) => {
-                console.info('FAKE TEXT')
                 resolve(JSON.stringify(axiosResponse.data))
             })
         },
