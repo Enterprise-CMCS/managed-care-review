@@ -71,7 +71,7 @@ describe('ContractDetails', () => {
             screen.queryByText(/All fields are required/)
         ).not.toBeInTheDocument()
         const requiredLabels = await screen.findAllByText('Required')
-        expect(requiredLabels).toHaveLength(6)
+        expect(requiredLabels).toHaveLength(7)
         const optionalLabels = await screen.findAllByText('Optional')
         expect(optionalLabels).toHaveLength(1)
     })
@@ -314,6 +314,59 @@ describe('ContractDetails', () => {
                 })
             ).not.toBeInTheDocument() // medicaid only authority should be in the list
         })
+
+        it('renders d-snp field when specific federal authorities are selected', async () => {
+            const draftContract = mockContractPackageUnlockedWithUnlockedType()
+            draftContract.draftRevision!.formData.populationCovered = 'MEDICAID'
+
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}
+                        element={<ContractDetails />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    ...draftContract,
+                                    id: '15',
+                                },
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/15/edit/contract-details',
+                    },
+                }
+            )
+
+            await screen.findByText('Contract Details')
+
+            const fedAuthQuestion = screen.getByRole('group', {
+                name: 'Active federal operating authority',
+            })
+
+            expect(fedAuthQuestion).toBeInTheDocument()
+            //This will trigger d-snp question
+            within(fedAuthQuestion)
+                .getByRole('checkbox', {
+                    name: '1915(b) Waiver Authority',
+                })
+                .click()
+
+            const dsnpQuestion = screen.getByRole('group', {
+                name: 'Is this contract associated with a Dual-Eligible Special Needs Plan (D-SNP) that covers Medicaid benefits?',
+            })
+
+            expect(dsnpQuestion).toBeInTheDocument()
+            within(dsnpQuestion).getByRole('link', {
+                name: 'D-SNP guidance',
+            })
+        })
     })
 
     describe('Contract provisions - yes/nos', () => {
@@ -376,7 +429,7 @@ describe('ContractDetails', () => {
 
             // overall number of provisions should be correct
             expect(screen.getAllByTestId('yes-no-radio-fieldset')).toHaveLength(
-                modifiedProvisionMedicaidAmendmentKeys.length
+                modifiedProvisionMedicaidAmendmentKeys.length + 1 //+1 to account for the unrelated dsnp question
             )
         })
         // eslint-disable-next-line jest/no-disabled-tests
@@ -625,7 +678,7 @@ describe('ContractDetails', () => {
             ).toBeNull()
             expect(
                 screen.queryAllByTestId('yes-no-radio-fieldset')
-            ).toHaveLength(0)
+            ).toHaveLength(1) //Should only find the d-snp question
         })
 
         it('can set provisions for CHIP only amendment', async () => {
@@ -685,7 +738,7 @@ describe('ContractDetails', () => {
 
             // overall number of provisions should be correct
             expect(screen.getAllByTestId('yes-no-radio-fieldset')).toHaveLength(
-                provisionCHIPKeys.length
+                provisionCHIPKeys.length + 1 //+1 to account for the unrelated dsnp question
             )
         })
         // eslint-disable-next-line jest/no-disabled-tests
