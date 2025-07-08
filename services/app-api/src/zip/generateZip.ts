@@ -16,6 +16,9 @@ const s3Client = new S3Client({
     region: process.env.AWS_REGION || 'us-east-1',
 })
 
+// Maximum total size for document zip packages (1.5GB)
+const MAX_ZIP_SIZE_BYTES = 1536 * 1024 * 1024
+
 /**
  * Extracts bucket name from S3 URL
  */
@@ -72,7 +75,7 @@ export async function generateDocumentZip(
     outputPath: string,
     options = {
         batchSize: 50,
-        maxTotalSize: 1024 * 1024 * 1024, // 1GB default limit
+        maxTotalSize: MAX_ZIP_SIZE_BYTES,
         baseTimeout: 120000,
         timeoutPerMB: 1000,
     }
