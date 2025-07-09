@@ -18,6 +18,7 @@ fragment strippedRateRevisionFragment on RateRevisionStripped {
         amendmentEffectiveDateStart
         amendmentEffectiveDateEnd
         rateProgramIDs
+        rateMedicaidPopulations
         deprecatedRateProgramIDs
         rateCertificationName
     }
