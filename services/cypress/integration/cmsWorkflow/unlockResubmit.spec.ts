@@ -7,7 +7,10 @@ describe('CMS user', () => {
     })
 
     it('can unlock and see state resubmit with child rates', () => {
-        cy.interceptFeatureFlags({'438-attestation': true})
+        cy.interceptFeatureFlags({
+            '438-attestation': true,
+            'dsnp': true
+        })
         cy.logInAsStateUser()
 
         // fill out contract details
@@ -236,7 +239,8 @@ describe('CMS user', () => {
         // turn on feature flag
         cy.interceptFeatureFlags({
             '438-attestation': true,
-            'hide-supporting-docs-page': true
+            'hide-supporting-docs-page': true,
+            'dsnp': true
         })
 
         // Set up a submission with linked rates
