@@ -298,6 +298,7 @@ function strippedRateRevisionToDomainModel(
         amendmentEffectiveDateEnd:
             revision.amendmentEffectiveDateEnd ?? undefined,
         rateProgramIDs: revision.rateProgramIDs,
+        rateMedicaidPopulations: revision.rateMedicaidPopulations,
         deprecatedRateProgramIDs: revision.deprecatedRateProgramIDs,
         rateCertificationName: revision.rateCertificationName ?? undefined,
     }

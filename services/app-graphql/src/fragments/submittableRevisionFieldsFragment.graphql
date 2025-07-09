@@ -32,6 +32,7 @@ fragment submittableRevisionsFieldsFragment on SubmittableRevision {
             programIDs
             populationCovered
             submissionType
+            dsnpContract
 
             riskBasedContract
             submissionDescription
@@ -104,6 +105,7 @@ fragment submittableRevisionsFieldsFragment on SubmittableRevision {
             rateDateStart
             rateDateEnd
             rateDateCertified
+            rateMedicaidPopulations
             amendmentEffectiveDateStart
             amendmentEffectiveDateEnd
             rateProgramIDs

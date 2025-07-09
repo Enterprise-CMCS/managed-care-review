@@ -1594,6 +1594,16 @@ enum RateAmendmentType {
 }
 
 """
+Covers the possible Medicaid populations associated with a rate cert
+This field only relates to rates associated with D-SNP contracts
+"""
+enum RateMedicaidPopulations {
+  MEDICARE_MEDICAID_WITH_DSNP
+  MEDICAID_ONLY
+  MEDICARE_MEDICAID_WITHOUT_DSNP
+}
+
+"""
 Determines on what basis the capitation rate is actuarially sound.
 With RATE_RANGE the state certifies a range of rates
 from the low to high end of the range as actuarially sound
@@ -1673,6 +1683,11 @@ type RateFormData {
     or an amendment to an existing rate certification
     """
     rateType: RateAmendmentType
+    """
+    Covers the possible Medicaid populations associated with a rate cert
+    This field only relates to rates associated with D-SNP contracts
+    """
+    rateMedicaidPopulations: [RateMedicaidPopulations]
     """
     Can be 'RATE_CELL' or 'RATE_RANGE'
     These values represent on what basis the capitation rate is actuarially sound
@@ -1775,6 +1790,11 @@ type RateFormDataStripped {
     These values represent on what basis the capitation rate is actuarially sound
     """
     rateCapitationType: RateCapitationType
+    """
+    Covers the possible Medicaid populations associated with a rate cert
+    This field only relates to rates associated with D-SNP contracts
+    """
+    rateMedicaidPopulations: [RateMedicaidPopulations]
     """
     If the rateType is NEW this is the start date of the
     rating period for a new certification.
@@ -2484,6 +2504,11 @@ input RateFormDataInput {
     These values represent on what basis the capitation rate is actuarially sound
     """
     rateCapitationType: RateCapitationType
+    """
+    Covers the possible Medicaid populations associated with a rate cert
+    This field only relates to rates associated with D-SNP contracts
+    """
+    rateMedicaidPopulations: [RateMedicaidPopulations]
     """
     Signed certification documents the state uploads
     Files can be PDF, DOC, or DOCX format

@@ -306,6 +306,7 @@ describe('parseContract', () => {
                             rateType: 'AMENDMENT',
                             rateCapitationType: 'RATE_CELL',
                             rateCertificationName: 'fake-name',
+                            rateMedicaidPopulations: [],
                             rateDocuments: [
                                 {
                                     s3URL: 's3://bucketname/key/contractsupporting1',
@@ -461,6 +462,7 @@ describe('parseContract', () => {
                             rateType: 'AMENDMENT',
                             rateCapitationType: 'RATE_CELL',
                             rateCertificationName: 'fake-rate-name',
+                            rateMedicaidPopulations: [],
                             rateDocuments: [
                                 {
                                     s3URL: 'foobar//foobar',
