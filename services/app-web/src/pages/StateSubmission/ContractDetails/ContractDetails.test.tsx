@@ -1,1764 +1,1470 @@
-import React from 'react'
-import { screen, waitFor, within, fireEvent } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
-import { Route, Routes } from 'react-router-dom'
-import { RoutesRecord } from '@mc-review/constants'
+import React, { useState } from 'react'
+import dayjs from 'dayjs'
+import {
+    Form as UswdsForm,
+    FormGroup,
+    Fieldset,
+    DateRangePicker,
+    Link,
+} from '@trussworks/react-uswds'
+import { v4 as uuidv4 } from 'uuid'
+import { generatePath, useNavigate } from 'react-router-dom'
+import { Formik, FormikErrors, getIn } from 'formik'
+import styles from '../StateSubmissionForm.module.scss'
 
 import {
-    fetchCurrentUserMock,
-    fetchContractMockSuccess,
-    mockContractPackageUnlockedWithUnlockedType,
-} from '@mc-review/mocks'
+    FileUpload,
+    FileItemT,
+    FieldRadio,
+    FieldCheckbox,
+    ErrorSummary,
+    PoliteErrorMessage,
+    FieldYesNo,
+    FieldTextarea,
+    DynamicStepIndicator,
+    LinkWithLogging,
+    ReactRouterLinkWithLogging,
+    FormNotificationContainer,
+} from '../../../components'
+import { formatForForm, isDateRangeEmpty } from '../../../formHelpers'
+import { formatUserInputDate } from '@mc-review/dates'
+import { useS3 } from '../../../contexts/S3Context'
 
+import { ContractDetailsFormSchema } from './ContractDetailsSchema'
+import { ManagedCareEntityRecord, FederalAuthorityRecord } from '@mc-review/hpp'
+import { PageActions } from '../PageActions'
 import {
-    renderWithProviders,
-    TEST_DOC_FILE,
-    TEST_PDF_FILE,
-    TEST_XLS_FILE,
-    TEST_PNG_FILE,
-    dragAndDrop,
-    selectYesNoRadio,
-} from '../../../testHelpers/jestHelpers'
+    activeFormPages,
+    type ContractFormPageProps,
+} from '../StateSubmissionForm'
+import {
+    formatYesNoForProto,
+    formatDocumentsForGQL,
+    formatDocumentsForForm,
+    formatFormDateForGQL,
+} from '../../../formHelpers/formatters'
 import { ACCEPTED_SUBMISSION_FILE_TYPES } from '../../../components/FileUpload'
-import { ContractDetails } from './ContractDetails'
 import {
-    provisionCHIPKeys,
-    federalAuthorityKeys,
     federalAuthorityKeysForCHIP,
-    modifiedProvisionMedicaidAmendmentKeys,
-    modifiedProvisionMedicaidBaseKeys,
+    federalAuthorityKeys,
 } from '@mc-review/hpp'
+import {
+    generateProvisionLabel,
+    generateApplicableProvisionsList,
+} from '@mc-review/common-code'
+import type {
+    ManagedCareEntity,
+    ContractExecutionStatus,
+    FederalAuthority,
+} from '@mc-review/hpp'
+import {
+    isBaseContract,
+    isCHIPOnly,
+    isContractAmendment,
+    isContractWithProvisions,
+} from '@mc-review/common-code'
+import { RoutesRecord, RouteT } from '@mc-review/constants'
+import { useLDClient } from 'launchdarkly-react-client-sdk'
+import { featureFlags } from '@mc-review/common-code'
+import {
+    booleanAsYesNoFormValue,
+    yesNoFormValueAsBoolean,
+} from '../../../components/Form/FieldYesNo/FieldYesNo'
 import {
     StatutoryRegulatoryAttestation,
     StatutoryRegulatoryAttestationDescription,
     StatutoryRegulatoryAttestationQuestion,
 } from '@mc-review/constants'
+import { FormContainer } from '../../../components/FormContainer/FormContainer'
+import { useCurrentRoute, useRouteParams } from '../../../hooks'
+import { useAuth } from '../../../contexts/AuthContext'
+import { ErrorOrLoadingPage } from '../ErrorOrLoadingPage'
+import { PageBannerAlerts } from '../PageBannerAlerts'
+import { useErrorSummary } from '../../../hooks/useErrorSummary'
+import { useContractForm } from '../../../hooks/useContractForm'
+import {
+    UpdateContractDraftRevisionInput,
+    ContractDraftRevisionFormDataInput,
+} from '../../../gen/gqlClient'
+import { useFocusOnRender } from '../../../hooks/useFocusOnRender'
 
-const scrollIntoViewMock = vi.fn()
-HTMLElement.prototype.scrollIntoView = scrollIntoViewMock
+function formattedDatePlusOneDay(initialValue: string): string {
+    const dayjsValue = dayjs(initialValue)
+    return initialValue && dayjsValue.isValid()
+        ? dayjsValue.add(1, 'day').format('YYYY-MM-DD')
+        : initialValue // preserve undefined to show validations later
+}
 
-describe('ContractDetails', () => {
-    it('displays correct form guidance', async () => {
-        renderWithProviders(
-            <Routes>
-                <Route
-                    path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}
-                    element={<ContractDetails />}
-                />
-            </Routes>,
-            {
-                apolloProvider: {
-                    mocks: [
-                        fetchCurrentUserMock({ statusCode: 200 }),
-                        fetchContractMockSuccess({
-                            contract: {
-                                ...mockContractPackageUnlockedWithUnlockedType(),
-                                id: '15',
-                            },
-                        }),
-                    ],
-                },
-                routerProvider: {
-                    route: '/submissions/15/edit/contract-details',
-                },
-                featureFlags: {
-                    'hide-supporting-docs-page': true,
-                },
+function formattedDateMinusOneDay(initialValue: string): string {
+    const dayjsValue = dayjs(initialValue)
+    return initialValue && dayjsValue.isValid()
+        ? dayjsValue.subtract(1, 'day').format('YYYY-MM-DD')
+        : initialValue // preserve undefined to show validations later
+}
+
+const ContractDatesErrorMessage = ({
+    values,
+    validationErrorMessage,
+    formFieldLabel,
+}: {
+    values: ContractDetailsFormValues
+    validationErrorMessage: string
+    formFieldLabel: string
+}): React.ReactElement => (
+    <PoliteErrorMessage formFieldLabel={formFieldLabel}>
+        {isDateRangeEmpty(values.contractDateStart, values.contractDateEnd)
+            ? 'You must provide a start and an end date'
+            : validationErrorMessage}
+    </PoliteErrorMessage>
+)
+
+export type ContractDetailsFormValues = {
+    contractDocuments: FileItemT[]
+    supportingDocuments: FileItemT[]
+    contractExecutionStatus: ContractExecutionStatus | undefined
+    contractDateStart: string
+    contractDateEnd: string
+    managedCareEntities: ManagedCareEntity[]
+    federalAuthorities: FederalAuthority[]
+    dsnpContract: string | undefined
+    inLieuServicesAndSettings: string | undefined
+    modifiedBenefitsProvided: string | undefined
+    modifiedGeoAreaServed: string | undefined
+    modifiedMedicaidBeneficiaries: string | undefined
+    modifiedRiskSharingStrategy: string | undefined
+    modifiedIncentiveArrangements: string | undefined
+    modifiedWitholdAgreements: string | undefined
+    modifiedStateDirectedPayments: string | undefined
+    modifiedPassThroughPayments: string | undefined
+    modifiedPaymentsForMentalDiseaseInstitutions: string | undefined
+    modifiedMedicalLossRatioStandards: string | undefined
+    modifiedOtherFinancialPaymentIncentive: string | undefined
+    modifiedEnrollmentProcess: string | undefined
+    modifiedGrevienceAndAppeal: string | undefined
+    modifiedNetworkAdequacyStandards: string | undefined
+    modifiedLengthOfContract: string | undefined
+    modifiedNonRiskPaymentArrangements: string | undefined
+    statutoryRegulatoryAttestation: string | undefined
+    statutoryRegulatoryAttestationDescription: string | undefined
+}
+export type FormError =
+    FormikErrors<ContractDetailsFormValues>[keyof FormikErrors<ContractDetailsFormValues>]
+
+export const ContractDetails = ({
+    showValidations = false,
+}: ContractFormPageProps): React.ReactElement => {
+    const [shouldValidate, setShouldValidate] = useState(showValidations)
+    const [draftSaved, setDraftSaved] = useState(false)
+    useFocusOnRender(draftSaved, '[data-testid="saveAsDraftSuccessBanner"]')
+    const navigate = useNavigate()
+    const ldClient = useLDClient()
+    const { setFocusErrorSummaryHeading, errorSummaryHeadingRef } =
+        useErrorSummary()
+
+    // set up API handling and HPP data
+    const { loggedInUser } = useAuth()
+    const { currentRoute } = useCurrentRoute()
+    const { id } = useRouteParams()
+    const { draftSubmission, interimState, updateDraft, showPageErrorMessage } =
+        useContractForm(id)
+
+    const contract438Attestation = ldClient?.variation(
+        featureFlags.CONTRACT_438_ATTESTATION.flag,
+        featureFlags.CONTRACT_438_ATTESTATION.defaultValue
+    )
+
+    const hideSupportingDocs = ldClient?.variation(
+        featureFlags.HIDE_SUPPORTING_DOCS_PAGE.flag,
+        featureFlags.HIDE_SUPPORTING_DOCS_PAGE.defaultValue
+    )
+
+    const enableDSNPs = ldClient?.variation(
+        featureFlags.DSNP.flag,
+        featureFlags.DSNP.defaultValue
+    )
+
+    // Contract documents state management
+    const { getKey, handleUploadFile, handleScanFile } = useS3()
+    if (interimState || !draftSubmission)
+        return <ErrorOrLoadingPage state={interimState || 'GENERIC_ERROR'} />
+
+    const fileItemsFromDraftSubmission = (
+        docType: string
+    ): FileItemT[] | undefined => {
+        if (
+            (draftSubmission &&
+                docType === 'contract' &&
+                !draftSubmission.draftRevision.formData.contractDocuments) ||
+            (draftSubmission &&
+                docType === 'supporting' &&
+                !draftSubmission.draftRevision.formData.supportingDocuments)
+        )
+            return undefined
+        const docs =
+            docType === 'contract'
+                ? draftSubmission.draftRevision.formData.contractDocuments
+                : draftSubmission.draftRevision.formData.supportingDocuments
+        return docs.map((doc) => {
+            const key = getKey(doc.s3URL)
+            if (!key) {
+                return {
+                    id: uuidv4(),
+                    name: doc.name,
+                    key: 'INVALID_KEY',
+                    s3URL: undefined,
+                    status: 'UPLOAD_ERROR',
+                    sha256: doc.sha256,
+                }
             }
+            return {
+                id: uuidv4(),
+                name: doc.name,
+                key: key,
+                s3URL: doc.s3URL,
+                status: 'UPLOAD_COMPLETE',
+                sha256: doc.sha256,
+            }
+        })
+    }
+    const applicableProvisions =
+        generateApplicableProvisionsList(draftSubmission)
+
+    const applicableFederalAuthorities = isCHIPOnly(draftSubmission)
+        ? federalAuthorityKeysForCHIP
+        : federalAuthorityKeys
+
+    const contractDetailsInitialValues: ContractDetailsFormValues = {
+        contractDocuments: formatDocumentsForForm({
+            documents: draftSubmission.draftRevision.formData.contractDocuments,
+            getKey: getKey,
+        }),
+        supportingDocuments: formatDocumentsForForm({
+            documents:
+                draftSubmission.draftRevision.formData.supportingDocuments,
+            getKey: getKey,
+        }),
+        contractExecutionStatus:
+            draftSubmission.draftRevision.formData.contractExecutionStatus ??
+            undefined,
+        contractDateStart:
+            (draftSubmission &&
+                formatForForm(
+                    draftSubmission.draftRevision.formData.contractDateStart
+                )) ??
+            '',
+        contractDateEnd:
+            (draftSubmission &&
+                formatForForm(
+                    draftSubmission.draftRevision.formData.contractDateEnd
+                )) ??
+            '',
+        managedCareEntities:
+            (draftSubmission.draftRevision.formData
+                .managedCareEntities as ManagedCareEntity[]) ?? [],
+        federalAuthorities:
+            draftSubmission.draftRevision.formData.federalAuthorities ?? [],
+        dsnpContract:
+            booleanAsYesNoFormValue(
+                draftSubmission.draftRevision.formData.dsnpContract
+            ) ?? '',
+        inLieuServicesAndSettings:
+            booleanAsYesNoFormValue(
+                draftSubmission.draftRevision.formData.inLieuServicesAndSettings
+            ) ?? '',
+        modifiedBenefitsProvided:
+            booleanAsYesNoFormValue(
+                draftSubmission.draftRevision.formData.modifiedBenefitsProvided
+            ) ?? '',
+        modifiedGeoAreaServed:
+            booleanAsYesNoFormValue(
+                draftSubmission.draftRevision.formData.modifiedGeoAreaServed
+            ) ?? '',
+        modifiedMedicaidBeneficiaries:
+            booleanAsYesNoFormValue(
+                draftSubmission.draftRevision.formData
+                    .modifiedMedicaidBeneficiaries
+            ) ?? '',
+        modifiedRiskSharingStrategy:
+            booleanAsYesNoFormValue(
+                draftSubmission.draftRevision.formData
+                    .modifiedRiskSharingStrategy
+            ) ?? '',
+        modifiedIncentiveArrangements:
+            booleanAsYesNoFormValue(
+                draftSubmission.draftRevision.formData
+                    .modifiedIncentiveArrangements
+            ) ?? '',
+        modifiedWitholdAgreements:
+            booleanAsYesNoFormValue(
+                draftSubmission.draftRevision.formData.modifiedWitholdAgreements
+            ) ?? '',
+        modifiedStateDirectedPayments:
+            booleanAsYesNoFormValue(
+                draftSubmission.draftRevision.formData
+                    .modifiedStateDirectedPayments
+            ) ?? '',
+        modifiedPassThroughPayments:
+            booleanAsYesNoFormValue(
+                draftSubmission.draftRevision.formData
+                    .modifiedPassThroughPayments
+            ) ?? '',
+        modifiedPaymentsForMentalDiseaseInstitutions:
+            booleanAsYesNoFormValue(
+                draftSubmission.draftRevision.formData
+                    .modifiedPaymentsForMentalDiseaseInstitutions
+            ) ?? '',
+        modifiedMedicalLossRatioStandards:
+            booleanAsYesNoFormValue(
+                draftSubmission.draftRevision.formData
+                    .modifiedMedicalLossRatioStandards
+            ) ?? '',
+        modifiedOtherFinancialPaymentIncentive:
+            booleanAsYesNoFormValue(
+                draftSubmission.draftRevision.formData
+                    .modifiedOtherFinancialPaymentIncentive
+            ) ?? '',
+        modifiedEnrollmentProcess:
+            booleanAsYesNoFormValue(
+                draftSubmission.draftRevision.formData.modifiedEnrollmentProcess
+            ) ?? '',
+        modifiedGrevienceAndAppeal:
+            booleanAsYesNoFormValue(
+                draftSubmission.draftRevision.formData
+                    .modifiedGrevienceAndAppeal
+            ) ?? '',
+        modifiedNetworkAdequacyStandards:
+            booleanAsYesNoFormValue(
+                draftSubmission.draftRevision.formData
+                    .modifiedNetworkAdequacyStandards
+            ) ?? '',
+        modifiedLengthOfContract:
+            booleanAsYesNoFormValue(
+                draftSubmission.draftRevision.formData.modifiedLengthOfContract
+            ) ?? '',
+        modifiedNonRiskPaymentArrangements:
+            booleanAsYesNoFormValue(
+                draftSubmission.draftRevision.formData
+                    .modifiedNonRiskPaymentArrangements
+            ) ?? '',
+        statutoryRegulatoryAttestation:
+            booleanAsYesNoFormValue(
+                draftSubmission.draftRevision.formData
+                    .statutoryRegulatoryAttestation
+            ) ?? '',
+        statutoryRegulatoryAttestationDescription:
+            draftSubmission.draftRevision.formData
+                .statutoryRegulatoryAttestationDescription ?? '',
+    }
+
+    const showFieldErrors = (
+        fieldName: keyof ContractDetailsFormValues,
+        errors: FormikErrors<ContractDetailsFormValues>
+    ): string | undefined => {
+        if (!shouldValidate) return undefined
+        return getIn(errors, `${fieldName}`)
+    }
+
+    const genecontractErrorsummaryErrors = (
+        errors: FormikErrors<ContractDetailsFormValues>,
+        values: ContractDetailsFormValues
+    ) => {
+        const errorsObject: { [field: string]: string } = {}
+        Object.entries(errors).forEach(([field, value]) => {
+            if (typeof value === 'string') {
+                errorsObject[field] = value
+            }
+            if (Array.isArray(value) && Array.length > 0) {
+                Object.entries(value).forEach(
+                    ([arrItemField, arrItemValue]) => {
+                        if (typeof arrItemValue === 'string') {
+                            errorsObject[arrItemField] = arrItemValue
+                        }
+                    }
+                )
+            }
+        })
+        values.contractDocuments.forEach((item) => {
+            const key = 'contractDocuments'
+            if (item.status === 'DUPLICATE_NAME_ERROR') {
+                errorsObject[key] =
+                    'You must remove all documents with error messages before continuing'
+            } else if (item.status === 'SCANNING_ERROR') {
+                errorsObject[key] =
+                    'You must remove files that failed the security scan'
+            } else if (item.status === 'UPLOAD_ERROR') {
+                errorsObject[key] =
+                    'You must remove or retry files that failed to upload'
+            }
+        })
+        // return errors
+        return errorsObject
+    }
+
+    const handleFormSubmit = async (
+        values: ContractDetailsFormValues,
+        setSubmitting: (isSubmitting: boolean) => void, // formik setSubmitting
+        options: {
+            type: 'SAVE_AS_DRAFT' | 'BACK' | 'CONTINUE'
+            redirectPath?: RouteT
+        }
+    ) => {
+        if (options.type === 'SAVE_AS_DRAFT' && draftSaved) {
+            setDraftSaved(false)
+        }
+
+        const dsnpTrigger = values.federalAuthorities.some((type) =>
+            dsnpTriggers.includes(type)
         )
 
-        expect(
-            screen.queryByText(/All fields are required/)
-        ).not.toBeInTheDocument()
-        const requiredLabels = await screen.findAllByText('Required')
-        expect(requiredLabels).toHaveLength(7)
-        const optionalLabels = await screen.findAllByText('Optional')
-        expect(optionalLabels).toHaveLength(1)
-    })
+        const updatedDraftSubmissionFormData: ContractDraftRevisionFormDataInput =
+            {
+                contractExecutionStatus: values.contractExecutionStatus,
+                contractDateStart: formatFormDateForGQL(
+                    values.contractDateStart
+                ),
+                contractDateEnd: formatFormDateForGQL(values.contractDateEnd),
+                riskBasedContract:
+                    draftSubmission.draftRevision.formData.riskBasedContract,
+                populationCovered:
+                    draftSubmission.draftRevision.formData.populationCovered,
+                programIDs:
+                    draftSubmission.draftRevision.formData.programIDs || [],
+                stateContacts:
+                    draftSubmission.draftRevision.formData.stateContacts || [],
+                contractDocuments:
+                    formatDocumentsForGQL(values.contractDocuments) || [],
+                supportingDocuments:
+                    formatDocumentsForGQL(values.supportingDocuments) || [],
+                managedCareEntities: values.managedCareEntities,
+                federalAuthorities: values.federalAuthorities,
+                // Clear dsnpContract if all dsnp trigger federalAuthorities are removed after a value was previously selected for dsnpContract
+                dsnpContract:
+                    values.dsnpContract && dsnpTrigger
+                        ? yesNoFormValueAsBoolean(values.dsnpContract)
+                        : undefined,
+                submissionType:
+                    draftSubmission.draftRevision.formData.submissionType,
+                statutoryRegulatoryAttestation: formatYesNoForProto(
+                    values.statutoryRegulatoryAttestation
+                ),
+                // If contract is in compliance, we set the description to undefined. This clears out previous non-compliance description
+                statutoryRegulatoryAttestationDescription:
+                    values.statutoryRegulatoryAttestationDescription,
+            }
 
-    describe('Contract documents file upload', () => {
-        it('renders without errors', async () => {
-            const draftContract = mockContractPackageUnlockedWithUnlockedType()
-            draftContract.draftRevision.formData.contractDocuments = []
-
-            renderWithProviders(
-                <Routes>
-                    <Route
-                        path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}
-                        element={<ContractDetails />}
-                    />
-                </Routes>,
-                {
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchContractMockSuccess({
-                                contract: {
-                                    ...draftContract,
-                                    id: '15',
-                                },
-                            }),
-                        ],
-                    },
-                    routerProvider: {
-                        route: '/submissions/15/edit/contract-details',
-                    },
-                }
+        if (
+            draftSubmission === undefined ||
+            !updateDraft ||
+            !draftSubmission.draftRevision
+        ) {
+            console.info(draftSubmission, updateDraft)
+            console.info(
+                'ERROR, SubmissionType for does not have props needed to update a draft.'
             )
-
-            // check hint text
-            await screen.findByText(
-                'Supporting documents can be added later. If you have additional contract actions, you must submit them in a separate submission.'
-            )
-            await screen.findAllByRole('link', { name: /Document definitions/ })
-
-            // check file input presences
-            await screen.findAllByTestId('file-input')
-
-            expect(screen.getAllByTestId('file-input')[0]).toBeInTheDocument()
-            expect(screen.getAllByTestId('file-input')[0]).toHaveClass(
-                'usa-file-input'
-            )
-            expect(
-                screen.getByRole('button', { name: 'Continue' })
-            ).not.toHaveAttribute('aria-disabled')
-            expect(
-                within(
-                    screen.getAllByTestId('file-input-preview-list')[0]
-                ).queryAllByRole('listitem')
-            ).toHaveLength(0)
-        })
-
-        it('accepts a new document', async () => {
-            renderWithProviders(
-                <Routes>
-                    <Route
-                        path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}
-                        element={<ContractDetails />}
-                    />
-                </Routes>,
-                {
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchContractMockSuccess({
-                                contract: {
-                                    ...mockContractPackageUnlockedWithUnlockedType(),
-                                    id: '15',
-                                },
-                            }),
-                        ],
-                    },
-                    routerProvider: {
-                        route: '/submissions/15/edit/contract-details',
-                    },
-                    featureFlags: {
-                        'hide-supporting-docs-page': true,
-                    },
-                }
-            )
-
-            await screen.findByText('Contract Details')
-
-            const contractDoc = screen.getByLabelText('Upload contract')
-            expect(contractDoc).toBeInTheDocument()
-            await userEvent.upload(contractDoc, [TEST_DOC_FILE])
-            const supportingDoc = screen.getByLabelText(
-                'Upload contract-supporting documents'
-            )
-            expect(supportingDoc).toBeInTheDocument()
-            await userEvent.upload(supportingDoc, [TEST_PDF_FILE])
-            expect(
-                await screen.findByText(TEST_DOC_FILE.name)
-            ).toBeInTheDocument()
-            expect(
-                await screen.findByText(TEST_PDF_FILE.name)
-            ).toBeInTheDocument()
-        })
-
-        it('accepts multiple pdf, word, excel documents', async () => {
-            renderWithProviders(
-                <Routes>
-                    <Route
-                        path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}
-                        element={<ContractDetails />}
-                    />
-                </Routes>,
-                {
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchContractMockSuccess({
-                                contract: {
-                                    ...mockContractPackageUnlockedWithUnlockedType(),
-                                    id: '15',
-                                },
-                            }),
-                        ],
-                    },
-                    routerProvider: {
-                        route: '/submissions/15/edit/contract-details',
-                    },
-                }
-            )
-
-            await screen.findByText('Contract Details')
-
-            const input = screen.getByLabelText('Upload contract')
-            expect(input).toBeInTheDocument()
-            expect(input).toHaveAttribute(
-                'accept',
-                ACCEPTED_SUBMISSION_FILE_TYPES
-            )
-            await userEvent.upload(input, [
-                TEST_DOC_FILE,
-                TEST_PDF_FILE,
-                TEST_XLS_FILE,
-            ])
-            await waitFor(() => {
-                expect(screen.getByText(TEST_DOC_FILE.name)).toBeInTheDocument()
-                expect(screen.getByText(TEST_PDF_FILE.name)).toBeInTheDocument()
-                expect(screen.getByText(TEST_XLS_FILE.name)).toBeInTheDocument()
-            })
-        })
-    })
-
-    describe('Federal authorities', () => {
-        it('displays correct form fields for federal authorities with medicaid contract', async () => {
-            const draftContract = mockContractPackageUnlockedWithUnlockedType()
-            draftContract.draftRevision!.formData.populationCovered = 'MEDICAID'
-
-            renderWithProviders(
-                <Routes>
-                    <Route
-                        path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}
-                        element={<ContractDetails />}
-                    />
-                </Routes>,
-                {
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchContractMockSuccess({
-                                contract: {
-                                    ...draftContract,
-                                    id: '15',
-                                },
-                            }),
-                        ],
-                    },
-                    routerProvider: {
-                        route: '/submissions/15/edit/contract-details',
-                    },
-                }
-            )
-
-            await screen.findByText('Contract Details')
-
-            const fedAuthQuestion = screen.getByRole('group', {
-                name: 'Active federal operating authority',
-            })
-
-            expect(fedAuthQuestion).toBeInTheDocument()
-            expect(
-                within(fedAuthQuestion).getAllByRole('checkbox')
-            ).toHaveLength(federalAuthorityKeys.length)
-            expect(
-                within(fedAuthQuestion).getByRole('checkbox', {
-                    name: '1915(b) Waiver Authority',
-                })
-            ).toBeInTheDocument() // authority disallowed for chip is not included in list
-        })
-
-        it('displays correct form fields for federal authorities with CHIP only contract', async () => {
-            const draftContract = mockContractPackageUnlockedWithUnlockedType()
-            draftContract.draftRevision!.formData.populationCovered = 'CHIP'
-
-            renderWithProviders(
-                <Routes>
-                    <Route
-                        path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}
-                        element={<ContractDetails />}
-                    />
-                </Routes>,
-                {
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchContractMockSuccess({
-                                contract: {
-                                    ...draftContract,
-                                    id: '15',
-                                },
-                            }),
-                        ],
-                    },
-                    routerProvider: {
-                        route: '/submissions/15/edit/contract-details',
-                    },
-                }
-            )
-
-            await screen.findByText('Contract Details')
-
-            const fedAuthQuestion = await screen.findByRole('group', {
-                name: 'Active federal operating authority',
-            })
-            expect(fedAuthQuestion).toBeInTheDocument()
-            expect(
-                within(fedAuthQuestion).getAllByRole('checkbox')
-            ).toHaveLength(federalAuthorityKeysForCHIP.length)
-            expect(
-                within(fedAuthQuestion).queryByRole('checkbox', {
-                    name: '1915(b) Waiver Authority',
-                })
-            ).not.toBeInTheDocument() // medicaid only authority should be in the list
-        })
-
-        it('renders d-snp field when specific federal authorities are selected', async () => {
-            const draftContract = mockContractPackageUnlockedWithUnlockedType()
-            draftContract.draftRevision!.formData.populationCovered = 'MEDICAID'
-
-            renderWithProviders(
-                <Routes>
-                    <Route
-                        path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}
-                        element={<ContractDetails />}
-                    />
-                </Routes>,
-                {
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchContractMockSuccess({
-                                contract: {
-                                    ...draftContract,
-                                    id: '15',
-                                },
-                            }),
-                        ],
-                    },
-                    routerProvider: {
-                        route: '/submissions/15/edit/contract-details',
-                    },
-                }
-            )
-
-            await screen.findByText('Contract Details')
-
-            const fedAuthQuestion = screen.getByRole('group', {
-                name: 'Active federal operating authority',
-            })
-
-            expect(fedAuthQuestion).toBeInTheDocument()
-            //This will trigger d-snp question
-            within(fedAuthQuestion)
-                .getByRole('checkbox', {
-                    name: '1915(b) Waiver Authority',
-                })
-                .click()
-
-            const dsnpQuestion = screen.getByRole('group', {
-                name: 'Is this contract associated with a Dual-Eligible Special Needs Plan (D-SNP) that covers Medicaid benefits?',
-            })
-
-            expect(dsnpQuestion).toBeInTheDocument()
-            within(dsnpQuestion).getByRole('link', {
-                name: 'D-SNP guidance',
-            })
-        })
-    })
-
-    describe('Contract provisions - yes/nos', () => {
-        it('can set provisions for medicaid contract amendment', async () => {
-            const draftContract = mockContractPackageUnlockedWithUnlockedType()
-            draftContract.draftRevision.formData.populationCovered = 'MEDICAID'
-            renderWithProviders(
-                <Routes>
-                    <Route
-                        path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}
-                        element={<ContractDetails />}
-                    />
-                </Routes>,
-                {
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchContractMockSuccess({
-                                contract: {
-                                    ...draftContract,
-                                    id: '15',
-                                },
-                            }),
-                        ],
-                    },
-                    routerProvider: {
-                        route: '/submissions/15/edit/contract-details',
-                    },
-                }
-            )
-
-            await screen.findByText('Contract Details')
-            // amendment specific copy is used
-            expect(
-                screen.queryByText(
-                    'Medicaid beneficiaries served by the managed care plans (e.g. eligibility or enrollment criteria)'
+            return
+        }
+        if (isContractWithProvisions(draftSubmission)) {
+            updatedDraftSubmissionFormData.inLieuServicesAndSettings =
+                yesNoFormValueAsBoolean(values.inLieuServicesAndSettings)
+            updatedDraftSubmissionFormData.modifiedBenefitsProvided =
+                yesNoFormValueAsBoolean(values.modifiedBenefitsProvided)
+            updatedDraftSubmissionFormData.modifiedGeoAreaServed =
+                yesNoFormValueAsBoolean(values.modifiedGeoAreaServed)
+            updatedDraftSubmissionFormData.modifiedMedicaidBeneficiaries =
+                yesNoFormValueAsBoolean(values.modifiedMedicaidBeneficiaries)
+            updatedDraftSubmissionFormData.modifiedRiskSharingStrategy =
+                yesNoFormValueAsBoolean(values.modifiedRiskSharingStrategy)
+            updatedDraftSubmissionFormData.modifiedIncentiveArrangements =
+                yesNoFormValueAsBoolean(values.modifiedIncentiveArrangements)
+            updatedDraftSubmissionFormData.modifiedWitholdAgreements =
+                yesNoFormValueAsBoolean(values.modifiedWitholdAgreements)
+            updatedDraftSubmissionFormData.modifiedStateDirectedPayments =
+                yesNoFormValueAsBoolean(values.modifiedStateDirectedPayments)
+            updatedDraftSubmissionFormData.modifiedPassThroughPayments =
+                yesNoFormValueAsBoolean(values.modifiedPassThroughPayments)
+            updatedDraftSubmissionFormData.modifiedPaymentsForMentalDiseaseInstitutions =
+                yesNoFormValueAsBoolean(
+                    values.modifiedPaymentsForMentalDiseaseInstitutions
                 )
-            ).toBeInTheDocument()
-
-            expect(
-                screen.queryByText('Network adequacy standards')
-            ).toBeInTheDocument()
-            expect(
-                screen.queryByText('Grievance and appeal system')
-            ).toBeInTheDocument()
-
-            // risk and payment related provisions should be visible
-            expect(
-                screen.queryByText(/Risk-sharing strategy/)
-            ).toBeInTheDocument()
-            expect(
-                screen.queryByText(/Withhold arrangements in accordance/)
-            ).toBeInTheDocument()
-            expect(
-                screen.queryByText(/Payments to MCOs and PIHPs/)
-            ).toBeInTheDocument()
-            expect(
-                screen.queryByText(/State directed payments/)
-            ).toBeInTheDocument()
-
-            // overall number of provisions should be correct
-            expect(screen.getAllByTestId('yes-no-radio-fieldset')).toHaveLength(
-                modifiedProvisionMedicaidAmendmentKeys.length + 1 //+1 to account for the unrelated dsnp question
-            )
-        })
-        // eslint-disable-next-line jest/no-disabled-tests
-        it.skip('shows correct validations for medicaid contract amendment', async () => {
-            const draftContract = mockContractPackageUnlockedWithUnlockedType()
-            draftContract.draftRevision.formData.populationCovered = 'MEDICAID'
-
-            renderWithProviders(
-                <Routes>
-                    <Route
-                        path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}
-                        element={<ContractDetails />}
-                    />
-                </Routes>,
-                {
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchContractMockSuccess({
-                                contract: {
-                                    ...draftContract,
-                                    id: '15',
-                                },
-                            }),
-                        ],
-                    },
-                    routerProvider: {
-                        route: '/submissions/15/edit/contract-details',
-                    },
-                }
-            )
-
-            await screen.findByText('Contract Details')
-
-            // trigger validations
-            await userEvent.click(
-                screen.getByRole('button', {
-                    name: 'Continue',
-                })
-            )
-
-            // check for overall list of yes/no errors in form
-            const formGroup = screen.getByText(
-                'Does this contract action include new or modified provisions related to any of the following'
-            ).parentElement
-            await waitFor(() => {
-                expect(
-                    formGroup &&
-                        within(formGroup).getAllByText(
-                            'You must select yes or no'
-                        )
-                ).toHaveLength(modifiedProvisionMedicaidAmendmentKeys.length)
-            })
-
-            await selectYesNoRadio(
-                screen,
-                'Benefits provided by the managed care plans',
-                'Yes'
-            )
-            await selectYesNoRadio(
-                screen,
-                'Geographic areas served by the managed care plans',
-                'No'
-            )
-            await selectYesNoRadio(
-                screen,
-                'Length of the contract period',
-                'Yes'
-            )
-
-            // overall list of yes/no errors should update as expected
-            await waitFor(() => {
-                expect(
-                    formGroup &&
-                        within(formGroup).getAllByText(
-                            'You must select yes or no'
-                        )
-                ).toHaveLength(
-                    modifiedProvisionMedicaidAmendmentKeys.length - 3
+            updatedDraftSubmissionFormData.modifiedMedicalLossRatioStandards =
+                yesNoFormValueAsBoolean(
+                    values.modifiedMedicalLossRatioStandards
                 )
-            })
-        })
-        // eslint-disable-next-line jest/no-disabled-tests
-        it.skip('can set provisions for medicaid base contract', async () => {
-            const draftContract = mockContractPackageUnlockedWithUnlockedType()
-            draftContract.draftRevision.formData.populationCovered = 'MEDICAID'
-            draftContract.draftRevision.formData.contractType = 'BASE'
-
-            renderWithProviders(
-                <Routes>
-                    <Route
-                        path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}
-                        element={<ContractDetails />}
-                    />
-                </Routes>,
-                {
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchContractMockSuccess({
-                                contract: {
-                                    ...draftContract,
-                                    id: '15',
-                                },
-                            }),
-                        ],
-                    },
-                    routerProvider: {
-                        route: '/submissions/15/edit/contract-details',
-                    },
-                }
-            )
-
-            await screen.findByText('Contract Details')
-
-            await screen.findByRole('form')
-
-            // risk and payment related provisions should be visible
-            expect(
-                screen.queryByText(/Risk-sharing strategy/)
-            ).toBeInTheDocument()
-            expect(
-                screen.queryByText(/Withhold arrangements in accordance/)
-            ).toBeInTheDocument()
-            expect(
-                screen.queryByText(/Payments to MCOs and PIHPs/)
-            ).toBeInTheDocument()
-            expect(
-                screen.queryByText(/State directed payments/)
-            ).toBeInTheDocument()
-
-            // overall number of provisions should be correct
-            expect(screen.getAllByTestId('yes-no-radio-fieldset')).toHaveLength(
-                modifiedProvisionMedicaidBaseKeys.length
-            )
-        })
-        // eslint-disable-next-line jest/no-disabled-tests
-        it.skip('shows correct validations for medicaid base contract', async () => {
-            const draftContract = mockContractPackageUnlockedWithUnlockedType()
-            draftContract.draftRevision.formData.populationCovered = 'MEDICAID'
-            draftContract.draftRevision.formData.contractType = 'BASE'
-
-            renderWithProviders(
-                <Routes>
-                    <Route
-                        path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}
-                        element={<ContractDetails />}
-                    />
-                </Routes>,
-                {
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchContractMockSuccess({
-                                contract: {
-                                    ...draftContract,
-                                    id: '15',
-                                },
-                            }),
-                        ],
-                    },
-                    routerProvider: {
-                        route: '/submissions/15/edit/contract-details',
-                    },
-                }
-            )
-
-            await screen.findByText('Contract Details')
-
-            // trigger validations
-            await userEvent.click(
-                screen.getByRole('button', {
-                    name: 'Continue',
-                })
-            )
-
-            // check for overall list of yes/no errors in form
-            const formGroup = screen.getByText(
-                'Does this contract action include provisions related to any of the following'
-            ).parentElement
-
-            await waitFor(() => {
-                expect(
-                    formGroup &&
-                        within(formGroup).getAllByText(
-                            'You must select yes or no'
-                        )
-                ).toHaveLength(modifiedProvisionMedicaidBaseKeys.length)
-            })
-
-            // select responses for a few provisions
-
-            await selectYesNoRadio(
-                screen,
-                /Non-risk payment arrangements/,
-                'Yes'
-            )
-            await selectYesNoRadio(screen, /Withhold arrangements/, 'No')
-
-            //overall list of yes/no errors should update as expected
-            await waitFor(() => {
-                expect(
-                    formGroup &&
-                        within(formGroup).queryAllByText(
-                            'You must select yes or no'
-                        )
-                ).toHaveLength(modifiedProvisionMedicaidBaseKeys.length - 2)
-            })
-        })
-
-        it('cannot set provisions for CHIP only base contract', async () => {
-            const draftContract = mockContractPackageUnlockedWithUnlockedType()
-            draftContract.draftRevision.formData.populationCovered = 'CHIP'
-            draftContract.draftRevision.formData.contractType = 'BASE'
-
-            renderWithProviders(
-                <Routes>
-                    <Route
-                        path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}
-                        element={<ContractDetails />}
-                    />
-                </Routes>,
-                {
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchContractMockSuccess({
-                                contract: {
-                                    ...draftContract,
-                                    id: '15',
-                                },
-                            }),
-                        ],
-                    },
-                    routerProvider: {
-                        route: '/submissions/15/edit/contract-details',
-                    },
-                }
-            )
-
-            await screen.findByText('Contract Details')
-            expect(
-                screen.queryByText(
-                    'Does this contract action include provisions related to any of the following'
+            updatedDraftSubmissionFormData.modifiedOtherFinancialPaymentIncentive =
+                yesNoFormValueAsBoolean(
+                    values.modifiedOtherFinancialPaymentIncentive
                 )
-            ).toBeNull()
-            expect(
-                screen.queryAllByTestId('yes-no-radio-fieldset')
-            ).toHaveLength(1) //Should only find the d-snp question
-        })
-
-        it('can set provisions for CHIP only amendment', async () => {
-            const draftContract = mockContractPackageUnlockedWithUnlockedType()
-            draftContract.draftRevision.formData.populationCovered = 'CHIP'
-            draftContract.draftRevision.formData.contractType = 'AMENDMENT'
-
-            renderWithProviders(
-                <Routes>
-                    <Route
-                        path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}
-                        element={<ContractDetails />}
-                    />
-                </Routes>,
-                {
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchContractMockSuccess({
-                                contract: {
-                                    ...draftContract,
-                                    id: '15',
-                                },
-                            }),
-                        ],
-                    },
-                    routerProvider: {
-                        route: '/submissions/15/edit/contract-details',
-                    },
-                }
-            )
-
-            await screen.findByText('Contract Details')
-
-            // CHIP specific copy is used
-            expect(
-                screen.queryByText(
-                    'CHIP beneficiaries served by the managed care plans (e.g. eligibility or enrollment criteria)'
+            updatedDraftSubmissionFormData.modifiedEnrollmentProcess =
+                yesNoFormValueAsBoolean(values.modifiedEnrollmentProcess)
+            updatedDraftSubmissionFormData.modifiedGrevienceAndAppeal =
+                yesNoFormValueAsBoolean(values.modifiedGrevienceAndAppeal)
+            updatedDraftSubmissionFormData.modifiedNetworkAdequacyStandards =
+                yesNoFormValueAsBoolean(values.modifiedNetworkAdequacyStandards)
+            updatedDraftSubmissionFormData.modifiedLengthOfContract =
+                yesNoFormValueAsBoolean(values.modifiedLengthOfContract)
+            updatedDraftSubmissionFormData.modifiedNonRiskPaymentArrangements =
+                yesNoFormValueAsBoolean(
+                    values.modifiedNonRiskPaymentArrangements
                 )
-            ).toBeInTheDocument()
-
-            expect(
-                screen.queryByText(
-                    'Network adequacy standards 42 CFR § 457.1218'
-                )
-            ).toBeInTheDocument()
-            expect(
-                screen.queryByText(
-                    'Grievance and appeal system 42 CFR § 457.1260'
-                )
-            ).toBeInTheDocument()
-
-            // risk and payment related provisions should not be visible
-            expect(screen.queryByText(/Risk-sharing strategy/)).toBeNull()
-            expect(screen.queryByText(/Payments to MCOs and PIHPs/)).toBeNull()
-            expect(screen.queryByText(/State directed payments/)).toBeNull()
-
-            // overall number of provisions should be correct
-            expect(screen.getAllByTestId('yes-no-radio-fieldset')).toHaveLength(
-                provisionCHIPKeys.length + 1 //+1 to account for the unrelated dsnp question
-            )
-        })
-        // eslint-disable-next-line jest/no-disabled-tests
-        it.skip('shows correct validations for CHIP only amendment', async () => {
-            const draftContract = mockContractPackageUnlockedWithUnlockedType()
-            draftContract.draftRevision.formData.populationCovered = 'CHIP'
-            draftContract.draftRevision.formData.contractType = 'AMENDMENT'
-
-            renderWithProviders(
-                <Routes>
-                    <Route
-                        path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}
-                        element={<ContractDetails />}
-                    />
-                </Routes>,
-                {
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchContractMockSuccess({
-                                contract: {
-                                    ...draftContract,
-                                    id: '15',
-                                },
-                            }),
-                        ],
-                    },
-                    routerProvider: {
-                        route: '/submissions/15/edit/contract-details',
-                    },
-                }
-            )
-
-            await screen.findByText('Contract Details')
-
-            // trigger validations
-            await userEvent.click(
-                screen.getByRole('button', {
-                    name: 'Continue',
-                })
-            )
-
-            // check for overall list of yes/no errors in form
-            const formGroup = screen.getByText(
-                'Does this contract action include new or modified provisions related to any of the following'
-            ).parentElement
-
-            await waitFor(() => {
-                expect(
-                    formGroup &&
-                        within(formGroup).getAllByText(
-                            'You must select yes or no'
-                        )
-                ).toHaveLength(provisionCHIPKeys.length)
-            })
-
-            await selectYesNoRadio(
-                screen,
-                'Benefits provided by the managed care plans',
-                'Yes'
-            )
-            await selectYesNoRadio(
-                screen,
-                'Geographic areas served by the managed care plans',
-                'No'
-            )
-            await selectYesNoRadio(
-                screen,
-                'Length of the contract period',
-                'Yes'
-            )
-
-            await screen.findByTestId('error-summary')
-
-            await waitFor(() => {
-                expect(
-                    formGroup &&
-                        within(formGroup).queryAllByText(
-                            'You must select yes or no'
-                        )
-                ).toHaveLength(provisionCHIPKeys.length - 3)
-            })
-        })
-    })
-
-    describe('Continue button', () => {
-        it('enabled when valid files are present', async () => {
-            renderWithProviders(
-                <Routes>
-                    <Route
-                        path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}
-                        element={<ContractDetails />}
-                    />
-                </Routes>,
-                {
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchContractMockSuccess({
-                                contract: {
-                                    ...mockContractPackageUnlockedWithUnlockedType(),
-                                    id: '15',
-                                },
-                            }),
-                        ],
-                    },
-                    routerProvider: {
-                        route: '/submissions/15/edit/contract-details',
-                    },
-                }
-            )
-
-            await screen.findByText('Contract Details')
-
-            const continueButton = screen.getByRole('button', {
-                name: 'Continue',
-            })
-            const input = screen.getByLabelText('Upload contract')
-
-            await userEvent.upload(input, [TEST_DOC_FILE])
-
-            await waitFor(() => {
-                expect(continueButton).not.toHaveAttribute('aria-disabled')
-            })
-        })
-
-        it('enabled when invalid files have been dropped but valid files are present', async () => {
-            renderWithProviders(
-                <Routes>
-                    <Route
-                        path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}
-                        element={<ContractDetails />}
-                    />
-                </Routes>,
-                {
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchContractMockSuccess({
-                                contract: {
-                                    ...mockContractPackageUnlockedWithUnlockedType(),
-                                    id: '15',
-                                },
-                            }),
-                        ],
-                    },
-                    routerProvider: {
-                        route: '/submissions/15/edit/contract-details',
-                    },
-                }
-            )
-
-            await screen.findByText('Contract Details')
-
-            const continueButton = screen.getByRole('button', {
-                name: 'Continue',
-            })
-            const input = screen.getByLabelText('Upload contract')
-            const targetEl = screen.getAllByTestId('file-input-droptarget')[0]
-
-            await userEvent.upload(input, [TEST_DOC_FILE])
-            dragAndDrop(targetEl, [TEST_PNG_FILE])
-
-            await waitFor(() => {
-                expect(
-                    screen.getByText('This is not a valid file type.')
-                ).toBeInTheDocument()
-                expect(continueButton).not.toHaveAttribute('aria-disabled')
-            })
-        })
-
-        it('disabled with alert after first attempt to continue with zero files', async () => {
-            const draftContract = mockContractPackageUnlockedWithUnlockedType()
-            draftContract.draftRevision.formData.contractDocuments = []
-
-            renderWithProviders(
-                <Routes>
-                    <Route
-                        path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}
-                        element={<ContractDetails />}
-                    />
-                </Routes>,
-                {
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchContractMockSuccess({
-                                contract: {
-                                    ...draftContract,
-                                    id: '15',
-                                },
-                            }),
-                        ],
-                    },
-                    routerProvider: {
-                        route: '/submissions/15/edit/contract-details',
-                    },
-                }
-            )
-
-            await screen.findByText('Contract Details')
-
-            const continueButton = screen.getByRole('button', {
-                name: 'Continue',
-            })
-            expect(continueButton).not.toHaveAttribute('aria-disabled')
-
-            await userEvent.click(continueButton)
-
-            await waitFor(() => {
-                expect(
-                    screen.getAllByText('You must upload at least one document')
-                ).toHaveLength(2)
-
-                expect(continueButton).toHaveAttribute('aria-disabled', 'true')
-            })
-        })
-
-        it('disabled with alert after first attempt to continue with invalid duplicate files', async () => {
-            renderWithProviders(
-                <Routes>
-                    <Route
-                        path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}
-                        element={<ContractDetails />}
-                    />
-                </Routes>,
-                {
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchContractMockSuccess({
-                                contract: {
-                                    ...mockContractPackageUnlockedWithUnlockedType(),
-                                    id: '15',
-                                },
-                            }),
-                        ],
-                    },
-                    routerProvider: {
-                        route: '/submissions/15/edit/contract-details',
-                    },
-                }
-            )
-
-            await screen.findByText('Contract Details')
-
-            const input = screen.getByLabelText('Upload contract')
-            const continueButton = screen.getByRole('button', {
-                name: 'Continue',
-            })
-
-            await userEvent.upload(input, [TEST_DOC_FILE])
-            await userEvent.upload(input, []) // clear input and ensure we add same file twice
-            await userEvent.upload(input, [TEST_DOC_FILE])
-
-            expect(continueButton).not.toHaveAttribute('aria-disabled')
-            await userEvent.click(continueButton)
-
-            await waitFor(() => {
-                expect(
-                    screen.getAllByText(
-                        'You must remove all documents with error messages before continuing'
-                    )
-                ).toHaveLength(2)
-
-                expect(continueButton).toHaveAttribute('aria-disabled', 'true')
-            })
-        })
-
-        it('disabled with alert after first attempt to continue with invalid files', async () => {
-            const draftContract = mockContractPackageUnlockedWithUnlockedType()
-            draftContract.draftRevision.formData.contractDocuments = []
-
-            renderWithProviders(
-                <Routes>
-                    <Route
-                        path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}
-                        element={<ContractDetails />}
-                    />
-                </Routes>,
-                {
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchContractMockSuccess({
-                                contract: {
-                                    ...draftContract,
-                                    id: '15',
-                                },
-                            }),
-                        ],
-                    },
-                    routerProvider: {
-                        route: '/submissions/15/edit/contract-details',
-                    },
-                }
-            )
-
-            await screen.findByText('Contract Details')
-
-            const continueButton = screen.getByRole('button', {
-                name: 'Continue',
-            })
-
-            const targetEl = screen.getAllByTestId('file-input-droptarget')[0]
-            dragAndDrop(targetEl, [TEST_PNG_FILE])
-
-            expect(
-                await screen.findByText('This is not a valid file type.')
-            ).toBeInTheDocument()
-
-            expect(continueButton).not.toHaveAttribute('aria-disabled')
-            await userEvent.click(continueButton)
-
-            expect(
-                await screen.findAllByText(
-                    'You must upload at least one document'
-                )
-            ).toHaveLength(2)
-
-            expect(continueButton).toHaveAttribute('aria-disabled', 'true')
-        })
-        it('disabled with alert when trying to continue while a file is still uploading', async () => {
-            const draftContract = mockContractPackageUnlockedWithUnlockedType()
-            draftContract.draftRevision.formData.contractDocuments = []
-
-            renderWithProviders(
-                <Routes>
-                    <Route
-                        path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}
-                        element={<ContractDetails />}
-                    />
-                </Routes>,
-                {
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchContractMockSuccess({
-                                contract: {
-                                    ...draftContract,
-                                    id: '15',
-                                },
-                            }),
-                        ],
-                    },
-                    routerProvider: {
-                        route: '/submissions/15/edit/contract-details',
-                    },
-                }
-            )
-
-            await screen.findByText('Contract Details')
-            const continueButton = screen.getByRole('button', {
-                name: 'Continue',
-            })
-            const targetEl = screen.getAllByTestId('file-input-droptarget')[0]
-
-            // upload one file
-            dragAndDrop(targetEl, [TEST_PDF_FILE])
-            const imageElFile1 = screen.getByTestId('file-input-preview-image')
-            expect(imageElFile1).toHaveClass('is-loading')
-            await waitFor(() =>
-                expect(imageElFile1).not.toHaveClass('is-loading')
-            )
-
-            // upload second file
-            dragAndDrop(targetEl, [TEST_DOC_FILE])
-
-            const imageElFile2 = screen.getAllByTestId(
-                'file-input-preview-image'
-            )[1]
-            expect(imageElFile2).toHaveClass('is-loading')
-            await waitFor(() => {
-                fireEvent.click(continueButton)
-                expect(continueButton).toHaveAttribute('aria-disabled', 'true')
-
-                expect(
-                    screen.getAllByText(
-                        'You must wait for all documents to finish uploading before continuing'
-                    )
-                ).toHaveLength(2)
-            })
-        })
-    })
-
-    describe('Save as draft button', () => {
-        it('enabled when valid files are present', async () => {
-            renderWithProviders(
-                <Routes>
-                    <Route
-                        path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}
-                        element={<ContractDetails />}
-                    />
-                </Routes>,
-                {
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchContractMockSuccess({
-                                contract: {
-                                    ...mockContractPackageUnlockedWithUnlockedType(),
-                                    id: '15',
-                                },
-                            }),
-                        ],
-                    },
-                    routerProvider: {
-                        route: '/submissions/15/edit/contract-details',
-                    },
-                }
-            )
-
-            await screen.findByText('Contract Details')
-
-            const saveAsDraftButton = screen.getByRole('button', {
-                name: 'Save as draft',
-            })
-            const input = screen.getByLabelText('Upload contract')
-
-            await userEvent.upload(input, [TEST_DOC_FILE])
-
-            await waitFor(() => {
-                expect(saveAsDraftButton).not.toHaveAttribute('aria-disabled')
-            })
-        })
-
-        it('enabled when invalid files have been dropped but valid files are present', async () => {
-            renderWithProviders(
-                <Routes>
-                    <Route
-                        path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}
-                        element={<ContractDetails />}
-                    />
-                </Routes>,
-                {
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchContractMockSuccess({
-                                contract: {
-                                    ...mockContractPackageUnlockedWithUnlockedType(),
-                                    id: '15',
-                                },
-                            }),
-                        ],
-                    },
-                    routerProvider: {
-                        route: '/submissions/15/edit/contract-details',
-                    },
-                }
-            )
-
-            await screen.findByText('Contract Details')
-
-            const saveAsDraftButton = screen.getByRole('button', {
-                name: 'Save as draft',
-            })
-            const input = screen.getByLabelText('Upload contract')
-            const targetEl = screen.getAllByTestId('file-input-droptarget')[0]
-
-            await userEvent.upload(input, [TEST_DOC_FILE])
-            dragAndDrop(targetEl, [TEST_PNG_FILE])
-
-            await waitFor(() => {
-                expect(saveAsDraftButton).not.toHaveAttribute('aria-disabled')
-            })
-        })
-
-        it('when zero files present, does not trigger missing documents alert on click but still saves the in progress draft', async () => {
-            renderWithProviders(
-                <Routes>
-                    <Route
-                        path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}
-                        element={<ContractDetails />}
-                    />
-                </Routes>,
-                {
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchContractMockSuccess({
-                                contract: {
-                                    ...mockContractPackageUnlockedWithUnlockedType(),
-                                    id: '15',
-                                },
-                            }),
-                        ],
-                    },
-                    routerProvider: {
-                        route: '/submissions/15/edit/contract-details',
-                    },
-                }
-            )
-
-            await screen.findByText('Contract Details')
-
-            const saveAsDraftButton = screen.getByRole('button', {
-                name: 'Save as draft',
-            })
-            expect(saveAsDraftButton).not.toHaveAttribute('aria-disabled')
-
-            await userEvent.click(saveAsDraftButton)
-            expect(
-                screen.queryByText('You must upload at least one document')
-            ).toBeNull()
-        })
-
-        it('when existing file is removed, does not trigger missing documents alert on click but still saves the in progress draft', async () => {
-            const draftContract = mockContractPackageUnlockedWithUnlockedType()
-            draftContract.draftRevision.formData.contractDocuments = [
-                {
-                    name: 'aasdf3423af',
-                    sha256: 'fakesha',
-                    s3URL: 's3://bucketname/key/fileName',
-                },
-            ]
-
-            renderWithProviders(
-                <Routes>
-                    <Route
-                        path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}
-                        element={<ContractDetails />}
-                    />
-                </Routes>,
-                {
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchContractMockSuccess({
-                                contract: {
-                                    ...draftContract,
-                                    id: '15',
-                                },
-                            }),
-                        ],
-                    },
-                    routerProvider: {
-                        route: '/submissions/15/edit/contract-details',
-                    },
-                }
-            )
-
-            await screen.findByText('Contract Details')
-
-            const saveAsDraftButton = screen.getByRole('button', {
-                name: 'Save as draft',
-            })
-            expect(saveAsDraftButton).not.toHaveAttribute('aria-disabled')
-
-            await userEvent.click(saveAsDraftButton)
-            expect(
-                screen.queryByText('You must upload at least one document')
-            ).toBeNull()
-        })
-
-        it('when duplicate files present, triggers error alert on click', async () => {
-            renderWithProviders(
-                <Routes>
-                    <Route
-                        path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}
-                        element={<ContractDetails />}
-                    />
-                </Routes>,
-                {
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchContractMockSuccess({
-                                contract: {
-                                    ...mockContractPackageUnlockedWithUnlockedType(),
-                                    id: '15',
-                                },
-                            }),
-                        ],
-                    },
-                    routerProvider: {
-                        route: '/submissions/15/edit/contract-details',
-                    },
-                }
-            )
-
-            await screen.findByText('Contract Details')
-            const input = screen.getByLabelText('Upload contract')
-            const saveAsDraftButton = screen.getByRole('button', {
-                name: 'Save as draft',
-            })
-
-            await userEvent.upload(input, [TEST_DOC_FILE])
-            await userEvent.upload(input, [TEST_PDF_FILE])
-            await userEvent.upload(input, [TEST_DOC_FILE])
-
-            await waitFor(() => {
-                expect(
-                    screen.queryAllByText('Duplicate file, please remove')
-                ).toHaveLength(1)
-            })
-            await userEvent.click(saveAsDraftButton)
-            await waitFor(() => {
-                expect(
-                    screen.queryAllByText(
-                        'You must remove all documents with error messages before continuing'
-                    )
-                ).toHaveLength(0)
-            })
-        })
-    })
-
-    describe('Back button', () => {
-        it('enabled when valid files are present', async () => {
-            renderWithProviders(
-                <Routes>
-                    <Route
-                        path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}
-                        element={<ContractDetails />}
-                    />
-                </Routes>,
-                {
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchContractMockSuccess({
-                                contract: {
-                                    ...mockContractPackageUnlockedWithUnlockedType(),
-                                    id: '15',
-                                },
-                            }),
-                        ],
-                    },
-                    routerProvider: {
-                        route: '/submissions/15/edit/contract-details',
-                    },
-                }
-            )
-
-            await screen.findByText('Contract Details')
-
-            const backButton = screen.getByRole('button', {
-                name: 'Back',
-            })
-            const input = screen.getByLabelText('Upload contract')
-
-            await userEvent.upload(input, [TEST_DOC_FILE])
-
-            await waitFor(() => {
-                expect(backButton).not.toHaveAttribute('aria-disabled')
-            })
-        })
-
-        it('enabled when invalid files have been dropped but valid files are present', async () => {
-            renderWithProviders(
-                <Routes>
-                    <Route
-                        path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}
-                        element={<ContractDetails />}
-                    />
-                </Routes>,
-                {
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchContractMockSuccess({
-                                contract: {
-                                    ...mockContractPackageUnlockedWithUnlockedType(),
-                                    id: '15',
-                                },
-                            }),
-                        ],
-                    },
-                    routerProvider: {
-                        route: '/submissions/15/edit/contract-details',
-                    },
-                }
-            )
-
-            await screen.findByText('Contract Details')
-
-            const backButton = screen.getByRole('button', {
-                name: 'Back',
-            })
-            const input = screen.getByLabelText('Upload contract')
-            const targetEl = screen.getAllByTestId('file-input-droptarget')[0]
-
-            await userEvent.upload(input, [TEST_DOC_FILE])
-            dragAndDrop(targetEl, [TEST_PNG_FILE])
-
-            await waitFor(() => {
-                expect(backButton).not.toHaveAttribute('aria-disabled')
-            })
-        })
-
-        it('when zero files present, does not trigger missing documents alert on click', async () => {
-            renderWithProviders(
-                <Routes>
-                    <Route
-                        path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}
-                        element={<ContractDetails />}
-                    />
-                </Routes>,
-                {
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchContractMockSuccess({
-                                contract: {
-                                    ...mockContractPackageUnlockedWithUnlockedType(),
-                                    id: '15',
-                                },
-                            }),
-                        ],
-                    },
-                    routerProvider: {
-                        route: '/submissions/15/edit/contract-details',
-                    },
-                }
-            )
-
-            await screen.findByText('Contract Details')
-
-            const backButton = screen.getByRole('button', {
-                name: 'Back',
-            })
-            expect(backButton).not.toHaveAttribute('aria-disabled')
-
-            await userEvent.click(backButton)
-            expect(
-                screen.queryByText('You must upload at least one document')
-            ).toBeNull()
-        })
-
-        it('when duplicate files present, does not trigger duplicate documents alert on click and silently updates submission without the duplicate', async () => {
-            const draftContract = mockContractPackageUnlockedWithUnlockedType()
-            draftContract.draftRevision.formData.contractDocuments = []
-
-            renderWithProviders(
-                <Routes>
-                    <Route
-                        path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}
-                        element={<ContractDetails />}
-                    />
-                </Routes>,
-                {
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchContractMockSuccess({
-                                contract: {
-                                    ...draftContract,
-                                    id: '15',
-                                },
-                            }),
-                        ],
-                    },
-                    routerProvider: {
-                        route: '/submissions/15/edit/contract-details',
-                    },
-                }
-            )
-
-            await screen.findByText('Contract Details')
-
-            const input = screen.getByLabelText('Upload contract')
-            const backButton = screen.getByRole('button', {
-                name: 'Back',
-            })
-
-            await userEvent.upload(input, [TEST_DOC_FILE])
-            await userEvent.upload(input, [TEST_PDF_FILE])
-            await userEvent.upload(input, [TEST_DOC_FILE])
-            await waitFor(() => {
-                expect(backButton).not.toHaveAttribute('aria-disabled')
-                expect(
-                    screen.queryAllByText('Duplicate file, please remove')
-                ).toHaveLength(1)
-            })
-            await userEvent.click(backButton)
-            expect(screen.queryByText('Remove files with errors')).toBeNull()
-        })
-    })
-
-    describe('Contract 438 attestation', () => {
-        it('renders 438 attestation question without errors', async () => {
-            const draftContract = mockContractPackageUnlockedWithUnlockedType()
-            draftContract.draftRevision.formData.statutoryRegulatoryAttestation =
-                true
-
-            renderWithProviders(
-                <Routes>
-                    <Route
-                        path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}
-                        element={<ContractDetails />}
-                    />
-                </Routes>,
-                {
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchContractMockSuccess({
-                                contract: {
-                                    ...draftContract,
-                                    id: '15',
-                                },
-                            }),
-                        ],
-                    },
-                    routerProvider: {
-                        route: '/submissions/15/edit/contract-details',
-                    },
-                    featureFlags: { '438-attestation': true },
-                }
-            )
-
-            await screen.findByText('Contract Details')
-
-            // expect 438 attestation question to be on the page
-            await waitFor(() => {
-                expect(
-                    screen.getByText(StatutoryRegulatoryAttestationQuestion)
-                ).toBeInTheDocument()
-            })
-
-            const yesRadio = screen.getByRole('radio', {
-                name: StatutoryRegulatoryAttestation.YES,
-            })
-            const noRadio = screen.getByRole('radio', {
-                name: StatutoryRegulatoryAttestation.NO,
-            })
-
-            // expect both yes and no answers on the page and yes to be checked
-            expect(yesRadio).toBeChecked()
-            expect(noRadio).toBeInTheDocument()
-
-            await userEvent.click(noRadio)
-            expect(noRadio).toBeChecked()
-
-            const nonComplianceTextBox = screen.getByRole('textbox', {
-                name: StatutoryRegulatoryAttestationDescription,
-            })
-            // expect 438 non-compliance description text box to be in the document
-            await waitFor(() => {
-                expect(nonComplianceTextBox).toBeInTheDocument()
-            })
-        })
-        it('errors when continuing without answering 438 attestation question', async () => {
-            const draftContract = mockContractPackageUnlockedWithUnlockedType()
-            draftContract.draftRevision.formData.statutoryRegulatoryAttestation =
+        } else {
+            updatedDraftSubmissionFormData.inLieuServicesAndSettings = undefined
+            updatedDraftSubmissionFormData.modifiedBenefitsProvided = undefined
+            updatedDraftSubmissionFormData.modifiedGeoAreaServed = undefined
+            updatedDraftSubmissionFormData.modifiedMedicaidBeneficiaries =
                 undefined
-            draftContract.draftRevision.formData.statutoryRegulatoryAttestationDescription =
+            updatedDraftSubmissionFormData.modifiedRiskSharingStrategy =
                 undefined
-            draftContract.draftRevision.formData.contractDateStart = new Date(
-                '11-12-2023'
-            )
-            draftContract.draftRevision.formData.contractDateEnd = new Date(
-                '11-12-2024'
-            )
-
-            renderWithProviders(
-                <Routes>
-                    <Route
-                        path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}
-                        element={<ContractDetails />}
-                    />
-                </Routes>,
-                {
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchContractMockSuccess({
-                                contract: {
-                                    ...draftContract,
-                                    id: '15',
-                                },
-                            }),
-                        ],
-                    },
-                    routerProvider: {
-                        route: '/submissions/15/edit/contract-details',
-                    },
-                    featureFlags: { '438-attestation': true },
-                }
-            )
-
-            await screen.findByText('Contract Details')
-
-            // expect 438 attestation question to be on the page
-            await waitFor(() => {
-                expect(
-                    screen.getByText(StatutoryRegulatoryAttestationQuestion)
-                ).toBeInTheDocument()
-            })
-
-            const yesRadio = screen.getByRole('radio', {
-                name: StatutoryRegulatoryAttestation.YES,
-            })
-            const noRadio = screen.getByRole('radio', {
-                name: StatutoryRegulatoryAttestation.NO,
-            })
-
-            // expect both yes and no answers on the page and yes to be checked
-            expect(yesRadio).toBeInTheDocument()
-            expect(noRadio).toBeInTheDocument()
-
-            const continueButton = screen.getByRole('button', {
-                name: 'Continue',
-            })
-
-            // click continue
-            await userEvent.click(continueButton)
-
-            // expect errors for attestation question
-            await waitFor(() => {
-                expect(
-                    screen.queryAllByText('You must select yes or no')
-                ).toHaveLength(2)
-            })
-
-            // Click the Yes radio
-            await userEvent.click(yesRadio)
-
-            // click continue
-            await userEvent.click(continueButton)
-
-            // There should be no errors
-            await waitFor(() => {
-                expect(
-                    screen.queryAllByText('You must select yes or no')
-                ).toHaveLength(0)
-            })
-        })
-        it('errors when continuing without description for 438 non-compliance', async () => {
-            const draftContract = mockContractPackageUnlockedWithUnlockedType()
-            draftContract.draftRevision.formData.statutoryRegulatoryAttestation =
+            updatedDraftSubmissionFormData.modifiedIncentiveArrangements =
                 undefined
-            draftContract.draftRevision.formData.statutoryRegulatoryAttestationDescription =
+            updatedDraftSubmissionFormData.modifiedWitholdAgreements = undefined
+            updatedDraftSubmissionFormData.modifiedStateDirectedPayments =
                 undefined
-            draftContract.draftRevision.formData.contractDateStart = new Date(
-                '11-12-2023'
-            )
-            draftContract.draftRevision.formData.contractDateEnd = new Date(
-                '11-12-2024'
-            )
+            updatedDraftSubmissionFormData.modifiedPassThroughPayments =
+                undefined
+            updatedDraftSubmissionFormData.modifiedPaymentsForMentalDiseaseInstitutions =
+                undefined
+            updatedDraftSubmissionFormData.modifiedMedicalLossRatioStandards =
+                undefined
+            updatedDraftSubmissionFormData.modifiedOtherFinancialPaymentIncentive =
+                undefined
+            updatedDraftSubmissionFormData.modifiedEnrollmentProcess = undefined
+            updatedDraftSubmissionFormData.modifiedGrevienceAndAppeal =
+                undefined
+            updatedDraftSubmissionFormData.modifiedNetworkAdequacyStandards =
+                undefined
+            updatedDraftSubmissionFormData.modifiedLengthOfContract = undefined
+            updatedDraftSubmissionFormData.modifiedNonRiskPaymentArrangements =
+                undefined
+        }
 
-            renderWithProviders(
-                <Routes>
-                    <Route
-                        path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}
-                        element={<ContractDetails />}
-                    />
-                </Routes>,
-                {
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchContractMockSuccess({
-                                contract: {
-                                    ...draftContract,
-                                    id: '15',
-                                },
-                            }),
-                        ],
-                    },
-                    routerProvider: {
-                        route: '/submissions/15/edit/contract-details',
-                    },
-                    featureFlags: { '438-attestation': true },
-                }
-            )
+        const updatedContract: UpdateContractDraftRevisionInput = {
+            formData: updatedDraftSubmissionFormData,
+            contractID: draftSubmission.id,
+            lastSeenUpdatedAt: draftSubmission.draftRevision.updatedAt,
+        }
 
-            await screen.findByText('Contract Details')
+        const updatedSubmission = await updateDraft(updatedContract)
+        if (updatedSubmission instanceof Error) {
+            setSubmitting(false)
+            console.info('Error updating draft submission: ', updatedSubmission)
+        } else if (options.type === 'SAVE_AS_DRAFT' && updatedSubmission) {
+            setDraftSaved(true)
+            setSubmitting(false)
+        } else {
+            //Can assume back or continue was clicked at this point
+            if (options.redirectPath) {
+                navigate(
+                    generatePath(RoutesRecord[options.redirectPath], {
+                        id: id,
+                    })
+                )
+            }
+        }
+    }
 
-            // expect 438 attestation question to be on the page
-            await waitFor(() => {
-                expect(
-                    screen.getByText(StatutoryRegulatoryAttestationQuestion)
-                ).toBeInTheDocument()
-            })
+    const formHeading = 'Contract Details Form'
 
-            const continueButton = screen.getByRole('button', {
-                name: 'Continue',
-            })
-            const noRadio = screen.getByRole('radio', {
-                name: StatutoryRegulatoryAttestation.NO,
-            })
+    const dsnpTriggers = [
+        'STATE_PLAN',
+        'WAIVER_1915B',
+        'WAIVER_1115',
+        'VOLUNTARY',
+    ]
 
-            // check no radio
-            await userEvent.click(noRadio)
+    return (
+        <>
+            <FormNotificationContainer>
+                <DynamicStepIndicator
+                    formPages={activeFormPages(
+                        draftSubmission.draftRevision.formData,
+                        hideSupportingDocs
+                    )}
+                    currentFormPage={currentRoute}
+                />
+                <PageBannerAlerts
+                    loggedInUser={loggedInUser}
+                    unlockedInfo={draftSubmission.draftRevision.unlockInfo}
+                    showPageErrorMessage={showPageErrorMessage ?? false}
+                    draftSaved={draftSaved}
+                />
+            </FormNotificationContainer>
+            <FormContainer id="ContactDetails">
+                <Formik
+                    initialValues={contractDetailsInitialValues}
+                    onSubmit={(values, { setSubmitting }) => {
+                        return handleFormSubmit(values, setSubmitting, {
+                            type: 'CONTINUE',
+                            redirectPath:
+                                draftSubmission.draftRevision.formData
+                                    .submissionType === 'CONTRACT_ONLY'
+                                    ? 'SUBMISSIONS_CONTACTS'
+                                    : 'SUBMISSIONS_RATE_DETAILS',
+                        })
+                    }}
+                    validationSchema={() =>
+                        ContractDetailsFormSchema(
+                            draftSubmission,
+                            ldClient?.allFlags()
+                        )
+                    }
+                >
+                    {({
+                        values,
+                        errors,
+                        handleSubmit,
+                        setSubmitting,
+                        isSubmitting,
+                        setFieldValue,
+                    }) => (
+                        <>
+                            <UswdsForm
+                                className={styles.formContainer}
+                                id="ContractDetailsForm"
+                                onSubmit={(e) => {
+                                    setShouldValidate(true)
+                                    setFocusErrorSummaryHeading(true)
+                                    handleSubmit(e)
+                                }}
+                            >
+                                <fieldset className="usa-fieldset">
+                                    <legend className="srOnly">
+                                        Contract Details
+                                    </legend>
 
-            const nonComplianceTextBox = screen.getByRole('textbox', {
-                name: StatutoryRegulatoryAttestationDescription,
-            })
+                                    {shouldValidate && (
+                                        <ErrorSummary
+                                            errors={genecontractErrorsummaryErrors(
+                                                errors,
+                                                values
+                                            )}
+                                            headingRef={errorSummaryHeadingRef}
+                                        />
+                                    )}
 
-            // expect 438 non-compliance description text box to be in the document
-            await waitFor(() => {
-                expect(nonComplianceTextBox).toBeInTheDocument()
-            })
+                                    <FormGroup
+                                        error={Boolean(
+                                            showFieldErrors(
+                                                'contractDocuments',
+                                                errors
+                                            )
+                                        )}
+                                        className="margin-top-0"
+                                    >
+                                        <FileUpload
+                                            id="contractDocuments"
+                                            name="contractDocuments"
+                                            label="Upload contract"
+                                            aria-required
+                                            error={showFieldErrors(
+                                                'contractDocuments',
+                                                errors
+                                            )}
+                                            hint={
+                                                <span
+                                                    className={
+                                                        styles.guidanceTextBlock
+                                                    }
+                                                >
+                                                    <LinkWithLogging
+                                                        aria-label="Document definitions and requirements (opens in new window)"
+                                                        href={
+                                                            '/help#key-documents'
+                                                        }
+                                                        variant="external"
+                                                        target="_blank"
+                                                    >
+                                                        Document definitions and
+                                                        requirements
+                                                    </LinkWithLogging>
+                                                    <span className="mcr-note padding-top-05">
+                                                        Supporting documents can
+                                                        be added later. If you
+                                                        have additional contract
+                                                        actions, you must submit
+                                                        them in a separate
+                                                        submission.
+                                                    </span>
+                                                    <span className="usa-hint padding-top-1">
+                                                        This input only accepts
+                                                        PDF, CSV, DOC, DOCX,
+                                                        XLS, XLSX files.
+                                                    </span>
+                                                </span>
+                                            }
+                                            accept={
+                                                ACCEPTED_SUBMISSION_FILE_TYPES
+                                            }
+                                            initialItems={fileItemsFromDraftSubmission(
+                                                'contract'
+                                            )}
+                                            uploadFile={(file) =>
+                                                handleUploadFile(
+                                                    file,
+                                                    'HEALTH_PLAN_DOCS'
+                                                )
+                                            }
+                                            scanFile={(key) =>
+                                                handleScanFile(
+                                                    key,
+                                                    'HEALTH_PLAN_DOCS'
+                                                )
+                                            }
+                                            onFileItemsUpdate={({
+                                                fileItems,
+                                            }) =>
+                                                setFieldValue(
+                                                    `contractDocuments`,
+                                                    fileItems
+                                                )
+                                            }
+                                        />
+                                    </FormGroup>
+                                    {hideSupportingDocs && (
+                                        <FormGroup
+                                            error={Boolean(
+                                                showFieldErrors(
+                                                    'supportingDocuments',
+                                                    errors
+                                                )
+                                            )}
+                                        >
+                                            <FileUpload
+                                                id="supportingDocuments"
+                                                name="supportingDocuments"
+                                                label="Upload contract-supporting documents"
+                                                error={showFieldErrors(
+                                                    'supportingDocuments',
+                                                    errors
+                                                )}
+                                                hint={
+                                                    <span
+                                                        className={
+                                                            styles.guidanceTextBlock
+                                                        }
+                                                    >
+                                                        <LinkWithLogging
+                                                            aria-label="Document definitions and requirements (opens in new window)"
+                                                            href={
+                                                                '/help#supporting-documents'
+                                                            }
+                                                            variant="external"
+                                                            target="_blank"
+                                                        >
+                                                            Document definitions
+                                                            and requirements
+                                                        </LinkWithLogging>
+                                                        <span className="mcr-note padding-top-05">
+                                                            Upload any
+                                                            supporting documents
+                                                            related to the
+                                                            contract.
+                                                        </span>
+                                                        <span className="usa-hint padding-top-1">
+                                                            This input only
+                                                            accepts PDF, CSV,
+                                                            DOC, DOCX, XLS, XLSX
+                                                            files.
+                                                        </span>
+                                                    </span>
+                                                }
+                                                accept={
+                                                    ACCEPTED_SUBMISSION_FILE_TYPES
+                                                }
+                                                initialItems={fileItemsFromDraftSubmission(
+                                                    'supporting'
+                                                )}
+                                                uploadFile={(file) =>
+                                                    handleUploadFile(
+                                                        file,
+                                                        'HEALTH_PLAN_DOCS'
+                                                    )
+                                                }
+                                                scanFile={(key) =>
+                                                    handleScanFile(
+                                                        key,
+                                                        'HEALTH_PLAN_DOCS'
+                                                    )
+                                                }
+                                                onFileItemsUpdate={({
+                                                    fileItems,
+                                                }) =>
+                                                    setFieldValue(
+                                                        `supportingDocuments`,
+                                                        fileItems
+                                                    )
+                                                }
+                                            />
+                                        </FormGroup>
+                                    )}
+                                    {contract438Attestation && (
+                                        <FormGroup
+                                            error={Boolean(
+                                                showFieldErrors(
+                                                    'statutoryRegulatoryAttestation',
+                                                    errors
+                                                )
+                                            )}
+                                        >
+                                            <Fieldset
+                                                role="radiogroup"
+                                                aria-required
+                                                className={
+                                                    styles.contractAttestation
+                                                }
+                                                legend={
+                                                    StatutoryRegulatoryAttestationQuestion
+                                                }
+                                            >
+                                                <div role="note">
+                                                    <span
+                                                        className={
+                                                            styles.requiredOptionalText
+                                                        }
+                                                    >
+                                                        Required
+                                                    </span>
+                                                    <span>
+                                                        <Link
+                                                            aria-label="Managed Care Contract Review and Approval State Guide (opens in new window)"
+                                                            href={
+                                                                'https://www.medicaid.gov/sites/default/files/2022-01/mce-checklist-state-user-guide.pdf'
+                                                            }
+                                                            variant="external"
+                                                            target="_blank"
+                                                        >
+                                                            Managed Care
+                                                            Contract Review and
+                                                            Approval State Guide
+                                                        </Link>
+                                                        <Link
+                                                            aria-label="CHIP Managed Care Contract Review and Approval State Guide (opens in new window)"
+                                                            href={
+                                                                'https://www.medicaid.gov/sites/default/files/2022-04/chip-managed-care-contract-guide_0.pdf'
+                                                            }
+                                                            variant="external"
+                                                            target="_blank"
+                                                        >
+                                                            CHIP Managed Care
+                                                            Contract Review and
+                                                            Approval State Guide
+                                                        </Link>
+                                                    </span>
+                                                </div>
+                                                {Boolean(
+                                                    showFieldErrors(
+                                                        'statutoryRegulatoryAttestation',
+                                                        errors
+                                                    )
+                                                ) && (
+                                                    <PoliteErrorMessage
+                                                        formFieldLabel={
+                                                            StatutoryRegulatoryAttestationQuestion
+                                                        }
+                                                    >
+                                                        {
+                                                            errors.statutoryRegulatoryAttestation
+                                                        }
+                                                    </PoliteErrorMessage>
+                                                )}
+                                                <FieldRadio
+                                                    name="statutoryRegulatoryAttestation"
+                                                    label={
+                                                        StatutoryRegulatoryAttestation.YES
+                                                    }
+                                                    id="statutoryRegulatoryAttestationYes"
+                                                    value={'YES'}
+                                                    aria-required
+                                                    list_position={1}
+                                                    list_options={2}
+                                                    parent_component_heading={
+                                                        StatutoryRegulatoryAttestationQuestion
+                                                    }
+                                                    radio_button_title={
+                                                        StatutoryRegulatoryAttestation.YES
+                                                    }
+                                                />
+                                                <FieldRadio
+                                                    name="statutoryRegulatoryAttestation"
+                                                    label={
+                                                        StatutoryRegulatoryAttestation.NO
+                                                    }
+                                                    id="statutoryRegulatoryAttestationNo"
+                                                    value={'NO'}
+                                                    aria-required
+                                                    list_position={2}
+                                                    list_options={2}
+                                                    parent_component_heading={
+                                                        StatutoryRegulatoryAttestationQuestion
+                                                    }
+                                                    radio_button_title={
+                                                        StatutoryRegulatoryAttestation.NO
+                                                    }
+                                                />
+                                            </Fieldset>
+                                        </FormGroup>
+                                    )}
+                                    {contract438Attestation &&
+                                        values.statutoryRegulatoryAttestation ===
+                                            'NO' && (
+                                            <div
+                                                className={
+                                                    styles.contractAttestation
+                                                }
+                                            >
+                                                <FieldTextarea
+                                                    label={
+                                                        StatutoryRegulatoryAttestationDescription
+                                                    }
+                                                    id="statutoryRegulatoryAttestationDescription"
+                                                    name="statutoryRegulatoryAttestationDescription"
+                                                    aria-required
+                                                    showError={Boolean(
+                                                        showFieldErrors(
+                                                            'statutoryRegulatoryAttestationDescription',
+                                                            errors
+                                                        )
+                                                    )}
+                                                    hint={
+                                                        <ReactRouterLinkWithLogging
+                                                            variant="external"
+                                                            className={
+                                                                'margin-bottom-1'
+                                                            }
+                                                            to={{
+                                                                pathname:
+                                                                    '/help',
+                                                                hash: '#non-compliance-guidance',
+                                                            }}
+                                                            target="_blank"
+                                                        >
+                                                            Non-compliance
+                                                            definitions and
+                                                            examples
+                                                        </ReactRouterLinkWithLogging>
+                                                    }
+                                                />
+                                            </div>
+                                        )}
+                                    <FormGroup
+                                        error={Boolean(
+                                            showFieldErrors(
+                                                'contractExecutionStatus',
+                                                errors
+                                            )
+                                        )}
+                                    >
+                                        <Fieldset
+                                            role="radiogroup"
+                                            aria-required
+                                            className={styles.radioGroup}
+                                            legend="Contract status"
+                                        >
+                                            <span
+                                                className={
+                                                    styles.requiredOptionalText
+                                                }
+                                            >
+                                                Required
+                                            </span>
+                                            {Boolean(
+                                                showFieldErrors(
+                                                    'contractExecutionStatus',
+                                                    errors
+                                                )
+                                            ) && (
+                                                <PoliteErrorMessage formFieldLabel="Contract status">
+                                                    {
+                                                        errors.contractExecutionStatus
+                                                    }
+                                                </PoliteErrorMessage>
+                                            )}
+                                            <FieldRadio
+                                                id="executedContract"
+                                                name="contractExecutionStatus"
+                                                label="Fully executed"
+                                                aria-required
+                                                value={'EXECUTED'}
+                                                list_position={1}
+                                                list_options={2}
+                                                parent_component_heading="Contract status"
+                                                radio_button_title="Fully executed"
+                                            />
+                                            <FieldRadio
+                                                id="unexecutedContract"
+                                                name="contractExecutionStatus"
+                                                label="Unexecuted by some or all parties"
+                                                aria-required
+                                                value={'UNEXECUTED'}
+                                                list_position={2}
+                                                list_options={2}
+                                                parent_component_heading="Contract status"
+                                                radio_button_title="Unexecuted by some or all parties"
+                                            />
+                                        </Fieldset>
+                                    </FormGroup>
+                                    {
+                                        <>
+                                            <FormGroup
+                                                error={
+                                                    Boolean(
+                                                        showFieldErrors(
+                                                            'contractDateStart',
+                                                            errors
+                                                        )
+                                                    ) ||
+                                                    Boolean(
+                                                        showFieldErrors(
+                                                            'contractDateEnd',
+                                                            errors
+                                                        )
+                                                    )
+                                                }
+                                            >
+                                                <Fieldset
+                                                    aria-required
+                                                    legend={
+                                                        isContractAmendment(
+                                                            draftSubmission
+                                                        )
+                                                            ? 'Amendment effective dates'
+                                                            : 'Contract effective dates'
+                                                    }
+                                                >
+                                                    <span
+                                                        className={
+                                                            styles.requiredOptionalText
+                                                        }
+                                                    >
+                                                        Required
+                                                    </span>
+                                                    {Boolean(
+                                                        showFieldErrors(
+                                                            'contractDateStart',
+                                                            errors
+                                                        ) ||
+                                                            Boolean(
+                                                                showFieldErrors(
+                                                                    'contractDateEnd',
+                                                                    errors
+                                                                )
+                                                            )
+                                                    ) && (
+                                                        <ContractDatesErrorMessage
+                                                            values={values}
+                                                            validationErrorMessage={
+                                                                errors.contractDateStart ||
+                                                                errors.contractDateEnd ||
+                                                                'Invalid date'
+                                                            }
+                                                            formFieldLabel={
+                                                                isContractAmendment(
+                                                                    draftSubmission
+                                                                )
+                                                                    ? 'Amendment effective dates'
+                                                                    : 'Contract effective dates'
+                                                            }
+                                                        />
+                                                    )}
+                                                    <LinkWithLogging
+                                                        aria-label="Effective date guidance (opens in new window)"
+                                                        href={
+                                                            '/help#effective-date-guidance'
+                                                        }
+                                                        variant="external"
+                                                        target="_blank"
+                                                    >
+                                                        Effective date guidance
+                                                    </LinkWithLogging>
+                                                    <DateRangePicker
+                                                        className={
+                                                            styles.dateRangePicker
+                                                        }
+                                                        startDateHint="mm/dd/yyyy"
+                                                        startDateLabel="Start date"
+                                                        startDatePickerProps={{
+                                                            id: 'contractDateStart',
+                                                            name: 'contractDateStart',
+                                                            'aria-required':
+                                                                true,
+                                                            disabled: false,
+                                                            defaultValue:
+                                                                values.contractDateStart,
+                                                            maxDate:
+                                                                formattedDateMinusOneDay(
+                                                                    values.contractDateEnd
+                                                                ),
+                                                            onChange: (val) =>
+                                                                setFieldValue(
+                                                                    'contractDateStart',
+                                                                    formatUserInputDate(
+                                                                        val
+                                                                    )
+                                                                ),
+                                                        }}
+                                                        endDateHint="mm/dd/yyyy"
+                                                        endDateLabel="End date"
+                                                        endDatePickerProps={{
+                                                            disabled: false,
+                                                            id: 'contractDateEnd',
+                                                            name: 'contractDateEnd',
+                                                            'aria-required':
+                                                                true,
+                                                            defaultValue:
+                                                                values.contractDateEnd,
+                                                            minDate:
+                                                                formattedDatePlusOneDay(
+                                                                    values.contractDateStart
+                                                                ),
+                                                            onChange: (val) =>
+                                                                setFieldValue(
+                                                                    'contractDateEnd',
+                                                                    formatUserInputDate(
+                                                                        val
+                                                                    )
+                                                                ),
+                                                        }}
+                                                    />
+                                                </Fieldset>
+                                            </FormGroup>
+                                            <FormGroup
+                                                error={Boolean(
+                                                    showFieldErrors(
+                                                        'managedCareEntities',
+                                                        errors
+                                                    )
+                                                )}
+                                            >
+                                                <Fieldset
+                                                    aria-required
+                                                    legend="Managed Care entities"
+                                                >
+                                                    <span
+                                                        className={
+                                                            styles.requiredOptionalText
+                                                        }
+                                                    >
+                                                        Required
+                                                    </span>
+                                                    <Link
+                                                        variant="external"
+                                                        href={
+                                                            'https://www.medicaid.gov/medicaid/managed-care/managed-care-entities/index.html'
+                                                        }
+                                                        target="_blank"
+                                                    >
+                                                        Managed Care entity
+                                                        definitions
+                                                    </Link>
+                                                    <div className="usa-hint">
+                                                        <span>
+                                                            Check all that apply
+                                                        </span>
+                                                    </div>
+                                                    {Boolean(
+                                                        showFieldErrors(
+                                                            'managedCareEntities',
+                                                            errors
+                                                        )
+                                                    ) && (
+                                                        <PoliteErrorMessage formFieldLabel="Managed Care entities">
+                                                            {
+                                                                errors.managedCareEntities
+                                                            }
+                                                        </PoliteErrorMessage>
+                                                    )}
+                                                    <FieldCheckbox
+                                                        id="managedCareOrganization"
+                                                        name="managedCareEntities"
+                                                        label={
+                                                            ManagedCareEntityRecord.MCO
+                                                        }
+                                                        value="MCO"
+                                                        heading="Managed Care entities"
+                                                        parent_component_heading={
+                                                            formHeading
+                                                        }
+                                                    />
+                                                    <FieldCheckbox
+                                                        id="prepaidInpatientHealthPlan"
+                                                        name="managedCareEntities"
+                                                        label={
+                                                            ManagedCareEntityRecord.PIHP
+                                                        }
+                                                        value="PIHP"
+                                                        heading="Managed Care entities"
+                                                        parent_component_heading={
+                                                            formHeading
+                                                        }
+                                                    />
+                                                    <FieldCheckbox
+                                                        id="prepaidAmbulatoryHealthPlans"
+                                                        name="managedCareEntities"
+                                                        label={
+                                                            ManagedCareEntityRecord.PAHP
+                                                        }
+                                                        value="PAHP"
+                                                        heading="Managed Care entities"
+                                                        parent_component_heading={
+                                                            formHeading
+                                                        }
+                                                    />
+                                                    <FieldCheckbox
+                                                        id="primaryCareCaseManagementEntity"
+                                                        name="managedCareEntities"
+                                                        label={
+                                                            ManagedCareEntityRecord.PCCM
+                                                        }
+                                                        value="PCCM"
+                                                        heading="Managed Care entities"
+                                                        parent_component_heading={
+                                                            formHeading
+                                                        }
+                                                    />
+                                                </Fieldset>
+                                            </FormGroup>
 
-            // try to continue without typing in non-compliance explanation
-            await userEvent.click(continueButton)
+                                            <FormGroup
+                                                error={Boolean(
+                                                    showFieldErrors(
+                                                        'federalAuthorities',
+                                                        errors
+                                                    )
+                                                )}
+                                            >
+                                                <Fieldset
+                                                    aria-required
+                                                    legend="Active federal operating authority"
+                                                >
+                                                    <span
+                                                        className={
+                                                            styles.requiredOptionalText
+                                                        }
+                                                    >
+                                                        Required
+                                                    </span>
+                                                    <Link
+                                                        variant="external"
+                                                        href={
+                                                            'https://www.medicaid.gov/medicaid/managed-care/managed-care-authorities/index.html'
+                                                        }
+                                                        target="_blank"
+                                                    >
+                                                        Managed Care authority
+                                                        definitions
+                                                    </Link>
+                                                    <div className="usa-hint">
+                                                        <span>
+                                                            Check all that apply
+                                                        </span>
+                                                    </div>
+                                                    {Boolean(
+                                                        showFieldErrors(
+                                                            'federalAuthorities',
+                                                            errors
+                                                        )
+                                                    ) && (
+                                                        <PoliteErrorMessage formFieldLabel="Active federal operating authority">
+                                                            {
+                                                                errors.federalAuthorities
+                                                            }
+                                                        </PoliteErrorMessage>
+                                                    )}
+                                                    {applicableFederalAuthorities.map(
+                                                        (federalAuthority) => (
+                                                            <FieldCheckbox
+                                                                id={federalAuthority.toLowerCase()}
+                                                                key={federalAuthority.toLowerCase()}
+                                                                name="federalAuthorities"
+                                                                label={
+                                                                    FederalAuthorityRecord[
+                                                                        federalAuthority
+                                                                    ]
+                                                                }
+                                                                value={
+                                                                    federalAuthority
+                                                                }
+                                                                heading="Managed Care entities"
+                                                                parent_component_heading={
+                                                                    formHeading
+                                                                }
+                                                            />
+                                                        )
+                                                    )}
+                                                </Fieldset>
+                                            </FormGroup>
+                                            {enableDSNPs &&
+                                                values.federalAuthorities.some(
+                                                    (type) =>
+                                                        dsnpTriggers.includes(
+                                                            type
+                                                        )
+                                                ) && (
+                                                    <FormGroup
+                                                        error={Boolean(
+                                                            showFieldErrors(
+                                                                'dsnpContract',
+                                                                errors
+                                                            )
+                                                        )}
+                                                    >
+                                                        <Fieldset
+                                                            aria-required
+                                                            legend="Is this contract associated with a Dual-Eligible Special Needs Plan (D-SNP) that covers Medicaid benefits?"
+                                                        >
+                                                            <span
+                                                                className={
+                                                                    styles.requiredOptionalText
+                                                                }
+                                                            >
+                                                                Required
+                                                            </span>
+                                                            <span
+                                                                className={
+                                                                    styles.requiredOptionalText
+                                                                }
+                                                                style={{
+                                                                    color: '#1B1B1B',
+                                                                }}
+                                                            >
+                                                                See 42 CFR §
+                                                                422.2
+                                                            </span>
+                                                            <LinkWithLogging
+                                                                variant="external"
+                                                                href={
+                                                                    '/help#dual-eligible-special-needs-plans'
+                                                                }
+                                                                target="_blank"
+                                                                data-testid="dsnpGuidanceLink"
+                                                            >
+                                                                D-SNP guidance
+                                                            </LinkWithLogging>
+                                                            <FieldYesNo
+                                                                id="dsnpContract"
+                                                                name="dsnpContract"
+                                                                label=""
+                                                                showError={Boolean(
+                                                                    showFieldErrors(
+                                                                        'dsnpContract',
+                                                                        errors
+                                                                    )
+                                                                )}
+                                                            />
+                                                        </Fieldset>
+                                                    </FormGroup>
+                                                )}
+                                            {isContractWithProvisions(
+                                                draftSubmission
+                                            ) && (
+                                                <FormGroup data-testid="yes-no-group">
+                                                    <Fieldset
+                                                        aria-required
+                                                        legend={
+                                                            isBaseContract(
+                                                                draftSubmission
+                                                            )
+                                                                ? 'Does this contract action include provisions related to any of the following'
+                                                                : 'Does this contract action include new or modified provisions related to any of the following'
+                                                        }
+                                                    >
+                                                        <span
+                                                            className={
+                                                                styles.requiredOptionalText
+                                                            }
+                                                        >
+                                                            Required
+                                                        </span>
+                                                        {applicableProvisions.map(
+                                                            (
+                                                                modifiedProvisionName
+                                                            ) => (
+                                                                <FieldYesNo
+                                                                    id={
+                                                                        modifiedProvisionName
+                                                                    }
+                                                                    key={
+                                                                        modifiedProvisionName
+                                                                    }
+                                                                    name={
+                                                                        modifiedProvisionName
+                                                                    }
+                                                                    label={generateProvisionLabel(
+                                                                        draftSubmission,
+                                                                        modifiedProvisionName
+                                                                    )}
+                                                                    showError={Boolean(
+                                                                        showFieldErrors(
+                                                                            modifiedProvisionName,
+                                                                            errors
+                                                                        )
+                                                                    )}
+                                                                    variant="SUBHEAD"
+                                                                />
+                                                            )
+                                                        )}
+                                                    </Fieldset>
+                                                </FormGroup>
+                                            )}
+                                        </>
+                                    }
+                                </fieldset>
 
-            // expect errors for attestation question
-            await waitFor(() => {
-                expect(
-                    screen.queryAllByText(
-                        'You must provide a description of the contract’s non-compliance'
-                    )
-                ).toHaveLength(2)
-            })
-
-            await userEvent.type(nonComplianceTextBox, 'No compliance')
-
-            // continue with explanation
-            await userEvent.click(continueButton)
-
-            // expect no errors
-            await waitFor(() => {
-                expect(
-                    screen.queryAllByText(
-                        'You must provide a description of the contract’s non-compliance'
-                    )
-                ).toHaveLength(0)
-            })
-        })
-    })
-})
+                                <PageActions
+                                    saveAsDraftOnClick={async () => {
+                                        await handleFormSubmit(
+                                            values,
+                                            setSubmitting,
+                                            {
+                                                type: 'SAVE_AS_DRAFT',
+                                            }
+                                        )
+                                    }}
+                                    backOnClick={async () => {
+                                        // do not need to validate or resubmit if no documents are uploaded
+                                        if (
+                                            values.contractDocuments.length ===
+                                            0
+                                        ) {
+                                            navigate('../type')
+                                        } else {
+                                            await handleFormSubmit(
+                                                values,
+                                                setSubmitting,
+                                                {
+                                                    type: 'BACK',
+                                                    redirectPath:
+                                                        'SUBMISSIONS_TYPE',
+                                                }
+                                            )
+                                        }
+                                    }}
+                                    disableContinue={
+                                        shouldValidate &&
+                                        !!Object.keys(errors).length
+                                    }
+                                    actionInProgress={isSubmitting}
+                                    backOnClickUrl={generatePath(
+                                        RoutesRecord.SUBMISSIONS_TYPE,
+                                        { id }
+                                    )}
+                                    continueOnClickUrl={
+                                        draftSubmission.draftRevision.formData
+                                            .submissionType === 'CONTRACT_ONLY'
+                                            ? generatePath(
+                                                  RoutesRecord.SUBMISSIONS_RATE_DETAILS,
+                                                  { id }
+                                              )
+                                            : generatePath(
+                                                  RoutesRecord.SUBMISSIONS_CONTACTS,
+                                                  { id }
+                                              )
+                                    }
+                                />
+                            </UswdsForm>
+                        </>
+                    )}
+                </Formik>
+            </FormContainer>
+        </>
+    )
+}
