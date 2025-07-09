@@ -36,7 +36,10 @@ import { InlineDocumentWarning } from '../../../components/DocumentWarning'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '@mc-review/common-code'
 import { Grid } from '@trussworks/react-uswds'
-import { booleanAsYesNoFormValue } from '../../../components/Form/FieldYesNo'
+import {
+    booleanAsYesNoFormValue,
+    booleanAsYesNoUserValue,
+} from '../../../components/Form/FieldYesNo'
 import {
     StatutoryRegulatoryAttestation,
     StatutoryRegulatoryAttestationQuestion,
@@ -301,6 +304,18 @@ export const ContractDetailsSummarySection = ({
                         }
                     />
                 </MultiColumnGrid>
+                {contractFormData?.dsnpContract !== null && (
+                    <MultiColumnGrid columns={1}>
+                        <DataDetail
+                            id="contractExecutionStatus"
+                            label="Is this contract associated with a Dual-Eligible Special Needs Plan (D-SNP) that covers Medicaid benefits?"
+                            explainMissingData={explainMissingData}
+                            children={booleanAsYesNoUserValue(
+                                contractFormData?.dsnpContract
+                            )}
+                        />
+                    </MultiColumnGrid>
+                )}
                 {isContractWithProvisions(contract) && (
                     <MultiColumnGrid columns={2}>
                         <DataDetail
