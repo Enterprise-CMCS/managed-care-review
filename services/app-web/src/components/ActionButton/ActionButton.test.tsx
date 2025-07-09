@@ -48,8 +48,10 @@ describe('ActionButton', () => {
             })
 
             expect(defaultButton).not.toHaveAttribute('aria-disabled')
-            expect(defaultButton).not.toHaveClass('usa-button--disabled')
-            expect(defaultButton).not.toHaveClass('_disabledCursor_b7011e')
+            expect(defaultButton.className).not.toContain(
+                'usa-button--disabled'
+            )
+            expect(defaultButton.className).not.toContain('_disabledCursor_')
         })
 
         it('renders button without loading styles and spinner', async () => {
@@ -62,8 +64,8 @@ describe('ActionButton', () => {
                 name: /Test Button/,
             })
 
-            expect(defaultButton).not.toHaveClass('usa-button--active')
-            expect(defaultButton).not.toHaveClass('_disabledCursor_b7011e')
+            expect(defaultButton.className).not.toContain('usa-button--active')
+            expect(defaultButton.className).not.toContain('_disabledCursor_')
             expect(screen.queryByRole('progressbar')).not.toBeInTheDocument()
         })
     })
@@ -103,13 +105,13 @@ describe('ActionButton', () => {
                 const loadingButton = screen.getByRole('button', {
                     name: /Loading/,
                 })
-                expect(loadingButton).toHaveClass('usa-button--active')
+                expect(loadingButton.className).toContain('usa-button--active')
 
-                expect(loadingButton).toHaveClass('_disabledCursor_b7011e')
+                expect(loadingButton.className).toContain('_disabledCursor_')
                 await waitFor(() => {
                     expect(screen.getByRole('progressbar')).toBeInTheDocument()
-                    expect(screen.getByRole('progressbar')).toHaveClass(
-                        ' _ds-c-spinner_d122df'
+                    expect(screen.getByRole('progressbar').className).toContain(
+                        '_ds-c-spinner_'
                     )
                 })
             })
@@ -184,8 +186,8 @@ describe('ActionButton', () => {
             expect(
                 screen.getByRole('button', {
                     name: /Test Button/,
-                })
-            ).toHaveClass('_disabledCursor_b7011e')
+                }).className
+            ).toContain('_disabledCursor_')
         })
     })
 
