@@ -6,20 +6,20 @@ import {
     createSubmitAndUnlockTestRate,
     submitTestRate,
 } from '../../testHelpers/gqlRateHelpers'
-import { generateDocumentZip } from '../../zip'
+import {
+    documentZipService,
+    type GenerateDocumentZipFunctionType,
+} from '../../zip'
 import { vi } from 'vitest'
-
-// Mock the zip generation function
-vi.mock('../../zip')
-const mockGenerateDocumentZip = generateDocumentZip as vi.MockedFunction<
-    typeof generateDocumentZip
->
+import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
+import { NewPostgresStore } from '../../postgres'
 
 describe('Rate Submission Zip Generation - Rate-Specific Scenarios', () => {
     const ldService = testLDService({
         'rate-edit-unlock': true,
     })
     const mockS3 = testS3Client()
+    const mockGenerateDocumentZip = vi.fn<GenerateDocumentZipFunctionType>()
 
     beforeEach(() => {
         vi.clearAllMocks()
@@ -33,15 +33,27 @@ describe('Rate Submission Zip Generation - Rate-Specific Scenarios', () => {
         it('generates zip for standalone rate resubmission (after unlock)', async () => {
             const stateUser = testStateUser()
             const cmsUser = testCMSUser()
+            const prismaClient = await sharedTestPrismaClient()
+            const postgresStore = NewPostgresStore(prismaClient)
+
+            const mockDocumentZipService = documentZipService(
+                postgresStore,
+                mockGenerateDocumentZip
+            )
+
             const stateServer = await constructTestPostgresServer({
                 context: { user: stateUser },
                 ldService,
                 s3Client: mockS3,
+                store: postgresStore,
+                documentZip: mockDocumentZipService,
             })
             const cmsServer = await constructTestPostgresServer({
                 context: { user: cmsUser },
                 ldService,
                 s3Client: mockS3,
+                store: postgresStore,
+                documentZip: mockDocumentZipService,
             })
 
             // Create, submit, and unlock a rate
@@ -87,15 +99,27 @@ describe('Rate Submission Zip Generation - Rate-Specific Scenarios', () => {
         it('combines rate documents and supporting documents in zip', async () => {
             const stateUser = testStateUser()
             const cmsUser = testCMSUser()
+            const prismaClient = await sharedTestPrismaClient()
+            const postgresStore = NewPostgresStore(prismaClient)
+
+            const mockDocumentZipService = documentZipService(
+                postgresStore,
+                mockGenerateDocumentZip
+            )
+
             const stateServer = await constructTestPostgresServer({
                 context: { user: stateUser },
                 ldService,
                 s3Client: mockS3,
+                store: postgresStore,
+                documentZip: mockDocumentZipService,
             })
             const cmsServer = await constructTestPostgresServer({
                 context: { user: cmsUser },
                 ldService,
                 s3Client: mockS3,
+                store: postgresStore,
+                documentZip: mockDocumentZipService,
             })
 
             const unlockedRate = await createSubmitAndUnlockTestRate(
@@ -131,15 +155,27 @@ describe('Rate Submission Zip Generation - Rate-Specific Scenarios', () => {
         it('uses correct S3 destination path for standalone rate resubmission', async () => {
             const stateUser = testStateUser()
             const cmsUser = testCMSUser()
+            const prismaClient = await sharedTestPrismaClient()
+            const postgresStore = NewPostgresStore(prismaClient)
+
+            const mockDocumentZipService = documentZipService(
+                postgresStore,
+                mockGenerateDocumentZip
+            )
+
             const stateServer = await constructTestPostgresServer({
                 context: { user: stateUser },
                 ldService,
                 s3Client: mockS3,
+                store: postgresStore,
+                documentZip: mockDocumentZipService,
             })
             const cmsServer = await constructTestPostgresServer({
                 context: { user: cmsUser },
                 ldService,
                 s3Client: mockS3,
+                store: postgresStore,
+                documentZip: mockDocumentZipService,
             })
 
             const unlockedRate = await createSubmitAndUnlockTestRate(

@@ -67,6 +67,35 @@ export const Help = (): React.ReactElement => {
                     your base contract.
                 </p>
             </section>
+            <section
+                className={styles.helpSection}
+                id="dual-eligible-special-needs-plans"
+            >
+                <h3>Dual Eligible Special Needs Plan (D-SNP) guidance</h3>
+                <h4>
+                    Is this contract associated with a Dual-Eligible Special
+                    Needs Plan (D-SNP) that covers Medicaid benefits?
+                </h4>
+                <p className="line-height-sans-4 measure-6">
+                    Choose ‘Yes’ if either of the following applies:
+                    <ul>
+                        <li>
+                            This contract includes both Medicaid managed care
+                            and D-SNP requirements
+                        </li>
+                        <li>
+                            This contract is with a D-SNP that covers Medicaid
+                            benefits directly, or the contract fulfills a
+                            regulatory requirement under 42 CFR § 422 for a
+                            Highly Integrated Dual Eligible Special Needs Plan
+                            (HIDE D-SNP) (or affiliated legal entity) or a Fully
+                            Integrated Dual Eligible Special Needs Plan (FIDE
+                            D-SNP) entity to also offer a Medicaid managed care
+                            plan
+                        </li>
+                    </ul>
+                </p>
+            </section>
             <section className={styles.helpSection}>
                 <h3 id="non-compliance-guidance">Non-compliance guidance</h3>
                 <h4>Contractual versus operational compliance</h4>

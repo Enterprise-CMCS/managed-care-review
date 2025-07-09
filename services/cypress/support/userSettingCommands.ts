@@ -1,11 +1,12 @@
 import { userLoginData, type CMSUserLoginNames } from './loginCommands';
+import { Division } from '../gen/gqlClient';
 
 Cypress.Commands.add('assignDivisionToCMSUser', ({
     cmsUser,
     division
  }: {
     cmsUser: CMSUserLoginNames,
-    division: 'DMCO' | 'DMCP' | 'OACT'
+    division: Division
 }) => {
     // Find the table row for the user
     cy.findByText(userLoginData[cmsUser].email).parent().then(row => {

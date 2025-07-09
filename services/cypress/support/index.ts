@@ -27,9 +27,8 @@ import {
 } from '@mc-review/common-code'
 import './apiCommands'
 import './accessibilityCommands'
-import { Contract, HealthPlanPackage } from '../gen/gqlClient'
-import { CMSUserType, DivisionType } from '../utils/apollo-test-utils'
-import { StateUserType } from '../../app-api/src/domain-models'
+import { Contract, HealthPlanPackage, Division} from '../gen/gqlClient'
+import { CMSUserType, StateUserType } from '../utils/apollo-test-utils'
 import { UnlockedHealthPlanFormDataType } from '@mc-review/hpp'
 import { CMSUserLoginNames } from './loginCommands'
 
@@ -117,7 +116,7 @@ declare global {
                 division,
             }: {
                 cmsUser: CMSUserLoginNames
-                division: DivisionType
+                division: Division
             }): void
 
             // Direct API commands
@@ -136,7 +135,7 @@ declare global {
             ): Cypress.Chainable<Contract>
             apiAssignDivisionToCMSUser(
                 cmsUser: CMSUserType,
-                division: DivisionType
+                division: Division
             ): Cypress.Chainable<void>
             apiCreateAndSubmitContractWithRates(
                 stateUser: StateUserType
