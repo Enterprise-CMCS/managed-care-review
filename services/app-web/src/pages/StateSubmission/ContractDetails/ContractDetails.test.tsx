@@ -63,6 +63,7 @@ describe('ContractDetails', () => {
                 },
                 featureFlags: {
                     'hide-supporting-docs-page': true,
+                    dsnp: true,
                 },
             }
         )
@@ -341,6 +342,7 @@ describe('ContractDetails', () => {
                     routerProvider: {
                         route: '/submissions/15/edit/contract-details',
                     },
+                    featureFlags: { dsnp: true },
                 }
             )
 
@@ -395,6 +397,7 @@ describe('ContractDetails', () => {
                     routerProvider: {
                         route: '/submissions/15/edit/contract-details',
                     },
+                    featureFlags: { dsnp: true },
                 }
             )
 
@@ -667,6 +670,7 @@ describe('ContractDetails', () => {
                     routerProvider: {
                         route: '/submissions/15/edit/contract-details',
                     },
+                    featureFlags: { dsnp: true },
                 }
             )
 
@@ -708,6 +712,7 @@ describe('ContractDetails', () => {
                     routerProvider: {
                         route: '/submissions/15/edit/contract-details',
                     },
+                    featureFlags: { dsnp: true },
                 }
             )
 
