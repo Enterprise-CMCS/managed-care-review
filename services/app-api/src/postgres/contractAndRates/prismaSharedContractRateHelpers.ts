@@ -479,6 +479,7 @@ function rateFormDataToDomainModel(
         rateProgramIDs: rateRevision.rateProgramIDs,
         deprecatedRateProgramIDs: rateRevision.deprecatedRateProgramIDs,
         rateCertificationName: rateRevision.rateCertificationName ?? undefined,
+        rateMedicaidPopulations: rateRevision.rateMedicaidPopulations ?? [],
         certifyingActuaryContacts: rateRevision.certifyingActuaryContacts
             ? rateRevision.certifyingActuaryContacts.map((actuary) => ({
                   name: actuary.name ?? undefined,
