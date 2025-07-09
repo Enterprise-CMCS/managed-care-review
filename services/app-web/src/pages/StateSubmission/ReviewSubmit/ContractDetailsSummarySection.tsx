@@ -307,7 +307,7 @@ export const ContractDetailsSummarySection = ({
                 {contractFormData?.dsnpContract !== null && (
                     <MultiColumnGrid columns={1}>
                         <DataDetail
-                            id="contractExecutionStatus"
+                            id="dsnp"
                             label="Is this contract associated with a Dual-Eligible Special Needs Plan (D-SNP) that covers Medicaid benefits?"
                             explainMissingData={explainMissingData}
                             children={booleanAsYesNoUserValue(
