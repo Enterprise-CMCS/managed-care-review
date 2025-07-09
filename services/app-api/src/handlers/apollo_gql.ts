@@ -36,6 +36,11 @@ import {
 } from 'apollo-server-core'
 import { newDeployedS3Client, newLocalS3Client } from '../s3'
 import type { S3ClientT, S3BucketConfigType } from '../s3'
+import {
+    documentZipService,
+    generateDocumentZip,
+    localGenerateDocumentZip,
+} from '../zip/generateZip'
 
 let ldClient: LDClient
 let s3Client: S3ClientT
@@ -329,6 +334,11 @@ async function initializeGQLHandler(): Promise<Handler> {
         s3Client = newDeployedS3Client(S3_BUCKETS_CONFIG, region)
     }
 
+    // Service for zipping documents
+    const generateDocZip =
+        authMode === 'LOCAL' ? localGenerateDocumentZip : generateDocumentZip
+    const documentZip = documentZipService(store, generateDocZip)
+
     // Print out all the variables we've been configured with. Leave sensitive ones out, please.
     console.info('Running With Config: ', {
         authMode,
@@ -348,7 +358,8 @@ async function initializeGQLHandler(): Promise<Handler> {
         launchDarkly,
         jwtLib,
         s3Client,
-        applicationEndpoint
+        applicationEndpoint,
+        documentZip
     )
 
     const userFetcher =
