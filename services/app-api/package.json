@@ -96,6 +96,6 @@
         "serverless-s3-bucket-helper": "https://github.com/CMSgov/serverless-s3-bucket-helper",
         "serverless-stack-termination-protection": "^2.0.2",
         "typescript": "4.9.5",
-        "vitest": "^3.0.7"
+        "vitest": "^3.2.4"
     }
 }

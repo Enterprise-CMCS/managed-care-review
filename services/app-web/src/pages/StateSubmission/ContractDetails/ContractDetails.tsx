@@ -178,6 +178,11 @@ export const ContractDetails = ({
         featureFlags.HIDE_SUPPORTING_DOCS_PAGE.defaultValue
     )
 
+    const enableDSNPs = ldClient?.variation(
+        featureFlags.DSNP.flag,
+        featureFlags.DSNP.defaultValue
+    )
+
     // Contract documents state management
     const { getKey, handleUploadFile, handleScanFile } = useS3()
     if (interimState || !draftSubmission)
@@ -1287,63 +1292,67 @@ export const ContractDetails = ({
                                                     )}
                                                 </Fieldset>
                                             </FormGroup>
-                                            {values.federalAuthorities.some(
-                                                (type) =>
-                                                    dsnpTriggers.includes(type)
-                                            ) && (
-                                                <FormGroup
-                                                    error={Boolean(
-                                                        showFieldErrors(
-                                                            'dsnpContract',
-                                                            errors
+                                            {enableDSNPs &&
+                                                values.federalAuthorities.some(
+                                                    (type) =>
+                                                        dsnpTriggers.includes(
+                                                            type
                                                         )
-                                                    )}
-                                                >
-                                                    <Fieldset
-                                                        aria-required
-                                                        legend="Is this contract associated with a Dual-Eligible Special Needs Plan (D-SNP) that covers Medicaid benefits?"
+                                                ) && (
+                                                    <FormGroup
+                                                        error={Boolean(
+                                                            showFieldErrors(
+                                                                'dsnpContract',
+                                                                errors
+                                                            )
+                                                        )}
                                                     >
-                                                        <span
-                                                            className={
-                                                                styles.requiredOptionalText
-                                                            }
+                                                        <Fieldset
+                                                            aria-required
+                                                            legend="Is this contract associated with a Dual-Eligible Special Needs Plan (D-SNP) that covers Medicaid benefits?"
                                                         >
-                                                            Required
-                                                        </span>
-                                                        <span
-                                                            className={
-                                                                styles.requiredOptionalText
-                                                            }
-                                                            style={{
-                                                                color: '#1B1B1B',
-                                                            }}
-                                                        >
-                                                            See 42 CFR § 422.2
-                                                        </span>
-                                                        <LinkWithLogging
-                                                            variant="external"
-                                                            href={
-                                                                '/help#dual-eligible-special-needs-plans'
-                                                            }
-                                                            target="_blank"
-                                                            data-testid="dsnpGuidanceLink"
-                                                        >
-                                                            D-SNP guidance
-                                                        </LinkWithLogging>
-                                                        <FieldYesNo
-                                                            id="dsnpContract"
-                                                            name="dsnpContract"
-                                                            label=""
-                                                            showError={Boolean(
-                                                                showFieldErrors(
-                                                                    'dsnpContract',
-                                                                    errors
-                                                                )
-                                                            )}
-                                                        />
-                                                    </Fieldset>
-                                                </FormGroup>
-                                            )}
+                                                            <span
+                                                                className={
+                                                                    styles.requiredOptionalText
+                                                                }
+                                                            >
+                                                                Required
+                                                            </span>
+                                                            <span
+                                                                className={
+                                                                    styles.requiredOptionalText
+                                                                }
+                                                                style={{
+                                                                    color: '#1B1B1B',
+                                                                }}
+                                                            >
+                                                                See 42 CFR §
+                                                                422.2
+                                                            </span>
+                                                            <LinkWithLogging
+                                                                variant="external"
+                                                                href={
+                                                                    '/help#dual-eligible-special-needs-plans'
+                                                                }
+                                                                target="_blank"
+                                                                data-testid="dsnpGuidanceLink"
+                                                            >
+                                                                D-SNP guidance
+                                                            </LinkWithLogging>
+                                                            <FieldYesNo
+                                                                id="dsnpContract"
+                                                                name="dsnpContract"
+                                                                label=""
+                                                                showError={Boolean(
+                                                                    showFieldErrors(
+                                                                        'dsnpContract',
+                                                                        errors
+                                                                    )
+                                                                )}
+                                                            />
+                                                        </Fieldset>
+                                                    </FormGroup>
+                                                )}
                                             {isContractWithProvisions(
                                                 draftSubmission
                                             ) && (
