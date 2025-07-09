@@ -2,8 +2,13 @@ import { createAndSubmitTestContractWithRate } from '../../testHelpers/gqlContra
 import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
 import { testStateUser } from '../../testHelpers/userHelpers'
 import { testS3Client } from '../../testHelpers'
-import { generateDocumentZip } from '../../zip/generateZip'
+import {
+    documentZipService,
+    type GenerateDocumentZipFunctionType,
+} from '../../zip'
 import { vi } from 'vitest'
+import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
+import { NewPostgresStore } from '../../postgres'
 
 // Mock the correct path that matches the import in submitContract
 vi.mock('../../zip/generateZip', async () => {
@@ -16,7 +21,7 @@ vi.mock('../../zip/generateZip', async () => {
 
 describe('Contract Submission Zip Generation Integration', () => {
     const mockS3 = testS3Client()
-    const mockGenerateDocumentZip = vi.mocked(generateDocumentZip)
+    const mockGenerateDocumentZip = vi.fn<GenerateDocumentZipFunctionType>()
 
     beforeEach(() => {
         vi.clearAllMocks()
@@ -27,8 +32,18 @@ describe('Contract Submission Zip Generation Integration', () => {
     })
 
     it('submits contract with rates and creates zip packages in database', async () => {
+        const prismaClient = await sharedTestPrismaClient()
+        const postgresStore = NewPostgresStore(prismaClient)
+
+        const mockDocumentZipService = documentZipService(
+            postgresStore,
+            mockGenerateDocumentZip
+        )
+
         const stateServer = await constructTestPostgresServer({
             s3Client: mockS3,
+            store: postgresStore,
+            documentZip: mockDocumentZipService,
         })
 
         const submittedContract =
@@ -80,9 +95,19 @@ describe('Contract Submission Zip Generation Integration', () => {
 
     it('continues submission when zip generation fails and creates no zip packages', async () => {
         const stateUser = testStateUser()
+        const prismaClient = await sharedTestPrismaClient()
+        const postgresStore = NewPostgresStore(prismaClient)
+
+        const mockDocumentZipService = documentZipService(
+            postgresStore,
+            mockGenerateDocumentZip
+        )
+
         const stateServer = await constructTestPostgresServer({
             context: { user: stateUser },
             s3Client: mockS3,
+            store: postgresStore,
+            documentZip: mockDocumentZipService,
         })
 
         // Mock zip generation to fail
@@ -119,8 +144,18 @@ describe('Contract Submission Zip Generation Integration', () => {
     })
 
     it('creates both contract and rate zip packages when generation succeeds', async () => {
+        const prismaClient = await sharedTestPrismaClient()
+        const postgresStore = NewPostgresStore(prismaClient)
+
+        const mockDocumentZipService = documentZipService(
+            postgresStore,
+            mockGenerateDocumentZip
+        )
+
         const stateServer = await constructTestPostgresServer({
             s3Client: mockS3,
+            store: postgresStore,
+            documentZip: mockDocumentZipService,
         })
 
         const submittedContract =
@@ -158,8 +193,18 @@ describe('Contract Submission Zip Generation Integration', () => {
     })
 
     it('creates no zip packages when generation completely fails', async () => {
+        const prismaClient = await sharedTestPrismaClient()
+        const postgresStore = NewPostgresStore(prismaClient)
+
+        const mockDocumentZipService = documentZipService(
+            postgresStore,
+            mockGenerateDocumentZip
+        )
+
         const stateServer = await constructTestPostgresServer({
             s3Client: mockS3,
+            store: postgresStore,
+            documentZip: mockDocumentZipService,
         })
 
         // Mock complete failure
