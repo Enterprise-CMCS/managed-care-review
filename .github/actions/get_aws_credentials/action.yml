@@ -43,13 +43,20 @@ runs:
       id: set-oidc-stage-name
       shell: bash
       run: |
+        echo "DEBUG: inputs.stage-name = ${{ inputs.stage-name }}"
+        echo "DEBUG: inputs.account-id = ${{ inputs.account-id }}"
+        echo "DEBUG: inputs.changed-services = ${{ inputs.changed-services }}"
+        echo "DEBUG: contains('main, val, prod', inputs.stage-name) = ${{ contains('main, val, prod', inputs.stage-name) }}"
         echo "stage-name=${{ (contains('main, val, prod', inputs.stage-name) || inputs.changed-services == '' || contains(inputs.changed-services, 'github-oidc')) && inputs.stage-name || 'main' }}" >> $GITHUB_OUTPUT
 
     - name: Format OIDC role ARN
       shell: bash
       id: format-oidc-role-arn
       run: |
+        echo "DEBUG: inputs.account-id = '${{ inputs.account-id }}'"
+        echo "DEBUG: set-oidc-stage-name.outputs.stage-name = '${{ steps.set-oidc-stage-name.outputs.stage-name }}'"
         ARN="arn:aws:iam::${{ inputs.account-id }}:role/delegatedadmin/developer/github-oidc-${{ steps.set-oidc-stage-name.outputs.stage-name }}-ServiceRole"
+        echo "DEBUG: Generated ARN = $ARN"
         echo "arn=$ARN" >> $GITHUB_OUTPUT
 
     - name: Configure AWS credentials
