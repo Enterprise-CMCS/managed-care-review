@@ -1,4 +1,4 @@
-import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
+import { createForbiddenError, createUserInputError } from '../errorUtils'
 import type { UpdateInfoType } from '../../domain-models'
 import { contractSubmitters, hasCMSPermissions } from '../../domain-models'
 import type { Emailer } from '../../emailer'
@@ -48,7 +48,7 @@ export function unlockContractResolver(
                 'user not authorized to unlock contract',
                 span
             )
-            throw new ForbiddenError('user not authorized to unlock contract')
+            throw createForbiddenError('user not authorized to unlock contract')
         }
 
         const contractResult = await store.findContractWithHistory(contractID)
@@ -57,9 +57,7 @@ export function unlockContractResolver(
                 const errMessage = `A contract must exist to be unlocked: ${contractID}`
                 logError('unlockContract', errMessage)
                 setErrorAttributesOnActiveSpan(errMessage, span)
-                throw new UserInputError(errMessage, {
-                    argumentName: 'contractID',
-                })
+                throw createUserInputError(errMessage, 'contractID')
             }
 
             const errMessage = `Issue finding a contract. Message: ${contractResult.message}`
@@ -80,10 +78,7 @@ export function unlockContractResolver(
             const errMessage = `Attempted to unlock contract with wrong status`
             logError('unlockContract', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
-            throw new UserInputError(errMessage, {
-                argumentName: 'contractID',
-                cause: 'INVALID_PACKAGE_STATUS',
-            })
+            throw createUserInputError(errMessage, 'contractID')
         }
 
         const unlockContractResult = await store.unlockContract({

@@ -29,7 +29,6 @@ import {
     GraphQLErrorCodeTypes,
 } from './apolloErrorCodeMocks'
 import { GraphQLError } from 'graphql'
-import { ApolloError } from '@apollo/client'
 
 const fetchContractMockSuccess = ({
     contract,
@@ -80,7 +79,7 @@ const fetchContractMockFail = ({
         code: GraphQLErrorCodeTypes
         cause: GraphQLErrorCauseTypes
     }
-}): MockedResponse<FetchContractQuery | ApolloError> => {
+}): MockedResponse<FetchContractQuery | GraphQLError> => {
     const graphQLError = new GraphQLError(
         error
             ? GRAPHQL_ERROR_CAUSE_MESSAGES[error.cause]
@@ -98,9 +97,6 @@ const fetchContractMockFail = ({
             query: FetchContractDocument,
             variables: { input: { contractID: id } },
         },
-        error: new ApolloError({
-            graphQLErrors: [graphQLError],
-        }),
         result: {
             data: null,
             errors: [graphQLError],
@@ -156,7 +152,7 @@ const createContractMockFail = ({
         code: GraphQLErrorCodeTypes
         cause: GraphQLErrorCauseTypes
     }
-}): MockedResponse<CreateContractMutation | ApolloError> => {
+}): MockedResponse<CreateContractMutation | GraphQLError> => {
     const graphQLError = new GraphQLError(
         error
             ? GRAPHQL_ERROR_CAUSE_MESSAGES[error.cause]
@@ -172,11 +168,17 @@ const createContractMockFail = ({
     return {
         request: {
             query: CreateContractDocument,
-            variables: { input: { contractID: '123' } },
+            variables: { 
+                input: { 
+                    populationCovered: 'MEDICAID',
+                    programIDs: ['d95394e5-44d1-45df-8151-1cc1ee66f100'],
+                    riskBasedContract: false,
+                    submissionType: 'CONTRACT_ONLY',
+                    submissionDescription: 'A submitted submission',
+                    contractType: 'BASE'
+                } 
+            },
         },
-        error: new ApolloError({
-            graphQLErrors: [graphQLError],
-        }),
         result: {
             data: null,
             errors: [graphQLError],
@@ -193,7 +195,7 @@ const fetchContractWithQuestionsMockFail = ({
         code: GraphQLErrorCodeTypes
         cause: GraphQLErrorCauseTypes
     }
-}): MockedResponse<FetchContractWithQuestionsQuery | ApolloError> => {
+}): MockedResponse<FetchContractWithQuestionsQuery | GraphQLError> => {
     const graphQLError = new GraphQLError(
         error
             ? GRAPHQL_ERROR_CAUSE_MESSAGES[error.cause]
@@ -211,9 +213,6 @@ const fetchContractWithQuestionsMockFail = ({
             query: FetchContractWithQuestionsDocument,
             variables: { input: { contractID: id } },
         },
-        error: new ApolloError({
-            graphQLErrors: [graphQLError],
-        }),
         result: {
             data: null,
             errors: [graphQLError],
@@ -338,7 +337,7 @@ const updateContractDraftRevisionMockFail = ({
         code: GraphQLErrorCodeTypes
         cause: GraphQLErrorCauseTypes
     }
-}): MockedResponse<UpdateContractDraftRevisionMutation | ApolloError> => {
+}): MockedResponse<UpdateContractDraftRevisionMutation | GraphQLError> => {
     const contractData = mockContractPackageDraft(contract)
     const contractInput = {
         contractID: contractData.id,
@@ -363,9 +362,6 @@ const updateContractDraftRevisionMockFail = ({
             query: UpdateContractDraftRevisionDocument,
             variables: { input: contractInput },
         },
-        error: new ApolloError({
-            graphQLErrors: [graphQLError],
-        }),
         result: {
             data: null,
             errors: [graphQLError],
@@ -399,7 +395,7 @@ const submitContractMockError = ({
         code: GraphQLErrorCodeTypes
         cause: GraphQLErrorCauseTypes
     }
-}): MockedResponse<SubmitContractMutation | ApolloError> => {
+}): MockedResponse<SubmitContractMutation | GraphQLError> => {
     const graphQLError = new GraphQLError(
         error
             ? GRAPHQL_ERROR_CAUSE_MESSAGES[error.cause]
@@ -417,9 +413,6 @@ const submitContractMockError = ({
             query: SubmitContractDocument,
             variables: { input: { contractID: id } },
         },
-        error: new ApolloError({
-            graphQLErrors: [graphQLError],
-        }),
         result: {
             data: null,
             errors: [graphQLError],
